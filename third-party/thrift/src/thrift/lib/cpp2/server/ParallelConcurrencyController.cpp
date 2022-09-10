@@ -94,8 +94,11 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
         continue;
       }
 
+      // by default we have 2 prios, external requests should go to
+      // lower priority queue to yield to the internal ones
+      unsigned requestPrio = folly::Executor::LO_PRI;
       // If the swap succeeded we schedule the task on the executor
-      executor_.add([this]() { executeRequest(); });
+      executor_.addWithPriority([this]() { executeRequest(); }, requestPrio);
       return true;
     }
 

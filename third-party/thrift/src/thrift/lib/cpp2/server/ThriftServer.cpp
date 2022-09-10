@@ -1008,8 +1008,11 @@ void ThriftServer::ensureResourcePools() {
             std::move(threadInitializer_),
             std::move(threadFinalizer_));
       }
+      // By default there will be 2 priorities so that we can prioritize
+      // internal requests over external ones
+      unsigned defaultNumPrioritiesExecutor = 2;
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          pool.numThreads, std::move(factory));
+          pool.numThreads, defaultNumPrioritiesExecutor, std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       if (threadManagerType_ == ThreadManagerType::PRIORITY_QUEUE) {
         options.setNumPriorities(concurrency::N_PRIORITIES);

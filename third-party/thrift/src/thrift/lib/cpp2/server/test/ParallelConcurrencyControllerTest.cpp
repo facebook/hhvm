@@ -18,11 +18,17 @@
 #include <folly/portability/GTest.h>
 #include <folly/synchronization/Baton.h>
 #include <folly/synchronization/Latch.h>
+
 #include <thrift/lib/cpp2/server/ParallelConcurrencyController.h>
 #include <thrift/lib/cpp2/server/RoundRobinRequestPile.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
+#include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
+#include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 using namespace std;
 using namespace apache::thrift;
+using namespace apache::thrift::test;
 using namespace apache::thrift::transport;
 using namespace apache::thrift::concurrency;
 
@@ -94,9 +100,10 @@ class FIFORequestPile : public RequestPileInterface {
   Queue queue_;
 };
 
-class ResourcePool {
+class ResourcePoolMock {
  public:
-  ResourcePool(FIFORequestPile* pile, ParallelConcurrencyController* controller)
+  ResourcePoolMock(
+      FIFORequestPile* pile, ParallelConcurrencyController* controller)
       : pile_(pile), controller_(controller) {}
 
   void enqueue(ServerRequest&& request) {
@@ -190,7 +197,7 @@ TEST(ParallelConcurrencyControllerTest, NormalCases) {
 
   auto endingAP = makeAP(endingTaskGen(baton2, controller));
 
-  ResourcePool pool(&pile, &controller);
+  ResourcePoolMock pool(&pile, &controller);
 
   pool.enqueue(getRequest(blockingAP.get(), &eb));
   pool.enqueue(getRequest(endingAP.get(), &eb));
@@ -223,7 +230,7 @@ TEST(ParallelConcurrencyControllerTest, LimitedTasks) {
 
   auto endingAP = makeAP(endingTaskGen(baton3, controller));
 
-  ResourcePool pool(&pile, &controller);
+  ResourcePoolMock pool(&pile, &controller);
 
   pool.enqueue(getRequest(blockingAP.get(), &eb));
   pool.enqueue(getRequest(blockingAP.get(), &eb));
@@ -271,7 +278,7 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   ParallelConcurrencyController controller(pile, ex);
   controller.setExecutionLimitRequests(2);
 
-  ResourcePool pool(&pile, &controller);
+  ResourcePoolMock pool(&pile, &controller);
 
   folly::Latch latch(3);
 
@@ -311,7 +318,7 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   ParallelConcurrencyController controller(pile, ex);
   controller.setExecutionLimitRequests(2);
 
-  ResourcePool pool(&pile, &controller);
+  ResourcePoolMock pool(&pile, &controller);
 
   folly::Latch latch(3);
 
@@ -339,4 +346,77 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   latch.wait();
   EXPECT_EQ(controller.requestCount(), 0);
   EXPECT_EQ(pile.requestCount(), 0);
+}
+
+TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
+  THRIFT_FLAG_SET_MOCK(experimental_use_resource_pools, true);
+
+  std::atomic<int> counter{0};
+  folly::Baton<> blockingBaton{};
+
+  class BlockingCallTestService
+      : public apache::thrift::ServiceHandler<TestService> {
+   public:
+    BlockingCallTestService(std::atomic<int>& counter) : counter_(counter) {}
+
+    folly::SemiFuture<int32_t> semifuture_echoInt(int32_t) override {
+      // this external task should be executed second
+      // so counter now is 1
+      EXPECT_EQ(counter_.load(), 1);
+      return folly::makeSemiFuture(1);
+    }
+
+   private:
+    std::atomic<int>& counter_;
+  };
+
+  auto handler = std::make_shared<BlockingCallTestService>(counter);
+
+  RoundRobinRequestPile::Options options;
+  auto requestPile = std::make_unique<apache::thrift::RoundRobinRequestPile>(
+      std::move(options));
+
+  // 1 thread, 2 priorities, so that we can serialize the calls
+  auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(1, 2);
+
+  auto concurrencyController =
+      std::make_unique<apache::thrift::ParallelConcurrencyController>(
+          *requestPile.get(), *executor.get());
+
+  auto config = [&](apache::thrift::ThriftServer& server) mutable {
+    server.resourcePoolSet().setResourcePool(
+        apache::thrift::ResourcePoolHandle::defaultAsync(),
+        std::move(requestPile),
+        executor,
+        std::move(concurrencyController));
+  };
+
+  ScopedServerInterfaceThread runner(handler, config);
+
+  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+
+  auto ka = thriftServer.getHandlerExecutorKeepAlive();
+
+  ka->add([&]() { blockingBaton.wait(); });
+
+  auto client = runner.newClient<TestServiceAsyncClient>();
+
+  auto res = client->semifuture_echoInt(0);
+
+  // wait for the request to reach the executor queue
+  while (executor->getTaskQueueSize() != 1) {
+    std::this_thread::yield();
+  }
+
+  // this is an internal task, which should
+  // be prioritized over external requests
+  // so counter should be 0 here
+  ka->add([&]() {
+    EXPECT_EQ(counter.load(), 0);
+    ++counter;
+  });
+
+  blockingBaton.post();
+
+  EXPECT_EQ(std::move(res).get(), 1);
 }

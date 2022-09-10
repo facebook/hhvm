@@ -33,6 +33,8 @@
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h>
+#include <thrift/test/testset/Testset.h>
+#include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 namespace apache::thrift::conformance::data {
 
@@ -264,6 +266,19 @@ template <typename C, typename... Types>
 using container_from_class_t =
     typename container_from_class<C>::template type<Types...>;
 
+template <typename Tag, typename T, typename = void>
+struct target_type_impl {
+  using type = T;
+};
+
+template <typename Tag, typename T>
+struct target_type_impl<Tag, T, folly::void_t<type::standard_type<Tag>>> {
+  using type = type::standard_type<Tag>;
+};
+
+template <typename Tag, typename T>
+using target_type = typename target_type_impl<Tag, T>::type;
+
 template <typename Tag>
 Object patchAddOperation(Object&& patch, op::PatchOp operation, auto value) {
   auto opId = static_cast<int16_t>(operation);
@@ -278,43 +293,45 @@ Value makePatchObject(auto operation, auto value) {
   return result;
 }
 
-template <typename ContainerTag>
-PatchOpTestCase makeContainerAssignTC(
-    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+template <typename Tag, typename Type>
+PatchOpTestCase makeAssignTC(
+    const AnyRegistry& registry, const Protocol& protocol, Type value) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
 
-  using Container = type::standard_type<ContainerTag>;
+  using Container = target_type<Tag, Type>;
 
   Container initial;
   Container expected = {value};
 
-  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchObject<ContainerTag>(op::PatchOp::Assign, expected), protocol);
+      makePatchObject<Tag>(op::PatchOp::Assign, expected), protocol);
   tascase.request() = req;
-  tascase.result() =
-      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  tascase.result() = registry.store(asValueStruct<Tag>(expected), protocol);
   return tascase;
 }
 
-template <typename ContainerTag>
-PatchOpTestCase makeContainerClearTC(
-    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+template <typename Tag, typename Type>
+PatchOpTestCase makeClearTC(
+    const AnyRegistry& registry, const Protocol& protocol, Type value) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
 
-  using Container = type::standard_type<ContainerTag>;
+  using Container = target_type<Tag, Type>;
 
   Container initial = {value};
   Container expected;
 
-  req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
+  req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
   req.patch() = registry.store(
       makePatchObject<type::bool_t>(op::PatchOp::Clear, true), protocol);
   tascase.request() = req;
-  tascase.result() =
-      registry.store(asValueStruct<ContainerTag>(expected), protocol);
+  auto expectedValue = asValueStruct<Tag>(expected);
+  if (auto obj = expectedValue.if_object()) {
+    obj->members().ensure().clear();
+  }
+  tascase.result() = registry.store(expectedValue, protocol);
   return tascase;
 }
 
@@ -420,12 +437,12 @@ Test createListSetPatchTest(
       auto& assignCase = test.testCases()->emplace_back();
       assignCase.name() = makeTestName(value, "assign");
       assignCase.test().emplace().objectPatch_ref() =
-          makeContainerAssignTC<ContainerTag>(registry, protocol, value.value);
+          makeAssignTC<ContainerTag>(registry, protocol, value.value);
 
       auto& clearCase = test.testCases()->emplace_back();
       clearCase.name() = makeTestName(value, "clear");
       clearCase.test().emplace().objectPatch_ref() =
-          makeContainerClearTC<ContainerTag>(registry, protocol, value.value);
+          makeClearTC<ContainerTag>(registry, protocol, value.value);
 
       auto& removeCase = test.testCases()->emplace_back();
       removeCase.name() = makeTestName(value, "remove");
@@ -491,14 +508,13 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       auto& assignCase = test.testCases()->emplace_back();
       assignCase.name() = makeTestName(key, "assign");
       assignCase.test().emplace().objectPatch_ref() =
-          makeContainerAssignTC<ContainerTag>(
+          makeAssignTC<ContainerTag>(
               registry, protocol, std::pair{key.value, value});
 
       auto& clearCase = test.testCases()->emplace_back();
       clearCase.name() = makeTestName(key, "clear");
-      clearCase.test().emplace().objectPatch_ref() =
-          makeContainerClearTC<ContainerTag>(
-              registry, protocol, std::pair{key.value, value});
+      clearCase.test().emplace().objectPatch_ref() = makeClearTC<ContainerTag>(
+          registry, protocol, std::pair{key.value, value});
 
       auto& removeCase = test.testCases()->emplace_back();
       removeCase.name() = makeTestName(key, "remove");
@@ -518,6 +534,37 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
               std::pair{patchkey, value});
     }
   });
+
+  return test;
+}
+
+template <typename TT>
+Test createStructPatchTest(
+    const AnyRegistry& registry, const Protocol& protocol) {
+  Test test;
+  test.name() = protocol.name();
+
+  using Struct = test::testset::struct_with<TT>;
+
+  auto makeTestName = [](auto op) {
+    return fmt::format("struct<{}>/{}", type::getName<TT>(), op);
+  };
+
+  type::standard_type<TT> value;
+  op::clear<TT>(value);
+
+  Struct patchVal;
+  patchVal.field_1_ref() = value;
+
+  auto& assignCase = test.testCases()->emplace_back();
+  assignCase.name() = makeTestName("assign");
+  assignCase.test().emplace().objectPatch_ref() =
+      makeAssignTC<type::struct_c>(registry, protocol, patchVal);
+
+  auto& clearCase = test.testCases()->emplace_back();
+  clearCase.name() = makeTestName("clear");
+  clearCase.test().emplace().objectPatch_ref() =
+      makeClearTC<type::struct_c>(registry, protocol, patchVal);
 
   return test;
 }
@@ -542,6 +589,8 @@ void addPatchToSuite(
     }
 
     suite.tests()->emplace_back(createMapPatchTest<TT>(registry, protocol));
+
+    suite.tests()->emplace_back(createStructPatchTest<TT>(registry, protocol));
   });
 }
 } // namespace

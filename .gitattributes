@@ -1,0 +1,2 @@
+third-party/*/src/** linguist-vendored
+third-party/fb-mysql/8.0.20/** linguist-vendored

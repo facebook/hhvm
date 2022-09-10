@@ -279,7 +279,7 @@ Value makePatchObject(auto operation, auto value) {
 }
 
 template <typename ContainerTag>
-PatchOpTestCase makeValueContainerAssignTC(
+PatchOpTestCase makeContainerAssignTC(
     const AnyRegistry& registry, const Protocol& protocol, auto value) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
@@ -287,7 +287,7 @@ PatchOpTestCase makeValueContainerAssignTC(
   using Container = type::standard_type<ContainerTag>;
 
   Container initial;
-  Container expected = {value.value};
+  Container expected = {value};
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
@@ -299,14 +299,14 @@ PatchOpTestCase makeValueContainerAssignTC(
 }
 
 template <typename ContainerTag>
-PatchOpTestCase makeValueContainerClearTC(
+PatchOpTestCase makeContainerClearTC(
     const AnyRegistry& registry, const Protocol& protocol, auto value) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
 
   using Container = type::standard_type<ContainerTag>;
 
-  Container initial = {value.value};
+  Container initial = {value};
   Container expected;
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
@@ -411,7 +411,7 @@ Test createListSetPatchTest(
           type::getName<TT>(),
           value.name);
       assignCase.test().emplace().objectPatch_ref() =
-          makeValueContainerAssignTC<ContainerTag>(registry, protocol, value);
+          makeContainerAssignTC<ContainerTag>(registry, protocol, value.value);
 
       auto& clearCase = test.testCases()->emplace_back();
       clearCase.name() = fmt::format(
@@ -420,7 +420,7 @@ Test createListSetPatchTest(
           type::getName<TT>(),
           value.name);
       clearCase.test().emplace().objectPatch_ref() =
-          makeValueContainerClearTC<ContainerTag>(registry, protocol, value);
+          makeContainerClearTC<ContainerTag>(registry, protocol, value.value);
 
       auto& removeCase = test.testCases()->emplace_back();
       removeCase.name() = fmt::format(
@@ -469,6 +469,49 @@ Test createListSetPatchTest(
   return test;
 }
 
+template <typename TT>
+Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
+  Test test;
+  test.name() = protocol.name();
+
+  using KeyTypeTags = boost::mp11::mp_list<
+      type::byte_t,
+      type::i16_t,
+      type::i32_t,
+      type::i64_t,
+      type::string_t>;
+  mp11::mp_for_each<KeyTypeTags>([&](auto kk) {
+    using KK = decltype(kk);
+    using ContainerTag = type::map<KK, TT>;
+    for (const auto& key : ValueGenerator<KK>::getInterestingValues()) {
+      type::standard_type<TT> value;
+      op::clear<TT>(value);
+
+      auto& assignCase = test.testCases()->emplace_back();
+      assignCase.name() = fmt::format(
+          "map<{},{}>/assign.{}",
+          type::getName<KK>(),
+          type::getName<TT>(),
+          key.name);
+      assignCase.test().emplace().objectPatch_ref() =
+          makeContainerAssignTC<ContainerTag>(
+              registry, protocol, std::make_pair(key.value, value));
+
+      auto& clearCase = test.testCases()->emplace_back();
+      clearCase.name() = fmt::format(
+          "map<{},{}>/clear.{}",
+          type::getName<KK>(),
+          type::getName<TT>(),
+          key.name);
+      clearCase.test().emplace().objectPatch_ref() =
+          makeContainerClearTC<ContainerTag>(
+              registry, protocol, std::make_pair(key.value, value));
+    }
+  });
+
+  return test;
+}
+
 void addPatchToSuite(
     const AnyRegistry& registry, const Protocol& protocol, TestSuite& suite) {
   mp11::mp_for_each<detail::PrimaryTypeTags>([&](auto tt) {
@@ -487,6 +530,8 @@ void addPatchToSuite(
       suite.tests()->emplace_back(
           createListSetPatchTest<TT>(registry, protocol));
     }
+
+    suite.tests()->emplace_back(createMapPatchTest<TT>(registry, protocol));
   });
 }
 } // namespace

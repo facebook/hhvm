@@ -34,7 +34,7 @@ TEST(PatchGeneratorTest, Basic) {
 
   {
     const auto& testCase = test.testCases()->at(0);
-    EXPECT_EQ(*testCase.name(), "byte/assign.zero");
+    EXPECT_EQ(*testCase.name(), "map<byte,bool>/assign.zero");
   }
 }
 

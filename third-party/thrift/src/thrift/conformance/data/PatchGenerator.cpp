@@ -577,6 +577,38 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
               protocol,
               std::pair{key.value, value},
               std::pair{patchkey, value});
+
+      using Container = type::native_type<ContainerTag>;
+
+      Container initial = {{key.value, value}};
+      auto newValue = valueToAssign<TT>();
+      auto keyValue = asValueStruct<KK>(key.value);
+      auto keyValuePatch = asValueStruct<type::struct_c>(
+          (op::patch_type<TT>() = toValue<TT>(newValue)).toThrift());
+      Container expected = {{key.value, newValue}};
+      Value patchValue;
+      patchValue.mapValue_ref().ensure()[keyValue] = keyValuePatch;
+
+      auto& patchPriorCase = test.testCases()->emplace_back();
+      patchPriorCase.name() = makeTestName(key, "patch_prior");
+      patchPriorCase.test().emplace().objectPatch_ref() =
+          makePatchXTC<ContainerTag>(
+              registry,
+              protocol,
+              initial,
+              op::PatchOp::PatchPrior,
+              patchValue,
+              expected);
+
+      auto& patchCase = test.testCases()->emplace_back();
+      patchCase.name() = makeTestName(key, "patch");
+      patchCase.test().emplace().objectPatch_ref() = makePatchXTC<ContainerTag>(
+          registry,
+          protocol,
+          initial,
+          op::PatchOp::PatchAfter,
+          patchValue,
+          expected);
     }
   });
 

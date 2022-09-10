@@ -361,11 +361,16 @@ void ApplyPatch::operator()(
   }
 
   auto patchElements = [&](auto patchFields) {
-    for (const auto& [keyv, valv] : *patchFields->mapValue_ref()) {
-      // Only patch values for fields that exist for now
-      if (auto* field = folly::get_ptr(value, keyv)) {
-        applyPatch(*valv.objectValue_ref(), *field);
+    if (const auto* keyPatches = patchFields->if_map()) {
+      for (const auto& [keyv, valv] : *keyPatches) {
+        // Only patch values for fields that exist for now
+        if (auto* field = folly::get_ptr(value, keyv)) {
+          applyPatch(*valv.objectValue_ref(), *field);
+        }
       }
+    } else {
+      throw std::runtime_error(
+          "struct patch PatchPrior/Patch should contain a map");
     }
   };
 

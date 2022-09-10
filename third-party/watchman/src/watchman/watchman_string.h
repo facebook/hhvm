@@ -274,7 +274,7 @@ class w_string {
    */
   void reset() noexcept;
 
-  operator w_string_t*() const {
+  w_string_t* ptr() const {
     return str_;
   }
 
@@ -449,7 +449,7 @@ namespace std {
 template <>
 struct hash<w_string> {
   std::size_t operator()(w_string const& str) const {
-    return w_string_hval(str);
+    return w_string_hval(str.ptr());
   }
 };
 template <>

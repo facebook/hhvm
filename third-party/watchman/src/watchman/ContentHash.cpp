@@ -38,7 +38,7 @@ bool ContentHashCacheKey::operator==(const ContentHashCacheKey& other) const {
 
 std::size_t ContentHashCacheKey::hashValue() const {
   return hash_128_to_64(
-      w_string_hval(relativePath),
+      w_string_hval(relativePath.ptr()),
       hash_128_to_64(fileSize, hash_128_to_64(mtime.tv_sec, mtime.tv_nsec)));
 }
 

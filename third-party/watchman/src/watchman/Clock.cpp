@@ -224,13 +224,13 @@ w_string ClockPosition::toClockString() const {
 }
 
 json_ref ClockSpec::toJson() const {
-  if (hasScmParams()) {
+  if (scmMergeBase) {
     auto scm = json_object(
-        {{"mergebase", w_string_to_json(scmMergeBase)},
+        {{"mergebase", w_string_to_json(scmMergeBase.value())},
          {"mergebase-with", w_string_to_json(scmMergeBaseWith)}});
-    if (hasSavedStateParams()) {
+    if (savedStateStorageType) {
       auto savedState = json_object(
-          {{"storage", w_string_to_json(savedStateStorageType)},
+          {{"storage", w_string_to_json(savedStateStorageType.value())},
            {"config", savedStateConfig.value()}});
       if (savedStateCommitId != w_string()) {
         json_object_set(
@@ -246,11 +246,11 @@ json_ref ClockSpec::toJson() const {
 }
 
 bool ClockSpec::hasScmParams() const {
-  return scmMergeBase;
+  return scmMergeBase.has_value();
 }
 
 bool ClockSpec::hasSavedStateParams() const {
-  return savedStateStorageType;
+  return savedStateStorageType.has_value();
 }
 
 /* vim:ts=2:sw=2:et:

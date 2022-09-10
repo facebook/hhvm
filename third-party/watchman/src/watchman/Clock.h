@@ -86,11 +86,11 @@ struct ClockSpec {
   std::variant<Timestamp, Clock, NamedCursor> spec;
 
   // Optional SCM merge base parameters
-  w_string scmMergeBase;
+  std::optional<w_string> scmMergeBase;
   w_string scmMergeBaseWith;
   // Optional saved state parameters
   std::optional<json_ref> savedStateConfig;
-  w_string savedStateStorageType;
+  std::optional<w_string> savedStateStorageType;
   w_string savedStateCommitId;
 
   ClockSpec();

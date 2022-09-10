@@ -293,7 +293,7 @@ QueryResult w_query_execute(
         // Find the most recent saved state to the new mergebase and return
         // changed files since that saved state, if available.
         auto savedStateInterface = savedStateFactory(
-            query->since_spec->savedStateStorageType,
+            query->since_spec->savedStateStorageType.value(),
             query->since_spec->savedStateConfig.value(),
             scm,
             root->config,
@@ -301,7 +301,8 @@ QueryResult w_query_execute(
               root->addPerfSampleMetadata(sample);
             });
         auto savedStateResult = savedStateInterface->getMostRecentSavedState(
-            resultClock.scmMergeBase);
+            resultClock.scmMergeBase ? resultClock.scmMergeBase->piece()
+                                     : w_string_piece{});
         res.savedStateInfo = savedStateResult.savedStateInfo;
         if (savedStateResult.commitId) {
           resultClock.savedStateCommitId = savedStateResult.commitId;
@@ -315,7 +316,7 @@ QueryResult w_query_execute(
           // clock as if scm-aware queries were not being used at all, to ensure
           // clients have all changed files they need.
           resultClock.savedStateCommitId = w_string();
-          modifiedMergebase = nullptr;
+          modifiedMergebase = std::nullopt;
         }
       }
       // If the modified mergebase is null then we had no saved state available
@@ -331,7 +332,10 @@ QueryResult w_query_execute(
           auto position = c->clockAtStartOfQuery.position();
           auto changedFiles =
               root->view()->getSCM()->getFilesChangedSinceMergeBaseWith(
-                  modifiedMergebase, position.toClockString(), requestId);
+                  modifiedMergebase ? modifiedMergebase->piece()
+                                    : w_string_piece{},
+                  position.toClockString(),
+                  requestId);
 
           ClockStamp clock{position.ticks, ::time(nullptr)};
           for (const auto& path : changedFiles) {

@@ -335,8 +335,17 @@ void ApplyPatch::operator()(const Object& patch, std::set<Value>& value) const {
     }
   }
 
+  auto validate_if_set = [](const auto patchOp, auto name) {
+    const auto* opData = patchOp->if_set();
+    if (!opData) {
+      throw std::runtime_error(
+          fmt::format("set {} patch should caontain a set", name));
+    }
+    return opData;
+  };
+
   if (auto* remove = findOp(patch, PatchOp::Remove)) {
-    for (const auto& key : *remove->setValue_ref()) {
+    for (const auto& key : *validate_if_set(remove, "remove")) {
       value.erase(key);
     }
   }
@@ -346,11 +355,11 @@ void ApplyPatch::operator()(const Object& patch, std::set<Value>& value) const {
   };
 
   if (auto* add = findOp(patch, PatchOp::Add)) {
-    insert_set(*add->setValue_ref());
+    insert_set(*validate_if_set(add, "add"));
   }
 
   if (auto* put = findOp(patch, PatchOp::Put)) {
-    insert_set(*put->setValue_ref());
+    insert_set(*validate_if_set(put, "put"));
   }
 }
 

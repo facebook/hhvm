@@ -26,33 +26,33 @@ namespace apache::thrift::test {
 namespace {
 
 template <typename Obj, typename Ord>
-void testFieldRef(Obj obj, Ord ordinal) {
-  auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
+void testFieldRef(Obj obj, Ord ord) {
+  auto field = op::get<decltype(ord), decltype(obj)>(obj);
   field = 2;
   EXPECT_EQ(*op::getValueOrNull(field), 2);
   // test with const T&
   const auto& objRef = obj;
-  auto fieldConst = op::get<decltype(obj), decltype(ordinal)>(objRef);
+  auto fieldConst = op::get<decltype(ord), decltype(obj)>(objRef);
   EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
 }
 
 template <typename Obj, typename Ord>
-void testGetValueNotOptional(Obj obj, Ord ordinal) {
-  auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
+void testGetValueNotOptional(Obj obj, Ord ord) {
+  auto field = op::get<decltype(ord), decltype(obj)>(obj);
   EXPECT_EQ(*op::getValueOrNull(field), 0);
-  testFieldRef(obj, ordinal);
+  testFieldRef(obj, ord);
 }
 
 template <typename Obj, typename Ord>
-void testGetValueOptional(Obj obj, Ord ordinal) {
-  auto field = op::get<decltype(obj), decltype(ordinal)>(obj);
+void testGetValueOptional(Obj obj, Ord ord) {
+  auto field = op::get<decltype(ord), decltype(obj)>(obj);
   EXPECT_EQ(op::getValueOrNull(field), nullptr);
-  testFieldRef(obj, ordinal);
+  testFieldRef(obj, ord);
 }
 
 template <typename Obj, typename Ord>
-void testGetValueSmartPointer(Obj obj, Ord ordinal) {
-  auto& field = op::get<decltype(obj), decltype(ordinal)>(obj);
+void testGetValueSmartPointer(Obj obj, Ord ord) {
+  auto& field = op::get<decltype(ord), decltype(obj)>(obj);
   EXPECT_EQ(op::getValueOrNull(field), nullptr);
   if constexpr (detail::is_unique_ptr_v<
                     std::remove_reference_t<decltype(field)>>) {

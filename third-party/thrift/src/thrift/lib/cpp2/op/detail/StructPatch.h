@@ -94,7 +94,7 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   using Base = BaseClearPatch<Patch, StructPatch>;
   using T = typename Base::value_type;
   template <typename Id>
-  using F = type::native_type<get_field_tag<T, Id>>;
+  using F = type::native_type<get_field_tag<Id, T>>;
 
  public:
   using Base::apply;
@@ -113,7 +113,7 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   template <typename Id>
   void clear() {
     if (hasAssign()) {
-      clearValue(get(get_field_tag<T, Id>{}, *data_.assign()));
+      clearValue(get(get_field_tag<Id, T>{}, *data_.assign()));
       return;
     }
     patchPrior<Id>().clear();
@@ -125,7 +125,7 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   template <typename Id, typename U = F<Id>>
   void assign(U&& val) {
     if (hasValue(data_.assign())) {
-      get(get_field_id<T, Id>{}, *data_.assign()) = std::forward<U>(val);
+      get(get_field_id<Id, T>{}, *data_.assign()) = std::forward<U>(val);
     } else {
       ensure<Id>().assign(std::forward<U>(val));
     }
@@ -225,12 +225,12 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   decltype(auto) patchPrior() {
     ensurePatchable();
     // Field Ids must always be used to access patchPrior.
-    return *data_.patchPrior()->get(get_field_id<T, Id>{});
+    return *data_.patchPrior()->get(get_field_id<Id, T>{});
   }
 
   template <typename Id, typename U>
   static decltype(auto) getEnsure(U&& data) {
-    return get(get_field_id<T, Id>{}, *data.ensure());
+    return get(get_field_id<Id, T>{}, *data.ensure());
   }
 
   template <typename Id>
@@ -251,7 +251,7 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   decltype(auto) patchAfter() {
     ensurePatchable();
     // Field Ids must always be used to access patch(After).
-    return *data_.patch()->get(get_field_id<T, Id>{});
+    return *data_.patch()->get(get_field_id<Id, T>{});
   }
 
   void ensurePatchable() {

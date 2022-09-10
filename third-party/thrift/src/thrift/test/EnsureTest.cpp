@@ -24,10 +24,10 @@ namespace apache::thrift::test {
 namespace {
 
 template <typename Obj, typename Ord>
-void testEnsure(Obj obj, Ord ordinal) {
+void testEnsure(Obj obj, Ord ord) {
   using Struct = decltype(obj);
-  using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
-  auto field = op::get<Struct, decltype(ordinal)>(obj);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto field = op::get<decltype(ord), Struct>(obj);
   op::ensure<FieldTag>(field, obj);
   EXPECT_EQ(field, 0);
   field = 2;
@@ -36,10 +36,10 @@ void testEnsure(Obj obj, Ord ordinal) {
 }
 
 template <typename Obj, typename Ord>
-void testEnsurePtr(Obj obj, Ord ordinal) {
+void testEnsurePtr(Obj obj, Ord ord) {
   using Struct = decltype(obj);
-  using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
-  auto& field = op::get<Struct, decltype(ordinal)>(obj);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto& field = op::get<decltype(ord), Struct>(obj);
   op::ensure<FieldTag>(field, obj);
   EXPECT_EQ(*field, 0);
   if constexpr (detail::is_unique_ptr_v<
@@ -66,7 +66,7 @@ TEST(EnsureTest, SmartPointer) {
 
 TEST(EnsureTest, Optional) {
   FieldRefStruct obj;
-  using FieldTag = op::get_field_tag<FieldRefStruct, field_ordinal<2>>;
+  using FieldTag = op::get_field_tag<field_ordinal<2>, FieldRefStruct>;
   auto opt = obj.optional_i32_ref().to_optional();
   op::ensure<FieldTag>(opt, obj);
   EXPECT_EQ(*opt, 0);

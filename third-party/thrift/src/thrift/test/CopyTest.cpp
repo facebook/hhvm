@@ -50,43 +50,43 @@ void copySharedPointer(Src&& src, Dst&& dst) {
 }
 
 template <typename Src, typename Dst, typename Ord>
-void testFieldRef(Src src, Dst dst, Ord ordinal) {
+void testFieldRef(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  auto srcField = op::get<Struct, decltype(ordinal)>(src);
-  auto dstField = op::get<Struct, decltype(ordinal)>(dst);
+  auto srcField = op::get<decltype(ord), Struct>(src);
+  auto dstField = op::get<decltype(ord), Struct>(dst);
   // test src = field_ref<T&>
   copyFieldRef(srcField, srcField, dstField);
   // test src = field_ref<const T&>
   const auto& srcConstRef = src;
-  auto srcConstField = op::get<Struct, decltype(ordinal)>(srcConstRef);
+  auto srcConstField = op::get<decltype(ord), Struct>(srcConstRef);
   copyFieldRef(srcField, srcConstField, dstField);
   // test src = field_ref<T&&>
   auto&& srcRvalueRef = std::move(src);
-  auto srcRvalueField = op::get<Struct, decltype(ordinal)>(
+  auto srcRvalueField = op::get<decltype(ord), Struct>(
       std::forward<decltype(srcRvalueRef)>(srcRvalueRef));
   copyFieldRef(srcField, srcRvalueField, dstField);
   // test src = field_ref<const T&&>
   const auto&& srcRvalueConstRef = std::move(src);
-  auto srcRvalueConstField = op::get<Struct, decltype(ordinal)>(
+  auto srcRvalueConstField = op::get<decltype(ord), Struct>(
       std::forward<decltype(srcRvalueConstRef)>(srcRvalueConstRef));
   copyFieldRef(srcField, srcRvalueConstField, dstField);
 }
 
 template <typename Src, typename Dst, typename Ord>
-void testCopyNotOptional(Src src, Dst dst, Ord ordinal) {
+void testCopyNotOptional(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  auto srcField = op::get<Struct, decltype(ordinal)>(src);
-  auto dstField = op::get<Struct, decltype(ordinal)>(dst);
+  auto srcField = op::get<decltype(ord), Struct>(src);
+  auto dstField = op::get<decltype(ord), Struct>(dst);
   op::copy(srcField, dstField);
   EXPECT_EQ(*dstField, 0);
-  testFieldRef(src, dst, ordinal);
+  testFieldRef(src, dst, ord);
 }
 
 template <typename Src, typename Dst, typename Ord>
-void testCopyOptional(Src src, Dst dst, Ord ordinal) {
+void testCopyOptional(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  auto srcField = op::get<Struct, decltype(ordinal)>(src);
-  auto dstField = op::get<Struct, decltype(ordinal)>(dst);
+  auto srcField = op::get<decltype(ord), Struct>(src);
+  auto dstField = op::get<decltype(ord), Struct>(dst);
   // src doesn't have value.
   op::copy(srcField, dstField);
   EXPECT_FALSE(dstField.has_value());
@@ -95,15 +95,15 @@ void testCopyOptional(Src src, Dst dst, Ord ordinal) {
   EXPECT_FALSE(dstField.has_value());
   // src has value.
   srcField = 1;
-  testFieldRef(src, dst, ordinal);
+  testFieldRef(src, dst, ord);
 }
 
 template <typename Src, typename Dst, typename Ord>
-void testCopyUniquePointer(Src src, Dst dst, Ord ordinal) {
+void testCopyUniquePointer(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
-  auto& srcField = op::get<Struct, decltype(ordinal)>(src);
-  auto& dstField = op::get<Struct, decltype(ordinal)>(dst);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto& srcField = op::get<decltype(ord), Struct>(src);
+  auto& dstField = op::get<decltype(ord), Struct>(dst);
 
   // src doesn't have value.
   op::copy(srcField, dstField);
@@ -134,11 +134,11 @@ void testCopyUniquePointer(Src src, Dst dst, Ord ordinal) {
 }
 
 template <typename Src, typename Dst, typename Ord>
-void testCopySharedPointer(Src src, Dst dst, Ord ordinal) {
+void testCopySharedPointer(Src src, Dst dst, Ord ord) {
   using Struct = decltype(src);
-  using FieldTag = op::get_field_tag<Struct, decltype(ordinal)>;
-  auto& srcField = op::get<Struct, decltype(ordinal)>(src);
-  auto& dstField = op::get<Struct, decltype(ordinal)>(dst);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto& srcField = op::get<decltype(ord), Struct>(src);
+  auto& dstField = op::get<decltype(ord), Struct>(dst);
 
   // src doesn't have value.
   op::copy(srcField, dstField);

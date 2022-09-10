@@ -137,7 +137,7 @@ class Type : public detail::Wrap<TypeStruct> {
     // The field ids are 1:1 with the associated BaseType.
     using Id = field_id_tag<static_cast<FieldId>(base_type_v<CTag>)>;
     using Union = folly::remove_cvref_t<decltype(*result.name())>;
-    return op::get<Union, Id>(*std::forward<T>(result).name());
+    return op::get<Id, Union>(*std::forward<T>(result).name());
   }
 
   template <typename Tag>

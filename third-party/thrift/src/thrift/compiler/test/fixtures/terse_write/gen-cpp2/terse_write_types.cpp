@@ -1443,9 +1443,9 @@ void AdaptedFields::__fbthrift_clear_terse_fields() {
 }
 
 bool AdaptedFields::__fbthrift_is_empty() const {
-  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedFields, ::apache::thrift::field_id<1>>>(this->__fbthrift_field_field1) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedFields, ::apache::thrift::field_id<2>>>(this->__fbthrift_field_field2) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<AdaptedFields, ::apache::thrift::field_id<3>>>(this->__fbthrift_field_field3);
+  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, AdaptedFields>>(this->__fbthrift_field_field2) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, AdaptedFields>>(this->__fbthrift_field_field3);
 }
 
 bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {

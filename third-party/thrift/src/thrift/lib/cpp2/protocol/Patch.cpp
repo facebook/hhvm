@@ -51,8 +51,7 @@ using value_field_id =
     type::field_id_tag<static_cast<FieldId>(type::base_type_v<Tag>)>;
 
 template <typename Tag>
-using value_native_type =
-    type::native_type<op::get_field_tag<Value, value_field_id<Tag>>>;
+using value_native_type = op::get_native_type<value_field_id<Tag>, Value>;
 
 PatchOp toOp(FieldId id) {
   auto op = static_cast<PatchOp>(id);
@@ -92,7 +91,7 @@ decltype(auto) argAs(const Value& value) {
         util::enumNameSafe<Value::Type>(expected),
         util::enumNameSafe<Value::Type>(value.getType())));
   }
-  return *op::get<Value, Id>(value);
+  return *op::get<Id, Value>(value);
 }
 
 template <typename Tag>

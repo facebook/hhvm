@@ -27,102 +27,102 @@ namespace thrift {
 namespace op {
 
 // Resolves to the number of definitions contained in Thrift class.
-template <typename S>
+template <typename T>
 FOLLY_INLINE_VARIABLE constexpr std::size_t size_v =
-    detail::pa::__fbthrift_field_size_v<S>;
+    detail::pa::__fbthrift_field_size_v<T>;
 
 // Gets the ordinal, for example:
 //
 //   // Resolves to ordinal at which the field "foo" was defined in MyS.
-//   using Ord = get_ordinal<MyS, ident::foo>
+//   using Ord = get_ordinal<ident::foo, MyS>
 //
-template <class S, class Id>
+template <typename Id, typename T>
 using get_ordinal =
-    typename detail::GetOrdinalImpl<type::infer_tag<S>, Id>::type;
-template <class S, class Id>
+    typename detail::GetOrdinalImpl<Id, type::infer_tag<T>>::type;
+template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
-    get_ordinal<S, Id>::value;
+    get_ordinal<Id, T>::value;
 
 // It calls the given function with ordinal<1> to ordinal<N>.
-template <typename S, typename F>
+template <typename T, typename F>
 void for_each_ordinal(F&& f) {
   detail::for_each_ordinal_impl(
-      std::forward<F>(f), std::make_integer_sequence<size_t, size_v<S>>{});
+      std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
 }
 
 // Gets the field id, for example:
 //
 //   // Resolves to field id assigned to the field "foo" in MyS.
-//   using FieldId = get_field_id<MyS, ident::foo>
+//   using FieldId = get_field_id<ident::foo, MyS>
 //
-template <class S, class Id>
+template <typename Id, typename T>
 using get_field_id = folly::conditional_t<
-    get_ordinal<S, Id>::value == type::Ordinal{},
-    field_id<0>,
-    detail::pa::field_id<S, get_ordinal<S, Id>>>;
-template <class S, class Id>
+    get_ordinal<Id, T>::value == type::Ordinal{},
+    type::field_id<0>,
+    detail::pa::field_id<T, get_ordinal<Id, T>>>;
+template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
-    get_field_id<S, Id>::value;
+    get_field_id<Id, T>::value;
 
 // It calls the given function with each field_id<{id}> in Thrift class.
-template <typename S, typename F>
+template <typename T, typename F>
 void for_each_field_id(F&& f) {
-  for_each_ordinal<S>([&](auto ord) { f(get_field_id<S, decltype(ord)>{}); });
+  for_each_ordinal<T>([&](auto ord) { f(get_field_id<decltype(ord), T>{}); });
 }
 
 // Gets the ident, for example:
 //
 //   // Resolves to thrift::ident::* type associated with field 7 in MyS.
-//   using Ident = get_field_id<MyS, field_id<7>>
+//   using Ident = get_field_id<field_id<7>, MyS>
 //
-template <class S, class Id>
-using get_ident = detail::pa::ident<S, get_ordinal<S, Id>>;
+template <typename Id, typename T>
+using get_ident = detail::pa::ident<T, get_ordinal<Id, T>>;
 
 // It calls the given function with each folly::tag<thrift::ident::*>{} in
 // Thrift class.
-template <typename S, typename F>
+template <typename T, typename F>
 void for_each_ident(F&& f) {
-  for_each_ordinal<S>(
-      [&](auto ord) { f(folly::tag_t<get_ident<S, decltype(ord)>>{}); });
+  for_each_ordinal<T>(
+      [&](auto ord) { f(folly::tag_t<get_ident<decltype(ord), T>>{}); });
 }
 
 // Gets the Thrift type tag, for example:
 //
 //   // Resolves to Thrift type tag for the field "foo" in MyS.
-//   using Tag = get_field_id<MyS, ident::foo>
+//   using Tag = get_field_id<ident::foo, MyS>
 //
-template <typename S, typename Id>
-using get_type_tag = detail::pa::type_tag<S, get_ordinal<S, Id>>;
+template <typename Id, typename T>
+using get_type_tag = detail::pa::type_tag<T, get_ordinal<Id, T>>;
 
-template <class S, class Id>
+template <typename Id, typename T>
 using get_field_tag = typename std::conditional_t<
-    get_ordinal<S, Id>::value == type::Ordinal{},
+    get_ordinal<Id, T>::value == type::Ordinal{},
     void,
     type::field<
-        get_type_tag<S, Id>,
-        FieldContext<S, folly::to_underlying(get_field_id<S, Id>::value)>>>;
+        get_type_tag<Id, T>,
+        FieldContext<T, folly::to_underlying(get_field_id<Id, T>::value)>>>;
 
-template <class S, class Id>
-using get_native_type = type::native_type<get_field_tag<S, Id>>;
+template <typename Id, typename T>
+using get_native_type = type::native_type<get_field_tag<Id, T>>;
 
 // Gets the thrift field name, for example:
 //
 //   // Returns the thrift field name associated with field 7 in MyStruct.
-//   op::get_name_v<MyStruct, field_id<7>>
+//   op::get_name_v<field_id<7>, MyStruct>
 //
-template <typename S, class Id>
+template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name_v =
-    detail::pa::__fbthrift_get_field_name<S, get_ordinal<S, Id>>();
+    detail::pa::__fbthrift_get_field_name<T, get_ordinal<Id, T>>();
 // TODO(afuller): Migrate usage a remove.
 template <typename S, class Id>
 FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
-    detail::pa::__fbthrift_get_field_name<S, get_ordinal<S, Id>>();
+    detail::pa::__fbthrift_get_field_name<S, get_ordinal<Id, S>>();
 
 // Gets the Thrift field, for example:
 //
-//   op::get<MyStruct, type::field_id<7>>(myStruct) = 4;
-template <typename S, class Id>
-FOLLY_INLINE_VARIABLE constexpr auto get = access_field<get_ident<S, Id>>;
+//   op::get<type::field_id<7>, MyStruct>(myStruct) = 4;
+template <typename Id, typename T>
+FOLLY_INLINE_VARIABLE constexpr auto get = access_field<get_ident<Id, T>>;
 
 // Returns pointer to the value from the given field.
 // Returns nullptr if it doesn't have a value.
@@ -137,7 +137,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::GetValueOrNull getValueOrNull;
 
 // Implementation details.
 namespace detail {
-template <class Tag, class Id>
+template <typename Id, typename Tag>
 struct GetOrdinalImpl {
   // TODO(ytj): To reduce build time, only check whether Id is reflection
   // metadata if we couldn't find Id.
@@ -145,8 +145,8 @@ struct GetOrdinalImpl {
   using type = detail::pa::ordinal<type::native_type<Tag>, Id>;
 };
 
-template <class Tag, type::Ordinal Ord>
-struct GetOrdinalImpl<Tag, std::integral_constant<type::Ordinal, Ord>> {
+template <type::Ordinal Ord, typename Tag>
+struct GetOrdinalImpl<std::integral_constant<type::Ordinal, Ord>, Tag> {
   static_assert(
       folly::to_underlying(Ord) <= size_v<type::native_type<Tag>>,
       "Ordinal cannot be larger than the number of definitions");
@@ -155,9 +155,9 @@ struct GetOrdinalImpl<Tag, std::integral_constant<type::Ordinal, Ord>> {
   using type = type::ordinal_tag<Ord>;
 };
 
-template <class Tag, class TypeTag, class Struct, int16_t Id>
-struct GetOrdinalImpl<Tag, type::field<TypeTag, FieldContext<Struct, Id>>>
-    : GetOrdinalImpl<Tag, field_id<Id>> {};
+template <typename TypeTag, typename Struct, int16_t Id, typename Tag>
+struct GetOrdinalImpl<type::field<TypeTag, FieldContext<Struct, Id>>, Tag>
+    : GetOrdinalImpl<field_id<Id>, Tag> {};
 
 template <size_t... I, typename F>
 void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {

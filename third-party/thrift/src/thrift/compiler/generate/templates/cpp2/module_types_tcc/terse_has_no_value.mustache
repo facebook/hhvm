@@ -40,7 +40,7 @@
 %><%#struct:no_deprecated_tag_incompatible_and_thrift_uri?%><%!
   // Note: All adapted fields need to use field tag.
   %><%#field:cpp_first_adapter%><%!
-    %>::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<<%struct:cpp_underlying_name%>, ::apache::thrift::field_id<<%field:key%>>>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
+    %>::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<<%field:key%>>, <%struct:cpp_underlying_name%>>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
   %><%/field:cpp_first_adapter%><%!
   %><%^field:cpp_first_adapter%><%!
     %>::apache::thrift::op::isEmpty<<%field:type_tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!

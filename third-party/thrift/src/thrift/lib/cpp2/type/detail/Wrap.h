@@ -83,7 +83,7 @@ class Wrap {
   // Gets the field reference, for the given id, in the given structured data.
   template <typename Id, typename U>
   constexpr static decltype(auto) get(Id, U&& data) {
-    return op::get<folly::remove_cvref_t<U>, Id>(std::forward<U>(data));
+    return op::get<Id, folly::remove_cvref_t<U>>(std::forward<U>(data));
   }
 
   // Gets the field reference, for the given id, in the underlying data.

@@ -178,25 +178,25 @@ TEST_F(FatalReflectionIndirectionTest, type_tag) {
   using namespace apache::thrift::type;
   using namespace reflection_indirection;
 
-  same_type<get_type_tag<type, field_ordinal<0>>, void>;
-  same_type<get_type_tag<type, field_ordinal<1>>, i32_t>;
+  same_type<get_type_tag<field_ordinal<0>, type>, void>;
+  same_type<get_type_tag<field_ordinal<1>, type>, i32_t>;
   same_type<
-      get_type_tag<type, field_ordinal<2>>,
+      get_type_tag<field_ordinal<2>, type>,
       apache::thrift::type::cpp_type<CppFakeI32, apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<type, field_ordinal<3>>,
+      get_type_tag<field_ordinal<3>, type>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasANumber>,
           apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<type, field_ordinal<4>>,
+      get_type_tag<field_ordinal<4>, type>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAResult>,
           apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<type, field_ordinal<5>>,
+      get_type_tag<field_ordinal<5>, type>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAPhrase>,

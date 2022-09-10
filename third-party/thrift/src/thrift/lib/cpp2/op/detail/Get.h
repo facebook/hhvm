@@ -27,7 +27,7 @@ namespace op {
 namespace detail {
 using pa = ::apache::thrift::detail::st::private_access;
 
-template <class Tag, class Id>
+template <typename Id, typename Tag>
 struct GetOrdinalImpl;
 template <size_t... I, typename F>
 void for_each_ordinal_impl(F&& f, std::index_sequence<I...>);
@@ -83,6 +83,7 @@ struct GetValueOrNull {
     return ptr ? ptr.get() : nullptr;
   }
 };
+
 } // namespace detail
 } // namespace op
 } // namespace thrift

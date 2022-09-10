@@ -135,8 +135,8 @@ template <size_t Ord, typename Struct>
 void clear_struct_impl(Struct& s) {
   if constexpr (Ord != 0) {
     using FieldOrdinal = field_ordinal<Ord>;
-    using FieldTag = op::get_field_tag<Struct, FieldOrdinal>;
-    op::clear_field<FieldTag>(op::get<Struct, FieldOrdinal>(s), s);
+    using FieldTag = op::get_field_tag<FieldOrdinal, Struct>;
+    op::clear_field<FieldTag>(op::get<FieldOrdinal, Struct>(s), s);
     clear_struct_impl<Ord - 1>(s);
   }
 }

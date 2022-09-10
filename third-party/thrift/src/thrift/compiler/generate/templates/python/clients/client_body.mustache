@@ -58,9 +58,14 @@ class Async({{#service:extends}}{{!
         self{{#function:args}},
         {{field:py_name}}: {{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/function:args}}
     ) -> {{#function:return_type}}{{!
-        }}{{#type:streamresponse?}}{{> clients/stream_response_class_name}}{{/type:streamresponse?}}{{!
-        }}{{^type:streamresponse?}}{{> types/pep484_type}}{{/type:streamresponse?}}{{!
+        }}{{#function:returns_tuple?}}_typing.Tuple[{{/function:returns_tuple?}}{{!
+        }}{{#function:creates_interaction?}}{{service:name}}_{{function:created_interaction}}.Async{{^type:void?}}, {{> types/pep484_type}}{{/type:void?}}{{/function:creates_interaction?}}{{!
+        }}{{^function:creates_interaction?}}{{> types/pep484_type}}{{/function:creates_interaction?}}{{!
+        }}{{#function:returns_tuple?}}]{{/function:returns_tuple?}}{{!
     }}{{/function:return_type}}:
+        {{#function:creates_interaction?}}
+        _fbthrift_interaction = self.create{{function:created_interaction}}()
+        {{/function:creates_interaction?}}
         _fbthrift_resp = await self._send_request(  # type: ignore {{! TODO: remove this ignore after wheel build }}
             {{^service:interaction?}}"{{service:name}}"{{/service:interaction?}}{{#service:interaction?}}"{{service:parent_service_name}}"{{/service:interaction?}},
             {{#service:interaction?}}"{{service:name}}.{{function:name}}",{{/service:interaction?}}{{^service:interaction?}}"{{function:name}}",{{/service:interaction?}}
@@ -68,31 +73,37 @@ class Async({{#service:extends}}{{!
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> types/function_return_type}},
             qualifier = _fbthrift_FunctionQualifier.{{function:qualifier}},  # type: ignore {{! TODO: remove this ignore after wheel build }}
-            {{#service:interaction?}}interaction_position=_fbthrift_InteractionMethodPosition.Member,{{/service:interaction?}}
-            {{#service:interaction?}}interaction_name="{{service:name}}",{{/service:interaction?}}
+            {{#function:creates_interaction?}}
+            interaction_position=_fbthrift_InteractionMethodPosition.Factory,
+            interaction_name="{{function:created_interaction}}",
+            created_interaction = _fbthrift_interaction,
+            {{/function:creates_interaction?}}
+            {{#service:interaction?}}
+            interaction_position=_fbthrift_InteractionMethodPosition.Member,
+            interaction_name="{{service:name}}",
+            {{/service:interaction?}}
         )
         {{#function:returns_stream?}}
         _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
         {{/function:returns_stream?}}
-        {{^function:returns_stream?}}{{^function:void?}}
+        {{#function:return_type}}
+        {{#function:early_client_return?}}
         # shortcut to success path for non-void returns
         if _fbthrift_resp.success is not None:
-            return _fbthrift_resp.success
-        {{/function:void?}}{{/function:returns_stream?}}
-        {{#function:return_type}}
-        {{#type:stream_has_first_response?}}
-        if _fbthrift_resp.success is not None:
-            return _fbthrift_resp.success, _fbthrift_stream
-        {{/type:stream_has_first_response?}}
+            return {{#function:creates_interaction?}}_fbthrift_interaction, {{/function:creates_interaction?}}{{!
+          }}_fbthrift_resp.success{{#type:streamresponse?}}, _fbthrift_stream{{/type:streamresponse?}}
+        {{/function:early_client_return?}}
         {{#function:exceptions}}
         if _fbthrift_resp.{{field:py_name}} is not None:
             raise _fbthrift_resp.{{field:py_name}}
         {{/function:exceptions}}
-        {{#type:streamresponse?}}
-        {{^type:stream_has_first_response?}}
-        return _fbthrift_stream
-        {{/type:stream_has_first_response?}}
-        {{/type:streamresponse?}}
+        {{^function:early_client_return?}}
+        {{^function:void?}}
+        return {{#function:creates_interaction?}}_fbthrift_interaction{{/function:creates_interaction?}}{{!
+          }}{{#function:returns_tuple?}}, {{/function:returns_tuple?}}{{!
+          }}{{#type:streamresponse?}}_fbthrift_stream{{/type:streamresponse?}}
+        {{/function:void?}}
+        {{/function:early_client_return?}}
         {{#type:with_regular_response?}}
         raise _fbthrift_python_exceptions.ApplicationError(
             _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,

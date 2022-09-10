@@ -32,5 +32,8 @@ interaction Addition {
 
 service Calculator {
   performs Addition;
+  Addition newAddition();
+  Addition, i32 initializedAddition(1: i32 a);
+  Addition, string stringifiedAddition(1: i32 a);
   i32 addPrimitive(1: i32 a, 2: i32 b);
 }

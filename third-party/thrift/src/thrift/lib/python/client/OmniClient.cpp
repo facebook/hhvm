@@ -374,6 +374,7 @@ void OmniClient::sendImpl(
   SerializedRequest serializedRequest(std::move(args));
 
   setInteraction(rpcOptions);
+  factoryClient_ = nullptr;
 
   // Send the request!
   switch (rpcKind) {

@@ -504,6 +504,11 @@ class python_mstch_function : public mstch_function {
         this,
         {
             {"function:args?", &python_mstch_function::has_args},
+            {"function:created_interaction",
+             &python_mstch_function::created_interaction},
+            {"function:returns_tuple?", &python_mstch_function::returns_tuple},
+            {"function:early_client_return?",
+             &python_mstch_function::early_client_return},
             {"function:regular_response_type",
              &python_mstch_function::regular_response_type},
             {"function:return_stream_elem_type",
@@ -514,6 +519,30 @@ class python_mstch_function : public mstch_function {
 
   mstch::node has_args() {
     return !function_->get_paramlist()->get_members().empty();
+  }
+
+  mstch::node created_interaction() {
+    const auto* interaction = function_->returned_interaction().get_type();
+    if (interaction != nullptr) {
+      return interaction->get_name();
+    }
+    return "";
+  }
+
+  mstch::node returns_tuple() {
+    // TOOD add in sinks, etc
+    const auto& rettype = *function_->return_type();
+    auto stream = dynamic_cast<const t_stream_response*>(&rettype);
+    return (stream && !stream->first_response_type().empty()) ||
+        (!function_->returned_interaction().empty() && !rettype.is_void());
+  }
+
+  mstch::node early_client_return() {
+    // TOOD add in sinks, etc
+    const auto& rettype = *function_->return_type();
+    auto stream = dynamic_cast<const t_stream_response*>(&rettype);
+    return !(
+        rettype.is_void() || (stream && stream->first_response_type().empty()));
   }
 
   mstch::node regular_response_type() {
@@ -544,7 +573,9 @@ class python_mstch_function : public mstch_function {
   }
 
   mstch::node async_only() {
-    return function_->returns_stream() || function_->returns_sink();
+    return function_->returns_stream() || function_->returns_sink() ||
+        function_->get_returntype()->is_service() ||
+        function_->is_interaction_member();
   }
 
  protected:

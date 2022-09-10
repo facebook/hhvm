@@ -54,8 +54,6 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     i32_to=i32_to,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_returnstream_result, module.thrift_types._fbthrift_PubSubStreamingService_returnstream_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
@@ -71,8 +69,6 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_streamthrows_result, module.thrift_types._fbthrift_PubSubStreamingService_streamthrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream
@@ -88,8 +84,6 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_servicethrows_result, module.thrift_types._fbthrift_PubSubStreamingService_servicethrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             if _fbthrift_resp.e is not None:
@@ -107,8 +101,6 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_boththrows_result, module.thrift_types._fbthrift_PubSubStreamingService_boththrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             if _fbthrift_resp.e is not None:
@@ -126,10 +118,9 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result, module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamstreamthrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
             raise _fbthrift_python_exceptions.ApplicationError(
@@ -148,10 +139,9 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result, module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamservicethrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
             if _fbthrift_resp.e is not None:
@@ -172,10 +162,9 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     foo=foo,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result, module.thrift_types._fbthrift_PubSubStreamingService_responseandstreamboththrows_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
                 return _fbthrift_resp.success, _fbthrift_stream
             if _fbthrift_resp.e is not None:
@@ -198,8 +187,6 @@ class PubSubStreamingService(_fbthrift_python_Client["PubSubStreamingService.Asy
                     i32_to=i32_to,),
                 (module.thrift_types._fbthrift_PubSubStreamingService_returnstreamFast_result, module.thrift_types._fbthrift_PubSubStreamingService_returnstreamFast_result_stream),
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             return _fbthrift_stream

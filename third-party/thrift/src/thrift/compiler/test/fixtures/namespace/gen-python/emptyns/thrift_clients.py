@@ -52,8 +52,6 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                     int1=int1,),
                 emptyns.thrift_types._fbthrift_TestService_init_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

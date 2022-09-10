@@ -113,6 +113,10 @@ class OmniClient : public apache::thrift::TClientBase {
     return channel_;
   }
 
+  // TODO(ffrancet): get rid of in favour of calling setInteraction once we've
+  // implemented client RPCOptions
+  void set_interaction_factory(OmniClient* client) { factoryClient_ = client; }
+
  private:
   /**
    * Sends the request to the Thrift service through the RequestChannel.
@@ -129,9 +133,14 @@ class OmniClient : public apache::thrift::TClientBase {
 
  protected:
   // RpcOptions unused in base OmniClient since no interaction support
-  virtual void setInteraction(apache::thrift::RpcOptions&) {}
+  virtual void setInteraction(apache::thrift::RpcOptions& rpcOptions) {
+    if (factoryClient_) {
+      factoryClient_->setInteraction(rpcOptions);
+    }
+  }
 
   std::shared_ptr<apache::thrift::RequestChannel> channel_;
+  OmniClient* factoryClient_ = nullptr;
 };
 
 class OmniInteractionClient : public OmniClient {

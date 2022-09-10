@@ -53,8 +53,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

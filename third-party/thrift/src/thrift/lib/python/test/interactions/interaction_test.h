@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/python/test/interactions/gen-cpp2/BlankService.h>
 #include <thrift/lib/python/test/interactions/gen-cpp2/Calculator.h>
 
@@ -56,6 +57,36 @@ struct SemiCalculatorHandler : apache::thrift::ServiceHandler<Calculator> {
   folly::SemiFuture<int32_t> semifuture_addPrimitive(
       int32_t a, int32_t b) override {
     return a + b;
+  }
+
+  void async_tm_newAddition(
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::TileAndResponse<AdditionIf, void>>> cb) override {
+    auto handler =
+        std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
+    cb->result({std::move(handler)});
+  }
+
+  void async_tm_initializedAddition(
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::TileAndResponse<AdditionIf, int>>> cb,
+      int x) override {
+    auto handler =
+        std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
+    handler->acc_ = x;
+    cb->result({std::move(handler), x});
+  }
+
+  void async_tm_stringifiedAddition(
+      std::unique_ptr<apache::thrift::HandlerCallback<
+          apache::thrift::
+              TileAndResponse<AdditionIf, std::unique_ptr<std::string>>>> cb,
+      int x) override {
+    auto handler =
+        std::make_unique<SemiCalculatorHandler::SemiAdditionHandler>();
+    handler->acc_ = x;
+    cb->result(
+        {std::move(handler), folly::copy_to_unique_ptr(std::to_string(x))});
   }
 };
 struct SemiBlankServiceHandler

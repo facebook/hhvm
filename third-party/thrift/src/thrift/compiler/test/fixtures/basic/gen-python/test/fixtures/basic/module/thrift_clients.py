@@ -51,8 +51,6 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
     class Sync(_fbthrift_python_SyncClient):
@@ -104,8 +102,6 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                     int_parameter=int_parameter,),
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -171,8 +167,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
         async def getRandomData(
@@ -184,8 +178,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -206,8 +198,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     sink=sink,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
         async def putDataById(
@@ -223,8 +213,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
         async def hasDataById(
@@ -238,8 +226,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -260,8 +246,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.ReadOnly,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -282,8 +266,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result,
                 qualifier = _fbthrift_FunctionQualifier.Idempotent,  # type: ignore 
-                
-                
             )
     
         async def lobDataById(
@@ -299,8 +281,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     data=data,),
                 None,
                 qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
-                
-                
             )
     
         async def invalid_return_for_hack(
@@ -312,8 +292,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -332,8 +310,6 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
     class Sync(_fbthrift_python_SyncClient):
@@ -519,8 +495,6 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -541,8 +515,6 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

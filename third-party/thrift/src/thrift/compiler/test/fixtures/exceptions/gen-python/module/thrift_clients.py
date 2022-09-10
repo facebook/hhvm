@@ -51,8 +51,6 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
     
         async def doRaise(
@@ -64,8 +62,6 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             if _fbthrift_resp.b is not None:
                 raise _fbthrift_resp.b
@@ -83,8 +79,6 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -103,8 +97,6 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
-                
-                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

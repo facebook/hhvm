@@ -29,9 +29,9 @@ Copy-paste output, or add a screenshot to illustrate what actually happens. Copy
 
 **Environment**
  - Operating system
-> For example, 'Debian Squeeze', 'Ubuntu 18.04', 'MacOS Catalina'.
+> For example, 'Debian Bullseye', 'Ubuntu 22.04', 'NixOS 22.05'.
  - Installation method
-> For example, 'built from source', 'apt-get with dl.hhvm.com repository', 'hhvm/hhvm on dockerhub', 'homebrew'
+> For example, 'built from source', 'nix', 'apt-get with dl.hhvm.com repository (version specific deb)', 'apt-get with dl.hhvm.com repository (universal deb)', 'hhvm/hhvm on dockerhub', 'homebrew'
  - HHVM Version
 > Please include the output of `hhvm --version` and `hh_client --version`
 

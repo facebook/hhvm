@@ -88,14 +88,16 @@ class w_string;
  * It is simply a pair of pointers that define the start and end
  * of the valid region. */
 class w_string_piece {
-  const char *s_, *e_;
+  const char* str_;
+  size_t len_;
 
  public:
-  w_string_piece();
-  /* implicit */ w_string_piece(std::nullptr_t);
+  w_string_piece() : str_{nullptr}, len_{0} {}
+
+  /* implicit */ w_string_piece(std::nullptr_t) : str_{nullptr}, len_{0} {}
 
   /* implicit */ w_string_piece(w_string_t* str)
-      : s_(str->buf), e_(str->buf + str->len) {}
+      : str_{str->buf}, len_{str->len} {}
 
   /** Construct from a string-like object */
   template <
@@ -105,7 +107,7 @@ class w_string_piece {
               !std::is_same<String, w_string>::value,
           int>::type = 0>
   /* implicit */ w_string_piece(const String& str)
-      : s_(str.data()), e_(str.data() + str.size()) {}
+      : str_(str.data()), len_(str.size()) {}
 
   /** Construct from w_string.  This is almost the same as
    * the string like object constructor above, but we need a nullptr check
@@ -116,20 +118,23 @@ class w_string_piece {
           type = 0>
   /* implicit */ w_string_piece(const String& str) {
     if (!str) {
-      s_ = nullptr;
-      e_ = nullptr;
+      str_ = nullptr;
+      len_ = 0;
     } else {
-      s_ = str.data();
-      e_ = str.data() + str.size();
+      str_ = str.data();
+      len_ = str.size();
     }
   }
 
   /* implicit */ w_string_piece(const char* cstr)
-      : s_(cstr), e_(cstr + strlen(cstr)) {}
+      : str_(cstr), len_(strlen(cstr)) {}
 
-  w_string_piece(const char* cstr, size_t len) : s_(cstr), e_(cstr + len) {}
+  w_string_piece(const char* cstr, size_t len) : str_(cstr), len_(len) {}
 
-  w_string_piece(const char* begin, const char* end) : s_{begin}, e_{end} {}
+  w_string_piece(const char* begin, const char* end)
+      : str_{begin}, len_{static_cast<size_t>(end - begin)} {
+    assert(end >= begin);
+  }
 
   /* implicit */ w_string_piece(std::string_view sv)
       : w_string_piece{sv.data(), sv.size()} {}
@@ -138,28 +143,29 @@ class w_string_piece {
   w_string_piece& operator=(const w_string_piece& other) = default;
   w_string_piece(w_string_piece&& other) noexcept;
 
-  const char* data() const {
-    return s_;
+  const char* data() const noexcept {
+    return str_;
   }
 
-  bool empty() const {
-    return e_ == s_;
+  bool empty() const noexcept {
+    return len_ == 0;
   }
 
-  size_t size() const {
-    return e_ - s_;
+  size_t size() const noexcept {
+    return len_;
   }
 
-  const char& operator[](size_t i) const {
-    return s_[i];
+  const char& operator[](size_t i) const noexcept {
+    return str_[i];
   }
 
   /** move the start of the string by n characters, stripping off that prefix */
   void advance(size_t n) {
-    if (n > size()) {
+    if (n > len_) {
       throw std::range_error("index out of range");
     }
-    s_ += n;
+    str_ += n;
+    len_ -= n;
   }
 
   /** Return a copy of the string as a w_string */
@@ -188,9 +194,10 @@ class w_string_piece {
   /** Split the string by delimiter and emit to the provided vector */
   template <typename Vector>
   void split(Vector& result, char delim) const {
-    const char* begin = s_;
+    const char* begin = str_;
+    const char* const end = str_ + len_;
     const char* it = begin;
-    while (it != e_) {
+    while (it != end) {
       if (*it == delim) {
         result.emplace_back(begin, it - begin);
         begin = ++it;
@@ -199,8 +206,8 @@ class w_string_piece {
       ++it;
     }
 
-    if (begin != e_) {
-      result.emplace_back(begin, e_ - begin);
+    if (begin != end) {
+      result.emplace_back(begin, end - begin);
     }
   }
 
@@ -209,8 +216,7 @@ class w_string_piece {
   }
 
   std::string_view view() const {
-    std::size_t count = e_ - s_;
-    return std::string_view{s_, count};
+    return std::string_view{str_, len_};
   }
 
   friend bool operator==(w_string_piece lhs, w_string_piece rhs) {

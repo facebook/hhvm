@@ -37,13 +37,10 @@ w_string_new_len_typed(const char* str, uint32_t len, w_string_type_t type);
 
 // string piece
 
-w_string_piece::w_string_piece() : s_(nullptr), e_(nullptr) {}
-w_string_piece::w_string_piece(std::nullptr_t) : s_(nullptr), e_(nullptr) {}
-
 w_string_piece::w_string_piece(w_string_piece&& other) noexcept
-    : s_(other.s_), e_(other.e_) {
-  other.s_ = nullptr;
-  other.e_ = nullptr;
+    : str_(other.str_), len_(other.len_) {
+  other.str_ = nullptr;
+  other.len_ = 0;
 }
 
 w_string w_string_piece::asWString(w_string_type_t stringType) const {
@@ -63,8 +60,9 @@ w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
   buf = const_cast<char*>(s->buf);
   s->type = stringType;
 
-  auto cursor = s_;
-  while (cursor < e_) {
+  auto cursor = str_;
+  const char* const end = str_ + len_;
+  while (cursor < end) {
     // TODO: `tolower` depends on locale.
     *buf = (char)tolower((uint8_t)*cursor);
     ++cursor;
@@ -93,8 +91,9 @@ w_string w_string_piece::asLowerCaseSuffix(w_string_type_t stringType) const {
   buf = const_cast<char*>(s->buf);
   s->type = stringType;
 
-  auto cursor = suffixPiece.s_;
-  while (cursor < suffixPiece.e_) {
+  auto cursor = suffixPiece.str_;
+  const char* const end = suffixPiece.str_ + suffixPiece.len_;
+  while (cursor < end) {
     // TODO: `tolower` depends on locale.
     *buf = (char)tolower((uint8_t)*cursor);
     ++cursor;
@@ -106,7 +105,7 @@ w_string w_string_piece::asLowerCaseSuffix(w_string_type_t stringType) const {
 }
 
 w_string w_string_piece::asUTF8Clean() const {
-  w_string s(s_, e_ - s_, W_STRING_UNICODE);
+  w_string s(str_, len_, W_STRING_UNICODE);
   utf8_fix_string(const_cast<char*>(s.data()), s.size());
   return s;
 }
@@ -161,42 +160,44 @@ bool w_string_piece::pathIsEqual(w_string_piece other) const {
 }
 
 w_string_piece w_string_piece::dirName() const {
-  if (e_ == s_) {
+  if (len_ == 0) {
     return nullptr;
   }
-  for (auto end = e_ - 1; end >= s_; --end) {
+  const char* const e = str_ + len_;
+  for (auto end = e - 1; end >= str_; --end) {
     if (is_slash(*end)) {
       /* found the end of the parent dir */
 #ifdef _WIN32
-      if (end > s_ && end[-1] == ':') {
+      if (end > str_ && end[-1] == ':') {
         // Special case for "C:\"; we want to keep the
         // trailing slash for this case so that we continue
         // to consider it an absolute path
-        return w_string_piece(s_, 1 + end - s_);
+        return w_string_piece(str_, 1 + end - str_);
       }
 #endif
-      return w_string_piece(s_, end - s_);
+      return w_string_piece(str_, end - str_);
     }
   }
   return nullptr;
 }
 
 w_string_piece w_string_piece::baseName() const {
-  if (e_ == s_) {
+  if (len_ == 0) {
     return *this;
   }
-  for (auto end = e_ - 1; end >= s_; --end) {
+  const char* const e = str_ + len_;
+  for (auto end = e - 1; end >= str_; --end) {
     if (is_slash(*end)) {
       /* found the end of the parent dir */
 #ifdef _WIN32
-      if (end == e_ && end > s_ && end[-1] == ':') {
+      if (end == e && end > str_ && end[-1] == ':') {
         // Special case for "C:\"; we want the baseName to
         // be this same component so that we continue
         // to consider it an absolute path
         return *this;
       }
 #endif
-      return w_string_piece(end + 1, e_ - (end + 1));
+      return w_string_piece(end + 1, e - (end + 1));
     }
   }
 
@@ -204,15 +205,16 @@ w_string_piece w_string_piece::baseName() const {
 }
 
 w_string_piece w_string_piece::suffix() const {
-  if (e_ == s_) {
+  if (len_ == 0) {
     return nullptr;
   }
-  for (auto end = e_ - 1; end >= s_; --end) {
+  const char* const e = str_ + len_;
+  for (auto end = e - 1; end >= str_; --end) {
     if (is_slash(*end)) {
       return nullptr;
     }
     if (*end == '.') {
-      return w_string_piece(end + 1, e_ - (end + 1));
+      return w_string_piece(end + 1, e - (end + 1));
     }
   }
   return nullptr;
@@ -230,10 +232,11 @@ bool w_string_piece::startsWithCaseInsensitive(w_string_piece prefix) const {
     return false;
   }
 
-  auto me = s_;
-  auto pref = prefix.s_;
+  auto me = str_;
+  auto pref = prefix.str_;
 
-  while (pref < prefix.e_) {
+  const char* const end = prefix.str_ + prefix.len_;
+  while (pref < end) {
     // TODO: `tolower` depends on locale.
     if (tolower((uint8_t)*me) != tolower((uint8_t)*pref)) {
       return false;
@@ -524,7 +527,7 @@ uint32_t strlen_uint32(const char* str) {
 #ifdef _WIN32
 
 std::wstring w_string_piece::asWideUNC() const {
-  int len, res, i, prefix_len;
+  int len, res, prefix_len;
   bool use_escape = false;
   bool is_unc = false;
 
@@ -665,13 +668,13 @@ bool w_string_piece::hasSuffix(w_string_piece suffix) const {
 
   base = size() - suffix.size();
 
-  if (s_[base - 1] != '.') {
+  if (str_[base - 1] != '.') {
     return false;
   }
 
   for (i = 0; i < suffix.size(); i++) {
     // TODO: `tolower` depends on locale.
-    if (tolower((uint8_t)s_[base + i]) != suffix[i]) {
+    if (tolower((uint8_t)str_[base + i]) != suffix[i]) {
       return false;
     }
   }

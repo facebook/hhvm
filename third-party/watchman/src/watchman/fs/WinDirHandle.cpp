@@ -37,7 +37,6 @@ class WinDirHandle : public DirHandle {
   }
 
   explicit WinDirHandle(const char* path, bool strict) {
-    int err = 0;
     dirWPath_ = w_string_piece(path).asWideUNC();
 
     h_ = openFileHandle(

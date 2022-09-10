@@ -81,8 +81,7 @@ PatchOpTestCase makeClearTest(
   PatchOpRequest req;
   req.value() = registry.store(asValueStruct<TT>(value.value), protocol);
 
-  auto patch = op::patch_type<TT>();
-  patch.clear();
+  auto patch = op::patch_type<TT>::createClear();
   req.patch() =
       registry.store(asValueStruct<type::struct_c>(patch.toThrift()), protocol);
 
@@ -188,7 +187,11 @@ Test createNumericPatchTest(
     auto& tascase = assignCase.test().emplace().objectPatch_ref().emplace();
     tascase = makeAssignTest<TT>(value, registry, protocol);
 
-    // TODO(afuller): decide if bool and numeric should have clear()
+    auto& clearCase = test.testCases()->emplace_back();
+    clearCase.name() =
+        fmt::format("{}/clear.{}", type::getName<TT>(), value.name);
+    auto& tclcase = clearCase.test().emplace().objectPatch_ref().emplace();
+    tclcase = makeClearTest<TT>(value, registry, protocol);
 
     using ValueType = decltype(value.value);
     auto addAddTestCase = [&](ValueType toAdd) {

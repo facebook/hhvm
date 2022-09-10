@@ -511,9 +511,9 @@ class SomeStruct final  {
  public:
 
   SomeStruct() :
-      __fbthrift_field_reasonable( ::test::fixtures::enums::Metasyntactic::FOO),
-      __fbthrift_field_fine( ::test::fixtures::enums::Metasyntactic::BAR),
-      __fbthrift_field_questionable(static_cast< ::test::fixtures::enums::Metasyntactic>(-1)) {
+      __fbthrift_field_reasonable(static_cast<::test::fixtures::enums::Metasyntactic>( ::test::fixtures::enums::Metasyntactic::FOO)),
+      __fbthrift_field_fine(static_cast<::test::fixtures::enums::Metasyntactic>( ::test::fixtures::enums::Metasyntactic::BAR)),
+      __fbthrift_field_questionable(static_cast<::test::fixtures::enums::Metasyntactic>(static_cast< ::test::fixtures::enums::Metasyntactic>(-1))) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -856,10 +856,10 @@ class MyStruct final  {
  public:
 
   MyStruct() :
-      __fbthrift_field_me2_3(static_cast< ::test::fixtures::enums::MyEnum2>(3)),
-      __fbthrift_field_me3_n3(static_cast< ::test::fixtures::enums::MyEnum3>(-3)),
-      __fbthrift_field_me1_t1( ::test::fixtures::enums::MyEnum1::ME1_1),
-      __fbthrift_field_me1_t2( ::test::fixtures::enums::MyEnum1::ME1_1) {
+      __fbthrift_field_me2_3(static_cast<::test::fixtures::enums::MyEnum2>(static_cast< ::test::fixtures::enums::MyEnum2>(3))),
+      __fbthrift_field_me3_n3(static_cast<::test::fixtures::enums::MyEnum3>(static_cast< ::test::fixtures::enums::MyEnum3>(-3))),
+      __fbthrift_field_me1_t1(static_cast<::test::fixtures::enums::MyEnum1>( ::test::fixtures::enums::MyEnum1::ME1_1)),
+      __fbthrift_field_me1_t2(static_cast<::test::fixtures::enums::MyEnum1>( ::test::fixtures::enums::MyEnum1::ME1_1)) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

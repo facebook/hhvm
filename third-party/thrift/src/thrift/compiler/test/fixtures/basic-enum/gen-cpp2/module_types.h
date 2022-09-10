@@ -231,7 +231,7 @@ class MyStruct final  {
 
   MyStruct() :
       __fbthrift_field_myEnum(),
-      __fbthrift_field_myBigEnum( ::test::fixtures::enumstrict::MyBigEnum::ONE) {
+      __fbthrift_field_myBigEnum(static_cast<::test::fixtures::enumstrict::MyBigEnum>( ::test::fixtures::enumstrict::MyBigEnum::ONE)) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

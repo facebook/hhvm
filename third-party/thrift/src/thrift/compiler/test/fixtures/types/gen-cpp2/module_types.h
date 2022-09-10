@@ -1470,8 +1470,8 @@ class MyStructWithForwardRefEnum final  {
  public:
 
   MyStructWithForwardRefEnum() :
-      __fbthrift_field_a( ::apache::thrift::fixtures::types::MyForwardRefEnum::NONZERO),
-      __fbthrift_field_b( ::apache::thrift::fixtures::types::MyForwardRefEnum::NONZERO) {
+      __fbthrift_field_a(static_cast<::apache::thrift::fixtures::types::MyForwardRefEnum>( ::apache::thrift::fixtures::types::MyForwardRefEnum::NONZERO)),
+      __fbthrift_field_b(static_cast<::apache::thrift::fixtures::types::MyForwardRefEnum>( ::apache::thrift::fixtures::types::MyForwardRefEnum::NONZERO)) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

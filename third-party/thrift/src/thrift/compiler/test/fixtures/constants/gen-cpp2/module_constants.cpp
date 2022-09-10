@@ -49,7 +49,7 @@ constexpr ::cpp2::MyIntIdentifier const module_constants::bar_;
 }
 
 ::cpp2::Internship const& module_constants::instagram() {
-  static folly::Indestructible<::cpp2::Internship> const instance{::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Software Engineer")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::INSTAGRAM), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1200)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::school>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Monters University")))};
+  static folly::Indestructible<::cpp2::Internship> const instance{::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(12)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Software Engineer")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>(static_cast<::cpp2::Company>( ::cpp2::Company::INSTAGRAM)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1200)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::school>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Monters University")))};
   return *instance;
 }
 
@@ -66,7 +66,7 @@ constexpr ::cpp2::MyIntIdentifier const module_constants::bar_;
 
 ::std::vector<::cpp2::Internship> const& module_constants::internList() {
   static folly::Indestructible<::std::vector<::cpp2::Internship>> const instance{std::initializer_list<::cpp2::Internship>{::cpp2::module_constants::instagram(),
-  ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Sales Intern")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>( ::cpp2::Company::FACEBOOK), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1000)))}};
+  ::apache::thrift::detail::make_structured_constant<::cpp2::Internship>(::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::weeks>(static_cast<::std::int32_t>(10)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::title>(apache::thrift::StringTraits<std::string>::fromStringLiteral("Sales Intern")), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::employer>(static_cast<::cpp2::Company>( ::cpp2::Company::FACEBOOK)), ::apache::thrift::detail::wrap_struct_argument<::apache::thrift::ident::compensation>(static_cast<double>(1000)))}};
   return *instance;
 }
 

@@ -24,7 +24,7 @@ struct module_constants {
     return constant2_;
   }
 
-  static constexpr ::test_cpp2::cpp_reflection::enum1 const constant3_ =  ::test_cpp2::cpp_reflection::enum1::field0;
+  static constexpr ::test_cpp2::cpp_reflection::enum1 const constant3_ = static_cast<::test_cpp2::cpp_reflection::enum1>( ::test_cpp2::cpp_reflection::enum1::field0);
   static constexpr ::test_cpp2::cpp_reflection::enum1 constant3() {
     return constant3_;
   }

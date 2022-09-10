@@ -4382,7 +4382,7 @@ uint32_t containerStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("fieldQ", apache::thrift::protocol::T_I32, 17);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldQ);
   }
-  if (this->fieldR !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldR != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     xfer += prot_->serializedFieldSize("fieldR", apache::thrift::protocol::T_I32, 18);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldR);
   }
@@ -4394,7 +4394,7 @@ uint32_t containerStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("opt_fieldR", apache::thrift::protocol::T_I32, 218);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->opt_fieldR);
   }
-  if (this->fieldS !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldS != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     xfer += prot_->serializedFieldSize("fieldS", apache::thrift::protocol::T_I32, 19);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldS);
   }
@@ -4574,7 +4574,7 @@ uint32_t containerStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("fieldQ", apache::thrift::protocol::T_I32, 17);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldQ);
   }
-  if (this->fieldR !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldR != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     xfer += prot_->serializedFieldSize("fieldR", apache::thrift::protocol::T_I32, 18);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldR);
   }
@@ -4586,7 +4586,7 @@ uint32_t containerStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("opt_fieldR", apache::thrift::protocol::T_I32, 218);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->opt_fieldR);
   }
-  if (this->fieldS !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldS != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     xfer += prot_->serializedFieldSize("fieldS", apache::thrift::protocol::T_I32, 19);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::enumeration, ::some::valid::ns::MyEnumA>::serializedSize<false>(*prot_, this->fieldS);
   }
@@ -4884,7 +4884,7 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (this->fieldR !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldR != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     constexpr int16_t kPrevFieldId = 17;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 18, kPrevFieldId>(*prot_, "fieldR", previousFieldHasValue);
     previousFieldHasValue = true;
@@ -4909,7 +4909,7 @@ uint32_t containerStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (this->fieldS !=  ::some::valid::ns::MyEnumA::fieldB) {
+  if (this->fieldS != static_cast<::some::valid::ns::MyEnumA>( ::some::valid::ns::MyEnumA::fieldB)) {
     constexpr int16_t kPrevFieldId = 218;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_I32, 19, kPrevFieldId>(*prot_, "fieldS", previousFieldHasValue);
     previousFieldHasValue = true;

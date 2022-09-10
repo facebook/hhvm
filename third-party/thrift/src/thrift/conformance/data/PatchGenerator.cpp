@@ -459,17 +459,17 @@ type::standard_type<TT> valueToAssign() {
 }
 
 template <typename Tag, typename Type>
-PatchOpTestCase makeEnsureStructTC(
+PatchOpTestCase makeEnsureTC(
     const AnyRegistry& registry,
     const Protocol& protocol,
     Type initial,
-    Type expected) {
+    Type expected,
+    op::PatchOp patchOp = op::PatchOp::EnsureStruct) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
   req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
   req.patch() = registry.store(
-      makePatchValue(op::PatchOp::EnsureStruct, asValueStruct<Tag>(expected)),
-      protocol);
+      makePatchValue(patchOp, asValueStruct<Tag>(expected)), protocol);
   tascase.request() = req;
   tascase.result() = registry.store(asValueStruct<Tag>(expected), protocol);
   return tascase;
@@ -660,8 +660,7 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       auto& ensureCase = test.testCases()->emplace_back();
       ensureCase.name() = makeTestName(key, "ensure");
       ensureCase.test().emplace().objectPatch_ref() =
-          makeEnsureStructTC<ContainerTag>(
-              registry, protocol, initial, expected);
+          makeEnsureTC<ContainerTag>(registry, protocol, initial, expected);
     }
   });
 
@@ -733,8 +732,21 @@ Test createStructPatchTest(
   auto& ensureCase = test.testCases()->emplace_back();
   ensureCase.name() = makeTestName("ensureStruct");
   ensureCase.test().emplace().objectPatch_ref() =
-      makeEnsureStructTC<type::struct_c>(
-          registry, protocol, initialOpt, expectedOpt);
+      makeEnsureTC<type::struct_c>(registry, protocol, initialOpt, expectedOpt);
+
+  using UnionStruct = test::testset::union_with<TT>;
+  UnionStruct initialUnion;
+  UnionStruct expectedUnion;
+  expectedUnion.field_1_ref() = valueToAssign<TT>();
+  auto& ensureUnionCase = test.testCases()->emplace_back();
+  ensureUnionCase.name() = makeTestName("ensureUnion");
+  ensureUnionCase.test().emplace().objectPatch_ref() =
+      makeEnsureTC<type::struct_c>(
+          registry,
+          protocol,
+          initialUnion,
+          expectedUnion,
+          op::PatchOp::EnsureUnion);
 
   return test;
 }

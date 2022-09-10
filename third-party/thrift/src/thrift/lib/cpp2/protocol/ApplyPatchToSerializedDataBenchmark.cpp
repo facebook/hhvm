@@ -55,7 +55,7 @@ Object getPatchObj1And4(bool clear) {
     objPatch.objectValue_ref().ensure()[FieldId{1}] = listPatch;
   }
   Object patchObj;
-  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::Patch)}] = objPatch;
+  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
   return patchObj;
 }
 
@@ -85,7 +85,7 @@ Object getPatchObj2() {
   objPatch.objectValue_ref().ensure()[FieldId{1}] = listPatch;
   objPatch.objectValue_ref().ensure()[FieldId{2}] = intPatch;
   Object patchObj;
-  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::Patch)}] = objPatch;
+  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
   return patchObj;
 }
 
@@ -108,7 +108,7 @@ Object getPatchObj3(int n) {
     objPatch.objectValue_ref().ensure()[static_cast<FieldId>(n)] = intPatch;
   }
   Object patchObj;
-  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::Patch)}] = objPatch;
+  patchObj[FieldId{static_cast<int16_t>(op::PatchOp::PatchAfter)}] = objPatch;
   return patchObj;
 }
 

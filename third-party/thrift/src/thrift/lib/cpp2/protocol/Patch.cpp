@@ -238,7 +238,7 @@ void ApplyPatch::operator()(
       Value::Type::listValue,
       {PatchOp::Assign,
        PatchOp::Clear,
-       PatchOp::Patch,
+       PatchOp::PatchPrior,
        PatchOp::Add,
        PatchOp::Put,
        PatchOp::Remove});
@@ -252,7 +252,7 @@ void ApplyPatch::operator()(
     }
   }
 
-  if (auto* elementPatches = findOp(patch, PatchOp::Patch)) {
+  if (auto* elementPatches = findOp(patch, PatchOp::PatchPrior)) {
     for (const auto& [idx, elPatch] : *elementPatches->mapValue_ref()) {
       if (idx.if_i32()) {
         auto index = type::toPosition(
@@ -345,7 +345,7 @@ void ApplyPatch::operator()(
       Value::Type::mapValue,
       {PatchOp::Assign,
        PatchOp::Clear,
-       PatchOp::Patch,
+       PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::Put,
        PatchOp::Remove,
@@ -369,7 +369,7 @@ void ApplyPatch::operator()(
     }
   };
 
-  if (auto* patchFields = findOp(patch, PatchOp::Patch)) {
+  if (auto* patchFields = findOp(patch, PatchOp::PatchPrior)) {
     patchElements(patchFields);
   }
 
@@ -402,7 +402,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
       Value::Type::objectValue,
       {PatchOp::Assign,
        PatchOp::Clear,
-       PatchOp::Patch,
+       PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::EnsureUnion,
        PatchOp::PatchAfter});
@@ -427,7 +427,7 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
     }
   };
 
-  if (auto* patchFields = findOp(patch, PatchOp::Patch)) {
+  if (auto* patchFields = findOp(patch, PatchOp::PatchPrior)) {
     applyFieldPatch(patchFields);
   }
 
@@ -557,10 +557,11 @@ ExtractedMasks extractMaskFromPatch(const protocol::Object& patch) {
     insertFieldsToMask(masks, *ensureStruct, false);
   }
 
-  // If Patch or PatchAfter, recursively constructs the mask for the fields.
-  // Note that list also supports Patch, but since it is indistinguishable from
-  // map (both uses a map), we just treat it as a map patch.
-  for (auto op : {PatchOp::Patch, PatchOp::PatchAfter}) {
+  // If PatchPrior or PatchAfter, recursively constructs the mask for the
+  // fields. Note that list also supports Patch, but since it is
+  // indistinguishable from map (both uses a map), we just treat it as a map
+  // patch.
+  for (auto op : {PatchOp::PatchPrior, PatchOp::PatchAfter}) {
     if (auto* patchFields = findOp(patch, op)) {
       insertFieldsToMask(masks, *patchFields, true);
     }

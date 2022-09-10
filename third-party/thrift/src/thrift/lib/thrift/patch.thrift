@@ -251,7 +251,7 @@ enum PatchOp {
   Clear = 2,
 
   /** Apply a field/value-wise patch. */
-  Patch = 3,
+  PatchPrior = 3,
 
   /**
    * Set to the given default, if not already of the same type.

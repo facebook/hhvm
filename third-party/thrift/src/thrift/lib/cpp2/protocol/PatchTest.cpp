@@ -383,7 +383,7 @@ TEST_F(PatchTest, List) {
     expectNoop(patchObj);
   }
 
-  // Patch
+  // PatchPrior
   {
     auto elementPatchValue = asValueStruct<type::binary_t>(std::string{"best"});
     Value fieldPatchValue;
@@ -394,7 +394,7 @@ TEST_F(PatchTest, List) {
         static_cast<int32_t>(type::toOrdinal(0)));
     listElementPatch.mapValue_ref()
         .ensure()[asValueStruct<type::i32_t>(zigZag)] = fieldPatchValue;
-    auto patchObj = makePatch(op::PatchOp::Patch, listElementPatch);
+    auto patchObj = makePatch(op::PatchOp::PatchPrior, listElementPatch);
     auto patched = *applyContainerPatch(patchObj, value).listValue_ref();
     EXPECT_EQ(
         std::vector<Value>{asValueStruct<type::binary_t>("testbest")}, patched);
@@ -409,7 +409,7 @@ TEST_F(PatchTest, List) {
   {
     auto emptyMapValue = asValueStruct<type::map<type::i32_t, type::binary_t>>(
         std::map<int32_t, std::string>{});
-    Object patchObj = makePatch(op::PatchOp::Patch, emptyMapValue);
+    Object patchObj = makePatch(op::PatchOp::PatchPrior, emptyMapValue);
     expectNoop(patchObj);
   }
 
@@ -766,7 +766,7 @@ TEST_F(PatchTest, Map) {
     checkMapMask(patchObj, {"key", "new key", "added key"});
   }
 
-  // Patch
+  // PatchPrior
   {
     auto value =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
@@ -780,7 +780,7 @@ TEST_F(PatchTest, Map) {
     Value mapPatch;
     mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
         fieldPatchValue;
-    auto patchObj = makePatch(op::PatchOp::Patch, mapPatch);
+    auto patchObj = makePatch(op::PatchOp::PatchPrior, mapPatch);
     auto expected =
         asValueStruct<type::map<type::binary_t, type::list<type::binary_t>>>(
             std::map<std::string, std::vector<std::string>>{
@@ -792,7 +792,7 @@ TEST_F(PatchTest, Map) {
     checkMapMask(patchObj, {"key"});
   }
   {
-    Object patchObj = makePatch(op::PatchOp::Patch, emptyValue);
+    Object patchObj = makePatch(op::PatchOp::PatchPrior, emptyValue);
     expectNoop(patchObj);
   }
 
@@ -882,7 +882,7 @@ TEST_F(PatchTest, Struct) {
     expectNoop(patchObj);
   }
 
-  // Patch
+  // PatchPrior
   auto applyFieldPatchTest = [&](auto op, auto expected, bool isRead) {
     Value fieldPatchValue;
     fieldPatchValue.objectValue_ref() = makePatch(
@@ -890,7 +890,7 @@ TEST_F(PatchTest, Struct) {
     Value fieldPatch;
     fieldPatch.objectValue_ref().ensure().members().ensure()[1] =
         fieldPatchValue;
-    Object patchObj = makePatch(op::PatchOp::Patch, fieldPatch);
+    Object patchObj = makePatch(op::PatchOp::PatchPrior, fieldPatch);
     EXPECT_EQ(
         expected,
         applyContainerPatch(patchObj, value)
@@ -921,7 +921,7 @@ TEST_F(PatchTest, Struct) {
           std::vector<int>{1, 2, 3, 3, 2, 1}),
       true);
 
-  // Ensure and PatchAfter
+  // Ensure and Patch
   {
     test::testset::struct_with<type::list<type::i32_t>> source;
     auto sourceValue = asValueStruct<type::struct_c>(source);
@@ -972,7 +972,7 @@ TEST_F(PatchTest, Struct) {
   {
     Value fieldPatch;
     fieldPatch.objectValue_ref().ensure();
-    expectNoop(makePatch(op::PatchOp::Patch, fieldPatch));
+    expectNoop(makePatch(op::PatchOp::PatchPrior, fieldPatch));
     expectNoop(makePatch(op::PatchOp::EnsureStruct, fieldPatch));
     expectNoop(makePatch(op::PatchOp::PatchAfter, fieldPatch));
   }
@@ -1026,7 +1026,7 @@ TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
     expectNoop(patchObj);
   }
 
-  // Ensure and Patch
+  // Ensure and PatchAfter
   {
     test::testset::union_with<type::i32_t> source;
     source.field_1_ref() = 42;
@@ -1116,7 +1116,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchNested) {
       bytePatchValue;
   Value objectPatchValue;
   objectPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::Patch, fieldPatchValue2);
+      makePatch(op::PatchOp::PatchPrior, fieldPatchValue2);
   Value nestedPatchValue, boolPatchValue, fieldPatchValue3;
   boolPatchValue.objectValue_ref() = convertToObject(op::BoolPatch{} = true);
   fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("a")] =
@@ -1124,7 +1124,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchNested) {
   fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("b")] =
       objectPatchValue;
   nestedPatchValue.objectValue_ref() =
-      makePatch(op::PatchOp::Patch, fieldPatchValue3);
+      makePatch(op::PatchOp::PatchPrior, fieldPatchValue3);
   mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key2")] =
       nestedPatchValue;
   auto patchObj = makePatch(op::PatchOp::PatchAfter, mapPatch);
@@ -1178,7 +1178,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchEdgeCase) {
       makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true));
   Value objPatch;
   objPatch.objectValue_ref().ensure()[FieldId{1}] = boolPatch;
-  Object patchObj = makePatch(op::PatchOp::Patch, objPatch);
+  Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
   // Add noops (this should not make the extractedMask allMask).
   patchObj = patchAddOperation(
       std::move(patchObj),
@@ -1206,7 +1206,7 @@ TEST_F(PatchTest, ExtractMaskFromPatchFieldPatch) {
       makePatch(op::PatchOp::Put, asValueStruct<type::bool_t>(true));
   Value objPatch;
   objPatch.objectValue_ref().ensure()[FieldId{1}] = boolPatch;
-  Object patchObj = makePatch(op::PatchOp::Patch, objPatch);
+  Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
   patchObj = patchAddOperation(
       std::move(patchObj),
       op::PatchOp::Clear,
@@ -1229,10 +1229,11 @@ TEST_F(PatchTest, ApplyPatchToSerializedData) {
   mapPatchValue.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
       fieldPatchValue;
   Value mapPatch;
-  mapPatch.objectValue_ref() = makePatch(op::PatchOp::Patch, mapPatchValue);
+  mapPatch.objectValue_ref() =
+      makePatch(op::PatchOp::PatchAfter, mapPatchValue);
   Value objPatch;
   objPatch.objectValue_ref().ensure()[FieldId{1}] = mapPatch;
-  Object patchObj = makePatch(op::PatchOp::Patch, objPatch);
+  Object patchObj = makePatch(op::PatchOp::PatchAfter, objPatch);
 
   // obj{1: map{"key": "string",
   //            "foo": "bar"},

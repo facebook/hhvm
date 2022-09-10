@@ -65,7 +65,7 @@ class SyncMysqlClient : public MysqlClientBase {
   template <typename Client>
   friend class ConnectionPool;
 
-  bool runInThread(folly::Cob&& fn, bool wait = false) override {
+  bool runInThread(folly::Cob&& fn, bool /*wait*/) override {
     fn();
     return true;
   }

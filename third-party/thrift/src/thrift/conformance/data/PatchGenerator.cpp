@@ -371,19 +371,20 @@ PatchOpTestCase makeValueContainerPrependTC(
   return tascase;
 }
 
-template <typename ContainerTag, typename TT>
-PatchOpTestCase makeValueContainerAppendTC(
-    const AnyRegistry& registry, const Protocol& protocol, auto value) {
+template <typename ContainerTag>
+PatchOpTestCase makeContainerAppendTC(
+    const AnyRegistry& registry,
+    const Protocol& protocol,
+    auto value,
+    auto toAppend) {
   PatchOpTestCase tascase;
   PatchOpRequest req;
 
   using Container = type::native_type<ContainerTag>;
 
-  auto patchValue = value.value;
-  op::clear<TT>(patchValue);
-  Container initial = {value.value};
-  Container expected = {value.value, patchValue};
-  Container patchData = {patchValue};
+  Container initial = {value};
+  Container expected = {value, toAppend};
+  Container patchData = {toAppend};
 
   req.value() = registry.store(asValueStruct<ContainerTag>(initial), protocol);
   req.patch() = registry.store(
@@ -405,67 +406,54 @@ Test createListSetPatchTest(
   using ValueContainers = boost::mp11::mp_list<type::list_c, type::set_c>;
   mp11::mp_for_each<ValueContainers>([&](auto cc) {
     using CC = decltype(cc);
+
+    auto makeTestName = [&](const auto& value, auto op) {
+      return fmt::format(
+          "{}<{}>/{}.{}",
+          type::getName<CC>(),
+          type::getName<TT>(),
+          op,
+          value.name);
+    };
     for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
       using ContainerTag = container_from_class_t<CC, TT>;
       auto& assignCase = test.testCases()->emplace_back();
-      assignCase.name() = fmt::format(
-          "{}<{}>/assign.{}",
-          type::getName<CC>(),
-          type::getName<TT>(),
-          value.name);
+      assignCase.name() = makeTestName(value, "assign");
       assignCase.test().emplace().objectPatch_ref() =
           makeContainerAssignTC<ContainerTag>(registry, protocol, value.value);
 
       auto& clearCase = test.testCases()->emplace_back();
-      clearCase.name() = fmt::format(
-          "{}<{}>/clear.{}",
-          type::getName<CC>(),
-          type::getName<TT>(),
-          value.name);
+      clearCase.name() = makeTestName(value, "clear");
       clearCase.test().emplace().objectPatch_ref() =
           makeContainerClearTC<ContainerTag>(registry, protocol, value.value);
 
       auto& removeCase = test.testCases()->emplace_back();
-      removeCase.name() = fmt::format(
-          "{}<{}>/remove.{}",
-          type::getName<CC>(),
-          type::getName<TT>(),
-          value.name);
+      removeCase.name() = makeTestName(value, "remove");
       removeCase.test().emplace().objectPatch_ref() =
           makeContainerRemoveTC<ContainerTag, TT>(
               registry, protocol, value.value, value.value);
 
       auto& prependCase = test.testCases()->emplace_back();
-      prependCase.name() = fmt::format(
-          "{}<{}>/prepend.{}",
-          type::getName<CC>(),
-          type::getName<TT>(),
-          value.name);
+      prependCase.name() = makeTestName(value, "prepend");
       prependCase.test().emplace().objectPatch_ref() =
           makeValueContainerPrependTC<ContainerTag, TT>(
               registry, protocol, value);
 
       if constexpr (std::is_same_v<CC, type::list_c>) {
         auto& prependSetCase = test.testCases()->emplace_back();
-        prependSetCase.name() = fmt::format(
-            "{}<{}>/prepend_set.{}",
-            type::getName<CC>(),
-            type::getName<TT>(),
-            value.name);
+        prependSetCase.name() = makeTestName(value, "prepend_set");
         prependSetCase.test().emplace().objectPatch_ref() =
             makeValueContainerPrependTC<ContainerTag, TT, type::set<TT>>(
                 registry, protocol, value);
       }
 
+      auto patchValue = value.value;
+      op::clear<TT>(patchValue);
       auto& appendCase = test.testCases()->emplace_back();
-      appendCase.name() = fmt::format(
-          "{}<{}>/append.{}",
-          type::getName<CC>(),
-          type::getName<TT>(),
-          value.name);
+      appendCase.name() = makeTestName(value, "append");
       appendCase.test().emplace().objectPatch_ref() =
-          makeValueContainerAppendTC<ContainerTag, TT>(
-              registry, protocol, value);
+          makeContainerAppendTC<ContainerTag>(
+              registry, protocol, value.value, patchValue);
     }
   });
 
@@ -517,6 +505,17 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
       removeCase.test().emplace().objectPatch_ref() =
           makeContainerRemoveTC<ContainerTag, KK>(
               registry, protocol, std::pair{key.value, value}, key.value);
+
+      auto patchkey = key.value;
+      op::clear<KK>(patchkey);
+      auto& appendCase = test.testCases()->emplace_back();
+      appendCase.name() = makeTestName(key, "append");
+      appendCase.test().emplace().objectPatch_ref() =
+          makeContainerAppendTC<ContainerTag>(
+              registry,
+              protocol,
+              std::pair{key.value, value},
+              std::pair{patchkey, value});
     }
   });
 

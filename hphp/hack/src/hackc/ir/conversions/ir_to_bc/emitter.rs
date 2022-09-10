@@ -9,7 +9,6 @@ use std::fmt::Display;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
-use hash::IndexMap;
 use hhbc::Dummy;
 use hhbc::Instruct;
 use hhbc::Opcode;
@@ -25,6 +24,7 @@ use ir::print::FmtSep;
 use ir::BlockId;
 use ir::BlockIdMap;
 use ir::LocalId;
+use itertools::Itertools;
 use log::trace;
 
 use crate::ex_frame::BlockIdOrExFrame;
@@ -43,12 +43,14 @@ pub(crate) fn emit_func<'a>(
     let root = crate::ex_frame::collect_tc_sections(func);
 
     ctx.convert_frame_vec(root);
+    // Collect the decl_vars - these are all the named locals after the params.
     let decl_vars: Vec<Str<'a>> = ctx
-        .named_locals
-        .keys()
-        .map(|k| match *k {
-            LocalId::Named(name) => strings.lookup_ffi_str(name),
-            LocalId::Unnamed(_) => unreachable!(),
+        .locals
+        .iter()
+        .sorted_by_key(|(_, v)| *v)
+        .filter_map(|(k, _)| match *k {
+            LocalId::Named(name) => Some(strings.lookup_ffi_str(name)),
+            LocalId::Unnamed(_) => None,
         })
         .skip(func.params.len())
         .collect();
@@ -149,8 +151,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     labeler: &'b mut Labeler,
     loc_id: ir::LocId,
     strings: &'b StringCache<'a, 'b>,
-    named_locals: IndexMap<LocalId, hhbc::Local>,
-    unnamed_locals: HashMap<LocalId, hhbc::Local>,
+    locals: HashMap<LocalId, hhbc::Local>,
 }
 
 fn convert_indexes_to_bools<'a>(
@@ -177,7 +178,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         labeler: &'b mut Labeler,
         strings: &'b StringCache<'a, '_>,
     ) -> Self {
-        let (named_locals, unnamed_locals) = Self::prealloc_locals(func);
+        let locals = Self::prealloc_locals(func);
 
         Self {
             alloc,
@@ -186,23 +187,17 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             instrs: Vec::new(),
             labeler,
             loc_id: ir::LocId::NONE,
+            locals,
             strings,
-            named_locals,
-            unnamed_locals,
         }
     }
 
-    fn prealloc_locals(
-        func: &'b ir::Func<'a>,
-    ) -> (
-        IndexMap<LocalId, hhbc::Local>,
-        HashMap<LocalId, hhbc::Local>,
-    ) {
+    fn prealloc_locals(func: &'b ir::Func<'a>) -> HashMap<LocalId, hhbc::Local> {
         let mut next_local_idx = 0;
 
         // The parameters are required to be the first named locals. We can't
         // control that.
-        let mut named_locals: IndexMap<LocalId, hhbc::Local> = func
+        let mut locals: HashMap<LocalId, hhbc::Local> = func
             .params
             .iter()
             .enumerate()
@@ -218,20 +213,18 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
 
         // Now go through and collect the named and unnamed locals. Once we know
         // how many named locals there are we can fixup the unnamed ones.
-        let mut unnamed_locals: HashMap<LocalId, hhbc::Local> = Default::default();
         for instr in func.body_instrs() {
-            let locals = instr.locals();
-            for lid in locals {
+            for lid in instr.locals() {
                 match lid {
                     LocalId::Named(_) => {
-                        named_locals.entry(*lid).or_insert_with(|| {
+                        locals.entry(*lid).or_insert_with(|| {
                             let local = hhbc::Local::from_usize(next_local_idx);
                             next_local_idx += 1;
                             local
                         });
                     }
                     LocalId::Unnamed(idx) => {
-                        unnamed_locals
+                        locals
                             .entry(*lid)
                             .or_insert_with(|| hhbc::Local::from_usize(idx.as_usize()));
                     }
@@ -241,12 +234,15 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
 
         trace!("Named locals end at {}", next_local_idx);
 
-        // And rename the unnamed locals into their final positions.
-        for local in unnamed_locals.values_mut() {
-            local.idx += next_local_idx as u32;
+        // Now that we know the count of named locals we can update the unnamed
+        // locals.
+        for (k, v) in locals.iter_mut() {
+            if matches!(k, LocalId::Unnamed(_)) {
+                v.idx += next_local_idx as u32;
+            }
         }
 
-        (named_locals, unnamed_locals)
+        locals
     }
 
     fn push_opcode(&mut self, opcode: Opcode<'a>) {
@@ -254,9 +250,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
     }
 
     fn lookup_local(&mut self, lid: LocalId) -> hhbc::Local {
-        if let Some(local) = self.named_locals.get(&lid) {
-            *local
-        } else if let Some(local) = self.unnamed_locals.get(&lid) {
+        if let Some(local) = self.locals.get(&lid) {
             *local
         } else {
             panic!("Unmapped LocalId {:?}", lid);

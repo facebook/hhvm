@@ -699,10 +699,6 @@ w_string_piece w_string_canon_path(w_string_piece str) {
   return w_string_piece{begin, end};
 }
 
-bool w_string_is_known_unicode(w_string_t* str) {
-  return str->type == W_STRING_UNICODE;
-}
-
 bool w_string_path_is_absolute(w_string_piece path) {
   // TODO: To avoid needing a strlen in call sites that have a null-terminated
   // `const char*` path, this function could have a `const char*` overload

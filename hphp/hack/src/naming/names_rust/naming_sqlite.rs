@@ -7,6 +7,7 @@ use std::path::Path;
 
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
+use hh24_types::FileDeclsHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntSet;
@@ -757,6 +758,120 @@ impl Names {
         self.conn
             .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
             .execute(params![file_info_id])?;
+        Ok(())
+    }
+
+    /// This updates the forward naming table.
+    /// It will replace the existing entry (preserving file_info_id) if file was present,
+    /// or add a new entry (with new file_info_id) otherwise.
+    /// It returns the file_info_id.
+    /// Note: it never deletes a row.
+    /// TODO(ljw): reconcile with existing delete() and insert_file_info_and_get_file_id()
+    pub fn fwd_update(
+        &self,
+        path: &RelativePath,
+        parsed_file: Option<&oxidized_by_ref::direct_decl_parser::ParsedFile<'_>>,
+    ) -> anyhow::Result<crate::FileInfoId> {
+        let file_info_id_opt = self
+            .conn
+            .prepare_cached(
+                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
+                WHERE PATH_PREFIX_TYPE = ?
+                AND PATH_SUFFIX = ?",
+            )?
+            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
+                row.get::<usize, crate::FileInfoId>(0)
+            })
+            .optional()?;
+
+        let file_info_id = match file_info_id_opt {
+            Some(file_info_id) => file_info_id,
+            None => {
+                self.conn
+                .prepare_cached("INSERT INTO NAMING_FILE_INFO(PATH_PREFIX_TYPE,PATH_SUFFIX) VALUES (?1, ?2);")?
+                .execute(params![
+                    path.prefix() as u8,
+                    path.path_str(),
+                ])?;
+                crate::FileInfoId::last_insert_rowid(&self.conn)
+            }
+        };
+
+        // This helper takes a list of (name,decl) pairs and turns into string "name1|name2|..."
+        fn join<'a, Decl, I: Iterator<Item = (&'a str, Decl)>>(i: I, sep: &'static str) -> String {
+            i.map(|(name, _decl)| name).collect::<Vec<&str>>().join(sep)
+        }
+
+        let decls_or_empty = parsed_file
+            .map_or_else(oxidized_by_ref::direct_decl_parser::Decls::empty, |pf| {
+                pf.decls
+            });
+        self.conn
+            .prepare_cached(
+                "
+                UPDATE NAMING_FILE_INFO
+                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?
+                WHERE FILE_INFO_ID=?
+                ",
+            )?
+            .execute(params![
+                crate::datatypes::convert::mode_to_i64(parsed_file.and_then(|pf| pf.mode)),
+                FileDeclsHash::from(decls_or_empty),
+                join(decls_or_empty.classes(), "|"),
+                join(decls_or_empty.consts(), "|"),
+                join(decls_or_empty.funs(), "|"),
+                join(decls_or_empty.typedefs(), "|"),
+                file_info_id,
+            ])?;
+
+        Ok(file_info_id)
+    }
+
+    /// This removes an entry from the forward naming table.
+    /// TODO(ljw): reconcile with delete.
+    pub fn fwd_delete(&self, file_info_id: crate::FileInfoId) -> anyhow::Result<()> {
+        self.conn
+            .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
+            .execute(params![file_info_id])?;
+        Ok(())
+    }
+
+    /// This updates the reverse naming-table NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW
+    /// by removing all old entries, then inserting the new entries.
+    /// TODO(ljw): remove previous implementations remove_symbol and insert_file_summary.
+    pub fn rev_update(
+        &self,
+        symbol_hash: ToplevelSymbolHash,
+        winner: Option<&crate::SymbolRow>,
+        overflow: &[crate::SymbolRow],
+    ) -> anyhow::Result<()> {
+        self.conn
+            .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?
+            .execute(params![symbol_hash])?;
+        self.conn
+            .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ?")?
+            .execute(params![symbol_hash])?;
+        if let Some(symbol) = winner {
+            self.conn.prepare("INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
+            .execute(params![
+                symbol.hash,
+                symbol.canon_hash,
+                symbol.decl_hash,
+                symbol.kind,
+                symbol.file_info_id
+            ])?;
+        }
+        for symbol in overflow {
+            self.conn.prepare("INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID) VALUES (?,?,?,?,?)")?
+            .execute(params![
+                symbol.hash,
+                symbol.canon_hash,
+                symbol.decl_hash,
+                symbol.kind,
+                symbol.file_info_id
+            ])?;
+        }
+
         Ok(())
     }
 }

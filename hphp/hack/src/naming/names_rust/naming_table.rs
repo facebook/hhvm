@@ -17,7 +17,7 @@ pub struct NamingTable {
     path_cache: IntMap<ToplevelSymbolHash, Option<RelativePath>>,
     pub names: crate::Names,
     rich_checksums: IntMap<Checksum, RichChecksum>,
-    checksum: Checksum,
+    pub checksum: Checksum,
 }
 
 impl NamingTable {

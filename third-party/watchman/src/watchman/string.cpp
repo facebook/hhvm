@@ -441,11 +441,21 @@ w_string w_string::normalizeSeparators(char targetSeparator) const {
 }
 
 bool w_string::operator<(const w_string& other) const {
-  return w_string_compare(str_, other.str_) < 0;
+  if (str_ == other.str_) {
+    // identity fast path
+    return false;
+  } else {
+    return view() < other.view();
+  }
 }
 
 bool w_string::operator==(const w_string& other) const {
-  return w_string_equal(str_, other.str_);
+  if (str_ == other.str_) {
+    // identity fast path
+    return true;
+  } else {
+    return view() == other.view();
+  }
 }
 
 bool w_string::operator!=(const w_string& other) const {
@@ -622,20 +632,6 @@ void w_string_delref(w_string_t* str) {
   str->~w_string_t();
   // Release the raw memory.
   delete[](char*) str;
-}
-
-int w_string_compare(const w_string_t* a, const w_string_t* b) {
-  int res;
-  if (a == b)
-    return 0;
-  if (a->len < b->len) {
-    res = memcmp(a->buf, b->buf, a->len);
-    return res == 0 ? -1 : res;
-  } else if (a->len > b->len) {
-    res = memcmp(a->buf, b->buf, b->len);
-    return res == 0 ? +1 : res;
-  }
-  return memcmp(a->buf, b->buf, a->len);
 }
 
 bool w_string_equal_cstring(const w_string_t* a, const char* b) {

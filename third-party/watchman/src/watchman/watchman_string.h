@@ -65,8 +65,6 @@ inline uint32_t w_string_hval(w_string_t* str) {
  */
 w_string_piece w_string_canon_path(w_string_piece str);
 
-int w_string_compare(const w_string_t* a, const w_string_t* b);
-
 bool w_string_equal(const w_string_t* a, const w_string_t* b);
 bool w_string_equal_cstring(const w_string_t* a, const char* b);
 

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <vector>
 #include "watchman/thirdparty/libart/src/art.h"
 #include "watchman/watchman_string.h"
 

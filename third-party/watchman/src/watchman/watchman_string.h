@@ -9,22 +9,20 @@
 
 #include "watchman/watchman_system.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <atomic>
-#include <cstring>
-#include <initializer_list>
-#include <memory>
-#ifdef _WIN32
-#include <string>
-#endif
 #include <fmt/format.h>
 #include <folly/Conv.h>
-#include <folly/Range.h>
+#include <folly/FBString.h>
 #include <folly/ScopeGuard.h>
+
+#include <stdint.h>
+#include <string.h>
+
+#include <atomic>
+#include <initializer_list>
+#include <memory>
 #include <stdexcept>
+#include <string>
 #include <string_view>
-#include <vector>
 
 class w_string_piece;
 
@@ -94,35 +92,11 @@ class w_string_piece {
  public:
   w_string_piece() : str_{nullptr}, len_{0} {}
 
-  /* implicit */ w_string_piece(w_string_t* str)
-      : str_{str->buf}, len_{str->len} {}
+  /* implicit */ w_string_piece(const std::string& str)
+      : str_{str.data()}, len_{str.size()} {}
 
-  /** Construct from a string-like object */
-  template <
-      typename String,
-      typename std::enable_if<
-          std::is_class<String>::value &&
-              !std::is_same<String, w_string>::value,
-          int>::type = 0>
-  /* implicit */ w_string_piece(const String& str)
-      : str_(str.data()), len_(str.size()) {}
-
-  /** Construct from w_string.  This is almost the same as
-   * the string like object constructor above, but we need a nullptr check
-   */
-  template <
-      typename String,
-      typename std::enable_if<std::is_same<String, w_string>::value, int>::
-          type = 0>
-  /* implicit */ w_string_piece(const String& str) {
-    if (!str) {
-      str_ = nullptr;
-      len_ = 0;
-    } else {
-      str_ = str.data();
-      len_ = str.size();
-    }
-  }
+  /* implicit */ w_string_piece(const folly::fbstring& str)
+      : str_{str.data()}, len_{str.size()} {}
 
   /* implicit */ w_string_piece(std::nullptr_t) = delete;
 
@@ -315,7 +289,7 @@ class w_string {
    * Returns a std::string_view covering this w_string's data. Returns the empty
    * string_view if null.
    */
-  std::string_view view() const {
+  std::string_view view() const noexcept {
     if (str_ == nullptr) {
       return {};
     }
@@ -326,11 +300,15 @@ class w_string {
    * Returns a w_string_piece covering this w_string's data. Returns the empty
    * w_string_piece if null.
    */
-  w_string_piece piece() const {
+  w_string_piece piece() const noexcept {
     if (str_ == nullptr) {
       return w_string_piece();
     }
     return w_string_piece(data(), size());
+  }
+
+  operator w_string_piece() const noexcept {
+    return piece();
   }
 
   explicit operator bool() const {

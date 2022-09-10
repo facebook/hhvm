@@ -724,6 +724,18 @@ Test createStructPatchTest(
       patchValue,
       expected);
 
+  using StructOptional =
+      test::testset::struct_with<TT, test::testset::FieldModifier::Optional>;
+
+  StructOptional initialOpt;
+  StructOptional expectedOpt;
+  expectedOpt.field_1_ref() = valueToAssign<TT>();
+  auto& ensureCase = test.testCases()->emplace_back();
+  ensureCase.name() = makeTestName("ensureStruct");
+  ensureCase.test().emplace().objectPatch_ref() =
+      makeEnsureStructTC<type::struct_c>(
+          registry, protocol, initialOpt, expectedOpt);
+
   return test;
 }
 

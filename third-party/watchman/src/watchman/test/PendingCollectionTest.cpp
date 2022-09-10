@@ -161,7 +161,7 @@ class NaivePendingCollection {
       std::chrono::system_clock::time_point now,
       PendingFlags flags) {
     for (std::shared_ptr<watchman_pending_fs> p = head_; p; p = p->next) {
-      if (w_string_startswith(path, p->path) &&
+      if (path.piece().startsWith(p->path) &&
           watchman::is_path_prefix(path, p->path)) {
         if ((p->flags & (W_PENDING_RECURSIVE | W_PENDING_CRAWL_ONLY)) ==
             W_PENDING_RECURSIVE) {

@@ -65,6 +65,7 @@ w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
 
   auto cursor = s_;
   while (cursor < e_) {
+    // TODO: `tolower` depends on locale.
     *buf = (char)tolower((uint8_t)*cursor);
     ++cursor;
     ++buf;
@@ -94,6 +95,7 @@ w_string w_string_piece::asLowerCaseSuffix(w_string_type_t stringType) const {
 
   auto cursor = suffixPiece.s_;
   while (cursor < suffixPiece.e_) {
+    // TODO: `tolower` depends on locale.
     *buf = (char)tolower((uint8_t)*cursor);
     ++cursor;
     ++buf;
@@ -232,6 +234,7 @@ bool w_string_piece::startsWithCaseInsensitive(w_string_piece prefix) const {
   auto pref = prefix.s_;
 
   while (pref < prefix.e_) {
+    // TODO: `tolower` depends on locale.
     if (tolower((uint8_t)*me) != tolower((uint8_t)*pref)) {
       return false;
     }
@@ -645,6 +648,7 @@ bool w_string_equal_caseless(w_string_piece a, w_string_piece b) {
     return false;
   }
   for (i = 0; i < a.size(); i++) {
+    // TODO: `tolower` depends on locale.
     if (tolower((uint8_t)a[i]) != tolower((uint8_t)b[i])) {
       return false;
     }
@@ -666,32 +670,12 @@ bool w_string_piece::hasSuffix(w_string_piece suffix) const {
   }
 
   for (i = 0; i < suffix.size(); i++) {
+    // TODO: `tolower` depends on locale.
     if (tolower((uint8_t)s_[base + i]) != suffix[i]) {
       return false;
     }
   }
 
-  return true;
-}
-
-bool w_string_startswith(w_string_t* str, w_string_t* prefix) {
-  if (prefix->len > str->len) {
-    return false;
-  }
-  return memcmp(str->buf, prefix->buf, prefix->len) == 0;
-}
-
-bool w_string_startswith_caseless(w_string_t* str, w_string_t* prefix) {
-  size_t i;
-
-  if (prefix->len > str->len) {
-    return false;
-  }
-  for (i = 0; i < prefix->len; i++) {
-    if (tolower((uint8_t)str->buf[i]) != tolower((uint8_t)prefix->buf[i])) {
-      return false;
-    }
-  }
   return true;
 }
 
@@ -738,6 +722,7 @@ bool w_string_path_is_absolute(w_string_piece path) {
     return is_slash(path[1]);
   }
 
+  // TODO: `tolower` depends on locale.
   drive_letter = (char)tolower(path[0]);
   // "C:something"
   if (drive_letter >= 'a' && drive_letter <= 'z' && path[1] == ':') {

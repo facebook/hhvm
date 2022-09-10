@@ -72,9 +72,6 @@ w_string_piece w_string_canon_path(w_string_piece str);
  */
 bool w_string_path_is_absolute(w_string_piece path);
 
-bool w_string_startswith(w_string_t* str, w_string_t* prefix);
-bool w_string_startswith_caseless(w_string_t* str, w_string_t* prefix);
-
 bool w_string_is_known_unicode(w_string_t* str);
 bool w_string_is_null_terminated(w_string_t* str);
 

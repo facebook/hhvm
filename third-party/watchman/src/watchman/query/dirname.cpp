@@ -22,7 +22,7 @@ static inline bool is_dir_sep(int c) {
 class DirNameExpr : public QueryExpr {
   w_string dirname;
   struct w_query_int_compare depth;
-  using StartsWith = bool (*)(w_string_t* str, w_string_t* prefix);
+  using StartsWith = bool (*)(w_string_piece str, w_string_piece prefix);
   StartsWith startswith;
 
  public:
@@ -119,8 +119,12 @@ class DirNameExpr : public QueryExpr {
         json_to_w_string(name),
         depth_comp,
         case_sensitive == CaseSensitivity::CaseInSensitive
-            ? w_string_startswith_caseless
-            : w_string_startswith);
+            ? [](w_string_piece str,
+                 w_string_piece
+                     prefix) { return str.startsWithCaseInsensitive(prefix); }
+            : [](w_string_piece str, w_string_piece prefix) {
+                return str.startsWith(prefix);
+              });
   }
   static std::unique_ptr<QueryExpr> parseDirName(
       Query* query,

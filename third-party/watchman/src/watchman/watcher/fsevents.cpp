@@ -431,7 +431,7 @@ std::unique_ptr<FSEventsStream> FSEventsWatcher::fse_stream_make(
 
     for (const auto& path : dirs_vec) {
       if (const auto& subdir = watcher->subdir) {
-        if (!w_string_startswith(path, *subdir)) {
+        if (!path.piece().startsWith(*subdir)) {
           continue;
         }
         logf(DBG, "Adding exclusion: {} for subdir: {}\n", path, *subdir);

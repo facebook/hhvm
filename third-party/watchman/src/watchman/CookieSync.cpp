@@ -49,7 +49,7 @@ void CookieSync::removeCookieDir(const w_string& dir) {
   // serviced.
   auto cookies = cookies_.wlock();
   for (const auto& [cookiePath, cookie] : *cookies) {
-    if (w_string_startswith(cookiePath, dir)) {
+    if (cookiePath.piece().startsWith(dir)) {
       cookie->notify();
       cookies->erase(cookiePath);
     }

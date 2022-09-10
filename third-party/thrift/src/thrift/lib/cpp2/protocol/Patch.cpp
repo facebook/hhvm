@@ -253,17 +253,24 @@ void ApplyPatch::operator()(
   }
 
   if (auto* elementPatches = findOp(patch, PatchOp::PatchPrior)) {
-    for (const auto& [idx, elPatch] : *elementPatches->mapValue_ref()) {
-      if (idx.if_i32()) {
-        auto index = type::toPosition(
-            type::Ordinal(apache::thrift::util::zigzagToI32(idx.as_i32())));
-        if (index >= 0 && static_cast<size_t>(index) < value.size()) {
-          applyPatch(*elPatch.objectValue_ref(), value[index]);
-        } else {
-          throw std::runtime_error("patch index out of range");
-        }
-      } else {
+    const auto* indexPatches = elementPatches->if_map();
+    if (!indexPatches) {
+      throw std::runtime_error("list patch should contain a map");
+    }
+
+    for (const auto& [idx, elPatch] : *indexPatches) {
+      const auto* indexPtr = idx.if_i32();
+      if (!indexPtr) {
         throw std::runtime_error("expected index as i32");
+      }
+
+      auto index = type::toPosition(
+          type::Ordinal(apache::thrift::util::zigzagToI32(*indexPtr)));
+      if (index >= 0 && static_cast<size_t>(index) < value.size()) {
+        applyPatch(*elPatch.objectValue_ref(), value[index]);
+      } else {
+        throw std::runtime_error(
+            fmt::format("patch index out of range {}", index));
       }
     }
   }

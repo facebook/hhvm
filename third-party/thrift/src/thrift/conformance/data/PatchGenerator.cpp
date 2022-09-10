@@ -29,6 +29,7 @@
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/op/Patch.h>
+#include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/Name.h>
 #include <thrift/lib/cpp2/type/Tag.h>
@@ -457,6 +458,23 @@ type::standard_type<TT> valueToAssign() {
   }
 }
 
+template <typename Tag, typename Type>
+PatchOpTestCase makeEnsureStructTC(
+    const AnyRegistry& registry,
+    const Protocol& protocol,
+    Type initial,
+    Type expected) {
+  PatchOpTestCase tascase;
+  PatchOpRequest req;
+  req.value() = registry.store(asValueStruct<Tag>(initial), protocol);
+  req.patch() = registry.store(
+      makePatchValue(op::PatchOp::EnsureStruct, asValueStruct<Tag>(expected)),
+      protocol);
+  tascase.request() = req;
+  tascase.result() = registry.store(asValueStruct<Tag>(expected), protocol);
+  return tascase;
+}
+
 } // namespace
 
 template <typename TT>
@@ -637,6 +655,13 @@ Test createMapPatchTest(const AnyRegistry& registry, const Protocol& protocol) {
           op::PatchOp::PatchAfter,
           patchValue,
           expected);
+
+      initial = {};
+      auto& ensureCase = test.testCases()->emplace_back();
+      ensureCase.name() = makeTestName(key, "ensure");
+      ensureCase.test().emplace().objectPatch_ref() =
+          makeEnsureStructTC<ContainerTag>(
+              registry, protocol, initial, expected);
     }
   });
 

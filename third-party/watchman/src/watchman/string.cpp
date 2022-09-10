@@ -110,7 +110,7 @@ w_string w_string_piece::asUTF8Clean() const {
 }
 
 bool w_string_piece::pathIsAbsolute() const {
-  return w_is_path_absolute_cstr_len(data(), size());
+  return w_string_path_is_absolute(*this);
 }
 
 /** Compares two path strings.
@@ -719,19 +719,15 @@ bool w_string_is_known_unicode(w_string_t* str) {
   return str->type == W_STRING_UNICODE;
 }
 
-bool w_string_path_is_absolute(const w_string_t* str) {
-  return w_is_path_absolute_cstr_len(str->buf, str->len);
-}
+bool w_string_path_is_absolute(w_string_piece path) {
+  // TODO: To avoid needing a strlen in call sites that have a null-terminated
+  // `const char*` path, this function could have a `const char*` overload
+  // because it only ever looks at the first few characters of the string.
 
-bool w_is_path_absolute_cstr(const char* path) {
-  return w_is_path_absolute_cstr_len(path, strlen_uint32(path));
-}
-
-bool w_is_path_absolute_cstr_len(const char* path, uint32_t len) {
 #ifdef _WIN32
   char drive_letter;
 
-  if (len <= 2) {
+  if (path.size() <= 2) {
     return false;
   }
 
@@ -755,7 +751,7 @@ bool w_is_path_absolute_cstr_len(const char* path, uint32_t len) {
   // the path is a valid watchable root
   return false;
 #else
-  return len > 0 && path[0] == '/';
+  return path.size() > 0 && path[0] == '/';
 #endif
 }
 

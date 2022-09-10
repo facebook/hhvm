@@ -65,7 +65,12 @@ inline uint32_t w_string_hval(w_string_t* str) {
  */
 w_string_piece w_string_canon_path(w_string_piece str);
 
-bool w_string_path_is_absolute(const w_string_t* str);
+/**
+ * Returns true if the specified string is an absolute path.
+ * On Windows, this accounts for UNC paths (which are absolute) and
+ * drive-relative paths (which are not).
+ */
+bool w_string_path_is_absolute(w_string_piece path);
 
 bool w_string_startswith(w_string_t* str, w_string_t* prefix);
 bool w_string_startswith_caseless(w_string_t* str, w_string_t* prefix);
@@ -74,9 +79,6 @@ bool w_string_is_known_unicode(w_string_t* str);
 bool w_string_is_null_terminated(w_string_t* str);
 
 uint32_t strlen_uint32(const char* str);
-
-bool w_is_path_absolute_cstr(const char* path);
-bool w_is_path_absolute_cstr_len(const char* path, uint32_t len);
 
 inline bool is_slash(char c) {
   return c == '/'

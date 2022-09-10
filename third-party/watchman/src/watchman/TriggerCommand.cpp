@@ -263,7 +263,7 @@ void spawn_command(
   auto cwd = cmd->definition.get_optional("chdir");
   if (cwd) {
     auto target = json_to_w_string(*cwd);
-    if (w_is_path_absolute_cstr_len(target.data(), target.size())) {
+    if (w_string_path_is_absolute(target)) {
       working_dir = target;
     } else {
       working_dir = w_string::pathCat({working_dir, target});

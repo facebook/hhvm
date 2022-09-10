@@ -127,19 +127,22 @@ std::optional<json_ref> load_root_config(const char* path) {
 } // namespace
 
 std::shared_ptr<Root>
-root_resolve(const char* filename, bool auto_watch, bool* created) {
+root_resolve(const char* filename_cstr, bool auto_watch, bool* created) {
   std::error_code realpath_err;
   std::shared_ptr<Root> root;
 
   *created = false;
 
+  w_string_piece filename{filename_cstr};
+
   // Sanity check that the path is absolute
-  if (!w_is_path_absolute_cstr(filename)) {
+  if (!w_string_path_is_absolute(filename)) {
     log(ERR, "resolve_root: path \"", filename, "\" must be absolute\n");
     RootResolveError::throwf("path \"{}\" must be absolute", filename);
   }
 
-  if (!strcmp(filename, "/")) {
+  // TODO: This does not prevent watching paths like C:\ on Windows.
+  if (filename == "/") {
     log(ERR, "resolve_root: cannot watchman \"/\"\n");
     throw RootResolveError("cannot watch \"/\"");
   }
@@ -147,9 +150,9 @@ root_resolve(const char* filename, bool auto_watch, bool* created) {
   w_string root_str;
 
   try {
-    root_str = realPath(filename);
+    root_str = realPath(filename_cstr);
     try {
-      getFileInformation(filename);
+      getFileInformation(filename_cstr);
     } catch (const std::system_error& exc) {
       if (exc.code() == error_code::no_such_file_or_directory) {
         RootResolveError::throwf(
@@ -169,7 +172,7 @@ root_resolve(const char* filename, bool auto_watch, bool* created) {
     }
   } catch (const std::system_error& exc) {
     realpath_err = exc.code();
-    root_str = w_string(filename, W_STRING_BYTE);
+    root_str = w_string(filename_cstr, W_STRING_BYTE);
   }
 
   {
@@ -207,7 +210,7 @@ root_resolve(const char* filename, bool auto_watch, bool* created) {
 
   logf(DBG, "Want to watch {} -> {}\n", filename, root_str);
 
-  auto fs_type = w_fstype(filename);
+  auto fs_type = w_fstype(filename_cstr);
   check_allowed_fs(root_str.c_str(), fs_type);
 
   if (!root_check_restrict(root_str.c_str())) {

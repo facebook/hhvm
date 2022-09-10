@@ -44,6 +44,10 @@ class FooServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FooService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.basic.module.thrift_metadata._fbthrift_metadata_service_response_FooService()
+
 
 
     async def simple_rpc(
@@ -81,6 +85,10 @@ class FB303ServiceInterface(
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_FB303Service()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.basic.module.thrift_metadata._fbthrift_metadata_service_response_FB303Service()
 
 
 
@@ -129,6 +137,10 @@ class MyServiceInterface(
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.basic.module.thrift_metadata._fbthrift_metadata_service_response_MyService()
 
 
 
@@ -292,6 +304,10 @@ class DbMixedStackArgumentsInterface(
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_DbMixedStackArguments()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.basic.module.thrift_metadata._fbthrift_metadata_service_response_DbMixedStackArguments()
 
 
 

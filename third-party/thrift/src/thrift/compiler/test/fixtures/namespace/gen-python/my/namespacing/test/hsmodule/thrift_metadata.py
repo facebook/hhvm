@@ -66,6 +66,13 @@ def _fbthrift_gen_metadata_service_HsTestService(metadata_struct: _fbthrift_meta
     
     return new_struct
 
+def _fbthrift_metadata_service_response_HsTestService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_HsTestService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["hsmodule.HsTestService"], module=_fbthrift_metadata.ThriftModuleContext(name="hsmodule"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:

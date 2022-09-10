@@ -45,6 +45,13 @@ def _fbthrift_gen_metadata_service_ExtendTestService(metadata_struct: _fbthrift_
     
     return new_struct
 
+def _fbthrift_metadata_service_response_ExtendTestService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_ExtendTestService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["extend.ExtendTestService"], module=_fbthrift_metadata.ThriftModuleContext(name="extend"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:

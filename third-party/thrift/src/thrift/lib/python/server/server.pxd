@@ -15,6 +15,7 @@
 from libcpp.memory cimport unique_ptr
 from libcpp.string cimport string
 from folly.iobuf cimport cIOBuf
+from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.py3.server cimport cAsyncProcessorFactory, AsyncProcessorFactory, ThriftServer as ThriftServer_py3
 from thrift.py3.exceptions cimport cException
 
@@ -28,12 +29,9 @@ cdef extern from "thrift/lib/cpp2/async/RpcTypes.h" namespace "::apache::thrift"
     cdef cppclass SerializedRequest "::apache::thrift::SerializedRequest":
         unique_ptr[cIOBuf] buffer
 
-cdef class ServiceInterface:
-    pass
-
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
-    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName)
+    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName, object server)
 
 cdef class PythonUserException(Exception):
     cdef unique_ptr[cPythonUserException] _cpp_obj
@@ -41,4 +39,4 @@ cdef class PythonUserException(Exception):
 cdef class ThriftServer(ThriftServer_py3):
     cdef readonly dict funcMap
     cdef readonly list lifecycle
-    cdef readonly ServiceInterface handler
+    cdef readonly cServiceInterface handler

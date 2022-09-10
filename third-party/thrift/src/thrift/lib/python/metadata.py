@@ -43,8 +43,7 @@ from apache.thrift.metadata.thrift_types import (
 )
 from thrift.python.client import Client
 from thrift.python.exceptions import GeneratedError
-from thrift.python.server import ServiceInterface
-from thrift.python.types import Enum, StructOrUnion
+from thrift.python.types import Enum, ServiceInterface, StructOrUnion
 
 
 class ThriftKind(enum.Enum):

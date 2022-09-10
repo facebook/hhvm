@@ -91,6 +91,13 @@ def _fbthrift_gen_metadata_service_{{service:parent_service_name}}_{{service:nam
 
 {{/service:interactions}}
 
+def _fbthrift_metadata_service_response_{{service:name}}() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_{{service:name}}()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["{{program:name}}.{{service:name}}"], module=_fbthrift_metadata.ThriftModuleContext(name="{{program:name}}"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 {{/program:services}}
 
 {{#program:enums}}

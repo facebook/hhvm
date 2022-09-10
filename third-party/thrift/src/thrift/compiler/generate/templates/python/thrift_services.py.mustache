@@ -71,6 +71,10 @@ class {{service:name}}Interface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return {{program:module_path}}.thrift_metadata._fbthrift_metadata_service_response_{{service:name}}()
+
 
 {{#service:supported_service_functions}}
 

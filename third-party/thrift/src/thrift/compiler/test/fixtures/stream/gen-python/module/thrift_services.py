@@ -42,4 +42,8 @@ class PubSubStreamingServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_PubSubStreamingService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return module.thrift_metadata._fbthrift_metadata_service_response_PubSubStreamingService()
+
 

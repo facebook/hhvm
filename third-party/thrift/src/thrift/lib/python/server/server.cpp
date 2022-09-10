@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <thrift/lib/python/server/server.h>
 #include <thrift/lib/python/server/server_api.h> // @manual
 
@@ -29,6 +30,11 @@ void do_import() {
 }
 
 } // namespace
+
+std::unique_ptr<folly::IOBuf> PythonAsyncProcessor::getPythonMetadata() {
+  FOLLY_MAYBE_UNUSED static bool done = (do_import(), false);
+  return getSerializedPythonMetadata(python_server_);
+}
 
 void PythonAsyncProcessor::handlePythonServerCallback(
     apache::thrift::ProtocolType protocol,

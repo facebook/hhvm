@@ -199,6 +199,13 @@ def _fbthrift_gen_metadata_service_FooService(metadata_struct: _fbthrift_metadat
     
     return new_struct
 
+def _fbthrift_metadata_service_response_FooService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_FooService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.FooService"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 def gen_metadata_service_FB303Service() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_FB303Service(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
@@ -231,6 +238,13 @@ def _fbthrift_gen_metadata_service_FB303Service(metadata_struct: _fbthrift_metad
     
     
     return new_struct
+
+def _fbthrift_metadata_service_response_FB303Service() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_FB303Service()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.FB303Service"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
 
 def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_MyService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
@@ -367,6 +381,13 @@ def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata
     
     return new_struct
 
+def _fbthrift_metadata_service_response_MyService() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_MyService()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.MyService"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
+
 def gen_metadata_service_DbMixedStackArguments() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_DbMixedStackArguments(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
@@ -409,6 +430,13 @@ def _fbthrift_gen_metadata_service_DbMixedStackArguments(metadata_struct: _fbthr
     
     
     return new_struct
+
+def _fbthrift_metadata_service_response_DbMixedStackArguments() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+    metadata = gen_metadata_service_DbMixedStackArguments()
+    context = _fbthrift_metadata.ThriftServiceContext(service_info=metadata.services["module.DbMixedStackArguments"], module=_fbthrift_metadata.ThriftModuleContext(name="module"))
+    services = [_fbthrift_metadata.ThriftServiceContextRef(module=_fbthrift_metadata.ThriftModuleContext(name=name.split('.')[0]), service_name=name) for name in metadata.services]
+    return _fbthrift_metadata.ThriftServiceMetadataResponse(metadata=metadata,context=context,services=services)
+
 
 
 def _fbthrift_gen_metadata_enum_MyEnum(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:

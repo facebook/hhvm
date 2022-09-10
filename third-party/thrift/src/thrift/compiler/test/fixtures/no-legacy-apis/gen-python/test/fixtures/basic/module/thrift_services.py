@@ -44,6 +44,10 @@ class MyServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return test.fixtures.basic.module.thrift_metadata.gen_metadata_service_MyService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return test.fixtures.basic.module.thrift_metadata._fbthrift_metadata_service_response_MyService()
+
 
 
     async def query(

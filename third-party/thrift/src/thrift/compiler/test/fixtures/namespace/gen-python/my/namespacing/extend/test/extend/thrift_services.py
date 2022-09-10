@@ -45,6 +45,10 @@ class ExtendTestServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root.my.namespacing.extend.test.extend.thrift_metadata.gen_metadata_service_ExtendTestService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return python_module_root.my.namespacing.extend.test.extend.thrift_metadata._fbthrift_metadata_service_response_ExtendTestService()
+
 
 
     async def check(

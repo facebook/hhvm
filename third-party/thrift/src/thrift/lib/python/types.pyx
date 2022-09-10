@@ -1254,3 +1254,27 @@ class Enum:
     @staticmethod
     def __get_thrift_name__() -> str:
         return NotImplementedError()
+
+
+cdef class ServiceInterface:
+    @staticmethod
+    def service_name():
+        raise NotImplementedError("Service name not implemented")
+
+    def getFunctionTable(self):
+        return {}
+
+    async def __aenter__(self):
+        # Establish async context managers as a way for end users to async initalize
+        # internal structures used by Service Handlers.
+        return self
+
+    async def __aexit__(self, *exc_info):
+        # Same as above, but allow end users to define things to be cleaned up
+        pass
+
+    async def onStartServing(self):
+        pass
+
+    async def onStopRequested(self):
+        pass

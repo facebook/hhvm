@@ -43,6 +43,10 @@ class TestServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return python_module_root.my.namespacing.test.module.module.thrift_metadata.gen_metadata_service_TestService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return python_module_root.my.namespacing.test.module.module.thrift_metadata._fbthrift_metadata_service_response_TestService()
+
 
 
     async def init(

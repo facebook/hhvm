@@ -85,6 +85,10 @@ class SimpleServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_SimpleService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return module.thrift_metadata._fbthrift_metadata_service_response_SimpleService()
+
 
 
     async def get_five(
@@ -689,6 +693,10 @@ SimpleServiceInterface,
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_DerivedService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return module.thrift_metadata._fbthrift_metadata_service_response_DerivedService()
+
 
 
     async def get_six(
@@ -726,6 +734,10 @@ DerivedServiceInterface,
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return module.thrift_metadata.gen_metadata_service_RederivedService()
+
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return module.thrift_metadata._fbthrift_metadata_service_response_RederivedService()
 
 
 

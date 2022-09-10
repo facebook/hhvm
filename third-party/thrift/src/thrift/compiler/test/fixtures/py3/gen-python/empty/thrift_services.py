@@ -42,4 +42,8 @@ class NullServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return empty.thrift_metadata.gen_metadata_service_NullService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return empty.thrift_metadata._fbthrift_metadata_service_response_NullService()
+
 

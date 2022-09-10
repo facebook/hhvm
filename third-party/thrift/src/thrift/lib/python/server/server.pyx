@@ -16,6 +16,10 @@ import asyncio
 import sys
 import traceback
 
+from thrift.python.metadata import gen_metadata, ThriftMetadata
+from thrift.python.serializer import serialize_iobuf
+from thrift.python.types import ServiceInterface
+
 from cpython.ref cimport PyObject
 from cython.operator cimport dereference
 from libcpp.map cimport map as cmap
@@ -27,6 +31,7 @@ from folly.executor cimport get_executor
 from folly.iobuf cimport IOBuf, from_unique_ptr
 from thrift.py3.exceptions cimport cTApplicationException, cTApplicationExceptionType__UNKNOWN, ApplicationError
 from thrift.py3.server cimport Cpp2RequestContext, RequestContext, THRIFT_REQUEST_CONTEXT
+from thrift.python.types cimport ServiceInterface as cServiceInterface
 from thrift.python.serializer cimport Protocol
 from folly cimport (
   cFollyPromise,
@@ -186,9 +191,14 @@ cdef public api void handleServerCallbackOneway(object func, string funcName, Cp
     cdef Promise_cFollyUnit __promise = Promise_cFollyUnit.create(cmove(cPromise))
     combinedHandler(func, funcName, ctx, __promise, cmove(serializedRequest), prot)
 
+cdef public api unique_ptr[cIOBuf] getSerializedPythonMetadata(object server):
+    metadata = server.__get_metadata_service_response__()
+    iobuf = serialize_iobuf(metadata, protocol=Protocol.BINARY)
+    return cmove((<IOBuf>iobuf)._ours)
+
 cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
     @staticmethod
-    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName):
+    cdef PythonAsyncProcessorFactory create(dict funcMap, list lifecycleFuncs, bytes serviceName, object server):
         cdef cmap[string, PyObject*] funcs
         cdef unordered_set[string] oneways
         cdef cvector[PyObject*] lifecycle
@@ -203,35 +213,12 @@ cdef class PythonAsyncProcessorFactory(AsyncProcessorFactory):
 
         cdef PythonAsyncProcessorFactory inst = PythonAsyncProcessorFactory.__new__(PythonAsyncProcessorFactory)
         inst._cpp_obj = static_pointer_cast[cAsyncProcessorFactory, cPythonAsyncProcessorFactory](
-            make_shared[cPythonAsyncProcessorFactory](cmove(funcs), cmove(oneways), cmove(lifecycle), get_executor(), serviceName))
+            make_shared[cPythonAsyncProcessorFactory](<PyObject*>server, cmove(funcs), cmove(oneways), cmove(lifecycle), get_executor(), serviceName))
         return inst
 
-cdef class ServiceInterface:
-    @staticmethod
-    def service_name():
-        raise NotImplementedError("Service name not implemented")
-
-    def getFunctionTable(self):
-        return {}
-
-    async def __aenter__(self):
-        # Establish async context managers as a way for end users to async initalize
-        # internal structures used by Service Handlers.
-        return self
-
-    async def __aexit__(self, *exc_info):
-        # Same as above, but allow end users to define things to be cleaned up
-        pass
-
-    async def onStartServing(self):
-        pass
-
-    async def onStopRequested(self):
-        pass
-
 cdef class ThriftServer(ThriftServer_py3):
-    def __init__(self, ServiceInterface server, int port=0, ip=None, path=None):
+    def __init__(self, cServiceInterface server, int port=0, ip=None, path=None):
         self.funcMap = server.getFunctionTable()
         self.handler = server
         self.lifecycle = [self.handler.onStartServing, self.handler.onStopRequested]
-        super().__init__(PythonAsyncProcessorFactory.create(self.funcMap, self.lifecycle, self.handler.service_name()), port, ip, path)
+        super().__init__(PythonAsyncProcessorFactory.create(self.funcMap, self.lifecycle, self.handler.service_name(), self.handler), port, ip, path)

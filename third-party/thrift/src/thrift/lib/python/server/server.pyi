@@ -21,6 +21,9 @@ from typing import Any, Awaitable, Callable, Mapping, Optional, Type, TypeVar, U
 from folly.iobuf import IOBuf
 from thrift.py3.server import ThriftServer as ThriftServer_py3
 
+# This looks really dumb but otherwise this name doesn't get re-exported
+from thrift.python.types import ServiceInterface as ServiceInterface
+
 IPAddress = Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
 # pyre-fixme[24]: Generic type `os.PathLike` expects 1 type parameter.
 Path = Union[str, bytes, os.PathLike]
@@ -31,21 +34,6 @@ def oneway(func: _T) -> _T: ...
 
 class PythonUserException(Exception):
     def __init__(self, type_: str, reason: str, buf: IOBuf) -> None: ...
-
-class ServiceInterface:
-    @staticmethod
-    def service_name() -> bytes: ...
-    def getFunctionTable(self) -> Mapping[bytes, Callable[..., ...]]: ...
-    # pyre-ignore[3]: it can return anything
-    async def __aenter__(self) -> Any: ...
-    async def __aexit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> Optional[bool]: ...
-    async def onStartServing(self) -> None: ...
-    async def onStopRequested(self) -> None: ...
 
 class ThriftServer(ThriftServer_py3):
     def __init__(

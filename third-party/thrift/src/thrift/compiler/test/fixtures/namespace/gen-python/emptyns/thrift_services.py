@@ -43,6 +43,10 @@ class TestServiceInterface(
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return emptyns.thrift_metadata.gen_metadata_service_TestService()
 
+    @staticmethod
+    def __get_metadata_service_response__() -> _fbthrift_metadata.ThriftServiceMetadataResponse:
+        return emptyns.thrift_metadata._fbthrift_metadata_service_response_TestService()
+
 
 
     async def init(

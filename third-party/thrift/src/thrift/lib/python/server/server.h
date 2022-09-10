@@ -25,6 +25,8 @@
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/AsyncProcessor.h>
 #include <thrift/lib/cpp2/gen/service_tcc.h>
+#include <thrift/lib/cpp2/protocol/Serializer.h>
+#include <thrift/lib/thrift/gen-cpp2/metadata_types.h>
 
 namespace thrift {
 namespace python {
@@ -64,10 +66,12 @@ class PythonUserException : public std::exception {
 class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
  public:
   PythonAsyncProcessor(
+      PyObject* python_server,
       const std::map<std::string, PyObject*>& functions,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
-      : functions_(functions),
+      : python_server_(python_server),
+        functions_(functions),
         executor(std::move(executor)),
         serviceName_(std::move(serviceName)) {
     for (const auto& function : functions) {
@@ -92,6 +96,19 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
 
     ProcessFuncs processFuncs;
   };
+
+  std::unique_ptr<folly::IOBuf> getPythonMetadata();
+
+  void getServiceMetadata(
+      apache::thrift::metadata::ThriftServiceMetadataResponse& response)
+      override {
+    std::unique_ptr<folly::IOBuf> buf = folly::via(this->executor, [this] {
+                                          return getPythonMetadata();
+                                        }).get();
+    apache::thrift::BinarySerializer::deserialize<
+        apache::thrift::metadata::ThriftServiceMetadataResponse>(
+        buf.get(), response);
+  }
 
   void handlePythonServerCallback(
       apache::thrift::ProtocolType protocol,
@@ -265,6 +282,7 @@ class PythonAsyncProcessor : public apache::thrift::AsyncProcessor {
   }
 
  private:
+  PyObject* python_server_;
   std::unordered_map<std::string, std::string> functionFullNameMap_;
   const std::map<std::string, PyObject*>& functions_;
   folly::Executor::KeepAlive<> executor;
@@ -370,12 +388,14 @@ class PythonAsyncProcessorFactory
       public apache::thrift::ServiceHandlerBase {
  public:
   PythonAsyncProcessorFactory(
+      PyObject* python_server,
       std::map<std::string, PyObject*> functions,
       std::unordered_set<std::string> oneways,
       std::vector<PyObject*> lifecycleFuncs,
       folly::Executor::KeepAlive<> executor,
       std::string serviceName)
-      : functions_(std::move(functions)),
+      : python_server_(python_server),
+        functions_(std::move(functions)),
         oneways_(std::move(oneways)),
         lifecycleFuncs_(std::move(lifecycleFuncs)),
         executor(std::move(executor)),
@@ -386,7 +406,7 @@ class PythonAsyncProcessorFactory
 
   std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
     return std::make_unique<PythonAsyncProcessor>(
-        functions_, executor, serviceName_);
+        python_server_, functions_, executor, serviceName_);
   }
 
   std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
@@ -416,6 +436,7 @@ class PythonAsyncProcessorFactory
  private:
   folly::SemiFuture<folly::Unit> callLifecycle(LifecycleFunc);
 
+  PyObject* python_server_;
   const std::map<std::string, PyObject*> functions_;
   const std::unordered_set<std::string> oneways_;
   const std::vector<PyObject*> lifecycleFuncs_;

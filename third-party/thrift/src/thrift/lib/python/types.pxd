@@ -175,3 +175,6 @@ cdef class Map(Container):
     cdef object _fbthrift_key_info
 
 cdef void set_struct_field(tuple struct_tuple, int16_t index, value) except *
+
+cdef class ServiceInterface:
+    pass

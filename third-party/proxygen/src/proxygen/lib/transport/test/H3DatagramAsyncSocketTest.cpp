@@ -65,7 +65,9 @@ void H3DatagramAsyncSocketTest::SetUp() {
 }
 
 void H3DatagramAsyncSocketTest::TearDown() {
-  datagramSocket_->close();
+  if (datagramSocket_) {
+    datagramSocket_->close();
+  }
   // Needed for proper teardown of the upstream session
   eventBase_.loop();
 }
@@ -404,4 +406,14 @@ TEST_F(H3DatagramAsyncSocketTest, ResumeReadReentrancy) {
           }));
   EXPECT_CALL(readCallbacks_, onReadClosed_()).Times(1);
   datagramSocket_->resumeRead(&readCallbacks_);
+}
+
+// Test delete before TransportReady
+TEST_F(H3DatagramAsyncSocketTest, DeleteSocketBeforeTransportReady) {
+  datagramSocket_->connect(getRemoteAddress());
+  datagramSocket_.reset();
+  eventBase_.loop();
+  session_->onConnectionError(quic::QuicError(
+      quic::QuicErrorCode(quic::TransportErrorCode::INTERNAL_ERROR),
+      std::string("connect timeout expired")));
 }

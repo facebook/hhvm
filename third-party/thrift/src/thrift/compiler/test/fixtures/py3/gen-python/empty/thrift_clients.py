@@ -17,6 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import empty.thrift_types
@@ -49,4 +50,3 @@ class NullService(_fbthrift_python_Client["NullService.Async", "NullService.Sync
         def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
             return empty.thrift_metadata.gen_metadata_service_NullService()
     
-

@@ -26,6 +26,7 @@
 #include <thrift/lib/cpp2/async/Interaction.h>
 #include <thrift/lib/cpp2/async/RequestCallback.h>
 #include <thrift/lib/cpp2/async/RequestChannel.h>
+#include <thrift/lib/cpp2/util/MethodMetadata.h>
 #include <thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h>
 
 namespace thrift {
@@ -72,12 +73,14 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
+      ::apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {});
 
   void oneway_send(
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
+      ::apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {});
 
   /**
@@ -89,6 +92,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
+      ::apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {},
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
@@ -97,6 +101,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
+      ::apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {},
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
@@ -119,7 +124,8 @@ class OmniClient : public apache::thrift::TClientBase {
       const char* serviceNameForContextStack,
       const char* functionNameForContextStack,
       std::unique_ptr<apache::thrift::RequestCallback> callback,
-      const apache::thrift::RpcKind rpcKind);
+      const apache::thrift::RpcKind rpcKind,
+      ::apache::thrift::MethodMetadata::Data&& metadata);
 
  protected:
   // RpcOptions unused in base OmniClient since no interaction support

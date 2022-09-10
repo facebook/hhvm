@@ -16,7 +16,11 @@ import enum
 import types
 import typing
 
-from thrift.python.client.omni_client import RpcKind
+from thrift.python.client.omni_client import (
+    FunctionQualifier,
+    InteractionMethodPosition,
+    RpcKind,
+)
 from thrift.python.types import _fbthrift_ResponseStreamResult, StructOrUnion, TChunk
 
 TAsyncClient = typing.TypeVar("TAsyncClient", bound="AsyncClient")
@@ -44,6 +48,9 @@ class AsyncClient:
         args: StructOrUnion,
         response_cls: None,
         rpc_kind: RpcKind = ...,
+        qualifier: FunctionQualifier = ...,
+        interaction_position: InteractionMethodPosition = ...,
+        interaction_name: str = ...,
     ) -> None: ...
     @typing.overload
     async def _send_request(
@@ -53,6 +60,9 @@ class AsyncClient:
         args: StructOrUnion,
         response_cls: typing.Type[TResponse],
         rpc_kind: RpcKind = ...,
+        qualifier: FunctionQualifier = ...,
+        interaction_position: InteractionMethodPosition = ...,
+        interaction_name: str = ...,
     ) -> TResponse: ...
     @typing.overload
     async def _send_request(
@@ -65,6 +75,9 @@ class AsyncClient:
             typing.Type[_fbthrift_ResponseStreamResult[TChunk]],
         ],
         rpc_kind: RpcKind = ...,
+        qualifier: FunctionQualifier = ...,
+        interaction_position: InteractionMethodPosition = ...,
+        interaction_name: str = ...,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

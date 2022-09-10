@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcpp.map cimport map as cmap
-from libcpp.memory cimport unique_ptr
-from libcpp.string cimport string
-from libcpp.unordered_map cimport unordered_map
-from thrift.python.client.omni_client cimport cOmniClient, cData, FunctionQualifier, InteractionMethodPosition
+cdef extern from "thrift/lib/cpp2/util/MethodMetadata.h" namespace "::apache::thrift":
+    cpdef enum class FunctionQualifier:
+        Unspecified = 0
+        OneWay = 1
+        Idempotent = 2
+        ReadOnly = 3
 
-cdef class SyncClient:
-    cdef unique_ptr[cOmniClient] _omni_client
-    cdef unordered_map[string, string] _persistent_headers
-    cdef unordered_map[string, string] _onetime_headers
-    cdef cmap[string, string] _last_resp_headers
+    cpdef enum class InteractionMethodPosition:
+        None = 0
+        Factory = 1
+        Member = 2

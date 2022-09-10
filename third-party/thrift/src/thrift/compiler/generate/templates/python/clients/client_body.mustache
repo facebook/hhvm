@@ -22,9 +22,16 @@ Thrift python client body definition, which is shared between normal clients and
 def __get_thrift_name__() -> str:
     return "{{program:name}}.{{service:name}}"
 
+{{^service:interaction?}}
 @staticmethod
 def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
     return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+{{/service:interaction?}}
+{{#service:interaction?}}
+@staticmethod
+def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+    return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+{{/service:interaction?}}
 
 class Async({{#service:extends}}{{!
     }}{{> services/client_module_path}}.Async{{!
@@ -35,9 +42,16 @@ class Async({{#service:extends}}{{!
     def __get_thrift_name__() -> str:
         return "{{program:name}}.{{service:name}}"
 
+    {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+    {{/service:interaction?}}
+    {{#service:interaction?}}
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+    {{/service:interaction?}}
     {{#service:supported_functions}}
 
     async def {{function:name}}(
@@ -47,12 +61,14 @@ class Async({{#service:extends}}{{!
         }}{{#type:streamresponse?}}{{> clients/stream_response_class_name}}{{/type:streamresponse?}}{{!
         }}{{^type:streamresponse?}}{{> types/pep484_type}}{{/type:streamresponse?}}{{!
     }}{{/function:return_type}}:
-        _fbthrift_resp = await self._send_request(
-            "{{service:name}}",
-            "{{function:name}}",
+        _fbthrift_resp = await self._send_request(  # type: ignore {{! TODO: remove this ignore after wheel build }}
+            {{^service:interaction?}}"{{service:name}}"{{/service:interaction?}}{{#service:interaction?}}"{{service:parent_service_name}}"{{/service:interaction?}},
+            {{#service:interaction?}}"{{service:name}}.{{function:name}}",{{/service:interaction?}}{{^service:interaction?}}"{{function:name}}",{{/service:interaction?}}
             {{> types/function_args_type}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> types/function_return_type}},
+            {{#service:interaction?}}interaction_position=_fbthrift_InteractionMethodPosition.Member,{{/service:interaction?}}
+            {{#service:interaction?}}interaction_name="{{service:name}}",{{/service:interaction?}}
         )
         {{#function:returns_stream?}}
         _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
@@ -88,8 +104,8 @@ class Async({{#service:extends}}{{!
     {{#service:interactions}}
     def create{{service:name}}(
         self #{{service:parent_service_name}}
-    ) -> {{service:parent_service_name}}.Async:
-        return self._create_interaction("{{service:name}}", {{service:parent_service_name}}.Async)  # type: ignore
+    ) -> {{service:parent_service_name}}_{{service:name}}.Async:
+        return self._create_interaction("{{service:name}}", {{service:parent_service_name}}_{{service:name}}.Async)  # type: ignore {{! TODO: remove this ignore after wheel build }}
 
     {{/service:interactions}}
 class Sync({{#service:extends}}{{!
@@ -101,9 +117,16 @@ class Sync({{#service:extends}}{{!
     def __get_thrift_name__() -> str:
         return "{{program:name}}.{{service:name}}"
 
+    {{^service:interaction?}}
     @staticmethod
     def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
         return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:name}}()
+    {{/service:interaction?}}
+    {{#service:interaction?}}
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return {{program:module_path}}.thrift_metadata.gen_metadata_service_{{service:parent_service_name}}_{{service:name}}()
+    {{/service:interaction?}}
     {{#service:supported_functions}}
     {{^function:async_only?}}
 

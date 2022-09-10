@@ -17,6 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_types
@@ -43,23 +44,27 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         async def foo(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "MyService",
                 "foo",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
+                
+                
             )
     
         async def interact(
             self,
             arg: int
         ) -> None:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "MyService",
                 "interact",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args(
                     arg=arg,),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -68,11 +73,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         async def interactFast(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "MyService",
                 "interactFast",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -85,11 +92,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         async def serialize(
             self
         ) -> _typing.Tuple[int, _typing.AsyncGenerator[int, None]]:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "MyService",
                 "serialize",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result_stream),
+                
+                
             )
             _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
             if _fbthrift_resp.success is not None:
@@ -101,18 +110,18 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def createMyInteraction(
             self #MyService
-        ) -> MyService.Async:
-            return self._create_interaction("MyInteraction", MyService.Async)  # type: ignore
+        ) -> MyService_MyInteraction.Async:
+            return self._create_interaction("MyInteraction", MyService_MyInteraction.Async)  # type: ignore 
     
         def createMyInteractionFast(
             self #MyService
-        ) -> MyService.Async:
-            return self._create_interaction("MyInteractionFast", MyService.Async)  # type: ignore
+        ) -> MyService_MyInteractionFast.Async:
+            return self._create_interaction("MyInteractionFast", MyService_MyInteractionFast.Async)  # type: ignore 
     
         def createSerialInteraction(
             self #MyService
-        ) -> MyService.Async:
-            return self._create_interaction("SerialInteraction", MyService.Async)  # type: ignore
+        ) -> MyService_SerialInteraction.Async:
+            return self._create_interaction("SerialInteraction", MyService_SerialInteraction.Async)  # type: ignore 
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -162,4 +171,254 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "Empty Response",
             )
     
-
+class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.Async", "MyService_MyInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteraction"
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+    
+        async def frobnicate(
+            self
+        ) -> int:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self
+        ) -> None:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteraction.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
+                None,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+            )
+    
+        async def truthify(
+            self
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteraction.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteraction",
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteraction"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteraction()
+    
+        def frobnicate(
+            self
+        ) -> int:
+            _fbthrift_resp = self._send_request(
+                "MyInteraction",
+                "frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            if _fbthrift_resp.ex is not None:
+                raise _fbthrift_resp.ex
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def ping(
+            self
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "MyInteraction",
+                "ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
+                None,
+            )
+    
+class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteractionFast.Async", "MyService_MyInteractionFast.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.MyInteractionFast"
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+    
+        async def frobnicate(
+            self
+        ) -> int:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteractionFast.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        async def ping(
+            self
+        ) -> None:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteractionFast.ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
+                None,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+            )
+    
+        async def truthify(
+            self
+        ) -> _typing.AsyncGenerator[bool, None]:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "MyInteractionFast.truthify",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_args(),
+                (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result_stream),
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="MyInteractionFast",
+            )
+            _fbthrift_resp, _fbthrift_stream = _fbthrift_resp
+            return _fbthrift_stream
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.MyInteractionFast"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_MyInteractionFast()
+    
+        def frobnicate(
+            self
+        ) -> int:
+            _fbthrift_resp = self._send_request(
+                "MyInteractionFast",
+                "frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
+            )
+            # shortcut to success path for non-void returns
+            if _fbthrift_resp.success is not None:
+                return _fbthrift_resp.success
+            raise _fbthrift_python_exceptions.ApplicationError(
+                _fbthrift_python_exceptions.ApplicationErrorType.MISSING_RESULT,
+                "Empty Response",
+            )
+    
+        def ping(
+            self
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "MyInteractionFast",
+                "ping",
+                test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
+                None,
+            )
+    
+class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInteraction.Async", "MyService_SerialInteraction.Sync"]):
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "module.SerialInteraction"
+    
+    @staticmethod
+    def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+        return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+    
+    class Async(_fbthrift_python_AsyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+    
+        async def frobnicate(
+            self
+        ) -> None:
+            _fbthrift_resp = await self._send_request(  # type: ignore 
+                "MyService",
+                "SerialInteraction.frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
+                interaction_position=_fbthrift_InteractionMethodPosition.Member,
+                interaction_name="SerialInteraction",
+            )
+    
+    class Sync(_fbthrift_python_SyncClient):
+        @staticmethod
+        def __get_thrift_name__() -> str:
+            return "module.SerialInteraction"
+    
+        @staticmethod
+        def __get_metadata__() -> _fbthrift_metadata.ThriftMetadata:
+            return test.fixtures.interactions.module.thrift_metadata.gen_metadata_service_MyService_SerialInteraction()
+    
+        def frobnicate(
+            self
+        ) -> None:
+            _fbthrift_resp = self._send_request(
+                "SerialInteraction",
+                "frobnicate",
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
+                test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
+            )
+    

@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcpp.map cimport map as cmap
-from libcpp.memory cimport unique_ptr
-from libcpp.string cimport string
-from libcpp.unordered_map cimport unordered_map
-from thrift.python.client.omni_client cimport cOmniClient, cData, FunctionQualifier, InteractionMethodPosition
+cdef class ServerBox:
+    def __init__(self):
+        raise TypeError
 
-cdef class SyncClient:
-    cdef unique_ptr[cOmniClient] _omni_client
-    cdef unordered_map[string, string] _persistent_headers
-    cdef unordered_map[string, string] _onetime_headers
-    cdef cmap[string, string] _last_resp_headers
+    cpdef reset(self):
+        self._cpp_obj.reset()
+
+    cpdef uint16_t getPort(self):
+        return self._cpp_obj.get().getPort()
+
+    @staticmethod
+    cdef box(unique_ptr[cScopedServerInterfaceThread]&& server):
+        inst = <ServerBox>ServerBox.__new__(ServerBox)
+        inst._cpp_obj = move(server)
+        return inst
+
+
+cpdef ServerBox run_interaction():
+    return ServerBox.box(move(make_unique[cScopedServerInterfaceThread](make_shared[cCalculatorHandler]())))

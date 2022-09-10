@@ -39,10 +39,10 @@ def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
 
 def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.MyService"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="foo", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
         ], exceptions = [
@@ -63,34 +63,178 @@ def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata
         ], is_oneway=False, structured_annotations=[
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-
-
-
+    
+    
+    
      # return value
-
-
+    
+    
      # arg
-
-
+    
+    
      # return value
-
-
-
-
+    
+    
+    
+    
      # return value
-
-
-
-
+    
+    
+    
+    
      # elem
      # response  # return value
+    
+    
+    return new_struct
+def gen_metadata_service_MyService_MyInteraction() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_MyService_MyInteraction(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+def _fbthrift_gen_metadata_service_MyService_MyInteraction(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyInteraction"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="frobnicate", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), arguments=[
+        ], exceptions = [
+            _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.CustomException")), name="ex", is_optional=False, structured_annotations=[
+            ]),
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="ping", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=True, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="truthify", return_type=_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="encode", return_type=_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),finalResponseType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE),initialResponseType=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    new_struct = _fbthrift_gen_metadata_exception_CustomException(new_struct) # ex
+    
+     # return value
+    
+    
+    
+    
+     # return value
+    
+    
+    
+    
+     # elem
+     # response  # return value
+    
+    
+    
+    
+     # elem
+     # final response
+     # first response  # return value
+    
+    
+    return new_struct
+def gen_metadata_service_MyService_MyInteractionFast() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_MyService_MyInteractionFast(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+def _fbthrift_gen_metadata_service_MyService_MyInteractionFast(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.MyInteractionFast"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="frobnicate", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="ping", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=True, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="truthify", return_type=_fbthrift_metadata.ThriftType(t_stream=_fbthrift_metadata.ThriftStreamType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftFunction(name="encode", return_type=_fbthrift_metadata.ThriftType(t_sink=_fbthrift_metadata.ThriftSinkType(elemType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE),finalResponseType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE),initialResponseType=_fbthrift_metadata.ThriftType(t_set=_fbthrift_metadata.ThriftSetType(valueType=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE))))), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+     # return value
+    
+    
+    
+    
+     # return value
+    
+    
+    
+    
+     # elem
+     # response  # return value
+    
+    
+    
+    
+     # elem
+     # final response
+     # first response  # return value
+    
+    
+    return new_struct
+def gen_metadata_service_MyService_SerialInteraction() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_MyService_SerialInteraction(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+def _fbthrift_gen_metadata_service_MyService_SerialInteraction(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "module.SerialInteraction"
+    
+    if qualified_name in metadata_struct.services:
+        return metadata_struct
+    
+    functions = [
+        _fbthrift_metadata.ThriftFunction(name="frobnicate", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
+        ], exceptions = [
+        ], is_oneway=False, structured_annotations=[
+        ]),
+    ]
+    
+    service_dict = dict(metadata_struct.services)
+    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
+    ])
+    new_struct = metadata_struct(services=service_dict)
+    
+    
+    
+     # return value
+    
+    
     return new_struct
 
 

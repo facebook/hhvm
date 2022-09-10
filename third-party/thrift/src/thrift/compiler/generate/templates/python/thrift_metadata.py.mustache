@@ -79,70 +79,17 @@ def gen_metadata_service_{{service:name}}() -> _fbthrift_metadata.ThriftMetadata
 
 def _fbthrift_gen_metadata_service_{{service:name}}({{!
 }}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "{{program:name}}.{{service:name}}"
+    {{> metadata/service_metadata }}
 
-    if qualified_name in metadata_struct.services:
-        return metadata_struct
+{{#service:interactions}}
+def gen_metadata_service_{{service:parent_service_name}}_{{service:name}}() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_service_{{service:parent_service_name}}_{{service:name}}(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
-    functions = [
-        {{#service:functions}}{{^function:starts_interaction?}}
-        _fbthrift_metadata.ThriftFunction(name="{{function:name}}", return_type={{#function:return_type}}{{> metadata/thrift_type }}{{/function:return_type}}, arguments=[
-            {{#function:args}}
-            _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-                {{#field:structured_annotations}}
-                {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
-                {{> metadata/const_struct }},
-                {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
-                {{/field:structured_annotations}}
-            ]),
-            {{/function:args}}
-        ], exceptions = [
-            {{#function:exceptions}}
-            _fbthrift_metadata.ThriftField(id={{field:key}}, type={{#field:type}}{{> metadata/thrift_type }}{{/field:type}}, name="{{field:name}}", is_optional=False, structured_annotations=[
-                {{#field:structured_annotations}}
-                {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
-                {{> metadata/const_struct }},
-                {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
-                {{/field:structured_annotations}}
-            ]),
-            {{/function:exceptions}}
-        ], is_oneway={{#function:oneway?}}True{{/function:oneway?}}{{^function:oneway?}}False{{/function:oneway?}}, structured_annotations=[
-            {{#function:structured_annotations}}
-            {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
-            {{> metadata/const_struct }},
-            {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
-            {{/function:structured_annotations}}
-        ]),
-        {{/function:starts_interaction?}}{{/service:functions}}
-    ]
+def _fbthrift_gen_metadata_service_{{service:parent_service_name}}_{{service:name}}({{!
+}}metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    {{> metadata/service_metadata }}
 
-    service_dict = dict(metadata_struct.services)
-    service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions, {{#service:extends?}}{{#service:extends}}parent="{{service:program_name}}.{{service:name}}",{{/service:extends}}{{/service:extends?}} structured_annotations=[
-        {{#service:structured_annotations}}
-        {{#structured_annotation:const_struct?}}{{#structured_annotation:const}}{{#constant:value}}
-        {{> metadata/const_struct }},
-        {{/constant:value}}{{/structured_annotation:const}}{{/structured_annotation:const_struct?}}
-        {{/service:structured_annotations}}
-    ])
-    new_struct = metadata_struct(services=service_dict)
-    {{#service:extends?}}{{#service:extends}}
-    new_struct = {{#service:external_program?}}{{service:module_path}}.thrift_metadata.{{/service:external_program?}}_fbthrift_gen_metadata_service_{{service:name}}(new_struct)
-    {{/service:extends}}{{/service:extends?}}
-    {{#service:functions}}{{^function:starts_interaction?}}
-
-    {{#function:args}}
-    {{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
-    {{/function:args}}
-
-    {{#function:exceptions}}
-    {{#field:type}}{{> metadata/recursive_call }} # {{field:name}}{{/field:type}}
-    {{/function:exceptions}}
-
-    {{#function:return_type}}{{> metadata/recursive_call }} # return value{{/function:return_type}}
-
-    {{/function:starts_interaction?}}{{/service:functions}}
-
-    return new_struct
+{{/service:interactions}}
 
 {{/program:services}}
 

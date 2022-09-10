@@ -144,6 +144,122 @@ class _fbthrift_MyService_serialize_result_stream(metaclass=_fbthrift_python_typ
 
 
 
+
+class _fbthrift_MyInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "ex",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(CustomException),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+class _fbthrift_MyInteraction_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteraction_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteraction_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteraction_truthify_result_stream(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+
+
+class _fbthrift_MyInteractionFast_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteractionFast_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            _fbthrift_python_types.typeinfo_i32,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+class _fbthrift_MyInteractionFast_ping_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteractionFast_truthify_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteractionFast_truthify_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_MyInteractionFast_truthify_result_stream(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            0,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "success",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+
+
+
+class _fbthrift_SerialInteraction_frobnicate_args(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+class _fbthrift_SerialInteraction_frobnicate_result(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+    )
+
+
+
 _fbthrift_python_types.fill_specs(
     _fbthrift_MyService_foo_args,
     _fbthrift_MyService_foo_result,
@@ -154,5 +270,22 @@ _fbthrift_python_types.fill_specs(
     _fbthrift_MyService_serialize_args,
     _fbthrift_MyService_serialize_result,
     _fbthrift_MyService_serialize_result_stream,
+    
+    _fbthrift_MyInteraction_frobnicate_args,
+    _fbthrift_MyInteraction_frobnicate_result,
+    _fbthrift_MyInteraction_ping_args,
+    _fbthrift_MyInteraction_truthify_args,
+    _fbthrift_MyInteraction_truthify_result,
+    _fbthrift_MyInteraction_truthify_result_stream,
+    
+    _fbthrift_MyInteractionFast_frobnicate_args,
+    _fbthrift_MyInteractionFast_frobnicate_result,
+    _fbthrift_MyInteractionFast_ping_args,
+    _fbthrift_MyInteractionFast_truthify_args,
+    _fbthrift_MyInteractionFast_truthify_result,
+    _fbthrift_MyInteractionFast_truthify_result_stream,
+    
+    _fbthrift_SerialInteraction_frobnicate_args,
+    _fbthrift_SerialInteraction_frobnicate_result,
     
 )

@@ -26,6 +26,7 @@ from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 
+cdef string blank_interaction = "".encode('ascii')
 
 cdef class SyncClient:
     def __init__(SyncClient self, RequestChannel channel):
@@ -66,6 +67,7 @@ cdef class SyncClient:
                     service_name,
                     function_name,
                     cmove(args_ciobuf),
+                    cmove(cData(function_name, FunctionQualifier.OneWay, blank_interaction, InteractionMethodPosition.None, blank_interaction)),
                     self._persistent_headers,
                 )
         else:

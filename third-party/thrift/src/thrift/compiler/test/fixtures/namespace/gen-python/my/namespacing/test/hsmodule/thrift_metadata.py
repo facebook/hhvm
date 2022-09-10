@@ -40,10 +40,10 @@ def gen_metadata_service_HsTestService() -> _fbthrift_metadata.ThriftMetadata:
 
 def _fbthrift_gen_metadata_service_HsTestService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "hsmodule.HsTestService"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="init", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), arguments=[
             _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I64_TYPE), name="int1", is_optional=False, structured_annotations=[
@@ -52,18 +52,18 @@ def _fbthrift_gen_metadata_service_HsTestService(metadata_struct: _fbthrift_meta
         ], is_oneway=False, structured_annotations=[
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-
+    
      # int1
-
-
+    
+    
      # return value
-
-
+    
+    
     return new_struct
 
 

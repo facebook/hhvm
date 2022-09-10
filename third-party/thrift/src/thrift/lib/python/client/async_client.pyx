@@ -27,11 +27,13 @@ from folly.futures cimport bridgeSemiFutureWith, bridgeFutureWith
 from folly.iobuf cimport IOBuf
 from libcpp.memory cimport make_unique, static_pointer_cast
 from libcpp.utility cimport move as cmove
-from thrift.python.client.omni_client cimport cOmniClientResponseWithHeaders, RpcKind, cOmniInteractionClient, createOmniInteractionClient
+from thrift.python.client.omni_client cimport cOmniClientResponseWithHeaders, RpcKind, cOmniInteractionClient, createOmniInteractionClient, cData, FunctionQualifier, InteractionMethodPosition
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.python.stream cimport ClientBufferedStream
+
+blank_uri = "".encode('ascii')
 
 @cython.auto_pickle(False)
 cdef class AsyncClient:
@@ -80,7 +82,9 @@ cdef class AsyncClient:
         string methodName,
         interactionClass,
     ):
-        # TODO subclass check
+        if not issubclass(interactionClass, AsyncClient):
+            raise TypeError(f"{interactionClass} is not a thrift python async client class")
+
         interactionClient = interactionClass()
         bridgeFutureWith[unique_ptr[cOmniInteractionClient]](
             (<AsyncClient> interactionClient)._executor,
@@ -96,6 +100,9 @@ cdef class AsyncClient:
         string function_name,
         args,
         response_cls,
+        FunctionQualifier qualifier = FunctionQualifier.Unspecified,
+        InteractionMethodPosition interaction_position = InteractionMethodPosition.None,
+        string interaction_name = "".encode('ascii'),
     ):
         protocol = deref(self._omni_client).getChannelProtocolId()
         cdef IOBuf args_iobuf = serialize_iobuf(args, protocol=protocol)
@@ -108,6 +115,7 @@ cdef class AsyncClient:
                 service_name,
                 function_name,
                 args_iobuf.c_clone(),
+                cmove(cData(function_name, FunctionQualifier.OneWay, blank_uri, interaction_position, interaction_name)),
                 self._persistent_headers,
             )
             future.set_result(None)
@@ -122,6 +130,7 @@ cdef class AsyncClient:
                     service_name,
                     function_name,
                     args_iobuf.c_clone(),
+                    cmove(cData(function_name, qualifier, blank_uri, interaction_position, interaction_name)),
                     self._persistent_headers,
                     rpc_kind,
                 ),

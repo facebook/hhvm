@@ -17,6 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.namespace_from_package_without_module_name.module.thrift_types
@@ -44,12 +45,14 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
             self,
             int1: int
         ) -> int:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "TestService",
                 "init",
                 test.namespace_from_package_without_module_name.module.thrift_types._fbthrift_TestService_init_args(
                     int1=int1,),
                 test.namespace_from_package_without_module_name.module.thrift_types._fbthrift_TestService_init_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -87,4 +90,3 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 "Empty Response",
             )
     
-

@@ -175,28 +175,28 @@ def gen_metadata_service_FooService() -> _fbthrift_metadata.ThriftMetadata:
 
 def _fbthrift_gen_metadata_service_FooService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.FooService"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="simple_rpc", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
         ], exceptions = [
         ], is_oneway=False, structured_annotations=[
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
         _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="RenamedService"),  }),
     ])
     new_struct = metadata_struct(services=service_dict)
-
-
-
+    
+    
+    
      # return value
-
-
+    
+    
     return new_struct
 
 def gen_metadata_service_FB303Service() -> _fbthrift_metadata.ThriftMetadata:
@@ -204,10 +204,10 @@ def gen_metadata_service_FB303Service() -> _fbthrift_metadata.ThriftMetadata:
 
 def _fbthrift_gen_metadata_service_FB303Service(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.FB303Service"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="simple_rpc", return_type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="module.ReservedKeyword")), arguments=[
             _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_I32_TYPE), name="int_parameter", is_optional=False, structured_annotations=[
@@ -218,18 +218,18 @@ def _fbthrift_gen_metadata_service_FB303Service(metadata_struct: _fbthrift_metad
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.Name"), fields= { "name": _fbthrift_metadata.ThriftConstValue(cv_string="renamed_rpc"),  }),
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-
+    
      # int_parameter
-
-
+    
+    
     new_struct = _fbthrift_gen_metadata_struct_ReservedKeyword(new_struct) # return value
-
-
+    
+    
     return new_struct
 
 def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
@@ -237,10 +237,10 @@ def gen_metadata_service_MyService() -> _fbthrift_metadata.ThriftMetadata:
 
 def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.MyService"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="ping", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_VOID_TYPE), arguments=[
         ], exceptions = [
@@ -301,70 +301,70 @@ def _fbthrift_gen_metadata_service_MyService(metadata_struct: _fbthrift_metadata
             _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="hack.SkipCodegen"), fields= { "reason": _fbthrift_metadata.ThriftConstValue(cv_string="Skip function deprecation"),  }),
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-
-
-
+    
+    
+    
      # return value
-
-
-
-
+    
+    
+    
+    
      # return value
-
-
+    
+    
      # sink
-
-
+    
+    
      # return value
-
-
+    
+    
      # id
      # data
-
-
+    
+    
      # return value
-
-
+    
+    
      # id
-
-
+    
+    
      # return value
-
-
+    
+    
      # id
-
-
+    
+    
      # return value
-
-
+    
+    
      # id
-
-
+    
+    
      # return value
-
-
+    
+    
      # id
      # data
-
-
+    
+    
      # return value
-
-
-
-
+    
+    
+    
+    
      # return value
-
-
-
-
+    
+    
+    
+    
      # return value
-
-
+    
+    
     return new_struct
 
 def gen_metadata_service_DbMixedStackArguments() -> _fbthrift_metadata.ThriftMetadata:
@@ -372,10 +372,10 @@ def gen_metadata_service_DbMixedStackArguments() -> _fbthrift_metadata.ThriftMet
 
 def _fbthrift_gen_metadata_service_DbMixedStackArguments(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "module.DbMixedStackArguments"
-
+    
     if qualified_name in metadata_struct.services:
         return metadata_struct
-
+    
     functions = [
         _fbthrift_metadata.ThriftFunction(name="getDataByKey0", return_type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BINARY_TYPE), arguments=[
             _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_STRING_TYPE), name="key", is_optional=False, structured_annotations=[
@@ -390,24 +390,24 @@ def _fbthrift_gen_metadata_service_DbMixedStackArguments(metadata_struct: _fbthr
         ], is_oneway=False, structured_annotations=[
         ]),
     ]
-
+    
     service_dict = dict(metadata_struct.services)
     service_dict[qualified_name] = _fbthrift_metadata.ThriftService(name=qualified_name, functions=functions,  structured_annotations=[
     ])
     new_struct = metadata_struct(services=service_dict)
-
+    
      # key
-
-
+    
+    
      # return value
-
-
+    
+    
      # key
-
-
+    
+    
      # return value
-
-
+    
+    
     return new_struct
 
 

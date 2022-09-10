@@ -72,6 +72,7 @@ cdef class SyncClient:
                 service_name,
                 function_name,
                 args_iobuf.c_clone(),
+                cmove(cData(function_name, FunctionQualifier.OneWay, "".encode('ascii'), InteractionMethodPosition.None, "".encode('ascii'))),
                 headers,
             )
         else:

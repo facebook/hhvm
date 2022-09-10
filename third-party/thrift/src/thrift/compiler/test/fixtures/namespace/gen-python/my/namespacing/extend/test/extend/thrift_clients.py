@@ -17,6 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_types
@@ -46,12 +47,14 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
             self,
             struct1: python_module_root.my.namespacing.test.hsmodule.thrift_types.HsFoo
         ) -> bool:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "ExtendTestService",
                 "check",
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_args(
                     struct1=struct1,),
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -89,4 +92,3 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
                 "Empty Response",
             )
     
-

@@ -31,6 +31,20 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::a
         SINGLE_REQUEST_STREAMING_RESPONSE = 4
         SINK = 6
 
+cdef extern from "thrift/lib/cpp2/util/MethodMetadata.h" namespace "::apache::thrift":
+    cpdef enum class FunctionQualifier:
+        Unspecified = 0
+        OneWay = 1
+        Idempotent = 2
+        ReadOnly = 3
+
+    cpdef enum class InteractionMethodPosition:
+        None = 0
+        Factory = 1
+        Member = 2
+
+    cdef cppclass cData "::apache::thrift::MethodMetadata::Data" nogil:
+        cData(string name, FunctionQualifier qualifier, string uriOrName, InteractionMethodPosition position, string interaction)
 
 cdef extern from "folly/container/F14Map.h" namespace "folly":
   cdef cppclass F14NodeMap[K, T]:
@@ -66,12 +80,14 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             const string& serviceName,
             const string& methodName,
             unique_ptr[cIOBuf] args,
+            cData&& metadata,
             const unordered_map[string, string] headers,
         )
         cFollySemiFuture[cOmniClientResponseWithHeaders] semifuture_send(
             const string& serviceName,
             const string& methodName,
             unique_ptr[cIOBuf] args,
+            cData&& metadata,
             const unordered_map[string, string] headers,
             const RpcKind rpcKind,
         )

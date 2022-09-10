@@ -17,6 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types
@@ -44,21 +45,25 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         async def doBland(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "Raiser",
                 "doBland",
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
+                
+                
             )
     
         async def doRaise(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "Raiser",
                 "doRaise",
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
+                
+                
             )
             if _fbthrift_resp.b is not None:
                 raise _fbthrift_resp.b
@@ -70,11 +75,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         async def get200(
             self
         ) -> str:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "Raiser",
                 "get200",
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -87,11 +94,13 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
         async def get500(
             self
         ) -> str:
-            _fbthrift_resp = await self._send_request(
+            _fbthrift_resp = await self._send_request(  # type: ignore 
                 "Raiser",
                 "get500",
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
+                
+                
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -182,4 +191,3 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "Empty Response",
             )
     
-

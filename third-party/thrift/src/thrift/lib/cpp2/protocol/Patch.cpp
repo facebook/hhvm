@@ -269,41 +269,50 @@ void ApplyPatch::operator()(
       if (index >= 0 && static_cast<size_t>(index) < value.size()) {
         applyPatch(*elPatch.objectValue_ref(), value[index]);
       } else {
-        throw std::runtime_error(
-            fmt::format("patch index out of range {}", index));
+        throw std::runtime_error("patch index out of range");
       }
     }
   }
 
   if (auto* remove = findOp(patch, PatchOp::Remove)) {
-    auto& to_remove = *remove->setValue_ref();
+    const auto* to_remove = remove->if_set();
+    if (!to_remove) {
+      throw std::runtime_error("list remove patch should contain a set");
+    }
+
     value.erase(
         std::remove_if(
             value.begin(),
             value.end(),
             [&](const auto& element) {
-              return to_remove.find(element) != to_remove.end();
+              return to_remove->find(element) != to_remove->end();
             }),
         value.end());
   }
 
   if (auto* add = findOp(patch, PatchOp::Add)) {
-    if (add->setValue_ref().has_value()) {
-      auto& to_add = *add->setValue_ref();
-      for (const auto& element : to_add) {
+    if (const auto* to_add = add->if_set()) {
+      for (const auto& element : *to_add) {
         if (std::find(value.begin(), value.end(), element) == value.end()) {
           value.insert(value.begin(), element);
         }
       }
     } else {
-      auto& prependVector = *add->listValue_ref();
-      value.insert(value.begin(), prependVector.begin(), prependVector.end());
+      const auto* prependVector = add->if_list();
+      if (!prependVector) {
+        throw std::runtime_error(
+            "list add patch should contain a set or a list");
+      }
+      value.insert(value.begin(), prependVector->begin(), prependVector->end());
     }
   }
 
   if (auto* append = findOp(patch, PatchOp::Put)) {
-    auto& appendVector = *append->listValue_ref();
-    value.insert(value.end(), appendVector.begin(), appendVector.end());
+    const auto* appendVector = append->if_list();
+    if (!appendVector) {
+      throw std::runtime_error("list put patch should contain a list");
+    }
+    value.insert(value.end(), appendVector->begin(), appendVector->end());
   }
 }
 

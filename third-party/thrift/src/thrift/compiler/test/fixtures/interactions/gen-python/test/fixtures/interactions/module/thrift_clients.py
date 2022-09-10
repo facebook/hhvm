@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_types
@@ -49,6 +49,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "foo",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -63,6 +64,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args(
                     arg=arg,),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -78,6 +80,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "interactFast",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -97,6 +100,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "serialize",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -197,6 +201,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 "MyInteraction.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -218,6 +223,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 "MyInteraction.ping",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
                 None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -230,6 +236,7 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
                 "MyInteraction.truthify",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -300,6 +307,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 "MyInteractionFast.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -319,6 +327,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 "MyInteractionFast.ping",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
                 None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -331,6 +340,7 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
                 "MyInteractionFast.truthify",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result_stream),
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -399,6 +409,7 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
                 "SerialInteraction.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="SerialInteraction",
             )

@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import python_module_root.my.namespacing.extend.test.extend.thrift_types
@@ -53,6 +53,7 @@ class ExtendTestService(_fbthrift_python_Client["ExtendTestService.Async", "Exte
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_args(
                     struct1=struct1,),
                 python_module_root.my.namespacing.extend.test.extend.thrift_types._fbthrift_ExtendTestService_check_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )

@@ -35,7 +35,7 @@ class AsyncClient:
         exc_value: typing.Optional[BaseException],
         traceback: typing.Optional[types.TracebackType],
     ) -> None: ...
-    async def _create_interaction(
+    def _create_interaction(
         self: AsyncClient,
         methodName: str,
         interactionClass: typing.Type[TAsyncClient],

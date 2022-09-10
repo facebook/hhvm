@@ -67,6 +67,7 @@ class Async({{#service:extends}}{{!
             {{> types/function_args_type}}({{#function:args}}
                 {{field:py_name}}={{field:py_name}},{{/function:args}}),
             {{> types/function_return_type}},
+            qualifier = _fbthrift_FunctionQualifier.{{function:qualifier}},  # type: ignore {{! TODO: remove this ignore after wheel build }}
             {{#service:interaction?}}interaction_position=_fbthrift_InteractionMethodPosition.Member,{{/service:interaction?}}
             {{#service:interaction?}}interaction_name="{{service:name}}",{{/service:interaction?}}
         )

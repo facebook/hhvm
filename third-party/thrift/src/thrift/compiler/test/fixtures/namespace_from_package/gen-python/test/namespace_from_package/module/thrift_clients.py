@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.namespace_from_package.module.thrift_types
@@ -51,6 +51,7 @@ class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync
                 test.namespace_from_package.module.thrift_types._fbthrift_TestService_init_args(
                     int1=int1,),
                 test.namespace_from_package.module.thrift_types._fbthrift_TestService_init_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )

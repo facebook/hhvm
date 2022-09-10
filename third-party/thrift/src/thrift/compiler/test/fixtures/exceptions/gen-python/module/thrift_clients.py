@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import module.thrift_types
@@ -50,6 +50,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "doBland",
                 module.thrift_types._fbthrift_Raiser_doBland_args(),
                 module.thrift_types._fbthrift_Raiser_doBland_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -62,6 +63,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "doRaise",
                 module.thrift_types._fbthrift_Raiser_doRaise_args(),
                 module.thrift_types._fbthrift_Raiser_doRaise_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -80,6 +82,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "get200",
                 module.thrift_types._fbthrift_Raiser_get200_args(),
                 module.thrift_types._fbthrift_Raiser_get200_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -99,6 +102,7 @@ class Raiser(_fbthrift_python_Client["Raiser.Async", "Raiser.Sync"]):
                 "get500",
                 module.thrift_types._fbthrift_Raiser_get500_args(),
                 module.thrift_types._fbthrift_Raiser_get500_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )

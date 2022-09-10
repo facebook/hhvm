@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types
@@ -50,6 +50,7 @@ class FooService(_fbthrift_python_Client["FooService.Async", "FooService.Sync"])
                 "simple_rpc",
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_FooService_simple_rpc_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -102,6 +103,7 @@ class FB303Service(_fbthrift_python_Client["FB303Service.Async", "FB303Service.S
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_args(
                     int_parameter=int_parameter,),
                 test.fixtures.basic.module.thrift_types._fbthrift_FB303Service_simple_rpc_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -168,6 +170,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "ping",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_ping_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -180,6 +183,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "getRandomData",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getRandomData_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -201,6 +205,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_args(
                     sink=sink,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_sink_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -217,6 +222,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,
                     data=data,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_putDataById_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -231,6 +237,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_hasDataById_result,
+                qualifier = _fbthrift_FunctionQualifier.ReadOnly,  # type: ignore 
                 
                 
             )
@@ -252,6 +259,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_getDataById_result,
+                qualifier = _fbthrift_FunctionQualifier.ReadOnly,  # type: ignore 
                 
                 
             )
@@ -273,6 +281,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_args(
                     id=id,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_deleteDataById_result,
+                qualifier = _fbthrift_FunctionQualifier.Idempotent,  # type: ignore 
                 
                 
             )
@@ -289,6 +298,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     id=id,
                     data=data,),
                 None,
+                qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
                 
                 
             )
@@ -301,6 +311,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "invalid_return_for_hack",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_invalid_return_for_hack_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -320,6 +331,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 "rpc_skipped_codegen",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_args(),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_rpc_skipped_codegen_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -506,6 +518,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_args(
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey0_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -527,6 +540,7 @@ class DbMixedStackArguments(_fbthrift_python_Client["DbMixedStackArguments.Async
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_args(
                     key=key,),
                 test.fixtures.basic.module.thrift_types._fbthrift_DbMixedStackArguments_getDataByKey1_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )

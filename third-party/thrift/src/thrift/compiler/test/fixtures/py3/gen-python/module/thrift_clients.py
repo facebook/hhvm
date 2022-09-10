@@ -19,7 +19,7 @@ from fbcode.thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from fbcode.thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition  # type: ignore 
+from fbcode.thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 import fbcode.thrift.python.types as _fbthrift_python_types
 import module.thrift_types
@@ -51,6 +51,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "get_five",
                 module.thrift_types._fbthrift_SimpleService_get_five_args(),
                 module.thrift_types._fbthrift_SimpleService_get_five_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -72,6 +73,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_add_five_args(
                     num=num,),
                 module.thrift_types._fbthrift_SimpleService_add_five_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -91,6 +93,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "do_nothing",
                 module.thrift_types._fbthrift_SimpleService_do_nothing_args(),
                 module.thrift_types._fbthrift_SimpleService_do_nothing_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -107,6 +110,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                     first=first,
                     second=second,),
                 module.thrift_types._fbthrift_SimpleService_concat_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -128,6 +132,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_get_value_args(
                     simple_struct=simple_struct,),
                 module.thrift_types._fbthrift_SimpleService_get_value_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -149,6 +154,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_negate_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_negate_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -170,6 +176,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_tiny_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_tiny_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -191,6 +198,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_small_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_small_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -212,6 +220,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_big_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_big_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -233,6 +242,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_two_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_two_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -252,6 +262,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "expected_exception",
                 module.thrift_types._fbthrift_SimpleService_expected_exception_args(),
                 module.thrift_types._fbthrift_SimpleService_expected_exception_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -266,6 +277,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "unexpected_exception",
                 module.thrift_types._fbthrift_SimpleService_unexpected_exception_args(),
                 module.thrift_types._fbthrift_SimpleService_unexpected_exception_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -287,6 +299,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_sum_i16_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i16_list_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -308,6 +321,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_sum_i32_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i32_list_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -329,6 +343,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_sum_i64_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i64_list_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -350,6 +365,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_concat_many_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_concat_many_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -371,6 +387,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_count_structs_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_count_structs_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -392,6 +409,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_sum_set_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_set_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -415,6 +433,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                     words=words,
                     word=word,),
                 module.thrift_types._fbthrift_SimpleService_contains_word_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -438,6 +457,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                     words=words,
                     key=key,),
                 module.thrift_types._fbthrift_SimpleService_get_map_value_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -459,6 +479,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_map_length_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_map_length_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -480,6 +501,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_sum_map_values_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_sum_map_values_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -501,6 +523,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_complex_sum_i32_args(
                     counter=counter,),
                 module.thrift_types._fbthrift_SimpleService_complex_sum_i32_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -522,6 +545,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_repeat_name_args(
                     counter=counter,),
                 module.thrift_types._fbthrift_SimpleService_repeat_name_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -541,6 +565,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 "get_struct",
                 module.thrift_types._fbthrift_SimpleService_get_struct_args(),
                 module.thrift_types._fbthrift_SimpleService_get_struct_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -562,6 +587,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_fib_args(
                     n=n,),
                 module.thrift_types._fbthrift_SimpleService_fib_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -583,6 +609,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_unique_words_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_unique_words_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -604,6 +631,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_words_count_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_words_count_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -625,6 +653,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_set_enum_args(
                     in_enum=in_enum,),
                 module.thrift_types._fbthrift_SimpleService_set_enum_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -648,6 +677,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                     num_lists=num_lists,
                     num_items=num_items,),
                 module.thrift_types._fbthrift_SimpleService_list_of_lists_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -669,6 +699,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_word_character_frequency_args(
                     sentence=sentence,),
                 module.thrift_types._fbthrift_SimpleService_word_character_frequency_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -690,6 +721,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_list_of_sets_args(
                     some_words=some_words,),
                 module.thrift_types._fbthrift_SimpleService_list_of_sets_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -711,6 +743,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_nested_map_argument_args(
                     struct_map=struct_map,),
                 module.thrift_types._fbthrift_SimpleService_nested_map_argument_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -732,6 +765,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_make_sentence_args(
                     word_chars=word_chars,),
                 module.thrift_types._fbthrift_SimpleService_make_sentence_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -753,6 +787,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_get_union_args(
                     sets=sets,),
                 module.thrift_types._fbthrift_SimpleService_get_union_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -774,6 +809,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_get_keys_args(
                     string_map=string_map,),
                 module.thrift_types._fbthrift_SimpleService_get_keys_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -795,6 +831,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_lookup_double_args(
                     key=key,),
                 module.thrift_types._fbthrift_SimpleService_lookup_double_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -816,6 +853,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_retrieve_binary_args(
                     something=something,),
                 module.thrift_types._fbthrift_SimpleService_retrieve_binary_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -837,6 +875,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_contain_binary_args(
                     binaries=binaries,),
                 module.thrift_types._fbthrift_SimpleService_contain_binary_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -858,6 +897,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_contain_enum_args(
                     the_enum=the_enum,),
                 module.thrift_types._fbthrift_SimpleService_contain_enum_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -879,6 +919,7 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args(
                     u=u,),
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -1691,6 +1732,7 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
                 "get_six",
                 module.thrift_types._fbthrift_DerivedService_get_six_args(),
                 module.thrift_types._fbthrift_DerivedService_get_six_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )
@@ -1755,6 +1797,7 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
                 "get_seven",
                 module.thrift_types._fbthrift_RederivedService_get_seven_args(),
                 module.thrift_types._fbthrift_RederivedService_get_seven_result,
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
                 
                 
             )

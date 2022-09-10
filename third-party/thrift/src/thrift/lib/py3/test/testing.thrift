@@ -359,12 +359,12 @@ struct StructuredAnnotation {
 }
 @Messy
 service TestingService {
-  string getName();
+  readonly string getName();
   string getMethodName();
   string getRequestId();
   float getRequestTimeout();
   oneway void shutdown();
-  bool invert(1: bool value);
+  idempotent bool invert(1: bool value);
   i32 complex_action(
     1: string first,
     2: string second,

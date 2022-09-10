@@ -24,6 +24,6 @@ parser_core_types = { path = "../../../../parser/cargo/core_types" }
 pos = { path = "../../../pos/cargo/pos" }
 rust_aast_parser_types = { path = "../../../../parser/cargo/rust_aast_parser_types" }
 special_names = { path = "../../../special_names/cargo/special_names" }
-thiserror = "1.0.30"
+thiserror = "=1.0.30"
 ty = { path = "../../../ty/cargo/ty" }
 utils = { path = "../../../utils/cargo/utils" }

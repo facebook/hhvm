@@ -10,5 +10,5 @@ path = "../../depgraph_api.rs"
 [dependencies]
 depgraph = { path = "../../../../depgraph/cargo/depgraph" }
 pos = { path = "../../../pos/cargo/pos" }
-thiserror = "1.0.30"
+thiserror = "=1.0.30"
 typing_deps_hash = { path = "../../../../deps/cargo/typing_deps_hash" }

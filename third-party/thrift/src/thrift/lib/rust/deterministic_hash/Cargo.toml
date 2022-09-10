@@ -11,4 +11,4 @@ publish = false
 anyhow = "1.0.56"
 fbthrift = { path = ".." }
 ring = "0.16.20"
-thiserror = "1.0.30"
+thiserror = "=1.0.30"

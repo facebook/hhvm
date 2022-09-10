@@ -16,5 +16,5 @@ naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
-thiserror = "1.0.30"
+thiserror = "=1.0.30"
 ty = { path = "../../../ty/cargo/ty" }

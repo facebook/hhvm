@@ -21,5 +21,5 @@ lazy_static = "1.4"
 naming_special_names_rust = { path = "../../naming" }
 oxidized = { path = "../../oxidized" }
 regex = "1.5.4"
-thiserror = "1.0.30"
+thiserror = "=1.0.30"
 write_bytes = { path = "../../utils/write_bytes/write_bytes" }

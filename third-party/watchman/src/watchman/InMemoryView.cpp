@@ -603,7 +603,7 @@ void InMemoryView::timeGenerator(const Query* query, QueryContext* ctx) const {
 }
 
 void InMemoryView::pathGenerator(const Query* query, QueryContext* ctx) const {
-  w_string_t* relative_root;
+  w_string_piece relative_root;
   struct watchman_file* f;
 
   if (query->relative_root) {

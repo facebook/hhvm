@@ -85,9 +85,6 @@ TEST(String, strings) {
     EXPECT_TRUE(w_string_piece().empty())
         << "default constructed string piece shouldbe empty";
 
-    EXPECT_TRUE(w_string_piece(nullptr).empty())
-        << "nullptr string piece shouldbe empty";
-
     EXPECT_TRUE(w_string::build("").empty()) << "empty string is empty";
   }
 }
@@ -168,11 +165,11 @@ TEST(String, lowercase_suffix) {
 }
 
 TEST(String, string_piece_suffix) {
-  EXPECT_EQ(w_string_piece().suffix(), nullptr);
-  EXPECT_EQ(w_string_piece("").suffix(), nullptr);
-  EXPECT_EQ(w_string_piece(".").suffix(), nullptr);
-  EXPECT_EQ(w_string_piece("endwithdot.").suffix(), nullptr);
-  EXPECT_EQ(w_string_piece("nosuffix").suffix(), nullptr);
+  EXPECT_EQ(w_string_piece().suffix(), "");
+  EXPECT_EQ(w_string_piece("").suffix(), "");
+  EXPECT_EQ(w_string_piece(".").suffix(), "");
+  EXPECT_EQ(w_string_piece("endwithdot.").suffix(), "");
+  EXPECT_EQ(w_string_piece("nosuffix").suffix(), "");
   EXPECT_EQ(
       w_string_piece(".beginwithdot").suffix(), w_string_piece("beginwithdot"));
   EXPECT_EQ(
@@ -181,14 +178,14 @@ TEST(String, string_piece_suffix) {
   EXPECT_EQ(
       w_string_piece("README.camelCaseSuffix").suffix(),
       w_string_piece("camelCaseSuffix"));
-  EXPECT_EQ(w_string_piece("foo/bar").suffix(), w_string_piece(nullptr));
-  EXPECT_EQ(w_string_piece("foo.wat/bar").suffix(), w_string_piece(nullptr));
-  EXPECT_EQ(w_string_piece("foo.wat/bar.xml").suffix(), w_string_piece("xml"));
-  EXPECT_EQ(w_string_piece("foo\\bar").suffix(), w_string_piece(nullptr));
-  EXPECT_EQ(w_string_piece("foo\\bar.lU").suffix(), w_string_piece("lU"));
+  EXPECT_EQ(w_string_piece("foo/bar").suffix(), "");
+  EXPECT_EQ(w_string_piece("foo.wat/bar").suffix(), "");
+  EXPECT_EQ(w_string_piece("foo.wat/bar.xml").suffix(), "xml");
+  EXPECT_EQ(w_string_piece("foo\\bar").suffix(), "");
+  EXPECT_EQ(w_string_piece("foo\\bar.lU").suffix(), "lU");
 
 #ifdef _WIN32
-  EXPECT_EQ(w_string_piece("foo.wat\\bar").suffix(), w_string_piece(nullptr));
+  EXPECT_EQ(w_string_piece("foo.wat\\bar").suffix(), "");
 #else
   EXPECT_EQ(
       w_string_piece("foo.wat\\bar").suffix(), w_string_piece("wat\\bar"));

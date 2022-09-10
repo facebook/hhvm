@@ -94,8 +94,6 @@ class w_string_piece {
  public:
   w_string_piece() : str_{nullptr}, len_{0} {}
 
-  /* implicit */ w_string_piece(std::nullptr_t) : str_{nullptr}, len_{0} {}
-
   /* implicit */ w_string_piece(w_string_t* str)
       : str_{str->buf}, len_{str->len} {}
 
@@ -125,6 +123,8 @@ class w_string_piece {
       len_ = str.size();
     }
   }
+
+  /* implicit */ w_string_piece(std::nullptr_t) = delete;
 
   /* implicit */ w_string_piece(const char* cstr)
       : str_(cstr), len_(strlen(cstr)) {}

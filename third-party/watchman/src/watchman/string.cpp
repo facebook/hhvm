@@ -78,8 +78,8 @@ w_string w_string_piece::asLowerCaseSuffix(w_string_type_t stringType) const {
   w_string_t* s;
 
   w_string_piece suffixPiece = this->suffix();
-  if (suffixPiece == nullptr) {
-    return nullptr;
+  if (suffixPiece.empty()) {
+    return {};
   }
 
   /* need to make a lowercase version */
@@ -161,7 +161,7 @@ bool w_string_piece::pathIsEqual(w_string_piece other) const {
 
 w_string_piece w_string_piece::dirName() const {
   if (len_ == 0) {
-    return nullptr;
+    return {};
   }
   const char* const e = str_ + len_;
   for (auto end = e - 1; end >= str_; --end) {
@@ -178,7 +178,7 @@ w_string_piece w_string_piece::dirName() const {
       return w_string_piece(str_, end - str_);
     }
   }
-  return nullptr;
+  return {};
 }
 
 w_string_piece w_string_piece::baseName() const {
@@ -206,18 +206,18 @@ w_string_piece w_string_piece::baseName() const {
 
 w_string_piece w_string_piece::suffix() const {
   if (len_ == 0) {
-    return nullptr;
+    return {};
   }
   const char* const e = str_ + len_;
   for (auto end = e - 1; end >= str_; --end) {
     if (is_slash(*end)) {
-      return nullptr;
+      return {};
     }
     if (*end == '.') {
       return w_string_piece(end + 1, e - (end + 1));
     }
   }
-  return nullptr;
+  return {};
 }
 
 bool w_string_piece::startsWith(w_string_piece prefix) const {

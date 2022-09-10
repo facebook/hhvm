@@ -166,7 +166,7 @@ static bool find_file_in_dir_tree(
     }
 
     auto parent = current_dir.dirName();
-    if (parent == nullptr || parent == current_dir) {
+    if (parent.empty() || parent == current_dir) {
       return false;
     }
     current_dir = parent;

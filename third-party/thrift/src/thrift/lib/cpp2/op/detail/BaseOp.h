@@ -27,7 +27,7 @@ namespace op {
 namespace detail {
 using FieldId = type::FieldId;
 using Ptr = type::detail::Ptr;
-using RuntimeBase = type::detail::RuntimeBase;
+using Dyn = type::detail::Dyn;
 using RuntimeType = type::detail::RuntimeType;
 using TypeInfo = type::detail::TypeInfo;
 
@@ -72,13 +72,13 @@ struct BaseAnyOp : type::detail::BaseErasedOp {
   }
   static bool empty(const void* ptr) { return op::isEmpty<Tag>(ref(ptr)); }
   static void clear(void* ptr) { op::clear<Tag>(ref(ptr)); }
-  static bool identical(const void* lhs, const RuntimeBase& rhs) {
+  static bool identical(const void* lhs, const Dyn& rhs) {
     // Caller should have already checked the types match.
     assert(rhs.type() == Tag{});
     return op::identical<Tag>(ref(lhs), rhs.as<Tag>());
   }
 
-  static partial_ordering compare(const void* lhs, const RuntimeBase& rhs) {
+  static partial_ordering compare(const void* lhs, const Dyn& rhs) {
     if (const T* ptr = rhs.tryAs<Tag>()) {
       return cmp<Tag>(ref(lhs), *ptr);
     }

@@ -34,7 +34,7 @@ namespace thrift {
 namespace type {
 namespace detail {
 using op::detail::partial_ordering;
-class RuntimeBase;
+class Dyn;
 class Ptr;
 
 // Runtime type information for a Thrift type.
@@ -47,31 +47,31 @@ struct TypeInfo {
   void (*delete_)(void*);
   void* (*make)(void*, bool);
   bool (*empty)(const void*);
-  bool (*identical)(const void*, const RuntimeBase&);
-  partial_ordering (*compare_)(const void*, const RuntimeBase&);
+  bool (*identical)(const void*, const Dyn&);
+  partial_ordering (*compare_)(const void*, const Dyn&);
   void (*clear)(void*);
-  void (*append)(void*, const RuntimeBase&);
-  bool (*add)(void*, const RuntimeBase&);
-  bool (*put)(void*, FieldId, const RuntimeBase*, const RuntimeBase&);
-  Ptr (*ensure)(void*, FieldId, const RuntimeBase*, const RuntimeBase*);
-  Ptr (*get_)(void*, FieldId, size_t, const RuntimeBase*);
+  void (*append)(void*, const Dyn&);
+  bool (*add)(void*, const Dyn&);
+  bool (*put)(void*, FieldId, const Dyn*, const Dyn&);
+  Ptr (*ensure)(void*, FieldId, const Dyn*, const Dyn*);
+  Ptr (*get_)(void*, FieldId, size_t, const Dyn*);
   size_t (*size)(const void*);
 
-  bool equal(const void* lhs, const RuntimeBase& rhs) const {
+  bool equal(const void* lhs, const Dyn& rhs) const {
     return is_eq(compare_(lhs, rhs));
   }
 
-  folly::ordering compare(const void* lhs, const RuntimeBase& rhs) const {
+  folly::ordering compare(const void* lhs, const Dyn& rhs) const {
     return to_ordering(compare_(lhs, rhs));
   }
 
-  bool less(const void* lhs, const RuntimeBase& rhs) const {
+  bool less(const void* lhs, const Dyn& rhs) const {
     return op::detail::is_lt(compare(lhs, rhs));
   }
 
   Ptr get(void* ptr, FieldId id) const;
   Ptr get(void* ptr, size_t pos) const;
-  Ptr get(void* ptr, const RuntimeBase& val) const;
+  Ptr get(void* ptr, const Dyn& val) const;
 
   // Type-safe, const-preserving casting functions.
   template <typename T>

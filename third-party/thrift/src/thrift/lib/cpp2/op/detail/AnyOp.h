@@ -41,19 +41,15 @@ struct AnyOp : BaseAnyOp<Tag> {
 
   // TODO(afuller): Implement all Tags and remove runtime throwing fallback.
   using Base::unimplemented;
-  [[noreturn]] static void append(void*, const RuntimeBase&) {
+  [[noreturn]] static void append(void*, const Dyn&) { unimplemented(); }
+  [[noreturn]] static bool add(void*, const Dyn&) { unimplemented(); }
+  [[noreturn]] static bool put(void*, FieldId, const Dyn*, const Dyn&) {
     unimplemented();
   }
-  [[noreturn]] static bool add(void*, const RuntimeBase&) { unimplemented(); }
-  [[noreturn]] static bool put(
-      void*, FieldId, const RuntimeBase*, const RuntimeBase&) {
+  [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn*, const Dyn*) {
     unimplemented();
   }
-  [[noreturn]] static Ptr ensure(
-      void*, FieldId, const RuntimeBase*, const RuntimeBase*) {
-    unimplemented();
-  }
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn*) {
     unimplemented();
   }
   [[noreturn]] static size_t size(const void*) { unimplemented(); }
@@ -66,9 +62,7 @@ struct NumericOp : BaseAnyOp<Tag> {
   using Base::ref;
 
   static bool add(T& self, const T& val) { return (self += val, true); }
-  static bool add(void* s, const RuntimeBase& v) {
-    return add(ref(s), v.as<Tag>());
-  }
+  static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<Tag>()); }
 };
 
 template <>
@@ -120,24 +114,20 @@ struct ListOp : ContainerOp<Tag> {
   static void append(T& self, V&& val) {
     self.push_back(std::forward<V>(val));
   }
-  static void append(void* s, const RuntimeBase& v) {
-    append(ref(s), v.as<VTag>());
-  }
+  static void append(void* s, const Dyn& v) { append(ref(s), v.as<VTag>()); }
 
   template <typename V = type::native_type<VTag>>
   [[noreturn]] static bool add(T&, V&&) {
     unimplemented(); // TODO(afuller): Add if not already present.
   }
-  static bool add(void* s, const RuntimeBase& v) {
-    return add(ref(s), v.as<VTag>());
-  }
+  static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<VTag>()); }
 
   template <typename U>
   static decltype(auto) get(U&& self, size_t pos) {
     return folly::forward_like<U>(self.at(pos));
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const RuntimeBase*) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn*) {
     check_op(pos != std::string::npos);
     return ret(VTag{}, *find(s, pos));
   }
@@ -162,15 +152,13 @@ struct SetOp : ContainerOp<Tag> {
   static bool add(T& self, K&& key) {
     return self.insert(std::forward<K>(key)).second;
   }
-  static bool add(void* s, const RuntimeBase& k) {
-    return add(ref(s), k.as<KTag>());
-  }
+  static bool add(void* s, const Dyn& k) { return add(ref(s), k.as<KTag>()); }
 
   template <typename K = type::native_type<KTag>>
   static bool contains(const T& self, K&& key) {
     return self.find(std::forward<K>(key)) != self.end();
   }
-  static Ptr get(void* s, FieldId, size_t pos, const RuntimeBase*) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn*) {
     if (pos != std::string::npos) {
       return ret(KTag{}, *find(s, pos));
     }
@@ -213,14 +201,12 @@ struct MapOp : ContainerOp<Tag> {
     return itr->second;
   }
 
-  static bool put(
-      void* s, FieldId, const RuntimeBase* k, const RuntimeBase& v) {
+  static bool put(void* s, FieldId, const Dyn* k, const Dyn& v) {
     check_op(k != nullptr);
     return put(ref(s), k->as<KTag>(), v.as<VTag>());
   }
 
-  static Ptr ensure(
-      void* s, FieldId, const RuntimeBase* k, const RuntimeBase* v) {
+  static Ptr ensure(void* s, FieldId, const Dyn* k, const Dyn* v) {
     check_op(k != nullptr);
     if (v == nullptr) {
       return ret(VTag{}, ensure(ref(s), k->as<KTag>(), V{}));
@@ -229,7 +215,7 @@ struct MapOp : ContainerOp<Tag> {
     }
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const RuntimeBase* k) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn* k) {
     if (k != nullptr) {
       return ret(VTag{}, ref(s).at(k->as<KTag>()));
     } else if (pos != std::string::npos) {
@@ -255,7 +241,7 @@ struct StructuredOp : BaseAnyOp<Tag> {
   using FTag = op::get_field_tag<Id, T>;
 
   template <typename Id>
-  static bool putIf(bool cond, T& self, const RuntimeBase& val) {
+  static bool putIf(bool cond, T& self, const Dyn& val) {
     if (cond) {
       if (val.type().empty()) {
         op::clear_field<FTag<Id>>(op::get<Id>(self), self);
@@ -266,8 +252,7 @@ struct StructuredOp : BaseAnyOp<Tag> {
     return cond;
   }
 
-  static bool put(
-      void* s, FieldId fid, const RuntimeBase* n, const RuntimeBase& val) {
+  static bool put(void* s, FieldId fid, const Dyn* n, const Dyn& val) {
     // TODO(afuller): Use a hash map lookups for these.
     if (n != nullptr) {
       const auto& name = n->as<type::string_t>();
@@ -283,7 +268,7 @@ struct StructuredOp : BaseAnyOp<Tag> {
     return true;
   }
 
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn*) {
     unimplemented();
   }
   static size_t size(const void*) { return op::size_v<T>; }

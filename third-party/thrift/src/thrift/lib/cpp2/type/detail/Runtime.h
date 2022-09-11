@@ -87,12 +87,13 @@ class RuntimeType {
   }
 };
 
-// A base class for qualifier-preserving type-erased runtime types.
-class RuntimeBase {
+// A base class for qualifier-preserving type-erased runtime-typed dynamic
+// value.
+class Dyn {
  public:
-  RuntimeBase() noexcept = default;
-  RuntimeBase(RuntimeType type, void* ptr) noexcept : type_(type), ptr_(ptr) {}
-  RuntimeBase(RuntimeType type, const void* ptr) noexcept
+  Dyn() noexcept = default;
+  Dyn(RuntimeType type, void* ptr) noexcept : type_(type), ptr_(ptr) {}
+  Dyn(RuntimeType type, const void* ptr) noexcept
       : type_(type.withContext(true)), ptr_(const_cast<void*>(ptr)) {}
 
   // Type accessors.
@@ -112,12 +113,12 @@ class RuntimeBase {
   }
 
   bool empty() const { return type_->empty(ptr_); }
-  bool identical(const RuntimeBase& rhs) const {
+  bool identical(const Dyn& rhs) const {
     return type() == rhs.type() && type_->identical(ptr_, rhs);
   }
 
-  bool equal(const RuntimeBase& rhs) const { return type_->equal(ptr_, rhs); }
-  folly::ordering compare(const RuntimeBase& rhs) const {
+  bool equal(const Dyn& rhs) const { return type_->equal(ptr_, rhs); }
+  folly::ordering compare(const Dyn& rhs) const {
     return type_->compare(ptr_, rhs);
   }
 
@@ -125,7 +126,7 @@ class RuntimeBase {
   RuntimeType type_;
   void* ptr_ = nullptr;
 
-  ~RuntimeBase() = default; // Abstract base class;
+  ~Dyn() = default; // Abstract base class;
 
   // Throws on mismatch or if const.
   template <typename Tag>
@@ -140,25 +141,25 @@ class RuntimeBase {
   }
 
   void clear() const { type_.mut().clear(ptr_); }
-  void append(const RuntimeBase& val) const { type_.mut().append(ptr_, val); }
-  bool add(const RuntimeBase& val) const { return type_.mut().add(ptr_, val); }
-  bool put(const RuntimeBase& key, const RuntimeBase& val) const {
+  void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
+  bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
+  bool put(const Dyn& key, const Dyn& val) const {
     return type_.mut().put(ptr_, {}, &key, val);
   }
-  bool put(FieldId id, const RuntimeBase& val) const {
+  bool put(FieldId id, const Dyn& val) const {
     return type_.mut().put(ptr_, id, nullptr, val);
   }
 
-  Ptr ensure(const RuntimeBase& key) const;
-  Ptr ensure(const RuntimeBase& key, const RuntimeBase& val) const;
+  Ptr ensure(const Dyn& key) const;
+  Ptr ensure(const Dyn& key, const Dyn& val) const;
   Ptr ensure(FieldId id) const;
-  Ptr ensure(FieldId id, const RuntimeBase& val) const;
+  Ptr ensure(FieldId id, const Dyn& val) const;
 
   // TODO(afuller): Make context an enum, instead of pair of bools.
-  Ptr get(const RuntimeBase& key) const;
+  Ptr get(const Dyn& key) const;
   Ptr get(FieldId id) const;
   Ptr get(size_t pos) const;
-  Ptr get(const RuntimeBase& key, bool ctxConst, bool ctxRvalue = false) const;
+  Ptr get(const Dyn& key, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(FieldId id, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
 
@@ -181,26 +182,26 @@ class RuntimeBase {
 };
 
 // An un-owning pointer to a thrift value.
-class Ptr final : public RuntimeBase {
+class Ptr final : public Dyn {
  public:
-  using RuntimeBase::RuntimeBase;
+  using Dyn::Dyn;
 
   // Pointers do not share constness with the value, so expose functions
   // directly.
-  using RuntimeBase::add;
-  using RuntimeBase::append;
-  using RuntimeBase::clear;
-  using RuntimeBase::ensure;
-  using RuntimeBase::get;
-  using RuntimeBase::mut;
-  using RuntimeBase::put;
-  using RuntimeBase::tryMut;
+  using Dyn::add;
+  using Dyn::append;
+  using Dyn::clear;
+  using Dyn::ensure;
+  using Dyn::get;
+  using Dyn::mut;
+  using Dyn::put;
+  using Dyn::tryMut;
 
   // Deref.
   Ref operator*() const noexcept;
 
  private:
-  friend class RuntimeBase;
+  friend class Dyn;
 };
 
 inline Ptr TypeInfo::get(void* ptr, FieldId id) const {
@@ -209,41 +210,39 @@ inline Ptr TypeInfo::get(void* ptr, FieldId id) const {
 inline Ptr TypeInfo::get(void* ptr, size_t pos) const {
   return get_(ptr, {}, pos, nullptr);
 }
-inline Ptr TypeInfo::get(void* ptr, const RuntimeBase& val) const {
+inline Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
   return get_(ptr, {}, std::string::npos, &val);
 }
 
-inline Ptr RuntimeBase::ensure(const RuntimeBase& key) const {
+inline Ptr Dyn::ensure(const Dyn& key) const {
   return type_.mut().ensure(ptr_, {}, &key, nullptr);
 }
-inline Ptr RuntimeBase::ensure(
-    const RuntimeBase& key, const RuntimeBase& val) const {
+inline Ptr Dyn::ensure(const Dyn& key, const Dyn& val) const {
   return type_.mut().ensure(ptr_, {}, &key, &val);
 }
-inline Ptr RuntimeBase::ensure(FieldId id) const {
+inline Ptr Dyn::ensure(FieldId id) const {
   return type_.mut().ensure(ptr_, id, nullptr, nullptr);
 }
-inline Ptr RuntimeBase::ensure(FieldId id, const RuntimeBase& val) const {
+inline Ptr Dyn::ensure(FieldId id, const Dyn& val) const {
   return type_.mut().ensure(ptr_, id, nullptr, &val);
 }
 
-inline Ptr RuntimeBase::get(const RuntimeBase& key) const {
+inline Ptr Dyn::get(const Dyn& key) const {
   return type_->get(ptr_, key);
 }
-inline Ptr RuntimeBase::get(FieldId id) const {
+inline Ptr Dyn::get(FieldId id) const {
   return type_->get(ptr_, id);
 }
-inline Ptr RuntimeBase::get(size_t pos) const {
+inline Ptr Dyn::get(size_t pos) const {
   return type_->get(ptr_, pos);
 }
-inline Ptr RuntimeBase::get(
-    const RuntimeBase& key, bool ctxConst, bool ctxRvalue) const {
+inline Ptr Dyn::get(const Dyn& key, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, key);
 }
-inline Ptr RuntimeBase::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
+inline Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, id);
 }
-inline Ptr RuntimeBase::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
+inline Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
 }
 
@@ -270,19 +269,15 @@ struct BaseErasedOp {
     folly::throw_exception<std::runtime_error>(msg);
   }
 
-  [[noreturn]] static void append(void*, const RuntimeBase&) { bad_op(); }
-  [[noreturn]] static bool add(void*, const RuntimeBase&) { bad_op(); }
-  [[noreturn]] static bool put(
-      void*, FieldId, const RuntimeBase*, const RuntimeBase&) {
+  [[noreturn]] static void append(void*, const Dyn&) { bad_op(); }
+  [[noreturn]] static bool add(void*, const Dyn&) { bad_op(); }
+  [[noreturn]] static bool put(void*, FieldId, const Dyn*, const Dyn&) {
     bad_op();
   }
-  [[noreturn]] static Ptr ensure(
-      void*, FieldId, const RuntimeBase*, const RuntimeBase*) {
+  [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn*, const Dyn*) {
     bad_op();
   }
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
-    bad_op();
-  }
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn*) { bad_op(); }
   [[noreturn]] static size_t size(const void*) { bad_op(); }
 };
 
@@ -290,12 +285,12 @@ struct BaseErasedOp {
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
-class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
-  using Base = RuntimeBase;
+class BaseDyn : public Dyn, protected BaseDerived<Derived> {
+  using Base = Dyn;
 
  public:
   using Base::Base;
-  explicit RuntimeAccessBase(const Base& other) : Base(other) {}
+  explicit BaseDyn(const Base& other) : Base(other) {}
 
   bool identical(const ConstT& rhs) const { return Base::identical(rhs); }
 
@@ -421,8 +416,8 @@ class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
 };
 
 template <typename Derived, typename ConstT = Derived>
-class BaseRef : public RuntimeAccessBase<ConstT, Derived, Derived> {
-  using Base = RuntimeAccessBase<ConstT, Derived, Derived>;
+class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
+  using Base = BaseDyn<ConstT, Derived, Derived>;
 
  public:
   using Base::Base;
@@ -453,8 +448,8 @@ struct VoidErasedOp : BaseErasedOp {
     return ptr = nullptr;
   }
   static bool empty(const void*) { return true; }
-  static bool identical(const void*, const RuntimeBase&) { return true; }
-  static partial_ordering compare(const void*, const RuntimeBase& rhs) {
+  static bool identical(const void*, const Dyn&) { return true; }
+  static partial_ordering compare(const void*, const Dyn& rhs) {
     check_op(rhs.type().empty());
     return partial_ordering::eq;
   }

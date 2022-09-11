@@ -29,6 +29,7 @@ TEST(GetTest, GetField) {
   EXPECT_EQ(*(op::get<>(type::ordinal<1>{}, actual)), "foo");
   EXPECT_EQ(*(op::get<ident::scheme>(actual)), "foo");
   EXPECT_EQ(*(op::get<type::field_id<1>, type::UriStruct>(actual)), "foo");
+  EXPECT_EQ(*(op::get<type::field_id<1>, Tag>(actual)), "foo");
 }
 
 } // namespace

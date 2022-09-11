@@ -21,6 +21,7 @@
 #include <thrift/lib/cpp2/op/detail/Get.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
+#include <thrift/lib/cpp2/type/ThriftType.h>
 
 namespace apache {
 namespace thrift {
@@ -168,13 +169,30 @@ void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   static_cast<void>(unused);
 }
 
-template <typename Id, typename T>
+template <typename Id, typename T, typename>
 struct Get {
   template <typename U>
   constexpr decltype(auto) operator()(U&& obj) const {
     return access_field<get_ident<Id, T>>(std::forward<U>(obj));
   }
 };
+template <typename Id, typename Tag>
+struct Get<Id, Tag, type::if_concrete<Tag>> {
+  using T = type::native_type<Tag>;
+  constexpr decltype(auto) operator()(T& obj) const {
+    return op::get<Id, T>(obj);
+  }
+  constexpr decltype(auto) operator()(T&& obj) const {
+    return op::get<Id, T>(std::move(obj));
+  }
+  constexpr decltype(auto) operator()(const T& obj) const {
+    return op::get<Id, T>(obj);
+  }
+  constexpr decltype(auto) operator()(const T&& obj) const {
+    return op::get<Id, T>(std::move(obj));
+  }
+};
+
 template <typename Id>
 struct Get<Id, void> {
   template <typename U>

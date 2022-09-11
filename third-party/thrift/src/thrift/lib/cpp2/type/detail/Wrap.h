@@ -80,28 +80,38 @@ class Wrap {
  protected:
   T data_;
 
-  // Gets the field reference, for the given id, in the given structured data.
-  template <typename Id, typename U>
-  constexpr static decltype(auto) get(Id, U&& data) {
-    return op::get<Id, folly::remove_cvref_t<U>>(std::forward<U>(data));
-  }
-
   // Gets the field reference, for the given id, in the underlying data.
   template <typename Id>
-  constexpr decltype(auto) get(Id id = Id{}) & {
-    return get(id, data_);
+  constexpr decltype(auto) get() & {
+    return op::get<Id>(data_);
   }
   template <typename Id>
-  constexpr decltype(auto) get(Id id = Id{}) && {
-    return get(id, std::move(data_));
+  constexpr decltype(auto) get(Id) & {
+    return get<Id>();
   }
   template <typename Id>
-  constexpr decltype(auto) get(Id id = Id{}) const& {
-    return get(id, data_);
+  constexpr decltype(auto) get() && {
+    return op::get<Id>(std::move(data_));
   }
   template <typename Id>
-  constexpr decltype(auto) get(Id id = Id{}) const&& {
-    return get(id, std::move(data_));
+  constexpr decltype(auto) get(Id) && {
+    return get<Id>();
+  }
+  template <typename Id>
+  constexpr decltype(auto) get() const& {
+    return op::get<Id>(data_);
+  }
+  template <typename Id>
+  constexpr decltype(auto) get(Id) const& {
+    return get<Id>();
+  }
+  template <typename Id>
+  constexpr decltype(auto) get() const&& {
+    return op::get<Id>(std::move(data_));
+  }
+  template <typename Id>
+  constexpr decltype(auto) get(Id) const&& {
+    return get<Id>();
   }
 
   ~Wrap() = default; // abstract base class

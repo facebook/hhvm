@@ -39,7 +39,7 @@ type PatchOp int64
 const (
   PatchOp_Assign PatchOp = 1
   PatchOp_Clear PatchOp = 2
-  PatchOp_Patch PatchOp = 3
+  PatchOp_PatchPrior PatchOp = 3
   PatchOp_EnsureUnion PatchOp = 4
   PatchOp_EnsureStruct PatchOp = 5
   PatchOp_PatchAfter PatchOp = 6
@@ -52,7 +52,7 @@ const (
 var PatchOpToName = map[PatchOp]string {
   PatchOp_Assign: "Assign",
   PatchOp_Clear: "Clear",
-  PatchOp_Patch: "Patch",
+  PatchOp_PatchPrior: "PatchPrior",
   PatchOp_EnsureUnion: "EnsureUnion",
   PatchOp_EnsureStruct: "EnsureStruct",
   PatchOp_PatchAfter: "PatchAfter",
@@ -65,7 +65,7 @@ var PatchOpToName = map[PatchOp]string {
 var PatchOpToValue = map[string]PatchOp {
   "Assign": PatchOp_Assign,
   "Clear": PatchOp_Clear,
-  "Patch": PatchOp_Patch,
+  "PatchPrior": PatchOp_PatchPrior,
   "EnsureUnion": PatchOp_EnsureUnion,
   "EnsureStruct": PatchOp_EnsureStruct,
   "PatchAfter": PatchOp_PatchAfter,
@@ -78,7 +78,7 @@ var PatchOpToValue = map[string]PatchOp {
 var PatchOpNames = []string {
   "Assign",
   "Clear",
-  "Patch",
+  "PatchPrior",
   "EnsureUnion",
   "EnsureStruct",
   "PatchAfter",
@@ -91,7 +91,7 @@ var PatchOpNames = []string {
 var PatchOpValues = []PatchOp {
   PatchOp_Assign,
   PatchOp_Clear,
-  PatchOp_Patch,
+  PatchOp_PatchPrior,
   PatchOp_EnsureUnion,
   PatchOp_EnsureStruct,
   PatchOp_PatchAfter,

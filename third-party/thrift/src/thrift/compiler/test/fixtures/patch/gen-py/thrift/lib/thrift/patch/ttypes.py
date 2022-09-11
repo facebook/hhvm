@@ -49,7 +49,7 @@ class PatchOp:
   """
   Assign = 1
   Clear = 2
-  Patch = 3
+  PatchPrior = 3
   EnsureUnion = 4
   EnsureStruct = 5
   PatchAfter = 6
@@ -61,7 +61,7 @@ class PatchOp:
   _VALUES_TO_NAMES = {
     1: "Assign",
     2: "Clear",
-    3: "Patch",
+    3: "PatchPrior",
     4: "EnsureUnion",
     5: "EnsureStruct",
     6: "PatchAfter",
@@ -74,7 +74,7 @@ class PatchOp:
   _NAMES_TO_VALUES = {
     "Assign": 1,
     "Clear": 2,
-    "Patch": 3,
+    "PatchPrior": 3,
     "EnsureUnion": 4,
     "EnsureStruct": 5,
     "PatchAfter": 6,

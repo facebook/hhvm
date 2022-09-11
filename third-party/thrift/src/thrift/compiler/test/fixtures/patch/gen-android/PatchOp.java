@@ -22,7 +22,7 @@ public enum PatchOp implements com.facebook.thrift.TEnum {
   /**
    * Apply a field/value-wise patch.
    */
-  Patch(3),
+  PatchPrior(3),
   /**
    * Set to the given default, if not already of the same type.
    * 
@@ -98,7 +98,7 @@ public enum PatchOp implements com.facebook.thrift.TEnum {
       case 2:
         return Clear;
       case 3:
-        return Patch;
+        return PatchPrior;
       case 4:
         return EnsureUnion;
       case 5:

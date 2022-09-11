@@ -27,6 +27,9 @@ namespace op {
 namespace detail {
 using pa = ::apache::thrift::detail::st::private_access;
 
+template <typename Id, typename T>
+struct Get;
+
 template <typename Id, typename Tag>
 struct GetOrdinalImpl;
 template <size_t... I, typename F>

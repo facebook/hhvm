@@ -31,7 +31,7 @@ enum PatchOp: int {
   /**
    * Apply a field/value-wise patch.
    */
-  Patch = 3;
+  PatchPrior = 3;
   /**
    * Set to the given default, if not already of the same type.
    * 
@@ -92,7 +92,7 @@ class PatchOp_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
         "elements" => dict[
           1 => "Assign",
           2 => "Clear",
-          3 => "Patch",
+          3 => "PatchPrior",
           4 => "EnsureUnion",
           5 => "EnsureStruct",
           6 => "PatchAfter",

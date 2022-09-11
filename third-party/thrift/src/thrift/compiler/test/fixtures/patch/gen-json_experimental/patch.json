@@ -33,8 +33,8 @@
             "lineno" : 251,
             "value" : 2
           },
-          "Patch" : {
-            "name" : "Patch",
+          "PatchPrior" : {
+            "name" : "PatchPrior",
             "docstring" : "Apply a field/value-wise patch.\n",
             "lineno" : 254,
             "value" : 3

@@ -336,7 +336,7 @@ def _fbthrift_gen_metadata_enum_PatchOp(metadata_struct: _fbthrift_metadata.Thri
     elements = {
         1: "Assign",
         2: "Clear",
-        3: "Patch",
+        3: "PatchPrior",
         4: "EnsureUnion",
         5: "EnsureStruct",
         6: "PatchAfter",

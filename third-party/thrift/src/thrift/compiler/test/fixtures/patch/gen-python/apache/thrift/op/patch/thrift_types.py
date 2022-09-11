@@ -580,7 +580,7 @@ import apache.thrift.op.patch.thrift_metadata
 class PatchOp(_fbthrift_python_types.Enum, enum.Enum):
     Assign = 1
     Clear = 2
-    Patch = 3
+    PatchPrior = 3
     EnsureUnion = 4
     EnsureStruct = 5
     PatchAfter = 6

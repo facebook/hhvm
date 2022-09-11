@@ -26,8 +26,8 @@ TEST(GetTest, GetField) {
   type::UriStruct actual;
   using Tag = type::struct_t<type::UriStruct>;
   actual.scheme() = "foo";
-  EXPECT_EQ(*(op::get<ident::scheme, type::UriStruct>(actual)), "foo");
-  EXPECT_EQ(*(op::get<type::ordinal<1>, type::UriStruct>(actual)), "foo");
+  EXPECT_EQ(*(op::get<>(type::ordinal<1>{}, actual)), "foo");
+  EXPECT_EQ(*(op::get<ident::scheme>(actual)), "foo");
   EXPECT_EQ(*(op::get<type::field_id<1>, type::UriStruct>(actual)), "foo");
 }
 

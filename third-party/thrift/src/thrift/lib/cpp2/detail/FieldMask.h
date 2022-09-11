@@ -180,7 +180,7 @@ void ensure_fields(MaskRef ref, Struct& t) {
         return;
       }
       using FieldTag = op::get_field_tag<Ord, Struct>;
-      auto&& field_ref = op::get<Ord, Struct>(t);
+      auto&& field_ref = op::get<Ord>(t);
       op::ensure<FieldTag>(field_ref, t);
       // Need to ensure the struct object.
       using FieldType = op::get_native_type<Ord, Struct>;
@@ -214,7 +214,7 @@ void clear_fields(MaskRef ref, Struct& t) {
         return;
       }
       using FieldTag = op::get_field_tag<Ord, Struct>;
-      auto&& field_ref = op::get<Ord, Struct>(t);
+      auto&& field_ref = op::get<Ord>(t);
       if (next.isAllMask()) {
         op::clear_field<FieldTag>(field_ref, t);
         return;
@@ -272,8 +272,8 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       }
       using FieldTag = op::get_field_tag<Ord, DstStruct>;
       using FieldType = op::get_native_type<Ord, DstStruct>;
-      auto&& src_ref = op::get<Ord, DstStruct>(src);
-      auto&& dst_ref = op::get<Ord, DstStruct>(dst);
+      auto&& src_ref = op::get<Ord>(src);
+      auto&& dst_ref = op::get<Ord>(dst);
       bool srcHasValue = bool(op::getValueOrNull(src_ref));
       bool dstHasValue = bool(op::getValueOrNull(dst_ref));
       if (!srcHasValue && !dstHasValue) { // skip
@@ -356,13 +356,14 @@ Mask path(
   // static_assert doesn't work as it compiles this code for every field.
   if constexpr (is_thrift_struct_v<Struct>) {
     Mask mask;
-    op::for_each_field_id<Struct>([&](auto fieldId) {
+    op::for_each_field_id<Struct>([&](auto id) {
+      using Id = decltype(id);
       if (mask.includes_ref()) { // already set
         return;
       }
-      if (op::get_name_v<decltype(fieldId), Struct> == fieldNames[index]) {
-        using FieldType = op::get_native_type<decltype(fieldId), Struct>;
-        mask.includes_ref().emplace()[static_cast<int16_t>(fieldId())] =
+      if (op::get_name_v<Id, Struct> == fieldNames[index]) {
+        using FieldType = op::get_native_type<Id, Struct>;
+        mask.includes_ref().emplace()[folly::to_underlying(id())] =
             path<FieldType>(fieldNames, index + 1, other);
       }
     });
@@ -381,11 +382,11 @@ void throwIfContainsMapMask(const Mask& mask);
 template <typename Struct>
 void compare_impl(
     const Struct& original, const Struct& modified, FieldIdToMask& mask) {
-  op::for_each_field_id<Struct>([&](auto fieldIdTag) {
-    using FieldIdTag = decltype(fieldIdTag);
-    int16_t fieldId = static_cast<int16_t>(fieldIdTag());
-    auto&& original_field = op::get<FieldIdTag, Struct>(original);
-    auto&& modified_field = op::get<FieldIdTag, Struct>(modified);
+  op::for_each_field_id<Struct>([&](auto id) {
+    using Id = decltype(id);
+    int16_t fieldId = folly::to_underlying(id());
+    auto&& original_field = op::get<Id>(original);
+    auto&& modified_field = op::get<Id>(modified);
     auto* original_ptr = op::getValueOrNull(original_field);
     auto* modified_ptr = op::getValueOrNull(modified_field);
 
@@ -400,7 +401,7 @@ void compare_impl(
       return;
     }
     // check if nested fields need to be added to mask
-    using FieldType = op::get_native_type<FieldIdTag, Struct>;
+    using FieldType = op::get_native_type<Id, Struct>;
     if constexpr (is_thrift_struct_v<FieldType>) {
       compare_impl(
           *original_ptr, *modified_ptr, mask[fieldId].includes_ref().emplace());

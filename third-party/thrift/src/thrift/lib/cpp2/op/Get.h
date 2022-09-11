@@ -120,9 +120,10 @@ FOLLY_INLINE_VARIABLE const folly::StringPiece get_name =
 
 // Gets the Thrift field, for example:
 //
-//   op::get<type::field_id<7>, MyStruct>(myStruct) = 4;
-template <typename Id, typename T>
-FOLLY_INLINE_VARIABLE constexpr auto get = access_field<get_ident<Id, T>>;
+//   op::get<type::field_id<7>>(myStruct) = 4;
+//
+template <typename Id = void, typename T = void>
+FOLLY_INLINE_VARIABLE constexpr detail::Get<Id, T> get = {};
 
 // Returns pointer to the value from the given field.
 // Returns nullptr if it doesn't have a value.
@@ -166,6 +167,28 @@ void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   int unused[] = {(f(field_ordinal<I + 1>()), 0)...};
   static_cast<void>(unused);
 }
+
+template <typename Id, typename T>
+struct Get {
+  template <typename U>
+  constexpr decltype(auto) operator()(U&& obj) const {
+    return access_field<get_ident<Id, T>>(std::forward<U>(obj));
+  }
+};
+template <typename Id>
+struct Get<Id, void> {
+  template <typename U>
+  constexpr decltype(auto) operator()(U&& obj) const {
+    return op::get<Id, folly::remove_cvref_t<U>>(std::forward<U>(obj));
+  }
+};
+template <>
+struct Get<void, void> {
+  template <typename Id, typename U>
+  constexpr decltype(auto) operator()(Id, U&& obj) const {
+    return op::get<Id, folly::remove_cvref_t<U>>(std::forward<U>(obj));
+  }
+};
 
 } // namespace detail
 

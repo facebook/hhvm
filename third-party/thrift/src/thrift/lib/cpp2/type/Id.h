@@ -19,7 +19,7 @@
 // Thrift supports a number of different types of identifiers, including
 //  - FieldId - The numeric identifier for a field.
 //  - Ident - The assigned 'name' for a definition.
-//  - Oridnal - The 1-based order at which a definition was defined in the
+//  - Ordinal - The 1-based order at which a definition was defined in the
 //  IDL/AST.
 #pragma once
 

@@ -31,6 +31,18 @@ using RuntimeBase = type::detail::RuntimeBase;
 using RuntimeType = type::detail::RuntimeType;
 using TypeInfo = type::detail::TypeInfo;
 
+template <typename Tag>
+const TypeInfo& getAnyTypeInfo();
+
+// Create a AnyOp-based Thrift runtime type.
+template <typename Tag, typename T = type::native_type<Tag>>
+RuntimeType getAnyType() {
+  static_assert(
+      std::is_same<folly::remove_cvref_t<T>, type::native_type<Tag>>::value,
+      "type missmatch");
+  return RuntimeType::create<T>(getAnyTypeInfo<Tag>());
+}
+
 // Ops all Thrift types support.
 template <typename Tag>
 struct BaseAnyOp : type::detail::BaseErasedOp {
@@ -39,6 +51,14 @@ struct BaseAnyOp : type::detail::BaseErasedOp {
   static T& ref(void* ptr) { return *static_cast<T*>(ptr); }
   static const T& ref(const void* ptr) { return cref(ptr); }
   static const T& cref(const void* ptr) { return *static_cast<const T*>(ptr); }
+  template <typename RTag, typename T>
+  static Ptr ret(T&& val) {
+    return {getAnyType<RTag, T>(), &val};
+  }
+  template <typename RTag, typename T>
+  static Ptr ret(RTag, T&& val) {
+    return ret<RTag>(std::forward<T>(val));
+  }
 
   static void delete_(void* ptr) { delete static_cast<T*>(ptr); }
   static void* make(void* ptr, bool consume) {

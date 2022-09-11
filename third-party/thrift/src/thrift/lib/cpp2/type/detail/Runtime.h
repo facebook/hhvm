@@ -455,9 +455,7 @@ struct VoidErasedOp : BaseErasedOp {
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const RuntimeBase&) { return true; }
   static partial_ordering compare(const void*, const RuntimeBase& rhs) {
-    if (!rhs.type().empty()) {
-      bad_op();
-    }
+    check_op(rhs.type().empty());
     return partial_ordering::eq;
   }
   static void clear(void*) {}

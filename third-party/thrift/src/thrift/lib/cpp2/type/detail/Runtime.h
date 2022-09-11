@@ -334,8 +334,14 @@ class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
 
   bool put(FieldId id, ConstT val) { return Base::put(id, val); }
   bool put(ConstT key, ConstT val) { return Base::put(key, val); }
+  bool put(FieldId id, const std::string& val) {
+    return Base::put(id, asRef(val));
+  }
   bool put(const std::string& name, ConstT val) {
     return put(asRef(name), val);
+  }
+  bool put(const std::string& name, const std::string& val) {
+    return put(asRef(name), asRef(val));
   }
 
  private:

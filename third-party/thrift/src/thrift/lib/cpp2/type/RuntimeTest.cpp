@@ -24,7 +24,9 @@
 
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
+#include <thrift/lib/thrift/gen-cpp2/standard_types.h>
 
 namespace apache::thrift::type {
 namespace {
@@ -166,6 +168,19 @@ TEST(RuntimeRefTest, Map) {
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
+}
+
+TEST(RuntimeRefTest, Struct) {
+  type::UriStruct actual;
+  using Tag = type::struct_t<type::UriStruct>;
+  auto ref = Ref::to<Tag>(actual);
+  EXPECT_FALSE(ref.empty());
+  EXPECT_EQ(ref.size(), 5);
+  EXPECT_TRUE(ref.put(FieldId{1}, "foo"));
+  EXPECT_EQ(*actual.scheme(), "foo");
+  EXPECT_TRUE(ref.put("scheme", "bar"));
+  EXPECT_EQ(*actual.scheme(), "bar");
+  EXPECT_THROW(ref.put("bad", "bar"), std::out_of_range);
 }
 
 TEST(RuntimeRefTest, Identical) {

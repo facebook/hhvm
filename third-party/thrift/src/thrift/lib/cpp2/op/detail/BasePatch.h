@@ -59,8 +59,6 @@ template <typename T>
 if_opt_type<T, bool> hasValue(const T& opt) {
   return opt.has_value();
 }
-// TODO(afuller): Technically 'fill' field should always return true for
-// hasValue, is this really just op::isEmpty?
 template <typename T>
 bool hasValue(field_ref<T> val) {
   return !thrift::empty(*val);

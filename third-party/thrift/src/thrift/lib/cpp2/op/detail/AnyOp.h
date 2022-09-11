@@ -236,13 +236,54 @@ struct MapOp : ContainerOp<Tag> {
     bad_op();
   }
 };
-
 template <typename KeyTag, typename ValTag>
 struct AnyOp<type::map<KeyTag, ValTag>> : MapOp<KeyTag, ValTag> {};
-
 template <typename T, typename KeyTag, typename ValTag>
 struct AnyOp<type::cpp_type<T, type::map<KeyTag, ValTag>>>
     : MapOp<KeyTag, ValTag, type::cpp_type<T, type::map<KeyTag, ValTag>>> {};
+
+template <typename T, typename Tag = type::infer_tag<T>>
+struct StructuredOp : BaseAnyOp<Tag> {
+  using Base = BaseAnyOp<Tag>;
+  using Base::ref;
+  using Base::unimplemented;
+
+  static bool put(
+      void* s, FieldId fid, const RuntimeBase* n, const RuntimeBase& val) {
+    bool found = false;
+    // TODO(afuller): Use a hash map for these lookups.
+    if (n != nullptr) {
+      const auto& name = n->as<type::string_t>();
+      found = find_by_field_id<T>([&](auto id) {
+        if (op::get_name_v<decltype(id), T> == name) {
+          op::get<>(id, ref(s)) = val.as<op::get_type_tag<decltype(id), T>>();
+          return true;
+        }
+        return false;
+      });
+    } else {
+      found = find_by_field_id<T>([&](auto id) {
+        if (id() == fid) {
+          op::get<>(id, ref(s)) = val.as<op::get_type_tag<decltype(id), T>>();
+          return true;
+        }
+        return false;
+      });
+    }
+    if (!found) {
+      folly::throw_exception<std::out_of_range>("out of range");
+    }
+    return true;
+  }
+
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
+    unimplemented();
+  }
+  static size_t size(const void*) { return op::size_v<T>; }
+};
+
+template <typename T>
+struct AnyOp<type::struct_t<T>> : StructuredOp<T> {};
 
 // Create a AnyOp-based Thrift type info.
 template <typename Tag>

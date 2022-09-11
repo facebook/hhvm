@@ -176,11 +176,21 @@ TEST(RuntimeRefTest, Struct) {
   auto ref = Ref::to<Tag>(actual);
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 5);
+
   EXPECT_TRUE(ref.put(FieldId{1}, "foo"));
   EXPECT_EQ(*actual.scheme(), "foo");
+  ref.clear(FieldId{1});
+  EXPECT_EQ(*actual.scheme(), "");
+
   EXPECT_TRUE(ref.put("scheme", "bar"));
   EXPECT_EQ(*actual.scheme(), "bar");
-  EXPECT_THROW(ref.put("bad", "bar"), std::out_of_range);
+  ref.clear("scheme");
+  EXPECT_EQ(*actual.scheme(), "");
+
+  EXPECT_THROW(ref.clear(FieldId{}), std::out_of_range);
+  EXPECT_THROW(ref.clear("bad"), std::out_of_range);
+  EXPECT_THROW(ref.put(FieldId{}, ""), std::out_of_range);
+  EXPECT_THROW(ref.put("bad", ""), std::out_of_range);
 }
 
 TEST(RuntimeRefTest, Identical) {

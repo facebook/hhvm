@@ -194,7 +194,6 @@ struct GetIntrinsicDefault<type::field<Tag, Context>>
 template <typename Tag, typename Context>
 struct IsEmpty<type::field<Tag, Context>> : IsEmpty<Tag> {};
 
-// TODO: support union
 struct ClearOptionalField {
   template <typename T, typename Struct>
   void operator()(optional_boxed_field_ref<T> field, Struct&) const {
@@ -203,6 +202,13 @@ struct ClearOptionalField {
   template <typename T, typename Struct>
   void operator()(optional_field_ref<T> field, Struct&) const {
     field.reset();
+  }
+  template <typename T, typename Union>
+  void operator()(union_field_ref<T> field, Union& u) const {
+    if (field.has_value()) {
+      thrift::clear(u);
+      assert(!field.has_value());
+    }
   }
   template <typename T, typename Struct>
   void operator()(std::shared_ptr<T>& field, Struct&) const {

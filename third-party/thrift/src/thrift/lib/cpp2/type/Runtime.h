@@ -79,7 +79,7 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
 
   // Sets the referenced value to it's intrinsic default (e.g. ignoring custom
   // field defaults).
-  void clear() { Base::clear(); }
+  using Base::clear;
 
   // Append to a list, string, etc.
   using Base::append;
@@ -234,7 +234,7 @@ class Value : public detail::RuntimeAccessBase<ConstRef, Ref, Value> {
 
   // Sets the referenced value to it's intrinsic default (e.g. ignoring custom
   // field defaults).
-  void clear() { Base::clear(); }
+  using Base::clear;
 
   // Append to a list, string, etc.
   using Base::append;

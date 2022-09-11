@@ -245,33 +245,37 @@ struct AnyOp<type::cpp_type<T, type::map<KeyTag, ValTag>>>
 template <typename T, typename Tag = type::infer_tag<T>>
 struct StructuredOp : BaseAnyOp<Tag> {
   using Base = BaseAnyOp<Tag>;
+  using Base::check_found;
   using Base::ref;
   using Base::unimplemented;
+  template <typename Id>
+  using FTag = op::get_field_tag<Id, T>;
+
+  template <typename Id>
+  static bool putIf(bool cond, T& self, const RuntimeBase& val) {
+    if (cond) {
+      if (val.type().empty()) {
+        op::clear_field<FTag<Id>>(op::get<Id>(self), self);
+      } else {
+        op::get<Id>(self) = val.as<FTag<Id>>();
+      }
+    }
+    return cond;
+  }
 
   static bool put(
       void* s, FieldId fid, const RuntimeBase* n, const RuntimeBase& val) {
-    bool found = false;
-    // TODO(afuller): Use a hash map for these lookups.
+    // TODO(afuller): Use a hash map lookups for these.
     if (n != nullptr) {
       const auto& name = n->as<type::string_t>();
-      found = find_by_field_id<T>([&](auto id) {
-        if (op::get_name_v<decltype(id), T> == name) {
-          op::get<>(id, ref(s)) = val.as<op::get_type_tag<decltype(id), T>>();
-          return true;
-        }
-        return false;
-      });
+      check_found(find_by_field_id<T>([&](auto id) {
+        using Id = decltype(id);
+        return putIf<Id>(op::get_name_v<Id, T> == name, ref(s), val);
+      }));
     } else {
-      found = find_by_field_id<T>([&](auto id) {
-        if (id() == fid) {
-          op::get<>(id, ref(s)) = val.as<op::get_type_tag<decltype(id), T>>();
-          return true;
-        }
-        return false;
-      });
-    }
-    if (!found) {
-      folly::throw_exception<std::out_of_range>("out of range");
+      check_found(find_by_field_id<T>([&](auto id) {
+        return putIf<decltype(id)>(id() == fid, ref(s), val);
+      }));
     }
     return true;
   }

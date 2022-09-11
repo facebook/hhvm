@@ -233,6 +233,16 @@ struct BaseErasedOp {
   [[noreturn]] static void bad_op(const char* msg = "not supported") {
     folly::throw_exception<std::logic_error>(msg);
   }
+  static void check_op(bool cond, const char* msg = "not supported") {
+    if (!cond) {
+      bad_op(msg);
+    }
+  }
+  static void check_found(bool found, const char* msg = "not found") {
+    if (!found) {
+      folly::throw_exception<std::out_of_range>(msg);
+    }
+  }
   [[noreturn]] static void bad_type() {
     folly::throw_exception<std::bad_any_cast>();
   }
@@ -343,6 +353,11 @@ class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
   bool put(const std::string& name, const std::string& val) {
     return put(asRef(name), asRef(val));
   }
+
+  void clear() { Base::clear(); }
+  void clear(FieldId id) { Base::put(id, ConstT{}); }
+  void clear(ConstT key) { Base::put(key, ConstT{}); }
+  void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
 
  private:
   friend bool operator==(const Derived& lhs, const Derived& rhs) {

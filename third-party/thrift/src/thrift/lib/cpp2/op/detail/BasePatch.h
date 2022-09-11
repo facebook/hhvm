@@ -86,6 +86,13 @@ constexpr bool isAbsent(terse_field_ref<T>) {
   return false;
 }
 
+template <typename T>
+if_opt_type<folly::remove_cvref_t<T>> resetValue(T&& opt) {
+  opt.reset();
+}
+template <typename T>
+constexpr if_not_opt_type<T> resetValue(T&&) {}
+
 // TODO: use op::clear and op::ensure to avoid duplication
 template <typename T>
 if_opt_type<folly::remove_cvref_t<T>> clearValue(T&& opt) {

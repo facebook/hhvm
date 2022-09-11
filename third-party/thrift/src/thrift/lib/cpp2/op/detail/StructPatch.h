@@ -191,7 +191,12 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
     // next.assign and next.clear known to be empty.
     for_each_field_id<T>([&](auto id) {
       using Id = decltype(id);
-      if (ensured<Id>()) {
+      if (next.toThrift().patchPrior()->get(id)->toThrift().clear() == true) {
+        // Complete replacement
+        patchPrior<Id>() =
+            *std::forward<U>(next).toThrift().patchPrior()->get(id);
+        resetValue(getEnsure<Id>(data_));
+      } else if (ensured<Id>()) {
         // All values will be set before next, so ignore next.ensure and
         // merge next.patchPrior and next.patch into this.patch.
         auto temp = *std::forward<U>(next).toThrift().patch()->get(id);
@@ -199,18 +204,20 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
             *std::forward<U>(next).toThrift().patchPrior()->get(id));
         patchAfter<Id>().merge(std::move(temp));
         return;
+      } else {
+        // Merge anything in patchAfter into patchPrior.
+        patchPrior<Id>().merge(std::move(patchAfter<Id>()));
+        // Merge in next.patchPrior into patchPrior.
+        patchPrior<Id>().merge(
+            *std::forward<U>(next).toThrift().patchPrior()->get(id));
       }
 
-      // Merge anything (oddly) in patchAfter into patchPrior.
-      patchPrior<Id>().merge(std::move(patchAfter<Id>()));
-      // Merge in next.patchPrior into patchPrior.
-      patchPrior<Id>().merge(
-          *std::forward<U>(next).toThrift().patchPrior()->get(id));
       // Consume next.ensure, if any.
       if (next.template ensured<decltype(id)>()) {
         getEnsure<Id>(data_) =
             *op::get<Id>(*std::forward<U>(next).toThrift().ensure());
       }
+
       // Consume next.patchAfter.
       patchAfter<Id>() = *std::forward<U>(next).toThrift().patch()->get(id);
     });

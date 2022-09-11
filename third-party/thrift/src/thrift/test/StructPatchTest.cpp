@@ -246,6 +246,29 @@ TEST(StructPatchTest, OptionalField_Assign) {
   test::expectPatch(patch, {}, expected);
 }
 
+TEST(StructPatchTest, AssignClearEnsure) {
+  MyStructPatch assign;
+  assign.assign<ident::optI32Val>(1);
+
+  MyStructPatch clearEnsure;
+  clearEnsure.clear<ident::optI32Val>();
+  clearEnsure.ensure<ident::optI32Val>(2);
+
+  MyStruct actual;
+  assign.apply(actual);
+  EXPECT_EQ(actual.optI32Val(), 1);
+  clearEnsure.apply(actual);
+  EXPECT_EQ(actual.optI32Val(), 2);
+
+  // Merging and applying should have the same result.
+  MyStructPatch assignClearEnsure = assign;
+  assignClearEnsure.merge(clearEnsure);
+  actual = {};
+  assignClearEnsure.apply(actual);
+  ASSERT_TRUE(actual.optI32Val().has_value());
+  EXPECT_EQ(*actual.optI32Val(), 2);
+}
+
 TEST(StructPatchTest, OptionalField_PatchPrior) {
   // unset -> true -> false.
   // set -> invert -> invert

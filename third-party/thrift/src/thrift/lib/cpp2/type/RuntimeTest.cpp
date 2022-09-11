@@ -16,6 +16,7 @@
 
 #include <thrift/lib/cpp2/type/Runtime.h>
 
+#include <limits>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -303,6 +304,14 @@ TEST(RuntimeValueTest, CppType_Map) {
   EXPECT_NE(map, otherMap);
 
   EXPECT_THROW(map < otherMap, std::logic_error);
+}
+
+TEST(RuntimeValueTest, Float_InterOp) {
+  EXPECT_EQ(Ref::to<double_t>(2.0), Ref::to<float_t>(2.0f));
+  EXPECT_LT(Ref::to<float_t>(1.0), Ref::to<double_t>(2.0f));
+  EXPECT_GT(
+      Ref::to<double_t>(std::numeric_limits<double>::infinity()),
+      Ref::to<float_t>(-std::numeric_limits<float>::infinity()));
 }
 
 TEST(RuntimeValueTest, StringBinary_InterOp) {

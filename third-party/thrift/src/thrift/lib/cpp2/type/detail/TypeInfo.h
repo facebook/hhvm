@@ -53,6 +53,7 @@ struct TypeInfo {
   void (*append)(void*, const RuntimeBase&);
   bool (*add)(void*, const RuntimeBase&);
   bool (*put)(void*, FieldId, const RuntimeBase*, const RuntimeBase&);
+  Ptr (*ensure)(void*, FieldId, const RuntimeBase*, const RuntimeBase*);
   Ptr (*get_)(void*, FieldId, size_t, const RuntimeBase*);
   size_t (*size)(const void*);
 
@@ -105,6 +106,7 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::append,
       &Op::add,
       &Op::put,
+      &Op::ensure,
       &Op::get,
       &Op::size,
   };

@@ -170,6 +170,18 @@ TEST(RuntimeRefTest, Map) {
   EXPECT_TRUE(value.empty());
 }
 
+TEST(RuntimeRefTest, Map_Add) {
+  std::map<std::string, int> value;
+  auto ref = Ref::to<map<string_t, i32_t>>(value);
+
+  // ensure = add if not present.
+  EXPECT_EQ(ref.ensure("zero"), 0);
+  EXPECT_EQ(ref.ensure("one", 1), 1);
+  EXPECT_EQ(ref.ensure("one", 2), 1);
+  EXPECT_EQ(value["zero"], 0);
+  EXPECT_EQ(value["one"], 1);
+}
+
 TEST(RuntimeRefTest, Struct) {
   type::UriStruct actual;
   using Tag = type::struct_t<type::UriStruct>;

@@ -92,6 +92,12 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   // Returns true if an existing value was replaced.
   using Base::put;
 
+  // Add a key-value pair, if not already present, using the given default if
+  // provided.
+  //
+  // Returns a reference to the associated value.
+  using Base::ensure;
+
   // Throws on mismatch or if const.
   template <typename Tag>
   native_type<Tag>& mut() {
@@ -246,6 +252,12 @@ class Value : public detail::RuntimeAccessBase<ConstRef, Ref, Value> {
   //
   // Returns true if an existing value was replaced.
   using Base::put;
+
+  // Add a key-value pair, if not already present, using the given default if
+  // provided.
+  //
+  // Returns a reference to the associated value.
+  using Base::ensure;
 
  private:
   using Base::Base;

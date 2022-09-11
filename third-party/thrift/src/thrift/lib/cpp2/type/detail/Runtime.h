@@ -149,6 +149,11 @@ class RuntimeBase {
     return type_.mut().put(ptr_, id, nullptr, val);
   }
 
+  Ptr ensure(const RuntimeBase& key) const;
+  Ptr ensure(const RuntimeBase& key, const RuntimeBase& val) const;
+  Ptr ensure(FieldId id) const;
+  Ptr ensure(FieldId id, const RuntimeBase& val) const;
+
   // TODO(afuller): Make context an enum, instead of pair of bools.
   Ptr get(const RuntimeBase& key) const;
   Ptr get(FieldId id) const;
@@ -185,6 +190,7 @@ class Ptr final : public RuntimeBase {
   using RuntimeBase::add;
   using RuntimeBase::append;
   using RuntimeBase::clear;
+  using RuntimeBase::ensure;
   using RuntimeBase::get;
   using RuntimeBase::mut;
   using RuntimeBase::put;
@@ -205,6 +211,20 @@ inline Ptr TypeInfo::get(void* ptr, size_t pos) const {
 }
 inline Ptr TypeInfo::get(void* ptr, const RuntimeBase& val) const {
   return get_(ptr, {}, std::string::npos, &val);
+}
+
+inline Ptr RuntimeBase::ensure(const RuntimeBase& key) const {
+  return type_.mut().ensure(ptr_, {}, &key, nullptr);
+}
+inline Ptr RuntimeBase::ensure(
+    const RuntimeBase& key, const RuntimeBase& val) const {
+  return type_.mut().ensure(ptr_, {}, &key, &val);
+}
+inline Ptr RuntimeBase::ensure(FieldId id) const {
+  return type_.mut().ensure(ptr_, id, nullptr, nullptr);
+}
+inline Ptr RuntimeBase::ensure(FieldId id, const RuntimeBase& val) const {
+  return type_.mut().ensure(ptr_, id, nullptr, &val);
 }
 
 inline Ptr RuntimeBase::get(const RuntimeBase& key) const {
@@ -254,6 +274,10 @@ struct BaseErasedOp {
   [[noreturn]] static bool add(void*, const RuntimeBase&) { bad_op(); }
   [[noreturn]] static bool put(
       void*, FieldId, const RuntimeBase*, const RuntimeBase&) {
+    bad_op();
+  }
+  [[noreturn]] static Ptr ensure(
+      void*, FieldId, const RuntimeBase*, const RuntimeBase*) {
     bad_op();
   }
   [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
@@ -352,6 +376,22 @@ class RuntimeAccessBase : public RuntimeBase, protected BaseDerived<Derived> {
   }
   bool put(const std::string& name, const std::string& val) {
     return put(asRef(name), asRef(val));
+  }
+
+  MutT ensure(FieldId id) { return MutT{Base::ensure(id)}; }
+  MutT ensure(FieldId id, ConstT defVal) {
+    return MutT{Base::ensure(id, defVal)};
+  }
+  MutT ensure(ConstT key) { return MutT{Base::ensure(key)}; }
+  MutT ensure(ConstT key, ConstT defVal) {
+    return MutT{Base::ensure(key, defVal)};
+  }
+  MutT ensure(const std::string& name) { return ensure(asRef(name)); }
+  MutT ensure(const std::string& name, ConstT val) {
+    return ensure(asRef(name), val);
+  }
+  MutT ensure(const std::string& name, const std::string& val) {
+    return ensure(asRef(name), asRef(val));
   }
 
   void clear() { Base::clear(); }

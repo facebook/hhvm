@@ -61,6 +61,10 @@ struct AnyOp : BaseAnyOp<Tag> {
       void*, FieldId, const RuntimeBase*, const RuntimeBase&) {
     unimplemented();
   }
+  [[noreturn]] static Ptr ensure(
+      void*, FieldId, const RuntimeBase*, const RuntimeBase*) {
+    unimplemented();
+  }
   [[noreturn]] static Ptr get(void*, FieldId, size_t, const RuntimeBase*) {
     unimplemented();
   }
@@ -213,6 +217,17 @@ struct MapOp : ContainerOp<Tag> {
     return true; // replacing existing.
   }
 
+  template <
+      typename K = type::native_type<KeyTag>,
+      typename V = type::native_type<ValTag>>
+  static V& ensure(T& self, K&& key, V&& val) {
+    auto itr = self.find(key);
+    if (itr == self.end()) {
+      itr = self.emplace(std::forward<K>(key), std::forward<V>(val)).first;
+    }
+    return itr->second;
+  }
+
   static bool put(
       void* s, FieldId, const RuntimeBase* k, const RuntimeBase& v) {
     if (k == nullptr) {
@@ -221,9 +236,19 @@ struct MapOp : ContainerOp<Tag> {
     return put(ref(s), k->as<KeyTag>(), v.as<ValTag>());
   }
 
-  [[noreturn]] static bool add(void*, const RuntimeBase&) {
-    // TODO(afuller): Add key/value pair, if key not already present.
-    unimplemented();
+  static Ptr ensure(
+      void* s, FieldId, const RuntimeBase* k, const RuntimeBase* v) {
+    if (k == nullptr) {
+      bad_op();
+    }
+    if (v == nullptr) {
+      return {
+          getAnyType<ValTag>(),
+          &ensure(ref(s), k->as<KeyTag>(), type::native_type<ValTag>{})};
+    }
+    return {
+        getAnyType<ValTag>(),
+        &ensure(ref(s), k->as<KeyTag>(), v->as<ValTag>())};
   }
 
   static Ptr get(void* s, FieldId, size_t pos, const RuntimeBase* k) {

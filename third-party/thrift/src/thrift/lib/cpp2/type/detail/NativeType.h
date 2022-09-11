@@ -184,10 +184,11 @@ struct NativeTypes<adapted<Adapter, Tag>>
 
 // Traits for cpp_type types.
 //
-// cpp_type types are concrete and have special native_type.
+// cpp_type types have a special native_type.
 template <typename T, typename Tag>
-struct NativeTypes<cpp_type<T, Tag>>
-    : ConcreteType<typename NativeTypes<Tag>::standard_type, T> {};
+struct NativeTypes<cpp_type<T, Tag>> : NativeTypes<Tag> {
+  using native_type = T;
+};
 
 // Traits for field type tag.
 //

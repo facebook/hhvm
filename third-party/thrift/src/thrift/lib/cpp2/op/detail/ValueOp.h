@@ -54,6 +54,81 @@ struct AnyOp<type::float_t> : NumberOp<type::float_t> {};
 template <>
 struct AnyOp<type::double_t> : NumberOp<type::double_t> {};
 
+struct StringCompare : folly::IOBufCompare {
+  using folly::IOBufCompare::operator();
+  folly::ordering operator()(fmt::string_view lhs, fmt::string_view rhs) const {
+    return folly::to_ordering(lhs.compare(rhs));
+  }
+  folly::ordering operator()(
+      fmt::string_view lhs, const folly::IOBuf& rhs) const {
+    return operator()(
+        folly::IOBuf::wrapBufferAsValue(lhs.data(), lhs.size()), rhs);
+  }
+  folly::ordering operator()(
+      fmt::string_view lhs, const std::unique_ptr<IOBuf>& rhs) const {
+    return operator()(
+        folly::IOBuf::wrapBufferAsValue(lhs.data(), lhs.size()), *rhs);
+  }
+  folly::ordering operator()(
+      const folly::IOBuf& lhs, fmt::string_view rhs) const {
+    return operator()(
+        lhs, folly::IOBuf::wrapBufferAsValue(rhs.data(), rhs.size()));
+  }
+  folly::ordering operator()(
+      const folly::IOBuf& lhs, const std::unique_ptr<IOBuf>& rhs) const {
+    return operator()(lhs, *rhs);
+  }
+  folly::ordering operator()(
+      const std::unique_ptr<IOBuf>& lhs, fmt::string_view rhs) const {
+    return operator()(
+        *lhs, folly::IOBuf::wrapBufferAsValue(rhs.data(), rhs.size()));
+  }
+  folly::ordering operator()(
+      const std::unique_ptr<IOBuf>& lhs, const folly::IOBuf& rhs) const {
+    return operator()(*lhs, rhs);
+  }
+};
+
+using StdTag = type::cpp_type<std::string, type::string_c>;
+using IOBufTag = type::cpp_type<folly::IOBuf, type::string_c>;
+using IOBufPtrTag = type::cpp_type<std::unique_ptr<IOBuf>, type::string_c>;
+
+template <typename Tag>
+struct StringOp : BaseOp<Tag> {
+  using T = type::native_type<Tag>;
+  using Base = BaseOp<Tag>;
+  using Base::ref;
+  using Base::unimplemented;
+
+  static partial_ordering compare(const void* lhs, const Dyn& rhs) {
+    StringCompare cmp;
+    // TODO(afuller): Consider using a ~map.
+    if (const T* ptr = rhs.tryAs<Tag>()) {
+      return to_partial_ordering(cmp(ref(lhs), *ptr));
+    } else if (const auto* ptr = rhs.tryAs<StdTag>()) {
+      return to_partial_ordering(cmp(ref(lhs), *ptr));
+    } else if (const auto* ptr = rhs.tryAs<IOBufTag>()) {
+      return to_partial_ordering(cmp(ref(lhs), *ptr));
+    } else if (const auto* ptr = rhs.tryAs<IOBufPtrTag>()) {
+      return to_partial_ordering(cmp(ref(lhs), **ptr));
+    }
+    // TODO(afuller): Implement compatibility with any type convertable to
+    // fmt::string_view.
+    unimplemented();
+  }
+};
+
+template <>
+struct AnyOp<type::string_t> : StringOp<type::string_t> {};
+template <typename T>
+struct AnyOp<type::cpp_type<T, type::string_t>>
+    : StringOp<type::cpp_type<T, type::string_t>> {};
+template <>
+struct AnyOp<type::binary_t> : StringOp<type::binary_t> {};
+template <typename T>
+struct AnyOp<type::cpp_type<T, type::binary_t>>
+    : StringOp<type::cpp_type<T, type::binary_t>> {};
+
 } // namespace detail
 } // namespace op
 } // namespace thrift

@@ -48,6 +48,7 @@ positioned_parser = { path = "../../../parser/api/cargo/positioned_parser" }
 profile_rust = { path = "../../../utils/perf/cargo/profile" }
 rayon = "1.2"
 regex = "1.5.4"
+sem_diff = { path = "../../sem_diff" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 strum = "0.21"
 strum_macros = "0.21"

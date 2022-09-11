@@ -1477,6 +1477,7 @@ dependencies = [
  "profile_rust",
  "rayon",
  "regex",
+ "sem_diff",
  "serde_json",
  "strum",
  "strum_macros",
@@ -3148,6 +3149,21 @@ name = "scratch"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "96311ef4a16462c757bb6a39152c40f58f31cd2602a40fceb937e2bc34e6cbab"
+
+[[package]]
+name = "sem_diff"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ffi",
+ "hash",
+ "hhbc",
+ "hhbc-gen",
+ "itertools 0.10.3",
+ "log",
+ "newtype",
+ "once_cell",
+]
 
 [[package]]
 name = "semver"

@@ -32,5 +32,18 @@ TEST(GetTest, GetField) {
   EXPECT_EQ(*(op::get<type::field_id<1>, Tag>(actual)), "foo");
 }
 
+// O(N) impl for testing.
+template <typename T>
+FieldId findIdByName(const std::string& name) {
+  return find_by_field_id<T>([&](auto id) {
+    return op::get_name_v<decltype(id), T> == name ? id() : FieldId{};
+  });
+}
+
+TEST(GetTest, FindByOrdinal) {
+  EXPECT_EQ(findIdByName<type::UriStruct>("unknown"), FieldId{});
+  EXPECT_EQ(findIdByName<type::UriStruct>("scheme"), FieldId{1});
+}
+
 } // namespace
 } // namespace apache::thrift::op

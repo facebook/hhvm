@@ -44,10 +44,18 @@ template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr type::Ordinal get_ordinal_v =
     get_ordinal<Id, T>::value;
 
-// It calls the given function with ordinal<1> to ordinal<N>.
+// Calls the given function with ordinal<1> to ordinal<N>.
 template <typename T, typename F>
 void for_each_ordinal(F&& f) {
   detail::for_each_ordinal_impl(
+      std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
+}
+
+// Calls the given function with with ordinal<1> to ordinal<N>, returing the
+// first 'true' result produced.
+template <typename T, typename F>
+decltype(auto) find_by_ordinal(F&& f) {
+  return detail::find_by_ordinal_impl(
       std::forward<F>(f), std::make_integer_sequence<size_t, size_v<T>>{});
 }
 
@@ -65,10 +73,18 @@ template <typename Id, typename T>
 FOLLY_INLINE_VARIABLE constexpr FieldId get_field_id_v =
     get_field_id<Id, T>::value;
 
-// It calls the given function with each field_id<{id}> in Thrift class.
+// Calls the given function with each field_id<{id}> in Thrift class.
 template <typename T, typename F>
 void for_each_field_id(F&& f) {
   for_each_ordinal<T>([&](auto ord) { f(get_field_id<decltype(ord), T>{}); });
+}
+
+// Calls the given function with with each field_id<{id}>, returing the
+// first 'true' result produced.
+template <typename T, typename F>
+decltype(auto) find_by_field_id(F&& f) {
+  return find_by_ordinal<T>(
+      [&](auto ord) { return f(get_field_id<decltype(ord), T>{}); });
 }
 
 // Gets the ident, for example:
@@ -165,8 +181,23 @@ template <size_t... I, typename F>
 void for_each_ordinal_impl(F&& f, std::index_sequence<I...>) {
   // This doesn't use fold expression (from C++17) as this file is used in
   // C++14 environment as well.
-  int unused[] = {(f(field_ordinal<I + 1>()), 0)...};
+  int unused[] = {(f(type::detail::pos_to_ordinal<I>{}), 0)...};
   static_cast<void>(unused);
+}
+
+template <size_t... I, typename F>
+ord_result_t<F> find_by_ordinal_impl(F&& f, std::index_sequence<I...>) {
+  ord_result_t<F> result;
+  // TODO(afuller): Use a short circuting c++17 folding expression.
+  for_each_ordinal_impl(
+      [&](auto id) {
+        auto found = f(id);
+        if (static_cast<bool>(found)) {
+          result = std::move(found);
+        }
+      },
+      std::index_sequence<I...>{});
+  return result;
 }
 
 template <typename Id, typename T, typename>

@@ -76,8 +76,8 @@ template <typename Tag>
 struct TypeTagToTType<type::set<Tag>> {
   static constexpr TType value = TType::T_SET;
 };
-template <typename KeyTag, typename ValueTag>
-struct TypeTagToTType<type::map<KeyTag, ValueTag>> {
+template <typename KTag, typename ValueTag>
+struct TypeTagToTType<type::map<KTag, ValueTag>> {
   static constexpr TType value = TType::T_MAP;
 };
 template <typename Tag>

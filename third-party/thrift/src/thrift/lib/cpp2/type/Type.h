@@ -192,13 +192,12 @@ class Type : public detail::Wrap<TypeStruct> {
       return makeParamed<CTag>(Type::makeType<PTags>(PTags{})...);
     }
   };
-  template <typename ValTag>
-  struct Helper<list<ValTag>> : ParamedTypeHelper<list_c, ValTag> {};
-  template <typename KeyTag>
-  struct Helper<set<KeyTag>> : ParamedTypeHelper<set_c, KeyTag> {};
-  template <typename KeyTag, typename ValTag>
-  struct Helper<map<KeyTag, ValTag>>
-      : ParamedTypeHelper<map_c, KeyTag, ValTag> {};
+  template <typename VTag>
+  struct Helper<list<VTag>> : ParamedTypeHelper<list_c, VTag> {};
+  template <typename KTag>
+  struct Helper<set<KTag>> : ParamedTypeHelper<set_c, KTag> {};
+  template <typename KTag, typename VTag>
+  struct Helper<map<KTag, VTag>> : ParamedTypeHelper<map_c, KTag, VTag> {};
 
   // Skip through adapters, cpp_type, etc.
   template <typename Adapter, typename Tag>

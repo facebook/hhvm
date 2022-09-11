@@ -98,14 +98,14 @@ struct GetNameParamed<CTag, T1, T2> {
   }
 };
 
-template <typename ValTag>
-struct GetName<list<ValTag>> : GetNameParamed<list_c, ValTag> {};
+template <typename VTag>
+struct GetName<list<VTag>> : GetNameParamed<list_c, VTag> {};
 
-template <typename KeyTag>
-struct GetName<set<KeyTag>> : GetNameParamed<set_c, KeyTag> {};
+template <typename KTag>
+struct GetName<set<KTag>> : GetNameParamed<set_c, KTag> {};
 
-template <typename KeyTag, typename ValTag>
-struct GetName<map<KeyTag, ValTag>> : GetNameParamed<map_c, KeyTag, ValTag> {};
+template <typename KTag, typename VTag>
+struct GetName<map<KTag, VTag>> : GetNameParamed<map_c, KTag, VTag> {};
 
 template <typename T>
 struct PrettyName {

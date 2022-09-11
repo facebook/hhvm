@@ -74,11 +74,11 @@ template <typename T> // the generated C++ type
 struct exception_t : exception_c {};
 
 // Parameterized types.
-template <typename ValTag>
+template <typename VTag>
 struct list : list_c {};
-template <typename KeyTag>
+template <typename KTag>
 struct set : set_c {};
-template <typename KeyTag, typename ValTag>
+template <typename KTag, typename VTag>
 struct map : map_c {};
 
 // Extra compile-time metadata.

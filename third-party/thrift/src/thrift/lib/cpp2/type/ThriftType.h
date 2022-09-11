@@ -161,15 +161,13 @@ struct is_concrete<exception_t<T>> : std::true_type {};
 template <typename T>
 struct is_concrete<service_t<T>> : std::true_type {};
 
-template <typename ValTag>
-struct is_concrete<list<ValTag>> : folly::bool_constant<is_concrete_v<ValTag>> {
-};
-template <typename KeyTag>
-struct is_concrete<set<KeyTag>> : folly::bool_constant<is_concrete_v<KeyTag>> {
-};
-template <typename KeyTag, typename ValTag>
-struct is_concrete<map<KeyTag, ValTag>>
-    : folly::bool_constant<is_concrete_v<KeyTag> && is_concrete_v<ValTag>> {};
+template <typename VTag>
+struct is_concrete<list<VTag>> : folly::bool_constant<is_concrete_v<VTag>> {};
+template <typename KTag>
+struct is_concrete<set<KTag>> : folly::bool_constant<is_concrete_v<KTag>> {};
+template <typename KTag, typename VTag>
+struct is_concrete<map<KTag, VTag>>
+    : folly::bool_constant<is_concrete_v<KTag> && is_concrete_v<VTag>> {};
 
 template <typename Adapter, typename Tag>
 struct is_concrete<adapted<Adapter, Tag>>
@@ -220,16 +218,16 @@ struct is_thrift_type_tag<map_c> : std::true_type {};
 template <>
 struct is_thrift_type_tag<service_c> : std::true_type {};
 
-template <typename ValTag>
-struct is_thrift_type_tag<list<ValTag>>
-    : folly::bool_constant<is_thrift_type_tag_v<ValTag>> {};
-template <typename KeyTag>
-struct is_thrift_type_tag<set<KeyTag>>
-    : folly::bool_constant<is_thrift_type_tag_v<KeyTag>> {};
-template <typename KeyTag, typename ValTag>
-struct is_thrift_type_tag<map<KeyTag, ValTag>>
+template <typename VTag>
+struct is_thrift_type_tag<list<VTag>>
+    : folly::bool_constant<is_thrift_type_tag_v<VTag>> {};
+template <typename KTag>
+struct is_thrift_type_tag<set<KTag>>
+    : folly::bool_constant<is_thrift_type_tag_v<KTag>> {};
+template <typename KTag, typename VTag>
+struct is_thrift_type_tag<map<KTag, VTag>>
     : folly::bool_constant<
-          is_thrift_type_tag_v<KeyTag> && is_thrift_type_tag_v<ValTag>> {};
+          is_thrift_type_tag_v<KTag> && is_thrift_type_tag_v<VTag>> {};
 
 template <typename Adapter, typename Tag>
 struct is_thrift_type_tag<adapted<Adapter, Tag>>

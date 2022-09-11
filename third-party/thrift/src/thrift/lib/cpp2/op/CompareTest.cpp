@@ -176,10 +176,10 @@ TEST(CompareTest, MapWithDouble) {
 }
 
 // Sets and maps that use representational uniqueness.
-template <typename KeyTag, typename T = type::native_type<KeyTag>>
-using InternSet = std::unordered_set<T, Hash<KeyTag>, IdenticalTo<KeyTag>>;
-template <typename KeyTag>
-using InternSetTag = type::cpp_type<InternSet<KeyTag>, type::set<KeyTag>>;
+template <typename KTag, typename T = type::native_type<KTag>>
+using InternSet = std::unordered_set<T, Hash<KTag>, IdenticalTo<KTag>>;
+template <typename KTag>
+using InternSetTag = type::cpp_type<InternSet<KTag>, type::set<KTag>>;
 
 TEST(CompareTest, InternSet_Dbl) {
   using Tag = InternSetTag<type::double_t>;
@@ -197,14 +197,14 @@ TEST(CompareTest, InternSet_Dbl) {
 }
 
 template <
-    typename KeyTag,
-    typename ValTag,
-    typename K = type::native_type<KeyTag>,
-    typename V = type::native_type<ValTag>>
-using InternMap = std::unordered_map<K, V, Hash<KeyTag>, IdenticalTo<KeyTag>>;
-template <typename KeyTag, typename ValTag>
+    typename KTag,
+    typename VTag,
+    typename K = type::native_type<KTag>,
+    typename V = type::native_type<VTag>>
+using InternMap = std::unordered_map<K, V, Hash<KTag>, IdenticalTo<KTag>>;
+template <typename KTag, typename VTag>
 using InternMapTag =
-    type::cpp_type<InternMap<KeyTag, ValTag>, type::map<KeyTag, ValTag>>;
+    type::cpp_type<InternMap<KTag, VTag>, type::map<KTag, VTag>>;
 
 TEST(CompareTest, InternMap_Flt) {
   using Tag = InternMapTag<type::float_t, type::float_t>;

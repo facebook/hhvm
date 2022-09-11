@@ -261,8 +261,8 @@ struct CompareWith<
 
 // Identical for lists.
 template <
-    typename ValTag,
-    typename Tag = type::list<ValTag>,
+    typename VTag,
+    typename Tag = type::list<VTag>,
     typename T = type::native_type<Tag>>
 struct ListIdenticalTo {
   bool operator()(const T& lhs, const T& rhs) const {
@@ -273,18 +273,18 @@ struct ListIdenticalTo {
   }
 
  protected:
-  IdenticalTo<ValTag> cmp;
+  IdenticalTo<VTag> cmp;
 };
-template <typename ValTag>
-struct IdenticalTo<type::list<ValTag>> : ListIdenticalTo<ValTag> {};
-template <typename T, typename ValTag>
-struct IdenticalTo<type::cpp_type<T, type::list<ValTag>>>
-    : ListIdenticalTo<ValTag, type::cpp_type<T, type::list<ValTag>>> {};
+template <typename VTag>
+struct IdenticalTo<type::list<VTag>> : ListIdenticalTo<VTag> {};
+template <typename T, typename VTag>
+struct IdenticalTo<type::cpp_type<T, type::list<VTag>>>
+    : ListIdenticalTo<VTag, type::cpp_type<T, type::list<VTag>>> {};
 
 // Identical for sets.
 template <
-    typename KeyTag,
-    typename Tag = type::set<KeyTag>,
+    typename KTag,
+    typename Tag = type::set<KTag>,
     typename T = type::native_type<Tag>>
 struct SetIdenticalTo {
   bool operator()(const T& lhs, const T& rhs) const {
@@ -295,7 +295,7 @@ struct SetIdenticalTo {
     auto hashMap = createHashMap(lhs);
     // Check that all entries match.
     for (const auto& key : rhs) {
-      if (!inRange(key, hashMap.equal_range(op::hash<KeyTag>(key)))) {
+      if (!inRange(key, hashMap.equal_range(op::hash<KTag>(key)))) {
         return false;
       }
     }
@@ -307,7 +307,7 @@ struct SetIdenticalTo {
   static auto createHashMap(const T& set) {
     std::unordered_multimap<size_t, typename T::const_pointer> hashMap;
     for (const auto& key : set) {
-      hashMap.emplace(op::hash<KeyTag>(key), &key);
+      hashMap.emplace(op::hash<KTag>(key), &key);
     }
     return hashMap;
   }
@@ -316,24 +316,24 @@ struct SetIdenticalTo {
   template <typename K, typename R>
   static bool inRange(const K& key, const R& range) {
     for (auto itr = range.first; itr != range.second; ++itr) {
-      if (IdenticalTo<KeyTag>()(*itr->second, key)) {
+      if (IdenticalTo<KTag>()(*itr->second, key)) {
         return true;
       }
     }
     return false;
   }
 };
-template <typename KeyTag>
-struct IdenticalTo<type::set<KeyTag>> : SetIdenticalTo<KeyTag> {};
-template <typename T, typename KeyTag>
-struct IdenticalTo<type::cpp_type<T, type::set<KeyTag>>>
-    : SetIdenticalTo<KeyTag, type::cpp_type<T, type::set<KeyTag>>> {};
+template <typename KTag>
+struct IdenticalTo<type::set<KTag>> : SetIdenticalTo<KTag> {};
+template <typename T, typename KTag>
+struct IdenticalTo<type::cpp_type<T, type::set<KTag>>>
+    : SetIdenticalTo<KTag, type::cpp_type<T, type::set<KTag>>> {};
 
 // Identical for maps.
 template <
-    typename KeyTag,
-    typename ValTag,
-    typename Tag = type::map<KeyTag, ValTag>,
+    typename KTag,
+    typename VTag,
+    typename Tag = type::map<KTag, VTag>,
     typename T = type::native_type<Tag>>
 struct MapIdenticalTo {
   bool operator()(const T& lhs, const T& rhs) const {
@@ -344,7 +344,7 @@ struct MapIdenticalTo {
     auto hashMap = createHashMap(lhs);
     // Check that all entries match.
     for (const auto& entry : rhs) {
-      if (!inRange(entry, hashMap.equal_range(op::hash<KeyTag>(entry.first)))) {
+      if (!inRange(entry, hashMap.equal_range(op::hash<KTag>(entry.first)))) {
         return false;
       }
     }
@@ -356,7 +356,7 @@ struct MapIdenticalTo {
   static auto createHashMap(const T& map) {
     std::unordered_multimap<size_t, typename T::const_pointer> hashMap;
     for (const auto& entry : map) {
-      hashMap.emplace(op::hash<KeyTag>(entry.first), &entry);
+      hashMap.emplace(op::hash<KTag>(entry.first), &entry);
     }
     return hashMap;
   }
@@ -365,23 +365,19 @@ struct MapIdenticalTo {
   template <typename E, typename R>
   static bool inRange(const E& entry, const R& range) {
     for (auto itr = range.first; itr != range.second; ++itr) {
-      if (IdenticalTo<KeyTag>()(itr->second->first, entry.first)) {
+      if (IdenticalTo<KTag>()(itr->second->first, entry.first)) {
         // Found the right key! The values must match.
-        return IdenticalTo<ValTag>()(itr->second->second, entry.second);
+        return IdenticalTo<VTag>()(itr->second->second, entry.second);
       }
     }
     return false;
   }
 };
-template <typename KeyTag, typename ValTag>
-struct IdenticalTo<type::map<KeyTag, ValTag>> : MapIdenticalTo<KeyTag, ValTag> {
-};
-template <typename T, typename KeyTag, typename ValTag>
-struct IdenticalTo<type::cpp_type<T, type::map<KeyTag, ValTag>>>
-    : MapIdenticalTo<
-          KeyTag,
-          ValTag,
-          type::cpp_type<T, type::map<KeyTag, ValTag>>> {};
+template <typename KTag, typename VTag>
+struct IdenticalTo<type::map<KTag, VTag>> : MapIdenticalTo<KTag, VTag> {};
+template <typename T, typename KTag, typename VTag>
+struct IdenticalTo<type::cpp_type<T, type::map<KTag, VTag>>>
+    : MapIdenticalTo<KTag, VTag, type::cpp_type<T, type::map<KTag, VTag>>> {};
 
 // TODO(dokwon): Support field_ref types.
 template <typename Tag, typename Context>

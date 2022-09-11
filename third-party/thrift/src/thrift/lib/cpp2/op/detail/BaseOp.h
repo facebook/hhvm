@@ -43,9 +43,13 @@ RuntimeType getAnyType() {
   return RuntimeType::create<T>(getAnyTypeInfo<Tag>());
 }
 
+// Compile-time and type-erased Thrift operator implementations.
+template <typename Tag, typename = void>
+struct AnyOp;
+
 // Ops all Thrift types support.
 template <typename Tag>
-struct BaseAnyOp : type::detail::BaseErasedOp {
+struct BaseOp : type::detail::BaseErasedOp {
   // Blind convert the pointer to the native type.
   using T = type::native_type<Tag>;
   static T& ref(void* ptr) { return *static_cast<T*>(ptr); }

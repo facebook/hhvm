@@ -144,7 +144,6 @@ members = [
     "src/utils/stack_limit",
     "src/utils/test",
     "src/utils/test/arena_deserializer",
-    "test",
     "test/facebook/ffp_www_perf",
     "test/facebook/hhbc_www_perf",
     "test/facebook/hh_decl",

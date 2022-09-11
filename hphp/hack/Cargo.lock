@@ -1411,15 +1411,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "hack_integration_tests"
-version = "3.49.0"
-dependencies = [
- "clap 2.33.3",
- "facts_rust",
- "oxidized",
-]
-
-[[package]]
 name = "hack_macro"
 version = "0.0.0"
 dependencies = [

@@ -382,10 +382,10 @@ t_type_ref patch_generator::find_patch_type(
   // Give it a stable name.
   std::string suffix = "Field" + std::to_string(field.id()) + "Patch";
   PatchGen gen{{annot, gen_suffix_struct(annot, parent, suffix.c_str())}};
-  // All value patches have an assign field.
+  // All value patches have an assign and clear field.
   gen.assign(field.type());
+  gen.clear();
   if (auto* container = dynamic_cast<const t_container*>(type)) {
-    gen.clear();
     switch (container->container_type()) {
       case t_container::type::t_list:
         // TODO(afuller): support 'patch'.

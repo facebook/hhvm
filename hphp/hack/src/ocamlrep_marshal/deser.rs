@@ -331,63 +331,48 @@ impl intern_state<'_> {
 
 #[inline]
 unsafe fn read8u(is: &mut intern_state<'_>) -> c_uchar {
-    let fresh0 = is.intern_src;
+    let res = u8::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(1);
-    *fresh0
+    res
 }
 
 #[inline]
 unsafe fn read8s(is: &mut intern_state<'_>) -> c_schar {
-    let fresh1 = is.intern_src;
+    let res = i8::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(1);
-    *fresh1 as c_schar
+    res
 }
 
 #[inline]
 unsafe fn read16u(is: &mut intern_state<'_>) -> uint16_t {
-    let res: uint16_t = (((*is.intern_src.offset(0) as c_int) << 8)
-        + *is.intern_src.offset(1) as c_int) as uint16_t;
+    let res = u16::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(2);
     res
 }
 
 #[inline]
 unsafe fn read16s(is: &mut intern_state<'_>) -> int16_t {
-    let res: int16_t =
-        (((*is.intern_src.offset(0) as c_int) << 8) + *is.intern_src.offset(1) as c_int) as int16_t;
+    let res = i16::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(2);
     res
 }
 
 #[inline]
 unsafe fn read32u(is: &mut intern_state<'_>) -> uint32_t {
-    let res: uint32_t = ((*is.intern_src.offset(0) as uint32_t) << 24)
-        + (((*is.intern_src.offset(1) as c_int) << 16) as c_uint)
-        + (((*is.intern_src.offset(2) as c_int) << 8) as c_uint)
-        + (*is.intern_src.offset(3) as c_uint);
+    let res = u32::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(4);
     res
 }
 
 #[inline]
 unsafe fn read32s(is: &mut intern_state<'_>) -> int32_t {
-    let res: int32_t = (((*is.intern_src.offset(0) as uint32_t) << 24 as c_int)
-        + (((*is.intern_src.offset(1) as c_int) << 16) as c_uint)
-        + (((*is.intern_src.offset(2) as c_int) << 8) as c_uint)
-        + (*is.intern_src.offset(3) as c_uint)) as int32_t;
+    let res = i32::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(4);
     res
 }
 
 unsafe fn read64u(is: &mut intern_state<'_>) -> uintnat {
-    let res: uintnat = ((*is.intern_src.offset(0) as uintnat) << 56)
-        + ((*is.intern_src.offset(1) as uintnat) << 48)
-        + ((*is.intern_src.offset(2) as uintnat) << 40)
-        + ((*is.intern_src.offset(3) as uintnat) << 32)
-        + ((*is.intern_src.offset(4) as uintnat) << 24)
-        + ((*is.intern_src.offset(5) as uintnat) << 16)
-        + ((*is.intern_src.offset(6) as uintnat) << 8)
-        + (*is.intern_src.offset(7) as uintnat);
+    let res = u64::from_be_bytes(*(is.intern_src as *const _));
     is.intern_src = is.intern_src.offset(8);
     res
 }

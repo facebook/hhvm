@@ -90,18 +90,24 @@ let test_sharing () =
     ()
 
 let () =
+  assert_eq 'c';
   assert_eq 5;
   assert_eq 3.14;
+  assert_eq (-5);
+  assert_eq (-3.14);
   assert_eq (3, 3);
   assert_eq "a";
   assert_eq (Some 42, "foo");
 
-  test_round_trip string_of_int 5;
+  test_round_trip (fun c -> String.make 1 c) 'c';
   test_round_trip string_of_float 3.14;
+  test_round_trip string_of_int (-5);
+  test_round_trip string_of_float (-3.14);
   test_round_trip show_pair_int_int (3, 3);
   test_round_trip (Printf.sprintf "%S") "a";
   test_round_trip show_pair_opt_int_string (Some 42, "foo");
   test_round_trip show_float_array (Caml.Array.make 3 3.14);
+  test_round_trip show_float_array (Caml.Array.make 3 (-3.14));
   test_round_trip show_tree tree;
 
   test_sharing ();

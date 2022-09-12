@@ -793,7 +793,12 @@ void ThriftServer::setupThreadManager() {
   LOG(INFO) << "Resource pools:" << resourcePoolSet().describe();
 }
 
-void ThriftServer::runtimeResourcePoolsChecks() {
+// Return true if the runtime checks pass and using resource pools is an option.
+bool ThriftServer::runtimeResourcePoolsChecks() {
+  if (runtimeDisableResourcePoolsSet()) {
+    // No need to check if we've already set this.
+    return false;
+  }
   // If this is called too early we can't run our other checks.
   if (!getProcessorFactory()) {
     runtimeServerActions_.setupThreadManagerBeforeHandler = true;
@@ -846,6 +851,8 @@ void ThriftServer::runtimeResourcePoolsChecks() {
     runtimeServerActions_.activeRequestTrackingDisabled = true;
     runtimeDisableResourcePoolsDeprecated();
   }
+
+  return !runtimeDisableResourcePoolsSet();
 }
 
 void ThriftServer::ensureResourcePools() {

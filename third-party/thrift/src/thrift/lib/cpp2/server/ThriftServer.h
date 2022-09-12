@@ -869,9 +869,10 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   /**
    * Apply various runtime checks to determine whether we can use resource pools
-   * in this service
+   * in this service. Returns true if resource pools is permitted by runtime
+   * checks.
    */
-  void runtimeResourcePoolsChecks();
+  bool runtimeResourcePoolsChecks();
 
   /**
    * Ensure that this Thrift Server has ResourcePools set up. If there is

@@ -195,11 +195,17 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     if (runtimeServerActions_.resourcePoolRuntimeDisabled) {
       return;
     }
-    if (runtimeServerActions_.resourcePoolEnablementLocked) {
-      LOG(FATAL) << "Trying to disable ResourcePool after it's locked";
+    if (runtimeServerActions_.resourcePoolEnablementLocked &&
+        runtimeServerActions_.resourcePoolEnabled) {
+      LOG(FATAL)
+          << "Trying to disable ResourcePool after it's locked (enabled)";
       return;
     }
     runtimeServerActions_.resourcePoolRuntimeDisabled = true;
+  }
+
+  bool runtimeDisableResourcePoolsSet() {
+    return runtimeServerActions_.resourcePoolRuntimeDisabled;
   }
 
   // Used to enable resource pool at run time. If resource
@@ -209,8 +215,10 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     if (runtimeServerActions_.resourcePoolRuntimeRequested) {
       return;
     }
-    if (runtimeServerActions_.resourcePoolEnablementLocked) {
-      LOG(FATAL) << "Trying to enable ResourcePool after it's locked";
+    if (runtimeServerActions_.resourcePoolEnablementLocked &&
+        !runtimeServerActions_.resourcePoolEnabled) {
+      LOG(FATAL)
+          << "Trying to enable ResourcePool after it's locked (disabled)";
       return;
     }
     runtimeServerActions_.resourcePoolRuntimeRequested = true;

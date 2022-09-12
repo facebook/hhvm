@@ -149,26 +149,40 @@ let make_return_type
         (Reason.Rret_fun_kind_from_decl (p, Ast_defs.FAsync))
         ty
     in
-    let localize ~wrap env dty =
-      let et_enforced = Typing_enforceability.get_enforcement env dty in
-      (match et_enforced with
-      | Unenforced -> Typing_log.log_pessimise_return env hint_pos
-      | Enforced -> ());
-      let ((env, ty_err_opt), et_type) =
-        Typing_phase.localize ~ety_env env dty
-      in
-      Option.iter ~f:Errors.add_typing_error ty_err_opt;
-      (* If return type t is enforced we permit values of type ~t to be returned *)
-      let ety =
-        Typing_utils.make_like_if_enforced env { et_enforced; et_type }
-      in
-      let et_type =
-        if wrap then
-          wrap_awaitable (get_pos et_type) ety.et_type
-        else
-          ety.et_type
-      in
-      (env, { ety with et_type })
+    let localize ~wrap (env : env) (dty : decl_ty) =
+      if TypecheckerOptions.everything_sdt env.genv.tcopt then (
+        (* Under implicit pessimisation, all unenforceable return types get pessimised to a like type,
+           and all enforceable ones for the purpose of checking the function body also get a like type
+           when the function is __SupportDynamicType, which all functions are during implicit pessimisation.
+           Hence we don't need to check enforcement here. Don't pessimise void. *)
+        let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        let et_type =
+          match get_node ty with
+          | Tprim Aast.Tvoid -> ty
+          | _ -> Typing_utils.make_like env ty
+        in
+        (env, { et_type; et_enforced = Unenforced })
+      ) else
+        let et_enforced = Typing_enforceability.get_enforcement env dty in
+        (match et_enforced with
+        | Unenforced -> Typing_log.log_pessimise_return env hint_pos
+        | Enforced -> ());
+        let ((env, ty_err_opt), et_type) =
+          Typing_phase.localize ~ety_env env dty
+        in
+        Option.iter ~f:Errors.add_typing_error ty_err_opt;
+        (* If return type t is enforced we permit values of type ~t to be returned *)
+        let ety =
+          Typing_utils.make_like_if_enforced env { et_enforced; et_type }
+        in
+        let et_type =
+          if wrap then
+            wrap_awaitable (get_pos et_type) ety.et_type
+          else
+            ety.et_type
+        in
+        (env, { ety with et_type })
     in
     (match (Env.get_fn_kind env, deref ty) with
     | (Ast_defs.FAsync, (_, Tapply ((_, class_name), [inner_ty])))

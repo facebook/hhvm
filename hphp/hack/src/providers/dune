@@ -94,6 +94,7 @@
   counters
   decl_counters
   decl_class
+  decl_enforceability
   decl_service_client
   direct_decl_utils
   provider_backend
@@ -230,7 +231,7 @@
  (modules typedef_provider)
  (libraries
   decl_counters
-  decl_nast 
-  direct_decl_utils 
-  provider_context 
+  decl_nast
+  direct_decl_utils
+  provider_context
   naming_provider))

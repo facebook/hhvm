@@ -1079,10 +1079,17 @@ let class_var_def ~is_static cls env cv =
           ~ignore_errors:false
           decl_cty
       in
-      (match cty.et_enforced with
-      | Unenforced ->
-        Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id)
-      | Enforced -> ());
+      let cty =
+        match cty.et_enforced with
+        | Unenforced ->
+          if TypecheckerOptions.everything_sdt env.genv.tcopt then
+            { cty with et_type = Typing_utils.make_like env cty.et_type }
+          else (
+            Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
+            cty
+          )
+        | Enforced -> cty
+      in
       Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let expected =
         Some (ExpectedTy.make_and_allow_coercion cv.cv_span Reason.URhint cty)

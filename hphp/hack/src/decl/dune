@@ -90,6 +90,7 @@
  (libraries
   ast_provider
   decl_class_elements
+  decl_enforceability
   decl_enum
   decl_env
   decl_fun_utils
@@ -172,6 +173,11 @@
  (libraries pos_or_decl typing_defs utils_core)
  (preprocess
   (pps ppx_deriving.std)))
+
+(library
+  (name decl_enforceability)
+  (modules decl_enforceability)
+  (libraries decl_env shallow_classes_provider typedef_provider naming_provider))
 
 (library
  (name decl_enum)

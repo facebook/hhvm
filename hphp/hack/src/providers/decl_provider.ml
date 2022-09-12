@@ -151,6 +151,16 @@ let get_class
       | Some v -> Some (counter, v, Some ctx)
     end
 
+let maybe_pessimise_fun_decl ctx fun_decl =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    Typing_defs.
+      {
+        fun_decl with
+        fe_type = Decl_enforceability.pessimise_fun_type ctx fun_decl.fe_type;
+      }
+  else
+    fun_decl
+
 let declare_fun_in_file_DEPRECATED
     (ctx : Provider_context.t) (file : Relative_path.t) (name : fun_key) :
     Typing_defs.fun_elt =
@@ -164,7 +174,8 @@ let get_fun
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (fun_name : fun_key) : fun_decl option =
-  Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
+  Option.map ~f:(maybe_pessimise_fun_decl ctx)
+  @@ Decl_counters.count_decl Decl_counters.Fun ?tracing_info fun_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_fun fun_name)
@@ -311,11 +322,22 @@ let declare_const_in_file_DEPRECATED
     decl
   | None -> err_not_found file name
 
+let maybe_pessimise_gconst_decl ctx gconst_decl =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    Typing_defs.
+      {
+        gconst_decl with
+        cd_type = Decl_enforceability.pessimise_type ctx gconst_decl.cd_type;
+      }
+  else
+    gconst_decl
+
 let get_gconst
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (gconst_name : gconst_key) : gconst_decl option =
-  Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
+  Option.map ~f:(maybe_pessimise_gconst_decl ctx)
+  @@ Decl_counters.count_decl Decl_counters.GConst ?tracing_info gconst_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_gconst gconst_name)

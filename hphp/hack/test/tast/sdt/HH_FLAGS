@@ -1,2 +1,4 @@
 --tast
 --everything-sdt
+--like-type-hints
+--enable-sound-dynamic-type

@@ -426,7 +426,7 @@ let build_prop_sprop_ty
   let ty =
     match sp.sp_type with
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> ty'
+    | Some ty' -> Decl_enforceability.maybe_pessimise_type ctx ty'
   in
   (if member_heaps_enabled ctx then
     if is_static then
@@ -625,7 +625,7 @@ let build_method_fun_elt
       fe_pos = pos;
       fe_internal = false;
       fe_deprecated = None;
-      fe_type = m.sm_type;
+      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx m.sm_type;
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
     }

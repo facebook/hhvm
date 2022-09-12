@@ -286,27 +286,6 @@ unsafe fn make_free_blocks(p: *mut value, size: mlsize_t, do_merge: c_int, color
         .expect("non-null function pointer")(p, size, do_merge, color);
 }
 
-unsafe fn Reverse_64(dest: *mut c_char, src: *mut c_char) {
-    let mut _p: *mut c_char = std::ptr::null_mut::<c_char>();
-    let mut _q: *mut c_char = std::ptr::null_mut::<c_char>();
-    let mut _a: c_char = 0;
-    let mut _b: c_char = 0;
-    _p = src as *mut c_char;
-    _q = dest as *mut c_char;
-    _a = *_p.offset(0);
-    _b = *_p.offset(1);
-    *_q.offset(0) = *_p.offset(7);
-    *_q.offset(1) = *_p.offset(6);
-    *_q.offset(7) = _a;
-    *_q.offset(6) = _b;
-    _a = *_p.offset(2);
-    _b = *_p.offset(3);
-    *_q.offset(2) = *_p.offset(5);
-    *_q.offset(3) = *_p.offset(4);
-    *_q.offset(5) = _a;
-    *_q.offset(4) = _b
-}
-
 struct intern_state<'a> {
     intern_src: *mut c_uchar,
     // Reading pointer in block holding input data.
@@ -456,19 +435,11 @@ unsafe fn readfloat(is: &mut intern_state<'_>, dest: *mut c_double, code: c_uint
     }
     readblock(is, dest as *mut c_void, 8 as intnat);
 
-    // Fix up endianness, if needed
-    if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
-        // Host is big-endian; fix up if data read is little-endian
-        if code != CODE_DOUBLE_BIG as c_uint {
-            Reverse_64(dest as *mut c_char, dest as *mut c_char)
-        }
-    } else if ARCH_FLOAT_ENDIANNESS == 0x01234567 {
-        // Host is little-endian; fix up if data read is big-endian
-        if code != CODE_DOUBLE_LITTLE as c_uint {
-            Reverse_64(dest as *mut c_char, dest as *mut c_char)
-        };
-    } else {
-        unimplemented!()
+    let bytes = *(dest as *const [u8; 8]);
+    *dest = match code as c_int {
+        CODE_DOUBLE_BIG => f64::from_be_bytes(bytes),
+        CODE_DOUBLE_LITTLE => f64::from_le_bytes(bytes),
+        _ => unreachable!(),
     }
 }
 
@@ -479,35 +450,16 @@ unsafe fn readfloats(is: &mut intern_state<'_>, dest: *mut c_double, len: mlsize
         caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
     }
     readblock(is, dest as *mut c_void, (len * 8) as intnat);
-    // Fix up endianness, if needed
-    if ARCH_FLOAT_ENDIANNESS == 0x76543210 {
-        // Host is big-endian; fix up if data read is little-endian
-        if code != CODE_DOUBLE_ARRAY8_BIG as c_uint && code != CODE_DOUBLE_ARRAY32_BIG as c_uint {
-            let mut i = 0;
-            while i < len {
-                Reverse_64(
-                    dest.offset(i as isize) as *mut c_char,
-                    dest.offset(i as isize) as *mut c_char,
-                );
-                i += 1
-            }
-        }
-    } else if ARCH_FLOAT_ENDIANNESS == 0x01234567 {
-        // Host is little-endian; fix up if data read is big-endian
-        if code != CODE_DOUBLE_ARRAY8_LITTLE as c_uint
-            && code != CODE_DOUBLE_ARRAY32_LITTLE as c_uint
-        {
-            let mut i = 0;
-            while i < len {
-                Reverse_64(
-                    dest.offset(i as isize) as *mut c_char,
-                    dest.offset(i as isize) as *mut c_char,
-                );
-                i += 1
-            }
-        }
-    } else {
-        unimplemented!()
+
+    let mut i = 0;
+    while i < len as usize {
+        let bytes = *(dest.add(i) as *const [u8; 8]);
+        *(dest.add(i)) = match code as c_int {
+            CODE_DOUBLE_ARRAY8_BIG | CODE_DOUBLE_ARRAY32_BIG => f64::from_be_bytes(bytes),
+            CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY32_LITTLE => f64::from_le_bytes(bytes),
+            _ => unreachable!(),
+        };
+        i += 1
     }
 }
 

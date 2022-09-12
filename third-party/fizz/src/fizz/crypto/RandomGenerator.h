@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include <folly/io/IOBuf.h>
 #include <sodium/randombytes.h>
 #include <array>
 
@@ -36,4 +37,18 @@ struct RandomNumGenerator {
     return random;
   }
 };
+
+struct RandomBufGenerator {
+  explicit RandomBufGenerator(size_t c) : count(c) {}
+  std::unique_ptr<folly::IOBuf> generateRandom() {
+    auto random = folly::IOBuf::create(count);
+    if (count > 0) {
+      randombytes_buf(random->writableData(), count);
+      random->append(count);
+    }
+    return random;
+  }
+  size_t count;
+};
+
 } // namespace fizz

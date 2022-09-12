@@ -241,6 +241,10 @@ class MockFactory : public OpenSSLFactory {
     return _makePeerCert(entry, leaf);
   }
 
+  MOCK_CONST_METHOD1(
+      makeRandomBytes,
+      std::unique_ptr<folly::IOBuf>(size_t count));
+
   void setDefaults() {
     ON_CALL(*this, makePlaintextReadRecordLayer())
         .WillByDefault(InvokeWithoutArgs([]() {
@@ -292,6 +296,12 @@ class MockFactory : public OpenSSLFactory {
     ON_CALL(*this, makeRandom()).WillByDefault(InvokeWithoutArgs([]() {
       Random random;
       random.fill(0x44);
+      return random;
+    }));
+    ON_CALL(*this, makeRandomBytes(_)).WillByDefault(Invoke([](size_t count) {
+      auto random = folly::IOBuf::create(count);
+      memset(random->writableData(), 0x44, count);
+      random->append(count);
       return random;
     }));
     ON_CALL(*this, makeTicketAgeAdd()).WillByDefault(InvokeWithoutArgs([]() {

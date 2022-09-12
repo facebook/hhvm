@@ -30,5 +30,14 @@ TEST(RandomGeneratorTest, TestRandomUInt32) {
   auto random = RandomNumGenerator<uint32_t>().generateRandom();
   EXPECT_EQ(random, 0x44444444);
 }
+
+TEST(RandomGeneratorTest, TestRandomBuf) {
+  useMockRandom();
+  auto random = RandomBufGenerator(32).generateRandom();
+  auto expected = folly::IOBuf::create(32);
+  memset(expected->writableData(), 0x44, 32);
+  expected->append(32);
+  EXPECT_TRUE(folly::IOBufEqualTo()(random, expected));
+}
 } // namespace test
 } // namespace fizz

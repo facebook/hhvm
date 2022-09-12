@@ -104,6 +104,38 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
   checkECHConfigContent(echConfigContent);
 }
 
+TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
+  auto json = folly::parseJson(R"(
+      {
+        "echconfigs": [{
+                "version": "Draft10",
+                "public_name": "publicname",
+                "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
+                "kem_id": "secp256r1",
+                "cipher_suites": [{
+                        "kdf_id": "Sha256",
+                        "aead_id": "TLS_AES_128_GCM_SHA256"
+                }],
+                "maximum_name_length": "0x03E8",
+                "extensions": "002c00080006636f6f6b6965",
+                "config_id": "0x90"
+        }]
+      }
+  )");
+  folly::Optional<std::vector<ech::ECHConfig>> echConfigs =
+      parseECHConfigs(json);
+
+  ASSERT_TRUE(echConfigs.has_value());
+
+  ASSERT_EQ(echConfigs->size(), 1);
+  auto echConfig = echConfigs.value()[0];
+  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft10);
+
+  folly::io::Cursor cursor(echConfig.ech_config_content.get());
+  auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
+  checkECHConfigContent(echConfigContent);
+}
+
 TEST(FizzCommandCommonTest, TestParseECHConfigsFailure) {
   auto json = folly::parseJson(R"(
       {
@@ -155,6 +187,21 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {
   auto wrongKEMJson = testJson;
   wrongKEMJson["echconfigs"][0]["kem_id"] = "secp48398";
   ASSERT_THROW(parseECHConfigs(wrongKEMJson), std::runtime_error);
+
+  // Test that an exception is thrown when you try to pass a non-numeric string
+  // for config_id
+  auto badConfigIdJson = testJson;
+  badConfigIdJson["echconfigs"][0]["config_id"] = "number";
+  ASSERT_THROW(parseECHConfigs(badConfigIdJson), std::runtime_error);
+
+  // Test that an exception is thrown when the numbers provided cannot be
+  // represented using the numeric type.
+  auto tooBigConfigIdJson = testJson;
+  tooBigConfigIdJson["echconfigs"][0]["config_id"] = "0x100";
+  ASSERT_THROW(parseECHConfigs(tooBigConfigIdJson), std::runtime_error);
+  auto tooBigMaxLenJson = testJson;
+  tooBigMaxLenJson["echconfigs"][0]["maximum_name_length"] = "0x10000";
+  ASSERT_THROW(parseECHConfigs(tooBigMaxLenJson), std::runtime_error);
 }
 
 TEST(FizzCommandCommonTest, TestReadECHConfigsJsonException) {

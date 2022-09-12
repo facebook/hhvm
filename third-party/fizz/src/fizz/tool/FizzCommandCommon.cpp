@@ -186,6 +186,20 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     throw std::runtime_error("Input doesn't match any Aead id");
   };
 
+  auto strToNum = [](const std::string& str) {
+    size_t processed;
+    try {
+      auto num = std::stoul(str, &processed, 0);
+      if (processed != str.size()) {
+        // The outer catch swallows it anyway
+        throw std::exception();
+      }
+      return num;
+    } catch (...) {
+      throw std::runtime_error("Input is not a valid number");
+    }
+  };
+
   auto echConfigs = std::vector<ech::ECHConfig>();
   for (const auto& config : json["echconfigs"]) {
     std::string version = config["version"].asString();
@@ -194,7 +208,7 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     if (version == "Draft10") {
       echVersion = ech::ECHVersion::Draft10;
     } else {
-      return folly::none;
+      continue;
     }
 
     ech::ECHConfigContentDraft configContent;
@@ -202,12 +216,13 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
         folly::IOBuf::copyBuffer(config["public_name"].asString());
 
     configContent.key_config.config_id =
-        folly::to<uint8_t>(config["config_id"].asInt());
+        folly::to<uint8_t>(strToNum(config["config_id"].asString()));
 
     configContent.key_config.public_key = folly::IOBuf::copyBuffer(
         folly::unhexlify(config["public_key"].asString()));
-    configContent.maximum_name_length = config["maximum_name_length"].asInt();
     configContent.key_config.kem_id = getKEMId(config["kem_id"].asString());
+    configContent.maximum_name_length =
+        folly::to<uint16_t>(strToNum(config["maximum_name_length"].asString()));
 
     // Get ciphersuites.
     auto ciphersuites = std::vector<ech::HpkeSymmetricCipherSuite>();
@@ -232,7 +247,11 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     parsedConfig.ech_config_content = encode(std::move(configContent));
     echConfigs.push_back(std::move(parsedConfig));
   }
-  return std::move(echConfigs);
+  if (echConfigs.empty()) {
+    return folly::none;
+  } else {
+    return echConfigs;
+  }
 }
 
 std::vector<ech::ECHConfig> getDefaultECHConfigs() {

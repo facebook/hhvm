@@ -1093,6 +1093,13 @@ mod tests {
         );
         assert_eq!(res.err(), None);
     }
+
+    #[test]
+    fn default_eq_json_default() {
+        let plain = Options::default();
+        let from_json = Options::from_configs(&[]).unwrap();
+        assert_eq!(plain, from_json);
+    }
 }
 
 // boilerplate code that could eventually be avoided via procedural macros

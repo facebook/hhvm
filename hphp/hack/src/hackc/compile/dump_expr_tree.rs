@@ -98,7 +98,7 @@ fn desugar_and_replace_et_literals(flags: &EnvFlags, program: ast::Program, src:
 /// syntax.
 pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let type_directed = false;
-    let opts = Options::from_configs(&[]).expect("Invalid options");
+    let opts = Options::default();
     let content = fs::read(filepath.to_absolute()).unwrap();
     let source_text = SourceText::make(RcOc::new(filepath), &content);
     let ns = RcOc::new(NamespaceEnv::empty(

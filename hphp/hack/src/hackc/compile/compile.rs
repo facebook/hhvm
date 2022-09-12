@@ -798,8 +798,7 @@ fn parse_file(
 pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {
     use print_expr::Context;
 
-    let opts = Options::from_configs(&[]).expect("Malformed options");
-
+    let opts = Options::default();
     let alloc = bumpalo::Bump::new();
     let emitter = Emitter::new(
         opts,

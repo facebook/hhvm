@@ -28,6 +28,8 @@ static constexpr StringPiece kDerivedSecret{"derived"};
 static constexpr StringPiece kTrafficKeyUpdate{"traffic upd"};
 static constexpr StringPiece kResumption{"resumption"};
 static constexpr StringPiece kECHAcceptConfirmation{"ech accept confirmation"};
+static constexpr StringPiece kHRRECHAcceptConfirmation{
+    "hrr ech accept confirmation"};
 
 namespace fizz {
 
@@ -132,6 +134,7 @@ DerivedSecret KeyScheduler::getSecret(
     EarlySecrets s,
     folly::ByteRange transcript) const {
   StringPiece label;
+  uint16_t secretLength = deriver_->hashLength();
   switch (s) {
     case EarlySecrets::ExternalPskBinder:
       label = kExternalPskBinder;
@@ -145,6 +148,14 @@ DerivedSecret KeyScheduler::getSecret(
     case EarlySecrets::EarlyExporter:
       label = kEarlyExporter;
       break;
+    case EarlySecrets::ECHAcceptConfirmation:
+      label = kECHAcceptConfirmation;
+      secretLength = ech::kEchAcceptConfirmationSize;
+      break;
+    case EarlySecrets::HRRECHAcceptConfirmation:
+      label = kHRRECHAcceptConfirmation;
+      secretLength = ech::kEchAcceptConfirmationSize;
+      break;
     default:
       LOG(FATAL) << "unknown secret";
   }
@@ -152,10 +163,7 @@ DerivedSecret KeyScheduler::getSecret(
   auto& earlySecret = *secret_->asEarlySecret();
   return DerivedSecret(
       deriver_->deriveSecret(
-          folly::range(earlySecret.secret),
-          label,
-          transcript,
-          deriver_->hashLength()),
+          folly::range(earlySecret.secret), label, transcript, secretLength),
       SecretType(s));
 }
 
@@ -163,15 +171,13 @@ DerivedSecret KeyScheduler::getSecret(
     HandshakeSecrets s,
     folly::ByteRange transcript) const {
   StringPiece label;
-  uint16_t secretLength;
+  uint16_t secretLength = deriver_->hashLength();
   switch (s) {
     case HandshakeSecrets::ClientHandshakeTraffic:
       label = kClientHandshakeTraffic;
-      secretLength = deriver_->hashLength();
       break;
     case HandshakeSecrets::ServerHandshakeTraffic:
       label = kServerHandshakeTraffic;
-      secretLength = deriver_->hashLength();
       break;
     case HandshakeSecrets::ECHAcceptConfirmation:
       label = kECHAcceptConfirmation;

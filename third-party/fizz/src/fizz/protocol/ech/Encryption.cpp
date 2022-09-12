@@ -180,7 +180,8 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
           if (suite.kdf_id == associatedCipherKdf) {
             auto supportedConfig = config;
             auto configId = echConfig.key_config.config_id;
-            return SupportedECHConfig{supportedConfig, configId, suite};
+            auto maxLen = echConfig.maximum_name_length;
+            return SupportedECHConfig{supportedConfig, configId, maxLen, suite};
           }
         }
       }
@@ -480,6 +481,31 @@ ClientPresharedKey generateGreasePSKForHRR(
   return generateGreasePskCommon(previousPsk, factory, true);
 }
 
+size_t calculateECHPadding(
+    const ClientHello& chlo,
+    size_t encodedSize,
+    size_t maxLen) {
+  size_t padding = 0;
+  auto sni = getExtension<ServerNameList>(chlo.extensions);
+  if (sni) {
+    // Add max(0, maxLen - len(server_name))
+    size_t sniLen = sni->server_name_list[0].hostname->computeChainDataLength();
+    if (sniLen < maxLen) {
+      padding = maxLen - sniLen;
+    }
+  } else {
+    // Add maxLen + 9, the size of an SNI extension of size maxLen
+    padding = maxLen + 9;
+  }
+
+  // Now, add the final padding.
+  // L = len(encodedClientHelloInner) + currentPadding
+  // N = 31 - ((L - 1) % 32)
+  size_t currentLen = encodedSize + padding;
+  padding += 31 - ((currentLen - 1) % 32);
+  return padding;
+}
+
 namespace {
 
 void encryptClientHelloShared(
@@ -487,11 +513,23 @@ void encryptClientHelloShared(
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
-    const folly::Optional<ClientPresharedKey>& greasePsk) {
+    const folly::Optional<ClientPresharedKey>& greasePsk,
+    size_t maxLen) {
   // Remove legacy_session_id and serialize the client hello inner
   auto chloInnerCopy = clientHelloInner.clone();
   chloInnerCopy.legacy_session_id = folly::IOBuf::copyBuffer("");
   auto encodedClientHelloInner = encode(chloInnerCopy);
+
+  size_t padding = calculateECHPadding(
+      clientHelloInner,
+      encodedClientHelloInner->computeChainDataLength(),
+      maxLen);
+  if (padding > 0) {
+    auto paddingBuf = folly::IOBuf::create(padding);
+    memset(paddingBuf->writableData(), 0, padding);
+    paddingBuf->append(padding);
+    encodedClientHelloInner->prependChain(std::move(paddingBuf));
+  }
 
   // Compute the AAD for sealing
   auto chloOuterForAAD = clientHelloOuter.clone();
@@ -534,7 +572,12 @@ OuterECHClientHello encryptClientHelloHRR(
   echExtension.enc = folly::IOBuf::create(0);
 
   encryptClientHelloShared(
-      echExtension, clientHelloInner, clientHelloOuter, setupResult, greasePsk);
+      echExtension,
+      clientHelloInner,
+      clientHelloOuter,
+      setupResult,
+      greasePsk,
+      supportedConfig.maxLen);
 
   return echExtension;
 }
@@ -552,7 +595,12 @@ OuterECHClientHello encryptClientHello(
   echExtension.enc = setupResult.enc->clone();
 
   encryptClientHelloShared(
-      echExtension, clientHelloInner, clientHelloOuter, setupResult, greasePsk);
+      echExtension,
+      clientHelloInner,
+      clientHelloOuter,
+      setupResult,
+      greasePsk,
+      supportedConfig.maxLen);
 
   return echExtension;
 }
@@ -572,6 +620,12 @@ ClientHello decryptECHWithContext(
   // Set actual client hello, ECH acceptance
   folly::io::Cursor encodedECHInnerCursor(encodedClientHelloInner.get());
   auto decodedChlo = decode<ClientHello>(encodedECHInnerCursor);
+
+  // Skip any padding and check that we don't have any data left.
+  encodedECHInnerCursor.skipWhile([](uint8_t b) { return b == 0; });
+  if (!encodedECHInnerCursor.isAtEnd()) {
+    throw std::runtime_error("ech padding contains nonzero byte");
+  }
 
   // Replace legacy_session_id that got removed during encryption
   decodedChlo.legacy_session_id = clientHelloOuter.legacy_session_id->clone();

@@ -83,6 +83,7 @@ OuterECHClientHello getTestOuterECHClientHelloWithInner(ClientHello chloInner) {
   SupportedECHConfig supportedConfig{
       getECHConfig(),
       configContent.key_config.config_id,
+      configContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
 
@@ -115,6 +116,7 @@ void checkSupportedConfigValid(
   EXPECT_EQ(
       result.value().cipherSuite.aead_id, hpke::AeadId::TLS_AES_128_GCM_SHA256);
   EXPECT_EQ(result.value().configId, 0xFB);
+  EXPECT_EQ(result.value().maxLen, 100);
 }
 
 } // namespace
@@ -268,6 +270,17 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
 
   folly::io::Cursor encodedECHInnerCursor(gotClientHelloInner.get());
   auto gotChlo = decode<ClientHello>(encodedECHInnerCursor);
+
+  // Check padding
+  auto configContent = getECHConfigContent();
+  auto paddingSize = calculateECHPadding(
+      gotChlo,
+      encodedECHInnerCursor.getCurrentPosition(),
+      configContent.maximum_name_length);
+  for (size_t i = 0; i < paddingSize; i++) {
+    EXPECT_EQ(0, encodedECHInnerCursor.read<uint8_t>());
+  }
+  EXPECT_TRUE(encodedECHInnerCursor.isAtEnd());
 
   // Check that we don't have a legacy_session_id (it should have gotten removed
   // during encryption)

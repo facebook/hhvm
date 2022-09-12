@@ -25,6 +25,7 @@ ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
       echConfigContent.key_config.config_id,
+      echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =
@@ -58,6 +59,7 @@ ClientHello getChloOuterHRRWithExt(
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
       echConfigContent.key_config.config_id,
+      echConfigContent.maximum_name_length,
       HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =

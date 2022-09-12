@@ -20,6 +20,7 @@ namespace ech {
 struct SupportedECHConfig {
   ECHConfig config;
   uint8_t configId;
+  uint16_t maxLen;
   HpkeSymmetricCipherSuite cipherSuite;
 };
 
@@ -77,6 +78,9 @@ void setAcceptConfirmation(
     HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
+
+size_t
+calculateECHPadding(const ClientHello& chlo, size_t encodedSize, size_t maxLen);
 
 OuterECHClientHello encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,

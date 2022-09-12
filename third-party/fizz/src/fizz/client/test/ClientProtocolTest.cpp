@@ -2630,6 +2630,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
+  state_.echState()->supportedConfig.maxLen = 42;
   state_.echState()->supportedConfig.configId = 0xFB;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
@@ -2751,8 +2752,22 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   // Save this one (the real one), then blank the legacy session id for AAD
   // construction
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
+
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
   auto encodedClientHelloInnerAad = encode(chlo);
+
+  // Add padding
+  auto paddingSize = ech::calculateECHPadding(
+      chlo,
+      encodedClientHelloInnerAad->computeChainDataLength(),
+      42); // maxLen
+
+  if (paddingSize > 0) {
+    auto paddingBuf = folly::IOBuf::create(paddingSize);
+    memset(paddingBuf->writableData(), 0, paddingSize);
+    paddingBuf->append(paddingSize);
+    encodedClientHelloInnerAad->prependChain(std::move(paddingBuf));
+  }
 
   // Set up ECH extension for AAD and ECH
   ech::OuterECHClientHello echExtension;
@@ -2884,6 +2899,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   state_.echState()->supportedConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   state_.echState()->supportedConfig.configId = 0xFB;
+  state_.echState()->supportedConfig.maxLen = 42;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
   auto mockHandshakeContext2 = new MockHandshakeContext();
@@ -3006,6 +3022,19 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto encodedClientHelloInner = encodeHandshake(chlo.clone());
   chlo.legacy_session_id = folly::IOBuf::copyBuffer("");
   auto encodedClientHelloInnerAad = encode(chlo);
+
+  // Add padding
+  auto paddingSize = ech::calculateECHPadding(
+      chlo,
+      encodedClientHelloInnerAad->computeChainDataLength(),
+      42); // maxLen
+
+  if (paddingSize > 0) {
+    auto paddingBuf = folly::IOBuf::create(paddingSize);
+    memset(paddingBuf->writableData(), 0, paddingSize);
+    paddingBuf->append(paddingSize);
+    encodedClientHelloInnerAad->prependChain(std::move(paddingBuf));
+  }
 
   // Set up ECH extension for AAD and ECH
   ech::OuterECHClientHello echExtension;

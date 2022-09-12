@@ -52,6 +52,12 @@ struct ECHIsInner {
   static constexpr ExtensionType extension_type = ExtensionType::ech_is_inner;
 };
 
+struct ECHAcceptanceConfirmation {
+  std::array<uint8_t, 8> payload;
+  static constexpr ExtensionType extension_type =
+      ExtensionType::encrypted_client_hello;
+};
+
 struct OuterExtensions {
   std::vector<ExtensionType> types;
   static constexpr ExtensionType extension_type =

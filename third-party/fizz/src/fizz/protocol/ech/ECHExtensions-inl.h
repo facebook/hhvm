@@ -60,6 +60,18 @@ inline Extension encodeExtension(const ech::OuterExtensions& outerExts) {
 }
 
 template <>
+inline Extension encodeExtension(const ech::ECHAcceptanceConfirmation& conf) {
+  Extension ext;
+  ext.extension_type = ExtensionType::encrypted_client_hello;
+  ext.extension_data = folly::IOBuf::create(8);
+
+  folly::io::Appender appender(ext.extension_data.get(), 0);
+  appender.push(conf.payload.data(), conf.payload.size());
+
+  return ext;
+}
+
+template <>
 inline ech::ClientECH getExtension(folly::io::Cursor& cs) {
   ech::ClientECH clientECH;
   detail::read(clientECH.cipher_suite, cs);
@@ -88,5 +100,12 @@ inline ech::OuterExtensions getExtension(folly::io::Cursor& cs) {
   ech::OuterExtensions outerExts;
   detail::readVector<uint8_t>(outerExts.types, cs);
   return outerExts;
+}
+
+template <>
+inline ech::ECHAcceptanceConfirmation getExtension(folly::io::Cursor& cs) {
+  ech::ECHAcceptanceConfirmation conf;
+  cs.pull(conf.payload.data(), conf.payload.size());
+  return conf;
 }
 } // namespace fizz

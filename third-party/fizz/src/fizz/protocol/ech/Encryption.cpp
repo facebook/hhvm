@@ -268,6 +268,34 @@ ServerHello makeDummyServerHello(const ServerHello& shlo) {
   return shloEch;
 }
 
+HelloRetryRequest makeDummyHRR(const HelloRetryRequest& hrr) {
+  // Dummy HRR is identical to original HRR except the contents of the ECH
+  // extension it sent is zeroed out.
+  std::vector<Extension> extensionCopies;
+  for (auto& ext : hrr.extensions) {
+    if (ext.extension_type != ExtensionType::encrypted_client_hello) {
+      // Not ECH, just clone it.
+      extensionCopies.push_back(ext.clone());
+    } else {
+      // This is an ECH extension, replace it with one that has the content
+      // zeroed out.
+      Extension e;
+      e.extension_type = ExtensionType::encrypted_client_hello;
+      e.extension_data = folly::IOBuf::create(kEchAcceptConfirmationSize);
+      memset(e.extension_data->writableData(), 0, kEchAcceptConfirmationSize);
+      e.extension_data->append(kEchAcceptConfirmationSize);
+      extensionCopies.push_back(std::move(e));
+    }
+  }
+  HelloRetryRequest hrrEch;
+  hrrEch.legacy_version = hrr.legacy_version;
+  hrrEch.legacy_session_id_echo = hrr.legacy_session_id_echo->clone();
+  hrrEch.cipher_suite = hrr.cipher_suite;
+  hrrEch.legacy_compression_method = hrr.legacy_compression_method;
+  hrrEch.extensions = std::move(extensionCopies);
+  return hrrEch;
+}
+
 namespace {
 
 std::vector<uint8_t> calculateAcceptConfirmation(
@@ -282,6 +310,27 @@ std::vector<uint8_t> calculateAcceptConfirmation(
   auto hsc = context->getHandshakeContext();
   auto echAcceptance = scheduler->getSecret(
       HandshakeSecrets::ECHAcceptConfirmation, hsc->coalesce());
+
+  return std::move(echAcceptance.secret);
+}
+
+std::vector<uint8_t> calculateAcceptConfirmation(
+    const HelloRetryRequest& hrr,
+    std::unique_ptr<HandshakeContext> context,
+    std::unique_ptr<KeyScheduler> scheduler) {
+  // Acceptance is done by zeroing the confirmation extension,
+  // putting it into the transcript, and deriving a secret.
+  auto hrrEch = makeDummyHRR(hrr);
+  context->appendToTranscript(encodeHandshake(std::move(hrrEch)));
+
+  auto hsc = context->getHandshakeContext();
+  auto echAcceptance = scheduler->getSecret(
+      EarlySecrets::HRRECHAcceptConfirmation, hsc->coalesce());
+
+  if (echAcceptance.secret.size() < kEchAcceptConfirmationSize) {
+    VLOG(8) << "ECH acceptance secret too small?";
+    throw std::runtime_error("ech acceptance secret too small");
+  }
 
   return std::move(echAcceptance.secret);
 }
@@ -302,6 +351,27 @@ bool checkECHAccepted(
              kEchAcceptConfirmationSize) == 0;
 }
 
+bool checkECHAccepted(
+    const HelloRetryRequest& hrr,
+    std::unique_ptr<HandshakeContext> context,
+    std::unique_ptr<KeyScheduler> scheduler) {
+  auto acceptConfirmation = calculateAcceptConfirmation(
+      hrr, std::move(context), std::move(scheduler));
+
+  // ECH accepted if the 8 bytes match the accept_confirmation in the
+  // extension
+  auto echConf = getExtension<ECHAcceptanceConfirmation>(hrr.extensions);
+  if (!echConf) {
+    VLOG(8) << "HRR ECH extension missing, rejected...";
+    return false;
+  }
+
+  return memcmp(
+             echConf->payload.data(),
+             acceptConfirmation.data(),
+             kEchAcceptConfirmationSize) == 0;
+}
+
 void setAcceptConfirmation(
     ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
@@ -312,6 +382,25 @@ void setAcceptConfirmation(
   // Copy the acceptance confirmation bytes to the end
   memcpy(
       shlo.random.data() + (shlo.random.size() - kEchAcceptConfirmationSize),
+      acceptConfirmation.data(),
+      kEchAcceptConfirmationSize);
+}
+
+void setAcceptConfirmation(
+    HelloRetryRequest& hrr,
+    std::unique_ptr<HandshakeContext> context,
+    std::unique_ptr<KeyScheduler> scheduler) {
+  // Add an ECH confirmation extension. The calculation code will ignore its
+  // contents but expects it to be there.
+  hrr.extensions.push_back(encodeExtension(ECHAcceptanceConfirmation()));
+
+  // Calculate it.
+  auto acceptConfirmation = calculateAcceptConfirmation(
+      hrr, std::move(context), std::move(scheduler));
+
+  // Copy the acceptance confirmation bytes to the payload
+  memcpy(
+      hrr.extensions.back().extension_data->writableData(),
       acceptConfirmation.data(),
       kEchAcceptConfirmationSize);
 }

@@ -53,8 +53,9 @@ struct GetIntrinsicDefault {
 };
 
 // Clear the given value, setting it to it's intrinsic default.
-template <typename Tag, typename = void>
+template <typename TagOrId, typename PTag = void, typename = void>
 struct Clear {
+  using Tag = TagOrId;
   constexpr void operator()(type::native_type<Tag>& val) const {
     clear(val, Tag{});
   }
@@ -73,11 +74,22 @@ struct Clear {
     val = GetIntrinsicDefault<Tag>{}();
   }
 };
+template <typename Id>
+struct Clear<Id, void, type::if_not_thrift_type_tag<Id>> {
+  template <typename T>
+  constexpr void operator()(T& val) const {
+    Clear<Id, type::infer_tag<T>>{}(val);
+  }
+};
 template <>
 struct Clear<void> {
-  template <typename U>
-  constexpr void operator()(U& val) const {
-    Clear<type::infer_tag<U>>{}(val);
+  template <typename Id, typename T>
+  constexpr void operator()(Id, T& val) const {
+    Clear<Id, type::infer_tag<T>>{}(val);
+  }
+  template <typename T>
+  constexpr void operator()(T& val) const {
+    Clear<type::infer_tag<T>>{}(val);
   }
 };
 
@@ -112,9 +124,9 @@ struct IsEmpty {
 };
 template <>
 struct IsEmpty<void> {
-  template <typename U>
-  constexpr bool operator()(U& val) const {
-    return IsEmpty<type::infer_tag<U>>{}(val);
+  template <typename T>
+  constexpr bool operator()(T& val) const {
+    return IsEmpty<type::infer_tag<T>>{}(val);
   }
 };
 
@@ -277,6 +289,15 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, id>>
   template <typename T>
   void operator()(field_ref<T> field, Struct& s) const {
     ::apache::thrift::adapt_detail::clear<Adapter, id>(*field, s);
+  }
+};
+
+template <typename Id, typename Tag>
+struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
+  using T = type::native_type<Tag>;
+  constexpr void operator()(T& val) const {
+    using FieldTag = op::get_field_tag<Id, T>;
+    ClearField<FieldTag>{}(op::get<Id, Tag>(val), val);
   }
 };
 

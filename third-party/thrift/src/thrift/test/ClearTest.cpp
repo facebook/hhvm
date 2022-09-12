@@ -131,19 +131,9 @@ TEST(AdaptTest, AdapterClearTestStructOpClear) {
 }
 
 // TODO: move this to public header
-template <size_t Ord, typename Struct>
-void clear_struct_impl(Struct& s) {
-  if constexpr (Ord != 0) {
-    using FieldOrdinal = field_ordinal<Ord>;
-    using FieldTag = op::get_field_tag<FieldOrdinal, Struct>;
-    op::clear_field<FieldTag>(op::get<FieldOrdinal, Struct>(s), s);
-    clear_struct_impl<Ord - 1>(s);
-  }
-}
-
 template <typename Struct>
 void clear_struct(Struct& s) {
-  clear_struct_impl<op::size_v<Struct>>(s);
+  op::for_each_ordinal<Struct>([&](auto id) { op::clear<>(id, s); });
 }
 
 TEST(ClearStructTest, StructWithDefaultStruct) {

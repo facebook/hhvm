@@ -55,10 +55,11 @@ FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<Tag>
 
 // Clears the given value, leaving it equal to its intrinsic default.
 // For example:
-//   clear<i32_t>(myInt) // sets myInt = 0.
+//   clear<>(myInt) // sets myInt = 0.
 //   clear<set<i32_t>>(myIntSet) // calls myIntSet.clear()
-template <typename Tag = void>
-FOLLY_INLINE_VARIABLE constexpr detail::Clear<Tag> clear{};
+//   clear<ident::foo>(myStruct) // calls myStruct.foo().reset()
+template <typename TagOrId = void, typename PTag = void>
+FOLLY_INLINE_VARIABLE constexpr detail::Clear<TagOrId, PTag> clear{};
 
 // Clears the given field, setting the field to initial state.
 // For example:
@@ -66,6 +67,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::Clear<Tag> clear{};
 //   clear_field<field_tag>(foo.field(), foo)
 //   // calls foo.optional_field().reset().
 //   clear_field<field_tag>(foo.optional_field(), foo)
+// TODO(afuller): Migrate all usage to op::clear<Id>(struct) and remove.
 template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr detail::ClearField<Tag> clear_field{};
 

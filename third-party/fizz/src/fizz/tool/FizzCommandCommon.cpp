@@ -191,8 +191,8 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     std::string version = config["version"].asString();
 
     ech::ECHVersion echVersion;
-    if (version == "Draft9") {
-      echVersion = ech::ECHVersion::Draft9;
+    if (version == "Draft10") {
+      echVersion = ech::ECHVersion::Draft10;
     } else {
       return folly::none;
     }
@@ -200,25 +200,29 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     ech::ECHConfigContentDraft configContent;
     configContent.public_name =
         folly::IOBuf::copyBuffer(config["public_name"].asString());
-    configContent.public_key = folly::IOBuf::copyBuffer(
+
+    configContent.key_config.config_id =
+        folly::to<uint8_t>(config["config_id"].asInt());
+
+    configContent.key_config.public_key = folly::IOBuf::copyBuffer(
         folly::unhexlify(config["public_key"].asString()));
-    configContent.kem_id = getKEMId(config["kem_id"].asString());
     configContent.maximum_name_length = config["maximum_name_length"].asInt();
+    configContent.key_config.kem_id = getKEMId(config["kem_id"].asString());
 
     // Get ciphersuites.
-    auto ciphersuites = std::vector<ech::ECHCipherSuite>();
+    auto ciphersuites = std::vector<ech::HpkeSymmetricCipherSuite>();
     for (size_t suiteIndex = 0; suiteIndex < config["cipher_suites"].size();
          ++suiteIndex) {
       const auto& suite = config["cipher_suites"][suiteIndex];
 
-      ech::ECHCipherSuite parsedSuite;
+      ech::HpkeSymmetricCipherSuite parsedSuite;
       parsedSuite.kdf_id = getKDFId(suite["kdf_id"].asString());
       parsedSuite.aead_id = getAeadId(suite["aead_id"].asString());
 
       ciphersuites.push_back(parsedSuite);
     }
 
-    configContent.cipher_suites = ciphersuites;
+    configContent.key_config.cipher_suites = ciphersuites;
 
     // Get extensions.
     configContent.extensions = getExtensions(config["extensions"].asString());
@@ -243,7 +247,7 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
   ech::ECHConfigContentDraft echConfigContent;
   echConfigContent.public_name = folly::IOBuf::copyBuffer("publicname");
 
-  echConfigContent.cipher_suites = {ech::ECHCipherSuite{
+  echConfigContent.key_config.cipher_suites = {ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   echConfigContent.maximum_name_length = 1000;
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
@@ -251,15 +255,19 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
 
   // Set default public key (which corresponds to the private key set on the
   // server side).
-  echConfigContent.public_key = folly::IOBuf::copyBuffer(folly::unhexlify(
-      "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
+  echConfigContent.key_config.public_key =
+      folly::IOBuf::copyBuffer(folly::unhexlify(
+          "8a07563949fac6232936ed6f36c4fa735930ecdeaef6734e314aeac35a56fd0a"));
 
   // Corresponds to the public key set above.
-  echConfigContent.kem_id = hpke::KEMId::x25519;
+  echConfigContent.key_config.kem_id = hpke::KEMId::x25519;
+
+  // Assign a config id
+  echConfigContent.key_config.config_id = 0xE6;
 
   // Construct an ECH config to pass in to the client.
   ech::ECHConfig echConfig;
-  echConfig.version = ech::ECHVersion::Draft9;
+  echConfig.version = ech::ECHVersion::Draft10;
   echConfig.ech_config_content = encode(std::move(echConfigContent));
   auto configs = std::vector<ech::ECHConfig>();
   configs.push_back(std::move(echConfig));

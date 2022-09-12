@@ -415,13 +415,13 @@ class Connection : public AsyncSocket::ConnectCallback,
       folly::io::Cursor cursor(configContent.get());
       auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
 
-      auto ciphersuite = echConfigContent.cipher_suites[0];
+      auto ciphersuite = echConfigContent.key_config.cipher_suites[0];
       LOG(INFO) << "    Hash function: "
                 << toString(getHashFunction(ciphersuite.kdf_id));
       LOG(INFO) << "    Cipher Suite: "
                 << toString(getCipherSuite(ciphersuite.aead_id));
       LOG(INFO) << "    Named Group: "
-                << toString(getKexGroup(echConfigContent.kem_id));
+                << toString(getKexGroup(echConfigContent.key_config.kem_id));
       LOG(INFO) << "    Fake SNI Used: "
                 << echConfigContent.public_name->clone()->moveToFbString();
     }

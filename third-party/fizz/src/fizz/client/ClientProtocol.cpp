@@ -671,7 +671,7 @@ static folly::Optional<ECHParams> setupECH(
   folly::io::Cursor cursor(configContent.get());
   auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
   auto fakeSni = echConfigContent.public_name->clone();
-  auto kemId = echConfigContent.kem_id;
+  auto kemId = echConfigContent.key_config.kem_id;
   auto kex = factory.makeKeyExchange(
       getKexGroup(kemId), Factory::KeyExchangeMode::Client);
   auto setupResult =
@@ -736,7 +736,7 @@ static ClientHello constructEncryptedClientHello(
   Extension encodedECHExtension;
   // Create the encrypted client hello inner extension.
   switch (supportedConfig.config.version) {
-    case (ech::ECHVersion::Draft9): {
+    case (ech::ECHVersion::Draft10): {
       ech::ClientECH clientECHExtension;
       if (e == Event::ClientHello) {
         clientECHExtension = encryptClientHello(
@@ -834,7 +834,7 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   if (echParams.has_value() &&
       echParams.value().supportedECHConfig.config.version ==
-          ech::ECHVersion::Draft9) {
+          ech::ECHVersion::Draft10) {
     ech::ECHIsInner chloIsInnerExt;
     chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
@@ -1467,7 +1467,7 @@ Actions EventHandler<
   // ECH extension required.
   if (state.echState().has_value() &&
       state.echState()->supportedConfig.config.version ==
-          ech::ECHVersion::Draft9) {
+          ech::ECHVersion::Draft10) {
     ech::ECHIsInner chloIsInnerExt;
     encodedInnerECHExt = encodeExtension(std::move(chloIsInnerExt));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);

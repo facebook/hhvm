@@ -42,9 +42,9 @@ enum class ECHStatus { NotRequested, Accepted, Rejected };
 
 struct ECHState {
   // Cipher suite used (for HRR)
-  ech::ECHCipherSuite cipherSuite;
+  ech::HpkeSymmetricCipherSuite cipherSuite;
   // Config ID used (for HRR)
-  Buf configId;
+  uint8_t configId;
   // HPKE context saved for use with HRR, if needed.
   mutable std::unique_ptr<hpke::HpkeContext> hpkeContext;
 };

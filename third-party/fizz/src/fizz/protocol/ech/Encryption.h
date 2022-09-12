@@ -19,7 +19,8 @@ namespace ech {
 
 struct SupportedECHConfig {
   ECHConfig config;
-  ECHCipherSuite cipherSuite;
+  uint8_t configId;
+  HpkeSymmetricCipherSuite cipherSuite;
 };
 
 // Used to indicate to the Decrypter that extension expansion failed (which is
@@ -40,8 +41,8 @@ hpke::SetupResult constructHpkeSetupResult(
     const SupportedECHConfig& supportedConfig);
 
 std::unique_ptr<folly::IOBuf> makeClientHelloAad(
-    ECHCipherSuite cipherSuite,
-    const std::unique_ptr<folly::IOBuf>& configId,
+    HpkeSymmetricCipherSuite cipherSuite,
+    const uint8_t configId,
     const std::unique_ptr<folly::IOBuf>& enc,
     const std::unique_ptr<folly::IOBuf>& clientHello);
 
@@ -72,23 +73,19 @@ ClientECH encryptClientHello(
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,
     const ECHConfig& echConfig,
-    ECHCipherSuite& cipherSuite,
+    HpkeSymmetricCipherSuite& cipherSuite,
     std::unique_ptr<folly::IOBuf> encapsulatedKey,
-    std::unique_ptr<folly::IOBuf> configId,
+    uint8_t configId,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context);
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     const ECHConfig& echConfig,
-    ECHCipherSuite cipherSuite,
+    HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum);
-
-std::unique_ptr<folly::IOBuf> constructConfigId(
-    hpke::KDFId kdfId,
-    ECHConfig echConfig);
 
 std::unique_ptr<folly::IOBuf> getRecordDigest(
     const ECHConfig& echConfig,

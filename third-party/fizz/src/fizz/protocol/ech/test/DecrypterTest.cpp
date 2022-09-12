@@ -21,9 +21,11 @@ namespace ech {
 namespace test {
 ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
   // Setup ECH extension
+  auto echConfigContent = getECHConfigContent();
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
-      ECHCipherSuite{
+      echConfigContent.key_config.config_id,
+      HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
@@ -52,9 +54,11 @@ ClientHello getChloOuterHRRWithExt(
     Buf& enc,
     ClientHello& initialOuterChlo) {
   // Setup ECH extension
+  auto echConfigContent = getECHConfigContent();
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
-      ECHCipherSuite{
+      echConfigContent.key_config.config_id,
+      HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
@@ -119,8 +123,8 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   Buf enc;
   ClientHello initialChlo;
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
-  auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, configId, enc);
+  auto echConfigContent = getECHConfigContent();
+  auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
 
   auto expectedChloInner = TestMessages::clientHello();
   EXPECT_FALSE(folly::IOBufEqualTo()(
@@ -148,9 +152,8 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   EXPECT_TRUE(gotChlo.has_value());
   auto chlo = std::move(gotChlo.value());
 
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
-  auto gotChloHRR =
-      decrypter.decryptClientHelloHRR(chloOuter, configId, chlo.context);
+  auto echConfigContent = getECHConfigContent();
+  auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
 
   auto expectedChloInner = TestMessages::clientHello();
   EXPECT_FALSE(folly::IOBufEqualTo()(
@@ -188,11 +191,10 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
   Buf enc;
   ClientHello initialClientHello;
   getChloOuterHRRWithExt(kex->clone(), enc, initialClientHello);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
+  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
-      decrypter.decryptClientHelloHRR(
-          TestMessages::clientHello(), configId, enc),
+      decrypter.decryptClientHelloHRR(TestMessages::clientHello(), enc),
       FizzException);
 }
 
@@ -207,11 +209,11 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   // Get a context to use.
   auto chloOuter = getChloOuterWithExt(kex->clone());
   auto gotChlo = decrypter.decryptClientHello(chloOuter);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
+  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
       decrypter.decryptClientHelloHRR(
-          TestMessages::clientHello(), configId, gotChlo->context),
+          TestMessages::clientHello(), gotChlo->context),
       FizzException);
 }
 

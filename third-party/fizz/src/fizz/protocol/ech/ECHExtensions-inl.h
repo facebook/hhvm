@@ -20,7 +20,7 @@ inline Extension encodeExtension(const ech::ClientECH& clientECH) {
 
   folly::io::Appender appender(ext.extension_data.get(), 20);
   detail::write(clientECH.cipher_suite, appender);
-  detail::writeBuf<uint8_t>(clientECH.config_id, appender);
+  detail::write(clientECH.config_id, appender);
   detail::writeBuf<uint16_t>(clientECH.enc, appender);
   detail::writeBuf<uint16_t>(clientECH.payload, appender);
 
@@ -63,7 +63,7 @@ template <>
 inline ech::ClientECH getExtension(folly::io::Cursor& cs) {
   ech::ClientECH clientECH;
   detail::read(clientECH.cipher_suite, cs);
-  detail::readBuf<uint8_t>(clientECH.config_id, cs);
+  detail::read(clientECH.config_id, cs);
   detail::readBuf<uint16_t>(clientECH.enc, cs);
   detail::readBuf<uint16_t>(clientECH.payload, cs);
 

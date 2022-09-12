@@ -24,8 +24,8 @@ struct CookieState {
 
   Buf appToken;
 
-  folly::Optional<ech::ECHCipherSuite> echCipherSuite;
-  Buf echConfigId;
+  folly::Optional<ech::HpkeSymmetricCipherSuite> echCipherSuite;
+  folly::Optional<uint8_t> echConfigId;
   Buf echEnc;
 };
 

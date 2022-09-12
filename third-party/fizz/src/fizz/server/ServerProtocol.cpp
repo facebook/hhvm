@@ -469,7 +469,7 @@ static Optional<CookieState> getCookieState(
   }
 
   if (cookieState->echCipherSuite.has_value() ^
-      (cookieState->echConfigId != nullptr)) {
+      cookieState->echConfigId.has_value()) {
     throw FizzException(
         "cookie has incomplete ech params", AlertDescription::internal_error);
   }
@@ -1035,7 +1035,7 @@ static Buf getCertificateRequest(
   return encodedCertificateRequest;
 }
 
-static ECHStatus processECHHRR(
+static std::tuple<ECHStatus, uint8_t> processECHHRR(
     const Optional<CookieState>& cookieState,
     const State& state,
     ClientHello& chlo) {
@@ -1057,10 +1057,9 @@ static ECHStatus processECHHRR(
       throw FizzException(
           "ech not sent for hrr", AlertDescription::missing_extension);
     }
-    if (!echExt->config_id->empty() || !echExt->enc->empty()) {
+    if (!echExt->enc->empty()) {
       throw FizzException(
-          "hrr ech enc or config_id not empty",
-          AlertDescription::illegal_parameter);
+          "hrr ech enc not empty", AlertDescription::illegal_parameter);
     }
   }
 
@@ -1070,26 +1069,33 @@ static ECHStatus processECHHRR(
       throw FizzException(
           "ech hrr cipher suite mismatch", AlertDescription::illegal_parameter);
     }
+    if (state.echState()->configId != echExt->config_id) {
+      throw FizzException(
+          "ech hrr config id mismatch", AlertDescription::illegal_parameter);
+    }
 
-    chlo = decrypter->decryptClientHelloHRR(
-        chlo, state.echState()->configId, state.echState()->hpkeContext);
+    chlo =
+        decrypter->decryptClientHelloHRR(chlo, state.echState()->hpkeContext);
 
-    return ECHStatus::Accepted;
+    return {ECHStatus::Accepted, echExt->config_id};
   } else if (cookieHasECH) {
     // Stateless HRR now
     if (*cookieState->echCipherSuite != echExt->cipher_suite) {
       throw FizzException(
           "ech hrr cipher suite mismatch", AlertDescription::illegal_parameter);
     }
+    if (*cookieState->echConfigId != echExt->config_id) {
+      throw FizzException(
+          "ech hrr config id mismatch", AlertDescription::illegal_parameter);
+    }
 
-    chlo = decrypter->decryptClientHelloHRR(
-        chlo, cookieState->echConfigId, cookieState->echEnc);
+    chlo = decrypter->decryptClientHelloHRR(chlo, cookieState->echEnc);
 
-    return ECHStatus::Accepted;
+    return {ECHStatus::Accepted, echExt->config_id};
   }
 
   // Just return the ECH status as is
-  return echStatus;
+  return {echStatus, 0};
 }
 
 // Process ECH, replacing chlo if successful
@@ -1104,13 +1110,11 @@ static std::pair<ECHStatus, ECHState> processECH(
 
   if (state.handshakeContext() || cookieState) {
     // Process ECH for HRR (if any)
-    echStatus = processECHHRR(cookieState, state, chlo);
+    std::tie(echStatus, echState.configId) =
+        processECHHRR(cookieState, state, chlo);
     // Populate ECH state for saving
     if (state.echState().has_value()) {
       echState.hpkeContext = std::move(state.echState()->hpkeContext);
-      if (state.echState()->configId != nullptr) {
-        echState.configId = state.echState()->configId->clone();
-      }
       echState.cipherSuite = state.echState()->cipherSuite;
     }
   } else {
@@ -1123,7 +1127,7 @@ static std::pair<ECHStatus, ECHState> processECH(
         auto echExt = getExtension<ech::ClientECH>(chlo.extensions);
         echStatus = ECHStatus::Accepted;
         echState.hpkeContext = std::move(gotChlo->context);
-        echState.configId = std::move(gotChlo->configId);
+        echState.configId = gotChlo->configId;
         echState.cipherSuite = echExt->cipher_suite;
         chlo = std::move(gotChlo->chlo);
       } else if (requestedECH) {

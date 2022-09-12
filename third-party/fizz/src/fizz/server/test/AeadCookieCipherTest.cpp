@@ -32,7 +32,7 @@ static constexpr folly::StringPiece testCookieGroup{
     "444444444444444444444444444444444444444444444444444444444444444400000000e5c57e4a6d07414a082f49d0fd7077f043b4fbdf55b2bff9f910e5544bc5cb203576b8504b6c46721d74af9a53ed56dc580f601bcaba2318b5a33fb5af4e6e0e"};
 
 static constexpr folly::StringPiece testCookieGroupAndEch{
-    "444444444444444444444444444444444444444444444444444444444444444400000000e5c57e4a6d07414a082f49d0fd7077f043b4fbdf55b2bff9f910e5544bc5cb203576b8504b6c46721d74af9a53ed56ddf71d16f1b3aca432da429621deb9adbf5c4f03561257bf694d1b316e189f4f4eef87"};
+    "444444444444444444444444444444444444444444444444444444444444444400000000e5c57e4a6d07414a082f49d0fd7077f043b4fbdf55b2bff9f910e5544bc5cb203576b8504b6c46721d74af9a53ed56ddf71d16f140cfc839d2481184c70ba732d9abac1a6376a172d04a"};
 
 namespace fizz {
 namespace server {
@@ -119,7 +119,7 @@ TEST_F(AeadCookieCipherTest, TestDecrypt) {
       folly::IOBufEqualTo()(state->appToken, folly::IOBuf::copyBuffer("test")));
   EXPECT_FALSE(state->group.has_value());
   EXPECT_FALSE(state->echCipherSuite.has_value());
-  EXPECT_EQ(state->echConfigId, nullptr);
+  EXPECT_FALSE(state->echConfigId.has_value());
 }
 
 TEST_F(AeadCookieCipherTest, TestDecryptGroup) {
@@ -129,7 +129,7 @@ TEST_F(AeadCookieCipherTest, TestDecryptGroup) {
       folly::IOBufEqualTo()(state->appToken, folly::IOBuf::copyBuffer("test")));
   EXPECT_EQ(*state->group, NamedGroup::secp256r1);
   EXPECT_FALSE(state->echCipherSuite.has_value());
-  EXPECT_EQ(state->echConfigId, nullptr);
+  EXPECT_FALSE(state->echConfigId.has_value());
 }
 
 TEST_F(AeadCookieCipherTest, TestDecryptGroupAndEch) {
@@ -142,8 +142,7 @@ TEST_F(AeadCookieCipherTest, TestDecryptGroupAndEch) {
   EXPECT_EQ(state->echCipherSuite->kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(
       state->echCipherSuite->aead_id, hpke::AeadId::TLS_AES_128_GCM_SHA256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      state->echConfigId, folly::IOBuf::copyBuffer("configid")));
+  EXPECT_EQ(state->echConfigId, 0xFB);
   EXPECT_TRUE(
       folly::IOBufEqualTo()(state->echEnc, folly::IOBuf::copyBuffer("enc")));
 }

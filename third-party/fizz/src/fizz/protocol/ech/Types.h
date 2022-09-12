@@ -22,26 +22,31 @@ using HpkePublicKey = Buf;
 constexpr size_t kEchAcceptConfirmationSize = 8;
 
 enum class ECHVersion : uint16_t {
-  Draft9 = 0xfe09,
+  Draft10 = 0xfe0a,
 };
 
-struct ECHCipherSuite {
+struct HpkeSymmetricCipherSuite {
   hpke::KDFId kdf_id;
   hpke::AeadId aead_id;
-  bool operator==(const ECHCipherSuite& other) const {
+  bool operator==(const HpkeSymmetricCipherSuite& other) const {
     return kdf_id == other.kdf_id && aead_id == other.aead_id;
   }
-  bool operator!=(const ECHCipherSuite& other) const {
+  bool operator!=(const HpkeSymmetricCipherSuite& other) const {
     return kdf_id != other.kdf_id || aead_id != other.aead_id;
   }
 };
 
-struct ECHConfigContentDraft {
-  Buf public_name;
-  HpkePublicKey public_key;
+struct HpkeKeyConfig {
+  uint8_t config_id;
   hpke::KEMId kem_id;
-  std::vector<ECHCipherSuite> cipher_suites;
+  HpkePublicKey public_key;
+  std::vector<HpkeSymmetricCipherSuite> cipher_suites;
+};
+
+struct ECHConfigContentDraft {
+  HpkeKeyConfig key_config;
   uint16_t maximum_name_length;
+  Buf public_name;
   std::vector<Extension> extensions;
 };
 

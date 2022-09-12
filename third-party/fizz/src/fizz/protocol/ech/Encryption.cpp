@@ -41,15 +41,15 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
 
 std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
     ECHVersion version,
-    std::unique_ptr<folly::IOBuf> configId,
-    const ECHCipherSuite& cipherSuite,
+    uint8_t configId,
+    const HpkeSymmetricCipherSuite& cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     std::unique_ptr<hpke::HpkeContext>& context,
     const ClientHello& clientHelloOuter) {
   std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
   switch (version) {
-    case ECHVersion::Draft9: {
+    case ECHVersion::Draft10: {
       auto aadCH = makeClientHelloOuterForAad(clientHelloOuter);
       auto chloOuterAad =
           makeClientHelloAad(cipherSuite, configId, encapsulatedKey, aadCH);
@@ -63,7 +63,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
 std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
     const ECHConfig& echConfig) {
   switch (echConfig.version) {
-    case ECHVersion::Draft9: {
+    case ECHVersion::Draft10: {
       // The "info" parameter to setupWithEncap is the
       // concatenation of "tls ech", a zero byte, and the serialized
       // ECHConfig.
@@ -79,37 +79,6 @@ std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
 }
 
 } // namespace
-
-std::unique_ptr<folly::IOBuf> constructConfigId(
-    hpke::KDFId kdfId,
-    ECHConfig echConfig) {
-  std::unique_ptr<HkdfImpl> hkdf;
-  // Draft 9 set this to a fixed value
-  const size_t hashLen = 8;
-  switch (kdfId) {
-    case (hpke::KDFId::Sha256): {
-      hkdf = std::make_unique<HkdfImpl>(HkdfImpl::create<Sha256>());
-      break;
-    }
-    case (hpke::KDFId::Sha384): {
-      hkdf = std::make_unique<HkdfImpl>(HkdfImpl::create<Sha384>());
-      break;
-    }
-    case (hpke::KDFId::Sha512): {
-      hkdf = std::make_unique<HkdfImpl>(HkdfImpl::create<Sha512>());
-      break;
-    }
-    default: {
-      throw std::runtime_error("kdf: not implemented");
-    }
-  }
-
-  auto extractedChlo = hkdf->extract(
-      folly::IOBuf::copyBuffer("")->coalesce(),
-      encode(std::move(echConfig))->coalesce());
-  return hkdf->expand(
-      extractedChlo, *folly::IOBuf::copyBuffer("tls ech config id"), hashLen);
-}
 
 // We currently don't support any extensions to alter ECH behavior. As such,
 // just check that there are no mandatory extensions. (Extensions with the high
@@ -140,7 +109,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
   // we should be selecting the first one that we can support.
   for (const auto& config : configs) {
     folly::io::Cursor cursor(config.ech_config_content.get());
-    if (config.version == ECHVersion::Draft9) {
+    if (config.version == ECHVersion::Draft10) {
       auto echConfig = decode<ECHConfigContentDraft>(cursor);
 
       // Before anything else, check if the config has mandatory extensions.
@@ -153,14 +122,16 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
 
       // Check if we (client) support the server's chosen KEM.
       auto result = std::find(
-          supportedKEMs.begin(), supportedKEMs.end(), echConfig.kem_id);
+          supportedKEMs.begin(),
+          supportedKEMs.end(),
+          echConfig.key_config.kem_id);
       if (result == supportedKEMs.end()) {
         continue;
       }
 
       // Check if we (client) support the HPKE cipher suite.
-      auto cipherSuites = echConfig.cipher_suites;
-      for (auto& suite : cipherSuites) {
+      auto& cipherSuites = echConfig.key_config.cipher_suites;
+      for (const auto& suite : cipherSuites) {
         auto isCipherSupported =
             std::find(
                 supportedAeads.begin(), supportedAeads.end(), suite.aead_id) !=
@@ -170,7 +141,8 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
               hpke::getKDFId(getHashFunction(getCipherSuite(suite.aead_id)));
           if (suite.kdf_id == associatedCipherKdf) {
             auto supportedConfig = config;
-            return SupportedECHConfig{supportedConfig, suite};
+            auto configId = echConfig.key_config.config_id;
+            return SupportedECHConfig{supportedConfig, configId, suite};
           }
         }
       }
@@ -183,7 +155,7 @@ static hpke::SetupParam getSetupParam(
     std::unique_ptr<DHKEM> dhkem,
     std::unique_ptr<folly::IOBuf> prefix,
     hpke::KEMId kemId,
-    const ECHCipherSuite& cipherSuite) {
+    const HpkeSymmetricCipherSuite& cipherSuite) {
   // Get suite id
   auto group = getKexGroup(kemId);
   auto hash = getHashFunction(cipherSuite.kdf_id);
@@ -243,7 +215,7 @@ hpke::SetupResult constructHpkeSetupResult(
   // Get shared secret
   auto hkdf = hpke::makeHpkeHkdf(prefix->clone(), cipherSuite.kdf_id);
   std::unique_ptr<DHKEM> dhkem = std::make_unique<DHKEM>(
-      std::move(kex), getKexGroup(config.kem_id), std::move(hkdf));
+      std::move(kex), getKexGroup(config.key_config.kem_id), std::move(hkdf));
 
   // Get context
   std::unique_ptr<folly::IOBuf> info =
@@ -251,22 +223,25 @@ hpke::SetupResult constructHpkeSetupResult(
 
   return setupWithEncap(
       hpke::Mode::Base,
-      config.public_key->clone()->coalesce(),
+      config.key_config.public_key->clone()->coalesce(),
       std::move(info),
       folly::none,
       getSetupParam(
-          std::move(dhkem), prefix->clone(), config.kem_id, cipherSuite));
+          std::move(dhkem),
+          prefix->clone(),
+          config.key_config.kem_id,
+          cipherSuite));
 }
 
 std::unique_ptr<folly::IOBuf> makeClientHelloAad(
-    ECHCipherSuite cipherSuite,
-    const std::unique_ptr<folly::IOBuf>& configId,
+    HpkeSymmetricCipherSuite cipherSuite,
+    const uint8_t configId,
     const std::unique_ptr<folly::IOBuf>& enc,
     const std::unique_ptr<folly::IOBuf>& clientHello) {
   auto aad = folly::IOBuf::create(0);
   folly::io::Appender appender(aad.get(), 32);
-  detail::write<ech::ECHCipherSuite>(cipherSuite, appender);
-  detail::writeBuf<uint8_t>(configId, appender);
+  detail::write<ech::HpkeSymmetricCipherSuite>(cipherSuite, appender);
+  detail::write(configId, appender);
   detail::writeBuf<uint16_t>(enc, appender);
   detail::writeBuf<detail::bits24>(clientHello, appender);
   return aad;
@@ -376,7 +351,7 @@ ClientECH encryptClientHelloHRR(
   // Create ECH extension with blank config ID and enc for HRR
   ClientECH echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
-  echExtension.config_id = folly::IOBuf::create(0);
+  echExtension.config_id = supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
   encryptClientHelloShared(
@@ -393,8 +368,7 @@ ClientECH encryptClientHello(
   // Create ECH extension
   ClientECH echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
-  echExtension.config_id = constructConfigId(
-      supportedConfig.cipherSuite.kdf_id, supportedConfig.config);
+  echExtension.config_id = supportedConfig.configId;
   echExtension.enc = setupResult.enc->clone();
 
   encryptClientHelloShared(
@@ -406,9 +380,9 @@ ClientECH encryptClientHello(
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,
     const ECHConfig& echConfig,
-    ECHCipherSuite& cipherSuite,
+    HpkeSymmetricCipherSuite& cipherSuite,
     std::unique_ptr<folly::IOBuf> encapsulatedKey,
-    std::unique_ptr<folly::IOBuf> configId,
+    uint8_t configId,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context) {
@@ -441,7 +415,7 @@ ClientHello decryptECHWithContext(
 
 std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     const ECHConfig& echConfig,
-    ECHCipherSuite cipherSuite,
+    HpkeSymmetricCipherSuite cipherSuite,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum) {
@@ -452,7 +426,7 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   hpke::KDFId kdfId = cipherSuite.kdf_id;
   folly::io::Cursor echConfigCursor(echConfig.ech_config_content.get());
   auto decodedConfigContent = decode<ECHConfigContentDraft>(echConfigCursor);
-  auto kemId = decodedConfigContent.kem_id;
+  auto kemId = decodedConfigContent.key_config.kem_id;
   NamedGroup group = hpke::getKexGroup(kemId);
 
   auto dhkem = std::make_unique<DHKEM>(

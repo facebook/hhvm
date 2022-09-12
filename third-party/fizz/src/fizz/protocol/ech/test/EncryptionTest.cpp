@@ -60,9 +60,9 @@ void checkDecodedChlo(ClientHello decodedChlo, ClientHello expectedChlo) {
 ECHConfig getInvalidVECHConfig() {
   // Add invalid config
   ECHConfig invalidConfig;
-  invalidConfig.version = ECHVersion::Draft9;
+  invalidConfig.version = ECHVersion::Draft10;
   auto configContent = getECHConfigContent();
-  configContent.kem_id = hpke::KEMId::secp384r1;
+  configContent.key_config.kem_id = hpke::KEMId::secp384r1;
   invalidConfig.ech_config_content = encode(std::move(configContent));
 
   return invalidConfig;
@@ -79,9 +79,11 @@ hpke::SetupResult constructSetupResult(
 }
 
 ClientECH getTestClientECHWithInner(ClientHello chloInner) {
+  auto configContent = getECHConfigContent();
   SupportedECHConfig supportedConfig{
       getECHConfig(),
-      ECHCipherSuite{
+      configContent.key_config.config_id,
+      HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
 
   auto setupResult = constructSetupResult(supportedConfig);
@@ -111,6 +113,7 @@ void checkSupportedConfigValid(
   EXPECT_EQ(result.value().cipherSuite.kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(
       result.value().cipherSuite.aead_id, hpke::AeadId::TLS_AES_128_GCM_SHA256);
+  EXPECT_EQ(result.value().configId, 0xFB);
 }
 
 } // namespace
@@ -118,10 +121,10 @@ void checkSupportedConfigValid(
 TEST(EncryptionTest, TestValidECHConfigContent) {
   // Add config that doesn't work and cannot be supported
   ECHConfigContentDraft invalidConfigContent = getECHConfigContent();
-  invalidConfigContent.kem_id = hpke::KEMId::secp521r1;
+  invalidConfigContent.key_config.kem_id = hpke::KEMId::secp521r1;
   std::vector<ECHConfig> configs;
   ECHConfig invalid;
-  invalid.version = ECHVersion::Draft9;
+  invalid.version = ECHVersion::Draft10;
   invalid.ech_config_content = encode(std::move(invalidConfigContent));
 
   // Add config that works and can be supported
@@ -136,11 +139,11 @@ TEST(EncryptionTest, TestValidECHConfigContent) {
 TEST(EncryptionTest, TestInvalidECHConfigContent) {
   ECHConfigContentDraft configContent = getECHConfigContent();
 
-  configContent.kem_id = hpke::KEMId::secp256r1;
-  ECHCipherSuite suite{
+  configContent.key_config.kem_id = hpke::KEMId::secp256r1;
+  HpkeSymmetricCipherSuite suite{
       hpke::KDFId::Sha512, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  std::vector<ECHCipherSuite> cipher_suites = {suite};
-  configContent.cipher_suites = cipher_suites;
+  std::vector<HpkeSymmetricCipherSuite> cipher_suites = {suite};
+  configContent.key_config.cipher_suites = cipher_suites;
 
   ECHConfig invalidConfig;
   invalidConfig.version = static_cast<ECHVersion>(0xfe07); // Draft 7
@@ -169,7 +172,7 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
 
   std::vector<ECHConfig> configs;
   ECHConfig invalid;
-  invalid.version = ECHVersion::Draft9;
+  invalid.version = ECHVersion::Draft10;
   invalid.ech_config_content = encode(std::move(invalidConfigContent));
   configs.push_back(std::move(invalid));
 
@@ -183,7 +186,7 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
 TEST(EncryptionTest, TestValidSelectECHConfigContent) {
   // Add valid config
   ECHConfig validConfig;
-  validConfig.version = ECHVersion::Draft9;
+  validConfig.version = ECHVersion::Draft10;
   validConfig.ech_config_content = encode(getECHConfigContent());
 
   std::vector<ECHConfig> configs;
@@ -302,7 +305,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
       std::move(testECH.enc),
       std::move(testECH.config_id),
       std::move(testECH.payload),
-      ECHVersion::Draft9,
+      ECHVersion::Draft10,
       context);
 
   checkDecodedChlo(std::move(chlo), std::move(expectedChlo));
@@ -365,7 +368,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
           std::move(clientECH.enc),
           std::move(clientECH.config_id),
           std::move(clientECH.payload),
-          ECHVersion::Draft9,
+          ECHVersion::Draft10,
           context),
       OuterExtensionsError);
 }
@@ -427,7 +430,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
           std::move(clientECH.enc),
           std::move(clientECH.config_id),
           std::move(clientECH.payload),
-          ECHVersion::Draft9,
+          ECHVersion::Draft10,
           context),
       OuterExtensionsError);
 }

@@ -2423,11 +2423,12 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft9;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft10;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
+  state_.echState()->supportedConfig.configId = 0xFB;
 
   auto mockHandshakeContext1 = new MockHandshakeContext();
   auto mockHandshakeContext2 = new MockHandshakeContext();
@@ -2516,7 +2517,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto clientHelloOuterEnc = encode(chloOuter);
   auto clientHelloOuterAad = makeClientHelloAad(
       state_.echState()->supportedConfig.cipherSuite,
-      folly::IOBuf::copyBuffer(""),
+      state_.echState()->supportedConfig.configId,
       folly::IOBuf::copyBuffer(""),
       clientHelloOuterEnc);
 
@@ -2548,7 +2549,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   // Now outer chlo should have a mocked ECH extension.
   ech::ClientECH echExtension;
   echExtension.cipher_suite = state_.echState()->supportedConfig.cipherSuite;
-  echExtension.config_id = folly::IOBuf::create(0);
+  echExtension.config_id = state_.echState()->supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
   echExtension.payload = folly::IOBuf::copyBuffer("echsealed");
   chloOuter.extensions.push_back(encodeExtension(std::move(echExtension)));
@@ -2619,11 +2620,12 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft9;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft10;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
+  state_.echState()->supportedConfig.configId = 0xFB;
 
   mockKeyScheduler_ = new MockKeyScheduler();
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
@@ -3112,7 +3114,7 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
   auto ee = TestMessages::encryptedExt();
   ech::ServerECH serverECH;
   ech::ECHConfig cfg;
-  cfg.version = ech::ECHVersion::Draft9;
+  cfg.version = ech::ECHVersion::Draft10;
   cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
   serverECH.retry_configs.push_back(std::move(cfg));
   ee.extensions.push_back(encodeExtension(std::move(serverECH)));

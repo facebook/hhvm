@@ -52,20 +52,6 @@ let process_decls_all_files ctx files_info progress =
 let process_source_text_all_files ctx files_info progress =
   List.fold files_info ~init:progress ~f:(process_source_text ctx)
 
-(* This function processes declarations, starting with an
-empty fact cache. *)
-let build_decls_json ctx files_info ~ownership =
-  Fact_acc.init ~ownership
-  |> process_decls_all_files ctx files_info
-  |> Fact_acc.to_json
-
-(* This function processes cross-references, starting with an
-empty fact cache. *)
-let build_xrefs_json ctx files_info ~ownership =
-  Fact_acc.init ~ownership
-  |> process_xrefs_all_files ctx files_info
-  |> Fact_acc.to_json
-
 (* This function processes both declarations and cross-references,
 sharing the declaration fact cache between them. *)
 let build_json ctx files_info ~ownership =

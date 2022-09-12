@@ -36,35 +36,23 @@ let write_json
     (file_dir : string)
     (files_info : File_info.t list)
     (start_time : float) : float =
-  (try
-     let (small, large) =
-       List.partition_tf files_info ~f:(fun File_info.{ tast; _ } ->
-           List.length tast <= 2000)
+  (* Large file may lead to large json files which timeout when sent
+     to the server. Not an issue currently, but if it is, we can index
+     xrefs/decls separately, or split in batches according to files size *)
+  (List.iter files_info ~f:(fun File_info.{ tast; path; _ } ->
+       if List.length tast > 2000 then Hh_logger.log "Large file: %s" path);
+   try
+     let json_chunks =
+       Symbol_index_batch.build_json ctx files_info ~ownership
      in
-     if List.is_empty large then
-       let json_chunks =
-         Symbol_index_batch.build_json ctx files_info ~ownership
-       in
-       write_file file_dir (List.length files_info) json_chunks
-     else
-       let json_chunks = Symbol_index_batch.build_json ctx small ~ownership in
-       write_file file_dir (List.length small) json_chunks;
-       List.iter large ~f:(fun file_info ->
-           let decl_json_chunks =
-             Symbol_index_batch.build_decls_json ctx [file_info] ~ownership
-           in
-           write_file file_dir 1 decl_json_chunks;
-           let xref_json_chunks =
-             Symbol_index_batch.build_xrefs_json ctx [file_info] ~ownership
-           in
-           write_file file_dir 1 xref_json_chunks)
+     write_file file_dir (List.length files_info) json_chunks
    with
-  | WorkerCancel.Worker_should_exit as exn ->
-    (* Cancellation requests must be re-raised *)
-    let e = Exception.wrap exn in
-    Exception.reraise e
-  | e ->
-    Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e));
+   | WorkerCancel.Worker_should_exit as exn ->
+     (* Cancellation requests must be re-raised *)
+     let e = Exception.wrap exn in
+     Exception.reraise e
+   | e ->
+     Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e));
   let elapsed = Unix.gettimeofday () -. start_time in
   log_elapsed "Processed batch in" elapsed;
   elapsed

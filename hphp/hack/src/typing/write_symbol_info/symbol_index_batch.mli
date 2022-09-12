@@ -6,18 +6,6 @@
  *
  *)
 
-val build_decls_json :
-  Provider_context.t ->
-  Symbol_file_info.t list ->
-  ownership:bool ->
-  Hh_json.json list
-
-val build_xrefs_json :
-  Provider_context.t ->
-  Symbol_file_info.t list ->
-  ownership:bool ->
-  Hh_json.json list
-
 val build_json :
   Provider_context.t ->
   Symbol_file_info.t list ->

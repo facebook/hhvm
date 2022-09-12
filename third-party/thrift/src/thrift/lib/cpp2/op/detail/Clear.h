@@ -73,6 +73,13 @@ struct Clear {
     val = GetIntrinsicDefault<Tag>{}();
   }
 };
+template <>
+struct Clear<void> {
+  template <typename U>
+  constexpr void operator()(U& val) const {
+    Clear<type::infer_tag<U>>{}(val);
+  }
+};
 
 // Checks if the given value is empty.
 template <typename Tag>
@@ -101,6 +108,13 @@ struct IsEmpty {
   template <typename ATag>
   static bool empty(const std::unique_ptr<folly::IOBuf>& val, ATag tag) {
     return val == nullptr || empty(*val, tag);
+  }
+};
+template <>
+struct IsEmpty<void> {
+  template <typename U>
+  constexpr bool operator()(U& val) const {
+    return IsEmpty<type::infer_tag<U>>{}(val);
   }
 };
 

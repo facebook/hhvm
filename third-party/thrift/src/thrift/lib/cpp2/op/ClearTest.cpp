@@ -70,6 +70,13 @@ void testClear(
       true>(expected, unexpected, emptiable);
 }
 
+TEST(ClearTest, InferTag) {
+  bool val = true;
+  EXPECT_FALSE(op::isEmpty<>(val));
+  op::clear<>(val);
+  EXPECT_TRUE(op::isEmpty<>(val));
+}
+
 TEST(ClearTest, Integral) {
   testClear<type::bool_t>(false, true);
   testClear<type::byte_t>(0, 1);

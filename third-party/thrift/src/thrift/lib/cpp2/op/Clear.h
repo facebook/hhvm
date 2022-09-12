@@ -38,7 +38,7 @@ namespace op {
 //   isEmpty<i64_t>(1) -> false
 //   isEmpty<set<i32_t>>({}) -> true
 //   isEmpty<set<i32_t>>({0}) -> false
-template <typename Tag>
+template <typename Tag = void>
 FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
 
 // Returns the 'intrinsic' default for the given type.
@@ -57,7 +57,7 @@ FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<Tag>
 // For example:
 //   clear<i32_t>(myInt) // sets myInt = 0.
 //   clear<set<i32_t>>(myIntSet) // calls myIntSet.clear()
-template <typename Tag>
+template <typename Tag = void>
 FOLLY_INLINE_VARIABLE constexpr detail::Clear<Tag> clear{};
 
 // Clears the given field, setting the field to initial state.

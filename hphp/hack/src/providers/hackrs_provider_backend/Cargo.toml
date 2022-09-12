@@ -33,7 +33,7 @@ ty = { path = "../../hackrs/ty/cargo/ty" }
 
 [dev-dependencies]
 hh24_test = { path = "../../facebook/utils/cargo/hh24_test" }
-libc = "0.2.121"
+libc = "=0.2.125"
 maplit = "1.0"
 rpds = "0.11.0"
 shmffi = { path = "../../shmffi/cargo/shmffi" }

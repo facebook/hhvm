@@ -9,7 +9,7 @@ path = "../../ocaml_blob.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-libc = "0.2.121"
+libc = "=0.2.125"
 lz4 = "1.23.1"
 ocamlrep = { path = "../../../ocamlrep" }
 shmrs = { path = "../../../shmrs" }

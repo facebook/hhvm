@@ -20,7 +20,7 @@ facts_rust = { path = "../../facts/cargo/facts_rust" }
 hash = { path = "../../utils/hash" }
 hhbc = { path = "../hhbc/cargo/hhbc" }
 itertools = "0.10.3"
-libc = "0.2.121"
+libc = "=0.2.125"
 no_pos_hash = { path = "../../utils/no_pos_hash" }
 ocamlrep = { path = "../../ocamlrep" }
 options = { path = "../compile/cargo/options" }

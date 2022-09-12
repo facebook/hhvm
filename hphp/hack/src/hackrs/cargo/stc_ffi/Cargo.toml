@@ -16,7 +16,7 @@ file_provider = { path = "../../file_provider/cargo/file_provider" }
 folded_decl_provider = { path = "../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hcons = { path = "../../../hcons" }
-libc = "0.2.121"
+libc = "=0.2.125"
 ocaml_runtime = { path = "../../../utils/ocaml_runtime" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }

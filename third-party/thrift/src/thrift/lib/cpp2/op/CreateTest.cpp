@@ -16,17 +16,22 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp/Field.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 #include <thrift/lib/cpp2/op/Create.h>
+#include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/lib/thrift/gen-cpp2/type_types.h>
+#include <thrift/test/gen-cpp2/ensure_types.h>
 #include <thrift/test/testset/Testset.h>
 #include <thrift/test/testset/gen-cpp2/testset_types.h>
 
 namespace apache::thrift::op {
 namespace {
-
+// TODO(afuller): Use testset instead.
+using test::FieldRefStruct;
+using test::SmartPointerStruct;
 using namespace apache::thrift::type;
 namespace testset = apache::thrift::test::testset;
 
@@ -183,6 +188,58 @@ TEST(CreateTest, Container) {
   testCreate<list<string_t>>();
   testCreate<set<string_t>>();
   testCreate<map<string_t, string_t>>();
+}
+
+template <typename Obj, typename Ord>
+void testEnsure(Obj obj, Ord ord) {
+  using Struct = decltype(obj);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto field = op::get<decltype(ord), Struct>(obj);
+  op::ensure<FieldTag>(field, obj);
+  EXPECT_EQ(field, 0);
+  field = 2;
+  op::ensure<FieldTag>(field, obj); // no-op
+  EXPECT_EQ(field, 2);
+}
+
+template <typename Obj, typename Ord>
+void testEnsurePtr(Obj obj, Ord ord) {
+  using Struct = decltype(obj);
+  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
+  auto& field = op::get<decltype(ord), Struct>(obj);
+  op::ensure<FieldTag>(field, obj);
+  EXPECT_EQ(*field, 0);
+  if constexpr (thrift::detail::is_unique_ptr_v<
+                    std::remove_reference_t<decltype(field)>>) {
+    field = std::make_unique<int32_t>(2);
+  } else {
+    field = std::make_shared<int32_t>(2);
+  }
+  op::ensure<FieldTag>(field, obj); // no-op
+  EXPECT_EQ(*field, 2);
+}
+
+TEST(EnsureTest, FieldRef) {
+  FieldRefStruct obj;
+  op::for_each_ordinal<FieldRefStruct>(
+      [&](auto fieldOrdinalTag) { testEnsure(obj, fieldOrdinalTag); });
+}
+
+TEST(EnsureTest, SmartPointer) {
+  SmartPointerStruct obj;
+  op::for_each_ordinal<SmartPointerStruct>(
+      [&](auto fieldOrdinalTag) { testEnsurePtr(obj, fieldOrdinalTag); });
+}
+
+TEST(EnsureTest, Optional) {
+  FieldRefStruct obj;
+  using FieldTag = op::get_field_tag<field_ordinal<2>, FieldRefStruct>;
+  auto opt = obj.optional_i32_ref().to_optional();
+  op::ensure<FieldTag>(opt, obj);
+  EXPECT_EQ(*opt, 0);
+  opt = 2;
+  op::ensure<FieldTag>(opt, obj);
+  EXPECT_EQ(*opt, 2);
 }
 
 } // namespace

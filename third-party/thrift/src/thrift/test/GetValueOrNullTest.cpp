@@ -18,7 +18,7 @@
 #include <type_traits>
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/FieldRefTraits.h>
-#include <thrift/lib/cpp2/op/Ensure.h>
+#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/test/gen-cpp2/get_value_or_null_types.h>
 

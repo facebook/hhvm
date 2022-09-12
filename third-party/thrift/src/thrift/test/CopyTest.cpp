@@ -16,7 +16,7 @@
 
 #include <folly/portability/GTest.h>
 #include <thrift/lib/cpp2/op/Copy.h>
-#include <thrift/lib/cpp2/op/Ensure.h>
+#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/test/gen-cpp2/copy_types.h>
 

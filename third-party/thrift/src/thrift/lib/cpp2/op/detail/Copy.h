@@ -17,7 +17,7 @@
 #pragma once
 
 #include <thrift/lib/cpp2/FieldRef.h>
-#include <thrift/lib/cpp2/op/detail/BasePatch.h>
+#include <thrift/lib/cpp2/op/detail/Create.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>
 

@@ -37,6 +37,13 @@ namespace op {
 template <typename Tag>
 FOLLY_INLINE_VARIABLE constexpr detail::Create<Tag> create{};
 
+// Ensures the given field. If the field doesn't exist, emplaces the field.
+// For example:
+//   // calls foo.field_ref().ensure()
+//   ensure<field_tag>(foo)
+template <typename Tag>
+FOLLY_INLINE_VARIABLE constexpr detail::Ensure<Tag> ensure{};
+
 } // namespace op
 } // namespace thrift
 } // namespace apache

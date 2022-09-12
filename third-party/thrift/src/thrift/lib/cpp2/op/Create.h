@@ -41,8 +41,8 @@ FOLLY_INLINE_VARIABLE constexpr detail::Create<Tag> create{};
 // For example:
 //   // calls foo.field_ref().ensure()
 //   ensure<field_tag>(foo)
-template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::Ensure<Tag> ensure{};
+template <typename Id = void, typename Tag = void>
+FOLLY_INLINE_VARIABLE constexpr detail::Ensure<Id, Tag> ensure{};
 
 } // namespace op
 } // namespace thrift

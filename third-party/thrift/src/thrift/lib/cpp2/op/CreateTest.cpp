@@ -192,22 +192,18 @@ TEST(CreateTest, Container) {
 
 template <typename Obj, typename Ord>
 void testEnsure(Obj obj, Ord ord) {
-  using Struct = decltype(obj);
-  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
-  auto field = op::get<decltype(ord), Struct>(obj);
-  op::ensure<FieldTag>(field, obj);
+  auto field = op::get<>(ord, obj);
+  EXPECT_EQ(op::ensure<>(ord, obj), 0);
   EXPECT_EQ(field, 0);
   field = 2;
-  op::ensure<FieldTag>(field, obj); // no-op
+  EXPECT_EQ(op::ensure<>(ord, obj), 2);
   EXPECT_EQ(field, 2);
 }
 
 template <typename Obj, typename Ord>
 void testEnsurePtr(Obj obj, Ord ord) {
-  using Struct = decltype(obj);
-  using FieldTag = op::get_field_tag<decltype(ord), Struct>;
-  auto& field = op::get<decltype(ord), Struct>(obj);
-  op::ensure<FieldTag>(field, obj);
+  auto& field = op::get<>(ord, obj);
+  EXPECT_EQ(op::ensure<>(ord, obj), 0);
   EXPECT_EQ(*field, 0);
   if constexpr (thrift::detail::is_unique_ptr_v<
                     std::remove_reference_t<decltype(field)>>) {
@@ -215,20 +211,19 @@ void testEnsurePtr(Obj obj, Ord ord) {
   } else {
     field = std::make_shared<int32_t>(2);
   }
-  op::ensure<FieldTag>(field, obj); // no-op
+  EXPECT_EQ(op::ensure<>(ord, obj), 2);
   EXPECT_EQ(*field, 2);
 }
 
 TEST(EnsureTest, FieldRef) {
   FieldRefStruct obj;
-  op::for_each_ordinal<FieldRefStruct>(
-      [&](auto fieldOrdinalTag) { testEnsure(obj, fieldOrdinalTag); });
+  op::for_each_ordinal<FieldRefStruct>([&](auto ord) { testEnsure(obj, ord); });
 }
 
 TEST(EnsureTest, SmartPointer) {
   SmartPointerStruct obj;
   op::for_each_ordinal<SmartPointerStruct>(
-      [&](auto fieldOrdinalTag) { testEnsurePtr(obj, fieldOrdinalTag); });
+      [&](auto ord) { testEnsurePtr(obj, ord); });
 }
 
 TEST(EnsureTest, Optional) {

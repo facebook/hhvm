@@ -397,6 +397,7 @@ void verifyTypeImpl(IRGS& env,
         gen(env, Unreachable, ASSERT_REASON);
         break;
       case Fail:
+        hint(env, Block::Hint::Unlikely);
         genFail(genericVal);
         break;
       case Fallback:
@@ -1147,7 +1148,7 @@ void verifyRetTypeImpl(IRGS& env, int32_t id, int32_t ind,
       tc,
       onlyCheckNullability,
       [&] { // Get value to test
-        return topC(env, BCSPRelOffset { ind });
+        return topC(env, BCSPRelOffset { ind }, DataTypeGeneric);
       },
       [&] { // Get the class representing `this' type
         return ldCtxCls(env);

@@ -166,18 +166,6 @@ pub struct marshal_header {
     pub whsize: uintnat,
 }
 
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct intern_item<'a> {
-    pub dest: *mut Value<'a>,
-    pub arg: intnat,
-    pub op: c_uint,
-}
-
-pub const OReadItems: c_uint = 0; // read arg items and store them in dest[0], dest[1], ...
-pub const OFreshOID: c_uint = 1; // generate a fresh OID and store it in *dest
-pub const OShift: c_uint = 2; // offset *dest by arg
-
 pub type caml_stat_block = *mut c_void;
 
 #[derive(Copy, Clone)]
@@ -198,16 +186,16 @@ pub struct mark_entry {
     pub end: *mut value,
 }
 
-pub const CAML_FROM_C: caml_alloc_small_flags = 0;
-pub const CAML_DONT_TRACK: caml_alloc_small_flags = 0;
-pub type caml_alloc_small_flags = c_uint;
+const CAML_FROM_C: caml_alloc_small_flags = 0;
+const CAML_DONT_TRACK: caml_alloc_small_flags = 0;
+type caml_alloc_small_flags = c_uint;
 
 // 'config.h'
-pub const PAGE_LOG: usize = 12; // A page is 4 kilobytes
-pub const PAGE_SIZE: usize = (1_isize << PAGE_LOG) as usize;
+const PAGE_LOG: usize = 12; // A page is 4 kilobytes
+const PAGE_SIZE: usize = (1_isize << PAGE_LOG) as usize;
 // Maximum size of a block allocated in the young generation (words).
 // Must be > 4
-pub const MAX_YOUNG_WOSIZE: usize = 256;
+const MAX_YOUNG_WOSIZE: usize = 256;
 
 // ---
 
@@ -286,6 +274,18 @@ unsafe fn make_free_blocks(p: *mut value, size: mlsize_t, do_merge: c_int, color
         .expect("non-null function pointer")(p, size, do_merge, color);
 }
 
+struct intern_item<'a> {
+    pub dest: *mut Value<'a>,
+    pub arg: intnat,
+    pub op: InternItemStackOp,
+}
+
+enum InternItemStackOp {
+    ReadItems = 0,
+    FreshObjectId = 1,
+    Shift = 2,
+}
+
 struct intern_state<'a> {
     intern_src: *mut c_uchar,
     // Reading pointer in block holding input data.
@@ -313,6 +313,8 @@ struct intern_state<'a> {
 }
 
 impl intern_state<'_> {
+    const INTERN_STACK_INIT_SIZE: usize = 256;
+
     unsafe fn new() -> Self {
         Self {
             intern_src: std::ptr::null_mut(),
@@ -324,7 +326,7 @@ impl intern_state<'_> {
             intern_color: 0,
             intern_header: Header::from_bits(0),
             intern_block: Value::from_bits(0),
-            stack: Vec::with_capacity(INTERN_STACK_INIT_SIZE),
+            stack: Vec::with_capacity(intern_state::INTERN_STACK_INIT_SIZE),
         }
     }
 }
@@ -448,15 +450,13 @@ unsafe fn readfloats(is: &mut intern_state<'_>, dest: *mut c_double, len: mlsize
     }
 }
 
-const INTERN_STACK_INIT_SIZE: usize = 256;
-
-const READ_BLOCK_LABEL: u64 = 16649699497103515194;
-const READ_STRING_LABEL: u64 = 11970676656440271524;
-const READ_SHARED_LABEL: u64 = 8656139126282042408;
-const READ_DOUBLE_ARRAY_LABEL: u64 = 8966088013221564425;
-const NOTHING_TO_DO_LABEL: u64 = 8288085890650723895;
-
 unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
+    const READ_BLOCK_LABEL: u64 = 16649699497103515194;
+    const READ_STRING_LABEL: u64 = 11970676656440271524;
+    const READ_SHARED_LABEL: u64 = 8656139126282042408;
+    const READ_DOUBLE_ARRAY_LABEL: u64 = 8966088013221564425;
+    const NOTHING_TO_DO_LABEL: u64 = 8288085890650723895;
+
     let mut current_block: u64;
     let mut header: header_t;
     let mut code: c_uint;
@@ -468,9 +468,11 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
     let mut v: Value<'a> = Value::from_bits(0);
     let mut ofs: asize_t = 0;
 
+    use InternItemStackOp::*;
+
     // Initially let's try to read the first object from the stream
     is.stack.push(intern_item {
-        op: OReadItems,
+        op: ReadItems,
         dest,
         arg: 1,
     });
@@ -480,21 +482,21 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
         // Interpret next item on the stack
         dest = top.dest;
 
-        match top.op as c_uint {
-            OFreshOID => {
+        match top.op {
+            FreshObjectId => {
                 if Long_val(Field(Value::from_bits(dest as usize), 1)) >= 0 {
                     caml_set_oo_id(dest as value);
                 }
                 // Pop item and iterate
                 is.stack.pop();
             }
-            OShift => {
+            Shift => {
                 // Shift value by an offset
                 *dest = Value::from_bits((*dest).to_bits() + top.arg as usize);
                 // Pop item and iterate
                 is.stack.pop();
             }
-            OReadItems => {
+            ReadItems => {
                 // Pop item
                 top.dest = top.dest.offset(1);
                 top.arg -= 1;
@@ -619,12 +621,12 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
                             CODE_INFIXPOINTER => {
                                 ofs = read32u(is) as asize_t;
                                 is.stack.push(intern_item {
-                                    op: OShift,
+                                    op: Shift,
                                     dest,
                                     arg: ofs as intnat,
                                 });
                                 is.stack.push(intern_item {
-                                    op: OReadItems,
+                                    op: ReadItems,
                                     dest,
                                     arg: 1,
                                 });
@@ -704,7 +706,7 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
                                 // Request to read rest of the elements of the block
                                 if size - 2 > 0 {
                                     is.stack.push(intern_item {
-                                        op: OReadItems,
+                                        op: ReadItems,
                                         dest: Field_ptr_mut(v.to_bits() as value, 2)
                                             as *mut Value<'a>,
                                         arg: (size - 2) as i64,
@@ -712,20 +714,20 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
                                 }
                                 // Request freshing OID
                                 is.stack.push(intern_item {
-                                    op: OFreshOID,
+                                    op: FreshObjectId,
                                     dest: v.to_bits() as *mut Value<'a>,
                                     arg: 1,
                                 });
                                 // Finally read first two block elements: method table and old OID
                                 is.stack.push(intern_item {
-                                    op: OReadItems,
+                                    op: ReadItems,
                                     dest: Field_ptr_mut(v.to_bits() as value, 0) as *mut Value<'a>,
                                     arg: 2,
                                 });
                             } else {
                                 // If it's not an object then read the conents of the block
                                 is.stack.push(intern_item {
-                                    op: OReadItems,
+                                    op: ReadItems,
                                     dest: Field_ptr_mut(v.to_bits() as value, 0) as *mut Value<'a>,
                                     arg: size as i64,
                                 });
@@ -736,7 +738,6 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
                 }
                 *dest = v
             }
-            _ => {}
         }
     }
 }

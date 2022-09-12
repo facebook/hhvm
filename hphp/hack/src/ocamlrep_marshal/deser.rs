@@ -792,7 +792,7 @@ unsafe fn intern_alloc<'a>(is: &mut intern_state<'a>, whsize: mlsize_t, num_obje
                         wosize as intnat,
                         CAML_DONT_TRACK as c_int | CAML_FROM_C as c_int,
                         1,
-                        std::ptr::null_mut::<c_uchar>(),
+                        std::ptr::null_mut(),
                     );
                 }
                 *((*Caml_state)._young_ptr as *mut header_t) =
@@ -863,10 +863,10 @@ unsafe fn intern_add_to_heap(is: &mut intern_state<'_>, _whsize: mlsize_t) -> *m
 unsafe fn intern_end<'a>(is: &mut intern_state<'a>, mut res: value, whsize: mlsize_t) -> value {
     let caml__frame: *mut caml__roots_block = (*Caml_state)._local_roots;
     let mut caml__roots_res: caml__roots_block = caml__roots_block {
-        next: std::ptr::null_mut::<caml__roots_block>(),
+        next: std::ptr::null_mut(),
         ntables: 0,
         nitems: 0,
-        tables: [std::ptr::null_mut::<value>(); 5],
+        tables: [std::ptr::null_mut(); 5],
     };
     caml__roots_res.next = (*Caml_state)._local_roots;
     (*Caml_state)._local_roots = &mut caml__roots_res;
@@ -930,10 +930,10 @@ unsafe fn input_val_from_string<'a>(
 ) -> value {
     let caml__frame: *mut caml__roots_block = (*Caml_state)._local_roots;
     let mut caml__roots_str: caml__roots_block = caml__roots_block {
-        next: std::ptr::null_mut::<caml__roots_block>(),
+        next: std::ptr::null_mut(),
         ntables: 0,
         nitems: 0,
-        tables: [std::ptr::null_mut::<value>(); 5],
+        tables: [std::ptr::null_mut(); 5],
     };
     caml__roots_str.next = (*Caml_state)._local_roots;
     (*Caml_state)._local_roots = &mut caml__roots_str;
@@ -943,10 +943,10 @@ unsafe fn input_val_from_string<'a>(
     let _caml__dummy_str: c_int = 0;
     let mut obj: value = ((0 as uintnat) << 1) as intnat + 1 as c_long;
     let mut caml__roots_obj: caml__roots_block = caml__roots_block {
-        next: std::ptr::null_mut::<caml__roots_block>(),
+        next: std::ptr::null_mut(),
         ntables: 0,
         nitems: 0,
-        tables: [std::ptr::null_mut::<value>(); 5],
+        tables: [std::ptr::null_mut(); 5],
     };
     caml__roots_obj.next = (*Caml_state)._local_roots;
     (*Caml_state)._local_roots = &mut caml__roots_obj;
@@ -966,7 +966,7 @@ unsafe fn input_val_from_string<'a>(
     intern_init(
         is,
         Byte_u_ptr_mut(str, ofs as usize) as *mut c_void,
-        std::ptr::null_mut::<c_void>(),
+        std::ptr::null_mut(),
     );
     parse_header(
         is,

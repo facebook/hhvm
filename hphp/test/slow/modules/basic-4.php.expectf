@@ -1,6 +1,4 @@
 in foo
-
-Warning: Accessing internal class C in module B from module A is not allowed in %s on line 13
 in foo
 
 Warning: Accessing internal class C in module B from module A is not allowed in %s on line 14

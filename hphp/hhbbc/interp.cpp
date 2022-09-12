@@ -4636,6 +4636,7 @@ void in(ISS& env, const bc::NewObjS& op) {
 
   auto const& dcls = dcls_of(cls);
   if (dcls.isExact() && !dcls.cls().couldHaveReifiedGenerics() &&
+      module_check_always_passes(env, dcls.cls()) &&
       (!dcls.cls().couldBeOverridden() ||
        equivalently_refined(cls, unctx(cls)))) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
@@ -4653,7 +4654,8 @@ void in(ISS& env, const bc::NewObj& op) {
   }
 
   auto const& dcls = dcls_of(cls);
-  if (dcls.isExact() && !dcls.cls().mightCareAboutDynConstructs()) {
+  if (dcls.isExact() && !dcls.cls().mightCareAboutDynConstructs() &&
+      module_check_always_passes(env, dcls.cls())) {
     return reduce(
       env,
       bc::PopC {},

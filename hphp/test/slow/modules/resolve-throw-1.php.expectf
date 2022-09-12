@@ -6,5 +6,5 @@ Accessing internal method C::foo_static in module a from module b is not allowed
 Accessing internal method C::foo_static in module a from module b is not allowed @ %s:11
 Accessing internal class CInternal in module a from module b is not allowed @ %s:13
 Accessing internal method CInternal::foo_static in module a from module b is not allowed @ %s:27
-Accessing internal class CInternal in module a from module b is not allowed @ %s:30
+in CInternal ctor
 Accessing internal method CInternal::foo_static in module a from module b is not allowed @ %s:32

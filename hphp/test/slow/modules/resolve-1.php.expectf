@@ -25,12 +25,8 @@ Warning: Accessing internal method CInternal::foo_static in module a from module
 
 Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 19
 in CInternal::f_static
-
-Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 21
 in CInternal ctor
 
 Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 22
 in CInternal ctor
-
-Warning: Accessing internal class CInternal in module a from module b is not allowed in %s on line 23
 in CInternal ctor

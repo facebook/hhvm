@@ -167,7 +167,7 @@ impl<'src> AastParser {
         let syntax_errors =
             Self::check_syntax_error(env, indexed_source_text, &tree, Some(&mut ret));
         let error_peak = stack_limit::peak() as u64;
-        let lowpri_errors = lowerer_env.lowpri_errors().borrow().to_vec();
+        let lowerer_parsing_errors = lowerer_env.parsing_errors().borrow().to_vec();
         let errors = lowerer_env.hh_errors().borrow().to_vec();
         let lint_errors = lowerer_env.lint_errors().borrow().to_vec();
         let error_t = error_t.elapsed();
@@ -176,7 +176,7 @@ impl<'src> AastParser {
             file_mode: mode,
             scoured_comments,
             aast: ret,
-            lowpri_errors,
+            lowerer_parsing_errors,
             syntax_errors,
             errors,
             lint_errors,

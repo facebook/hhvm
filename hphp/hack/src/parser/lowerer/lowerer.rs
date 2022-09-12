@@ -159,13 +159,9 @@ pub struct State {
     pub fn_generics: HashMap<String, bool>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
-    /// This provides a generic mechanism to delay raising parsing errors;
-    /// since we're moving FFP errors away from CST to a stage after lowering
-    /// _and_ want to prioritize errors before lowering, the lowering errors
-    /// must be merely stored when the lowerer runs (until check for FFP runs (on AST)
-    /// and raised _after_ FFP error checking (unless we run the lowerer twice,
-    /// which would be expensive).
-    pub lowpri_errors: Vec<(Pos, String)>,
+    /// Parsing errors emitted during lowering. Note that most parsing
+    /// errors are emitted in the initial FFP parse.
+    pub parsing_errors: Vec<(Pos, String)>,
     /// hh_errors captures errors after parsing, naming, nast, etc.
     pub hh_errors: Vec<HHError>,
     pub lint_errors: Vec<LintError>,
@@ -244,7 +240,7 @@ impl<'a> Env<'a> {
                 fn_generics: HashMap::default(),
                 in_static_method: false,
                 parent_maybe_reified: false,
-                lowpri_errors: vec![],
+                parsing_errors: vec![],
                 doc_comments: vec![],
                 local_id_counter: 1,
                 hh_errors: vec![],
@@ -306,8 +302,8 @@ impl<'a> Env<'a> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    pub fn lowpri_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
-        RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
+    pub fn parsing_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.parsing_errors)
     }
 
     pub fn hh_errors(&mut self) -> RefMut<'_, Vec<HHError>> {
@@ -392,7 +388,7 @@ fn emit_error<'a>(error: Error, env: &mut Env<'a>) {
     // Don't emit multiple parsing errors during lowering. Once we've
     // seen one parsing error, later parsing errors are rarely
     // meaningful.
-    if !env.lowpri_errors().is_empty() {
+    if !env.parsing_errors().is_empty() {
         return;
     }
 
@@ -404,10 +400,10 @@ fn emit_error<'a>(error: Error, env: &mut Env<'a>) {
             ..
         } => {
             let msg = syntax_error::lowering_parsing_error(&node_name, &expecting);
-            env.lowpri_errors().push((pos, msg.to_string()));
+            env.parsing_errors().push((pos, msg.to_string()));
         }
         Error::ParsingError { message, pos } => {
-            env.lowpri_errors().push((pos, message));
+            env.parsing_errors().push((pos, message));
         }
     }
 }
@@ -430,7 +426,7 @@ fn raise_parsing_error_pos<'a>(pos: &Pos, env: &mut Env<'a>, msg: &str) {
 fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>, msg: &str) {
     if env.should_surface_error() {
         let pos = node_or_pos.either(|node| p_pos(node, env), |pos| pos.clone());
-        env.lowpri_errors().push((pos, String::from(msg)))
+        env.parsing_errors().push((pos, String::from(msg)))
     } else if env.codegen() {
         let pos = node_or_pos.either(
             |node| {
@@ -439,7 +435,7 @@ fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>,
             },
             |pos| pos.clone(),
         );
-        env.lowpri_errors().push((pos, String::from(msg)))
+        env.parsing_errors().push((pos, String::from(msg)))
     }
 }
 
@@ -467,7 +463,7 @@ fn text_str<'b, 'a>(node: S<'a>, env: &'b Env<'_>) -> &'b str {
 }
 
 fn lowering_error(env: &mut Env<'_>, pos: &Pos, text: &str, syntax_kind: &str) {
-    if env.is_typechecker() && env.lowpri_errors().is_empty() {
+    if env.is_typechecker() && env.parsing_errors().is_empty() {
         raise_parsing_error_pos(
             pos,
             env,

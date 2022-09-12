@@ -35,7 +35,7 @@ pub struct ParserResult {
     pub file_mode: Mode,
     pub scoured_comments: ScouredComments,
     pub aast: Program<(), ()>,
-    pub lowpri_errors: Vec<(Pos, String)>,
+    pub lowerer_parsing_errors: Vec<(Pos, String)>,
     pub syntax_errors: Vec<SyntaxError>,
     pub errors: Vec<Error>,
     pub lint_errors: Vec<LintError>,

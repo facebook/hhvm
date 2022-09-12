@@ -764,8 +764,11 @@ fn parse_file(
                     },
                 ))
             }
-            ParserResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
-                let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
+            ParserResult {
+                lowerer_parsing_errors,
+                ..
+            } if !lowerer_parsing_errors.is_empty() => {
+                let (pos, msg) = lowerer_parsing_errors.into_iter().next().unwrap();
                 Err(ParseError(pos, msg, FatalOp::Parse))
             }
             ParserResult {

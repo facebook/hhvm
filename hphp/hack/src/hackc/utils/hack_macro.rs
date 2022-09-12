@@ -569,9 +569,9 @@ fn parse_aast_from_string(input: &str, internal_offset: usize, span: Span) -> Re
     aast.syntax_errors
         .iter()
         .try_for_each(|e| convert_syntax_error(e, input, internal_offset, span))?;
-    aast.lowpri_errors
+    aast.lowerer_parsing_errors
         .iter()
-        .try_for_each(|e| convert_lowpri_error(e, input, internal_offset, span))?;
+        .try_for_each(|e| convert_lowerer_parsing_error(e, input, internal_offset, span))?;
 
     Ok(aast.aast)
 }
@@ -632,7 +632,7 @@ fn convert_syntax_error(
     ))
 }
 
-fn convert_lowpri_error(
+fn convert_lowerer_parsing_error(
     err: &(Pos, String),
     src: &str,
     internal_offset: usize,

@@ -183,12 +183,10 @@ CompilerResult hackc_compile(
   CompileAbortMode mode,
   hackc::DeclProvider* provider
 ) {
-  auto aliased_namespaces = options.getAliasedNamespacesConfig();
-
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .aliased_namespaces = aliased_namespaces,
+    .aliased_namespaces = options.getAliasedNamespacesConfig(),
     .include_roots = s_misc_config,
     .emit_class_pointers = RuntimeOption::EvalEmitClassPointers,
     .check_int_overflow = RuntimeOption::CheckIntOverflow,
@@ -377,16 +375,13 @@ ParseFactsResult extract_facts(
       }
     }
     try {
-      auto const decl_flags = options.getDeclFlags();
-      auto const decl_opts = hackc::create_direct_decl_parse_options(
-        decl_flags,
-        options.getAliasedNamespacesConfig()
-      );
+      hackc::DeclParserConfig decl_config;
+      options.initDeclConfig(decl_config);
       auto const decls = hackc::direct_decl_parse(
-        *decl_opts, filename, source_text
+        decl_config, filename, source_text
       );
       auto const facts = hackc::decls_to_facts_cpp_ffi(
-        decl_flags, decls, actual_sha1
+        decl_config, decls, actual_sha1
       );
       rust::String json = hackc::facts_to_json_cpp_ffi(
           facts, /* pretty= */ false

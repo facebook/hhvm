@@ -311,15 +311,14 @@ std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
   return folly::toJson(m_config);
 }
 
-uint32_t RepoOptionsFlags::getDeclFlags() const {
-  uint32_t flags =
-    DisableXHPElementMangling << 0 |
-    1 << 1 | // interpret_soft_types_as_like_types
-    AllowNewAttributeSyntax   << 2 |
-    EnableXHPClassModifier    << 3 |
-    1 << 4 |  //php5_compat_mode
-    1 << 5;   //hhvm_compat_mode
-  return flags;
+void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
+  config.aliased_namespaces = getAliasedNamespacesConfig();
+  config.disable_xhp_element_mangling = DisableXHPElementMangling;
+  config.interpret_soft_types_as_like_types = true;
+  config.allow_new_attribute_syntax = AllowNewAttributeSyntax;
+  config.enable_xhp_class_modifier = EnableXHPClassModifier;
+  config.php5_compat_mode = true;
+  config.hhvm_compat_mode = true;
 }
 
 void RepoOptionsFlags::initHhbcFlags(hackc::HhbcFlags& flags) const {

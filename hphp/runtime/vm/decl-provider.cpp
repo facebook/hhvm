@@ -45,22 +45,16 @@ HhvmDeclProvider::create(AutoloadMap* map,
   // This will only cache entries it sees during this invocation of
   // the compiler. Hackc should have a per-session cache indexed by symbol,
   // and this file-to-decls cache should span sessions.
-  auto decl_flags = options.getDeclFlags();
-  auto aliased_namespaces = options.getAliasedNamespacesConfig();
-  return std::make_unique<HhvmDeclProvider>(
-      decl_flags, aliased_namespaces, map, repoRoot
-  );
+  hackc::DeclParserConfig decl_config;
+  options.initDeclConfig(decl_config);
+  return std::make_unique<HhvmDeclProvider>(decl_config, map, repoRoot);
 }
 
 HhvmDeclProvider::HhvmDeclProvider(
-    int32_t flags,
-    std::string const& aliased_namespaces,
+    hackc::DeclParserConfig decl_config,
     AutoloadMap* map,
     const std::filesystem::path& repo
-)
-  : m_opts{hackc::create_direct_decl_parse_options(flags, aliased_namespaces)}
-  , m_map{map}
-  , m_repo{repo}
+) : m_config{decl_config}, m_map{map}, m_repo{repo}
 {}
 
 // Called by hackc.
@@ -116,7 +110,7 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
       std::istreambuf_iterator<char>(s), std::istreambuf_iterator<char>()
     };
 
-    auto decl_result = hackc::direct_decl_parse(*m_opts, filename, text);
+    auto decl_result = hackc::direct_decl_parse(m_config, filename, text);
     ITRACE(3, "DP parsed {} in {}\n", sym, filename);
 
     auto const norm_filename =

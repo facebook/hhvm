@@ -33,8 +33,8 @@ namespace HPHP {
 struct RepoOptionsFlags;
 
 struct HhvmDeclProvider: hackc::DeclProvider {
-  HhvmDeclProvider(int32_t flags, std::string const& aliased_namespaces,
-                   AutoloadMap*, const std::filesystem::path&);
+  HhvmDeclProvider(hackc::DeclParserConfig, AutoloadMap*,
+                   const std::filesystem::path&);
   virtual ~HhvmDeclProvider() override = default;
   HhvmDeclProvider(HhvmDeclProvider const&) = delete;
   HhvmDeclProvider& operator=(HhvmDeclProvider const&) = delete;
@@ -88,7 +88,7 @@ struct HhvmDeclProvider: hackc::DeclProvider {
 
   bool m_sawMissing{false};
 
-  rust::Box<hackc::DeclParserOptions> m_opts;
+  hackc::DeclParserConfig m_config;
 
   // Map from filename to DeclResult containing the cached results of calling
   // hackc_direct_decl_parse().

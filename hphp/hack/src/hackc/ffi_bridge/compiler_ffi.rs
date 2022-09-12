@@ -20,6 +20,7 @@ use compile::HhbcFlags;
 use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
+use direct_decl_parser::DeclParserOptions;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::Unit;
@@ -84,6 +85,16 @@ pub mod compile_ffi {
         enable_enum_classes: bool,
         enable_xhp_class_modifier: bool,
         enable_class_level_where_clauses: bool,
+    }
+
+    struct DeclParserConfig {
+        aliased_namespaces: String,
+        disable_xhp_element_mangling: bool,
+        interpret_soft_types_as_like_types: bool,
+        allow_new_attribute_syntax: bool,
+        enable_xhp_class_modifier: bool,
+        php5_compat_mode: bool,
+        hhvm_compat_mode: bool,
     }
 
     pub struct DeclResult {
@@ -164,7 +175,6 @@ pub mod compile_ffi {
 
     extern "Rust" {
         type DeclsHolder;
-        type DeclParserOptions;
         type UnitWrapper;
 
         /// Compile Hack source code to a Unit or an error.
@@ -176,14 +186,9 @@ pub mod compile_ffi {
         /// Compile Hack source code to either HHAS or an error.
         fn compile_from_text_cpp_ffi(env: &NativeEnv, source_text: &CxxString) -> Result<Vec<u8>>;
 
-        fn create_direct_decl_parse_options(
-            flags: i32,
-            aliased_namespaces: &CxxString,
-        ) -> Box<DeclParserOptions>;
-
         /// Invoke the hackc direct decl parser and return every shallow decl in the file.
         fn direct_decl_parse(
-            options: &DeclParserOptions,
+            config: &DeclParserConfig,
             filename: &CxxString,
             text: &CxxString,
         ) -> DeclResult;
@@ -201,7 +206,7 @@ pub mod compile_ffi {
 
         /// Extract Facts from Decls, passing along the source text hash.
         fn decls_to_facts_cpp_ffi(
-            decl_flags: i32,
+            decl_config: &DeclParserConfig,
             decls: &DeclResult,
             sha1sum: &CxxString,
         ) -> FactsResult;
@@ -216,8 +221,6 @@ pub struct DeclsHolder {
     decls: Decls<'static>,
     attributes: &'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>],
 }
-
-pub struct DeclParserOptions(direct_decl_parser::DeclParserOptions);
 
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
 
@@ -323,33 +326,26 @@ fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
     result.decls.decls.types().any(|(sym, _)| sym == symbol)
 }
 
-pub fn create_direct_decl_parse_options(
-    flags: i32,
-    aliased_namespaces: &CxxString,
-) -> Box<DeclParserOptions> {
-    let config_opts =
-        options::Options::from_configs(&[aliased_namespaces.to_str().unwrap()]).unwrap();
-    let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-        Some(m) => Vec::from_iter(m.iter().map(|(k, v)| (k.to_owned(), v.to_owned()))),
-        None => Vec::new(),
-    };
-    Box::new(DeclParserOptions(direct_decl_parser::DeclParserOptions {
-        auto_namespace_map,
-        disable_xhp_element_mangling: ((1 << 0) & flags) != 0,
-        interpret_soft_types_as_like_types: ((1 << 1) & flags) != 0,
-        allow_new_attribute_syntax: ((1 << 2) & flags) != 0,
-        enable_xhp_class_modifier: ((1 << 3) & flags) != 0,
-        php5_compat_mode: ((1 << 4) & flags) != 0,
-        hhvm_compat_mode: ((1 << 5) & flags) != 0,
-        ..Default::default()
-    }))
-}
-
 pub fn direct_decl_parse(
-    opts: &DeclParserOptions,
+    config: &compile_ffi::DeclParserConfig,
     filename: &CxxString,
     text: &CxxString,
 ) -> compile_ffi::DeclResult {
+    let options = options::Options::from_configs(&[&config.aliased_namespaces]).unwrap();
+    let auto_namespace_map = match options.hhvm.aliased_namespaces.get().as_map() {
+        Some(m) => Vec::from_iter(m.iter().map(|(k, v)| (k.to_owned(), v.to_owned()))),
+        None => Vec::new(),
+    };
+    let decl_opts = DeclParserOptions {
+        auto_namespace_map,
+        disable_xhp_element_mangling: config.disable_xhp_element_mangling,
+        interpret_soft_types_as_like_types: config.interpret_soft_types_as_like_types,
+        allow_new_attribute_syntax: config.allow_new_attribute_syntax,
+        enable_xhp_class_modifier: config.enable_xhp_class_modifier,
+        php5_compat_mode: config.php5_compat_mode,
+        hhvm_compat_mode: config.hhvm_compat_mode,
+        ..Default::default()
+    };
     let text = text.as_bytes();
     let path = PathBuf::from(OsStr::from_bytes(filename.as_bytes()));
     let filename = RelativePath::make(Prefix::Root, path);
@@ -357,7 +353,7 @@ pub fn direct_decl_parse(
     let alloc: &'static bumpalo::Bump =
         unsafe { std::mem::transmute::<&'_ bumpalo::Bump, &'static bumpalo::Bump>(&arena) };
     let parsed_file: ParsedFile<'static> =
-        direct_decl_parser::parse_decls_without_reference_text(&opts.0, filename, text, alloc);
+        direct_decl_parser::parse_decls_without_reference_text(&decl_opts, filename, text, alloc);
 
     compile_ffi::DeclResult {
         nopos_hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
@@ -423,7 +419,7 @@ pub fn facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: boo
 }
 
 pub fn decls_to_facts_cpp_ffi(
-    decl_flags: i32,
+    decl_config: &compile_ffi::DeclParserConfig,
     decl_result: &compile_ffi::DeclResult,
     sha1sum: &CxxString,
 ) -> compile_ffi::FactsResult {
@@ -433,11 +429,10 @@ pub fn decls_to_facts_cpp_ffi(
             ..Default::default()
         }
     } else {
-        let disable_xhp_element_mangling = ((1 << 0) & decl_flags) != 0;
         let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
             &decl_result.decls.decls,
             decl_result.decls.attributes,
-            disable_xhp_element_mangling,
+            decl_config.disable_xhp_element_mangling,
         ));
         compile_ffi::FactsResult {
             facts,

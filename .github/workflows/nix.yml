@@ -26,12 +26,12 @@ jobs:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
       matrix:
-        os:
-        - ubuntu-latest
         include:
         - package: hhvm
+          os: ubuntu-latest
           nix_flags: --no-sandbox
         - package: hhvm_impure
+          os: ubuntu-latest
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0

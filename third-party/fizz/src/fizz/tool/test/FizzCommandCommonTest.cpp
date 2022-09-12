@@ -64,7 +64,7 @@ void checkECHConfigContent(const ech::ECHConfigContentDraft& echConfigContent) {
   ASSERT_EQ(
       echConfigContent.key_config.cipher_suites[0].aead_id,
       hpke::AeadId::TLS_AES_128_GCM_SHA256);
-  ASSERT_EQ(echConfigContent.maximum_name_length, 1000);
+  ASSERT_EQ(echConfigContent.maximum_name_length, 100);
 
   ASSERT_EQ(echConfigContent.extensions.size(), 1);
   ASSERT_EQ(
@@ -76,7 +76,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
   auto json = folly::parseJson(R"(
       {
         "echconfigs": [{
-                "version": "Draft10",
+                "version": "Draft11",
                 "public_name": "publicname",
                 "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
                 "kem_id": "secp256r1",
@@ -84,7 +84,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
                         "kdf_id": "Sha256",
                         "aead_id": "TLS_AES_128_GCM_SHA256"
                 }],
-                "maximum_name_length": 1000,
+                "maximum_name_length": 100,
                 "extensions": "002c00080006636f6f6b6965",
                 "config_id": 144
         }]
@@ -97,7 +97,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsSuccess) {
 
   ASSERT_EQ(echConfigs->size(), 1);
   auto echConfig = echConfigs.value()[0];
-  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft10);
+  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft11);
 
   folly::io::Cursor cursor(echConfig.ech_config_content.get());
   auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
@@ -108,7 +108,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
   auto json = folly::parseJson(R"(
       {
         "echconfigs": [{
-                "version": "Draft10",
+                "version": "Draft11",
                 "public_name": "publicname",
                 "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
                 "kem_id": "secp256r1",
@@ -116,7 +116,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
                         "kdf_id": "Sha256",
                         "aead_id": "TLS_AES_128_GCM_SHA256"
                 }],
-                "maximum_name_length": "0x03E8",
+                "maximum_name_length": "0x64",
                 "extensions": "002c00080006636f6f6b6965",
                 "config_id": "0x90"
         }]
@@ -129,7 +129,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsWithHexNumsSuccess) {
 
   ASSERT_EQ(echConfigs->size(), 1);
   auto echConfig = echConfigs.value()[0];
-  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft10);
+  ASSERT_EQ(echConfig.version, ech::ECHVersion::Draft11);
 
   folly::io::Cursor cursor(echConfig.ech_config_content.get());
   auto echConfigContent = decode<ech::ECHConfigContentDraft>(cursor);
@@ -153,7 +153,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {
   auto testJson = folly::parseJson(R"(
       {
         "echconfigs": [{
-                "version": "Draft10",
+                "version": "Draft11",
                 "public_name": "publicname",
                 "public_key": "049d87bcaddb65d8dcf6df8b148a9679b5b710db19c95a9badfff13468cb358b4e21d24a5c826112658ebb96d64e2985dfb41c1948334391a4aa81b67837e2dbf0",
                 "kem_id": "secp256r1",
@@ -161,7 +161,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {
                         "kdf_id": "Sha256",
                         "aead_id": "TLS_AES_128_GCM_SHA256"
                 }],
-                "maximum_name_length": 1000,
+                "maximum_name_length": 100,
                 "extensions": "002c00080006636f6f6b6965",
                 "config_id": 144
         }]
@@ -200,7 +200,7 @@ TEST(FizzCommandCommonTest, TestParseECHConfigsJsonExceptions) {
   tooBigConfigIdJson["echconfigs"][0]["config_id"] = "0x100";
   ASSERT_THROW(parseECHConfigs(tooBigConfigIdJson), std::runtime_error);
   auto tooBigMaxLenJson = testJson;
-  tooBigMaxLenJson["echconfigs"][0]["maximum_name_length"] = "0x10000";
+  tooBigMaxLenJson["echconfigs"][0]["maximum_name_length"] = "0x1000";
   ASSERT_THROW(parseECHConfigs(tooBigMaxLenJson), std::runtime_error);
 }
 

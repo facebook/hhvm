@@ -60,7 +60,7 @@ void checkDecodedChlo(ClientHello decodedChlo, ClientHello expectedChlo) {
 ECHConfig getInvalidVECHConfig() {
   // Add invalid config
   ECHConfig invalidConfig;
-  invalidConfig.version = ECHVersion::Draft10;
+  invalidConfig.version = ECHVersion::Draft11;
   auto configContent = getECHConfigContent();
   configContent.key_config.kem_id = hpke::KEMId::secp384r1;
   invalidConfig.ech_config_content = encode(std::move(configContent));
@@ -78,7 +78,7 @@ hpke::SetupResult constructSetupResult(
   return constructHpkeSetupResult(std::move(kex), supportedConfig);
 }
 
-ClientECH getTestClientECHWithInner(ClientHello chloInner) {
+OuterClientECH getTestOuterClientECHWithInner(ClientHello chloInner) {
   auto configContent = getECHConfigContent();
   SupportedECHConfig supportedConfig{
       getECHConfig(),
@@ -93,11 +93,12 @@ ClientECH getTestClientECHWithInner(ClientHello chloInner) {
       supportedConfig,
       std::move(chloInner),
       getClientHelloOuter(),
-      setupResult);
+      setupResult,
+      folly::none);
 }
 
-ClientECH getTestClientECH() {
-  return getTestClientECHWithInner(TestMessages::clientHello());
+OuterClientECH getTestOuterClientECH() {
+  return getTestOuterClientECHWithInner(TestMessages::clientHello());
 }
 
 void checkSupportedConfigValid(
@@ -124,7 +125,7 @@ TEST(EncryptionTest, TestValidECHConfigContent) {
   invalidConfigContent.key_config.kem_id = hpke::KEMId::secp521r1;
   std::vector<ECHConfig> configs;
   ECHConfig invalid;
-  invalid.version = ECHVersion::Draft10;
+  invalid.version = ECHVersion::Draft11;
   invalid.ech_config_content = encode(std::move(invalidConfigContent));
 
   // Add config that works and can be supported
@@ -172,7 +173,7 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
 
   std::vector<ECHConfig> configs;
   ECHConfig invalid;
-  invalid.version = ECHVersion::Draft10;
+  invalid.version = ECHVersion::Draft11;
   invalid.ech_config_content = encode(std::move(invalidConfigContent));
   configs.push_back(std::move(invalid));
 
@@ -186,7 +187,7 @@ TEST(EncryptionTest, TestUnsupportedMandatoryExtension) {
 TEST(EncryptionTest, TestValidSelectECHConfigContent) {
   // Add valid config
   ECHConfig validConfig;
-  validConfig.version = ECHVersion::Draft10;
+  validConfig.version = ECHVersion::Draft11;
   validConfig.ech_config_content = encode(getECHConfigContent());
 
   std::vector<ECHConfig> configs;
@@ -207,10 +208,10 @@ TEST(EncryptionTest, TestInvalidSelectECHConfigContent) {
 }
 
 TEST(EncryptionTest, TestValidEncryptClientHello) {
-  auto clientECH = getTestClientECH();
+  auto clientECH = getTestOuterClientECH();
   auto expectedChlo = TestMessages::clientHello();
   // Add a legacy_session_id to match client hello inner used in
-  // getTestClientECH()
+  // getTestOuterClientECH()
   expectedChlo.legacy_session_id =
       folly::IOBuf::copyBuffer("test legacy session id");
 
@@ -254,12 +255,14 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
       std::move(setupParam));
 
   // Get client hello inner by decrypting
-  auto clientHelloOuterEnc = encode(getClientHelloOuter());
-  auto clientHelloOuterAad = makeClientHelloAad(
-      clientECH.cipher_suite,
-      clientECH.config_id,
-      clientECH.enc,
-      clientHelloOuterEnc);
+  auto clientHelloOuter = getClientHelloOuter();
+  auto dummyECH = getTestOuterClientECH();
+  dummyECH.payload->coalesce();
+  memset(dummyECH.payload->writableData(), 0, dummyECH.payload->length());
+  clientHelloOuter.extensions.push_back(encodeExtension(dummyECH));
+
+  auto clientHelloOuterAad = encode(clientHelloOuter);
+
   std::unique_ptr<folly::IOBuf> gotClientHelloInner =
       context->open(clientHelloOuterAad.get(), std::move(clientECH.payload));
 
@@ -284,7 +287,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
 
   // Add ECH extension to client hello outer.
   auto chloOuter = getClientHelloOuter();
-  auto testECH = getTestClientECH();
+  auto testECH = getTestOuterClientECH();
   chloOuter.extensions.push_back(encodeExtension(testECH));
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
@@ -305,7 +308,7 @@ TEST(EncryptionTest, TestTryToDecryptECH) {
       std::move(testECH.enc),
       std::move(testECH.config_id),
       std::move(testECH.payload),
-      ECHVersion::Draft10,
+      ECHVersion::Draft11,
       context);
 
   checkDecodedChlo(std::move(chlo), std::move(expectedChlo));
@@ -317,7 +320,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   OuterExtensions outer;
   outer.types = {ExtensionType::encrypted_client_hello};
   innerChlo.extensions.push_back(encodeExtension(std::move(outer)));
-  auto clientECH = getTestClientECHWithInner(std::move(innerChlo));
+  auto clientECH = getTestOuterClientECHWithInner(std::move(innerChlo));
 
   // Create HPKE setup prefix
   std::string tlsEchPrefix = "tls ech";
@@ -368,7 +371,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
           std::move(clientECH.enc),
           std::move(clientECH.config_id),
           std::move(clientECH.payload),
-          ECHVersion::Draft10,
+          ECHVersion::Draft11,
           context),
       OuterExtensionsError);
 }
@@ -379,7 +382,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   OuterExtensions outer;
   outer.types = {ExtensionType::server_name};
   innerChlo.extensions.push_back(encodeExtension(std::move(outer)));
-  auto clientECH = getTestClientECHWithInner(std::move(innerChlo));
+  auto clientECH = getTestOuterClientECHWithInner(std::move(innerChlo));
 
   // Create HPKE setup prefix
   std::string tlsEchPrefix = "tls ech";
@@ -430,7 +433,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
           std::move(clientECH.enc),
           std::move(clientECH.config_id),
           std::move(clientECH.payload),
-          ECHVersion::Draft10,
+          ECHVersion::Draft11,
           context),
       OuterExtensionsError);
 }
@@ -751,14 +754,12 @@ TEST(EncryptionTest, TestSetShloAcceptance) {
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(
-          HandshakeSecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
+      getSecret(EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
       .WillOnce(InvokeWithoutArgs([&]() {
-        return DerivedSecret(
-            acceptSecret, HandshakeSecrets::ServerHandshakeTraffic);
+        return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  setAcceptConfirmation(shlo, std::move(context), schedulerBasePtr);
+  setAcceptConfirmation(shlo, std::move(context), std::move(schedulerBasePtr));
   auto shloIt = shlo.random.end() - kEchAcceptConfirmationSize;
   auto secretIt = acceptSecret.begin();
   for (size_t i = 0; i < kEchAcceptConfirmationSize; i++) {
@@ -810,14 +811,13 @@ TEST(EncryptionTest, TestCheckShloAcceptance) {
   }));
   EXPECT_CALL(
       *scheduler,
-      getSecret(
-          HandshakeSecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
+      getSecret(EarlySecrets::ECHAcceptConfirmation, RangeMatches("dummyshlo")))
       .WillOnce(InvokeWithoutArgs([&]() {
-        return DerivedSecret(
-            acceptSecret, HandshakeSecrets::ServerHandshakeTraffic);
+        return DerivedSecret(acceptSecret, EarlySecrets::ECHAcceptConfirmation);
       }));
   std::unique_ptr<KeyScheduler> schedulerBasePtr = std::move(scheduler);
-  EXPECT_TRUE(checkECHAccepted(shlo, std::move(context), schedulerBasePtr));
+  EXPECT_TRUE(
+      checkECHAccepted(shlo, std::move(context), std::move(schedulerBasePtr)));
 }
 
 TEST(EncryptionTest, TestCheckHrrAcceptance) {

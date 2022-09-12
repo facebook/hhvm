@@ -31,15 +31,15 @@ ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  ECHIsInner chloInnerECHExt;
+  InnerClientECH chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   // Encrypt client hello
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
-  ClientECH echExt =
-      encryptClientHello(supportedECHConfig, chloInner, chloOuter, setupResult);
+  OuterClientECH echExt = encryptClientHello(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));
@@ -64,15 +64,15 @@ ClientHello getChloOuterHRRWithExt(
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  ECHIsInner chloInnerECHExt;
+  InnerClientECH chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
   // Encrypt client hello once to increment counter and get enc value.
-  auto initialECH =
-      encryptClientHello(supportedECHConfig, chloInner, chloOuter, setupResult);
+  auto initialECH = encryptClientHello(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // First, save out the first ECH
   initialOuterChlo = chloOuter.clone();
@@ -82,8 +82,8 @@ ClientHello getChloOuterHRRWithExt(
   enc = std::move(initialECH.enc);
 
   // Second encryption for HRR
-  ClientECH echExt = encryptClientHelloHRR(
-      supportedECHConfig, chloInner, chloOuter, setupResult);
+  OuterClientECH echExt = encryptClientHelloHRR(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));
@@ -108,7 +108,8 @@ TEST(DecrypterTest, TestDecodeSuccess) {
 
   auto chlo = std::move(gotChlo.value());
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(chlo.chlo, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(
+      chlo.chlo, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(chlo.chlo), encodeHandshake(expectedChloInner)));
@@ -131,7 +132,7 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
       encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(gotChlo, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(gotChlo, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(gotChlo), encodeHandshake(expectedChloInner)));
@@ -160,7 +161,8 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
       encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(gotChloHRR, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(
+      gotChloHRR, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(gotChloHRR), encodeHandshake(expectedChloInner)));

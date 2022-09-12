@@ -22,7 +22,7 @@ using HpkePublicKey = Buf;
 constexpr size_t kEchAcceptConfirmationSize = 8;
 
 enum class ECHVersion : uint16_t {
-  Draft10 = 0xfe0a,
+  Draft11 = 0xfe0b,
 };
 
 struct HpkeSymmetricCipherSuite {
@@ -45,7 +45,7 @@ struct HpkeKeyConfig {
 
 struct ECHConfigContentDraft {
   HpkeKeyConfig key_config;
-  uint16_t maximum_name_length;
+  uint8_t maximum_name_length;
   Buf public_name;
   std::vector<Extension> extensions;
 };

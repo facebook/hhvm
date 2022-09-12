@@ -119,13 +119,21 @@ class Protocol {
     checkDuplicateExtensions(shlo.extensions);
   }
 
-  static void checkAllowedExtensions(const HelloRetryRequest& hrr) {
-    // HRR is allowed to send 'cookie' unprompted. Otherwise only other allowed
-    // extensions are key_share and supported_versions, which we always send.
+  static void checkAllowedExtensions(
+      const HelloRetryRequest& hrr,
+      const std::vector<ExtensionType>& requestedExtensions) {
+    // HRR is allowed to send 'cookie' unprompted, and we always send key_share
+    // and supported_versions. ech is the only other allowed extension here, and
+    // only when we sent it before.
     for (const auto& ext : hrr.extensions) {
       if (ext.extension_type != ExtensionType::cookie &&
           ext.extension_type != ExtensionType::key_share &&
-          ext.extension_type != ExtensionType::supported_versions) {
+          ext.extension_type != ExtensionType::supported_versions &&
+          (ext.extension_type != ExtensionType::encrypted_client_hello ||
+           std::find(
+               requestedExtensions.begin(),
+               requestedExtensions.end(),
+               ext.extension_type) == requestedExtensions.end())) {
         throw FizzException(
             "unexpected extension in hrr: " + toString(ext.extension_type),
             AlertDescription::illegal_parameter);

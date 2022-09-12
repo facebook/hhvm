@@ -13,12 +13,13 @@
 
 namespace fizz {
 template <>
-inline Extension encodeExtension(const ech::ClientECH& clientECH) {
+inline Extension encodeExtension(const ech::OuterClientECH& clientECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
 
   folly::io::Appender appender(ext.extension_data.get(), 20);
+  detail::write(clientECH.ech_type, appender);
   detail::write(clientECH.cipher_suite, appender);
   detail::write(clientECH.config_id, appender);
   detail::writeBuf<uint16_t>(clientECH.enc, appender);
@@ -40,10 +41,13 @@ inline Extension encodeExtension(const ech::ServerECH& serverECH) {
 }
 
 template <>
-inline Extension encodeExtension(const ech::ECHIsInner&) {
+inline Extension encodeExtension(const ech::InnerClientECH& innerECH) {
   Extension ext;
-  ext.extension_type = ExtensionType::ech_is_inner;
+  ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
+
+  folly::io::Appender appender(ext.extension_data.get(), 4);
+  detail::write(innerECH.ech_type, appender);
   return ext;
 }
 
@@ -72,8 +76,13 @@ inline Extension encodeExtension(const ech::ECHAcceptanceConfirmation& conf) {
 }
 
 template <>
-inline ech::ClientECH getExtension(folly::io::Cursor& cs) {
-  ech::ClientECH clientECH;
+inline ech::OuterClientECH getExtension(folly::io::Cursor& cs) {
+  ech::ClientECHType type;
+  detail::read(type, cs);
+  if (type != ech::ClientECHType::Outer) {
+    throw std::runtime_error("wrong ech variant");
+  }
+  ech::OuterClientECH clientECH;
   detail::read(clientECH.cipher_suite, cs);
   detail::read(clientECH.config_id, cs);
   detail::readBuf<uint16_t>(clientECH.enc, cs);
@@ -91,8 +100,13 @@ inline ech::ServerECH getExtension(folly::io::Cursor& cs) {
 }
 
 template <>
-inline ech::ECHIsInner getExtension(folly::io::Cursor&) {
-  return ech::ECHIsInner();
+inline ech::InnerClientECH getExtension(folly::io::Cursor& cs) {
+  ech::ClientECHType type;
+  detail::read(type, cs);
+  if (type != ech::ClientECHType::Inner) {
+    throw std::runtime_error("wrong ech variant");
+  }
+  return ech::InnerClientECH();
 }
 
 template <>

@@ -125,14 +125,13 @@ inline Buf encode<ech::ECHConfigContentDraft>(
     return sizeof(uint16_t) + sz;
   }();
   auto buf = folly::IOBuf::create(
-      detail::getSize(ech.key_config) +
-      sizeof(uint16_t) + // maximum_name_length
+      detail::getSize(ech.key_config) + sizeof(uint8_t) + // maximum_name_length
       detail::getBufSize<uint16_t>(ech.public_name) + extLen); // extensions
 
   folly::io::Appender appender(buf.get(), 0);
   detail::write(ech.key_config, appender);
   detail::write(ech.maximum_name_length, appender);
-  detail::writeBuf<uint16_t>(ech.public_name, appender);
+  detail::writeBuf<uint8_t>(ech.public_name, appender);
   detail::writeVector<uint16_t>(ech.extensions, appender);
   return buf;
 }
@@ -160,7 +159,7 @@ inline ech::ECHConfigContentDraft decode(folly::io::Cursor& cursor) {
   ech::ECHConfigContentDraft echConfigContent;
   detail::read(echConfigContent.key_config, cursor);
   detail::read(echConfigContent.maximum_name_length, cursor);
-  detail::readBuf<uint16_t>(echConfigContent.public_name, cursor);
+  detail::readBuf<uint8_t>(echConfigContent.public_name, cursor);
   detail::readVector<uint16_t>(echConfigContent.extensions, cursor);
 
   return echConfigContent;

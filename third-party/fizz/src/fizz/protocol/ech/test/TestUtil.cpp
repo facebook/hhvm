@@ -34,8 +34,8 @@ ECHConfigContentDraft getECHConfigContent() {
   echConfigContent.key_config.public_key = detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
   echConfigContent.key_config.cipher_suites = {suite};
-  echConfigContent.maximum_name_length = 1000;
-  echConfigContent.public_name = folly::IOBuf::copyBuffer("v9 publicname");
+  echConfigContent.maximum_name_length = 100;
+  echConfigContent.public_name = folly::IOBuf::copyBuffer("public.dummy.com");
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
   echConfigContent.extensions = getExtensions(cookie);
   return echConfigContent;
@@ -43,7 +43,7 @@ ECHConfigContentDraft getECHConfigContent() {
 
 ECHConfig getECHConfig() {
   ECHConfig config;
-  config.version = ECHVersion::Draft10;
+  config.version = ECHVersion::Draft11;
   config.ech_config_content = encode(getECHConfigContent());
   return config;
 }
@@ -57,7 +57,7 @@ ClientHello getClientHelloOuter() {
   // Set fake server name
   ServerNameList sni;
   ServerName sn;
-  sn.hostname = folly::IOBuf::copyBuffer("fake host name");
+  sn.hostname = folly::IOBuf::copyBuffer("public.dummy.com");
   sni.server_name_list.push_back(std::move(sn));
   chloOuter.extensions.push_back(encodeExtension(std::move(sni)));
 

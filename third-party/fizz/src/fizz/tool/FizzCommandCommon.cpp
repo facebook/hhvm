@@ -205,8 +205,8 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
     std::string version = config["version"].asString();
 
     ech::ECHVersion echVersion;
-    if (version == "Draft10") {
-      echVersion = ech::ECHVersion::Draft10;
+    if (version == "Draft11") {
+      echVersion = ech::ECHVersion::Draft11;
     } else {
       continue;
     }
@@ -222,7 +222,7 @@ folly::Optional<std::vector<ech::ECHConfig>> parseECHConfigs(
         folly::unhexlify(config["public_key"].asString()));
     configContent.key_config.kem_id = getKEMId(config["kem_id"].asString());
     configContent.maximum_name_length =
-        folly::to<uint16_t>(strToNum(config["maximum_name_length"].asString()));
+        folly::to<uint8_t>(strToNum(config["maximum_name_length"].asString()));
 
     // Get ciphersuites.
     auto ciphersuites = std::vector<ech::HpkeSymmetricCipherSuite>();
@@ -268,7 +268,7 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
 
   echConfigContent.key_config.cipher_suites = {ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
-  echConfigContent.maximum_name_length = 1000;
+  echConfigContent.maximum_name_length = 100;
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
   echConfigContent.extensions = getExtensions(cookie);
 
@@ -286,7 +286,7 @@ std::vector<ech::ECHConfig> getDefaultECHConfigs() {
 
   // Construct an ECH config to pass in to the client.
   ech::ECHConfig echConfig;
-  echConfig.version = ech::ECHVersion::Draft10;
+  echConfig.version = ech::ECHVersion::Draft11;
   echConfig.ech_config_content = encode(std::move(echConfigContent));
   auto configs = std::vector<ech::ECHConfig>();
   configs.push_back(std::move(echConfig));

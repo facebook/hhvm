@@ -16,7 +16,13 @@
 
 namespace fizz {
 namespace ech {
-struct ClientECH {
+
+enum class ClientECHType : uint8_t {
+  Inner = 1,
+  Outer = 0,
+};
+
+struct OuterClientECH {
   // The cipher suite used to encrypt ClientHelloInner.
   // This MUST match a value provided in the corresponding
   // "ECHConfig.cipher_suites" list.
@@ -36,6 +42,7 @@ struct ClientECH {
   // encrypted using HPKE.
   Buf payload;
 
+  static constexpr ClientECHType ech_type = ClientECHType::Outer;
   static constexpr ExtensionType extension_type =
       ExtensionType::encrypted_client_hello;
 };
@@ -48,8 +55,10 @@ struct ServerECH {
       ExtensionType::encrypted_client_hello;
 };
 
-struct ECHIsInner {
-  static constexpr ExtensionType extension_type = ExtensionType::ech_is_inner;
+struct InnerClientECH {
+  static constexpr ClientECHType ech_type = ClientECHType::Inner;
+  static constexpr ExtensionType extension_type =
+      ExtensionType::encrypted_client_hello;
 };
 
 struct ECHAcceptanceConfirmation {

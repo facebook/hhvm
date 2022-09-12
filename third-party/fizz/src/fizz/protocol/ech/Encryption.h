@@ -61,7 +61,7 @@ HelloRetryRequest makeDummyHRR(const HelloRetryRequest& hrr);
 bool checkECHAccepted(
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
-    std::unique_ptr<KeyScheduler>& scheduler);
+    std::unique_ptr<KeyScheduler> scheduler);
 
 bool checkECHAccepted(
     const HelloRetryRequest& shlo,
@@ -71,24 +71,26 @@ bool checkECHAccepted(
 void setAcceptConfirmation(
     ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
-    std::unique_ptr<KeyScheduler>& scheduler);
+    std::unique_ptr<KeyScheduler> scheduler);
 
 void setAcceptConfirmation(
     HelloRetryRequest& hrr,
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-ClientECH encryptClientHelloHRR(
+OuterClientECH encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
-    hpke::SetupResult& setupResult);
+    hpke::SetupResult& setupResult,
+    const folly::Optional<ClientPresharedKey>& greasePsk);
 
-ClientECH encryptClientHello(
+OuterClientECH encryptClientHello(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
-    hpke::SetupResult& setupResult);
+    hpke::SetupResult& setupResult,
+    const folly::Optional<ClientPresharedKey>& greasePsk);
 
 ClientHello decryptECHWithContext(
     const ClientHello& clientHelloOuter,

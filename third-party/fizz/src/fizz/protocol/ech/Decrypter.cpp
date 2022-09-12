@@ -17,7 +17,7 @@ namespace {
 // ever using it while holding a const reference to its parent container,
 // guaranteeing its lifetime while we use it (since it's internal to this unit)
 struct DecrypterLookupResult {
-  ech::ClientECH echExtension;
+  ech::OuterClientECH echExtension;
   const DecrypterParams& matchingParam;
 };
 
@@ -32,8 +32,8 @@ folly::Optional<DecrypterLookupResult> decodeAndGetParam(
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
   for (const auto& param : decrypterParams) {
     switch (param.echConfig.version) {
-      case ECHVersion::Draft10: {
-        auto echExtension = getExtension<ech::ClientECH>(cursor);
+      case ECHVersion::Draft11: {
+        auto echExtension = getExtension<ech::OuterClientECH>(cursor);
         auto& echConfig = param.echConfig;
         auto currentConfigDraft = decode<ECHConfigContentDraft>(
             echConfig.ech_config_content->clone());
@@ -75,7 +75,7 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
         configIdResult->echExtension.enc->clone(),
         configIdResult->echExtension.config_id,
         configIdResult->echExtension.payload->clone(),
-        ECHVersion::Draft10,
+        ECHVersion::Draft11,
         context);
     return DecrypterResult{
         std::move(chlo),
@@ -117,7 +117,7 @@ ClientHello decodeClientHelloHRR(
           configIdResult->echExtension.enc->clone(),
           configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft10,
+          ECHVersion::Draft11,
           context);
     } else {
       auto recreatedContext = setupDecryptionContext(
@@ -133,7 +133,7 @@ ClientHello decodeClientHelloHRR(
           configIdResult->echExtension.enc->clone(),
           configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft10,
+          ECHVersion::Draft11,
           recreatedContext);
     }
   } catch (const OuterExtensionsError& e) {

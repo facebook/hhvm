@@ -85,13 +85,17 @@ class MockKeyScheduler : public KeyScheduler {
         .WillByDefault(Invoke([](HandshakeSecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
-
-    ON_CALL(*this, getSecret(HandshakeSecrets::ECHAcceptConfirmation, _))
+    ON_CALL(*this, getSecret(EarlySecrets::ECHAcceptConfirmation, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return DerivedSecret(
-              std::vector<uint8_t>(
-                  {'e', 'c', 'h', 'a', 'c', 'c', 'e', 'p', 't', 'e', 'd'}),
-              HandshakeSecrets::ServerHandshakeTraffic);
+              std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
+              EarlySecrets::ECHAcceptConfirmation);
+        }));
+    ON_CALL(*this, getSecret(EarlySecrets::HRRECHAcceptConfirmation, _))
+        .WillByDefault(InvokeWithoutArgs([]() {
+          return DerivedSecret(
+              std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
+              EarlySecrets::HRRECHAcceptConfirmation);
         }));
     ON_CALL(*this, getSecret(An<MasterSecrets>(), _))
         .WillByDefault(Invoke([](MasterSecrets type, folly::ByteRange) {

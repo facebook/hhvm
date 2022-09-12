@@ -28,33 +28,39 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
   // Copy client hello outer
   ClientHello chloCopy = clientHelloOuter.clone();
 
-  // Remove ech extension from the copy
-  auto it =
-      findExtension(chloCopy.extensions, ExtensionType::encrypted_client_hello);
-  chloCopy.extensions.erase(it);
+  // Zero the ech extension from the copy
+  auto it = std::find_if(
+      chloCopy.extensions.begin(), chloCopy.extensions.end(), [](auto& e) {
+        return e.extension_type == ExtensionType::encrypted_client_hello;
+      });
+
+  folly::io::Cursor cursor(it->extension_data.get());
+  auto echExtension = getExtension<OuterClientECH>(cursor);
+
+  // Create a zeroed out version of the payload
+  size_t payloadSize = echExtension.payload->computeChainDataLength();
+  echExtension.payload = folly::IOBuf::create(payloadSize);
+  memset(echExtension.payload->writableData(), 0, payloadSize);
+  echExtension.payload->append(payloadSize);
+
+  *it = encodeExtension(echExtension);
 
   // Get the serialized version of the client hello outer
   // without the ECH extension to use
-  auto clientHelloOuterAad = encode(chloCopy);
-  return clientHelloOuterAad;
+  return encode(chloCopy);
 }
 
 std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
     ECHVersion version,
-    uint8_t configId,
-    const HpkeSymmetricCipherSuite& cipherSuite,
-    const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<folly::IOBuf> encryptedCh,
     std::unique_ptr<hpke::HpkeContext>& context,
     const ClientHello& clientHelloOuter) {
   std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
   switch (version) {
-    case ECHVersion::Draft10: {
+    case ECHVersion::Draft11: {
       auto aadCH = makeClientHelloOuterForAad(clientHelloOuter);
-      auto chloOuterAad =
-          makeClientHelloAad(cipherSuite, configId, encapsulatedKey, aadCH);
       encodedClientHelloInner =
-          context->open(chloOuterAad.get(), std::move(encryptedCh));
+          context->open(aadCH.get(), std::move(encryptedCh));
     }
   }
   return encodedClientHelloInner;
@@ -63,7 +69,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
 std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
     const ECHConfig& echConfig) {
   switch (echConfig.version) {
-    case ECHVersion::Draft10: {
+    case ECHVersion::Draft11: {
       // The "info" parameter to setupWithEncap is the
       // concatenation of "tls ech", a zero byte, and the serialized
       // ECHConfig.
@@ -76,6 +82,29 @@ std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
     }
   }
   return nullptr;
+}
+
+bool isValidPublicName(const std::string& publicName) {
+  // Starts/ends with a dot.
+  if (publicName.front() == '.' || publicName.back() == '.') {
+    return false;
+  }
+
+  std::vector<std::string> parts;
+  folly::split(".", publicName, parts, false);
+
+  // Check that each part is a valid LDH label ([a-z,A-Z,0-9,-])
+  for (auto& part : parts) {
+    if (part.empty()) {
+      return false;
+    }
+    if (std::any_of(part.begin(), part.end(), [](char c) {
+          return !std::isalnum(c) && c != '-';
+        })) {
+      return false;
+    }
+  }
+  return true;
 }
 
 } // namespace
@@ -109,7 +138,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
   // we should be selecting the first one that we can support.
   for (const auto& config : configs) {
     folly::io::Cursor cursor(config.ech_config_content.get());
-    if (config.version == ECHVersion::Draft10) {
+    if (config.version == ECHVersion::Draft11) {
       auto echConfig = decode<ECHConfigContentDraft>(cursor);
 
       // Before anything else, check if the config has mandatory extensions.
@@ -117,6 +146,15 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
       // config.
       if (echConfigHasMandatoryExtension(echConfig)) {
         VLOG(8) << "ECH config has mandatory extension, skipping...";
+        continue;
+      }
+
+      // Check for an invalid public name and skip if found.
+      std::string publicName = echConfig.public_name->cloneCoalescedAsValue()
+                                   .moveToFbString()
+                                   .toStdString();
+      if (!isValidPublicName(publicName)) {
+        VLOG(8) << publicName << " isn't a valid public name";
         continue;
       }
 
@@ -233,20 +271,6 @@ hpke::SetupResult constructHpkeSetupResult(
           cipherSuite));
 }
 
-std::unique_ptr<folly::IOBuf> makeClientHelloAad(
-    HpkeSymmetricCipherSuite cipherSuite,
-    const uint8_t configId,
-    const std::unique_ptr<folly::IOBuf>& enc,
-    const std::unique_ptr<folly::IOBuf>& clientHello) {
-  auto aad = folly::IOBuf::create(0);
-  folly::io::Appender appender(aad.get(), 32);
-  detail::write<ech::HpkeSymmetricCipherSuite>(cipherSuite, appender);
-  detail::write(configId, appender);
-  detail::writeBuf<uint16_t>(enc, appender);
-  detail::writeBuf<detail::bits24>(clientHello, appender);
-  return aad;
-}
-
 ServerHello makeDummyServerHello(const ServerHello& shlo) {
   std::vector<Extension> extensionCopies;
   for (auto& ext : shlo.extensions) {
@@ -301,7 +325,7 @@ namespace {
 std::vector<uint8_t> calculateAcceptConfirmation(
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
-    std::unique_ptr<KeyScheduler>& scheduler) {
+    std::unique_ptr<KeyScheduler> scheduler) {
   // Acceptance is done by feeding a dummy hello into the transcript and
   // deriving a secret from it.
   auto shloEch = makeDummyServerHello(shlo);
@@ -309,7 +333,7 @@ std::vector<uint8_t> calculateAcceptConfirmation(
 
   auto hsc = context->getHandshakeContext();
   auto echAcceptance = scheduler->getSecret(
-      HandshakeSecrets::ECHAcceptConfirmation, hsc->coalesce());
+      EarlySecrets::ECHAcceptConfirmation, hsc->coalesce());
 
   return std::move(echAcceptance.secret);
 }
@@ -340,9 +364,9 @@ std::vector<uint8_t> calculateAcceptConfirmation(
 bool checkECHAccepted(
     const ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
-    std::unique_ptr<KeyScheduler>& scheduler) {
-  auto acceptConfirmation =
-      calculateAcceptConfirmation(shlo, std::move(context), scheduler);
+    std::unique_ptr<KeyScheduler> scheduler) {
+  auto acceptConfirmation = calculateAcceptConfirmation(
+      shlo, std::move(context), std::move(scheduler));
   // ECH accepted if the 8 bytes match the accept_confirmation
   return memcmp(
              shlo.random.data() +
@@ -375,9 +399,9 @@ bool checkECHAccepted(
 void setAcceptConfirmation(
     ServerHello& shlo,
     std::unique_ptr<HandshakeContext> context,
-    std::unique_ptr<KeyScheduler>& scheduler) {
-  auto acceptConfirmation =
-      calculateAcceptConfirmation(shlo, std::move(context), scheduler);
+    std::unique_ptr<KeyScheduler> scheduler) {
+  auto acceptConfirmation = calculateAcceptConfirmation(
+      shlo, std::move(context), std::move(scheduler));
 
   // Copy the acceptance confirmation bytes to the end
   memcpy(
@@ -459,22 +483,36 @@ ClientPresharedKey generateGreasePSKForHRR(
 namespace {
 
 void encryptClientHelloShared(
-    ClientECH& echExtension,
+    OuterClientECH& echExtension,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
-    hpke::SetupResult& setupResult) {
+    hpke::SetupResult& setupResult,
+    const folly::Optional<ClientPresharedKey>& greasePsk) {
   // Remove legacy_session_id and serialize the client hello inner
   auto chloInnerCopy = clientHelloInner.clone();
   chloInnerCopy.legacy_session_id = folly::IOBuf::copyBuffer("");
   auto encodedClientHelloInner = encode(chloInnerCopy);
 
   // Compute the AAD for sealing
-  auto clientHelloOuterEnc = encode(clientHelloOuter);
-  auto clientHelloOuterAad = makeClientHelloAad(
-      echExtension.cipher_suite,
-      echExtension.config_id,
-      echExtension.enc,
-      clientHelloOuterEnc);
+  auto chloOuterForAAD = clientHelloOuter.clone();
+
+  // Get cipher overhead
+  size_t dummyPayloadSize = encodedClientHelloInner->computeChainDataLength() +
+      makeCipher(echExtension.cipher_suite.aead_id)->getCipherOverhead();
+
+  // Make dummy payload.
+  echExtension.payload = folly::IOBuf::create(dummyPayloadSize);
+  memset(echExtension.payload->writableData(), 0, dummyPayloadSize);
+  echExtension.payload->append(dummyPayloadSize);
+  chloOuterForAAD.extensions.push_back(encodeExtension(echExtension));
+
+  // Add grease PSK if passed in
+  if (greasePsk.has_value()) {
+    chloOuterForAAD.extensions.push_back(encodeExtension(*greasePsk));
+  }
+
+  // Serialize for AAD
+  auto clientHelloOuterAad = encode(chloOuterForAAD);
 
   // Encrypt inner client hello
   echExtension.payload = setupResult.context->seal(
@@ -483,36 +521,38 @@ void encryptClientHelloShared(
 
 } // namespace
 
-ClientECH encryptClientHelloHRR(
+OuterClientECH encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
-    hpke::SetupResult& setupResult) {
+    hpke::SetupResult& setupResult,
+    const folly::Optional<ClientPresharedKey>& greasePsk) {
   // Create ECH extension with blank config ID and enc for HRR
-  ClientECH echExtension;
+  OuterClientECH echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
 
   encryptClientHelloShared(
-      echExtension, clientHelloInner, clientHelloOuter, setupResult);
+      echExtension, clientHelloInner, clientHelloOuter, setupResult, greasePsk);
 
   return echExtension;
 }
 
-ClientECH encryptClientHello(
+OuterClientECH encryptClientHello(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
-    hpke::SetupResult& setupResult) {
+    hpke::SetupResult& setupResult,
+    const folly::Optional<ClientPresharedKey>& greasePsk) {
   // Create ECH extension
-  ClientECH echExtension;
+  OuterClientECH echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = setupResult.enc->clone();
 
   encryptClientHelloShared(
-      echExtension, clientHelloInner, clientHelloOuter, setupResult);
+      echExtension, clientHelloInner, clientHelloOuter, setupResult, greasePsk);
 
   return echExtension;
 }
@@ -527,13 +567,7 @@ ClientHello decryptECHWithContext(
     ECHVersion version,
     std::unique_ptr<hpke::HpkeContext>& context) {
   auto encodedClientHelloInner = extractEncodedClientHelloInner(
-      version,
-      std::move(configId),
-      cipherSuite,
-      encapsulatedKey,
-      std::move(encryptedCh),
-      context,
-      clientHelloOuter);
+      version, std::move(encryptedCh), context, clientHelloOuter);
 
   // Set actual client hello, ECH acceptance
   folly::io::Cursor encodedECHInnerCursor(encodedClientHelloInner.get());
@@ -614,10 +648,10 @@ std::vector<Extension> substituteOuterExtensions(
       expandedInnerExt.push_back(std::move(ext));
     } else {
       // Parse the extension
-      ech::OuterExtensions outerExtensions;
+      OuterExtensions outerExtensions;
       try {
         folly::io::Cursor cursor(ext.extension_data.get());
-        outerExtensions = getExtension<ech::OuterExtensions>(cursor);
+        outerExtensions = getExtension<OuterExtensions>(cursor);
       } catch (...) {
         throw OuterExtensionsError("ech_outer_extensions malformed");
       }

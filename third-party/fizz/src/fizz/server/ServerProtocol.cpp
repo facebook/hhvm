@@ -733,7 +733,7 @@ static SemiFuture<Optional<AsyncKeyExchange::DoKexResult>> doKexFuture(
   }
 }
 
-static Buf getHelloRetryRequest(
+static HelloRetryRequest getHelloRetryRequest(
     ProtocolVersion version,
     CipherSuite cipher,
     NamedGroup group,
@@ -749,10 +749,7 @@ static Buf getHelloRetryRequest(
   HelloRetryRequestKeyShare keyShare;
   keyShare.selected_group = group;
   hrr.extensions.push_back(encodeExtension(std::move(keyShare)));
-  auto encodedHelloRetryRequest = encodeHandshake(std::move(hrr));
-
-  handshakeContext.appendToTranscript(encodedHelloRetryRequest);
-  return encodedHelloRetryRequest;
+  return hrr;
 }
 
 static ServerHello getServerHello(
@@ -1040,7 +1037,7 @@ static std::tuple<ECHStatus, uint8_t> processECHHRR(
     const State& state,
     ClientHello& chlo) {
   auto decrypter = state.context()->getECHDecrypter();
-  auto echExt = getExtension<ech::ClientECH>(chlo.extensions);
+  auto echExt = getExtension<ech::OuterClientECH>(chlo.extensions);
   ECHStatus echStatus = state.echStatus();
 
   // Check for cookie ECH
@@ -1124,7 +1121,7 @@ static std::pair<ECHStatus, ECHState> processECH(
     if (requestedECH && decrypter) {
       auto gotChlo = decrypter->decryptClientHello(chlo);
       if (gotChlo.has_value()) {
-        auto echExt = getExtension<ech::ClientECH>(chlo.extensions);
+        auto echExt = getExtension<ech::OuterClientECH>(chlo.extensions);
         echStatus = ECHStatus::Accepted;
         echState.hpkeContext = std::move(gotChlo->context);
         echState.configId = gotChlo->configId;
@@ -1136,11 +1133,10 @@ static std::pair<ECHStatus, ECHState> processECH(
     }
   }
 
-  // Check for ECH inner extension, if accepted.
-  auto innerExt = getExtension<ech::ECHIsInner>(chlo.extensions);
-  if (echStatus == ECHStatus::Accepted && !innerExt) {
+  if (echStatus == ECHStatus::Accepted &&
+      getExtension<ech::InnerClientECH>(chlo.extensions) == folly::none) {
     throw FizzException(
-        "inner clienthello missing ech_is_inner",
+        "inner clienthello missing encrypted_client_hello",
         AlertDescription::missing_extension);
   }
 
@@ -1370,12 +1366,25 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
             handshakeContext->appendToTranscript(
                 encodeHandshake(std::move(chloHash)));
 
-            auto encodedHelloRetryRequest = getHelloRetryRequest(
+            auto hrr = getHelloRetryRequest(
                 version,
                 cipher,
                 *group,
                 legacySessionId ? legacySessionId->clone() : nullptr,
                 *handshakeContext);
+
+            if (echStatus == ECHStatus::Accepted) {
+              // Set up acceptance scheduler
+              auto echScheduler =
+                  state.context()->getFactory()->makeKeyScheduler(cipher);
+              echScheduler->deriveEarlySecret(folly::range(chlo.random));
+              // Add acceptance extension
+              ech::setAcceptConfirmation(
+                  hrr, handshakeContext->clone(), std::move(echScheduler));
+            }
+
+            auto encodedHelloRetryRequest = encodeHandshake(std::move(hrr));
+            handshakeContext->appendToTranscript(encodedHelloRetryRequest);
 
             WriteToSocket serverFlight;
             serverFlight.contents.emplace_back(
@@ -1517,10 +1526,15 @@ EventHandler<ServerTypes, StateEnum::ExpectingClientHello, Event::ClientHello>::
 
               folly::Optional<std::vector<ech::ECHConfig>> echRetryConfigs;
               if (echStatus == ECHStatus::Accepted) {
-                // If accepted, go ahead and set the last random bytes to the
-                // accept_confirmation
+                // Set up acceptance scheduler
+                auto echScheduler =
+                    state.context()->getFactory()->makeKeyScheduler(cipher);
+                echScheduler->deriveEarlySecret(folly::range(chlo.random));
+                // Add acceptance extension
                 ech::setAcceptConfirmation(
-                    serverHello, handshakeContext->clone(), scheduler);
+                    serverHello,
+                    handshakeContext->clone(),
+                    std::move(echScheduler));
               } else if (echStatus == ECHStatus::Rejected) {
                 auto decrypter = state.context()->getECHDecrypter();
                 echRetryConfigs = decrypter->getRetryConfigs();

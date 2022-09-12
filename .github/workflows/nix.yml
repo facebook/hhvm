@@ -43,7 +43,7 @@ jobs:
       with:
         extra_nix_config: |
           extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-          extra-experimental-features = nix-command flakes impure-derivations
+          extra-experimental-features = nix-command flakes impure-derivations ca-derivations
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=

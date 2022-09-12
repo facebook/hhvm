@@ -56,34 +56,34 @@ TEST(GetTest, FindByOrdinal) {
   EXPECT_EQ(findIdByName<type::UriStruct>("scheme"), FieldId{1});
 }
 
-template <typename Obj, typename Ord>
-void testFieldRef(Obj obj, Ord ord) {
-  auto field = op::get<decltype(ord), decltype(obj)>(obj);
+template <typename Id, typename T>
+void testFieldRef(T obj) {
+  auto field = op::get<Id>(obj);
   field = 2;
   EXPECT_EQ(*op::getValueOrNull(field), 2);
   // test with const T&
   const auto& objRef = obj;
-  auto fieldConst = op::get<decltype(ord), decltype(obj)>(objRef);
+  auto fieldConst = op::get<Id>(objRef);
   EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
 }
 
-template <typename Obj, typename Ord>
-void testGetValueNotOptional(Obj obj, Ord ord) {
-  auto field = op::get<decltype(ord), decltype(obj)>(obj);
+template <typename Id, typename T>
+void testGetValueNotOptional(T obj) {
+  auto field = op::get<Id>(obj);
   EXPECT_EQ(*op::getValueOrNull(field), 0);
-  testFieldRef(obj, ord);
+  testFieldRef<Id>(obj);
 }
 
-template <typename Obj, typename Ord>
-void testGetValueOptional(Obj obj, Ord ord) {
-  auto field = op::get<decltype(ord), decltype(obj)>(obj);
+template <typename Id, typename T>
+void testGetValueOptional(T obj) {
+  auto field = op::get<Id>(obj);
   EXPECT_EQ(op::getValueOrNull(field), nullptr);
-  testFieldRef(obj, ord);
+  testFieldRef<Id>(obj);
 }
 
-template <typename Obj, typename Ord>
-void testGetValueSmartPointer(Obj obj, Ord ord) {
-  auto& field = op::get<decltype(ord), decltype(obj)>(obj);
+template <typename Id, typename T>
+void testGetValueSmartPointer(T obj) {
+  auto& field = op::get<Id>(obj);
   EXPECT_EQ(op::getValueOrNull(field), nullptr);
   if constexpr (thrift::detail::is_unique_ptr_v<
                     std::remove_reference_t<decltype(field)>>) {
@@ -99,23 +99,20 @@ void testGetValueSmartPointer(Obj obj, Ord ord) {
 
 TEST(GetValueOrNullTest, FieldRefNotOptional) {
   FieldRefNotOptionalStruct obj;
-  op::for_each_ordinal<FieldRefNotOptionalStruct>([&](auto fieldOrdinalTag) {
-    testGetValueNotOptional(obj, fieldOrdinalTag);
-  });
+  op::for_each_ordinal<FieldRefNotOptionalStruct>(
+      [&](auto id) { testGetValueNotOptional<decltype(id)>(obj); });
 }
 
 TEST(GetValueOrNullTest, FieldRefOptional) {
   FieldRefOptionalStruct obj;
-  op::for_each_ordinal<FieldRefOptionalStruct>([&](auto fieldOrdinalTag) {
-    testGetValueOptional(obj, fieldOrdinalTag);
-  });
+  op::for_each_ordinal<FieldRefOptionalStruct>(
+      [&](auto id) { testGetValueOptional<decltype(id)>(obj); });
 }
 
 TEST(GetValueOrNullTest, SmartPointer) {
   SmartPointerStruct obj;
-  op::for_each_ordinal<SmartPointerStruct>([&](auto fieldOrdinalTag) {
-    testGetValueSmartPointer(obj, fieldOrdinalTag);
-  });
+  op::for_each_ordinal<SmartPointerStruct>(
+      [&](auto id) { testGetValueSmartPointer<decltype(id)>(obj); });
 }
 
 TEST(GetValueOrNullTest, Optional) {

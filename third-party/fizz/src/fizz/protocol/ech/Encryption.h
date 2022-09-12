@@ -78,14 +78,14 @@ void setAcceptConfirmation(
     std::unique_ptr<HandshakeContext> context,
     std::unique_ptr<KeyScheduler> scheduler);
 
-OuterClientECH encryptClientHelloHRR(
+OuterECHClientHello encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
     const folly::Optional<ClientPresharedKey>& greasePsk);
 
-OuterClientECH encryptClientHello(
+OuterECHClientHello encryptClientHello(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,

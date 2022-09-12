@@ -31,14 +31,14 @@ ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  InnerClientECH chloInnerECHExt;
+  InnerECHClientHello chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   // Encrypt client hello
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
-  OuterClientECH echExt = encryptClientHello(
+  OuterECHClientHello echExt = encryptClientHello(
       supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension
@@ -64,7 +64,7 @@ ClientHello getChloOuterHRRWithExt(
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  InnerClientECH chloInnerECHExt;
+  InnerECHClientHello chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   ClientHello chloOuter = getClientHelloOuter();
@@ -82,7 +82,7 @@ ClientHello getChloOuterHRRWithExt(
   enc = std::move(initialECH.enc);
 
   // Second encryption for HRR
-  OuterClientECH echExt = encryptClientHelloHRR(
+  OuterECHClientHello echExt = encryptClientHelloHRR(
       supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension

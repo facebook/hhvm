@@ -110,7 +110,7 @@ enum class ExtensionType : uint16_t {
   // alternate_server_name = 0xfb00,
   // draft_delegated_credential = 0xff02,
   test_extension = 0xff04,
-  encrypted_client_hello = 0xfe0b,
+  encrypted_client_hello = 0xfe0d,
   ech_nonce = 0xff03,
   thrift_parameters = 0xff41,
 };

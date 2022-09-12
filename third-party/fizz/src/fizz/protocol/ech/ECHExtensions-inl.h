@@ -13,7 +13,7 @@
 
 namespace fizz {
 template <>
-inline Extension encodeExtension(const ech::OuterClientECH& clientECH) {
+inline Extension encodeExtension(const ech::OuterECHClientHello& clientECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
@@ -29,7 +29,7 @@ inline Extension encodeExtension(const ech::OuterClientECH& clientECH) {
 }
 
 template <>
-inline Extension encodeExtension(const ech::ServerECH& serverECH) {
+inline Extension encodeExtension(const ech::ECHEncryptedExtensions& serverECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
@@ -41,7 +41,7 @@ inline Extension encodeExtension(const ech::ServerECH& serverECH) {
 }
 
 template <>
-inline Extension encodeExtension(const ech::InnerClientECH& innerECH) {
+inline Extension encodeExtension(const ech::InnerECHClientHello& innerECH) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(0);
@@ -64,25 +64,25 @@ inline Extension encodeExtension(const ech::OuterExtensions& outerExts) {
 }
 
 template <>
-inline Extension encodeExtension(const ech::ECHAcceptanceConfirmation& conf) {
+inline Extension encodeExtension(const ech::ECHHelloRetryRequest& conf) {
   Extension ext;
   ext.extension_type = ExtensionType::encrypted_client_hello;
   ext.extension_data = folly::IOBuf::create(8);
 
   folly::io::Appender appender(ext.extension_data.get(), 0);
-  appender.push(conf.payload.data(), conf.payload.size());
+  appender.push(conf.confirmation.data(), conf.confirmation.size());
 
   return ext;
 }
 
 template <>
-inline ech::OuterClientECH getExtension(folly::io::Cursor& cs) {
-  ech::ClientECHType type;
+inline ech::OuterECHClientHello getExtension(folly::io::Cursor& cs) {
+  ech::ECHClientHelloType type;
   detail::read(type, cs);
-  if (type != ech::ClientECHType::Outer) {
+  if (type != ech::ECHClientHelloType::Outer) {
     throw std::runtime_error("wrong ech variant");
   }
-  ech::OuterClientECH clientECH;
+  ech::OuterECHClientHello clientECH;
   detail::read(clientECH.cipher_suite, cs);
   detail::read(clientECH.config_id, cs);
   detail::readBuf<uint16_t>(clientECH.enc, cs);
@@ -92,21 +92,21 @@ inline ech::OuterClientECH getExtension(folly::io::Cursor& cs) {
 }
 
 template <>
-inline ech::ServerECH getExtension(folly::io::Cursor& cs) {
-  ech::ServerECH serverECH;
+inline ech::ECHEncryptedExtensions getExtension(folly::io::Cursor& cs) {
+  ech::ECHEncryptedExtensions serverECH;
   detail::readVector<uint16_t>(serverECH.retry_configs, cs);
 
   return serverECH;
 }
 
 template <>
-inline ech::InnerClientECH getExtension(folly::io::Cursor& cs) {
-  ech::ClientECHType type;
+inline ech::InnerECHClientHello getExtension(folly::io::Cursor& cs) {
+  ech::ECHClientHelloType type;
   detail::read(type, cs);
-  if (type != ech::ClientECHType::Inner) {
+  if (type != ech::ECHClientHelloType::Inner) {
     throw std::runtime_error("wrong ech variant");
   }
-  return ech::InnerClientECH();
+  return ech::InnerECHClientHello();
 }
 
 template <>
@@ -117,9 +117,14 @@ inline ech::OuterExtensions getExtension(folly::io::Cursor& cs) {
 }
 
 template <>
-inline ech::ECHAcceptanceConfirmation getExtension(folly::io::Cursor& cs) {
-  ech::ECHAcceptanceConfirmation conf;
-  cs.pull(conf.payload.data(), conf.payload.size());
+inline ech::ECHHelloRetryRequest getExtension(folly::io::Cursor& cs) {
+  ech::ECHHelloRetryRequest conf;
+  if (cs.totalLength() != conf.confirmation.size()) {
+    throw FizzException(
+        "ECHHelloRetryRequest confirmation wrong size",
+        AlertDescription::decode_error);
+  }
+  cs.pull(conf.confirmation.data(), conf.confirmation.size());
   return conf;
 }
 } // namespace fizz

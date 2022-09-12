@@ -937,7 +937,7 @@ static Buf getEncryptedExt(
   }
 
   if (echRetryConfigs.has_value()) {
-    ech::ServerECH serverEch;
+    ech::ECHEncryptedExtensions serverEch;
     serverEch.retry_configs = std::move(*echRetryConfigs);
     encryptedExt.extensions.push_back(encodeExtension(std::move(serverEch)));
   }
@@ -1037,7 +1037,7 @@ static std::tuple<ECHStatus, uint8_t> processECHHRR(
     const State& state,
     ClientHello& chlo) {
   auto decrypter = state.context()->getECHDecrypter();
-  auto echExt = getExtension<ech::OuterClientECH>(chlo.extensions);
+  auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
   ECHStatus echStatus = state.echStatus();
 
   // Check for cookie ECH
@@ -1121,7 +1121,7 @@ static std::pair<ECHStatus, ECHState> processECH(
     if (requestedECH && decrypter) {
       auto gotChlo = decrypter->decryptClientHello(chlo);
       if (gotChlo.has_value()) {
-        auto echExt = getExtension<ech::OuterClientECH>(chlo.extensions);
+        auto echExt = getExtension<ech::OuterECHClientHello>(chlo.extensions);
         echStatus = ECHStatus::Accepted;
         echState.hpkeContext = std::move(gotChlo->context);
         echState.configId = gotChlo->configId;
@@ -1134,7 +1134,7 @@ static std::pair<ECHStatus, ECHState> processECH(
   }
 
   if (echStatus == ECHStatus::Accepted &&
-      getExtension<ech::InnerClientECH>(chlo.extensions) == folly::none) {
+      getExtension<ech::InnerECHClientHello>(chlo.extensions) == folly::none) {
     throw FizzException(
         "inner clienthello missing encrypted_client_hello",
         AlertDescription::missing_extension);

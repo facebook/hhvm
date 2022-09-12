@@ -16,7 +16,7 @@ namespace fizz {
 namespace ech {
 namespace test {
 
-folly::StringPiece kOuterClientECHExtensionData{
+folly::StringPiece kOuterECHClientHelloExtensionData{
     "0000010001AA0003656e6300077061796c6f6164"};
 
 Buf getBuf(folly::StringPiece hex) {
@@ -62,7 +62,7 @@ TEST(ECHTest, TestConfigContentEncodeDecode) {
 TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
-  echConfig.version = ECHVersion::Draft11;
+  echConfig.version = ECHVersion::Draft13;
   echConfig.ech_config_content =
       encode<ECHConfigContentDraft>(getECHConfigContent());
   std::unique_ptr<folly::IOBuf> encodedBuf =
@@ -73,38 +73,38 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   auto gotECHConfig = decode<ECHConfig>(cursor);
 
   // Check decode(encode(config)) = config
-  EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft11);
+  EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft13);
   EXPECT_TRUE(folly::IOBufEqualTo()(
       gotECHConfig.ech_config_content,
       encode<ECHConfigContentDraft>(getECHConfigContent())));
 }
 
-TEST(ECHTest, TestOuterClientECHEncode) {
-  OuterClientECH ech;
+TEST(ECHTest, TestOuterECHClientHelloEncode) {
+  OuterECHClientHello ech;
   ech.cipher_suite = HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   ech.config_id = 0xAA;
   ech.enc = folly::IOBuf::copyBuffer("enc");
   ech.payload = folly::IOBuf::copyBuffer("payload");
 
-  Extension encoded = encodeExtension<ech::OuterClientECH>(ech);
+  Extension encoded = encodeExtension<ech::OuterECHClientHello>(ech);
 
   EXPECT_EQ(encoded.extension_type, ExtensionType::encrypted_client_hello);
   // This was captured as the expected output from generating the result.
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encoded.extension_data,
       folly::IOBuf::copyBuffer(
-          folly::unhexlify(kOuterClientECHExtensionData))));
+          folly::unhexlify(kOuterECHClientHelloExtensionData))));
 }
 
-TEST(ECHTest, TestOuterClientECHDecode) {
+TEST(ECHTest, TestOuterECHClientHelloDecode) {
   Extension e;
   e.extension_type = ExtensionType::encrypted_client_hello;
-  e.extension_data =
-      folly::IOBuf::copyBuffer(folly::unhexlify(kOuterClientECHExtensionData));
+  e.extension_data = folly::IOBuf::copyBuffer(
+      folly::unhexlify(kOuterECHClientHelloExtensionData));
   std::vector<Extension> vec;
   vec.push_back(std::move(e));
-  auto ech = getExtension<OuterClientECH>(vec);
+  auto ech = getExtension<OuterECHClientHello>(vec);
 
   EXPECT_EQ(ech->cipher_suite.kdf_id, hpke::KDFId::Sha256);
   EXPECT_EQ(ech->config_id, 0xAA);

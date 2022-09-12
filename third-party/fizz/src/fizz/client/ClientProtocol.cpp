@@ -739,8 +739,8 @@ static ClientHello constructEncryptedClientHello(
   Extension encodedECHExtension;
   // Create the encrypted client hello inner extension.
   switch (supportedConfig.config.version) {
-    case (ech::ECHVersion::Draft11): {
-      ech::OuterClientECH clientECHExtension;
+    case (ech::ECHVersion::Draft13): {
+      ech::OuterECHClientHello clientECHExtension;
       if (e == Event::ClientHello) {
         clientECHExtension = encryptClientHello(
             supportedConfig,
@@ -848,8 +848,8 @@ EventHandler<ClientTypes, StateEnum::Uninitialized, Event::Connect>::handle(
 
   if (echParams.has_value() &&
       echParams.value().supportedECHConfig.config.version ==
-          ech::ECHVersion::Draft11) {
-    ech::InnerClientECH chloIsInnerExt;
+          ech::ECHVersion::Draft13) {
+    ech::InnerECHClientHello chloIsInnerExt;
     chlo.extensions.push_back(encodeExtension(std::move(chloIsInnerExt)));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
   }
@@ -1507,8 +1507,8 @@ Actions EventHandler<
   // ECH extension required.
   if (state.echState().has_value() &&
       state.echState()->supportedConfig.config.version ==
-          ech::ECHVersion::Draft11) {
-    ech::InnerClientECH chloIsInnerExt;
+          ech::ECHVersion::Draft13) {
+    ech::InnerECHClientHello chloIsInnerExt;
     encodedInnerECHExt = encodeExtension(std::move(chloIsInnerExt));
     requestedExtensions.push_back(ExtensionType::encrypted_client_hello);
 
@@ -1781,7 +1781,7 @@ Actions EventHandler<
   folly::Optional<std::vector<ech::ECHConfig>> retryConfigs;
   if (state.echState().has_value()) {
     // Check if we were sent retry configs
-    auto serverECH = getExtension<ech::ServerECH>(ee.extensions);
+    auto serverECH = getExtension<ech::ECHEncryptedExtensions>(ee.extensions);
     if (serverECH.has_value()) {
       retryConfigs = std::move(serverECH->retry_configs);
     }

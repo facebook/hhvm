@@ -17,12 +17,12 @@
 namespace fizz {
 namespace ech {
 
-enum class ClientECHType : uint8_t {
+enum class ECHClientHelloType : uint8_t {
   Inner = 1,
   Outer = 0,
 };
 
-struct OuterClientECH {
+struct OuterECHClientHello {
   // The cipher suite used to encrypt ClientHelloInner.
   // This MUST match a value provided in the corresponding
   // "ECHConfig.cipher_suites" list.
@@ -42,12 +42,12 @@ struct OuterClientECH {
   // encrypted using HPKE.
   Buf payload;
 
-  static constexpr ClientECHType ech_type = ClientECHType::Outer;
+  static constexpr ECHClientHelloType ech_type = ECHClientHelloType::Outer;
   static constexpr ExtensionType extension_type =
       ExtensionType::encrypted_client_hello;
 };
 
-struct ServerECH {
+struct ECHEncryptedExtensions {
   // The server's list of supported configurations.
   std::vector<ECHConfig> retry_configs;
 
@@ -55,14 +55,14 @@ struct ServerECH {
       ExtensionType::encrypted_client_hello;
 };
 
-struct InnerClientECH {
-  static constexpr ClientECHType ech_type = ClientECHType::Inner;
+struct InnerECHClientHello {
+  static constexpr ECHClientHelloType ech_type = ECHClientHelloType::Inner;
   static constexpr ExtensionType extension_type =
       ExtensionType::encrypted_client_hello;
 };
 
-struct ECHAcceptanceConfirmation {
-  std::array<uint8_t, 8> payload;
+struct ECHHelloRetryRequest {
+  std::array<uint8_t, 8> confirmation;
   static constexpr ExtensionType extension_type =
       ExtensionType::encrypted_client_hello;
 };

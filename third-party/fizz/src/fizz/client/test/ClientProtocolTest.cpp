@@ -1042,7 +1042,8 @@ TEST_F(ClientProtocolTest, TestConnectECH) {
       actualChlo.legacy_session_id, chloOuter.legacy_session_id));
 
   // Check there exists an ECH extension.
-  auto echExtension = getExtension<ech::OuterClientECH>(chloOuter.extensions);
+  auto echExtension =
+      getExtension<ech::OuterECHClientHello>(chloOuter.extensions);
   EXPECT_TRUE(echExtension.hasValue());
 
   // Check that early data and PSK are NOT present.
@@ -2624,7 +2625,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft11;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -2700,8 +2701,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
       .InSequence(contextSeq)
       .WillOnce(Invoke([&](const std::unique_ptr<folly::IOBuf>& buf) mutable {
         auto hrr = TestMessages::helloRetryRequest();
-        ech::ECHAcceptanceConfirmation conf;
-        conf.payload.fill(0x00);
+        ech::ECHHelloRetryRequest conf;
+        conf.confirmation.fill(0x00);
         hrr.extensions.push_back(encodeExtension(conf));
         EXPECT_TRUE(
             folly::IOBufEqualTo()(buf, encodeHandshake(std::move(hrr))));
@@ -2745,7 +2746,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   chloOuter.extensions.insert(it, encodeExtension(std::move(sni)));
 
   // Add the extension to the inner one
-  chlo.extensions.push_back(encodeExtension(ech::InnerClientECH()));
+  chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
   // Save this one (the real one), then blank the legacy session id for AAD
   // construction
@@ -2754,7 +2755,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
   auto encodedClientHelloInnerAad = encode(chlo);
 
   // Set up ECH extension for AAD and ECH
-  ech::OuterClientECH echExtension;
+  ech::OuterECHClientHello echExtension;
   echExtension.cipher_suite = state_.echState()->supportedConfig.cipherSuite;
   echExtension.config_id = state_.echState()->supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
@@ -2819,8 +2820,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHFlow) {
 
   // Generate HRR with accepted ECH
   auto hrr = TestMessages::helloRetryRequest();
-  ech::ECHAcceptanceConfirmation conf;
-  conf.payload.fill(0xAA);
+  ech::ECHHelloRetryRequest conf;
+  conf.confirmation.fill(0xAA);
   hrr.extensions.push_back(encodeExtension(conf));
 
   auto actions = detail::processEvent(state_, std::move(hrr));
@@ -2877,7 +2878,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft11;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -2953,8 +2954,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
       .InSequence(contextSeq)
       .WillOnce(Invoke([&](const std::unique_ptr<folly::IOBuf>& buf) mutable {
         auto hrr = TestMessages::helloRetryRequest();
-        ech::ECHAcceptanceConfirmation conf;
-        conf.payload.fill(0x00);
+        ech::ECHHelloRetryRequest conf;
+        conf.confirmation.fill(0x00);
         hrr.extensions.push_back(encodeExtension(conf));
         EXPECT_TRUE(
             folly::IOBufEqualTo()(buf, encodeHandshake(std::move(hrr))));
@@ -2998,7 +2999,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   chloOuter.extensions.insert(it, encodeExtension(std::move(sni)));
 
   // Add the extension to the inner one
-  chlo.extensions.push_back(encodeExtension(ech::InnerClientECH()));
+  chlo.extensions.push_back(encodeExtension(ech::InnerECHClientHello()));
 
   // Save this one (the real one), then blank the legacy session id for AAD
   // construction
@@ -3007,7 +3008,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
   auto encodedClientHelloInnerAad = encode(chlo);
 
   // Set up ECH extension for AAD and ECH
-  ech::OuterClientECH echExtension;
+  ech::OuterECHClientHello echExtension;
   echExtension.cipher_suite = state_.echState()->supportedConfig.cipherSuite;
   echExtension.config_id = state_.echState()->supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
@@ -3072,8 +3073,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHRejectedFlow) {
 
   // Generate HRR with rejected ECH
   auto hrr = TestMessages::helloRetryRequest();
-  ech::ECHAcceptanceConfirmation conf;
-  conf.payload.fill(0xFF);
+  ech::ECHHelloRetryRequest conf;
+  conf.confirmation.fill(0xFF);
   hrr.extensions.push_back(encodeExtension(conf));
 
   auto actions = detail::processEvent(state_, std::move(hrr));
@@ -3144,7 +3145,7 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
   auto mockHpkeContext = new hpke::test::MockHpkeContext();
   state_.echState()->hpkeSetup.enc = folly::IOBuf::copyBuffer("enc");
   state_.echState()->hpkeSetup.context.reset(mockHpkeContext);
-  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft11;
+  state_.echState()->supportedConfig.config.version = ech::ECHVersion::Draft13;
   state_.echState()->supportedConfig.config.ech_config_content =
       folly::IOBuf::copyBuffer("echconfig");
   state_.echState()->supportedConfig.cipherSuite = {
@@ -3251,8 +3252,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
       .InSequence(contextSeq)
       .WillOnce(Invoke([&](const std::unique_ptr<folly::IOBuf>& buf) mutable {
         auto hrr = TestMessages::helloRetryRequest();
-        ech::ECHAcceptanceConfirmation conf;
-        conf.payload.fill(0x00);
+        ech::ECHHelloRetryRequest conf;
+        conf.confirmation.fill(0x00);
         hrr.extensions.push_back(encodeExtension(conf));
         EXPECT_TRUE(
             folly::IOBufEqualTo()(buf, encodeHandshake(std::move(hrr))));
@@ -3308,8 +3309,8 @@ TEST_F(ClientProtocolTest, TestHelloRetryRequestECHPSKFlow) {
 
   // Generate HRR with accepted ECH
   auto hrr = TestMessages::helloRetryRequest();
-  ech::ECHAcceptanceConfirmation conf;
-  conf.payload.fill(0xAA);
+  ech::ECHHelloRetryRequest conf;
+  conf.confirmation.fill(0xAA);
   hrr.extensions.push_back(encodeExtension(conf));
 
   auto actions = detail::processEvent(state_, std::move(hrr));
@@ -3686,9 +3687,9 @@ TEST_F(ClientProtocolTest, TestEncryptedExtensionsECHRetryConfigs) {
       *mockHandshakeContext_, appendToTranscript(BufMatches("eeencoding")));
 
   auto ee = TestMessages::encryptedExt();
-  ech::ServerECH serverECH;
+  ech::ECHEncryptedExtensions serverECH;
   ech::ECHConfig cfg;
-  cfg.version = ech::ECHVersion::Draft11;
+  cfg.version = ech::ECHVersion::Draft13;
   cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
   serverECH.retry_configs.push_back(std::move(cfg));
   ee.extensions.push_back(encodeExtension(std::move(serverECH)));

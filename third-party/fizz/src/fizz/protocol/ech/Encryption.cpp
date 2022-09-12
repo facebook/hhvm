@@ -35,7 +35,7 @@ std::unique_ptr<folly::IOBuf> makeClientHelloOuterForAad(
       });
 
   folly::io::Cursor cursor(it->extension_data.get());
-  auto echExtension = getExtension<OuterClientECH>(cursor);
+  auto echExtension = getExtension<OuterECHClientHello>(cursor);
 
   // Create a zeroed out version of the payload
   size_t payloadSize = echExtension.payload->computeChainDataLength();
@@ -57,7 +57,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
     const ClientHello& clientHelloOuter) {
   std::unique_ptr<folly::IOBuf> encodedClientHelloInner;
   switch (version) {
-    case ECHVersion::Draft11: {
+    case ECHVersion::Draft13: {
       auto aadCH = makeClientHelloOuterForAad(clientHelloOuter);
       encodedClientHelloInner =
           context->open(aadCH.get(), std::move(encryptedCh));
@@ -69,7 +69,7 @@ std::unique_ptr<folly::IOBuf> extractEncodedClientHelloInner(
 std::unique_ptr<folly::IOBuf> makeHpkeContextInfoParam(
     const ECHConfig& echConfig) {
   switch (echConfig.version) {
-    case ECHVersion::Draft11: {
+    case ECHVersion::Draft13: {
       // The "info" parameter to setupWithEncap is the
       // concatenation of "tls ech", a zero byte, and the serialized
       // ECHConfig.
@@ -138,7 +138,7 @@ folly::Optional<SupportedECHConfig> selectECHConfig(
   // we should be selecting the first one that we can support.
   for (const auto& config : configs) {
     folly::io::Cursor cursor(config.ech_config_content.get());
-    if (config.version == ECHVersion::Draft11) {
+    if (config.version == ECHVersion::Draft13) {
       auto echConfig = decode<ECHConfigContentDraft>(cursor);
 
       // Before anything else, check if the config has mandatory extensions.
@@ -384,14 +384,14 @@ bool checkECHAccepted(
 
   // ECH accepted if the 8 bytes match the accept_confirmation in the
   // extension
-  auto echConf = getExtension<ECHAcceptanceConfirmation>(hrr.extensions);
+  auto echConf = getExtension<ECHHelloRetryRequest>(hrr.extensions);
   if (!echConf) {
     VLOG(8) << "HRR ECH extension missing, rejected...";
     return false;
   }
 
   return memcmp(
-             echConf->payload.data(),
+             echConf->confirmation.data(),
              acceptConfirmation.data(),
              kEchAcceptConfirmationSize) == 0;
 }
@@ -416,7 +416,7 @@ void setAcceptConfirmation(
     std::unique_ptr<KeyScheduler> scheduler) {
   // Add an ECH confirmation extension. The calculation code will ignore its
   // contents but expects it to be there.
-  hrr.extensions.push_back(encodeExtension(ECHAcceptanceConfirmation()));
+  hrr.extensions.push_back(encodeExtension(ECHHelloRetryRequest()));
 
   // Calculate it.
   auto acceptConfirmation = calculateAcceptConfirmation(
@@ -483,7 +483,7 @@ ClientPresharedKey generateGreasePSKForHRR(
 namespace {
 
 void encryptClientHelloShared(
-    OuterClientECH& echExtension,
+    OuterECHClientHello& echExtension,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
@@ -521,14 +521,14 @@ void encryptClientHelloShared(
 
 } // namespace
 
-OuterClientECH encryptClientHelloHRR(
+OuterECHClientHello encryptClientHelloHRR(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
     const folly::Optional<ClientPresharedKey>& greasePsk) {
   // Create ECH extension with blank config ID and enc for HRR
-  OuterClientECH echExtension;
+  OuterECHClientHello echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = folly::IOBuf::create(0);
@@ -539,14 +539,14 @@ OuterClientECH encryptClientHelloHRR(
   return echExtension;
 }
 
-OuterClientECH encryptClientHello(
+OuterECHClientHello encryptClientHello(
     const SupportedECHConfig& supportedConfig,
     const ClientHello& clientHelloInner,
     const ClientHello& clientHelloOuter,
     hpke::SetupResult& setupResult,
     const folly::Optional<ClientPresharedKey>& greasePsk) {
   // Create ECH extension
-  OuterClientECH echExtension;
+  OuterECHClientHello echExtension;
   echExtension.cipher_suite = supportedConfig.cipherSuite;
   echExtension.config_id = supportedConfig.configId;
   echExtension.enc = setupResult.enc->clone();

@@ -60,6 +60,7 @@ class ClientMetadataRef {
   std::optional<std::string_view> getAgent();
   std::optional<std::string_view> getHostname();
   std::optional<std::string_view> getOtherMetadataField(std::string_view key);
+  const folly::F14NodeMap<std::string, std::string>& getFields() const;
 
  private:
   const ClientMetadata& md_;

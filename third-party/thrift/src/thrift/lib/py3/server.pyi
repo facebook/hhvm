@@ -123,6 +123,7 @@ class ConnectionContext:
     security_protocol: str
     peer_certificate: bytes
     peer_certificate_identity: str
+    client_metadata: ClientMetadata
 
 class RequestContext:
     connection_context: ConnectionContext
@@ -136,3 +137,8 @@ class RequestContext:
     method_name: str
     request_id: str
     request_timeout: float
+
+class ClientMetadata:
+    agent: str
+    hostname: str
+    def getMetadataField(self, key: str) -> str: ...

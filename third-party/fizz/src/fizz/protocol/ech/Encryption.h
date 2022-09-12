@@ -46,6 +46,14 @@ std::unique_ptr<folly::IOBuf> makeClientHelloAad(
     const std::unique_ptr<folly::IOBuf>& enc,
     const std::unique_ptr<folly::IOBuf>& clientHello);
 
+folly::Optional<ClientPresharedKey> generateGreasePSK(
+    const ClientHello& chloInner,
+    const Factory* factory);
+
+ClientPresharedKey generateGreasePSKForHRR(
+    const ClientPresharedKey& previousPsk,
+    const Factory* factory);
+
 ServerHello makeDummyServerHello(const ServerHello& shlo);
 
 HelloRetryRequest makeDummyHRR(const HelloRetryRequest& hrr);

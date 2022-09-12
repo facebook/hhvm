@@ -843,6 +843,48 @@ TEST(EncryptionTest, TestCheckHrrAcceptance) {
       checkECHAccepted(hrr, std::move(context), std::move(schedulerBasePtr)));
 }
 
+TEST(EncryptionTest, TestGenerateGreasePsk) {
+  MockFactory factory;
+  factory.setDefaults();
+
+  // If no psk extension is present, expect no GREASE PSK.
+  EXPECT_EQ(
+      generateGreasePSK(TestMessages::clientHello(), &factory), folly::none);
+
+  auto chlo = TestMessages::clientHelloPsk();
+  auto psk = getExtension<ClientPresharedKey>(chlo.extensions);
+
+  // Check that data is replaced with random data for GREASE PSK
+  auto greasePsk = generateGreasePSK(chlo, &factory);
+  EXPECT_TRUE(greasePsk.has_value());
+  EXPECT_EQ(greasePsk->identities.size(), psk->identities.size());
+  EXPECT_EQ(greasePsk->binders.size(), psk->binders.size());
+  for (size_t i = 0; i < greasePsk->identities.size(); i++) {
+    auto idSz = psk->identities[i].psk_identity->computeChainDataLength();
+    auto binderSz = psk->binders[i].binder->computeChainDataLength();
+    auto randomId = folly::IOBuf::copyBuffer(std::string(idSz, 0x44));
+    auto randomBinder = folly::IOBuf::copyBuffer(std::string(binderSz, 0x44));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(greasePsk->identities[i].psk_identity, randomId));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(greasePsk->binders[i].binder, randomBinder));
+  }
+
+  // Check HRR GREASE. Same as above, but preserves identities.
+  auto hrrGreasePsk = generateGreasePSKForHRR(*psk, &factory);
+  EXPECT_EQ(hrrGreasePsk.identities.size(), psk->identities.size());
+  EXPECT_EQ(hrrGreasePsk.binders.size(), psk->binders.size());
+  for (size_t i = 0; i < hrrGreasePsk.identities.size(); i++) {
+    auto binderSz = psk->binders[i].binder->computeChainDataLength();
+    auto randomBinder = folly::IOBuf::copyBuffer(std::string(binderSz, 0x44));
+    EXPECT_TRUE(folly::IOBufEqualTo()(
+        hrrGreasePsk.identities[i].psk_identity,
+        psk->identities[i].psk_identity));
+    EXPECT_TRUE(
+        folly::IOBufEqualTo()(hrrGreasePsk.binders[i].binder, randomBinder));
+  }
+}
+
 } // namespace test
 } // namespace ech
 } // namespace fizz

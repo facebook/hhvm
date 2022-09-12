@@ -406,6 +406,57 @@ void setAcceptConfirmation(
 }
 
 namespace {
+// GREASE PSKs are essentially the same size as the source PSK with the actual
+// contents of all fields replaced with random data. For the HRR case, the PSK
+// identity is preserved.
+ClientPresharedKey generateGreasePskCommon(
+    const ClientPresharedKey& source,
+    const Factory* factory,
+    bool keepIdentity) {
+  ClientPresharedKey grease;
+  for (size_t i = 0; i < source.identities.size(); i++) {
+    const auto& identity = source.identities.at(i);
+    PskIdentity greaseIdentity;
+    if (keepIdentity) {
+      greaseIdentity.psk_identity = identity.psk_identity->clone();
+    } else {
+      size_t identitySize = identity.psk_identity->computeChainDataLength();
+      greaseIdentity.psk_identity = factory->makeRandomBytes(identitySize);
+    }
+    greaseIdentity.obfuscated_ticket_age = factory->makeTicketAgeAdd();
+    grease.identities.push_back(std::move(greaseIdentity));
+
+    const auto& binder = source.binders.at(i);
+    PskBinder greaseBinder;
+    size_t binderSize = binder.binder->computeChainDataLength();
+    greaseBinder.binder = factory->makeRandomBytes(binderSize);
+    grease.binders.push_back(std::move(greaseBinder));
+  }
+  return grease;
+}
+} // namespace
+
+folly::Optional<ClientPresharedKey> generateGreasePSK(
+    const ClientHello& chloInner,
+    const Factory* factory) {
+  auto innerPsk = getExtension<ClientPresharedKey>(chloInner.extensions);
+  if (!innerPsk) {
+    return folly::none;
+  }
+
+  // For client hello, don't preserve identity.
+  return generateGreasePskCommon(*innerPsk, factory, false);
+}
+
+ClientPresharedKey generateGreasePSKForHRR(
+    const ClientPresharedKey& previousPsk,
+    const Factory* factory) {
+  // This PSK was the one sent before (i.e. with a random identity). We want to
+  // keep it.
+  return generateGreasePskCommon(previousPsk, factory, true);
+}
+
+namespace {
 
 void encryptClientHelloShared(
     ClientECH& echExtension,

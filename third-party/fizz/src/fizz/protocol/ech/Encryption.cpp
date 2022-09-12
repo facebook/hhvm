@@ -11,6 +11,7 @@
 
 #include <fizz/crypto/Sha256.h>
 #include <fizz/crypto/Sha384.h>
+#include <fizz/crypto/Sha512.h>
 #include <fizz/crypto/hpke/Utils.h>
 #include <fizz/protocol/Protocol.h>
 #include <fizz/protocol/ech/ECHExtensions.h>
@@ -92,6 +93,10 @@ std::unique_ptr<folly::IOBuf> constructConfigId(
     }
     case (hpke::KDFId::Sha384): {
       hkdf = std::make_unique<HkdfImpl>(HkdfImpl::create<Sha384>());
+      break;
+    }
+    case (hpke::KDFId::Sha512): {
+      hkdf = std::make_unique<HkdfImpl>(HkdfImpl::create<Sha512>());
       break;
     }
     default: {
@@ -213,6 +218,13 @@ std::unique_ptr<folly::IOBuf> getRecordDigest(
           folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
       return folly::IOBuf::copyBuffer(recordDigest);
     }
+    case hpke::KDFId::Sha512: {
+      std::array<uint8_t, fizz::Sha512::HashLen> recordDigest;
+      fizz::Sha512::hash(
+          *encode(echConfig),
+          folly::MutableByteRange(recordDigest.data(), recordDigest.size()));
+      return folly::IOBuf::copyBuffer(recordDigest);
+    }
     default:
       throw std::runtime_error("kdf: not implemented");
   }
@@ -222,7 +234,7 @@ hpke::SetupResult constructHpkeSetupResult(
     std::unique_ptr<KeyExchange> kex,
     const SupportedECHConfig& supportedConfig) {
   const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-07");
+      folly::IOBuf::copyBuffer("HPKE-v1");
 
   folly::io::Cursor cursor(supportedConfig.config.ech_config_content.get());
   auto config = decode<ECHConfigContentDraft>(cursor);
@@ -434,7 +446,7 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
     std::unique_ptr<KeyExchange> kex,
     uint64_t seqNum) {
   const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-07");
+      folly::IOBuf::copyBuffer("HPKE-v1");
 
   // Get crypto primitive types used for decrypting
   hpke::KDFId kdfId = cipherSuite.kdf_id;
@@ -461,6 +473,7 @@ std::unique_ptr<hpke::HpkeContext> setupDecryptionContext(
   return hpke::setupWithDecap(
       hpke::Mode::Base,
       encapsulatedKey->coalesce(),
+      folly::none,
       std::move(info),
       folly::none,
       std::move(setupParam));

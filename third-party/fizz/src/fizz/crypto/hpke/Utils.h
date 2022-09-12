@@ -81,6 +81,16 @@ KEMId getKEMId(NamedGroup group);
 NamedGroup getKexGroup(KEMId kemId);
 
 /**
+ * fizz::hpke::getHashFunctionForKEM converts an HPKE KEM code point to a
+ * `fizz::HashFunction` code point
+ *
+ * @param kemId  An HPKE KEM code point.
+ * @return The corresponding `fizz::HashFunction` code point.
+ * @throws std::runtime_error On invalid code points.
+ */
+HashFunction getHashFunctionForKEM(KEMId kemId);
+
+/**
  * fizz::hpke::makeKeyExchange returns a `fizz::KeyExchange` instance given an
  * HPKE code point.
  *

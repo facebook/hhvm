@@ -39,6 +39,16 @@ DHKEM::DHKEM(
     std::unique_ptr<fizz::hpke::Hkdf> hkdf)
     : kex_(std::move(kex)), group_(group), hkdf_(std::move(hkdf)) {}
 
+DHKEM::DHKEM(
+    std::unique_ptr<KeyExchange> kex,
+    std::unique_ptr<KeyExchange> authKex,
+    NamedGroup group,
+    std::unique_ptr<fizz::hpke::Hkdf> hkdf)
+    : kex_(std::move(kex)),
+      authKex_(std::move(authKex)),
+      group_(group),
+      hkdf_(std::move(hkdf)) {}
+
 std::unique_ptr<folly::IOBuf> DHKEM::extractAndExpand(
     std::unique_ptr<folly::IOBuf> dh,
     std::unique_ptr<folly::IOBuf> kemContext) {
@@ -74,12 +84,47 @@ DHKEM::EncapResult DHKEM::encap(folly::ByteRange pkR) {
   return EncapResult{std::move(sharedSecret), std::move(enc)};
 }
 
+DHKEM::EncapResult DHKEM::authEncap(folly::ByteRange pkR) {
+  if (!authKex_) {
+    throw std::runtime_error("DHKEM has no sender key exchange set up");
+  }
+  kex_->generateKeyPair();
+  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(pkR);
+  dh->prependChain(authKex_->generateSharedSecret(pkR));
+  std::unique_ptr<folly::IOBuf> enc = kex_->getKeyShare();
+
+  std::unique_ptr<folly::IOBuf> kemContext = enc->clone();
+  kemContext->prependChain(folly::IOBuf::copyBuffer(pkR));
+  kemContext->prependChain(authKex_->getKeyShare());
+
+  std::unique_ptr<folly::IOBuf> sharedSecret =
+      extractAndExpand(std::move(dh), std::move(kemContext));
+
+  return EncapResult{std::move(sharedSecret), std::move(enc)};
+}
+
 std::unique_ptr<folly::IOBuf> DHKEM::decap(folly::ByteRange enc) {
   std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(enc);
   std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
 
   std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
   kemContext->prependChain(std::move(pkRm));
+
+  std::unique_ptr<folly::IOBuf> sharedSecret =
+      extractAndExpand(std::move(dh), std::move(kemContext));
+  return sharedSecret;
+}
+
+std::unique_ptr<folly::IOBuf> DHKEM::authDecap(
+    folly::ByteRange enc,
+    folly::ByteRange pkS) {
+  std::unique_ptr<folly::IOBuf> dh = kex_->generateSharedSecret(enc);
+  dh->prependChain(kex_->generateSharedSecret(pkS));
+  std::unique_ptr<folly::IOBuf> pkRm = kex_->getKeyShare();
+
+  std::unique_ptr<folly::IOBuf> kemContext = folly::IOBuf::copyBuffer(enc);
+  kemContext->prependChain(std::move(pkRm));
+  kemContext->prependChain(folly::IOBuf::copyBuffer(pkS));
 
   std::unique_ptr<folly::IOBuf> sharedSecret =
       extractAndExpand(std::move(dh), std::move(kemContext));

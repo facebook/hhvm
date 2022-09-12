@@ -97,7 +97,17 @@ SetupResult setupWithEncap(
     std::unique_ptr<folly::IOBuf> info,
     folly::Optional<PskInputs> pskInputs,
     SetupParam param) {
-  DHKEM::EncapResult encapResult = param.dhkem->encap(pkR);
+  DHKEM::EncapResult encapResult;
+  switch (mode) {
+    case Mode::Auth:
+    case Mode::AuthPsk:
+      encapResult = param.dhkem->authEncap(pkR);
+      break;
+    case Mode::Base:
+    case Mode::Psk:
+      encapResult = param.dhkem->encap(pkR);
+      break;
+  }
 
   KeyScheduleParams keyScheduleParams{
       mode,
@@ -118,10 +128,21 @@ SetupResult setupWithEncap(
 std::unique_ptr<HpkeContext> setupWithDecap(
     Mode mode,
     folly::ByteRange enc,
+    folly::Optional<folly::ByteRange> pkS,
     std::unique_ptr<folly::IOBuf> info,
     folly::Optional<PskInputs> pskInputs,
     SetupParam param) {
-  auto sharedSecret = param.dhkem->decap(enc);
+  std::unique_ptr<folly::IOBuf> sharedSecret;
+  switch (mode) {
+    case Mode::Auth:
+    case Mode::AuthPsk:
+      sharedSecret = param.dhkem->authDecap(enc, *pkS);
+      break;
+    case Mode::Base:
+    case Mode::Psk:
+      sharedSecret = param.dhkem->decap(enc);
+      break;
+  }
   KeyScheduleParams keyScheduleParams{
       mode,
       std::move(sharedSecret),

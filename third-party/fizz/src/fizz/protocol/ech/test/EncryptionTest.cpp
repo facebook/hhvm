@@ -218,7 +218,7 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   hpkePrefix->prependChain(encode(getECHConfig()));
 
   const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-07");
+      folly::IOBuf::copyBuffer("HPKE-v1");
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
@@ -245,6 +245,7 @@ TEST(EncryptionTest, TestValidEncryptClientHello) {
   auto context = setupWithDecap(
       hpke::Mode::Base,
       clientECH.enc->coalesce(),
+      folly::none,
       std::move(hpkePrefix),
       folly::none,
       std::move(setupParam));
@@ -322,7 +323,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   hpkePrefix->prependChain(encode(getECHConfig()));
 
   const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-07");
+      folly::IOBuf::copyBuffer("HPKE-v1");
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
@@ -349,6 +350,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsECH) {
   auto context = setupWithDecap(
       hpke::Mode::Base,
       clientECH.enc->coalesce(),
+      folly::none,
       std::move(hpkePrefix),
       folly::none,
       std::move(setupParam));
@@ -383,7 +385,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   hpkePrefix->prependChain(encode(getECHConfig()));
 
   const std::unique_ptr<folly::IOBuf> prefix =
-      folly::IOBuf::copyBuffer("HPKE-07");
+      folly::IOBuf::copyBuffer("HPKE-v1");
 
   auto kex = std::make_unique<MockOpenSSLECKeyExchange256>();
   kex->setPrivateKey(getPrivateKey(kP256Key));
@@ -410,6 +412,7 @@ TEST(EncryptionTest, TestInnerClientHelloOuterExtensionsContainsDupes) {
   auto context = setupWithDecap(
       hpke::Mode::Base,
       clientECH.enc->coalesce(),
+      folly::none,
       std::move(hpkePrefix),
       folly::none,
       std::move(setupParam));

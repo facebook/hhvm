@@ -10,6 +10,7 @@
 
 #include <fizz/crypto/Sha256.h>
 #include <fizz/crypto/Sha384.h>
+#include <fizz/crypto/Sha512.h>
 #include <fizz/crypto/aead/AESGCM128.h>
 #include <fizz/crypto/aead/AESGCM256.h>
 #include <fizz/crypto/aead/ChaCha20Poly1305.h>
@@ -55,6 +56,8 @@ KDFId getKDFId(HashFunction hash) {
       return KDFId::Sha256;
     case HashFunction::Sha384:
       return KDFId::Sha384;
+    case HashFunction::Sha512:
+      return KDFId::Sha512;
     default:
       throw std::runtime_error("kdf: not implemented");
   }
@@ -88,12 +91,29 @@ NamedGroup getKexGroup(KEMId kemId) {
   }
 }
 
+HashFunction getHashFunctionForKEM(KEMId kemId) {
+  switch (kemId) {
+    case KEMId::secp256r1:
+      return HashFunction::Sha256;
+    case KEMId::secp384r1:
+      return HashFunction::Sha384;
+    case KEMId::secp521r1:
+      return HashFunction::Sha512;
+    case KEMId::x25519:
+      return HashFunction::Sha256;
+    default:
+      throw std::runtime_error("can't make KEM hash function: not implemented");
+  }
+}
+
 HashFunction getHashFunction(KDFId kdfId) {
   switch (kdfId) {
     case KDFId::Sha256:
       return HashFunction::Sha256;
     case KDFId::Sha384:
       return HashFunction::Sha384;
+    case KDFId::Sha512:
+      return HashFunction::Sha512;
     default:
       throw std::runtime_error("kdf: not implemented");
   }
@@ -124,6 +144,10 @@ std::unique_ptr<Hkdf> makeHpkeHkdf(
       return std::make_unique<Hkdf>(
           std::move(prefix),
           std::make_unique<HkdfImpl>(HkdfImpl::create<Sha384>()));
+    case KDFId::Sha512:
+      return std::make_unique<Hkdf>(
+          std::move(prefix),
+          std::make_unique<HkdfImpl>(HkdfImpl::create<Sha512>()));
     default:
       throw std::runtime_error("hkdf: not implemented");
   }

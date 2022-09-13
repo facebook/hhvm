@@ -134,7 +134,7 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
 
   // Returns the proper patch object for the given field.
   template <typename Id>
-  decltype(auto) patch() {
+  decltype(auto) patchIfSet() {
     return ensured<Id>() ? patchAfter<Id>() : patchPrior<Id>();
   }
 

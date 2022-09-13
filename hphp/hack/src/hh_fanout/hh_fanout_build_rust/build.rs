@@ -14,13 +14,13 @@ use std::io::BufReader;
 use std::io::Read;
 use std::path::Path;
 
+use dep_graph_delta::DepGraphDelta;
 use depgraph::dep::Dep;
 use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
 use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
 use depgraph_writer::ShardedLookupTableWriter;
-use deps_rust::DepGraphDelta;
 use log::info;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use parking_lot::Mutex;

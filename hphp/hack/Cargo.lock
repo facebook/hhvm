@@ -943,6 +943,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "dep_graph_delta"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+]
+
+[[package]]
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
@@ -966,6 +973,7 @@ dependencies = [
 name = "deps_rust"
 version = "0.0.0"
 dependencies = [
+ "dep_graph_delta",
  "depgraph",
  "hh_fanout_rust_ffi",
  "ocamlrep",
@@ -1630,9 +1638,9 @@ dependencies = [
 name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
+ "dep_graph_delta",
  "depgraph",
  "depgraph_writer",
- "deps_rust",
  "env_logger 0.7.1",
  "log",
  "ocamlrep_ocamlpool",

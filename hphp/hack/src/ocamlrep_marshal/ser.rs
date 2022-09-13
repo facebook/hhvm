@@ -63,8 +63,7 @@ const EXTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
 #[derive(Copy, Clone)]
 #[repr(C)]
 struct ExternItem<'a> {
-    v: &'a Value<'a>,
-    count: usize,
+    fields: &'a [Value<'a>],
 }
 
 // Hash table to record already-marshaled objects and their positions
@@ -502,17 +501,17 @@ impl<'a> State<'a> {
             if v.is_immediate() {
                 self.extern_int(v.as_int().unwrap());
             } else {
-                let hd: Header = v.as_block().unwrap().header();
-                let tag: u8 = hd.tag();
-                let sz: usize = hd.size();
+                let b = v.as_block().unwrap();
+                let tag = b.tag();
+                let sz = b.size();
 
                 if tag == ocamlrep::FORWARD_TAG {
-                    let f: Value<'a> = v.field(0).unwrap();
-                    if f.is_block()
-                        && (f.as_block().unwrap().tag() == ocamlrep::FORWARD_TAG
-                            || f.as_block().unwrap().tag() == ocamlrep::LAZY_TAG
-                            || f.as_block().unwrap().tag() == ocamlrep::FORCING_TAG
-                            || f.as_block().unwrap().tag() == ocamlrep::DOUBLE_TAG)
+                    let f = b[0];
+                    if let Some(f) = f.as_block()
+                        && (f.tag() == ocamlrep::FORWARD_TAG
+                            || f.tag() == ocamlrep::LAZY_TAG
+                            || f.tag() == ocamlrep::FORCING_TAG
+                            || f.tag() == ocamlrep::DOUBLE_TAG)
                     {
                         // Do not short-circuit the pointer.
                     } else {
@@ -587,8 +586,7 @@ impl<'a> State<'a> {
                                         self.stack_overflow();
                                     }
                                     self.stack.push(ExternItem {
-                                        v: v.field_ref(1).unwrap(),
-                                        count: sz - 1,
+                                        fields: &b.as_values().unwrap()[1..],
                                     });
                                 }
                                 // Continue serialization with the first field
@@ -603,15 +601,9 @@ impl<'a> State<'a> {
 
             // Pop one more item to marshal, if any
             if let Some(item) = self.stack.last_mut() {
-                let fresh8 = item.v;
-                // SAFETY: the stack contains items with nonzero `item.count`,
-                // where `item.v` points to a field in a valid block with
-                // `item.count` fields after it. This addition (along with
-                // `item.count -= 1` below) moves us to the next field.
-                item.v = unsafe { &*(item.v as *const Value<'a>).add(1) as &'a Value<'a> };
-                v = *fresh8;
-                item.count -= 1;
-                if item.count == 0 {
+                v = item.fields[0];
+                item.fields = &item.fields[1..];
+                if item.fields.is_empty() {
                     self.stack.pop();
                 }
             } else {

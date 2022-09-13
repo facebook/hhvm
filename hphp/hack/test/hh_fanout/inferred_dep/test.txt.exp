@@ -47,7 +47,7 @@ Fanout calculation on line 55
 {'cursor': 'cursor,4,integration-test,<hash-redacted-for-test>',
  'debug': {'dependencies': [{'hash': '-3688026448255553557',
                              'variant': 'Type Foo'}],
-           'fanout_dependents': ['3296325908251159198', '-3688026448255553557'],
+           'fanout_dependents': ['-3688026448255553557', '3296325908251159198'],
            'relevant_dep_edges': [{'dependency': {'hash': '416052434339636281',
                                                   'variant': 'Type Baz'},
                                    'dependent': {'hash': '-3688026448255553557',

@@ -14,9 +14,6 @@ use std::sync::Mutex;
 pub use depgraph::reader::Dep;
 use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
-use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
-use no_pos_hash::NoPosHash;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::Value;
@@ -26,8 +23,6 @@ use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::OnceCell;
 use rpds::HashTrieSet;
-use serde::Deserialize;
-use serde::Serialize;
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -56,22 +51,7 @@ static DEPGRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
 static DEPGRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
 
 /// Which dependency graph format are we using?
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 #[repr(C, u8)]
 // CAUTION: This must be kept in sync with typing_deps_mode.ml
 pub enum TypingDepsMode {
@@ -91,6 +71,10 @@ pub enum TypingDepsMode {
         graph: Option<String>,
         new_edges_dir: String,
         human_readable_dep_map_dir: Option<String>,
+    },
+    /// Mode that keeps track of edges via hh_fanout's Rust API
+    HhFanoutRustMode {
+        hh_fanout: ocamlrep_custom::Custom<hh_fanout_rust_ffi::HhFanoutRustFfi>,
     },
 }
 
@@ -192,6 +176,9 @@ impl UnsafeDepGraph {
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
                     let depgraph = UnsafeDepGraph::new(opener)?;
                     Ok(Some(depgraph))
+                }
+                TypingDepsMode::HhFanoutRustMode { hh_fanout: _ } => {
+                    todo!()
                 }
             }
         })?;

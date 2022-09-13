@@ -667,6 +667,40 @@ end = struct
     hh_save_custom_dep_graph_save_delta source dest
 end
 
+module HhFanout : sig
+  val add_idep :
+    Hh_fanout_rust_ffi_externs.hh_fanout_rust_ffi ->
+    Dep.dependent Dep.variant ->
+    Dep.dependency Dep.variant ->
+    unit
+end = struct
+  let current_buffer : Hh_fanout_rust_ffi_externs.edges_buffer option ref =
+    ref None
+
+  let get_buffer_or_start hh_fanout : Hh_fanout_rust_ffi_externs.edges_buffer =
+    match !current_buffer with
+    | None ->
+      let buffer = Hh_fanout_rust_ffi_externs.start_edges hh_fanout in
+      let () = current_buffer := Some buffer in
+      buffer
+    | Some buffer -> buffer
+
+  let add_idep hh_fanout dependent dependency =
+    let buffer = get_buffer_or_start hh_fanout in
+    let dependent_int64 = dependent |> Dep.make |> Dep.to_int64 in
+    let add_edge_result =
+      Hh_fanout_rust_ffi_externs.add_edge
+        hh_fanout
+        ~dependent:dependent_int64
+        ~dependency:(dependency |> Dep.make |> Dep.to_int64)
+        buffer (* TODO(toyang): use an actual checksum *)
+        ~expected_checksum:(Int64.of_int 42)
+    in
+    match add_edge_result with
+    | Ok edges_buffer -> current_buffer := Some edges_buffer
+    | Error _hh_fanout_error -> failwith "TODO handle errors from hh_fanout"
+end
+
 (** Registers Rust custom types with the OCaml runtime, supporting deserialization *)
 let () = CustomGraph.hh_custom_dep_graph_register_custom_types ()
 
@@ -740,6 +774,7 @@ module Telemetry = struct
     match mode with
     | InMemoryMode _ -> Some (CustomGraph.dep_graph_delta_num_edges ())
     | SaveToDiskMode _ -> None
+    | HhFanoutRustMode _ -> None
 end
 
 type dep_edge = CustomGraph.dep_edge
@@ -759,11 +794,15 @@ let allow_dependency_table_reads mode flag =
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.allow_dependency_table_reads flag
+    (* TODO(toyang): I don't think the re-architecture will have similar staleness issues. *)
+  | HhFanoutRustMode _ -> true
 
 let add_idep mode dependent dependency =
   match mode with
   | InMemoryMode _ -> CustomGraph.add_idep mode dependent dependency
   | SaveToDiskMode _ -> SaveCustomGraph.add_idep mode dependent dependency
+  | HhFanoutRustMode { hh_fanout } ->
+    HhFanout.add_idep hh_fanout dependent dependency
 
 let idep_exists mode dependent dependency =
   match mode with
@@ -787,6 +826,7 @@ let flush_ideps_batch mode : dep_edges =
     SaveCustomGraph.filter_discovered_deps_batch ~flush:true mode;
     SaveHumanReadableDepMap.export_to_disk ~flush:true mode;
     None
+  | HhFanoutRustMode _ -> failwith "TODO"
 
 let merge_dep_edges (x : dep_edges) (y : dep_edges) : dep_edges =
   match (x, y) with
@@ -803,17 +843,20 @@ let save_discovered_edges mode ~dest ~reset_state_after_saving =
   | InMemoryMode _ -> CustomGraph.save_delta dest reset_state_after_saving
   | SaveToDiskMode _ ->
     failwith "save_discovered_edges not supported for SaveToDiskMode"
+  | HhFanoutRustMode _ -> failwith "TODO"
 
 let load_discovered_edges mode source =
   match mode with
   | InMemoryMode _ -> CustomGraph.load_delta mode source
   | SaveToDiskMode _ -> SaveCustomGraph.save_delta mode ~source
+  | HhFanoutRustMode _ -> failwith "TODO"
 
 let get_ideps_from_hash mode hash =
   match mode with
   | InMemoryMode _
   | SaveToDiskMode _ ->
     CustomGraph.get_ideps_from_hash mode hash
+  | HhFanoutRustMode _ -> failwith "TODO"
 
 let get_ideps mode dependency = get_ideps_from_hash mode (Dep.make dependency)
 

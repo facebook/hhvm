@@ -967,14 +967,12 @@ name = "deps_rust"
 version = "0.0.0"
 dependencies = [
  "depgraph",
- "eq_modulo_pos",
- "no_pos_hash",
+ "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
  "ocamlrep_derive",
  "once_cell",
  "rpds",
- "serde",
 ]
 
 [[package]]
@@ -1661,6 +1659,19 @@ dependencies = [
  "json",
  "log",
  "ocamlrep_ocamlpool",
+]
+
+[[package]]
+name = "hh_fanout_rust_ffi"
+version = "0.0.0"
+dependencies = [
+ "hh24_types",
+ "ocamlrep",
+ "ocamlrep_caml_builtins",
+ "ocamlrep_custom",
+ "ocamlrep_derive",
+ "ocamlrep_ocamlpool",
+ "rpds",
 ]
 
 [[package]]

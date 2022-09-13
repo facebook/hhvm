@@ -101,13 +101,13 @@ const fn Threshold(sz: usize) -> usize {
 // Accessing bitvectors
 
 #[inline]
-unsafe fn bitvect_test(bv: *mut usize, i: usize) -> usize {
-    *bv.add(i / Bits_word) & (1 << (i & (Bits_word - 1)))
+fn bitvect_test(bv: &[usize], i: usize) -> usize {
+    bv[i / Bits_word] & (1 << (i & (Bits_word - 1)))
 }
 
 #[inline]
-unsafe fn bitvect_set(bv: *mut usize, i: usize) {
-    *bv.add(i / Bits_word) |= 1 << (i & (Bits_word - 1));
+fn bitvect_set(bv: &mut [usize], i: usize) {
+    bv[i / Bits_word] |= 1 << (i & (Bits_word - 1));
 }
 
 // Conversion to big-endian
@@ -217,18 +217,16 @@ impl<'a> State<'a> {
         );
 
         // Insert every entry of the old table in the new table
-        let old_present = old.present.as_mut_ptr();
         let old_entries = old.entries.as_mut_ptr();
-        let new_present = self.pos_table.present.as_mut_ptr();
         let new_entries = self.pos_table.entries.as_mut_ptr();
         i = 0;
         while i < old.size {
-            if bitvect_test(old_present, i) != 0 {
+            if bitvect_test(&old.present, i) != 0 {
                 h = Hash((*old_entries.add(i)).obj, self.pos_table.shift);
-                while bitvect_test(new_present, h) != 0 {
+                while bitvect_test(&self.pos_table.present, h) != 0 {
                     h = (h + 1) & self.pos_table.mask
                 }
-                bitvect_set(new_present, h);
+                bitvect_set(&mut self.pos_table.present, h);
                 *new_entries.add(h) = *old_entries.add(i)
             }
             i += 1
@@ -248,7 +246,7 @@ impl<'a> State<'a> {
     ) -> bool {
         let mut h: usize = Hash(obj, self.pos_table.shift);
         loop {
-            if bitvect_test(self.pos_table.present.as_mut_ptr(), h) == 0 {
+            if bitvect_test(&self.pos_table.present, h) == 0 {
                 *h_out = h;
                 return false;
             }
@@ -268,7 +266,7 @@ impl<'a> State<'a> {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
-        bitvect_set(self.pos_table.present.as_mut_ptr(), h);
+        bitvect_set(&mut self.pos_table.present, h);
         (*self.pos_table.entries.as_mut_ptr().add(h)).obj = obj;
         (*self.pos_table.entries.as_mut_ptr().add(h)).pos = self.obj_counter;
         self.obj_counter += 1;

@@ -347,7 +347,7 @@ impl<'a> State<'a> {
 
     /// Marshaling integers
     #[inline]
-    unsafe fn extern_int(&mut self, n: isize) {
+    fn extern_int(&mut self, n: isize) {
         if (0..0x40).contains(&n) {
             self.write(PREFIX_SMALL_INT + n as u8);
         } else if (-(1 << 7)..(1 << 7)).contains(&n) {
@@ -366,7 +366,7 @@ impl<'a> State<'a> {
 
     /// Marshaling references to previously-marshaled blocks
     #[inline]
-    unsafe fn extern_shared_reference(&mut self, d: usize) {
+    fn extern_shared_reference(&mut self, d: usize) {
         if d < 0x100 {
             self.writecode8(CODE_SHARED8, d as i8);
         } else if d < 0x10000 {
@@ -380,7 +380,7 @@ impl<'a> State<'a> {
 
     /// Marshaling block headers
     #[inline]
-    unsafe fn extern_header(&mut self, sz: usize, tag: u8) {
+    fn extern_header(&mut self, sz: usize, tag: u8) {
         if tag < 16 && sz < 8 {
             self.write(PREFIX_SMALL_BLOCK + tag + ((sz as u8) << 4));
         } else {
@@ -408,7 +408,7 @@ impl<'a> State<'a> {
     }
 
     #[inline]
-    unsafe fn extern_string(&mut self, bytes: &'a [u8]) {
+    fn extern_string(&mut self, bytes: &'a [u8]) {
         let len = bytes.len();
         if len < 0x20 {
             self.write(PREFIX_SMALL_STRING + len as u8);
@@ -429,14 +429,14 @@ impl<'a> State<'a> {
 
     /// Marshaling FP numbers
     #[inline]
-    unsafe fn extern_double(&mut self, v: f64) {
+    fn extern_double(&mut self, v: f64) {
         self.write(CODE_DOUBLE_NATIVE);
         self.writeblock_float8(&[v]);
     }
 
     /// Marshaling FP arrays
     #[inline]
-    unsafe fn extern_double_array(&mut self, slice: &[f64]) {
+    fn extern_double_array(&mut self, slice: &[f64]) {
         let nfloats = slice.len();
         if nfloats < 0x100 {
             self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as i8);

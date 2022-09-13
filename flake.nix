@@ -32,6 +32,7 @@
                 # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
                 pkgs.darwin.system_cmds
               ];
+              __impure = hhvm.__impure;
             }
             ''
               set -ex

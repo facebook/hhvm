@@ -5,6 +5,7 @@
 
 pub mod dump_expr_tree;
 
+use std::collections::BTreeMap;
 use std::fmt;
 use std::time::Duration;
 use std::time::Instant;
@@ -16,6 +17,7 @@ use aast_parser::AastParser;
 use aast_parser::Error as AastError;
 use anyhow::anyhow;
 use anyhow::Result;
+use bstr::BString;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
@@ -51,8 +53,8 @@ use types::readonly_nonlocal_infer;
 #[derive(Debug)]
 pub struct NativeEnv {
     pub filepath: RelativePath,
-    pub aliased_namespaces: String,
-    pub include_roots: String,
+    pub aliased_namespaces: BTreeMap<String, String>,
+    pub include_roots: BTreeMap<BString, BString>,
     pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub hhbc_flags: HhbcFlags,
@@ -64,8 +66,8 @@ impl Default for NativeEnv {
     fn default() -> Self {
         Self {
             filepath: RelativePath::make(Prefix::Dummy, Default::default()),
-            aliased_namespaces: "".into(),
-            include_roots: "".into(),
+            aliased_namespaces: Default::default(),
+            include_roots: Default::default(),
             emit_class_pointers: 0,
             check_int_overflow: 0,
             hhbc_flags: HhbcFlags::default(),
@@ -382,27 +384,20 @@ impl ParserFlags {
 }
 
 impl NativeEnv {
-    fn to_options(native_env: &NativeEnv) -> Options {
-        let hhbc_flags = &native_env.hhbc_flags;
-        let config = [
-            native_env.aliased_namespaces.as_str(),
-            native_env.include_roots.as_str(),
-        ];
-        let opts = Options::from_configs(&config).unwrap();
-        let hhvm = Hhvm {
-            aliased_namespaces: opts.hhvm.aliased_namespaces,
-            include_roots: opts.hhvm.include_roots,
-            flags: hhbc_flags.to_hhvm_flags(),
-            emit_class_pointers: Arg::new(native_env.emit_class_pointers.to_string()),
-            hack_lang: HackLang {
-                flags: native_env.parser_flags.to_lang_flags(),
-                check_int_overflow: Arg::new(native_env.check_int_overflow.to_string()),
-            },
-        };
+    fn to_options(&self) -> Options {
         Options {
-            hhvm,
-            php7_flags: hhbc_flags.to_php7_flags(),
-            repo_flags: hhbc_flags.to_repo_flags(),
+            hhvm: Hhvm {
+                aliased_namespaces: Arg::new(self.aliased_namespaces.clone()),
+                include_roots: Arg::new(self.include_roots.clone()),
+                flags: self.hhbc_flags.to_hhvm_flags(),
+                emit_class_pointers: Arg::new(self.emit_class_pointers.to_string()),
+                hack_lang: HackLang {
+                    flags: self.parser_flags.to_lang_flags(),
+                    check_int_overflow: Arg::new(self.check_int_overflow.to_string()),
+                },
+            },
+            php7_flags: self.hhbc_flags.to_php7_flags(),
+            repo_flags: self.hhbc_flags.to_repo_flags(),
             ..Default::default()
         }
     }

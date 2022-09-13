@@ -38,7 +38,6 @@
 
 mod options_cli;
 
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
@@ -49,12 +48,10 @@ use bitflags::bitflags;
 use bstr::BString;
 use bstr::ByteSlice;
 use hhbc::IncludePath;
-use lru::LruCache;
 use options_serde::prefix_all;
 use oxidized::relative_path::RelativePath;
 use serde_derive::Deserialize;
 use serde_derive::Serialize;
-use serde_json::json;
 use serde_json::value::Value as Json;
 
 /// Provides uniform access to bitflags-generated structs in JSON SerDe
@@ -271,7 +268,7 @@ mod serde_bstr_btree {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq)]
 pub struct Hhvm {
     #[serde(default)]
-    pub aliased_namespaces: Arg<BTreeMapOrEmptyVec<String, String>>,
+    pub aliased_namespaces: Arg<BTreeMap<String, String>>,
 
     // TODO(leoo) change to HashMap if order doesn't matter
     #[serde(default, with = "serde_bstr_btree")]
@@ -305,11 +302,10 @@ impl Default for Hhvm {
 
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        let x = match self.aliased_namespaces.get() {
-            BTreeMapOrEmptyVec::Nonempty(m) => Some(m.iter().map(|(x, y)| (x.clone(), y.clone()))),
-            _ => None,
-        };
-        x.into_iter().flatten()
+        self.aliased_namespaces
+            .get()
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
     }
 }
 
@@ -517,19 +513,11 @@ mod defaults {
     }
 }
 
-thread_local! {
-    static CACHE: RefCell<Cache> = {
-        let hasher = fnv::FnvBuildHasher::default();
-        RefCell::new(LruCache::with_hasher(100, hasher))
-    }
-}
-
-pub(crate) type Cache = LruCache<Vec<String>, Options, fnv::FnvBuildHasher>;
-
 impl Options {
     /// Merges src JSON into dst JSON, recursively adding or overwriting existing entries.
     /// This method cleverly avoids the need to represent each option as Option<Type>,
     /// since only the ones that are specified by JSON will be actually overridden.
+    #[cfg(test)]
     fn merge(dst: &mut Json, src: &Json) {
         match (dst, src) {
             (&mut Json::Object(ref mut dst), &Json::Object(ref src)) => {
@@ -541,36 +529,6 @@ impl Options {
                 *dst = src.clone();
             }
         }
-    }
-
-    pub fn from_configs(jsons: &[&str]) -> Result<Self, String> {
-        CACHE.with(|cache| {
-            let key: Vec<String> = jsons.iter().map(|&x| x.to_string()).collect();
-            let mut cache = cache.borrow_mut();
-            if let Some(o) = cache.get_mut(&key) {
-                Ok(o.clone())
-            } else {
-                let o = Options::from_configs_(&key)?;
-                cache.put(key, o.clone());
-                Ok(o)
-            }
-        })
-    }
-
-    fn from_configs_<S: AsRef<str>>(jsons: &[S]) -> Result<Self, String> {
-        let mut merged = json!({});
-        for json in jsons {
-            let json: &str = json.as_ref();
-            if json.is_empty() {
-                continue;
-            }
-            Self::merge(
-                &mut merged,
-                &serde_json::from_str(json).map_err(|e| e.to_string())?,
-            );
-        }
-        let opts: serde_json::Result<Self> = serde_json::value::from_value(merged);
-        opts.map_err(|e| e.to_string())
     }
 
     pub fn array_provenance(&self) -> bool {
@@ -683,54 +641,10 @@ fn deserialize_flags<'de, D: Deserializer<'de>, P: PrefixedFlags>(
     deserializer.deserialize_map(Phantom(PhantomData::<P>))
 }
 
-/// Wrapper that serves as a workaround for a bug in the HHVM's serialization
-/// empty JSON objects ({}) are silently converted to [] (darray vs varray):
-/// - (de)serialize [] as Empty (instead of {});
-/// - (de)serialize missing values as [].
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug, Clone)]
-#[serde(untagged)]
-pub enum BTreeMapOrEmptyVec<K: Ord, V> {
-    Nonempty(BTreeMap<K, V>),
-    Empty(Vec<V>),
-}
-
-impl<K: Ord, V> BTreeMapOrEmptyVec<K, V> {
-    pub fn as_map(&self) -> Option<&BTreeMap<K, V>> {
-        match self {
-            BTreeMapOrEmptyVec::Nonempty(m) => Some(m),
-            _ => None,
-        }
-    }
-}
-
-impl<K: Ord, V> From<BTreeMapOrEmptyVec<K, V>> for BTreeMap<K, V> {
-    fn from(m: BTreeMapOrEmptyVec<K, V>) -> Self {
-        match m {
-            BTreeMapOrEmptyVec::Nonempty(m) => m,
-            _ => BTreeMap::new(),
-        }
-    }
-}
-
-impl<K: Ord, V> From<BTreeMap<K, V>> for BTreeMapOrEmptyVec<K, V> {
-    fn from(m: BTreeMap<K, V>) -> Self {
-        if m.is_empty() {
-            BTreeMapOrEmptyVec::Empty(vec![])
-        } else {
-            BTreeMapOrEmptyVec::Nonempty(m)
-        }
-    }
-}
-
-impl<K: Ord, V> Default for BTreeMapOrEmptyVec<K, V> {
-    fn default() -> Self {
-        BTreeMapOrEmptyVec::Empty(vec![])
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
+    use serde_json::json;
 
     use super::*; // make assert_eq print huge diffs more human-readable
 
@@ -946,20 +860,11 @@ mod tests {
             "hhvm.aliased_namespaces": { "global_value": {"ns1": "ns2"} }
         }))
         .unwrap();
-        assert_eq!(act.hhvm.aliased_namespaces.get().as_map().unwrap(), &{
+        assert_eq!(act.hhvm.aliased_namespaces.get(), &{
             let mut m = BTreeMap::new();
             m.insert("ns1".to_owned(), "ns2".to_owned());
             m
         },);
-    }
-
-    #[test]
-    fn test_options_map_str_str_as_empty_array_json_de() {
-        let act: Options = serde_json::value::from_value(json!({
-            "hhvm.aliased_namespaces": { "global_value": [] }
-        }))
-        .unwrap();
-        assert_eq!(act.hhvm.aliased_namespaces.get().as_map(), None);
     }
 
     #[test]
@@ -990,35 +895,6 @@ mod tests {
     }
 
     #[test]
-    fn test_options_de_multiple_jsons() {
-        let jsons: [String; 2] = [
-            json!({
-                // override an options from 1 to 0 in first JSON,
-                "hhvm.hack.lang.enable_enum_classes": { "global_value": false },
-            })
-            .to_string(),
-            json!({
-                // override another option from 0 to 1 in second JSON for the first time
-                "hhvm.hack.lang.disable_xhp_element_mangling": { "global_value": true },
-            })
-            .to_string(),
-        ];
-        let act = Options::from_configs_(&jsons).unwrap();
-        assert!(
-            act.hhvm
-                .hack_lang
-                .flags
-                .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING)
-        );
-        assert!(
-            !act.hhvm
-                .hack_lang
-                .flags
-                .contains(LangFlags::ENABLE_ENUM_CLASSES)
-        );
-    }
-
-    #[test]
     fn test_options_de_regression_boolish_parse_on_unrelated_opt() {
         // Note: this fails if bool-looking options are too eagerly parsed
         // (i.e., before they're are looked by JSON key/name and match a flag)
@@ -1027,78 +903,6 @@ mod tests {
              "hhvm.only.opt2": { "global_value": "" },
         }))
         .expect("boolish-parsing logic wrongly triggered");
-    }
-
-    #[test]
-    fn test_options_de_untyped_global_value_no_crash() {
-        let res: Result<Options, String> = Options::from_configs(
-            // try parsing an HHVM option whose layout is none of the
-            // typed variants of GlobalValue, i.e., a string-to-int map
-            &[r#"{
-            "hhvm.semr_thread_overrides": {
-              "global_value": {
-                "17":160,
-                "14":300,
-                "0":320
-              },
-              "local_value": { "4":300 },
-                "access":4
-              }
-                 }"#],
-        );
-        assert_eq!(res.err(), None);
-    }
-
-    #[test]
-    fn test_options_de_empty_configs_skipped_no_crash() {
-        let res: Result<Options, String> = Options::from_configs_(
-            // a subset (only 30/5K lines) of the real config passed by HHVM
-            &[
-                "", // this should be skipped (it's an invalid JSON)
-                r#"
-          {
-            "hhvm.trusted_db_path": {
-              "access": 4,
-              "local_value": "",
-              "global_value": ""
-            },
-            "hhvm.query": {
-              "access": 4,
-              "local_value": "",
-              "global_value": ""
-            },
-            "hhvm.php7.ltr_assign": {
-              "access": 4,
-              "local_value": "0",
-              "global_value": "0"
-            },
-            "hhvm.aliased_namespaces": {
-              "access": 4,
-              "local_value": {
-                "C": "HH\\Lib\\C"
-              },
-              "global_value": {
-                "Vec": "HH\\Lib\\Vec"
-              }
-            }
-          }
-          "#,
-                r#"
-          {
-            "hhvm.include_roots": {
-              "global_value": {}
-            }
-          }"#,
-            ],
-        );
-        assert_eq!(res.err(), None);
-    }
-
-    #[test]
-    fn default_eq_json_default() {
-        let plain = Options::default();
-        let from_json = Options::from_configs(&[]).unwrap();
-        assert_eq!(plain, from_json);
     }
 }
 

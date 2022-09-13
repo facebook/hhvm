@@ -39,14 +39,19 @@ pub mod compile_ffi {
         decl_provider: usize,
 
         filepath: String,
-        aliased_namespaces: String,
-        include_roots: String,
+        aliased_namespaces: Vec<StringMapEntry>,
+        include_roots: Vec<StringMapEntry>,
         emit_class_pointers: i32,
         check_int_overflow: i32,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
         flags: EnvFlags,
+    }
+
+    struct StringMapEntry {
+        key: String,
+        value: String,
     }
 
     /// compiler::EnvFlags exposed to C++
@@ -87,7 +92,7 @@ pub mod compile_ffi {
     }
 
     struct DeclParserConfig {
-        aliased_namespaces: String,
+        aliased_namespaces: Vec<StringMapEntry>,
         disable_xhp_element_mangling: bool,
         interpret_soft_types_as_like_types: bool,
         allow_new_attribute_syntax: bool,
@@ -227,8 +232,12 @@ impl compile_ffi::NativeEnv {
                 Prefix::Dummy,
                 PathBuf::from(OsStr::from_bytes(self.filepath.as_bytes())),
             ),
-            aliased_namespaces: self.aliased_namespaces.clone(),
-            include_roots: self.include_roots.clone(),
+            aliased_namespaces: (self.aliased_namespaces.iter())
+                .map(|e| (e.key.clone(), e.value.clone()))
+                .collect(),
+            include_roots: (self.include_roots.iter())
+                .map(|e| (e.key.clone().into(), e.value.clone().into()))
+                .collect(),
             emit_class_pointers: self.emit_class_pointers,
             check_int_overflow: self.check_int_overflow,
             hhbc_flags: HhbcFlags {
@@ -330,13 +339,10 @@ pub fn direct_decl_parse(
     filename: &CxxString,
     text: &CxxString,
 ) -> compile_ffi::DeclResult {
-    let options = options::Options::from_configs(&[&config.aliased_namespaces]).unwrap();
-    let auto_namespace_map = match options.hhvm.aliased_namespaces.get().as_map() {
-        Some(m) => Vec::from_iter(m.iter().map(|(k, v)| (k.to_owned(), v.to_owned()))),
-        None => Vec::new(),
-    };
     let decl_opts = DeclParserOptions {
-        auto_namespace_map,
+        auto_namespace_map: (config.aliased_namespaces.iter())
+            .map(|e| (e.key.clone(), e.value.clone()))
+            .collect(),
         disable_xhp_element_mangling: config.disable_xhp_element_mangling,
         interpret_soft_types_as_like_types: config.interpret_soft_types_as_like_types,
         allow_new_attribute_syntax: config.allow_new_attribute_syntax,

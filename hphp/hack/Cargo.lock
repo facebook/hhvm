@@ -509,6 +509,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
+ "bstr",
  "bumpalo",
  "bytecode_printer",
  "clap 3.2.17",
@@ -552,7 +553,6 @@ dependencies = [
  "libc",
  "no_pos_hash",
  "ocamlrep",
- "options",
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
@@ -2034,15 +2034,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "lru"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32613e41de4c47ab04970c348ca7ae7382cf116625755af070b008a15516a889"
-dependencies = [
- "hashbrown",
-]
-
-[[package]]
 name = "lz4"
 version = "1.23.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2415,10 +2406,8 @@ dependencies = [
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "fnv",
  "hhbc",
  "lazy_static",
- "lru",
  "options_serde",
  "oxidized",
  "pretty_assertions",

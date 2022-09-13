@@ -5,6 +5,14 @@
     "cpp": "thrift/annotation/cpp.thrift",
     "thrift": "thrift/annotation/thrift.thrift"
   },
+  "typedefs": {
+      "MyInteger": {
+        "name": "MyInteger",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 117
+      }
+  },
   "enumerations" :
   {
       "MyEnum" : {

@@ -6,6 +6,17 @@
     "java": "com.facebook.thrift.annotation_deprecated",
     "py": "thrift.annotation.scope",
     "py.asyncio": "facebook_thrift_asyncio.annotation.scope"
+  },
+  "typedefs": {
+      "Enum": {
+        "name": "Enum",
+        "type": {
+  "type" : "struct",
+  "name" : "FbthriftInternalEnum"
+},
+        "is_exception": false,
+        "lineno": 69
+      }
   },  "structs" :
   {
       "Program" : {

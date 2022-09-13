@@ -218,6 +218,34 @@ class json_experimental_field : public mstch_field {
   source_manager& source_mgr_;
 };
 
+class json_experimental_typedef : public mstch_typedef {
+ public:
+  json_experimental_typedef(
+      const t_typedef* t,
+      mstch_context& ctx,
+      mstch_element_position pos,
+      source_manager* sm)
+      : mstch_typedef(t, ctx, pos), source_mgr_(*sm) {
+    register_methods(
+        this,
+        {
+            {"typedef:lineno", &json_experimental_typedef::get_lineno},
+            {"typedef:docstring?", &json_experimental_typedef::has_docstring},
+            {"typedef:docstring", &json_experimental_typedef::get_docstring},
+            {"typedef:exception?", &json_experimental_typedef::is_exception},
+        });
+  }
+  mstch::node get_lineno() {
+    return compiler::get_lineno(*typedef_, source_mgr_);
+  }
+  mstch::node has_docstring() { return typedef_->has_doc(); }
+  mstch::node get_docstring() { return json_quote_ascii(typedef_->get_doc()); }
+  mstch::node is_exception() { return typedef_->is_exception(); }
+
+ private:
+  source_manager& source_mgr_;
+};
+
 class json_experimental_enum : public mstch_enum {
  public:
   json_experimental_enum(
@@ -384,6 +412,7 @@ void t_json_experimental_generator::set_mstch_factories() {
   mstch_context_.add<json_experimental_enum>(&source_mgr_);
   mstch_context_.add<json_experimental_enum_value>(&source_mgr_);
   mstch_context_.add<json_experimental_const_value>(&source_mgr_);
+  mstch_context_.add<json_experimental_typedef>(&source_mgr_);
 }
 
 THRIFT_REGISTER_GENERATOR(json_experimental, "JSON_EXPERIMENTAL", "");

@@ -7,6 +7,110 @@
     "json": "thrift.test.doc",
     "py": "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"
   },
+  "typedefs": {
+      "UserId": {
+        "name": "UserId",
+        "type": "i64",
+        "is_exception": false,
+        "lineno": 56
+      },
+      "SorryNoGo": {
+        "name": "SorryNoGo",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 155
+      },
+      "TrivialMultiLine": {
+        "name": "TrivialMultiLine",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 160
+      },
+      "StandardMultiLine": {
+        "name": "StandardMultiLine",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 166
+      },
+      "LastLine": {
+        "name": "LastLine",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 171
+      },
+      "FirstAndLastLine": {
+        "name": "FirstAndLastLine",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 176
+      },
+      "IndentedTitle": {
+        "name": "IndentedTitle",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 182
+      },
+      "FirstLineIndent": {
+        "name": "FirstLineIndent",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 187
+      },
+      "CodeInComment": {
+        "name": "CodeInComment",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 194
+      },
+      "IndentedDocstring": {
+        "name": "IndentedDocstring",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 201
+      },
+      "Irregular1": {
+        "name": "Irregular1",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 206
+      },
+      "Irregular2": {
+        "name": "Irregular2",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 214
+      },
+      "Flush": {
+        "name": "Flush",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 220
+      },
+      "NoStars": {
+        "name": "NoStars",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 227
+      },
+      "TrailingWhitespace": {
+        "name": "TrailingWhitespace",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 232
+      },
+      "BigDog": {
+        "name": "BigDog",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 243
+      },
+      "TotallyDegenerate": {
+        "name": "TotallyDegenerate",
+        "type": "i32",
+        "is_exception": false,
+        "lineno": 249
+      }
+  },
   "constants": {
       "INT32CONSTANT": {
         "name": "INT32CONSTANT",

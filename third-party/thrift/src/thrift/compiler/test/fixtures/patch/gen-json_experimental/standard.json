@@ -15,6 +15,84 @@
     "py.asyncio": "apache_thrift_asyncio.standard",
     "py3": "apache.thrift.type"
   },
+  "typedefs": {
+      "ByteString": {
+        "name": "ByteString",
+        "type": "binary",
+        "is_exception": false,
+        "lineno": 49
+      },
+      "ByteBuffer": {
+        "name": "ByteBuffer",
+        "type": "binary",
+        "is_exception": false,
+        "lineno": 62
+      },
+      "Uuid": {
+        "name": "Uuid",
+        "type": "binary",
+        "is_exception": false,
+        "lineno": 94
+      },
+      "UuidString": {
+        "name": "UuidString",
+        "type": "string",
+        "is_exception": false,
+        "lineno": 108
+      },
+      "Path": {
+        "name": "Path",
+        "type": "string",
+        "is_exception": false,
+        "lineno": 114
+      },
+      "PathSegments": {
+        "name": "PathSegments",
+        "type": {
+  "type" : "list",
+  "inner_type" : "string"
+},
+        "is_exception": false,
+        "lineno": 122
+      },
+      "Domain": {
+        "name": "Domain",
+        "type": "string",
+        "is_exception": false,
+        "lineno": 130
+      },
+      "DomainLabels": {
+        "name": "DomainLabels",
+        "type": {
+  "type" : "list",
+  "inner_type" : "string"
+},
+        "is_exception": false,
+        "lineno": 138
+      },
+      "QueryString": {
+        "name": "QueryString",
+        "type": "string",
+        "is_exception": false,
+        "lineno": 148
+      },
+      "QueryArgs": {
+        "name": "QueryArgs",
+        "type": {
+  "type" : "map",
+  "key_type" : "string",
+  "value_type" : "string"
+},
+        "is_exception": false,
+        "lineno": 157
+      },
+      "Uri": {
+        "name": "Uri",
+        "type": "string",
+        "is_exception": false,
+        "lineno": 168
+      }
+  },
   "constants": {
       "minTypeHashBytes": {
         "name": "minTypeHashBytes",

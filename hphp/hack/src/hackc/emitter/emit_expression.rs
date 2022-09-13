@@ -60,7 +60,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::CompilerFlags;
 use options::HhvmFlags;
 use options::LangFlags;
 use options::Options;
@@ -4927,9 +4926,7 @@ fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
 }
 
 fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
-    e.options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::OPTIMIZE_NULL_CHECKS)
+    e.options().hack_compiler_flags.optimize_null_checks
 }
 
 fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {

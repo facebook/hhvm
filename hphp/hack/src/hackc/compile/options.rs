@@ -26,15 +26,20 @@ macro_rules! prefixed_flags {
     }
 }
 
-prefixed_flags!(
-    CompilerFlags,
-    CONSTANT_FOLDING,
-    OPTIMIZE_NULL_CHECKS,
-    RELABEL,
-);
+#[derive(Debug, Clone, PartialEq)]
+pub struct CompilerFlags {
+    pub constant_folding: bool,
+    pub optimize_null_checks: bool,
+    pub relabel: bool,
+}
+
 impl Default for CompilerFlags {
-    fn default() -> CompilerFlags {
-        CompilerFlags::CONSTANT_FOLDING | CompilerFlags::RELABEL
+    fn default() -> Self {
+        Self {
+            constant_folding: true,
+            optimize_null_checks: false,
+            relabel: true,
+        }
     }
 }
 

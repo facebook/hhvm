@@ -2938,7 +2938,6 @@ dependencies = [
  "hack_macro",
  "hhbc",
  "ocamlrep",
- "options",
  "oxidized",
  "rewrite_xml",
 ]

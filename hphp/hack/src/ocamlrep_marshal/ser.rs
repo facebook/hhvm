@@ -5,6 +5,7 @@
 // `f14c8ff3f8a164685bc24184fba84904391e378e`.
 
 use std::io::Write;
+use std::mem::MaybeUninit;
 
 use ocamlrep::Header;
 use ocamlrep::Value;
@@ -66,11 +67,13 @@ struct object_position<'a> {
 #[repr(C)]
 struct position_table<'a> {
     shift: u8,
-    size: usize,                         // size == 1 << (wordsize - shift)
-    mask: usize,                         // mask == size - 1
-    threshold: usize,                    // threshold == a fixed fraction of size
-    present: Box<[usize]>,               // [Bitvect_size(size)]
-    entries: Box<[object_position<'a>]>, // [size]
+    size: usize,           // size == 1 << (wordsize - shift)
+    mask: usize,           // mask == size - 1
+    threshold: usize,      // threshold == a fixed fraction of size
+    present: Box<[usize]>, // [Bitvect_size(size)]
+    /// SAFETY: Elements of `entries` are not initialized unless their
+    /// corresponding bit is set in `present`.
+    entries: Box<[MaybeUninit<object_position<'a>>]>, // [size]
 }
 
 const Bits_word: usize = 8 * std::mem::size_of::<usize>();
@@ -169,7 +172,7 @@ impl<'a> State<'a> {
     }
 
     /// Initialize the position table
-    unsafe fn init_position_table(&mut self) {
+    fn init_position_table(&mut self) {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
@@ -178,20 +181,23 @@ impl<'a> State<'a> {
             (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as u8;
         self.pos_table.mask = POS_TABLE_INIT_SIZE - 1;
         self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE);
-        self.pos_table.present =
-            Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
-        self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE).assume_init();
+        // SAFETY: zero is a valid value for the elements of `present`.
+        unsafe {
+            self.pos_table.present =
+                Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
+        }
+        self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE);
     }
 
     /// Grow the position table
-    unsafe fn resize_position_table(&mut self) {
+    fn resize_position_table(&mut self) {
         let new_size: usize;
         let new_shift: u8;
         let new_present: Box<[usize]>;
-        let new_entries: Box<[object_position<'a>]>;
+        let new_entries: Box<[MaybeUninit<object_position<'a>>]>;
         let mut i: usize;
         let mut h: usize;
-        let mut old: position_table<'a>;
+        let old: position_table<'a>;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
@@ -202,8 +208,11 @@ impl<'a> State<'a> {
             new_size = self.pos_table.size * 2;
             new_shift = self.pos_table.shift - 1;
         }
-        new_entries = Box::new_uninit_slice(new_size).assume_init();
-        new_present = Box::new_zeroed_slice(Bitvect_size(new_size)).assume_init();
+        new_entries = Box::new_uninit_slice(new_size);
+        // SAFETY: zero is a valid value for the elements of `present`.
+        unsafe {
+            new_present = Box::new_zeroed_slice(Bitvect_size(new_size)).assume_init();
+        }
         old = std::mem::replace(
             &mut self.pos_table,
             position_table {
@@ -217,17 +226,18 @@ impl<'a> State<'a> {
         );
 
         // Insert every entry of the old table in the new table
-        let old_entries = old.entries.as_mut_ptr();
-        let new_entries = self.pos_table.entries.as_mut_ptr();
         i = 0;
         while i < old.size {
             if bitvect_test(&old.present, i) != 0 {
-                h = Hash((*old_entries.add(i)).obj, self.pos_table.shift);
+                // SAFETY: We checked that the bit for `i` is set in
+                // `old.present`, so `entries[i]` must be initialized
+                let old_entry = unsafe { old.entries[i].assume_init() };
+                h = Hash(old_entry.obj, self.pos_table.shift);
                 while bitvect_test(&self.pos_table.present, h) != 0 {
                     h = (h + 1) & self.pos_table.mask
                 }
                 bitvect_set(&mut self.pos_table.present, h);
-                *new_entries.add(h) = *old_entries.add(i)
+                self.pos_table.entries[h] = MaybeUninit::new(old_entry);
             }
             i += 1
         }
@@ -238,20 +248,18 @@ impl<'a> State<'a> {
     /// If not, set `*h_out` to the hash value appropriate for
     /// `record_location` and return false.
     #[inline]
-    unsafe fn lookup_position(
-        &mut self,
-        obj: Value<'a>,
-        pos_out: *mut usize,
-        h_out: *mut usize,
-    ) -> bool {
+    fn lookup_position(&mut self, obj: Value<'a>, pos_out: &mut usize, h_out: &mut usize) -> bool {
         let mut h: usize = Hash(obj, self.pos_table.shift);
         loop {
             if bitvect_test(&self.pos_table.present, h) == 0 {
                 *h_out = h;
                 return false;
             }
-            if (*self.pos_table.entries.as_mut_ptr().add(h)).obj == obj {
-                *pos_out = (*self.pos_table.entries.as_mut_ptr().add(h)).pos;
+            // SAFETY: We checked that the bit for `h` is set in `present`, so
+            // `entries[h]` must be initialized
+            let entry = unsafe { self.pos_table.entries[h].assume_init_ref() };
+            if entry.obj == obj {
+                *pos_out = entry.pos;
                 return true;
             }
             h = (h + 1) & self.pos_table.mask
@@ -262,13 +270,15 @@ impl<'a> State<'a> {
     ///
     /// The [h] parameter is the index in the hash table where the object
     /// must be inserted.  It was determined during lookup.
-    unsafe fn record_location(&mut self, obj: Value<'a>, h: usize) {
+    fn record_location(&mut self, obj: Value<'a>, h: usize) {
         if self.extern_flags & NO_SHARING != 0 {
             return;
         }
         bitvect_set(&mut self.pos_table.present, h);
-        (*self.pos_table.entries.as_mut_ptr().add(h)).obj = obj;
-        (*self.pos_table.entries.as_mut_ptr().add(h)).pos = self.obj_counter;
+        self.pos_table.entries[h] = MaybeUninit::new(object_position {
+            obj,
+            pos: self.obj_counter,
+        });
         self.obj_counter += 1;
         if self.obj_counter >= self.pos_table.threshold {
             self.resize_position_table();
@@ -315,6 +325,8 @@ impl<'a> State<'a> {
     #[inline]
     fn writeblock_float8(&mut self, data: &[f64]) {
         if ARCH_FLOAT_ENDIANNESS == 0x01234567 || ARCH_FLOAT_ENDIANNESS == 0x76543210 {
+            // SAFETY: `data.as_ptr()` will be valid for reads of `data.len() *
+            // size_of::<f64>()` bytes
             self.writeblock(unsafe {
                 std::slice::from_raw_parts(
                     data.as_ptr() as *const u8,
@@ -454,7 +466,7 @@ impl<'a> State<'a> {
     }
 
     /// Marshal the given value in the output buffer
-    unsafe fn extern_rec(&mut self, mut v: Value<'a>) {
+    fn extern_rec(&mut self, mut v: Value<'a>) {
         let mut goto_next_item: bool;
 
         let mut h: usize = 0;
@@ -528,12 +540,12 @@ impl<'a> State<'a> {
                             ocamlrep::ABSTRACT_TAG => {
                                 self.invalid_argument("output_value: abstract value (Abstract)");
                             }
-                            ocamlrep::INFIX_TAG => {
-                                let infix_offset = hd.size() * std::mem::size_of::<Value<'_>>();
-                                self.writecode32(CODE_INFIXPOINTER, infix_offset as i32);
-                                v = Value::from_bits(v.to_bits() - infix_offset); // PR#5772
-                                continue;
-                            }
+                            // INFIX_TAG represents an infix header inside a
+                            // closure, and can only occur in blocks with tag
+                            // CLOSURE_TAG
+                            ocamlrep::INFIX_TAG => self.invalid_argument(
+                                "output_value: marshaling of closures not implemented",
+                            ),
                             ocamlrep::CUSTOM_TAG => self.invalid_argument(
                                 "output_value: marshaling of custom blocks not implemented",
                             ),
@@ -568,7 +580,11 @@ impl<'a> State<'a> {
             // Pop one more item to marshal, if any
             if let Some(item) = self.stack.last_mut() {
                 let fresh8 = item.v;
-                item.v = &*(item.v as *const Value<'a>).offset(1) as &'a Value<'a>;
+                // SAFETY: the stack contains items with nonzero `item.count`,
+                // where `item.v` points to a field in a valid block with
+                // `item.count` fields after it. This addition (along with
+                // `item.count -= 1` below) moves us to the next field.
+                item.v = unsafe { &*(item.v as *const Value<'a>).add(1) as &'a Value<'a> };
                 v = *fresh8;
                 item.count -= 1;
                 if item.count == 0 {
@@ -582,7 +598,7 @@ impl<'a> State<'a> {
         // Never reached as function leaves with return
     }
 
-    unsafe fn extern_value(
+    fn extern_value(
         &mut self,
         v: Value<'a>,
         flags: Value<'a>,
@@ -629,7 +645,7 @@ impl<'a> State<'a> {
     }
 }
 
-pub unsafe fn output_val<W: std::io::Write>(
+pub fn output_val<W: std::io::Write>(
     w: &mut W,
     v: Value<'_>,
     flags: Value<'_>,

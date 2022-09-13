@@ -400,7 +400,7 @@ impl<'a> State<'a> {
         self.stack.clear()
     }
 
-    unsafe fn readfloat(&mut self, dest: *mut c_double, code: c_uint) {
+    unsafe fn readfloat(&mut self, dest: *mut c_double, code: u8) {
         if std::mem::size_of::<c_double>() != 8 {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
@@ -408,7 +408,7 @@ impl<'a> State<'a> {
         self.readblock(dest as *mut c_void, 8 as intnat);
 
         let bytes = *(dest as *const [u8; 8]);
-        *dest = match code as c_int {
+        *dest = match code {
             CODE_DOUBLE_BIG => f64::from_be_bytes(bytes),
             CODE_DOUBLE_LITTLE => f64::from_le_bytes(bytes),
             _ => unreachable!(),
@@ -416,7 +416,7 @@ impl<'a> State<'a> {
     }
 
     // `len` is a number of floats
-    unsafe fn readfloats(&mut self, dest: *mut c_double, len: mlsize_t, code: c_uint) {
+    unsafe fn readfloats(&mut self, dest: *mut c_double, len: mlsize_t, code: u8) {
         if std::mem::size_of::<c_double>() != 8 {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
@@ -426,7 +426,7 @@ impl<'a> State<'a> {
         let mut i = 0;
         while i < len as usize {
             let bytes = *(dest.add(i) as *const [u8; 8]);
-            *(dest.add(i)) = match code as c_int {
+            *(dest.add(i)) = match code {
                 CODE_DOUBLE_ARRAY8_BIG | CODE_DOUBLE_ARRAY32_BIG => f64::from_be_bytes(bytes),
                 CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY32_LITTLE => f64::from_le_bytes(bytes),
                 _ => unreachable!(),
@@ -444,7 +444,7 @@ impl<'a> State<'a> {
 
         let mut current_block: u64;
         let mut header: header_t;
-        let mut code: c_uint;
+        let mut code: u8;
 
         let mut tag: tag_t = 0;
         let mut size: mlsize_t = 0;
@@ -489,12 +489,12 @@ impl<'a> State<'a> {
                         self.stack.pop();
                     }
                     // Read a value and set v to this value
-                    code = self.read8u() as c_uint;
-                    if code >= PREFIX_SMALL_INT as c_uint {
-                        if code >= PREFIX_SMALL_BLOCK as c_uint {
+                    code = self.read8u() as u8;
+                    if code >= PREFIX_SMALL_INT {
+                        if code >= PREFIX_SMALL_BLOCK {
                             // Small block
-                            tag = code & 0xf as c_uint;
-                            size = (code >> 4 & 0x7 as c_uint) as mlsize_t;
+                            tag = (code & 0xf) as tag_t;
+                            size = (code >> 4 & 0x7) as mlsize_t;
                             current_block = READ_BLOCK_LABEL;
                         } else {
                             // Small integer
@@ -502,12 +502,12 @@ impl<'a> State<'a> {
                             current_block = NOTHING_TO_DO_LABEL;
                         }
                     } else {
-                        if code >= PREFIX_SMALL_STRING as c_uint {
+                        if code >= PREFIX_SMALL_STRING {
                             // Small string
                             len = (code & 0x1f) as mlsize_t;
                             current_block = READ_STRING_LABEL;
                         } else {
-                            match code as i32 {
+                            match code {
                                 CODE_INT8 => {
                                     v = Value::from_bits(
                                         (((self.read8s() as uintnat) << 1) as intnat + 1) as usize,

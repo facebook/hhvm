@@ -307,8 +307,8 @@ impl<'a> State<'a> {
     // Write characters, integers, and blocks in the output buffer
 
     #[inline]
-    fn write(&mut self, c: c_int) {
-        self.output.write_all(&[c as u8]).unwrap();
+    fn write(&mut self, c: u8) {
+        self.output.write_all(&[c]).unwrap();
     }
 
     unsafe fn writeblock(&mut self, data: *const c_char, len: usize) {
@@ -326,22 +326,22 @@ impl<'a> State<'a> {
         }
     }
 
-    fn writecode8(&mut self, code: c_int, val: i8) {
-        self.output.write_all(&[code as u8, val as u8]).unwrap();
+    fn writecode8(&mut self, code: u8, val: i8) {
+        self.output.write_all(&[code, val as u8]).unwrap();
     }
 
-    fn writecode16(&mut self, code: c_int, val: i16) {
-        self.output.write_all(&[code as u8]).unwrap();
+    fn writecode16(&mut self, code: u8, val: i16) {
+        self.output.write_all(&[code]).unwrap();
         store16(&mut self.output, val);
     }
 
-    fn writecode32(&mut self, code: c_int, val: i32) {
-        self.output.write_all(&[code as u8]).unwrap();
+    fn writecode32(&mut self, code: u8, val: i32) {
+        self.output.write_all(&[code]).unwrap();
         store32(&mut self.output, val);
     }
 
-    fn writecode64(&mut self, code: c_int, val: i64) {
-        self.output.write_all(&[code as u8]).unwrap();
+    fn writecode64(&mut self, code: u8, val: i64) {
+        self.output.write_all(&[code]).unwrap();
         store64(&mut self.output, val);
     }
 
@@ -349,7 +349,7 @@ impl<'a> State<'a> {
     #[inline]
     unsafe fn extern_int(&mut self, n: isize) {
         if (0..0x40).contains(&n) {
-            self.write(PREFIX_SMALL_INT + n as c_int);
+            self.write(PREFIX_SMALL_INT + n as u8);
         } else if (-(1 << 7)..(1 << 7)).contains(&n) {
             self.writecode8(CODE_INT8, n as i8);
         } else if (-(1 << 15)..(1 << 15)).contains(&n) {
@@ -382,7 +382,7 @@ impl<'a> State<'a> {
     #[inline]
     unsafe fn extern_header(&mut self, sz: usize, tag: u8) {
         if tag < 16 && sz < 8 {
-            self.write(PREFIX_SMALL_BLOCK + (tag as c_int) + ((sz << 4) as c_int));
+            self.write(PREFIX_SMALL_BLOCK + tag + ((sz as u8) << 4));
         } else {
             // Note: ocaml-14.4.0 uses `Caml_white` (`0 << 8`)
             // ('caml/runtime/gc.h'). That's why we use this here, so that we
@@ -411,7 +411,7 @@ impl<'a> State<'a> {
     unsafe fn extern_string(&mut self, bytes: &'a [u8]) {
         let len = bytes.len();
         if len < 0x20 {
-            self.write(PREFIX_SMALL_STRING + (len as c_int));
+            self.write(PREFIX_SMALL_STRING + len as u8);
         } else if len < 0x100 {
             self.writecode8(CODE_STRING8, len as i8);
         } else {

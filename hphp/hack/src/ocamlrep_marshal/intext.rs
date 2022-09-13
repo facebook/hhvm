@@ -43,35 +43,35 @@ pub(crate) const ARCH_FLOAT_ENDIANNESS: u32 = 0x01234567;
 
 // Codes for the compact format
 
-pub(crate) const PREFIX_SMALL_BLOCK: libc::c_int = 0x80; // 10000000
-pub(crate) const PREFIX_SMALL_INT: libc::c_int = 0x40; // 01000000
-pub(crate) const PREFIX_SMALL_STRING: libc::c_int = 0x20; // 00100000
-pub(crate) const CODE_INT8: libc::c_int = 0x0; // 00000000
-pub(crate) const CODE_INT16: libc::c_int = 0x1; // 00000001
-pub(crate) const CODE_INT32: libc::c_int = 0x2; // 00000010
-pub(crate) const CODE_INT64: libc::c_int = 0x3; // 00000011
-pub(crate) const CODE_SHARED8: libc::c_int = 0x4; // 00000100
-pub(crate) const CODE_SHARED16: libc::c_int = 0x5; // 00000101
-pub(crate) const CODE_SHARED32: libc::c_int = 0x6; // 00000110
-pub(crate) const CODE_SHARED64: libc::c_int = 0x14; // 00010100
-pub(crate) const CODE_BLOCK32: libc::c_int = 0x8; // 00001000
-pub(crate) const CODE_BLOCK64: libc::c_int = 0x13; // 00010011
-pub(crate) const CODE_STRING8: libc::c_int = 0x9; // 00001001
-pub(crate) const CODE_STRING32: libc::c_int = 0xA; // 00001010
-pub(crate) const CODE_STRING64: libc::c_int = 0x15; // 00010101
-pub(crate) const CODE_DOUBLE_BIG: libc::c_int = 0xB; // 00001011
-pub(crate) const CODE_DOUBLE_LITTLE: libc::c_int = 0xC; // 00001100
-pub(crate) const CODE_DOUBLE_ARRAY8_BIG: libc::c_int = 0xD; // 00001101
-pub(crate) const CODE_DOUBLE_ARRAY8_LITTLE: libc::c_int = 0xE; // 00001110
-pub(crate) const CODE_DOUBLE_ARRAY32_BIG: libc::c_int = 0xF; // 00001111
-pub(crate) const CODE_DOUBLE_ARRAY32_LITTLE: libc::c_int = 0x7; // 00000111
-pub(crate) const CODE_DOUBLE_ARRAY64_BIG: libc::c_int = 0x16; // 00010110
-pub(crate) const CODE_DOUBLE_ARRAY64_LITTLE: libc::c_int = 0x17; // 00010111
-pub(crate) const CODE_CODEPOINTER: libc::c_int = 0x10; // 00010000
-pub(crate) const CODE_INFIXPOINTER: libc::c_int = 0x11; // 00010001
-pub(crate) const CODE_CUSTOM: libc::c_int = 0x12; // 00010010 (deprecated)
-pub(crate) const CODE_CUSTOM_LEN: libc::c_int = 0x18; // 00011000
-pub(crate) const CODE_CUSTOM_FIXED: libc::c_int = 0x19; // 00011001
+pub(crate) const PREFIX_SMALL_BLOCK: u8 = 0x80; // 10000000
+pub(crate) const PREFIX_SMALL_INT: u8 = 0x40; // 01000000
+pub(crate) const PREFIX_SMALL_STRING: u8 = 0x20; // 00100000
+pub(crate) const CODE_INT8: u8 = 0x0; // 00000000
+pub(crate) const CODE_INT16: u8 = 0x1; // 00000001
+pub(crate) const CODE_INT32: u8 = 0x2; // 00000010
+pub(crate) const CODE_INT64: u8 = 0x3; // 00000011
+pub(crate) const CODE_SHARED8: u8 = 0x4; // 00000100
+pub(crate) const CODE_SHARED16: u8 = 0x5; // 00000101
+pub(crate) const CODE_SHARED32: u8 = 0x6; // 00000110
+pub(crate) const CODE_SHARED64: u8 = 0x14; // 00010100
+pub(crate) const CODE_BLOCK32: u8 = 0x8; // 00001000
+pub(crate) const CODE_BLOCK64: u8 = 0x13; // 00010011
+pub(crate) const CODE_STRING8: u8 = 0x9; // 00001001
+pub(crate) const CODE_STRING32: u8 = 0xA; // 00001010
+pub(crate) const CODE_STRING64: u8 = 0x15; // 00010101
+pub(crate) const CODE_DOUBLE_BIG: u8 = 0xB; // 00001011
+pub(crate) const CODE_DOUBLE_LITTLE: u8 = 0xC; // 00001100
+pub(crate) const CODE_DOUBLE_ARRAY8_BIG: u8 = 0xD; // 00001101
+pub(crate) const CODE_DOUBLE_ARRAY8_LITTLE: u8 = 0xE; // 00001110
+pub(crate) const CODE_DOUBLE_ARRAY32_BIG: u8 = 0xF; // 00001111
+pub(crate) const CODE_DOUBLE_ARRAY32_LITTLE: u8 = 0x7; // 00000111
+pub(crate) const CODE_DOUBLE_ARRAY64_BIG: u8 = 0x16; // 00010110
+pub(crate) const CODE_DOUBLE_ARRAY64_LITTLE: u8 = 0x17; // 00010111
+pub(crate) const CODE_CODEPOINTER: u8 = 0x10; // 00010000
+pub(crate) const CODE_INFIXPOINTER: u8 = 0x11; // 00010001
+pub(crate) const CODE_CUSTOM: u8 = 0x12; // 00010010 (deprecated)
+pub(crate) const CODE_CUSTOM_LEN: u8 = 0x18; // 00011000
+pub(crate) const CODE_CUSTOM_FIXED: u8 = 0x19; // 00011001
 
 macro_rules! cond_arch_float_endian {
     ($if_:ident, $else_:ident) => {
@@ -82,13 +82,13 @@ macro_rules! cond_arch_float_endian {
         }
     };
 }
-pub(crate) const CODE_DOUBLE_NATIVE: libc::c_int =
+pub(crate) const CODE_DOUBLE_NATIVE: u8 =
     cond_arch_float_endian!(CODE_DOUBLE_BIG, CODE_DOUBLE_LITTLE);
-pub(crate) const CODE_DOUBLE_ARRAY8_NATIVE: libc::c_int =
+pub(crate) const CODE_DOUBLE_ARRAY8_NATIVE: u8 =
     cond_arch_float_endian!(CODE_DOUBLE_ARRAY8_BIG, CODE_DOUBLE_ARRAY8_LITTLE);
-pub(crate) const CODE_DOUBLE_ARRAY32_NATIVE: libc::c_int =
+pub(crate) const CODE_DOUBLE_ARRAY32_NATIVE: u8 =
     cond_arch_float_endian!(CODE_DOUBLE_ARRAY32_BIG, CODE_DOUBLE_ARRAY32_LITTLE);
-pub(crate) const CODE_DOUBLE_ARRAY64_NATIVE: libc::c_int =
+pub(crate) const CODE_DOUBLE_ARRAY64_NATIVE: u8 =
     cond_arch_float_endian!(CODE_DOUBLE_ARRAY64_BIG, CODE_DOUBLE_ARRAY64_LITTLE);
 
 ///   Size-ing data structures for extern.  Chosen so that

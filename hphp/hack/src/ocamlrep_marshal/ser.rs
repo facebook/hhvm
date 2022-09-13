@@ -104,8 +104,8 @@ const fn Threshold(sz: usize) -> usize {
 // Accessing bitvectors
 
 #[inline]
-fn bitvect_test(bv: &[usize], i: usize) -> usize {
-    bv[i / Bits_word] & (1 << (i & (Bits_word - 1)))
+fn bitvect_test(bv: &[usize], i: usize) -> bool {
+    bv[i / Bits_word] & (1 << (i & (Bits_word - 1))) != 0
 }
 
 #[inline]
@@ -228,12 +228,12 @@ impl<'a> State<'a> {
         // Insert every entry of the old table in the new table
         i = 0;
         while i < old.size {
-            if bitvect_test(&old.present, i) != 0 {
+            if bitvect_test(&old.present, i) {
                 // SAFETY: We checked that the bit for `i` is set in
                 // `old.present`, so `entries[i]` must be initialized
                 let old_entry = unsafe { old.entries[i].assume_init() };
                 h = Hash(old_entry.obj, self.pos_table.shift);
-                while bitvect_test(&self.pos_table.present, h) != 0 {
+                while bitvect_test(&self.pos_table.present, h) {
                     h = (h + 1) & self.pos_table.mask
                 }
                 bitvect_set(&mut self.pos_table.present, h);
@@ -251,7 +251,7 @@ impl<'a> State<'a> {
     fn lookup_position(&mut self, obj: Value<'a>, pos_out: &mut usize, h_out: &mut usize) -> bool {
         let mut h: usize = Hash(obj, self.pos_table.shift);
         loop {
-            if bitvect_test(&self.pos_table.present, h) == 0 {
+            if !bitvect_test(&self.pos_table.present, h) {
                 *h_out = h;
                 return false;
             }

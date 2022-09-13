@@ -6,8 +6,6 @@
 
 use std::io::Write;
 
-use libc::c_char;
-use libc::c_double;
 use libc::c_int;
 use ocamlrep::Header;
 use ocamlrep::Value;
@@ -311,16 +309,19 @@ impl<'a> State<'a> {
         self.output.write_all(&[c]).unwrap();
     }
 
-    unsafe fn writeblock(&mut self, data: *const c_char, len: usize) {
-        self.output
-            .write_all(std::slice::from_raw_parts(data as *const u8, len as usize))
-            .unwrap();
+    fn writeblock(&mut self, data: &[u8]) {
+        self.output.write_all(data).unwrap();
     }
 
     #[inline]
-    unsafe fn writeblock_float8(&mut self, data: *const c_double, ndoubles: usize) {
+    fn writeblock_float8(&mut self, data: &[f64]) {
         if ARCH_FLOAT_ENDIANNESS == 0x01234567 || ARCH_FLOAT_ENDIANNESS == 0x76543210 {
-            self.writeblock(data as *const c_char, ndoubles * 8);
+            self.writeblock(unsafe {
+                std::slice::from_raw_parts(
+                    data.as_ptr() as *const u8,
+                    data.len() * std::mem::size_of::<f64>(),
+                )
+            });
         } else {
             unimplemented!()
         }
@@ -424,14 +425,14 @@ impl<'a> State<'a> {
                 self.writecode64(CODE_STRING64, len as i64);
             }
         }
-        self.writeblock(bytes.as_ptr() as *const c_char, len);
+        self.writeblock(bytes);
     }
 
     /// Marshaling FP numbers
     #[inline]
     unsafe fn extern_double(&mut self, v: f64) {
         self.write(CODE_DOUBLE_NATIVE);
-        self.writeblock_float8(&v, 1);
+        self.writeblock_float8(&[v]);
     }
 
     /// Marshaling FP arrays
@@ -450,7 +451,7 @@ impl<'a> State<'a> {
                 self.writecode64(CODE_DOUBLE_ARRAY64_NATIVE, nfloats as i64);
             }
         }
-        self.writeblock_float8(slice.as_ptr() as *const c_double, nfloats);
+        self.writeblock_float8(slice);
     }
 
     /// Marshal the given value in the output buffer

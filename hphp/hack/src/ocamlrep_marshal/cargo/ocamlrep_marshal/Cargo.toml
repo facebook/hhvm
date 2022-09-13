@@ -11,5 +11,7 @@ doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
+bitflags = "1.3"
 libc = "=0.2.125"
 ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_derive = { path = "../../../ocamlrep_derive" }

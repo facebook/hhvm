@@ -7,28 +7,53 @@
 use std::io::Write;
 use std::mem::MaybeUninit;
 
+use ocamlrep::FromOcamlRep;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
 use crate::intext::*;
 
-// Flags affecting marshaling
-
-type Flags = u8;
-
-const NO_SHARING: Flags = 1; // Flag to ignore sharing
-const CLOSURES: Flags = 2; // Flag to allow marshaling code pointers
-const COMPAT_32: Flags = 4; // Flag to ensure that output can safely be read back on a 32-bit platform
-
-fn convert_flag_list(mut list: Value<'_>, flags: &[Flags]) -> Result<Flags, ocamlrep::FromError> {
-    let mut res = 0;
-    while !list.is_immediate() {
-        let block = ocamlrep::from::expect_tuple(list, 2)?;
-        let idx: usize = ocamlrep::from::field(block, 0)?;
-        res |= flags[idx];
-        list = block[1];
+bitflags::bitflags! {
+    /// Flags affecting marshaling
+    pub struct ExternFlags: u8 {
+        /// Flag to ignore sharing
+        const NO_SHARING = 1;
+        /// Flag to allow marshaling code pointers. Not permitted in `ocamlrep_marshal`.
+        const CLOSURES = 2;
+        /// Flag to ensure that output can safely be read back on a 32-bit platform
+        const COMPAT_32 = 4;
     }
-    Ok(res)
+}
+
+// NB: Must match the definition order in ocaml's marshal.ml
+#[derive(ocamlrep_derive::FromOcamlRep)]
+enum ExternFlag {
+    NoSharing,
+    Closures,
+    Compat32,
+}
+
+impl From<ExternFlag> for ExternFlags {
+    fn from(flag: ExternFlag) -> Self {
+        match flag {
+            ExternFlag::NoSharing => ExternFlags::NO_SHARING,
+            ExternFlag::Closures => ExternFlags::CLOSURES,
+            ExternFlag::Compat32 => ExternFlags::COMPAT_32,
+        }
+    }
+}
+
+impl FromOcamlRep for ExternFlags {
+    fn from_ocamlrep(mut list: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
+        let mut res = ExternFlags::empty();
+        while !list.is_immediate() {
+            let block = ocamlrep::from::expect_tuple(list, 2)?;
+            let flag: ExternFlag = ocamlrep::from::field(block, 0)?;
+            res |= flag.into();
+            list = block[1];
+        }
+        Ok(res)
+    }
 }
 
 // Stack for pending values to marshal
@@ -132,7 +157,7 @@ fn store64(dst: &mut impl Write, n: i64) {
 
 #[repr(C)]
 struct State<'a> {
-    extern_flags: Flags, // logical or of some of the flags
+    flags: ExternFlags, // logical or of some of the flags
 
     obj_counter: usize, // Number of objects emitted so far
     size_32: usize,     // Size in words of 32-bit block for struct.
@@ -151,7 +176,7 @@ struct State<'a> {
 impl<'a> State<'a> {
     fn new() -> Self {
         Self {
-            extern_flags: 0,
+            flags: ExternFlags::empty(),
             obj_counter: 0,
             size_32: 0,
             size_64: 0,
@@ -173,7 +198,7 @@ impl<'a> State<'a> {
 
     /// Initialize the position table
     fn init_position_table(&mut self) {
-        if self.extern_flags & NO_SHARING != 0 {
+        if self.flags.contains(ExternFlags::NO_SHARING) {
             return;
         }
         self.pos_table.size = POS_TABLE_INIT_SIZE;
@@ -271,7 +296,7 @@ impl<'a> State<'a> {
     /// The [h] parameter is the index in the hash table where the object
     /// must be inserted.  It was determined during lookup.
     fn record_location(&mut self, obj: Value<'a>, h: usize) {
-        if self.extern_flags & NO_SHARING != 0 {
+        if self.flags.contains(ExternFlags::NO_SHARING) {
             return;
         }
         bitvect_set(&mut self.pos_table.present, h);
@@ -367,7 +392,7 @@ impl<'a> State<'a> {
         } else if (-(1 << 15)..(1 << 15)).contains(&n) {
             self.writecode16(CODE_INT16, n as i16);
         } else if !(-(1 << 30)..(1 << 30)).contains(&n) {
-            if self.extern_flags & COMPAT_32 != 0 {
+            if self.flags.contains(ExternFlags::COMPAT_32) {
                 self.failwith("output_value: integer cannot be read back on 32-bit platform");
             }
             self.writecode64(CODE_INT64, n as i64);
@@ -408,7 +433,7 @@ impl<'a> State<'a> {
             // where, `NOT_MARKABLE` (`3 << 8`) ('caml/runtime/shared_heap.h').
             let hd = Header::with_color(sz, tag, ocamlrep::Color::White).to_bits();
 
-            if sz > 0x3FFFFF && self.extern_flags & COMPAT_32 != 0 {
+            if sz > 0x3FFFFF && self.flags.contains(ExternFlags::COMPAT_32) {
                 self.failwith("output_value: array cannot be read back on 32-bit platform");
             }
             if hd < 1 << 32 {
@@ -427,7 +452,7 @@ impl<'a> State<'a> {
         } else if len < 0x100 {
             self.writecode8(CODE_STRING8, len as i8);
         } else {
-            if len > 0xFFFFFB && self.extern_flags & COMPAT_32 != 0 {
+            if len > 0xFFFFFB && self.flags.contains(ExternFlags::COMPAT_32) {
                 self.failwith("output_value: string cannot be read back on 32-bit platform");
             }
             if len < 1 << 32 {
@@ -453,7 +478,7 @@ impl<'a> State<'a> {
         if nfloats < 0x100 {
             self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as i8);
         } else {
-            if nfloats > 0x1FFFFF && self.extern_flags & COMPAT_32 != 0 {
+            if nfloats > 0x1FFFFF && self.flags.contains(ExternFlags::COMPAT_32) {
                 self.failwith("output_value: float array cannot be read back on 32-bit platform");
             }
             if nfloats < 1 << 32 {
@@ -502,7 +527,7 @@ impl<'a> State<'a> {
                     self.extern_header(0, tag);
                 } else {
                     // Check if object already seen
-                    if self.extern_flags & NO_SHARING == 0 {
+                    if !self.flags.contains(ExternFlags::NO_SHARING) {
                         if self.lookup_position(v, &mut pos, &mut h) {
                             self.extern_shared_reference(self.obj_counter - pos);
                             goto_next_item = true;
@@ -605,11 +630,9 @@ impl<'a> State<'a> {
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
     ) -> usize {
-        static EXTERN_FLAG_VALUES: [Flags; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
-
         let res_len: usize;
         // Parse flag list
-        self.extern_flags = convert_flag_list(flags, &EXTERN_FLAG_VALUES).unwrap();
+        self.flags = ExternFlags::from_ocamlrep(flags).unwrap();
         // Initializations
         self.obj_counter = 0;
         self.size_32 = 0;
@@ -623,7 +646,7 @@ impl<'a> State<'a> {
         if res_len >= (1 << 32) || self.size_32 >= (1 << 32) || self.size_64 >= (1 << 32) {
             // The object is too big for the small header format.
             // Fail if we are in compat32 mode, or use big header.
-            if self.extern_flags & COMPAT_32 != 0 {
+            if self.flags.contains(ExternFlags::COMPAT_32) {
                 self.failwith("output_value: object too big to be read back on 32-bit platform");
             }
             store32(&mut header, MAGIC_NUMBER_BIG as i32);

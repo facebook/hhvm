@@ -2362,8 +2362,10 @@ dependencies = [
 name = "ocamlrep_marshal"
 version = "0.0.0"
 dependencies = [
+ "bitflags",
  "libc",
  "ocamlrep",
+ "ocamlrep_derive",
 ]
 
 [[package]]

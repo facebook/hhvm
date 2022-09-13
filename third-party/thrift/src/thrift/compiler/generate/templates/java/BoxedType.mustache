@@ -31,10 +31,10 @@
     }}{{#type:double?}}Double{{/type:double?}}{{!
     }}{{#type:float?}}Float{{/type:float?}}{{!
     }}{{#type:string?}}{{!
-        }}{{#type:isBinaryString?}}byte[]{{/type:isBinaryString?}}{{!
+        }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}io.netty.buffer.ByteBuf{{/field:hasAdapter?}}{{^field:hasAdapter?}}byte[]{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
         }}{{^type:isBinaryString?}}String{{/type:isBinaryString?}}{{!
     }}{{/type:string?}}{{!
-    }}{{#type:binary?}}byte[]{{/type:binary?}}{{!
+    }}{{#type:binary?}}{{#field:hasAdapter?}}io.netty.buffer.ByteBuf{{/field:hasAdapter?}}{{^field:hasAdapter?}}byte[]{{/field:hasAdapter?}}{{/type:binary?}}{{!
 
     }}{{#type:map?}}{{!
         }}Map<{{#type:key_type}}{{> BoxedType}}{{/type:key_type}}, {{#type:value_type}}{{> BoxedType}}{{/type:value_type}}>{{!

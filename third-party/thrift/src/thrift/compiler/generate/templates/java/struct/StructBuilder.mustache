@@ -24,8 +24,8 @@ public static class Builder {
     {{^field:value}}
     {{#field:terse?}}
     {{#field:hasAdapter?}}
-    private {{> FieldType}} {{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift(com.facebook.thrift.protocol.ByteBufIntrinsicDefaultTProtocol.getInstance());
-    private static {{> FieldType}} {{field:javaAllCapsName}}_INTRINSIC_DEFAULT = _{{field:javaName}}_Adapter.fromThrift(com.facebook.thrift.protocol.ByteBufIntrinsicDefaultTProtocol.getInstance());
+    private {{> FieldType}} {{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}});
+    private static {{> FieldType}} {{field:javaAllCapsName}}_INTRINSIC_DEFAULT = _{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}});
     {{/field:hasAdapter?}}
     {{^field:hasAdapter?}}
     {{#field:isObject?}}
@@ -36,12 +36,13 @@ public static class Builder {
     {{/field:isObject?}}
     {{/field:hasAdapter?}}
     {{/field:terse?}}
-    {{^field:terse?}}
-    private {{> FieldType}} {{field:javaName}} = {{field:javaDefaultValue}};
+    {{^field:terse?}}    
+    {{#field:hasAdapter?}}private {{> FieldType}} {{field:javaName}} =  null;{{/field:hasAdapter?}}{{!
+    }}{{^field:hasAdapter?}}private {{> FieldType}} {{field:javaName}} = {{field:javaDefaultValue}};{{/field:hasAdapter?}}
     {{/field:terse?}}
     {{/field:value}}{{!
     }}{{#field:value}}
-    private {{> FieldType}} {{field:javaName}} = {{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}};
+    private {{> FieldType}} {{field:javaName}} = {{#field:hasAdapter?}}_{{field:javaName}}_Adapter.fromThrift({{/field:hasAdapter?}}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{#field:hasAdapter?}}){{/field:hasAdapter?}};
     {{/field:value}}
     {{/struct:fields}}
 

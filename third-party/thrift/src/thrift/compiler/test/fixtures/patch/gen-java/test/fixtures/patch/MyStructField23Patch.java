@@ -284,9 +284,9 @@ public final class MyStructField23Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.assign != null) {
+      if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        Map<String, String> _iter0 = this.assign;
+        Map<String, String> _iter0 = assign;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -298,9 +298,9 @@ public final class MyStructField23Patch implements com.facebook.thrift.payload.T
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
-      if (this.add != null) {
+      if (add != null) {
         oprot.writeFieldBegin(ADD_FIELD_DESC);
-        Map<String, String> _iter0 = this.add;
+        Map<String, String> _iter0 = add;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -309,9 +309,9 @@ public final class MyStructField23Patch implements com.facebook.thrift.payload.T
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.put != null) {
+      if (put != null) {
         oprot.writeFieldBegin(PUT_FIELD_DESC);
-        Map<String, String> _iter0 = this.put;
+        Map<String, String> _iter0 = put;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());

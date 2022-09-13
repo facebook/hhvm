@@ -310,9 +310,9 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.lsMap != null) {
+      if (lsMap != null) {
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
-        com.foo.FastLongStringMap _iter0 = this.lsMap;
+        com.foo.FastLongStringMap _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
         for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
           oprot.writeI64(_iter1.getKey());
@@ -321,9 +321,9 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.ioMap != null) {
+      if (ioMap != null) {
         oprot.writeFieldBegin(IO_MAP_FIELD_DESC);
-        com.foo.FastIntObjectMap<com.foo.FastIntLongMap> _iter0 = this.ioMap;
+        com.foo.FastIntObjectMap<com.foo.FastIntLongMap> _iter0 = ioMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
         for (Map.Entry<Integer, com.foo.FastIntLongMap> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -338,9 +338,9 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.binaryMap != null) {
+      if (binaryMap != null) {
         oprot.writeFieldBegin(BINARY_MAP_FIELD_DESC);
-        Map<String, byte[]> _iter0 = this.binaryMap;
+        Map<String, byte[]> _iter0 = binaryMap;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -349,13 +349,14 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.regularBinary != null) {
+      if (regularBinary != null) {
         oprot.writeFieldBegin(REGULAR_BINARY_FIELD_DESC);
-        Map<String, byte[]> _iter0 = this.regularBinary;
+        Map<String, byte[]> _iter0 = regularBinary;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
           oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
+
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

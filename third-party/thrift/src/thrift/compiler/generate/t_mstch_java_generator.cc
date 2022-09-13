@@ -726,21 +726,22 @@ class mstch_java_field : public mstch_field {
           &mstch_java_field::get_structured_adapter_class_name},
          {"field:typeClassName",
           &mstch_java_field::get_structured_type_class_name},
-         {"field:hasAdapter?", &mstch_java_field::is_typedef_adapter}});
+         {"field:hasAdapter?", &mstch_java_field::has_type_adapter}});
   }
 
   int32_t nestedDepth = 0;
   bool isNestedContainerFlag = false;
 
-  mstch::node is_typedef_adapter() {
+  mstch::node has_type_adapter() {
     auto type = field_->get_type();
     if (type->is_typedef()) {
       auto has_annotation =
           type->find_structured_annotation_or_null(kJavaAdapterUri);
       return has_annotation != nullptr;
-    } else {
-      return false;
     }
+    auto has_annotation =
+        field_->find_structured_annotation_or_null(kJavaAdapterUri);
+    return has_annotation != nullptr;
   }
 
   mstch::node get_structured_adapter_class_name() {
@@ -753,11 +754,22 @@ class mstch_java_field : public mstch_field {
 
   mstch::node get_structed_annotation_attribute(const std::string& field) {
     auto type = field_->get_type();
-    if (auto annotation =
-            type->find_structured_annotation_or_null(kJavaAdapterUri)) {
-      for (const auto& item : annotation->value()->get_map()) {
-        if (item.first->get_string() == field) {
-          return item.second->get_string();
+    if (type->is_typedef()) {
+      if (auto annotation =
+              type->find_structured_annotation_or_null(kJavaAdapterUri)) {
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == field) {
+            return item.second->get_string();
+          }
+        }
+      }
+    } else {
+      if (auto annotation =
+              field_->find_structured_annotation_or_null(kJavaAdapterUri)) {
+        for (const auto& item : annotation->value()->get_map()) {
+          if (item.first->get_string() == field) {
+            return item.second->get_string();
+          }
         }
       }
     }

@@ -140,12 +140,12 @@ public final class CustomFieldNames extends org.apache.thrift.TBaseException imp
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.errorMessage != null) {
+      if (errorMessage != null) {
         oprot.writeFieldBegin(ERROR_MESSAGE_FIELD_DESC);
         oprot.writeString(this.errorMessage);
         oprot.writeFieldEnd();
       }
-      if (this.internalGreatMessage != null) {
+      if (internalGreatMessage != null) {
         oprot.writeFieldBegin(INTERNAL_ERROR_MESSAGE_FIELD_DESC);
         oprot.writeString(this.internalGreatMessage);
         oprot.writeFieldEnd();

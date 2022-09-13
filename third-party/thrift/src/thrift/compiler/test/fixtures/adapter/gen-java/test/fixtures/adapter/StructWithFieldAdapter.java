@@ -257,12 +257,12 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
       oprot.writeFieldBegin(SHARED_FIELD_FIELD_DESC);
       oprot.writeI32(this.sharedField);
       oprot.writeFieldEnd();
-      if (this.optSharedField != null) {
+      if (optSharedField != null) {
         oprot.writeFieldBegin(OPT_SHARED_FIELD_FIELD_DESC);
         oprot.writeI32(this.optSharedField);
         oprot.writeFieldEnd();
       }
-      if (this.optBoxedField != null) {
+      if (optBoxedField != null) {
         oprot.writeFieldBegin(OPT_BOXED_FIELD_FIELD_DESC);
         oprot.writeI32(this.optBoxedField);
         oprot.writeFieldEnd();

@@ -261,19 +261,19 @@ public final class Struct2 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldBegin(A_FIELD_DESC);
       oprot.writeI32(this.a);
       oprot.writeFieldEnd();
-      if (this.b != null) {
+      if (b != null) {
         oprot.writeFieldBegin(B_FIELD_DESC);
         oprot.writeString(this.b);
         oprot.writeFieldEnd();
       }
-      if (this.c != null) {
+      if (c != null) {
         oprot.writeFieldBegin(C_FIELD_DESC);
         this.c.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.d != null) {
+      if (d != null) {
         oprot.writeFieldBegin(D_FIELD_DESC);
-        List<Integer> _iter0 = this.d;
+        List<Integer> _iter0 = d;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);

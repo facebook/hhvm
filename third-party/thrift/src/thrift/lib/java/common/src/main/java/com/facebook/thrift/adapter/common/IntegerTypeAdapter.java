@@ -17,20 +17,5 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import org.apache.thrift.protocol.TProtocol;
 
-public interface IntegerTypeAdapter<T> extends TypeAdapter<T> {
-  @Override
-  default void toThrift(T t, TProtocol protocol) {
-    protocol.writeI32(toThrift(t));
-  }
-
-  @Override
-  default T fromThrift(TProtocol protocol) {
-    return fromThrift(protocol.readI32());
-  }
-
-  int toThrift(T t);
-
-  T fromThrift(int b);
-}
+public interface IntegerTypeAdapter<T> extends TypeAdapter<Integer, T> {}

@@ -254,7 +254,7 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
       oprot.writeFieldBegin(MY_BYTE_FIELD_FIELD_DESC);
       oprot.writeByte(this.myByteField);
       oprot.writeFieldEnd();
-      if (this.myStringField != null) {
+      if (myStringField != null) {
         oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.myStringField);
         oprot.writeFieldEnd();

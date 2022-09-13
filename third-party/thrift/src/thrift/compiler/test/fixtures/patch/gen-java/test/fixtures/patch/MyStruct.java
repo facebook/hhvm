@@ -1005,56 +1005,56 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       int structStart = 0;
       int pos = 0;
       com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.boolVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(boolVal)) {
         oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
         oprot.writeBool(this.boolVal);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.byteVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(byteVal)) {
         oprot.writeFieldBegin(BYTE_VAL_FIELD_DESC);
         oprot.writeByte(this.byteVal);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.i16Val)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(i16Val)) {
         oprot.writeFieldBegin(I16_VAL_FIELD_DESC);
         oprot.writeI16(this.i16Val);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.i32Val)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(i32Val)) {
         oprot.writeFieldBegin(I32_VAL_FIELD_DESC);
         oprot.writeI32(this.i32Val);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.i64Val)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(i64Val)) {
         oprot.writeFieldBegin(I64_VAL_FIELD_DESC);
         oprot.writeI64(this.i64Val);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.floatVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(floatVal)) {
         oprot.writeFieldBegin(FLOAT_VAL_FIELD_DESC);
         oprot.writeFloat(this.floatVal);
         oprot.writeFieldEnd();
       };
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.doubleVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(doubleVal)) {
         oprot.writeFieldBegin(DOUBLE_VAL_FIELD_DESC);
         oprot.writeDouble(this.doubleVal);
         oprot.writeFieldEnd();
       };
-      java.util.Objects.requireNonNull(this.stringVal, "stringVal must not be null");
+      java.util.Objects.requireNonNull(stringVal, "stringVal must not be null");
       
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.stringVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(stringVal)) {
         oprot.writeFieldBegin(STRING_VAL_FIELD_DESC);
         oprot.writeString(this.stringVal);
         oprot.writeFieldEnd();
       }
-      java.util.Objects.requireNonNull(this.binaryVal, "binaryVal must not be null");
+      java.util.Objects.requireNonNull(binaryVal, "binaryVal must not be null");
       
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.binaryVal)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(binaryVal)) {
         oprot.writeFieldBegin(BINARY_VAL_FIELD_DESC);
         oprot.writeBinary(java.nio.ByteBuffer.wrap(this.binaryVal));
         oprot.writeFieldEnd();
       }
-      java.util.Objects.requireNonNull(this.structVal, "structVal must not be null");
+      java.util.Objects.requireNonNull(structVal, "structVal must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(STRUCT_VAL_FIELD_DESC);
         pos = p.mark();
@@ -1064,59 +1064,59 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         } else {
           p.rollback(structStart);
         }    
-      if (this.optBoolVal != null) {
+      if (optBoolVal != null) {
         oprot.writeFieldBegin(OPT_BOOL_VAL_FIELD_DESC);
         oprot.writeBool(this.optBoolVal);
         oprot.writeFieldEnd();
       }
-      if (this.optByteVal != null) {
+      if (optByteVal != null) {
         oprot.writeFieldBegin(OPT_BYTE_VAL_FIELD_DESC);
         oprot.writeByte(this.optByteVal);
         oprot.writeFieldEnd();
       }
-      if (this.optI16Val != null) {
+      if (optI16Val != null) {
         oprot.writeFieldBegin(OPT_I16_VAL_FIELD_DESC);
         oprot.writeI16(this.optI16Val);
         oprot.writeFieldEnd();
       }
-      if (this.optI32Val != null) {
+      if (optI32Val != null) {
         oprot.writeFieldBegin(OPT_I32_VAL_FIELD_DESC);
         oprot.writeI32(this.optI32Val);
         oprot.writeFieldEnd();
       }
-      if (this.optI64Val != null) {
+      if (optI64Val != null) {
         oprot.writeFieldBegin(OPT_I64_VAL_FIELD_DESC);
         oprot.writeI64(this.optI64Val);
         oprot.writeFieldEnd();
       }
-      if (this.optFloatVal != null) {
+      if (optFloatVal != null) {
         oprot.writeFieldBegin(OPT_FLOAT_VAL_FIELD_DESC);
         oprot.writeFloat(this.optFloatVal);
         oprot.writeFieldEnd();
       }
-      if (this.optDoubleVal != null) {
+      if (optDoubleVal != null) {
         oprot.writeFieldBegin(OPT_DOUBLE_VAL_FIELD_DESC);
         oprot.writeDouble(this.optDoubleVal);
         oprot.writeFieldEnd();
       }
-      if (this.optStringVal != null) {
+      if (optStringVal != null) {
         oprot.writeFieldBegin(OPT_STRING_VAL_FIELD_DESC);
         oprot.writeString(this.optStringVal);
         oprot.writeFieldEnd();
       }
-      if (this.optBinaryVal != null) {
+      if (optBinaryVal != null) {
         oprot.writeFieldBegin(OPT_BINARY_VAL_FIELD_DESC);
         oprot.writeBinary(java.nio.ByteBuffer.wrap(this.optBinaryVal));
         oprot.writeFieldEnd();
       }
-      if (this.optStructVal != null) {
+      if (optStructVal != null) {
         oprot.writeFieldBegin(OPT_STRUCT_VAL_FIELD_DESC);
         this.optStructVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optListVal != null) {
+      if (optListVal != null) {
         oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
-        List<Short> _iter0 = this.optListVal;
+        List<Short> _iter0 = optListVal;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
@@ -1124,9 +1124,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.optSetVal != null) {
+      if (optSetVal != null) {
         oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
-        Set<String> _iter0 = this.optSetVal;
+        Set<String> _iter0 = optSetVal;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -1134,9 +1134,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.optMapVal != null) {
+      if (optMapVal != null) {
         oprot.writeFieldBegin(OPT_MAP_VAL_FIELD_DESC);
-        Map<String, String> _iter0 = this.optMapVal;
+        Map<String, String> _iter0 = optMapVal;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRING, _iter0.size()));
         for (Map.Entry<String, String> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -1145,7 +1145,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      java.util.Objects.requireNonNull(this.unionVal, "unionVal must not be null");
+      java.util.Objects.requireNonNull(unionVal, "unionVal must not be null");
       structStart = p.mark();
         oprot.writeFieldBegin(UNION_VAL_FIELD_DESC);
         pos = p.mark();

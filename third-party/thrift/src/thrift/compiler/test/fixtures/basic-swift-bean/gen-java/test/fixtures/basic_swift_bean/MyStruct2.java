@@ -178,12 +178,12 @@ static {
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.myStruct1 != null) {
+      if (myStruct1 != null) {
         oprot.writeFieldBegin(MY_STRUCT1_FIELD_DESC);
         this.myStruct1.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.myString != null) {
+      if (myString != null) {
         oprot.writeFieldBegin(MY_STRING_FIELD_DESC);
         oprot.writeString(this.myString);
         oprot.writeFieldEnd();

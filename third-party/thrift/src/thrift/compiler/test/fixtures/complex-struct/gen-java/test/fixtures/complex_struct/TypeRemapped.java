@@ -288,9 +288,9 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.lsMap != null) {
+      if (lsMap != null) {
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
-        it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = this.lsMap;
+        it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
         for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
           oprot.writeI64(_iter1.getKey());
@@ -299,9 +299,9 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.ioMap != null) {
+      if (ioMap != null) {
         oprot.writeFieldBegin(IO_MAP_FIELD_DESC);
-        it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter0 = this.ioMap;
+        it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap<it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter0 = ioMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.MAP, _iter0.size()));
         for (Map.Entry<Integer, it.unimi.dsi.fastutil.ints.Int2LongArrayMap> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -319,7 +319,7 @@ public final class TypeRemapped implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldBegin(BIG_INTEGER_FIELD_DESC);
       oprot.writeI32(this.bigInteger);
       oprot.writeFieldEnd();
-      if (this.binaryTestBuffer != null) {
+      if (binaryTestBuffer != null) {
         oprot.writeFieldBegin(BINARY_TEST_BUFFER_FIELD_DESC);
         oprot.writeBinary((this.binaryTestBuffer));
         oprot.writeFieldEnd();

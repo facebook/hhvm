@@ -16,20 +16,63 @@
 
 package com.facebook.thrift.adapter;
 
-import java.util.Objects;
-import org.apache.thrift.protocol.TProtocol;
+import com.facebook.thrift.adapter.common.EnumTypeAdapter;
+import com.facebook.thrift.adapter.common.ListTypeAdapter;
+import com.facebook.thrift.adapter.common.MapTypeAdapter;
+import com.facebook.thrift.adapter.common.SetTypeAdapter;
 
 /**
- * A Thrift Type Adapter in Java.
+ * Base interface for Type Adapters. TypeAdapters can be applied to typedef, struct or a struct
+ * field.
  *
- * @param <T>
+ * @param <T> Type, This is a thrift type when type is read from thrift IO stream during encoding or
+ *     an adapted type when a Type Adapter is composed from another Adapter.
+ *     <p>Note that most of the types are mapped to equivalent Boxed java types, but binary is
+ *     mapped to ByteBuf. Mapping binary to ByteBuf allow zero-copy of the binary data and pass it
+ *     to the adapter.
+ *     <p>When adapting a thrift type, these type interfaces can be used as base. If one of the
+ *     interfaces doesn’t work you can implement TypeAdapter directly.
+ *     <ul>
+ *       <li>{@link com.facebook.thrift.adapter.common.BooleanTypeAdapter BooleanTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.ByteTypeAdapter ByteTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.ShortTypeAdapter ShortTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.IntegerTypeAdapter IntegerTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.LongTypeAdapter LongTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.FloatTypeAdapter FloatTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.DoubleTypeAdapter DoubleTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.StringTypeAdapter StringTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.BinaryStringTypeAdapter
+ *           BinaryStringTypeAdapter}
+ *       <li>{@link EnumTypeAdapter EnumAdapter}
+ *       <li>{@link MapTypeAdapter MapAdapter}
+ *       <li>{@link ListTypeAdapter ListAdapter}
+ *       <li>{@link SetTypeAdapter SetAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.StructTypeAdapter StructTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.CopiedPooledByteBufTypeAdapter
+ *           CopiedPooledByteBufTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter
+ *           UnpooledByteBufTypeAdapter}
+ *       <li>{@link com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter
+ *           RetainedSlicedPooledByteBufTypeAdapter}
+ *     </ul>
+ *
+ * @param <P> Adapted type, i.e java.util.Date
  */
-public interface TypeAdapter<T> {
-  void toThrift(T t, TProtocol protocol);
+public interface TypeAdapter<T, P> extends Adapter<P> {
 
-  T fromThrift(TProtocol protocol);
+  /**
+   * Converts given type to the adapted type.
+   *
+   * @param t Thrift type or an adapted type.
+   * @return Adapted type
+   */
+  P fromThrift(T t);
 
-  default boolean equals(T t1, T t2) {
-    return Objects.equals(t1, t2);
-  }
+  /**
+   * Converts adapted type to the original type.
+   *
+   * @param p Adapted type
+   * @return Thrift type or an adapted type
+   */
+  T toThrift(P p);
 }

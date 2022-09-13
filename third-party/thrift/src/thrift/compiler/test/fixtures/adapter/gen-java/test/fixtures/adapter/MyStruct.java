@@ -192,9 +192,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(FIELD_FIELD_DESC);
       oprot.writeI32(this.field);
       oprot.writeFieldEnd();
-      if (this.setString != null) {
+      if (setString != null) {
         oprot.writeFieldBegin(SET_STRING_FIELD_DESC);
-        Set<String> _iter0 = this.setString;
+        Set<String> _iter0 = setString;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);

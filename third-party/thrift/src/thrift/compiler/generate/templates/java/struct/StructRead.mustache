@@ -46,7 +46,8 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
         {{#field:type}}
         {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
         {{/field:type}}
-        builder.{{> SetterName}}({{field:javaName}});
+        {{#field:hasAdapter?}}builder.{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));{{/field:hasAdapter?}}{{!
+        }}{{^field:hasAdapter?}}builder.{{> SetterName}}({{field:javaName}});{{/field:hasAdapter?}}
       } else {
         TProtocolUtil.skip(oprot, __field.type);
       }

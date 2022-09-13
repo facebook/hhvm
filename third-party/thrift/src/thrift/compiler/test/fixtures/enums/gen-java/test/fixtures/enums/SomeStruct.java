@@ -272,9 +272,9 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
       oprot.writeFieldBegin(QUESTIONABLE_FIELD_DESC);
       oprot.writeI32(this.questionable == null ? 0 : this.questionable.getValue());
       oprot.writeFieldEnd();
-      if (this.tags != null) {
+      if (tags != null) {
         oprot.writeFieldBegin(TAGS_FIELD_DESC);
-        Set<Integer> _iter0 = this.tags;
+        Set<Integer> _iter0 = tags;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);

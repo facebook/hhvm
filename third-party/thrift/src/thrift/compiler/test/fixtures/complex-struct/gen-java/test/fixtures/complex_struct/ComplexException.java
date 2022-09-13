@@ -273,14 +273,14 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.message != null) {
+      if (message != null) {
         oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
         oprot.writeString(this.message);
         oprot.writeFieldEnd();
       }
-      if (this.listStrings != null) {
+      if (listStrings != null) {
         oprot.writeFieldBegin(LIST_STRINGS_FIELD_DESC);
-        List<String> _iter0 = this.listStrings;
+        List<String> _iter0 = listStrings;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -291,19 +291,19 @@ public final class ComplexException extends org.apache.thrift.TBaseException imp
       oprot.writeFieldBegin(ERROR_ENUM_FIELD_DESC);
       oprot.writeI32(this.errorEnum == null ? 0 : this.errorEnum.getValue());
       oprot.writeFieldEnd();
-      if (this.unionError != null) {
+      if (unionError != null) {
         oprot.writeFieldBegin(UNION_ERROR_FIELD_DESC);
         this.unionError.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.structError != null) {
+      if (structError != null) {
         oprot.writeFieldBegin(STRUCT_ERROR_FIELD_DESC);
         this.structError.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.lsMap != null) {
+      if (lsMap != null) {
         oprot.writeFieldBegin(LS_MAP_FIELD_DESC);
-        it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = this.lsMap;
+        it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap<String> _iter0 = lsMap;
         oprot.writeMapBegin(new TMap(TType.I64, TType.STRING, _iter0.size()));
         for (Map.Entry<Long, String> _iter1 : _iter0.entrySet()) {
           oprot.writeI64(_iter1.getKey());

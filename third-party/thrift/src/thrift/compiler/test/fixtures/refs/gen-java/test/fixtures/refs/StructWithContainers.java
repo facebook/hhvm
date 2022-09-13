@@ -381,9 +381,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.listRef != null) {
+      if (listRef != null) {
         oprot.writeFieldBegin(LIST_REF_FIELD_DESC);
-        List<Integer> _iter0 = this.listRef;
+        List<Integer> _iter0 = listRef;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);
@@ -391,9 +391,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.setRef != null) {
+      if (setRef != null) {
         oprot.writeFieldBegin(SET_REF_FIELD_DESC);
-        Set<Integer> _iter0 = this.setRef;
+        Set<Integer> _iter0 = setRef;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);
@@ -401,9 +401,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mapRef != null) {
+      if (mapRef != null) {
         oprot.writeFieldBegin(MAP_REF_FIELD_DESC);
-        Map<Integer, Integer> _iter0 = this.mapRef;
+        Map<Integer, Integer> _iter0 = mapRef;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter0.size()));
         for (Map.Entry<Integer, Integer> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -412,9 +412,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.listRefUnique != null) {
+      if (listRefUnique != null) {
         oprot.writeFieldBegin(LIST_REF_UNIQUE_FIELD_DESC);
-        List<Integer> _iter0 = this.listRefUnique;
+        List<Integer> _iter0 = listRefUnique;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);
@@ -422,9 +422,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.setRefShared != null) {
+      if (setRefShared != null) {
         oprot.writeFieldBegin(SET_REF_SHARED_FIELD_DESC);
-        Set<Integer> _iter0 = this.setRefShared;
+        Set<Integer> _iter0 = setRefShared;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);
@@ -432,9 +432,9 @@ public final class StructWithContainers implements com.facebook.thrift.payload.T
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.listRefSharedConst != null) {
+      if (listRefSharedConst != null) {
         oprot.writeFieldBegin(LIST_REF_SHARED_CONST_FIELD_DESC);
-        List<Integer> _iter0 = this.listRefSharedConst;
+        List<Integer> _iter0 = listRefSharedConst;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);

@@ -140,7 +140,7 @@ public final class A implements com.facebook.thrift.payload.ThriftSerializable {
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.a != null) {
+      if (a != null) {
         oprot.writeFieldBegin(A_FIELD_DESC);
         oprot.writeString(this.a);
         oprot.writeFieldEnd();

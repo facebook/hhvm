@@ -16,6 +16,11 @@
 
 package org.apache.thrift.protocol;
 
+import com.facebook.thrift.protocol.ByteBufTProtocol;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.util.ReferenceCountUtil;
+import java.nio.ByteBuffer;
 import java.util.Collections;
 import org.apache.thrift.TException;
 
@@ -135,5 +140,38 @@ public class TProtocolUtil {
       default:
         break;
     }
+  }
+
+  public static ByteBuf readBinaryAsByteBuf(TProtocol protocol) {
+    if (protocol instanceof ByteBufTProtocol) {
+      return ((ByteBufTProtocol) protocol).readBinaryAsSlice();
+    }
+    return Unpooled.wrappedBuffer(protocol.readBinary());
+  }
+
+  public static void writeBinary(TProtocol protocol, ByteBuffer buf) {
+    protocol.writeBinary(buf);
+  }
+
+  public static void writeBinary(TProtocol protocol, ByteBuf buf) {
+    if (protocol instanceof ByteBufTProtocol) {
+      try {
+        ((ByteBufTProtocol) protocol).writeBinaryAsByteBuf(buf);
+      } finally {
+        if (buf.refCnt() > 0) {
+          ReferenceCountUtil.safeRelease(buf);
+        }
+      }
+    } else {
+      // fix:
+      // if bytebuf is not backed by an array, this would not work
+      //
+      // protocol.writeBinary(ByteBuffer.wrap(buf.array()));
+      protocol.writeBinary(buf.nioBuffer());
+    }
+  }
+
+  public static void writeBinary(TProtocol protocol, byte[] bytes) {
+    protocol.writeBinary(ByteBuffer.wrap(bytes));
   }
 }

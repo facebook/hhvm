@@ -971,122 +971,122 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.boolVal != null) {
+      if (boolVal != null) {
         oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
         this.boolVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.byteVal != null) {
+      if (byteVal != null) {
         oprot.writeFieldBegin(BYTE_VAL_FIELD_DESC);
         this.byteVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.i16Val != null) {
+      if (i16Val != null) {
         oprot.writeFieldBegin(I16_VAL_FIELD_DESC);
         this.i16Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.i32Val != null) {
+      if (i32Val != null) {
         oprot.writeFieldBegin(I32_VAL_FIELD_DESC);
         this.i32Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.i64Val != null) {
+      if (i64Val != null) {
         oprot.writeFieldBegin(I64_VAL_FIELD_DESC);
         this.i64Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.floatVal != null) {
+      if (floatVal != null) {
         oprot.writeFieldBegin(FLOAT_VAL_FIELD_DESC);
         this.floatVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.doubleVal != null) {
+      if (doubleVal != null) {
         oprot.writeFieldBegin(DOUBLE_VAL_FIELD_DESC);
         this.doubleVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.stringVal != null) {
+      if (stringVal != null) {
         oprot.writeFieldBegin(STRING_VAL_FIELD_DESC);
         this.stringVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.binaryVal != null) {
+      if (binaryVal != null) {
         oprot.writeFieldBegin(BINARY_VAL_FIELD_DESC);
         this.binaryVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.structVal != null) {
+      if (structVal != null) {
         oprot.writeFieldBegin(STRUCT_VAL_FIELD_DESC);
         this.structVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optBoolVal != null) {
+      if (optBoolVal != null) {
         oprot.writeFieldBegin(OPT_BOOL_VAL_FIELD_DESC);
         this.optBoolVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optByteVal != null) {
+      if (optByteVal != null) {
         oprot.writeFieldBegin(OPT_BYTE_VAL_FIELD_DESC);
         this.optByteVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optI16Val != null) {
+      if (optI16Val != null) {
         oprot.writeFieldBegin(OPT_I16_VAL_FIELD_DESC);
         this.optI16Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optI32Val != null) {
+      if (optI32Val != null) {
         oprot.writeFieldBegin(OPT_I32_VAL_FIELD_DESC);
         this.optI32Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optI64Val != null) {
+      if (optI64Val != null) {
         oprot.writeFieldBegin(OPT_I64_VAL_FIELD_DESC);
         this.optI64Val.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optFloatVal != null) {
+      if (optFloatVal != null) {
         oprot.writeFieldBegin(OPT_FLOAT_VAL_FIELD_DESC);
         this.optFloatVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optDoubleVal != null) {
+      if (optDoubleVal != null) {
         oprot.writeFieldBegin(OPT_DOUBLE_VAL_FIELD_DESC);
         this.optDoubleVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optStringVal != null) {
+      if (optStringVal != null) {
         oprot.writeFieldBegin(OPT_STRING_VAL_FIELD_DESC);
         this.optStringVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optBinaryVal != null) {
+      if (optBinaryVal != null) {
         oprot.writeFieldBegin(OPT_BINARY_VAL_FIELD_DESC);
         this.optBinaryVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optStructVal != null) {
+      if (optStructVal != null) {
         oprot.writeFieldBegin(OPT_STRUCT_VAL_FIELD_DESC);
         this.optStructVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optListVal != null) {
+      if (optListVal != null) {
         oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
         this.optListVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optSetVal != null) {
+      if (optSetVal != null) {
         oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
         this.optSetVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optMapVal != null) {
+      if (optMapVal != null) {
         oprot.writeFieldBegin(OPT_MAP_VAL_FIELD_DESC);
         this.optMapVal.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.unionVal != null) {
+      if (unionVal != null) {
         oprot.writeFieldBegin(UNION_VAL_FIELD_DESC);
         this.unionVal.write0(oprot);
         oprot.writeFieldEnd();

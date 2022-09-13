@@ -23,6 +23,27 @@ public void write0(TProtocol oprot) throws TException {
   switch (this.id) {
   {{#struct:fields}}
   case _{{field:javaAllCapsName}}: {
+{{#field:hasAdapter?}}{{#field:type}}    {{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(({{> FieldType}})this.value);
+    if ({{field:javaName}} != null) {
+      oprot.writeFieldBegin({{field:javaTFieldName}});
+      {{#field:isContainer?}}
+      {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
+      {{/field:isContainer?}}{{!
+
+      }}{{#type:typedef_type}}
+      {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
+      {{/type:typedef_type}}{{!
+
+      }}{{^field:isContainer?}}{{^type:typedef_type}}{{!
+      }}{{/type:typedef_type}}{{/field:isContainer?}}{{!
+
+      }}{{#field:type}}
+      {{field:nestedDepth++}}{{> WriteType }}{{field:nestedDepth--}}
+      {{/field:type}}
+      oprot.writeFieldEnd();
+    }
+    {{/field:hasAdapter?}}
+    {{^field:hasAdapter?}}
     oprot.writeFieldBegin({{field:javaTFieldName}});
     {{#field:isContainer?}}
     {{> FieldType}} _iter{{field:nestedDepth}} = ({{> FieldType}})this.value;
@@ -40,6 +61,7 @@ public void write0(TProtocol oprot) throws TException {
     {{field:nestedDepth++}}{{> WriteType }}{{field:nestedDepth--}}
     {{/field:type}}
     oprot.writeFieldEnd();
+    {{/field:hasAdapter?}}
     break;
   }
   {{/struct:fields}}

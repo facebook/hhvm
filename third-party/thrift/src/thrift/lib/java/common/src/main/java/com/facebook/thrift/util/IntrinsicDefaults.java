@@ -183,6 +183,6 @@ public final class IntrinsicDefaults {
   }
 
   public static boolean isDefault(ByteBuf byteBuf) {
-    return defaultByteBuf() == byteBuf || byteBuf != null && byteBuf.isReadable();
+    return defaultByteBuf() == byteBuf || (byteBuf != null && !byteBuf.isReadable());
   }
 }

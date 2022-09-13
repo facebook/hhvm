@@ -444,12 +444,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
       oprot.writeI64(this.myIntField);
       oprot.writeFieldEnd();
-      if (this.myStringField != null) {
+      if (myStringField != null) {
         oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.myStringField);
         oprot.writeFieldEnd();
       }
-      if (this.myDataField != null) {
+      if (myDataField != null) {
         oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
         this.myDataField.write0(oprot);
         oprot.writeFieldEnd();
@@ -466,9 +466,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(IDEMPOTENT_FIELD_DESC);
       oprot.writeBool(this.idempotent);
       oprot.writeFieldEnd();
-      if (this.floatSet != null) {
+      if (floatSet != null) {
         oprot.writeFieldBegin(FLOAT_SET_FIELD_DESC);
-        Set<Float> _iter0 = this.floatSet;
+        Set<Float> _iter0 = floatSet;
         oprot.writeSetBegin(new TSet(TType.FLOAT, _iter0.size()));
         for (float _iter1 : _iter0) {
           oprot.writeFloat(_iter1);
@@ -476,7 +476,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.noHackCodegenField != null) {
+      if (noHackCodegenField != null) {
         oprot.writeFieldBegin(NO_HACK_CODEGEN_FIELD_FIELD_DESC);
         oprot.writeString(this.noHackCodegenField);
         oprot.writeFieldEnd();

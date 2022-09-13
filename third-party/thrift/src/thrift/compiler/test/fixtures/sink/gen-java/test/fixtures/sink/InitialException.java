@@ -107,7 +107,7 @@ public final class InitialException extends org.apache.thrift.TBaseException imp
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.reason != null) {
+      if (reason != null) {
         oprot.writeFieldBegin(REASON_FIELD_DESC);
         oprot.writeString(this.reason);
         oprot.writeFieldEnd();

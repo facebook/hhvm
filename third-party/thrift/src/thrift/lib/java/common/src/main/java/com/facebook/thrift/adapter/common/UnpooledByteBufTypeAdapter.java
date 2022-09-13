@@ -16,21 +16,25 @@
 
 package com.facebook.thrift.adapter.common;
 
-import com.facebook.thrift.protocol.ByteBufTProtocol;
+import com.facebook.thrift.adapter.TypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 /**
- * A type adapter that will return a ByteBuf that is an unpooled copy of the underlying binary
- * field. You do not need to free the ByteBuf returned from this adapter.
+ * An adapter that will return a ByteBuf that is an unpooled copy of the underlying binary field.
+ * You do not need to free the ByteBuf returned from this adapter.
  */
-public class UnpooledByteBufTypeAdapter extends AbstractByteBufTypeAdapter {
+public class UnpooledByteBufTypeAdapter implements TypeAdapter<ByteBuf, ByteBuf> {
   @Override
-  public ByteBuf fromThrift(ByteBufTProtocol protocol) {
-    ByteBuf slice = protocol.readBinaryAsSlice();
-    int size = slice.readableBytes();
+  public ByteBuf fromThrift(ByteBuf byteBuf) {
+    int size = byteBuf.readableBytes();
     ByteBuf buffer = Unpooled.buffer(size);
-    slice.readBytes(buffer);
+    byteBuf.readBytes(buffer);
     return buffer;
+  }
+
+  @Override
+  public ByteBuf toThrift(ByteBuf byteBuf) {
+    return byteBuf;
   }
 }

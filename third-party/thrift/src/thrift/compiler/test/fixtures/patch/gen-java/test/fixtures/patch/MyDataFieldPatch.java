@@ -179,12 +179,12 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.data1 != null) {
+      if (data1 != null) {
         oprot.writeFieldBegin(DATA1_FIELD_DESC);
         this.data1.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.data2 != null) {
+      if (data2 != null) {
         oprot.writeFieldBegin(DATA2_FIELD_DESC);
         this.data2.write0(oprot);
         oprot.writeFieldEnd();

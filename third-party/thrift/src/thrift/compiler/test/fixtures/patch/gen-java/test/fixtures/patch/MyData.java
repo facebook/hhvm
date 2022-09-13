@@ -182,14 +182,14 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
       int structStart = 0;
       int pos = 0;
       com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      java.util.Objects.requireNonNull(this.data1, "data1 must not be null");
+      java.util.Objects.requireNonNull(data1, "data1 must not be null");
       
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.data1)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(data1)) {
         oprot.writeFieldBegin(DATA1_FIELD_DESC);
         oprot.writeString(this.data1);
         oprot.writeFieldEnd();
       }
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.data2)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(data2)) {
         oprot.writeFieldBegin(DATA2_FIELD_DESC);
         oprot.writeI32(this.data2);
         oprot.writeFieldEnd();

@@ -143,7 +143,7 @@ public final class InnerUnionFieldPatch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.innerOption != null) {
+      if (innerOption != null) {
         oprot.writeFieldBegin(INNER_OPTION_FIELD_DESC);
         this.innerOption.write0(oprot);
         oprot.writeFieldEnd();

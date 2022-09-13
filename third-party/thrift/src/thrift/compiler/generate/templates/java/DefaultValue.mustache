@@ -53,7 +53,7 @@
 
     String constants
   }}{{#type:string?}}{{value:quotedString}}{{/type:string?}}{{!
-  }}{{#type:binary?}}{{value:quotedString}}.getBytes(){{/type:binary?}}{{!
+  }}{{#type:binary?}}{{#field:hasAdapter?}}io.netty.buffer.Unpooled.wrappedBuffer({{value:quotedString}}.getBytes()){{/field:hasAdapter?}}{{^field:hasAdapter?}}{{value:quotedString}}.getBytes(){{/field:hasAdapter?}}{{/type:binary?}}{{!
 
     Map constants
   }}{{#type:map?}}{{!

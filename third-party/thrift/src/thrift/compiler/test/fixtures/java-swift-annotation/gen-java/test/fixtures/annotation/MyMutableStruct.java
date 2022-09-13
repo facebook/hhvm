@@ -181,7 +181,7 @@ static {
       oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
       oprot.writeI64(this.intField);
       oprot.writeFieldEnd();
-      if (this.stringField != null) {
+      if (stringField != null) {
         oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.stringField);
         oprot.writeFieldEnd();

@@ -480,27 +480,27 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MAJOR_FIELD_DESC);
       oprot.writeI64(this.major);
       oprot.writeFieldEnd();
-      if (this._package != null) {
+      if (_package != null) {
         oprot.writeFieldBegin(PACKAGE_FIELD_DESC);
         oprot.writeString(this._package);
         oprot.writeFieldEnd();
       }
-      if (this.annotationWithQuote != null) {
+      if (annotationWithQuote != null) {
         oprot.writeFieldBegin(ANNOTATION_WITH_QUOTE_FIELD_DESC);
         oprot.writeString(this.annotationWithQuote);
         oprot.writeFieldEnd();
       }
-      if (this.class_ != null) {
+      if (class_ != null) {
         oprot.writeFieldBegin(CLASS__FIELD_DESC);
         oprot.writeString(this.class_);
         oprot.writeFieldEnd();
       }
-      if (this.annotationWithTrailingComma != null) {
+      if (annotationWithTrailingComma != null) {
         oprot.writeFieldBegin(ANNOTATION_WITH_TRAILING_COMMA_FIELD_DESC);
         oprot.writeString(this.annotationWithTrailingComma);
         oprot.writeFieldEnd();
       }
-      if (this.emptyAnnotations != null) {
+      if (emptyAnnotations != null) {
         oprot.writeFieldBegin(EMPTY_ANNOTATIONS_FIELD_DESC);
         oprot.writeString(this.emptyAnnotations);
         oprot.writeFieldEnd();
@@ -508,9 +508,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MY_ENUM_FIELD_DESC);
       oprot.writeI32(this.myEnum == null ? 0 : this.myEnum.getValue());
       oprot.writeFieldEnd();
-      if (this.cppTypeAnnotation != null) {
+      if (cppTypeAnnotation != null) {
         oprot.writeFieldBegin(CPP_TYPE_ANNOTATION_FIELD_DESC);
-        List<String> _iter0 = this.cppTypeAnnotation;
+        List<String> _iter0 = cppTypeAnnotation;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -518,7 +518,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.myUnion != null) {
+      if (myUnion != null) {
         oprot.writeFieldBegin(MY_UNION_FIELD_DESC);
         this.myUnion.write0(oprot);
         oprot.writeFieldEnd();

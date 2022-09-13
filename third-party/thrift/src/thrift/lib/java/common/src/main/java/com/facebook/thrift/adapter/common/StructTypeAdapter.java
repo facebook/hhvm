@@ -17,25 +17,6 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import com.facebook.thrift.payload.Reader;
 import com.facebook.thrift.payload.ThriftSerializable;
-import org.apache.thrift.protocol.TProtocol;
 
-public abstract class StructTypeAdapter<T, K extends ThriftSerializable> implements TypeAdapter<T> {
-  @Override
-  public final void toThrift(T t, TProtocol protocol) {
-    to(t).write0(protocol);
-  }
-
-  @Override
-  public final T fromThrift(TProtocol protocol) {
-    final K read = getReader().read(protocol);
-    return from(read);
-  }
-
-  protected abstract Reader<K> getReader();
-
-  protected abstract T from(K k);
-
-  protected abstract K to(T t);
-}
+public interface StructTypeAdapter<T> extends TypeAdapter<ThriftSerializable, T> {}

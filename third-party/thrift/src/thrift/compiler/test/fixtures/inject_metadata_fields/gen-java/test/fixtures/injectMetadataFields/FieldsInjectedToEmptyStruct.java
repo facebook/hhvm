@@ -140,7 +140,7 @@ public final class FieldsInjectedToEmptyStruct implements com.facebook.thrift.pa
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.injectedField != null) {
+      if (injectedField != null) {
         oprot.writeFieldBegin(INJECTED_FIELD_FIELD_DESC);
         oprot.writeString(this.injectedField);
         oprot.writeFieldEnd();

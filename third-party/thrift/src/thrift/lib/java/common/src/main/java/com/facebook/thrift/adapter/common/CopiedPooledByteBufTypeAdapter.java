@@ -16,16 +16,21 @@
 
 package com.facebook.thrift.adapter.common;
 
-import com.facebook.thrift.protocol.ByteBufTProtocol;
+import com.facebook.thrift.adapter.TypeAdapter;
 import io.netty.buffer.ByteBuf;
 
 /**
- * Use this type adapter if you want a ByteBuf but are ok with coping the underlying data to a new
- * ByeBuf. The ByteBuf this receives will be refcnt and should be freed when no longer being used.
+ * An adapter that will return a ByteBuf that is an pooled copy of the underlying binary field. You
+ * do not need to free the ByteBuf returned from this adapter.
  */
-public class CopiedPooledByteBufTypeAdapter extends AbstractByteBufTypeAdapter {
+public class CopiedPooledByteBufTypeAdapter implements TypeAdapter<ByteBuf, ByteBuf> {
   @Override
-  public ByteBuf fromThrift(ByteBufTProtocol protocol) {
-    return protocol.readBinaryAsSlice().copy();
+  public ByteBuf fromThrift(ByteBuf byteBuf) {
+    return byteBuf.copy();
+  }
+
+  @Override
+  public ByteBuf toThrift(ByteBuf byteBuf) {
+    return byteBuf;
   }
 }

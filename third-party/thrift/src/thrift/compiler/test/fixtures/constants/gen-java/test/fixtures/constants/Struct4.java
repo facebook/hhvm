@@ -215,12 +215,12 @@ public final class Struct4 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldBegin(A_FIELD_DESC);
       oprot.writeI32(this.a);
       oprot.writeFieldEnd();
-      if (this.b != null) {
+      if (b != null) {
         oprot.writeFieldBegin(B_FIELD_DESC);
         oprot.writeDouble(this.b);
         oprot.writeFieldEnd();
       }
-      if (this.c != null) {
+      if (c != null) {
         oprot.writeFieldBegin(C_FIELD_DESC);
         oprot.writeByte(this.c);
         oprot.writeFieldEnd();

@@ -281,9 +281,9 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.assign != null) {
+      if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        List<Short> _iter0 = this.assign;
+        List<Short> _iter0 = assign;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
@@ -294,9 +294,9 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
-      if (this.prepend != null) {
+      if (prepend != null) {
         oprot.writeFieldBegin(PREPEND_FIELD_DESC);
-        List<Short> _iter0 = this.prepend;
+        List<Short> _iter0 = prepend;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
@@ -304,9 +304,9 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.append != null) {
+      if (append != null) {
         oprot.writeFieldBegin(APPEND_FIELD_DESC);
-        List<Short> _iter0 = this.append;
+        List<Short> _iter0 = append;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);

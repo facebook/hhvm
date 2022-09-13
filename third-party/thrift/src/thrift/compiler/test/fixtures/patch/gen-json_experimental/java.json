@@ -17,14 +17,14 @@
           "adapterClassName" : {
             "name" : "adapterClassName",
             "key" : 1,
-            "lineno" : 34,
+            "lineno" : 36,
             "required" : "opt-in-req-out",
             "type" : "string"
           },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
-            "lineno" : 37,
+            "lineno" : 39,
             "required" : "opt-in-req-out",
             "type" : "string"
           }

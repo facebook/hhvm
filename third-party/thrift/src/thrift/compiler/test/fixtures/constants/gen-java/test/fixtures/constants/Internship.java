@@ -287,22 +287,22 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
       oprot.writeFieldBegin(WEEKS_FIELD_DESC);
       oprot.writeI32(this.weeks);
       oprot.writeFieldEnd();
-      if (this.title != null) {
+      if (title != null) {
         oprot.writeFieldBegin(TITLE_FIELD_DESC);
         oprot.writeString(this.title);
         oprot.writeFieldEnd();
       }
-      if (this.employer != null) {
+      if (employer != null) {
         oprot.writeFieldBegin(EMPLOYER_FIELD_DESC);
         oprot.writeI32(this.employer == null ? 0 : this.employer.getValue());
         oprot.writeFieldEnd();
       }
-      if (this.compensation != null) {
+      if (compensation != null) {
         oprot.writeFieldBegin(COMPENSATION_FIELD_DESC);
         oprot.writeDouble(this.compensation);
         oprot.writeFieldEnd();
       }
-      if (this.school != null) {
+      if (school != null) {
         oprot.writeFieldBegin(SCHOOL_FIELD_DESC);
         oprot.writeString(this.school);
         oprot.writeFieldEnd();

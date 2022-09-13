@@ -17,26 +17,6 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import com.facebook.thrift.protocol.ByteBufTProtocol;
-import org.apache.thrift.protocol.TProtocol;
+import io.netty.buffer.ByteBuf;
 
-/**
- * A Thrift Type Adapter exposes {@link ByteBufTProtocol protocol} directly
- *
- * @param <T>
- */
-public interface ByteBufTProtocolTypeAdapter<T> extends TypeAdapter<T> {
-  @Override
-  default void toThrift(T t, TProtocol protocol) {
-    toThrift(t, (ByteBufTProtocol) protocol);
-  }
-
-  void toThrift(T t, ByteBufTProtocol protocol);
-
-  @Override
-  default T fromThrift(TProtocol protocol) {
-    return fromThrift((ByteBufTProtocol) protocol);
-  }
-
-  T fromThrift(ByteBufTProtocol protocol);
-}
+public interface BinaryTypeAdapter<T> extends TypeAdapter<ByteBuf, T> {}

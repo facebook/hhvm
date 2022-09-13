@@ -143,7 +143,7 @@ public final class MyAnnotation implements com.facebook.thrift.payload.ThriftSer
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.signature != null) {
+      if (signature != null) {
         oprot.writeFieldBegin(SIGNATURE_FIELD_DESC);
         oprot.writeString(this.signature);
         oprot.writeFieldEnd();

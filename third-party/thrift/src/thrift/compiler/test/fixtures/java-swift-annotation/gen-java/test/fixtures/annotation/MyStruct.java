@@ -336,19 +336,19 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
       oprot.writeI64(this.intField);
       oprot.writeFieldEnd();
-      if (this.stringField != null) {
+      if (stringField != null) {
         oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.stringField);
         oprot.writeFieldEnd();
       }
-      if (this.detailField != null) {
+      if (detailField != null) {
         oprot.writeFieldBegin(DETAIL_FIELD_FIELD_DESC);
         oprot.writeString(this.detailField);
         oprot.writeFieldEnd();
       }
-      if (this.detailMap != null) {
+      if (detailMap != null) {
         oprot.writeFieldBegin(DETAIL_MAP_FIELD_DESC);
-        com.foo.FastIntLongMap _iter0 = this.detailMap;
+        com.foo.FastIntLongMap _iter0 = detailMap;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I64, _iter0.size()));
         for (Map.Entry<Integer, Long> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -357,12 +357,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.toto != null) {
+      if (toto != null) {
         oprot.writeFieldBegin(TITI_FIELD_DESC);
         oprot.writeString(this.toto);
         oprot.writeFieldEnd();
       }
-      if (this.password != null) {
+      if (password != null) {
         oprot.writeFieldBegin(PASSWORD_FIELD_DESC);
         oprot.writeString(this.password);
         oprot.writeFieldEnd();

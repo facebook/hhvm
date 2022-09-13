@@ -101,6 +101,12 @@ struct MyStructWithCustomDefault {
   1: i64 field1 = 1;
 }
 
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.ByteToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef byte adaptedByte
+
 @thrift.TerseWrite
 struct StructLevelTerseStruct {
   1: bool bool_field;
@@ -120,6 +126,7 @@ struct StructLevelTerseStruct {
   15: InnerTerseStruct inner_field;
   16: MyUnion union_field;
   17: TerseException exception_field;
+  18: adaptedByte adapted_byte_field;
 }
 
 struct FieldLevelTerseStruct {

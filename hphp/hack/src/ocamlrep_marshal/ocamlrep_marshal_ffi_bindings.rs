@@ -30,7 +30,7 @@ unsafe extern "C" fn ocamlrep_marshal_input_value_from_string(
         let offset = usize::from_ocaml(ofs).unwrap();
         let str = ocamlrep::bytes_from_ocamlrep(ocamlrep::Value::from_bits(str)).unwrap();
         let str = &str[offset..];
-        let arena = ocamlrep::Arena::new();
-        ocamlrep_marshal::input_value(str, &arena).to_bits()
+        let pool = ocamlrep_ocamlpool::Pool::new();
+        ocamlrep_marshal::input_value(str, &pool).to_bits()
     })
 }

@@ -1635,7 +1635,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "hh_fanout_build_rust"
+name = "hh_fanout_build"
 version = "0.0.0"
 dependencies = [
  "dep_graph_delta",
@@ -1643,9 +1643,16 @@ dependencies = [
  "depgraph_writer",
  "env_logger 0.7.1",
  "log",
- "ocamlrep_ocamlpool",
  "parking_lot",
  "rayon",
+]
+
+[[package]]
+name = "hh_fanout_build_rust"
+version = "0.0.0"
+dependencies = [
+ "hh_fanout_build",
+ "ocamlrep_ocamlpool",
 ]
 
 [[package]]

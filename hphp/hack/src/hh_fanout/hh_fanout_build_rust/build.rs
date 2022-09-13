@@ -22,7 +22,6 @@ use depgraph_writer::DepGraphWriter;
 use depgraph_writer::HashListIndex;
 use depgraph_writer::ShardedLookupTableWriter;
 use log::info;
-use ocamlrep_ocamlpool::ocaml_ffi;
 use parking_lot::Mutex;
 use rayon::prelude::*;
 
@@ -348,7 +347,7 @@ fn extend_edges_from_dep_graph(all_edges: &Edges, graph: &DepGraph<'_>) {
     });
 }
 
-fn main(
+pub fn build(
     allow_empty: bool,
     incremental: Option<OsString>,
     new_edges_dir: Option<OsString>,
@@ -481,17 +480,5 @@ fn main(
     w.write_indexer_and_finalize()?;
 
     info!("Done");
-    std::process::exit(0)
-}
-
-ocaml_ffi! {
-  fn hh_fanout_build_main(
-    allow_empty: bool,
-    incremental: Option<OsString>,
-    new_edges_dir: Option<OsString>,
-    delta_file: Option<OsString>,
-    output: OsString,
-  ) {
-    main(allow_empty, incremental, new_edges_dir, delta_file, output).unwrap();
-  }
+    Ok(())
 }

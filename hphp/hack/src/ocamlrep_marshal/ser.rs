@@ -1,6 +1,8 @@
 // Initially generatd by c2rust of 'extern.c' at revision:
 // `f14c8ff3f8a164685bc24184fba84904391e378e`.
 
+use std::io::Read;
+use std::io::Seek;
 use std::io::Write;
 use std::mem::MaybeUninit;
 
@@ -152,7 +154,7 @@ fn store64(dst: &mut impl Write, n: i64) {
 }
 
 #[repr(C)]
-struct State<'a> {
+struct State<'a, W: Write> {
     flags: ExternFlags, // logical or of some of the flags
 
     obj_counter: usize, // Number of objects emitted so far
@@ -165,12 +167,13 @@ struct State<'a> {
     // Hash table to record already marshalled objects
     pos_table: PositionTable<'a>,
 
-    // To buffer the output
-    output: Vec<u8>,
+    // The output file or buffer we are writing to
+    output: W,
+    output_len: usize,
 }
 
-impl<'a> State<'a> {
-    fn new() -> Self {
+impl<'a, W: Write> State<'a, W> {
+    fn new(output: W) -> Self {
         Self {
             flags: ExternFlags::empty(),
             obj_counter: 0,
@@ -188,7 +191,8 @@ impl<'a> State<'a> {
                 entries: [].into(),
             },
 
-            output: vec![],
+            output,
+            output_len: 0,
         }
     }
 
@@ -297,18 +301,6 @@ impl<'a> State<'a> {
         };
     }
 
-    // To buffer the output
-
-    fn init_output(&mut self) {
-        self.output = Vec::with_capacity(SIZE_EXTERN_OUTPUT_BLOCK);
-    }
-
-    fn close_output(&mut self) {}
-
-    fn output_length(&mut self) -> usize {
-        self.output.len()
-    }
-
     // Panic raising (cleanup is handled by State's Drop impl)
 
     fn invalid_argument(&mut self, msg: &str) -> ! {
@@ -327,10 +319,12 @@ impl<'a> State<'a> {
 
     #[inline]
     fn write(&mut self, c: u8) {
+        self.output_len += 1;
         self.output.write_all(&[c]).unwrap();
     }
 
     fn writeblock(&mut self, data: &[u8]) {
+        self.output_len += data.len();
         self.output.write_all(data).unwrap();
     }
 
@@ -351,20 +345,24 @@ impl<'a> State<'a> {
     }
 
     fn writecode8(&mut self, code: u8, val: i8) {
+        self.output_len += 2;
         self.output.write_all(&[code, val as u8]).unwrap();
     }
 
     fn writecode16(&mut self, code: u8, val: i16) {
+        self.output_len += 3;
         self.output.write_all(&[code]).unwrap();
         store16(&mut self.output, val);
     }
 
     fn writecode32(&mut self, code: u8, val: i32) {
+        self.output_len += 5;
         self.output.write_all(&[code]).unwrap();
         store32(&mut self.output, val);
     }
 
     fn writecode64(&mut self, code: u8, val: i64) {
+        self.output_len += 9;
         self.output.write_all(&[code]).unwrap();
         store64(&mut self.output, val);
     }
@@ -617,10 +615,8 @@ impl<'a> State<'a> {
         self.size_64 = 0;
         // Marshal the object
         self.extern_rec(v);
-        // Record end of output
-        self.close_output();
         // Write the header
-        let res_len = self.output_length();
+        let res_len = self.output_len;
         if res_len >= (1 << 32) || self.size_32 >= (1 << 32) || self.size_64 >= (1 << 32) {
             // The object is too big for the small header format.
             // Fail if we are in compat32 mode, or use big header.
@@ -646,19 +642,30 @@ impl<'a> State<'a> {
     }
 }
 
-pub fn output_value<W: std::io::Write>(
+pub fn output_value<W: Read + Write + Seek>(
     w: &mut W,
     v: Value<'_>,
     flags: ExternFlags,
 ) -> std::io::Result<()> {
     let mut header: [u8; 32] = [0; 32];
     let mut header_len = 0;
-    let mut s: State<'_> = State::new();
-    s.init_output();
+    // At this point we don't know the size of the header.
+    // Guess that it is small, and fix up later if not.
+    w.seek(std::io::SeekFrom::Start(0))?;
+    w.write_all(&[0; 20])?;
+    let mut s = State::new(&mut *w);
     s.extern_value(v, flags, &mut header, &mut header_len);
-    let output = std::mem::take(&mut s.output);
     drop(s);
+    w.flush()?;
+    if header_len != 20 {
+        // Bad guess! Need to shift the output to make room for big header.
+        w.seek(std::io::SeekFrom::Start(20))?;
+        let mut output = vec![];
+        w.read_to_end(&mut output)?;
+        w.seek(std::io::SeekFrom::Start(header_len as u64))?;
+        w.write_all(&output)?;
+    }
+    w.seek(std::io::SeekFrom::Start(0))?;
     w.write_all(&header[0..header_len])?;
-    w.write_all(&output)?;
     w.flush()
 }

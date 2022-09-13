@@ -15,8 +15,8 @@ unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(
     ocamlrep_ocamlpool::catch_unwind(|| {
         let v = ocamlrep::Value::from_bits(v);
         let flags = ocamlrep_marshal::ExternFlags::from_ocaml(flags).unwrap();
-        let mut vec = vec![];
-        ocamlrep_marshal::output_value(&mut vec, v, flags).unwrap();
-        ocamlrep_ocamlpool::to_ocaml(&vec)
+        let mut cursor = std::io::Cursor::new(vec![]);
+        ocamlrep_marshal::output_value(&mut cursor, v, flags).unwrap();
+        ocamlrep_ocamlpool::to_ocaml(&cursor.into_inner())
     })
 }

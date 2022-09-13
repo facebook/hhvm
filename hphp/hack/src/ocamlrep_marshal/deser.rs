@@ -25,7 +25,6 @@ use libc::c_ulong;
 use libc::c_ushort;
 use libc::c_void;
 use libc::memcpy;
-use libc::snprintf;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
@@ -53,8 +52,6 @@ extern "C" {
     fn caml_alloc_for_heap(request: asize_t) -> *mut c_char;
     fn caml_free_for_heap(mem: *mut c_char);
     fn caml_add_to_heap(mem: *mut c_char) -> c_int;
-    fn caml_failwith(msg: *const c_char) -> !;
-    fn caml_invalid_argument(msg: *const c_char) -> !;
     fn caml_stat_alloc_noexc(_: asize_t) -> caml_stat_block;
     fn caml_raise_out_of_memory() -> !;
     fn caml_stat_free(_: caml_stat_block);
@@ -329,6 +326,14 @@ impl intern_state<'_> {
             stack: Vec::with_capacity(intern_state::INTERN_STACK_INIT_SIZE),
         }
     }
+
+    fn invalid_argument(&mut self, msg: &str) -> ! {
+        panic!("{}", msg);
+    }
+
+    fn failwith(&mut self, msg: &str) -> ! {
+        panic!("{}", msg);
+    }
 }
 
 #[inline]
@@ -418,7 +423,7 @@ unsafe fn intern_cleanup(is: &mut intern_state<'_>) {
 unsafe fn readfloat(is: &mut intern_state<'_>, dest: *mut c_double, code: c_uint) {
     if std::mem::size_of::<c_double>() != 8 {
         intern_cleanup(is);
-        caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
+        is.invalid_argument("input_value: non-standard floats");
     }
     readblock(is, dest as *mut c_void, 8 as intnat);
 
@@ -434,7 +439,7 @@ unsafe fn readfloat(is: &mut intern_state<'_>, dest: *mut c_double, code: c_uint
 unsafe fn readfloats(is: &mut intern_state<'_>, dest: *mut c_double, len: mlsize_t, code: c_uint) {
     if std::mem::size_of::<c_double>() != 8 {
         intern_cleanup(is);
-        caml_invalid_argument(b"input_value: non-standard floats\x00".as_ptr() as *const c_char);
+        is.invalid_argument("input_value: non-standard floats");
     }
     readblock(is, dest as *mut c_void, (len * 8) as intnat);
 
@@ -637,8 +642,7 @@ unsafe fn intern_rec<'a>(is: &mut intern_state<'a>, mut dest: *mut Value<'a>) {
                             }
                             _ => {
                                 intern_cleanup(is);
-                                caml_failwith(b"input_value: ill-formed message\x00".as_ptr()
-                                    as *const c_char);
+                                is.failwith("input_value_from_string: ill-formed message");
                             }
                         }
                         match current_block {
@@ -874,12 +878,7 @@ unsafe fn intern_end<'a>(is: &mut intern_state<'a>, mut res: value, whsize: mlsi
     caml__temp_result
 }
 
-unsafe fn parse_header(
-    is: &mut intern_state<'_>,
-    fun_name: *mut c_char,
-    mut h: *mut marshal_header,
-) {
-    let mut errmsg: [c_char; 100] = [0; 100];
+unsafe fn parse_header(is: &mut intern_state<'_>, mut h: *mut marshal_header) {
     (*h).magic = read32u(is);
     match (*h).magic {
         MAGIC_NUMBER_SMALL => {
@@ -896,16 +895,7 @@ unsafe fn parse_header(
             (*h).num_objects = read64u(is);
             (*h).whsize = read64u(is)
         }
-        _ => {
-            errmsg[((std::mem::size_of::<[c_char; 100]>() as c_ulong) - 1) as usize] = 0;
-            snprintf(
-                errmsg.as_mut_ptr() as *mut c_char,
-                ((std::mem::size_of::<[c_char; 100]>() as c_ulong) - 1) as usize,
-                b"%s: bad object\x00".as_ptr() as *const c_char,
-                fun_name,
-            );
-            caml_failwith(errmsg.as_mut_ptr());
-        }
+        _ => is.failwith("input_value_from_string: bad object"),
     };
 }
 
@@ -954,13 +944,9 @@ unsafe fn input_val_from_string<'a>(
         Byte_u_ptr_mut(str, ofs as usize) as *mut c_void,
         std::ptr::null_mut(),
     );
-    parse_header(
-        is,
-        b"input_val_from_string\x00".as_ptr() as *mut c_char,
-        &mut h,
-    );
+    parse_header(is, &mut h);
     if ((ofs + h.header_len as c_long) as c_ulong) + h.data_len > caml_string_length(str) {
-        caml_failwith(b"input_val_from_string: bad length\x00".as_ptr() as *const c_char);
+        is.failwith("input_val_from_string: bad length");
     }
     // Allocate result
     intern_alloc(is, h.whsize, h.num_objects);

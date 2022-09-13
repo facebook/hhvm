@@ -53,7 +53,7 @@ jobs:
       if: matrix.package != 'hhvm_impure'
     - run: hhvm --version
       if: matrix.package != 'hhvm_impure'
-    - run: nix flake check --print-build-logs ${{matrix.nix_flags}} "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+    - run: nix flake check --print-build-logs ${{matrix.nix_flags}} "git+file://$(pwd)?submodules=1&shallow=1#checks.x86_64-linux.${{matrix.package}}"
     - name: Build the deb package
       if: runner.os == 'Linux' && matrix.package != 'hhvm_impure'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"

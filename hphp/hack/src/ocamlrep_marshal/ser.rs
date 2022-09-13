@@ -265,7 +265,7 @@ impl<'a, W: Write> State<'a, W> {
     /// If not, set `*h_out` to the hash value appropriate for
     /// `record_location` and return false.
     #[inline]
-    fn lookup_position(&mut self, obj: Value<'a>, pos_out: &mut usize, h_out: &mut usize) -> bool {
+    fn lookup_position(&self, obj: Value<'a>, pos_out: &mut usize, h_out: &mut usize) -> bool {
         let mut h: usize = hash(obj, self.pos_table.shift);
         loop {
             if !bitvect_test(&self.pos_table.present, h) {

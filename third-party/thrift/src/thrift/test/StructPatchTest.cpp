@@ -482,9 +482,9 @@ TEST(UnionPatchTest, Ensure) {
 
 TEST(UnionPatchTest, Patch) {
   MyUnionPatch patch;
-  *patch.patch()->option1() = "Hi";
+  *patch.patchIfSet()->option1() = "Hi";
   patch.ensure().option1_ref() = "Bye";
-  *patch.patch()->option1() += " World!";
+  *patch.patchIfSet()->option1() += " World!";
 
   MyUnion hi, bye;
   hi.option1_ref() = "Hi World!";
@@ -503,7 +503,7 @@ TEST(UnionPatchTest, Patch) {
 
 TEST(UnionPatchTest, PatchInner) {
   MyUnionPatch patch;
-  *patch.patch()->option3()->patch()->option1() = "World";
+  *patch.patchIfSet()->option3()->patchIfSet()->option1() = "World";
 
   MyUnion a, b;
   a.option3_ref().ensure().option1_ref() = "Hello";

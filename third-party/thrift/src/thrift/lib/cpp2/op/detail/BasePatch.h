@@ -321,7 +321,7 @@ class BaseEnsurePatch : public BasePatch<Patch, Derived> {
   void clear() { resetAnd().clear() = true; }
 
   // Patch any set value.
-  FOLLY_NODISCARD value_patch_type& patch() {
+  FOLLY_NODISCARD value_patch_type& patchIfSet() {
     if (hasValue(data_.ensure())) {
       return *data_.patch();
     } else if (*data_.clear()) {

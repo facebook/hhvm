@@ -169,7 +169,7 @@ class ChildProcess {
    * The provided pipeWriteCallback allows sending data to the input stream.
    * communicate() will return with the pair of output and error streams once
    * they have been completely consumed. */
-  std::pair<w_string, w_string> communicate(
+  std::pair<std::optional<w_string>, std::optional<w_string>> communicate(
       pipeWriteCallback writeCallback = [](FileDescriptor&) {
         // If not provided by the caller, we're just going to close the input
         // stream
@@ -178,8 +178,10 @@ class ChildProcess {
 
   // these are public for the sake of testing.  You should use the
   // communicate() method instead of calling these directly.
-  std::pair<w_string, w_string> pollingCommunicate(pipeWriteCallback writable);
-  std::pair<w_string, w_string> threadedCommunicate(pipeWriteCallback writable);
+  std::pair<std::optional<w_string>, std::optional<w_string>>
+  pollingCommunicate(pipeWriteCallback writable);
+  std::pair<std::optional<w_string>, std::optional<w_string>>
+  threadedCommunicate(pipeWriteCallback writable);
 
   /**
    * Return the maximum number of platform characters allowed in the command
@@ -194,6 +196,6 @@ class ChildProcess {
   int status_;
   std::unordered_map<int, std::unique_ptr<Pipe>> pipes_;
 
-  folly::Future<w_string> readPipe(int fd);
+  folly::Future<std::optional<w_string>> readPipe(int fd);
 };
 } // namespace watchman

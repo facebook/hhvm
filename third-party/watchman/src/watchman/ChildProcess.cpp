@@ -423,8 +423,8 @@ std::unique_ptr<Pipe> ChildProcess::takeStdin() {
   return pipe;
 }
 
-std::pair<w_string, w_string> ChildProcess::communicate(
-    pipeWriteCallback writeCallback) {
+std::pair<std::optional<w_string>, std::optional<w_string>>
+ChildProcess::communicate(pipeWriteCallback writeCallback) {
 #ifdef _WIN32
   return threadedCommunicate(writeCallback);
 #else
@@ -433,8 +433,8 @@ std::pair<w_string, w_string> ChildProcess::communicate(
 }
 
 #ifndef _WIN32
-std::pair<w_string, w_string> ChildProcess::pollingCommunicate(
-    pipeWriteCallback writeCallback) {
+std::pair<std::optional<w_string>, std::optional<w_string>>
+ChildProcess::pollingCommunicate(pipeWriteCallback writeCallback) {
   std::unordered_map<int, std::string> outputs;
 
   for (auto& it : pipes_) {
@@ -584,11 +584,11 @@ std::pair<w_string, w_string> ChildProcess::pollingCommunicate(
     watchman::log(watchman::DBG, "remaining pipes ", pipes_.size(), "\n");
   }
 
-  auto optBuffer = [&](int fd) -> w_string {
+  auto optBuffer = [&](int fd) -> std::optional<w_string> {
     auto it = outputs.find(fd);
     if (it == outputs.end()) {
       watchman::log(watchman::DBG, "communicate fd ", fd, " nullptr\n");
-      return nullptr;
+      return std::nullopt;
     }
     watchman::log(
         watchman::DBG, "communicate fd ", fd, " gives ", it->second, "\n");
@@ -602,10 +602,10 @@ std::pair<w_string, w_string> ChildProcess::pollingCommunicate(
 /** Spawn a thread to read from the pipe connected to the specified fd.
  * Returns a Future that will hold a string with the entire output from
  * that stream. */
-folly::Future<w_string> ChildProcess::readPipe(int fd) {
+folly::Future<std::optional<w_string>> ChildProcess::readPipe(int fd) {
   auto it = pipes_.find(fd);
   if (it == pipes_.end()) {
-    return folly::makeFuture(w_string(nullptr));
+    return std::nullopt;
   }
 
   auto p = std::make_shared<folly::Promise<w_string>>();
@@ -636,8 +636,8 @@ folly::Future<w_string> ChildProcess::readPipe(int fd) {
  * It is intended to be used on Windows where there is no reasonable
  * way to carry out a non-blocking read on a pipe.  We compile and
  * test it on all platforms to make it easier to avoid regressions. */
-std::pair<w_string, w_string> ChildProcess::threadedCommunicate(
-    pipeWriteCallback writeCallback) {
+std::pair<std::optional<w_string>, std::optional<w_string>>
+ChildProcess::threadedCommunicate(pipeWriteCallback writeCallback) {
   auto outFuture = readPipe(STDOUT_FILENO);
   auto errFuture = readPipe(STDERR_FILENO);
 

@@ -31,12 +31,12 @@ TEST(ChildProcess, pipe) {
   auto outputs = echo.communicate();
   EXPECT_EQ(0, echo.wait())
       << "\nstdout:\n"
-      << outputs.first << "\nstderr:" << outputs.second << "\n";
+      << outputs.first.value() << "\nstderr:" << outputs.second.value() << "\n";
 
-  w_string_piece line(outputs.first);
+  w_string_piece line(outputs.first.value());
   EXPECT_TRUE(line.startsWith("hello"))
       << "\nstdout:\n"
-      << outputs.first << "\nstderr:" << outputs.second << "\n";
+      << outputs.first.value() << "\nstderr:" << outputs.second.value() << "\n";
 }
 
 void test_pipe_input(bool threaded) {
@@ -66,7 +66,7 @@ void test_pipe_input(bool threaded) {
   cat.wait();
 
   std::vector<std::string> resultLines;
-  w_string_piece(outputs.first).split(resultLines, '\n');
+  w_string_piece(outputs.first.value()).split(resultLines, '\n');
   EXPECT_EQ(resultLines.size(), 3);
   EXPECT_EQ(resultLines, expected);
 #else
@@ -83,7 +83,7 @@ TEST(ChildProcess, stresstest_pipe_output) {
     opts.pipeStdout();
     ChildProcess proc({"head", "-n20", "/dev/urandom"}, std::move(opts));
     auto outputs = proc.communicate();
-    w_string_piece out(outputs.first);
+    w_string_piece out(outputs.first.value());
     proc.wait();
     if (out.empty() || out[out.size() - 1] != '\n') {
       okay = false;

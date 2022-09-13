@@ -41,8 +41,10 @@ GitResult runGit(
   auto outputs = proc.communicate();
   auto status = proc.wait();
   if (status) {
-    auto output = std::string{outputs.first.view()};
-    auto error = std::string{outputs.second.view()};
+    auto output =
+        std::string{outputs.first ? outputs.first->view() : std::string_view{}};
+    auto error = std::string{
+        outputs.second ? outputs.second->view() : std::string_view{}};
     replaceEmbeddedNulls(output);
     replaceEmbeddedNulls(error);
 
@@ -55,7 +57,11 @@ GitResult runGit(
         status);
   }
 
-  return GitResult{std::move(outputs.first)};
+  if (outputs.first) {
+    return GitResult{std::move(*outputs.first)};
+  } else {
+    return GitResult{""};
+  }
 }
 
 } // namespace

@@ -46,7 +46,6 @@ extern "C" {
     fn caml_alloc_for_heap(request: asize_t) -> *mut c_char;
     fn caml_free_for_heap(mem: *mut c_char);
     fn caml_add_to_heap(mem: *mut c_char) -> c_int;
-    fn caml_stat_alloc_noexc(_: asize_t) -> caml_stat_block;
     fn caml_raise_out_of_memory() -> !;
     fn caml_stat_free(_: caml_stat_block);
     fn caml_alloc_small_dispatch(_: intnat, _: c_int, _: c_int, _: *mut c_uchar);
@@ -289,7 +288,7 @@ struct State<'a> {
     // If non-NULL, point to new heap chunk allocated with caml_alloc_for_heap.
     obj_counter: asize_t,
     // Count how many objects seen so far
-    intern_obj_table: *mut Value<'a>,
+    intern_obj_table: Vec<Value<'a>>,
     // The pointers to objects already seen
     intern_color: color_t,
     // Color to assign to newly created headers
@@ -313,7 +312,7 @@ impl<'a> State<'a> {
             intern_dest: std::ptr::null_mut(),
             intern_extra_block: std::ptr::null_mut(),
             obj_counter: 0,
-            intern_obj_table: std::ptr::null_mut(),
+            intern_obj_table: Vec::new(),
             intern_color: 0,
             intern_header: Header::from_bits(0),
             intern_block: Value::from_bits(0),
@@ -388,10 +387,7 @@ impl<'a> State<'a> {
             caml_stat_free(self.intern_input as caml_stat_block);
             self.intern_input = std::ptr::null_mut();
         }
-        if !self.intern_obj_table.is_null() {
-            caml_stat_free(self.intern_obj_table as caml_stat_block);
-            self.intern_obj_table = std::ptr::null_mut();
-        }
+        self.intern_obj_table.clear();
         if !self.intern_extra_block.is_null() {
             // free newly allocated heap chunk
             caml_free_for_heap(self.intern_extra_block);
@@ -578,11 +574,8 @@ impl<'a> State<'a> {
                                 }
                                 CODE_DOUBLE_LITTLE | CODE_DOUBLE_BIG => {
                                     v = Val_hp(self.intern_dest);
-                                    if !self.intern_obj_table.is_null() {
-                                        let fresh5 = self.obj_counter;
-                                        self.obj_counter += 1;
-                                        *self.intern_obj_table.offset(fresh5 as isize) = v
-                                    }
+                                    self.obj_counter += 1;
+                                    self.intern_obj_table.push(v);
                                     *self.intern_dest = Make_header(
                                         ocamlrep::DOUBLE_WOSIZE as c_ulong,
                                         ocamlrep::DOUBLE_TAG as tag_t,
@@ -637,16 +630,13 @@ impl<'a> State<'a> {
                                 _ => {
                                     match current_block {
                                         READ_SHARED_LABEL => {
-                                            v = *self.intern_obj_table.offset((self.obj_counter - ofs) as isize)
+                                            v = self.intern_obj_table[(self.obj_counter - ofs) as usize];
                                         }
                                         _ /* READ_DOUBLE_ARRAY_LABEL */ => {
                                             size = len * ocamlrep::DOUBLE_WOSIZE as c_ulong;
                                             v = Val_hp(self.intern_dest);
-                                            if !self.intern_obj_table.is_null() {
-                                                let fresh6 = self.obj_counter;
-                                                self.obj_counter += 1;
-                                                *self.intern_obj_table.offset(fresh6 as isize) = v
-                                            }
+                                            self.obj_counter += 1;
+                                            self.intern_obj_table.push(v);
                                             *self.intern_dest = Make_header(size, ocamlrep::DOUBLE_ARRAY_TAG as tag_t, self.intern_color);
                                             self.intern_dest = self.intern_dest.offset((1 + size) as isize);
                                             self.readfloats(v.to_bits() as *mut c_double, len, code);
@@ -662,11 +652,8 @@ impl<'a> State<'a> {
                             _ /* READ_STRING_LABEL */ => {
                                 size = (len + (std::mem::size_of::<value>() as c_ulong)) / (std::mem::size_of::<value>() as c_ulong);
                                 v = Val_hp(self.intern_dest);
-                                if !self.intern_obj_table.is_null() {
-                                    let fresh4 = self.obj_counter;
-                                    self.obj_counter += 1;
-                                    *self.intern_obj_table.offset(fresh4 as isize) = v
-                                }
+                                self.obj_counter += 1;
+                                self.intern_obj_table.push(v);
                                 *self.intern_dest = Make_header(size, ocamlrep::STRING_TAG as tag_t, self.intern_color);
                                 self.intern_dest = self.intern_dest.offset((1 + size) as isize);
                                 *(Field_ptr_mut(v.to_bits() as value, (size - 1) as usize)) = 0;
@@ -683,11 +670,8 @@ impl<'a> State<'a> {
                                 v = Atom(tag as isize)
                             } else {
                                 v = Val_hp(self.intern_dest);
-                                if !self.intern_obj_table.is_null() {
-                                    let fresh3 = self.obj_counter;
-                                    self.obj_counter += 1;
-                                    *self.intern_obj_table.offset(fresh3 as isize) = v
-                                }
+                                self.obj_counter += 1;
+                                self.intern_obj_table.push(v);
                                 *self.intern_dest = Make_header(size, tag, self.intern_color);
                                 self.intern_dest = self.intern_dest.offset((1 + size) as isize);
                                 // For objects, we need to freshen the oid
@@ -795,15 +779,7 @@ impl<'a> State<'a> {
             self.intern_dest = Hp_val(self.intern_block);
         }
         self.obj_counter = 0;
-        if num_objects > 0 {
-            self.intern_obj_table =
-                caml_stat_alloc_noexc(num_objects * (std::mem::size_of::<value>() as c_ulong))
-                    as *mut Value<'a>;
-            if self.intern_obj_table.is_null() {
-                self.intern_cleanup();
-                caml_raise_out_of_memory();
-            }
-        };
+        self.intern_obj_table.reserve(num_objects as usize);
     }
 
     unsafe fn intern_add_to_heap(&mut self, _whsize: mlsize_t) -> *mut Header {

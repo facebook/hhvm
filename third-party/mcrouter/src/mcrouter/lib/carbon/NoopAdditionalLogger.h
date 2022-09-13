@@ -5,8 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "mcrouter/lib/carbon/ExternalCarbonConnectionStats.h"
-
 #pragma once
 
 // Forward declaration
@@ -65,23 +63,6 @@ class NoopNoBeforeAdditionalLogger {
       const facebook::memcache::mcrouter::RequestClass& /* unused */,
       const carbon::Result& /* unused */,
       const int64_t /* unused */) const {
-    return false;
-  }
-};
-
-class NoopExternalConnectionAdditionalLogger {
- public:
-  explicit NoopExternalConnectionAdditionalLogger(
-      carbon::ExternalCarbonConnectionLoggerOptions&) {}
-
-  void log(carbon::ExternalCarbonConnectionStats&) {}
-
-  bool shouldLog() const {
-    return false;
-  }
-
-  void setEnabledStatus(bool /* unused */) {}
-  bool getEnabledStatus() {
     return false;
   }
 };

@@ -539,7 +539,7 @@ pub struct StringifiedError {
 impl StringifiedError {
     pub fn from_anyhow(err: anyhow::Error) -> Self {
         let chain = err.chain().map(|c| format!("{}", c)).rev().collect();
-        let backtrace = format!("{}", err.backtrace());
+        let backtrace = format!("{:?}", err);
         Self { chain, backtrace }
     }
 

@@ -1,5 +1,3 @@
-#![allow(clippy::needless_late_init)]
-
 // Initially generatd by c2rust of 'extern.c' at revision:
 // `f14c8ff3f8a164685bc24184fba84904391e378e`.
 
@@ -216,11 +214,6 @@ impl<'a> State<'a> {
     fn resize_position_table(&mut self) {
         let new_size: usize;
         let new_shift: u8;
-        let new_present: Box<[usize]>;
-        let new_entries: Box<[MaybeUninit<ObjectPosition<'a>>]>;
-        let mut i: usize;
-        let mut h: usize;
-        let old: PositionTable<'a>;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
@@ -231,31 +224,27 @@ impl<'a> State<'a> {
             new_size = self.pos_table.size * 2;
             new_shift = self.pos_table.shift - 1;
         }
-        new_entries = Box::new_uninit_slice(new_size);
-        // SAFETY: zero is a valid value for the elements of `present`.
-        unsafe {
-            new_present = Box::new_zeroed_slice(bitvect_size(new_size)).assume_init();
-        }
-        old = std::mem::replace(
+        let old = std::mem::replace(
             &mut self.pos_table,
             PositionTable {
                 size: new_size,
                 shift: new_shift,
                 mask: new_size - 1,
                 threshold: threshold(new_size),
-                present: new_present,
-                entries: new_entries,
+                // SAFETY: zero is a valid value for the elements of `present`.
+                present: unsafe { Box::new_zeroed_slice(bitvect_size(new_size)).assume_init() },
+                entries: Box::new_uninit_slice(new_size),
             },
         );
 
         // Insert every entry of the old table in the new table
-        i = 0;
+        let mut i = 0;
         while i < old.size {
             if bitvect_test(&old.present, i) {
                 // SAFETY: We checked that the bit for `i` is set in
                 // `old.present`, so `entries[i]` must be initialized
                 let old_entry = unsafe { old.entries[i].assume_init() };
-                h = hash(old_entry.obj, self.pos_table.shift);
+                let mut h = hash(old_entry.obj, self.pos_table.shift);
                 while bitvect_test(&self.pos_table.present, h) {
                     h = (h + 1) & self.pos_table.mask
                 }
@@ -621,7 +610,6 @@ impl<'a> State<'a> {
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
     ) -> usize {
-        let res_len: usize;
         // Initializations
         self.flags = flags;
         self.obj_counter = 0;
@@ -632,7 +620,7 @@ impl<'a> State<'a> {
         // Record end of output
         self.close_output();
         // Write the header
-        res_len = self.output_length();
+        let res_len = self.output_length();
         if res_len >= (1 << 32) || self.size_32 >= (1 << 32) || self.size_64 >= (1 << 32) {
             // The object is too big for the small header format.
             // Fail if we are in compat32 mode, or use big header.

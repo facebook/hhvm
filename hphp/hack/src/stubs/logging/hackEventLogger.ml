@@ -262,8 +262,6 @@ let monitor_dead_but_typechecker_alive () = ()
 
 let client_established_connection _ = ()
 
-let client_establish_connection_exception _ = ()
-
 let client_connect_once ~t_start:_ = ()
 
 let client_connect_once_failure ~t_start:_ _ = ()

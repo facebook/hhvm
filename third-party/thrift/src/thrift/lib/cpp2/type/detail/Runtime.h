@@ -328,25 +328,13 @@ class BaseDyn : public Dyn, protected BaseDerived<Derived> {
 
   size_t size() const { return type_->size(ptr_); }
 
-  // TODO(afuller): Make these 'ensuring' gets, aka insert_or_assign.
-  template <typename Id>
-  MutT operator[](Id&& id) & {
-    return get(std::forward<Id>(id));
-  }
-  template <typename Id>
-  MutT operator[](Id&& id) && {
-    return get(std::forward<Id>(id));
-  }
-  template <typename Id>
-  ConstT operator[](Id&& id) const& {
-    return get(std::forward<Id>(id));
-  }
-  template <typename Id>
-  ConstT operator[](Id&& id) const&& {
-    return get(std::forward<Id>(id));
-  }
-
  protected:
+  template <typename IdT>
+  constexpr static bool is_index_type_v =
+      std::is_same<IdT, Ordinal>::value || std::is_integral<IdT>::value;
+  template <typename IdT, typename R = ConstT>
+  using if_not_index = std::enable_if_t<!is_index_type_v<IdT>, R>;
+
   static ConstT asRef(const std::string& name) {
     return ConstT::template to<type::string_t>(name);
   }

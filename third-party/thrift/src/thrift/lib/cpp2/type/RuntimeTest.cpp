@@ -165,7 +165,7 @@ TEST(RuntimeRefTest, Map) {
   EXPECT_THROW(ref.put(FieldId{1}, 2), std::logic_error);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
   EXPECT_EQ(ref["one"], 2);
-  EXPECT_THROW(ref["two"], std::out_of_range);
+  EXPECT_EQ(ref["two"], 0);
 
   ref.clear();
   EXPECT_TRUE(ref.empty());

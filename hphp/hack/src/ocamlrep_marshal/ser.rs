@@ -6,7 +6,6 @@
 
 use std::io::Write;
 
-use libc::c_int;
 use ocamlrep::Header;
 use ocamlrep::Value;
 
@@ -14,11 +13,13 @@ use crate::intext::*;
 
 // Flags affecting marshaling
 
-const NO_SHARING: c_int = 1; // Flag to ignore sharing
-const CLOSURES: c_int = 2; // Flag to allow marshaling code pointers
-const COMPAT_32: c_int = 4; // Flag to ensure that output can safely be read back on a 32-bit platform
+type Flags = u8;
 
-fn convert_flag_list(mut list: Value<'_>, flags: &[c_int]) -> Result<c_int, ocamlrep::FromError> {
+const NO_SHARING: Flags = 1; // Flag to ignore sharing
+const CLOSURES: Flags = 2; // Flag to allow marshaling code pointers
+const COMPAT_32: Flags = 4; // Flag to ensure that output can safely be read back on a 32-bit platform
+
+fn convert_flag_list(mut list: Value<'_>, flags: &[Flags]) -> Result<Flags, ocamlrep::FromError> {
     let mut res = 0;
     while !list.is_immediate() {
         let block = ocamlrep::from::expect_tuple(list, 2)?;
@@ -128,7 +129,7 @@ fn store64(dst: &mut impl Write, n: i64) {
 
 #[repr(C)]
 struct State<'a> {
-    extern_flags: c_int, // logical or of some of the flags
+    extern_flags: Flags, // logical or of some of the flags
 
     obj_counter: usize, // Number of objects emitted so far
     size_32: usize,     // Size in words of 32-bit block for struct.
@@ -590,7 +591,7 @@ impl<'a> State<'a> {
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
     ) -> usize {
-        static EXTERN_FLAG_VALUES: [c_int; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
+        static EXTERN_FLAG_VALUES: [Flags; 3] = [NO_SHARING, CLOSURES, COMPAT_32];
 
         let res_len: usize;
         // Parse flag list

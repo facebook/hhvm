@@ -13,7 +13,7 @@ fn main() -> Result<()> {
 
     // cc will normally only build a library - so we need to massage
     // it a little to build an exe.
-    let mut build = cc::Build::new();
+    let mut build = cc::Build::new().cpp(true);
     build.include("../../..");
     let compiler = build.get_compiler();
     let mut cmd = compiler.to_command();

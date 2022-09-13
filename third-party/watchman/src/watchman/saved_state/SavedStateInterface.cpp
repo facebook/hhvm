@@ -31,7 +31,7 @@ SavedStateInterface::SavedStateInterface(const json_ref& savedStateConfig) {
     }
     projectMetadata_ = json_to_w_string(*projectMetadata);
   } else {
-    projectMetadata_ = w_string();
+    projectMetadata_ = std::nullopt;
   }
 }
 

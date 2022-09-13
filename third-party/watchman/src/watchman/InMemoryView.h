@@ -67,7 +67,7 @@ class InMemoryFileResult final : public FileResult {
 
  private:
   const watchman_file* file_;
-  w_string dirName_;
+  std::optional<w_string> dirName_;
   InMemoryViewCaches& caches_;
   std::optional<w_string> symlinkTarget_;
   Result<FileResult::ContentHash> contentSha1_;

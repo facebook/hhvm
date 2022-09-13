@@ -302,20 +302,6 @@ impl<'a, W: Write> State<'a, W> {
         };
     }
 
-    // Panic raising (cleanup is handled by State's Drop impl)
-
-    fn invalid_argument(&mut self, msg: &str) -> ! {
-        panic!("{}", msg);
-    }
-
-    fn failwith(&mut self, msg: &str) -> ! {
-        panic!("{}", msg);
-    }
-
-    fn stack_overflow(&mut self) -> ! {
-        panic!("Stack overflow in marshaling value");
-    }
-
     // Write characters, integers, and blocks in the output buffer
 
     #[inline]
@@ -379,7 +365,7 @@ impl<'a, W: Write> State<'a, W> {
             self.writecode16(CODE_INT16, n as i16)
         } else if !(-(1 << 30)..(1 << 30)).contains(&n) {
             if self.flags.contains(ExternFlags::COMPAT_32) {
-                self.failwith("output_value: integer cannot be read back on 32-bit platform");
+                panic!("output_value: integer cannot be read back on 32-bit platform");
             }
             self.writecode64(CODE_INT64, n as i64)
         } else {
@@ -420,7 +406,7 @@ impl<'a, W: Write> State<'a, W> {
             let hd = Header::with_color(sz, tag, ocamlrep::Color::White).to_bits();
 
             if sz > 0x3FFFFF && self.flags.contains(ExternFlags::COMPAT_32) {
-                self.failwith("output_value: array cannot be read back on 32-bit platform");
+                panic!("output_value: array cannot be read back on 32-bit platform");
             }
             if hd < 1 << 32 {
                 self.writecode32(CODE_BLOCK32, hd as i32)
@@ -439,7 +425,7 @@ impl<'a, W: Write> State<'a, W> {
             self.writecode8(CODE_STRING8, len as i8)?;
         } else {
             if len > 0xFFFFFB && self.flags.contains(ExternFlags::COMPAT_32) {
-                self.failwith("output_value: string cannot be read back on 32-bit platform");
+                panic!("output_value: string cannot be read back on 32-bit platform");
             }
             if len < 1 << 32 {
                 self.writecode32(CODE_STRING32, len as i32)?;
@@ -465,7 +451,7 @@ impl<'a, W: Write> State<'a, W> {
             self.writecode8(CODE_DOUBLE_ARRAY8_NATIVE, nfloats as i8)?;
         } else {
             if nfloats > 0x1FFFFF && self.flags.contains(ExternFlags::COMPAT_32) {
-                self.failwith("output_value: float array cannot be read back on 32-bit platform");
+                panic!("output_value: float array cannot be read back on 32-bit platform");
             }
             if nfloats < 1 << 32 {
                 self.writecode32(CODE_DOUBLE_ARRAY32_NATIVE, nfloats as i32)?;
@@ -549,20 +535,20 @@ impl<'a, W: Write> State<'a, W> {
                                 self.record_location(v, h);
                             }
                             ocamlrep::ABSTRACT_TAG => {
-                                self.invalid_argument("output_value: abstract value (Abstract)");
+                                panic!("output_value: abstract value (Abstract)");
                             }
                             // INFIX_TAG represents an infix header inside a
                             // closure, and can only occur in blocks with tag
                             // CLOSURE_TAG
-                            ocamlrep::INFIX_TAG => self.invalid_argument(
-                                "output_value: marshaling of closures not implemented",
-                            ),
-                            ocamlrep::CUSTOM_TAG => self.invalid_argument(
-                                "output_value: marshaling of custom blocks not implemented",
-                            ),
-                            ocamlrep::CLOSURE_TAG => self.invalid_argument(
-                                "output_value: marshaling of closures not implemented",
-                            ),
+                            ocamlrep::INFIX_TAG => {
+                                panic!("output_value: marshaling of closures not implemented");
+                            }
+                            ocamlrep::CUSTOM_TAG => {
+                                panic!("output_value: marshaling of custom blocks not implemented");
+                            }
+                            ocamlrep::CLOSURE_TAG => {
+                                panic!("output_value: marshaling of closures not implemented");
+                            }
                             _ => {
                                 self.extern_header(sz, tag)?;
                                 self.size_32 += 1 + sz;
@@ -571,7 +557,7 @@ impl<'a, W: Write> State<'a, W> {
                                 // Remember that we still have to serialize fields 1 ... sz - 1
                                 if sz > 1 {
                                     if self.stack.len() + 1 >= EXTERN_STACK_MAX_SIZE {
-                                        self.stack_overflow();
+                                        panic!("Stack overflow in marshaling value");
                                     }
                                     self.stack.push(ExternItem {
                                         fields: &b.as_values().unwrap()[1..],
@@ -622,7 +608,7 @@ impl<'a, W: Write> State<'a, W> {
             // The object is too big for the small header format.
             // Fail if we are in compat32 mode, or use big header.
             if self.flags.contains(ExternFlags::COMPAT_32) {
-                self.failwith("output_value: object too big to be read back on 32-bit platform");
+                panic!("output_value: object too big to be read back on 32-bit platform");
             }
             store32(&mut header, MAGIC_NUMBER_BIG as i32)?;
             store32(&mut header, 0)?;

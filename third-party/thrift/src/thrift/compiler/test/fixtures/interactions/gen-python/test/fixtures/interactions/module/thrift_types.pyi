@@ -141,3 +141,178 @@ class _fbthrift_MyService_serialize_result_stream(_fbthrift_python_types._fbthri
         _typing.Union[
             int,
         ]]]: ...
+
+
+class _fbthrift_MyInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[int]
+    ex: _typing.Final[CustomException]
+
+    def __init__(
+        self, *, success: _typing.Optional[int] = ..., ex: _typing.Optional[CustomException]=...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            int,
+            CustomException,
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_ping_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_MyInteraction_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+
+    def __init__(
+        self, *, success: _typing.Optional[bool] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            bool,
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_frobnicate_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_frobnicate_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[int]
+
+    def __init__(
+        self, *, success: _typing.Optional[int] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            int,
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_ping_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_truthify_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_MyInteractionFast_truthify_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...
+
+
+class _fbthrift_MyInteractionFast_truthify_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[bool]):
+
+    def __init__(
+        self, *, success: _typing.Optional[bool] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            bool,
+        ]]]: ...
+
+
+class _fbthrift_SerialInteraction_frobnicate_args(_fbthrift_python_types.Struct):
+
+    def __init__(
+        self,
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None]]]: ...
+
+
+class _fbthrift_SerialInteraction_frobnicate_result(_fbthrift_python_types.Struct):
+    success: _typing.Final[None]
+
+    def __init__(
+        self, *, success: _typing.Optional[None] = ...
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            None,
+        ]]]: ...

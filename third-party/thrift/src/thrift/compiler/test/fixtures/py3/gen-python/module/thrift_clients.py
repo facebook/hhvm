@@ -19,7 +19,7 @@ from fbcode.thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from fbcode.thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
+from fbcode.thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
 import fbcode.thrift.python.types as _fbthrift_python_types
 import module.thrift_types
@@ -46,12 +46,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         async def get_five(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_five",
                 module.thrift_types._fbthrift_SimpleService_get_five_args(),
                 module.thrift_types._fbthrift_SimpleService_get_five_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -65,13 +65,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             num: int
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "add_five",
                 module.thrift_types._fbthrift_SimpleService_add_five_args(
                     num=num,),
                 module.thrift_types._fbthrift_SimpleService_add_five_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -84,12 +84,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         async def do_nothing(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "do_nothing",
                 module.thrift_types._fbthrift_SimpleService_do_nothing_args(),
                 module.thrift_types._fbthrift_SimpleService_do_nothing_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
     
         async def concat(
@@ -97,14 +97,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             first: str,
             second: str
         ) -> str:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat",
                 module.thrift_types._fbthrift_SimpleService_concat_args(
                     first=first,
                     second=second,),
                 module.thrift_types._fbthrift_SimpleService_concat_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -118,13 +118,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             simple_struct: module.thrift_types.SimpleStruct
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_value",
                 module.thrift_types._fbthrift_SimpleService_get_value_args(
                     simple_struct=simple_struct,),
                 module.thrift_types._fbthrift_SimpleService_get_value_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -138,13 +138,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             input: bool
         ) -> bool:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "negate",
                 module.thrift_types._fbthrift_SimpleService_negate_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_negate_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -158,13 +158,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             input: int
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "tiny",
                 module.thrift_types._fbthrift_SimpleService_tiny_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_tiny_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -178,13 +178,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             input: int
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "small",
                 module.thrift_types._fbthrift_SimpleService_small_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_small_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -198,13 +198,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             input: int
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "big",
                 module.thrift_types._fbthrift_SimpleService_big_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_big_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -218,13 +218,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             input: float
         ) -> float:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "two",
                 module.thrift_types._fbthrift_SimpleService_two_args(
                     input=input,),
                 module.thrift_types._fbthrift_SimpleService_two_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -237,12 +237,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         async def expected_exception(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "expected_exception",
                 module.thrift_types._fbthrift_SimpleService_expected_exception_args(),
                 module.thrift_types._fbthrift_SimpleService_expected_exception_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             if _fbthrift_resp.se is not None:
                 raise _fbthrift_resp.se
@@ -250,12 +250,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         async def unexpected_exception(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unexpected_exception",
                 module.thrift_types._fbthrift_SimpleService_unexpected_exception_args(),
                 module.thrift_types._fbthrift_SimpleService_unexpected_exception_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -269,13 +269,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             numbers: _typing.Sequence[int]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i16_list",
                 module.thrift_types._fbthrift_SimpleService_sum_i16_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i16_list_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -289,13 +289,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             numbers: _typing.Sequence[int]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i32_list",
                 module.thrift_types._fbthrift_SimpleService_sum_i32_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i32_list_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -309,13 +309,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             numbers: _typing.Sequence[int]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_i64_list",
                 module.thrift_types._fbthrift_SimpleService_sum_i64_list_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_i64_list_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -329,13 +329,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             words: _typing.Sequence[str]
         ) -> str:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "concat_many",
                 module.thrift_types._fbthrift_SimpleService_concat_many_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_concat_many_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -349,13 +349,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             items: _typing.Sequence[module.thrift_types.SimpleStruct]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "count_structs",
                 module.thrift_types._fbthrift_SimpleService_count_structs_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_count_structs_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -369,13 +369,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             numbers: _typing.AbstractSet[int]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_set",
                 module.thrift_types._fbthrift_SimpleService_sum_set_args(
                     numbers=numbers,),
                 module.thrift_types._fbthrift_SimpleService_sum_set_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -390,14 +390,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             words: _typing.AbstractSet[str],
             word: str
         ) -> bool:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contains_word",
                 module.thrift_types._fbthrift_SimpleService_contains_word_args(
                     words=words,
                     word=word,),
                 module.thrift_types._fbthrift_SimpleService_contains_word_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -412,14 +412,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             words: _typing.Mapping[str, str],
             key: str
         ) -> str:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_map_value",
                 module.thrift_types._fbthrift_SimpleService_get_map_value_args(
                     words=words,
                     key=key,),
                 module.thrift_types._fbthrift_SimpleService_get_map_value_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -433,13 +433,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             items: _typing.Mapping[str, module.thrift_types.SimpleStruct]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "map_length",
                 module.thrift_types._fbthrift_SimpleService_map_length_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_map_length_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -453,13 +453,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             items: _typing.Mapping[str, int]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "sum_map_values",
                 module.thrift_types._fbthrift_SimpleService_sum_map_values_args(
                     items=items,),
                 module.thrift_types._fbthrift_SimpleService_sum_map_values_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -473,13 +473,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             counter: module.thrift_types.ComplexStruct
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "complex_sum_i32",
                 module.thrift_types._fbthrift_SimpleService_complex_sum_i32_args(
                     counter=counter,),
                 module.thrift_types._fbthrift_SimpleService_complex_sum_i32_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -493,13 +493,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             counter: module.thrift_types.ComplexStruct
         ) -> str:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "repeat_name",
                 module.thrift_types._fbthrift_SimpleService_repeat_name_args(
                     counter=counter,),
                 module.thrift_types._fbthrift_SimpleService_repeat_name_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -512,12 +512,12 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
         async def get_struct(
             self
         ) -> module.thrift_types.SimpleStruct:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_struct",
                 module.thrift_types._fbthrift_SimpleService_get_struct_args(),
                 module.thrift_types._fbthrift_SimpleService_get_struct_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -531,13 +531,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             n: int
         ) -> _typing.Sequence[int]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "fib",
                 module.thrift_types._fbthrift_SimpleService_fib_args(
                     n=n,),
                 module.thrift_types._fbthrift_SimpleService_fib_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -551,13 +551,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             words: _typing.Sequence[str]
         ) -> _typing.AbstractSet[str]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "unique_words",
                 module.thrift_types._fbthrift_SimpleService_unique_words_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_unique_words_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -571,13 +571,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             words: _typing.Sequence[str]
         ) -> _typing.Mapping[str, int]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "words_count",
                 module.thrift_types._fbthrift_SimpleService_words_count_args(
                     words=words,),
                 module.thrift_types._fbthrift_SimpleService_words_count_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -591,13 +591,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             in_enum: module.thrift_types.AnEnum
         ) -> module.thrift_types.AnEnum:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "set_enum",
                 module.thrift_types._fbthrift_SimpleService_set_enum_args(
                     in_enum=in_enum,),
                 module.thrift_types._fbthrift_SimpleService_set_enum_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -612,14 +612,14 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             num_lists: int,
             num_items: int
         ) -> _typing.Sequence[_typing.Sequence[int]]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_lists",
                 module.thrift_types._fbthrift_SimpleService_list_of_lists_args(
                     num_lists=num_lists,
                     num_items=num_items,),
                 module.thrift_types._fbthrift_SimpleService_list_of_lists_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -633,13 +633,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             sentence: str
         ) -> _typing.Mapping[str, _typing.Mapping[str, int]]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "word_character_frequency",
                 module.thrift_types._fbthrift_SimpleService_word_character_frequency_args(
                     sentence=sentence,),
                 module.thrift_types._fbthrift_SimpleService_word_character_frequency_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -653,13 +653,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             some_words: str
         ) -> _typing.Sequence[_typing.AbstractSet[str]]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "list_of_sets",
                 module.thrift_types._fbthrift_SimpleService_list_of_sets_args(
                     some_words=some_words,),
                 module.thrift_types._fbthrift_SimpleService_list_of_sets_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -673,13 +673,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             struct_map: _typing.Mapping[str, _typing.Sequence[module.thrift_types.SimpleStruct]]
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "nested_map_argument",
                 module.thrift_types._fbthrift_SimpleService_nested_map_argument_args(
                     struct_map=struct_map,),
                 module.thrift_types._fbthrift_SimpleService_nested_map_argument_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -693,13 +693,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             word_chars: _typing.Sequence[_typing.Sequence[str]]
         ) -> str:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "make_sentence",
                 module.thrift_types._fbthrift_SimpleService_make_sentence_args(
                     word_chars=word_chars,),
                 module.thrift_types._fbthrift_SimpleService_make_sentence_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -713,13 +713,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             sets: _typing.Sequence[_typing.AbstractSet[int]]
         ) -> _typing.AbstractSet[int]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_union",
                 module.thrift_types._fbthrift_SimpleService_get_union_args(
                     sets=sets,),
                 module.thrift_types._fbthrift_SimpleService_get_union_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -733,13 +733,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             string_map: _typing.Sequence[_typing.Mapping[str, str]]
         ) -> _typing.AbstractSet[str]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_keys",
                 module.thrift_types._fbthrift_SimpleService_get_keys_args(
                     string_map=string_map,),
                 module.thrift_types._fbthrift_SimpleService_get_keys_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -753,13 +753,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             key: int
         ) -> float:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "lookup_double",
                 module.thrift_types._fbthrift_SimpleService_lookup_double_args(
                     key=key,),
                 module.thrift_types._fbthrift_SimpleService_lookup_double_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -773,13 +773,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             something: bytes
         ) -> bytes:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "retrieve_binary",
                 module.thrift_types._fbthrift_SimpleService_retrieve_binary_args(
                     something=something,),
                 module.thrift_types._fbthrift_SimpleService_retrieve_binary_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -793,13 +793,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             binaries: _typing.Sequence[bytes]
         ) -> _typing.AbstractSet[bytes]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contain_binary",
                 module.thrift_types._fbthrift_SimpleService_contain_binary_args(
                     binaries=binaries,),
                 module.thrift_types._fbthrift_SimpleService_contain_binary_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -813,13 +813,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             the_enum: _typing.Sequence[module.thrift_types.AnEnum]
         ) -> _typing.Sequence[module.thrift_types.AnEnum]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "contain_enum",
                 module.thrift_types._fbthrift_SimpleService_contain_enum_args(
                     the_enum=the_enum,),
                 module.thrift_types._fbthrift_SimpleService_contain_enum_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -833,13 +833,13 @@ class SimpleService(_fbthrift_python_Client["SimpleService.Async", "SimpleServic
             self,
             u: module.thrift_types.BinaryUnion
         ) -> module.thrift_types.BinaryUnionStruct:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "SimpleService",
                 "get_binary_union_struct",
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_args(
                     u=u,),
                 module.thrift_types._fbthrift_SimpleService_get_binary_union_struct_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1645,12 +1645,12 @@ class DerivedService(_fbthrift_python_Client["DerivedService.Async", "DerivedSer
         async def get_six(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "DerivedService",
                 "get_six",
                 module.thrift_types._fbthrift_DerivedService_get_six_args(),
                 module.thrift_types._fbthrift_DerivedService_get_six_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -1708,12 +1708,12 @@ class RederivedService(_fbthrift_python_Client["RederivedService.Async", "Rederi
         async def get_seven(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "RederivedService",
                 "get_seven",
                 module.thrift_types._fbthrift_RederivedService_get_seven_args(),
                 module.thrift_types._fbthrift_RederivedService_get_seven_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

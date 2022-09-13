@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.interactions.module.thrift_types
@@ -44,12 +44,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         async def foo(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "foo",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_foo_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
     
         async def interact(
@@ -57,13 +57,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             arg: int
         ) -> MyService_MyInteraction.Async:
             _fbthrift_interaction = self.createMyInteraction()
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "interact",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_args(
                     arg=arg,),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interact_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteraction",
                 created_interaction = _fbthrift_interaction,
@@ -74,12 +74,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self
         ) -> _typing.Tuple[MyService_MyInteractionFast.Async, int]:
             _fbthrift_interaction = self.createMyInteractionFast()
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "interactFast",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_interactFast_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="MyInteractionFast",
                 created_interaction = _fbthrift_interaction,
@@ -96,12 +96,12 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self
         ) -> _typing.Tuple[MyService_SerialInteraction.Async, int, _typing.AsyncGenerator[int, None]]:
             _fbthrift_interaction = self.createSerialInteraction()
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "serialize",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyService_serialize_result_stream),
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Factory,
                 interaction_name="SerialInteraction",
                 created_interaction = _fbthrift_interaction,
@@ -118,17 +118,17 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
         def createMyInteraction(
             self #MyService
         ) -> MyService_MyInteraction.Async:
-            return self._create_interaction("MyInteraction", MyService_MyInteraction.Async)  # type: ignore 
+            return self._create_interaction("MyInteraction", MyService_MyInteraction.Async)
     
         def createMyInteractionFast(
             self #MyService
         ) -> MyService_MyInteractionFast.Async:
-            return self._create_interaction("MyInteractionFast", MyService_MyInteractionFast.Async)  # type: ignore 
+            return self._create_interaction("MyInteractionFast", MyService_MyInteractionFast.Async)
     
         def createSerialInteraction(
             self #MyService
         ) -> MyService_SerialInteraction.Async:
-            return self._create_interaction("SerialInteraction", MyService_SerialInteraction.Async)  # type: ignore 
+            return self._create_interaction("SerialInteraction", MyService_SerialInteraction.Async)
     
     class Sync(_fbthrift_python_SyncClient):
         @staticmethod
@@ -199,12 +199,12 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         async def frobnicate(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_frobnicate_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -221,12 +221,12 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         async def ping(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.ping",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_ping_args(),
                 None,
-                qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -234,12 +234,12 @@ class MyService_MyInteraction(_fbthrift_python_Client["MyService_MyInteraction.A
         async def truthify(
             self
         ) -> _typing.AsyncGenerator[bool, None]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteraction.truthify",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteraction_truthify_result_stream),
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteraction",
             )
@@ -276,12 +276,12 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         async def frobnicate(
             self
         ) -> int:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_frobnicate_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -296,12 +296,12 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         async def ping(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.ping",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_ping_args(),
                 None,
-                qualifier = _fbthrift_FunctionQualifier.OneWay,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.OneWay,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -309,12 +309,12 @@ class MyService_MyInteractionFast(_fbthrift_python_Client["MyService_MyInteracti
         async def truthify(
             self
         ) -> _typing.AsyncGenerator[bool, None]:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "MyInteractionFast.truthify",
                 test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_args(),
                 (test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result, test.fixtures.interactions.module.thrift_types._fbthrift_MyInteractionFast_truthify_result_stream),
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="MyInteractionFast",
             )
@@ -351,12 +351,12 @@ class MyService_SerialInteraction(_fbthrift_python_Client["MyService_SerialInter
         async def frobnicate(
             self
         ) -> None:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "SerialInteraction.frobnicate",
                 test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_args(),
                 test.fixtures.interactions.module.thrift_types._fbthrift_SerialInteraction_frobnicate_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
                 interaction_position=_fbthrift_InteractionMethodPosition.Member,
                 interaction_name="SerialInteraction",
             )

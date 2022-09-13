@@ -1,0 +1,88 @@
+{{!
+
+  Copyright (c) Meta Platforms, Inc. and affiliates.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+
+}}{{!
+The argument and result types for functions on thrift services (and interactions) for typing stub
+}}{{#service:supported_functions}}
+
+
+class {{> types/function_args_type}}(_fbthrift_python_types.Struct):
+    {{#function:args}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}] = ...
+    {{/function:args}}
+
+    def __init__(
+        self,{{#function:args?}} *{{/function:args?}}{{#function:args}},
+        {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{/function:args}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[None{{#function:args}}, {{!
+            }}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{!
+        }}{{/function:args}}]]]: ...
+{{^function:oneway?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result(_fbthrift_python_types.Struct):
+   {{#function:regular_response_type}}
+    success: _typing.Final[{{ >types/pep484_type }}]
+   {{/function:regular_response_type}}
+    {{#function:exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:exceptions}}
+
+    def __init__(
+        self, *, success: _typing.Optional[{{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}}] = ...{{!
+        }}{{#function:exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:exceptions}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#function:regular_response_type}}{{ >types/pep484_type }}{{/function:regular_response_type}},
+            {{#function:exceptions}}
+            {{#field:type}}{{> types/pep484_type}}{{/field:type}},
+            {{/function:exceptions}}
+        ]]]: ...
+{{/function:oneway?}}
+{{#function:returns_stream?}}
+
+
+class _fbthrift_{{service:name}}_{{function:name}}_result_stream(_fbthrift_python_types._fbthrift_ResponseStreamResult[{{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}}]):
+    {{#function:stream_exceptions}}
+    {{field:py_name}}: _typing.Final[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]
+    {{/function:stream_exceptions}}
+
+    def __init__(
+        self, *, success: _typing.Optional[{{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}}] = ...{{!
+        }}{{#function:stream_exceptions}}{{!
+        }}, {{field:py_name}}: _typing.Optional[{{#field:type}}{{> types/pep484_type}}{{/field:type}}]=...{{!
+        }}{{/function:stream_exceptions}}
+    ) -> None: ...
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[
+        str,
+        _typing.Union[
+            {{#function:return_stream_elem_type}}{{ >types/pep484_type }}{{/function:return_stream_elem_type}},
+            {{#function:stream_exceptions}}
+            {{#field:type}}{{> types/pep484_type}}{{/field:type}},
+            {{/function:stream_exceptions}}
+        ]]]: ...
+{{/function:returns_stream?}}
+{{/service:supported_functions}}

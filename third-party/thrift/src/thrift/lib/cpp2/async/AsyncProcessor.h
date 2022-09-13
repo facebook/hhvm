@@ -411,6 +411,16 @@ namespace detail {
 class ServerRequestHelper;
 }
 
+// This struct serves as a appendix data carrier
+// that can store metadata about internal process
+// e.g. logging info, and also external user-facing
+// data, e.g. by adding a shared_ptr<void> to store user data
+struct ServerRequestData {
+  // for thrift internal usage only
+  // user should not try to modify these members
+  std::chrono::steady_clock::time_point queueBegin;
+};
+
 // The ServerRequest is used to hold all the information about a request that we
 // need to save when queueing it in order to execute the request later.
 //
@@ -425,10 +435,6 @@ class ServerRequestHelper;
 // as narrow as possible as this type is used in several customization points.
 class ServerRequest {
  public:
-  struct ProcessInfo {
-    std::chrono::steady_clock::time_point queueBegin;
-  };
-
   // Eventually we won't need a default ctor once there is no path that doesn't
   // use the ServerRequest and resource pools.
   ServerRequest() : serializedRequest_(std::unique_ptr<folly::IOBuf>{}) {}
@@ -466,6 +472,8 @@ class ServerRequest {
   const ResponseChannelRequest::UniquePtr& request() const { return request_; }
 
   ResponseChannelRequest::UniquePtr& request() { return request_; }
+
+  ServerRequestData& requestData() { return requestData_; }
 
   const std::shared_ptr<folly::RequestContext>& follyRequestContext() const {
     return follyRequestContext_;
@@ -550,8 +558,6 @@ class ServerRequest {
         sr.notifyConcurrencyControllerUserData_};
   }
 
-  static ProcessInfo& processInfo(ServerRequest& sr) { return sr.processInfo_; }
-
   static intptr_t& queueObserverPayload(ServerRequest& sr) {
     return sr.queueObserverPayload_;
   }
@@ -569,7 +575,7 @@ class ServerRequest {
   RequestPileInterface::UserData notifyRequestPileUserData_;
   ConcurrencyControllerInterface* notifyConcurrencyController_{nullptr};
   ConcurrencyControllerInterface::UserData notifyConcurrencyControllerUserData_;
-  ProcessInfo processInfo_;
+  ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
 };
 
@@ -582,7 +588,6 @@ class ServerRequestHelper : public ServerRequest {
   using ServerRequest::concurrencyControllerNotification;
   using ServerRequest::eventBase;
   using ServerRequest::executor;
-  using ServerRequest::processInfo;
   using ServerRequest::protocol;
   using ServerRequest::queueObserverPayload;
   using ServerRequest::request;

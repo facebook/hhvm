@@ -28,7 +28,6 @@ use hhbc::FatalOp;
 use hhbc::Unit;
 use hhvm_options::HhvmConfig;
 use ocamlrep::rc::RcOc;
-use options::Arg;
 use options::HackLang;
 use options::Hhvm;
 use options::HhvmFlags;
@@ -387,13 +386,13 @@ impl NativeEnv {
     fn to_options(&self) -> Options {
         Options {
             hhvm: Hhvm {
-                aliased_namespaces: Arg::new(self.aliased_namespaces.clone()),
-                include_roots: Arg::new(self.include_roots.clone()),
+                aliased_namespaces: self.aliased_namespaces.clone(),
+                include_roots: self.include_roots.clone(),
                 flags: self.hhbc_flags.to_hhvm_flags(),
-                emit_class_pointers: Arg::new(self.emit_class_pointers.to_string()),
+                emit_class_pointers: self.emit_class_pointers.to_string(),
                 hack_lang: HackLang {
                     flags: self.parser_flags.to_lang_flags(),
-                    check_int_overflow: Arg::new(self.check_int_overflow.to_string()),
+                    check_int_overflow: self.check_int_overflow.to_string(),
                 },
             },
             php7_flags: self.hhbc_flags.to_php7_flags(),

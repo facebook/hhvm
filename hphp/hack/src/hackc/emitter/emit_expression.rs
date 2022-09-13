@@ -709,7 +709,7 @@ fn emit_import<'a, 'arena, 'decl>(
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
         ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::incl_once()),
         ImportFlavor::RequireOnce => {
-            match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
+            match inc.into_doc_root_relative(alloc, &e.options().hhvm.include_roots) {
                 IncludePath::DocRootRelative(path) => {
                     let expr = ast::Expr(
                         (),
@@ -1357,7 +1357,7 @@ fn is_struct_init<'arena, 'decl>(
         are_all_keys_non_numeric_strings = false;
     }
     let num_keys = fields.len();
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     Ok((allow_numerics || are_all_keys_non_numeric_strings)
         && uniq_keys.len() == num_keys
         && num_keys <= limit
@@ -1537,7 +1537,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(u32) -> Instruct<'are
     fields: &[ast::Afield],
     constructor: F,
 ) -> Result<InstrSeq<'arena>> {
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     let inline =
         |e: &mut Emitter<'arena, 'decl>, exprs: &[ast::Afield]| -> Result<InstrSeq<'arena>> {
             let mut instrs = vec![];

@@ -26,25 +26,6 @@ macro_rules! prefixed_flags {
     }
 }
 
-/// An option of non-boolean type T (i.e., not a flag)
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct Arg<T> {
-    global_value: T,
-}
-impl<T> Arg<T> {
-    pub fn get(&self) -> &T {
-        &self.global_value
-    }
-
-    pub fn get_mut(&mut self) -> &mut T {
-        &mut self.global_value
-    }
-
-    pub fn new(global_value: T) -> Arg<T> {
-        Arg { global_value }
-    }
-}
-
 prefixed_flags!(
     CompilerFlags,
     CONSTANT_FOLDING,
@@ -77,9 +58,9 @@ impl Default for HhvmFlags {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hhvm {
-    pub aliased_namespaces: Arg<BTreeMap<String, String>>,
-    pub include_roots: Arg<BTreeMap<BString, BString>>,
-    pub emit_class_pointers: Arg<String>,
+    pub aliased_namespaces: BTreeMap<String, String>,
+    pub include_roots: BTreeMap<BString, BString>,
+    pub emit_class_pointers: String,
     pub flags: HhvmFlags,
     pub hack_lang: HackLang,
 }
@@ -89,7 +70,7 @@ impl Default for Hhvm {
         Self {
             aliased_namespaces: Default::default(),
             include_roots: Default::default(),
-            emit_class_pointers: defaults::emit_class_pointers(),
+            emit_class_pointers: "0".into(),
             flags: Default::default(),
             hack_lang: Default::default(),
         }
@@ -99,7 +80,6 @@ impl Default for Hhvm {
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
         self.aliased_namespaces
-            .get()
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
     }
@@ -108,7 +88,7 @@ impl Hhvm {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct HackLang {
     pub flags: LangFlags,
-    pub check_int_overflow: Arg<String>,
+    pub check_int_overflow: String,
 }
 
 prefixed_flags!(
@@ -156,15 +136,15 @@ impl Default for RepoFlags {
 
 #[derive(Clone, Default, PartialEq, Debug)]
 pub struct Server {
-    pub include_search_paths: Arg<Vec<BString>>,
+    pub include_search_paths: Vec<BString>,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Options {
-    pub doc_root: Arg<BString>,
+    pub doc_root: BString,
     pub hack_compiler_flags: CompilerFlags,
     pub hhvm: Hhvm,
-    pub max_array_elem_size_on_the_stack: Arg<isize>,
+    pub max_array_elem_size_on_the_stack: usize,
     pub php7_flags: Php7Flags,
     pub repo_flags: RepoFlags,
     pub server: Server,
@@ -181,14 +161,14 @@ impl Options {
 impl Default for Options {
     fn default() -> Options {
         Options {
-            max_array_elem_size_on_the_stack: defaults::max_array_elem_size_on_the_stack(),
+            max_array_elem_size_on_the_stack: 64,
             hack_compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             php7_flags: Php7Flags::default(),
             repo_flags: RepoFlags::default(),
             server: Server::default(),
             // the rest is zeroed out (cannot do ..Default::default() as it'd be recursive)
-            doc_root: Arg::new("".into()),
+            doc_root: "".into(),
         }
     }
 }
@@ -200,9 +180,9 @@ impl bytecode_printer::IncludeProcessor for Options {
         cur_path: Option<&'a RelativePath>,
     ) -> Option<PathBuf> {
         let alloc = bumpalo::Bump::new();
-        let include_roots = self.hhvm.include_roots.get();
-        let search_paths = self.server.include_search_paths.get();
-        let doc_root = self.doc_root.get().as_bstr();
+        let include_roots = &self.hhvm.include_roots;
+        let search_paths = &self.server.include_search_paths;
+        let doc_root = self.doc_root.as_bstr();
         match include_path.into_doc_root_relative(&alloc, include_roots) {
             IncludePath::Absolute(p) => {
                 let path = Path::new(OsStr::from_bytes(&p));
@@ -254,19 +234,6 @@ impl bytecode_printer::IncludeProcessor for Options {
     }
 }
 
-/// Non-zero argument defaults for use in both Default::default & SerDe framework
-mod defaults {
-    use super::*;
-
-    pub fn max_array_elem_size_on_the_stack() -> Arg<isize> {
-        Arg::new(64)
-    }
-
-    pub fn emit_class_pointers() -> Arg<String> {
-        Arg::new("0".into())
-    }
-}
-
 impl Options {
     pub fn array_provenance(&self) -> bool {
         self.hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE)
@@ -276,13 +243,12 @@ impl Options {
         self.hhvm
             .hack_lang
             .check_int_overflow
-            .get()
             .parse::<i32>()
             .map_or(false, |x| x.is_positive())
     }
 
     pub fn emit_class_pointers(&self) -> i32 {
-        self.hhvm.emit_class_pointers.get().parse::<i32>().unwrap()
+        self.hhvm.emit_class_pointers.parse::<i32>().unwrap()
     }
 }
 

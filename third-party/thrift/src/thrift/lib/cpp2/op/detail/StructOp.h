@@ -97,6 +97,39 @@ struct StructuredOp : BaseOp<Tag> {
     return result;
   }
 
+  template <typename Id>
+  static bool ensureIf(bool cond, T& self, const Dyn* val, Ptr& result) {
+    if (cond) {
+      auto&& field = op::get<Id>(self);
+      if (isAbsent(field)) {
+        if (val != nullptr) {
+          *field = val->as<FTag<Id>>();
+        } else {
+          ensureValue(field);
+        }
+      }
+      result = ret(get_type_tag<Id, T>{}, *field);
+    }
+    return cond;
+  }
+
+  static Ptr ensure(void* s, FieldId fid, const Dyn* n, const Dyn* val) {
+    // TODO(afuller): Use a hash map for these lookups.
+    Ptr result;
+    if (n != nullptr) { // Ensure by name.
+      const auto& name = n->as<type::string_t>();
+      check_found(find_by_field_id<T>([&](auto id) {
+        using Id = decltype(id);
+        return ensureIf<Id>(op::get_name_v<Id, T> == name, ref(s), val, result);
+      }));
+    } else { // Ensure by field id.
+      check_found(find_by_field_id<T>([&](auto id) {
+        return ensureIf<decltype(id)>(id() == fid, ref(s), val, result);
+      }));
+    }
+    return result;
+  }
+
   static size_t size(const void*) { return op::size_v<T>; }
 };
 

@@ -184,16 +184,21 @@ TEST(RuntimeRefTest, Map_Add) {
   EXPECT_EQ(value["one"], 1);
 }
 
+// TODO(afuller): Add test for ensuring an optional field.
 TEST(RuntimeRefTest, Struct) {
   type::UriStruct actual;
   using Tag = type::struct_t<type::UriStruct>;
   auto ref = Ref::to<Tag>(actual);
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 5);
+  EXPECT_EQ(*actual.scheme(), "");
+  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>(""));
+  EXPECT_EQ(ref.ensure("scheme", "baz"), Ref::to<string_t>(""));
 
   EXPECT_TRUE(ref.put(FieldId{1}, "foo"));
   EXPECT_EQ(*actual.scheme(), "foo");
   EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>("foo"));
+  EXPECT_EQ(ref.ensure(FieldId{1}, "baz"), Ref::to<string_t>("foo"));
   ref.clear(FieldId{1});
   EXPECT_EQ(*actual.scheme(), "");
   EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>(""));
@@ -201,6 +206,7 @@ TEST(RuntimeRefTest, Struct) {
   EXPECT_TRUE(ref.put("scheme", "bar"));
   EXPECT_EQ(*actual.scheme(), "bar");
   EXPECT_EQ(ref["scheme"], Ref::to<string_t>("bar"));
+  EXPECT_EQ(ref.ensure("scheme"), std::string("bar"));
   ref.clear("scheme");
   EXPECT_EQ(*actual.scheme(), "");
   EXPECT_EQ(ref["scheme"], Ref::to<string_t>(""));
@@ -209,6 +215,8 @@ TEST(RuntimeRefTest, Struct) {
   EXPECT_THROW(ref["bad"], std::out_of_range);
   EXPECT_THROW(ref.clear(FieldId{}), std::out_of_range);
   EXPECT_THROW(ref.clear("bad"), std::out_of_range);
+  EXPECT_THROW(ref.ensure(FieldId{}), std::out_of_range);
+  EXPECT_THROW(ref.ensure("bad"), std::out_of_range);
   EXPECT_THROW(ref.put(FieldId{}, ""), std::out_of_range);
   EXPECT_THROW(ref.put("bad", ""), std::out_of_range);
 }

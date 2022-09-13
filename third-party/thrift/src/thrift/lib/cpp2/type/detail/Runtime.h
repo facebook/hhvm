@@ -377,16 +377,19 @@ class BaseDyn : public Dyn, protected BaseDerived<Derived> {
   MutT ensure(FieldId id, ConstT defVal) {
     return MutT{Base::ensure(id, defVal)};
   }
+  MutT ensure(FieldId id, const std::string& defVal) {
+    return MutT{Base::ensure(id, asRef(defVal))};
+  }
   MutT ensure(ConstT key) { return MutT{Base::ensure(key)}; }
   MutT ensure(ConstT key, ConstT defVal) {
     return MutT{Base::ensure(key, defVal)};
   }
   MutT ensure(const std::string& name) { return ensure(asRef(name)); }
-  MutT ensure(const std::string& name, ConstT val) {
-    return ensure(asRef(name), val);
+  MutT ensure(const std::string& name, ConstT defVal) {
+    return ensure(asRef(name), defVal);
   }
-  MutT ensure(const std::string& name, const std::string& val) {
-    return ensure(asRef(name), asRef(val));
+  MutT ensure(const std::string& name, const std::string& defVal) {
+    return ensure(asRef(name), asRef(defVal));
   }
 
   void clear() { Base::clear(); }

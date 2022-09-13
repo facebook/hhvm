@@ -1,4 +1,3 @@
-#![allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 #![allow(clippy::needless_late_init)]
 
 // Initially generatd by c2rust of 'extern.c' at revision:
@@ -63,7 +62,7 @@ const EXTERN_STACK_MAX_SIZE: usize = 1024 * 1024 * 100;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-struct extern_item<'a> {
+struct ExternItem<'a> {
     v: &'a Value<'a>,
     count: usize,
 }
@@ -72,7 +71,7 @@ struct extern_item<'a> {
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-struct object_position<'a> {
+struct ObjectPosition<'a> {
     obj: Value<'a>,
     pos: usize,
 }
@@ -90,22 +89,22 @@ struct object_position<'a> {
 // array can be left uninitialized.
 
 #[repr(C)]
-struct position_table<'a> {
+struct PositionTable<'a> {
     shift: u8,
     size: usize,           // size == 1 << (wordsize - shift)
     mask: usize,           // mask == size - 1
     threshold: usize,      // threshold == a fixed fraction of size
-    present: Box<[usize]>, // [Bitvect_size(size)]
+    present: Box<[usize]>, // [bitvect_size(size)]
     /// SAFETY: Elements of `entries` are not initialized unless their
     /// corresponding bit is set in `present`.
-    entries: Box<[MaybeUninit<object_position<'a>>]>, // [size]
+    entries: Box<[MaybeUninit<ObjectPosition<'a>>]>, // [size]
 }
 
-const Bits_word: usize = 8 * std::mem::size_of::<usize>();
+const BITS_WORD: usize = 8 * std::mem::size_of::<usize>();
 
 #[inline]
-const fn Bitvect_size(n: usize) -> usize {
-    (n + Bits_word - 1) / Bits_word
+const fn bitvect_size(n: usize) -> usize {
+    (n + BITS_WORD - 1) / BITS_WORD
 }
 
 const POS_TABLE_INIT_SIZE_LOG2: usize = 8;
@@ -116,13 +115,13 @@ const POS_TABLE_INIT_SIZE: usize = 1 << POS_TABLE_INIT_SIZE_LOG2;
 // HASH_FACTOR is (sqrt(5) - 1) / 2 * 2^wordsize.
 const HASH_FACTOR: usize = 11400714819323198486;
 #[inline]
-const fn Hash(v: Value<'_>, shift: u8) -> usize {
+const fn hash(v: Value<'_>, shift: u8) -> usize {
     v.to_bits().wrapping_mul(HASH_FACTOR) >> shift
 }
 
 // When the table becomes 2/3 full, its size is increased.
 #[inline]
-const fn Threshold(sz: usize) -> usize {
+const fn threshold(sz: usize) -> usize {
     (sz * 2) / 3
 }
 
@@ -130,12 +129,12 @@ const fn Threshold(sz: usize) -> usize {
 
 #[inline]
 fn bitvect_test(bv: &[usize], i: usize) -> bool {
-    bv[i / Bits_word] & (1 << (i & (Bits_word - 1))) != 0
+    bv[i / BITS_WORD] & (1 << (i & (BITS_WORD - 1))) != 0
 }
 
 #[inline]
 fn bitvect_set(bv: &mut [usize], i: usize) {
-    bv[i / Bits_word] |= 1 << (i & (Bits_word - 1));
+    bv[i / BITS_WORD] |= 1 << (i & (BITS_WORD - 1));
 }
 
 // Conversion to big-endian
@@ -164,10 +163,10 @@ struct State<'a> {
     size_64: usize,     // Size in words of 64-bit block for struct.
 
     // Stack for pending value to marshal
-    stack: Vec<extern_item<'a>>,
+    stack: Vec<ExternItem<'a>>,
 
     // Hash table to record already marshalled objects
-    pos_table: position_table<'a>,
+    pos_table: PositionTable<'a>,
 
     // To buffer the output
     output: Vec<u8>,
@@ -183,7 +182,7 @@ impl<'a> State<'a> {
 
             stack: Vec::with_capacity(EXTERN_STACK_INIT_SIZE),
 
-            pos_table: position_table {
+            pos_table: PositionTable {
                 shift: 0,
                 size: 0,
                 mask: 0,
@@ -205,11 +204,11 @@ impl<'a> State<'a> {
         self.pos_table.shift =
             (8 * std::mem::size_of::<Value<'a>>() - POS_TABLE_INIT_SIZE_LOG2) as u8;
         self.pos_table.mask = POS_TABLE_INIT_SIZE - 1;
-        self.pos_table.threshold = Threshold(POS_TABLE_INIT_SIZE);
+        self.pos_table.threshold = threshold(POS_TABLE_INIT_SIZE);
         // SAFETY: zero is a valid value for the elements of `present`.
         unsafe {
             self.pos_table.present =
-                Box::new_zeroed_slice(Bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
+                Box::new_zeroed_slice(bitvect_size(POS_TABLE_INIT_SIZE)).assume_init();
         }
         self.pos_table.entries = Box::new_uninit_slice(POS_TABLE_INIT_SIZE);
     }
@@ -219,10 +218,10 @@ impl<'a> State<'a> {
         let new_size: usize;
         let new_shift: u8;
         let new_present: Box<[usize]>;
-        let new_entries: Box<[MaybeUninit<object_position<'a>>]>;
+        let new_entries: Box<[MaybeUninit<ObjectPosition<'a>>]>;
         let mut i: usize;
         let mut h: usize;
-        let old: position_table<'a>;
+        let old: PositionTable<'a>;
 
         // Grow the table quickly (x 8) up to 10^6 entries,
         // more slowly (x 2) afterwards.
@@ -236,15 +235,15 @@ impl<'a> State<'a> {
         new_entries = Box::new_uninit_slice(new_size);
         // SAFETY: zero is a valid value for the elements of `present`.
         unsafe {
-            new_present = Box::new_zeroed_slice(Bitvect_size(new_size)).assume_init();
+            new_present = Box::new_zeroed_slice(bitvect_size(new_size)).assume_init();
         }
         old = std::mem::replace(
             &mut self.pos_table,
-            position_table {
+            PositionTable {
                 size: new_size,
                 shift: new_shift,
                 mask: new_size - 1,
-                threshold: Threshold(new_size),
+                threshold: threshold(new_size),
                 present: new_present,
                 entries: new_entries,
             },
@@ -257,7 +256,7 @@ impl<'a> State<'a> {
                 // SAFETY: We checked that the bit for `i` is set in
                 // `old.present`, so `entries[i]` must be initialized
                 let old_entry = unsafe { old.entries[i].assume_init() };
-                h = Hash(old_entry.obj, self.pos_table.shift);
+                h = hash(old_entry.obj, self.pos_table.shift);
                 while bitvect_test(&self.pos_table.present, h) {
                     h = (h + 1) & self.pos_table.mask
                 }
@@ -274,7 +273,7 @@ impl<'a> State<'a> {
     /// `record_location` and return false.
     #[inline]
     fn lookup_position(&mut self, obj: Value<'a>, pos_out: &mut usize, h_out: &mut usize) -> bool {
-        let mut h: usize = Hash(obj, self.pos_table.shift);
+        let mut h: usize = hash(obj, self.pos_table.shift);
         loop {
             if !bitvect_test(&self.pos_table.present, h) {
                 *h_out = h;
@@ -300,7 +299,7 @@ impl<'a> State<'a> {
             return;
         }
         bitvect_set(&mut self.pos_table.present, h);
-        self.pos_table.entries[h] = MaybeUninit::new(object_position {
+        self.pos_table.entries[h] = MaybeUninit::new(ObjectPosition {
             obj,
             pos: self.obj_counter,
         });
@@ -587,7 +586,7 @@ impl<'a> State<'a> {
                                     if self.stack.len() + 1 >= EXTERN_STACK_MAX_SIZE {
                                         self.stack_overflow();
                                     }
-                                    self.stack.push(extern_item {
+                                    self.stack.push(ExternItem {
                                         v: v.field_ref(1).unwrap(),
                                         count: sz - 1,
                                     });

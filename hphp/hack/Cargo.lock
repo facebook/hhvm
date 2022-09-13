@@ -2407,21 +2407,7 @@ dependencies = [
  "bumpalo",
  "bytecode_printer",
  "hhbc",
- "lazy_static",
- "options_serde",
  "oxidized",
- "pretty_assertions",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
-name = "options_serde"
-version = "0.0.0"
-dependencies = [
- "quote",
- "syn",
 ]
 
 [[package]]

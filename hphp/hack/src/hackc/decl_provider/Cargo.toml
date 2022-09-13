@@ -15,4 +15,4 @@ direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 hash = { path = "../../utils/hash" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 sha-1 = "0.10"
-thiserror = "=1.0.30"
+thiserror = "1.0.34"

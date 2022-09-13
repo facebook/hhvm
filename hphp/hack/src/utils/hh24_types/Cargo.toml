@@ -17,5 +17,5 @@ oxidized_by_ref = { path = "../../oxidized_by_ref" }
 rusqlite = { version = "0.27.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

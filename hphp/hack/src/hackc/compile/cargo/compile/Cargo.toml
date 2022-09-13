@@ -31,5 +31,5 @@ print_expr = { path = "../../../print_expr" }
 profile_rust = { path = "../../../../utils/perf/cargo/profile" }
 rewrite_program = { path = "../rewrite_program" }
 stack_limit = { path = "../../../../utils/stack_limit" }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"
 types = { path = "../../../types/cargo/types" }

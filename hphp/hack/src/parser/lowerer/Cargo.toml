@@ -24,4 +24,4 @@ parser_core_types = { path = "../cargo/core_types" }
 regex = "1.5.4"
 rescan_trivia = { path = "../api/cargo/rescan_trivia" }
 stack_limit = { path = "../../utils/stack_limit" }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"

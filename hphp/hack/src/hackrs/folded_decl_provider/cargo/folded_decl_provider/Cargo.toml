@@ -18,5 +18,5 @@ oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 special_names = { path = "../../../special_names/cargo/special_names" }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"
 ty = { path = "../../../ty/cargo/ty" }

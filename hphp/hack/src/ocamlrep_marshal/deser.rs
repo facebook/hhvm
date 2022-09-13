@@ -277,7 +277,7 @@ enum InternItemStackOp {
 }
 
 struct State<'a> {
-    intern_src: *mut c_uchar,
+    intern_src: *const c_uchar,
     // Reading pointer in block holding input data.
     intern_input: *mut c_uchar,
     // Pointer to beginning of block holding input data, if non-NULL this
@@ -305,7 +305,7 @@ struct State<'a> {
 impl<'a> State<'a> {
     const INTERN_STACK_INIT_SIZE: usize = 256;
 
-    unsafe fn new(src: *mut c_uchar) -> Self {
+    unsafe fn new(src: *const c_uchar) -> Self {
         Self {
             intern_src: src,
             intern_input: std::ptr::null_mut(),
@@ -920,9 +920,11 @@ impl<'a> State<'a> {
     }
 }
 
-#[no_mangle]
-unsafe extern "C" fn ocamlrep_marshal_input_value_from_string(str: value, ofs: value) -> value {
-    let offset = ofs as usize >> 1;
-    let mut state: State<'_> = State::new(Byte_u_ptr_mut(str, offset));
-    state.input_val_from_string(offset)
+pub unsafe fn input_value<'a, A: ocamlrep::Allocator>(
+    str: &[u8],
+    _alloc: &'a A,
+) -> ocamlrep::OpaqueValue<'a> {
+    let offset = 0;
+    let mut state: State<'_> = State::new(str.as_ptr());
+    ocamlrep::OpaqueValue::from_bits(state.input_val_from_string(offset) as usize)
 }

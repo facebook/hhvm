@@ -94,7 +94,7 @@ struct Query {
 
   QueryFieldList fieldList;
 
-  w_string request_id;
+  std::optional<w_string> request_id;
   w_string subscriptionName;
   pid_t clientPid{0};
 

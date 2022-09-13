@@ -253,9 +253,9 @@ QueryResult w_query_execute(
   auto requestId = query->request_id;
 
   PerfSample sample("query_execute");
-  if (requestId && !requestId.empty()) {
-    log(DBG, "request_id = ", requestId, "\n");
-    sample.add_meta("request_id", w_string_to_json(requestId));
+  if (requestId && !requestId->empty()) {
+    log(DBG, "request_id = ", *requestId, "\n");
+    sample.add_meta("request_id", w_string_to_json(*requestId));
   }
 
   // We want to check this before we sync, as the SCM may generate changes

@@ -73,7 +73,8 @@ Git::Git(w_string_piece rootPath, w_string_piece scmRoot)
           32,
           10) {}
 
-ChildProcess::Options Git::makeGitOptions(w_string requestId) const {
+ChildProcess::Options Git::makeGitOptions(
+    const std::optional<w_string>& requestId) const {
   ChildProcess::Options opt;
   (void)requestId;
   opt.nullStdin();
@@ -99,7 +100,9 @@ struct timespec Git::getIndexMtime() const {
   }
 }
 
-w_string Git::mergeBaseWith(w_string_piece commitId, w_string requestId) const {
+w_string Git::mergeBaseWith(
+    w_string_piece commitId,
+    const std::optional<w_string>& requestId) const {
   auto mtime = getIndexMtime();
   auto key = folly::to<std::string>(
       commitId.view(), ":", mtime.tv_sec, ":", mtime.tv_nsec);
@@ -135,7 +138,7 @@ w_string Git::mergeBaseWith(w_string_piece commitId, w_string requestId) const {
 std::vector<w_string> Git::getFilesChangedSinceMergeBaseWith(
     w_string_piece commitId,
     w_string_piece clock,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto key = folly::to<std::string>(commitId.view(), ":", clock.view());
   auto commitCopy = std::string{commitId.view()};
   return filesChangedSinceMergeBaseWith_
@@ -158,7 +161,7 @@ std::vector<w_string> Git::getFilesChangedSinceMergeBaseWith(
 
 std::chrono::time_point<std::chrono::system_clock> Git::getCommitDate(
     w_string_piece commitId,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto result = runGit(
       {gitExecutablePath(), "log", "--format:%ct", "-n", "1", commitId.view()},
       makeGitOptions(requestId),
@@ -176,7 +179,7 @@ std::chrono::time_point<std::chrono::system_clock> Git::getCommitDate(
 std::vector<w_string> Git::getCommitsPriorToAndIncluding(
     w_string_piece commitId,
     int numCommits,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto mtime = getIndexMtime();
   auto key = folly::to<std::string>(
       commitId.view(), ":", numCommits, ":", mtime.tv_sec, ":", mtime.tv_nsec);

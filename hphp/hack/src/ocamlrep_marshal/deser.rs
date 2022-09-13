@@ -306,9 +306,9 @@ struct State<'a> {
 impl<'a> State<'a> {
     const INTERN_STACK_INIT_SIZE: usize = 256;
 
-    unsafe fn new() -> Self {
+    unsafe fn new(src: *mut c_uchar) -> Self {
         Self {
-            intern_src: std::ptr::null_mut(),
+            intern_src: src,
             intern_input: std::ptr::null_mut(),
             intern_dest: std::ptr::null_mut(),
             intern_extra_block: std::ptr::null_mut(),
@@ -381,15 +381,6 @@ impl<'a> State<'a> {
     unsafe fn readblock(&mut self, dest: *mut c_void, len: intnat) {
         memcpy(dest, self.intern_src as *const c_void, len as usize);
         self.intern_src = self.intern_src.offset(len as isize);
-    }
-
-    unsafe fn intern_init(&mut self, src: *mut c_void, input: *mut c_void) {
-        // This is asserted at the beginning of demarshaling primitives. If it fails,
-        // it probably means that an exception was raised without calling
-        // intern_cleanup() during the previous demarshaling.
-
-        self.intern_src = src as *mut c_uchar;
-        self.intern_input = input as *mut c_uchar;
     }
 
     unsafe fn intern_cleanup(&mut self) {
@@ -897,7 +888,9 @@ impl<'a> State<'a> {
         };
     }
 
-    unsafe fn input_val_from_string(&mut self, mut str: value, ofs: intnat) -> value {
+    unsafe fn input_val_from_string(&mut self, ofs: usize) -> value {
+        let mut str = self.intern_src as *mut value as intnat;
+
         let caml__frame: *mut caml__roots_block = (*Caml_state)._local_roots;
         let mut caml__roots_str: caml__roots_block = caml__roots_block {
             next: std::ptr::null_mut(),
@@ -909,7 +902,9 @@ impl<'a> State<'a> {
         (*Caml_state)._local_roots = &mut caml__roots_str;
         caml__roots_str.nitems = 1;
         caml__roots_str.ntables = 1;
+
         caml__roots_str.tables[0] = &mut str;
+
         let _caml__dummy_str: c_int = 0;
         let mut obj: value = ((0 as uintnat) << 1) as intnat + 1 as c_long;
         let mut caml__roots_obj: caml__roots_block = caml__roots_block {
@@ -932,18 +927,14 @@ impl<'a> State<'a> {
             num_objects: 0,
             whsize: 0,
         };
-        // Initialize state
-        self.intern_init(
-            Byte_u_ptr_mut(str, ofs as usize) as *mut c_void,
-            std::ptr::null_mut(),
-        );
+
         self.parse_header(&mut h);
-        if ((ofs + h.header_len as c_long) as c_ulong) + h.data_len > caml_string_length(str) {
+        if ((ofs + h.header_len as usize) as c_ulong) + h.data_len > caml_string_length(str) {
             self.failwith("input_val_from_string: bad length");
         }
         // Allocate result
         self.intern_alloc(h.whsize, h.num_objects);
-        self.intern_src = Byte_u_ptr_mut(str, (ofs + h.header_len as c_long) as usize);
+        self.intern_src = Byte_u_ptr_mut(str, ofs + h.header_len as usize);
         // Fill it in
         self.intern_rec(&mut obj as *mut value as *mut Value<'a>);
 
@@ -955,6 +946,7 @@ impl<'a> State<'a> {
 
 #[no_mangle]
 unsafe extern "C" fn ocamlrep_marshal_input_value_from_string(str: value, ofs: value) -> value {
-    let mut state: State<'_> = State::new();
-    state.input_val_from_string(str, ofs >> 1)
+    let offset = ofs as usize >> 1;
+    let mut state: State<'_> = State::new(Byte_u_ptr_mut(str, offset));
+    state.input_val_from_string(offset)
 }

@@ -71,9 +71,32 @@ struct StructuredOp : BaseOp<Tag> {
     return true;
   }
 
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn*) {
-    unimplemented();
+  template <typename Id>
+  static bool getIf(bool cond, T& self, Ptr& result) {
+    auto&& field = op::get<Id>(self);
+    if (cond && !isAbsent(field)) {
+      result = ret(op::get_type_tag<Id, T>{}, *field);
+    }
+    return cond;
   }
+
+  static Ptr get(void* s, FieldId fid, size_t, const Dyn* n) {
+    Ptr result;
+    // TODO(afuller): Use a hash map for these lookups.
+    if (n != nullptr) { // Get by name.
+      const auto& name = n->as<type::string_t>();
+      check_found(find_by_field_id<T>([&](auto id) {
+        using Id = decltype(id);
+        return getIf<Id>(op::get_name_v<Id, T> == name, ref(s), result);
+      }));
+    } else { // Get by field id.
+      check_found(find_by_field_id<T>([&](auto id) {
+        return getIf<decltype(id)>(id() == fid, ref(s), result);
+      }));
+    }
+    return result;
+  }
+
   static size_t size(const void*) { return op::size_v<T>; }
 };
 

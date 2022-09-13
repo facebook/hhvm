@@ -36,6 +36,10 @@ class StdHasher {
       const T& val) {
     result_ = folly::hash::hash_combine(val, result_);
   }
+  template <typename T>
+  constexpr std::enable_if_t<std::is_enum<T>::value> combine(const T& val) {
+    combine(folly::to_underlying(val));
+  }
   void combine(const folly::IOBuf& value) {
     for (const auto& buf : value) {
       combine(buf);

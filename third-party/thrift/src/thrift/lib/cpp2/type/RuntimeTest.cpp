@@ -193,14 +193,20 @@ TEST(RuntimeRefTest, Struct) {
 
   EXPECT_TRUE(ref.put(FieldId{1}, "foo"));
   EXPECT_EQ(*actual.scheme(), "foo");
+  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>("foo"));
   ref.clear(FieldId{1});
   EXPECT_EQ(*actual.scheme(), "");
+  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>(""));
 
   EXPECT_TRUE(ref.put("scheme", "bar"));
   EXPECT_EQ(*actual.scheme(), "bar");
+  EXPECT_EQ(ref["scheme"], Ref::to<string_t>("bar"));
   ref.clear("scheme");
   EXPECT_EQ(*actual.scheme(), "");
+  EXPECT_EQ(ref["scheme"], Ref::to<string_t>(""));
 
+  EXPECT_THROW(ref[FieldId{}], std::out_of_range);
+  EXPECT_THROW(ref["bad"], std::out_of_range);
   EXPECT_THROW(ref.clear(FieldId{}), std::out_of_range);
   EXPECT_THROW(ref.clear("bad"), std::out_of_range);
   EXPECT_THROW(ref.put(FieldId{}, ""), std::out_of_range);

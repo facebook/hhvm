@@ -90,7 +90,7 @@ decltype(auto) find_by_field_id(F&& f) {
 // Gets the ident, for example:
 //
 //   // Resolves to thrift::ident::* type associated with field 7 in MyS.
-//   using Ident = get_field_id<field_id<7>, MyS>
+//   using Ident = get_ident<field_id<7>, MyS>
 //
 template <typename Id, typename T>
 using get_ident = detail::pa::ident<T, get_ordinal<Id, T>>;
@@ -106,7 +106,7 @@ void for_each_ident(F&& f) {
 // Gets the Thrift type tag, for example:
 //
 //   // Resolves to Thrift type tag for the field "foo" in MyS.
-//   using Tag = get_field_id<ident::foo, MyS>
+//   using Tag = get_type_tag<ident::foo, MyS>
 //
 template <typename Id, typename T>
 using get_type_tag = detail::pa::type_tag<T, get_ordinal<Id, T>>;

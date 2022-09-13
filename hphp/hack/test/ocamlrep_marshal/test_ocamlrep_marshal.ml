@@ -47,10 +47,14 @@ let rec print_tree
      let n = List.length cs - 1 in
      Printf.sprintf "%s%s" pd tag :: List.concat (Caml.List.mapi (
          fun i c ->
-         let pad =
-           (pc ^ (if i = n then "`-- " else "|-- "),
-            pc ^ (if i = n then "    " else "|   ")) in
-         print_tree ~pad c
+         let pad = let enable_utf8 = true in
+           if enable_utf8 then
+             (pc ^ (if i = n then "\u{02517} " else "\u{02523} "),
+              pc ^ (if i = n then " " else "\u{02503} "))
+           else
+             (pc ^ (if i = n then "`-- " else "|-- "),
+              pc ^ (if i = n then "    " else "|   "))
+         in print_tree ~pad c
        ) cs) [@@ocamlformat "disable"]
 
 (* [show_tree] produces a string of [t]. *)
@@ -59,13 +63,15 @@ let show_tree t =
 
 (* An example tree. *)
 let tree =
-  `Node ("."
+  `Node ("life"
         , [
-            `Node ("S", [
-                      `Node ("T", [
-                                `Node ("U", [])]);
-                      `Node ("V", [])])
-          ;  `Node ("W", [])
+            `Node ("domain", [
+                      `Node ("kingdom", [
+                                `Node ("phylum", [])]);
+                      `Node ("class", []);
+                      `Node ("order", [])
+              ])
+          ;  `Node ("family", [])
           ]) [@@ocamlformat "disable"]
 
 let test_sharing () =

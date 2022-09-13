@@ -32,8 +32,8 @@
           };
           packages.default = packages.hhvm;
 
-          checks.quick = pkgs.runCommand
-            "hhvm-quick-test"
+          checks.full = pkgs.runCommand
+            "hhvm-full-test"
             {
               buildInputs = pkgs.lib.optionals pkgs.hostPlatform.isMacOS [
                 # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
@@ -43,7 +43,7 @@
             ''
               set -ex
               cd ${./.}
-              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" hphp/test/run.php quick
+              HHVM_BIN="${packages.hhvm}/bin/hhvm" "${packages.hhvm}/bin/hhvm" hphp/test/run.php full
               mkdir $out
             '';
 

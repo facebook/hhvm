@@ -2372,9 +2372,9 @@ dependencies = [
 name = "ocamlrep_marshal_ffi_bindings"
 version = "0.0.0"
 dependencies = [
- "libc",
  "ocamlrep",
  "ocamlrep_marshal",
+ "ocamlrep_ocamlpool",
 ]
 
 [[package]]

@@ -626,14 +626,13 @@ impl<'a> State<'a> {
     fn extern_value(
         &mut self,
         v: Value<'a>,
-        flags: Value<'a>,
+        flags: ExternFlags,
         mut header: &mut [u8],  // out
         header_len: &mut usize, // out
     ) -> usize {
         let res_len: usize;
-        // Parse flag list
-        self.flags = ExternFlags::from_ocamlrep(flags).unwrap();
         // Initializations
+        self.flags = flags;
         self.obj_counter = 0;
         self.size_32 = 0;
         self.size_64 = 0;
@@ -668,10 +667,10 @@ impl<'a> State<'a> {
     }
 }
 
-pub fn output_val<W: std::io::Write>(
+pub fn output_value<W: std::io::Write>(
     w: &mut W,
     v: Value<'_>,
-    flags: Value<'_>,
+    flags: ExternFlags,
 ) -> std::io::Result<()> {
     let mut header: [u8; 32] = [0; 32];
     let mut header_len = 0;

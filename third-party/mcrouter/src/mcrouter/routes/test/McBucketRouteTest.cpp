@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <folly/Range.h>
+#include <folly/String.h>
 #include <folly/dynamic.h>
 #include <gtest/gtest.h>
 #include "folly/fibers/FiberManagerMap.h"
@@ -152,7 +153,7 @@ TEST(McBucketRouteTest, checkParams) {
   mockFiberContext();
   auto name = rh->routeName();
   std::vector<std::string> params;
-  facebook::strings::split('|', name, params, true);
+  folly::split('|', name, params, true);
   EXPECT_TRUE(params.size() == 5);
   EXPECT_EQ(params[0], "bucketize");
   EXPECT_EQ(params[1], folly::to<std::string>("total_buckets=", total));

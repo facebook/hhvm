@@ -29,6 +29,7 @@ static_assert(false, "mcrouter: invalid build");
 
 #include "mcrouter/lib/Reply.h"
 #include "mcrouter/lib/carbon/NoopAdditionalLogger.h"
+#include "mcrouter/lib/carbon/NoopExternalConnectionLogger.h"
 #include "mcrouter/lib/network/Transport.h"
 
 #define MCROUTER_RUNTIME_VARS_DEFAULT ""

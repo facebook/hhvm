@@ -5,13 +5,7 @@
 // 'extern.c' was but that proved to be quite incompatible with the 4.14.0
 // runtime.
 
-#![allow(
-    clippy::upper_case_acronyms,
-    mutable_transmutes,
-    non_camel_case_types,
-    non_snake_case,
-    non_upper_case_globals
-)]
+#![allow(non_camel_case_types, non_snake_case)]
 
 use libc::c_char;
 use libc::c_double;

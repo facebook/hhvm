@@ -6,18 +6,18 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use clap::ArgAction;
 use clap::Parser;
 pub use hhvm_config::*;
 
-// Define HHVM-compatible options, as best as we can with structopt.
+// Define HHVM-compatible options, as best as we can with clap.
 #[derive(Debug, Default, Parser)]
 pub struct HhvmOptions {
     /// Load specified HDF or INI config file(s)
     #[clap(
         short('c'),
         long("config"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("CONFIG")
     )]
     pub config_files: Vec<PathBuf>,
@@ -26,8 +26,7 @@ pub struct HhvmOptions {
     #[clap(
         short('v'),
         long("config-value"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("NAME=VALUE")
     )]
     pub hdf_values: Vec<String>,
@@ -36,8 +35,7 @@ pub struct HhvmOptions {
     #[clap(
         short('d'),
         long("define"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("NAME=VALUE")
     )]
     pub ini_values: Vec<String>,
@@ -100,15 +98,6 @@ pub struct HphpOptions {
     #[clap(long, short, default_value("-1"))]
     pub log: i32,
 
-    /// Whether to keep the output directory (ignored)
-    #[clap(long, short, parse(try_from_str = parse_boolish), default_value("true"))]
-    pub keep_tempdir: bool,
-
-    /// Use the autoload map to parse additional files transitively referenced
-    /// from input files.
-    #[clap(long, parse(try_from_str = parse_boolish), default_value("true"))]
-    pub parse_on_demand: bool,
-
     /// Input directory. If specified, input pathnames are interpreted
     /// relative to this directory. Absolute input pathnames must have this
     /// directory as a prefix, which will be stripped.
@@ -124,98 +113,51 @@ pub struct HphpOptions {
     pub file_cache: Option<PathBuf>,
 
     /// Directory containing input files.
-    #[clap(
-        long("module"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
+    #[clap(long("module"), action(ArgAction::Append), value_name("PATH"))]
     pub modules: Vec<PathBuf>,
 
-    /// Same as --module, except no exclusion checking is performed so these
-    /// directories are forced to be included.
-    #[clap(
-        long("fmodule"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
-    pub fmodules: Vec<PathBuf>,
-
     /// Extra directories for static files without exclusion checking
-    #[clap(
-        long("cmodule"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
+    #[clap(long("cmodule"), action(ArgAction::Append), value_name("PATH"))]
     pub cmodules: Vec<PathBuf>,
 
     /// Extra static files force-included without exclusion checking (ignored)
-    #[clap(
-        long("cfile"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
+    #[clap(long("cfile"), action(ArgAction::Append), value_name("PATH"))]
     pub cfiles: Vec<PathBuf>,
-
-    /// Extra Hack source files force-included without exclusion checking (ignored)
-    #[clap(
-        long("ffile"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
-    pub ffiles: Vec<PathBuf>,
 
     /// Exclude these files or directories from the static content cache (ignored)
     #[clap(
         long("exclude-static-pattern"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("REGEX")
     )]
     pub exclude_static_patterns: Vec<String>,
 
     /// Directories to exclude from the input
-    #[clap(
-        long("exclude-dir"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
+    #[clap(long("exclude-dir"), action(ArgAction::Append), value_name("PATH"))]
     pub exclude_dirs: Vec<PathBuf>,
 
     /// Directories to exclude from the static content cache (ignored)
     #[clap(
         long("exclude-static-dir"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("PATH")
     )]
     pub exclude_static_dirs: Vec<PathBuf>,
 
     /// Regex pattern for files or directories to exclude from the input,
-    /// even if --parse-on-demand finds it
+    /// even if transitively referenced.
     #[clap(
         long("exclude-pattern"),
-        multiple_occurrences(true),
-        number_of_values(1),
+        action(ArgAction::Append),
         value_name("REGEX")
     )]
     pub exclude_patterns: Vec<String>,
 
-    /// Files to exclude from the input, even if parse-on-demand finds it
-    #[clap(
-        long("exclude-file"),
-        multiple_occurrences(true),
-        number_of_values(1),
-        value_name("PATH")
-    )]
+    /// Files to exclude from the input, even if transitively referenced
+    #[clap(long("exclude-file"), action(ArgAction::Append), value_name("PATH"))]
     pub exclude_files: Vec<PathBuf>,
 
-    /// Input file names
+    /// Input file names XXX (should this be --inputs?)
     pub inputs: Vec<PathBuf>,
 
     /// File containing list of relative file names, one per line.
@@ -225,11 +167,4 @@ pub struct HphpOptions {
     /// Filename of final program to emit; will be placed in output-dir.
     #[clap(long)]
     pub program: Option<String>,
-}
-
-/// Parse strings that are convertible to bool. Currently:
-/// true, false => bool
-/// int => nonzero means true
-fn parse_boolish(s: &str) -> Result<bool, std::num::ParseIntError> {
-    s.parse::<bool>().or_else(|_| Ok(s.parse::<i64>()? != 0))
 }

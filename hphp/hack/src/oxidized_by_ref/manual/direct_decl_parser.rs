@@ -22,11 +22,20 @@ use crate::typing_defs;
 #[derive(Copy, Clone, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[derive(Deserialize, FromOcamlRepIn, NoPosHash, Serialize, ToOcamlRep)]
 pub struct ParsedFile<'a> {
+    /// Was the file Hack or HHI?
     pub mode: Option<file_info::Mode>,
+
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub file_attributes: &'a [&'a typing_defs::UserAttribute<'a>],
+
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub decls: Decls<'a>,
+
+    /// How did the parser handle xhp elements? This is a copy of
+    /// the setting from DeclParserOptions, for use when converting
+    /// Decls to Facts.
+    pub disable_xhp_element_mangling: bool,
+
     /// True if the FFP detected parse errors while parsing. Other parse errors
     /// are detected in a second pass over the CST, and this field does not
     /// indicate whether errors would be detected in that second pass.

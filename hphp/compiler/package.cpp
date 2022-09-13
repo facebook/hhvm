@@ -1114,7 +1114,7 @@ Package::UnitDecls IndexJob::run(
   }
 
   // Get Facts from Decls, then populate IndexMeta.
-  auto facts = hackc::decls_to_facts_cpp_ffi(decl_config, decls, "");
+  auto facts = hackc::decls_to_facts_cpp_ffi(decls, "");
   Package::IndexMeta summary;
   for (auto& e : facts.facts.types) {
     summary.types.emplace_back(makeStaticString(std::string(e.name)));

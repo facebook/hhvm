@@ -49,6 +49,7 @@ pub fn parse_decls<'a>(
             state.file_attributes.len(),
         ),
         decls: state.decls,
+        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),
     }
 }
@@ -80,6 +81,7 @@ pub fn parse_decls_without_reference_text<'a, 'text>(
             state.file_attributes.len(),
         ),
         decls: state.decls,
+        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
         has_first_pass_parse_errors: !errors.is_empty(),
     }
 }

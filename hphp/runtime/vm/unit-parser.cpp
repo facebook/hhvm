@@ -380,9 +380,7 @@ ParseFactsResult extract_facts(
       auto const decls = hackc::direct_decl_parse(
         decl_config, filename, source_text
       );
-      auto const facts = hackc::decls_to_facts_cpp_ffi(
-        decl_config, decls, actual_sha1
-      );
+      auto const facts = hackc::decls_to_facts_cpp_ffi(decls, actual_sha1);
       rust::String json = hackc::facts_to_json_cpp_ffi(
           facts, /* pretty= */ false
       );

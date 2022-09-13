@@ -25,7 +25,7 @@ pub(crate) struct Opts {
 
 /// Write a JSON object to stdout containing Facts for each input file.
 /// If input-file-list was specified or if there are multiple CLI files,
-/// the result is a JSON object will map filenames to facts. Otherwise
+/// the result is a JSON object that maps filenames to facts. Otherwise
 /// the result is just the single file's Facts.
 pub(crate) fn extract_facts(
     hackc_opts: &crate::Opts,
@@ -53,11 +53,7 @@ pub(crate) fn extract_facts(
             // Swallowing errors is bad.
             continue;
         }
-        let facts = Facts::from_decls(
-            &parsed_file.decls,
-            parsed_file.file_attributes,
-            dp_opts.disable_xhp_element_mangling,
-        );
+        let facts = Facts::from_decls(&parsed_file);
         let json = if opts.nohash {
             json!(facts)
         } else {

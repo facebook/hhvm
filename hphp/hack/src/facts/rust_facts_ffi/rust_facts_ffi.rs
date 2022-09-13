@@ -61,28 +61,20 @@ fn extract_facts_as_json_ffi(
     };
 
     let arena = bumpalo::Bump::new();
-    let decls =
+    let parsed_file =
         direct_decl_parser::parse_decls_without_reference_text(&opts, filename, text, &arena);
 
     let pretty = false;
-    if decls.has_first_pass_parse_errors {
+    if parsed_file.has_first_pass_parse_errors {
         None
     } else {
         let sha1sum = facts::sha1(text);
         if mangle_xhp {
-            let facts = Facts::from_decls(
-                &decls.decls,
-                decls.file_attributes,
-                disable_xhp_element_mangling,
-            );
+            let facts = Facts::from_decls(&parsed_file);
             Some(facts.to_json(pretty, &sha1sum))
         } else {
             without_xhp_mangling(|| {
-                let facts = Facts::from_decls(
-                    &decls.decls,
-                    decls.file_attributes,
-                    disable_xhp_element_mangling,
-                );
+                let facts = Facts::from_decls(&parsed_file);
                 Some(facts.to_json(pretty, &sha1sum))
             })
         }

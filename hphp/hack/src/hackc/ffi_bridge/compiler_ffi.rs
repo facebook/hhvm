@@ -21,13 +21,12 @@ use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
 use direct_decl_parser::DeclParserOptions;
+use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::Unit;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
-use oxidized_by_ref::direct_decl_parser::Decls;
-use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use parser_core_types::source_text::SourceText;
 use sha1::Digest;
 use sha1::Sha1;
@@ -205,11 +204,7 @@ pub mod compile_ffi {
         fn facts_to_json_cpp_ffi(facts: FactsResult, pretty: bool) -> String;
 
         /// Extract Facts from Decls, passing along the source text hash.
-        fn decls_to_facts_cpp_ffi(
-            decl_config: &DeclParserConfig,
-            decls: &DeclResult,
-            sha1sum: &CxxString,
-        ) -> FactsResult;
+        fn decls_to_facts_cpp_ffi(decls: &DeclResult, sha1sum: &CxxString) -> FactsResult;
     }
 }
 
@@ -218,8 +213,7 @@ pub mod compile_ffi {
 
 pub struct DeclsHolder {
     _arena: bumpalo::Bump,
-    decls: Decls<'static>,
-    attributes: &'static [&'static oxidized_by_ref::typing_defs::UserAttribute<'static>],
+    parsed_file: ParsedFile<'static>,
 }
 
 pub struct UnitWrapper(Unit<'static>, bumpalo::Bump);
@@ -323,7 +317,12 @@ fn compile_from_text_cpp_ffi(
 
 fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
     // TODO T123158488: fix case insensitive lookups
-    result.decls.decls.types().any(|(sym, _)| sym == symbol)
+    result
+        .decls
+        .parsed_file
+        .decls
+        .types()
+        .any(|(sym, _)| sym == symbol)
 }
 
 pub fn direct_decl_parse(
@@ -359,8 +358,7 @@ pub fn direct_decl_parse(
         nopos_hash: no_pos_hash::position_insensitive_hash(&parsed_file.decls),
         serialized: decl_provider::serialize_decls(&parsed_file.decls).unwrap(),
         decls: Box::new(DeclsHolder {
-            decls: parsed_file.decls,
-            attributes: parsed_file.file_attributes,
+            parsed_file,
             _arena: arena,
         }),
         has_errors: parsed_file.has_first_pass_parse_errors,
@@ -370,7 +368,7 @@ pub fn direct_decl_parse(
 fn verify_deserialization(result: &compile_ffi::DeclResult) -> bool {
     let arena = bumpalo::Bump::new();
     let decls = decl_provider::deserialize_decls(&arena, &result.serialized).unwrap();
-    decls == result.decls.decls
+    decls == result.decls.parsed_file.decls
 }
 
 fn compile_unit_from_text_cpp_ffi(
@@ -419,7 +417,6 @@ pub fn facts_to_json_cpp_ffi(facts_result: compile_ffi::FactsResult, pretty: boo
 }
 
 pub fn decls_to_facts_cpp_ffi(
-    decl_config: &compile_ffi::DeclParserConfig,
     decl_result: &compile_ffi::DeclResult,
     sha1sum: &CxxString,
 ) -> compile_ffi::FactsResult {
@@ -429,11 +426,8 @@ pub fn decls_to_facts_cpp_ffi(
             ..Default::default()
         }
     } else {
-        let facts = compile_ffi::Facts::from(facts::Facts::from_decls(
-            &decl_result.decls.decls,
-            decl_result.decls.attributes,
-            decl_config.disable_xhp_element_mangling,
-        ));
+        let facts =
+            compile_ffi::Facts::from(facts::Facts::from_decls(&decl_result.decls.parsed_file));
         compile_ffi::FactsResult {
             facts,
             sha1sum: sha1sum.to_string_lossy().to_string(),

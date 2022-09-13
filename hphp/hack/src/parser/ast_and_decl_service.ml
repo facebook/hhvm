@@ -46,17 +46,7 @@ let process_parse_result
       | Relative_path.Tmp -> Relative_path.to_root fn
       | _ -> fn
     in
-    (* We only have to write to the disk heap on initialization, and only *)
-    (* if quick mode is on: otherwise Full Asts means the ParserHeap will *)
-    (* never use the DiskHeap, and the Ide services update DiskHeap directly *)
-    (if quick then
-      let enable_disk_heap =
-        TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
-      in
-      File_provider.provide_file_hint
-        ~write_disk_contents_in_shmem_provider:enable_disk_heap
-        fn
-        content);
+    if quick then File_provider.provide_file_hint fn content;
     let mode =
       if quick then
         Ast_provider.Decl
@@ -84,19 +74,14 @@ let process_parse_result
         (Relative_path.suffix fn)
         (FileInfo.to_string defs);
     (acc, errorl, error_files)
-  ) else
-    let enable_disk_heap =
-      TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
-    in
-    File_provider.provide_file_hint
-      ~write_disk_contents_in_shmem_provider:enable_disk_heap
-      fn
-      content;
+  ) else (
+    File_provider.provide_file_hint fn content;
     (* we also now keep in the file_info regular php files
      * as we need at least their names in hack build
      *)
     let acc = Relative_path.Map.add acc ~key:fn ~data:FileInfo.empty_t in
     (acc, errorl, error_files)
+  )
 
 let parse ctx ~quick ~show_all_errors ~trace ~cache_decls popt acc fn =
   if not @@ FindUtils.path_filter fn then

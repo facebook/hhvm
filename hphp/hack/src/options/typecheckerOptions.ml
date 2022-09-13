@@ -258,8 +258,6 @@ let everything_sdt t = t.GlobalOptions.tco_everything_sdt
 
 let pessimise_builtins t = t.GlobalOptions.tco_pessimise_builtins
 
-let enable_disk_heap t = t.GlobalOptions.tco_enable_disk_heap
-
 let explicit_consistent_constructors t =
   t.GlobalOptions.tco_explicit_consistent_constructors
 

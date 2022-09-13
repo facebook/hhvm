@@ -15,7 +15,6 @@ let make_local_server_api
     (naming_table : Naming_table.t)
     ~(root : string)
     ~(init_id : string)
-    ~(enable_disk_heap : bool)
     ~(deps_mode : Typing_deps_mode.t) : (module LocalServerApi) =
   (module struct
     let send_progress (message : string) : unit =
@@ -96,10 +95,7 @@ let make_local_server_api
             let changed_file_path =
               Relative_path.create Relative_path.Root changed_file
             in
-            ( changed_file_path,
-              File_provider.get_contents
-                ~writeback_disk_contents_in_shmem_provider:enable_disk_heap
-                changed_file_path ))
+            (changed_file_path, File_provider.get_contents changed_file_path))
       in
       changed_files_and_content
 

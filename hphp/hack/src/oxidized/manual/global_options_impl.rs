@@ -128,7 +128,6 @@ impl Default for GlobalOptions {
             tco_enforce_sealed_subclasses: false,
             tco_everything_sdt: false,
             tco_pessimise_builtins: false,
-            tco_enable_disk_heap: false,
             tco_explicit_consistent_constructors: 0,
             tco_require_types_class_consts: 0,
             tco_type_printer_fuel: 100,

@@ -20,6 +20,7 @@
 #include <atomic>
 #include <initializer_list>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -149,7 +150,8 @@ class w_string_piece {
   w_string asLowerCase(w_string_type_t stringType = W_STRING_BYTE) const;
 
   /** Return a lowercased copy of the suffix */
-  w_string asLowerCaseSuffix(w_string_type_t stringType = W_STRING_BYTE) const;
+  std::optional<w_string> asLowerCaseSuffix(
+      w_string_type_t stringType = W_STRING_BYTE) const;
 
   /** Return a UTF-8-clean copy of the string */
   w_string asUTF8Clean() const;
@@ -438,7 +440,7 @@ class w_string {
   /** Returns the file name component of the string, assuming a path string */
   w_string baseName() const;
   /** Returns the filename suffix of a path string */
-  w_string asLowerCaseSuffix() const;
+  std::optional<w_string> asLowerCaseSuffix() const;
 
  private:
   w_string_t* str_{nullptr};

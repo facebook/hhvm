@@ -36,7 +36,7 @@ class SuffixExpr : public QueryExpr {
       return false;
     }
     auto suffix = file->baseName().asLowerCaseSuffix();
-    return suffix && (suffixSet_.find(suffix) != suffixSet_.end());
+    return suffix && (suffixSet_.find(*suffix) != suffixSet_.end());
   }
 
   static std::unique_ptr<QueryExpr> parse(Query*, const json_ref& term) {

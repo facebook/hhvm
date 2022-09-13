@@ -23,7 +23,7 @@ bool SymlinkTargetCacheKey::operator==(
 }
 
 std::size_t SymlinkTargetCacheKey::hashValue() const {
-  return hash_128_to_64(w_string_hval(relativePath.ptr()), otime.ticks);
+  return hash_128_to_64(relativePath.hashValue(), otime.ticks);
 }
 
 SymlinkTargetCache::SymlinkTargetCache(

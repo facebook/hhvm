@@ -419,6 +419,7 @@ fn make_memoize_method_with_params_code<'a, 'arena, 'decl>(
                 instr::ret_c_suspended(),
                 instr::label(eager_set),
                 instr::memo_set_eager(local_range),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
                 instr::ret_c(),
             ])
         } else {
@@ -515,6 +516,7 @@ fn make_memoize_method_no_params_code<'a, 'arena, 'decl>(
                 instr::ret_c_suspended(),
                 instr::label(eager_set),
                 instr::memo_set_eager(LocalRange::EMPTY),
+                emit_memoize_helpers::ic_restore(ic_stash_local, should_make_ic_inaccessible),
                 instr::ret_c(),
             ])
         } else {

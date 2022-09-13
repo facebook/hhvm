@@ -94,13 +94,14 @@ let process_scour_comments (env : env) (sc : Scoured_comments.t) =
       Fixme_provider.provide_hh_fixmes env.file sc.sc_fixmes
   )
 
-let process_lowpri_errors (env : env) (lowpri_errors : (Pos.t * string) list) =
+let process_lowerer_parsing_errors
+    (env : env) (lowerer_parsing_errors : (Pos.t * string) list) =
   if should_surface_errors env then
     List.iter
       ~f:(fun (pos, msg) ->
         Errors.add_parsing_error
         @@ Parsing_error.Parsing_error { pos; msg; quickfixes = [] })
-      lowpri_errors
+      lowerer_parsing_errors
 
 let process_non_syntax_errors (_ : env) (errors : Errors.error list) =
   List.iter ~f:Errors.add_error errors
@@ -194,7 +195,7 @@ let process_lowerer_result
   Rust_aast_parser_types.(
     process_scour_comments env r.scoured_comments;
     process_syntax_errors env source_text r.syntax_errors;
-    process_lowpri_errors env r.lowpri_errors;
+    process_lowerer_parsing_errors env r.lowerer_parsing_errors;
     process_non_syntax_errors env r.errors;
     process_lint_errors env r.lint_errors;
     {

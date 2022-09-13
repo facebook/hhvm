@@ -17,20 +17,5 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import org.apache.thrift.protocol.TProtocol;
 
-public interface DoubleTypeAdapter<T> extends TypeAdapter<T> {
-  @Override
-  default void toThrift(T t, TProtocol protocol) {
-    protocol.writeDouble(toThrift(t));
-  }
-
-  @Override
-  default T fromThrift(TProtocol protocol) {
-    return fromThrift(protocol.readDouble());
-  }
-
-  double toThrift(T t);
-
-  T fromThrift(double b);
-}
+public interface DoubleTypeAdapter<T> extends TypeAdapter<Double, T> {}

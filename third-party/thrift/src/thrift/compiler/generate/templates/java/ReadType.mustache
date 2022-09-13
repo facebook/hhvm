@@ -15,12 +15,9 @@
   limitations under the License.
 
 }}{{#type:typedef?}}{{!
-    }}{{#field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift(oprot);{{/field:hasAdapter?}}{{!
-    }}{{^field:hasAdapter?}}{{!
-      }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
-      }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
-      }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
-    }}{{/field:hasAdapter?}}{{!
+  }}{{#type:isMapKey?}}{{#type:typedef_type}}{{type:setIsMapKey}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapKey?}}{{!
+  }}{{#type:isMapValue?}}{{#type:typedef_type}}{{type:setIsMapValue}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{!
+  }}{{^type:isMapKey?}}{{^type:isMapValue?}}{{#type:typedef_type}}{{> ReadType}}{{/type:typedef_type}}{{/type:isMapValue?}}{{/type:isMapKey?}}{{!
 }}{{/type:typedef?}}{{!
 }}{{^type:typedef?}}{{!
 }}{{#type:set?}}{{> ReadTypeContainer}}{{/type:set?}}{{!
@@ -31,63 +28,63 @@
 
 }}{{#type:struct?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.read0(oprot){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{#field:hasAdapter?}}{{> BoxedType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}{{> FieldType}} {{field:javaName}} = {{> BoxedType}}.read0(oprot);{{/field:hasAdapter?}}{{/field:isNested?}}{{!
 }}{{/type:struct?}}{{!
 
 }}{{#type:enum?}}{{!
 }}{{#field:isNested?}}{{> BoxedType}}.fromInteger(oprot.readI32()){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{> FieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = {{> FieldType}}.fromInteger(oprot.readI32());{{/field:isNested?}}{{!
 }}{{/type:enum?}}{{!
 
 }}{{#type:binary?}}{{!
-}}{{#field:isNested?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:isNested?}}{{!
+}}{{#field:isNested?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}}{{/field:hasAdapter?}}{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = {{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary(){{^type:javaType}}.array(){{/type:javaType}};{{/field:hasAdapter?}}{{/field:isNested?}}{{!
 }}{{/type:binary?}}{{!
 
 }}{{#type:string?}}{{!
 }}{{#field:isNested?}}{{!
-  }}{{#type:isBinaryString?}}oprot.readBinary().array(){{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot){{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary().array(){{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
   }}{{^type:isBinaryString?}}oprot.readString(){{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = {{!
-  }}{{#type:isBinaryString?}}oprot.readBinary();{{/type:isBinaryString?}}{{!
-  }}{{^type:isBinaryString?}}oprot.readString();{{/type:isBinaryString?}}{{!
+}}{{^field:isNested?}}{{!
+  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}{{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = org.apache.thrift.protocol.TProtocolUtil.readBinaryAsByteBuf(oprot);{{/field:hasAdapter?}}{{^field:hasAdapter?}}oprot.readBinary();{{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{^type:isBinaryString?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readString();{{/type:isBinaryString?}}{{!
 }}{{/field:isNested?}}{{!
 }}{{/type:string?}}{{!
 
 }}{{#type:bool?}}{{!
 }}{{#field:isNested?}}oprot.readBool(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readBool();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readBool();{{/field:isNested?}}{{!
 }}{{/type:bool?}}{{!
 
 }}{{#type:byte?}}{{!
 }}{{#field:isNested?}}oprot.readByte(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readByte();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readByte();{{/field:isNested?}}{{!
 }}{{/type:byte?}}{{!
 
 }}{{#type:i16?}}{{!
 }}{{#field:isNested?}}oprot.readI16(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI16();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI16();{{/field:isNested?}}{{!
 }}{{/type:i16?}}{{!
 
 }}{{#type:i32?}}{{!
 }}{{#field:isNested?}}oprot.readI32(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI32();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI32();{{/field:isNested?}}{{!
 }}{{/type:i32?}}{{!
 
 }}{{#type:i64?}}{{!
 }}{{#field:isNested?}}oprot.readI64(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readI64();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readI64();{{/field:isNested?}}{{!
 }}{{/type:i64?}}{{!
 
 }}{{#type:float?}}{{!
 }}{{#field:isNested?}}oprot.readFloat(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readFloat();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readFloat();{{/field:isNested?}}{{!
 }}{{/type:float?}}{{!
 
 }}{{#type:double?}}{{!
 }}{{#field:isNested?}}oprot.readDouble(){{/field:isNested?}}{{!
-}}{{^field:isNested?}}{{> FieldType}} {{field:javaName}} = oprot.readDouble();{{/field:isNested?}}{{!
+}}{{^field:isNested?}}{{> ThriftFieldType}} {{field:javaName}} = oprot.readDouble();{{/field:isNested?}}{{!
 }}{{/type:double?}}{{!
 
 }}{{/type:typedef?}}{{!

@@ -42,7 +42,8 @@ HpkeContextImpl::HpkeContextImpl(
 
 void HpkeContextImpl::incrementSeq() {
   if (seqNum_ >= (UINT64_MAX - 1)) {
-    throw std::runtime_error("NonceOverflowError: When incrementing seqNum");
+    throw std::runtime_error(
+        "MessageLimitReachedError: When incrementing seqNum");
   }
   seqNum_ += 1;
 }

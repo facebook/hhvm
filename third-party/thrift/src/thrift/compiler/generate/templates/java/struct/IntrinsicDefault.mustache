@@ -33,8 +33,12 @@
   }}{{#type:float?}}0.f{{/type:float?}}{{!
 
     String constants
-  }}{{#type:string?}}com.facebook.thrift.util.IntrinsicDefaults.defaultString(){{/type:string?}}{{!
-  }}{{#type:binary?}}com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray(){{/type:binary?}}{{!
+  }}{{#type:string?}}{{^type:isBinaryString?}}com.facebook.thrift.util.IntrinsicDefaults.defaultString(){{/type:isBinaryString?}}{{!
+  }}{{#type:isBinaryString?}}{{#field:hasAdapter?}}com.facebook.thrift.util.IntrinsicDefaults.defaultByteBuf(){{/field:hasAdapter?}}{{^field:hasAdapter?}}com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray(){{/field:hasAdapter?}}{{/type:isBinaryString?}}{{!
+  }}{{/type:string?}}{{!
+
+    Binary constants  
+  }}{{#type:binary?}}{{#field:hasAdapter?}}com.facebook.thrift.util.IntrinsicDefaults.defaultByteBuf(){{/field:hasAdapter?}}{{^field:hasAdapter?}}com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray(){{/field:hasAdapter?}}{{/type:binary?}}{{!
 
     Map constants
   }}{{#type:map?}}com.facebook.thrift.util.IntrinsicDefaults.defaultMap(){{/type:map?}}{{!

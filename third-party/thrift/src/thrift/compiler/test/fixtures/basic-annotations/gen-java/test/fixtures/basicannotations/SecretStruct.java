@@ -181,7 +181,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldBegin(ID_FIELD_DESC);
       oprot.writeI64(this.id);
       oprot.writeFieldEnd();
-      if (this.password != null) {
+      if (password != null) {
         oprot.writeFieldBegin(PASSWORD_FIELD_DESC);
         oprot.writeString(this.password);
         oprot.writeFieldEnd();

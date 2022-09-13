@@ -23,12 +23,14 @@ namespace py.asyncio facebook_thrift_asyncio.annotation.java
 namespace go thrift.annotation.java
 namespace py thrift.annotation.java
 
-// An annotation that is applied to a Typedef field that maps it a Java type Adapter.
+// An annotation that is applied to a Typedef or field that maps it a Java type Adapter.
 // For example:
 // @java.Adapter{adapterClassName="com.facebook.thrift.TimestampAdapter", typeClassName="java.time.Instant"}
 // typedef i64 Timestamp
 //
+@scope.Field
 @scope.Typedef
+@scope.Structured
 struct Adapter {
   // Fully qualified name to a class that implements com.facebook.thrift.adaptor.TypeAdapter
   1: string adapterClassName;

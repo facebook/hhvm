@@ -112,6 +112,14 @@ BENCHMARK_NAMED_PARAM(
     clientKeyShareGenerationBench,
     cecpq2,
     NamedGroup::cecpq2);
+BENCHMARK_NAMED_PARAM(
+    clientKeyShareGenerationBench,
+    x25519_kyber768,
+    NamedGroup::x25519_kyber768);
+BENCHMARK_NAMED_PARAM(
+    clientKeyShareGenerationBench,
+    secp384r1_kyber768,
+    NamedGroup::secp384r1_kyber768);
 
 BENCHMARK_NAMED_PARAM(
     serverKeyShareGenerationBench,
@@ -137,6 +145,14 @@ BENCHMARK_NAMED_PARAM(
     serverKeyShareGenerationBench,
     cecpq2,
     NamedGroup::cecpq2);
+BENCHMARK_NAMED_PARAM(
+    serverKeyShareGenerationBench,
+    x25519_kyber768,
+    NamedGroup::x25519_kyber768);
+BENCHMARK_NAMED_PARAM(
+    serverKeyShareGenerationBench,
+    secp384r1_kyber768,
+    NamedGroup::secp384r1_kyber768);
 
 BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
@@ -162,6 +178,14 @@ BENCHMARK_NAMED_PARAM(
     clientSharedSecretDerivationBench,
     cecpq2,
     NamedGroup::cecpq2);
+BENCHMARK_NAMED_PARAM(
+    clientSharedSecretDerivationBench,
+    x25519_kyber768,
+    NamedGroup::x25519_kyber768);
+BENCHMARK_NAMED_PARAM(
+    clientSharedSecretDerivationBench,
+    secp384r1_kyber768,
+    NamedGroup::secp384r1_kyber768);
 
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);

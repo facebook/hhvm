@@ -16,11 +16,22 @@
 
 #include <thrift/lib/cpp2/op/Get.h>
 
+#include <memory>
+#include <type_traits>
+
 #include <folly/portability/GTest.h>
+#include <thrift/lib/cpp2/FieldRefTraits.h>
+#include <thrift/lib/cpp2/op/Create.h>
 #include <thrift/lib/thrift/gen-cpp2/standard_types.h>
+#include <thrift/test/gen-cpp2/get_value_or_null_types.h>
 
 namespace apache::thrift::op {
 namespace {
+// TODO(afuller): Use shared test structs instead, e.g. testset
+using test::FieldRefNotOptionalStruct;
+using test::FieldRefOptionalStruct;
+using test::SmartPointerStruct;
+using test::UnionStruct;
 
 TEST(GetTest, GetField) {
   type::UriStruct actual;
@@ -43,6 +54,94 @@ FieldId findIdByName(const std::string& name) {
 TEST(GetTest, FindByOrdinal) {
   EXPECT_EQ(findIdByName<type::UriStruct>("unknown"), FieldId{});
   EXPECT_EQ(findIdByName<type::UriStruct>("scheme"), FieldId{1});
+}
+
+template <typename Id, typename T>
+void testFieldRef(T obj) {
+  auto field = op::get<Id>(obj);
+  field = 2;
+  EXPECT_EQ(*op::getValueOrNull(field), 2);
+  // test with const T&
+  const auto& objRef = obj;
+  auto fieldConst = op::get<Id>(objRef);
+  EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
+}
+
+template <typename Id, typename T>
+void testGetValueNotOptional(T obj) {
+  auto field = op::get<Id>(obj);
+  EXPECT_EQ(*op::getValueOrNull(field), 0);
+  testFieldRef<Id>(obj);
+}
+
+template <typename Id, typename T>
+void testGetValueOptional(T obj) {
+  auto field = op::get<Id>(obj);
+  EXPECT_EQ(op::getValueOrNull(field), nullptr);
+  testFieldRef<Id>(obj);
+}
+
+template <typename Id, typename T>
+void testGetValueSmartPointer(T obj) {
+  auto& field = op::get<Id>(obj);
+  EXPECT_EQ(op::getValueOrNull(field), nullptr);
+  if constexpr (thrift::detail::is_unique_ptr_v<
+                    std::remove_reference_t<decltype(field)>>) {
+    field = std::make_unique<int32_t>(2);
+  } else {
+    field = std::make_shared<int32_t>(2);
+  }
+  EXPECT_EQ(*op::getValueOrNull(field), 2);
+  // test with const T&
+  const auto& fieldConst = field;
+  EXPECT_EQ(*op::getValueOrNull(fieldConst), 2);
+}
+
+TEST(GetValueOrNullTest, FieldRefNotOptional) {
+  FieldRefNotOptionalStruct obj;
+  op::for_each_ordinal<FieldRefNotOptionalStruct>(
+      [&](auto id) { testGetValueNotOptional<decltype(id)>(obj); });
+}
+
+TEST(GetValueOrNullTest, FieldRefOptional) {
+  FieldRefOptionalStruct obj;
+  op::for_each_ordinal<FieldRefOptionalStruct>(
+      [&](auto id) { testGetValueOptional<decltype(id)>(obj); });
+}
+
+TEST(GetValueOrNullTest, SmartPointer) {
+  SmartPointerStruct obj;
+  op::for_each_ordinal<SmartPointerStruct>(
+      [&](auto id) { testGetValueSmartPointer<decltype(id)>(obj); });
+}
+
+TEST(GetValueOrNullTest, Optional) {
+  std::optional<int> opt;
+  EXPECT_EQ(op::getValueOrNull(opt), nullptr);
+  opt = 1;
+  EXPECT_EQ(*op::getValueOrNull(opt), 1);
+  // test with const T&
+  const auto& optConst = opt;
+  opt = 2;
+  EXPECT_EQ(*op::getValueOrNull(optConst), 2);
+}
+
+TEST(GetValueOrNullTest, Union) {
+  {
+    UnionStruct obj;
+    EXPECT_EQ(op::getValueOrNull(obj.field_ref()), nullptr);
+    obj.field_ref().emplace().int_field_ref() = 2;
+    EXPECT_EQ(op::getValueOrNull(obj.field_ref())->get_int_field(), 2);
+  }
+  {
+    // test with const T&
+    UnionStruct obj;
+    const auto& objConst = obj;
+    EXPECT_EQ(op::getValueOrNull(objConst.field_ref()), nullptr);
+    obj.field_ref().emplace().string_field_ref() = "foo";
+    EXPECT_EQ(
+        op::getValueOrNull(objConst.field_ref())->get_string_field(), "foo");
+  }
 }
 
 } // namespace

@@ -156,7 +156,7 @@ class AsyncFizzClientTest : public Test {
               } else {
                 newState.echState()->status = ECHStatus::Rejected;
                 ech::ECHConfig cfg;
-                cfg.version = ech::ECHVersion::Draft9;
+                cfg.version = ech::ECHVersion::Draft13;
                 cfg.ech_config_content =
                     folly::IOBuf::copyBuffer("retryconfig");
                 newState.echState()->retryConfigs.emplace({std::move(cfg)});

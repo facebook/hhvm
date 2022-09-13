@@ -18,20 +18,21 @@ namespace watchman {
 class Git : public SCM {
  public:
   Git(w_string_piece rootPath, w_string_piece scmRoot);
-  w_string mergeBaseWith(w_string_piece commitId, w_string requestId = nullptr)
-      const override;
+  w_string mergeBaseWith(
+      w_string_piece commitId,
+      const std::optional<w_string>& requestId = std::nullopt) const override;
   std::vector<w_string> getFilesChangedSinceMergeBaseWith(
       w_string_piece commitId,
       w_string_piece clock,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
 
   std::chrono::time_point<std::chrono::system_clock> getCommitDate(
       w_string_piece commitId,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
   std::vector<w_string> getCommitsPriorToAndIncluding(
       w_string_piece commitId,
       int numCommits,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
 
  private:
   std::string indexPath_;
@@ -40,7 +41,8 @@ class Git : public SCM {
   mutable LRUCache<std::string, std::vector<w_string>>
       filesChangedSinceMergeBaseWith_;
 
-  ChildProcess::Options makeGitOptions(w_string requestId) const;
+  ChildProcess::Options makeGitOptions(
+      const std::optional<w_string>& requestId) const;
   struct timespec getIndexMtime() const;
 };
 

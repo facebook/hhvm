@@ -16,13 +16,8 @@ namespace fizz {
 namespace ech {
 namespace test {
 
-folly::StringPiece kTestClientHelloInnerStr{
-    "6563685f636f6e6669675f636f6e74656e74"};
-folly::StringPiece kTestEncStr{"6b54657374456e63537472"};
-folly::StringPiece kTestRecordDigestStr{
-    "6b546573745265636f7264446967657374537472"};
-folly::StringPiece kClientECHExtensionData{
-    "0001000109636f6e6669675f69640003656e6300077061796c6f6164"};
+folly::StringPiece kOuterECHClientHelloExtensionData{
+    "0000010001AA0003656e6300077061796c6f6164"};
 
 Buf getBuf(folly::StringPiece hex) {
   auto data = unhexlify(hex);
@@ -43,11 +38,17 @@ TEST(ECHTest, TestConfigContentEncodeDecode) {
   EXPECT_TRUE(folly::IOBufEqualTo()(
       gotEchConfigContent.public_name, expectedEchConfigContent.public_name));
   EXPECT_TRUE(folly::IOBufEqualTo()(
-      gotEchConfigContent.public_key, expectedEchConfigContent.public_key));
-  EXPECT_EQ(gotEchConfigContent.kem_id, expectedEchConfigContent.kem_id);
+      gotEchConfigContent.key_config.public_key,
+      expectedEchConfigContent.key_config.public_key));
   EXPECT_EQ(
-      gotEchConfigContent.cipher_suites.size(),
-      expectedEchConfigContent.cipher_suites.size());
+      gotEchConfigContent.key_config.kem_id,
+      expectedEchConfigContent.key_config.kem_id);
+  EXPECT_EQ(
+      gotEchConfigContent.key_config.config_id,
+      expectedEchConfigContent.key_config.config_id);
+  EXPECT_EQ(
+      gotEchConfigContent.key_config.cipher_suites.size(),
+      expectedEchConfigContent.key_config.cipher_suites.size());
   EXPECT_EQ(
       gotEchConfigContent.maximum_name_length,
       expectedEchConfigContent.maximum_name_length);
@@ -61,7 +62,7 @@ TEST(ECHTest, TestConfigContentEncodeDecode) {
 TEST(ECHTest, TestECHConfigEncodeDecode) {
   // Encode ECH config
   ECHConfig echConfig;
-  echConfig.version = ECHVersion::Draft9;
+  echConfig.version = ECHVersion::Draft13;
   echConfig.ech_config_content =
       encode<ECHConfigContentDraft>(getECHConfigContent());
   std::unique_ptr<folly::IOBuf> encodedBuf =
@@ -72,41 +73,41 @@ TEST(ECHTest, TestECHConfigEncodeDecode) {
   auto gotECHConfig = decode<ECHConfig>(cursor);
 
   // Check decode(encode(config)) = config
-  EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft9);
+  EXPECT_EQ(gotECHConfig.version, ECHVersion::Draft13);
   EXPECT_TRUE(folly::IOBufEqualTo()(
       gotECHConfig.ech_config_content,
       encode<ECHConfigContentDraft>(getECHConfigContent())));
 }
 
-TEST(ECHTest, TestClientECHEncode) {
-  ClientECH ech;
-  ech.cipher_suite =
-      ECHCipherSuite{hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  ech.config_id = folly::IOBuf::copyBuffer("config_id");
+TEST(ECHTest, TestOuterECHClientHelloEncode) {
+  OuterECHClientHello ech;
+  ech.cipher_suite = HpkeSymmetricCipherSuite{
+      hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
+  ech.config_id = 0xAA;
   ech.enc = folly::IOBuf::copyBuffer("enc");
   ech.payload = folly::IOBuf::copyBuffer("payload");
 
-  Extension encoded = encodeExtension<ech::ClientECH>(ech);
+  Extension encoded = encodeExtension<ech::OuterECHClientHello>(ech);
 
   EXPECT_EQ(encoded.extension_type, ExtensionType::encrypted_client_hello);
   // This was captured as the expected output from generating the result.
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encoded.extension_data,
-      folly::IOBuf::copyBuffer(folly::unhexlify(kClientECHExtensionData))));
+      folly::IOBuf::copyBuffer(
+          folly::unhexlify(kOuterECHClientHelloExtensionData))));
 }
 
-TEST(ECHTest, TestClientECHDecode) {
+TEST(ECHTest, TestOuterECHClientHelloDecode) {
   Extension e;
   e.extension_type = ExtensionType::encrypted_client_hello;
-  e.extension_data =
-      folly::IOBuf::copyBuffer(folly::unhexlify(kClientECHExtensionData));
+  e.extension_data = folly::IOBuf::copyBuffer(
+      folly::unhexlify(kOuterECHClientHelloExtensionData));
   std::vector<Extension> vec;
   vec.push_back(std::move(e));
-  auto ech = getExtension<ClientECH>(vec);
+  auto ech = getExtension<OuterECHClientHello>(vec);
 
   EXPECT_EQ(ech->cipher_suite.kdf_id, hpke::KDFId::Sha256);
-  EXPECT_TRUE(folly::IOBufEqualTo()(
-      ech->config_id, folly::IOBuf::copyBuffer("config_id")));
+  EXPECT_EQ(ech->config_id, 0xAA);
   EXPECT_TRUE(folly::IOBufEqualTo()(ech->enc, folly::IOBuf::copyBuffer("enc")));
   EXPECT_TRUE(
       folly::IOBufEqualTo()(ech->payload, folly::IOBuf::copyBuffer("payload")));

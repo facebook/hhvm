@@ -34,7 +34,8 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
           {{#field:type}}
           {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
           {{/field:type}}
-          res.value = {{field:javaName}};
+          {{#field:hasAdapter?}}res.value = _{{field:javaName}}_Adapter.fromThrift({{field:javaName}});{{/field:hasAdapter?}}{{!
+          }}{{^field:hasAdapter?}}res.value = {{field:javaName}};{{/field:hasAdapter?}}
         }
         break;
       {{/struct:fields}}

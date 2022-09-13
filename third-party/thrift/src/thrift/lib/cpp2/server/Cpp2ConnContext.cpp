@@ -121,5 +121,13 @@ std::optional<std::string_view> ClientMetadataRef::getOtherMetadataField(
   return {};
 }
 
+const folly::F14NodeMap<std::string, std::string>&
+ClientMetadataRef::getFields() const {
+  static const folly::F14NodeMap<std::string, std::string> emptyFields;
+
+  return static_cast<bool>(md_.otherMetadata_ref()) ? *md_.otherMetadata_ref()
+                                                    : emptyFields;
+}
+
 } // namespace thrift
 } // namespace apache

@@ -55,9 +55,8 @@ public class AnyTest {
   }
 
   private ByteBufTProtocol serialize(LazyAny lazyAny, SerializationProtocol protocol) {
-    LazyAnyAdapter adapter = new LazyAnyAdapter();
     ByteBufTProtocol prot = createTProtocol(protocol);
-    adapter.toThrift(lazyAny, prot);
+    lazyAny.getAny().write0(prot);
 
     return prot;
   }
@@ -67,8 +66,8 @@ public class AnyTest {
   }
 
   private Object deserialize(TProtocol protocol) {
-    LazyAnyAdapter adapter = new LazyAnyAdapter();
-    return adapter.fromThrift(protocol).get();
+    Any any = Any.read0(protocol);
+    return LazyAny.wrap(any).get();
   }
 
   @Test
@@ -78,11 +77,9 @@ public class AnyTest {
     assertEquals(req, lazyAny.get());
 
     LazyAnyAdapter adapter = new LazyAnyAdapter();
-    ByteBufTProtocol protocol = createTProtocol(SerializationProtocol.TBinary);
-    adapter.toThrift(lazyAny, protocol);
+    Any any = adapter.toThrift(lazyAny);
 
-    ByteBufTProtocol readerProtocol = cloneTProtocol(protocol, SerializationProtocol.TBinary);
-    TestRequest received = (TestRequest) adapter.fromThrift(readerProtocol).get();
+    TestRequest received = (TestRequest) adapter.fromThrift(any).get();
 
     assertEquals(req.getAString(), received.getAString());
     assertEquals(req.getALong(), received.getALong());
@@ -101,8 +98,7 @@ public class AnyTest {
     assertEquals(req, lazyAny.get());
 
     LazyAnyAdapter adapter = new LazyAnyAdapter();
-    ByteBufTProtocol protocol = createTProtocol(SerializationProtocol.TBinary);
-    adapter.toThrift(lazyAny, protocol);
+    ByteBufTProtocol protocol = serialize(lazyAny, SerializationProtocol.TBinary);
 
     Any any = Any.read0(protocol);
     assertEquals("test.dev/thrift/lib/java/my_request", any.getType());
@@ -111,7 +107,7 @@ public class AnyTest {
     assertEquals(StandardProtocol.COMPACT, any.getProtocol());
 
     protocol.getByteBuf().resetReaderIndex();
-    TestRequest received = (TestRequest) adapter.fromThrift(protocol).get();
+    TestRequest received = (TestRequest) LazyAny.wrap(Any.read0(protocol)).get();
 
     assertEquals(req.getAString(), received.getAString());
     assertEquals(req.getALong(), received.getALong());
@@ -324,12 +320,10 @@ public class AnyTest {
 
     LazyAnyAdapter adapter = new LazyAnyAdapter();
     ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
-    ByteBufTProtocol protocol =
-        SerializerUtil.toByteBufProtocol(SerializationProtocol.TBinary, dest);
-    adapter.toThrift(lazyAny, protocol);
+    ByteBufTProtocol protocol = serialize(lazyAny);
 
     // deserialize it
-    SerializedLazyAny any = (SerializedLazyAny) adapter.fromThrift(protocol);
+    LazyAny any = LazyAny.wrap(Any.read0(protocol));
     TestRequest received = (TestRequest) any.get();
     assertEquals(null, any.getAny().getCustomProtocol());
 
@@ -364,8 +358,7 @@ public class AnyTest {
         new LazyAny.Builder<>().setValue(createSampleRequest()).setProtocol(null).build();
 
     LazyAnyAdapter adapter = new LazyAnyAdapter();
-    ByteBufTProtocol protocol = createTProtocol(SerializationProtocol.TBinary);
-    adapter.toThrift(lazyAny, protocol);
+    ByteBufTProtocol protocol = serialize(lazyAny);
 
     Any any = Any.read0(protocol);
     assertEquals(StandardProtocol.COMPACT, any.getProtocol());

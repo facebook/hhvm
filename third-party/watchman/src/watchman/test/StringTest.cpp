@@ -79,8 +79,9 @@ TEST(String, strings) {
     EXPECT_TRUE(defaultStr.empty())
         << "default constructed string should be empty";
 
-    w_string nullStr(nullptr);
-    EXPECT_TRUE(nullStr.empty()) << "nullptr string should be empty";
+    w_string movedFrom{"hello"};
+    w_string{std::move(movedFrom)};
+    EXPECT_TRUE(movedFrom.empty()) << "moved-from string should be empty";
 
     EXPECT_TRUE(w_string_piece().empty())
         << "default constructed string piece shouldbe empty";
@@ -128,15 +129,14 @@ TEST(String, canon_path) {
 }
 
 TEST(String, concat) {
-  auto str =
-      w_string::build("one", 2, "three", 1.2, false, w_string(nullptr).view());
+  auto str = w_string::build("one", 2, "three", 1.2, false, w_string_piece{});
   EXPECT_EQ(str, w_string("one2three1.2false"));
 }
 
 TEST(String, lowercase_suffix) {
   EXPECT_FALSE(w_string("").asLowerCaseSuffix());
-  EXPECT_EQ(w_string(".").asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(w_string("endwithdot.").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string(".").asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string("endwithdot.").asLowerCaseSuffix(), std::nullopt);
   EXPECT_FALSE(w_string("nosuffix").asLowerCaseSuffix());
   EXPECT_EQ(
       w_string(".beginwithdot").asLowerCaseSuffix(), w_string("beginwithdot"));
@@ -146,14 +146,14 @@ TEST(String, lowercase_suffix) {
   EXPECT_EQ(
       w_string("README.camelCaseSuffix").asLowerCaseSuffix(),
       w_string("camelcasesuffix"));
-  EXPECT_EQ(w_string("foo/bar").asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(w_string("foo.wat/bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string("foo/bar").asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string("foo.wat/bar").asLowerCaseSuffix(), std::nullopt);
   EXPECT_EQ(w_string("foo.wat/bar.xml").asLowerCaseSuffix(), w_string("xml"));
-  EXPECT_EQ(w_string("foo\\bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string("foo\\bar").asLowerCaseSuffix(), std::nullopt);
   EXPECT_EQ(w_string("foo\\bar.lU").asLowerCaseSuffix(), w_string("lu"));
 
 #ifdef _WIN32
-  EXPECT_EQ(w_string("foo.wat\\bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string("foo.wat\\bar").asLowerCaseSuffix(), std::nullopt);
 #else
   EXPECT_EQ(w_string("foo.wat\\bar").asLowerCaseSuffix(), w_string("wat\\bar"));
 #endif
@@ -161,7 +161,7 @@ TEST(String, lowercase_suffix) {
   // 255 is the longest suffix among some systems
   std::string longName(255, 'a');
   auto str = w_string::build(".", longName.c_str());
-  EXPECT_EQ(str.asLowerCaseSuffix().size(), 255);
+  EXPECT_EQ(str.asLowerCaseSuffix()->size(), 255);
 }
 
 TEST(String, string_piece_suffix) {
@@ -195,15 +195,14 @@ TEST(String, string_piece_suffix) {
   std::string longName(255, 'a');
   auto str = w_string::build(".", longName.c_str());
   auto sp = w_string_piece(str.data(), str.size());
-  EXPECT_EQ(sp.asLowerCaseSuffix().size(), 255);
+  EXPECT_EQ(sp.asLowerCaseSuffix()->size(), 255);
 }
 
 TEST(String, string_piece_lowercase_suffix) {
-  EXPECT_EQ(w_string_piece().asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(w_string_piece("").asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(w_string_piece(".").asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(
-      w_string_piece("endwithdot.").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string_piece().asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string_piece("").asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string_piece(".").asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string_piece("endwithdot.").asLowerCaseSuffix(), std::nullopt);
   EXPECT_FALSE(w_string_piece("nosuffix").asLowerCaseSuffix());
   EXPECT_EQ(
       w_string_piece(".beginwithdot").asLowerCaseSuffix(),
@@ -215,17 +214,15 @@ TEST(String, string_piece_lowercase_suffix) {
   EXPECT_EQ(
       w_string_piece("README.camelCaseSuffix").asLowerCaseSuffix(),
       w_string("camelcasesuffix"));
-  EXPECT_EQ(w_string_piece("foo/bar").asLowerCaseSuffix(), w_string(nullptr));
-  EXPECT_EQ(
-      w_string_piece("foo.wat/bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string_piece("foo/bar").asLowerCaseSuffix(), std::nullopt);
+  EXPECT_EQ(w_string_piece("foo.wat/bar").asLowerCaseSuffix(), std::nullopt);
   EXPECT_EQ(
       w_string_piece("foo.wat/bar.xml").asLowerCaseSuffix(), w_string("xml"));
-  EXPECT_EQ(w_string_piece("foo\\bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string_piece("foo\\bar").asLowerCaseSuffix(), std::nullopt);
   EXPECT_EQ(w_string_piece("foo\\bar.lU").asLowerCaseSuffix(), w_string("lu"));
 
 #ifdef _WIN32
-  EXPECT_EQ(
-      w_string_piece("foo.wat\\bar").asLowerCaseSuffix(), w_string(nullptr));
+  EXPECT_EQ(w_string_piece("foo.wat\\bar").asLowerCaseSuffix(), std::nullopt);
 #else
   EXPECT_EQ(
       w_string_piece("foo.wat\\bar").asLowerCaseSuffix(), w_string("wat\\bar"));
@@ -235,7 +232,7 @@ TEST(String, string_piece_lowercase_suffix) {
   std::string longName(255, 'a');
   auto str = w_string::build(".", longName.c_str());
   auto sp = w_string_piece(str.c_str(), str.size());
-  EXPECT_EQ(sp.asLowerCaseSuffix().size(), 255);
+  EXPECT_EQ(sp.asLowerCaseSuffix()->size(), 255);
 }
 
 TEST(String, path_cat) {
@@ -372,10 +369,6 @@ TEST(String, split) {
         << "split as 0 elements, got " << result.size();
 
     w_string_piece(w_string()).split(result, ':');
-    EXPECT_TRUE(result.size() == 0)
-        << "split as 0 elements, got " << result.size();
-
-    w_string_piece(w_string(nullptr)).split(result, ':');
     EXPECT_TRUE(result.size() == 0)
         << "split as 0 elements, got " << result.size();
   }

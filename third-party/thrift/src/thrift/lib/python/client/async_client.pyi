@@ -51,6 +51,8 @@ class AsyncClient:
         qualifier: FunctionQualifier = ...,
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
+        created_interaction: AsyncClient = ...,
+        uriOrName: str = ...,
     ) -> None: ...
     @typing.overload
     async def _send_request(
@@ -63,6 +65,8 @@ class AsyncClient:
         qualifier: FunctionQualifier = ...,
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
+        created_interaction: AsyncClient = ...,
+        uriOrName: str = ...,
     ) -> TResponse: ...
     @typing.overload
     async def _send_request(
@@ -78,6 +82,8 @@ class AsyncClient:
         qualifier: FunctionQualifier = ...,
         interaction_position: InteractionMethodPosition = ...,
         interaction_name: str = ...,
+        created_interaction: AsyncClient = ...,
+        uriOrName: str = ...,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

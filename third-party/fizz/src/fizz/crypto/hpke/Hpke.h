@@ -87,6 +87,7 @@ SetupResult setupWithEncap(
 std::unique_ptr<HpkeContext> setupWithDecap(
     Mode mode,
     folly::ByteRange enc,
+    folly::Optional<folly::ByteRange> pkS,
     std::unique_ptr<folly::IOBuf> info,
     folly::Optional<PskInputs> pskInputs,
     SetupParam param);

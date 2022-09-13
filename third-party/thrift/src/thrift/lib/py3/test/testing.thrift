@@ -395,3 +395,9 @@ struct ListNode {
 struct IOBufListStruct {
   1: list<binary (py3.iobuf)> iobufs;
 }
+
+service ClientMetadataTestingService {
+  string getAgent();
+  string getHostname();
+  string getMetadaField(1: string key);
+}

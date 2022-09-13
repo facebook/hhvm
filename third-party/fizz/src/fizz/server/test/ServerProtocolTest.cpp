@@ -9,6 +9,7 @@
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 
+#include <boost/variant/get.hpp>
 #include <fizz/crypto/exchange/test/Mocks.h>
 #include <fizz/crypto/hpke/test/Mocks.h>
 #include <fizz/crypto/test/TestUtil.h>
@@ -38,32 +39,31 @@ class MockDecrypter : public ech::Decrypter {
   MOCK_METHOD(
       ClientHello,
       _decryptClientHelloHRR_Stateful,
-      (const ClientHello& chlo,
-       const std::unique_ptr<folly::IOBuf>& configId,
-       std::unique_ptr<hpke::HpkeContext>& context));
+      (const ClientHello& chlo, std::unique_ptr<hpke::HpkeContext>& context));
 
   ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       std::unique_ptr<hpke::HpkeContext>& context) override {
-    return _decryptClientHelloHRR_Stateful(chlo, configId, context);
+    return _decryptClientHelloHRR_Stateful(chlo, context);
   }
 
   MOCK_METHOD(
       ClientHello,
       _decryptClientHelloHRR_Stateless,
       (const ClientHello& chlo,
-       const std::unique_ptr<folly::IOBuf>& configId,
        const std::unique_ptr<folly::IOBuf>& encapsulatedKey));
 
   ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override {
-    return _decryptClientHelloHRR_Stateless(chlo, configId, encapsulatedKey);
+    return _decryptClientHelloHRR_Stateless(chlo, encapsulatedKey);
   }
 
-  MOCK_CONST_METHOD0(getRetryConfigs, std::vector<ech::ECHConfig>());
+  MOCK_METHOD(
+      std::vector<ech::ECHConfig>,
+      getRetryConfigs,
+      (),
+      (const, override));
 };
 
 class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
@@ -243,10 +243,10 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
             cs.cipher = CipherSuite::TLS_AES_128_GCM_SHA256;
             cs.chloHash = folly::IOBuf::copyBuffer("chlohash");
             cs.appToken = folly::IOBuf::create(0);
-            cs.echCipherSuite = fizz::ech::ECHCipherSuite{
+            cs.echCipherSuite = fizz::ech::HpkeSymmetricCipherSuite{
                 fizz::hpke::KDFId::Sha256,
                 fizz::hpke::AeadId::TLS_AES_128_GCM_SHA256};
-            cs.echConfigId = folly::IOBuf::copyBuffer("configid");
+            cs.echConfigId = 0xFB;
             cs.echEnc = folly::IOBuf::copyBuffer("echpubkey");
             return folly::Optional<CookieState>(std::move(cs));
           } else {
@@ -285,7 +285,7 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     fizz::server::ECHState echState;
     echState.cipherSuite.kdf_id = fizz::hpke::KDFId::Sha256;
     echState.cipherSuite.aead_id = fizz::hpke::AeadId::TLS_AES_128_GCM_SHA256;
-    echState.configId = folly::IOBuf::copyBuffer("configid");
+    echState.configId = 0xFB;
     echState.hpkeContext = std::make_unique<hpke::test::MockHpkeContext>();
     state_.echState() = std::move(echState);
     state_.echStatus() = ECHStatus::Accepted;
@@ -394,10 +394,10 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     sn.hostname = folly::IOBuf::copyBuffer("www.fakehostname.com");
     sni.server_name_list.push_back(std::move(sn));
     testChlo.extensions.push_back(encodeExtension(std::move(sni)));
-    ech::ClientECH echExt;
-    echExt.cipher_suite = ech::ECHCipherSuite{
+    ech::OuterECHClientHello echExt;
+    echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
         hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-    echExt.config_id = folly::IOBuf::copyBuffer("configid");
+    echExt.config_id = 0xFB;
     echExt.enc = folly::IOBuf::copyBuffer("echpubkey");
     echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
     testChlo.extensions.push_back(encodeExtension(std::move(echExt)));
@@ -414,10 +414,10 @@ class ServerProtocolTest : public ProtocolTest<ServerTypes, Actions> {
     sn.hostname = folly::IOBuf::copyBuffer("www.fakehostname.com");
     sni.server_name_list.push_back(std::move(sn));
     testChlo.extensions.push_back(encodeExtension(std::move(sni)));
-    ech::ClientECH echExt;
-    echExt.cipher_suite = ech::ECHCipherSuite{
+    ech::OuterECHClientHello echExt;
+    echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
         hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-    echExt.config_id = folly::IOBuf::create(0);
+    echExt.config_id = 0xFB;
     echExt.enc = folly::IOBuf::create(0);
     echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
     testChlo.extensions.push_back(encodeExtension(std::move(echExt)));
@@ -1162,18 +1162,23 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       .WillOnce(
           InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
             auto chlo = TestMessages::clientHello();
-            chlo.extensions.push_back(encodeExtension(ech::ECHIsInner()));
+            chlo.random.fill(0xEC);
+            chlo.extensions.push_back(
+                encodeExtension(ech::InnerECHClientHello()));
             return ech::DecrypterResult{
                 std::move(chlo),
-                folly::IOBuf::copyBuffer("configid"),
+                0xFB,
                 std::make_unique<hpke::test::MockHpkeContext>()};
           }));
   context_->setECHDecrypter(decrypter);
 
   mockKeyScheduler_ = new MockKeyScheduler();
+  auto mockEchKeyScheduler = new MockKeyScheduler();
   mockHandshakeContext_ = new MockHandshakeContext();
   auto mockEchContext = new MockHandshakeContext();
+  Sequence factorySchedulerSeq;
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+      .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs(
           [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
   EXPECT_CALL(
@@ -1185,6 +1190,17 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       *mockHandshakeContext_,
       appendToTranscript(BufMatches("clienthelloencoding")))
       .InSequence(contextSeq);
+  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+      .InSequence(factorySchedulerSeq)
+      .WillOnce(InvokeWithoutArgs([=]() {
+        return std::unique_ptr<KeyScheduler>(mockEchKeyScheduler);
+      }));
+  Random r;
+  r.fill(0xEC);
+  EXPECT_CALL(
+      *mockEchKeyScheduler,
+      deriveEarlySecret(RangeMatches(std::string(r.begin(), r.end()))))
+      .InSequence(contextSeq);
   EXPECT_CALL(*mockHandshakeContext_, clone())
       .InSequence(contextSeq)
       .WillOnce(Invoke(
@@ -1195,14 +1211,13 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
       .WillOnce(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shloech"); }));
   EXPECT_CALL(
-      *mockKeyScheduler_,
+      *mockEchKeyScheduler,
       getSecret(
-          HandshakeSecrets::ECHAcceptConfirmation,
-          RangeMatches("chlo_shloech")))
+          EarlySecrets::ECHAcceptConfirmation, RangeMatches("chlo_shloech")))
       .InSequence(contextSeq)
       .WillOnce(InvokeWithoutArgs([]() {
         return DerivedSecret(
-            std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'e', 'p', 't'}),
+            std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
             HandshakeSecrets::ServerHandshakeTraffic);
       }));
 
@@ -1225,7 +1240,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionSuccess) {
         content.contentType = msg.type;
         content.encryptionLevel = mockWrite_->getEncryptionLevel();
         EXPECT_EQ(msg.type, ContentType::handshake);
-        const std::string echAcceptFragment = "echaccep";
+        const std::string echAcceptFragment = "echaccpt";
         auto expected = TestMessages::serverHello();
         memcpy(expected.random.data() + 24, echAcceptFragment.data(), 8);
         EXPECT_TRUE(folly::IOBufEqualTo()(
@@ -1472,7 +1487,7 @@ TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
           InvokeWithoutArgs([=]() -> folly::Optional<ech::DecrypterResult> {
             return ech::DecrypterResult{
                 TestMessages::clientHello(),
-                folly::IOBuf::copyBuffer("configid"),
+                0xFB,
                 std::make_unique<hpke::test::MockHpkeContext>()};
           }));
   context_->setECHDecrypter(decrypter);
@@ -1481,7 +1496,7 @@ TEST_F(ServerProtocolTest, TestECHMissingInnerExtension) {
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
-      "inner clienthello missing ech_is_inner");
+      "inner clienthello missing encrypted_client_hello");
 }
 
 TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
@@ -1495,7 +1510,7 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
   EXPECT_CALL(*decrypter, getRetryConfigs())
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft9;
+        cfg.version = ech::ECHVersion::Draft13;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         return {std::move(cfg)};
       }));
@@ -1609,9 +1624,9 @@ TEST_F(ServerProtocolTest, TestECHDecryptionFailure) {
       [](TLSMessage& msg, auto writeRecord) {
         EXPECT_EQ(msg.type, ContentType::handshake);
         auto modifiedEncryptedExt = TestMessages::encryptedExt();
-        ech::ServerECH serverECH;
+        ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft9;
+        cfg.version = ech::ECHVersion::Draft13;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         serverECH.retry_configs.push_back(std::move(cfg));
         modifiedEncryptedExt.extensions.push_back(
@@ -3058,19 +3073,20 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   context_->setECHDecrypter(decrypter);
   Sequence contextSeq;
   mockKeyScheduler_ = new MockKeyScheduler();
+  Sequence factorySchedulerSeq;
   EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+      .InSequence(factorySchedulerSeq)
       .WillOnce(InvokeWithoutArgs(
           [=]() { return std::unique_ptr<KeyScheduler>(mockKeyScheduler_); }));
-  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _, _))
+  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _))
       .InSequence(contextSeq)
       .WillOnce(Invoke(
           [=](const ClientHello& chlo,
-              const std::unique_ptr<folly::IOBuf>& configId,
               std::unique_ptr<hpke::HpkeContext>& context) -> ClientHello {
-            EXPECT_TRUE(folly::IOBufEqualTo()(
-                configId, folly::IOBuf::copyBuffer("configid")));
             auto innerchlo = TestMessages::clientHello();
-            innerchlo.extensions.push_back(encodeExtension(ech::ECHIsInner()));
+            innerchlo.random.fill(0xEC);
+            innerchlo.extensions.push_back(
+                encodeExtension(ech::InnerECHClientHello()));
             return innerchlo;
           }));
   EXPECT_CALL(
@@ -3091,6 +3107,18 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
         }));
         return ret;
       }));
+  auto mockEchKeyScheduler = new MockKeyScheduler();
+  EXPECT_CALL(*factory_, makeKeyScheduler(CipherSuite::TLS_AES_128_GCM_SHA256))
+      .InSequence(factorySchedulerSeq)
+      .WillOnce(InvokeWithoutArgs([=]() {
+        return std::unique_ptr<KeyScheduler>(mockEchKeyScheduler);
+      }));
+  Random r;
+  r.fill(0xEC);
+  EXPECT_CALL(
+      *mockEchKeyScheduler,
+      deriveEarlySecret(RangeMatches(std::string(r.begin(), r.end()))))
+      .InSequence(contextSeq);
   auto mockEchContext = new MockHandshakeContext();
   EXPECT_CALL(*mockHandshakeContext_, clone())
       .InSequence(contextSeq)
@@ -3102,14 +3130,13 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
       .WillOnce(
           Invoke([]() { return folly::IOBuf::copyBuffer("chlo_shloech"); }));
   EXPECT_CALL(
-      *mockKeyScheduler_,
+      *mockEchKeyScheduler,
       getSecret(
-          HandshakeSecrets::ECHAcceptConfirmation,
-          RangeMatches("chlo_shloech")))
+          EarlySecrets::ECHAcceptConfirmation, RangeMatches("chlo_shloech")))
       .InSequence(contextSeq)
       .WillOnce(InvokeWithoutArgs([]() {
         return DerivedSecret(
-            std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'e', 'p', 't'}),
+            std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
             HandshakeSecrets::ServerHandshakeTraffic);
       }));
   EXPECT_CALL(*mockHandshakeContext_, appendToTranscript(_))
@@ -3135,7 +3162,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
         memcpy(
             shlo.random.data() +
                 (shlo.random.size() - ech::kEchAcceptConfirmationSize),
-            "echaccept",
+            "echaccpt",
             ech::kEchAcceptConfirmationSize);
         EXPECT_TRUE(folly::IOBufEqualTo()(
             msg.fragment, encodeHandshake(std::move(shlo))));
@@ -3331,7 +3358,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHFlow) {
   ASSERT_TRUE(state_.clientRandom().hasValue());
   auto cr = state_.clientRandom().value();
   EXPECT_TRUE(
-      std::all_of(begin(cr), end(cr), [](auto c) { return c == 0x44; }));
+      std::all_of(begin(cr), end(cr), [](auto c) { return c == 0xEC; }));
   EXPECT_EQ(state_.echStatus(), ECHStatus::Accepted);
 }
 
@@ -3339,7 +3366,7 @@ TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
   setUpExpectingClientHelloRetryECH();
 
   auto decrypter = std::make_shared<MockDecrypter>();
-  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _, _))
+  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateful(_, _))
       .WillOnce(
           InvokeWithoutArgs([=]() { return TestMessages::clientHello(); }));
   context_->setECHDecrypter(decrypter);
@@ -3348,7 +3375,7 @@ TEST_F(ServerProtocolTest, TestRetryECHMissingInnerExtension) {
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
-      "inner clienthello missing ech_is_inner");
+      "inner clienthello missing encrypted_client_hello");
 }
 
 TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
@@ -3358,7 +3385,7 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
   EXPECT_CALL(*decrypter, getRetryConfigs())
       .WillOnce(InvokeWithoutArgs([]() -> std::vector<ech::ECHConfig> {
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft9;
+        cfg.version = ech::ECHVersion::Draft13;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         return {std::move(cfg)};
       }));
@@ -3460,9 +3487,9 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHRejectedFlow) {
       [](TLSMessage& msg, auto writeRecord) {
         EXPECT_EQ(msg.type, ContentType::handshake);
         auto ee = TestMessages::encryptedExt();
-        ech::ServerECH serverECH;
+        ech::ECHEncryptedExtensions serverECH;
         ech::ECHConfig cfg;
-        cfg.version = ech::ECHVersion::Draft9;
+        cfg.version = ech::ECHVersion::Draft13;
         cfg.ech_config_content = folly::IOBuf::copyBuffer("retryconfig");
         serverECH.retry_configs.push_back(std::move(cfg));
         ee.extensions.push_back(encodeExtension(std::move(serverECH)));
@@ -5210,10 +5237,10 @@ TEST_F(ServerProtocolTest, TestRetryClientHelloECHCipherMismatch) {
   auto chlo = setupClientHelloOuterHRR();
   ::fizz::test::TestMessages::removeExtension(
       chlo, ExtensionType::encrypted_client_hello);
-  ech::ClientECH echExt;
-  echExt.cipher_suite = ech::ECHCipherSuite{
+  ech::OuterECHClientHello echExt;
+  echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha512, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  echExt.config_id = folly::IOBuf::create(0);
+  echExt.config_id = 0xFB;
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
   chlo.extensions.push_back(encodeExtension(std::move(echExt)));
@@ -5313,21 +5340,17 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECH) {
 
   auto decrypter = std::make_shared<MockDecrypter>();
   context_->setECHDecrypter(decrypter);
-  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _, _))
+  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _))
       .WillOnce(Invoke(
           [=](const ClientHello& /*chlo*/,
-              const std::unique_ptr<folly::IOBuf>& configId,
               const std::unique_ptr<folly::IOBuf>& encapsulatedKey)
               -> ClientHello {
-            EXPECT_TRUE(folly::IOBufEqualTo()(
-                configId, folly::IOBuf::copyBuffer("configid")));
-            EXPECT_TRUE(folly::IOBufEqualTo()(
-                encapsulatedKey, folly::IOBuf::copyBuffer("echpubkey")));
             auto chloinner = TestMessages::clientHello();
             Cookie c;
             c.cookie = folly::IOBuf::copyBuffer("echcookie");
             chloinner.extensions.push_back(encodeExtension(std::move(c)));
-            chloinner.extensions.push_back(encodeExtension(ech::ECHIsInner()));
+            chloinner.extensions.push_back(
+                encodeExtension(ech::InnerECHClientHello()));
             return chloinner;
           }));
 
@@ -5350,14 +5373,11 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECHMissingInner) {
 
   auto decrypter = std::make_shared<MockDecrypter>();
   context_->setECHDecrypter(decrypter);
-  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _, _))
+  EXPECT_CALL(*decrypter, _decryptClientHelloHRR_Stateless(_, _))
       .WillOnce(Invoke(
           [=](const ClientHello& /*chlo*/,
-              const std::unique_ptr<folly::IOBuf>& configId,
               const std::unique_ptr<folly::IOBuf>& encapsulatedKey)
               -> ClientHello {
-            EXPECT_TRUE(folly::IOBufEqualTo()(
-                configId, folly::IOBuf::copyBuffer("configid")));
             EXPECT_TRUE(folly::IOBufEqualTo()(
                 encapsulatedKey, folly::IOBuf::copyBuffer("echpubkey")));
             auto chloinner = TestMessages::clientHello();
@@ -5376,7 +5396,7 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieECHMissingInner) {
   expectError<FizzException>(
       actions,
       AlertDescription::missing_extension,
-      "inner clienthello missing ech_is_inner");
+      "inner clienthello missing encrypted_client_hello");
 }
 
 TEST_F(ServerProtocolTest, TestClientHelloCookieFail) {
@@ -5517,10 +5537,10 @@ TEST_F(ServerProtocolTest, TestClientHelloCookieRejectECHCipher) {
   Cookie c;
   c.cookie = folly::IOBuf::copyBuffer("echcookie");
   chlo.extensions.push_back(encodeExtension(std::move(c)));
-  ech::ClientECH echExt;
-  echExt.cipher_suite = ech::ECHCipherSuite{
+  ech::OuterECHClientHello echExt;
+  echExt.cipher_suite = ech::HpkeSymmetricCipherSuite{
       hpke::KDFId::Sha512, hpke::AeadId::TLS_AES_128_GCM_SHA256};
-  echExt.config_id = folly::IOBuf::create(0);
+  echExt.config_id = 0xFB;
   echExt.enc = folly::IOBuf::create(0);
   echExt.payload = folly::IOBuf::copyBuffer("encryptedchlo");
   chlo.extensions.push_back(encodeExtension(std::move(echExt)));
@@ -6583,7 +6603,8 @@ TEST_F(ServerProtocolTest, AsyncKeyExchangeTest) {
 
   // The returned future shouldn't have been fulfilled
   auto asyncActions = detail::processEvent(state_, TestMessages::clientHello());
-  auto& actionsFuture = strict_get<folly::SemiFuture<Actions>>(asyncActions);
+  auto& actionsFuture =
+      boost::strict_get<folly::SemiFuture<Actions>>(asyncActions);
   executor_.drain();
 
   // We fulfill the future

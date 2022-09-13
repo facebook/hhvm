@@ -19,11 +19,13 @@ package com.facebook.thrift.adapter.common;
 import java.util.Date;
 
 public class DateTypeAdapter implements LongTypeAdapter<Date> {
-  public long toThrift(java.util.Date d) {
-    return d.getTime();
+  @Override
+  public Date fromThrift(Long aLong) {
+    return new Date(aLong);
   }
 
-  public Date fromThrift(long b) {
-    return new Date(b);
+  @Override
+  public Long toThrift(Date date) {
+    return date == null ? null : date.getTime();
   }
 }

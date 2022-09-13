@@ -159,13 +159,9 @@ pub struct State {
     pub fn_generics: HashMap<String, bool>,
     pub in_static_method: bool,
     pub parent_maybe_reified: bool,
-    /// This provides a generic mechanism to delay raising parsing errors;
-    /// since we're moving FFP errors away from CST to a stage after lowering
-    /// _and_ want to prioritize errors before lowering, the lowering errors
-    /// must be merely stored when the lowerer runs (until check for FFP runs (on AST)
-    /// and raised _after_ FFP error checking (unless we run the lowerer twice,
-    /// which would be expensive).
-    pub lowpri_errors: Vec<(Pos, String)>,
+    /// Parsing errors emitted during lowering. Note that most parsing
+    /// errors are emitted in the initial FFP parse.
+    pub parsing_errors: Vec<(Pos, String)>,
     /// hh_errors captures errors after parsing, naming, nast, etc.
     pub hh_errors: Vec<HHError>,
     pub lint_errors: Vec<LintError>,
@@ -244,7 +240,7 @@ impl<'a> Env<'a> {
                 fn_generics: HashMap::default(),
                 in_static_method: false,
                 parent_maybe_reified: false,
-                lowpri_errors: vec![],
+                parsing_errors: vec![],
                 doc_comments: vec![],
                 local_id_counter: 1,
                 hh_errors: vec![],
@@ -306,8 +302,8 @@ impl<'a> Env<'a> {
         RefMut::map(self.state.borrow_mut(), |s| &mut s.parent_maybe_reified)
     }
 
-    pub fn lowpri_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
-        RefMut::map(self.state.borrow_mut(), |s| &mut s.lowpri_errors)
+    pub fn parsing_errors(&mut self) -> RefMut<'_, Vec<(Pos, String)>> {
+        RefMut::map(self.state.borrow_mut(), |s| &mut s.parsing_errors)
     }
 
     pub fn hh_errors(&mut self) -> RefMut<'_, Vec<HHError>> {
@@ -384,15 +380,15 @@ pub enum Error {
         node_name: String,
         kind: syntax_kind::SyntaxKind,
     },
-    #[error("{0}")]
-    Failwith(String),
+    #[error("{message}")]
+    ParsingError { message: String, pos: Pos },
 }
 
 fn emit_error<'a>(error: Error, env: &mut Env<'a>) {
     // Don't emit multiple parsing errors during lowering. Once we've
     // seen one parsing error, later parsing errors are rarely
     // meaningful.
-    if !env.lowpri_errors().is_empty() {
+    if !env.parsing_errors().is_empty() {
         return;
     }
 
@@ -404,12 +400,10 @@ fn emit_error<'a>(error: Error, env: &mut Env<'a>) {
             ..
         } => {
             let msg = syntax_error::lowering_parsing_error(&node_name, &expecting);
-            env.lowpri_errors().push((pos, msg.to_string()));
+            env.parsing_errors().push((pos, msg.to_string()));
         }
-        Error::Failwith(_) => {
-            let msg = error.to_string();
-            let pos = env.mk_none_pos();
-            env.lowpri_errors().push((pos, msg));
+        Error::ParsingError { message, pos } => {
+            env.parsing_errors().push((pos, message));
         }
     }
 }
@@ -432,7 +426,7 @@ fn raise_parsing_error_pos<'a>(pos: &Pos, env: &mut Env<'a>, msg: &str) {
 fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>, msg: &str) {
     if env.should_surface_error() {
         let pos = node_or_pos.either(|node| p_pos(node, env), |pos| pos.clone());
-        env.lowpri_errors().push((pos, String::from(msg)))
+        env.parsing_errors().push((pos, String::from(msg)))
     } else if env.codegen() {
         let pos = node_or_pos.either(
             |node| {
@@ -441,7 +435,7 @@ fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>,
             },
             |pos| pos.clone(),
         );
-        env.lowpri_errors().push((pos, String::from(msg)))
+        env.parsing_errors().push((pos, String::from(msg)))
     }
 }
 
@@ -453,8 +447,11 @@ fn raise_lint_error(env: &mut Env<'_>, err: LintError) {
     env.lint_errors().push(err);
 }
 
-fn failwith<N>(msg: impl Into<String>) -> Result<N> {
-    Err(Error::Failwith(msg.into()))
+fn parsing_error<N>(msg: impl Into<String>, pos: Pos) -> Result<N> {
+    Err(Error::ParsingError {
+        message: msg.into(),
+        pos,
+    })
 }
 
 fn text<'a>(node: S<'a>, env: &Env<'_>) -> String {
@@ -466,7 +463,7 @@ fn text_str<'b, 'a>(node: S<'a>, env: &'b Env<'_>) -> &'b str {
 }
 
 fn lowering_error(env: &mut Env<'_>, pos: &Pos, text: &str, syntax_kind: &str) {
-    if env.is_typechecker() && env.lowpri_errors().is_empty() {
+    if env.is_typechecker() && env.parsing_errors().is_empty() {
         raise_parsing_error_pos(
             pos,
             env,
@@ -956,10 +953,13 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 })
                 .collect::<Result<Vec<_>, _>>()?;
             if variadic_hints.len() > 1 {
-                return failwith(format!(
-                    "{} variadic parameters found. There should be no more than one.",
-                    variadic_hints.len()
-                ));
+                return parsing_error(
+                    format!(
+                        "{} variadic parameters found. There should be no more than one.",
+                        variadic_hints.len()
+                    ),
+                    p_pos(&c.parameter_list, env),
+                );
             }
             let ctxs = p_contexts(
                 &c.contexts,
@@ -1160,11 +1160,14 @@ fn p_null_flavor<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::OgNullFlavor
     }
 }
 
-fn wrap_unescaper<F>(s: &str, unescaper: F) -> Result<BString>
+fn wrap_unescaper<F>(s: &str, unescaper: F, err_pos: Pos) -> Result<BString>
 where
     F: FnOnce(&str) -> Result<BString, InvalidString>,
 {
-    unescaper(s).map_err(|e| Error::Failwith(e.msg))
+    unescaper(s).map_err(|e| Error::ParsingError {
+        message: e.msg,
+        pos: err_pos,
+    })
 }
 
 fn fail_if_invalid_class_creation<'a>(node: S<'a>, env: &mut Env<'a>, id: impl AsRef<str>) {
@@ -1189,18 +1192,18 @@ fn fail_if_invalid_reified_generic<'a>(node: S<'a>, env: &mut Env<'a>, id: impl 
     }
 }
 
-fn rfind(s: &[u8], mut i: usize, c: u8) -> Result<usize> {
+fn rfind(s: &[u8], mut i: usize, c: u8) -> Option<usize> {
     if i >= s.len() {
-        return failwith("index out of range");
+        return None;
     }
     i += 1;
     while i > 0 {
         i -= 1;
         if s[i] == c {
-            return Ok(i);
+            return Some(i);
         }
     }
-    failwith("char not found")
+    None
 }
 
 fn prep_string2<'a>(
@@ -1241,11 +1244,14 @@ fn prep_string2<'a>(
                 raise(env);
                 Ok((first_token_op, Noop))
             } else if is_heredoc(text) {
-                let trim_size = text
-                    .iter()
-                    .position(|c| *c == b'\n')
-                    .ok_or_else(|| Error::Failwith(String::from("newline not found")))?
-                    + 1;
+                let trim_size =
+                    text.iter()
+                        .position(|c| *c == b'\n')
+                        .ok_or_else(|| Error::ParsingError {
+                            message: String::from("newline not found"),
+                            pos: p_pos(first.unwrap(), env),
+                        })?
+                        + 1;
                 let first_token_op = match trim_size {
                     _ if trim_size == text.len() => Skip,
                     _ => LeftTrim(trim_size),
@@ -1254,7 +1260,13 @@ fn prep_string2<'a>(
                     let text = t.text_raw(env.source_text());
                     let len = text.len();
                     if len != 0 {
-                        let n = rfind(text, len - 2, b'\n')?;
+                        let n = (match rfind(text, len - 2, b'\n') {
+                            Some(n) => Ok(n),
+                            None => Err(Error::ParsingError {
+                                message: String::from("newline not found"),
+                                pos: p_pos(first.unwrap(), env),
+                            }),
+                        })?;
                         let last_token_op = match n {
                             0 => Skip,
                             _ => RightTrim(len - n),
@@ -1281,7 +1293,7 @@ fn process_token_op<'a>(env: &mut Env<'a>, op: TokenOp, node: S<'a>) -> Result<O
                 let node = env.arena.alloc(Syntax::make_token(token));
                 Ok(Some(node))
             }
-            _ => failwith("Token expected"),
+            _ => missing_syntax("token in operator", node, env),
         },
         RightTrim(n) => match &node.children {
             Token(t) => {
@@ -1289,7 +1301,7 @@ fn process_token_op<'a>(env: &mut Env<'a>, op: TokenOp, node: S<'a>) -> Result<O
                 let node = env.arena.alloc(Syntax::make_token(token));
                 Ok(Some(node))
             }
-            _ => failwith("Token expected"),
+            _ => missing_syntax("token in operator", node, env),
         },
         _ => Ok(None),
     }
@@ -1445,7 +1457,7 @@ fn p_expr_lit<'a>(
                             missing_syntax(&format!("{}", int_kind), expr, env)?;
                         }
                         Err(ParseIntError::Empty) => {
-                            failwith("Unexpected int literal error")?;
+                            missing_syntax("int literal", expr, env)?;
                         }
                         Ok(_) => {}
                     }
@@ -1502,7 +1514,10 @@ fn p_expr_recurse<'a>(
     parent_pos: Option<Pos>,
 ) -> Result<Expr_> {
     if *env.exp_recursion_depth() >= EXP_RECURSION_LIMIT {
-        Err(Error::Failwith("Expression recursion limit reached".into()))
+        Err(Error::ParsingError {
+            message: "Expression recursion limit reached".into(),
+            pos: parent_pos.unwrap_or_else(|| env.mk_none_pos()),
+        })
     } else {
         *env.exp_recursion_depth() += 1;
         let r = stack_limit::maybe_grow(|| p_expr_impl(location, node, env, parent_pos));
@@ -1786,8 +1801,12 @@ fn p_function_call_expr<'a>(
     match get_hhas_adata() {
         Some(expr) => {
             let literal_expression_pos = p_pos(expr, env);
-            let s = extract_unquoted_string(text_str(expr, env), 0, expr.width())
-                .map_err(|e| Error::Failwith(e.msg))?;
+            let s = extract_unquoted_string(text_str(expr, env), 0, expr.width()).map_err(|e| {
+                Error::ParsingError {
+                    message: e.msg,
+                    pos: literal_expression_pos.clone(),
+                }
+            })?;
             Ok(Expr_::mk_call(
                 p_expr(recv, env)?,
                 vec![],
@@ -1984,11 +2003,12 @@ fn p_token<'a>(
         (InDoubleQuotedString, TK::HeredocStringLiteral)
         | (InDoubleQuotedString, TK::HeredocStringLiteralHead)
         | (InDoubleQuotedString, TK::HeredocStringLiteralTail) => Ok(Expr_::String(
-            wrap_unescaper(text_str(node, env), unescape_heredoc)?,
+            wrap_unescaper(text_str(node, env), unescape_heredoc, p_pos(node, env))?,
         )),
         (InDoubleQuotedString, _) => Ok(Expr_::String(wrap_unescaper(
             text_str(node, env),
             unesc_dbl,
+            p_pos(node, env),
         )?)),
         (MemberSelect, _)
         | (TopLevel, _)
@@ -2056,8 +2076,11 @@ fn p_scope_resolution_expr<'a>(
                 Expr_::String(id) => Ok(Expr_::mk_class_const(
                     ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                     (
-                        p,
-                        String::from_utf8(id.into()).map_err(|e| Error::Failwith(e.to_string()))?,
+                        p.clone(),
+                        String::from_utf8(id.into()).map_err(|e| Error::ParsingError {
+                            message: e.to_string(),
+                            pos: p,
+                        })?,
                     ),
                 )),
                 Expr_::Id(id) => {
@@ -2360,7 +2383,7 @@ fn p_xhp_expr<'a>(
             id, attrs, exprs,
         ))
     } else {
-        failwith("expect xhp open")
+        missing_syntax("XHP open", &c.open, env)
     }
 }
 
@@ -2711,16 +2734,19 @@ where
     let lifted_awaits = mem::replace(&mut env.lifted_awaits, saved_lifted_awaits);
     let result = result?;
     let awaits = match lifted_awaits {
-        Some(la) => process_lifted_awaits(la)?,
-        None => failwith("lifted awaits should not be None")?,
+        Some(la) => process_lifted_awaits(la, env)?,
+        None => parsing_error("lifted awaits should not be None", env.mk_none_pos())?,
     };
     Ok((awaits, result))
 }
 
-fn process_lifted_awaits(mut awaits: LiftedAwaits) -> Result<LiftedAwaitExprs> {
+fn process_lifted_awaits<'a>(
+    mut awaits: LiftedAwaits,
+    env: &mut Env<'a>,
+) -> Result<LiftedAwaitExprs> {
     for await_ in awaits.awaits.iter() {
         if (await_.1).1.is_none() {
-            return failwith("none pos in lifted awaits");
+            return parsing_error("none pos in lifted awaits", env.mk_none_pos());
         }
     }
     awaits
@@ -2778,7 +2804,7 @@ where
     };
     if let Some(lifted_awaits) = lifted_awaits {
         if !lifted_awaits.awaits.is_empty() {
-            let awaits = process_lifted_awaits(lifted_awaits)?;
+            let awaits = process_lifted_awaits(lifted_awaits, env)?;
             let pos = match pos {
                 Either::Left(n) => p_pos(n, env),
                 Either::Right(p) => p.clone(),
@@ -2991,7 +3017,7 @@ fn p_concurrent_stmt<'a>(
                         }
                     }
 
-                    failwith("Expect assignment stmt")?;
+                    raise_missing_syntax("assignment statement", &c.keyword, env);
                 } else {
                     raise_parsing_error_pos(
                         &stmt_pos,
@@ -3004,7 +3030,7 @@ fn p_concurrent_stmt<'a>(
             body_stmts.append(&mut assign_stmts);
             new(stmt_pos, S_::mk_block(body_stmts))
         }
-        _ => failwith("Unexpected concurrent stmt structure")?,
+        _ => missing_syntax("block in concurrent", &c.keyword, env)?,
     };
     Ok(new(keyword_pos, S_::mk_awaitall(lifted_awaits, vec![stmt])))
 }
@@ -3368,7 +3394,7 @@ fn p_markup<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Stmt> {
             let stmt_ = ast::Stmt_::mk_markup((pos.clone(), text(markup_hashbang, env)));
             Ok(ast::Stmt::new(pos, stmt_))
         }
-        _ => failwith("invalid node"),
+        _ => missing_syntax("XHP markup node", node, env),
     }
 }
 
@@ -4639,7 +4665,12 @@ fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::Xh
             let pos = if c.initializer.is_missing() {
                 p.clone()
             } else {
-                Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(Error::Failwith)?
+                Pos::btw(&p, &p_pos(&c.initializer, env)).map_err(|message| {
+                    Error::ParsingError {
+                        message,
+                        pos: p.clone(),
+                    }
+                })?
             };
             let (hint, like, enum_values, enum_) = match &c.type_.children {
                 XHPEnumType(c1) => {

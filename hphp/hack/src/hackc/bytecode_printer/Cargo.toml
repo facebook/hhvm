@@ -20,5 +20,5 @@ hhvm_types_ffi = { path = "../hhvm_cxx/hhvm_types" }
 itertools = "0.10.3"
 oxidized = { path = "../../oxidized" }
 print_opcode = { path = "print_opcode/cargo/lib" }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"
 write_bytes = { path = "../../utils/write_bytes/write_bytes" }

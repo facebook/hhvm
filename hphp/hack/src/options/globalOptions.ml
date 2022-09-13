@@ -145,7 +145,6 @@ type t = {
   tco_enforce_sealed_subclasses: bool;
   tco_everything_sdt: bool;
   tco_pessimise_builtins: bool;
-  tco_enable_disk_heap: bool;
   tco_explicit_consistent_constructors: int;
   tco_require_types_class_consts: int;
   tco_type_printer_fuel: int;
@@ -283,7 +282,6 @@ let default =
     tco_enforce_sealed_subclasses = false;
     tco_everything_sdt = false;
     tco_pessimise_builtins = false;
-    tco_enable_disk_heap = false;
     tco_explicit_consistent_constructors = 0;
     tco_require_types_class_consts = 0;
     tco_type_printer_fuel = 100;
@@ -440,7 +438,6 @@ let make
     ?(tco_enforce_sealed_subclasses = default.tco_enforce_sealed_subclasses)
     ?(tco_everything_sdt = default.tco_everything_sdt)
     ?(tco_pessimise_builtins = default.tco_pessimise_builtins)
-    ?(tco_enable_disk_heap = default.tco_enable_disk_heap)
     ?(tco_explicit_consistent_constructors =
       default.tco_explicit_consistent_constructors)
     ?(tco_require_types_class_consts = default.tco_require_types_class_consts)
@@ -583,7 +580,6 @@ let make
     tco_enforce_sealed_subclasses;
     tco_everything_sdt;
     tco_pessimise_builtins;
-    tco_enable_disk_heap;
     tco_explicit_consistent_constructors;
     tco_require_types_class_consts;
     tco_type_printer_fuel;

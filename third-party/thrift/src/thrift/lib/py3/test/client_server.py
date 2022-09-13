@@ -28,12 +28,15 @@ from folly.iobuf import IOBuf
 from stack_args.clients import StackService
 from stack_args.services import StackServiceInterface
 from stack_args.types import simple
-from testing.clients import TestingService
-from testing.services import TestingServiceInterface
+from testing.clients import ClientMetadataTestingService, TestingService
+from testing.services import (
+    ClientMetadataTestingServiceInterface,
+    TestingServiceInterface,
+)
 from testing.types import Color, easy, HardError
 from thrift.py3.client import ClientType, get_client
 from thrift.py3.common import Protocol, RpcOptions
-from thrift.py3.exceptions import ApplicationError, TransportError
+from thrift.py3.exceptions import ApplicationError
 from thrift.py3.server import get_context, ServiceInterface, SocketAddress, ThriftServer
 from thrift.py3.test.cpp_handler import CppHandler
 
@@ -309,7 +312,7 @@ class ClientServerTests(unittest.TestCase):
                 await client.__aenter__()
                 self.assertTrue(await client.invert(False))
                 self.assertFalse(await client.invert(True))
-                fut = client.__aexit__(None, None, None)
+                client.__aexit__(None, None, None)
                 del client  # If we do not abort here then good
 
         loop.run_until_complete(inner_test())
@@ -502,5 +505,78 @@ class ClientStackServerTests(unittest.TestCase):
                     # currently unsupported by cpp backend:
                     # self.assertEqual(b'xyz', (await client.get_iobuf_ptr()))
                     await client.take_iobuf_ptr(IOBuf(b"zyx"))
+
+        loop.run_until_complete(inner_test())
+
+
+class ClientMetadataTestingServiceHandler(ClientMetadataTestingServiceInterface):
+    async def getAgent(self) -> str:
+        requestContext = get_context()
+        connectionContext = requestContext.connection_context
+        clientMetadata = connectionContext.client_metadata
+        return clientMetadata.agent
+
+    async def getHostname(self) -> str:
+        requestContext = get_context()
+        connectionContext = requestContext.connection_context
+        clientMetadata = connectionContext.client_metadata
+        return clientMetadata.hostname
+
+    async def getMetadaField(self, key: str) -> str:
+        requestContext = get_context()
+        connectionContext = requestContext.connection_context
+        clientMetadata = connectionContext.client_metadata
+        return clientMetadata.getMetadataField(key)
+
+
+class ClientMetadataTestingServiceTests(unittest.TestCase):
+    def test_client_metadata(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(
+                handler=ClientMetadataTestingServiceHandler(), ip="::1"
+            ) as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(
+                    ClientMetadataTestingService, host=ip, port=port
+                ) as client:
+                    agent = await client.getAgent()
+                    self.assertEqual(agent, "HeaderClientChannel.cpp")
+                    hostname = await client.getHostname()
+                    self.assertTrue(hostname.endswith("facebook.com"))
+                    # Test env returns empty metadata fields dict
+                    cluster = await client.getMetadaField("tw_cluster")
+                    self.assertEqual(cluster, "")
+                    user = await client.getMetadaField("tw_user")
+                    self.assertEqual(user, "")
+                    job = await client.getMetadaField("tw_job")
+                    self.assertEqual(job, "")
+                    task = await client.getMetadaField("tw_task")
+                    self.assertEqual(task, "")
+                    # twhostname in case if anything changes and test env will get not empty metadata field dictionary
+                    # return f"{cluster}/{user}/{job}/{task}"
+
+        loop.run_until_complete(inner_test())
+
+    def test_call_get_metadata_field_with_invalid_key_should_return_empty_field(
+        self,
+    ) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(
+                handler=ClientMetadataTestingServiceHandler(), ip="::1"
+            ) as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(
+                    ClientMetadataTestingService, host=ip, port=port
+                ) as client:
+                    cluster = await client.getMetadaField("invalid_cluster_key")
+                    self.assertEqual(cluster, "")
+                    # twhostname in case if anything changes and test env will get not empty metadata field dictionary
+                    # return f"{cluster}/{user}/{job}/{task}"
 
         loop.run_until_complete(inner_test())

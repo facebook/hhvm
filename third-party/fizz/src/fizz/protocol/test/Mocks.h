@@ -85,13 +85,17 @@ class MockKeyScheduler : public KeyScheduler {
         .WillByDefault(Invoke([](HandshakeSecrets type, folly::ByteRange) {
           return DerivedSecret(std::vector<uint8_t>(), type);
         }));
-
-    ON_CALL(*this, getSecret(HandshakeSecrets::ECHAcceptConfirmation, _))
+    ON_CALL(*this, getSecret(EarlySecrets::ECHAcceptConfirmation, _))
         .WillByDefault(InvokeWithoutArgs([]() {
           return DerivedSecret(
-              std::vector<uint8_t>(
-                  {'e', 'c', 'h', 'a', 'c', 'c', 'e', 'p', 't', 'e', 'd'}),
-              HandshakeSecrets::ServerHandshakeTraffic);
+              std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
+              EarlySecrets::ECHAcceptConfirmation);
+        }));
+    ON_CALL(*this, getSecret(EarlySecrets::HRRECHAcceptConfirmation, _))
+        .WillByDefault(InvokeWithoutArgs([]() {
+          return DerivedSecret(
+              std::vector<uint8_t>({'e', 'c', 'h', 'a', 'c', 'c', 'p', 't'}),
+              EarlySecrets::HRRECHAcceptConfirmation);
         }));
     ON_CALL(*this, getSecret(An<MasterSecrets>(), _))
         .WillByDefault(Invoke([](MasterSecrets type, folly::ByteRange) {
@@ -241,6 +245,10 @@ class MockFactory : public OpenSSLFactory {
     return _makePeerCert(entry, leaf);
   }
 
+  MOCK_CONST_METHOD1(
+      makeRandomBytes,
+      std::unique_ptr<folly::IOBuf>(size_t count));
+
   void setDefaults() {
     ON_CALL(*this, makePlaintextReadRecordLayer())
         .WillByDefault(InvokeWithoutArgs([]() {
@@ -292,6 +300,12 @@ class MockFactory : public OpenSSLFactory {
     ON_CALL(*this, makeRandom()).WillByDefault(InvokeWithoutArgs([]() {
       Random random;
       random.fill(0x44);
+      return random;
+    }));
+    ON_CALL(*this, makeRandomBytes(_)).WillByDefault(Invoke([](size_t count) {
+      auto random = folly::IOBuf::create(count);
+      memset(random->writableData(), 0x44, count);
+      random->append(count);
       return random;
     }));
     ON_CALL(*this, makeTicketAgeAdd()).WillByDefault(InvokeWithoutArgs([]() {

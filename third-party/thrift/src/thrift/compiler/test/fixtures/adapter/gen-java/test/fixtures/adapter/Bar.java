@@ -379,19 +379,19 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.structField != null) {
+      if (structField != null) {
         oprot.writeFieldBegin(STRUCT_FIELD_FIELD_DESC);
         this.structField.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optionalStructField != null) {
+      if (optionalStructField != null) {
         oprot.writeFieldBegin(OPTIONAL_STRUCT_FIELD_FIELD_DESC);
         this.optionalStructField.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.structListField != null) {
+      if (structListField != null) {
         oprot.writeFieldBegin(STRUCT_LIST_FIELD_FIELD_DESC);
-        List<test.fixtures.adapter.Foo> _iter0 = this.structListField;
+        List<test.fixtures.adapter.Foo> _iter0 = structListField;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
         for (test.fixtures.adapter.Foo _iter1 : _iter0) {
           _iter1.write0(oprot);
@@ -399,9 +399,9 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.optionalStructListField != null) {
+      if (optionalStructListField != null) {
         oprot.writeFieldBegin(OPTIONAL_STRUCT_LIST_FIELD_FIELD_DESC);
-        List<test.fixtures.adapter.Foo> _iter0 = this.optionalStructListField;
+        List<test.fixtures.adapter.Foo> _iter0 = optionalStructListField;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
         for (test.fixtures.adapter.Foo _iter1 : _iter0) {
           _iter1.write0(oprot);
@@ -409,17 +409,17 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.unionField != null) {
+      if (unionField != null) {
         oprot.writeFieldBegin(UNION_FIELD_FIELD_DESC);
         this.unionField.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.optionalUnionField != null) {
+      if (optionalUnionField != null) {
         oprot.writeFieldBegin(OPTIONAL_UNION_FIELD_FIELD_DESC);
         this.optionalUnionField.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.adaptedStructField != null) {
+      if (adaptedStructField != null) {
         oprot.writeFieldBegin(ADAPTED_STRUCT_FIELD_FIELD_DESC);
         this.adaptedStructField.write0(oprot);
         oprot.writeFieldEnd();

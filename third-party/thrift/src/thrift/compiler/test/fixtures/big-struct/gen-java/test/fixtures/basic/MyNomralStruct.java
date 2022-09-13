@@ -1184,47 +1184,47 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.msg1 != null) {
+      if (msg1 != null) {
         oprot.writeFieldBegin(MSG1_FIELD_DESC);
         oprot.writeString(this.msg1);
         oprot.writeFieldEnd();
       }
-      if (this.msg2 != null) {
+      if (msg2 != null) {
         oprot.writeFieldBegin(MSG2_FIELD_DESC);
         oprot.writeString(this.msg2);
         oprot.writeFieldEnd();
       }
-      if (this.msg3 != null) {
+      if (msg3 != null) {
         oprot.writeFieldBegin(MSG3_FIELD_DESC);
         oprot.writeString(this.msg3);
         oprot.writeFieldEnd();
       }
-      if (this.msg4 != null) {
+      if (msg4 != null) {
         oprot.writeFieldBegin(MSG4_FIELD_DESC);
         oprot.writeString(this.msg4);
         oprot.writeFieldEnd();
       }
-      if (this.msg5 != null) {
+      if (msg5 != null) {
         oprot.writeFieldBegin(MSG5_FIELD_DESC);
         oprot.writeString(this.msg5);
         oprot.writeFieldEnd();
       }
-      if (this.msg6 != null) {
+      if (msg6 != null) {
         oprot.writeFieldBegin(MSG6_FIELD_DESC);
         oprot.writeString(this.msg6);
         oprot.writeFieldEnd();
       }
-      if (this.msg7 != null) {
+      if (msg7 != null) {
         oprot.writeFieldBegin(MSG7_FIELD_DESC);
         oprot.writeString(this.msg7);
         oprot.writeFieldEnd();
       }
-      if (this.msg8 != null) {
+      if (msg8 != null) {
         oprot.writeFieldBegin(MSG8_FIELD_DESC);
         oprot.writeString(this.msg8);
         oprot.writeFieldEnd();
       }
-      if (this.msg9 != null) {
+      if (msg9 != null) {
         oprot.writeFieldBegin(MSG9_FIELD_DESC);
         oprot.writeString(this.msg9);
         oprot.writeFieldEnd();

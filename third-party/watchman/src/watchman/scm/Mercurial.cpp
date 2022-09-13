@@ -49,8 +49,10 @@ MercurialResult runMercurial(
   auto outputs = proc.communicate();
   auto status = proc.wait();
   if (status) {
-    auto output = std::string{outputs.first.view()};
-    auto error = std::string{outputs.second.view()};
+    auto output =
+        std::string{outputs.first ? outputs.first->view() : std::string_view{}};
+    auto error = std::string{
+        outputs.second ? outputs.second->view() : std::string_view{}};
     replaceEmbeddedNulls(output);
     replaceEmbeddedNulls(error);
     SCMError::throwf(
@@ -61,14 +63,19 @@ MercurialResult runMercurial(
         error);
   }
 
-  return MercurialResult{std::move(outputs.first)};
+  if (outputs.first) {
+    return MercurialResult{std::move(*outputs.first)};
+  } else {
+    return MercurialResult{""};
+  }
 }
 
 } // namespace
 
 namespace watchman {
 
-ChildProcess::Options Mercurial::makeHgOptions(w_string requestId) const {
+ChildProcess::Options Mercurial::makeHgOptions(
+    const std::optional<w_string>& requestId) const {
   ChildProcess::Options opt;
   // Ensure that the hgrc doesn't mess with the behavior
   // of the commands that we're runing.
@@ -91,8 +98,8 @@ ChildProcess::Options Mercurial::makeHgOptions(w_string requestId) const {
   // environmental variable allows us to break the view isolation and read
   // information about the commit before the transaction is complete.
   opt.environment().set("HG_PENDING", getRootPath());
-  if (requestId && !requestId.empty()) {
-    opt.environment().set("HGREQUESTID", requestId);
+  if (requestId && !requestId->empty()) {
+    opt.environment().set("HGREQUESTID", *requestId);
   }
 
   // Default to strict hg status.  HGDETECTRACE is used by some deployments
@@ -144,8 +151,9 @@ struct timespec Mercurial::getDirStateMtime() const {
   }
 }
 
-w_string Mercurial::mergeBaseWith(w_string_piece commitId, w_string requestId)
-    const {
+w_string Mercurial::mergeBaseWith(
+    w_string_piece commitId,
+    const std::optional<w_string>& requestId) const {
   auto mtime = getDirStateMtime();
   auto key = folly::to<std::string>(
       commitId.view(), ":", mtime.tv_sec, ":", mtime.tv_nsec);
@@ -161,7 +169,7 @@ w_string Mercurial::mergeBaseWith(w_string_piece commitId, w_string requestId)
                 makeHgOptions(requestId),
                 "query for the merge base");
 
-            if (!result.output) {
+            if (result.output.empty()) {
               SCMError::throwf(
                   "no output was returned from `hg log -T{{node}} -r {}",
                   revset);
@@ -182,7 +190,7 @@ w_string Mercurial::mergeBaseWith(w_string_piece commitId, w_string requestId)
 std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
     w_string_piece commitId,
     w_string_piece clock,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto key = folly::to<std::string>(commitId.view(), ":", clock.view());
   auto commitCopy = std::string{commitId.view()};
 
@@ -219,7 +227,7 @@ std::vector<w_string> Mercurial::getFilesChangedSinceMergeBaseWith(
 
 time_point<system_clock> Mercurial::getCommitDate(
     w_string_piece commitId,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto result = runMercurial(
       {hgExecutablePath(),
        "--traceback",
@@ -245,7 +253,7 @@ time_point<system_clock> Mercurial::convertCommitDate(const char* commitDate) {
 std::vector<w_string> Mercurial::getCommitsPriorToAndIncluding(
     w_string_piece commitId,
     int numCommits,
-    w_string requestId) const {
+    const std::optional<w_string>& requestId) const {
   auto mtime = getDirStateMtime();
   auto key = folly::to<std::string>(
       commitId.view(), ":", numCommits, ":", mtime.tv_sec, ":", mtime.tv_nsec);

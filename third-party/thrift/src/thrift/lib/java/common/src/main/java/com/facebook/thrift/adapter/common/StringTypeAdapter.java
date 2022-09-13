@@ -17,20 +17,5 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import org.apache.thrift.protocol.TProtocol;
 
-public interface StringTypeAdapter<T> extends TypeAdapter<T> {
-  @Override
-  default void toThrift(T t, TProtocol protocol) {
-    protocol.writeString(toThrift(t));
-  }
-
-  @Override
-  default T fromThrift(TProtocol protocol) {
-    return fromThrift(protocol.readString());
-  }
-
-  String toThrift(T t);
-
-  T fromThrift(String b);
-}
+public interface StringTypeAdapter<T> extends TypeAdapter<String, T> {}

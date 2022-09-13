@@ -26,15 +26,16 @@ std::vector<Extension> getExtensions(folly::StringPiece hex) {
 }
 
 ECHConfigContentDraft getECHConfigContent() {
-  ECHCipherSuite suite{
+  HpkeSymmetricCipherSuite suite{
       hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256};
   ECHConfigContentDraft echConfigContent;
-  echConfigContent.public_name = folly::IOBuf::copyBuffer("v9 publicname");
-  echConfigContent.public_key = detail::encodeECPublicKey(
+  echConfigContent.key_config.config_id = 0xFB;
+  echConfigContent.key_config.kem_id = hpke::KEMId::secp256r1;
+  echConfigContent.key_config.public_key = detail::encodeECPublicKey(
       ::fizz::test::getPublicKey(::fizz::test::kP256PublicKey));
-  echConfigContent.kem_id = hpke::KEMId::secp256r1;
-  echConfigContent.cipher_suites = {suite};
-  echConfigContent.maximum_name_length = 1000;
+  echConfigContent.key_config.cipher_suites = {suite};
+  echConfigContent.maximum_name_length = 100;
+  echConfigContent.public_name = folly::IOBuf::copyBuffer("public.dummy.com");
   folly::StringPiece cookie{"002c00080006636f6f6b6965"};
   echConfigContent.extensions = getExtensions(cookie);
   return echConfigContent;
@@ -42,7 +43,7 @@ ECHConfigContentDraft getECHConfigContent() {
 
 ECHConfig getECHConfig() {
   ECHConfig config;
-  config.version = ECHVersion::Draft9;
+  config.version = ECHVersion::Draft13;
   config.ech_config_content = encode(getECHConfigContent());
   return config;
 }
@@ -56,7 +57,7 @@ ClientHello getClientHelloOuter() {
   // Set fake server name
   ServerNameList sni;
   ServerName sn;
-  sn.hostname = folly::IOBuf::copyBuffer("fake host name");
+  sn.hostname = folly::IOBuf::copyBuffer("public.dummy.com");
   sni.server_name_list.push_back(std::move(sn));
   chloOuter.extensions.push_back(encodeExtension(std::move(sni)));
 

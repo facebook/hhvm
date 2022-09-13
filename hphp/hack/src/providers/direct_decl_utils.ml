@@ -174,13 +174,8 @@ let get_file_contents ~ignore_file_content_caches ctx filename =
     let source_text = Ast_provider.compute_source_text ~entry in
     Some (Full_fidelity_source_text.text source_text)
   | None ->
-    let write_to_cache =
-      (not ignore_file_content_caches)
-      && TypecheckerOptions.enable_disk_heap (Provider_context.get_tcopt ctx)
-    in
     File_provider.get_contents
       ~force_read_disk:ignore_file_content_caches
-      ~writeback_disk_contents_in_shmem_provider:write_to_cache
       filename
 
 let direct_decl_parse ?(ignore_file_content_caches = false) ctx file =

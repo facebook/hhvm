@@ -1,0 +1,18 @@
+File "test_internal_on_internal_class.php--def.php", line 27, characters 40-48:
+You cannot use this type in a public declaration. (Typing[4446])
+  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
+  It is declared as `internal` here
+File "test_internal_on_internal_class.php--file.php", line 6, characters 9-11:
+You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
+  This type is mixed because this is an internal symbol from module b, which is opaque outside of the module.
+  File "test_internal_on_internal_class.php--def.php", line 20, characters 20-28:
+  The type originated from here
+  File "test_internal_on_internal_class.php--def.php", line 15, characters 10-10:
+    via this generic `T`
+File "test_internal_on_internal_class.php--file.php", line 10, characters 9-11:
+You are trying to access the method `get` but this is a mixed value. Use a **specific** class or interface name. (Typing[4064])
+  File "test_internal_on_internal_class.php--def.php", line 5, characters 16-24:
+  This type is mixed because this is an internal symbol from module b, which is opaque outside of the module.
+  File "test_internal_on_internal_class.php--def.php", line 32, characters 37-45:
+  The type originated from here

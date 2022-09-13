@@ -1,4 +1,4 @@
-File "", line 0, characters 0-0:
-Unexpected int literal error (Parsing[1002])
 File "parse_int_with_underscore_bad5.php", line 5, characters 17-18:
 A binary literal needs at least one digit. (Parsing[1002])
+File "parse_int_with_underscore_bad5.php", line 5, characters 17-18:
+Encountered unexpected text `0b`, was expecting a int literal. (Parsing[1002])

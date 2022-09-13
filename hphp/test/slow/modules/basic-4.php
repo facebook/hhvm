@@ -10,7 +10,7 @@ function test(
   string $z
 ) {
   $x::foo(); // pass
-  $y::foo(); // error
+  $y::foo(); // pass
   $z::foo(); // error
 }
 

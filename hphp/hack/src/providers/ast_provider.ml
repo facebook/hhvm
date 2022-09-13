@@ -108,11 +108,7 @@ let get_from_local_cache ~full ctx file_name =
       Option.value_map
         ~default:(with_no_err [])
         ~f
-        (File_provider.get_contents
-           file_name
-           ~writeback_disk_contents_in_shmem_provider:
-             (TypecheckerOptions.enable_disk_heap
-                (Provider_context.get_tcopt ctx)))
+        (File_provider.get_contents file_name)
     in
     let ast =
       if

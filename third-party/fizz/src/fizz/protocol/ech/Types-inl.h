@@ -20,11 +20,21 @@ inline void detail::write<ech::ECHConfig>(
 }
 
 template <>
-inline void detail::write<ech::ECHCipherSuite>(
-    const ech::ECHCipherSuite& suite,
+inline void detail::write<ech::HpkeSymmetricCipherSuite>(
+    const ech::HpkeSymmetricCipherSuite& suite,
     folly::io::Appender& out) {
   detail::write(suite.kdf_id, out);
   detail::write(suite.aead_id, out);
+}
+
+template <>
+inline void detail::write<ech::HpkeKeyConfig>(
+    const ech::HpkeKeyConfig& config,
+    folly::io::Appender& out) {
+  detail::write(config.config_id, out);
+  detail::write(config.kem_id, out);
+  detail::writeBuf<uint16_t>(config.public_key, out);
+  detail::writeVector<uint16_t>(config.cipher_suites, out);
 }
 
 template <>
@@ -37,17 +47,34 @@ struct detail::Sizer<ech::ECHConfig> {
 };
 
 template <>
-struct detail::Sizer<ech::ECHCipherSuite> {
+struct detail::Sizer<ech::HpkeSymmetricCipherSuite> {
   template <class T>
-  size_t getSize(const ech::ECHCipherSuite&) {
+  size_t getSize(const ech::HpkeSymmetricCipherSuite&) {
     return sizeof(uint16_t) + sizeof(uint16_t);
   }
 };
 
 template <>
-struct detail::Reader<ech::ECHCipherSuite> {
+struct detail::Sizer<ech::HpkeKeyConfig> {
   template <class T>
-  size_t read(ech::ECHCipherSuite& suite, folly::io::Cursor& cursor) {
+  size_t getSize(const ech::HpkeKeyConfig& config) {
+    auto sz = sizeof(uint8_t) + // config_id
+        sizeof(uint16_t) + // kem_id
+        detail::getBufSize<uint16_t>(config.public_key) +
+        sizeof(uint16_t); // len(cipher_suites)
+    // Add remaining array length, if any.
+    if (!config.cipher_suites.empty()) {
+      sz += config.cipher_suites.size() *
+          detail::getSize(config.cipher_suites.front());
+    }
+    return sz;
+  }
+};
+
+template <>
+struct detail::Reader<ech::HpkeSymmetricCipherSuite> {
+  template <class T>
+  size_t read(ech::HpkeSymmetricCipherSuite& suite, folly::io::Cursor& cursor) {
     size_t len = detail::read(suite.kdf_id, cursor) +
         detail::read(suite.aead_id, cursor);
     return len;
@@ -61,6 +88,19 @@ struct detail::Reader<ech::ECHConfig> {
     size_t len = 0;
     len += detail::read(echConfig.version, cursor);
     len += readBuf<uint16_t>(echConfig.ech_config_content, cursor);
+    return len;
+  }
+};
+
+template <>
+struct detail::Reader<ech::HpkeKeyConfig> {
+  template <class T>
+  size_t read(ech::HpkeKeyConfig& keyConfig, folly::io::Cursor& cursor) {
+    size_t len = 0;
+    len += detail::read(keyConfig.config_id, cursor);
+    len += detail::read(keyConfig.kem_id, cursor);
+    len += readBuf<uint16_t>(keyConfig.public_key, cursor);
+    len += readVector<uint16_t>(keyConfig.cipher_suites, cursor);
     return len;
   }
 };
@@ -85,20 +125,13 @@ inline Buf encode<ech::ECHConfigContentDraft>(
     return sizeof(uint16_t) + sz;
   }();
   auto buf = folly::IOBuf::create(
-      detail::getBufSize<uint16_t>(ech.public_name) +
-      detail::getBufSize<uint16_t>(ech.public_key) +
-      sizeof(uint16_t) + // kem_id
-      sizeof(uint16_t) + // cipher_suites.size
-      sizeof(ech::ECHCipherSuite) * ech.cipher_suites.size() + // cipher_suites
-      sizeof(uint16_t) + // maximum_name_length
-      extLen); // extensions
+      detail::getSize(ech.key_config) + sizeof(uint8_t) + // maximum_name_length
+      detail::getBufSize<uint16_t>(ech.public_name) + extLen); // extensions
 
   folly::io::Appender appender(buf.get(), 0);
-  detail::writeBuf<uint16_t>(ech.public_name, appender);
-  detail::writeBuf<uint16_t>(ech.public_key, appender);
-  detail::write(ech.kem_id, appender);
-  detail::writeVector<uint16_t>(ech.cipher_suites, appender);
+  detail::write(ech.key_config, appender);
   detail::write(ech.maximum_name_length, appender);
+  detail::writeBuf<uint8_t>(ech.public_name, appender);
   detail::writeVector<uint16_t>(ech.extensions, appender);
   return buf;
 }
@@ -124,11 +157,9 @@ inline Buf encode<ech::ECHConfig>(ech::ECHConfig&& echConfig) {
 template <>
 inline ech::ECHConfigContentDraft decode(folly::io::Cursor& cursor) {
   ech::ECHConfigContentDraft echConfigContent;
-  detail::readBuf<uint16_t>(echConfigContent.public_name, cursor);
-  detail::readBuf<uint16_t>(echConfigContent.public_key, cursor);
-  detail::read(echConfigContent.kem_id, cursor);
-  detail::readVector<uint16_t>(echConfigContent.cipher_suites, cursor);
-  detail::read<uint16_t>(echConfigContent.maximum_name_length, cursor);
+  detail::read(echConfigContent.key_config, cursor);
+  detail::read(echConfigContent.maximum_name_length, cursor);
+  detail::readBuf<uint8_t>(echConfigContent.public_name, cursor);
   detail::readVector<uint16_t>(echConfigContent.extensions, cursor);
 
   return echConfigContent;

@@ -99,7 +99,7 @@ impl AstProvider {
         }
     }
 
-    fn process_lowpri_errors(
+    fn process_lowerer_parsing_errors(
         &self,
         acc: &mut Vec<ParsingError>,
         env: &ParserEnv,
@@ -159,7 +159,7 @@ impl AstProvider {
         let mut errs = Vec::new();
         self.process_scour_comments(&mut errs, parsed_file.scoured_comments);
         self.process_syntax_errors(&mut errs, &indexed_source_text, parsed_file.syntax_errors);
-        self.process_lowpri_errors(&mut errs, &env, parsed_file.lowpri_errors);
+        self.process_lowerer_parsing_errors(&mut errs, &env, parsed_file.lowerer_parsing_errors);
         self.process_non_syntax_errors(&mut errs, parsed_file.errors);
         self.process_lint_errors(parsed_file.lint_errors);
 

@@ -179,7 +179,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
       oprot.writeFieldBegin(AGE_FIELD_DESC);
       oprot.writeI64(this.age);
       oprot.writeFieldEnd();
-      if (this.name != null) {
+      if (name != null) {
         oprot.writeFieldBegin(NAME_FIELD_DESC);
         oprot.writeString(this.name);
         oprot.writeFieldEnd();

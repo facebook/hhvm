@@ -322,7 +322,13 @@ let method_ env m =
       m.m_where_constraints
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt;
-  let tenv = Env.set_internal tenv (at_least_internal m.m_visibility) in
+  (* Only throw hack error if class and method are both public *)
+  let tenv =
+    Env.set_internal
+      tenv
+      (at_least_internal m.m_visibility || Env.get_internal tenv)
+  in
+
   let env = { env with tenv } in
   fun_params env m.m_params
   @ tparams env m.m_tparams

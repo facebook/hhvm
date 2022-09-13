@@ -20,15 +20,25 @@
 public {{struct:javaCapitalName}}() {
   {{#struct:fields}}
   {{^field:value}}
+  {{#field:terse?}}
   {{#field:hasAdapter?}}
-  this.{{field:javaName}} = Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT;
+  this.{{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}});
   {{/field:hasAdapter?}}
   {{^field:hasAdapter?}}
   this.{{field:javaName}} = {{field:javaDefaultValue}};
   {{/field:hasAdapter?}}
+  {{/field:terse?}}
+  {{^field:terse?}}
+  {{#field:hasAdapter?}}
+  this.{{field:javaName}} = null;
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
+  this.{{field:javaName}} = {{field:javaDefaultValue}};
+  {{/field:hasAdapter?}}
+  {{/field:terse?}}
   {{/field:value}}{{!
   }}{{#field:value}}
-  this.{{field:javaName}} = {{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}};
+  this.{{field:javaName}} = {{#field:hasAdapter?}}_{{field:javaName}}_Adapter.fromThrift({{/field:hasAdapter?}}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{#field:hasAdapter?}}){{/field:hasAdapter?}};
   {{/field:value}}
   {{/struct:fields}}
 }
@@ -54,18 +64,23 @@ protected {{struct:javaCapitalName}}() {
   {{^field:value}}
   {{#field:terse?}}
   {{#field:hasAdapter?}}
-  this.{{field:javaName}} = Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT;
+  this.{{field:javaName}} = _{{field:javaName}}_Adapter.fromThrift({{#field:isObject?}}{{#field:type}}{{> BoxedType}}{{/field:type}}.defaultInstance(){{/field:isObject?}}{{^field:isObject?}}{{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}}{{/field:isObject?}});
   {{/field:hasAdapter?}}
   {{^field:hasAdapter?}}
   this.{{field:javaName}} = {{field:javaDefaultValue}};
   {{/field:hasAdapter?}}
   {{/field:terse?}}
   {{^field:terse?}}
+  {{#field:hasAdapter?}}
+  this.{{field:javaName}} = null;
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
   this.{{field:javaName}} = {{field:javaDefaultValue}};
+  {{/field:hasAdapter?}}
   {{/field:terse?}}
   {{/field:value}}{{!
   }}{{#field:value}}
-  this.{{field:javaName}} = {{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}};
+  this.{{field:javaName}} = {{#field:hasAdapter?}}_{{field:javaName}}_Adapter.fromThrift({{/field:hasAdapter?}}{{#field:hasInitialValue?}}{{#field:type}}{{field:nestedDepth++}}{{> DefaultValue}}{{field:nestedDepth--}}{{/field:type}}{{/field:hasInitialValue?}}{{^field:hasInitialValue?}}{{field:javaDefaultValue}}{{/field:hasInitialValue?}}{{#field:hasAdapter?}}){{/field:hasAdapter?}};
   {{/field:value}}
   {{/struct:fields}}
 }{{/struct:fields?}}

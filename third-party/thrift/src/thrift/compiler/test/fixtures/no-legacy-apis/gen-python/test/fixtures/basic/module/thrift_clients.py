@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types
@@ -46,13 +46,13 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
             self,
             u: test.fixtures.basic.module.thrift_types.MyUnion
         ) -> test.fixtures.basic.module.thrift_types.MyStruct:
-            _fbthrift_resp = await self._send_request(  # type: ignore 
+            _fbthrift_resp = await self._send_request(
                 "MyService",
                 "query",
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_args(
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
-                qualifier = _fbthrift_FunctionQualifier.Unspecified,  # type: ignore 
+                qualifier = _fbthrift_FunctionQualifier.Unspecified,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

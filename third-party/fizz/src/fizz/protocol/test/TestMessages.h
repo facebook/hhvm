@@ -95,7 +95,9 @@ struct TestMessages {
   static HelloRetryRequest helloRetryRequest() {
     HelloRetryRequest hrr;
     hrr.legacy_version = ProtocolVersion::tls_1_2;
+    hrr.legacy_session_id_echo = folly::IOBuf::create(0);
     hrr.cipher_suite = CipherSuite::TLS_AES_128_GCM_SHA256;
+    hrr.legacy_session_id_echo = folly::IOBuf::create(0);
     ServerSupportedVersions supportedVersions;
     supportedVersions.selected_version = TestProtocolVersion;
     hrr.extensions.push_back(encodeExtension(std::move(supportedVersions)));

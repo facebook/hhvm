@@ -1336,12 +1336,12 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MY_INT_FIELD_FIELD_DESC);
       oprot.writeI64(this.myIntField);
       oprot.writeFieldEnd();
-      if (this.myStringField != null) {
+      if (myStringField != null) {
         oprot.writeFieldBegin(MY_STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.myStringField);
         oprot.writeFieldEnd();
       }
-      if (this.myDataField != null) {
+      if (myDataField != null) {
         oprot.writeFieldBegin(MY_DATA_FIELD_FIELD_DESC);
         this.myDataField.write0(oprot);
         oprot.writeFieldEnd();
@@ -1364,9 +1364,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
       oprot.writeFieldBegin(MY_DOUBLE_FIELD_FIELD_DESC);
       oprot.writeDouble(this.myDoubleField);
       oprot.writeFieldEnd();
-      if (this.lDouble != null) {
+      if (lDouble != null) {
         oprot.writeFieldBegin(L_DOUBLE_FIELD_DESC);
-        List<Double> _iter0 = this.lDouble;
+        List<Double> _iter0 = lDouble;
         oprot.writeListBegin(new TList(TType.DOUBLE, _iter0.size()));
         for (double _iter1 : _iter0) {
           oprot.writeDouble(_iter1);
@@ -1374,9 +1374,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lShort != null) {
+      if (lShort != null) {
         oprot.writeFieldBegin(L_SHORT_FIELD_DESC);
-        List<Short> _iter0 = this.lShort;
+        List<Short> _iter0 = lShort;
         oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
@@ -1384,9 +1384,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lInteger != null) {
+      if (lInteger != null) {
         oprot.writeFieldBegin(L_INTEGER_FIELD_DESC);
-        List<Integer> _iter0 = this.lInteger;
+        List<Integer> _iter0 = lInteger;
         oprot.writeListBegin(new TList(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);
@@ -1394,9 +1394,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lLong != null) {
+      if (lLong != null) {
         oprot.writeFieldBegin(L_LONG_FIELD_DESC);
-        List<Long> _iter0 = this.lLong;
+        List<Long> _iter0 = lLong;
         oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
         for (long _iter1 : _iter0) {
           oprot.writeI64(_iter1);
@@ -1404,9 +1404,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lString != null) {
+      if (lString != null) {
         oprot.writeFieldBegin(L_STRING_FIELD_DESC);
-        List<String> _iter0 = this.lString;
+        List<String> _iter0 = lString;
         oprot.writeListBegin(new TList(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -1414,9 +1414,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lBool != null) {
+      if (lBool != null) {
         oprot.writeFieldBegin(L_BOOL_FIELD_DESC);
-        List<Boolean> _iter0 = this.lBool;
+        List<Boolean> _iter0 = lBool;
         oprot.writeListBegin(new TList(TType.BOOL, _iter0.size()));
         for (boolean _iter1 : _iter0) {
           oprot.writeBool(_iter1);
@@ -1424,9 +1424,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.lByte != null) {
+      if (lByte != null) {
         oprot.writeFieldBegin(L_BYTE_FIELD_DESC);
-        List<Byte> _iter0 = this.lByte;
+        List<Byte> _iter0 = lByte;
         oprot.writeListBegin(new TList(TType.BYTE, _iter0.size()));
         for (byte _iter1 : _iter0) {
           oprot.writeByte(_iter1);
@@ -1434,9 +1434,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mShortString != null) {
+      if (mShortString != null) {
         oprot.writeFieldBegin(M_SHORT_STRING_FIELD_DESC);
-        Map<Short, String> _iter0 = this.mShortString;
+        Map<Short, String> _iter0 = mShortString;
         oprot.writeMapBegin(new TMap(TType.I16, TType.STRING, _iter0.size()));
         for (Map.Entry<Short, String> _iter1 : _iter0.entrySet()) {
           oprot.writeI16(_iter1.getKey());
@@ -1445,9 +1445,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mIntegerString != null) {
+      if (mIntegerString != null) {
         oprot.writeFieldBegin(M_INTEGER_STRING_FIELD_DESC);
-        Map<Integer, String> _iter0 = this.mIntegerString;
+        Map<Integer, String> _iter0 = mIntegerString;
         oprot.writeMapBegin(new TMap(TType.I32, TType.STRING, _iter0.size()));
         for (Map.Entry<Integer, String> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -1456,9 +1456,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mStringMyStruct != null) {
+      if (mStringMyStruct != null) {
         oprot.writeFieldBegin(M_STRING_MY_STRUCT_FIELD_DESC);
-        Map<String, test.fixtures.complex_struct.MyStruct> _iter0 = this.mStringMyStruct;
+        Map<String, test.fixtures.complex_struct.MyStruct> _iter0 = mStringMyStruct;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, _iter0.size()));
         for (Map.Entry<String, test.fixtures.complex_struct.MyStruct> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -1467,9 +1467,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mStringBool != null) {
+      if (mStringBool != null) {
         oprot.writeFieldBegin(M_STRING_BOOL_FIELD_DESC);
-        Map<String, Boolean> _iter0 = this.mStringBool;
+        Map<String, Boolean> _iter0 = mStringBool;
         oprot.writeMapBegin(new TMap(TType.STRING, TType.BOOL, _iter0.size()));
         for (Map.Entry<String, Boolean> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
@@ -1478,9 +1478,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mIntegerInteger != null) {
+      if (mIntegerInteger != null) {
         oprot.writeFieldBegin(M_INTEGER_INTEGER_FIELD_DESC);
-        Map<Integer, Integer> _iter0 = this.mIntegerInteger;
+        Map<Integer, Integer> _iter0 = mIntegerInteger;
         oprot.writeMapBegin(new TMap(TType.I32, TType.I32, _iter0.size()));
         for (Map.Entry<Integer, Integer> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -1489,9 +1489,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mIntegerBool != null) {
+      if (mIntegerBool != null) {
         oprot.writeFieldBegin(M_INTEGER_BOOL_FIELD_DESC);
-        Map<Integer, Boolean> _iter0 = this.mIntegerBool;
+        Map<Integer, Boolean> _iter0 = mIntegerBool;
         oprot.writeMapBegin(new TMap(TType.I32, TType.BOOL, _iter0.size()));
         for (Map.Entry<Integer, Boolean> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -1500,9 +1500,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.sShort != null) {
+      if (sShort != null) {
         oprot.writeFieldBegin(S_SHORT_FIELD_DESC);
-        Set<Short> _iter0 = this.sShort;
+        Set<Short> _iter0 = sShort;
         oprot.writeSetBegin(new TSet(TType.I16, _iter0.size()));
         for (short _iter1 : _iter0) {
           oprot.writeI16(_iter1);
@@ -1510,9 +1510,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.sMyStruct != null) {
+      if (sMyStruct != null) {
         oprot.writeFieldBegin(S_MY_STRUCT_FIELD_DESC);
-        Set<test.fixtures.complex_struct.MyStruct> _iter0 = this.sMyStruct;
+        Set<test.fixtures.complex_struct.MyStruct> _iter0 = sMyStruct;
         oprot.writeSetBegin(new TSet(TType.STRUCT, _iter0.size()));
         for (test.fixtures.complex_struct.MyStruct _iter1 : _iter0) {
           _iter1.write0(oprot);
@@ -1520,9 +1520,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.sLong != null) {
+      if (sLong != null) {
         oprot.writeFieldBegin(S_LONG_FIELD_DESC);
-        Set<Long> _iter0 = this.sLong;
+        Set<Long> _iter0 = sLong;
         oprot.writeSetBegin(new TSet(TType.I64, _iter0.size()));
         for (long _iter1 : _iter0) {
           oprot.writeI64(_iter1);
@@ -1530,9 +1530,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.sString != null) {
+      if (sString != null) {
         oprot.writeFieldBegin(S_STRING_FIELD_DESC);
-        Set<String> _iter0 = this.sString;
+        Set<String> _iter0 = sString;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -1540,9 +1540,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.sByte != null) {
+      if (sByte != null) {
         oprot.writeFieldBegin(S_BYTE_FIELD_DESC);
-        Set<Byte> _iter0 = this.sByte;
+        Set<Byte> _iter0 = sByte;
         oprot.writeSetBegin(new TSet(TType.BYTE, _iter0.size()));
         for (byte _iter1 : _iter0) {
           oprot.writeByte(_iter1);
@@ -1550,9 +1550,9 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.mListList != null) {
+      if (mListList != null) {
         oprot.writeFieldBegin(M_LIST_LIST_FIELD_DESC);
-        Map<List<Integer>, List<Integer>> _iter0 = this.mListList;
+        Map<List<Integer>, List<Integer>> _iter0 = mListList;
         oprot.writeMapBegin(new TMap(TType.LIST, TType.LIST, _iter0.size()));
         for (Map.Entry<List<Integer>, List<Integer>> _iter1 : _iter0.entrySet()) {
           oprot.writeListBegin(new TList(TType.I32, _iter1.getKey().size()));

@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package com.facebook.thrift.adapter.common;
+package com.facebook.thrift.adapter;
 
-import com.facebook.thrift.protocol.ByteBufTProtocol;
-import io.netty.buffer.ByteBuf;
+import java.util.Objects;
 
 /**
- * Use this type adapter if you want a to get a zero copy slice of the binary field. This will
- * create a retained slice so you must free the ByteBuf when you're not longer interested in using
- * it to prevent memory leaks. Use with caution.
+ * Base Adapter interface for {@link TypeAdapter TypeAdapter} and FieldAdapter
+ *
+ * @param <T>
  */
-public class SlicedPooledByteBufTypeTypeAdapter extends AbstractByteBufTypeAdapter {
-  @Override
-  public ByteBuf fromThrift(ByteBufTProtocol protocol) {
-    return protocol.readBinaryAsSlice().retain();
+public interface Adapter<T> {
+
+  /**
+   * Compares given types.
+   *
+   * @param t1 Type
+   * @param t2 Type
+   * @return true if both types are equal.
+   */
+  default boolean equals(T t1, T t2) {
+    return Objects.equals(t1, t2);
   }
 }

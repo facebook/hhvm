@@ -52,4 +52,4 @@ sem_diff = { path = "../../sem_diff" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 strum = "0.21"
 strum_macros = "0.21"
-thiserror = "=1.0.30"
+thiserror = "1.0.34"

@@ -78,11 +78,7 @@ let update_naming_tables_for_changed_file
     Relative_path.is_root (Relative_path.prefix path)
     && FindUtils.path_filter path
   then begin
-    let contents =
-      File_provider.get_contents
-        ~writeback_disk_contents_in_shmem_provider:false
-        path
-    in
+    let contents = File_provider.get_contents path in
     let new_file_info =
       compute_fileinfo_for_path (Provider_context.get_popt ctx) contents path
     in

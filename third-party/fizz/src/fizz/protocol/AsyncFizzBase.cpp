@@ -542,6 +542,12 @@ class SecretVisitor {
       case EarlySecrets::EarlyExporter:
         callback_->earlyExporterSecretAvailable(secretBuf_);
         return;
+      case EarlySecrets::ECHAcceptConfirmation:
+        // Not an actual encryption secret
+        return;
+      case EarlySecrets::HRRECHAcceptConfirmation:
+        // Not an actual encryption secret
+        return;
     }
   }
   void operator()(const HandshakeSecrets& secret) {

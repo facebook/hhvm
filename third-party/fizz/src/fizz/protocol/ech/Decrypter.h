@@ -21,7 +21,7 @@ struct DecrypterParams {
 
 struct DecrypterResult {
   ClientHello chlo;
-  Buf configId;
+  uint8_t configId;
   std::unique_ptr<hpke::HpkeContext> context;
 };
 
@@ -37,11 +37,9 @@ class Decrypter {
    */
   virtual ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       std::unique_ptr<hpke::HpkeContext>& context) = 0;
   virtual ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) = 0;
   virtual std::vector<ech::ECHConfig> getRetryConfigs() const = 0;
 };
@@ -53,11 +51,9 @@ class ECHConfigManager : public Decrypter {
       const ClientHello& chlo) override;
   ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       std::unique_ptr<hpke::HpkeContext>& context) override;
   ClientHello decryptClientHelloHRR(
       const ClientHello& chlo,
-      const std::unique_ptr<folly::IOBuf>& configId,
       const std::unique_ptr<folly::IOBuf>& encapsulatedKey) override;
   std::vector<ech::ECHConfig> getRetryConfigs() const override;
 

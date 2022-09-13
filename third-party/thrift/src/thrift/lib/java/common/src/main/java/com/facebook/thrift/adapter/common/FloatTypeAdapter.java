@@ -17,20 +17,5 @@
 package com.facebook.thrift.adapter.common;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import org.apache.thrift.protocol.TProtocol;
 
-public interface FloatTypeAdapter<T> extends TypeAdapter<T> {
-  @Override
-  default void toThrift(T t, TProtocol protocol) {
-    protocol.writeFloat(toThrift(t));
-  }
-
-  @Override
-  default T fromThrift(TProtocol protocol) {
-    return fromThrift(protocol.readFloat());
-  }
-
-  float toThrift(T t);
-
-  T fromThrift(float b);
-}
+public interface FloatTypeAdapter<T> extends TypeAdapter<Float, T> {}

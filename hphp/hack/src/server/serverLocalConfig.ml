@@ -589,10 +589,6 @@ type t = {
       (** Add sqlite naming table to hack/64 ss job *)
   workload_quantile: quantile option;
       (** Allows to typecheck only a certain quantile of the workload. *)
-  enable_disk_heap: bool;
-      (** After reading the contents of a file from the filesystem, store them
-      in shared memory. True by default. Disabling this saves memory at the
-      risk of increasing the rate of consistency errors. *)
   rollout_group: string option;
       (** A string from hh.conf, written to HackEventLogger telemetry. Before it got
        into here, [t], it was first used as a lookup in ServerLocalConfigKnobs.
@@ -730,7 +726,6 @@ let default =
     log_from_client_when_slow_monitor_connections = false;
     naming_sqlite_in_hack_64 = false;
     workload_quantile = None;
-    enable_disk_heap = false;
     rollout_group = None;
     saved_state_manifold_api_key = None;
     hulk_strategy = HulkStrategy.Legacy;
@@ -1451,13 +1446,6 @@ let load_ fn ~silent ~current_version overrides =
         None
     | _ -> None
   in
-  let enable_disk_heap =
-    bool_if_min_version
-      "enable_disk_heap"
-      ~default:default.enable_disk_heap
-      ~current_version
-      config
-  in
   let rollout_group = string_opt "rollout_group" config in
   let specify_manifold_api_key =
     bool_if_min_version
@@ -1515,14 +1503,6 @@ let load_ fn ~silent ~current_version overrides =
       ~default:default.rust_provider_backend
       ~current_version
       config
-  in
-  let rust_provider_backend =
-    if rust_provider_backend && enable_disk_heap then (
-      Hh_logger.warn
-        "You have rust_provider_backend=true but enable_disk_heap=true. This is incompatible. Turning off rust_provider_backend";
-      false
-    ) else
-      rust_provider_backend
   in
   let rust_provider_backend =
     if rust_provider_backend && not use_direct_decl_parser then (
@@ -1685,7 +1665,6 @@ let load_ fn ~silent ~current_version overrides =
     log_from_client_when_slow_monitor_connections;
     naming_sqlite_in_hack_64;
     workload_quantile;
-    enable_disk_heap;
     rollout_group;
     saved_state_manifold_api_key;
     hulk_strategy;
@@ -1720,7 +1699,6 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
         options.log_saved_state_age_and_distance;
       naming_sqlite_in_hack_64 = options.naming_sqlite_in_hack_64;
       use_hack_64_naming_table = options.use_hack_64_naming_table;
-      enable_disk_heap = options.enable_disk_heap;
       fetch_remote_old_decls = options.fetch_remote_old_decls;
       ide_max_num_decls = options.ide_max_num_decls;
       ide_max_num_shallow_decls = options.ide_max_num_shallow_decls;

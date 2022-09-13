@@ -915,6 +915,7 @@ function hhvm_cmd_impl(
       '-vEval.HHIRInliningIgnoreHints=false',
       '-vEval.HHIRAlwaysInterpIgnoreHint=false',
       '-vEval.FoldLazyClassKeys=false',
+      '-vEval.EnableLogBridge=false',
       $mode,
       $options->wholecfg ? '-vEval.JitPGORegionSelector=wholecfg' : '',
 

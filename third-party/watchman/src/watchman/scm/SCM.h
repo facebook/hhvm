@@ -9,6 +9,7 @@
 #include <folly/Conv.h>
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 #include "watchman/Errors.h"
@@ -21,8 +22,8 @@ namespace watchman {
 // At each level, checks to see if any of the candidate filenames
 // in the provided candidates list exist.  Returns the name of
 // the first one it finds.  If no candidates are found, returns
-// nullptr.
-w_string findFileInDirTree(
+// nullopt.
+std::optional<w_string> findFileInDirTree(
     w_string_piece rootPath,
     std::initializer_list<w_string_piece> candidates);
 
@@ -61,7 +62,7 @@ class SCM {
   // specified commitId.  The commitId is typically a branch name like "main".
   virtual w_string mergeBaseWith(
       w_string_piece commitId,
-      w_string requestId = nullptr) const = 0;
+      const std::optional<w_string>& requestId = std::nullopt) const = 0;
 
   // Compute the set of paths that have changed in the commits
   // starting in the working copy and going back to the merge base
@@ -71,13 +72,13 @@ class SCM {
   virtual std::vector<w_string> getFilesChangedSinceMergeBaseWith(
       w_string_piece commitId,
       w_string_piece clock,
-      w_string requestId = nullptr) const = 0;
+      const std::optional<w_string>& requestId = std::nullopt) const = 0;
 
   // Compute the source control date associated with the specified
   // commit.
   virtual std::chrono::time_point<std::chrono::system_clock> getCommitDate(
       w_string_piece commitId,
-      w_string requestId = nullptr) const = 0;
+      const std::optional<w_string>& requestId = std::nullopt) const = 0;
 
   // Compute the numCommits commits prior to and including the specified commit
   // in source control history. Returns an ordered list with the most recent
@@ -85,7 +86,7 @@ class SCM {
   virtual std::vector<w_string> getCommitsPriorToAndIncluding(
       w_string_piece commitId,
       int numCommits,
-      w_string requestId = nullptr) const = 0;
+      const std::optional<w_string>& requestId = std::nullopt) const = 0;
 
  private:
   w_string rootPath_;

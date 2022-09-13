@@ -108,6 +108,10 @@ class Factory {
     return RandomNumGenerator<uint32_t>().generateRandom();
   }
 
+  virtual std::unique_ptr<folly::IOBuf> makeRandomBytes(size_t count) const {
+    return RandomBufGenerator(count).generateRandom();
+  }
+
   virtual std::shared_ptr<PeerCert> makePeerCert(
       CertificateEntry certEntry,
       bool /*leaf*/) const {

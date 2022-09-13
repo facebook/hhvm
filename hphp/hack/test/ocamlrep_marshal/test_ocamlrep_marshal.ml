@@ -47,10 +47,14 @@ let rec print_tree
      let n = List.length cs - 1 in
      Printf.sprintf "%s%s" pd tag :: List.concat (Caml.List.mapi (
          fun i c ->
-         let pad =
-           (pc ^ (if i = n then "`-- " else "|-- "),
-            pc ^ (if i = n then "    " else "|   ")) in
-         print_tree ~pad c
+         let pad = let enable_utf8 = true in
+           if enable_utf8 then
+             (pc ^ (if i = n then "\u{02517} " else "\u{02523} "),
+              pc ^ (if i = n then " " else "\u{02503} "))
+           else
+             (pc ^ (if i = n then "`-- " else "|-- "),
+              pc ^ (if i = n then "    " else "|   "))
+         in print_tree ~pad c
        ) cs) [@@ocamlformat "disable"]
 
 (* [show_tree] produces a string of [t]. *)
@@ -59,13 +63,15 @@ let show_tree t =
 
 (* An example tree. *)
 let tree =
-  `Node ("."
+  `Node ("life"
         , [
-            `Node ("S", [
-                      `Node ("T", [
-                                `Node ("U", [])]);
-                      `Node ("V", [])])
-          ;  `Node ("W", [])
+            `Node ("domain", [
+                      `Node ("kingdom", [
+                                `Node ("phylum", [])]);
+                      `Node ("class", []);
+                      `Node ("order", [])
+              ])
+          ;  `Node ("family", [])
           ]) [@@ocamlformat "disable"]
 
 let test_sharing () =
@@ -90,18 +96,24 @@ let test_sharing () =
     ()
 
 let () =
+  assert_eq 'c';
   assert_eq 5;
   assert_eq 3.14;
+  assert_eq (-5);
+  assert_eq (-3.14);
   assert_eq (3, 3);
   assert_eq "a";
   assert_eq (Some 42, "foo");
 
-  test_round_trip string_of_int 5;
+  test_round_trip (fun c -> String.make 1 c) 'c';
   test_round_trip string_of_float 3.14;
+  test_round_trip string_of_int (-5);
+  test_round_trip string_of_float (-3.14);
   test_round_trip show_pair_int_int (3, 3);
   test_round_trip (Printf.sprintf "%S") "a";
   test_round_trip show_pair_opt_int_string (Some 42, "foo");
   test_round_trip show_float_array (Caml.Array.make 3 3.14);
+  test_round_trip show_float_array (Caml.Array.make 3 (-3.14));
   test_round_trip show_tree tree;
 
   test_sharing ();

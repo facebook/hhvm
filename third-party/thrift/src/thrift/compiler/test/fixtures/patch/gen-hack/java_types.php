@@ -109,7 +109,15 @@ class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
+        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Typedef' => \thrift\annotation\Typedef::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
           shape(
           )
         ),

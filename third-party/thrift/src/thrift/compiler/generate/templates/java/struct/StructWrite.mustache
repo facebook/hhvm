@@ -23,32 +23,30 @@ public void write0(TProtocol oprot) throws TException {
   com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
   {{/struct:hasTerseField?}}
   {{#struct:fields_in_serialization_order}}
+  {{#field:hasAdapter?}}
+  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(this.{{field:javaName}});
+  {{/field:hasAdapter?}}
   {{#field:isNullableOrOptionalNotEnum?}}
   {{#field:terse?}}  
-  java.util.Objects.requireNonNull(this.{{field:javaName}}, "{{field:javaName}} must not be null");
+  java.util.Objects.requireNonNull({{field:javaName}}, "{{field:javaName}} must not be null");
   {{#field:isObject?}}structStart = p.mark();{{/field:isObject?}}
   {{^field:isObject?}}
-  {{#field:hasAdapter?}}
-  if (!_{{field:javaName}}_Adapter.equals(this.{{field:javaName}}, Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT)) {
-  {{/field:hasAdapter?}}
-  {{^field:hasAdapter?}}
-  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}})) {
-  {{/field:hasAdapter?}}
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}})) {
   {{/field:isObject?}}
     oprot.writeFieldBegin({{field:javaTFieldName}});
     {{#field:isContainer?}}
-    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
     {{/field:isContainer?}}{{!
 
     }}{{#type:typedef_type}}
-    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
     {{/type:typedef_type}}{{!
 
     }}{{#field:type}}
     {{#field:isObject?}}
     pos = p.mark();
     {{/field:isObject?}}    
-    {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+    {{#field:type}}{{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}{{/field:type}}
     {{/field:type}}{{!
     }}
     {{#field:isObject?}}
@@ -66,14 +64,14 @@ public void write0(TProtocol oprot) throws TException {
   {{/field:isObject?}}
   {{/field:terse?}}
   {{^field:terse?}}
-  if (this.{{field:javaName}} != null) {
+  if ({{field:javaName}} != null) {
     oprot.writeFieldBegin({{field:javaTFieldName}});
     {{#field:isContainer?}}
-    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
     {{/field:isContainer?}}{{!
 
     }}{{#type:typedef_type}}
-    {{> FieldType}} _iter{{field:nestedDepth}} = this.{{field:javaName}};
+    {{> ThriftFieldType}} _iter{{field:nestedDepth}} = {{field:javaName}};
     {{/type:typedef_type}}{{!
 
     }}{{#field:type}}
@@ -87,16 +85,11 @@ public void write0(TProtocol oprot) throws TException {
   }}{{^field:isNullableOrOptionalNotEnum?}}
   {{#field:terse?}}
   {{#field:isEnum?}}
-  java.util.Objects.requireNonNull(this.{{field:javaName}}, "{{field:javaName}} must not be null");
-  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}}.getValue())) {
+  java.util.Objects.requireNonNull({{field:javaName}}, "{{field:javaName}} must not be null");
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}}.getValue())) {
   {{/field:isEnum?}}
   {{^field:isEnum?}}
-  {{#field:hasAdapter?}}
-  if (!_{{field:javaName}}_Adapter.equals(this.{{field:javaName}}, Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT)) {
-  {{/field:hasAdapter?}}
-  {{^field:hasAdapter?}}
-  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.{{field:javaName}})) {
-  {{/field:hasAdapter?}}
+  if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault({{field:javaName}})) {
   {{/field:isEnum?}}
     oprot.writeFieldBegin({{field:javaTFieldName}});
     {{#field:type}}
@@ -106,13 +99,24 @@ public void write0(TProtocol oprot) throws TException {
   };
   {{/field:terse?}}
   {{^field:terse?}}
+  {{#field:hasAdapter?}}
+  if ({{field:javaName}} != null) {
+    oprot.writeFieldBegin({{field:javaTFieldName}});
+    {{#field:type}}
+    {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
+    {{/field:type}}{{!
+    }}oprot.writeFieldEnd();
+  }
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
   oprot.writeFieldBegin({{field:javaTFieldName}});
   {{#field:type}}
   {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
   {{/field:type}}{{!
   }}oprot.writeFieldEnd();
-  {{/field:terse?}}  
-  {{/field:isNullableOrOptionalNotEnum?}}
+  {{/field:hasAdapter?}}{{!
+  }}{{/field:terse?}}{{!
+  }}{{/field:isNullableOrOptionalNotEnum?}}
   {{/struct:fields_in_serialization_order}}
   oprot.writeFieldStop();
   oprot.writeStructEnd();

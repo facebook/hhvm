@@ -475,7 +475,6 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (bool_opt "enforce_sealed_subclasses" config)
       ?tco_everything_sdt:(bool_opt "everything_sdt" config)
       ?tco_pessimise_builtins:(bool_opt "pessimise_builtins" config)
-      ~tco_enable_disk_heap:local_config.ServerLocalConfig.enable_disk_heap
       ?tco_explicit_consistent_constructors:
         (int_opt "explicit_consistent_constructors" config)
       ?tco_require_types_class_consts:

@@ -21,23 +21,26 @@ namespace ech {
 namespace test {
 ClientHello getChloOuterWithExt(std::unique_ptr<KeyExchange> kex) {
   // Setup ECH extension
+  auto echConfigContent = getECHConfigContent();
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
-      ECHCipherSuite{
+      echConfigContent.key_config.config_id,
+      echConfigContent.maximum_name_length,
+      HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  ECHIsInner chloInnerECHExt;
+  InnerECHClientHello chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   // Encrypt client hello
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
-  ClientECH echExt =
-      encryptClientHello(supportedECHConfig, chloInner, chloOuter, setupResult);
+  OuterECHClientHello echExt = encryptClientHello(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));
@@ -52,23 +55,26 @@ ClientHello getChloOuterHRRWithExt(
     Buf& enc,
     ClientHello& initialOuterChlo) {
   // Setup ECH extension
+  auto echConfigContent = getECHConfigContent();
   auto supportedECHConfig = SupportedECHConfig{
       getECHConfig(),
-      ECHCipherSuite{
+      echConfigContent.key_config.config_id,
+      echConfigContent.maximum_name_length,
+      HpkeSymmetricCipherSuite{
           hpke::KDFId::Sha256, hpke::AeadId::TLS_AES_128_GCM_SHA256}};
   auto setupResult =
       constructHpkeSetupResult(std::move(kex), supportedECHConfig);
 
   auto chloInner = TestMessages::clientHello();
-  ECHIsInner chloInnerECHExt;
+  InnerECHClientHello chloInnerECHExt;
   chloInner.extensions.push_back(encodeExtension(chloInnerECHExt));
 
   ClientHello chloOuter = getClientHelloOuter();
   chloOuter.legacy_session_id = folly::IOBuf::create(0);
 
   // Encrypt client hello once to increment counter and get enc value.
-  auto initialECH =
-      encryptClientHello(supportedECHConfig, chloInner, chloOuter, setupResult);
+  auto initialECH = encryptClientHello(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // First, save out the first ECH
   initialOuterChlo = chloOuter.clone();
@@ -78,8 +84,8 @@ ClientHello getChloOuterHRRWithExt(
   enc = std::move(initialECH.enc);
 
   // Second encryption for HRR
-  ClientECH echExt = encryptClientHelloHRR(
-      supportedECHConfig, chloInner, chloOuter, setupResult);
+  OuterECHClientHello echExt = encryptClientHelloHRR(
+      supportedECHConfig, chloInner, chloOuter, setupResult, folly::none);
 
   // Add ECH extension
   chloOuter.extensions.push_back(encodeExtension(echExt));
@@ -104,7 +110,8 @@ TEST(DecrypterTest, TestDecodeSuccess) {
 
   auto chlo = std::move(gotChlo.value());
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(chlo.chlo, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(
+      chlo.chlo, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(chlo.chlo), encodeHandshake(expectedChloInner)));
@@ -119,15 +126,15 @@ TEST(DecrypterTest, TestDecodeHRRSuccess) {
   Buf enc;
   ClientHello initialChlo;
   auto chloOuter = getChloOuterHRRWithExt(kex->clone(), enc, initialChlo);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
-  auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, configId, enc);
+  auto echConfigContent = getECHConfigContent();
+  auto gotChlo = decrypter.decryptClientHelloHRR(chloOuter, enc);
 
   auto expectedChloInner = TestMessages::clientHello();
   EXPECT_FALSE(folly::IOBufEqualTo()(
       encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(gotChlo, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(gotChlo, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(gotChlo), encodeHandshake(expectedChloInner)));
@@ -148,16 +155,16 @@ TEST(DecrypterTest, TestDecodeHRRWithContextSuccess) {
   EXPECT_TRUE(gotChlo.has_value());
   auto chlo = std::move(gotChlo.value());
 
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
-  auto gotChloHRR =
-      decrypter.decryptClientHelloHRR(chloOuter, configId, chlo.context);
+  auto echConfigContent = getECHConfigContent();
+  auto gotChloHRR = decrypter.decryptClientHelloHRR(chloOuter, chlo.context);
 
   auto expectedChloInner = TestMessages::clientHello();
   EXPECT_FALSE(folly::IOBufEqualTo()(
       encodeHandshake(chloOuter), encodeHandshake(expectedChloInner)));
 
   // Remove the inner ECH extension from the client hello inner
-  TestMessages::removeExtension(gotChloHRR, ExtensionType::ech_is_inner);
+  TestMessages::removeExtension(
+      gotChloHRR, ExtensionType::encrypted_client_hello);
 
   EXPECT_TRUE(folly::IOBufEqualTo()(
       encodeHandshake(gotChloHRR), encodeHandshake(expectedChloInner)));
@@ -188,11 +195,10 @@ TEST(DecrypterTest, TestDecodeHRRFailure) {
   Buf enc;
   ClientHello initialClientHello;
   getChloOuterHRRWithExt(kex->clone(), enc, initialClientHello);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
+  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
-      decrypter.decryptClientHelloHRR(
-          TestMessages::clientHello(), configId, enc),
+      decrypter.decryptClientHelloHRR(TestMessages::clientHello(), enc),
       FizzException);
 }
 
@@ -207,11 +213,11 @@ TEST(DecrypterTest, TestDecodeHRRWithContextFailure) {
   // Get a context to use.
   auto chloOuter = getChloOuterWithExt(kex->clone());
   auto gotChlo = decrypter.decryptClientHello(chloOuter);
-  auto configId = constructConfigId(hpke::KDFId::Sha256, getECHConfig());
+  auto echConfigContent = getECHConfigContent();
 
   EXPECT_THROW(
       decrypter.decryptClientHelloHRR(
-          TestMessages::clientHello(), configId, gotChlo->context),
+          TestMessages::clientHello(), gotChlo->context),
       FizzException);
 }
 

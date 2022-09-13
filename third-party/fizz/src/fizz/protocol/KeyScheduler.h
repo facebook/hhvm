@@ -19,7 +19,9 @@ enum class EarlySecrets {
   ExternalPskBinder,
   ResumptionPskBinder,
   ClientEarlyTraffic,
-  EarlyExporter
+  EarlyExporter,
+  ECHAcceptConfirmation,
+  HRRECHAcceptConfirmation
 };
 
 enum class HandshakeSecrets {

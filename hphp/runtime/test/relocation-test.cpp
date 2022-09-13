@@ -88,7 +88,7 @@ TEST(Relocation, RelocateBccImm2MovzMovkBccReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -152,7 +152,7 @@ TEST(Relocation, RelocateCbz2MovzMovkCbnzReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -217,7 +217,7 @@ TEST(Relocation, RelocateTbz2MovzMovkTbnzReg) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -283,7 +283,7 @@ TEST(Relocation, RelocateMovzMovkLdr2LdrLiteral) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end + 8);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -323,7 +323,7 @@ TEST(Relocation, RelocateAdjustedMovzMovk) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -374,7 +374,7 @@ TEST(Relocation, RelocateInternalAdjustedMovzMovk) {
 
   // 3. Call relocate()
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   auto instr = Instruction::Cast(end);
   relocate(rel, main, start, end, main, meta, nullptr, ai);
 
@@ -425,7 +425,7 @@ TEST(Relocation, AdjustMovzMovk) {
 
   // 3. Call relocate() and then adjust the mov/movk
   RelocationInfo rel;
-  AreaIndex ai;
+  AreaIndex ai = AreaIndex::Main;
   relocate(rel, main, start, end, main, meta, nullptr, ai);
   adjustForRelocation(rel, orig, start);
 

@@ -140,7 +140,7 @@ public final class InitialResponse implements com.facebook.thrift.payload.Thrift
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.content != null) {
+      if (content != null) {
         oprot.writeFieldBegin(CONTENT_FIELD_DESC);
         oprot.writeString(this.content);
         oprot.writeFieldEnd();

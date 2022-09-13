@@ -15,13 +15,15 @@
 from cpython.version cimport PY_VERSION_HEX
 from libcpp.memory cimport unique_ptr, shared_ptr, make_shared
 from libc.string cimport const_uchar
-from cython.operator cimport dereference as deref
+from cython.operator cimport dereference as deref, preincrement as inc
 from libc.stdint cimport uint64_t
 from folly.iobuf cimport from_unique_ptr as create_IOBuf
 from cpython.ref cimport PyObject
 from folly.executor cimport get_executor
 from folly.range cimport StringPiece
 from libcpp.utility cimport move as cmove
+from thrift.py3.std_libcpp cimport sv_to_str
+from typing import Mapping
 
 import asyncio
 import collections
@@ -50,6 +52,33 @@ cdef inline _get_SocketAddress(const cfollySocketAddress* sadr):
             os.fsdecode(sadr.getPath())
         )
     )
+
+
+cdef inline string _get_agent_from_metadata(optional[ClientMetadataRef] metadata_ref):
+    cdef string cagent
+    if not metadata_ref.has_value():
+      return cagent
+    if not metadata_ref.value().getAgent().has_value():
+        return cagent
+    cagent = metadata_ref.value().getAgent().value().data()
+    return cagent
+
+
+cdef inline string _get_hostname_from_metadata(optional[ClientMetadataRef] metadata_ref):
+    cdef string chostname
+    if not metadata_ref.has_value():
+      return chostname
+    if not metadata_ref.value().getHostname().has_value():
+      return chostname
+    chostname = metadata_ref.value().getHostname().value().data()
+    return chostname
+
+
+cdef inline F14NodeMap[string, string] _get_fields_from_metadata(optional[ClientMetadataRef] metadata_ref):
+    cdef F14NodeMap[string, string] empty_fields
+    if not metadata_ref.has_value():
+      return empty_fields
+    return metadata_ref.value().getFields()
 
 
 class SSLPolicy(Enum):
@@ -273,6 +302,33 @@ cdef class ThriftServer:
         self.server.get().setIdleServerTimeout(milliseconds(<int64_t>(seconds * 1000)))
 
 
+cdef class ClientMetadata:
+    @staticmethod
+    cdef ClientMetadata _fbthrift_create(optional[ClientMetadataRef] metadata_ref):
+        inst = <ClientMetadata>ClientMetadata.__new__(ClientMetadata)
+        inst._cagent = _get_agent_from_metadata(metadata_ref)
+        inst._chostname = _get_hostname_from_metadata(metadata_ref)
+        inst._cfields = _get_fields_from_metadata(metadata_ref)
+        return inst
+
+    @property
+    def agent(ClientMetadata self) -> str:
+        return self._cagent.decode('utf-8')
+
+    @property
+    def hostname(ClientMetadata self) -> str:
+        return self._chostname.decode('utf-8')
+
+    def getMetadataField(self, str key not None) -> str:
+        if key is None:
+          return ""
+        cdef string ckey = key.encode('utf-8')
+        it = self._cfields.find(ckey)
+        if it == self._cfields.end():
+          return ""
+        return (<bytes>deref(it).second).decode('utf-8')
+
+
 cdef class ConnectionContext:
     @staticmethod
     cdef ConnectionContext _fbthrift_create(Cpp2ConnContext* ctx):
@@ -287,6 +343,7 @@ cdef class ConnectionContext:
             local_address = ctx.getLocalAddress()
             if not local_address.empty():
                 inst._local_address = _get_SocketAddress(local_address)
+            inst._client_metadata = ClientMetadata._fbthrift_create(ctx.getClientMetadataRef())
         return inst
 
     @property
@@ -337,6 +394,10 @@ cdef class ConnectionContext:
     @property
     def local_address(ConnectionContext self):
         return self._local_address
+
+    @property
+    def client_metadata(ConnectionContext self):
+      return self._client_metadata
 
 
 cdef class ReadHeaders(Headers):

@@ -281,9 +281,9 @@ public final class MyStructField22Patch implements com.facebook.thrift.payload.T
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.assign != null) {
+      if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        Set<String> _iter0 = this.assign;
+        Set<String> _iter0 = assign;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -294,9 +294,9 @@ public final class MyStructField22Patch implements com.facebook.thrift.payload.T
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
-      if (this.remove != null) {
+      if (remove != null) {
         oprot.writeFieldBegin(REMOVE_FIELD_DESC);
-        Set<String> _iter0 = this.remove;
+        Set<String> _iter0 = remove;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -304,9 +304,9 @@ public final class MyStructField22Patch implements com.facebook.thrift.payload.T
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.add != null) {
+      if (add != null) {
         oprot.writeFieldBegin(ADD_FIELD_DESC);
-        Set<String> _iter0 = this.add;
+        Set<String> _iter0 = add;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);

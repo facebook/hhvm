@@ -17,7 +17,7 @@ from thrift.python.client import (
     SyncClient as _fbthrift_python_SyncClient,
     Client as _fbthrift_python_Client,
 )
-from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier  # type: ignore 
+from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import empty.thrift_types

@@ -764,8 +764,11 @@ fn parse_file(
                     },
                 ))
             }
-            ParserResult { lowpri_errors, .. } if !lowpri_errors.is_empty() => {
-                let (pos, msg) = lowpri_errors.into_iter().next().unwrap();
+            ParserResult {
+                lowerer_parsing_errors,
+                ..
+            } if !lowerer_parsing_errors.is_empty() => {
+                let (pos, msg) = lowerer_parsing_errors.into_iter().next().unwrap();
                 Err(ParseError(pos, msg, FatalOp::Parse))
             }
             ParserResult {
@@ -798,8 +801,7 @@ fn parse_file(
 pub fn expr_to_string_lossy(flags: &EnvFlags, expr: &ast::Expr) -> String {
     use print_expr::Context;
 
-    let opts = Options::from_configs(&[]).expect("Malformed options");
-
+    let opts = Options::default();
     let alloc = bumpalo::Bump::new();
     let emitter = Emitter::new(
         opts,

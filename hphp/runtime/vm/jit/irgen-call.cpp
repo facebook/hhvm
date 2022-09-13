@@ -1963,7 +1963,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
     }
     auto const ret = name->isA(TObj) ?
       gen(env, LdObjClass, name) : ldCls(env, name);
-    if (name->isA(TStr|TLazyCls)) emitModuleBoundaryCheck(env, ret, false);
+    if (name->isA(TStr)) emitModuleBoundaryCheck(env, ret, false);
     decRef(env, name, DecRefProfileId::Default);
     return ret;
   }();

@@ -120,12 +120,19 @@ fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> Ins
     ])
 }
 
-fn ic_restore<'arena>(local: Local) -> InstrSeq<'arena> {
-    InstrSeq::gather(vec![
-        instr::c_get_l(local),
-        instr::set_implicit_context_by_value(),
-        instr::pop_c(),
-    ])
+pub fn ic_restore<'arena>(
+    local: Local,
+    should_make_ic_inaccessible: Option<bool>,
+) -> InstrSeq<'arena> {
+    if should_make_ic_inaccessible.is_some() {
+        InstrSeq::gather(vec![
+            instr::c_get_l(local),
+            instr::set_implicit_context_by_value(),
+            instr::pop_c(),
+        ])
+    } else {
+        instr::empty()
+    }
 }
 
 pub fn with_possible_ic<'arena>(
@@ -138,8 +145,14 @@ pub fn with_possible_ic<'arena>(
     if let Some(soft) = should_make_ic_inaccessible {
         InstrSeq::gather(vec![
             ic_set(alloc, local, soft),
-            create_try_catch(label_gen, None, false, instrs, ic_restore(local)),
-            ic_restore(local),
+            create_try_catch(
+                label_gen,
+                None,
+                false,
+                instrs,
+                ic_restore(local, should_make_ic_inaccessible),
+            ),
+            ic_restore(local, should_make_ic_inaccessible),
         ])
     } else {
         instrs

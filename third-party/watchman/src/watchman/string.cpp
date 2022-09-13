@@ -73,13 +73,14 @@ w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
   return w_string(s, false);
 }
 
-w_string w_string_piece::asLowerCaseSuffix(w_string_type_t stringType) const {
+std::optional<w_string> w_string_piece::asLowerCaseSuffix(
+    w_string_type_t stringType) const {
   char* buf;
   w_string_t* s;
 
   w_string_piece suffixPiece = this->suffix();
   if (suffixPiece.empty()) {
-    return {};
+    return std::nullopt;
   }
 
   /* need to make a lowercase version */
@@ -249,8 +250,6 @@ bool w_string_piece::startsWithCaseInsensitive(w_string_piece prefix) const {
 
 // string
 
-w_string::w_string(std::nullptr_t) {}
-
 w_string::~w_string() {
   if (str_) {
     w_string_delref(str_);
@@ -399,9 +398,8 @@ w_string w_string::baseName() const {
   return w_string_piece(*this).baseName().asWString();
 }
 
-w_string w_string::asLowerCaseSuffix() const {
-  ensureNotNull();
-  return w_string_piece(*this).asLowerCaseSuffix();
+std::optional<w_string> w_string::asLowerCaseSuffix() const {
+  return piece().asLowerCaseSuffix();
 }
 
 w_string w_string::normalizeSeparators(char targetSeparator) const {

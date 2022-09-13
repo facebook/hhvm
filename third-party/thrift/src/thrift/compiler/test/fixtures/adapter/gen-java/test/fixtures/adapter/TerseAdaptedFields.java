@@ -228,23 +228,23 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
       int structStart = 0;
       int pos = 0;
       com.facebook.thrift.protocol.ByteBufTProtocol p = (com.facebook.thrift.protocol.ByteBufTProtocol) oprot;
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.intField)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(intField)) {
         oprot.writeFieldBegin(INT_FIELD_FIELD_DESC);
         oprot.writeI32(this.intField);
         oprot.writeFieldEnd();
       };
-      java.util.Objects.requireNonNull(this.stringField, "stringField must not be null");
+      java.util.Objects.requireNonNull(stringField, "stringField must not be null");
       
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.stringField)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(stringField)) {
         oprot.writeFieldBegin(STRING_FIELD_FIELD_DESC);
         oprot.writeString(this.stringField);
         oprot.writeFieldEnd();
       }
-      java.util.Objects.requireNonNull(this.setField, "setField must not be null");
+      java.util.Objects.requireNonNull(setField, "setField must not be null");
       
-      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(this.setField)) {
+      if (!com.facebook.thrift.util.IntrinsicDefaults.isDefault(setField)) {
         oprot.writeFieldBegin(SET_FIELD_FIELD_DESC);
-        Set<Integer> _iter0 = this.setField;
+        Set<Integer> _iter0 = setField;
         oprot.writeSetBegin(new TSet(TType.I32, _iter0.size()));
         for (int _iter1 : _iter0) {
           oprot.writeI32(_iter1);

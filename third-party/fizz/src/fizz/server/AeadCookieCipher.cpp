@@ -43,7 +43,7 @@ inline Buf encodeCookie(const CookieState& state) {
   if (state.echCipherSuite) {
     fizz::detail::write(CookieHasEch::Yes, appender);
     fizz::detail::write(*state.echCipherSuite, appender);
-    fizz::detail::writeBuf<uint8_t>(state.echConfigId, appender);
+    fizz::detail::write(*state.echConfigId, appender);
     fizz::detail::writeBuf<uint16_t>(state.echEnc, appender);
   } else {
     fizz::detail::write(CookieHasEch::No, appender);
@@ -72,10 +72,12 @@ inline CookieState decodeCookie(Buf cookie) {
   CookieHasEch hasEch;
   fizz::detail::read(hasEch, cursor);
   if (hasEch == CookieHasEch::Yes) {
-    ech::ECHCipherSuite cs;
+    ech::HpkeSymmetricCipherSuite cs;
     fizz::detail::read(cs, cursor);
     state.echCipherSuite = std::move(cs);
-    fizz::detail::readBuf<uint8_t>(state.echConfigId, cursor);
+    uint8_t configId;
+    fizz::detail::read(configId, cursor);
+    state.echConfigId = configId;
     fizz::detail::readBuf<uint16_t>(state.echEnc, cursor);
   }
   return state;

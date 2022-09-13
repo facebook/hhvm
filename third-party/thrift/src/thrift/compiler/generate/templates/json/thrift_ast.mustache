@@ -15,6 +15,17 @@
     {{/program:namespaces}}
   },{{/program:namespaces?}}{{#program:docstring?}}
   "global_docstring": {{program:docstring}},{{/program:docstring?}}{{%!
+  %}}{{#program:typedefs?}}
+  "typedefs": {
+    {{#program:typedefs}}
+      "{{typedef:name}}": {
+        "name": "{{typedef:name}}",
+        "type": {{#typedef:type}}{{> Types}}{{/typedef:type}},
+        "is_exception": {{typedef:exception?}},
+        "lineno": {{typedef:lineno}}
+      }{{^last?}},{{/last?}}
+    {{/program:typedefs}}
+  },{{/program:typedefs?}}{{%!
   %}}{{#program:constants?}}
   "constants": {
       {{#program:constants}}

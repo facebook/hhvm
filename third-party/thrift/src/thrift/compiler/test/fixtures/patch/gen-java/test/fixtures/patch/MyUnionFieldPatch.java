@@ -215,17 +215,17 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.option1 != null) {
+      if (option1 != null) {
         oprot.writeFieldBegin(OPTION1_FIELD_DESC);
         this.option1.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.option2 != null) {
+      if (option2 != null) {
         oprot.writeFieldBegin(OPTION2_FIELD_DESC);
         this.option2.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.option3 != null) {
+      if (option3 != null) {
         oprot.writeFieldBegin(OPTION3_FIELD_DESC);
         this.option3.write0(oprot);
         oprot.writeFieldEnd();

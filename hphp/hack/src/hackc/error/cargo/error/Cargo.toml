@@ -10,4 +10,4 @@ path = "../../error.rs"
 [dependencies]
 hhvm_hhbc_defs_ffi = { path = "../../../hhvm_cxx/hhvm_hhbc_defs" }
 oxidized = { path = "../../../../oxidized" }
-thiserror = "=1.0.30"
+thiserror = "1.0.34"

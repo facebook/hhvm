@@ -222,14 +222,14 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.a != null) {
+      if (a != null) {
         oprot.writeFieldBegin(A_FIELD_DESC);
         oprot.writeString(this.a);
         oprot.writeFieldEnd();
       }
-      if (this.b != null) {
+      if (b != null) {
         oprot.writeFieldBegin(B_FIELD_DESC);
-        List<Long> _iter0 = this.b;
+        List<Long> _iter0 = b;
         oprot.writeListBegin(new TList(TType.I64, _iter0.size()));
         for (long _iter1 : _iter0) {
           oprot.writeI64(_iter1);
@@ -237,7 +237,7 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.c != null) {
+      if (c != null) {
         oprot.writeFieldBegin(C_FIELD_DESC);
         this.c.write0(oprot);
         oprot.writeFieldEnd();

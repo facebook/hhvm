@@ -703,7 +703,7 @@ static {
       oprot.writeFieldBegin(MY_INT64_FIELD_DESC);
       oprot.writeI64(this.myInt64);
       oprot.writeFieldEnd();
-      if (this.myString != null) {
+      if (myString != null) {
         oprot.writeFieldBegin(MY_STRING_FIELD_DESC);
         oprot.writeString(this.myString);
         oprot.writeFieldEnd();
@@ -714,9 +714,9 @@ static {
       oprot.writeFieldBegin(MY_DOUBLE_FIELD_DESC);
       oprot.writeDouble(this.myDouble);
       oprot.writeFieldEnd();
-      if (this.mySet != null) {
+      if (mySet != null) {
         oprot.writeFieldBegin(MY_SET_FIELD_DESC);
-        Set<String> _iter0 = this.mySet;
+        Set<String> _iter0 = mySet;
         oprot.writeSetBegin(new TSet(TType.STRING, _iter0.size()));
         for (String _iter1 : _iter0) {
           oprot.writeString(_iter1);
@@ -724,14 +724,14 @@ static {
         oprot.writeSetEnd();
         oprot.writeFieldEnd();
       }
-      if (this.myDataItem != null) {
+      if (myDataItem != null) {
         oprot.writeFieldBegin(MY_DATA_ITEM_FIELD_DESC);
         this.myDataItem.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.myList != null) {
+      if (myList != null) {
         oprot.writeFieldBegin(MY_LIST_FIELD_DESC);
-        List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = this.myList;
+        List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = myList;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
         for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
           _iter1.write0(oprot);
@@ -739,9 +739,9 @@ static {
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.myMapList != null) {
+      if (myMapList != null) {
         oprot.writeFieldBegin(MY_MAP_LIST_FIELD_DESC);
-        Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = this.myMapList;
+        Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = myMapList;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
         for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());
@@ -755,9 +755,9 @@ static {
         oprot.writeMapEnd();
         oprot.writeFieldEnd();
       }
-      if (this.myEmptyList != null) {
+      if (myEmptyList != null) {
         oprot.writeFieldBegin(MY_EMPTY_LIST_FIELD_DESC);
-        List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = this.myEmptyList;
+        List<test.fixtures.basic_swift_bean.MyDataItem> _iter0 = myEmptyList;
         oprot.writeListBegin(new TList(TType.STRUCT, _iter0.size()));
         for (test.fixtures.basic_swift_bean.MyDataItem _iter1 : _iter0) {
           _iter1.write0(oprot);
@@ -765,9 +765,9 @@ static {
         oprot.writeListEnd();
         oprot.writeFieldEnd();
       }
-      if (this.myEmptyMapList != null) {
+      if (myEmptyMapList != null) {
         oprot.writeFieldBegin(MY_EMPTY_MAP_LIST_FIELD_DESC);
-        Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = this.myEmptyMapList;
+        Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter0 = myEmptyMapList;
         oprot.writeMapBegin(new TMap(TType.I32, TType.LIST, _iter0.size()));
         for (Map.Entry<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> _iter1 : _iter0.entrySet()) {
           oprot.writeI32(_iter1.getKey());

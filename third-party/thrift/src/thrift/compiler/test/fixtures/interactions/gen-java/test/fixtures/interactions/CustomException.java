@@ -107,7 +107,7 @@ public final class CustomException extends org.apache.thrift.TBaseException impl
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.message != null) {
+      if (message != null) {
         oprot.writeFieldBegin(MESSAGE_FIELD_DESC);
         oprot.writeString(this.message);
         oprot.writeFieldEnd();

@@ -18,20 +18,21 @@ package com.facebook.thrift.any;
 
 import com.facebook.thrift.adapter.TypeAdapter;
 import org.apache.thrift.conformance.Any;
-import org.apache.thrift.protocol.TProtocol;
 
 /**
  * A {@link TypeAdapter} from serializing and deserialize a {@link com.facebook.thrift.any.LazyAny}
  */
-public class LazyAnyAdapter implements TypeAdapter<LazyAny> {
+public class LazyAnyAdapter implements TypeAdapter<Any, LazyAny> {
   @Override
-  public void toThrift(LazyAny lazyAny, TProtocol protocol) {
-    lazyAny.getAny().write0(protocol);
+  public LazyAny fromThrift(Any any) {
+    return new SerializedLazyAny(any);
   }
 
   @Override
-  public LazyAny fromThrift(TProtocol protocol) {
-    Any any = Any.read0(protocol);
-    return new SerializedLazyAny(any);
+  public Any toThrift(LazyAny lazyAny) {
+    if (lazyAny == null) {
+      return null;
+    }
+    return lazyAny.getAny();
   }
 }

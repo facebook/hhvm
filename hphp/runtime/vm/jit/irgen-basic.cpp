@@ -56,7 +56,7 @@ void emitClassGetC(IRGS& env) {
 
   auto const cls = ldCls(env, name);
   decRef(env, name, DecRefProfileId::Default);
-  emitModuleBoundaryCheck(env, cls, false);
+  if (name->isA(TStr)) emitModuleBoundaryCheck(env, cls, false);
   push(env, cls);
 }
 

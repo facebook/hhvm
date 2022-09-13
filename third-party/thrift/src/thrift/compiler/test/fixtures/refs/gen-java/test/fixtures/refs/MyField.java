@@ -428,7 +428,7 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.optValue != null) {
+      if (optValue != null) {
         oprot.writeFieldBegin(OPT_VALUE_FIELD_DESC);
         oprot.writeI64(this.optValue);
         oprot.writeFieldEnd();
@@ -439,7 +439,7 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldBegin(REQ_VALUE_FIELD_DESC);
       oprot.writeI64(this.reqValue);
       oprot.writeFieldEnd();
-      if (this.optEnumValue != null) {
+      if (optEnumValue != null) {
         oprot.writeFieldBegin(OPT_ENUM_VALUE_FIELD_DESC);
         oprot.writeI32(this.optEnumValue == null ? 0 : this.optEnumValue.getValue());
         oprot.writeFieldEnd();
@@ -450,17 +450,17 @@ public final class MyField implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldBegin(REQ_ENUM_VALUE_FIELD_DESC);
       oprot.writeI32(this.reqEnumValue == null ? 0 : this.reqEnumValue.getValue());
       oprot.writeFieldEnd();
-      if (this.optStrValue != null) {
+      if (optStrValue != null) {
         oprot.writeFieldBegin(OPT_STR_VALUE_FIELD_DESC);
         oprot.writeString(this.optStrValue);
         oprot.writeFieldEnd();
       }
-      if (this.strValue != null) {
+      if (strValue != null) {
         oprot.writeFieldBegin(STR_VALUE_FIELD_DESC);
         oprot.writeString(this.strValue);
         oprot.writeFieldEnd();
       }
-      if (this.reqStrValue != null) {
+      if (reqStrValue != null) {
         oprot.writeFieldBegin(REQ_STR_VALUE_FIELD_DESC);
         oprot.writeString(this.reqStrValue);
         oprot.writeFieldEnd();

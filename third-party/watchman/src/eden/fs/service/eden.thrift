@@ -1269,14 +1269,25 @@ enum ObjectType {
   SYMLINK = 3,
 }
 
+struct SetPathObjectIdObject {
+  1: PathString path;
+  2: ThriftObjectId objectId;
+  3: ObjectType type;
+}
+
+// Any new use case should try to avoid using path, objectId and type, they will be deprecated.
+// Please use objects instead which would batch requests. If both path/objectId/type and objects
+// both present, the singlular will be added to the objects.
 struct SetPathObjectIdParams {
   1: PathString mountPoint;
+  // TODO: deprecate path, objectId and type
   2: PathString path;
   3: ThriftObjectId objectId;
   4: ObjectType type;
   5: CheckoutMode mode;
   // Extra request infomation. i.e. build uuid, cache session id.
   6: optional map<string, string> requestInfo;
+  7: list<SetPathObjectIdObject> objects;
 }
 
 struct SetPathObjectIdResult {

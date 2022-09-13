@@ -179,7 +179,7 @@ public final class Struct1 implements com.facebook.thrift.payload.ThriftSerializ
       oprot.writeFieldBegin(A_FIELD_DESC);
       oprot.writeI32(this.a);
       oprot.writeFieldEnd();
-      if (this.b != null) {
+      if (b != null) {
         oprot.writeFieldBegin(B_FIELD_DESC);
         oprot.writeString(this.b);
         oprot.writeFieldEnd();

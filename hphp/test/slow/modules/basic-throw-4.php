@@ -11,7 +11,7 @@ function test(
 ) {
   $x::foo(); // pass
   try {
-    $y::foo(); // error
+    $y::foo(); // pass
   } catch (Exception $e) { echo $e->getMessage()."\n"; }
   try {
     $z::foo(); // error

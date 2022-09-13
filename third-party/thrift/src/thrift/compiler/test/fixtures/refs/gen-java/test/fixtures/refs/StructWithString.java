@@ -284,27 +284,27 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.defUniqueStringRef != null) {
+      if (defUniqueStringRef != null) {
         oprot.writeFieldBegin(DEF_UNIQUE_STRING_REF_FIELD_DESC);
         oprot.writeString(this.defUniqueStringRef);
         oprot.writeFieldEnd();
       }
-      if (this.defSharedStringRef != null) {
+      if (defSharedStringRef != null) {
         oprot.writeFieldBegin(DEF_SHARED_STRING_REF_FIELD_DESC);
         oprot.writeString(this.defSharedStringRef);
         oprot.writeFieldEnd();
       }
-      if (this.defSharedStringConstRef != null) {
+      if (defSharedStringConstRef != null) {
         oprot.writeFieldBegin(DEF_SHARED_STRING_CONST_REF_FIELD_DESC);
         oprot.writeString(this.defSharedStringConstRef);
         oprot.writeFieldEnd();
       }
-      if (this.uniqueStringRef != null) {
+      if (uniqueStringRef != null) {
         oprot.writeFieldBegin(UNIQUE_STRING_REF_FIELD_DESC);
         oprot.writeString(this.uniqueStringRef);
         oprot.writeFieldEnd();
       }
-      if (this.sharedStringRef != null) {
+      if (sharedStringRef != null) {
         oprot.writeFieldBegin(SHARED_STRING_REF_FIELD_DESC);
         oprot.writeString(this.sharedStringRef);
         oprot.writeFieldEnd();

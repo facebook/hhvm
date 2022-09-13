@@ -18,22 +18,23 @@ namespace watchman {
 class Mercurial : public SCM {
  public:
   Mercurial(w_string_piece rootPath, w_string_piece scmRoot);
-  w_string mergeBaseWith(w_string_piece commitId, w_string requestId = nullptr)
-      const override;
+  w_string mergeBaseWith(
+      w_string_piece commitId,
+      const std::optional<w_string>& requestId = std::nullopt) const override;
   std::vector<w_string> getFilesChangedSinceMergeBaseWith(
       w_string_piece commitId,
       w_string_piece clock,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
   std::chrono::time_point<std::chrono::system_clock> getCommitDate(
       w_string_piece commitId,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
   // public for testing
   static std::chrono::time_point<std::chrono::system_clock> convertCommitDate(
       const char* commitDate);
   std::vector<w_string> getCommitsPriorToAndIncluding(
       w_string_piece commitId,
       int numCommits,
-      w_string requestId = nullptr) const override;
+      const std::optional<w_string>& requestId = std::nullopt) const override;
 
  private:
   std::string dirStatePath_;
@@ -43,7 +44,8 @@ class Mercurial : public SCM {
       filesChangedSinceMergeBaseWith_;
 
   // Returns options for invoking hg
-  ChildProcess::Options makeHgOptions(w_string requestId) const;
+  ChildProcess::Options makeHgOptions(
+      const std::optional<w_string>& requestId) const;
   struct timespec getDirStateMtime() const;
 };
 

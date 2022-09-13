@@ -287,7 +287,7 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
     
     public void write0(TProtocol oprot) throws TException {
       oprot.writeStructBegin(STRUCT_DESC);
-      if (this.assign != null) {
+      if (assign != null) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         this.assign.write0(oprot);
         oprot.writeFieldEnd();
@@ -295,17 +295,17 @@ public final class InnerUnionPatch implements com.facebook.thrift.payload.Thrift
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
-      if (this.patchPrior != null) {
+      if (patchPrior != null) {
         oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
         this.patchPrior.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.ensure != null) {
+      if (ensure != null) {
         oprot.writeFieldBegin(ENSURE_FIELD_DESC);
         this.ensure.write0(oprot);
         oprot.writeFieldEnd();
       }
-      if (this.patch != null) {
+      if (patch != null) {
         oprot.writeFieldBegin(PATCH_FIELD_DESC);
         this.patch.write0(oprot);
         oprot.writeFieldEnd();

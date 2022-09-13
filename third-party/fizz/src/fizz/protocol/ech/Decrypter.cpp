@@ -17,36 +17,30 @@ namespace {
 // ever using it while holding a const reference to its parent container,
 // guaranteeing its lifetime while we use it (since it's internal to this unit)
 struct DecrypterLookupResult {
-  Buf configId;
-  ech::ClientECH echExtension;
+  ech::OuterECHClientHello echExtension;
   const DecrypterParams& matchingParam;
 };
 
-// Tries to find a config in our decrypter params that matches the passed in
-// config ID if given or the config ID in the encoded extension if no config
-// ID is explicitly passed in.
+// Tries to find a config in our decrypter params that matches the config ID
+// in the passed in extension. If one is found, returns the extension and the
+// matching config.
 //
 // Can return folly::none if no matching config is found.
-folly::Optional<DecrypterLookupResult> getMatchingConfigIdAndECH(
+folly::Optional<DecrypterLookupResult> decodeAndGetParam(
     const Extension& encodedECHExtension,
-    const Buf& overrideConfigId,
     const std::vector<DecrypterParams>& decrypterParams) {
   folly::io::Cursor cursor(encodedECHExtension.extension_data.get());
   for (const auto& param : decrypterParams) {
     switch (param.echConfig.version) {
-      case ECHVersion::Draft9: {
-        auto echExtension = getExtension<ech::ClientECH>(cursor);
+      case ECHVersion::Draft13: {
+        auto echExtension = getExtension<ech::OuterECHClientHello>(cursor);
         auto& echConfig = param.echConfig;
-        const Buf& configId = overrideConfigId == nullptr
-            ? echExtension.config_id
-            : overrideConfigId;
-        auto currentConfigId =
-            constructConfigId(echExtension.cipher_suite.kdf_id, echConfig);
-        if (!folly::IOBufEqualTo()(currentConfigId, configId)) {
+        auto currentConfigDraft = decode<ECHConfigContentDraft>(
+            echConfig.ech_config_content->clone());
+        if (echExtension.config_id != currentConfigDraft.key_config.config_id) {
           continue;
         }
-        return DecrypterLookupResult{
-            std::move(currentConfigId), std::move(echExtension), param};
+        return DecrypterLookupResult{std::move(echExtension), param};
       }
       default: {
         continue;
@@ -61,8 +55,7 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
     const ClientHello& clientHelloOuter,
     const Extension& encodedECHExtension,
     const std::vector<DecrypterParams>& decrypterParams) {
-  auto configIdResult =
-      getMatchingConfigIdAndECH(encodedECHExtension, nullptr, decrypterParams);
+  auto configIdResult = decodeAndGetParam(encodedECHExtension, decrypterParams);
 
   if (!configIdResult.has_value()) {
     return folly::none;
@@ -80,13 +73,13 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
         configIdResult->matchingParam.echConfig,
         configIdResult->echExtension.cipher_suite,
         configIdResult->echExtension.enc->clone(),
-        configIdResult->configId->clone(),
+        configIdResult->echExtension.config_id,
         configIdResult->echExtension.payload->clone(),
-        ECHVersion::Draft9,
+        ECHVersion::Draft13,
         context);
     return DecrypterResult{
         std::move(chlo),
-        std::move(configIdResult->configId),
+        configIdResult->echExtension.config_id,
         std::move(context)};
   } catch (const OuterExtensionsError& e) {
     throw FizzException(e.what(), AlertDescription::illegal_parameter);
@@ -97,7 +90,6 @@ folly::Optional<DecrypterResult> tryToDecodeECH(
 
 ClientHello decodeClientHelloHRR(
     const ClientHello& chlo,
-    const std::unique_ptr<folly::IOBuf>& configId,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey,
     std::unique_ptr<hpke::HpkeContext>& context,
     const std::vector<DecrypterParams>& decrypterParams) {
@@ -109,8 +101,7 @@ ClientHello decodeClientHelloHRR(
         "ech not sent for hrr", AlertDescription::missing_extension);
   }
 
-  auto configIdResult =
-      getMatchingConfigIdAndECH(*it, configId, decrypterParams);
+  auto configIdResult = decodeAndGetParam(*it, decrypterParams);
 
   if (!configIdResult.has_value()) {
     throw FizzException(
@@ -124,9 +115,9 @@ ClientHello decodeClientHelloHRR(
           configIdResult->matchingParam.echConfig,
           configIdResult->echExtension.cipher_suite,
           configIdResult->echExtension.enc->clone(),
-          configIdResult->echExtension.config_id->clone(),
+          configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft9,
+          ECHVersion::Draft13,
           context);
     } else {
       auto recreatedContext = setupDecryptionContext(
@@ -140,9 +131,9 @@ ClientHello decodeClientHelloHRR(
           configIdResult->matchingParam.echConfig,
           configIdResult->echExtension.cipher_suite,
           configIdResult->echExtension.enc->clone(),
-          configIdResult->echExtension.config_id->clone(),
+          configIdResult->echExtension.config_id,
           configIdResult->echExtension.payload->clone(),
-          ECHVersion::Draft9,
+          ECHVersion::Draft13,
           recreatedContext);
     }
   } catch (const OuterExtensionsError& e) {
@@ -173,17 +164,15 @@ folly::Optional<DecrypterResult> ECHConfigManager::decryptClientHello(
 
 ClientHello ECHConfigManager::decryptClientHelloHRR(
     const ClientHello& chlo,
-    const std::unique_ptr<folly::IOBuf>& configId,
     std::unique_ptr<hpke::HpkeContext>& context) {
-  return decodeClientHelloHRR(chlo, configId, nullptr, context, configs_);
+  return decodeClientHelloHRR(chlo, nullptr, context, configs_);
 }
 
 ClientHello ECHConfigManager::decryptClientHelloHRR(
     const ClientHello& chlo,
-    const std::unique_ptr<folly::IOBuf>& configId,
     const std::unique_ptr<folly::IOBuf>& encapsulatedKey) {
   std::unique_ptr<hpke::HpkeContext> dummy;
-  return decodeClientHelloHRR(chlo, configId, encapsulatedKey, dummy, configs_);
+  return decodeClientHelloHRR(chlo, encapsulatedKey, dummy, configs_);
 }
 
 std::vector<ech::ECHConfig> ECHConfigManager::getRetryConfigs() const {

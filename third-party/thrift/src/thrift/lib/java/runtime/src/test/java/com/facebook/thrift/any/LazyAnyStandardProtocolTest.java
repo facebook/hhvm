@@ -26,6 +26,7 @@ import com.facebook.thrift.util.resources.RpcResources;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Collection;
+import org.apache.thrift.conformance.Any;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -57,13 +58,12 @@ public class LazyAnyStandardProtocolTest {
     LazyAny any = new LazyAny.Builder<>(req).setProtocol(serializationProtocol).build();
     assertEquals(req, any.get());
 
-    LazyAnyAdapter adapter = new LazyAnyAdapter();
     ByteBuf dest = RpcResources.getUnpooledByteBufAllocator().buffer();
     ByteBufTProtocol protocol =
         SerializerUtil.toByteBufProtocol(SerializationProtocol.TBinary, dest);
 
-    adapter.toThrift(any, protocol);
-    TestRequest received = (TestRequest) adapter.fromThrift(protocol).get();
+    any.getAny().write0(protocol);
+    TestRequest received = (TestRequest) LazyAny.wrap(Any.read0(protocol)).get();
 
     assertEquals(req.getAString(), received.getAString());
     assertEquals(req.getALong(), received.getALong());

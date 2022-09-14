@@ -178,6 +178,19 @@ const t_const* type_resolver::find_nontransitive_adapter(const t_type& node) {
   return nullptr;
 }
 
+const t_type* type_resolver::find_first_type(const t_type& node) {
+  const t_type* result = nullptr;
+  t_typedef::find_type_if(&node, [&result](const t_type* type) {
+    if (find_type(*type) ||
+        type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
+      result = type;
+      return true;
+    }
+    return false;
+  });
+  return result;
+}
+
 const std::string* type_resolver::find_first_adapter(const t_type& node) {
   if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
           &node, kCppAdapterUri)) {
@@ -432,11 +445,16 @@ std::string type_resolver::gen_adapted_type(
             });
 }
 
-// TODO(ytj): Support type::adapted, and cpp.template
+// TODO(ytj): Support cpp.template
 std::string type_resolver::gen_type_tag(const t_type& type) {
   auto tag = gen_thrift_type_tag(type);
   if (const auto* cpp_type = find_first_type(type)) {
-    if (cpp_type->find_annotation_or_null("cpp.indirection")) {
+    if (cpp_type->find_structured_annotation_or_null(kCppStrongTypeUri)) {
+      tag = fmt::format(
+          "::apache::thrift::type::cpp_type<{}, {}>",
+          get_native_type(*cpp_type),
+          tag);
+    } else if (cpp_type->find_annotation_or_null("cpp.indirection")) {
       tag = fmt::format(
           "::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<{}>, {}>",
           *find_type(*cpp_type),

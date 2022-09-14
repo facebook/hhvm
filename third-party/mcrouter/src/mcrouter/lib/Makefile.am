@@ -70,9 +70,11 @@ libmcrouter_a_SOURCES = \
   carbon/CarbonProtocolReader.h \
   carbon/CarbonProtocolWriter.h \
   carbon/CommonSerializationTraits.h \
+  carbon/ExternalCarbonConnectionStats.h \
   carbon/Keys-inl.h \
   carbon/Keys.h \
   carbon/NoopAdditionalLogger.h \
+  carbon/NoopExternalConnectionLogger.h \
   carbon/ReplyCommon.h \
   carbon/RequestCommon.h \
   carbon/RequestReplyUtil.h \

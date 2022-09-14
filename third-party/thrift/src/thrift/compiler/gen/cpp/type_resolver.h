@@ -147,17 +147,7 @@ class type_resolver {
   static const std::string* find_type(const t_type& node) {
     return node.find_annotation_or_null({"cpp.type", "cpp2.type"});
   }
-  static const t_type* find_first_type(const t_type& node) {
-    const t_type* result = nullptr;
-    t_typedef::find_type_if(&node, [&result](const t_type* type) {
-      if (find_type(*type)) {
-        result = type;
-        return true;
-      }
-      return false;
-    });
-    return result;
-  }
+  static const t_type* find_first_type(const t_type& node);
   static const std::string* find_first_adapter(const t_type& node);
   static const std::string* find_first_adapter(const t_field& node);
   static const std::string* find_template(const t_type& node) {

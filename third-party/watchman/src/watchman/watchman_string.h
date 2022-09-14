@@ -26,37 +26,107 @@
 
 class w_string_piece;
 
-typedef enum {
+enum w_string_type_t : uint8_t {
   W_STRING_BYTE,
   W_STRING_UNICODE,
   W_STRING_MIXED
-} w_string_type_t;
-
-struct w_string_t {
-  std::atomic<long> refcnt;
-  uint32_t _hval;
-  uint32_t len;
-  w_string_type_t type : 3;
-  unsigned hval_computed : 1;
-
-  // This holds the character data.  This is a variable
-  // sized member and we have to specify at least 1 byte
-  // for the compiler to accept this.
-  // This must be the last element of this struct.
-  const char buf[1];
-
-  w_string_t()
-      : refcnt(0), len(0), type(W_STRING_BYTE), hval_computed(0), buf{0} {}
 };
 
-uint32_t w_string_compute_hval(w_string_t* str);
+// Assume 64-bit platforms for now. 32-bit platforms should have a separate
+// 32-bit flag next to the reference count.
+static_assert(sizeof(size_t) == 8);
 
-inline uint32_t w_string_hval(w_string_t* str) {
-  if (str->hval_computed) {
-    return str->_hval;
+namespace watchman {
+
+/**
+ * To pack StringHeader into 16 bytes, Watchman uses a 32-bit hash scheme. It's
+ * important to hold the invariant that std::hash<w_string> ==
+ * std::hash<w_string_piece>, so if we replace w_string_piece with
+ * std::string_view, StringHeader will need to become 20 or 24 bytes.
+ */
+using StringHash = uint32_t;
+
+/**
+ * w_string is a heap-allocated string buffer with a fixed-size header and
+ * variable-size contents.
+ */
+struct StringHeader {
+  // Bottom 2 bits are w_string_type_t.
+  // Third bit is whether _hval is computed.
+  // Remaining 61 bits are the reference count. At 10 nanoseconds per increment,
+  // overflow would take over 700 years.
+  std::atomic<size_t> refcnt;
+  uint32_t len;
+  std::atomic<StringHash> _hval;
+
+  StringHeader(w_string_type_t type, uint32_t len)
+      : refcnt{static_cast<size_t>(type) | kRefIncrement}, len{len} {}
+
+  bool has_hval() const {
+    return refcnt.load(std::memory_order_acquire) & kHasHval;
   }
-  return w_string_compute_hval(str);
-}
+
+  void set_hval_computed() {
+    refcnt.fetch_or(kHasHval, std::memory_order_acq_rel);
+  }
+
+  w_string_type_t get_type() const {
+    return static_cast<w_string_type_t>(
+        refcnt.load(std::memory_order_relaxed) & kTypeMask);
+  }
+
+  void addref() {
+    refcnt.fetch_add(kRefIncrement, std::memory_order_relaxed);
+  }
+
+  // Returns true if this was the final reference, indicating the string
+  // should be destroyed.
+  bool decref() {
+    // In the common case that the reference count is 1, we can avoid an
+    // expensive atomic RMW (e.g. lock xadd) with a single load. This saves a
+    // dozen or two cycles.
+    //
+    // This is safe because, if the reference count is 1, we have exclusive
+    // ownership of the object. Therefore, the reference count cannot climb
+    // to 2. (It is UB to destroy an object while another thread copies it.)
+    //
+    // This technique is surprisingly uncommon, but it shows up in abseil:
+    // https://github.com/abseil/abseil-cpp/blob/4a1ccf16ed98c876bf1e1985afb080baeff5101f/absl/strings/internal/cord_internal.h#L114
+    return (
+        kRefIncrement == (refcnt.load(std::memory_order_acquire) & kRefMask) ||
+        kRefIncrement ==
+            (refcnt.fetch_sub(kRefIncrement, std::memory_order_acq_rel) &
+             kRefMask));
+  }
+
+  /**
+   * Allocates storage for length + 1 bytes.
+   */
+  static StringHeader* alloc(uint32_t length, w_string_type_t type) {
+    void* s = malloc(sizeof(StringHeader) + length + 1);
+    if (!s) {
+      throw std::bad_alloc{};
+    }
+    new (s) StringHeader(type, length);
+    return static_cast<StringHeader*>(s);
+  }
+
+  char* buf() {
+    return reinterpret_cast<char*>(this + 1);
+  }
+
+  const char* buf() const {
+    return reinterpret_cast<const char*>(this + 1);
+  }
+
+  static constexpr uint8_t kTypeMask = 3ull;
+  static constexpr size_t kHasHval = 1ull << 2ull;
+  static constexpr size_t kRefShift = 3ull;
+  static constexpr size_t kRefIncrement = 1ull << kRefShift;
+  static constexpr size_t kRefMask = ~(kRefIncrement - 1);
+};
+
+} // namespace watchman
 
 /**
  * Trims all trailing slashes from a path.
@@ -86,6 +156,8 @@ class w_string;
  * It is simply a pair of pointers that define the start and end
  * of the valid region. */
 class w_string_piece {
+  using StringHash = watchman::StringHash;
+
   const char* str_;
   size_t len_;
 
@@ -211,7 +283,7 @@ class w_string_piece {
   bool startsWithCaseInsensitive(w_string_piece prefix) const;
 
   // Compute a hash value for this piece
-  uint32_t hashValue() const;
+  StringHash hashValue() const noexcept;
 
 #ifdef _WIN32
   // Returns a wide character representation of the piece
@@ -227,6 +299,9 @@ bool w_string_equal_caseless(w_string_piece a, w_string_piece b);
  * The default-initialized and moved-from w_string values are empty.
  */
 class w_string {
+  using StringHash = watchman::StringHash;
+  using StringHeader = watchman::StringHeader;
+
  public:
   /**
    * Constructs an empty string.
@@ -267,8 +342,8 @@ class w_string {
   w_string(const WCHAR* wpath, size_t len);
 #endif
 
-  /** Initialize, taking a ref on w_string_t */
-  explicit w_string(w_string_t* str, bool addRef = true);
+  /** Private constructor. Takes ownership of StringHeader*. */
+  explicit w_string(StringHeader* str) : str_{str} {}
 
   ~w_string();
 
@@ -286,8 +361,17 @@ class w_string {
    */
   void reset() noexcept;
 
-  w_string_t* ptr() const {
-    return str_;
+  StringHash hashValue() const noexcept {
+    if (str_) {
+      if (str_->has_hval()) {
+        return str_->_hval.load(std::memory_order_acquire);
+      } else {
+        // It's okay to race has computation: hashing is cheaper than blocking.
+        return computeAndStoreHash();
+      }
+    } else {
+      return w_string_piece{}.hashValue();
+    }
   }
 
   /**
@@ -382,10 +466,9 @@ class w_string {
    */
   template <typename... Args>
   static w_string format(fmt::string_view format_str, Args&&... args) {
-    auto size = fmt::formatted_size(fmt::runtime(format_str), args...);
+    uint32_t size = fmt::formatted_size(fmt::runtime(format_str), args...);
 
-    w_string_t* s = (w_string_t*)(new char[sizeof(*s) + size + 1]);
-    new (s) w_string_t;
+    auto* s = StringHeader::alloc(size, W_STRING_BYTE);
 
     {
       // in case format_to throws
@@ -393,16 +476,12 @@ class w_string {
         delete[](char*) s;
       };
 
-      s->refcnt = 1;
-      s->len = uint32_t(size);
-
-      auto mut_buf = const_cast<char*>(s->buf);
+      auto mut_buf = const_cast<char*>(s->buf());
       fmt::format_to(mut_buf, fmt::runtime(format_str), args...);
-
       mut_buf[s->len] = 0;
     }
 
-    return w_string(s, false);
+    return w_string{s};
   }
 
   /** Return a possibly new version of this string that has its separators
@@ -414,7 +493,7 @@ class w_string {
     return data();
   }
   const char* data() const {
-    return str_ ? str_->buf : nullptr;
+    return str_ ? str_->buf() : nullptr;
   }
 
   bool empty() const {
@@ -427,7 +506,7 @@ class w_string {
 
   w_string_type_t type() const {
     // Empty strings are known unicode.
-    return str_ ? str_->type : W_STRING_UNICODE;
+    return str_ ? str_->get_type() : W_STRING_UNICODE;
   }
 
   /** Returns the directory component of the string, assuming a path string */
@@ -438,20 +517,22 @@ class w_string {
   std::optional<w_string> asLowerCaseSuffix() const;
 
  private:
-  w_string_t* str_ = nullptr;
+  StringHash computeAndStoreHash() const noexcept;
+
+  StringHeader* str_ = nullptr;
 };
 
 /** Allow w_string to act as a key in unordered_(map|set) */
 namespace std {
 template <>
 struct hash<w_string> {
-  std::size_t operator()(w_string const& str) const {
-    return w_string_hval(str.ptr());
+  std::size_t operator()(w_string const& str) const noexcept {
+    return str.hashValue();
   }
 };
 template <>
 struct hash<w_string_piece> {
-  std::size_t operator()(w_string_piece const& str) const {
+  std::size_t operator()(w_string_piece const& str) const noexcept {
     return str.hashValue();
   }
 };

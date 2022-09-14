@@ -237,19 +237,24 @@ TEST(String, string_piece_lowercase_suffix) {
 
 TEST(String, path_cat) {
   auto str = w_string::pathCat({"foo", ""});
-  EXPECT_EQ(str, "foo");
+  EXPECT_EQ("foo", str);
+  EXPECT_EQ(3, str.size());
 
   str = w_string::pathCat({"", "foo"});
-  EXPECT_EQ(str, "foo");
+  EXPECT_EQ("foo", str);
+  EXPECT_EQ(3, str.size());
 
   str = w_string::pathCat({"foo", "bar"});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 
   str = w_string::pathCat({"foo", "bar", ""});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 
   str = w_string::pathCat({"foo", "", "bar"});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 }
 
 TEST(String, basename_dirname) {
@@ -326,6 +331,12 @@ TEST(String, operators) {
   EXPECT_TRUE(!(w_string_piece("b") < w_string_piece("a"))) << "b not < a";
   EXPECT_TRUE(!(w_string_piece("a") < w_string_piece("a"))) << "a not < a";
   EXPECT_LT(w_string_piece("A"), w_string_piece("a"));
+}
+
+TEST(String, piece_and_string_should_have_same_hash) {
+  EXPECT_EQ(w_string{""}.hashValue(), w_string_piece{""}.hashValue());
+  EXPECT_EQ(
+      w_string{"foobar"}.hashValue(), w_string_piece{"foobar"}.hashValue());
 }
 
 TEST(String, split) {
@@ -439,4 +450,18 @@ TEST(String, contains) {
   EXPECT_TRUE(haystack.contains(""));
   EXPECT_TRUE(haystack.contains("watchman"));
   EXPECT_FALSE(haystack.contains("watchman2"));
+}
+
+TEST(String, allocate_many_sizes) {
+  // This strange test relies on ASAN to assert that our allocation size math is
+  // correct.
+  EXPECT_EQ(0, w_string("", 0).size());
+  EXPECT_EQ(1, w_string("x", 1).size());
+  EXPECT_EQ(2, w_string("xx", 2).size());
+  EXPECT_EQ(3, w_string("xxx", 3).size());
+  EXPECT_EQ(4, w_string("xxxx", 4).size());
+  EXPECT_EQ(5, w_string("xxxxx", 5).size());
+  EXPECT_EQ(6, w_string("xxxxxx", 6).size());
+  EXPECT_EQ(7, w_string("xxxxxxx", 7).size());
+  EXPECT_EQ(8, w_string("xxxxxxxx", 8).size());
 }

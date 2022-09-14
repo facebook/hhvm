@@ -42,6 +42,8 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   using Base = detail::BaseRef<ConstRef>;
 
  public:
+  using Base::get;
+
   ConstRef() noexcept = default;
   // 'capture' any other runtime type.
   /* implicit */ ConstRef(const detail::Dyn& other) noexcept : Base(other) {}
@@ -53,6 +55,11 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
   // TODO: infer_tag a string_view type instead.
   /* implicit */ ConstRef(const std::string& val) noexcept
       : ConstRef(binary_t{}, val) {}
+
+  template <typename IdT>
+  ConstRef operator[](IdT&& id) const {
+    return get(std::forward<IdT>(id));
+  }
 
  private:
   friend Base;
@@ -71,7 +78,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
 // runtime metadata associated with the type of the value.
 class Ref final : public detail::BaseRef<Ref, ConstRef> {
   using Base = detail::BaseRef<Ref, ConstRef>;
-  using Dyn = detail::Dyn;
+  using Base::if_not_index;
 
  public:
   Ref() noexcept = default;
@@ -107,6 +114,31 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   template <typename Tag>
   native_type<Tag>* tryMut() noexcept {
     return Base::tryMut<Tag>();
+  }
+
+  Ref operator[](Ordinal ord) & { return get(ord); }
+  Ref operator[](Ordinal ord) && { return get(ord); }
+  Ref operator[](size_t pos) & { return get(pos); }
+  Ref operator[](size_t pos) && { return get(pos); }
+  ConstRef operator[](Ordinal ord) const& { return get(ord); }
+  ConstRef operator[](Ordinal ord) const&& { return get(ord); }
+  ConstRef operator[](size_t pos) const& { return get(pos); }
+  ConstRef operator[](size_t pos) const&& { return get(pos); }
+  template <typename IdT>
+  if_not_index<IdT, Ref> operator[](IdT&& id) & {
+    return ensure(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT, Ref> operator[](IdT&& id) && {
+    return ensure(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT> operator[](IdT&& id) const& {
+    return get(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT> operator[](IdT&& id) const&& {
+    return get(std::forward<IdT>(id));
   }
 
  private:
@@ -200,6 +232,31 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
     other.Base::reset();
   }
   ~Value() { reset(); }
+
+  Ref operator[](Ordinal ord) & { return get(ord); }
+  Ref operator[](Ordinal ord) && { return get(ord); }
+  Ref operator[](size_t pos) & { return get(pos); }
+  Ref operator[](size_t pos) && { return get(pos); }
+  ConstRef operator[](Ordinal ord) const& { return get(ord); }
+  ConstRef operator[](Ordinal ord) const&& { return get(ord); }
+  ConstRef operator[](size_t pos) const& { return get(pos); }
+  ConstRef operator[](size_t pos) const&& { return get(pos); }
+  template <typename IdT>
+  if_not_index<IdT, Ref> operator[](IdT&& id) & {
+    return ensure(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT, Ref> operator[](IdT&& id) && {
+    return ensure(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT> operator[](IdT&& id) const& {
+    return get(std::forward<IdT>(id));
+  }
+  template <typename IdT>
+  if_not_index<IdT> operator[](IdT&& id) const&& {
+    return get(std::forward<IdT>(id));
+  }
 
   Value& operator=(const Value& other) noexcept {
     reset();

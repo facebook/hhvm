@@ -503,14 +503,12 @@ add_library(log STATIC
   watchman/portability/Backtrace.cpp
 )
 target_link_libraries(log third_party_deps)
-add_library(hash STATIC watchman/hash.cpp)
-target_link_libraries(hash third_party_deps)
 add_library(err STATIC watchman/Poison.cpp watchman/root/warnerr.cpp)
 target_link_libraries(err third_party_deps)
 add_library(jansson_utf STATIC watchman/thirdparty/jansson/utf.cpp)
 
 add_library(string STATIC watchman/string.cpp)
-target_link_libraries(string jansson_utf hash third_party_deps)
+target_link_libraries(string jansson_utf third_party_deps)
 
 add_library(jansson STATIC
 watchman/thirdparty/jansson/dump.cpp
@@ -612,7 +610,6 @@ watchman/UserDir.cpp
 watchman/WatchmanConfig.cpp
 watchman/fs/WinDirHandle.cpp
 watchman/bser.cpp
-# hash.cpp (in libhash)
 watchman/launchd.cpp
 watchman/listener-user.cpp
 watchman/listener.cpp
@@ -700,7 +697,6 @@ set_target_properties(watchman PROPERTIES
 target_link_libraries(
   watchman
   log
-  hash
   string
   err
   jansson

@@ -115,11 +115,6 @@ class Type : public detail::Wrap<TypeStruct> {
   static bool isFull(const TypeName& typeName);
   static bool isFull(const TypeStruct& type);
 
-  template <typename Tag>
-  static const std::string& getUri() {
-    return ::apache::thrift::uri<standard_type<Tag>>();
-  }
-
   friend bool operator==(Type lhs, Type rhs) noexcept {
     return lhs.data_ == rhs.data_;
   }
@@ -173,11 +168,13 @@ class Type : public detail::Wrap<TypeStruct> {
   }
   template <typename Tag>
   static TypeStruct makeType(structured_c) {
-    return makeNamed<Tag>(getUri<Tag>());
+    return makeNamed<Tag>(thrift::uri<standard_type<Tag>>());
   }
   template <typename Tag>
   static TypeStruct makeType(enum_c) {
-    return makeNamed<Tag>(getUri<Tag>());
+    // TODO(afuller): Support enums in thrift::uri.
+    // return makeNamed<Tag>(thrift::uri<standard_type<Tag>>());
+    return makeNamed<Tag>("");
   }
   template <typename Tag>
   struct Helper;

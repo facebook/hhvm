@@ -3,30 +3,20 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-#![allow(non_camel_case_types)]
+use ocamlrep::FromOcamlRep;
 
-use libc::c_long;
-use libc::c_ulong;
-use libc::c_void;
-use libc::memcpy;
-use ocamlrep::Value;
-
-type intnat = c_long;
-type uintnat = c_ulong;
-type value = intnat;
-type mlsize_t = uintnat;
-
-extern "C" {
-    fn caml_alloc_string(len: mlsize_t) -> value;
-}
+type OcamlValue = usize;
 
 #[no_mangle]
-unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(v: value, flags: value) -> value {
-    let v = Value::from_bits(v as usize);
-    let flags = Value::from_bits(flags as usize);
-    let mut vec = vec![];
-    ocamlrep_marshal::output_val(&mut vec, v, flags).unwrap();
-    let res: value = caml_alloc_string(vec.len() as mlsize_t);
-    memcpy(res as *mut c_void, vec.as_ptr() as *const c_void, vec.len());
-    res
+unsafe extern "C" fn ocamlrep_marshal_output_value_to_string(
+    v: OcamlValue,
+    flags: OcamlValue,
+) -> OcamlValue {
+    ocamlrep_ocamlpool::catch_unwind(|| {
+        let v = ocamlrep::Value::from_bits(v);
+        let flags = ocamlrep_marshal::ExternFlags::from_ocaml(flags).unwrap();
+        let mut cursor = std::io::Cursor::new(vec![]);
+        ocamlrep_marshal::output_value(&mut cursor, v, flags).unwrap();
+        ocamlrep_ocamlpool::to_ocaml(&cursor.into_inner())
+    })
 }

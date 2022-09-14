@@ -111,8 +111,7 @@ ServerRequest RoundRobinRequestPile::dequeueImpl(
 std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
     ServerRequest&& request) {
   // record the enqueue time
-  auto& info =
-      apache::thrift::detail::ServerRequestHelper::processInfo(request);
+  auto& info = request.requestData();
   info.queueBegin = std::chrono::steady_clock::now();
 
   unsigned pri = 0, bucket = 0;

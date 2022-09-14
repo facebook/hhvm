@@ -13,7 +13,7 @@ use hhbc_string_utils::strip_global_ns;
 use naming_special_names_rust::user_attributes;
 use oxidized_by_ref::ast_defs::Abstraction;
 use oxidized_by_ref::ast_defs::ClassishKind;
-use oxidized_by_ref::direct_decl_parser::Decls;
+use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
 use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use oxidized_by_ref::typing_defs::Ty;
@@ -135,15 +135,11 @@ impl Facts {
         }
     }
 
-    pub fn from_decls(
-        decls: &Decls<'_>,
-        file_attributes: &[&UserAttribute<'_>],
-        disable_xhp_element_mangling: bool,
-    ) -> Facts {
+    pub fn from_decls(parsed_file: &ParsedFile<'_>) -> Facts {
         let mut types = TypeFactsByName::new();
-        decls.classes().for_each(|(class_name, decl)| {
+        parsed_file.decls.classes().for_each(|(class_name, decl)| {
             let mut name = format(class_name);
-            if !disable_xhp_element_mangling && decl.is_xhp {
+            if !parsed_file.disable_xhp_element_mangling && decl.is_xhp {
                 // strips the namespace and mangles the class id
                 if let Some(id) = name.rsplit('\\').next() {
                     name = id.to_string();
@@ -152,7 +148,7 @@ impl Facts {
             let type_fact = TypeFacts::of_class_decl(decl);
             add_or_update_classish_decl(name, type_fact, &mut types);
         });
-        for (name, decl) in decls.typedefs().filter(|(_, decl)| {
+        for (name, decl) in parsed_file.decls.typedefs().filter(|(_, decl)| {
             // Ignore context aliases
             !decl.is_ctx
         }) {
@@ -160,7 +156,8 @@ impl Facts {
             add_or_update_classish_decl(format(name), type_fact, &mut types);
         }
 
-        let mut functions = decls
+        let mut functions = parsed_file
+            .decls
             .funs()
             .filter_map(|(name, _)| {
                 let name = format(name);
@@ -171,24 +168,30 @@ impl Facts {
                 }
             })
             .collect::<Vec<String>>();
-        let mut constants = decls
+        let mut constants = parsed_file
+            .decls
             .consts()
             .map(|(name, _)| format(name))
             .collect::<Vec<String>>();
 
         let mut modules = ModuleFactsByName::new();
-        decls.modules().for_each(|(module_name, _decl)| {
-            let name = format(module_name);
-            add_or_update_module_decl(name, ModuleFacts {}, &mut modules);
-        });
+        parsed_file
+            .decls
+            .modules()
+            .for_each(|(module_name, _decl)| {
+                let name = format(module_name);
+                add_or_update_module_decl(name, ModuleFacts {}, &mut modules);
+            });
         functions.reverse();
         constants.reverse();
+
+        let file_attributes = to_facts_attributes(parsed_file.file_attributes);
 
         Facts {
             types,
             functions,
             constants,
-            file_attributes: to_facts_attributes(file_attributes),
+            file_attributes,
             modules,
         }
     }

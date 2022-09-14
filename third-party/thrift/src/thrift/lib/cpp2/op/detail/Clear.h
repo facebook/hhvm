@@ -75,7 +75,7 @@ struct Clear {
   }
 };
 template <typename Id>
-struct Clear<Id, void, type::if_not_thrift_type_tag<Id>> {
+struct Clear<Id, type::if_id<Id>, type::if_not_thrift_type_tag<Id>> {
   template <typename T>
   constexpr void operator()(T& val) const {
     Clear<Id, type::infer_tag<T>>{}(val);
@@ -294,6 +294,7 @@ struct ClearField<adapted_field_tag<Adapter, UTag, Struct, id>>
 
 template <typename Id, typename Tag>
 struct Clear<Id, Tag, type::if_thrift_type_tag<Tag>> {
+  static_assert(type::is_id_v<Id>, "");
   using T = type::native_type<Tag>;
   constexpr void operator()(T& val) const {
     using FieldTag = op::get_field_tag<Id, T>;

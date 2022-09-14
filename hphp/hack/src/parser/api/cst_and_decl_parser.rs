@@ -68,6 +68,7 @@ pub fn parse_script<'a, 'o>(
         file_attributes: attrs.into_bump_slice(),
         decls: sc_state.1.decls,
         has_first_pass_parse_errors,
+        disable_xhp_element_mangling: opts.disable_xhp_element_mangling,
     };
     (cst, parsed_file)
 }

@@ -133,7 +133,7 @@ impl<'a> ExternalDeclProvider<'a> {
             ExternalDeclProviderResult::Missing => Err(Error::NotFound),
             ExternalDeclProviderResult::Decls(ptr) => {
                 let holder = unsafe { ptr.as_ref() }.unwrap();
-                find(&holder.decls)
+                find(&holder.parsed_file.decls)
             }
             ExternalDeclProviderResult::RustVec(p) => {
                 // turn raw pointer back into &Vec<u8>

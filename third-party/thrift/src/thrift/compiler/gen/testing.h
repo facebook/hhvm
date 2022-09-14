@@ -123,4 +123,18 @@ struct thrift_annotation_builder : base_thrift_annotation_builder {
   using base_thrift_annotation_builder::base_thrift_annotation_builder;
 };
 
+struct cpp_annotation_builder : base_thrift_annotation_builder {
+  static cpp_annotation_builder strongType(t_program& p) {
+    return {p, "StrongType"};
+  }
+
+  std::unique_ptr<t_const> make() {
+    return make_inst(std::make_unique<t_const_value>());
+  }
+
+ protected:
+  cpp_annotation_builder(t_program& p, const std::string& name)
+      : base_thrift_annotation_builder(p, "cpp", name) {}
+};
+
 } // namespace apache::thrift::compiler::gen

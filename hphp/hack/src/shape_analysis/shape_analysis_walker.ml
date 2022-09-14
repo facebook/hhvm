@@ -331,22 +331,26 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       {
         hack_pos = fst name;
         origin = __LINE__;
-        constraint_ = HT.Identifier name;
+        constraint_ = HT.ConstantIdentifier (fst name, None, snd name);
       }
     in
     let env = Env.add_inter_constraint env constr_ in
-    (env, Some (Inter (HT.Identifier name)))
+    (env, Some (Inter (HT.ConstantIdentifier (fst name, None, snd name))))
   | A.Class_const ((_, ident_pos, A.CI class_id), (_, const_name)) ->
-    let ident_id = snd class_id ^ "::" ^ const_name in
     let constr_ =
       {
         hack_pos = ident_pos;
         origin = __LINE__;
-        constraint_ = HT.Identifier (ident_pos, ident_id);
+        constraint_ =
+          HT.ConstantIdentifier (ident_pos, Some (snd class_id), const_name);
       }
     in
     let env = Env.add_inter_constraint env constr_ in
-    (env, Some (Inter (HT.Identifier (ident_pos, ident_id))))
+    ( env,
+      Some
+        (Inter
+           (HT.ConstantIdentifier (ident_pos, Some (snd class_id), const_name)))
+    )
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)

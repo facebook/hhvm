@@ -136,7 +136,12 @@ module Inter (I : Intra) = struct
             |> SMap.update
                  current_func_id
                  (Option.map ~f:(fun x -> x @ constr_list_backwards))
-          | Identifier ((_, const_name) as ident_ent) ->
+          | ConstantIdentifier ((_, class_name_opt, const_name) as ident_ent) ->
+            let const_name =
+              match class_name_opt with
+              | Some class_name -> class_name ^ "::" ^ const_name
+              | None -> const_name
+            in
             let constr_list_at = SMap.find_opt const_name base_constraint_map in
             let constr_list_backwards =
               match constr_list_at with
@@ -165,7 +170,8 @@ module Inter (I : Intra) = struct
             let constr_list_forwards =
               List.filter_map
                 current_func_constr_list
-                ~f:(substitute_inter_any_forwards (Identifier ident_ent))
+                ~f:
+                  (substitute_inter_any_forwards (ConstantIdentifier ident_ent))
             in
             input_constr_list_map
             |> SMap.update
@@ -201,9 +207,15 @@ module Inter (I : Intra) = struct
         any_constraint list SMap.t =
       let add_constraints
           (input_constr_map_2 : any_constraint list SMap.t)
-          (ident_ent : identifier_entity) : any_constraint list SMap.t =
+          ((_, class_name_opt, constr_name) as ident_ent :
+            constant_identifier_entity) : any_constraint list SMap.t =
+        let const_ident =
+          match class_name_opt with
+          | Some class_name -> class_name ^ "::" ^ constr_name
+          | None -> constr_name
+        in
         let constr_list_at_const_ent =
-          SMap.find (snd ident_ent) current_constraint_map
+          SMap.find const_ident current_constraint_map
           (* This raises Not_found, if no binding exists. We assume
              that identifiers only refer to existing constants. *)
         in
@@ -236,14 +248,14 @@ module Inter (I : Intra) = struct
         let subset_any_constr =
           Intra
             (I.subsets
-               (I.embed_entity (Identifier ident_ent))
+               (I.embed_entity (ConstantIdentifier ident_ent))
                (I.embed_entity (Constant const_ent)))
         in
         let subset_initial_any_constr =
           Intra
             (I.subsets
                const_initial_ent
-               (I.embed_entity (Identifier ident_ent)))
+               (I.embed_entity (ConstantIdentifier ident_ent)))
         in
         let append_opt = Option.map ~f:(fun x -> subset_any_constr :: x) in
         let append_initial_opt =
@@ -252,9 +264,10 @@ module Inter (I : Intra) = struct
         SMap.update (snd const_ent) append_opt input_constr_map_2
         |> SMap.update f append_initial_opt
       in
-      let only_identifier (constr : any_constraint) : identifier_entity option =
+      let only_identifier (constr : any_constraint) :
+          constant_identifier_entity option =
         match constr with
-        | Inter (Identifier ident_ent) -> Some ident_ent
+        | Inter (ConstantIdentifier ident_ent) -> Some ident_ent
         | _ -> None
       in
       let only_identifier_list =

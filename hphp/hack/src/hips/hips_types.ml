@@ -31,6 +31,7 @@ type 'a inter_constraint_ =
   | ConstantInitial of 'a
   | Identifier of identifier_entity
   | Param of param_entity
+  | ClassExtends of identifier_entity
 [@@deriving ord]
 
 module type Intra = sig

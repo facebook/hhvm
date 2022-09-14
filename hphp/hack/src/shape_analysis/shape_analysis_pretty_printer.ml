@@ -59,6 +59,8 @@ let show_inter_constraint _ = function
     Format.asprintf "Identifier %s" (HT.show_identifier_entity ident)
   | HT.Param param ->
     Format.asprintf "Parameter %s" (HT.show_param_entity param)
+  | HT.ClassExtends ident ->
+    Format.asprintf "Extends %s " (HT.show_identifier_entity ident)
 
 let show_decorated_constraint_general
     ~verbosity

@@ -617,7 +617,8 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
       [(id, callable id tast_env f_params ~return:f_ret f_body)]
-    | A.Class A.{ c_methods; c_name = (_, class_name); c_consts; _ } ->
+    | A.Class A.{ c_methods; c_name = (_, class_name); c_consts; c_extends; _ }
+      ->
       let handle_method
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
@@ -662,7 +663,25 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
         in
         (id, ((env.constraints, env.inter_constraints), env.errors))
       in
-      List.map ~f:handle_method c_methods @ List.map ~f:handle_constant c_consts
+      let handle_extends class_hint =
+        match class_hint with
+        | (pos, A.Happly (class_id_of_extends, _)) ->
+          let extends_constr =
+            {
+              hack_pos = pos;
+              origin = __LINE__;
+              constraint_ = HT.ClassExtends class_id_of_extends;
+            }
+          in
+          let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
+          let env = Env.add_inter_constraint empty_env extends_constr in
+          Some
+            (class_name, ((env.constraints, env.inter_constraints), env.errors))
+        | _ -> None
+      in
+      List.map ~f:handle_method c_methods
+      @ List.map ~f:handle_constant c_consts
+      @ List.filter_map ~f:handle_extends c_extends
     | A.Constant A.{ cst_name; cst_value; cst_type; _ } ->
       let hint_pos = dict_pos_of_hint cst_type in
       let (env, ent) =

@@ -42,6 +42,9 @@ type 'a inter_constraint_ =
       (** Captures function parameter entities, e.g. "$x" and "$y" in "function
         f(int $x, bool $y)". This constraint is used for function call constraint
         substitution, where it interacts with "Arg of param_entity * 'a". *)
+  | ClassExtends of identifier_entity
+      (** Captures single class inheritance, e.g. the position and the name "C" in
+      "class D extends C" *)
 [@@deriving ord]
 
 (** Domain-specific intra-procedural data that can be used to instantiate an

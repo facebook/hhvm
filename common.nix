@@ -25,7 +25,6 @@
 , icu
 , imagemagick6
 , jemalloc
-, lastModifiedDate
 , lib
 , libcap
 , libdwarf
@@ -67,6 +66,7 @@
 , zlib
 , zstd
 }:
+lastModifiedDate:
 let
   versionParts =
     builtins.match

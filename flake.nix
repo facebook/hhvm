@@ -27,9 +27,7 @@
           };
         in
         rec {
-          packages.hhvm = pkgs.callPackage ./hhvm_default.nix {
-            lastModifiedDate = self.lastModifiedDate;
-          };
+          packages.hhvm = pkgs.callPackage ./hhvm_default.nix { } self.lastModifiedDate;
           packages.default = packages.hhvm;
 
           checks.quick = pkgs.runCommand

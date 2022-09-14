@@ -175,42 +175,6 @@ def run_hh_fanout(
     return result
 
 
-def run_hh_fanout_calculate_errors(
-    env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
-) -> Dict[str, object]:
-    args = []
-    args.extend(("--from", "integration-test"))
-    args.extend(("--root", env.root_dir))
-    args.extend(("--detail-level", "high"))
-    args.extend(("--naming-table-path", saved_state_info.naming_table_path))
-    args.extend(("--dep-table-path", saved_state_info.dep_table_path))
-    args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
-    args.extend(("--cursor", cursor))
-
-    result = exec([env.hh_fanout_path, "calculate-errors", *args])  # noqa P204
-    result = json.loads(result)
-    return result
-
-
-def run_hh_fanout_calculate_errors_pretty_print(
-    env: Env, saved_state_info: SavedStateInfo, cursor: Cursor
-) -> str:
-    args = []
-    args.extend(("--from", "integration-test"))
-    args.extend(("--root", env.root_dir))
-    args.extend(("--detail-level", "high"))
-    args.extend(("--naming-table-path", saved_state_info.naming_table_path))
-    args.extend(("--dep-table-path", saved_state_info.dep_table_path))
-    args.extend(("--state-path", os.path.join(env.root_dir, "hh_fanout_state")))
-    args.extend(("--cursor", cursor))
-    args.append("--pretty-print")
-
-    result = exec([env.hh_fanout_path, "calculate-errors", *args])  # noqa P204
-    result = result.replace(env.root_dir, "")
-    result = result.strip()
-    return result
-
-
 def run_hh_fanout_status(env: Env, cursor: Cursor) -> str:
     args = []
     args.extend(("--from", "integration-test"))
@@ -219,17 +183,6 @@ def run_hh_fanout_status(env: Env, cursor: Cursor) -> str:
     args.extend(("--cursor", cursor))
 
     result = exec([env.hh_fanout_path, "status", *args])  # noqa P204
-    result = result.replace(env.root_dir, "")
-    result = result.strip()
-    return result
-
-
-def run_hh_server_check(env: Env) -> str:
-    result = exec(  # noqa P204
-        [env.hh_server_path, "--check", env.root_dir, "--no-load"],
-        # Returns 1 when there's typechecking errors.
-        raise_on_error=False,
-    )
     result = result.replace(env.root_dir, "")
     result = result.strip()
     return result
@@ -269,24 +222,6 @@ def run_fanout_test(
     sanitize_hh_fanout_result(env, result)
     pprint.pprint(result)
     return cursor
-
-
-def run_typecheck_test(
-    env: Env, saved_state_info: SavedStateInfo, work_dir: Path, cursor: Cursor
-) -> None:
-    hh_fanout_result = run_hh_fanout_calculate_errors_pretty_print(
-        env=env, saved_state_info=saved_state_info, cursor=cursor
-    )
-    hh_server_result = run_hh_server_check(env=env)
-    print(hh_fanout_result)
-
-    if hh_fanout_result == hh_server_result:
-        print("(Additionally, hh_fanout errors matched hh_server errors.)")
-    else:
-        nocommit = "\x40nocommit"
-        print(f"{nocommit} -- hh_fanout did NOT match hh_server output!")
-        print("hh_server errors:")
-        print(hh_server_result)
 
 
 def main() -> None:
@@ -373,48 +308,6 @@ def main() -> None:
                     cursor=cursor,
                 )
                 changed_files = []
-
-            # `calculate-errors` calculates the set of typechecking errors in
-            # the codebase and prints it to the test output for comparison
-            # against the `.exp` file.
-            elif command == "calculate-errors":
-                if is_first:
-                    is_first = False
-                else:
-                    print()
-                print(f"Typecheck for change set on line {i + 1}")
-
-                # We require a cursor to calculate errors, but we won't have a
-                # non-`None` one on the first iteration of this loop. Do an
-                # `hh_fanout` query to bring us up to date and to ensure we
-                # have a cursor.
-                assert (
-                    saved_state_info is not None
-                ), f"Must call `generate-saved-state` before `calculate-errors` on line {i + 1}"
-                cursor = cast(
-                    Optional[Cursor],
-                    run_hh_fanout(
-                        env=env,
-                        saved_state_info=saved_state_info,
-                        changed_files=changed_files,
-                        args=[],
-                        cursor=cursor,
-                    )["cursor"],
-                )
-                changed_files = []
-                assert (
-                    cursor is not None
-                ), "Cursor should be available since we queried fanout"
-
-                assert (
-                    saved_state_info is not None
-                ), f"Must call `generate-saved-state` before `calculate-errors` on line {i + 1}"
-                run_typecheck_test(
-                    env=env,
-                    saved_state_info=saved_state_info,
-                    work_dir=work_dir,
-                    cursor=cursor,
-                )
 
             else:
                 raise ValueError(f"Unrecognized test command: {command}")

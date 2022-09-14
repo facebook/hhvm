@@ -3,15 +3,13 @@
 
 import os.path
 import tempfile
-from typing import cast, List, Mapping, Tuple
+from typing import cast, List, Tuple
 
 from hh_fanout_test_driver import (
     Env,
     generate_saved_state,
     Path,
     run_hh_fanout,
-    run_hh_fanout_calculate_errors,
-    run_hh_fanout_status,
     SavedStateInfo,
 )
 from libfb.py.testutil import BaseFacebookTestCase
@@ -78,76 +76,6 @@ function deleted(): void {
             result_files = cast(List[str], result["files"])
             self.assertSetEqual(set(result_files), {file("foo.php")})
 
-    def test_cursor_increases_lexicographically(self) -> None:
-        work_dir: str
-        with tempfile.TemporaryDirectory() as work_dir:
-
-            def file(path: Path) -> Path:
-                return os.path.join(work_dir, path)
-
-            self.write(
-                file("foo.php"),
-                """<?hh
-function foo(): void {}
-""",
-            )
-            self.write(
-                file("bar.php"),
-                """<?hh
-function bar(): void {}
-""",
-            )
-            (env, saved_state_info) = self.set_up_work_dir(work_dir)
-
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[],
-                args=[file("foo.php")],
-                cursor=None,
-            )
-            cursor1 = result.get("cursor")
-            self.assertIsNotNone(cursor1)
-            cursor1 = cast(str, cursor1)
-
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[file("bar.php")],
-                args=[],
-                cursor=cursor1,
-            )
-            cursor2 = result.get("cursor")
-            self.assertIsNotNone(cursor2)
-            cursor2 = cast(str, cursor2)
-            self.assertGreater(cursor2, cursor1)
-
-    def test_invalid_cursor(self) -> None:
-        work_dir: str
-        with tempfile.TemporaryDirectory() as work_dir:
-
-            def file(path: Path) -> Path:
-                return os.path.join(work_dir, path)
-
-            (env, saved_state_info) = self.set_up_work_dir(work_dir)
-            self.write(
-                file("foo.php"),
-                """<?hh
-""",
-            )
-            try:
-                result = run_hh_fanout(
-                    env=env,
-                    saved_state_info=saved_state_info,
-                    changed_files=["foo.php"],
-                    args=["foo.php"],
-                    cursor="nonexistent",
-                )
-                print(result)
-                self.fail("Should have failed to find the cursor ID")
-            except RuntimeError as e:
-                self.assertIn("Cursor with ID nonexistent not found", str(e))
-
     def test_filter_hack_files(self) -> None:
         work_dir: str
         with tempfile.TemporaryDirectory() as work_dir:
@@ -181,118 +109,3 @@ function foo(): void {}
             )
             result_files = cast(List[str], result["files"])
             self.assertEqual(set(result_files), {file("foo.php")})
-
-    def test_calculate_errors(self) -> None:
-        work_dir: str
-        with tempfile.TemporaryDirectory() as work_dir:
-
-            def file(path: Path) -> Path:
-                return os.path.join(work_dir, path)
-
-            (env, saved_state_info) = self.set_up_work_dir(work_dir)
-            self.write(
-                file("foo.php"),
-                """<?hh
-function foo(): void {
-    return 1;
-}
-""",
-            )
-
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[file("foo.php")],
-                args=[file("foo.php")],
-                cursor=None,
-            )
-            cursor1 = cast(str, result["cursor"])
-
-            result = run_hh_fanout_calculate_errors(
-                env=env, saved_state_info=saved_state_info, cursor=cursor1
-            )
-            cursor2 = cast(str, result["cursor"])
-            errors = cast(
-                Mapping[int, Mapping[str, Mapping[int, Mapping[str, str]]]],
-                result["errors"],
-            )
-            self.assertGreater(cursor2, cursor1)
-            self.assertNotEmpty(errors)
-            self.assertIn("You cannot return a value", errors[0]["message"][0]["descr"])
-
-            result = run_hh_fanout_calculate_errors(
-                env=env, saved_state_info=saved_state_info, cursor=cursor2
-            )
-            cursor3 = result["cursor"]
-            self.assertEqual(cursor3, cursor2)
-
-    def test_status(self) -> None:
-        work_dir: str
-        with tempfile.TemporaryDirectory() as work_dir:
-
-            def file(path: Path) -> Path:
-                return os.path.join(work_dir, path)
-
-            # Initial status should have no changed files.
-            (env, saved_state_info) = self.set_up_work_dir(work_dir)
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[],
-                args=[],
-                cursor=None,
-            )
-            cursor = cast(str, result["cursor"])
-            status = run_hh_fanout_status(env=env, cursor=cursor)
-            self.assertEqual(status, "Total files to typecheck: 0")
-
-            # Creating files should add each file as an individual element to
-            # the status, with no fanout other than itself.
-            self.write(
-                file("foo.php"),
-                """<?hh
-function foo(): int {
-    return 1;
-}
-""",
-            )
-            self.write(
-                file("depends_on_foo.php"),
-                """<?hh
-function depends_on_foo(): int {
-    return foo();
-}
-""",
-            )
-            result = run_hh_fanout(
-                env=env,
-                saved_state_info=saved_state_info,
-                changed_files=[file("foo.php"), file("depends_on_foo.php")],
-                args=[],
-                cursor=cursor,
-            )
-            cursor = cast(str, result["cursor"])
-            status = run_hh_fanout_status(env=env, cursor=cursor)
-            self.assertEqual(
-                status,
-                """\
-depends_on_foo.php
-  A \\depends_on_foo (1 file)
-foo.php
-  A \\foo (1 file)
-Total files to typecheck: 2\
-""",
-            )
-
-            # Performing a typecheck should clear out the status, since we no
-            # longer need to re-typecheck any files.
-            result = run_hh_fanout_calculate_errors(
-                env=env, saved_state_info=saved_state_info, cursor=cursor
-            )
-            cursor = cast(str, result["cursor"])
-            status = run_hh_fanout_status(env=env, cursor=cursor)
-            self.assertEqual(status, "Total files to typecheck: 0")
-
-            # It'd be interesting to do another fanout calculation here.
-            # However, the hh_fanout tool doesn't support iterated fanout
-            # calculations, i.e. calculating fanouts after a typecheck.

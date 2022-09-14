@@ -1,8 +1,0 @@
-Typecheck for change set on line 9
-File "/foo.php", line 5, characters 10-10:
-Invalid return type (Typing[4110])
-File "/foo.php", line 4, characters 17-22:
-Expected `string`
-File "/foo.php", line 5, characters 10-10:
-But got `int`
-(Additionally, hh_fanout errors matched hh_server errors.)

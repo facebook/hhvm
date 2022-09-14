@@ -41,16 +41,3 @@ write uses_foo.php
 
 generate-saved-state
 calculate-fanout foo.php
-calculate-errors
-
-write foo.php
-  <?hh
-  class Foo {
-    // Return type now changed -- downstream users may have different
-    // dependencies.
-    public function getSomething(): Baz {
-      throw new Exception('not implemented');
-    }
-  }
-calculate-fanout foo.php
-calculate-errors

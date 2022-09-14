@@ -1482,6 +1482,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "textual",
  "thiserror",
 ]
 
@@ -3479,6 +3480,14 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "ir_core",
+]
+
+[[package]]
+name = "textual"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ir",
 ]
 
 [[package]]

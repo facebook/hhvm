@@ -56,7 +56,6 @@
 , re2
 , re2c
 , rustChannelOf
-, stdenv
 , sqlite
 , tbb
 , tzdata
@@ -99,7 +98,7 @@ let
     channel = "nightly";
   };
 in
-stdenv.mkDerivation rec {
+rec {
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;

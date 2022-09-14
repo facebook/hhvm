@@ -527,6 +527,7 @@ dependencies = [
  "print_expr",
  "profile_rust",
  "rewrite_program",
+ "serde",
  "stack_limit",
  "thiserror",
  "types",
@@ -2443,6 +2444,7 @@ dependencies = [
  "bytecode_printer",
  "hhbc",
  "oxidized",
+ "serde",
 ]
 
 [[package]]

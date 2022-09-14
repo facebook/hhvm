@@ -84,6 +84,12 @@ module Inter (I : Intra) = struct
         ~f:(fun x -> Inter x)
         (substitute_inter_inter_forwards ~inter_constr_1 inter_constr_2)
 
+  let string_of_const_ident_ent
+      ((_, class_name_opt, const_name) : constant_identifier_entity) : string =
+    match class_name_opt with
+    | Some class_name -> class_name ^ "::" ^ const_name
+    | None -> const_name
+
   let substitute
       ~base_constraint_map
       (argument_constraint_map : any_constraint list SMap.t) :
@@ -137,11 +143,7 @@ module Inter (I : Intra) = struct
                  current_func_id
                  (Option.map ~f:(fun x -> x @ constr_list_backwards))
           | ConstantIdentifier ((_, class_name_opt, const_name) as ident_ent) ->
-            let const_ident =
-              match class_name_opt with
-              | Some class_name -> class_name ^ "::" ^ const_name
-              | None -> const_name
-            in
+            let const_ident = string_of_const_ident_ent ident_ent in
             let (constr_list_at, new_const_ident) =
               match SMap.find_opt const_ident base_constraint_map with
               | Some constr_list_at -> (constr_list_at, const_ident)
@@ -239,11 +241,7 @@ module Inter (I : Intra) = struct
           (input_constr_map_2 : any_constraint list SMap.t)
           ((_, class_name_opt, constr_name) as ident_ent :
             constant_identifier_entity) : any_constraint list SMap.t =
-        let const_ident =
-          match class_name_opt with
-          | Some class_name -> class_name ^ "::" ^ constr_name
-          | None -> constr_name
-        in
+        let const_ident = string_of_const_ident_ent ident_ent in
         let constr_list_at_const_ent =
           match SMap.find_opt const_ident current_constraint_map with
           | Some constr_list_at_const_ent -> constr_list_at_const_ent

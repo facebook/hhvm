@@ -871,6 +871,11 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return addresses_;
   }
 
+  const std::string getAddressAsString() const {
+    return getAddress().isInitialized() ? getAddress().describe()
+                                        : std::to_string(port_);
+  }
+
   /**
    * Set the port to listen on.
    */

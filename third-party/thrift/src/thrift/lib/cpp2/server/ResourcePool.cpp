@@ -320,6 +320,10 @@ std::string ResourcePoolSet::describe() const {
   std::string result;
   auto guard = locked_ ? std::unique_lock<std::mutex>()
                        : std::unique_lock<std::mutex>(mutex_);
+  if (resourcePools_.size() == 0) {
+    return "none";
+  }
+
   for (std::size_t i = 0; i < resourcePools_.size(); ++i) {
     if (resourcePools_.at(i)) {
       auto& rp = resourcePools_.at(i);

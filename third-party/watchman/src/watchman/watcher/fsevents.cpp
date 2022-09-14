@@ -205,7 +205,7 @@ void FSEventsWatcher::fse_callback(
             // If we fail, then we allow the UserDropped event to propagate
             // to the consumer thread which has existing logic to schedule
             // a recrawl.
-            std::optional<w_string> failure_reason;
+            w_string failure_reason;
             auto replacement = fse_stream_make(
                 root, watcher, stream->last_good, failure_reason);
 
@@ -214,7 +214,7 @@ void FSEventsWatcher::fse_callback(
                   ERR,
                   "Failed to rebuild fsevent stream ({}) while trying to "
                   "resync, falling back to a regular recrawl\n",
-                  failure_reason ? *failure_reason : w_string{});
+                  failure_reason);
               // Allow the UserDropped event to propagate and trigger a recrawl
               goto propagate;
             }
@@ -305,7 +305,7 @@ std::unique_ptr<FSEventsStream> FSEventsWatcher::fse_stream_make(
     const std::shared_ptr<Root>& root,
     FSEventsWatcher* watcher,
     FSEventStreamEventId since,
-    std::optional<w_string>& failure_reason) {
+    w_string& failure_reason) {
   auto ctx = FSEventStreamContext();
   unique_ref<CFMutableArrayRef> parray;
   unique_ref<CFStringRef> cpath;
@@ -591,7 +591,7 @@ bool FSEventsWatcher::start(const std::shared_ptr<Root>& root) {
     fseCond_.wait(wlock.as_lock());
 
     if (root->failure_reason) {
-      logf(ERR, "failed to start fsevents thread: {}\n", *root->failure_reason);
+      logf(ERR, "failed to start fsevents thread: {}\n", root->failure_reason);
       return false;
     }
 

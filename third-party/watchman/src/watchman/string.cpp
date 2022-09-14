@@ -250,6 +250,8 @@ bool w_string_piece::startsWithCaseInsensitive(w_string_piece prefix) const {
 
 // string
 
+w_string::w_string(std::nullptr_t) {}
+
 w_string::~w_string() {
   if (str_) {
     w_string_delref(str_);

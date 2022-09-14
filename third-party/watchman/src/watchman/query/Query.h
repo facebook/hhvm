@@ -95,7 +95,7 @@ struct Query {
   QueryFieldList fieldList;
 
   std::optional<w_string> request_id;
-  std::optional<w_string> subscriptionName;
+  w_string subscriptionName;
   pid_t clientPid{0};
 
   bool alwaysIncludeDirectories{false};

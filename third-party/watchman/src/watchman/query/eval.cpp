@@ -304,7 +304,7 @@ QueryResult w_query_execute(
             resultClock.scmMergeBase ? resultClock.scmMergeBase->piece()
                                      : w_string_piece{});
         res.savedStateInfo = savedStateResult.savedStateInfo;
-        if (!savedStateResult.commitId.empty()) {
+        if (savedStateResult.commitId) {
           resultClock.savedStateCommitId = savedStateResult.commitId;
           // Modify the mergebase to be the saved state mergebase so we can
           // return changed files since the saved state.

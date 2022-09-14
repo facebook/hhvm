@@ -375,6 +375,10 @@ json_string_t::json_string_t(w_string str)
     : json_t(JSON_STRING), value(std::move(str)) {}
 
 json_ref w_string_to_json(w_string str) {
+  if (!str) {
+    return json_null();
+  }
+
   return json_ref::takeOwnership(new json_string_t(str));
 }
 

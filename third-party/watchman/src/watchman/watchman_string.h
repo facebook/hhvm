@@ -21,6 +21,7 @@
 #include <initializer_list>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -224,16 +225,11 @@ bool w_string_equal_caseless(w_string_piece a, w_string_piece b);
 /**
  * w_string is a reference-counted, immutable, 8-bit string type.
  * It can hold known-unicode text, known-binary data, or a mixture of both.
- * The default-initialized and moved-from w_string values are empty.
+ * The default-initialized and moved-from w_string values are falsey.
  */
 class w_string {
  public:
-  /**
-   * Constructs an empty string.
-   */
-  w_string() = default;
-
-  /* implicit */ w_string(std::nullptr_t) = delete;
+  /* implicit */ w_string(std::nullptr_t = nullptr);
 
   /**
    * Make a new string from some bytes and a type.
@@ -251,12 +247,6 @@ class w_string {
       w_string_type_t stringType = W_STRING_BYTE);
 
   explicit w_string(std::string_view sv) : w_string{sv.data(), sv.size()} {}
-
-  /**
-   * Copy a std::string into a w_string.
-   */
-  explicit w_string(const std::string& str)
-      : w_string{str.data(), str.size()} {}
 
 #ifdef _WIN32
   /** Convert a wide character path to utf-8 and return it as a w_string.
@@ -321,6 +311,10 @@ class w_string {
 
   operator w_string_piece() const noexcept {
     return piece();
+  }
+
+  explicit operator bool() const {
+    return str_ != nullptr;
   }
 
   bool operator==(const w_string& other) const;
@@ -409,25 +403,36 @@ class w_string {
    * normalized to unix slashes */
   w_string normalizeSeparators(char targetSeparator = '/') const;
 
+  void ensureNotNull() const {
+    if (!str_) {
+      throw std::runtime_error("failed assertion w_string::ensureNotNull");
+    }
+  }
+
   /** Returns a pointer to a null terminated c-string. */
   const char* c_str() const {
     return data();
   }
   const char* data() const {
-    return str_ ? str_->buf : nullptr;
+    ensureNotNull();
+    return str_->buf;
   }
 
   bool empty() const {
-    return str_ ? (str_->len == 0) : true;
+    if (str_) {
+      return str_->len == 0;
+    }
+    return true;
   }
 
   size_t size() const {
-    return str_ ? str_->len : 0;
+    ensureNotNull();
+    return str_->len;
   }
 
   w_string_type_t type() const {
-    // Empty strings are known unicode.
-    return str_ ? str_->type : W_STRING_UNICODE;
+    ensureNotNull();
+    return str_->type;
   }
 
   /** Returns the directory component of the string, assuming a path string */
@@ -438,7 +443,7 @@ class w_string {
   std::optional<w_string> asLowerCaseSuffix() const;
 
  private:
-  w_string_t* str_ = nullptr;
+  w_string_t* str_{nullptr};
 };
 
 /** Allow w_string to act as a key in unordered_(map|set) */

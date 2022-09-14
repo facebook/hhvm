@@ -169,7 +169,7 @@ w_string Mercurial::mergeBaseWith(
                 makeHgOptions(requestId),
                 "query for the merge base");
 
-            if (result.output.empty()) {
+            if (!result.output) {
               SCMError::throwf(
                   "no output was returned from `hg log -T{{node}} -r {}",
                   revset);

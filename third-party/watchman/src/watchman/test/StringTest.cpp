@@ -79,9 +79,8 @@ TEST(String, strings) {
     EXPECT_TRUE(defaultStr.empty())
         << "default constructed string should be empty";
 
-    w_string movedFrom{"hello"};
-    w_string{std::move(movedFrom)};
-    EXPECT_TRUE(movedFrom.empty()) << "moved-from string should be empty";
+    w_string nullStr(nullptr);
+    EXPECT_TRUE(nullStr.empty()) << "nullptr string should be empty";
 
     EXPECT_TRUE(w_string_piece().empty())
         << "default constructed string piece shouldbe empty";
@@ -129,7 +128,8 @@ TEST(String, canon_path) {
 }
 
 TEST(String, concat) {
-  auto str = w_string::build("one", 2, "three", 1.2, false, w_string_piece{});
+  auto str =
+      w_string::build("one", 2, "three", 1.2, false, w_string(nullptr).view());
   EXPECT_EQ(str, w_string("one2three1.2false"));
 }
 
@@ -369,6 +369,10 @@ TEST(String, split) {
         << "split as 0 elements, got " << result.size();
 
     w_string_piece(w_string()).split(result, ':');
+    EXPECT_TRUE(result.size() == 0)
+        << "split as 0 elements, got " << result.size();
+
+    w_string_piece(w_string(nullptr)).split(result, ':');
     EXPECT_TRUE(result.size() == 0)
         << "split as 0 elements, got " << result.size();
   }

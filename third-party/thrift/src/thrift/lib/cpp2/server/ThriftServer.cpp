@@ -840,7 +840,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
         }
       }
     } else {
-      if (!THRIFT_FLAG(allow_resource_pools_for_wildcards)) {
+      if (!THRIFT_FLAG(allow_resource_pools_for_wildcards) &&
+          !FLAGS_thrift_allow_resource_pools_for_wildcards) {
         LOG(INFO) << "Resource pools disabled. Wildcard methods";
         runtimeServerActions_.wildcardMethods = true;
         runtimeDisableResourcePoolsDeprecated();

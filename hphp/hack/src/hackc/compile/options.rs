@@ -43,23 +43,12 @@ impl Default for CompilerFlags {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Hhvm {
     pub aliased_namespaces: BTreeMap<String, String>,
     pub include_roots: BTreeMap<BString, BString>,
-    pub emit_class_pointers: String,
+    pub emit_class_pointers: i32,
     pub hack_lang: HackLang,
-}
-
-impl Default for Hhvm {
-    fn default() -> Self {
-        Self {
-            aliased_namespaces: Default::default(),
-            include_roots: Default::default(),
-            emit_class_pointers: "0".into(),
-            hack_lang: Default::default(),
-        }
-    }
 }
 
 impl Hhvm {
@@ -73,7 +62,7 @@ impl Hhvm {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct HackLang {
     pub flags: LangFlags,
-    pub check_int_overflow: String,
+    pub check_int_overflow: i32,
 }
 
 prefixed_flags!(
@@ -204,15 +193,11 @@ impl Options {
     }
 
     pub fn check_int_overflow(&self) -> bool {
-        self.hhvm
-            .hack_lang
-            .check_int_overflow
-            .parse::<i32>()
-            .map_or(false, |x| x.is_positive())
+        self.hhvm.hack_lang.check_int_overflow > 0
     }
 
     pub fn emit_class_pointers(&self) -> i32 {
-        self.hhvm.emit_class_pointers.parse::<i32>().unwrap()
+        self.hhvm.emit_class_pointers
     }
 }
 

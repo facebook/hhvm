@@ -260,10 +260,10 @@ impl NativeEnv {
             hhvm: Hhvm {
                 aliased_namespaces: self.aliased_namespaces.clone(),
                 include_roots: self.include_roots.clone(),
-                emit_class_pointers: self.emit_class_pointers.to_string(),
+                emit_class_pointers: self.emit_class_pointers,
                 hack_lang: HackLang {
                     flags: self.parser_flags.to_lang_flags(),
-                    check_int_overflow: self.check_int_overflow.to_string(),
+                    check_int_overflow: self.check_int_overflow,
                 },
             },
             hhbc: self.hhbc_flags.clone(),

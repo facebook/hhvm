@@ -8,6 +8,7 @@ mod crc;
 mod decls;
 mod expr_trees;
 mod facts;
+mod infer;
 mod parse;
 mod profile;
 mod util;
@@ -124,6 +125,9 @@ enum Command {
 
     /// Compute JSON facts for a set of Hack source files.
     Facts(facts::Opts),
+
+    /// Emit Infer SIL.
+    CompileInfer(infer::Opts),
 
     /// Render the source text parse tree for each given file.
     Parse(parse::Opts),
@@ -262,6 +266,7 @@ fn main() -> Result<()> {
         Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::BinaryDecls(decls_opts)) => decls::binary_decls(opts, decls_opts),
         Some(Command::JsonDecls(decls_opts)) => decls::json_decls(opts, decls_opts),
+        Some(Command::CompileInfer(opts)) => infer::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),

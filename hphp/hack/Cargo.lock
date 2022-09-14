@@ -1458,6 +1458,7 @@ dependencies = [
  "hhbc",
  "hhvm_options",
  "hhvm_types_ffi",
+ "ir",
  "ir_to_bc",
  "itertools 0.10.3",
  "jwalk",

@@ -519,7 +519,6 @@ dependencies = [
  "env",
  "error",
  "hhbc",
- "hhvm_options",
  "ir",
  "ir_to_bc",
  "ocamlrep",
@@ -2439,7 +2438,6 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "bstr",
  "bumpalo",
  "bytecode_printer",

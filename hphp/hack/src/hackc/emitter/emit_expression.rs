@@ -60,7 +60,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::LangFlags;
 use options::Options;
 use oxidized::aast;
 use oxidized::aast_defs;
@@ -2551,12 +2550,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
     use ast::Expr_;
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
-    let fun_and_clsmeth_disabled = e
-        .options()
-        .hhvm
-        .hack_lang
-        .flags
-        .contains(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
+    let fun_and_clsmeth_disabled =
+        (e.options().hhvm.hack_lang.flags).po_disallow_fun_and_cls_meth_pseudo_funcs;
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()

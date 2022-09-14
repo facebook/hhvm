@@ -16,7 +16,6 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use compile::EnvFlags;
-use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
 use direct_decl_parser::DeclParserOptions;
@@ -25,6 +24,7 @@ use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::Unit;
 use options::HhbcFlags;
+use options::ParserOptions;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
@@ -252,22 +252,24 @@ impl compile_ffi::NativeEnv {
                 fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
                 ..Default::default()
             },
-            parser_flags: ParserFlags {
-                abstract_static_props: self.parser_flags.abstract_static_props,
-                allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
-                allow_unstable_features: self.parser_flags.allow_unstable_features,
-                const_default_func_args: self.parser_flags.const_default_func_args,
-                const_static_props: self.parser_flags.const_static_props,
-                disable_lval_as_an_expression: self.parser_flags.disable_lval_as_an_expression,
-                disallow_inst_meth: self.parser_flags.disallow_inst_meth,
-                disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
-                disallow_fun_and_cls_meth_pseudo_funcs: self
+            parser_options: ParserOptions {
+                po_abstract_static_props: self.parser_flags.abstract_static_props,
+                po_allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
+                po_allow_unstable_features: self.parser_flags.allow_unstable_features,
+                po_const_default_func_args: self.parser_flags.const_default_func_args,
+                tco_const_static_props: self.parser_flags.const_static_props,
+                po_disable_lval_as_an_expression: self.parser_flags.disable_lval_as_an_expression,
+                po_disallow_inst_meth: self.parser_flags.disallow_inst_meth,
+                po_disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
+                po_disallow_fun_and_cls_meth_pseudo_funcs: self
                     .parser_flags
                     .disallow_fun_and_cls_meth_pseudo_funcs,
-                disallow_func_ptrs_in_constants: self.parser_flags.disallow_func_ptrs_in_constants,
-                enable_enum_classes: self.parser_flags.enable_enum_classes,
-                enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
-                enable_class_level_where_clauses: self
+                po_disallow_func_ptrs_in_constants: self
+                    .parser_flags
+                    .disallow_func_ptrs_in_constants,
+                po_enable_enum_classes: self.parser_flags.enable_enum_classes,
+                po_enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
+                po_enable_class_level_where_clauses: self
                     .parser_flags
                     .enable_class_level_where_clauses,
                 ..Default::default()

@@ -16,7 +16,6 @@ use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
 use compile::NativeEnv;
-use compile::ParserFlags;
 use compile::Profile;
 use decl_provider::DeclProvider;
 use decl_provider::Error;
@@ -25,6 +24,7 @@ use direct_decl_parser::Decls;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use options::HhbcFlags;
+use options::ParserOptions;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -128,8 +128,8 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Nativ
             log_extern_compiler_perf: true,
             ..Default::default()
         },
-        parser_flags: ParserFlags {
-            enable_enum_classes: true,
+        parser_options: ParserOptions {
+            po_enable_enum_classes: true,
             ..Default::default()
         },
         flags: opts.env_flags.clone(),

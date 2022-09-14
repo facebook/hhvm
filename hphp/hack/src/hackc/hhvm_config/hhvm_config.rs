@@ -6,6 +6,7 @@
 use anyhow::Result;
 use hhvm_options::HhvmConfig;
 use options::HhbcFlags;
+use options::ParserOptions;
 
 /**!
 These helper functions are best-effort utilities for CLI tools like hackc
@@ -16,7 +17,7 @@ files are turned into hackc/compile::NativeEnv (and its embedded options)
 see hphp/runtime/base/config.{cpp,h} and runtime_option.{cpp,h}
 */
 
-pub fn init_hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
+pub fn hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
     let mut flags = HhbcFlags::default();
     // Use the config setting if provided; otherwise preserve existing value.
     let init = |flag: &mut bool, name: &str| -> Result<()> {
@@ -63,5 +64,92 @@ pub fn init_hhbc_flags(config: &HhvmConfig) -> Result<HhbcFlags> {
 
     // Only hdf version
     flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
+    Ok(flags)
+}
+
+pub fn parser_options(config: &HhvmConfig) -> Result<ParserOptions> {
+    let mut flags = ParserOptions::default();
+
+    // Use the config setting if provided; otherwise preserve default.
+    let init = |flag: &mut bool, name: &str| -> Result<()> {
+        match config.get_bool(name)? {
+            Some(b) => Ok(*flag = b),
+            None => Ok(()),
+        }
+    };
+
+    // Note: Could only find examples of Hack.Lang.AbstractStaticProps
+    init(
+        &mut flags.po_abstract_static_props,
+        "Hack.Lang.AbstractStaticProps",
+    )?;
+
+    // TODO: I'm pretty sure allow_new_attribute_syntax is dead and we can kill this option
+    init(
+        &mut flags.po_allow_new_attribute_syntax,
+        "hack.lang.allow_new_attribute_syntax",
+    )?;
+
+    // Both hdf and ini versions are being used
+    init(
+        &mut flags.po_allow_unstable_features,
+        "Hack.Lang.AllowUnstableFeatures",
+    )?;
+
+    // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
+    init(
+        &mut flags.po_const_default_func_args,
+        "Hack.Lang.ConstDefaultFuncArgs",
+    )?;
+
+    // Only hdf version found in use
+    init(
+        &mut flags.tco_const_static_props,
+        "Hack.Lang.ConstStaticProps",
+    )?;
+
+    // TODO: Kill disable_lval_as_an_expression
+
+    // Only hdf option in use
+    init(
+        &mut flags.po_disallow_inst_meth,
+        "Hack.Lang.DisallowInstMeth",
+    )?;
+
+    // Both ini and hdf variants in use
+    init(
+        &mut flags.po_disable_xhp_element_mangling,
+        "Hack.Lang.DisableXHPElementMangling",
+    )?;
+
+    // Both ini and hdf variants in use
+    init(
+        &mut flags.po_disallow_fun_and_cls_meth_pseudo_funcs,
+        "Hack.Lang.DisallowFunAndClsMethPseudoFuncs",
+    )?;
+
+    // Only hdf option in use
+    init(
+        &mut flags.po_disallow_func_ptrs_in_constants,
+        "Hack.Lang.DisallowFuncPtrsInConstants",
+    )?;
+
+    // Only hdf option in use
+    init(
+        &mut flags.po_enable_enum_classes,
+        "Hack.Lang.EnableEnumClasses",
+    )?;
+
+    // Both options in use
+    init(
+        &mut flags.po_enable_xhp_class_modifier,
+        "Hack.Lang.EnableXHPClassModifier",
+    )?;
+
+    // Only hdf option in use. Kill variant in options_cli.rs
+    init(
+        &mut flags.po_enable_class_level_where_clauses,
+        "Hack.Lang.EnableClassLevelWhereClauses",
+    )?;
     Ok(flags)
 }

@@ -9,22 +9,11 @@ use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 use std::path::PathBuf;
 
-use bitflags::bitflags;
 use bstr::BString;
 use bstr::ByteSlice;
 use hhbc::IncludePath;
+pub use oxidized::parser_options::ParserOptions;
 use oxidized::relative_path::RelativePath;
-
-macro_rules! prefixed_flags {
-    ($class:ident, $($field:ident),*,) => { // require trailing comma
-        bitflags! {
-            pub struct $class: u64 {
-                // TODO(leoo) expand RHS this into 1 << i, using equivalent of C++ index_sequence
-                $( const $field = Flags::$field.bits(); )*
-            }
-        }
-    }
-}
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CompilerFlags {
@@ -61,34 +50,8 @@ impl Hhvm {
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct HackLang {
-    pub flags: LangFlags,
+    pub flags: ParserOptions,
     pub check_int_overflow: i32,
-}
-
-prefixed_flags!(
-    LangFlags,
-    ABSTRACT_STATIC_PROPS,
-    ALLOW_NEW_ATTRIBUTE_SYNTAX,
-    ALLOW_UNSTABLE_FEATURES,
-    CONST_DEFAULT_FUNC_ARGS,
-    CONST_DEFAULT_LAMBDA_ARGS,
-    CONST_STATIC_PROPS,
-    DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
-    DISABLE_LEGACY_SOFT_TYPEHINTS,
-    DISABLE_LVAL_AS_AN_EXPRESSION,
-    DISABLE_XHP_ELEMENT_MANGLING,
-    DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
-    DISALLOW_INST_METH,
-    DISALLOW_FUNC_PTRS_IN_CONSTANTS,
-    ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
-    ENABLE_ENUM_CLASSES,
-    ENABLE_XHP_CLASS_MODIFIER,
-    RUST_EMITTER,
-);
-impl Default for LangFlags {
-    fn default() -> LangFlags {
-        LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS | LangFlags::ENABLE_ENUM_CLASSES
-    }
 }
 
 #[derive(Clone, Default, PartialEq, Debug)]
@@ -120,7 +83,6 @@ impl Default for Options {
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
             server: Server::default(),
-            // the rest is zeroed out (cannot do ..Default::default() as it'd be recursive)
             doc_root: "".into(),
         }
     }
@@ -233,63 +195,5 @@ impl Default for HhbcFlags {
             array_provenance: false,
             fold_lazy_class_keys: true,
         }
-    }
-}
-
-// boilerplate code that could eventually be avoided via procedural macros
-
-bitflags! {
-    struct Flags: u64 {
-        const CONSTANT_FOLDING = 1 << 0;
-        const OPTIMIZE_NULL_CHECKS = 1 << 1;
-        // No longer using bit 2.
-        const UVS = 1 << 3;
-        const LTR_ASSIGN = 1 << 4;
-        /// If true, then renumber labels after generating code for a method
-        /// body. Semantic diff doesn't care about labels, but for visual diff against
-        /// HHVM it's helpful to renumber in order that the labels match more closely
-        const RELABEL = 1 << 5;
-        // No longer using bit 6.
-        // No longer using bit 7.
-        // No longer using bit 8.
-        const AUTHORITATIVE = 1 << 9;
-        const JIT_ENABLE_RENAME_FUNCTION = 1 << 10;
-        // No longer using bits 11-13.
-        const LOG_EXTERN_COMPILER_PERF = 1 << 14;
-        const ENABLE_INTRINSICS_EXTENSION = 1 << 15;
-        // No longer using bits 16-22.
-        // No longer using bits 23-25.
-        const EMIT_CLS_METH_POINTERS = 1 << 26;
-        // No longer using bit 27.
-        const EMIT_METH_CALLER_FUNC_POINTERS = 1 << 28;
-        // No longer using bit 29.
-        const DISABLE_LVAL_AS_AN_EXPRESSION = 1 << 30;
-        // No longer using bits 31-32.
-        const ARRAY_PROVENANCE = 1 << 33;
-        // No longer using bit 34.
-        const ENABLE_CLASS_LEVEL_WHERE_CLAUSES = 1 << 35;
-        const DISABLE_LEGACY_SOFT_TYPEHINTS = 1 << 36;
-        const ALLOW_NEW_ATTRIBUTE_SYNTAX = 1 << 37;
-        const DISABLE_LEGACY_ATTRIBUTE_SYNTAX = 1 << 38;
-        const CONST_DEFAULT_FUNC_ARGS = 1 << 39;
-        const CONST_STATIC_PROPS = 1 << 40;
-        const ABSTRACT_STATIC_PROPS = 1 << 41;
-        // No longer using bit 42
-        const DISALLOW_FUNC_PTRS_IN_CONSTANTS = 1 << 43;
-        // No longer using bit 44.
-        const CONST_DEFAULT_LAMBDA_ARGS = 1 << 45;
-        const ENABLE_XHP_CLASS_MODIFIER = 1 << 46;
-        // No longer using bit 47.
-        const ENABLE_ENUM_CLASSES = 1 << 48;
-        const DISABLE_XHP_ELEMENT_MANGLING = 1 << 49;
-        // No longer using bit 50.
-        const RUST_EMITTER = 1 << 51;
-        // No longer using bits 52-54.
-        const ALLOW_UNSTABLE_FEATURES = 1 << 55;
-        // No longer using bit 56.
-        const DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS = 1 << 57;
-        const FOLD_LAZY_CLASS_KEYS = 1 << 58;
-        // No longer using bit 59.
-        const DISALLOW_INST_METH = 1 << 60;
     }
 }

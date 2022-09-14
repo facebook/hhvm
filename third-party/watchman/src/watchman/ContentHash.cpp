@@ -8,10 +8,10 @@
 #include "watchman/ContentHash.h"
 #include <folly/ScopeGuard.h>
 #include <string>
-#include "watchman/Hash.h"
 #include "watchman/Logging.h"
 #include "watchman/ThreadPool.h"
 #include "watchman/fs/FileSystem.h"
+#include "watchman/watchman_hash.h"
 #include "watchman/watchman_stream.h"
 
 #ifdef __APPLE__
@@ -37,11 +37,9 @@ bool ContentHashCacheKey::operator==(const ContentHashCacheKey& other) const {
 }
 
 std::size_t ContentHashCacheKey::hashValue() const {
-  return hash_combine(
-      {relativePath.hashValue(),
-       fileSize,
-       static_cast<uint64_t>(mtime.tv_sec),
-       static_cast<uint64_t>(mtime.tv_nsec)});
+  return hash_128_to_64(
+      w_string_hval(relativePath.ptr()),
+      hash_128_to_64(fileSize, hash_128_to_64(mtime.tv_sec, mtime.tv_nsec)));
 }
 
 ContentHashCache::ContentHashCache(

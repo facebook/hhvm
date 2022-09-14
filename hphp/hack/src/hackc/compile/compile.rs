@@ -24,19 +24,13 @@ use error::Error;
 use error::ErrorKind;
 use hhbc::FatalOp;
 use hhbc::Unit;
-use hhvm_options::HhvmConfig;
 use ocamlrep::rc::RcOc;
-use options::Arg;
-use options::HackLang;
+use options::HhbcFlags;
 use options::Hhvm;
-use options::HhvmFlags;
-use options::LangFlags;
 use options::Options;
-use options::Php7Flags;
-use options::RepoFlags;
+use options::ParserOptions;
 use oxidized::ast;
 use oxidized::namespace_env::Env as NamespaceEnv;
-use oxidized::parser_options::ParserOptions;
 use oxidized::pos::Pos;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
@@ -51,12 +45,8 @@ use types::readonly_nonlocal_infer;
 #[derive(Debug)]
 pub struct NativeEnv {
     pub filepath: RelativePath,
-    pub aliased_namespaces: String,
-    pub include_roots: String,
-    pub emit_class_pointers: i32,
-    pub check_int_overflow: i32,
+    pub hhvm: Hhvm,
     pub hhbc_flags: HhbcFlags,
-    pub parser_flags: ParserFlags,
     pub flags: EnvFlags,
 }
 
@@ -64,12 +54,8 @@ impl Default for NativeEnv {
     fn default() -> Self {
         Self {
             filepath: RelativePath::make(Prefix::Dummy, Default::default()),
-            aliased_namespaces: "".into(),
-            include_roots: "".into(),
-            emit_class_pointers: 0,
-            check_int_overflow: 0,
+            hhvm: Default::default(),
             hhbc_flags: HhbcFlags::default(),
-            parser_flags: ParserFlags::default(),
             flags: EnvFlags::default(),
         }
     }
@@ -98,311 +84,17 @@ pub struct EnvFlags {
     pub enable_ir: bool,
 }
 
-#[derive(Debug, Default, Clone, clap::Parser)]
-pub struct HhbcFlags {
-    /// PHP7 left-to-right assignment semantics
-    #[clap(long)]
-    pub ltr_assign: bool,
-
-    /// PHP7 Uniform Variable Syntax
-    #[clap(long)]
-    pub uvs: bool,
-
-    #[clap(long)]
-    pub repo_authoritative: bool,
-    #[clap(long)]
-    pub jit_enable_rename_function: bool,
-    #[clap(long)]
-    pub log_extern_compiler_perf: bool,
-    #[clap(long)]
-    pub enable_intrinsics_extension: bool,
-    #[clap(long)]
-    pub emit_cls_meth_pointers: bool,
-    #[clap(long)]
-    pub emit_meth_caller_func_pointers: bool,
-    #[clap(long)]
-    pub array_provenance: bool,
-    #[clap(long)]
-    pub fold_lazy_class_keys: bool,
-}
-
-#[derive(Debug, Default, Clone, clap::Parser)]
-pub struct ParserFlags {
-    #[clap(long)]
-    pub abstract_static_props: bool,
-    #[clap(long)]
-    pub allow_new_attribute_syntax: bool,
-    #[clap(long)]
-    pub allow_unstable_features: bool,
-    #[clap(long)]
-    pub const_default_func_args: bool,
-    #[clap(long)]
-    pub const_static_props: bool,
-    #[clap(long)]
-    pub disable_lval_as_an_expression: bool,
-    #[clap(long)]
-    pub disallow_inst_meth: bool,
-    #[clap(long)]
-    pub disable_xhp_element_mangling: bool,
-    #[clap(long)]
-    pub disallow_fun_and_cls_meth_pseudo_funcs: bool,
-    #[clap(long)]
-    pub disallow_func_ptrs_in_constants: bool,
-    #[clap(long)]
-    pub enable_enum_classes: bool,
-    #[clap(long)]
-    pub enable_xhp_class_modifier: bool,
-    #[clap(long)]
-    pub enable_class_level_where_clauses: bool,
-}
-
-impl HhbcFlags {
-    pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
-        let mut flags = Self::default();
-
-        // Use the config setting if provided; otherwise preserve default.
-        let init = |flag: &mut bool, name: &str| -> Result<()> {
-            match config.get_bool(name)? {
-                Some(b) => Ok(*flag = b),
-                None => Ok(()),
-            }
-        };
-
-        init(&mut flags.ltr_assign, "php7.ltr_assign")?;
-        init(&mut flags.uvs, "php7.uvs")?;
-        init(&mut flags.repo_authoritative, "Repo.Authoritative")?;
-        init(
-            &mut flags.jit_enable_rename_function,
-            "Eval.JitEnableRenameFunction",
-        )?;
-        init(
-            &mut flags.jit_enable_rename_function,
-            "JitEnableRenameFunction",
-        )?;
-        init(
-            &mut flags.log_extern_compiler_perf,
-            "Eval.LogExternCompilerPerf",
-        )?;
-        init(
-            &mut flags.enable_intrinsics_extension,
-            "Eval.EnableIntrinsicsExtension",
-        )?;
-        init(
-            &mut flags.emit_cls_meth_pointers,
-            "Eval.EmitClsMethPointers",
-        )?;
-
-        // Only the hdf versions used. Can kill variant in options_cli.rs
-        flags.emit_meth_caller_func_pointers = config
-            .get_bool("Eval.EmitMethCallerFuncPointers")?
-            .unwrap_or(true);
-
-        // ini might use hhvm.array_provenance
-        // hdf might use Eval.ArrayProvenance
-        // But super unclear here
-        init(&mut flags.array_provenance, "Eval.ArrayProvenance")?;
-        init(&mut flags.array_provenance, "array_provenance")?;
-
-        // Only hdf version
-        flags.fold_lazy_class_keys = config.get_bool("Eval.FoldLazyClassKeys")?.unwrap_or(true);
-        Ok(flags)
-    }
-
-    fn to_php7_flags(&self) -> Php7Flags {
-        let mut f = Php7Flags::empty();
-        if self.uvs {
-            f |= Php7Flags::UVS;
-        }
-        if self.ltr_assign {
-            f |= Php7Flags::LTR_ASSIGN;
-        }
-        f
-    }
-
-    fn to_hhvm_flags(&self) -> HhvmFlags {
-        let mut f = HhvmFlags::empty();
-        if self.array_provenance {
-            f |= HhvmFlags::ARRAY_PROVENANCE;
-        }
-        if self.emit_cls_meth_pointers {
-            f |= HhvmFlags::EMIT_CLS_METH_POINTERS;
-        }
-        if self.emit_meth_caller_func_pointers {
-            f |= HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS;
-        }
-        if self.enable_intrinsics_extension {
-            f |= HhvmFlags::ENABLE_INTRINSICS_EXTENSION;
-        }
-        if self.fold_lazy_class_keys {
-            f |= HhvmFlags::FOLD_LAZY_CLASS_KEYS;
-        }
-        if self.jit_enable_rename_function {
-            f |= HhvmFlags::JIT_ENABLE_RENAME_FUNCTION;
-        }
-        if self.log_extern_compiler_perf {
-            f |= HhvmFlags::LOG_EXTERN_COMPILER_PERF;
-        }
-        f
-    }
-
-    fn to_repo_flags(&self) -> RepoFlags {
-        let mut f = RepoFlags::empty();
-        if self.repo_authoritative {
-            f |= RepoFlags::AUTHORITATIVE;
-        }
-        f
-    }
-}
-
-impl ParserFlags {
-    pub fn from_hhvm_config(config: &HhvmConfig) -> Result<Self> {
-        let mut flags = Self::default();
-
-        // Use the config setting if provided; otherwise preserve default.
-        let init = |flag: &mut bool, name: &str| -> Result<()> {
-            match config.get_bool(name)? {
-                Some(b) => Ok(*flag = b),
-                None => Ok(()),
-            }
-        };
-
-        // Note: Could only find examples of Hack.Lang.AbstractStaticProps
-        init(
-            &mut flags.abstract_static_props,
-            "Hack.Lang.AbstractStaticProps",
-        )?;
-
-        // TODO: I'm pretty sure allow_new_attribute_syntax is dead and we can kill this option
-        init(
-            &mut flags.allow_new_attribute_syntax,
-            "hack.lang.allow_new_attribute_syntax",
-        )?;
-
-        // Both hdf and ini versions are being used
-        init(
-            &mut flags.allow_unstable_features,
-            "Hack.Lang.AllowUnstableFeatures",
-        )?;
-
-        // TODO: could not find examples of const_default_func_args, kill it in options_cli.rs
-        init(
-            &mut flags.const_default_func_args,
-            "Hack.Lang.ConstDefaultFuncArgs",
-        )?;
-
-        // Only hdf version found in use
-        init(&mut flags.const_static_props, "Hack.Lang.ConstStaticProps")?;
-
-        // TODO: Kill disable_lval_as_an_expression
-
-        // Only hdf option in use
-        init(&mut flags.disallow_inst_meth, "Hack.Lang.DisallowInstMeth")?;
-
-        // Both ini and hdf variants in use
-        init(
-            &mut flags.disable_xhp_element_mangling,
-            "Hack.Lang.DisableXHPElementMangling",
-        )?;
-
-        // Both ini and hdf variants in use
-        init(
-            &mut flags.disallow_fun_and_cls_meth_pseudo_funcs,
-            "Hack.Lang.DisallowFunAndClsMethPseudoFuncs",
-        )?;
-
-        // Only hdf option in use
-        init(
-            &mut flags.disallow_func_ptrs_in_constants,
-            "Hack.Lang.DisallowFuncPtrsInConstants",
-        )?;
-
-        // Only hdf option in use
-        init(
-            &mut flags.enable_enum_classes,
-            "Hack.Lang.EnableEnumClasses",
-        )?;
-
-        // Both options in use
-        init(
-            &mut flags.enable_xhp_class_modifier,
-            "Hack.Lang.EnableXHPClassModifier",
-        )?;
-
-        // Only hdf option in use. Kill variant in options_cli.rs
-        init(
-            &mut flags.enable_class_level_where_clauses,
-            "Hack.Lang.EnableClassLevelWhereClauses",
-        )?;
-        Ok(flags)
-    }
-
-    fn to_lang_flags(&self) -> LangFlags {
-        let mut f = LangFlags::empty();
-        if self.abstract_static_props {
-            f |= LangFlags::ABSTRACT_STATIC_PROPS;
-        }
-        if self.allow_new_attribute_syntax {
-            f |= LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX;
-        }
-        if self.allow_unstable_features {
-            f |= LangFlags::ALLOW_UNSTABLE_FEATURES;
-        }
-        if self.const_default_func_args {
-            f |= LangFlags::CONST_DEFAULT_FUNC_ARGS;
-        }
-        if self.const_static_props {
-            f |= LangFlags::CONST_STATIC_PROPS;
-        }
-        if self.disable_lval_as_an_expression {
-            f |= LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION;
-        }
-        if self.disallow_inst_meth {
-            f |= LangFlags::DISALLOW_INST_METH;
-        }
-        if self.disable_xhp_element_mangling {
-            f |= LangFlags::DISABLE_XHP_ELEMENT_MANGLING;
-        }
-        if self.disallow_fun_and_cls_meth_pseudo_funcs {
-            f |= LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS;
-        }
-        if self.disallow_func_ptrs_in_constants {
-            f |= LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS;
-        }
-        if self.enable_enum_classes {
-            f |= LangFlags::ENABLE_ENUM_CLASSES;
-        }
-        if self.enable_xhp_class_modifier {
-            f |= LangFlags::ENABLE_XHP_CLASS_MODIFIER;
-        }
-        if self.enable_class_level_where_clauses {
-            f |= LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES;
-        }
-        f
-    }
-}
-
 impl NativeEnv {
-    fn to_options(native_env: &NativeEnv) -> Options {
-        let hhbc_flags = &native_env.hhbc_flags;
-        let config = [
-            native_env.aliased_namespaces.as_str(),
-            native_env.include_roots.as_str(),
-        ];
-        let opts = Options::from_configs(&config).unwrap();
-        let hhvm = Hhvm {
-            aliased_namespaces: opts.hhvm.aliased_namespaces,
-            include_roots: opts.hhvm.include_roots,
-            flags: hhbc_flags.to_hhvm_flags(),
-            emit_class_pointers: Arg::new(native_env.emit_class_pointers.to_string()),
-            hack_lang: HackLang {
-                flags: native_env.parser_flags.to_lang_flags(),
-                check_int_overflow: Arg::new(native_env.check_int_overflow.to_string()),
-            },
-        };
+    fn to_options(&self) -> Options {
         Options {
-            hhvm,
-            php7_flags: hhbc_flags.to_php7_flags(),
-            repo_flags: hhbc_flags.to_repo_flags(),
+            hhvm: Hhvm {
+                parser_options: ParserOptions {
+                    po_disable_legacy_soft_typehints: false,
+                    ..self.hhvm.parser_options.clone()
+                },
+                ..self.hhvm.clone()
+            },
+            hhbc: self.hhbc_flags.clone(),
             ..Default::default()
         }
     }
@@ -614,9 +306,8 @@ fn emit_unit_from_text<'arena, 'decl>(
         emitter
             .options()
             .hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+            .parser_options
+            .po_disable_xhp_element_mangling,
     ));
 
     let parse_result = parse_file(
@@ -675,37 +366,11 @@ fn create_emitter<'arena, 'decl>(
 }
 
 fn create_parser_options(opts: &Options, type_directed: bool) -> ParserOptions {
-    let hack_lang_flags = |flag| opts.hhvm.hack_lang.flags.contains(flag);
     ParserOptions {
-        po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
         po_codegen: true,
         po_disallow_silence: false,
-        po_disable_lval_as_an_expression: hack_lang_flags(LangFlags::DISABLE_LVAL_AS_AN_EXPRESSION),
-        po_enable_class_level_where_clauses: hack_lang_flags(
-            LangFlags::ENABLE_CLASS_LEVEL_WHERE_CLAUSES,
-        ),
-        po_disable_legacy_soft_typehints: hack_lang_flags(LangFlags::DISABLE_LEGACY_SOFT_TYPEHINTS),
-        po_allow_new_attribute_syntax: hack_lang_flags(LangFlags::ALLOW_NEW_ATTRIBUTE_SYNTAX),
-        po_disable_legacy_attribute_syntax: hack_lang_flags(
-            LangFlags::DISABLE_LEGACY_ATTRIBUTE_SYNTAX,
-        ),
-        po_const_default_func_args: hack_lang_flags(LangFlags::CONST_DEFAULT_FUNC_ARGS),
-        po_const_default_lambda_args: hack_lang_flags(LangFlags::CONST_DEFAULT_LAMBDA_ARGS),
-        tco_const_static_props: hack_lang_flags(LangFlags::CONST_STATIC_PROPS),
-        po_abstract_static_props: hack_lang_flags(LangFlags::ABSTRACT_STATIC_PROPS),
-        po_disallow_func_ptrs_in_constants: hack_lang_flags(
-            LangFlags::DISALLOW_FUNC_PTRS_IN_CONSTANTS,
-        ),
-        po_enable_xhp_class_modifier: hack_lang_flags(LangFlags::ENABLE_XHP_CLASS_MODIFIER),
-        po_disable_xhp_element_mangling: hack_lang_flags(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
-        po_enable_enum_classes: hack_lang_flags(LangFlags::ENABLE_ENUM_CLASSES),
-        po_allow_unstable_features: hack_lang_flags(LangFlags::ALLOW_UNSTABLE_FEATURES),
-        po_disallow_fun_and_cls_meth_pseudo_funcs: hack_lang_flags(
-            LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS,
-        ),
-        po_disallow_inst_meth: hack_lang_flags(LangFlags::DISALLOW_INST_METH),
         tco_no_parser_readonly_check: type_directed,
-        ..Default::default()
+        ..opts.hhvm.parser_options.clone()
     }
 }
 
@@ -724,7 +389,7 @@ fn parse_file(
 ) -> Result<ast::Program, ParseError> {
     let aast_env = AastEnv {
         codegen: true,
-        php5_compat_mode: !opts.php7_flags.contains(Php7Flags::UVS),
+        php5_compat_mode: !opts.hhbc.uvs,
         keep_errors: false,
         is_systemlib,
         elaborate_namespaces,

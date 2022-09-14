@@ -2219,6 +2219,7 @@ t_hack_generator::ThriftPrimitiveType t_hack_generator::base_to_t_primitive(
 std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
     const t_type* type) {
   auto tmeta_ThriftType = std::make_unique<t_const_value>();
+  tmeta_ThriftType->set_map();
 
   if (const auto* tbase_type = dynamic_cast<const t_base_type*>(type)) {
     tmeta_ThriftType->add_map(
@@ -2226,6 +2227,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>(base_to_t_primitive(tbase_type)));
   } else if (const auto* tlist = dynamic_cast<const t_list*>(type)) {
     auto tlist_tmeta = std::make_unique<t_const_value>();
+    tlist_tmeta->set_map();
     tlist_tmeta->add_map(
         std::make_unique<t_const_value>("valueType"),
         type_to_tmeta(tlist->get_elem_type()));
@@ -2234,6 +2236,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_list"), std::move(tlist_tmeta));
   } else if (const auto* tset = dynamic_cast<const t_set*>(type)) {
     auto tset_tmeta = std::make_unique<t_const_value>();
+    tset_tmeta->set_map();
     tset_tmeta->add_map(
         std::make_unique<t_const_value>("valueType"),
         type_to_tmeta(tset->get_elem_type()));
@@ -2242,6 +2245,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_set"), std::move(tset_tmeta));
   } else if (const auto* tmap = dynamic_cast<const t_map*>(type)) {
     auto tmap_tmeta = std::make_unique<t_const_value>();
+    tmap_tmeta->set_map();
     tmap_tmeta->add_map(
         std::make_unique<t_const_value>("keyType"),
         type_to_tmeta(tmap->get_key_type()));
@@ -2253,6 +2257,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_map"), std::move(tmap_tmeta));
   } else if (type->is_enum()) {
     auto tenum_tmeta = std::make_unique<t_const_value>();
+    tenum_tmeta->set_map();
     tenum_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(type->get_scoped_name()));
@@ -2261,6 +2266,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_enum"), std::move(tenum_tmeta));
   } else if (type->is_struct() || type->is_exception()) {
     auto tstruct_tmeta = std::make_unique<t_const_value>();
+    tstruct_tmeta->set_map();
     tstruct_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(type->get_scoped_name()));
@@ -2269,6 +2275,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_struct"), std::move(tstruct_tmeta));
   } else if (type->is_union()) {
     auto tunion_tmeta = std::make_unique<t_const_value>();
+    tunion_tmeta->set_map();
     tunion_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(type->get_scoped_name()));
@@ -2277,6 +2284,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::make_unique<t_const_value>("t_union"), std::move(tunion_tmeta));
   } else if (const auto* ttypedef = dynamic_cast<const t_typedef*>(type)) {
     auto ttypedef_tmeta = std::make_unique<t_const_value>();
+    ttypedef_tmeta->set_map();
     ttypedef_tmeta->add_map(
         std::make_unique<t_const_value>("name"),
         std::make_unique<t_const_value>(ttypedef->get_scoped_name()));
@@ -2289,6 +2297,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
         std::move(ttypedef_tmeta));
   } else if (const auto* tsink = dynamic_cast<const t_sink*>(type)) {
     auto tsink_tmeta = std::make_unique<t_const_value>();
+    tsink_tmeta->set_map();
     tsink_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
         type_to_tmeta(tsink->get_sink_type()));
@@ -2301,6 +2310,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
           type_to_tmeta(tsink->get_first_response_type()));
     } else {
       auto first_response_type = std::make_unique<t_const_value>();
+      first_response_type->set_map();
       first_response_type->add_map(
           std::make_unique<t_const_value>("t_primitive"),
           std::make_unique<t_const_value>(
@@ -2314,6 +2324,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
   } else if (
       const auto* tstream = dynamic_cast<const t_stream_response*>(type)) {
     auto tstream_tmeta = std::make_unique<t_const_value>();
+    tstream_tmeta->set_map();
     tstream_tmeta->add_map(
         std::make_unique<t_const_value>("elemType"),
         type_to_tmeta(tstream->get_elem_type()));
@@ -2323,6 +2334,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
           type_to_tmeta(tstream->get_first_response_type()));
     } else {
       auto first_response_type = std::make_unique<t_const_value>();
+      first_response_type->set_map();
       first_response_type->add_map(
           std::make_unique<t_const_value>("t_primitive"),
           std::make_unique<t_const_value>(
@@ -2344,6 +2356,7 @@ std::unique_ptr<t_const_value> t_hack_generator::type_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::field_to_tmeta(
     const t_field* field) {
   auto tmeta_ThriftField = std::make_unique<t_const_value>();
+  tmeta_ThriftField->set_map();
 
   tmeta_ThriftField->add_map(
       std::make_unique<t_const_value>("id"),
@@ -2370,6 +2383,7 @@ std::unique_ptr<t_const_value> t_hack_generator::field_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
     const t_function* function) {
   auto tmeta_ThriftFunction = std::make_unique<t_const_value>();
+  tmeta_ThriftFunction->set_map();
 
   tmeta_ThriftFunction->add_map(
       std::make_unique<t_const_value>("name"),
@@ -2412,6 +2426,7 @@ std::unique_ptr<t_const_value> t_hack_generator::function_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::service_to_tmeta(
     const t_service* service) {
   auto tmeta_ThriftService = std::make_unique<t_const_value>();
+  tmeta_ThriftService->set_map();
 
   tmeta_ThriftService->add_map(
       std::make_unique<t_const_value>("name"),
@@ -2443,6 +2458,7 @@ std::unique_ptr<t_const_value> t_hack_generator::service_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
     const t_enum* tenum) {
   auto tmeta_ThriftEnum = std::make_unique<t_const_value>();
+  tmeta_ThriftEnum->set_map();
 
   tmeta_ThriftEnum->add_map(
       std::make_unique<t_const_value>("name"),
@@ -2473,6 +2489,7 @@ std::unique_ptr<t_const_value> t_hack_generator::enum_to_tmeta(
 std::unique_ptr<t_const_value> t_hack_generator::struct_to_tmeta(
     const t_struct* tstruct, bool is_exception) {
   auto tmeta = std::make_unique<t_const_value>();
+  tmeta->set_map();
 
   tmeta->add_map(
       std::make_unique<t_const_value>("name"),

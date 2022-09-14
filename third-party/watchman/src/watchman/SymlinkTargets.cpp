@@ -8,10 +8,10 @@
 #include "watchman/SymlinkTargets.h"
 #include <folly/ScopeGuard.h>
 #include <string>
-#include "watchman/Hash.h"
 #include "watchman/Logging.h"
 #include "watchman/ThreadPool.h"
 #include "watchman/fs/FileSystem.h"
+#include "watchman_hash.h"
 
 namespace watchman {
 
@@ -23,7 +23,7 @@ bool SymlinkTargetCacheKey::operator==(
 }
 
 std::size_t SymlinkTargetCacheKey::hashValue() const {
-  return hash_128_to_64(relativePath.hashValue(), otime.ticks);
+  return hash_128_to_64(w_string_hval(relativePath.ptr()), otime.ticks);
 }
 
 SymlinkTargetCache::SymlinkTargetCache(

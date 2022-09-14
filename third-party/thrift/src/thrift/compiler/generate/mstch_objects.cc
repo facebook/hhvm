@@ -613,6 +613,21 @@ mstch::node mstch_program::constants() {
   return a;
 }
 
+mstch::node mstch_program::interned_values() {
+  mstch::array a;
+  const auto& container = program_->intern_list();
+  for (size_t i = 0, size = container.size(); i < size; ++i) {
+    a.push_back(context_.const_factory->make_mstch_object(
+        container[i].get(),
+        context_,
+        mstch_element_position(i, size),
+        container[i].get(),
+        container[i]->get_type(),
+        nullptr));
+  }
+  return a;
+}
+
 const std::vector<t_struct*>& mstch_program::get_program_objects() {
   return program_->objects();
 }

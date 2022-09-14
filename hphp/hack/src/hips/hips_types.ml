@@ -10,14 +10,21 @@ module A = Ast_defs
 
 type const_entity = A.id [@@deriving ord, show]
 
-type identifier_entity = A.id [@@deriving ord, show]
+type constant_identifier_entity = {
+  ident_pos: A.pos;
+  class_name_opt: string option;
+  const_name: string;
+}
+[@@deriving ord, show { with_path = false }]
 
 type param_entity = A.id * int [@@deriving ord, show]
+
+type class_identifier_entity = A.id [@@deriving ord, show]
 
 type entity =
   | Param of param_entity
   | Constant of const_entity
-  | Identifier of identifier_entity
+  | ConstantIdentifier of constant_identifier_entity
 [@@deriving ord, show { with_path = false }]
 
 type ('a, 'b) any_constraint_ =
@@ -29,8 +36,9 @@ type 'a inter_constraint_ =
   | Arg of param_entity * 'a
   | Constant of const_entity
   | ConstantInitial of 'a
-  | Identifier of identifier_entity
+  | ConstantIdentifier of constant_identifier_entity
   | Param of param_entity
+  | ClassExtends of class_identifier_entity
 [@@deriving ord]
 
 module type Intra = sig
@@ -68,6 +76,25 @@ let equal_entity (ent1 : entity) (ent2 : entity) : bool =
     String.equal f_id g_id && Int.equal f_idx g_idx
   | (Constant (pos1, id1), Constant (pos2, id2)) ->
     A.equal_pos pos1 pos2 && String.equal id1 id2
-  | (Identifier (pos1, name1), Identifier (pos2, name2)) ->
-    A.equal_pos pos1 pos2 && String.equal name1 name2
+  | ( ConstantIdentifier
+        {
+          ident_pos = pos1;
+          class_name_opt = Some class_name1;
+          const_name = constant_name1;
+        },
+      ConstantIdentifier
+        {
+          ident_pos = pos2;
+          class_name_opt = Some class_name2;
+          const_name = constant_name2;
+        } ) ->
+    A.equal_pos pos1 pos2
+    && String.equal class_name1 class_name2
+    && String.equal constant_name1 constant_name2
+  | ( ConstantIdentifier
+        { ident_pos = pos1; class_name_opt = None; const_name = constant_name1 },
+      ConstantIdentifier
+        { ident_pos = pos2; class_name_opt = None; const_name = constant_name2 }
+    ) ->
+    A.equal_pos pos1 pos2 && String.equal constant_name1 constant_name2
   | _ -> false

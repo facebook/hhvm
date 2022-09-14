@@ -83,7 +83,7 @@ pub trait CanThrow {
 /// should be. Q: Should the type be on the Instr itself or embedded in the
 /// Func::instrs table?
 ///
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Instr {
     Call(Box<Call>),
     Hhbc(Hhbc),
@@ -134,7 +134,7 @@ impl CanThrow for Instr {
     }
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Terminator {
     // This is an async call - it's a terminator with one edge for the async
     // return and one edge for the eager return. The async edge takes a single
@@ -314,7 +314,7 @@ impl CanThrow for Terminator {
     }
 }
 
-#[derive(Debug, HasLocals, HasLoc)]
+#[derive(Clone, Debug, HasLocals, HasLoc)]
 pub struct MemoGet {
     pub edges: [BlockId; 2],
     pub locals: Box<[LocalId]>,
@@ -353,7 +353,7 @@ impl HasEdges for MemoGet {
     }
 }
 
-#[derive(Debug, HasLoc, HasLocals)]
+#[derive(Clone, Debug, HasLoc, HasLocals)]
 pub struct MemoGetEager {
     pub edges: [BlockId; 3],
     pub locals: Box<[LocalId]>,
@@ -396,7 +396,7 @@ impl HasEdges for MemoGetEager {
     }
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Hhbc {
     AKExists([ValueId; 2], LocId),
     Add([ValueId; 2], LocId),
@@ -639,6 +639,17 @@ impl FinalOp {
             FinalOp::SetRangeM { .. } => None,
         }
     }
+
+    pub fn is_write(&self) -> bool {
+        match self {
+            FinalOp::QueryM { .. } => false,
+            FinalOp::IncDecM { .. }
+            | FinalOp::SetM { .. }
+            | FinalOp::SetOpM { .. }
+            | FinalOp::UnsetM { .. }
+            | FinalOp::SetRangeM { .. } => true,
+        }
+    }
 }
 
 #[derive(Debug, HasLoc, HasLocals, HasOperands, Clone)]
@@ -688,7 +699,7 @@ impl CanThrow for MemberOp {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum CallDetail {
     // A::$b(42);
     // $a::$b(42);
@@ -823,7 +834,7 @@ impl CallDetail {
     }
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 #[has_locals(none)]
 pub struct Call {
     pub operands: Box<[ValueId]>,
@@ -854,7 +865,7 @@ impl CanThrow for Call {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum IncludeKind {
     Eval,
     Include,
@@ -864,7 +875,7 @@ pub enum IncludeKind {
     RequireOnceDoc,
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 #[has_locals(none)]
 pub struct IncludeEval {
     pub kind: IncludeKind,
@@ -989,13 +1000,13 @@ impl CanThrow for MemberArgs {
     }
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub enum Predicate {
     NonZero,
     Zero,
 }
 
-#[derive(Debug, HasLoc)]
+#[derive(Clone, Debug, HasLoc)]
 pub struct IteratorArgs {
     pub iter_id: IterId,
     // Stored as [ValueLid, KeyLid]
@@ -1061,7 +1072,8 @@ pub enum CmpOp {
     Same,
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+/// Instructions used by the SSA pass.
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Tmp {
     SetVar(VarId, ValueId), // var, value
     GetVar(VarId),          // var
@@ -1078,7 +1090,7 @@ pub enum IrToBc {
     UnsetL(LocalId),
 }
 
-#[derive(Debug, HasLoc, HasLocals, HasOperands)]
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
     Copy(ValueId),
     IrToBc(IrToBc),

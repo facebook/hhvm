@@ -8,7 +8,9 @@ Constraints for \DICT:
    3: Constant ([3:7-26], "\\DICT")
 
 Constraints for \main:
-   6: ? SK (Identifier ([6:3-7], "\\DICT")) : shape('b' => mixed)
-   6: ! SK (Identifier ([6:3-7], "\\DICT")) : shape('b' => mixed)
-   6: Identifier ([6:3-7], "\\DICT")
+   6: ? SK (ConstantIdentifier
+   { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }) : shape('b' => mixed)
+   6: ! SK (ConstantIdentifier
+   { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }) : shape('b' => mixed)
+   6: ConstantIdentifier { ident_pos = [6:3-7]; class_name_opt = None; const_name = "\\DICT" }
 

@@ -1339,9 +1339,9 @@ bool isProjfs(const w_string& path) {
   }
 }
 
-std::optional<w_string> findEdenFSRoot(w_string_piece root_path) {
+w_string findEdenFSRoot(w_string_piece root_path) {
   w_string path = root_path.asWString();
-  std::optional<w_string> result;
+  w_string result = nullptr;
   while (true) {
     if (isProjfs(path)) {
       result = path;
@@ -1367,13 +1367,12 @@ std::shared_ptr<QueryableView> detectEden(
     const Configuration& config) {
 #ifdef _WIN32
   (void)fstype;
-  auto maybeEdenRoot = findEdenFSRoot(root_path);
-  if (!maybeEdenRoot) {
+  auto edenRoot = findEdenFSRoot(root_path);
+  log(DBG, "detected eden root: ", edenRoot, "\n");
+  if (!edenRoot) {
     throw std::runtime_error(
         to<std::string>("Not an Eden clone: ", root_path.view()));
   }
-  auto edenRoot = *maybeEdenRoot;
-  log(DBG, "detected eden root: ", edenRoot, "\n");
 
   if (isEdenStopped(root_path)) {
     throw TerminalWatcherError(to<std::string>(

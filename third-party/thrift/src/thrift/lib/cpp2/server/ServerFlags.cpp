@@ -24,6 +24,11 @@ FOLLY_GFLAGS_DEFINE_bool(
     false,
     "Use experimental resource pools");
 THRIFT_FLAG_DEFINE_bool(allow_resource_pools_for_wildcards, false);
+FOLLY_GFLAGS_DEFINE_bool(
+    thrift_allow_resource_pools_for_wildcards,
+    false,
+    "Allow resource pools for wildcard processors");
+
 THRIFT_FLAG_DEFINE_bool(allow_wildcard_process_via_execute_request, true);
 
 THRIFT_FLAG_DEFINE_bool(

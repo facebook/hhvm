@@ -120,10 +120,16 @@ inline constexpr Ordinal toOrdinal(size_t pos) {
  * Does reverse conversion from ordinal obtained by toOrdinal()
  *
  * @param ordinal to convert back to integer
+ * @param max if specified, ensures return value is below this number (throwing
+ *   std::out_of_range), e.g. for bounds checking before container access
  * @return integer
  */
-inline constexpr size_t toPosition(Ordinal ordinal) noexcept {
-  return static_cast<size_t>(ordinal) - 1;
+inline constexpr size_t toPosition(Ordinal ordinal, size_t max = 0) {
+  auto val = static_cast<size_t>(ordinal);
+  if (max && val > max) {
+    throw std::out_of_range(fmt::format("max size supported is {}", max));
+  }
+  return val - 1;
 }
 
 } // namespace type

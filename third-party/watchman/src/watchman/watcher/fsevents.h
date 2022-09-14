@@ -71,7 +71,7 @@ class FSEventsWatcher : public Watcher {
       const std::shared_ptr<Root>& root,
       FSEventsWatcher* watcher,
       FSEventStreamEventId since,
-      std::optional<w_string>& failure_reason);
+      w_string& failure_reason);
   static void fse_callback(
       ConstFSEventStreamRef,
       void* clientCallBackInfo,

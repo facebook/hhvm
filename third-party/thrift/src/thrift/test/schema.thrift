@@ -32,3 +32,9 @@ struct Fields {
   3: optional set<string> keyset;
   7: Empty strct;
 }
+
+@thrift.GenerateRuntimeSchema
+struct Defaults {
+  1: i32 none;
+  2: i32 some = 42;
+}

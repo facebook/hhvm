@@ -277,7 +277,6 @@ struct Vgen {
 
   // vm entry abi
   void emit(const inittc& /*i*/) {}
-  void emit(const leavetc& i);
 
   // exceptions
   void emit(const landingpad& /*i*/) {}
@@ -849,15 +848,6 @@ void Vgen::emit(const contenter& i) {
   recordAddressImmediate();
   a->Bl(&stub);
   emit(unwind{{i.targets[0], i.targets[1]}});
-}
-
-///////////////////////////////////////////////////////////////////////////////
-
-void Vgen::emit(const leavetc& /*i*/) {
-  // The LR was preserved on the stack by resumetc. Pop it while preserving
-  // SP alignment and return.
-  a->Ldp(rAsm, X(rlr()), MemOperand(sp, 16, PostIndex));
-  a->Ret();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1785,10 +1775,15 @@ void lower(const VLS& e, phplogue& i, Vlabel b, size_t z) {
 
 void lower(const VLS& e, resumetc& i, Vlabel b, size_t z) {
   lower_impl(e.unit, b, z, [&] (Vout& v) {
-    // Call the translation target.
-    v << callr{i.target, i.args};
+    // Jump to the translation target.
+    v << jmpr{i.target, i.args};
+  });
+}
 
-    // After returning to the translation, jump directly to the exit.
+  ///////////////////////////////////////////////////////////////////////////////
+
+void lower(const VLS& e, leavetc& i, Vlabel b, size_t z) {
+  lower_impl(e.unit, b, z, [&] (Vout& v) {
     v << jmpi{i.exittc};
   });
 }

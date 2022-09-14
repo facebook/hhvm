@@ -27,6 +27,10 @@ template <typename... Args>
 std::unique_ptr<t_const_value> val(Args... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
 }
+std::unique_ptr<t_const_value> val(t_program::value_id val) {
+  return std::make_unique<t_const_value>(
+      static_cast<std::underlying_type_t<t_program::value_id>>(val));
+}
 
 void add_definition(t_const_value& schema, const t_named& node) {
   auto definition = val();
@@ -170,7 +174,12 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
     field_schema->add_map(val("qualifier"), std::move(qualifier));
     field_schema->add_map(
         val("type"), gen_type(*field.type()->get_true_type()));
-    // TODO: default
+    if (auto deflt = field.default_value()) {
+      assert(program);
+      auto id = const_cast<t_program*>(program)->intern_value(
+          deflt->clone(), field.type());
+      field_schema->add_map(val("customDefault"), val(id));
+    }
     fields->add_list(std::move(field_schema));
   }
 

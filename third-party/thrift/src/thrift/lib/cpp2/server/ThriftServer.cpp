@@ -641,7 +641,8 @@ void ThriftServer::setupThreadManager() {
       DCHECK(resourcePoolSet().empty());
       // We always need a threadmanager for cpp2.
       LOG(INFO) << "Using thread manager (resource pools not enabled) "
-                << runtimeServerActions_.explain();
+                << runtimeServerActions_.explain() << " on address/port "
+                << getAddressAsString();
       if (!threadManager_) {
         std::shared_ptr<apache::thrift::concurrency::ThreadManager>
             threadManager;
@@ -732,7 +733,8 @@ void ThriftServer::setupThreadManager() {
         THRIFT_SERVER_EVENT(resourcepoolsruntimedisallowed).log(*this);
       }
     } else {
-      LOG(INFO) << "Using resource pools";
+      LOG(INFO) << "Using resource pools on address/port "
+                << getAddressAsString();
       DCHECK(!threadManager_);
 
       ensureResourcePools();
@@ -838,7 +840,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
         }
       }
     } else {
-      if (!THRIFT_FLAG(allow_resource_pools_for_wildcards)) {
+      if (!THRIFT_FLAG(allow_resource_pools_for_wildcards) &&
+          !FLAGS_thrift_allow_resource_pools_for_wildcards) {
         LOG(INFO) << "Resource pools disabled. Wildcard methods";
         runtimeServerActions_.wildcardMethods = true;
         runtimeDisableResourcePoolsDeprecated();

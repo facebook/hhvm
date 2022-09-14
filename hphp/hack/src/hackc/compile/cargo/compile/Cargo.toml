@@ -11,6 +11,7 @@ path = "../../compile.rs"
 aast_parser = { path = "../../../../parser/cargo/aast_parser" }
 anyhow = "1.0.56"
 bc_to_ir = { path = "../../../ir/conversions/bc_to_ir" }
+bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
@@ -20,7 +21,6 @@ emit_unit = { path = "../../../emitter/cargo/emit_unit" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
-hhvm_options = { path = "../../../../utils/hhvm_options" }
 ir = { path = "../../../ir" }
 ir_to_bc = { path = "../../../ir/conversions/ir_to_bc" }
 ocamlrep = { path = "../../../../ocamlrep" }

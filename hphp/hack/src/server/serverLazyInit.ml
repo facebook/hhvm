@@ -1072,48 +1072,21 @@ let write_symbol_info
       ~telemetry_label:"write_symbol_info.naming"
       ~cgroup_steps
   in
-  let index_paths = env.swriteopt.symbol_write_index_paths in
-  let index_paths_file = env.swriteopt.symbol_write_index_paths_file in
+  let paths = env.swriteopt.symbol_write_index_paths in
+  let paths_file = env.swriteopt.symbol_write_index_paths_file in
+  let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
+  let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
   let files =
-    if List.length index_paths > 0 || Option.is_some index_paths_file then
-      let relative_path_exists r =
-        Sys.file_exists (Relative_path.to_absolute r)
-      in
-      List.concat
-        [
-          Option.value_map index_paths_file ~default:[] ~f:In_channel.read_lines
-          |> List.map ~f:Relative_path.storage_of_string;
-          index_paths
-          |> List.map ~f:(fun path -> Relative_path.from_root ~suffix:path)
-          |> List.filter ~f:relative_path_exists;
-        ]
+    if List.length paths > 0 || Option.is_some paths_file then
+      Symbol_indexable.from_options ~paths ~paths_file
     else
-      let defs_per_file = Naming_table.to_defs_per_file env.naming_table in
+      let naming_table = env.naming_table in
       let failed_parsing = Errors.get_failed_files env.errorl Errors.Parsing in
-      let defs_per_file =
-        Relative_path.Set.fold
-          failed_parsing
-          ~f:(fun x m -> Relative_path.Map.remove m x)
-          ~init:defs_per_file
-      in
-      let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
-      let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
-      Relative_path.Map.fold defs_per_file ~init:[] ~f:(fun path _ acc ->
-          match Naming_table.get_file_info env.naming_table path with
-          | None -> acc
-          | Some _ ->
-            let path_str = Relative_path.S.to_string path in
-            if
-              Relative_path.is_hhi (Relative_path.prefix path)
-              && (exclude_hhi
-                 || String_utils.string_starts_with path_str "hhi|hsl_generated"
-                 )
-              || List.exists ignore_paths ~f:(fun ignore ->
-                     String.equal path_str ignore)
-            then
-              acc
-            else
-              path :: acc)
+      Symbol_indexable.from_naming_table
+        naming_table
+        ~failed_parsing
+        ~exclude_hhi
+        ~ignore_paths
   in
   match env.swriteopt.symbol_write_index_paths_file_output with
   | Some output ->

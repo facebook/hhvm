@@ -308,6 +308,7 @@ class cpp_mstch_program : public mstch_program {
         "program:enforce_required?", "deprecated_enforce_required");
     register_has_option(
         "program:deprecated_tag_incompatible?", "deprecated_tag_incompatible");
+    register_has_option("program:interning?", "interning");
 
     init_objects_and_enums();
   }

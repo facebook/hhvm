@@ -91,7 +91,7 @@ w_string LocalSavedStateInterface::getLocalPath(w_string_piece commitId) const {
   if (!projectMetadata_) {
     filename = w_string::build(commitId);
   } else {
-    filename = w_string::build(commitId, w_string("_"), *projectMetadata_);
+    filename = w_string::build(commitId, w_string("_"), projectMetadata_);
   }
   return w_string::pathCat({localStoragePath_, project_, filename});
 }

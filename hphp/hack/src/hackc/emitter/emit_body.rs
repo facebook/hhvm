@@ -33,7 +33,6 @@ use indexmap::IndexSet;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
 use oxidized::aast;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -372,11 +371,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<Body<'arena>> {
-    if emitter
-        .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::RELABEL)
-    {
+    if emitter.options().compiler_flags.relabel {
         label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {

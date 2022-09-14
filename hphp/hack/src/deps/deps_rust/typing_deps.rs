@@ -4,19 +4,14 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::collections::HashSet;
-use std::io;
-use std::io::Read;
 use std::io::Write;
 use std::sync::Mutex;
 
+use dep_graph_delta::DepGraphDelta;
 pub use depgraph::reader::Dep;
 use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
-use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
-use no_pos_hash::NoPosHash;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::Value;
@@ -26,8 +21,6 @@ use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::OnceCell;
 use rpds::HashTrieSet;
-use serde::Deserialize;
-use serde::Serialize;
 
 fn _static_assert() {
     // The use of 64-bit (actually 63-bit) dependency hashes requires that we
@@ -47,31 +40,16 @@ fn _static_assert() {
 ///
 /// It's an option, because custom mode might be enabled without
 /// an existing saved-state.
-static DEPGRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
+static DEP_GRAPH: OnceCell<Option<UnsafeDepGraph>> = OnceCell::new();
 
 /// The dependency graph delta.
 ///
 /// Even though this is only used in a single-threaded context (from OCaml)
 /// we wrap it in a `Mutex` to ensure safety.
-static DEPGRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
+static DEP_GRAPH_DELTA: OnceCell<Mutex<DepGraphDelta>> = OnceCell::new();
 
 /// Which dependency graph format are we using?
-#[derive(
-    Clone,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    FromOcamlRep,
-    Hash,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize,
-    ToOcamlRep
-)]
+#[derive(FromOcamlRep, ToOcamlRep)]
 #[repr(C, u8)]
 // CAUTION: This must be kept in sync with typing_deps_mode.ml
 pub enum TypingDepsMode {
@@ -91,6 +69,10 @@ pub enum TypingDepsMode {
         graph: Option<String>,
         new_edges_dir: String,
         human_readable_dep_map_dir: Option<String>,
+    },
+    /// Mode that keeps track of edges via hh_fanout's Rust API
+    HhFanoutRustMode {
+        hh_fanout: ocamlrep_custom::Custom<hh_fanout_rust_ffi::HhFanoutRustFfi>,
     },
 }
 
@@ -170,7 +152,7 @@ impl UnsafeDepGraph {
     /// The pointer to the dependency graph mode should still be pointing
     /// to a valid OCaml object.
     pub unsafe fn load(mode: RawTypingDepsMode) -> Result<Option<&'static UnsafeDepGraph>, String> {
-        let depgraph = DEPGRAPH.get_or_try_init::<_, String>(|| {
+        let depgraph = DEP_GRAPH.get_or_try_init::<_, String>(|| {
             let mode = mode.to_rust().unwrap();
             match mode {
                 TypingDepsMode::InMemoryMode(None)
@@ -192,6 +174,9 @@ impl UnsafeDepGraph {
                         .map_err(|err| format!("could not open dep graph file: {:?}", err))?;
                     let depgraph = UnsafeDepGraph::new(opener)?;
                     Ok(Some(depgraph))
+                }
+                TypingDepsMode::HhFanoutRustMode { hh_fanout: _ } => {
+                    todo!()
                 }
             }
         })?;
@@ -248,143 +233,30 @@ impl UnsafeDepGraph {
     }
 }
 
-/// Structure to keep track of the dependency graph delta.
+pub fn dep_graph_delta_with_cell<R>(f: impl FnOnce(&Mutex<DepGraphDelta>) -> R) -> R {
+    let cell = DEP_GRAPH_DELTA.get_or_init(|| Mutex::new(DepGraphDelta::new()));
+    f(cell)
+}
+
+/// Run the closure with the dep graph delta.
 ///
-/// The second field is used to keep track of the number of edges.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DepGraphDelta(pub HashMap<Dep, HashSet<Dep>>, pub usize);
+/// # Panics
+///
+/// When another reference to delta is still active, but that
+/// isn't likely,given that we only have one thread, and the
+/// `with`/`with_mut` auxiliary functions disallow the reference
+/// to escape.
+pub fn dep_graph_delta_with<R>(f: impl FnOnce(&DepGraphDelta) -> R) -> R {
+    dep_graph_delta_with_cell(|cell| f(&cell.lock().unwrap()))
+}
 
-impl DepGraphDelta {
-    pub fn new() -> Self {
-        DepGraphDelta(HashMap::new(), 0)
-    }
-
-    pub fn insert(&mut self, dependent: Dep, dependency: Dep) {
-        let depts = self.0.entry(dependency).or_default();
-        if depts.insert(dependent) {
-            self.1 += 1;
-        }
-    }
-
-    pub fn get(&self, dependency: Dep) -> Option<&HashSet<Dep>> {
-        self.0.get(&dependency)
-    }
-
-    /// Return an iterator over this dependency graph delta.
-    ///
-    /// Iterates over (dependent, dependency) pairs
-    pub fn iter(&self) -> impl Iterator<Item = (Dep, Dep)> + '_ {
-        self.0.iter().flat_map(|(&dependency, dependents_set)| {
-            dependents_set
-                .iter()
-                .map(move |&dependent| (dependent, dependency))
-        })
-    }
-
-    /// Return the number of edges in the dep graph delta.
-    pub fn num_edges(&self) -> usize {
-        self.1
-    }
-
-    /// Write all edges in the delta to the writer in a custom format.
-    pub fn write_to<W: Write>(&self, w: &mut W) -> io::Result<usize> {
-        let mut edges_added = 0;
-        for (&dependency, dependents) in self.0.iter() {
-            if dependents.is_empty() {
-                continue;
-            }
-
-            let dependency: u64 = dependency.into();
-            w.write_all(&dependency.to_be_bytes())?;
-            for &dependent in dependents.iter() {
-                let dependent: u64 = dependent.into();
-
-                // Hashes are 63-bits, so we have one bit left to distinguish
-                // between dependencies and dependents. Dependents have their
-                // MSB set.
-                let dependent = dependent | (1 << 63);
-                w.write_all(&dependent.to_be_bytes())?;
-                edges_added += 1;
-            }
-        }
-
-        Ok(edges_added)
-    }
-
-    /// Load all edges into the delta.
-    ///
-    /// The predicate determines whether or not to add a loaded edge to the delta.
-    /// If the predicate returns true for a given dependent-dependency edge
-    /// (in that order), the edge is added.
-    ///
-    /// Returns the number of edges actually read.
-    pub fn read_from<R: Read>(
-        &mut self,
-        r: &mut R,
-        f: impl Fn(Dep, Dep) -> bool,
-    ) -> io::Result<usize> {
-        let mut edges_read = 0;
-        let mut dependency: Option<Dep> = None;
-        loop {
-            let mut bytes: [u8; 8] = [0; 8];
-            match r.read_exact(&mut bytes) {
-                Err(err) if err.kind() == io::ErrorKind::UnexpectedEof => {
-                    break;
-                }
-                r => r?,
-            };
-
-            let hash = u64::from_be_bytes(bytes);
-            if (hash & (1 << 63)) == 0 {
-                // This is a dependency hash.
-                dependency = Some(Dep::new(hash));
-            } else {
-                // This is a dependent hash.
-                let hash = hash & !(1 << 63);
-                let dependent = Dep::new(hash);
-                let dependency =
-                    dependency.expect("Expected a dependent hash before a dependency hash");
-
-                if f(dependent, dependency) {
-                    self.insert(dependent, dependency);
-                    edges_read += 1;
-                }
-            }
-        }
-
-        Ok(edges_read)
-    }
-
-    pub fn clear(&mut self) {
-        self.0.clear();
-        self.1 = 0;
-    }
-
-    pub fn with_cell<R>(f: impl FnOnce(&Mutex<Self>) -> R) -> R {
-        let cell = DEPGRAPH_DELTA.get_or_init(|| Mutex::new(Self::new()));
-        f(cell)
-    }
-
-    /// Run the closure with the dep graph delta.
-    ///
-    /// # Panics
-    ///
-    /// When another reference to delta is still active, but that
-    /// isn't likely,given that we only have one thread, and the
-    /// `with`/`with_mut` auxiliary functions disallow the reference
-    /// to escape.
-    pub fn with<R>(f: impl FnOnce(&Self) -> R) -> R {
-        Self::with_cell(|cell| f(&cell.lock().unwrap()))
-    }
-
-    /// Run the closure with the mutable dep graph delta.
-    ///
-    /// # Panics
-    ///
-    /// See `with`
-    pub fn with_mut<R>(f: impl FnOnce(&mut Self) -> R) -> R {
-        Self::with_cell(|cell| f(&mut cell.lock().unwrap()))
-    }
+/// Run the closure with the mutable dep graph delta.
+///
+/// # Panics
+///
+/// See `with`
+pub fn dep_graph_delta_with_mut<R>(f: impl FnOnce(&mut DepGraphDelta) -> R) -> R {
+    dep_graph_delta_with_cell(|cell| f(&mut cell.lock().unwrap()))
 }
 
 /// Rust set of dependencies that can be transferred from
@@ -538,62 +410,6 @@ mod tests {
         let y = DepSet::deserialize(&buf);
 
         assert_eq!(x, y);
-    }
-
-    #[test]
-    fn test_dep_graph_delta_serialize_empty() {
-        let x = DepGraphDelta::new();
-        let mut bytes = Vec::new();
-        x.write_to(&mut bytes).unwrap();
-
-        let mut y = DepGraphDelta::new();
-        let mut bytes_read: &[u8] = &bytes;
-        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
-
-        assert_eq!(num_loaded, 0);
-        assert_eq!(x, y);
-    }
-
-    #[test]
-    fn test_dep_graph_delta_serialize_non_empty() {
-        let mut x = DepGraphDelta::new();
-        x.insert(Dep::new(10), Dep::new(1));
-        x.insert(Dep::new(10), Dep::new(2));
-        x.insert(Dep::new(11), Dep::new(2));
-        x.insert(Dep::new(12), Dep::new(3));
-        let mut bytes = Vec::new();
-        x.write_to(&mut bytes).unwrap();
-
-        let mut y = DepGraphDelta::new();
-        let mut bytes_read: &[u8] = &bytes;
-        let num_loaded = y.read_from(&mut bytes_read, |_, _| true).unwrap();
-
-        assert_eq!(num_loaded, 4);
-        assert_eq!(x, y);
-    }
-
-    #[test]
-    fn test_dep_graph_delta_iter_empty() {
-        let x = DepGraphDelta::new();
-        let v: Vec<_> = x.iter().collect();
-        assert_eq!(v.len(), 0);
-    }
-
-    #[test]
-    fn test_dep_graph_delta_iter_non_empty() {
-        let mut x = DepGraphDelta::new();
-        let edges = vec![
-            (Dep::new(10), Dep::new(1)),
-            (Dep::new(10), Dep::new(2)),
-            (Dep::new(11), Dep::new(2)),
-            (Dep::new(12), Dep::new(3)),
-        ];
-        for (dependency, dependent) in edges.iter() {
-            x.insert(*dependency, *dependent)
-        }
-        let mut v: Vec<_> = x.iter().collect();
-        v.sort();
-        assert_eq!(v, edges);
     }
 
     #[test]

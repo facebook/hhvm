@@ -42,7 +42,6 @@ members = [
     "src/hackc/compile/cargo/closure_convert",
     "src/hackc/compile/cargo/compile",
     "src/hackc/compile/cargo/options",
-    "src/hackc/compile/cargo/options_serde",
     "src/hackc/compile/cargo/rewrite_program",
     "src/hackc/compile/cargo/rewrite_xml",
     "src/hackc/emitter/cargo/emit_pos",

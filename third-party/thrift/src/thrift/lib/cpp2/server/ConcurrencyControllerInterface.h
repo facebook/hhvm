@@ -69,6 +69,8 @@ class ConcurrencyControllerInterface {
   virtual uint64_t numPendingDequeRequest() const { return 0; }
 
   virtual std::string describe() const;
+
+  virtual void setExecutorSupportPriority(bool support) = 0;
 };
 
 } // namespace apache::thrift

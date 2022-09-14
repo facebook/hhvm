@@ -10,14 +10,21 @@ module A = Ast_defs
 
 type const_entity = A.id [@@deriving ord, show]
 
-type identifier_entity = A.id [@@deriving ord, show]
+type constant_identifier_entity = {
+  ident_pos: A.pos;
+  class_name_opt: string option;
+  const_name: string;
+}
+[@@deriving ord, show { with_path = false }]
 
 type param_entity = A.id * int [@@deriving ord, show]
+
+type class_identifier_entity = A.id [@@deriving ord, show]
 
 type entity =
   | Param of param_entity
   | Constant of const_entity
-  | Identifier of identifier_entity
+  | ConstantIdentifier of constant_identifier_entity
 [@@deriving ord, show]
 
 type ('a, 'b) any_constraint_ =
@@ -34,14 +41,17 @@ type 'a inter_constraint_ =
   | ConstantInitial of 'a
       (** Captures the initial entity of a global constant, e.g. the right hand side of
         "const dict<string, mixed> DICT = dict['a' => 42];". *)
-  | Identifier of identifier_entity
-      (** Captures global constant identifier entities, e.g. the "DICT" part in
+  | ConstantIdentifier of constant_identifier_entity
+      (** Captures global and class constant identifier entities e.g. the "DICT" part in
         "DICT['b'];", which identifies a global constant "const dict<string, mixed>
-        DICT". *)
+        DICT". For class constants, the optional string specifies the class name.  *)
   | Param of param_entity
       (** Captures function parameter entities, e.g. "$x" and "$y" in "function
         f(int $x, bool $y)". This constraint is used for function call constraint
         substitution, where it interacts with "Arg of param_entity * 'a". *)
+  | ClassExtends of class_identifier_entity
+      (** Captures single class inheritance, e.g. the position and the name "C" in
+      "class D extends C" *)
 [@@deriving ord]
 
 (** Domain-specific intra-procedural data that can be used to instantiate an

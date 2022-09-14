@@ -96,11 +96,6 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         &self.opts
     }
 
-    /// Destruct the emitter but salvage its options (for use in emitting fatal program).
-    pub fn into_options(self) -> Options {
-        self.opts
-    }
-
     pub fn iterator(&self) -> &IterGen {
         &self.iterator
     }

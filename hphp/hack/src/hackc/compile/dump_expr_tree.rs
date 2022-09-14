@@ -7,7 +7,6 @@ use std::fs;
 
 // use crate::compile_rust as compile;
 use ocamlrep::rc::RcOc;
-use options::LangFlags;
 use options::Options;
 use oxidized::aast;
 use oxidized::aast_visitor::AstParams;
@@ -104,10 +103,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let ns = RcOc::new(NamespaceEnv::empty(
         opts.hhvm.aliased_namespaces_cloned().collect(),
         true,
-        opts.hhvm
-            .hack_lang
-            .flags
-            .contains(LangFlags::DISABLE_XHP_ELEMENT_MANGLING),
+        opts.hhvm.parser_options.po_disable_xhp_element_mangling,
     ));
     match crate::parse_file(
         &opts,

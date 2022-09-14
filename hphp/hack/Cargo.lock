@@ -509,6 +509,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
+ "bstr",
  "bumpalo",
  "bytecode_printer",
  "clap 3.2.17",
@@ -518,7 +519,6 @@ dependencies = [
  "env",
  "error",
  "hhbc",
- "hhvm_options",
  "ir",
  "ir_to_bc",
  "ocamlrep",
@@ -593,12 +593,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "const_fn"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce90df4c658c62f12d78f7508cf92f9173e5184a539c10bfe54a3107b3ffd0f2"
-
-[[package]]
 name = "constant_folder"
 version = "0.0.0"
 dependencies = [
@@ -611,7 +605,6 @@ dependencies = [
  "indexmap",
  "itertools 0.10.3",
  "naming_special_names_rust",
- "options",
  "oxidized",
  "stack_limit",
 ]
@@ -713,7 +706,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd01a6eb3daaafa260f6fc94c3a6c36390abc2080e38e3e34ced87393fb77d80"
 dependencies = [
  "cfg-if 1.0.0",
- "crossbeam-channel 0.5.4",
+ "crossbeam-channel 0.5.6",
  "crossbeam-deque",
  "crossbeam-epoch",
  "crossbeam-queue",
@@ -731,9 +724,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.4"
+version = "0.5.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5aaa7bd5fb665c6864b5f963dd9097905c54125909c7aa94c9e18507cdbe6c53"
+checksum = "c2dd04ddaf88237dc3b8d8f9a3c1004b506b54b3313403944054d23c0870c521"
 dependencies = [
  "cfg-if 1.0.0",
  "crossbeam-utils 0.8.7",
@@ -752,15 +745,15 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-epoch"
-version = "0.9.1"
+version = "0.9.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1aaa739f95311c2c7887a76863f500026092fb1dce0161dab577e559ef3569d"
+checksum = "045ebe27666471bb549370b4b0b3e51b07f56325befa4284db65fc89c02511b1"
 dependencies = [
+ "autocfg",
  "cfg-if 1.0.0",
- "const_fn",
  "crossbeam-utils 0.8.7",
- "lazy_static",
  "memoffset",
+ "once_cell",
  "scopeguard",
 ]
 
@@ -949,6 +942,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "dep_graph_delta"
+version = "0.0.0"
+dependencies = [
+ "depgraph",
+]
+
+[[package]]
 name = "depgraph"
 version = "0.0.0"
 dependencies = [
@@ -972,15 +972,14 @@ dependencies = [
 name = "deps_rust"
 version = "0.0.0"
 dependencies = [
+ "dep_graph_delta",
  "depgraph",
- "eq_modulo_pos",
- "no_pos_hash",
+ "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
  "ocamlrep_derive",
  "once_cell",
  "rpds",
- "serde",
 ]
 
 [[package]]
@@ -1456,8 +1455,10 @@ dependencies = [
  "hash",
  "hdrhistogram",
  "hhbc",
+ "hhvm_config",
  "hhvm_options",
  "hhvm_types_ffi",
+ "ir",
  "ir_to_bc",
  "itertools 0.10.3",
  "jwalk",
@@ -1481,6 +1482,7 @@ dependencies = [
  "serde_json",
  "strum",
  "strum_macros",
+ "textual",
  "thiserror",
 ]
 
@@ -1635,17 +1637,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "hh_fanout_build"
+version = "0.0.0"
+dependencies = [
+ "dep_graph_delta",
+ "depgraph",
+ "depgraph_writer",
+ "env_logger 0.7.1",
+ "log",
+ "parking_lot",
+ "rayon",
+]
+
+[[package]]
 name = "hh_fanout_build_rust"
 version = "0.0.0"
 dependencies = [
- "depgraph",
- "depgraph_writer",
- "deps_rust",
- "env_logger 0.7.1",
- "log",
+ "hh_fanout_build",
  "ocamlrep_ocamlpool",
- "parking_lot",
- "rayon",
 ]
 
 [[package]]
@@ -1667,6 +1676,19 @@ dependencies = [
  "json",
  "log",
  "ocamlrep_ocamlpool",
+]
+
+[[package]]
+name = "hh_fanout_rust_ffi"
+version = "0.0.0"
+dependencies = [
+ "hh24_types",
+ "ocamlrep",
+ "ocamlrep_caml_builtins",
+ "ocamlrep_custom",
+ "ocamlrep_derive",
+ "ocamlrep_ocamlpool",
+ "rpds",
 ]
 
 [[package]]
@@ -1718,6 +1740,15 @@ dependencies = [
  "ocaml_helper",
  "pretty_assertions",
  "regex",
+]
+
+[[package]]
+name = "hhvm_config"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "hhvm_options",
+ "options",
 ]
 
 [[package]]
@@ -2037,15 +2068,6 @@ dependencies = [
  "rescan_trivia",
  "stack_limit",
  "thiserror",
-]
-
-[[package]]
-name = "lru"
-version = "0.7.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32613e41de4c47ab04970c348ca7ae7382cf116625755af070b008a15516a889"
-dependencies = [
- "hashbrown",
 ]
 
 [[package]]
@@ -2417,28 +2439,11 @@ dependencies = [
 name = "options"
 version = "0.0.0"
 dependencies = [
- "bitflags",
  "bstr",
  "bumpalo",
  "bytecode_printer",
- "fnv",
  "hhbc",
- "lazy_static",
- "lru",
- "options_serde",
  "oxidized",
- "pretty_assertions",
- "serde",
- "serde_derive",
- "serde_json",
-]
-
-[[package]]
-name = "options_serde"
-version = "0.0.0"
-dependencies = [
- "quote",
- "syn",
 ]
 
 [[package]]
@@ -2873,7 +2878,7 @@ version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d78120e2c850279833f1dd3582f730c4ab53ed95aeaaaa862a2a5c71b1656d8e"
 dependencies = [
- "crossbeam-channel 0.5.4",
+ "crossbeam-channel 0.5.6",
  "crossbeam-deque",
  "crossbeam-utils 0.8.7",
  "lazy_static",
@@ -2943,7 +2948,6 @@ dependencies = [
  "hack_macro",
  "hhbc",
  "ocamlrep",
- "options",
  "oxidized",
  "rewrite_xml",
 ]
@@ -3476,6 +3480,14 @@ version = "0.0.0"
 dependencies = [
  "hash",
  "ir_core",
+]
+
+[[package]]
+name = "textual"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ir",
 ]
 
 [[package]]

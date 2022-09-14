@@ -4295,18 +4295,26 @@ fn process_attribute_constructor_call<'a>(
             > 0
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
-    } else if (name.1.eq_ignore_ascii_case(special_attrs::MEMOIZE)
-        || name.1.eq_ignore_ascii_case(special_attrs::MEMOIZE_LSB))
-        && constructor_call_argument_list
+    } else if naming_special_names_rust::user_attributes::is_memoized(&name.1) {
+        let list: Vec<_> = constructor_call_argument_list
             .syntax_node_to_list_skip_separator()
-            .count()
-            > 1
-    {
-        raise_parsing_error(
-            node,
-            env,
-            &syntax_error::memoize_too_many_arguments(&name.1),
-        );
+            .collect();
+        if list.len() > 1 {
+            let ast::Id(_, first) = pos_name(list[0], env)?;
+            let ast::Id(_, second) = pos_name(list[1], env)?;
+            // Only allow of the form (#SoftMakeICInaccessible, 4)
+            if !(list.len() == 2
+                && first == "#SoftMakeICInaccessible"
+                && second.parse::<u32>().is_ok())
+            {
+                //TODO: Improve error message for the sample rate
+                raise_parsing_error(
+                    node,
+                    env,
+                    &syntax_error::memoize_too_many_arguments(&name.1),
+                );
+            }
+        }
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);

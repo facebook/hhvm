@@ -179,7 +179,7 @@ w_string_piece InMemoryFileResult::dirName() {
   if (!dirName_) {
     dirName_ = file_->parent->getFullPath();
   }
-  return *dirName_;
+  return dirName_;
 }
 
 std::optional<bool> InMemoryFileResult::exists() {
@@ -634,7 +634,7 @@ void InMemoryView::pathGenerator(const Query* query, QueryContext* ctx) const {
     // that had been deleted and replaced by a file.
     // We prefer to resolve the parent and walk down.
     dir_name = full_name.dirName();
-    if (dir_name.empty()) {
+    if (!dir_name) {
       continue;
     }
 

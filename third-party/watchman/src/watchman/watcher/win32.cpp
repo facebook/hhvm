@@ -357,7 +357,7 @@ bool WinWatcher::start(const std::shared_ptr<Root>& root) {
       logf(
           ERR,
           "failed to start readchanges thread: {}\n",
-          *root->failure_reason);
+          root->failure_reason);
       return false;
     }
     return true;

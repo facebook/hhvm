@@ -231,15 +231,97 @@ impl_with_iter! {
     <K, V> std::collections::BTreeMap<K, V>, len
 }
 
-impl_with_iter! {
-    <T> <S> std::collections::HashSet<T, S>, len
+impl<K, V, S> EqModuloPos for std::collections::HashMap<K, V, S>
+where
+    K: Eq + std::hash::Hash,
+    V: EqModuloPos,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        // Since we've checked that both collections have the same number of
+        // elements, and all keys are distinct, iterating over one set is
+        // sufficient. That is to say, if all members of `self` are in `other`,
+        // we can assume that all members of `other` are in `self`.
+        // c.f. the impl of PartialEq: https://github.com/rust-lang/rust/blob/1.63.0/library/std/src/collections/hash/map.rs#L1275
+        self.iter()
+            .all(|(key, value)| other.get(key).map_or(false, |v| value.eq_modulo_pos(v)))
+    }
 }
-impl_with_iter! {
-    <K, V> <S> std::collections::HashMap<K, V, S>, len
+impl<K, V, S> EqModuloPosAndReason for std::collections::HashMap<K, V, S>
+where
+    K: Eq + std::hash::Hash,
+    V: EqModuloPosAndReason,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        self.iter().all(|(key, value)| {
+            other
+                .get(key)
+                .map_or(false, |v| value.eq_modulo_pos_and_reason(v))
+        })
+    }
 }
-impl_with_iter! {
-    <T> <S> indexmap::IndexSet<T, S>, len
+
+impl<K, V, S> EqModuloPos for indexmap::IndexMap<K, V, S>
+where
+    K: Eq + std::hash::Hash,
+    V: EqModuloPos,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        self.iter()
+            .all(|(key, value)| other.get(key).map_or(false, |v| value.eq_modulo_pos(v)))
+    }
 }
-impl_with_iter! {
-    <K, V> <S> indexmap::IndexMap<K, V, S>, len
+impl<K, V, S> EqModuloPosAndReason for indexmap::IndexMap<K, V, S>
+where
+    K: Eq + std::hash::Hash,
+    V: EqModuloPosAndReason,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        self.iter().all(|(key, value)| {
+            other
+                .get(key)
+                .map_or(false, |v| value.eq_modulo_pos_and_reason(v))
+        })
+    }
+}
+
+impl<T, S> EqModuloPos for std::collections::HashSet<T, S>
+where
+    T: Eq + std::hash::Hash,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        self.iter().all(|key| other.contains(key))
+    }
+}
+
+impl<T, S> EqModuloPos for indexmap::IndexSet<T, S>
+where
+    T: Eq + std::hash::Hash,
+    S: std::hash::BuildHasher,
+{
+    fn eq_modulo_pos(&self, other: &Self) -> bool {
+        if self.len() != other.len() {
+            return false;
+        }
+        self.iter().all(|key| other.contains(key))
+    }
 }

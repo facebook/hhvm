@@ -284,7 +284,7 @@ Optional<DumpFile> dump_file(const char* name) {
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
-  transport->addHeader("Content-Type", "text/plain");
+  transport->addHeader("Content-Type", "text/plain; charset=utf-8");
   std::string cmd = transport->getCommand();
 
   do {

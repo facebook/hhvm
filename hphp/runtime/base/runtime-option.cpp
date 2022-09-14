@@ -304,15 +304,16 @@ ParserEnv RepoOptionsFlags::getParserEnvironment() const {
     };
 }
 
-std::string RepoOptionsFlags::getAliasedNamespacesConfig() const {
-  folly::dynamic m_config = folly::dynamic::object();
-  m_config["hhvm.aliased_namespaces"] =
-    folly::dynamic::object("global_value", folly::toDynamic(AliasedNamespaces));
-  return folly::toJson(m_config);
+void RepoOptionsFlags::initAliasedNamespaces(hackc::NativeEnv& env) const {
+  for (auto& [k, v] : AliasedNamespaces) {
+    env.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});
+  }
 }
 
 void RepoOptionsFlags::initDeclConfig(hackc::DeclParserConfig& config) const {
-  config.aliased_namespaces = getAliasedNamespacesConfig();
+  for (auto& [k, v] : AliasedNamespaces) {
+    config.aliased_namespaces.emplace_back(hackc::StringMapEntry{k, v});
+  }
   config.disable_xhp_element_mangling = DisableXHPElementMangling;
   config.interpret_soft_types_as_like_types = true;
   config.allow_new_attribute_syntax = AllowNewAttributeSyntax;

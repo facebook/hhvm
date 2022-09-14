@@ -8,7 +8,6 @@
 #pragma once
 
 #include <folly/Range.h>
-#include <optional>
 #include "watchman/fs/FileDescriptor.h"
 #include "watchman/watchman_string.h"
 
@@ -22,7 +21,7 @@ CaseSensitivity getCaseSensitivityForPath(const char* path);
 
 // Returns the name of the filesystem for the specified path
 w_string w_fstype(const char* path);
-std::optional<w_string> find_fstype_in_linux_proc_mounts(
+w_string find_fstype_in_linux_proc_mounts(
     std::string_view path,
     std::string_view procMountsData);
 

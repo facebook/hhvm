@@ -15,6 +15,5 @@ error = { path = "../../../error/cargo/error" }
 hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 ocamlrep = { path = "../../../../ocamlrep" }
-options = { path = "../options" }
 oxidized = { path = "../../../../oxidized" }
 rewrite_xml = { path = "../rewrite_xml" }

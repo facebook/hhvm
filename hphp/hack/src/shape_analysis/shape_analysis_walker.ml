@@ -331,11 +331,49 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       {
         hack_pos = fst name;
         origin = __LINE__;
-        constraint_ = HT.Identifier name;
+        constraint_ =
+          HT.ConstantIdentifier
+            {
+              HT.ident_pos = fst name;
+              HT.class_name_opt = None;
+              HT.const_name = snd name;
+            };
       }
     in
     let env = Env.add_inter_constraint env constr_ in
-    (env, Some (Inter (HT.Identifier name)))
+    ( env,
+      Some
+        (Inter
+           (HT.ConstantIdentifier
+              {
+                HT.ident_pos = fst name;
+                HT.class_name_opt = None;
+                HT.const_name = snd name;
+              })) )
+  | A.Class_const ((_, ident_pos, A.CI class_id), (_, const_name)) ->
+    let constr_ =
+      {
+        hack_pos = ident_pos;
+        origin = __LINE__;
+        constraint_ =
+          HT.ConstantIdentifier
+            {
+              HT.ident_pos;
+              HT.class_name_opt = Some (snd class_id);
+              HT.const_name;
+            };
+      }
+    in
+    let env = Env.add_inter_constraint env constr_ in
+    ( env,
+      Some
+        (Inter
+           (HT.ConstantIdentifier
+              {
+                HT.ident_pos;
+                HT.class_name_opt = Some (snd class_id);
+                HT.const_name;
+              })) )
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)
@@ -571,6 +609,33 @@ let callable id tast_env params ~return body =
   let env = block env body.A.fb_ast in
   ((env.constraints, env.inter_constraints), env.errors)
 
+let marker_constraint_of ~hack_pos (marker_pos : Pos.t) : constraint_ decorated
+    =
+  { hack_pos; origin = __LINE__; constraint_ = Marks (Constant, marker_pos) }
+
+let constant_constraint_of
+    ~hack_pos (constant_pos : Pos.t) (constant_name : string) :
+    inter_constraint_ decorated =
+  {
+    hack_pos;
+    origin = __LINE__;
+    constraint_ = HT.Constant (constant_pos, constant_name);
+  }
+
+let subset_constraint_of
+    ~hack_pos (ent1 : entity_) ~constant_pos (constant_name : string) :
+    constraint_ decorated =
+  {
+    hack_pos;
+    origin = __LINE__;
+    constraint_ =
+      Subsets (ent1, Inter (HT.Constant (constant_pos, constant_name)));
+  }
+
+let initial_constraint_of ~hack_pos (ent : entity_) :
+    inter_constraint_ decorated =
+  { hack_pos; origin = __LINE__; constraint_ = HT.ConstantInitial ent }
+
 let program (ctx : Provider_context.t) (tast : Tast.program) =
   let def (def : T.def) : (string * (decorated_constraints * Error.t list)) list
       =
@@ -579,51 +644,96 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
     | A.Fun fd ->
       let A.{ f_body; f_name = (_, id); f_params; f_ret; _ } = fd.A.fd_fun in
       [(id, callable id tast_env f_params ~return:f_ret f_body)]
-    | A.Class A.{ c_methods; c_name = (_, class_name); _ } ->
+    | A.Class A.{ c_methods; c_name = (_, class_name); c_consts; c_extends; _ }
+      ->
       let handle_method
           A.{ m_body; m_name = (_, method_name); m_params; m_ret; _ } =
         let id = class_name ^ "::" ^ method_name in
         (id, callable id tast_env m_params ~return:m_ret m_body)
       in
+      let handle_constant A.{ cc_type; cc_id; cc_kind; _ } =
+        let id = class_name ^ "::" ^ snd cc_id in
+        let hint_pos = dict_pos_of_hint cc_type in
+        let (env, ent) =
+          let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
+          match cc_kind with
+          | A.CCAbstract initial_expr_opt ->
+            (match initial_expr_opt with
+            | Some initial_expr -> expr_ empty_env initial_expr
+            | None -> (empty_env, None))
+          | A.CCConcrete initial_expr -> expr_ empty_env initial_expr
+        in
+        let marker_constraint =
+          marker_constraint_of ~hack_pos:hint_pos hint_pos
+        in
+        let env = Env.add_constraint env marker_constraint in
+        let constant_constraint =
+          constant_constraint_of ~hack_pos:(fst cc_id) hint_pos id
+        in
+        let env = Env.add_inter_constraint env constant_constraint in
+        let env =
+          match ent with
+          | Some ent_ ->
+            let subset_constr =
+              subset_constraint_of
+                ~hack_pos:(fst cc_id)
+                ent_
+                ~constant_pos:hint_pos
+                id
+            in
+            let initial_constr =
+              initial_constraint_of ~hack_pos:(fst cc_id) ent_
+            in
+            let env = Env.add_constraint env subset_constr in
+            Env.add_inter_constraint env initial_constr
+          | None -> env
+        in
+        (id, ((env.constraints, env.inter_constraints), env.errors))
+      in
+      let handle_extends class_hint =
+        match class_hint with
+        | (pos, A.Happly (class_id_of_extends, _)) ->
+          let extends_constr =
+            {
+              hack_pos = pos;
+              origin = __LINE__;
+              constraint_ = HT.ClassExtends class_id_of_extends;
+            }
+          in
+          let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
+          let env = Env.add_inter_constraint empty_env extends_constr in
+          Some
+            (class_name, ((env.constraints, env.inter_constraints), env.errors))
+        | _ -> None
+      in
       List.map ~f:handle_method c_methods
+      @ List.map ~f:handle_constant c_consts
+      @ List.filter_map ~f:handle_extends c_extends
     | A.Constant A.{ cst_name; cst_value; cst_type; _ } ->
       let hint_pos = dict_pos_of_hint cst_type in
       let (env, ent) =
         expr_ (Env.init tast_env [] [] ~return:None LMap.empty) cst_value
       in
       let marker_constraint =
-        {
-          hack_pos = hint_pos;
-          origin = __LINE__;
-          constraint_ = Marks (Constant, hint_pos);
-        }
+        marker_constraint_of ~hack_pos:hint_pos hint_pos
       in
       let env = Env.add_constraint env marker_constraint in
       let constant_constraint =
-        {
-          hack_pos = fst cst_name;
-          origin = __LINE__;
-          constraint_ = HT.Constant (hint_pos, snd cst_name);
-        }
+        constant_constraint_of ~hack_pos:(fst cst_name) hint_pos (snd cst_name)
       in
       let env = Env.add_inter_constraint env constant_constraint in
       let env =
         match ent with
         | Some ent_ ->
           let subset_constr =
-            {
-              hack_pos = fst cst_name;
-              origin = __LINE__;
-              constraint_ =
-                Subsets (ent_, Inter (HT.Constant (hint_pos, snd cst_name)));
-            }
+            subset_constraint_of
+              ~hack_pos:(fst cst_name)
+              ent_
+              ~constant_pos:hint_pos
+              (snd cst_name)
           in
           let initial_constr =
-            {
-              hack_pos = fst cst_name;
-              origin = __LINE__;
-              constraint_ = HT.ConstantInitial ent_;
-            }
+            initial_constraint_of ~hack_pos:(fst cst_name) ent_
           in
           let env = Env.add_constraint env subset_constr in
           Env.add_inter_constraint env initial_constr

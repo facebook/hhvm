@@ -10,6 +10,7 @@
 #include <ostream>
 #include <stdexcept>
 #include "watchman/thirdparty/jansson/utf.h"
+#include "watchman/watchman_hash.h"
 #include "watchman/watchman_string.h"
 
 // Filename mapping and handling strategy
@@ -29,14 +30,9 @@
 #define SYMLINK_ESCAPE L"\\??\\"
 #define SYMLINK_ESCAPE_LEN 4
 
-namespace watchman {
-struct StringHeader;
-}
-
-using namespace watchman;
-
-static void w_string_delref(StringHeader* str);
-static StringHeader*
+static void w_string_addref(w_string_t* str);
+static void w_string_delref(w_string_t* str);
+static w_string_t*
 w_string_new_len_typed(const char* str, uint32_t len, w_string_type_t type);
 
 // string piece
@@ -52,9 +48,17 @@ w_string w_string_piece::asWString(w_string_type_t stringType) const {
 }
 
 w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
+  char* buf;
+  w_string_t* s;
+
   /* need to make a lowercase version */
-  auto* s = StringHeader::alloc(size(), stringType);
-  char* buf = s->buf();
+  s = (w_string_t*)(new char[sizeof(*s) + size() + 1]);
+  new (s) w_string_t;
+
+  s->refcnt = 1;
+  s->len = size();
+  buf = const_cast<char*>(s->buf);
+  s->type = stringType;
 
   auto cursor = str_;
   const char* const end = str_ + len_;
@@ -66,19 +70,27 @@ w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
   }
   *buf = 0;
 
-  return w_string{s};
+  return w_string(s, false);
 }
 
 std::optional<w_string> w_string_piece::asLowerCaseSuffix(
     w_string_type_t stringType) const {
+  char* buf;
+  w_string_t* s;
+
   w_string_piece suffixPiece = this->suffix();
   if (suffixPiece.empty()) {
     return std::nullopt;
   }
 
   /* need to make a lowercase version */
-  auto* s = StringHeader::alloc(suffixPiece.size(), stringType);
-  char* buf = s->buf();
+  s = (w_string_t*)(new char[sizeof(*s) + suffixPiece.size() + 1]);
+  new (s) w_string_t;
+
+  s->refcnt = 1;
+  s->len = suffixPiece.size();
+  buf = const_cast<char*>(s->buf);
+  s->type = stringType;
 
   auto cursor = suffixPiece.str_;
   const char* const end = suffixPiece.str_ + suffixPiece.len_;
@@ -90,7 +102,7 @@ std::optional<w_string> w_string_piece::asLowerCaseSuffix(
   }
   *buf = 0;
 
-  return w_string{s};
+  return w_string(s, false);
 }
 
 w_string w_string_piece::asUTF8Clean() const {
@@ -238,15 +250,23 @@ bool w_string_piece::startsWithCaseInsensitive(w_string_piece prefix) const {
 
 // string
 
+w_string::w_string(std::nullptr_t) {}
+
 w_string::~w_string() {
   if (str_) {
     w_string_delref(str_);
   }
 }
 
+w_string::w_string(w_string_t* str, bool addRef) : str_(str) {
+  if (str_ && addRef) {
+    w_string_addref(str_);
+  }
+}
+
 w_string::w_string(const w_string& other) : str_(other.str_) {
   if (str_) {
-    str_->addref();
+    w_string_addref(str_);
   }
 }
 
@@ -284,8 +304,13 @@ w_string::w_string(const WCHAR* wpath, size_t pathlen) {
         GetLastError(), std::system_category(), "WideCharToMultiByte");
   }
 
-  str_ = StringHeader::alloc(len, W_STRING_UNICODE);
-  char* buf = str_->buf();
+  str_ = (w_string_t*)(new char[sizeof(w_string_t) + len + 1]);
+  new (str_) w_string_t;
+
+  str_->refcnt = 1;
+  str_->len = len;
+  auto buf = const_cast<char*>(str_->buf);
+  str_->type = W_STRING_UNICODE;
 
   res = WideCharToMultiByte(
       CP_UTF8, 0, wpath, pathlen, buf, len, nullptr, nullptr);
@@ -323,7 +348,7 @@ w_string& w_string::operator=(const w_string& other) {
   }
   str_ = other.str_;
   if (str_) {
-    str_->addref();
+    w_string_addref(str_);
   }
 
   return *this;
@@ -350,28 +375,6 @@ void w_string::reset() noexcept {
   }
 }
 
-inline uint32_t hash_string(const char* str, size_t len) {
-  // Watchman used to use Bob Jenkins's lookup3. Many good hash functions exist,
-  // but, empirically, the standard library's are faster than lookup3 and
-  // convenient.
-  size_t hash = std::hash<std::string_view>{}(std::string_view(str, len));
-  // Supporting 32-bit is easy: we can skip the mix.
-  static_assert(
-      sizeof(size_t) == sizeof(uint64_t), "32-bit platforms are not supported");
-
-  // We could use do fancy mixing like with twang_32from64 but a simple xor
-  // should be sufficient for hash tables.
-  return (hash >> 32) ^ hash;
-}
-
-StringHash w_string::computeAndStoreHash() const noexcept {
-  StringHash hash = hash_string(str_->buf(), str_->len);
-
-  str_->_hval.store(hash, std::memory_order_release);
-  str_->set_hval_computed();
-  return hash;
-}
-
 static inline uint32_t checked_len(size_t len) {
   if (len > UINT32_MAX) {
     throw std::range_error("string length exceeds UINT32_MAX");
@@ -380,10 +383,14 @@ static inline uint32_t checked_len(size_t len) {
 }
 
 w_string::w_string(const char* buf, size_t len, w_string_type_t stringType)
-    : w_string{w_string_new_len_typed(buf, checked_len(len), stringType)} {}
+    : w_string(
+          w_string_new_len_typed(buf, checked_len(len), stringType),
+          false) {}
 
 w_string::w_string(const char* buf, w_string_type_t stringType)
-    : w_string{w_string_new_len_typed(buf, strlen_uint32(buf), stringType)} {}
+    : w_string(
+          w_string_new_len_typed(buf, strlen_uint32(buf), stringType),
+          false) {}
 
 w_string w_string::dirName() const {
   return w_string_piece(*this).dirName().asWString();
@@ -398,6 +405,8 @@ std::optional<w_string> w_string::asLowerCaseSuffix() const {
 }
 
 w_string w_string::normalizeSeparators(char targetSeparator) const {
+  w_string_t* s;
+  char* buf;
   uint32_t i, len;
 
   len = str_->len;
@@ -406,28 +415,30 @@ w_string w_string::normalizeSeparators(char targetSeparator) const {
     return *this;
   }
 
-  char* thisbuf = str_->buf();
-
   // This doesn't do any special UNC or path len escape prefix handling
   // on windows.  We don't currently use it in a way that would require it.
 
   // Trim any trailing dir seps
   while (len > 0) {
-    if (thisbuf[len - 1] == '/' || thisbuf[len - 1] == '\\') {
+    if (str_->buf[len - 1] == '/' || str_->buf[len - 1] == '\\') {
       --len;
     } else {
       break;
     }
   }
 
-  auto* s = StringHeader::alloc(len, W_STRING_BYTE);
-  char* buf = s->buf();
+  s = (w_string_t*)(new char[sizeof(*s) + len + 1]);
+  new (s) w_string_t;
+
+  s->refcnt = 1;
+  s->len = len;
+  buf = const_cast<char*>(s->buf);
 
   for (i = 0; i < len; i++) {
-    if (thisbuf[i] == '/' || thisbuf[i] == '\\') {
+    if (str_->buf[i] == '/' || str_->buf[i] == '\\') {
       buf[i] = targetSeparator;
     } else {
-      buf[i] = thisbuf[i];
+      buf[i] = str_->buf[i];
     }
   }
   buf[len] = 0;
@@ -449,7 +460,7 @@ bool w_string::operator==(const w_string& other) const {
     // identity fast path
     return true;
   } else if (
-      str_->has_hval() && other.str_->has_hval() &&
+      str_->hval_computed && other.str_->hval_computed &&
       str_->_hval != other.str_->_hval) {
     return false;
   } else {
@@ -463,20 +474,25 @@ bool w_string::operator!=(const w_string& other) const {
 
 w_string w_string::pathCat(std::initializer_list<w_string_piece> elems) {
   uint32_t length = 0;
+  w_string_t* s;
+  char* buf;
 
   for (auto& p : elems) {
     length += p.size() + 1;
   }
 
-  auto* s = StringHeader::alloc(length, W_STRING_BYTE);
-  char* buf = s->buf();
+  s = (w_string_t*)(new char[sizeof(*s) + length]);
+  new (s) w_string_t;
+
+  s->refcnt = 1;
+  buf = const_cast<char*>(s->buf);
 
   for (auto& p : elems) {
     if (p.size() == 0) {
       // Skip empty strings
       continue;
     }
-    if (buf != s->buf()) {
+    if (buf != s->buf) {
       *buf = '/';
       ++buf;
     }
@@ -484,15 +500,19 @@ w_string w_string::pathCat(std::initializer_list<w_string_piece> elems) {
     buf += p.size();
   }
   *buf = 0;
-  // Post-hoc length adjustment.
-  // TODO: correctly calculate destination length up front.
-  s->len = buf - s->buf();
+  s->len = buf - s->buf;
 
-  return w_string{s};
+  return w_string(s, false);
 }
 
-StringHash w_string_piece::hashValue() const noexcept {
-  return hash_string(data(), size());
+uint32_t w_string_compute_hval(w_string_t* str) {
+  str->_hval = w_hash_bytes(str->buf, str->len, 0);
+  str->hval_computed = 1;
+  return str->_hval;
+}
+
+uint32_t w_string_piece::hashValue() const {
+  return w_hash_bytes(data(), size(), 0);
 }
 
 uint32_t strlen_uint32(const char* str) {
@@ -588,24 +608,40 @@ std::wstring w_string_piece::asWideUNC() const {
 
 #endif
 
-static StringHeader*
+static w_string_t*
 w_string_new_len_typed(const char* str, uint32_t len, w_string_type_t type) {
-  auto* s = StringHeader::alloc(len, type);
-  char* buf = s->buf();
-  if (len) {
+  w_string_t* s;
+  char* buf;
+
+  s = (w_string_t*)(new char[sizeof(*s) + len + 1]);
+  new (s) w_string_t;
+
+  s->refcnt = 1;
+  s->len = len;
+  buf = const_cast<char*>(s->buf);
+  if (str) {
     memcpy(buf, str, len);
   }
   buf[len] = 0;
+  s->type = type;
+
   return s;
 }
 
-void w_string_delref(StringHeader* str) {
-  if (str->decref()) {
-    // Call the destructor.  We can't use regular delete because
-    // we allocated with malloc().
-    str->~StringHeader();
-    free(str);
+void w_string_addref(w_string_t* str) {
+  ++str->refcnt;
+}
+
+void w_string_delref(w_string_t* str) {
+  if (--str->refcnt != 0) {
+    return;
   }
+  // Call the destructor.  We can't use regular delete because
+  // we allocated using operator new[], and we can't use delete[]
+  // directly either because the type doesn't match what we allocated.
+  str->~w_string_t();
+  // Release the raw memory.
+  delete[](char*) str;
 }
 
 bool w_string_equal_caseless(w_string_piece a, w_string_piece b) {

@@ -73,3 +73,28 @@ TEST(SchemaTest, Fields) {
       *field.type()->toThrift().name()->structType_ref()->uri_ref(),
       "facebook.com/thrift/test/schema/Empty");
 }
+
+TEST(SchemaTest, Defaults) {
+  EXPECT_THROW(
+      schema_constants::getValue(apache::thrift::type::ValueId{}),
+      std::out_of_range);
+  EXPECT_THROW(
+      schema_constants::getValue(apache::thrift::type::ValueId{42}),
+      std::out_of_range);
+
+  auto schema = schema_constants::schemaDefaults();
+  EXPECT_EQ(schema.fields()->size(), 2);
+
+  // 1: i32 none;
+  auto field = schema.fields()->at(0);
+  EXPECT_EQ(*field.name(), "none");
+  EXPECT_EQ(*field.customDefault(), apache::thrift::type::ValueId{});
+
+  // 2: i32 some = 42;
+  field = schema.fields()->at(1);
+  EXPECT_EQ(*field.name(), "some");
+  EXPECT_EQ(
+      schema_constants::getValue(*field.customDefault())
+          .as<apache::thrift::type::i32_t>(),
+      42);
+}

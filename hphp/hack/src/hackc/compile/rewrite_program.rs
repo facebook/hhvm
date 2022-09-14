@@ -11,7 +11,6 @@ use error::Result;
 use hack_macro::hack_stmt;
 use hhbc::decl_vars;
 use ocamlrep::rc::RcOc;
-use options::CompilerFlags;
 use oxidized::ast;
 use oxidized::ast::Def;
 use oxidized::ast::FunDef;
@@ -77,11 +76,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         }
     }
 
-    if emitter
-        .options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::CONSTANT_FOLDING)
-    {
+    if emitter.options().compiler_flags.constant_folding {
         constant_folder::fold_program(prog, emitter)
             .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
     }

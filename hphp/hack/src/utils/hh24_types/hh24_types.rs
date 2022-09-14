@@ -357,6 +357,7 @@ impl ToplevelCanonSymbolHash {
     Eq,
     PartialOrd,
     Ord,
+    Hash,
     serde::Deserialize,
     serde::Serialize
 )]
@@ -427,6 +428,7 @@ impl DependencyHash {
     Debug,
     PartialEq,
     Eq,
+    Hash,
     PartialOrd,
     Ord,
     serde::Deserialize,

@@ -21,7 +21,6 @@ use naming_special_names_rust::pseudo_functions;
 use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use ocamlrep::rc::RcOc;
-use options::HhvmFlags;
 use options::Options;
 use oxidized::aast_visitor;
 use oxidized::aast_visitor::visit_mut;
@@ -1048,12 +1047,7 @@ impl<'ast, 'a: 'b, 'b, 'arena: 'a> VisitorMut<'ast> for ClosureVisitor<'a, 'b, '
                 }
                 Expr_::Call(x)
                     if is_meth_caller(&x)
-                        && self
-                            .ro_state
-                            .options
-                            .hhvm
-                            .flags
-                            .contains(HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS) =>
+                        && self.ro_state.options.hhbc.emit_meth_caller_func_pointers =>
                 {
                     self.visit_meth_caller_funcptr(scope, x, &*pos)?
                 }

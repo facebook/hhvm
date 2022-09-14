@@ -11,12 +11,11 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+use anyhow::Context;
 use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
-use compile::HhbcFlags;
 use compile::NativeEnv;
-use compile::ParserFlags;
 use compile::Profile;
 use decl_provider::DeclProvider;
 use decl_provider::Error;
@@ -24,6 +23,7 @@ use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
+use options::HhbcFlags;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -127,10 +127,6 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Nativ
             log_extern_compiler_perf: true,
             ..Default::default()
         },
-        parser_flags: ParserFlags {
-            enable_enum_classes: true,
-            ..Default::default()
-        },
         flags: opts.env_flags.clone(),
         ..Default::default()
     }
@@ -159,7 +155,8 @@ pub(crate) fn process_single_file(
 pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
-        let source_text = std::fs::read(&path)?;
+        let source_text = std::fs::read(&path)
+            .with_context(|| format!("Unable to read file '{}'", path.display()))?;
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, None)?;
         w.write_all(&hhas)?;

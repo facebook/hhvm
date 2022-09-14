@@ -34,20 +34,6 @@ pub trait Consable: Eq + Hash + Sized + 'static {
     fn conser() -> &'static Conser<Self>;
 }
 
-#[macro_export]
-macro_rules! consable {
-    ( $ty:ty ) => {
-        impl crate::Consable for $ty {
-            #[inline]
-            fn conser() -> &'static crate::Conser<$ty> {
-                static CONSER: crate::Lazy<crate::Conser<$ty>> =
-                    crate::Lazy::new(crate::Conser::new);
-                &CONSER
-            }
-        }
-    };
-}
-
 impl<T> Clone for Hc<T> {
     #[inline]
     fn clone(&self) -> Self {

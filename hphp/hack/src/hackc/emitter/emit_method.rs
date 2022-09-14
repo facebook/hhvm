@@ -23,7 +23,6 @@ use instruction_sequence::instr;
 use naming_special_names_rust::classes;
 use naming_special_names_rust::user_attributes;
 use ocamlrep::rc::RcOc;
-use options::HhvmFlags;
 use options::Options;
 use oxidized::ast;
 use oxidized::ast_defs;
@@ -325,7 +324,5 @@ pub fn from_ast<'a, 'arena, 'decl>(
 }
 
 fn is_method_interceptable(opts: &Options) -> bool {
-    opts.hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
+    opts.hhbc.jit_enable_rename_function
 }

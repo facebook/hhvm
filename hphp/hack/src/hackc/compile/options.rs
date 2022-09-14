@@ -43,30 +43,11 @@ impl Default for CompilerFlags {
     }
 }
 
-prefixed_flags!(
-    HhvmFlags,
-    ARRAY_PROVENANCE,
-    EMIT_CLS_METH_POINTERS,
-    EMIT_METH_CALLER_FUNC_POINTERS,
-    ENABLE_INTRINSICS_EXTENSION,
-    FOLD_LAZY_CLASS_KEYS,
-    JIT_ENABLE_RENAME_FUNCTION,
-    LOG_EXTERN_COMPILER_PERF,
-);
-impl Default for HhvmFlags {
-    fn default() -> HhvmFlags {
-        HhvmFlags::EMIT_CLS_METH_POINTERS
-            | HhvmFlags::EMIT_METH_CALLER_FUNC_POINTERS
-            | HhvmFlags::FOLD_LAZY_CLASS_KEYS
-    }
-}
-
 #[derive(Clone, Debug, PartialEq)]
 pub struct Hhvm {
     pub aliased_namespaces: BTreeMap<String, String>,
     pub include_roots: BTreeMap<BString, BString>,
     pub emit_class_pointers: String,
-    pub flags: HhvmFlags,
     pub hack_lang: HackLang,
 }
 
@@ -76,7 +57,6 @@ impl Default for Hhvm {
             aliased_namespaces: Default::default(),
             include_roots: Default::default(),
             emit_class_pointers: "0".into(),
-            flags: Default::default(),
             hack_lang: Default::default(),
         }
     }
@@ -122,23 +102,6 @@ impl Default for LangFlags {
     }
 }
 
-prefixed_flags!(
-    Php7Flags, LTR_ASSIGN, // Left to right assignment
-    UVS,        // uniform variable syntax
-);
-impl Default for Php7Flags {
-    fn default() -> Php7Flags {
-        Php7Flags::empty()
-    }
-}
-
-prefixed_flags!(RepoFlags, AUTHORITATIVE,);
-impl Default for RepoFlags {
-    fn default() -> RepoFlags {
-        RepoFlags::empty()
-    }
-}
-
 #[derive(Clone, Default, PartialEq, Debug)]
 pub struct Server {
     pub include_search_paths: Vec<BString>,
@@ -149,17 +112,14 @@ pub struct Options {
     pub doc_root: BString,
     pub hack_compiler_flags: CompilerFlags,
     pub hhvm: Hhvm,
+    pub hhbc: HhbcFlags,
     pub max_array_elem_size_on_the_stack: usize,
-    pub php7_flags: Php7Flags,
-    pub repo_flags: RepoFlags,
     pub server: Server,
 }
 
 impl Options {
     pub fn log_extern_compiler_perf(&self) -> bool {
-        self.hhvm
-            .flags
-            .contains(HhvmFlags::LOG_EXTERN_COMPILER_PERF)
+        self.hhbc.log_extern_compiler_perf
     }
 }
 
@@ -169,8 +129,7 @@ impl Default for Options {
             max_array_elem_size_on_the_stack: 64,
             hack_compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
-            php7_flags: Php7Flags::default(),
-            repo_flags: RepoFlags::default(),
+            hhbc: HhbcFlags::default(),
             server: Server::default(),
             // the rest is zeroed out (cannot do ..Default::default() as it'd be recursive)
             doc_root: "".into(),
@@ -241,7 +200,7 @@ impl bytecode_printer::IncludeProcessor for Options {
 
 impl Options {
     pub fn array_provenance(&self) -> bool {
-        self.hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE)
+        self.hhbc.array_provenance
     }
 
     pub fn check_int_overflow(&self) -> bool {
@@ -254,6 +213,41 @@ impl Options {
 
     pub fn emit_class_pointers(&self) -> i32 {
         self.hhvm.emit_class_pointers.parse::<i32>().unwrap()
+    }
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct HhbcFlags {
+    /// PHP7 left-to-right assignment semantics
+    pub ltr_assign: bool,
+
+    /// PHP7 Uniform Variable Syntax
+    pub uvs: bool,
+
+    pub repo_authoritative: bool,
+    pub jit_enable_rename_function: bool,
+    pub log_extern_compiler_perf: bool,
+    pub enable_intrinsics_extension: bool,
+    pub emit_cls_meth_pointers: bool,
+    pub emit_meth_caller_func_pointers: bool,
+    pub array_provenance: bool,
+    pub fold_lazy_class_keys: bool,
+}
+
+impl Default for HhbcFlags {
+    fn default() -> Self {
+        Self {
+            ltr_assign: false,
+            uvs: false,
+            repo_authoritative: false,
+            jit_enable_rename_function: false,
+            log_extern_compiler_perf: false,
+            enable_intrinsics_extension: false,
+            emit_cls_meth_pointers: true,
+            emit_meth_caller_func_pointers: true,
+            array_provenance: false,
+            fold_lazy_class_keys: true,
+        }
     }
 }
 

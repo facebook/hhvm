@@ -16,7 +16,6 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use compile::EnvFlags;
-use compile::HhbcFlags;
 use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
@@ -25,6 +24,7 @@ use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::Unit;
+use options::HhbcFlags;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;

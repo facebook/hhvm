@@ -60,7 +60,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::HhvmFlags;
 use options::LangFlags;
 use options::Options;
 use oxidized::aast;
@@ -834,11 +833,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
 
-    let cant_inline_gen_functions = !emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    let cant_inline_gen_functions = !emitter.options().hhbc.jit_enable_rename_function;
     match e.as_call() {
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
@@ -2955,11 +2950,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
     let alloc = env.arena;
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
-    {
+    if e.options().hhbc.emit_cls_meth_pointers {
         let method_name = match &meth.2 {
             Expr_::String(method_name) => {
                 hhbc::MethodName::new(Str::new_str(alloc, method_name.to_string().as_str()))
@@ -3473,11 +3464,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let jit_enable_rename_function = e
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    let jit_enable_rename_function = e.options().hhbc.jit_enable_rename_function;
     use ast::Expr;
     use ast::Expr_;
     match (&expr.2, &args[..], uarg) {
@@ -6147,9 +6134,8 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     rhs_readonly: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_;
-    use options::Php7Flags;
 
-    let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
+    let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
         Expr_::List(exprs) => {
             let last_non_omitted = if last_usage {

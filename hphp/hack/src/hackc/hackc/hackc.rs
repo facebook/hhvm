@@ -20,7 +20,6 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use ::compile::EnvFlags;
-use ::compile::HhbcFlags;
 use ::compile::NativeEnv;
 use ::compile::ParserFlags;
 use anyhow::Result;
@@ -212,7 +211,7 @@ impl Opts {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
         let parser_flags = ParserFlags::from_hhvm_config(&hhvm_config)?;
-        let hhbc_flags = HhbcFlags::from_hhvm_config(&hhvm_config)?;
+        let hhbc_flags = hhvm_config::init_hhbc_flags(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
             aliased_namespaces: auto_namespace_map().into_iter().collect(),

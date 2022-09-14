@@ -29,9 +29,7 @@ use hhvm_types_ffi::ffi::Attr;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
-use options::HhvmFlags;
 use options::Options;
-use options::RepoFlags;
 use oxidized::ast;
 use oxidized::pos::Pos;
 
@@ -41,10 +39,7 @@ use crate::emit_memoize_helpers;
 use crate::emit_param;
 
 pub fn is_interceptable(opts: &Options) -> bool {
-    opts.hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION)
-        && !opts.repo_flags.contains(RepoFlags::AUTHORITATIVE)
+    opts.hhbc.jit_enable_rename_function && !opts.hhbc.repo_authoritative
 }
 
 pub(crate) fn get_attrs_for_fun<'a, 'arena, 'decl>(

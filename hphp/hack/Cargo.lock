@@ -148,12 +148,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ascii"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
-
-[[package]]
 name = "ast_and_decl_parser"
 version = "0.0.0"
 dependencies = [
@@ -559,6 +553,7 @@ dependencies = [
  "libc",
  "no_pos_hash",
  "ocamlrep",
+ "options",
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
@@ -611,7 +606,6 @@ dependencies = [
  "indexmap",
  "itertools 0.10.3",
  "naming_special_names_rust",
- "options",
  "oxidized",
  "stack_limit",
 ]
@@ -1462,6 +1456,7 @@ dependencies = [
  "hash",
  "hdrhistogram",
  "hhbc",
+ "hhvm_config",
  "hhvm_options",
  "hhvm_types_ffi",
  "ir",
@@ -1748,6 +1743,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "hhvm_config"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "hhvm_options",
+ "options",
+]
+
+[[package]]
 name = "hhvm_hhbc_defs_ffi"
 version = "0.0.0"
 dependencies = [
@@ -1866,7 +1870,6 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
- "ascii",
  "bstr",
  "ffi",
  "hash",

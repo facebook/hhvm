@@ -11,7 +11,6 @@ use hhbc::ClassName;
 use hhbc::TypedValue;
 use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
-use options::HhvmFlags;
 
 pub fn typed_value_into_instr<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
@@ -49,7 +48,7 @@ fn get_array_identifier<'arena, 'decl>(
     tv: TypedValue<'arena>,
 ) -> &'arena str {
     let alloc = e.alloc;
-    if e.options().hhvm.flags.contains(HhvmFlags::ARRAY_PROVENANCE) {
+    if e.options().hhbc.array_provenance {
         e.adata_state_mut().push(alloc, tv)
     } else {
         e.adata_state_mut().intern(alloc, tv)

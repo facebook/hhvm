@@ -5,7 +5,6 @@
 
 pub mod dump_expr_tree;
 
-use std::collections::BTreeMap;
 use std::fmt;
 use std::time::Duration;
 use std::time::Instant;
@@ -17,7 +16,6 @@ use aast_parser::AastParser;
 use aast_parser::Error as AastError;
 use anyhow::anyhow;
 use anyhow::Result;
-use bstr::BString;
 use bytecode_printer::Context;
 use decl_provider::DeclProvider;
 use emit_unit::emit_unit;
@@ -27,7 +25,6 @@ use error::ErrorKind;
 use hhbc::FatalOp;
 use hhbc::Unit;
 use ocamlrep::rc::RcOc;
-use options::HackLang;
 use options::HhbcFlags;
 use options::Hhvm;
 use options::Options;
@@ -48,12 +45,8 @@ use types::readonly_nonlocal_infer;
 #[derive(Debug)]
 pub struct NativeEnv {
     pub filepath: RelativePath,
-    pub aliased_namespaces: BTreeMap<String, String>,
-    pub include_roots: BTreeMap<BString, BString>,
-    pub emit_class_pointers: i32,
-    pub check_int_overflow: i32,
+    pub hhvm: Hhvm,
     pub hhbc_flags: HhbcFlags,
-    pub parser_options: ParserOptions,
     pub flags: EnvFlags,
 }
 
@@ -61,12 +54,8 @@ impl Default for NativeEnv {
     fn default() -> Self {
         Self {
             filepath: RelativePath::make(Prefix::Dummy, Default::default()),
-            aliased_namespaces: Default::default(),
-            include_roots: Default::default(),
-            emit_class_pointers: 0,
-            check_int_overflow: 0,
+            hhvm: Default::default(),
             hhbc_flags: HhbcFlags::default(),
-            parser_options: ParserOptions::default(),
             flags: EnvFlags::default(),
         }
     }
@@ -99,16 +88,11 @@ impl NativeEnv {
     fn to_options(&self) -> Options {
         Options {
             hhvm: Hhvm {
-                aliased_namespaces: self.aliased_namespaces.clone(),
-                include_roots: self.include_roots.clone(),
-                emit_class_pointers: self.emit_class_pointers,
-                hack_lang: HackLang {
-                    flags: ParserOptions {
-                        po_disable_legacy_soft_typehints: false,
-                        ..self.parser_options.clone()
-                    },
-                    check_int_overflow: self.check_int_overflow,
+                parser_options: ParserOptions {
+                    po_disable_legacy_soft_typehints: false,
+                    ..self.hhvm.parser_options.clone()
                 },
+                ..self.hhvm.clone()
             },
             hhbc: self.hhbc_flags.clone(),
             ..Default::default()
@@ -322,8 +306,7 @@ fn emit_unit_from_text<'arena, 'decl>(
         emitter
             .options()
             .hhvm
-            .hack_lang
-            .flags
+            .parser_options
             .po_disable_xhp_element_mangling,
     ));
 
@@ -384,11 +367,10 @@ fn create_emitter<'arena, 'decl>(
 
 fn create_parser_options(opts: &Options, type_directed: bool) -> ParserOptions {
     ParserOptions {
-        po_auto_namespace_map: opts.hhvm.aliased_namespaces_cloned().collect(),
         po_codegen: true,
         po_disallow_silence: false,
         tco_no_parser_readonly_check: type_directed,
-        ..opts.hhvm.hack_lang.flags.clone()
+        ..opts.hhvm.parser_options.clone()
     }
 }
 

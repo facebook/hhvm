@@ -24,7 +24,6 @@ use direct_decl_parser::Decls;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
 use options::HhbcFlags;
-use options::ParserOptions;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
@@ -126,10 +125,6 @@ pub(crate) fn native_env(filepath: RelativePath, opts: &SingleFileOpts) -> Nativ
             emit_meth_caller_func_pointers: true,
             fold_lazy_class_keys: true,
             log_extern_compiler_perf: true,
-            ..Default::default()
-        },
-        parser_options: ParserOptions {
-            po_enable_enum_classes: true,
             ..Default::default()
         },
         flags: opts.env_flags.clone(),

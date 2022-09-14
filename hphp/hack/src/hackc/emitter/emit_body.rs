@@ -371,7 +371,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     doc_comment: Option<DocComment>,
     opt_env: Option<&Env<'a, 'arena>>,
 ) -> Result<Body<'arena>> {
-    if emitter.options().hack_compiler_flags.relabel {
+    if emitter.options().compiler_flags.relabel {
         label_rewriter::relabel_function(alloc, &mut params, &mut body_instrs);
     }
     let num_iters = if is_memoize_wrapper {

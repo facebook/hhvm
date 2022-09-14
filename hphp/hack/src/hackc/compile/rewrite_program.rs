@@ -76,7 +76,7 @@ pub fn rewrite_program<'p, 'arena, 'emitter, 'decl>(
         }
     }
 
-    if emitter.options().hack_compiler_flags.constant_folding {
+    if emitter.options().compiler_flags.constant_folding {
         constant_folder::fold_program(prog, emitter)
             .map_err(|e| Error::unrecoverable(format!("{}", e)))?;
     }

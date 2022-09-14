@@ -26,6 +26,8 @@ use byte_unit::Byte;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use log::info;
+use options::Hhvm;
+use options::ParserOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
@@ -209,17 +211,21 @@ impl Opts {
     pub fn native_env(&self, path: PathBuf) -> Result<NativeEnv> {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
-        let parser_options = hhvm_config::parser_options(&hhvm_config)?;
+        let parser_options = ParserOptions {
+            po_auto_namespace_map: auto_namespace_map().collect(),
+            ..hhvm_config::parser_options(&hhvm_config)?
+        };
         let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
-            aliased_namespaces: auto_namespace_map().into_iter().collect(),
-            include_roots: Default::default(),
-            hhbc_flags,
-            parser_options,
+            hhvm: Hhvm {
+                include_roots: Default::default(),
+                parser_options,
+                emit_class_pointers: self.emit_class_pointers,
+                check_int_overflow: self.check_int_overflow,
+            },
             flags: self.env_flags.clone(),
-            emit_class_pointers: self.emit_class_pointers,
-            check_int_overflow: self.check_int_overflow,
+            hhbc_flags,
         })
     }
 }

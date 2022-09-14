@@ -103,7 +103,7 @@ pub fn desugar_and_print(filepath: RelativePath, flags: &EnvFlags) {
     let ns = RcOc::new(NamespaceEnv::empty(
         opts.hhvm.aliased_namespaces_cloned().collect(),
         true,
-        opts.hhvm.hack_lang.flags.po_disable_xhp_element_mangling,
+        opts.hhvm.parser_options.po_disable_xhp_element_mangling,
     ));
     match crate::parse_file(
         &opts,

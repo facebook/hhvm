@@ -34,39 +34,26 @@ impl Default for CompilerFlags {
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Hhvm {
-    pub aliased_namespaces: BTreeMap<String, String>,
     pub include_roots: BTreeMap<BString, BString>,
     pub emit_class_pointers: i32,
-    pub hack_lang: HackLang,
+    pub check_int_overflow: i32,
+    pub parser_options: ParserOptions,
 }
 
 impl Hhvm {
     pub fn aliased_namespaces_cloned(&self) -> impl Iterator<Item = (String, String)> + '_ {
-        self.aliased_namespaces
-            .iter()
-            .map(|(k, v)| (k.clone(), v.clone()))
+        self.parser_options.po_auto_namespace_map.iter().cloned()
     }
-}
-
-#[derive(Clone, Debug, Default, PartialEq)]
-pub struct HackLang {
-    pub flags: ParserOptions,
-    pub check_int_overflow: i32,
-}
-
-#[derive(Clone, Default, PartialEq, Debug)]
-pub struct Server {
-    pub include_search_paths: Vec<BString>,
 }
 
 #[derive(Clone, PartialEq, Debug)]
 pub struct Options {
     pub doc_root: BString,
-    pub hack_compiler_flags: CompilerFlags,
+    pub compiler_flags: CompilerFlags,
     pub hhvm: Hhvm,
     pub hhbc: HhbcFlags,
     pub max_array_elem_size_on_the_stack: usize,
-    pub server: Server,
+    pub include_search_paths: Vec<BString>,
 }
 
 impl Options {
@@ -79,10 +66,10 @@ impl Default for Options {
     fn default() -> Options {
         Options {
             max_array_elem_size_on_the_stack: 64,
-            hack_compiler_flags: CompilerFlags::default(),
+            compiler_flags: CompilerFlags::default(),
             hhvm: Hhvm::default(),
             hhbc: HhbcFlags::default(),
-            server: Server::default(),
+            include_search_paths: Default::default(),
             doc_root: "".into(),
         }
     }
@@ -96,7 +83,7 @@ impl bytecode_printer::IncludeProcessor for Options {
     ) -> Option<PathBuf> {
         let alloc = bumpalo::Bump::new();
         let include_roots = &self.hhvm.include_roots;
-        let search_paths = &self.server.include_search_paths;
+        let search_paths = &self.include_search_paths;
         let doc_root = self.doc_root.as_bstr();
         match include_path.into_doc_root_relative(&alloc, include_roots) {
             IncludePath::Absolute(p) => {
@@ -155,7 +142,7 @@ impl Options {
     }
 
     pub fn check_int_overflow(&self) -> bool {
-        self.hhvm.hack_lang.check_int_overflow > 0
+        self.hhvm.check_int_overflow > 0
     }
 
     pub fn emit_class_pointers(&self) -> i32 {

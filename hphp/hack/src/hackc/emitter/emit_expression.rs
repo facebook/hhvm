@@ -2551,7 +2551,7 @@ fn emit_special_function<'a, 'arena, 'decl>(
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
     let fun_and_clsmeth_disabled =
-        (e.options().hhvm.hack_lang.flags).po_disallow_fun_and_cls_meth_pseudo_funcs;
+        (e.options().hhvm.parser_options).po_disallow_fun_and_cls_meth_pseudo_funcs;
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -4908,7 +4908,7 @@ fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
 }
 
 fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
-    e.options().hack_compiler_flags.optimize_null_checks
+    e.options().compiler_flags.optimize_null_checks
 }
 
 fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {

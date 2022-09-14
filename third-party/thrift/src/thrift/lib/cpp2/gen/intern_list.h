@@ -14,27 +14,8 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
-include "thrift/lib/thrift/schema.thrift"
+#pragma once
 
-package "facebook.com/thrift/test/schema"
-
-@thrift.GenerateRuntimeSchema
-struct Empty {}
-
-@thrift.GenerateRuntimeSchema{name = "RenamedSchema"}
-struct Renamed {}
-
-@thrift.GenerateRuntimeSchema
-struct Fields {
-  1: i32 num;
-  3: optional set<string> keyset;
-  7: Empty strct;
-}
-
-@thrift.GenerateRuntimeSchema
-struct Defaults {
-  1: i32 none;
-  2: i32 some = 42;
-}
+#include <thrift/lib/cpp2/type/AnyValue.h>
+#include <thrift/lib/cpp2/type/Id.h>
+#include <thrift/lib/thrift/gen-cpp2/id_types.h>

@@ -351,22 +351,8 @@ void w_string::reset() noexcept {
   }
 }
 
-inline uint32_t hash_string(const char* str, size_t len) {
-  // Watchman used to use Bob Jenkins's lookup3. Many good hash functions exist,
-  // but, empirically, the standard library's are faster than lookup3 and
-  // convenient.
-  size_t hash = std::hash<std::string_view>{}(std::string_view(str, len));
-  // Supporting 32-bit is easy: we can skip the mix.
-  static_assert(
-      sizeof(size_t) == sizeof(uint64_t), "32-bit platforms are not supported");
-
-  // We could use do fancy mixing like with twang_32from64 but a simple xor
-  // should be sufficient for hash tables.
-  return (hash >> 32) ^ hash;
-}
-
 StringHash w_string::computeAndStoreHash() const noexcept {
-  StringHash hash = hash_string(str_->buf(), str_->len);
+  StringHash hash = w_hash_bytes(str_->buf(), str_->len, 0);
 
   str_->_hval.store(hash, std::memory_order_release);
   str_->set_hval_computed();
@@ -492,8 +478,8 @@ w_string w_string::pathCat(std::initializer_list<w_string_piece> elems) {
   return w_string{s};
 }
 
-StringHash w_string_piece::hashValue() const noexcept {
-  return hash_string(data(), size());
+uint32_t w_string_piece::hashValue() const {
+  return w_hash_bytes(data(), size(), 0);
 }
 
 uint32_t strlen_uint32(const char* str) {

@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef WATCHMAN_HASH_H
+#define WATCHMAN_HASH_H
 
 /* Bob Jenkins' lookup3.c hash function */
 uint32_t w_hash_bytes(const void* key, size_t length, uint32_t initval);
@@ -24,5 +25,9 @@ inline uint64_t hash_128_to_64(const uint64_t upper, const uint64_t lower) {
   b *= kMul;
   return b;
 }
-
 } // namespace watchman
+
+#endif
+
+/* vim:ts=2:sw=2:et:
+ */

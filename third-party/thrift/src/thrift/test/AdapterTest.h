@@ -263,6 +263,12 @@ struct CountingAdapter {
 
 template <typename T>
 struct VariableWrapper {
+  VariableWrapper(const VariableWrapper&) = delete;
+
+  VariableWrapper(const T& v) : value{v} {}
+  VariableWrapper(const T& v, std::string n, std::string u)
+      : value{v}, name{n}, uri{u} {}
+
   T value;
   std::string name = "";
   std::string uri = "";

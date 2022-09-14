@@ -3,6 +3,7 @@
  (wrapped false)
  (modules
   symbol_gencode
+  symbol_indexable
   symbol_file_info
   symbol_add_fact
   symbol_build_json
@@ -16,6 +17,7 @@
   symbol_predicate)
  (libraries
   ast_provider
+  naming_table
   tast_provider
   typing
   typing_ast

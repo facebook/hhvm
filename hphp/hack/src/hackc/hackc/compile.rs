@@ -11,6 +11,7 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Mutex;
 
+use anyhow::Context;
 use anyhow::Result;
 use clap::Parser;
 use compile::EnvFlags;
@@ -159,7 +160,8 @@ pub(crate) fn process_single_file(
 pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write) -> Result<()> {
     let files = hackc_opts.files.gather_input_files()?;
     for path in files {
-        let source_text = std::fs::read(&path)?;
+        let source_text = std::fs::read(&path)
+            .with_context(|| format!("Unable to read file '{}'", path.display()))?;
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, None)?;
         w.write_all(&hhas)?;

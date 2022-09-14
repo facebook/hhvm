@@ -148,6 +148,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ascii"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
+
+[[package]]
 name = "ast_and_decl_parser"
 version = "0.0.0"
 dependencies = [
@@ -1860,6 +1866,7 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
+ "ascii",
  "bstr",
  "ffi",
  "hash",

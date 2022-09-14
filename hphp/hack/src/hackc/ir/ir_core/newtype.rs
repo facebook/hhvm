@@ -2,6 +2,7 @@
 
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+use bstr::BStr;
 pub use hhbc::BareThisOp;
 pub use hhbc::ClassishKind;
 pub use hhbc::CollectionType;
@@ -44,6 +45,14 @@ macro_rules! interned_hhbc_id {
 
             pub fn from_str(name: &str, strings: &mut StringInterner) -> Self {
                 Self::new(strings.intern_str(name))
+            }
+
+            pub fn as_bytes<'a>(self, strings: &'a StringInterner) -> &'a [u8] {
+                strings.lookup_bytes(self.id)
+            }
+
+            pub fn as_bstr<'a>(self, strings: &'a StringInterner) -> &'a BStr {
+                strings.lookup_bstr(self.id)
             }
         }
     };

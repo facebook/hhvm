@@ -84,7 +84,7 @@ impl SrcLoc {
 }
 
 /// Func parameters.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Param<'a> {
     pub name: UnitBytesId,
     pub is_variadic: bool,
@@ -122,7 +122,7 @@ newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);
 ///    to be an `invoke` in that model.  In addition reconstructing the HHVM
 ///    TryBegin/TryMiddle/TryEnd model directly from the LLVM style state can be
 ///    tricky.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ExFrame {
     /// The parent of this ExFrame. The parent is probably not strictly
     /// necessary and could be recomputed from the try/catch structure - but
@@ -194,7 +194,7 @@ impl Default for TryCatchId {
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
 ///
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Func<'a> {
     pub blocks: IdVec<BlockId, Block>,
     pub doc_comment: Option<Str<'a>>,
@@ -449,7 +449,7 @@ pub struct Method<'a> {
     pub visibility: Visibility,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TParamBounds {
     pub bounds: Vec<UserType>,
 }

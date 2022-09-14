@@ -137,35 +137,65 @@ module Inter (I : Intra) = struct
                  current_func_id
                  (Option.map ~f:(fun x -> x @ constr_list_backwards))
           | ConstantIdentifier ((_, class_name_opt, const_name) as ident_ent) ->
-            let const_name =
+            let const_ident =
               match class_name_opt with
               | Some class_name -> class_name ^ "::" ^ const_name
               | None -> const_name
             in
-            let constr_list_at = SMap.find_opt const_name base_constraint_map in
+            let (constr_list_at, new_const_ident) =
+              match SMap.find_opt const_ident base_constraint_map with
+              | Some constr_list_at -> (constr_list_at, const_ident)
+              | None ->
+                (* We assume that in this case there exists a ClassExtends constraint at class_name of
+                   base_constraint_map. *)
+                let constr_list_at_const_class =
+                  match class_name_opt with
+                  | Some class_name ->
+                    (match SMap.find_opt class_name base_constraint_map with
+                    | Some constr_list -> constr_list
+                    | None -> failwith "Couldn't find binding for class_name")
+                  | None -> failwith "Assumed class_name_opt is not None"
+                in
+                let new_const_ident =
+                  let is_class_extends_constr (constr : any_constraint) : bool =
+                    match constr with
+                    | Inter (ClassExtends _) -> true
+                    | _ -> false
+                  in
+                  match
+                    List.find
+                      ~f:is_class_extends_constr
+                      constr_list_at_const_class
+                  with
+                  | Some (Inter (ClassExtends class_identifier_ent)) ->
+                    snd class_identifier_ent ^ "::" ^ const_name
+                  | _ -> failwith "Couldn't find ClassExtends constraint"
+                in
+                (match SMap.find_opt new_const_ident base_constraint_map with
+                | Some constr_list_at_const_ent ->
+                  (constr_list_at_const_ent, new_const_ident)
+                | None -> failwith "Couldn't find binding for new_const_ident")
+            in
             let constr_list_backwards =
-              match constr_list_at with
-              | None -> []
-              | Some constr_list_at_ ->
-                let is_const_initial_constr (constr : any_constraint) : bool =
-                  match constr with
-                  | Inter (ConstantInitial _) -> true
-                  | _ -> false
-                in
-                let const_initial_constraint_opt =
-                  List.find ~f:is_const_initial_constr constr_list_at_
-                in
-                let const_initial_ent =
-                  match const_initial_constraint_opt with
-                  | Some (Inter (ConstantInitial const_initial_ent)) ->
-                    const_initial_ent
-                  | _ -> failwith "Used invalid identifier"
-                in
-                List.filter_map
-                  constr_list_at_
-                  ~f:
-                    (substitute_inter_any_backwards
-                       (ConstantInitial const_initial_ent))
+              let is_const_initial_constr (constr : any_constraint) : bool =
+                match constr with
+                | Inter (ConstantInitial _) -> true
+                | _ -> false
+              in
+              let const_initial_constraint_opt =
+                List.find ~f:is_const_initial_constr constr_list_at
+              in
+              let const_initial_ent =
+                match const_initial_constraint_opt with
+                | Some (Inter (ConstantInitial const_initial_ent)) ->
+                  const_initial_ent
+                | _ -> failwith "Used invalid identifier"
+              in
+              List.filter_map
+                constr_list_at
+                ~f:
+                  (substitute_inter_any_backwards
+                     (ConstantInitial const_initial_ent))
             in
             let constr_list_forwards =
               List.filter_map
@@ -175,7 +205,7 @@ module Inter (I : Intra) = struct
             in
             input_constr_list_map
             |> SMap.update
-                 const_name
+                 new_const_ident
                  (Option.map ~f:(fun x -> x @ constr_list_forwards))
             |> SMap.update
                  current_func_id
@@ -195,9 +225,9 @@ module Inter (I : Intra) = struct
 
   (** For a given map, at every key, we iterate through its identifier constraints.
       For a fixed identifier, we modify the map by adding to the value/constraints
-      at the respective global constant key: i) a subset constraint between identifier
-      and global constant; and ii) the constraints/value of the map at the identifier
-      key. *)
+      at the respective global/class constant key: i) a subset constraint between
+      identifier and global/class constant; and ii) the constraints/value of the map
+      at the identifier key. *)
   let close_identifier (current_constraint_map : any_constraint list SMap.t) :
       any_constraint list SMap.t =
     let close
@@ -215,9 +245,35 @@ module Inter (I : Intra) = struct
           | None -> constr_name
         in
         let constr_list_at_const_ent =
-          SMap.find const_ident current_constraint_map
-          (* This raises Not_found, if no binding exists. We assume
-             that identifiers only refer to existing constants. *)
+          match SMap.find_opt const_ident current_constraint_map with
+          | Some constr_list_at_const_ent -> constr_list_at_const_ent
+          | None ->
+            (* We assume that in this case there exists a ClassExtends constraint at class_name of
+               current_constraint_map. *)
+            let constr_list_at_const_class =
+              match class_name_opt with
+              | Some class_name ->
+                (match SMap.find_opt class_name current_constraint_map with
+                | Some constr_list -> constr_list
+                | None -> failwith "Couldn't find binding for class_name")
+              | None -> failwith "Assumed class_name_opt is not None"
+            in
+            let class_name =
+              let is_class_extends_constr (constr : any_constraint) : bool =
+                match constr with
+                | Inter (ClassExtends _) -> true
+                | _ -> false
+              in
+              match
+                List.find ~f:is_class_extends_constr constr_list_at_const_class
+              with
+              | Some (Inter (ClassExtends class_identifier_ent)) ->
+                snd class_identifier_ent ^ "::" ^ constr_name
+              | _ -> failwith "Couldn't find ClassExtends constraint"
+            in
+            (match SMap.find_opt class_name current_constraint_map with
+            | Some constr_list_at_const_ent -> constr_list_at_const_ent
+            | None -> failwith "Couldn't find binding for class_name")
         in
         let is_const_constr (constr : any_constraint) : bool =
           match constr with
@@ -229,19 +285,22 @@ module Inter (I : Intra) = struct
           | Inter (ConstantInitial _) -> true
           | _ -> false
         in
-        let const_constraint_opt =
-          List.find ~f:is_const_constr constr_list_at_const_ent
-          (* This raises Not_found, if no value in constr_list_at_const_ent
-             satisifes is_const_constr. We assume that our map is well-behaved
-             in this sense. *)
+        let const_constraint =
+          match List.find ~f:is_const_constr constr_list_at_const_ent with
+          | Some const_constraint -> const_constraint
+          | None -> failwith "Couldn't find Constant constraint"
         in
-        let const_initial_constraint_opt =
-          List.find ~f:is_const_initial_constr constr_list_at_const_ent
+        let const_initial_constraint =
+          match
+            List.find ~f:is_const_initial_constr constr_list_at_const_ent
+          with
+          | Some const_initial_constraint -> const_initial_constraint
+          | None -> failwith "Couldn't find ConstantInitial constraint"
         in
         let (const_ent, const_initial_ent) =
-          match (const_constraint_opt, const_initial_constraint_opt) with
-          | ( Some (Inter (Constant const_ent)),
-              Some (Inter (ConstantInitial const_initial_ent)) ) ->
+          match (const_constraint, const_initial_constraint) with
+          | ( Inter (Constant const_ent),
+              Inter (ConstantInitial const_initial_ent) ) ->
             (const_ent, const_initial_ent)
           | _ -> failwith "Used invalid identifier"
         in

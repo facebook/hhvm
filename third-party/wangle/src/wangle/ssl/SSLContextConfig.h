@@ -131,8 +131,6 @@ struct SSLContextConfig {
   bool isLocalPrivateKey{true};
   // Should this SSLContextConfig be the default for SNI purposes
   bool isDefault{false};
-  // File containing trusted CA's to validate client certificates
-  std::string clientCAFile;
   // List of files containing trusted CA's to validate client certificates
   std::vector<std::string> clientCAFiles;
 

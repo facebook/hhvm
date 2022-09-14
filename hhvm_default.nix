@@ -1,5 +1,5 @@
 { callPackage
 , stdenv
 }:
-lastModifiedDate: 
+lastModifiedDate:
 stdenv.mkDerivation (callPackage ./common.nix { } lastModifiedDate)

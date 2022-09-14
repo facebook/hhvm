@@ -849,7 +849,7 @@ class ConnectPoolOperation : public ConnectOperation {
 
     auto now = std::chrono::steady_clock::now();
     // Adjust timeout
-    auto timeout_attempt_based = getConnectionOptions().getTimeout() +
+    std::chrono::duration<uint64_t, std::micro> timeout_attempt_based = getConnectionOptions().getTimeout() +
         std::chrono::duration_cast<std::chrono::milliseconds>(
                                      now - start_time_);
     timeout_ =

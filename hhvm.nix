@@ -113,6 +113,9 @@ stdenv.mkDerivation rec {
       python3
       unixtools.getconf
       which
+    ] ++ lib.optionals hostPlatform.isMacOS [
+      # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
+      darwin.system_cmds
     ];
   buildInputs =
     [
@@ -221,6 +224,13 @@ stdenv.mkDerivation rec {
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch
       patchShebangs \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen
+    '';
+
+  doCheck = true;
+
+  checkPhase =
+    ''
+      HHVM_BIN="$PWD/hphp/hhvm/hhvm " "hphp/hhvm/hhvm" hphp/test/run.php quick
     '';
 
   meta = {

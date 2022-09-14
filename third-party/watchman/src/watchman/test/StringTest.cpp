@@ -333,12 +333,6 @@ TEST(String, operators) {
   EXPECT_LT(w_string_piece("A"), w_string_piece("a"));
 }
 
-TEST(String, piece_and_string_should_have_same_hash) {
-  EXPECT_EQ(w_string{""}.hashValue(), w_string_piece{""}.hashValue());
-  EXPECT_EQ(
-      w_string{"foobar"}.hashValue(), w_string_piece{"foobar"}.hashValue());
-}
-
 TEST(String, split) {
   {
     std::vector<std::string> expected{"a", "b", "c"};

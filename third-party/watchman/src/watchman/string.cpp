@@ -10,6 +10,7 @@
 #include <ostream>
 #include <stdexcept>
 #include "watchman/thirdparty/jansson/utf.h"
+#include "watchman/watchman_hash.h"
 #include "watchman/watchman_string.h"
 
 // Filename mapping and handling strategy

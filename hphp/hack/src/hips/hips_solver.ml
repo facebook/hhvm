@@ -85,7 +85,8 @@ module Inter (I : Intra) = struct
         (substitute_inter_inter_forwards ~inter_constr_1 inter_constr_2)
 
   let string_of_const_ident_ent
-      ((_, class_name_opt, const_name) : constant_identifier_entity) : string =
+      ({ class_name_opt; const_name; _ } : constant_identifier_entity) : string
+      =
     match class_name_opt with
     | Some class_name -> class_name ^ "::" ^ const_name
     | None -> const_name
@@ -150,7 +151,7 @@ module Inter (I : Intra) = struct
       ->
       (Some (_, E::DICT), Some (_, C::DICT)) *)
   let constr_list_and_string_of
-      ((_, class_name_opt, const_name) as ident_ent :
+      ({ class_name_opt; const_name; _ } as ident_ent :
         constant_identifier_entity)
       (base_constraint_map : any_constraint list SMap.t) :
       (any_constraint list * string) option

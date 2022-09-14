@@ -488,7 +488,7 @@ let produce_results
       | Literal pos
       | Inter (HT.Param ((pos, _), _))
       | Inter (HT.Constant (pos, _))
-      | Inter (HT.ConstantIdentifier (pos, _, _)) ->
+      | Inter (HT.ConstantIdentifier { HT.ident_pos = pos; _ }) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map
       | Variable _ -> pos_map
     in

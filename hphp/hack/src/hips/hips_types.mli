@@ -10,8 +10,12 @@ module A = Ast_defs
 
 type const_entity = A.id [@@deriving ord, show]
 
-type constant_identifier_entity = A.pos * string option * string
-[@@deriving ord, show]
+type constant_identifier_entity = {
+  ident_pos: A.pos;
+  class_name_opt: string option;
+  const_name: string;
+}
+[@@deriving ord, show { with_path = false }]
 
 type param_entity = A.id * int [@@deriving ord, show]
 

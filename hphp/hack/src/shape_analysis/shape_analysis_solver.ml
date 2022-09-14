@@ -580,6 +580,15 @@ let substitute_inter_intra
         None
     in
     replace_intra intra_constr replace false
+  | HT.Constant const_ent ->
+    let ent = embed_entity (HT.Constant const_ent) in
+    let replace intra_ent_2 =
+      if equal_entity_ ent intra_ent_2 then
+        Some ent
+      else
+        None
+    in
+    replace_intra intra_constr replace false
   | _ -> Some intra_constr
 
 let replace_backwards

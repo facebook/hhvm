@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 
 #include <folly/json.h>
+#include <folly/Random.h>
 #include <folly/synchronization/AtomicNotification.h>
 
 #include "hphp/runtime/base/array-init.h"
@@ -1250,6 +1251,19 @@ Object HHVM_FUNCTION(set_special_implicit_context,
     // If we are moving from Value or Inaccessible to SoftSet, remain
     // in previous configuration
     return Object{prev_obj};
+  }
+
+  if (type == ImplicitContext::State::SoftInaccessible) {
+    VMRegAnchor _;
+    auto const func =
+      fromCaller([] (const BTFrame& frm) { return frm.func(); });
+    assertx(func->isMemoizeWrapper() || func->isMemoizeWrapperLSB());
+    assertx(func->isSoftMakeICInaccessibleMemoize());
+    auto const sampleRate = func->softMakeICInaccessibleSampleRate();
+    if (sampleRate > 1 && !folly::Random::oneIn(sampleRate)) {
+      // Return the previous object if we coinflipped false
+      return Object{prev_obj};
+    }
   }
 
   auto obj = create_new_IC();

@@ -22,8 +22,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 /**
- * Generates a const of type schema.Struct containing the schma of the
- * annotated struct. Optionally specify name to override default
+ * Generates a const of type schema. Struct containing the schema of the
+ * annotated type. Optionally specify name to override default
  * schema<structName>.
  */
 @SuppressWarnings({ "unused", "serial" })

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <functional>
+#include <type_traits>
 #include <thrift/compiler/sema/standard_mutator.h>
 
 #include <thrift/compiler/lib/cpp2/util.h>
@@ -254,35 +256,58 @@ void gen_default_enum_values(
 }
 
 void generate_runtime_schema(
-    diagnostic_context& ctx, mutator_context&, t_struct& node) {
+    diagnostic_context& ctx,
+    mutator_context&,
+    bool annotation_required,
+    std::string schemaTypeUri,
+    t_type& node,
+    std::function<std::unique_ptr<apache::thrift::compiler::t_const_value>()>
+        generator) {
   const t_const* annotation =
       node.find_structured_annotation_or_null(kGenerateRuntimeSchemaUri);
-  if (!annotation) {
+  if (annotation_required && !annotation) {
     return;
   }
 
   std::string name;
-  if (auto nameOverride =
-          annotation->get_value_from_structured_annotation_or_null("name")) {
+  if (auto nameOverride = annotation
+          ? annotation->get_value_from_structured_annotation_or_null("name")
+          : nullptr) {
     name = nameOverride->get_string();
   } else {
     name = fmt::format("schema{}", node.name());
   }
 
   auto program = const_cast<t_program*>(node.program());
-  auto schemaType = dynamic_cast<const t_type*>(
-      program->scope()->find_def("facebook.com/thrift/type/Struct"));
+  auto schemaType =
+      dynamic_cast<const t_type*>(program->scope()->find_def(schemaTypeUri));
   if (!schemaType) {
     ctx.error("Must include thrift/lib/thrift/schema.thrift");
     return;
   }
 
-  auto schema = schematizer::gen_schema(node);
+  std::unique_ptr<apache::thrift::compiler::t_const_value> schema = generator();
 
   auto schemaConst = std::make_unique<t_const>(
       program, schemaType, std::move(name), std::move(schema));
   schemaConst->set_generated();
   program->add_definition(std::move(schemaConst));
+}
+
+void generate_struct_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_struct& node) {
+  generate_runtime_schema(
+      ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
+void generate_service_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
+  generate_runtime_schema(
+      ctx, mCtx, true, "facebook.com/thrift/type/Service", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
 }
 
 ast_mutators standard_mutators() {
@@ -303,7 +328,8 @@ ast_mutators standard_mutators() {
     main.add_struct_visitor(&mutate_terse_write_annotation_structured);
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);
-    main.add_struct_visitor(&generate_runtime_schema);
+    main.add_struct_visitor(&generate_struct_schema);
+    main.add_service_visitor(&generate_service_schema);
   }
   add_patch_mutators(mutators);
   return mutators;

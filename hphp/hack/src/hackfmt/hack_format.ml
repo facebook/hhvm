@@ -3770,7 +3770,7 @@ and transform_trivia ~is_leading trivia =
     Concat (List.rev !comments)
   )
 
-and _MAX_CONSECUTIVE_BLANK_LINES = 2
+and max_consecutive_blank_lines = 1
 
 and transform_leading_invisibles triv =
   let newlines = ref 0 in
@@ -3783,7 +3783,7 @@ and transform_leading_invisibles triv =
            Concat
              [
                ignored;
-               (if !newlines <= _MAX_CONSECUTIVE_BLANK_LINES then
+               (if !newlines <= max_consecutive_blank_lines then
                  BlankLine
                else
                  Nothing);

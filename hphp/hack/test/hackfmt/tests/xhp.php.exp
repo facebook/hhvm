@@ -113,7 +113,6 @@ function u($x, $y) {
 
       <item>bar</item>
 
-
       <item>bar</item>
     </grid>;
 }

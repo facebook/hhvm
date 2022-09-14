@@ -214,6 +214,8 @@ class ConnectionOptions {
     return connection_tcp_timeout_;
   }
 
+  // The connection created by these options will apply this query timeout
+  // to all statements executed
   ConnectionOptions& setQueryTimeout(Duration dur) {
     query_timeout_ = dur;
     return *this;
@@ -223,6 +225,7 @@ class ConnectionOptions {
     return query_timeout_;
   }
 
+  // Used to provide an SSLContext and SSL_Session provider
   ConnectionOptions& setSSLOptionsProvider(
       std::shared_ptr<SSLOptionsProviderBase> ssl_options_provider) {
     ssl_options_provider_ = ssl_options_provider;
@@ -237,6 +240,7 @@ class ConnectionOptions {
     return ssl_options_provider_.get();
   }
 
+  // Provide a Connection Attribute to be passed in the connection handshake
   ConnectionOptions& setAttribute(
       const std::string& attr,
       const std::string& value) {
@@ -281,6 +285,8 @@ class ConnectionOptions {
   // connection. Each attempt will take at maximum the given timeout. To set
   // a global timeout that the operation shouldn't take more than, use
   // setTotalTimeout.
+  //
+  // This is no longer recommended for use, due to higher level retries
   ConnectionOptions& setConnectAttempts(uint32_t max_attempts) {
     max_attempts_ = max_attempts;
     return *this;
@@ -318,6 +324,8 @@ class ConnectionOptions {
   // If this is not set, but regular timeout was, the TotalTimeout for the
   // operation will be the number of attempts times the primary timeout.
   // Set this if you have strict timeout needs.
+  //
+  // This should generally not be set, as connectAttempts is 1
   ConnectionOptions& setTotalTimeout(Duration dur) {
     total_timeout_ = dur;
     return *this;

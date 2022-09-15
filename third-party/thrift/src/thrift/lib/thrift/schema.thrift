@@ -397,7 +397,7 @@ union ReturnType {
   /** The sink return type. */
   3: Sink sinkType;
   /** The interaction return type. */
-  4: Interaction interactionType;
+  4: id.DefinitionId interactionType;
 }
 
 /** A container of Thrift function return type. */

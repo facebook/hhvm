@@ -1,8 +1,8 @@
 { callPackage
-, llvmPackages_12
+, llvmPackages_14
 }:
 lastModifiedDate:
 let
   common = callPackage ./common.nix { } lastModifiedDate;
 in
-llvmPackages_12.libcxxStdenv.mkDerivation common
+llvmPackages_14.libcxxStdenv.mkDerivation common

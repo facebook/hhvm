@@ -47,3 +47,6 @@ val maybe_add_supportdyn_constraints :
   Pos_or_decl.t ->
   Typing_defs.decl_ty Typing_defs_core.tparam list ->
   Typing_defs.decl_ty Typing_defs_core.tparam list
+
+val supportdyn_mixed :
+  Pos_or_decl.t -> Typing_defs.Reason.decl_t -> Typing_defs.decl_ty

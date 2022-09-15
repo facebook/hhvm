@@ -563,7 +563,29 @@ let typeconst_structure
     cc_refs = [];
   }
 
+let maybe_add_supportdyn_bound ctx p kind =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    match kind with
+    | TCAbstract { atc_as_constraint = None; atc_super_constraint; atc_default }
+      ->
+      TCAbstract
+        {
+          atc_as_constraint =
+            Some
+              (Decl_enforceability.supportdyn_mixed
+                 p
+                 (Typing_defs.Reason.Rwitness_from_decl p));
+          atc_super_constraint;
+          atc_default;
+        }
+    | TCAbstract _
+    | TCConcrete _ ->
+      kind
+  else
+    kind
+
 let typeconst_fold
+    (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
     (stc : Shallow_decl_defs.shallow_typeconst) :
@@ -601,7 +623,8 @@ let typeconst_fold
       {
         ttc_synthesized = false;
         ttc_name = stc.stc_name;
-        ttc_kind = stc.stc_kind;
+        ttc_kind =
+          maybe_add_supportdyn_bound ctx (fst stc.stc_name) stc.stc_kind;
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;
@@ -810,7 +833,7 @@ and class_decl
   let (typeconsts, consts) =
     List.fold_left
       c.sc_typeconsts
-      ~f:(typeconst_fold c)
+      ~f:(typeconst_fold ctx c)
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =

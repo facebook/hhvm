@@ -42,3 +42,13 @@ struct Defaults {
 @thrift.GenerateRuntimeSchema
 service EmptyService {
 }
+
+@thrift.GenerateRuntimeSchema
+union Union {}
+
+// @lint-ignore THRIFTCHECKS
+@thrift.GenerateRuntimeSchema
+exception SimpleException {}
+
+@thrift.GenerateRuntimeSchema
+safe transient server exception FancyException {}

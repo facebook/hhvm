@@ -29,9 +29,10 @@ template <typename... Args>
 std::unique_ptr<t_const_value> val(Args... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
 }
-std::unique_ptr<t_const_value> val(t_program::value_id val) {
+template <typename Enm, typename = std::enable_if_t<std::is_enum<Enm>::value>>
+std::unique_ptr<t_const_value> val(Enm val) {
   return std::make_unique<t_const_value>(
-      static_cast<std::underlying_type_t<t_program::value_id>>(val));
+      static_cast<std::underlying_type_t<Enm>>(val));
 }
 
 void add_definition(t_const_value& schema, const t_named& node) {
@@ -186,6 +187,13 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
   }
 
   schema->add_map(val("fields"), std::move(fields));
+
+  if (node.is_exception()) {
+    const auto& ex = static_cast<const t_exception&>(node);
+    schema->add_map(val("safety"), val(ex.safety()));
+    schema->add_map(val("kind"), val(ex.kind()));
+    schema->add_map(val("blame"), val(ex.blame()));
+  }
 
   return schema;
 }

@@ -53,7 +53,7 @@ struct TypeInfo {
   void (*append)(void*, const Dyn&);
   bool (*add)(void*, const Dyn&);
   bool (*put_)(void*, FieldId, const Dyn&, const Dyn&);
-  Ptr (*ensure)(void*, FieldId, const Dyn&, const Dyn&);
+  Ptr (*ensure_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
   size_t (*size)(const void*);
 
@@ -75,6 +75,11 @@ struct TypeInfo {
 
   bool put(void* ptr, FieldId id, const Dyn& val) const;
   bool put(void* ptr, const Dyn& key, const Dyn& val) const;
+
+  Ptr ensure(void* ptr, FieldId id) const;
+  Ptr ensure(void* ptr, FieldId id, const Dyn& defVal) const;
+  Ptr ensure(void* ptr, const Dyn& key) const;
+  Ptr ensure(void* ptr, const Dyn& key, const Dyn& defVal) const;
 
   // Type-safe, const-preserving casting functions.
   template <typename T>

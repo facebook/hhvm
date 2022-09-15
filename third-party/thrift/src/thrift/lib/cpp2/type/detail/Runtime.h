@@ -244,17 +244,31 @@ inline bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
   return put_(ptr, {}, key, val);
 }
 
+inline Ptr TypeInfo::ensure(void* ptr, FieldId id) const {
+  return ensure(ptr, id, nullPtr());
+}
+inline Ptr TypeInfo::ensure(void* ptr, FieldId id, const Dyn& defVal) const {
+  return ensure_(ptr, id, nullPtr(), defVal);
+}
+inline Ptr TypeInfo::ensure(void* ptr, const Dyn& key) const {
+  return ensure(ptr, key, nullPtr());
+}
+inline Ptr TypeInfo::ensure(
+    void* ptr, const Dyn& key, const Dyn& defVal) const {
+  return ensure_(ptr, {}, key, defVal);
+}
+
 inline Ptr Dyn::ensure(const Dyn& key) const {
-  return type_.mut().ensure(ptr_, {}, key, nullPtr());
+  return type_.mut().ensure(ptr_, key);
 }
 inline Ptr Dyn::ensure(const Dyn& key, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, {}, key, val);
+  return type_.mut().ensure(ptr_, key, val);
 }
 inline Ptr Dyn::ensure(FieldId id) const {
-  return type_.mut().ensure(ptr_, id, nullPtr(), nullPtr());
+  return type_.mut().ensure(ptr_, id);
 }
 inline Ptr Dyn::ensure(FieldId id, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, id, nullPtr(), val);
+  return type_.mut().ensure(ptr_, id, val);
 }
 
 inline Ptr Dyn::get(const Dyn& key) const {

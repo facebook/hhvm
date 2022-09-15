@@ -625,7 +625,7 @@ let build_method_fun_elt
       fe_pos = pos;
       fe_internal = false;
       fe_deprecated = None;
-      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx m.sm_type;
+      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx pos m.sm_type;
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
     }
@@ -779,7 +779,7 @@ and class_decl
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   (* Support both attribute and keyword for now, until typechecker changes are made *)
   let internal = c.sc_internal in
-  let (_p, cls_name) = c.sc_name in
+  let (p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
   let env =
     {
@@ -909,6 +909,9 @@ and class_decl
       env
       c
   in
+  let dc_tparams =
+    Decl_enforceability.maybe_add_supportdyn_constraints ctx p c.sc_tparams
+  in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =
     {
@@ -924,7 +927,7 @@ and class_decl
       dc_module = c.sc_module;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
-      dc_tparams = c.sc_tparams;
+      dc_tparams;
       dc_where_constraints = c.sc_where_constraints;
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;

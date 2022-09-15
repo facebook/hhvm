@@ -169,6 +169,27 @@ let is_enforceable (ctx : Provider_context.t) (ty : decl_ty) =
 
 let make_like_type ty = Typing_make_type.like (get_reason ty) ty
 
+let add_supportdyn_constraints p tparams =
+  let r = Reason.Rwitness_from_decl p in
+  List.map tparams ~f:(fun tparam ->
+      {
+        tparam with
+        tp_constraints =
+          ( Ast_defs.Constraint_as,
+            mk
+              ( r,
+                Tapply
+                  ( (p, Naming_special_names.Classes.cSupportDyn),
+                    [mk (r, Tmixed)] ) ) )
+          :: tparam.tp_constraints;
+      })
+
+let maybe_add_supportdyn_constraints ctx p tparams =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    add_supportdyn_constraints p tparams
+  else
+    tparams
+
 let pessimise_type ctx ty =
   if is_enforceable ctx ty then
     ty
@@ -181,12 +202,15 @@ let maybe_pessimise_type ctx ty =
   else
     ty
 
-let pessimise_fun_type ctx ty =
+let pessimise_fun_type ctx p ty =
   match get_node ty with
   | Tfun ft ->
     let ret_ty = ft.ft_ret.et_type in
+    let ft =
+      { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
+    in
     if is_enforceable ctx ret_ty then
-      ty
+      mk (get_reason ty, Tfun ft)
     else
       mk
         ( get_reason ty,
@@ -198,8 +222,8 @@ let pessimise_fun_type ctx ty =
             } )
   | _ -> ty
 
-let maybe_pessimise_fun_type ctx ty =
+let maybe_pessimise_fun_type ctx p ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_fun_type ctx ty
+    pessimise_fun_type ctx p ty
   else
     ty

@@ -156,7 +156,11 @@ let maybe_pessimise_fun_decl ctx fun_decl =
     Typing_defs.
       {
         fun_decl with
-        fe_type = Decl_enforceability.pessimise_fun_type ctx fun_decl.fe_type;
+        fe_type =
+          Decl_enforceability.pessimise_fun_type
+            ctx
+            fun_decl.fe_pos
+            fun_decl.fe_type;
       }
   else
     fun_decl

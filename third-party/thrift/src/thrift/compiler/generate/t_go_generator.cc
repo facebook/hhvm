@@ -802,6 +802,12 @@ void t_go_generator::init_generator() {
       package_dir_ += "/";
       package_dir_ += module;
       package_name_ = module;
+      // TODO(dokwon): Remove this after fixing package name colliding with
+      // reserved keywords.
+      // 'type' is a reserved keyword in go. Append '_' to bypass this issue.
+      if (package_name_ == "type") {
+        package_name_ += "_";
+      }
       module.clear();
     } else {
       package_dir_ += "/";

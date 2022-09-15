@@ -52,9 +52,9 @@ struct TypeInfo {
   void (*clear)(void*);
   void (*append)(void*, const Dyn&);
   bool (*add)(void*, const Dyn&);
-  bool (*put)(void*, FieldId, const Dyn*, const Dyn&);
-  Ptr (*ensure)(void*, FieldId, const Dyn*, const Dyn*);
-  Ptr (*get_)(void*, FieldId, size_t, const Dyn*);
+  bool (*put)(void*, FieldId, const Dyn&, const Dyn&);
+  Ptr (*ensure)(void*, FieldId, const Dyn&, const Dyn&);
+  Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
   size_t (*size)(const void*);
 
   bool equal(const void* lhs, const Dyn& rhs) const {

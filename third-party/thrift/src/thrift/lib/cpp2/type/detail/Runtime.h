@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 #include <type_traits>
@@ -112,15 +113,19 @@ class Dyn {
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
 
-  bool empty() const { return type_->empty(ptr_); }
-  bool identical(const Dyn& rhs) const {
+  FOLLY_NODISCARD bool empty() const { return type_->empty(ptr_); }
+  FOLLY_NODISCARD bool identical(const Dyn& rhs) const {
     return type() == rhs.type() && type_->identical(ptr_, rhs);
   }
 
-  bool equal(const Dyn& rhs) const { return type_->equal(ptr_, rhs); }
-  folly::ordering compare(const Dyn& rhs) const {
+  FOLLY_NODISCARD bool equal(const Dyn& rhs) const {
+    return type_->equal(ptr_, rhs);
+  }
+  FOLLY_NODISCARD folly::ordering compare(const Dyn& rhs) const {
     return type_->compare(ptr_, rhs);
   }
+
+  FOLLY_NODISCARD bool has_value() const { return !type().empty(); }
 
  protected:
   RuntimeType type_;
@@ -144,11 +149,9 @@ class Dyn {
   void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
   bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
   bool put(const Dyn& key, const Dyn& val) const {
-    return type_.mut().put(ptr_, {}, &key, val);
+    return type_.mut().put(ptr_, {}, key, val);
   }
-  bool put(FieldId id, const Dyn& val) const {
-    return type_.mut().put(ptr_, id, nullptr, val);
-  }
+  bool put(FieldId id, const Dyn& val) const;
 
   Ptr ensure(const Dyn& key) const;
   Ptr ensure(const Dyn& key, const Dyn& val) const;
@@ -179,6 +182,20 @@ class Dyn {
     type_ = {};
     ptr_ = {};
   }
+
+ private:
+  friend bool operator==(const Dyn& lhs, std::nullptr_t) {
+    return !lhs.has_value();
+  }
+  friend bool operator==(std::nullptr_t, const Dyn& rhs) {
+    return !rhs.has_value();
+  }
+  friend bool operator!=(const Dyn& lhs, std::nullptr_t) {
+    return lhs.has_value();
+  }
+  friend bool operator!=(std::nullptr_t, const Dyn& rhs) {
+    return rhs.has_value();
+  }
 };
 
 // An un-owning pointer to a thrift value.
@@ -204,27 +221,31 @@ class Ptr final : public Dyn {
   friend class Dyn;
 };
 
+inline Ptr nullPtr() {
+  return {};
+}
+
 inline Ptr TypeInfo::get(void* ptr, FieldId id) const {
-  return get_(ptr, id, std::string::npos, nullptr);
+  return get_(ptr, id, std::string::npos, nullPtr());
 }
 inline Ptr TypeInfo::get(void* ptr, size_t pos) const {
-  return get_(ptr, {}, pos, nullptr);
+  return get_(ptr, {}, pos, nullPtr());
 }
 inline Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
-  return get_(ptr, {}, std::string::npos, &val);
+  return get_(ptr, {}, std::string::npos, val);
 }
 
 inline Ptr Dyn::ensure(const Dyn& key) const {
-  return type_.mut().ensure(ptr_, {}, &key, nullptr);
+  return type_.mut().ensure(ptr_, {}, key, nullPtr());
 }
 inline Ptr Dyn::ensure(const Dyn& key, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, {}, &key, &val);
+  return type_.mut().ensure(ptr_, {}, key, val);
 }
 inline Ptr Dyn::ensure(FieldId id) const {
-  return type_.mut().ensure(ptr_, id, nullptr, nullptr);
+  return type_.mut().ensure(ptr_, id, nullPtr(), nullPtr());
 }
 inline Ptr Dyn::ensure(FieldId id, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, id, nullptr, &val);
+  return type_.mut().ensure(ptr_, id, nullPtr(), val);
 }
 
 inline Ptr Dyn::get(const Dyn& key) const {
@@ -244,6 +265,9 @@ inline Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
 }
 inline Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
+}
+inline bool Dyn::put(FieldId id, const Dyn& val) const {
+  return type_.mut().put(ptr_, id, nullPtr(), val);
 }
 
 // A base struct provides helpers for throwing exceptions and default throwing
@@ -271,13 +295,13 @@ struct BaseErasedOp {
 
   [[noreturn]] static void append(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static bool add(void*, const Dyn&) { bad_op(); }
-  [[noreturn]] static bool put(void*, FieldId, const Dyn*, const Dyn&) {
+  [[noreturn]] static bool put(void*, FieldId, const Dyn&, const Dyn&) {
     bad_op();
   }
-  [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn*, const Dyn*) {
+  [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn&, const Dyn&) {
     bad_op();
   }
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn*) { bad_op(); }
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) { bad_op(); }
   [[noreturn]] static size_t size(const void*) { bad_op(); }
 };
 

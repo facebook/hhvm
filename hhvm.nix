@@ -228,7 +228,7 @@ stdenv.mkDerivation rec {
 
   doCheck = true;
 
-  checkPhase =
+  preCheck =
     ''
       set -ex
       export HHVM_BIN="$PWD/hphp/hhvm/hhvm"

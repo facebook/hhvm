@@ -28,6 +28,7 @@ jobs:
       matrix:
         package:
         - hhvm
+        - hhvm_clang
         os:
         - ubuntu-latest
     runs-on: ${{matrix.os}}
@@ -58,7 +59,7 @@ jobs:
       if: runner.os == 'Linux'
       run: dpkg-deb --contents bundle.deb
     - name: Save the deb package as build artifact
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
         name: bundle.deb
@@ -73,7 +74,7 @@ jobs:
       if: runner.os == 'Linux'
       run: rpm --query --list --package bundle.rpm
     - name: Save the rpm package as build artifact
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
         name: bundle.rpm

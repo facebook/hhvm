@@ -169,18 +169,17 @@ let is_enforceable (ctx : Provider_context.t) (ty : decl_ty) =
 
 let make_like_type ty = Typing_make_type.like (get_reason ty) ty
 
+let supportdyn_mixed p r =
+  mk
+    (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [mk (r, Tmixed)]))
+
 let add_supportdyn_constraints p tparams =
   let r = Reason.Rwitness_from_decl p in
   List.map tparams ~f:(fun tparam ->
       {
         tparam with
         tp_constraints =
-          ( Ast_defs.Constraint_as,
-            mk
-              ( r,
-                Tapply
-                  ( (p, Naming_special_names.Classes.cSupportDyn),
-                    [mk (r, Tmixed)] ) ) )
+          (Ast_defs.Constraint_as, supportdyn_mixed p r)
           :: tparam.tp_constraints;
       })
 
@@ -202,12 +201,30 @@ let maybe_pessimise_type ctx ty =
   else
     ty
 
+let dynamic_param_to_supportdyn param =
+  let ty = param.fp_type.et_type in
+  match get_node ty with
+  | Tdynamic ->
+    {
+      param with
+      fp_type =
+        {
+          param.fp_type with
+          et_type = supportdyn_mixed (get_pos ty) (get_reason ty);
+        };
+    }
+  | _ -> param
+
 let pessimise_fun_type ctx p ty =
   match get_node ty with
   | Tfun ft ->
     let ret_ty = ft.ft_ret.et_type in
     let ft =
-      { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
+      {
+        ft with
+        ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
+        ft_params = List.map ~f:dynamic_param_to_supportdyn ft.ft_params;
+      }
     in
     if is_enforceable ctx ret_ty then
       mk (get_reason ty, Tfun ft)

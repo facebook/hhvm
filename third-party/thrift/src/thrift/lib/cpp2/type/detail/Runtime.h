@@ -429,6 +429,10 @@ class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
   static Derived to(const native_type<Tag>&& val) {
     return {Tag{}, std::move(val)};
   }
+  template <typename T>
+  static Derived to(T&& val) {
+    return to<type::infer_tag<T>>(std::forward<T>(val));
+  }
 };
 
 // The ops for the empty type 'void'.

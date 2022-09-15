@@ -156,7 +156,11 @@ let maybe_pessimise_fun_decl ctx fun_decl =
     Typing_defs.
       {
         fun_decl with
-        fe_type = Decl_enforceability.pessimise_fun_type ctx fun_decl.fe_type;
+        fe_type =
+          Decl_enforceability.pessimise_fun_type
+            ctx
+            fun_decl.fe_pos
+            fun_decl.fe_type;
       }
   else
     fun_decl
@@ -250,11 +254,30 @@ let get_fun
   | Provider_backend.Rust_provider_backend backend ->
     Rust_provider_backend.Decl.get_fun backend fun_name
 
+let maybe_pessimise_typedef_decl ctx typedef_decl =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    match typedef_decl.Typing_defs.td_constraint with
+    | Some _ -> typedef_decl
+    | None ->
+      let open Typing_defs in
+      let pos = typedef_decl.td_pos in
+      {
+        typedef_decl with
+        td_constraint =
+          Some
+            (Decl_enforceability.supportdyn_mixed
+               pos
+               (Reason.Rwitness_from_decl pos));
+      }
+  else
+    typedef_decl
+
 let get_typedef
     ?(tracing_info : Decl_counters.tracing_info option)
     (ctx : Provider_context.t)
     (typedef_name : type_key) : typedef_decl option =
-  Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
+  Option.map ~f:(maybe_pessimise_typedef_decl ctx)
+  @@ Decl_counters.count_decl Decl_counters.Typedef ?tracing_info typedef_name
   @@ fun _counter ->
   match Provider_context.get_backend ctx with
   | Provider_backend.Analysis -> Decl_store.((get ()).get_typedef typedef_name)

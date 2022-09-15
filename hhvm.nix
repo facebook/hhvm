@@ -25,6 +25,7 @@
 , icu
 , imagemagick6
 , jemalloc
+, lastModifiedDate
 , lib
 , libcap
 , libdwarf
@@ -55,6 +56,7 @@
 , re2
 , re2c
 , rustChannelOf
+, stdenv
 , sqlite
 , tbb
 , tzdata
@@ -66,7 +68,6 @@
 , zlib
 , zstd
 }:
-lastModifiedDate:
 let
   versionParts =
     builtins.match
@@ -98,7 +99,7 @@ let
     channel = "nightly";
   };
 in
-rec {
+stdenv.mkDerivation rec {
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -230,9 +231,10 @@ rec {
   checkPhase =
     ''
       set -ex
-      cd ${./.}
+      runHook preCheck
       export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
-      "$HHVM_BIN" hphp/test/run.php quick
+      (cd ${./.} && "$HHVM_BIN" hphp/test/run.php quick)
+      runHook postCheck
     '';
 
   meta = {

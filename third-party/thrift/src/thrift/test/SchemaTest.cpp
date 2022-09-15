@@ -98,3 +98,10 @@ TEST(SchemaTest, Defaults) {
           .as<apache::thrift::type::i32_t>(),
       42);
 }
+
+TEST(SchemaTest, EmptyService) {
+  auto schema = schema_constants::schemaEmptyService();
+  EXPECT_EQ(*schema.name(), "EmptyService");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/EmptyService");
+  EXPECT_TRUE(schema.functions()->empty());
+}

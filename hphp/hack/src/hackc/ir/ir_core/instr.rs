@@ -783,9 +783,10 @@ impl CallDetail {
     pub fn method(&self, operands: &[ValueId]) -> ValueId {
         let len = operands.len();
         match self {
-            CallDetail::FCallClsMethod { .. }
-            | CallDetail::FCallClsMethodS { .. }
-            | CallDetail::FCallObjMethod { .. } => operands[len - 1],
+            CallDetail::FCallClsMethod { .. } => operands[len - 2],
+            CallDetail::FCallClsMethodS { .. } | CallDetail::FCallObjMethod { .. } => {
+                operands[len - 1]
+            }
             CallDetail::FCallClsMethodD { .. }
             | CallDetail::FCallClsMethodM { .. }
             | CallDetail::FCallClsMethodSD { .. }

@@ -94,7 +94,7 @@ struct CompilerOptions {
   std::string inputDir;
   std::vector<std::string> inputs;
   std::string inputList;
-  std::vector<std::string> modules;
+  std::vector<std::string> dirs;
   std::vector<std::string> excludeDirs;
   std::vector<std::string> excludeFiles;
   std::vector<std::string> excludePatterns;
@@ -102,7 +102,7 @@ struct CompilerOptions {
   std::vector<std::string> excludeStaticFiles;
   std::vector<std::string> excludeStaticPatterns;
   std::vector<std::string> cfiles;
-  std::vector<std::string> cmodules;
+  std::vector<std::string> cdirs;
   std::string push_phases;
   std::string matched_overrides;
   int logLevel;
@@ -185,14 +185,14 @@ bool addAutoloadQueryToPackage(Package& package, const std::string& queryStr) {
 }
 
 void addInputsToPackage(Package& package, const CompilerOptions& po) {
-  if (po.modules.empty() && po.inputs.empty() && po.inputList.empty()) {
+  if (po.dirs.empty() && po.inputs.empty() && po.inputList.empty()) {
     package.addDirectory("/");
   } else {
-    for (auto const& module : po.modules) {
-      package.addDirectory(module);
+    for (auto const& dir : po.dirs) {
+      package.addDirectory(dir);
     }
-    for (auto const& cmodule : po.cmodules) {
-      package.addStaticDirectory(cmodule);
+    for (auto const& cdir : po.cdirs) {
+      package.addStaticDirectory(cdir);
     }
     for (auto const& cfile : po.cfiles) {
       package.addStaticFile(cfile);
@@ -528,7 +528,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "input file names")
     ("input-list", value<std::string>(&po.inputList),
      "file containing list of file names, one per line")
-    ("module", value<std::vector<std::string>>(&po.modules)->composing(),
+    ("module", value<std::vector<std::string>>(&po.dirs)->composing(),
+     "DEPRECATED - use --dir instead")
+    ("dir", value<std::vector<std::string>>(&po.dirs)->composing(),
      "directories containing all input files")
     ("exclude-dir",
      value<std::vector<std::string>>(&po.excludeDirs)->composing(),
@@ -553,7 +555,9 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
      "files to exclude from static content cache")
     ("cfile", value<std::vector<std::string>>(&po.cfiles)->composing(),
      "extra static files forced to include without exclusion checking")
-    ("cmodule", value<std::vector<std::string>>(&po.cmodules)->composing(),
+    ("cmodule", value<std::vector<std::string>>(&po.cdirs)->composing(),
+     "DEPRECATED - use --cdir instead")
+    ("cdir", value<std::vector<std::string>>(&po.cdirs)->composing(),
      "extra directories for static files without exclusion checking")
     ("output-dir,o", value<std::string>(&po.outputDir), "output directory")
     ("config,c", value<std::vector<std::string>>(&po.config)->composing(),

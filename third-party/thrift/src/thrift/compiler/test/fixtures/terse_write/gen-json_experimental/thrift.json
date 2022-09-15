@@ -235,12 +235,12 @@
       },
       "GenerateRuntimeSchema" : {
         "name" : "GenerateRuntimeSchema",
-        "docstring" : "Generates a const of type schema.Struct containing the schma of the\nannotated struct. Optionally specify name to override default\nschema<structName>.\n",
+        "docstring" : "Generates a const of type schema. Struct containing the schema of the\nannotated type. Optionally specify name to override default\nschema<structName>.\n",
         "fields" : {
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 293,
+            "lineno" : 294,
             "required" : "opt-in-req-out",
             "type" : "string"
           }

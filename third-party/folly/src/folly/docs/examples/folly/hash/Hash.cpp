@@ -14,31 +14,20 @@
  * limitations under the License.
  */
 
-include "thrift/annotation/thrift.thrift"
-// @lint-ignore THRIFTCHECKS used by GenerateRuntimeSchema
-include "thrift/lib/thrift/schema.thrift"
+#include <folly/hash/Hash.h>
+#include <folly/portability/GTest.h>
 
-package "facebook.com/thrift/test/schema"
+using namespace folly::hash;
 
-@thrift.GenerateRuntimeSchema
-struct Empty {}
+TEST(hash, demo) {
+  uint64_t a = 12345;
+  uint64_t b = 67890;
+  uint64_t ha = twang_mix64(a);
+  uint64_t hb = twang_mix64(b);
+  uint64_t h = hash_128_to_64(ha, hb);
 
-@thrift.GenerateRuntimeSchema{name = "RenamedSchema"}
-struct Renamed {}
+  EXPECT_EQ(h, 3938132036471221536);
 
-@thrift.GenerateRuntimeSchema
-struct Fields {
-  1: i32 num;
-  3: optional set<string> keyset;
-  7: Empty strct;
-}
-
-@thrift.GenerateRuntimeSchema
-struct Defaults {
-  1: i32 none;
-  2: i32 some = 42;
-}
-
-@thrift.GenerateRuntimeSchema
-service EmptyService {
+  uint64_t switched = hash_128_to_64(hb, ha); // switch order of ha, hb
+  EXPECT_NE(h, switched); // hash_128_to_64 is order-dependent
 }

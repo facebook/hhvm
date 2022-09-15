@@ -231,7 +231,7 @@ stdenv.mkDerivation rec {
   checkPhase =
     ''
       set -ex
-      export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
+      export HHVM_BIN="$PWD/build/hphp/hhvm/hhvm"
       cd ${./.}
       "$HHVM_BIN" hphp/test/run.php quick
     '';

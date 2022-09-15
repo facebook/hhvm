@@ -37,12 +37,14 @@ use oxidized::relative_path::RelativePath;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::ErrorType;
+use serde::Deserialize;
+use serde::Serialize;
 use thiserror::Error;
 use types::readonly_check;
 use types::readonly_nonlocal_infer;
 
 /// Common input needed for compilation.
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct NativeEnv {
     pub filepath: RelativePath,
     pub hhvm: Hhvm,
@@ -61,7 +63,7 @@ impl Default for NativeEnv {
     }
 }
 
-#[derive(Debug, Default, Clone, clap::Parser)]
+#[derive(Debug, Default, Clone, clap::Parser, Serialize, Deserialize)]
 pub struct EnvFlags {
     /// Enable features only allowed in systemlib
     #[clap(long)]

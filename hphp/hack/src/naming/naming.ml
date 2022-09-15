@@ -1164,10 +1164,11 @@ and type_param ~forbid_this genv t =
   let hk_types_enabled =
     TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
   in
-  (if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
-    let (pos, name) = t.Aast.tp_name in
+  let (pos, name) = t.Aast.tp_name in
+
+  if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
     Errors.add_naming_error
-    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name });
+    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name };
 
   (* Bring all type parameters into scope at once before traversing nested tparams,
      as per the note above *)
@@ -1181,6 +1182,14 @@ and type_param ~forbid_this genv t =
   (* Use the env with all nested tparams still in scope *)
   let tp_constraints =
     List.map t.Aast.tp_constraints ~f:(constraint_ ~forbid_this env)
+  in
+  let tp_constraints =
+    if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt genv.ctx)
+    then
+      (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos N.Hmixed))
+      :: tp_constraints
+    else
+      tp_constraints
   in
   {
     N.tp_variance = t.Aast.tp_variance;

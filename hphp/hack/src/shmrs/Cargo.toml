@@ -8,7 +8,7 @@ edition = "2021"
 path = "shmrs.rs"
 
 [dependencies]
-hashbrown = { version = "0.11.2", features = ["nightly", "raw", "serde"] }
+hashbrown = { version = "0.12.3", features = ["nightly", "raw", "serde"] }
 libc = "=0.2.125"
 nohash-hasher = "0.2"
 owning_ref = "0.4"

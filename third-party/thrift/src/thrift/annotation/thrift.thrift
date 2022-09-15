@@ -283,11 +283,12 @@ struct ExceptionMessage {
 @scope.Enum
 struct BitmaskEnum {}
 /**
- * Generates a const of type schema.Struct containing the schma of the
- * annotated struct. Optionally specify name to override default
+ * Generates a const of type schema. Struct containing the schema of the
+ * annotated type. Optionally specify name to override default
  * schema<structName>.
  */
 @scope.Struct
+@scope.Service
 @Experimental
 struct GenerateRuntimeSchema {
   1: string name;

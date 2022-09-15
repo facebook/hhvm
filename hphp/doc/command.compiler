@@ -48,7 +48,7 @@ FILE is added to the list of input PHP files.
 FILE is the path to a file with a list of PHP sources to add to the input
 list. The format is one path per line.
 
-= --module=DIR
+= --dir=DIR
 
 DIR is a path to a directory. All PHP sources in that directory, including
 subdirectories, are added to the input list.
@@ -58,11 +58,6 @@ subdirectories, are added to the input list.
 DIR is the path to a directory. All PHP sources in that directory, including
 subdirectories, are excluded from the input list with the exception of
 forced inputs.
-
-= --fmodule=DIR
-
---fmodule is the same as --module, except it will override any --exclude-dir
-commands that would affect inclusion of the PHP files.
 
 = --ffile=FILE
 
@@ -76,7 +71,7 @@ FILE is excluded from the input list, except where overridden by --ffile.
 
 FILE is included in the file cache. It is not affected by exclusion commands.
 
-= --cmodule=DIR
+= --cdir=DIR
 
 All static resources in DIR, including subdirectories, are added to the file
 cache. It is not affected by exclusion commands.

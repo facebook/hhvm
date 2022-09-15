@@ -126,7 +126,7 @@ class AcceptorTest : public ::testing::TestWithParam<TestSSLConfig> {
       sslCtxConfig.clientCAFiles =
           std::vector<std::string>{folly::kTestCA, folly::kClientTestCA};
     } else {
-      sslCtxConfig.clientCAFiles = std::vector<std::string>{folly::kTestCA};
+      sslCtxConfig.clientCAFile = folly::kTestCA;
     }
     sslCtxConfig.sessionContext = "AcceptorTest";
     sslCtxConfig.isDefault = true;

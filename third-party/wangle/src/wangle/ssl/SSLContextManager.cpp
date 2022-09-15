@@ -594,7 +594,7 @@ void SSLContextManager::SslContexts::addSSLContextConfig(
     set_key_from_curve(sslCtx->getSSLCtx(), curve);
   }
 
-  if (ctxConfig.clientCAFiles.empty() &&
+  if ((ctxConfig.clientCAFile.empty() && ctxConfig.clientCAFiles.empty()) &&
       ctxConfig.clientVerification !=
           SSLContext::VerifyClientCertificate::DO_NOT_REQUEST) {
     LOG(FATAL) << "You can't verify certs without the client ca file";
@@ -616,6 +616,8 @@ void SSLContextManager::SslContexts::addSSLContextConfig(
         clientCAFiles.push_back(path);
       }
     }
+  } else if (!ctxConfig.clientCAFile.empty()) {
+    clientCAFiles.push_back(ctxConfig.clientCAFile);
   }
   loadCAFiles(sslCtx, clientCAFiles);
   setSupportedClientCANames(sslCtx, clientCAFiles);

@@ -1480,6 +1480,9 @@ void ThriftServer::updateCertsToWatch() {
     for (auto& caPath : sslContext.clientCAFiles) {
       certPaths.insert(caPath);
     }
+    if (sslContext.clientCAFiles.empty()) {
+      certPaths.insert(sslContext.clientCAFile);
+    }
   }
   tlsCredWatcher_.withWLock([this, &certPaths](auto& credWatcher) {
     if (!credWatcher) {

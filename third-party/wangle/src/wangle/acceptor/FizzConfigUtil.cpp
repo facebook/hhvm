@@ -111,25 +111,29 @@ FizzConfigUtil::createFizzContext(const ServerSocketConfig& config) {
       ctx->setClientAuthMode(ClientAuthMode::None);
   }
 
+  std::string& caFile = config.sslContextConfigs.front().clientCAFile;
   std::vector<std::string>& caFiles =
       config.sslContextConfigs.front().clientCAFiles;
 
-  std::vector<std::string> CAFilesToVerify = {};
+  std::vector<std::string> combinedCAFiles = {};
 
-  for (std::string& caFile : caFiles) {
-    if (!caFile.empty()) {
-      CAFilesToVerify.push_back((caFile));
+  if (!caFile.empty()) {
+    combinedCAFiles.push_back(caFile);
+  }
+  for (std::string& singleCAFile : caFiles) {
+    if (!singleCAFile.empty()) {
+      combinedCAFiles.push_back((singleCAFile));
     }
   }
 
-  if (!CAFilesToVerify.empty()) {
+  if (!combinedCAFiles.empty()) {
     try {
       auto verifier = DefaultCertificateVerifier::createFromCAFiles(
-          VerificationContext::Server, CAFilesToVerify);
+          VerificationContext::Server, combinedCAFiles);
       ctx->setClientCertVerifier(std::move(verifier));
     } catch (const std::runtime_error& ex) {
       auto msg = folly::sformat(
-          " Failed to load ca file at {}", folly::join(", ", CAFilesToVerify));
+          " Failed to load ca file at {}", folly::join(", ", combinedCAFiles));
       if (config.strictSSL) {
         throw std::runtime_error(ex.what() + msg);
       } else {

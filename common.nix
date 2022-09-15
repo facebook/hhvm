@@ -229,7 +229,10 @@ rec {
 
   checkPhase =
     ''
-      HHVM_BIN="$PWD/hphp/hhvm/hhvm " "hphp/hhvm/hhvm" hphp/test/run.php quick
+      set -ex
+      cd ${./.}
+      export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
+      "$HHVM_BIN" hphp/test/run.php quick
     '';
 
   meta = {

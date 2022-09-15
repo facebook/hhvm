@@ -42,7 +42,7 @@ void add_definition(t_const_value& schema, const t_named& node) {
     definition->add_map(val("uri"), val(node.uri()));
   }
   // TODO: annotations
-  schema.add_map(val("definition"), std::move(definition));
+  schema.add_map(val("attrs"), std::move(definition));
 }
 
 std::unique_ptr<t_const_value> gen_type(const t_type& type) {

@@ -25,7 +25,6 @@
 , icu
 , imagemagick6
 , jemalloc
-, lastModifiedDate
 , lib
 , libcap
 , libdwarf
@@ -56,7 +55,6 @@
 , re2
 , re2c
 , rustChannelOf
-, stdenv
 , sqlite
 , tbb
 , tzdata
@@ -68,6 +66,7 @@
 , zlib
 , zstd
 }:
+lastModifiedDate:
 let
   versionParts =
     builtins.match
@@ -99,7 +98,7 @@ let
     channel = "nightly";
   };
 in
-stdenv.mkDerivation rec {
+rec {
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -113,6 +112,9 @@ stdenv.mkDerivation rec {
       python3
       unixtools.getconf
       which
+    ] ++ lib.optionals hostPlatform.isMacOS [
+      # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
+      darwin.system_cmds
     ];
   buildInputs =
     [
@@ -221,6 +223,16 @@ stdenv.mkDerivation rec {
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch
       patchShebangs \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen
+    '';
+
+  doCheck = true;
+
+  checkPhase =
+    ''
+      set -ex
+      cd ${./.}
+      export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
+      "$HHVM_BIN" hphp/test/run.php quick
     '';
 
   meta = {

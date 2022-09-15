@@ -14,6 +14,8 @@ use bstr::ByteSlice;
 use hhbc::IncludePath;
 pub use oxidized::parser_options::ParserOptions;
 use oxidized::relative_path::RelativePath;
+use serde::Deserialize;
+use serde::Serialize;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CompilerFlags {
@@ -32,7 +34,7 @@ impl Default for CompilerFlags {
     }
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
     pub emit_class_pointers: i32,
@@ -150,7 +152,7 @@ impl Options {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct HhbcFlags {
     /// PHP7 left-to-right assignment semantics
     pub ltr_assign: bool,

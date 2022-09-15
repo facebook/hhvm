@@ -563,7 +563,29 @@ let typeconst_structure
     cc_refs = [];
   }
 
+let maybe_add_supportdyn_bound ctx p kind =
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
+    match kind with
+    | TCAbstract { atc_as_constraint = None; atc_super_constraint; atc_default }
+      ->
+      TCAbstract
+        {
+          atc_as_constraint =
+            Some
+              (Decl_enforceability.supportdyn_mixed
+                 p
+                 (Typing_defs.Reason.Rwitness_from_decl p));
+          atc_super_constraint;
+          atc_default;
+        }
+    | TCAbstract _
+    | TCConcrete _ ->
+      kind
+  else
+    kind
+
 let typeconst_fold
+    (ctx : Provider_context.t)
     (c : Shallow_decl_defs.shallow_class)
     (acc : Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t)
     (stc : Shallow_decl_defs.shallow_typeconst) :
@@ -601,7 +623,8 @@ let typeconst_fold
       {
         ttc_synthesized = false;
         ttc_name = stc.stc_name;
-        ttc_kind = stc.stc_kind;
+        ttc_kind =
+          maybe_add_supportdyn_bound ctx (fst stc.stc_name) stc.stc_kind;
         ttc_origin = c_name;
         ttc_enforceable = enforceable;
         ttc_reifiable = reifiable;
@@ -625,7 +648,7 @@ let build_method_fun_elt
       fe_pos = pos;
       fe_internal = false;
       fe_deprecated = None;
-      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx m.sm_type;
+      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx pos m.sm_type;
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
     }
@@ -779,7 +802,7 @@ and class_decl
   let const = Attrs.mem SN.UserAttributes.uaConst c.sc_user_attributes in
   (* Support both attribute and keyword for now, until typechecker changes are made *)
   let internal = c.sc_internal in
-  let (_p, cls_name) = c.sc_name in
+  let (p, cls_name) = c.sc_name in
   let class_dep = Dep.Type cls_name in
   let env =
     {
@@ -810,7 +833,7 @@ and class_decl
   let (typeconsts, consts) =
     List.fold_left
       c.sc_typeconsts
-      ~f:(typeconst_fold c)
+      ~f:(typeconst_fold ctx c)
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
@@ -909,6 +932,9 @@ and class_decl
       env
       c
   in
+  let dc_tparams =
+    Decl_enforceability.maybe_add_supportdyn_constraints ctx p c.sc_tparams
+  in
   let sealed_whitelist = get_sealed_whitelist c in
   let tc =
     {
@@ -924,7 +950,7 @@ and class_decl
       dc_module = c.sc_module;
       dc_name = snd c.sc_name;
       dc_pos = fst c.sc_name;
-      dc_tparams = c.sc_tparams;
+      dc_tparams;
       dc_where_constraints = c.sc_where_constraints;
       dc_substs = inherited.Decl_inherit.ih_substs;
       dc_consts = consts;

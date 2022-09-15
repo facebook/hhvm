@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <thrift/compiler/ast/t_const_value.h>
+#include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
 
 namespace apache {
@@ -29,6 +30,7 @@ class schematizer {
   // Creates a constant of type schema.Struct describing the argument.
   // https://github.com/facebook/fbthrift/blob/main/thrift/lib/thrift/schema.thrift
   static std::unique_ptr<t_const_value> gen_schema(const t_structured& node);
+  static std::unique_ptr<t_const_value> gen_schema(const t_service& node);
 };
 } // namespace compiler
 } // namespace thrift

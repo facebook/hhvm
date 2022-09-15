@@ -20,11 +20,33 @@ val maybe_pessimise_type :
   Provider_context.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty
 
 (** If the return type is not enforceable, turn it into a like type (~ty) otherwise
-    return the original function type *)
+    return the original function type. Also add supportdyn<mixed> to the type parameters. *)
 val pessimise_fun_type :
-  Provider_context.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty
+  Provider_context.t ->
+  Pos_or_decl.t ->
+  Typing_defs.decl_ty ->
+  Typing_defs.decl_ty
 
 (** Pessimise the type if in implicit pessimisation mode, otherwise
     return the type *)
 val maybe_pessimise_fun_type :
-  Provider_context.t -> Typing_defs.decl_ty -> Typing_defs.decl_ty
+  Provider_context.t ->
+  Pos_or_decl.t ->
+  Typing_defs.decl_ty ->
+  Typing_defs.decl_ty
+
+(** Add as supportdyn<mixed> constraints to the type parameters *)
+val add_supportdyn_constraints :
+  Pos_or_decl.t ->
+  Typing_defs.decl_ty Typing_defs_core.tparam list ->
+  Typing_defs.decl_ty Typing_defs_core.tparam list
+
+(** Add as supportdyn<mixed> constraints to the type parameters if in implicit pessimisation mode.*)
+val maybe_add_supportdyn_constraints :
+  Provider_context.t ->
+  Pos_or_decl.t ->
+  Typing_defs.decl_ty Typing_defs_core.tparam list ->
+  Typing_defs.decl_ty Typing_defs_core.tparam list
+
+val supportdyn_mixed :
+  Pos_or_decl.t -> Typing_defs.Reason.decl_t -> Typing_defs.decl_ty

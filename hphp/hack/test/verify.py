@@ -154,6 +154,7 @@ def check_output(
         out_path = (
             case.file_path + out_extension
             if verify_pessimisation == VerifyPessimisationOptions.no
+            or out_extension == ".pess.out"
             else case.file_path + ".pess" + out_extension
         )
         try:

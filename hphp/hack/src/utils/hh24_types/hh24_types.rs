@@ -8,6 +8,8 @@
 use hh_hash::hash;
 use typing_deps_hash::DepType;
 
+/// TODO(ljw): add backtraces to the three expected cases.
+/// But let's hold off until we've adopted thiserror 1.0.34 and rustc post backtrace stabilization
 #[derive(thiserror::Error, Debug)]
 pub enum HhError {
     #[error("Unexpected: {0:#}")]
@@ -23,6 +25,10 @@ pub enum HhError {
     Stopped(String),
 }
 
+/// TODO(ljw): once we adopt thiserror 1.0.34 and anyhow 1.0.64, then anyhow
+/// stacks will always be present, and we'll have no need for peppering our
+/// codebase with .hh_context("desc") to make up for their lack. At that time,
+/// let's delete the HhErrorContext trait and all calls to it.
 pub trait HhErrorContext<T> {
     fn hh_context(self, context: &'static str) -> Result<T, HhError>;
 }
@@ -45,18 +51,21 @@ impl<T> HhErrorContext<T> for Result<T, HhError> {
 }
 
 impl<T> HhErrorContext<T> for Result<T, std::io::Error> {
+    #[inline(never)]
     fn hh_context(self, context: &'static str) -> Result<T, HhError> {
         self.map_err(|err| HhError::Unexpected(anyhow::Error::new(err).context(context)))
     }
 }
 
 impl<T> HhErrorContext<T> for Result<T, serde_json::error::Error> {
+    #[inline(never)]
     fn hh_context(self, context: &'static str) -> Result<T, HhError> {
         self.map_err(|err| HhError::Unexpected(anyhow::Error::new(err).context(context)))
     }
 }
 
 impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
+    #[inline(never)]
     fn hh_context(self, context: &'static str) -> Result<T, HhError> {
         self.map_err(|err| HhError::Unexpected(err.context(context)))
     }

@@ -228,13 +228,9 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
         Ok(())
     }
 
-    // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
-    fn decl_class_parents(
-        &self,
-        stack: &mut TypeNameIndexSet,
-        errors: &mut Vec<DeclError<R::Pos>>,
-        sc: &ShallowClass<R>,
-    ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
+    /// Produce a stream of a class's parent types that will be folded
+    /// recursively before folding the class itself.
+    pub fn parents_to_fold(sc: &ShallowClass<R>) -> impl Iterator<Item = &Ty<R>> {
         (sc.extends.iter())
             .chain(sc.implements.iter())
             .chain(sc.uses.iter())
@@ -246,6 +242,16 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
                     .map_or([].as_slice(), |et| &et.includes)
                     .iter(),
             )
+    }
+
+    // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
+    fn decl_class_parents(
+        &self,
+        stack: &mut TypeNameIndexSet,
+        errors: &mut Vec<DeclError<R::Pos>>,
+        sc: &ShallowClass<R>,
+    ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
+        Self::parents_to_fold(sc)
             .chain(DeclFolder::stringish_object_parent(sc).iter())
             .map(|ty| {
                 self.register_extends_dependency(ty, sc)?;

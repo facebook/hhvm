@@ -90,19 +90,19 @@ TEST(RuntimeRefTest, Void) {
 
 TEST(RuntimeRefTest, Int) {
   int32_t value = 1;
-  Ref ref = Ref::to<i32_t>(value);
+  Ref ref = Ref::to(value);
   EXPECT_EQ(ref.type(), Type::get<i32_t>());
   EXPECT_FALSE(ref.empty());
   EXPECT_TRUE(ref.add(ref));
   EXPECT_EQ(value, 2);
-  EXPECT_EQ(ref, Ref::to<i32_t>(2));
-  EXPECT_EQ(ref, Value::of<i32_t>(2));
+  EXPECT_EQ(ref, Ref::to(2));
+  EXPECT_EQ(ref, Value::of(2));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(value, 0);
   EXPECT_EQ(ref.as<i32_t>(), 0);
-  EXPECT_EQ(ref, Ref::to<i32_t>(0));
+  EXPECT_EQ(ref, Ref::to(0));
   EXPECT_EQ(ref, Value::create<i32_t>());
 }
 
@@ -123,7 +123,7 @@ TEST(RuntimeRefTest, List) {
   EXPECT_EQ(ref[Ordinal{1}], Ref::to<string_t>("hi"));
   EXPECT_THROW(ref[1], std::out_of_range);
   EXPECT_THROW(ref.add(Ref::to<string_t>(value[0])), std::runtime_error);
-  EXPECT_THROW(ref[Ref::to<i32_t>(0)], std::logic_error);
+  EXPECT_THROW(ref[Ref::to(0)], std::logic_error);
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
@@ -187,8 +187,7 @@ TEST(RuntimeRefTest, Map_Add) {
 // TODO(afuller): Add test for ensuring an optional field.
 TEST(RuntimeRefTest, Struct) {
   type::UriStruct actual;
-  using Tag = type::struct_t<type::UriStruct>;
-  auto ref = Ref::to<Tag>(actual);
+  auto ref = Ref::to(actual);
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 5);
   EXPECT_EQ(*actual.scheme(), "");
@@ -223,7 +222,7 @@ TEST(RuntimeRefTest, Struct) {
 
 TEST(RuntimeRefTest, Identical) {
   float value = 1.0f;
-  auto ref = Ref::to<float_t>(value);
+  auto ref = Ref::to(value);
   EXPECT_FALSE(ref.empty());
   ref.clear();
   float zero = 0.0;
@@ -237,7 +236,7 @@ TEST(RuntimeRefTest, Identical) {
 
 TEST(RuntimeRefTest, ConstRef) {
   constexpr int32_t one = 1;
-  auto ref = Ref::to<i32_t>(one);
+  auto ref = Ref::to(one);
   EXPECT_FALSE(ref.empty());
   EXPECT_TRUE(ref.identical(1));
   // Cannot be modified.

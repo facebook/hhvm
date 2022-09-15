@@ -79,7 +79,7 @@ struct ListOp : ContainerOp<Tag> {
     return folly::forward_like<U>(self.at(pos));
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn*) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
     check_op(pos != std::string::npos);
     return ret(VTag{}, *find(s, pos));
   }
@@ -110,7 +110,7 @@ struct SetOp : ContainerOp<Tag> {
   static bool contains(const T& self, K&& key) {
     return self.find(std::forward<K>(key)) != self.end();
   }
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn*) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
     if (pos != std::string::npos) {
       return ret(KTag{}, *find(s, pos));
     }
@@ -153,23 +153,23 @@ struct MapOp : ContainerOp<Tag> {
     return itr->second;
   }
 
-  static bool put(void* s, FieldId, const Dyn* k, const Dyn& v) {
+  static bool put(void* s, FieldId, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
-    return put(ref(s), k->as<KTag>(), v.as<VTag>());
+    return put(ref(s), k.as<KTag>(), v.as<VTag>());
   }
 
-  static Ptr ensure(void* s, FieldId, const Dyn* k, const Dyn* v) {
+  static Ptr ensure(void* s, FieldId, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
     if (v == nullptr) {
-      return ret(VTag{}, ensure(ref(s), k->as<KTag>(), V{}));
+      return ret(VTag{}, ensure(ref(s), k.as<KTag>(), V{}));
     } else {
-      return ret(VTag{}, ensure(ref(s), k->as<KTag>(), v->as<VTag>()));
+      return ret(VTag{}, ensure(ref(s), k.as<KTag>(), v.as<VTag>()));
     }
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn* k) {
+  static Ptr get(void* s, FieldId, size_t pos, const Dyn& k) {
     if (k != nullptr) {
-      return ret(VTag{}, ref(s).at(k->as<KTag>()));
+      return ret(VTag{}, ref(s).at(k.as<KTag>()));
     } else if (pos != std::string::npos) {
       return ret(KTag{}, Base::find(s, pos)->first);
     }

@@ -223,6 +223,10 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
     }
     return Value{Tag{}, std::move(val)};
   }
+  template <typename U>
+  static Value of(U&& val) {
+    return of<infer_tag<U>>(std::forward<U>(val));
+  }
 
   Value() noexcept = default; // A void/null value.
   Value(const Value& other) noexcept

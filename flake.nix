@@ -43,8 +43,13 @@
               };
         in
         rec {
-          packages.hhvm = pkgs.callPackage ./hhvm_default.nix { } self.lastModifiedDate;
-          packages.hhvm_clang = pkgs.callPackage ./hhvm_clang.nix { } self.lastModifiedDate;
+          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+            lastModifiedDate = self.lastModifiedDate;
+          };
+          packages.hhvm_clang = pkgs.callPackage ./hhvm.nix { 
+            lastModifiedDate = self.lastModifiedDate;
+            stdenv = pkgs.llvmPackages_12.libcxxStdenv;
+          };
           packages.default = packages.hhvm;
 
           devShells.clang = devShellForPackage packages.hhvm_clang;

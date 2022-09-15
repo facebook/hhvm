@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/lib/schematizer.h>
 
@@ -185,6 +187,13 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
 
   schema->add_map(val("fields"), std::move(fields));
 
+  return schema;
+}
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
   return schema;
 }
 } // namespace compiler

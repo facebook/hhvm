@@ -8,6 +8,8 @@
 
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>
 
+#include <cstdlib>
+
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/test/MockAsyncServerSocket.h>
 #include <folly/io/async/test/MockAsyncSocket.h>
@@ -70,8 +72,11 @@ class HTTPSessionAcceptorTestBase
     : public ::testing::TestWithParam<const char*> {
  public:
   virtual void setupSSL() {
-    sslCtxConfig_.setCertificate(
-        kTestDir + "test_cert1.pem", kTestDir + "test_cert1.key", "");
+    setenv("test_cert_pem_path", (kTestDir + "test_cert1.pem").c_str(), 0);
+    setenv("test_cert_key_path", (kTestDir + "test_cert1.key").c_str(), 0);
+    sslCtxConfig_.setCertificate(std::getenv("test_cert_pem_path"),
+                                 std::getenv("test_cert_key_path"),
+                                 "");
 
     sslCtxConfig_.isDefault = true;
     sslCtxConfig_.clientVerification =

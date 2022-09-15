@@ -149,9 +149,11 @@ class Dyn {
   void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
   bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
   bool put(const Dyn& key, const Dyn& val) const {
-    return type_.mut().put(ptr_, {}, key, val);
+    return type_.mut().put(ptr_, key, val);
   }
-  bool put(FieldId id, const Dyn& val) const;
+  bool put(FieldId id, const Dyn& val) const {
+    return type_.mut().put(ptr_, id, val);
+  }
 
   Ptr ensure(const Dyn& key) const;
   Ptr ensure(const Dyn& key, const Dyn& val) const;
@@ -235,6 +237,13 @@ inline Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
   return get_(ptr, {}, std::string::npos, val);
 }
 
+inline bool TypeInfo::put(void* ptr, FieldId id, const Dyn& val) const {
+  return put_(ptr, id, nullPtr(), val);
+}
+inline bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
+  return put_(ptr, {}, key, val);
+}
+
 inline Ptr Dyn::ensure(const Dyn& key) const {
   return type_.mut().ensure(ptr_, {}, key, nullPtr());
 }
@@ -265,9 +274,6 @@ inline Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
 }
 inline Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
-}
-inline bool Dyn::put(FieldId id, const Dyn& val) const {
-  return type_.mut().put(ptr_, id, nullPtr(), val);
 }
 
 // A base struct provides helpers for throwing exceptions and default throwing

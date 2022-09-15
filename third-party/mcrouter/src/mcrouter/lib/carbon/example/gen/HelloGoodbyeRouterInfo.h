@@ -55,6 +55,14 @@ namespace detail {
 using HelloGoodbyeRoutableRequests = carbon::List<
     GoodbyeRequest,
     HelloRequest>;
+using HelloGoodbyeAllRequests = carbon::List<
+    GoodbyeRequest,
+    HelloRequest,
+    facebook::memcache::McExecRequest,
+    facebook::memcache::McQuitRequest,
+    facebook::memcache::McShutdownRequest,
+    facebook::memcache::McStatsRequest,
+    facebook::memcache::McVersionRequest>;
 } // namespace detail
 
 struct HelloGoodbyeRouterInfo {
@@ -67,6 +75,7 @@ struct HelloGoodbyeRouterInfo {
   template <class Route>
   using RouteHandle = HelloGoodbyeRouteHandle<Route>;
   using RoutableRequests = detail::HelloGoodbyeRoutableRequests;
+  using AllRequests = detail::HelloGoodbyeAllRequests;
   
   using RouterStats = carbon::Stats<HelloGoodbyeRouterStatsConfig>;
 

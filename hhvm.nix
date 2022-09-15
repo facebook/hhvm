@@ -228,12 +228,13 @@ stdenv.mkDerivation rec {
 
   doCheck = true;
 
-  preCheck =
+  checkPhase =
     ''
       set -ex
+      runHook preCheck
       export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
-      cd ${./.}
-      "$HHVM_BIN" hphp/test/run.php quick
+      (cd ${./.} && "$HHVM_BIN" hphp/test/run.php quick)
+      runHook postCheck
     '';
 
   meta = {

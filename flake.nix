@@ -28,6 +28,7 @@
         in
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm_default.nix { } self.lastModifiedDate;
+          packages.hhvm_impure = pkgs.callPackage ./hhvm_impure.nix { } self.lastModifiedDate;
           packages.default = packages.hhvm;
 
           devShells.default =

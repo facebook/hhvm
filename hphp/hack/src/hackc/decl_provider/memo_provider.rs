@@ -7,11 +7,11 @@
 use std::cell::RefCell;
 
 use hash::HashMap;
-use oxidized_by_ref::shallow_decl_defs::ConstDecl;
-use oxidized_by_ref::shallow_decl_defs::FunDecl;
-use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 
+use crate::ConstDecl;
 use crate::DeclProvider;
+use crate::FunDecl;
+use crate::ModuleDecl;
 use crate::Result;
 use crate::TypeDecl;
 

@@ -554,7 +554,6 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
- "oxidized_by_ref",
  "parser_core_types",
  "sha-1",
 ]
@@ -1469,7 +1468,6 @@ dependencies = [
  "once_cell",
  "options",
  "oxidized",
- "oxidized_by_ref",
  "panic-message",
  "parser_core_types",
  "positioned_by_ref_parser",

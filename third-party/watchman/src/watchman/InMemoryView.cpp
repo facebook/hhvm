@@ -88,7 +88,7 @@ void InMemoryFileResult::batchFetchProperties(
 
     if (file->neededProperties() & FileResult::Property::SymlinkTarget) {
       if (!file->file_->stat.isSymlink()) {
-        // If this file is not a symlink then we yield
+        // If this file is not a symlink then we immediately yield
         // a nullptr w_string instance rather than propagating an error.
         // This behavior is relied upon by the field rendering code and
         // checked in test_symlink.py.
@@ -194,14 +194,12 @@ std::optional<ClockStamp> InMemoryFileResult::otime() {
   return file_->otime;
 }
 
-std::optional<w_string> InMemoryFileResult::readLink() {
+std::optional<ResolvedSymlink> InMemoryFileResult::readLink() {
   if (!symlinkTarget_.has_value()) {
     if (!file_->stat.isSymlink()) {
-      // If this file is not a symlink then we immediately yield
-      // a nullptr w_string instance rather than propagating an error.
-      // This behavior is relied upon by the field rendering code and
-      // checked in test_symlink.py.
-      symlinkTarget_ = w_string();
+      // We already know it's not a symlink, so there is no need to fetch
+      // properties.
+      symlinkTarget_ = NotSymlink{};
       return symlinkTarget_;
     }
     // Need to load the symlink target; batch that up

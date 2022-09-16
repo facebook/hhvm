@@ -15,6 +15,9 @@
 
 namespace watchman {
 
+struct NotSymlink {};
+using ResolvedSymlink = std::variant<NotSymlink, w_string>;
+
 // A View-independent way of accessing file properties in the
 // query engine.  A FileResult is not intended to be accessed
 // concurrently from multiple threads and may be unsafe to
@@ -51,7 +54,7 @@ class FileResult {
   virtual std::optional<bool> exists() = 0;
 
   // Returns the symlink target
-  virtual std::optional<w_string> readLink() = 0;
+  virtual std::optional<ResolvedSymlink> readLink() = 0;
 
   // Maybe return the change time.
   // Returns folly::none if ctime is not currently known

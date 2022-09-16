@@ -26,7 +26,7 @@
             ];
           };
           devShellForPackage = hhvm:
-            pkgs.callPackage "${nixpkgs.outPath}/pkgs/build-support/mkshell/default.nix"
+            pkgs.mkShell.override
               { stdenv = hhvm.stdenv; }
               {
                 inputsFrom = [
@@ -46,8 +46,7 @@
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
           };
-          packages.hhvm_clang = pkgs.callPackage ./hhvm.nix { 
-            lastModifiedDate = self.lastModifiedDate;
+          packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_12.libcxxStdenv;
           };
           packages.default = packages.hhvm;

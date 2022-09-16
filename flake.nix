@@ -25,28 +25,34 @@
               "libdwarf-20210528"
             ];
           };
-        in
-        rec {
-          packages.hhvm = pkgs.callPackage ./hhvm.nix {
-            lastModifiedDate = self.lastModifiedDate;
-          };
-          packages.default = packages.hhvm;
-
-          devShells.default =
-            pkgs.mkShell
+          devShellForPackage = hhvm:
+            pkgs.mkShell.override
+              { stdenv = hhvm.stdenv; }
               {
                 inputsFrom = [
-                  packages.hhvm
+                  hhvm
                 ];
                 packages = [
                   pkgs.rnix-lsp
                   pkgs.fpm
                   pkgs.rpm
                 ];
-                inherit (packages.hhvm)
+                inherit (hhvm)
                   NIX_CFLAGS_COMPILE
                   CMAKE_INIT_CACHE;
               };
+        in
+        rec {
+          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+            lastModifiedDate = self.lastModifiedDate;
+          };
+          packages.hhvm_clang = packages.hhvm.override {
+            stdenv = pkgs.llvmPackages_12.libcxxStdenv;
+          };
+          packages.default = packages.hhvm;
+
+          devShells.clang = devShellForPackage packages.hhvm_clang;
+          devShells.default = devShellForPackage packages.hhvm;
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =
             let

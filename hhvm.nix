@@ -16,6 +16,7 @@
 , gd
 , gdb
 , gettext
+, gflags
 , git
 , glog
 , gmp
@@ -133,8 +134,15 @@ stdenv.mkDerivation rec {
       gdb
       gettext
       git
-      # TODO: (glog.override { inherit stdenv; })
-      glog
+      (
+        (glog.override {
+          inherit stdenv;
+          gflags = gflags.override { inherit stdenv; };
+        }).overrideAttrs (finalAttrs: previousAttrs: {
+          # Workaround for https://github.com/google/glog/issues/709
+          doCheck = !stdenv.cc.isClang;
+        })
+      )
       gmp
       # TODO: (gperf.override {inherit stdenv; })
       gperf

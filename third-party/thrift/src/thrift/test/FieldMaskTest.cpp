@@ -15,7 +15,7 @@
  */
 
 #include <folly/portability/GTest.h>
-#include <thrift/lib/cpp2/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/test/gen-cpp2/FieldMask_types.h>
 

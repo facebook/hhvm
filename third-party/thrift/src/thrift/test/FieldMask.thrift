@@ -19,7 +19,7 @@ include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/field_mask.thrift"
 
 cpp_include "thrift/test/AdapterTest.h"
-cpp_include "thrift/lib/cpp2/FieldMask.h"
+cpp_include "thrift/lib/cpp2/protocol/FieldMask.h"
 
 package "apache.org/thrift/test"
 

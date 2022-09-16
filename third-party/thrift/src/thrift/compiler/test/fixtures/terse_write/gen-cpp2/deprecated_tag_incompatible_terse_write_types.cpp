@@ -335,20 +335,20 @@ void StructLevelTerseStruct::__fbthrift_clear_terse_fields() {
 }
 
 bool StructLevelTerseStruct::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_bool_field == bool() &&
- this->__fbthrift_field_byte_field == ::std::int8_t() &&
- this->__fbthrift_field_short_field == ::std::int16_t() &&
- this->__fbthrift_field_int_field == ::std::int32_t() &&
- this->__fbthrift_field_long_field == ::std::int64_t() &&
- this->__fbthrift_field_float_field == float() &&
- this->__fbthrift_field_double_field == double() &&
- apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_string_field) &&
- apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_binary_field) &&
- this->__fbthrift_field_enum_field == ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyEnum() &&
- this->__fbthrift_field_list_field.empty() &&
- this->__fbthrift_field_set_field.empty() &&
- this->__fbthrift_field_map_field.empty() &&
- ::apache::thrift::empty(this->__fbthrift_field_struct_field);
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyEnum>>(this->__fbthrift_field_enum_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyStruct>>(this->__fbthrift_field_struct_field);
 }
 
 bool StructLevelTerseStruct::operator==(FOLLY_MAYBE_UNUSED const StructLevelTerseStruct& rhs) const {
@@ -1176,20 +1176,20 @@ void TerseStructWithCustomDefault::__fbthrift_clear_terse_fields() {
 }
 
 bool TerseStructWithCustomDefault::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_bool_field == bool() &&
- this->__fbthrift_field_byte_field == ::std::int8_t() &&
- this->__fbthrift_field_short_field == ::std::int16_t() &&
- this->__fbthrift_field_int_field == ::std::int32_t() &&
- this->__fbthrift_field_long_field == ::std::int64_t() &&
- this->__fbthrift_field_float_field == float() &&
- this->__fbthrift_field_double_field == double() &&
- apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_string_field) &&
- apache::thrift::StringTraits<std::string>::isEmpty(this->__fbthrift_field_binary_field) &&
- this->__fbthrift_field_enum_field == ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyEnum() &&
- this->__fbthrift_field_list_field.empty() &&
- this->__fbthrift_field_set_field.empty() &&
- this->__fbthrift_field_map_field.empty() &&
- ::apache::thrift::empty(this->__fbthrift_field_struct_field);
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::bool_t>(this->__fbthrift_field_bool_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::byte_t>(this->__fbthrift_field_byte_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i16_t>(this->__fbthrift_field_short_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_int_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::i64_t>(this->__fbthrift_field_long_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_float_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_double_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_string_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::binary_t>(this->__fbthrift_field_binary_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyEnum>>(this->__fbthrift_field_enum_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::list<::apache::thrift::type::i16_t>>(this->__fbthrift_field_list_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::set<::apache::thrift::type::i16_t>>(this->__fbthrift_field_set_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::map<::apache::thrift::type::i16_t, ::apache::thrift::type::i16_t>>(this->__fbthrift_field_map_field) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyStructWithCustomDefault>>(this->__fbthrift_field_struct_field);
 }
 
 bool TerseStructWithCustomDefault::operator==(FOLLY_MAYBE_UNUSED const TerseStructWithCustomDefault& rhs) const {
@@ -1443,9 +1443,9 @@ void AdaptedFields::__fbthrift_clear_terse_fields() {
 }
 
 bool AdaptedFields::__fbthrift_is_empty() const {
-  return this->__fbthrift_field_field1 == ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyInteger() &&
- this->__fbthrift_field_field2 == ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter, 2, ::std::int32_t, AdaptedFields>() &&
- this->__fbthrift_field_field3 == ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter, 3, ::facebook::thrift::test::terse_write::deprecated_tag_incompatible::MyInteger, AdaptedFields>();
+  return ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<1>, AdaptedFields>>(this->__fbthrift_field_field1) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<2>, AdaptedFields>>(this->__fbthrift_field_field2) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<3>, AdaptedFields>>(this->__fbthrift_field_field3);
 }
 
 bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {

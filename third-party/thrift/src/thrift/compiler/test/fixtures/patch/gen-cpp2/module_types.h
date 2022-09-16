@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
 #include "thrift/lib/thrift/gen-cpp2/patch_types.h"

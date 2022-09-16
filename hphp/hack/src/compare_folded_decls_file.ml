@@ -98,7 +98,14 @@ let print_diff ~expected_name ~actual_name ~expected_contents ~actual_contents =
     ()
 
 let compare_folded
-    ctx rupro_decls ~print_ocaml ~print_rupro multifile filename text =
+    ctx
+    rupro_decls
+    ~print_ocaml
+    ~print_rupro
+    ~test_ocamlrep_marshal
+    multifile
+    filename
+    text =
   let class_names =
     direct_decl_parse ctx filename text
     |> List.rev_filter_map ~f:(function
@@ -113,6 +120,40 @@ let compare_folded
           cid)
   in
   let rupro_folded_classes = Relative_path.Map.find rupro_decls filename in
+
+  (if test_ocamlrep_marshal then
+    let folded_class_decls = List.zip_exn class_names ocaml_folded_classes in
+    let test_marshaling (c, o) =
+      let ocaml_marshaled = Marshal.to_string o [] in
+      let rust_marshaled = Ocamlrep_marshal_ffi.to_string o [] in
+      let _ =
+        if not (String.equal rust_marshaled ocaml_marshaled) then
+          failwith
+            (Printf.sprintf
+               "Marshaling of '%s' differs between Rust and OCaml. This indicates 'ocamlrep_marshal_output_value_to_string' is broken.\nocaml:\n%S\nrust:\n%S\n"
+               c
+               ocaml_marshaled
+               rust_marshaled)
+        else
+          ()
+      in
+      let rust_read_back = Ocamlrep_marshal_ffi.from_string rust_marshaled 0 in
+      let _ =
+        if
+          not
+            (String.equal
+               (Decl_defs.show_decl_class_type o)
+               (Decl_defs.show_decl_class_type rust_read_back))
+        then
+          failwith
+            (Printf.sprintf
+               "Rust unmarshaling of '%s' is wrong. This indicates 'ocamlrep_marshal_input_value' is broken."
+               c)
+      in
+      ()
+    in
+    List.iter folded_class_decls ~f:test_marshaling);
+
   let show_folded_decls decls =
     decls
     |> List.map ~f:Decl_folded_class_rupro.show_decl_class_type
@@ -158,6 +199,7 @@ let () =
   let enable_strict_const_semantics = ref 0 in
   let print_ocaml = ref false in
   let print_rupro = ref false in
+  let test_ocamlrep_marshal = ref false in
   let ignored_flag flag = (flag, Arg.Unit (fun _ -> ()), "(ignored)") in
   let ignored_arg flag = (flag, Arg.String (fun _ -> ()), "(ignored)") in
   Arg.parse
@@ -194,6 +236,9 @@ let () =
       ( "--print-rupro",
         Arg.Set print_rupro,
         " Print rupro folded decls to stdout" );
+      ( "--test-marshaling",
+        Arg.Set test_ocamlrep_marshal,
+        " Test ocamlrep_marshal (rust) marshaling/unmarshaling" );
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
@@ -273,6 +318,7 @@ let () =
     let everything_sdt = !everything_sdt in
     let print_ocaml = !print_ocaml in
     let print_rupro = !print_rupro in
+    let test_ocamlrep_marshal = !test_ocamlrep_marshal in
     let popt =
       popt
         ~auto_namespace_map
@@ -338,6 +384,12 @@ let () =
           Printf.eprintf "%s\n%!" e;
           exit 1
       in
-      iter_files (compare_folded ctx rupro_decls ~print_ocaml ~print_rupro)
+      iter_files
+        (compare_folded
+           ctx
+           rupro_decls
+           ~print_ocaml
+           ~print_rupro
+           ~test_ocamlrep_marshal)
     in
     if not all_matched then exit 1

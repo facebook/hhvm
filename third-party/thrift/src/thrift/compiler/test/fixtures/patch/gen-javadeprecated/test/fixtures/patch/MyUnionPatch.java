@@ -66,7 +66,7 @@ public class MyUnionPatch implements TBase, java.io.Serializable, Cloneable, Com
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.DEFAULT, 
+    tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
         new StructMetaData(TType.STRUCT, MyUnion.class)));
     tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
@@ -84,6 +84,19 @@ public class MyUnionPatch implements TBase, java.io.Serializable, Cloneable, Com
   }
 
   public MyUnionPatch() {
+  }
+
+  public MyUnionPatch(
+      boolean clear,
+      MyUnionFieldPatch patchPrior,
+      MyUnion ensure,
+      MyUnionFieldPatch patch) {
+    this();
+    this.clear = clear;
+    setClearIsSet(true);
+    this.patchPrior = patchPrior;
+    this.ensure = ensure;
+    this.patch = patch;
   }
 
   public MyUnionPatch(
@@ -551,9 +564,11 @@ public class MyUnionPatch implements TBase, java.io.Serializable, Cloneable, Com
 
     oprot.writeStructBegin(STRUCT_DESC);
     if (this.assign != null) {
-      oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-      this.assign.write(oprot);
-      oprot.writeFieldEnd();
+      if (isSetAssign()) {
+        oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
+        this.assign.write(oprot);
+        oprot.writeFieldEnd();
+      }
     }
     oprot.writeFieldBegin(CLEAR_FIELD_DESC);
     oprot.writeBool(this.clear);
@@ -593,16 +608,19 @@ public class MyUnionPatch implements TBase, java.io.Serializable, Cloneable, Com
     sb.append(newLine);
     boolean first = true;
 
-    sb.append(indentStr);
-    sb.append("assign");
-    sb.append(space);
-    sb.append(":").append(space);
-    if (this.getAssign() == null) {
-      sb.append("null");
-    } else {
-      sb.append(TBaseHelper.toString(this.getAssign(), indent + 1, prettyPrint));
+    if (isSetAssign())
+    {
+      sb.append(indentStr);
+      sb.append("assign");
+      sb.append(space);
+      sb.append(":").append(space);
+      if (this.getAssign() == null) {
+        sb.append("null");
+      } else {
+        sb.append(TBaseHelper.toString(this.getAssign(), indent + 1, prettyPrint));
+      }
+      first = false;
     }
-    first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
     sb.append("clear");

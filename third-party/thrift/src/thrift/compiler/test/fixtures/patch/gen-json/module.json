@@ -707,7 +707,7 @@
         "assign" : {
           "type_enum" : "STRUCT",
           "spec_args" : "InnerUnion",
-          "required" : true,
+          "required" : false,
           "source_range" : {
             "begin" : {
               "line" : 21,
@@ -861,7 +861,7 @@
         "assign" : {
           "type_enum" : "STRUCT",
           "spec_args" : "MyUnion",
-          "required" : true,
+          "required" : false,
           "source_range" : {
             "begin" : {
               "line" : 21,

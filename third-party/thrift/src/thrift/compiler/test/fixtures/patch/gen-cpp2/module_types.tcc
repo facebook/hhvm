@@ -2197,11 +2197,12 @@ void InnerUnionPatchStruct::readNoXfer(Protocol_* iprot) {
 _readField_assign:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::readWithContext(*iprot, this->__fbthrift_field_assign, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_assign = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2215,7 +2216,7 @@ _readField_clear:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_clear, _readState);
     
   }
- this->__isset.set(1, true);
+ this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2239,7 +2240,7 @@ _readField_patchPrior:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(2, true);
+ this->__isset.set(1, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2255,7 +2256,7 @@ _readField_ensure:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(3, true);
+ this->__isset.set(2, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2279,7 +2280,7 @@ _readField_patch:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(4, true);
+ this->__isset.set(3, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2359,9 +2360,9 @@ template <class Protocol_>
 uint32_t InnerUnionPatchStruct::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("InnerUnionPatch");
-  {
+  if (this->__fbthrift_field_assign) {
     xfer += prot_->serializedFieldSize("assign", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::serializedSize<false>(*prot_, *this->__fbthrift_field_assign);
   }
   {
     xfer += prot_->serializedFieldSize("clear", apache::thrift::protocol::T_BOOL, 2);
@@ -2387,9 +2388,9 @@ template <class Protocol_>
 uint32_t InnerUnionPatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("InnerUnionPatch");
-  {
+  if (this->__fbthrift_field_assign) {
     xfer += prot_->serializedFieldSize("assign", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::serializedSize<true>(*prot_, *this->__fbthrift_field_assign);
   }
   {
     xfer += prot_->serializedFieldSize("clear", apache::thrift::protocol::T_BOOL, 2);
@@ -2416,12 +2417,14 @@ uint32_t InnerUnionPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("InnerUnionPatch");
   bool previousFieldHasValue = true;
-  {
+  if (this->__fbthrift_field_assign) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "assign", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::write(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::InnerUnion>::write(*prot_, *this->__fbthrift_field_assign);
     xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   {
     constexpr int16_t kPrevFieldId = 1;
@@ -2709,11 +2712,12 @@ void MyUnionPatchStruct::readNoXfer(Protocol_* iprot) {
 _readField_assign:
   {
     _readState.beforeSubobject(iprot);
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::readWithContext(*iprot, this->__fbthrift_field_assign, _readState);
+    auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::readWithContext(*iprot, *ptr, _readState);
+    this->__fbthrift_field_assign = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2727,7 +2731,7 @@ _readField_clear:
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, bool>::readWithContext(*iprot, this->__fbthrift_field_clear, _readState);
     
   }
- this->__isset.set(1, true);
+ this->__isset.set(0, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2751,7 +2755,7 @@ _readField_patchPrior:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(2, true);
+ this->__isset.set(1, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2767,7 +2771,7 @@ _readField_ensure:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(3, true);
+ this->__isset.set(2, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2791,7 +2795,7 @@ _readField_patch:
     _readState.afterSubobject(iprot);
     
   }
- this->__isset.set(4, true);
+ this->__isset.set(3, true);
 
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
@@ -2871,9 +2875,9 @@ template <class Protocol_>
 uint32_t MyUnionPatchStruct::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("MyUnionPatch");
-  {
+  if (this->__fbthrift_field_assign) {
     xfer += prot_->serializedFieldSize("assign", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::serializedSize<false>(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::serializedSize<false>(*prot_, *this->__fbthrift_field_assign);
   }
   {
     xfer += prot_->serializedFieldSize("clear", apache::thrift::protocol::T_BOOL, 2);
@@ -2899,9 +2903,9 @@ template <class Protocol_>
 uint32_t MyUnionPatchStruct::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("MyUnionPatch");
-  {
+  if (this->__fbthrift_field_assign) {
     xfer += prot_->serializedFieldSize("assign", apache::thrift::protocol::T_STRUCT, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::serializedSize<true>(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::serializedSize<true>(*prot_, *this->__fbthrift_field_assign);
   }
   {
     xfer += prot_->serializedFieldSize("clear", apache::thrift::protocol::T_BOOL, 2);
@@ -2928,12 +2932,14 @@ uint32_t MyUnionPatchStruct::write(Protocol_* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->writeStructBegin("MyUnionPatch");
   bool previousFieldHasValue = true;
-  {
+  if (this->__fbthrift_field_assign) {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 1, kPrevFieldId>(*prot_, "assign", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::write(*prot_, this->__fbthrift_field_assign);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::test::fixtures::patch::MyUnion>::write(*prot_, *this->__fbthrift_field_assign);
     xfer += prot_->writeFieldEnd();
+  } else {
+    previousFieldHasValue = false;
   }
   {
     constexpr int16_t kPrevFieldId = 1;

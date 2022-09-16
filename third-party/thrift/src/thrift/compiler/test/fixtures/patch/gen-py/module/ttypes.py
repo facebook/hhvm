@@ -3596,7 +3596,7 @@ InnerUnionFieldPatch.__setstate__ = InnerUnionFieldPatch__setstate__
 all_structs.append(InnerUnionPatch)
 InnerUnionPatch.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'assign', [InnerUnion, InnerUnion.thrift_spec, True], None, 2, ), # 1
+  (1, TType.STRUCT, 'assign', [InnerUnion, InnerUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   (3, TType.STRUCT, 'patchPrior', [InnerUnionFieldPatch, InnerUnionFieldPatch.thrift_spec, False], None, 2, ), # 3
   (4, TType.STRUCT, 'ensure', [InnerUnion, InnerUnion.thrift_spec, True], None, 2, ), # 4
@@ -3607,6 +3607,9 @@ InnerUnionPatch.thrift_spec = (
 InnerUnionPatch.thrift_struct_annotations = {
 }
 InnerUnionPatch.thrift_field_annotations = {
+  1: {
+    "thrift.box": "",
+  },
 }
 
 def InnerUnionPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None,):
@@ -3661,7 +3664,7 @@ MyUnionFieldPatch.__setstate__ = MyUnionFieldPatch__setstate__
 all_structs.append(MyUnionPatch)
 MyUnionPatch.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'assign', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 1
+  (1, TType.STRUCT, 'assign', [MyUnion, MyUnion.thrift_spec, True], None, 1, ), # 1
   (2, TType.BOOL, 'clear', None, None, 2, ), # 2
   (3, TType.STRUCT, 'patchPrior', [MyUnionFieldPatch, MyUnionFieldPatch.thrift_spec, False], None, 2, ), # 3
   (4, TType.STRUCT, 'ensure', [MyUnion, MyUnion.thrift_spec, True], None, 2, ), # 4
@@ -3672,6 +3675,9 @@ MyUnionPatch.thrift_spec = (
 MyUnionPatch.thrift_struct_annotations = {
 }
 MyUnionPatch.thrift_field_annotations = {
+  1: {
+    "thrift.box": "",
+  },
 }
 
 def MyUnionPatch__init__(self, assign=None, clear=None, patchPrior=None, ensure=None, patch=None,):

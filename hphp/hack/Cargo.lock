@@ -554,7 +554,6 @@ dependencies = [
  "ocamlrep",
  "options",
  "oxidized",
- "oxidized_by_ref",
  "parser_core_types",
  "sha-1",
 ]
@@ -1469,7 +1468,6 @@ dependencies = [
  "once_cell",
  "options",
  "oxidized",
- "oxidized_by_ref",
  "panic-message",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -3521,18 +3519,18 @@ dependencies = [
 
 [[package]]
 name = "thiserror"
-version = "1.0.34"
+version = "1.0.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8c1b05ca9d106ba7d2e31a9dab4a64e7be2cce415321966ea3132c49a656e252"
+checksum = "854babe52e4df1653706b98fcfc05843010039b406875930a70e4d9644e5c417"
 dependencies = [
  "thiserror-impl",
 ]
 
 [[package]]
 name = "thiserror-impl"
-version = "1.0.34"
+version = "1.0.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8f2591983642de85c921015f3f070c665a197ed69e417af436115e3a1407487"
+checksum = "aa32fd3f627f367fe16f893e2597ae3c05020f8bba2666a4e6ea73d377e5714b"
 dependencies = [
  "proc-macro2",
  "quote",

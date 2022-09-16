@@ -148,13 +148,11 @@ struct PatchGen : StructGen {
   };
 
   // {kAssignId}: {type} assign;
-  t_field& assignUnion(t_type_ref type) {
-    return doc(
-        "Assigns a value. If set, all other operations are ignored.",
-        field(kAssignId, type, "assign"));
+  t_field& assign(t_type_ref type) {
+    return box(
+        doc("Assigns a value. If set, all other operations are ignored.",
+            field(kAssignId, type, "assign")));
   }
-  // {kAssignId}: optional {type} assign (thrift.box);
-  t_field& assign(t_type_ref type) { return box(assignUnion(type)); }
 
   // {kClearId}: bool clear;
   t_field& clear() {
@@ -294,7 +292,7 @@ t_struct& patch_generator::add_field_patch(
 t_struct& patch_generator::add_union_patch(
     const t_node& annot, t_union& value_type, t_type_ref patch_type) {
   PatchGen gen{{annot, gen_suffix_struct(annot, value_type, "Patch")}};
-  gen.assignUnion(value_type);
+  gen.assign(value_type);
   gen.clearUnion();
   gen.patchPrior(patch_type);
   gen.ensureUnion(value_type);

@@ -2249,7 +2249,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ?'patch' => ?\fixtures\patch\InnerUnionFieldPatch::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 789480094543637412;
+  const int STRUCTURAL_ID = 6617672747921804043;
   /**
    * Assigns a value. If set, all other operations are ignored.
    * 
@@ -2330,6 +2330,7 @@ class InnerUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
                 )
               ),
               "name" => "assign",
+              "is_optional" => true,
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -2791,7 +2792,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ?'patch' => ?\fixtures\patch\MyUnionFieldPatch::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 2377880301889744847;
+  const int STRUCTURAL_ID = 4411333096338672350;
   /**
    * Assigns a value. If set, all other operations are ignored.
    * 
@@ -2872,6 +2873,7 @@ class MyUnionPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
                 )
               ),
               "name" => "assign",
+              "is_optional" => true,
             )
           ),
           \tmeta_ThriftField::fromShape(

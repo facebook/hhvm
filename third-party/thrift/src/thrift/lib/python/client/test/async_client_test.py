@@ -20,6 +20,10 @@ import typing
 
 from unittest import IsolatedAsyncioTestCase
 
+from thrift.lib.python.client.test.event_handler_helper import (
+    client_handler_that_throws,
+)
+
 from thrift.python.client import (
     ClientType,
     get_client,
@@ -301,3 +305,12 @@ class AsyncClientTests(IsolatedAsyncioTestCase):
 
         self.assertTrue(cb1.triggered)
         self.assertTrue(cb2.triggered)
+
+    async def test_exception_in_client_event_handler(self) -> None:
+        async with server_in_event_loop() as addr:
+            with self.assertRaises(RuntimeError):
+                with client_handler_that_throws():
+                    async with get_client(
+                        TestService, host=addr.ip, port=addr.port
+                    ) as client:
+                        await client.add(1, 2)

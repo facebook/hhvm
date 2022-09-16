@@ -277,9 +277,11 @@ public class InnerUnionPatch implements TBase, java.io.Serializable, Cloneable {
 
     oprot.writeStructBegin(STRUCT_DESC);
     if (this.assign != null) {
-      oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-      this.assign.write(oprot);
-      oprot.writeFieldEnd();
+      if (isSetAssign()) {
+        oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
+        this.assign.write(oprot);
+        oprot.writeFieldEnd();
+      }
     }
     if (this.clear != null) {
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);

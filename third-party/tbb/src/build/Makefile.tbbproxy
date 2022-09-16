@@ -1,0 +1,109 @@
+# Copyright (c) 2005-2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+#
+
+# default target
+default_tbbproxy: tbbproxy tbbproxy_test
+
+tbb_root ?= $(TBBROOT)
+BUILDING_PHASE=1
+include $(tbb_root)/build/common.inc
+DEBUG_SUFFIX=$(findstring _debug,_$(cfg))
+
+PROXY_ROOT ?= $(tbb_root)/src/tbbproxy
+PROXY_SOURCE_ROOT ?= $(PROXY_ROOT)
+
+VPATH = $(tbb_root)/src/tbb/$(ASSEMBLY_SOURCE) $(tbb_root)/src/tbb $(tbb_root)/src/test
+VPATH += $(PROXY_ROOT) $(PROXY_SOURCE_ROOT)
+
+CPLUS_FLAGS += $(DEFINE_KEY)__TBB_DLL_NAME=$(TBB.DLL)
+CPLUS_FLAGS += $(DEFINE_KEY)__TBB_LST=$(TBB.LST)
+CPLUS_FLAGS += $(foreach dir,$(VPATH),$(INCLUDE_KEY)$(dir))
+CPLUS_FLAGS += $(PIC_KEY) $(DSE_KEY)
+
+include $(tbb_root)/build/common_rules.inc
+
+#------------------------------------------------------
+# Define rules for making the TBB Proxy static library.
+#------------------------------------------------------
+
+# Object files that make up TBB Proxy
+PROXY_CPLUS.OBJ = tbbproxy.$(OBJ)
+PROXY_ASM.OBJ   = tbbproxy-asm.$(OBJ)
+PROXY.OBJ := $(PROXY_CPLUS.OBJ) $(PROXY_ASM.OBJ)
+
+# Not using intrinsics prevents undesired dependence on ICL libraries (e.g. libirc).
+# Not using default libs prevents link issues caused by different CRT versions in tbbproxy and in an app.
+$(PROXY.OBJ): CPLUS_FLAGS += $(DEFINE_KEY)ARCH_$(arch) $(DEFINE_KEY)OS_$(tbb_os) $(NOINTRINSIC_KEY) $(NODEFAULTLIB_KEY)
+
+$(PROXY_CPLUS.OBJ): CPLUS_FLAGS+=$(if $(filter windows.%cl,$(tbb_os).$(compiler)),/Fdtbbproxy$(DEBUG_SUFFIX).pdb)
+$(PROXY_CPLUS.OBJ): %.$(OBJ): %.cpp
+	$(CPLUS) $(COMPILE_ONLY) $(CPLUS_FLAGS) $(INCLUDES) $<
+
+$(PROXY.LIB): $(PROXY.OBJ)
+	$(AR) $(AR_FLAGS) $(AR_OUTPUT_KEY)$@ $^
+
+.PRECIOUS : %.$(ASMEXT)
+tbbproxy-asm.$(ASMEXT) : tbbproxy-$(tbb_os).$(ASMEXT) $(TBB.LST) $(TBB-OBJECTS.LST)
+	$(CPLUS) $(PREPROC_ONLY) $< $(INCLUDES) $(CPLUS_FLAGS) $(DEFINE_KEY)__TBB_BUILD=1 > $@
+
+.PHONY: tbbproxy
+ifeq (windows,$(tbb_os))
+tbbproxy: $(PROXY.LIB)
+else
+tbbproxy:
+endif
+
+#------------------------------------------------------
+# End of rules for making the TBB Proxy static library
+#------------------------------------------------------
+
+#------------------------------------------------------
+# Define rules for making the TBB Proxy unit tests
+#------------------------------------------------------
+
+add_debug=$(basename $(1))_debug$(suffix $(1))
+cross_suffix=$(if $(crosstest),$(if $(DEBUG_SUFFIX),$(subst _debug,,$(1)),$(call add_debug,$(1))),$(1))
+
+PROXY_LIB        = $(call cross_suffix,$(PROXY.LIB))
+PROXY_TESTS_SRCS = test_runtime_loader.cpp
+PROXY_TESTS_OBJS = $(PROXY_TESTS_SRCS:.cpp=.$(OBJ))
+PROXY_TESTS_EXES = $(PROXY_TESTS_OBJS:.$(OBJ)=.$(TEST_EXT))
+
+# Run rules.
+.PHONY: tbbproxy_test
+ifeq (windows,$(tbb_os))
+tbbproxy_test: $(call cross_suffix,$(PROXY.LIB)) $(TEST_PREREQUISITE) $(PROXY_TESTS_EXES)
+	$(run_cmd) ./test_runtime_loader.$(TEST_EXT) $(args)
+else
+tbbproxy_test:
+endif
+
+# Link rules.
+$(PROXY_TESTS_EXES): %.$(TEST_EXT): %.$(OBJ) $(PROXY_LIB)
+	$(CPLUS) $(OUTPUT_KEY)$@ $(CPLUS_FLAGS) $< $(PROXY_LIB) $(LIBS) $(LIBDL) $(LINK_FLAGS)
+
+# Compilation rules.
+$(PROXY_TESTS_OBJS): %.$(OBJ): %.cpp
+	$(CPLUS) $(COMPILE_ONLY) $(CPLUS_FLAGS) $(CXX_ONLY_FLAGS) $(CXX_WARN_SUPPRESS) $(INCLUDES) $(OUTPUT_KEY)$@ $<
+
+#------------------------------------------------------
+# End of rules for making the TBB Proxy unit tests
+#------------------------------------------------------
+
+# Include automatically generated dependencies
+-include *.d

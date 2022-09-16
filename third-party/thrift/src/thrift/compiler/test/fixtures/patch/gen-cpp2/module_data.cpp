@@ -326,11 +326,11 @@ const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::pat
   "__fbthrift_field_patch",
 }};
 const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::InnerUnionPatchStruct>::isset_indexes = {{
+  -1,
   0,
   1,
   2,
   3,
-  4,
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::patch::MyUnionFieldPatchStruct>::fields_names = {{
@@ -388,11 +388,11 @@ const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::pat
   "__fbthrift_field_patch",
 }};
 const std::array<int, 5> TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruct>::isset_indexes = {{
+  -1,
   0,
   1,
   2,
   3,
-  4,
 }};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::patch::MyStructField21PatchStruct>::fields_names = {{

@@ -75,14 +75,14 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             const string& methodName,
             unique_ptr[cIOBuf] args,
             const unordered_map[string, string] headers,
-        )
+        ) except+
         void oneway_send(
             const string& serviceName,
             const string& methodName,
             unique_ptr[cIOBuf] args,
             cData&& metadata,
             const unordered_map[string, string] headers,
-        )
+        ) except+
         cFollySemiFuture[cOmniClientResponseWithHeaders] semifuture_send(
             const string& serviceName,
             const string& methodName,

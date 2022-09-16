@@ -239,7 +239,7 @@ StructMetadata<::test::fixtures::patch::InnerUnionPatchStruct>::gen(ThriftMetada
   module_InnerUnionPatch.is_union() = false;
   static const auto* const
   module_InnerUnionPatch_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "assign", false, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{}},
+    {1, "assign", true, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::InnerUnionFieldPatchStruct>>("module.InnerUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
     {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::InnerUnion>>("module.InnerUnion"), std::vector<ThriftConstStruct>{}},
@@ -295,7 +295,7 @@ StructMetadata<::test::fixtures::patch::MyUnionPatchStruct>::gen(ThriftMetadata&
   module_MyUnionPatch.is_union() = false;
   static const auto* const
   module_MyUnionPatch_fields = new std::array<EncodedThriftField, 5>{{
-    {1, "assign", false, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
+    {1, "assign", true, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},
     {2, "clear", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BOOL_TYPE), std::vector<ThriftConstStruct>{}},
     {3, "patchPrior", false, std::make_unique<Struct<::test::fixtures::patch::MyUnionFieldPatchStruct>>("module.MyUnionFieldPatch"), std::vector<ThriftConstStruct>{}},
     {4, "ensure", false, std::make_unique<Union<::test::fixtures::patch::MyUnion>>("module.MyUnion"), std::vector<ThriftConstStruct>{}},

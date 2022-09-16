@@ -185,7 +185,7 @@ stdenv.mkDerivation rec {
     [
       "-DFOLLY_MOBILE=0"
     ]
-    ++ lib.optionals hostPlatform.isMacOS [
+    ++ lib.optionals stdenv.cc.isClang [
       # Workaround for dtoa.0.3.2
       "-Wno-error=unused-command-line-argument"
     ];

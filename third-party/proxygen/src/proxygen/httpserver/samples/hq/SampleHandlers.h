@@ -12,6 +12,7 @@
 #include <chrono>
 #include <climits>
 #include <cmath>
+#include <folly/Conv.h>
 #include <folly/futures/Future.h>
 #include <folly/io/IOBuf.h>
 #include <functional>
@@ -146,6 +147,13 @@ class BaseSampleHandler : public proxygen::HTTPTransactionHandler {
     return footer;
   }
 
+  static uint32_t getQueryParamAsNumber(
+      std::unique_ptr<proxygen::HTTPMessage>& msg,
+      const std::string& name,
+      uint32_t defValue) noexcept {
+    return folly::tryTo<uint32_t>(msg->getQueryParam(name)).value_or(defValue);
+  }
+
  protected:
   [[nodiscard]] const std::string& getHttpVersion() const {
     return params_.httpVersion;
@@ -173,17 +181,6 @@ class ChunkedHandler
   }
 
   ChunkedHandler() = delete;
-
-  uint32_t getQueryParamAsNumber(std::unique_ptr<proxygen::HTTPMessage>& msg,
-                                 const std::string& name,
-                                 uint32_t defValue) noexcept {
-    uint32_t res{defValue};
-    try {
-      res = folly::to<uint32_t>(msg->getQueryParam(name));
-    } catch (const folly::ConversionError&) {
-    }
-    return res;
-  }
 
   void onHeadersComplete(
       std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override {
@@ -545,6 +542,66 @@ class DummyHandler : public BaseSampleHandler {
                              "reach the /echo endpoint for an echo response ",
                              "query /<number> endpoints for a variable size "
                              "response with random bytes");
+};
+
+class DelayHandler
+    : public BaseSampleHandler
+    , folly::DelayedDestruction {
+ public:
+  explicit DelayHandler(const HandlerParams& params, folly::EventBase* evb)
+      : BaseSampleHandler(params), evb_(evb) {
+  }
+
+  DelayHandler() = delete;
+
+  void onHeadersComplete(
+      std::unique_ptr<proxygen::HTTPMessage> msg) noexcept override {
+    VLOG(10) << "DelayHandler::onHeadersComplete";
+    proxygen::HTTPMessage resp;
+    VLOG(10) << "Setting http-version to " << getHttpVersion();
+    resp.setVersionString(getHttpVersion());
+    resp.setStatusCode(200);
+    resp.setStatusMessage("Ok");
+    resp.setWantsKeepalive(true);
+    maybeAddAltSvcHeader(resp);
+    VLOG(10) << "DelayHandler::onHeadersComplete calling sendHeaders";
+    txn_->sendHeaders(resp);
+    duration_ = getQueryParamAsNumber(msg, "duration", 0);
+
+    delayFutureCallback(msg);
+  }
+
+  void onBody(std::unique_ptr<folly::IOBuf> /*chain*/) noexcept override {
+    VLOG(10) << "DelayHandler::onBody";
+  }
+
+  void onEOM() noexcept override {
+    VLOG(10) << "DelayHandler::onEOM";
+  }
+
+  void onError(const proxygen::HTTPException& /*error*/) noexcept override {
+    sleepFuture_.cancel();
+    txn_->sendAbort();
+  }
+
+ private:
+  void delayFutureCallback(std::unique_ptr<proxygen::HTTPMessage>& msg) {
+    DestructorGuard destructorGuard(this);
+
+    std::string responseBody = fmt::format(
+        "Response Body for: {} {}", msg->getMethodString(), msg->getURL());
+
+    sleepFuture_ = folly::futures::sleep(std::chrono::milliseconds(duration_))
+                       .via(evb_)
+                       .then([this, responseBody, destructorGuard](auto&&) {
+                         txn_->sendBody(folly::IOBuf::copyBuffer(responseBody));
+                         txn_->sendEOM();
+                       });
+  }
+
+  uint32_t duration_{0}; // delay duration in milliseconds
+  folly::EventBase* evb_;
+  folly::SemiFuture<folly::Unit> sleepFuture_;
 };
 
 class HealthCheckHandler : public BaseSampleHandler {

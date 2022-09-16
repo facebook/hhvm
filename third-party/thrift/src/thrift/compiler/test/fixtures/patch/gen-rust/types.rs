@@ -112,7 +112,7 @@ pub struct InnerUnionFieldPatch {
 #[derive(Clone, PartialEq)]
 pub struct InnerUnionPatch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
-    pub assign: crate::types::InnerUnion,
+    pub assign: ::std::option::Option<::std::boxed::Box<crate::types::InnerUnion>>,
     #[doc = "Clears any set value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
@@ -145,7 +145,7 @@ pub struct MyUnionFieldPatch {
 #[derive(Clone, PartialEq)]
 pub struct MyUnionPatch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
-    pub assign: crate::types::MyUnion,
+    pub assign: ::std::option::Option<::std::boxed::Box<crate::types::MyUnion>>,
     #[doc = "Clears any set value. Applies first."]
     pub clear: ::std::primitive::bool,
     #[doc = "Patches any previously set values. Applies second."]
@@ -1099,7 +1099,7 @@ where
 impl ::std::default::Default for self::InnerUnionPatch {
     fn default() -> Self {
         Self {
-            assign: ::std::default::Default::default(),
+            assign: ::std::option::Option::None,
             clear: ::std::default::Default::default(),
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
@@ -1141,9 +1141,11 @@ where
 {
     fn write(&self, p: &mut P) {
         p.write_struct_begin("InnerUnionPatch");
-        p.write_field_begin("assign", ::fbthrift::TType::Struct, 1);
-        ::fbthrift::Serialize::write(&self.assign, p);
-        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.assign {
+            p.write_field_begin("assign", ::fbthrift::TType::Struct, 1);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
         p.write_field_begin("clear", ::fbthrift::TType::Bool, 2);
         ::fbthrift::Serialize::write(&self.clear, p);
         p.write_field_end();
@@ -1194,7 +1196,7 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-            assign: field_assign.unwrap_or_default(),
+            assign: field_assign,
             clear: field_clear.unwrap_or_default(),
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),
@@ -1301,7 +1303,7 @@ where
 impl ::std::default::Default for self::MyUnionPatch {
     fn default() -> Self {
         Self {
-            assign: ::std::default::Default::default(),
+            assign: ::std::option::Option::None,
             clear: ::std::default::Default::default(),
             patchPrior: ::std::default::Default::default(),
             ensure: ::std::default::Default::default(),
@@ -1343,9 +1345,11 @@ where
 {
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyUnionPatch");
-        p.write_field_begin("assign", ::fbthrift::TType::Struct, 1);
-        ::fbthrift::Serialize::write(&self.assign, p);
-        p.write_field_end();
+        if let ::std::option::Option::Some(some) = &self.assign {
+            p.write_field_begin("assign", ::fbthrift::TType::Struct, 1);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
         p.write_field_begin("clear", ::fbthrift::TType::Bool, 2);
         ::fbthrift::Serialize::write(&self.clear, p);
         p.write_field_end();
@@ -1396,7 +1400,7 @@ where
         }
         p.read_struct_end()?;
         ::std::result::Result::Ok(Self {
-            assign: field_assign.unwrap_or_default(),
+            assign: field_assign,
             clear: field_clear.unwrap_or_default(),
             patchPrior: field_patchPrior.unwrap_or_default(),
             ensure: field_ensure.unwrap_or_default(),

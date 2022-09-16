@@ -1,0 +1,318 @@
+# Copyright (c) 2005-2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+#
+
+#------------------------------------------------------------------------------
+# Define rules for making the TBB tests.
+#------------------------------------------------------------------------------
+.PHONY: default test_tbb_plain test_tbb_openmp test_tbb_cilk test_tbb_old clean
+
+default: test_tbb_plain test_tbb_openmp test_tbb_cilk test_tbb_old
+
+tbb_root ?= $(TBBROOT)
+BUILDING_PHASE=1
+TEST_RESOURCE = $(TBB.RES)
+TESTFILE=test
+include $(tbb_root)/build/common.inc
+DEBUG_SUFFIX=$(findstring _debug,$(call cross_cfg,_$(cfg)))
+
+#------------------------------------------------------------
+# Define static pattern rules dealing with .cpp source files
+#------------------------------------------------------------
+
+VPATH = $(tbb_root)/src/tbb/$(ASSEMBLY_SOURCE) $(tbb_root)/src/tbb $(tbb_root)/src/rml/client $(tbb_root)/src/old $(tbb_root)/src/test $(tbb_root)/src/perf
+CPLUS_FLAGS += $(if $(crosstest),$(DEFINE_KEY)__TBB_NO_IMPLICIT_LINKAGE=1) \
+               $(if $(no_exceptions),$(DEFINE_KEY)__TBB_TEST_NO_EXCEPTIONS=1) \
+               $(if $(LINK_TBB.LIB),$(DEFINE_KEY)TEST_USES_TBB=1)
+
+TEST_PREREQUISITE+=$(TBB.LIB)
+LINK_FILES+=$(LINK_TBB.LIB)
+
+ifdef use_proxy
+    USE_PROXY_FLAG = $(DEFINE_KEY)HARNESS_USE_RUNTIME_LOADER
+    CPLUS_FLAGS += $(USE_PROXY_FLAG)
+    LINK_TBB.LIB = $(PROXY.LIB)
+    LIBS += $(LIBDL)
+endif
+
+TEST_SUFFIXES=secondary compiler_builtins pic
+include $(tbb_root)/build/common_rules.inc
+
+# Rules for the tests, which use TBB in a dynamically loadable library
+test_model_plugin.$(TEST_EXT): LINK_TBB.LIB =
+test_model_plugin.$(TEST_EXT): CPLUS_FLAGS := $(CPLUS_FLAGS:$(USE_PROXY_FLAG)=)
+test_model_plugin.$(TEST_EXT): LIBS += $(LIBDL)
+ifneq (,$(DYLIB_KEY))
+test_model_plugin.$(TEST_EXT): test_model_plugin_dll.$(DLL)
+endif
+
+# tbb_misc.$(OBJ) has to be specified here (instead of harness_inject_scheduler.h) because it carries dependency on version_string.ver
+SCHEDULER_DEPENDENCIES = $(TBB_ASM.OBJ) tbb_misc.$(OBJ)
+
+# These executables don't depend on the TBB library, but include core .cpp files directly
+SCHEDULER_DIRECTLY_INCLUDED = test_task_leaks.$(TEST_EXT) \
+    test_task_assertions.$(TEST_EXT) \
+    test_fast_random.$(TEST_EXT) \
+    test_global_control_whitebox.$(TEST_EXT) \
+    test_concurrent_queue_whitebox.$(TEST_EXT)
+
+# Necessary to locate version_string.ver referenced from directly included tbb_misc.cpp
+INCLUDES += $(INCLUDE_KEY). $(INCLUDE_TEST_HEADERS)
+
+$(SCHEDULER_DIRECTLY_INCLUDED): CPLUS_FLAGS += $(DSE_KEY)
+$(SCHEDULER_DIRECTLY_INCLUDED): WARNING_KEY += $(WARNING_SUPPRESS)
+$(SCHEDULER_DIRECTLY_INCLUDED): LIBS += $(LIBDL)
+#tbb.lib must not be linked to scheduler white box tests in order to not violate ODR
+$(SCHEDULER_DIRECTLY_INCLUDED): LINK_TBB.LIB =
+$(SCHEDULER_DIRECTLY_INCLUDED): LINK_FILES += $(SCHEDULER_DEPENDENCIES)
+$(SCHEDULER_DIRECTLY_INCLUDED): $(SCHEDULER_DEPENDENCIES)
+
+# test_tbb_header detects "multiple definition" linker error using the test that covers the whole library
+TWICE_LINKED_TESTS = test_tbb_header.$(TEST_EXT) \
+                     test_concurrent_unordered_set.$(TEST_EXT)
+
+%_secondary.$(OBJ): CPLUS_FLAGS+=$(DEFINE_KEY)__TBB_TEST_SECONDARY=1
+
+# Detecting "multiple definition" linker error using the test that covers the whole library
+$(TWICE_LINKED_TESTS): %.$(TEST_EXT): %.$(OBJ) %_secondary.$(OBJ)
+$(TWICE_LINKED_TESTS): LINK_FILES+=$(@:.$(TEST_EXT)=_secondary.$(OBJ))
+
+# Checks that TBB works correctly in position independent code
+%_pic.$(OBJ): CPLUS_FLAGS+=$(PIC_KEY)
+%_pic.$(OBJ): CPLUS_FLAGS+=$(DEFINE_KEY)__TBB_TEST_PIC=1
+
+# Test of generic gcc port and icc intrinsics port
+%_compiler_builtins.$(TEST_EXT): LINK_TBB.LIB =
+%_compiler_builtins.$(OBJ): CPLUS_FLAGS+=$(DEFINE_KEY)__TBB_TEST_BUILTINS=1 $(DEFINE_KEY)TBB_USE_ASSERT=0
+
+# dynamic_link tests don't depend on the TBB library
+test_dynamic_link%.$(TEST_EXT): LINK_TBB.LIB =
+test_dynamic_link.$(TEST_EXT): LIBS += $(LIBDL)
+
+# Resolving issue with the number of sections that an object file can contain
+ifneq (,$(BIGOBJ_KEY))
+TEST_BIGOBJ = test_opencl_node.$(TEST_EXT)      \
+    test_atomic.$(TEST_EXT)                     \
+    test_concurrent_unordered_set.$(TEST_EXT)   \
+    test_concurrent_unordered_map.$(TEST_EXT)   \
+    test_join_node_key_matching.$(TEST_EXT)     \
+    test_join_node_msg_key_matching.$(TEST_EXT) \
+    test_join_node.$(TEST_EXT)
+$(TEST_BIGOBJ): override CXXFLAGS += $(BIGOBJ_KEY)
+endif
+
+# TODO: remove repetition of .$(TEST_EXT) in the list bellow
+# The main list of TBB tests
+TEST_TBB_PLAIN.EXE = test_assembly.$(TEST_EXT)   \
+	test_global_control.$(TEST_EXT)              \
+	test_tbb_fork.$(TEST_EXT)                    \
+	test_assembly_compiler_builtins.$(TEST_EXT)  \
+	test_aligned_space.$(TEST_EXT)               \
+	test_atomic.$(TEST_EXT)                      \
+	test_atomic_pic.$(TEST_EXT)                  \
+	test_atomic_compiler_builtins.$(TEST_EXT)    \
+	test_blocked_range.$(TEST_EXT)               \
+	test_blocked_range2d.$(TEST_EXT)             \
+	test_blocked_range3d.$(TEST_EXT)             \
+	test_blocked_rangeNd.$(TEST_EXT)             \
+	test_concurrent_queue.$(TEST_EXT)            \
+	test_concurrent_vector.$(TEST_EXT)           \
+	test_concurrent_unordered_set.$(TEST_EXT)    \
+	test_concurrent_unordered_map.$(TEST_EXT)    \
+	test_concurrent_hash_map.$(TEST_EXT)         \
+	test_enumerable_thread_specific.$(TEST_EXT)  \
+	test_handle_perror.$(TEST_EXT)               \
+	test_halt.$(TEST_EXT)                        \
+	test_model_plugin.$(TEST_EXT)                \
+	test_mutex.$(TEST_EXT)                       \
+	test_mutex_native_threads.$(TEST_EXT)        \
+	test_rwm_upgrade_downgrade.$(TEST_EXT)       \
+	test_cache_aligned_allocator.$(TEST_EXT)     \
+	test_cache_aligned_allocator_STL.$(TEST_EXT) \
+	test_parallel_for.$(TEST_EXT)                \
+	test_parallel_reduce.$(TEST_EXT)             \
+	test_parallel_sort.$(TEST_EXT)               \
+	test_parallel_scan.$(TEST_EXT)               \
+	test_parallel_while.$(TEST_EXT)              \
+	test_parallel_do.$(TEST_EXT)                 \
+	test_pipeline.$(TEST_EXT)                    \
+	test_pipeline_with_tbf.$(TEST_EXT)           \
+	test_parallel_pipeline.$(TEST_EXT)           \
+	test_lambda.$(TEST_EXT)                      \
+	test_task_scheduler_init.$(TEST_EXT)         \
+	test_task_scheduler_observer.$(TEST_EXT)     \
+	test_task.$(TEST_EXT)                        \
+	test_tbb_thread.$(TEST_EXT)                  \
+	test_std_thread.$(TEST_EXT)                  \
+	test_tick_count.$(TEST_EXT)                  \
+	test_inits_loop.$(TEST_EXT)                  \
+	test_yield.$(TEST_EXT)                       \
+	test_eh_tasks.$(TEST_EXT)                    \
+	test_eh_algorithms.$(TEST_EXT)               \
+	test_eh_flow_graph.$(TEST_EXT)               \
+	test_parallel_invoke.$(TEST_EXT)             \
+	test_task_group.$(TEST_EXT)                  \
+	test_ittnotify.$(TEST_EXT)                   \
+	test_parallel_for_each.$(TEST_EXT)           \
+	test_tbb_header.$(TEST_EXT)                  \
+	test_combinable.$(TEST_EXT)                  \
+	test_task_auto_init.$(TEST_EXT)              \
+	test_task_arena.$(TEST_EXT)                  \
+	test_concurrent_monitor.$(TEST_EXT)          \
+	test_semaphore.$(TEST_EXT)                   \
+	test_critical_section.$(TEST_EXT)            \
+	test_reader_writer_lock.$(TEST_EXT)          \
+	test_tbb_condition_variable.$(TEST_EXT)      \
+	test_intrusive_list.$(TEST_EXT)              \
+	test_concurrent_priority_queue.$(TEST_EXT)   \
+	test_task_priority.$(TEST_EXT)               \
+	test_task_enqueue.$(TEST_EXT)                \
+	test_task_steal_limit.$(TEST_EXT)            \
+	test_hw_concurrency.$(TEST_EXT)              \
+	test_fp.$(TEST_EXT)                          \
+	test_tuple.$(TEST_EXT)                       \
+	test_flow_graph.$(TEST_EXT)                  \
+	test_broadcast_node.$(TEST_EXT)              \
+	test_continue_node.$(TEST_EXT)               \
+	test_function_node.$(TEST_EXT)               \
+	test_limiter_node.$(TEST_EXT)                \
+	test_join_node.$(TEST_EXT)                   \
+	test_join_node_key_matching.$(TEST_EXT)      \
+	test_join_node_msg_key_matching.$(TEST_EXT)  \
+	test_buffer_node.$(TEST_EXT)                 \
+	test_queue_node.$(TEST_EXT)                  \
+	test_priority_queue_node.$(TEST_EXT)         \
+	test_sequencer_node.$(TEST_EXT)              \
+	test_source_node.$(TEST_EXT)                 \
+	test_overwrite_node.$(TEST_EXT)              \
+	test_write_once_node.$(TEST_EXT)             \
+	test_indexer_node.$(TEST_EXT)                \
+	test_multifunction_node.$(TEST_EXT)          \
+	test_split_node.$(TEST_EXT)                  \
+	test_static_assert.$(TEST_EXT)               \
+	test_aggregator.$(TEST_EXT)                  \
+	test_concurrent_lru_cache.$(TEST_EXT)        \
+	test_examples_common_utility.$(TEST_EXT)     \
+	test_dynamic_link.$(TEST_EXT)                \
+	test_parallel_for_vectorization.$(TEST_EXT)  \
+	test_tagged_msg.$(TEST_EXT)                  \
+	test_partitioner_whitebox.$(TEST_EXT)        \
+	test_flow_graph_whitebox.$(TEST_EXT)         \
+	test_composite_node.$(TEST_EXT)              \
+	test_async_node.$(TEST_EXT)                  \
+	test_async_msg.$(TEST_EXT)                   \
+	test_tbb_version.$(TEST_EXT)                 # insert new files right above
+
+# These tests depend on other technologies
+TEST_TBB_SPECIAL.EXE = test_openmp.$(TEST_EXT) \
+    test_cilk_interop.$(TEST_EXT)              \
+    test_gfx_factory.$(TEST_EXT)               \
+    test_opencl_node.$(TEST_EXT)
+
+# skip mode_plugin for now
+skip_tests += test_model_plugin
+
+ifdef OPENMP_FLAG
+test_openmp.$(TEST_EXT): CPLUS_FLAGS += $(OPENMP_FLAG)
+
+test_tbb_openmp: $(TEST_PREREQUISITE) test_openmp.$(TEST_EXT)
+	$(run_cmd) ./test_openmp.$(TEST_EXT) 1:4
+else
+test_tbb_openmp:
+	@echo "OpenMP is not available"
+endif
+
+ifdef CILK_AVAILABLE
+# Workaround on cilkrts linkage known issue (see Intel(R) C++ Composer XE 2011 Release Notes)
+# The issue reveals itself if a version of binutils is prior to 2.17
+ifeq (linux_icc,$(tbb_os)_$(compiler))
+test_cilk_interop.$(TEST_EXT): LIBS += -lcilkrts
+test_gfx_factory.$(TEST_EXT): LIBS += -lcilkrts
+endif
+test_tbb_cilk: test_cilk_interop.$(TEST_EXT)
+	$(run_cmd) ./test_cilk_interop.$(TEST_EXT) $(args)
+else
+test_tbb_cilk:
+	@echo "Intel(R) Cilk(TM) Plus is not available"
+endif
+
+test_opencl_node.$(TEST_EXT): LIBS += $(OPENCL.LIB)
+
+$(TEST_TBB_PLAIN.EXE) $(TEST_TBB_SPECIAL.EXE): WARNING_KEY += $(TEST_WARNING_KEY)
+
+# Run tests that are in SCHEDULER_DIRECTLY_INCLUDED and TEST_TBB_PLAIN.EXE but not in skip_tests (which is specified by user)
+TESTS_TO_RUN := $(filter-out $(addsuffix .$(TEST_EXT),$(skip_tests)),$(TEST_TBB_PLAIN.EXE) $(SCHEDULER_DIRECTLY_INCLUDED))
+
+# This definition intentionally consists of two blank lines
+define eol
+
+
+endef
+
+# First build the targets, then run them
+# Form a list of commands separated with end of line
+# Note that usually run_cmd is empty, and tests run directly
+
+test_tbb_plain: $(TEST_PREREQUISITE) $(TESTS_TO_RUN)
+	$(foreach test, $(TESTS_TO_RUN), $(run_cmd) ./$(test) $(args) $(eol))
+
+
+# For deprecated files, we don't mind warnings etc., thus compilation rules are most relaxed
+CPLUS_FLAGS_DEPRECATED = $(DEFINE_KEY)__TBB_TEST_DEPRECATED=1 $(subst $(WARNING_KEY),,$(CPLUS_FLAGS)) $(WARNING_SUPPRESS) $(INCLUDE_KEY)$(tbb_root)/src/test
+TEST_TBB_OLD.OBJ = test_concurrent_vector_v2.$(OBJ) test_concurrent_queue_v2.$(OBJ) test_mutex_v2.$(OBJ) test_task_scheduler_observer_v3.$(OBJ) 
+
+$(TEST_TBB_OLD.OBJ): CPLUS_FLAGS := $(CPLUS_FLAGS_DEPRECATED)
+
+TEST_TBB_OLD.EXE = $(subst .$(OBJ),.$(TEST_EXT),$(TEST_TBB_OLD.OBJ))
+
+ifeq (,$(NO_LEGACY_TESTS))
+test_tbb_old: $(TEST_PREREQUISITE) $(TEST_TBB_OLD.EXE)
+	$(run_cmd) ./test_concurrent_vector_v2.$(TEST_EXT) $(args) 1:4
+	$(run_cmd) ./test_concurrent_queue_v2.$(TEST_EXT) $(args) 1:4
+	$(run_cmd) ./test_mutex_v2.$(TEST_EXT) $(args) 1
+	$(run_cmd) ./test_mutex_v2.$(TEST_EXT) $(args) 2
+	$(run_cmd) ./test_mutex_v2.$(TEST_EXT) $(args) 4
+	$(run_cmd) ./test_task_scheduler_observer_v3.$(TEST_EXT) $(args) 1:4
+else
+test_tbb_old:
+	@echo Legacy tests skipped
+endif
+
+ifneq (,$(codecov))
+codecov_gen:
+	profmerge
+	codecov $(if $(findstring -,$(codecov)),$(codecov),) -demang -comp $(tbb_root)/build/codecov.txt
+endif
+
+time_%: time_%.$(TEST_EXT) $(TEST_PREREQUISITE)
+	$(run_cmd) ./$< $(args)
+
+
+# for some reason, "perf_%.$(TEST_EXT): perf_dll.$(DLL)" does not work TODO: find out how to apply pattern here
+perf_sched.$(TEST_EXT): perf_dll.$(DLL)
+perf_%.$(TEST_EXT): TEST_LIBS = perf_dll.$(LIBEXT)
+perf_%: perf_%.$(TEST_EXT) $(TEST_PREREQUISITE)
+	$(run_cmd) ./$< $(args)
+
+clean_%:
+	$(RM) $*.$(OBJ) $*.exe $*.$(DLL) $*.$(LIBEXT) $*.res $*.map $*.ilk $*.pdb $*.exp $*.*manifest $*.tmp $*.d *.ver
+
+clean:
+	$(RM) *.$(OBJ) *.exe *.$(DLL) *.$(LIBEXT) *.res *.map *.ilk *.pdb *.exp *.manifest *.tmp *.d pgopti.* *.dyn core core.*[0-9][0-9] *.ver
+
+# Include automatically generated dependencies
+-include *.d

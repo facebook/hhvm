@@ -549,7 +549,7 @@ class InnerUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
             1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(InnerUnion),  # typeinfo
             None,  # default value
@@ -677,7 +677,7 @@ class MyUnionPatch(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
             1,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "assign",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(MyUnion),  # typeinfo
             None,  # default value

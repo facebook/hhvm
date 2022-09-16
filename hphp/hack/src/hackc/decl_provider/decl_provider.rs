@@ -19,11 +19,11 @@ use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
 pub use memo_provider::MemoProvider;
 use oxidized_by_ref::shallow_decl_defs::ClassDecl;
-use oxidized_by_ref::shallow_decl_defs::ConstDecl;
+pub use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::Decl;
-use oxidized_by_ref::shallow_decl_defs::FunDecl;
-use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
-use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+pub use oxidized_by_ref::shallow_decl_defs::FunDecl;
+pub use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
+pub use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
 use sha1::Digest;
 use sha1::Sha1;
 use thiserror::Error;
@@ -39,7 +39,7 @@ pub enum Error {
     Bincode(#[from] bincode::Error),
 }
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub enum TypeDecl<'a> {
     Class(&'a ClassDecl<'a>),
     Typedef(&'a TypedefDecl<'a>),

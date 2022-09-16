@@ -302,6 +302,22 @@ void generate_struct_schema(
       });
 }
 
+void generate_union_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_union& node) {
+  generate_runtime_schema(
+      ctx, mCtx, true, "facebook.com/thrift/type/Union", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
+void generate_exception_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_exception& node) {
+  generate_runtime_schema(
+      ctx, mCtx, true, "facebook.com/thrift/type/Exception", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
 void generate_service_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
   generate_runtime_schema(
@@ -329,6 +345,8 @@ ast_mutators standard_mutators() {
     main.add_exception_visitor(&mutate_terse_write_annotation_structured);
     main.add_struct_visitor(&mutate_inject_metadata_fields);
     main.add_struct_visitor(&generate_struct_schema);
+    main.add_union_visitor(&generate_union_schema);
+    main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);
   }
   add_patch_mutators(mutators);

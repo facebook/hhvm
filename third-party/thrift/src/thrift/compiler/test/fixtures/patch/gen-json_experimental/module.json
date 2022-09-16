@@ -376,7 +376,7 @@
             "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
             "key" : 1,
             "lineno" : 21,
-            "required" : "opt-in-req-out",
+            "required" : "optional",
             "type" : {
   "type" : "struct",
   "name" : "InnerUnion"
@@ -474,7 +474,7 @@
             "docstring" : "Assigns a value. If set, all other operations are ignored.\n",
             "key" : 1,
             "lineno" : 21,
-            "required" : "opt-in-req-out",
+            "required" : "optional",
             "type" : {
   "type" : "struct",
   "name" : "MyUnion"

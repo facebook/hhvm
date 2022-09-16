@@ -609,7 +609,7 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Struct" : {  },
+        "scope.Structured" : {  },
         "scope.Service" : {  },
         "Experimental" : {  }
       },

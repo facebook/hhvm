@@ -2536,7 +2536,7 @@ func (p *InnerUnionFieldPatch) String() string {
 //  - Ensure: Assigns the value, if not already set to the same field. Applies third.
 //  - Patch: Patches any set value, including newly set values. Applies last.
 type InnerUnionPatch struct {
-  Assign *InnerUnion `thrift:"assign,1" db:"assign" json:"assign"`
+  Assign *InnerUnion `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   PatchPrior *InnerUnionFieldPatch `thrift:"patchPrior,3" db:"patchPrior" json:"patchPrior"`
   Ensure *InnerUnion `thrift:"ensure,4" db:"ensure" json:"ensure"`
@@ -2774,13 +2774,15 @@ func (p *InnerUnionPatch) Write(oprot thrift.Protocol) error {
 }
 
 func (p *InnerUnionPatch) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
-  if err := p.Assign.Write(oprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
   }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
   return err
 }
 
@@ -3102,7 +3104,7 @@ func (p *MyUnionFieldPatch) String() string {
 //  - Ensure: Assigns the value, if not already set to the same field. Applies third.
 //  - Patch: Patches any set value, including newly set values. Applies last.
 type MyUnionPatch struct {
-  Assign *MyUnion `thrift:"assign,1" db:"assign" json:"assign"`
+  Assign *MyUnion `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   PatchPrior *MyUnionFieldPatch `thrift:"patchPrior,3" db:"patchPrior" json:"patchPrior"`
   Ensure *MyUnion `thrift:"ensure,4" db:"ensure" json:"ensure"`
@@ -3340,13 +3342,15 @@ func (p *MyUnionPatch) Write(oprot thrift.Protocol) error {
 }
 
 func (p *MyUnionPatch) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
-  if err := p.Assign.Write(oprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
   }
-  if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
   return err
 }
 

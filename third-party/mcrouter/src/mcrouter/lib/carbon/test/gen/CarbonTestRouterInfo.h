@@ -58,6 +58,14 @@ namespace detail {
 using CarbonTestRoutableRequests = carbon::List<
     TestRequest,
     TestRequestStringKey>;
+using CarbonTestAllRequests = carbon::List<
+    TestRequest,
+    TestRequestStringKey,
+    facebook::memcache::McExecRequest,
+    facebook::memcache::McQuitRequest,
+    facebook::memcache::McShutdownRequest,
+    facebook::memcache::McStatsRequest,
+    facebook::memcache::McVersionRequest>;
 } // namespace detail
 
 struct CarbonTestRouterInfo {
@@ -70,6 +78,7 @@ struct CarbonTestRouterInfo {
   template <class Route>
   using RouteHandle = CarbonTestRouteHandle<Route>;
   using RoutableRequests = detail::CarbonTestRoutableRequests;
+  using AllRequests = detail::CarbonTestAllRequests;
   
   using RouterStats = carbon::Stats<CarbonTestRouterStatsConfig>;
 

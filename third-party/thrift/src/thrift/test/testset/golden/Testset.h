@@ -13,6 +13,7 @@ namespace apache::thrift::test::testset {
 enum class FieldModifier {
   Optional = 1,
   Required,
+  Terse,
   Reference,
   SharedReference,
   Lazy,
@@ -1923,6 +1924,636 @@ struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCust
 template <>
 struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required>> {
   using type = struct_required_string_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_float;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_double;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_list_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_set_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_float;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_double;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_string;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_bool_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_byte_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i16_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i32_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_float_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_double_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_binary_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_list_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_set_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_set_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_bool_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_byte_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i16_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i32_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_float_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_double_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_binary_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_bool_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_byte_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i16_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i32_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_float_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_double_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_binary_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_string_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_i64_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_bool_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_byte_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i16_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i32_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_float_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_double_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_binary_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_list_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_set_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_bool_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_byte_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i16_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i32_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_float_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_double_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_binary_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_bool_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_byte_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i16_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i32_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_float_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_double_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_binary_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_string_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_string_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = struct_terse_map_i64_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_bool;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_byte;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_i16;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_i32;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_i64;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_float;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_double;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_binary;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::Terse>> {
+  using type = struct_terse_string;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_bool_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_byte_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i16_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i32_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i64_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_float_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_double_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_binary_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_string_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_bool_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_byte_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i16_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i32_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_i64_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_float_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_double_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_binary_alternative_custom_default;
+};
+
+template <>
+struct struct_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = struct_terse_string_alternative_custom_default;
 };
 
 template <>
@@ -4148,6 +4779,636 @@ struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeC
 template <>
 struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Required>> {
   using type = exception_required_string_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_float;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_double;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_list_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_set_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_float;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_double;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_string;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_bool_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_byte_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i16_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i32_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_float_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_double_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_binary_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_list_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_set_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_set_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_bool_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_byte_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i16_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i32_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_float_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_double_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_binary_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_bool_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_byte_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i16_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i32_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_float_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_double_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_binary_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_string_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::Reference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_i64_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_bool_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_byte_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i16_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i32_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_float_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_double_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_binary_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::list<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_list_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_set_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::set<type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_bool_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_byte_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i16_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i32_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_float_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_double_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_binary_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::bool_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_bool_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::byte_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_byte_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i16_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i16_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i32_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i32_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::i64_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::float_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_float_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::double_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_double_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::binary_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_binary_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::string_t>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::string_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_string_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::string_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_string_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::map<type::i64_t, type::set<type::i64_t>>, mod_set<FieldModifier::SharedReference, FieldModifier::Terse>> {
+  using type = exception_terse_map_i64_set_i64_shared_cpp_ref;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_bool;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_byte;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_i16;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_i32;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_i64;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_float;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_double;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_binary;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::Terse>> {
+  using type = exception_terse_string;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_bool_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_byte_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i16_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i32_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i64_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_float_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_double_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_binary_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::CustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_string_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::bool_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_bool_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::byte_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_byte_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i16_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i16_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i32_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i32_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::i64_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_i64_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::float_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_float_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::double_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_double_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::binary_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_binary_alternative_custom_default;
+};
+
+template <>
+struct exception_ByFieldType<type::string_t, mod_set<FieldModifier::AlternativeCustomDefault, FieldModifier::Terse>> {
+  using type = exception_terse_string_alternative_custom_default;
 };
 
 template <>

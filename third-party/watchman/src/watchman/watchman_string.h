@@ -283,7 +283,7 @@ class w_string_piece {
   bool startsWithCaseInsensitive(w_string_piece prefix) const;
 
   // Compute a hash value for this piece
-  StringHash hashValue() const;
+  StringHash hashValue() const noexcept;
 
 #ifdef _WIN32
   // Returns a wide character representation of the piece

@@ -145,7 +145,7 @@ class H3DatagramAsyncSocket
   }
 
   void close() override {
-    if (txn_) {
+    if (txn_ && !txn_->isEgressEOMSeen()) {
       txn_->sendEOM();
     }
     if (upstreamSession_) {

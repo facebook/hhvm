@@ -609,7 +609,8 @@
       "is_exception" : false,
       "is_union" : false,
       "structured_annotations" : {
-        "scope.Struct" : {  },
+        "scope.Structured" : {  },
+        "scope.Service" : {  },
         "Experimental" : {  }
       },
       "fields" : {
@@ -619,11 +620,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 293,
+              "line" : 294,
               "column" : 3
             },
             "end" : {
-              "line" : 293,
+              "line" : 294,
               "column" : 18
             }
           }
@@ -635,7 +636,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 294,
+          "line" : 295,
           "column" : 2
         }
       }

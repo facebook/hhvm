@@ -417,3 +417,13 @@ TEST_F(H3DatagramAsyncSocketTest, DeleteSocketBeforeTransportReady) {
       quic::QuicErrorCode(quic::TransportErrorCode::INTERNAL_ERROR),
       std::string("connect timeout expired")));
 }
+
+// Test that calling close twice doesn't violate the HTTP state machine by
+// trying to send EOM twice
+TEST_F(H3DatagramAsyncSocketTest, CloseTwice) {
+  datagramSocket_->connect(getRemoteAddress());
+  session_->onTransportReady();
+  session_->onReplaySafe();
+  datagramSocket_->close();
+  datagramSocket_->close();
+}

@@ -35,7 +35,7 @@ TEST(SchemaTest, Renamed) {
 }
 
 TEST(SchemaTest, Fields) {
-  auto schema = schema_constants::schemaFields();
+  facebook::thrift::type::Struct schema = schema_constants::schemaFields();
   EXPECT_EQ(schema.fields()->size(), 3);
 
   // 1: i32 num;
@@ -97,4 +97,34 @@ TEST(SchemaTest, Defaults) {
       schema_constants::getValue(*field.customDefault())
           .as<apache::thrift::type::i32_t>(),
       42);
+}
+
+TEST(SchemaTest, Union) {
+  facebook::thrift::type::Union schema = schema_constants::schemaUnion();
+  EXPECT_EQ(*schema.name(), "Union");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/Union");
+  EXPECT_TRUE(schema.fields()->empty());
+}
+
+TEST(SchemaTest, Exception) {
+  facebook::thrift::type::Exception schema =
+      schema_constants::schemaSimpleException();
+  EXPECT_EQ(*schema.name(), "SimpleException");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/SimpleException");
+  EXPECT_TRUE(schema.fields()->empty());
+  EXPECT_EQ(*schema.safety(), facebook::thrift::type::ErrorSafety::Unspecified);
+  EXPECT_EQ(*schema.kind(), facebook::thrift::type::ErrorKind::Unspecified);
+  EXPECT_EQ(*schema.blame(), facebook::thrift::type::ErrorBlame::Unspecified);
+
+  schema = schema_constants::schemaFancyException();
+  EXPECT_EQ(*schema.safety(), facebook::thrift::type::ErrorSafety::Safe);
+  EXPECT_EQ(*schema.kind(), facebook::thrift::type::ErrorKind::Transient);
+  EXPECT_EQ(*schema.blame(), facebook::thrift::type::ErrorBlame::Server);
+}
+
+TEST(SchemaTest, EmptyService) {
+  auto schema = schema_constants::schemaEmptyService();
+  EXPECT_EQ(*schema.name(), "EmptyService");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/EmptyService");
+  EXPECT_TRUE(schema.functions()->empty());
 }

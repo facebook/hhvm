@@ -1,0 +1,259 @@
+# Copyright (c) 2005-2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+#
+#
+#
+
+# default target
+default_malloc: malloc malloc_test
+
+tbb_root ?= $(TBBROOT)
+BUILDING_PHASE=1
+TEST_RESOURCE = $(MALLOC.RES)
+TESTFILE=tbbmalloc
+include $(tbb_root)/build/common.inc
+DEBUG_SUFFIX=$(findstring _debug,$(call cross_cfg,_$(cfg)))
+
+MALLOC.STATIC = $(LIB_OUTPUT_KEY)libtbbmalloc$(CPF_SUFFIX)$(DEBUG_SUFFIX).a
+
+MALLOC_ROOT ?= $(tbb_root)/src/tbbmalloc
+MALLOC_SOURCE_ROOT ?= $(MALLOC_ROOT)
+
+VPATH = $(tbb_root)/src/tbb/$(ASSEMBLY_SOURCE) $(tbb_root)/src/tbb $(tbb_root)/src/test
+VPATH += $(MALLOC_ROOT) $(MALLOC_SOURCE_ROOT)
+
+CPLUS_FLAGS += $(if $(crosstest),$(DEFINE_KEY)__TBBMALLOC_NO_IMPLICIT_LINKAGE=1)
+
+TEST_SUFFIXES=proxy
+TEST_PREREQUISITE+=$(MALLOC.LIB)
+LINK_FILES+=$(LINK_MALLOC.LIB)
+include $(tbb_root)/build/common_rules.inc
+
+ORIG_CPLUS_FLAGS:=$(CPLUS_FLAGS)
+ORIG_INCLUDES:=$(INCLUDES)
+ORIG_LINK_MALLOC.LIB:=$(LINK_MALLOC.LIB)
+
+#------------------------------------------------------
+# Define rules for making the TBBMalloc shared library.
+#------------------------------------------------------
+
+# Object files that make up TBBMalloc
+MALLOC_CPLUS.OBJ = backend.$(OBJ) large_objects.$(OBJ) backref.$(OBJ)  tbbmalloc.$(OBJ)
+MALLOC.OBJ := $(MALLOC_CPLUS.OBJ) $(MALLOC_ASM.OBJ) itt_notify_malloc.$(OBJ) frontend.$(OBJ)
+PROXY.OBJ := proxy.$(OBJ) tbb_function_replacement.$(OBJ)
+M_CPLUS_FLAGS := $(subst $(WARNING_KEY),,$(M_CPLUS_FLAGS)) $(DEFINE_KEY)__TBBMALLOC_BUILD=1
+M_INCLUDES := $(INCLUDES) $(INCLUDE_KEY)$(MALLOC_ROOT) $(INCLUDE_KEY)$(MALLOC_SOURCE_ROOT)
+
+# Suppress superfluous warnings for TBBMalloc compilation
+$(MALLOC.OBJ): M_CPLUS_FLAGS += $(WARNING_SUPPRESS)
+# Suppress superfluous warnings for TBBMalloc proxy compilation
+$(PROXY.OBJ): CPLUS_FLAGS += $(WARNING_SUPPRESS)
+
+frontend.$(OBJ): frontend.cpp version_string.ver
+	$(CPLUS) $(COMPILE_ONLY) $(M_CPLUS_FLAGS) $(PIC_KEY) $(DSE_KEY) $(M_INCLUDES) $(INCLUDE_KEY). $<
+
+$(PROXY.OBJ): %.$(OBJ): %.cpp
+	$(CPLUS) $(COMPILE_ONLY) $(CPLUS_FLAGS) $(PIC_KEY) $(DSE_KEY) $(DEFINE_KEY)__TBBMALLOC_BUILD=1 $(M_INCLUDES) $<
+
+$(MALLOC_CPLUS.OBJ): %.$(OBJ): %.cpp
+	$(CPLUS) $(COMPILE_ONLY) $(M_CPLUS_FLAGS) $(PIC_KEY) $(DSE_KEY) $(M_INCLUDES) $<
+
+itt_notify_malloc.$(OBJ): itt_notify.cpp
+	$(CPLUS) $(COMPILE_ONLY) $(M_CPLUS_FLAGS) $(PIC_KEY) $(DSE_KEY) $(OUTPUTOBJ_KEY)$@ $(INCLUDES) $<
+
+MALLOC_LINK_FLAGS = $(LIB_LINK_FLAGS)
+PROXY_LINK_FLAGS = $(LIB_LINK_FLAGS)
+
+ifneq (,$(MALLOC.DEF))
+tbbmalloc.def: $(MALLOC.DEF)
+	$(CPLUS) $(PREPROC_ONLY) $< $(M_CPLUS_FLAGS) $(WARNING_SUPPRESS) $(INCLUDES) > $@
+
+MALLOC_LINK_FLAGS += $(EXPORT_KEY)tbbmalloc.def
+$(MALLOC.DLL): tbbmalloc.def
+endif
+
+$(MALLOC.DLL) $(MALLOCPROXY.DLL): CPLUS_FLAGS += $(SDL_FLAGS)
+$(MALLOC.DLL) $(MALLOCPROXY.DLL): M_CPLUS_FLAGS += $(SDL_FLAGS)
+$(MALLOC.DLL): BUILDING_LIBRARY = $(MALLOC.DLL)
+$(MALLOC.DLL): $(MALLOC.OBJ) $(MALLOC.RES) $(MALLOC_NO_VERSION.DLL)
+	$(subst $(CPLUS),$(CONLY),$(LIB_LINK_CMD)) $(LIB_OUTPUT_KEY)$(MALLOC.DLL) $(MALLOC.OBJ) $(MALLOC.RES) $(LIB_LINK_LIBS) $(MALLOC_LINK_FLAGS)
+
+ifneq (,$(MALLOCPROXY.DEF))
+tbbmallocproxy.def: $(MALLOCPROXY.DEF)
+	$(CPLUS) $(PREPROC_ONLY) $< $(CPLUS_FLAGS) $(WARNING_SUPPRESS) $(INCLUDES) > $@
+
+PROXY_LINK_FLAGS += $(EXPORT_KEY)tbbmallocproxy.def
+$(MALLOCPROXY.DLL): tbbmallocproxy.def
+endif
+
+ifneq (,$(MALLOCPROXY.DLL))
+$(MALLOCPROXY.DLL): BUILDING_LIBRARY = $(MALLOCPROXY.DLL)
+$(MALLOCPROXY.DLL): $(PROXY.OBJ) $(MALLOCPROXY_NO_VERSION.DLL) $(MALLOC.DLL) $(MALLOC.RES)
+	$(LIB_LINK_CMD) $(LIB_OUTPUT_KEY)$(MALLOCPROXY.DLL) $(PROXY.OBJ) $(MALLOC.RES) $(LIB_LINK_LIBS) $(LINK_MALLOC.LIB) $(PROXY_LINK_FLAGS)
+endif
+
+$(MALLOC.STATIC): $(MALLOC.OBJ) $(MALLOC.RES)
+	# The makefile, as-is, will not build a static lib.
+	# Follow the trick in Makefile.tbb to build libtbbmalloc.a
+	echo ar -rcs $(MALLOC.STATIC) $(MALLOC.OBJ)
+	ar -rcs $(MALLOC.STATIC) $(MALLOC.OBJ)
+
+
+ifneq (,$(MALLOC_NO_VERSION.DLL))
+$(MALLOC_NO_VERSION.DLL):
+	ln -sfT $(MALLOC.DLL) $(MALLOC_NO_VERSION.DLL)
+endif
+
+ifneq (,$(MALLOCPROXY_NO_VERSION.DLL))
+$(MALLOCPROXY_NO_VERSION.DLL):
+	ln -sfT $(MALLOCPROXY.DLL) $(MALLOCPROXY_NO_VERSION.DLL)
+endif
+
+ifneq ($(BUILD_SHARED),no)
+malloc: $(MALLOC.DLL) $(MALLOCPROXY.DLL) $(MALLOC.STATIC)
+else
+malloc: $(MALLOC.STATIC)
+endif
+
+malloc_dll: $(MALLOC.DLL)
+
+malloc_proxy_dll: $(MALLOCPROXY.DLL)
+
+.PHONY: malloc malloc_dll malloc_proxy_dll
+
+#------------------------------------------------------
+# End of rules for making the TBBMalloc shared library
+#------------------------------------------------------
+
+#------------------------------------------------------
+# Define rules for making the TBBMalloc unit tests
+#------------------------------------------------------
+
+# --------- The list of TBBMalloc unit tests ----------
+MALLOC_TESTS = test_ScalableAllocator.$(TEST_EXT) \
+               test_ScalableAllocator_STL.$(TEST_EXT) \
+               test_malloc_compliance.$(TEST_EXT) \
+               test_malloc_regression.$(TEST_EXT) \
+               test_malloc_init_shutdown.$(TEST_EXT) \
+               test_malloc_pools.$(TEST_EXT) \
+               test_malloc_pure_c.$(TEST_EXT) \
+               test_malloc_whitebox.$(TEST_EXT) \
+               test_malloc_used_by_lib.$(TEST_EXT) \
+               test_malloc_lib_unload.$(TEST_EXT)
+ifneq (,$(MALLOCPROXY.DLL))
+MALLOC_TESTS += test_malloc_overload.$(TEST_EXT) \
+                test_malloc_overload_proxy.$(TEST_EXT) \
+                test_malloc_atexit.$(TEST_EXT)
+endif
+# -----------------------------------------------------
+
+# ------------ Set test specific variables ------------
+# TODO: implement accurate warning suppression for tests to unify with Makefile.test.
+$(MALLOC_TESTS): CPLUS_FLAGS += $(TEST_WARNING_KEY) $(if $(no_exceptions),$(DEFINE_KEY)__TBB_TEST_NO_EXCEPTIONS=1)
+$(MALLOC_TESTS): M_CPLUS_FLAGS += $(TEST_WARNING_KEY) $(if $(no_exceptions),$(DEFINE_KEY)__TBB_TEST_NO_EXCEPTIONS=1)
+$(MALLOC_TESTS): INCLUDES += $(INCLUDE_TEST_HEADERS)
+$(MALLOC_TESTS): M_INCLUDES += $(INCLUDE_TEST_HEADERS)
+
+ifeq (windows.gcc,$(tbb_os).$(compiler))
+test_malloc_overload.$(TEST_EXT): LIBS += $(MALLOCPROXY.LIB)
+endif
+
+MALLOC_M_CPLUS_TESTS =    test_malloc_whitebox.$(TEST_EXT) test_malloc_lib_unload.$(TEST_EXT) \
+        test_malloc_used_by_lib.$(TEST_EXT)
+MALLOC_NO_LIB_TESTS =     test_malloc_whitebox.$(TEST_EXT) test_malloc_lib_unload.$(TEST_EXT) \
+        test_malloc_used_by_lib.$(TEST_EXT) test_malloc_overload.$(TEST_EXT)
+MALLOC_LINK_PROXY_TESTS = test_malloc_overload_proxy.$(TEST_EXT)
+MALLOC_ADD_DLL_TESTS =    test_malloc_lib_unload.$(TEST_EXT) test_malloc_used_by_lib.$(TEST_EXT) \
+        test_malloc_atexit.$(TEST_EXT)
+
+$(MALLOC_M_CPLUS_TESTS): CPLUS_FLAGS=$(M_CPLUS_FLAGS)
+$(MALLOC_M_CPLUS_TESTS): INCLUDES=$(M_INCLUDES)
+$(MALLOC_NO_LIB_TESTS): LINK_MALLOC.LIB=
+$(MALLOC_NO_LIB_TESTS): LINK_FLAGS+=$(LIBDL)
+$(MALLOC_LINK_PROXY_TESTS): LINK_MALLOC.LIB=$(LINK_MALLOCPROXY.LIB)
+ifneq (,$(DYLIB_KEY))
+$(MALLOC_ADD_DLL_TESTS): %.$(TEST_EXT): %_dll.$(DLL)
+$(MALLOC_ADD_DLL_TESTS): TEST_LIBS+=$(@:.$(TEST_EXT)=_dll.$(LIBEXT))
+endif
+
+# test_malloc_pure_c is intended to be compiled by CONLY
+# compiler. Hence cannot include any C++-compiler options.
+# TODO: separate C and C++ compiler options (i.e. C_FLAGS and CPLUS_FLAGS).
+test_malloc_pure_c.$(TEST_EXT): CPLUS_FLAGS := $(subst -Woverloaded-virtual,,$(CPLUS_FLAGS))
+test_malloc_pure_c.$(TEST_EXT): CPLUS_FLAGS := $(subst -Wnon-virtual-dtor,,$(CPLUS_FLAGS))
+
+test_malloc_over%.$(TEST_EXT): CPLUS_FLAGS=$(subst /MT,/MD,$(M_CPLUS_FLAGS))
+test_malloc_over%.$(TEST_EXT): INCLUDES=$(M_INCLUDES)
+test_malloc_overload_proxy.$(TEST_EXT): LINK_FLAGS+=$(LIBDL)
+
+test_malloc_atexit_dll.$(DLL): CPLUS_FLAGS=$(subst /MT,/MD,$(M_CPLUS_FLAGS))
+test_malloc_atexit.$(TEST_EXT): CPLUS_FLAGS=$(subst /MT,/MD,$(M_CPLUS_FLAGS))
+test_malloc_atexit.$(TEST_EXT): LINK_FLAGS+=$(LIBDL)
+# on Ubuntu 11.10 linker called with --as-needed, so dependency on libtbbmalloc_proxy
+# is not created, and malloc overload via linking with -ltbbmalloc_proxy is not working.
+# Overcome with --no-as-needed.
+ifeq (linux.gcc,$(tbb_os).$(compiler))
+test_malloc_atexit.$(TEST_EXT): MALLOCPROXY.LIB := -Wl,--no-as-needed $(MALLOCPROXY.LIB)
+endif
+# The test isn't added to MALLOC_LINK_PROXY_TESTS, because we need both
+# tbbmalloc and proxy libs. For platforms other than Android it's enough
+# to modify LINK_MALLOC.LIB for TEST_EXT target only. But under Android build
+# of DLL and TEST_EXT can be requested independently, so there is no chance
+# to set LINK_MALLOC.LIB in TEST_EXT build rule, and affect DLL build.
+test_malloc_atexit.$(TEST_EXT): LINK_MALLOC.LIB := $(LINK_MALLOC.LIB) $(LINK_MALLOCPROXY.LIB)
+test_malloc_atexit_dll.$(DLL): LINK_MALLOC.LIB := $(LINK_MALLOC.LIB) $(LINK_MALLOCPROXY.LIB)
+
+test_malloc_whitebox.$(TEST_EXT): $(MALLOC_ASM.OBJ) version_string.ver
+test_malloc_whitebox.$(TEST_EXT): INCLUDES+=$(INCLUDE_KEY).
+test_malloc_whitebox.$(TEST_EXT): LINK_FILES+=$(MALLOC_ASM.OBJ)
+
+# Some _dll targets need to restore variables since they are changed by parent
+# target-specific rule of its .exe targets
+test_malloc_lib_unload_dll.$(DLL): CPLUS_FLAGS=$(ORIG_CPLUS_FLAGS) $(if $(no_exceptions),$(DEFINE_KEY)__TBB_TEST_NO_EXCEPTIONS=1)
+test_malloc_lib_unload_dll.$(DLL): INCLUDES=$(ORIG_INCLUDES) $(INCLUDE_TEST_HEADERS)
+
+test_malloc_used_by_lib_dll.$(DLL): CPLUS_FLAGS=$(subst /MT,/LD,$(M_CPLUS_FLAGS))
+test_malloc_used_by_lib_dll.$(DLL): LINK_FILES+=$(ORIG_LINK_MALLOC.LIB)
+test_malloc_used_by_lib_dll.$(DLL): LIBDL=
+# -----------------------------------------------------
+
+# ---- The list of TBBMalloc test running commands ----
+# run_cmd is usually empty
+malloc_test: $(MALLOC.DLL) malloc_test_no_depends
+
+malloc_test_no_depends: $(TEST_PREREQUISITE) $(MALLOC_TESTS)
+	$(run_cmd) ./test_malloc_pools.$(TEST_EXT) $(args) 1:4
+ifneq (,$(MALLOCPROXY.DLL))
+	$(run_cmd) ./test_malloc_atexit.$(TEST_EXT) $(args)
+	$(run_cmd) $(TEST_LAUNCHER) -l $(MALLOCPROXY.DLL) ./test_malloc_overload.$(TEST_EXT) $(args)
+	$(run_cmd) $(TEST_LAUNCHER) ./test_malloc_overload_proxy.$(TEST_EXT) $(args)
+endif
+	$(run_cmd) $(TEST_LAUNCHER) ./test_malloc_lib_unload.$(TEST_EXT) $(args)
+	$(run_cmd) $(TEST_LAUNCHER) ./test_malloc_used_by_lib.$(TEST_EXT)
+	$(run_cmd) ./test_malloc_whitebox.$(TEST_EXT) $(args) 1:4
+	$(run_cmd) $(TEST_LAUNCHER) -u ./test_malloc_compliance.$(TEST_EXT) $(args) 1:4
+	$(run_cmd) ./test_ScalableAllocator.$(TEST_EXT) $(args)
+	$(run_cmd) ./test_ScalableAllocator_STL.$(TEST_EXT) $(args)
+	$(run_cmd) ./test_malloc_regression.$(TEST_EXT) $(args)
+	$(run_cmd) ./test_malloc_init_shutdown.$(TEST_EXT) $(args)
+	$(run_cmd) ./test_malloc_pure_c.$(TEST_EXT) $(args)
+# -----------------------------------------------------
+
+#------------------------------------------------------
+# End of rules for making the TBBMalloc unit tests
+#------------------------------------------------------
+
+# Include automatically generated dependencies
+-include *.d

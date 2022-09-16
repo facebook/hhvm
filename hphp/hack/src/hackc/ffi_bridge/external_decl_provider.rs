@@ -7,15 +7,15 @@ use std::cell::RefCell;
 use std::ffi::c_void;
 
 use cxx::CxxString;
+use decl_provider::ConstDecl;
 use decl_provider::Error;
+use decl_provider::FunDecl;
+use decl_provider::ModuleDecl;
 use decl_provider::Result;
 use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
 use hash::HashMap;
 use libc::c_char;
-use oxidized_by_ref::shallow_decl_defs::ConstDecl;
-use oxidized_by_ref::shallow_decl_defs::FunDecl;
-use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 
 use crate::DeclProvider;
 use crate::DeclsHolder;

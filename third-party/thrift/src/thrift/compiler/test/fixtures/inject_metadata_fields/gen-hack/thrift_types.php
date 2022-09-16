@@ -1814,8 +1814,8 @@ class BitmaskEnum implements \IThriftSyncStruct {
 }
 
 /**
- * Generates a const of type schema.Struct containing the schma of the
- * annotated struct. Optionally specify name to override default
+ * Generates a const of type schema. Struct containing the schema of the
+ * annotated type. Optionally specify name to override default
  * schema<structName>.
  *
  * Original thrift struct:-
@@ -1889,7 +1889,11 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct {
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
       'struct' => dict[
-        '\thrift\annotation\Struct' => \thrift\annotation\Struct::fromShape(
+        '\thrift\annotation\Structured' => \thrift\annotation\Structured::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Service' => \thrift\annotation\Service::fromShape(
           shape(
           )
         ),

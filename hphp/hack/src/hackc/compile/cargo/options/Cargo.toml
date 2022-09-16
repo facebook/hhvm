@@ -13,3 +13,4 @@ bumpalo = { version = "3.8", features = ["collections"] }
 bytecode_printer = { path = "../../../bytecode_printer" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 oxidized = { path = "../../../../oxidized" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }

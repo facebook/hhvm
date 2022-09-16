@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
+#include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_union.h>
 #include <thrift/compiler/lib/schematizer.h>
 
@@ -27,9 +29,10 @@ template <typename... Args>
 std::unique_ptr<t_const_value> val(Args... args) {
   return std::make_unique<t_const_value>(std::forward<Args>(args)...);
 }
-std::unique_ptr<t_const_value> val(t_program::value_id val) {
+template <typename Enm, typename = std::enable_if_t<std::is_enum<Enm>::value>>
+std::unique_ptr<t_const_value> val(Enm val) {
   return std::make_unique<t_const_value>(
-      static_cast<std::underlying_type_t<t_program::value_id>>(val));
+      static_cast<std::underlying_type_t<Enm>>(val));
 }
 
 void add_definition(t_const_value& schema, const t_named& node) {
@@ -40,7 +43,7 @@ void add_definition(t_const_value& schema, const t_named& node) {
     definition->add_map(val("uri"), val(node.uri()));
   }
   // TODO: annotations
-  schema.add_map(val("definition"), std::move(definition));
+  schema.add_map(val("attrs"), std::move(definition));
 }
 
 std::unique_ptr<t_const_value> gen_type(const t_type& type) {
@@ -185,6 +188,20 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
 
   schema->add_map(val("fields"), std::move(fields));
 
+  if (node.is_exception()) {
+    const auto& ex = static_cast<const t_exception&>(node);
+    schema->add_map(val("safety"), val(ex.safety()));
+    schema->add_map(val("kind"), val(ex.kind()));
+    schema->add_map(val("blame"), val(ex.blame()));
+  }
+
+  return schema;
+}
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
   return schema;
 }
 } // namespace compiler

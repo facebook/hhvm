@@ -421,7 +421,7 @@ function create_ic_inaccessible_context()[] {
 }
 
 /*
- * Returns the currently implicit context hash or emptry string if
+ * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */
 <<__Native>>

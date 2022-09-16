@@ -38,6 +38,7 @@ use hhbc::Module;
 use hhbc::Param;
 use hhbc::Property;
 use hhbc::Pseudo;
+use hhbc::Requirement;
 use hhbc::Span;
 use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
@@ -334,22 +335,18 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -
     newline(w)
 }
 
-fn print_requirement(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    r: &Pair<ClassName<'_>, TraitReqKind>,
-) -> Result<()> {
+fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
-    match r {
-        Pair(name, TraitReqKind::MustExtend) => {
-            write_bytes!(w, "extends <{}>;", name)
+    match r.kind {
+        TraitReqKind::MustExtend => {
+            write_bytes!(w, "extends <{}>;", r.name)
         }
-        Pair(name, TraitReqKind::MustImplement) => {
-            write_bytes!(w, "implements <{}>;", name)
+        TraitReqKind::MustImplement => {
+            write_bytes!(w, "implements <{}>;", r.name)
         }
-        Pair(name, TraitReqKind::MustBeClass) => {
-            write_bytes!(w, "class <{}>;", name)
+        TraitReqKind::MustBeClass => {
+            write_bytes!(w, "class <{}>;", r.name)
         }
     }
 }

@@ -4,9 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
-use ir::class::TraitReqKind;
 
 use crate::convert;
 use crate::convert::UnitBuilder;
@@ -39,11 +37,11 @@ pub(crate) fn convert_class<'a>(
         uses,
     } = class;
 
-    let requirements: Slice<'a, Pair<hhbc::ClassName<'a>, TraitReqKind>> = Slice::fill_iter(
+    let requirements: Slice<'a, hhbc::Requirement<'a>> = Slice::fill_iter(
         alloc,
-        requirements.iter().map(|(clsid, req_kind)| {
-            let clsid = strings.lookup_class_name(*clsid);
-            Pair(clsid, *req_kind)
+        (requirements.iter()).map(|ir::class::Requirement { name, kind }| {
+            let name = strings.lookup_class_name(*name);
+            hhbc::Requirement { name, kind: *kind }
         }),
     );
 

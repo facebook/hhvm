@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Pair;
 use hhbc::Class;
 use itertools::Itertools;
 
@@ -42,9 +41,9 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
         .requirements
         .as_ref()
         .iter()
-        .map(|Pair(clsid, req_kind)| {
-            let clsid = ir::ClassId::from_hhbc(*clsid, &mut unit.strings);
-            (clsid, *req_kind)
+        .map(|hhbc::Requirement { name, kind }| {
+            let name = ir::ClassId::from_hhbc(*name, &mut unit.strings);
+            ir::class::Requirement { name, kind: *kind }
         })
         .collect_vec();
 

@@ -333,13 +333,18 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
         writeln!(w, "  uses {}", FmtIdentifierId(use_.id, strings))?;
     }
 
-    for (name, req_kind) in &class.requirements {
-        let req = match req_kind {
+    for req in &class.requirements {
+        let kind = match req.kind {
             TraitReqKind::MustExtend => "extends",
             TraitReqKind::MustImplement => "implements",
             TraitReqKind::MustBeClass => "must_be_class",
         };
-        writeln!(w, "  require {} {}", req, FmtIdentifierId(name.id, strings))?;
+        writeln!(
+            w,
+            "  require {} {}",
+            kind,
+            FmtIdentifierId(req.name.id, strings)
+        )?;
     }
 
     for prop in &class.properties {

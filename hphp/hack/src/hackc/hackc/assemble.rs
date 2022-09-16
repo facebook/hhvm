@@ -448,19 +448,19 @@ fn assemble_ctx_constant<'arena>(
 fn assemble_requirement<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Pair<hhbc::ClassName<'arena>, hhbc::TraitReqKind>> {
+) -> Result<hhbc::Requirement<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".require")?;
-    let trq = match token_iter.expect(Token::into_identifier)? {
+    let kind = match token_iter.expect(Token::into_identifier)? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
         b"class" => hhbc::TraitReqKind::MustBeClass,
         trq => bail!("Expected TraitReqKind, saw: {:?}", trq),
     };
     token_iter.expect(Token::into_lt)?;
-    let cn = assemble_class_name(alloc, token_iter)?;
+    let name = assemble_class_name(alloc, token_iter)?;
     token_iter.expect(Token::into_gt)?;
     token_iter.expect(Token::into_semicolon)?;
-    Ok(Pair(cn, trq))
+    Ok(hhbc::Requirement { name, kind })
 }
 
 /// Ex:

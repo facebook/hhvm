@@ -71,9 +71,9 @@ impl MapName for hhbc::TypeConstant<'_> {
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
+impl MapName for hhbc::Requirement<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 

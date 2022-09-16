@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use hhvm_types_ffi::ffi::Attr;
@@ -29,6 +28,13 @@ pub enum TraitReqKind {
     MustBeClass,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct Requirement<'arena> {
+    pub name: ClassName<'arena>,
+    pub kind: TraitReqKind,
+}
+
 #[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Class<'arena> {
@@ -45,7 +51,7 @@ pub struct Class<'arena> {
     pub constants: Slice<'arena, Constant<'arena>>,
     pub type_constants: Slice<'arena, TypeConstant<'arena>>,
     pub ctx_constants: Slice<'arena, CtxConstant<'arena>>, // TODO(SF, 2021-0811): CtxConstant is part of Steve's Coeffect work
-    pub requirements: Slice<'arena, Pair<ClassName<'arena>, TraitReqKind>>,
+    pub requirements: Slice<'arena, Requirement<'arena>>,
     pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,

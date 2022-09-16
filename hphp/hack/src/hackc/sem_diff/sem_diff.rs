@@ -357,7 +357,7 @@ fn sem_diff_class<'arena>(
         &path.qualified("requirements"),
         a_requirements,
         b_requirements,
-        |path, a, b| sem_diff_eq(path, &a.1, &b.1),
+        |path, a, b| sem_diff_eq(path, &a.kind, &b.kind),
     )?;
     sem_diff_map_t(
         &path.qualified("upper_bounds"),

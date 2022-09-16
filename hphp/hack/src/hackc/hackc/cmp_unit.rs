@@ -170,9 +170,9 @@ impl MapName for hhbc::TypeConstant<'_> {
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
+impl MapName for hhbc::Requirement<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 
@@ -582,8 +582,10 @@ fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_map_t(a_type_constants, b_type_constants, cmp_eq).qualified("type_constants")?;
     cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_eq).qualified("ctx_constants")?;
-    cmp_map_t(a_requirements, b_requirements, |a, b| cmp_eq(&a.1, &b.1))
-        .qualified("requirements")?;
+    cmp_map_t(a_requirements, b_requirements, |a, b| {
+        cmp_eq(&a.kind, &b.kind)
+    })
+    .qualified("requirements")?;
     cmp_map_t(a_upper_bounds, b_upper_bounds, |a, b| {
         cmp_slice(&a.bounds, &b.bounds, cmp_eq)
     })

@@ -506,13 +506,13 @@ void translateEnumType(TranslationState& ts, const Maybe<hhbc::TypeInfo>& t) {
   }
 }
 
-void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> requirement) {
-  auto const name = toStaticString(requirement._0._0);
+void translateRequirements(TranslationState& ts, const hhbc::Requirement& req) {
+  auto const name = toStaticString(req.name._0);
   auto const requirementKind = [&] {
-    switch (requirement._1) {
-      case TraitReqKind::MustExtend: return PreClass::RequirementExtends;
-      case TraitReqKind::MustImplement: return PreClass::RequirementImplements;
-      case TraitReqKind::MustBeClass: return PreClass::RequirementClass;
+    switch (req.kind) {
+      case hhbc::TraitReqKind::MustExtend: return PreClass::RequirementExtends;
+      case hhbc::TraitReqKind::MustImplement: return PreClass::RequirementImplements;
+      case hhbc::TraitReqKind::MustBeClass: return PreClass::RequirementClass;
     }
     not_reached();
   }();

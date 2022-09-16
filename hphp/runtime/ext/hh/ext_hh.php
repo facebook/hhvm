@@ -335,9 +335,11 @@ async function soft_run_with_async<Tout>(
   (function ()[_]: Awaitable<Tout>) $f,
   string $key,
 )[zoned, ctx $f]: Awaitable<Tout> {
-  $prev = _Private\set_special_implicit_context(
-    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-    $key
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
+      $key
+    ),
   );
   try {
     $result = $f();
@@ -353,9 +355,11 @@ function soft_run_with<Tout>(
   (function ()[_]: Tout) $f,
   string $key,
 )[zoned, ctx $f]: Tout {
-  $prev = _Private\set_special_implicit_context(
-    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-    $key
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
+      $key
+    ),
   );
   try {
     return $f();
@@ -395,10 +399,26 @@ function set_implicit_context(
  * Returns the previous implicit context.
  */
 <<__Native>>
-function set_special_implicit_context(
+function create_special_implicit_context(
   int $type /* SpecialImplicitContextType */,
   ?string $memo_key = null,
 )[zoned]: object /* ImplicitContextData */;
+
+/*
+ * Singleton memoization wrapper over create_special_implicit_context for
+ * ic inaccessible case
+ */
+<<__Memoize>>
+function create_ic_inaccessible_context()[] {
+  // Note: This function needs a backdoor since it needs to call zoned code
+  // but it does not actually inspect the IC
+  // The parent function cannot be zoned since zoned requires a memoization
+  // category which will result in infinite loop since MakeICInaccessible
+  // uses this function.
+  return \HH\Coeffects\backdoor(
+    ()[zoned] ==> create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE),
+  );
+}
 
 /*
  * Returns the currently implicit context hash or emptry string if

@@ -1601,12 +1601,12 @@ pub(crate) fn print_param(
         ellipsis_for_variadic,
         FmtIdentifierId(param.name, strings)
     )?;
-    if let Some((bid, value_str)) = param.default_value {
+    if let Some(dv) = param.default_value {
         write!(
             w,
             " @ {} ({})",
-            FmtBid(func, bid, false),
-            FmtQuotedStr(&value_str)
+            FmtBid(func, dv.init, false),
+            FmtQuotedStr(&dv.expr)
         )?;
     }
     Ok(())

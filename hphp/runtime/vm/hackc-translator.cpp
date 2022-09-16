@@ -933,10 +933,10 @@ void translateInstruction(TranslationState& ts, const Instruct& i) {
 }
 
 void translateDefaultParameterValue(TranslationState& ts,
-                                    const Pair<Label,Str>& dv,
+                                    const hhbc::DefaultValue& dv,
                                     FuncEmitter::ParamInfo& param) {
-  auto const str = toStaticString(dv._1);
-  ts.labelMap[dv._0].dvInits.push_back(ts.fe->params.size());
+  auto const str = toStaticString(dv.expr);
+  ts.labelMap[dv.label].dvInits.push_back(ts.fe->params.size());
   parse_default_value(param, str);
 }
 

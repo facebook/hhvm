@@ -67,10 +67,16 @@ pub(crate) fn convert_func<'a>(
         func.params.into_iter().map(|param| {
             let name = strings.lookup_ffi_str(param.name);
             let user_attributes = convert::convert_attributes(alloc, param.user_attributes);
-            let dv = param.default_value.map(|(bid, value)| {
-                let label = labeler.lookup_bid(bid);
-                ffi::Pair(label, value)
-            });
+            let default_value = param
+                .default_value
+                .map(|dv| {
+                    let label = labeler.lookup_bid(dv.init);
+                    hhbc::DefaultValue {
+                        label,
+                        expr: dv.expr,
+                    }
+                })
+                .into();
             hhbc::Param {
                 name,
                 is_variadic: param.is_variadic,
@@ -78,7 +84,7 @@ pub(crate) fn convert_func<'a>(
                 is_readonly: param.is_readonly,
                 user_attributes,
                 type_info: crate::types::convert(alloc, &param.ty, strings),
-                default_value: dv.into(),
+                default_value,
             }
         }),
     );

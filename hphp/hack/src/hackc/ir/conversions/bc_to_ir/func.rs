@@ -4,11 +4,11 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Pair;
 use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::Param;
+use ir::func::DefaultValue;
 use ir::instr::Terminator;
 use ir::CcReified;
 use ir::CcThis;
@@ -149,10 +149,10 @@ fn convert_body<'a>(
     for param in params.as_ref() {
         let ir_param = convert_param(&mut ctx, param);
         ctx.builder.func.params.push(ir_param);
-        if let ffi::Just(Pair(label, _)) = param.default_value.as_ref() {
+        if let ffi::Just(dv) = param.default_value.as_ref() {
             // This default value will jump to a different start than the
             // Func::ENTRY_BID.
-            let addr = ctx.label_to_addr[label];
+            let addr = ctx.label_to_addr[&dv.label];
             ctx.add_work_addr(addr);
         }
     }
@@ -205,10 +205,13 @@ fn convert_body<'a>(
 }
 
 fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Param<'a> {
-    let default_value = match param.default_value {
-        Maybe::Just(Pair(label, value)) => {
-            let bid = ctx.target_from_label(label, 0);
-            Some((bid, value))
+    let default_value = match &param.default_value {
+        Maybe::Just(dv) => {
+            let init = ctx.target_from_label(dv.label, 0);
+            Some(DefaultValue {
+                init,
+                expr: dv.expr,
+            })
         }
         Maybe::Nothing => None,
     };

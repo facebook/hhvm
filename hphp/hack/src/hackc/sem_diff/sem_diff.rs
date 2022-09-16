@@ -1,5 +1,9 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use anyhow::Result;
-use ffi::Pair;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -261,7 +265,7 @@ fn sem_diff_param<'arena>(
         &path.qualified("default_value"),
         a_default_value.as_ref().into_option(),
         b_default_value.as_ref().into_option(),
-        |path, Pair(_, a_text), Pair(_, b_text)| sem_diff_eq(path, a_text, b_text),
+        |path, a, b| sem_diff_eq(path, &a.expr, &b.expr),
     )?;
 
     Ok(())

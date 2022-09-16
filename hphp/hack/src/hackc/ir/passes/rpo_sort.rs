@@ -42,8 +42,8 @@ pub fn rpo_sort(func: &mut Func<'_>) {
 
     for param in &mut func.params {
         if let Some(dv) = param.default_value.as_mut() {
-            if let Some(target) = remap.get(dv.0) {
-                dv.0 = *target;
+            if let Some(target) = remap.get(dv.init) {
+                dv.init = *target;
             }
         }
     }

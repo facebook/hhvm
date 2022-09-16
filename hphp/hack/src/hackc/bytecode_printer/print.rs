@@ -24,6 +24,7 @@ use hhbc::Coeffects;
 use hhbc::ConstName;
 use hhbc::Constant;
 use hhbc::CtxConstant;
+use hhbc::DefaultValue;
 use hhbc::FCallArgs;
 use hhbc::Fatal;
 use hhbc::FatalOp;
@@ -952,7 +953,7 @@ fn find_dv_labels(params: &[Param<'_>]) -> HashSet<Label> {
     params
         .iter()
         .filter_map(|param| match &param.default_value {
-            Just(Pair(label, _)) => Some(*label),
+            Just(dv) => Some(dv.label),
             _ => None,
         })
         .collect()
@@ -986,11 +987,8 @@ fn print_param<'arena>(
     w.write_all(&param.name)?;
     option(
         w,
-        param
-            .default_value
-            .map(|Pair(label, php_code)| (label, php_code))
-            .as_ref(),
-        |w, &(label, php_code)| print_param_default_value(w, label, php_code, dv_labels),
+        param.default_value.as_ref(),
+        |w, dv: &DefaultValue<'_>| print_param_default_value(w, dv.label, dv.expr, dv_labels),
     )
 }
 

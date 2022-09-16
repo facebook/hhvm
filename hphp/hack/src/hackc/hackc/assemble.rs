@@ -1564,13 +1564,13 @@ fn assemble_param<'arena>(
 fn assemble_default_value<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Maybe<Pair<hhbc::Label, Str<'arena>>>> {
+) -> Result<Maybe<hhbc::DefaultValue<'arena>>> {
     let tr = if token_iter.next_if(Token::is_equal) {
-        let lbl = assemble_label(token_iter, false)?; // false: not expecting colon
+        let label = assemble_label(token_iter, false)?; // false: not expecting colon
         token_iter.expect(Token::into_open_paren)?;
-        let st = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
+        let expr = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
         token_iter.expect(Token::into_close_paren)?;
-        Maybe::Just(Pair(lbl, st))
+        Maybe::Just(hhbc::DefaultValue { label, expr })
     } else {
         Maybe::Nothing
     };

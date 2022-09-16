@@ -6,7 +6,6 @@
 use std::fmt;
 
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashMap;
@@ -518,7 +517,7 @@ fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result<()> {
     cmp_option(
         a_default_value.as_ref().into_option(),
         b_default_value.as_ref().into_option(),
-        |Pair(_, a_text), Pair(_, b_text)| cmp_eq(a_text, b_text),
+        |a, b| cmp_eq(&a.expr, &b.expr),
     )
     .qualified("default_value")?;
     Ok(())

@@ -383,25 +383,30 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
         writeln!(w, ";")?;
     }
 
-    for (idx, name) in &coeffects.cc_param {
-        writeln!(w, ".coeffects_cc_param {idx} {}", FmtQuotedStr(name))?;
+    for CcParam { index, ctx_name } in &coeffects.cc_param {
+        writeln!(w, ".coeffects_cc_param {index} {}", FmtQuotedStr(ctx_name))?;
     }
 
-    for cc_this in &coeffects.cc_this {
+    for CcThis { types } in &coeffects.cc_this {
         writeln!(
             w,
             ".coeffects_cc_this {}",
-            FmtSep::comma(cc_this.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
+            FmtSep::comma(types.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
         )?;
     }
 
-    for (is_class, idx, qn) in &coeffects.cc_reified {
+    for CcReified {
+        is_class,
+        index,
+        types,
+    } in &coeffects.cc_reified
+    {
         writeln!(
             w,
             "  .coeffects_cc_reified {}{} {}",
             if *is_class { "isClass" } else { "" },
-            idx,
-            FmtSep::new("", "::", "", qn.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
+            index,
+            FmtSep::new("", "::", "", types.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
         )?;
     }
 

@@ -5,7 +5,6 @@
 
 use ffi::Pair;
 use ffi::Slice;
-use ffi::Triple;
 use hhbc::Method;
 use log::trace;
 
@@ -173,22 +172,19 @@ fn convert_coeffects<'a>(
     let unenforced_static_coeffects =
         Slice::fill_iter(alloc, coeffects.unenforced_static_coeffects.iter().copied());
     let fun_param = Slice::fill_iter(alloc, coeffects.fun_param.iter().copied());
-    let cc_param = Slice::fill_iter(
-        alloc,
-        coeffects.cc_param.iter().copied().map(|(a, b)| Pair(a, b)),
-    );
+    let cc_param = Slice::fill_iter(alloc, coeffects.cc_param.iter().copied());
     let cc_this = Slice::fill_iter(
         alloc,
-        coeffects
-            .cc_this
-            .iter()
-            .map(|inner| Slice::fill_iter(alloc, inner.iter().copied())),
+        coeffects.cc_this.iter().map(|inner| hhbc::CcThis {
+            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
+        }),
     );
     let cc_reified = Slice::fill_iter(
         alloc,
-        coeffects.cc_reified.iter().map(|(a, b, c)| {
-            let c = Slice::fill_iter(alloc, c.iter().copied());
-            Triple(*a, *b, c)
+        coeffects.cc_reified.iter().map(|inner| hhbc::CcReified {
+            is_class: inner.is_class,
+            index: inner.index,
+            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
         }),
     );
     let closure_parent_scope = coeffects.closure_parent_scope;

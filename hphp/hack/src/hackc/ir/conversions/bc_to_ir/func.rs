@@ -5,13 +5,13 @@
 
 use ffi::Maybe;
 use ffi::Pair;
-use ffi::Str;
-use ffi::Triple;
 use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::Param;
 use ir::instr::Terminator;
+use ir::CcReified;
+use ir::CcThis;
 use ir::ClassIdMap;
 use ir::Instr;
 use ir::LocalId;
@@ -238,24 +238,21 @@ fn convert_coeffects<'a>(coeffects: &hhbc::Coeffects<'a>) -> ir::Coeffects<'a> {
         static_coeffects: coeffects.get_static_coeffects().to_vec(),
         unenforced_static_coeffects: coeffects.get_unenforced_static_coeffects().to_vec(),
         fun_param: coeffects.get_fun_param().to_vec(),
-        cc_param: coeffects
-            .get_cc_param()
-            .iter()
-            .copied()
-            .map(|Pair(a, b)| (a, b))
-            .collect(),
+        cc_param: coeffects.get_cc_param().to_vec(),
         cc_this: coeffects
             .get_cc_this()
             .iter()
-            .map(|inner| inner.iter().copied().collect::<Vec<Str<'a>>>())
+            .map(|inner| CcThis {
+                types: inner.types.iter().copied().collect(),
+            })
             .collect(),
         cc_reified: coeffects
             .get_cc_reified()
             .iter()
-            .copied()
-            .map(|Triple(a, b, c)| {
-                let c: Vec<Str<'a>> = c.iter().copied().collect();
-                (a, b, c)
+            .map(|inner| CcReified {
+                is_class: inner.is_class,
+                index: inner.index,
+                types: inner.types.iter().copied().collect(),
             })
             .collect(),
         closure_parent_scope: coeffects.is_closure_parent_scope(),

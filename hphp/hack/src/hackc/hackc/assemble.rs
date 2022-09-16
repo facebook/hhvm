@@ -1744,7 +1744,7 @@ fn assemble_static_coeffects<'arena>(
 /// .coeffects_fun_param 0;
 fn assemble_coeffects_fun_param(
     token_iter: &mut Lexer<'_>,
-    fun_param: &mut Vec<usize>,
+    fun_param: &mut Vec<u32>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_fun_param")?;
     while !token_iter.peek_if(Token::is_semicolon) {
@@ -1759,13 +1759,13 @@ fn assemble_coeffects_fun_param(
 fn assemble_coeffects_cc_param<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_param: &mut Vec<Pair<usize, Str<'arena>>>,
+    cc_param: &mut Vec<hhbc::CcParam<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_param")?;
     while !token_iter.peek_if(Token::is_semicolon) {
-        let num: usize = token_iter.expect_and_get_number()?;
-        let st = token_iter.expect_identifier_into_ffi_str(alloc)?;
-        cc_param.push(Pair(num, st));
+        let index = token_iter.expect_and_get_number()?;
+        let ctx_name = token_iter.expect_identifier_into_ffi_str(alloc)?;
+        cc_param.push(hhbc::CcParam { index, ctx_name });
     }
     token_iter.expect(Token::into_semicolon)?;
     Ok(())
@@ -1776,7 +1776,7 @@ fn assemble_coeffects_cc_param<'arena>(
 fn assemble_coeffects_cc_this<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_this: &mut Vec<Slice<'arena, Str<'arena>>>,
+    cc_this: &mut Vec<hhbc::CcThis<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_this")?;
     let mut params = Vec::new();
@@ -1784,7 +1784,9 @@ fn assemble_coeffects_cc_this<'arena>(
         params.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
     }
     token_iter.expect(Token::into_semicolon)?;
-    cc_this.push(Slice::from_vec(alloc, params));
+    cc_this.push(hhbc::CcThis {
+        types: Slice::from_vec(alloc, params),
+    });
     Ok(())
 }
 
@@ -1792,17 +1794,21 @@ fn assemble_coeffects_cc_this<'arena>(
 fn assemble_coeffects_cc_reified<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_reified: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    cc_reified: &mut Vec<hhbc::CcReified<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_reified")?;
-    let isc = token_iter.next_if_str(Token::is_identifier, "isClass");
-    let us = token_iter.expect_and_get_number()?;
-    let mut sl = Vec::new();
+    let is_class = token_iter.next_if_str(Token::is_identifier, "isClass");
+    let index = token_iter.expect_and_get_number()?;
+    let mut types = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
-        sl.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+        types.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
     }
     token_iter.expect(Token::into_semicolon)?;
-    cc_reified.push(ffi::Triple(isc, us, Slice::from_vec(alloc, sl)));
+    cc_reified.push(hhbc::CcReified {
+        is_class,
+        index,
+        types: Slice::from_vec(alloc, types),
+    });
     Ok(())
 }
 

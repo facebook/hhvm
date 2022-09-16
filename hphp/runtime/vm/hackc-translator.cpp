@@ -1084,28 +1084,31 @@ void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) 
   auto cc_param = range(coeffects.cc_param);
   for (auto const& c : cc_param) {
     ts.fe->coeffectRules.emplace_back(
-      CoeffectRule(CoeffectRule::CCParam{}, c._0, toStaticString(c._1)));
+      CoeffectRule(CoeffectRule::CCParam{}, c.index, toStaticString(c.ctx_name)));
   }
 
   auto cc_this_vec = range(coeffects.cc_this);
   for (auto const& cc_this : cc_this_vec) {
+    auto const& types = cc_this.types;
 
     std::vector<LowStringPtr> names;
-    for (int i = 0; i < cc_this.len - 1; i++) {
-      names.push_back(toStaticString(cc_this.data[i]));
+    names.reserve(types.len - 1);
+    for (int i = 0; i < types.len - 1; i++) {
+      names.push_back(toStaticString(types.data[i]));
     }
-    auto const ctx_name = toStaticString(cc_this.data[cc_this.len - 1]);
+    auto const ctx_name = toStaticString(types.data[types.len - 1]);
     ts.fe->coeffectRules.emplace_back(
         CoeffectRule(CoeffectRule::CCThis{}, names, ctx_name));
   }
 
   auto cc_reified_vec = range(coeffects.cc_reified);
   for (auto const& cc_reified : cc_reified_vec) {
-    auto const isClass = cc_reified._0;
-    auto const pos = cc_reified._1;
-    auto types = cc_reified._2;
+    auto const isClass = cc_reified.is_class;
+    auto const pos = cc_reified.index;
+    auto const& types = cc_reified.types;
 
     std::vector<LowStringPtr> names;
+    names.reserve(types.len - 1);
     for (int i = 0; i < types.len - 1; i++) {
       names.push_back(toStaticString(types.data[i]));
     }

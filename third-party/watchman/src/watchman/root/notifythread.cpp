@@ -25,7 +25,7 @@ void InMemoryView::notifyThread(const std::shared_ptr<Root>& root) {
         ERR,
         "failed to start root {}, cancelling watch: {}\n",
         root->root_path,
-        root->failure_reason);
+        root->failure_reason ? *root->failure_reason : w_string{});
     root->cancel();
     return;
   }

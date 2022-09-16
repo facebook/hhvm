@@ -49,7 +49,7 @@ CaseSensitivity getCaseSensitivityForPath(const char* path) {
 // This function is used to return the fstype for a given path
 // based on the linux style /proc/mounts data provided.
 // It will return nullptr for paths that don't have a match.
-w_string find_fstype_in_linux_proc_mounts(
+std::optional<w_string> find_fstype_in_linux_proc_mounts(
     std::string_view path,
     std::string_view procMountsData) {
   std::vector<std::string_view> lines;
@@ -104,7 +104,7 @@ w_string find_fstype_in_linux_proc_mounts(
   }
 
   if (bestVfsType.empty()) {
-    return nullptr;
+    return std::nullopt;
   }
   return w_string(bestVfsType.data(), bestVfsType.size());
 }
@@ -130,7 +130,7 @@ w_string w_fstype(const char* path) {
   if (folly::readFile("/proc/self/mounts", mounts)) {
     auto fstype = find_fstype_in_linux_proc_mounts(path, mounts);
     if (fstype) {
-      return fstype;
+      return *fstype;
     }
   }
 

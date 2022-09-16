@@ -487,18 +487,22 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
       throw std::runtime_error("union patch Ensure should contain an object");
     }
 
-    if (ensureUnion->size() != 1) {
-      throw std::runtime_error(
-          "union patch Ensure should contain an object with only one field set");
-    }
+    // EnsureUnion is not optional and will contain an empty union by default.
+    // We should ignore such cases.
+    if (!ensureUnion->empty()) {
+      if (ensureUnion->size() != 1) {
+        throw std::runtime_error(
+            "union patch Ensure should contain an object with only one field set");
+      }
 
-    auto& id = ensureUnion->begin()->first;
-    auto itr = value.members()->find(id);
-    if (itr == value.end()) {
-      value = *ensureUnion;
-    } else if (value.size() != 1) {
-      // Clear other values, without copying the current value
-      value.members() = {{itr->first, std::move(itr->second)}};
+      auto& id = ensureUnion->begin()->first;
+      auto itr = value.members()->find(id);
+      if (itr == value.end()) {
+        value = *ensureUnion;
+      } else if (value.size() != 1) {
+        // Clear other values, without copying the current value
+        value.members() = {{itr->first, std::move(itr->second)}};
+      }
     }
   }
 

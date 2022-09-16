@@ -1350,13 +1350,13 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
-  maybeThen(unit.fatal, [&](Triple<FatalOp, hhbc::SrcLoc, Str> fatal) {
-    auto const pos = fatal._1;
-    auto const msg = toString(fatal._2);
+  maybeThen(unit.fatal, [&](Fatal fatal) {
+    auto const loc = fatal.loc;
+    auto const msg = toString(fatal.message);
     throw FatalUnitError(
       msg, ts.ue->m_filepath,
-      Location::Range(pos.line_begin, pos.col_begin, pos.line_end, pos.col_end),
-      fatal._0
+      Location::Range(loc.line_begin, loc.col_begin, loc.line_end, loc.col_end),
+      fatal.op
     );
   });
 

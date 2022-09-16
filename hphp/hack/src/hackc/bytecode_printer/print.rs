@@ -14,7 +14,6 @@ use ffi::Maybe::*;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use hash::HashSet;
 use hhbc::Adata;
 use hhbc::Attribute;
@@ -26,6 +25,7 @@ use hhbc::ConstName;
 use hhbc::Constant;
 use hhbc::CtxConstant;
 use hhbc::FCallArgs;
+use hhbc::Fatal;
 use hhbc::FatalOp;
 use hhbc::Function;
 use hhbc::FunctionName;
@@ -128,14 +128,19 @@ fn get_fatal_op(f: &FatalOp) -> &str {
 }
 
 fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
-    if let Just(Triple(fop, p, msg)) = &prog.fatal {
+    if let Just(Fatal {
+        op,
+        loc:
+            SrcLoc {
+                line_begin,
+                line_end,
+                col_begin,
+                col_end,
+            },
+        message,
+    }) = &prog.fatal
+    {
         newline(w)?;
-        let SrcLoc {
-            line_begin,
-            line_end,
-            col_begin,
-            col_end,
-        } = p;
         write_bytes!(
             w,
             ".fatal {}:{},{}:{} {} \"{}\";",
@@ -143,8 +148,8 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
             col_begin,
             line_end,
             col_end,
-            get_fatal_op(fop),
-            escaper::escape_bstr(msg.as_bstr()),
+            get_fatal_op(op),
+            escaper::escape_bstr(message.as_bstr()),
         )?;
     }
 

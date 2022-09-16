@@ -872,7 +872,7 @@ fn assemble_enum_ty<'arena>(
 fn assemble_fatal<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::SrcLoc, Str<'arena>>> {
+) -> Result<hhbc::Fatal<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".fatal")?;
     let loc = hhbc::SrcLoc {
         line_begin: token_iter.expect_and_get_number()?,
@@ -889,22 +889,19 @@ fn assemble_fatal<'arena>(
             token_iter.expect_and_get_number()?
         },
     };
-    let fat_op = token_iter.expect(Token::into_identifier)?;
-    let fat_op = match fat_op {
+    let op = token_iter.expect(Token::into_identifier)?;
+    let op = match op {
         b"Parse" => hhbc::FatalOp::Parse,
         b"Runtime" => hhbc::FatalOp::Runtime,
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
-        _ => bail!("Unknown fatal op: {:?}", fat_op),
+        _ => bail!("Unknown fatal op: {:?}", op),
     };
     let msg = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
         token_iter.expect(Token::into_str_literal)?,
     ))?;
     token_iter.expect(Token::into_semicolon)?;
-    Ok(ffi::Triple::from((
-        fat_op,
-        loc,
-        Str::new_slice(alloc, &msg),
-    )))
+    let message = Str::new_slice(alloc, &msg);
+    Ok(hhbc::Fatal { op, loc, message })
 }
 
 /// A line of adata looks like:

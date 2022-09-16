@@ -1,17 +1,14 @@
 use anyhow::Result;
 use ffi::Pair;
-use ffi::Str;
-use ffi::Triple;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
 use hhbc::Constant;
-use hhbc::FatalOp;
+use hhbc::Fatal;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
-use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::Typedef;
 use hhbc::Unit;
@@ -403,14 +400,10 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
     Ok(())
 }
 
-fn sem_diff_fatal(
-    path: &CodePath<'_>,
-    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
-    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
-) -> Result<()> {
-    sem_diff_eq(&path.index(0), &a.0, &b.0)?;
-    sem_diff_eq(&path.index(1), &a.1, &b.1)?;
-    sem_diff_eq(&path.index(2), &a.2, &b.2)?;
+fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+    sem_diff_eq(&path.index(0), &a.op, &b.op)?;
+    sem_diff_eq(&path.index(1), &a.loc, &b.loc)?;
+    sem_diff_eq(&path.index(2), &a.message, &b.message)?;
     Ok(())
 }
 

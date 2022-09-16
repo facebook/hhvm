@@ -9,14 +9,13 @@ use ffi::Maybe;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use hash::HashMap;
 use hash::HashSet;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
 use hhbc::Constant;
-use hhbc::FatalOp;
+use hhbc::Fatal;
 use hhbc::Function;
 use hhbc::Instruct;
 use hhbc::Method;
@@ -24,7 +23,6 @@ use hhbc::Module;
 use hhbc::Opcode;
 use hhbc::Param;
 use hhbc::Property;
-use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -659,13 +657,10 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_fatal(
-    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
-    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
-) -> Result<()> {
-    cmp_eq(&a.0, &b.0).indexed("0")?;
-    cmp_eq(&a.1, &b.1).indexed("1")?;
-    cmp_eq(&a.2, &b.2).indexed("2")?;
+fn cmp_fatal(a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+    cmp_eq(&a.op, &b.op).qualified("op")?;
+    cmp_eq(&a.loc, &b.loc).qualified("loc")?;
+    cmp_eq(&a.message, &b.message).qualified("message")?;
     Ok(())
 }
 

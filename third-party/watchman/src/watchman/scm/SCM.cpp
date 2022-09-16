@@ -30,7 +30,7 @@ const w_string& SCM::getSCMRoot() const {
   return scmRoot_;
 }
 
-w_string findFileInDirTree(
+std::optional<w_string> findFileInDirTree(
     w_string_piece rootPath,
     std::initializer_list<w_string_piece> candidates) {
   w_check(
@@ -41,7 +41,7 @@ w_string findFileInDirTree(
       auto path = w_string::pathCat({rootPath, candidate});
 
       if (w_path_exists(path.c_str())) {
-        return path;
+        return std::move(path);
       }
     }
 
@@ -49,7 +49,7 @@ w_string findFileInDirTree(
     if (next == rootPath) {
       // We can't go any higher, so we couldn't find the
       // requested path(s)
-      return nullptr;
+      return std::nullopt;
     }
 
     rootPath = next;
@@ -58,19 +58,19 @@ w_string findFileInDirTree(
 
 std::unique_ptr<SCM> SCM::scmForPath(w_string_piece rootPath) {
   auto scmRoot = findFileInDirTree(rootPath, {kHg, kGit});
-
   if (!scmRoot) {
     return nullptr;
   }
+  auto root = scmRoot->piece();
 
-  auto base = scmRoot.piece().baseName();
+  auto base = root.baseName();
 
   if (base == kHg) {
-    return std::make_unique<Mercurial>(rootPath, scmRoot.piece().dirName());
+    return std::make_unique<Mercurial>(rootPath, root.dirName());
   }
 
   if (base == kGit) {
-    return std::make_unique<Git>(rootPath, scmRoot.piece().dirName());
+    return std::make_unique<Git>(rootPath, root.dirName());
   }
 
   return nullptr;

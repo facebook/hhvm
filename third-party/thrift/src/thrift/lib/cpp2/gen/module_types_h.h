@@ -35,6 +35,7 @@
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Protocol.h>
 #include <thrift/lib/cpp2/protocol/TableBasedForwardTypes.h>
+#include <thrift/lib/cpp2/type/Tag.h>
 
 #if !FOLLY_MOBILE
 #include <folly/SharedMutex.h>

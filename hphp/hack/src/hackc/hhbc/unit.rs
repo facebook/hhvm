@@ -6,7 +6,6 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use serde::Serialize;
 
 use crate::Adata;
@@ -32,5 +31,15 @@ pub struct Unit<'arena> {
     pub module_use: Maybe<Str<'arena>>,
     pub symbol_refs: SymbolRefs<'arena>,
     pub constants: Slice<'arena, Constant<'arena>>,
-    pub fatal: Maybe<Triple<FatalOp, SrcLoc, Str<'arena>>>,
+    pub fatal: Maybe<Fatal<'arena>>,
+}
+
+/// Fields used when a unit had compile-time errors that should be reported
+/// when the unit is loaded.
+#[derive(Debug, Serialize)]
+#[repr(C)]
+pub struct Fatal<'arena> {
+    pub op: FatalOp,
+    pub loc: SrcLoc,
+    pub message: Str<'arena>,
 }

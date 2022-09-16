@@ -634,6 +634,27 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
     | BodyXHPClassAttribute thing ->
       invalidate_xhp_class_attribute_declaration (value, thing)
 
+  and validate_enum_class_body_declaration :
+      enum_class_body_declaration validator =
+   fun x ->
+    match Syntax.syntax x with
+    | Syntax.EnumClassEnumerator _ ->
+      tag
+        validate_enum_class_enumerator
+        (fun x -> ECBodyEnumClassEnumerator x)
+        x
+    | Syntax.TypeConstDeclaration _ ->
+      tag validate_type_const_declaration (fun x -> ECBodyTypeConst x) x
+    | s -> aggregation_fail Def.EnumClassBodyDeclaration s
+
+  and invalidate_enum_class_body_declaration :
+      enum_class_body_declaration invalidator =
+   fun (value, thing) ->
+    match thing with
+    | ECBodyEnumClassEnumerator thing ->
+      invalidate_enum_class_enumerator (value, thing)
+    | ECBodyTypeConst thing -> invalidate_type_const_declaration (value, thing)
+
   and validate_refinement_member : refinement_member validator =
    fun x ->
     match Syntax.syntax x with
@@ -1633,7 +1654,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
           enum_class_right_brace = validate_token x.enum_class_right_brace;
           enum_class_elements =
             validate_list_with
-              validate_enum_class_enumerator
+              validate_enum_class_body_declaration
               x.enum_class_elements;
           enum_class_left_brace = validate_token x.enum_class_left_brace;
           enum_class_extends_list =
@@ -1681,7 +1702,7 @@ module Make (Token : TokenType) (SyntaxValue : SyntaxValueType) = struct
             enum_class_left_brace = invalidate_token x.enum_class_left_brace;
             enum_class_elements =
               invalidate_list_with
-                invalidate_enum_class_enumerator
+                invalidate_enum_class_body_declaration
                 x.enum_class_elements;
             enum_class_right_brace = invalidate_token x.enum_class_right_brace;
           };

@@ -281,6 +281,17 @@ void cgLdImplicitContext(IRLS& env, const IRInstruction* inst) {
   };
 }
 
+void cgLdImplicitContextMemoKey(IRLS& env, const IRInstruction* inst) {
+  auto const obj = srcLoc(env, inst, 0).reg();
+  auto const dst = dstLoc(env, inst, 0).reg();
+
+  auto& v = vmain(env);
+  v << load{
+    obj[Native::dataOffset<ImplicitContext>() + ImplicitContext::memoKeyOffset()],
+    dst
+  };
+}
+
 void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   auto& v = vmain(env);
   auto const src = inst->src(0);

@@ -28,6 +28,7 @@ use hhbc::MethodFlags;
 use hhbc::Param;
 use hhbc::Property;
 use hhbc::ReadonlyOp;
+use hhbc::Requirement;
 use hhbc::Span;
 use hhbc::SpecialClsRef;
 use hhbc::TraitReqKind;
@@ -65,14 +66,14 @@ fn add_symbol_refs<'arena, 'decl>(
     base: Option<&ClassName<'arena>>,
     implements: &[ClassName<'arena>],
     uses: &[ClassName<'arena>],
-    requirements: &[(ClassName<'arena>, TraitReqKind)],
+    requirements: &[hhbc::Requirement<'arena>],
 ) {
     base.iter().for_each(|&x| emitter.add_class_ref(*x));
     implements.iter().for_each(|x| emitter.add_class_ref(*x));
     uses.iter().for_each(|x| emitter.add_class_ref(*x));
     requirements
         .iter()
-        .for_each(|(x, _)| emitter.add_class_ref(*x));
+        .for_each(|r| emitter.add_class_ref(r.name));
 }
 
 fn make_86method<'arena, 'decl>(
@@ -328,17 +329,18 @@ fn from_class_elt_constants<'a, 'arena, 'decl>(
 fn from_class_elt_requirements<'a, 'arena>(
     alloc: &'arena bumpalo::Bump,
     class_: &'a ast::Class_,
-) -> Vec<(ClassName<'arena>, TraitReqKind)> {
+) -> Vec<Requirement<'arena>> {
     class_
         .reqs
         .iter()
         .map(|(h, req_kind)| {
-            let class = emit_type_hint::hint_to_class(alloc, h);
-            match *req_kind {
-                RequireKind::RequireExtends => (class, TraitReqKind::MustExtend),
-                RequireKind::RequireImplements => (class, TraitReqKind::MustImplement),
-                RequireKind::RequireClass => (class, TraitReqKind::MustBeClass),
-            }
+            let name = emit_type_hint::hint_to_class(alloc, h);
+            let kind = match *req_kind {
+                RequireKind::RequireExtends => TraitReqKind::MustExtend,
+                RequireKind::RequireImplements => TraitReqKind::MustImplement,
+                RequireKind::RequireClass => TraitReqKind::MustBeClass,
+            };
+            Requirement { name, kind }
         })
         .collect()
 }

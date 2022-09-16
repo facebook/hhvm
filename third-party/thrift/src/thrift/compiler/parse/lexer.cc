@@ -153,7 +153,9 @@ token lexer::make_int_literal(int offset, int base) {
   errno = 0;
   char* end = nullptr;
   uint64_t val = strtoull(text.data() + offset, &end, base);
-  assert(end == text.data() + text.size());
+  if (end != text.data() + text.size()) {
+    return report_error("internal error when lexing an int literal");
+  }
   return errno != ERANGE
       ? token::make_int_literal(token_source_range(), val)
       : report_error("integer constant {} is too large", text);
@@ -162,7 +164,8 @@ token lexer::make_int_literal(int offset, int base) {
 token lexer::make_float_literal() {
   fmt::string_view text = token_text();
   errno = 0;
-  double val = strtod(std::string(text.data(), text.size()).c_str(), nullptr);
+  char* end = nullptr;
+  double val = strtod(text.data(), &end);
   if (errno == ERANGE) {
     if (val == 0) {
       return report_error(
@@ -171,6 +174,9 @@ token lexer::make_float_literal() {
       return report_error("floating-point constant {} is out of range", text);
     }
     // Allow subnormals.
+  }
+  if (end != text.data() + text.size()) {
+    return report_error("internal error when lexing a float literal");
   }
   return token::make_float_literal(token_source_range(), val);
 }

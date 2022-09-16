@@ -43,7 +43,7 @@ cdef class ApplicationError(Error):
         return self.args[1]
 
 
-cdef ApplicationError create_ApplicationError(unique_ptr[cTApplicationException] ex):
+cdef ApplicationError create_ApplicationError(const cTApplicationException* ex):
     if not ex:
         return
     type = ApplicationErrorType(deref(ex).getType())
@@ -103,7 +103,7 @@ cdef object runHandlers(const cFollyExceptionWrapper& ex, RpcOptions options):
             return pyex
 
 
-cdef TransportError create_TransportError(unique_ptr[cTTransportException] ex):
+cdef TransportError create_TransportError(const cTTransportException* ex):
     if not ex:
         return
     type = TransportErrorType(deref(ex).getType())
@@ -127,11 +127,11 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
     if pyex:
         return pyex
 
-    pyex = create_ApplicationError(try_make_unique_exception[cTApplicationException](ex))
+    pyex = create_ApplicationError(ex.get_exception[cTApplicationException]())
     if pyex:
         return pyex
 
-    pyex = create_TransportError(try_make_unique_exception[cTTransportException](ex))
+    pyex = create_TransportError(ex.get_exception[cTTransportException]())
     if pyex:
         return pyex
 

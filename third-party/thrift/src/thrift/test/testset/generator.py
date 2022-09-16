@@ -56,6 +56,7 @@ namespace apache::thrift::test::testset {{
 enum class FieldModifier {{
   Optional = 1,
   Required,
+  Terse,
   Reference,
   SharedReference,
   Lazy,
@@ -203,6 +204,12 @@ REQUIRED_TRANSFORM: Dict[Target, str] = {
     Target.CPP2: "{}|FieldModifier::Required",
 }
 
+TERSE_TRANSFORM: Dict[Target, str] = {
+    Target.NAME: "terse_{}",
+    Target.THRIFT: "{}|@thrift.TerseWrite",
+    Target.CPP2: "{}|FieldModifier::Terse",
+}
+
 CPP_REF_TRANSFORM: Dict[Target, str] = {
     Target.NAME: "{}_cpp_ref",
     Target.THRIFT: "{}|@cpp.Ref{{type = cpp.RefType.Unique}}",
@@ -339,6 +346,10 @@ def gen_required(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(REQUIRED_TRANSFORM, target, values)
 
 
+def gen_terse(target: Target, values: Dict[str, str]) -> Dict[str, str]:
+    return _gen_unary_tramsform(TERSE_TRANSFORM, target, values)
+
+
 def gen_cpp_ref(target: Target, values: Dict[str, str]) -> Dict[str, str]:
     return _gen_unary_tramsform(CPP_REF_TRANSFORM, target, values)
 
@@ -394,6 +405,7 @@ def gen_struct_fields(target: Target) -> Dict[str, str]:
     ret.update(
         **gen_optional(target, ret),
         **gen_required(target, ret),
+        **gen_terse(target, ret),
         **gen_optional_box_fields(target),
     )
     ret.update(**gen_lazy_fields(target))

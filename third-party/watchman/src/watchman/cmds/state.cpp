@@ -27,7 +27,7 @@ struct state_arg {
 static void parse_state_arg(Client*, const json_ref& args, state_arg* parsed) {
   parsed->sync_timeout = kDefaultQuerySyncTimeout;
   parsed->metadata = std::nullopt;
-  parsed->name = nullptr;
+  parsed->name = w_string{};
 
   if (json_array_size(args) != 3) {
     throw ErrorResponse(

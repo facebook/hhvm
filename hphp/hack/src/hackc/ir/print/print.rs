@@ -333,13 +333,18 @@ fn print_class(w: &mut dyn Write, class: &Class<'_>, strings: &StringInterner) -
         writeln!(w, "  uses {}", FmtIdentifierId(use_.id, strings))?;
     }
 
-    for (name, req_kind) in &class.requirements {
-        let req = match req_kind {
+    for req in &class.requirements {
+        let kind = match req.kind {
             TraitReqKind::MustExtend => "extends",
             TraitReqKind::MustImplement => "implements",
             TraitReqKind::MustBeClass => "must_be_class",
         };
-        writeln!(w, "  require {} {}", req, FmtIdentifierId(name.id, strings))?;
+        writeln!(
+            w,
+            "  require {} {}",
+            kind,
+            FmtIdentifierId(req.name.id, strings)
+        )?;
     }
 
     for prop in &class.properties {
@@ -383,25 +388,30 @@ pub(crate) fn print_coeffects(w: &mut dyn Write, coeffects: &Coeffects<'_>) -> R
         writeln!(w, ";")?;
     }
 
-    for (idx, name) in &coeffects.cc_param {
-        writeln!(w, ".coeffects_cc_param {idx} {}", FmtQuotedStr(name))?;
+    for CcParam { index, ctx_name } in &coeffects.cc_param {
+        writeln!(w, ".coeffects_cc_param {index} {}", FmtQuotedStr(ctx_name))?;
     }
 
-    for cc_this in &coeffects.cc_this {
+    for CcThis { types } in &coeffects.cc_this {
         writeln!(
             w,
             ".coeffects_cc_this {}",
-            FmtSep::comma(cc_this.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
+            FmtSep::comma(types.iter(), |f, v| { FmtQuotedStr(v).fmt(f) })
         )?;
     }
 
-    for (is_class, idx, qn) in &coeffects.cc_reified {
+    for CcReified {
+        is_class,
+        index,
+        types,
+    } in &coeffects.cc_reified
+    {
         writeln!(
             w,
             "  .coeffects_cc_reified {}{} {}",
             if *is_class { "isClass" } else { "" },
-            idx,
-            FmtSep::new("", "::", "", qn.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
+            index,
+            FmtSep::new("", "::", "", types.iter(), |w, qn| FmtIdentifier(qn).fmt(w))
         )?;
     }
 
@@ -1591,12 +1601,12 @@ pub(crate) fn print_param(
         ellipsis_for_variadic,
         FmtIdentifierId(param.name, strings)
     )?;
-    if let Some((bid, value_str)) = param.default_value {
+    if let Some(dv) = param.default_value {
         write!(
             w,
             " @ {} ({})",
-            FmtBid(func, bid, false),
-            FmtQuotedStr(&value_str)
+            FmtBid(func, dv.init, false),
+            FmtQuotedStr(&dv.expr)
         )?;
     }
     Ok(())

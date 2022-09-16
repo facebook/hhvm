@@ -45,6 +45,9 @@ pub mod unit;
 
 pub use self::block::Block;
 pub use self::class::Class;
+pub use self::coeffects::CcParam;
+pub use self::coeffects::CcReified;
+pub use self::coeffects::CcThis;
 pub use self::coeffects::Coeffects;
 pub use self::coeffects::CtxConstant;
 pub use self::common::Attr;

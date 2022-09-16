@@ -22,7 +22,7 @@ namespace apache::thrift {
 
 RequestPileInterface::~RequestPileInterface() {}
 
-void RequestPileInterface::onRequestFinished(UserData) {
+void RequestPileInterface::onRequestFinished(ServerRequestData&) {
   LOG(FATAL) << "Unimplemented onRequestFinished called";
 }
 

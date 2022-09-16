@@ -6,17 +6,15 @@
 use std::fmt;
 
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use hash::HashMap;
 use hash::HashSet;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
 use hhbc::Constant;
-use hhbc::FatalOp;
+use hhbc::Fatal;
 use hhbc::Function;
 use hhbc::Instruct;
 use hhbc::Method;
@@ -24,7 +22,6 @@ use hhbc::Module;
 use hhbc::Opcode;
 use hhbc::Param;
 use hhbc::Property;
-use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
@@ -172,15 +169,15 @@ impl MapName for hhbc::TypeConstant<'_> {
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
+impl MapName for hhbc::Requirement<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::TypeInfo<'_>>> {
+impl MapName for hhbc::UpperBound<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 
@@ -520,7 +517,7 @@ fn cmp_param(a: &Param<'_>, b: &Param<'_>) -> Result<()> {
     cmp_option(
         a_default_value.as_ref().into_option(),
         b_default_value.as_ref().into_option(),
-        |Pair(_, a_text), Pair(_, b_text)| cmp_eq(a_text, b_text),
+        |a, b| cmp_eq(&a.expr, &b.expr),
     )
     .qualified("default_value")?;
     Ok(())
@@ -584,10 +581,12 @@ fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
     cmp_map_t(a_constants, b_constants, cmp_constant).qualified("constants")?;
     cmp_map_t(a_type_constants, b_type_constants, cmp_eq).qualified("type_constants")?;
     cmp_map_t(a_ctx_constants, b_ctx_constants, cmp_eq).qualified("ctx_constants")?;
-    cmp_map_t(a_requirements, b_requirements, |a, b| cmp_eq(&a.1, &b.1))
-        .qualified("requirements")?;
+    cmp_map_t(a_requirements, b_requirements, |a, b| {
+        cmp_eq(&a.kind, &b.kind)
+    })
+    .qualified("requirements")?;
     cmp_map_t(a_upper_bounds, b_upper_bounds, |a, b| {
-        cmp_slice(&a.1, &b.1, cmp_eq)
+        cmp_slice(&a.bounds, &b.bounds, cmp_eq)
     })
     .qualified("upper_bounds")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
@@ -659,13 +658,10 @@ fn cmp_constant(a: &Constant<'_>, b: &Constant<'_>) -> Result<()> {
     Ok(())
 }
 
-fn cmp_fatal(
-    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
-    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
-) -> Result<()> {
-    cmp_eq(&a.0, &b.0).indexed("0")?;
-    cmp_eq(&a.1, &b.1).indexed("1")?;
-    cmp_eq(&a.2, &b.2).indexed("2")?;
+fn cmp_fatal(a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+    cmp_eq(&a.op, &b.op).qualified("op")?;
+    cmp_eq(&a.loc, &b.loc).qualified("loc")?;
+    cmp_eq(&a.message, &b.message).qualified("message")?;
     Ok(())
 }
 

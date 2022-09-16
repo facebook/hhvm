@@ -14,7 +14,6 @@ use ffi::Maybe::*;
 use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use hash::HashSet;
 use hhbc::Adata;
 use hhbc::Attribute;
@@ -25,7 +24,9 @@ use hhbc::Coeffects;
 use hhbc::ConstName;
 use hhbc::Constant;
 use hhbc::CtxConstant;
+use hhbc::DefaultValue;
 use hhbc::FCallArgs;
+use hhbc::Fatal;
 use hhbc::FatalOp;
 use hhbc::Function;
 use hhbc::FunctionName;
@@ -38,6 +39,7 @@ use hhbc::Module;
 use hhbc::Param;
 use hhbc::Property;
 use hhbc::Pseudo;
+use hhbc::Requirement;
 use hhbc::Span;
 use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
@@ -47,6 +49,7 @@ use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
+use hhbc::UpperBound;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -128,14 +131,19 @@ fn get_fatal_op(f: &FatalOp) -> &str {
 }
 
 fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
-    if let Just(Triple(fop, p, msg)) = &prog.fatal {
+    if let Just(Fatal {
+        op,
+        loc:
+            SrcLoc {
+                line_begin,
+                line_end,
+                col_begin,
+                col_end,
+            },
+        message,
+    }) = &prog.fatal
+    {
         newline(w)?;
-        let SrcLoc {
-            line_begin,
-            line_end,
-            col_begin,
-            col_end,
-        } = p;
         write_bytes!(
             w,
             ".fatal {}:{},{}:{} {} \"{}\";",
@@ -143,8 +151,8 @@ fn print_unit_(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<
             col_begin,
             line_end,
             col_end,
-            get_fatal_op(fop),
-            escaper::escape_bstr(msg.as_bstr()),
+            get_fatal_op(op),
+            escaper::escape_bstr(message.as_bstr()),
         )?;
     }
 
@@ -328,22 +336,18 @@ fn print_fun_def(ctx: &Context<'_>, w: &mut dyn Write, fun_def: &Function<'_>) -
     newline(w)
 }
 
-fn print_requirement(
-    ctx: &Context<'_>,
-    w: &mut dyn Write,
-    r: &Pair<ClassName<'_>, TraitReqKind>,
-) -> Result<()> {
+fn print_requirement(ctx: &Context<'_>, w: &mut dyn Write, r: &Requirement<'_>) -> Result<()> {
     ctx.newline(w)?;
     w.write_all(b".require ")?;
-    match r {
-        Pair(name, TraitReqKind::MustExtend) => {
-            write_bytes!(w, "extends <{}>;", name)
+    match r.kind {
+        TraitReqKind::MustExtend => {
+            write_bytes!(w, "extends <{}>;", r.name)
         }
-        Pair(name, TraitReqKind::MustImplement) => {
-            write_bytes!(w, "implements <{}>;", name)
+        TraitReqKind::MustImplement => {
+            write_bytes!(w, "implements <{}>;", r.name)
         }
-        Pair(name, TraitReqKind::MustBeClass) => {
-            write_bytes!(w, "class <{}>;", name)
+        TraitReqKind::MustBeClass => {
+            write_bytes!(w, "class <{}>;", r.name)
         }
     }
 }
@@ -949,7 +953,7 @@ fn find_dv_labels(params: &[Param<'_>]) -> HashSet<Label> {
     params
         .iter()
         .filter_map(|param| match &param.default_value {
-            Just(Pair(label, _)) => Some(*label),
+            Just(dv) => Some(dv.label),
             _ => None,
         })
         .collect()
@@ -983,11 +987,8 @@ fn print_param<'arena>(
     w.write_all(&param.name)?;
     option(
         w,
-        param
-            .default_value
-            .map(|Pair(label, php_code)| (label, php_code))
-            .as_ref(),
-        |w, &(label, php_code)| print_param_default_value(w, label, php_code, dv_labels),
+        param.default_value.as_ref(),
+        |w, dv: &DefaultValue<'_>| print_param_default_value(w, dv.label, dv.expr, dv_labels),
     )
 }
 
@@ -1062,35 +1063,29 @@ fn print_special_and_user_attrs(
 
 fn print_upper_bounds<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[UpperBound<'arena>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
-fn print_upper_bound<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'_>>>,
-) -> Result<()> {
+fn print_upper_bound<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+        write_bytes!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 
 fn print_upper_bounds_<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[UpperBound<'arena>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
-fn print_upper_bound_<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>,
-) -> Result<()> {
+fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+        write_bytes!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 

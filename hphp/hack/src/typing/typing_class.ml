@@ -816,13 +816,12 @@ let typeconst_def
     } =
   let tcopt = Env.get_tcopt env in
   Profile.measure_elapsed_time_and_report tcopt (Some env) id @@ fun () ->
-  (if is_enum_or_enum_class cls.c_kind then
+  (if Ast_defs.is_c_enum cls.c_kind then
     let (class_pos, class_name) = cls.c_name in
     Errors.add_typing_error
       Typing_error.(
         primary
         @@ Primary.Cannot_declare_constant { pos; class_pos; class_name }));
-
   let name = snd cls.c_name ^ "::" ^ snd id in
   (* Check constraints and report cycles through the definition *)
   let (env, ty_err_opt) =

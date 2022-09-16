@@ -58,7 +58,7 @@ class InMemoryFileResult final : public FileResult {
   w_string_piece baseName() override;
   w_string_piece dirName() override;
   std::optional<bool> exists() override;
-  std::optional<w_string> readLink() override;
+  std::optional<ResolvedSymlink> readLink() override;
   std::optional<ClockStamp> ctime() override;
   std::optional<ClockStamp> otime() override;
   std::optional<FileResult::ContentHash> getContentSha1() override;
@@ -67,9 +67,9 @@ class InMemoryFileResult final : public FileResult {
 
  private:
   const watchman_file* file_;
-  w_string dirName_;
+  std::optional<w_string> dirName_;
   InMemoryViewCaches& caches_;
-  std::optional<w_string> symlinkTarget_;
+  std::optional<ResolvedSymlink> symlinkTarget_;
   Result<FileResult::ContentHash> contentSha1_;
 };
 

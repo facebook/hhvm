@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <variant>
 #include "watchman/fs/FileSystem.h"
 #include "watchman/query/FileResult.h"
 #include "watchman/thirdparty/jansson/jansson.h"
@@ -14,7 +15,8 @@
 
 namespace watchman {
 
-/** A FileResult that exists on the local filesystem.
+/**
+ * A FileResult that exists on the local filesystem.
  * This differs from InMemoryFileResult in that we don't maintain any
  * long-lived persistent information about the file and that the methods of
  * this instance will query the local filesystem to discover the information as
@@ -53,7 +55,7 @@ class LocalFileResult : public FileResult {
   // Returns true if the file currently exists
   std::optional<bool> exists() override;
   // Returns the symlink target
-  std::optional<w_string> readLink() override;
+  std::optional<ResolvedSymlink> readLink() override;
 
   std::optional<ClockStamp> ctime() override;
   std::optional<ClockStamp> otime() override;
@@ -73,7 +75,7 @@ class LocalFileResult : public FileResult {
   w_string fullPath_;
   ClockStamp clock_;
   CaseSensitivity caseSensitivity_;
-  std::optional<w_string> symlinkTarget_;
+  std::optional<ResolvedSymlink> symlinkTarget_;
   Result<FileResult::ContentHash> contentSha1_;
 };
 

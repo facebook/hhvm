@@ -61,8 +61,8 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_hasDataById(std::move(callback), args.get<0>().ref());
 }
@@ -131,8 +131,8 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_getDataById(std::move(callback), args.get<0>().ref());
 }
@@ -203,8 +203,8 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_putDataById(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }
@@ -266,8 +266,8 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_lobDataById(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }

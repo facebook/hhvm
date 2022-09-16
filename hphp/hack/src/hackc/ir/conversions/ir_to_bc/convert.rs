@@ -6,6 +6,7 @@
 use ffi::Maybe;
 use ffi::Slice;
 use ffi::Str;
+use hhbc::Fatal;
 
 use crate::strings::StringCache;
 
@@ -69,7 +70,11 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
                 ir::FatalOp::Runtime(..) => hhbc::FatalOp::Runtime,
                 ir::FatalOp::RuntimeOmitFrame(..) => hhbc::FatalOp::RuntimeOmitFrame,
             };
-            unit.fatal = Maybe::Just(ffi::Triple(op, loc.to_hhbc(), *msg))
+            unit.fatal = Maybe::Just(Fatal {
+                op,
+                loc: loc.to_hhbc(),
+                message: *msg,
+            })
         }
     }
 

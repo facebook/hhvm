@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_B_types.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_C_types.h"

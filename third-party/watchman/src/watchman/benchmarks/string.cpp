@@ -19,6 +19,26 @@ void string_allocate_and_deallocate(benchmark::State& state) {
 
 BENCHMARK(string_allocate_and_deallocate);
 
+void string_hash(benchmark::State& state) {
+  char c[] = "if there are no branches in the hash function, constant is fine";
+  w_string str = c;
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(str.hashValue());
+  }
+}
+
+BENCHMARK(string_hash);
+
+void string_piece_hash(benchmark::State& state) {
+  char c[] = "if there are no branches in the hash function, constant is fine";
+  w_string_piece piece = c;
+  for (auto _ : state) {
+    benchmark::DoNotOptimize(piece.hashValue());
+  }
+}
+
+BENCHMARK(string_piece_hash);
+
 } // namespace
 
 int main(int argc, char** argv) {

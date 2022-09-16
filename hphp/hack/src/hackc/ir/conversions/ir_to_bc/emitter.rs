@@ -130,7 +130,7 @@ fn compute_block_entry_edges(func: &ir::Func<'_>) -> BlockIdMap<usize> {
     let mut edges = BlockIdMap::default();
     for param in &func.params {
         if let Some(dv) = param.default_value.as_ref() {
-            edges.entry(dv.0).and_modify(|e| *e += 1).or_insert(1);
+            edges.entry(dv.init).and_modify(|e| *e += 1).or_insert(1);
         }
     }
     for bid in func.block_ids() {

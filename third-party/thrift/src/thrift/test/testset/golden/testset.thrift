@@ -1346,6 +1346,576 @@ struct struct_required_binary_alternative_custom_default {
 struct struct_required_string_alternative_custom_default {
   1: required string field_1 = "80";
 } (thrift.uri="facebook.com/thrift/test/testset/struct_required_string_alternative_custom_default")
+struct struct_terse_list_bool {
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool")
+struct struct_terse_list_byte {
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte")
+struct struct_terse_list_i16 {
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16")
+struct struct_terse_list_i32 {
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32")
+struct struct_terse_list_i64 {
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64")
+struct struct_terse_list_float {
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float")
+struct struct_terse_list_double {
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double")
+struct struct_terse_list_binary {
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary")
+struct struct_terse_list_string {
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string")
+struct struct_terse_set_string {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string")
+struct struct_terse_set_i64 {
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64")
+struct struct_terse_map_string_bool {
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool")
+struct struct_terse_map_string_byte {
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte")
+struct struct_terse_map_string_i16 {
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16")
+struct struct_terse_map_string_i32 {
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32")
+struct struct_terse_map_string_i64 {
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64")
+struct struct_terse_map_string_float {
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float")
+struct struct_terse_map_string_double {
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double")
+struct struct_terse_map_string_binary {
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary")
+struct struct_terse_map_string_string {
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string")
+struct struct_terse_map_i64_bool {
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool")
+struct struct_terse_map_i64_byte {
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte")
+struct struct_terse_map_i64_i16 {
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16")
+struct struct_terse_map_i64_i32 {
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32")
+struct struct_terse_map_i64_i64 {
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64")
+struct struct_terse_map_i64_float {
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float")
+struct struct_terse_map_i64_double {
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double")
+struct struct_terse_map_i64_binary {
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary")
+struct struct_terse_map_i64_string {
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string")
+struct struct_terse_map_string_set_string {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string")
+struct struct_terse_map_string_set_i64 {
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64")
+struct struct_terse_map_i64_set_string {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string")
+struct struct_terse_map_i64_set_i64 {
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64")
+struct struct_terse_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool_cpp_ref")
+struct struct_terse_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte_cpp_ref")
+struct struct_terse_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16_cpp_ref")
+struct struct_terse_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32_cpp_ref")
+struct struct_terse_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64_cpp_ref")
+struct struct_terse_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float_cpp_ref")
+struct struct_terse_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double_cpp_ref")
+struct struct_terse_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary_cpp_ref")
+struct struct_terse_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string_cpp_ref")
+struct struct_terse_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string_cpp_ref")
+struct struct_terse_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64_cpp_ref")
+struct struct_terse_map_string_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool_cpp_ref")
+struct struct_terse_map_string_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte_cpp_ref")
+struct struct_terse_map_string_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16_cpp_ref")
+struct struct_terse_map_string_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32_cpp_ref")
+struct struct_terse_map_string_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64_cpp_ref")
+struct struct_terse_map_string_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float_cpp_ref")
+struct struct_terse_map_string_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double_cpp_ref")
+struct struct_terse_map_string_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary_cpp_ref")
+struct struct_terse_map_string_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string_cpp_ref")
+struct struct_terse_map_i64_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool_cpp_ref")
+struct struct_terse_map_i64_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte_cpp_ref")
+struct struct_terse_map_i64_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16_cpp_ref")
+struct struct_terse_map_i64_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32_cpp_ref")
+struct struct_terse_map_i64_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64_cpp_ref")
+struct struct_terse_map_i64_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float_cpp_ref")
+struct struct_terse_map_i64_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double_cpp_ref")
+struct struct_terse_map_i64_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary_cpp_ref")
+struct struct_terse_map_i64_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string_cpp_ref")
+struct struct_terse_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string_cpp_ref")
+struct struct_terse_map_string_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64_cpp_ref")
+struct struct_terse_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string_cpp_ref")
+struct struct_terse_map_i64_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64_cpp_ref")
+struct struct_terse_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_bool_shared_cpp_ref")
+struct struct_terse_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_byte_shared_cpp_ref")
+struct struct_terse_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i16_shared_cpp_ref")
+struct struct_terse_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i32_shared_cpp_ref")
+struct struct_terse_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_i64_shared_cpp_ref")
+struct struct_terse_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_float_shared_cpp_ref")
+struct struct_terse_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_double_shared_cpp_ref")
+struct struct_terse_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_binary_shared_cpp_ref")
+struct struct_terse_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_list_string_shared_cpp_ref")
+struct struct_terse_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_string_shared_cpp_ref")
+struct struct_terse_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_set_i64_shared_cpp_ref")
+struct struct_terse_map_string_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_bool_shared_cpp_ref")
+struct struct_terse_map_string_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_byte_shared_cpp_ref")
+struct struct_terse_map_string_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i16_shared_cpp_ref")
+struct struct_terse_map_string_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i32_shared_cpp_ref")
+struct struct_terse_map_string_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_i64_shared_cpp_ref")
+struct struct_terse_map_string_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_float_shared_cpp_ref")
+struct struct_terse_map_string_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_double_shared_cpp_ref")
+struct struct_terse_map_string_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_binary_shared_cpp_ref")
+struct struct_terse_map_string_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_string_shared_cpp_ref")
+struct struct_terse_map_i64_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_bool_shared_cpp_ref")
+struct struct_terse_map_i64_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_byte_shared_cpp_ref")
+struct struct_terse_map_i64_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i16_shared_cpp_ref")
+struct struct_terse_map_i64_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i32_shared_cpp_ref")
+struct struct_terse_map_i64_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_i64_shared_cpp_ref")
+struct struct_terse_map_i64_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_float_shared_cpp_ref")
+struct struct_terse_map_i64_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_double_shared_cpp_ref")
+struct struct_terse_map_i64_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_binary_shared_cpp_ref")
+struct struct_terse_map_i64_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_string_shared_cpp_ref")
+struct struct_terse_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_string_shared_cpp_ref")
+struct struct_terse_map_string_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_string_set_i64_shared_cpp_ref")
+struct struct_terse_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_string_shared_cpp_ref")
+struct struct_terse_map_i64_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_map_i64_set_i64_shared_cpp_ref")
+struct struct_terse_bool {
+  @thrift.TerseWrite
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool")
+struct struct_terse_byte {
+  @thrift.TerseWrite
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte")
+struct struct_terse_i16 {
+  @thrift.TerseWrite
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16")
+struct struct_terse_i32 {
+  @thrift.TerseWrite
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32")
+struct struct_terse_i64 {
+  @thrift.TerseWrite
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64")
+struct struct_terse_float {
+  @thrift.TerseWrite
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float")
+struct struct_terse_double {
+  @thrift.TerseWrite
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double")
+struct struct_terse_binary {
+  @thrift.TerseWrite
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary")
+struct struct_terse_string {
+  @thrift.TerseWrite
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string")
+struct struct_terse_bool_custom_default {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool_custom_default")
+struct struct_terse_byte_custom_default {
+  @thrift.TerseWrite
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte_custom_default")
+struct struct_terse_i16_custom_default {
+  @thrift.TerseWrite
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16_custom_default")
+struct struct_terse_i32_custom_default {
+  @thrift.TerseWrite
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32_custom_default")
+struct struct_terse_i64_custom_default {
+  @thrift.TerseWrite
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64_custom_default")
+struct struct_terse_float_custom_default {
+  @thrift.TerseWrite
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float_custom_default")
+struct struct_terse_double_custom_default {
+  @thrift.TerseWrite
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double_custom_default")
+struct struct_terse_binary_custom_default {
+  @thrift.TerseWrite
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary_custom_default")
+struct struct_terse_string_custom_default {
+  @thrift.TerseWrite
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string_custom_default")
+struct struct_terse_bool_alternative_custom_default {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_bool_alternative_custom_default")
+struct struct_terse_byte_alternative_custom_default {
+  @thrift.TerseWrite
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_byte_alternative_custom_default")
+struct struct_terse_i16_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i16_alternative_custom_default")
+struct struct_terse_i32_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i32_alternative_custom_default")
+struct struct_terse_i64_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_i64_alternative_custom_default")
+struct struct_terse_float_alternative_custom_default {
+  @thrift.TerseWrite
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_float_alternative_custom_default")
+struct struct_terse_double_alternative_custom_default {
+  @thrift.TerseWrite
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_double_alternative_custom_default")
+struct struct_terse_binary_alternative_custom_default {
+  @thrift.TerseWrite
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_binary_alternative_custom_default")
+struct struct_terse_string_alternative_custom_default {
+  @thrift.TerseWrite
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/struct_terse_string_alternative_custom_default")
 struct struct_optional_list_bool_box {
   @thrift.Box
   1: optional list<bool> field_1;
@@ -2948,6 +3518,576 @@ exception exception_required_binary_alternative_custom_default {
 exception exception_required_string_alternative_custom_default {
   1: required string field_1 = "80";
 } (thrift.uri="facebook.com/thrift/test/testset/exception_required_string_alternative_custom_default")
+exception exception_terse_list_bool {
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool")
+exception exception_terse_list_byte {
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte")
+exception exception_terse_list_i16 {
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16")
+exception exception_terse_list_i32 {
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32")
+exception exception_terse_list_i64 {
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64")
+exception exception_terse_list_float {
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float")
+exception exception_terse_list_double {
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double")
+exception exception_terse_list_binary {
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary")
+exception exception_terse_list_string {
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string")
+exception exception_terse_set_string {
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string")
+exception exception_terse_set_i64 {
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64")
+exception exception_terse_map_string_bool {
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool")
+exception exception_terse_map_string_byte {
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte")
+exception exception_terse_map_string_i16 {
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16")
+exception exception_terse_map_string_i32 {
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32")
+exception exception_terse_map_string_i64 {
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64")
+exception exception_terse_map_string_float {
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float")
+exception exception_terse_map_string_double {
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double")
+exception exception_terse_map_string_binary {
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary")
+exception exception_terse_map_string_string {
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string")
+exception exception_terse_map_i64_bool {
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool")
+exception exception_terse_map_i64_byte {
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte")
+exception exception_terse_map_i64_i16 {
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16")
+exception exception_terse_map_i64_i32 {
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32")
+exception exception_terse_map_i64_i64 {
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64")
+exception exception_terse_map_i64_float {
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float")
+exception exception_terse_map_i64_double {
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double")
+exception exception_terse_map_i64_binary {
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary")
+exception exception_terse_map_i64_string {
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string")
+exception exception_terse_map_string_set_string {
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string")
+exception exception_terse_map_string_set_i64 {
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64")
+exception exception_terse_map_i64_set_string {
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string")
+exception exception_terse_map_i64_set_i64 {
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64")
+exception exception_terse_list_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool_cpp_ref")
+exception exception_terse_list_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte_cpp_ref")
+exception exception_terse_list_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16_cpp_ref")
+exception exception_terse_list_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32_cpp_ref")
+exception exception_terse_list_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64_cpp_ref")
+exception exception_terse_list_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float_cpp_ref")
+exception exception_terse_list_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double_cpp_ref")
+exception exception_terse_list_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary_cpp_ref")
+exception exception_terse_list_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string_cpp_ref")
+exception exception_terse_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string_cpp_ref")
+exception exception_terse_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64_cpp_ref")
+exception exception_terse_map_string_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool_cpp_ref")
+exception exception_terse_map_string_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte_cpp_ref")
+exception exception_terse_map_string_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16_cpp_ref")
+exception exception_terse_map_string_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32_cpp_ref")
+exception exception_terse_map_string_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64_cpp_ref")
+exception exception_terse_map_string_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float_cpp_ref")
+exception exception_terse_map_string_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double_cpp_ref")
+exception exception_terse_map_string_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary_cpp_ref")
+exception exception_terse_map_string_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string_cpp_ref")
+exception exception_terse_map_i64_bool_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool_cpp_ref")
+exception exception_terse_map_i64_byte_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte_cpp_ref")
+exception exception_terse_map_i64_i16_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16_cpp_ref")
+exception exception_terse_map_i64_i32_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32_cpp_ref")
+exception exception_terse_map_i64_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64_cpp_ref")
+exception exception_terse_map_i64_float_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float_cpp_ref")
+exception exception_terse_map_i64_double_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double_cpp_ref")
+exception exception_terse_map_i64_binary_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary_cpp_ref")
+exception exception_terse_map_i64_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string_cpp_ref")
+exception exception_terse_map_string_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string_cpp_ref")
+exception exception_terse_map_string_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64_cpp_ref")
+exception exception_terse_map_i64_set_string_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string_cpp_ref")
+exception exception_terse_map_i64_set_i64_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.Unique}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64_cpp_ref")
+exception exception_terse_list_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_bool_shared_cpp_ref")
+exception exception_terse_list_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_byte_shared_cpp_ref")
+exception exception_terse_list_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i16_shared_cpp_ref")
+exception exception_terse_list_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i32_shared_cpp_ref")
+exception exception_terse_list_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_i64_shared_cpp_ref")
+exception exception_terse_list_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_float_shared_cpp_ref")
+exception exception_terse_list_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_double_shared_cpp_ref")
+exception exception_terse_list_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_binary_shared_cpp_ref")
+exception exception_terse_list_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: list<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_list_string_shared_cpp_ref")
+exception exception_terse_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_string_shared_cpp_ref")
+exception exception_terse_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: set<i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_set_i64_shared_cpp_ref")
+exception exception_terse_map_string_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_bool_shared_cpp_ref")
+exception exception_terse_map_string_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_byte_shared_cpp_ref")
+exception exception_terse_map_string_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i16_shared_cpp_ref")
+exception exception_terse_map_string_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i32_shared_cpp_ref")
+exception exception_terse_map_string_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_i64_shared_cpp_ref")
+exception exception_terse_map_string_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_float_shared_cpp_ref")
+exception exception_terse_map_string_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_double_shared_cpp_ref")
+exception exception_terse_map_string_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_binary_shared_cpp_ref")
+exception exception_terse_map_string_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_string_shared_cpp_ref")
+exception exception_terse_map_i64_bool_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, bool> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_bool_shared_cpp_ref")
+exception exception_terse_map_i64_byte_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, byte> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_byte_shared_cpp_ref")
+exception exception_terse_map_i64_i16_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i16> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i16_shared_cpp_ref")
+exception exception_terse_map_i64_i32_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i32> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i32_shared_cpp_ref")
+exception exception_terse_map_i64_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, i64> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_i64_shared_cpp_ref")
+exception exception_terse_map_i64_float_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, float> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_float_shared_cpp_ref")
+exception exception_terse_map_i64_double_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, double> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_double_shared_cpp_ref")
+exception exception_terse_map_i64_binary_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, binary> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_binary_shared_cpp_ref")
+exception exception_terse_map_i64_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, string> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_string_shared_cpp_ref")
+exception exception_terse_map_string_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_string_shared_cpp_ref")
+exception exception_terse_map_string_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<string, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_string_set_i64_shared_cpp_ref")
+exception exception_terse_map_i64_set_string_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<string>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_string_shared_cpp_ref")
+exception exception_terse_map_i64_set_i64_shared_cpp_ref {
+  @cpp.Ref{type = cpp.RefType.SharedMutable}
+  @thrift.TerseWrite
+  1: map<i64, set<i64>> field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_map_i64_set_i64_shared_cpp_ref")
+exception exception_terse_bool {
+  @thrift.TerseWrite
+  1: bool field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool")
+exception exception_terse_byte {
+  @thrift.TerseWrite
+  1: byte field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte")
+exception exception_terse_i16 {
+  @thrift.TerseWrite
+  1: i16 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16")
+exception exception_terse_i32 {
+  @thrift.TerseWrite
+  1: i32 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32")
+exception exception_terse_i64 {
+  @thrift.TerseWrite
+  1: i64 field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64")
+exception exception_terse_float {
+  @thrift.TerseWrite
+  1: float field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float")
+exception exception_terse_double {
+  @thrift.TerseWrite
+  1: double field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double")
+exception exception_terse_binary {
+  @thrift.TerseWrite
+  1: binary field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary")
+exception exception_terse_string {
+  @thrift.TerseWrite
+  1: string field_1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string")
+exception exception_terse_bool_custom_default {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool_custom_default")
+exception exception_terse_byte_custom_default {
+  @thrift.TerseWrite
+  1: byte field_1 = 1;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte_custom_default")
+exception exception_terse_i16_custom_default {
+  @thrift.TerseWrite
+  1: i16 field_1 = 2;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16_custom_default")
+exception exception_terse_i32_custom_default {
+  @thrift.TerseWrite
+  1: i32 field_1 = 3;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32_custom_default")
+exception exception_terse_i64_custom_default {
+  @thrift.TerseWrite
+  1: i64 field_1 = 4;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64_custom_default")
+exception exception_terse_float_custom_default {
+  @thrift.TerseWrite
+  1: float field_1 = 5;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float_custom_default")
+exception exception_terse_double_custom_default {
+  @thrift.TerseWrite
+  1: double field_1 = 6;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double_custom_default")
+exception exception_terse_binary_custom_default {
+  @thrift.TerseWrite
+  1: binary field_1 = "7";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary_custom_default")
+exception exception_terse_string_custom_default {
+  @thrift.TerseWrite
+  1: string field_1 = "8";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string_custom_default")
+exception exception_terse_bool_alternative_custom_default {
+  @thrift.TerseWrite
+  1: bool field_1 = true;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_bool_alternative_custom_default")
+exception exception_terse_byte_alternative_custom_default {
+  @thrift.TerseWrite
+  1: byte field_1 = 10;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_byte_alternative_custom_default")
+exception exception_terse_i16_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i16 field_1 = 20;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i16_alternative_custom_default")
+exception exception_terse_i32_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i32 field_1 = 30;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i32_alternative_custom_default")
+exception exception_terse_i64_alternative_custom_default {
+  @thrift.TerseWrite
+  1: i64 field_1 = 40;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_i64_alternative_custom_default")
+exception exception_terse_float_alternative_custom_default {
+  @thrift.TerseWrite
+  1: float field_1 = 50;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_float_alternative_custom_default")
+exception exception_terse_double_alternative_custom_default {
+  @thrift.TerseWrite
+  1: double field_1 = 60;
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_double_alternative_custom_default")
+exception exception_terse_binary_alternative_custom_default {
+  @thrift.TerseWrite
+  1: binary field_1 = "70";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_binary_alternative_custom_default")
+exception exception_terse_string_alternative_custom_default {
+  @thrift.TerseWrite
+  1: string field_1 = "80";
+} (thrift.uri="facebook.com/thrift/test/testset/exception_terse_string_alternative_custom_default")
 exception exception_optional_list_bool_box {
   @thrift.Box
   1: optional list<bool> field_1;
@@ -4162,180 +5302,306 @@ struct struct_all {
   377: struct_required_double_alternative_custom_default field_377;
   378: struct_required_binary_alternative_custom_default field_378;
   379: struct_required_string_alternative_custom_default field_379;
-  380: struct_optional_list_bool_box field_380;
-  381: struct_optional_list_byte_box field_381;
-  382: struct_optional_list_i16_box field_382;
-  383: struct_optional_list_i32_box field_383;
-  384: struct_optional_list_i64_box field_384;
-  385: struct_optional_list_float_box field_385;
-  386: struct_optional_list_double_box field_386;
-  387: struct_optional_list_binary_box field_387;
-  388: struct_optional_list_string_box field_388;
-  389: struct_optional_set_string_box field_389;
-  390: struct_optional_set_i64_box field_390;
-  391: struct_optional_map_string_bool_box field_391;
-  392: struct_optional_map_string_byte_box field_392;
-  393: struct_optional_map_string_i16_box field_393;
-  394: struct_optional_map_string_i32_box field_394;
-  395: struct_optional_map_string_i64_box field_395;
-  396: struct_optional_map_string_float_box field_396;
-  397: struct_optional_map_string_double_box field_397;
-  398: struct_optional_map_string_binary_box field_398;
-  399: struct_optional_map_string_string_box field_399;
-  400: struct_optional_map_i64_bool_box field_400;
-  401: struct_optional_map_i64_byte_box field_401;
-  402: struct_optional_map_i64_i16_box field_402;
-  403: struct_optional_map_i64_i32_box field_403;
-  404: struct_optional_map_i64_i64_box field_404;
-  405: struct_optional_map_i64_float_box field_405;
-  406: struct_optional_map_i64_double_box field_406;
-  407: struct_optional_map_i64_binary_box field_407;
-  408: struct_optional_map_i64_string_box field_408;
-  409: struct_optional_map_string_set_string_box field_409;
-  410: struct_optional_map_string_set_i64_box field_410;
-  411: struct_optional_map_i64_set_string_box field_411;
-  412: struct_optional_map_i64_set_i64_box field_412;
-  413: struct_list_bool_lazy field_413;
-  414: struct_list_byte_lazy field_414;
-  415: struct_list_i16_lazy field_415;
-  416: struct_list_i32_lazy field_416;
-  417: struct_list_i64_lazy field_417;
-  418: struct_list_float_lazy field_418;
-  419: struct_list_double_lazy field_419;
-  420: struct_list_binary_lazy field_420;
-  421: struct_list_string_lazy field_421;
-  422: struct_set_string_lazy field_422;
-  423: struct_set_i64_lazy field_423;
-  424: struct_map_string_bool_lazy field_424;
-  425: struct_map_string_byte_lazy field_425;
-  426: struct_map_string_i16_lazy field_426;
-  427: struct_map_string_i32_lazy field_427;
-  428: struct_map_string_i64_lazy field_428;
-  429: struct_map_string_float_lazy field_429;
-  430: struct_map_string_double_lazy field_430;
-  431: struct_map_string_binary_lazy field_431;
-  432: struct_map_string_string_lazy field_432;
-  433: struct_map_i64_bool_lazy field_433;
-  434: struct_map_i64_byte_lazy field_434;
-  435: struct_map_i64_i16_lazy field_435;
-  436: struct_map_i64_i32_lazy field_436;
-  437: struct_map_i64_i64_lazy field_437;
-  438: struct_map_i64_float_lazy field_438;
-  439: struct_map_i64_double_lazy field_439;
-  440: struct_map_i64_binary_lazy field_440;
-  441: struct_map_i64_string_lazy field_441;
-  442: struct_map_string_set_string_lazy field_442;
-  443: struct_map_string_set_i64_lazy field_443;
-  444: struct_map_i64_set_string_lazy field_444;
-  445: struct_map_i64_set_i64_lazy field_445;
-  446: struct_string_lazy field_446;
-  447: union_empty field_447;
-  448: union_list_bool field_448;
-  449: union_list_byte field_449;
-  450: union_list_i16 field_450;
-  451: union_list_i32 field_451;
-  452: union_list_i64 field_452;
-  453: union_list_float field_453;
-  454: union_list_double field_454;
-  455: union_list_binary field_455;
-  456: union_list_string field_456;
-  457: union_set_string field_457;
-  458: union_set_i64 field_458;
-  459: union_map_string_bool field_459;
-  460: union_map_string_byte field_460;
-  461: union_map_string_i16 field_461;
-  462: union_map_string_i32 field_462;
-  463: union_map_string_i64 field_463;
-  464: union_map_string_float field_464;
-  465: union_map_string_double field_465;
-  466: union_map_string_binary field_466;
-  467: union_map_string_string field_467;
-  468: union_map_i64_bool field_468;
-  469: union_map_i64_byte field_469;
-  470: union_map_i64_i16 field_470;
-  471: union_map_i64_i32 field_471;
-  472: union_map_i64_i64 field_472;
-  473: union_map_i64_float field_473;
-  474: union_map_i64_double field_474;
-  475: union_map_i64_binary field_475;
-  476: union_map_i64_string field_476;
-  477: union_map_string_set_string field_477;
-  478: union_map_string_set_i64 field_478;
-  479: union_map_i64_set_string field_479;
-  480: union_map_i64_set_i64 field_480;
-  481: union_list_bool_cpp_ref field_481;
-  482: union_list_byte_cpp_ref field_482;
-  483: union_list_i16_cpp_ref field_483;
-  484: union_list_i32_cpp_ref field_484;
-  485: union_list_i64_cpp_ref field_485;
-  486: union_list_float_cpp_ref field_486;
-  487: union_list_double_cpp_ref field_487;
-  488: union_list_binary_cpp_ref field_488;
-  489: union_list_string_cpp_ref field_489;
-  490: union_set_string_cpp_ref field_490;
-  491: union_set_i64_cpp_ref field_491;
-  492: union_map_string_bool_cpp_ref field_492;
-  493: union_map_string_byte_cpp_ref field_493;
-  494: union_map_string_i16_cpp_ref field_494;
-  495: union_map_string_i32_cpp_ref field_495;
-  496: union_map_string_i64_cpp_ref field_496;
-  497: union_map_string_float_cpp_ref field_497;
-  498: union_map_string_double_cpp_ref field_498;
-  499: union_map_string_binary_cpp_ref field_499;
-  500: union_map_string_string_cpp_ref field_500;
-  501: union_map_i64_bool_cpp_ref field_501;
-  502: union_map_i64_byte_cpp_ref field_502;
-  503: union_map_i64_i16_cpp_ref field_503;
-  504: union_map_i64_i32_cpp_ref field_504;
-  505: union_map_i64_i64_cpp_ref field_505;
-  506: union_map_i64_float_cpp_ref field_506;
-  507: union_map_i64_double_cpp_ref field_507;
-  508: union_map_i64_binary_cpp_ref field_508;
-  509: union_map_i64_string_cpp_ref field_509;
-  510: union_map_string_set_string_cpp_ref field_510;
-  511: union_map_string_set_i64_cpp_ref field_511;
-  512: union_map_i64_set_string_cpp_ref field_512;
-  513: union_map_i64_set_i64_cpp_ref field_513;
-  514: union_list_bool_shared_cpp_ref field_514;
-  515: union_list_byte_shared_cpp_ref field_515;
-  516: union_list_i16_shared_cpp_ref field_516;
-  517: union_list_i32_shared_cpp_ref field_517;
-  518: union_list_i64_shared_cpp_ref field_518;
-  519: union_list_float_shared_cpp_ref field_519;
-  520: union_list_double_shared_cpp_ref field_520;
-  521: union_list_binary_shared_cpp_ref field_521;
-  522: union_list_string_shared_cpp_ref field_522;
-  523: union_set_string_shared_cpp_ref field_523;
-  524: union_set_i64_shared_cpp_ref field_524;
-  525: union_map_string_bool_shared_cpp_ref field_525;
-  526: union_map_string_byte_shared_cpp_ref field_526;
-  527: union_map_string_i16_shared_cpp_ref field_527;
-  528: union_map_string_i32_shared_cpp_ref field_528;
-  529: union_map_string_i64_shared_cpp_ref field_529;
-  530: union_map_string_float_shared_cpp_ref field_530;
-  531: union_map_string_double_shared_cpp_ref field_531;
-  532: union_map_string_binary_shared_cpp_ref field_532;
-  533: union_map_string_string_shared_cpp_ref field_533;
-  534: union_map_i64_bool_shared_cpp_ref field_534;
-  535: union_map_i64_byte_shared_cpp_ref field_535;
-  536: union_map_i64_i16_shared_cpp_ref field_536;
-  537: union_map_i64_i32_shared_cpp_ref field_537;
-  538: union_map_i64_i64_shared_cpp_ref field_538;
-  539: union_map_i64_float_shared_cpp_ref field_539;
-  540: union_map_i64_double_shared_cpp_ref field_540;
-  541: union_map_i64_binary_shared_cpp_ref field_541;
-  542: union_map_i64_string_shared_cpp_ref field_542;
-  543: union_map_string_set_string_shared_cpp_ref field_543;
-  544: union_map_string_set_i64_shared_cpp_ref field_544;
-  545: union_map_i64_set_string_shared_cpp_ref field_545;
-  546: union_map_i64_set_i64_shared_cpp_ref field_546;
-  547: union_bool field_547;
-  548: union_byte field_548;
-  549: union_i16 field_549;
-  550: union_i32 field_550;
-  551: union_i64 field_551;
-  552: union_float field_552;
-  553: union_double field_553;
-  554: union_binary field_554;
-  555: union_string field_555;
+  380: struct_terse_list_bool field_380;
+  381: struct_terse_list_byte field_381;
+  382: struct_terse_list_i16 field_382;
+  383: struct_terse_list_i32 field_383;
+  384: struct_terse_list_i64 field_384;
+  385: struct_terse_list_float field_385;
+  386: struct_terse_list_double field_386;
+  387: struct_terse_list_binary field_387;
+  388: struct_terse_list_string field_388;
+  389: struct_terse_set_string field_389;
+  390: struct_terse_set_i64 field_390;
+  391: struct_terse_map_string_bool field_391;
+  392: struct_terse_map_string_byte field_392;
+  393: struct_terse_map_string_i16 field_393;
+  394: struct_terse_map_string_i32 field_394;
+  395: struct_terse_map_string_i64 field_395;
+  396: struct_terse_map_string_float field_396;
+  397: struct_terse_map_string_double field_397;
+  398: struct_terse_map_string_binary field_398;
+  399: struct_terse_map_string_string field_399;
+  400: struct_terse_map_i64_bool field_400;
+  401: struct_terse_map_i64_byte field_401;
+  402: struct_terse_map_i64_i16 field_402;
+  403: struct_terse_map_i64_i32 field_403;
+  404: struct_terse_map_i64_i64 field_404;
+  405: struct_terse_map_i64_float field_405;
+  406: struct_terse_map_i64_double field_406;
+  407: struct_terse_map_i64_binary field_407;
+  408: struct_terse_map_i64_string field_408;
+  409: struct_terse_map_string_set_string field_409;
+  410: struct_terse_map_string_set_i64 field_410;
+  411: struct_terse_map_i64_set_string field_411;
+  412: struct_terse_map_i64_set_i64 field_412;
+  413: struct_terse_list_bool_cpp_ref field_413;
+  414: struct_terse_list_byte_cpp_ref field_414;
+  415: struct_terse_list_i16_cpp_ref field_415;
+  416: struct_terse_list_i32_cpp_ref field_416;
+  417: struct_terse_list_i64_cpp_ref field_417;
+  418: struct_terse_list_float_cpp_ref field_418;
+  419: struct_terse_list_double_cpp_ref field_419;
+  420: struct_terse_list_binary_cpp_ref field_420;
+  421: struct_terse_list_string_cpp_ref field_421;
+  422: struct_terse_set_string_cpp_ref field_422;
+  423: struct_terse_set_i64_cpp_ref field_423;
+  424: struct_terse_map_string_bool_cpp_ref field_424;
+  425: struct_terse_map_string_byte_cpp_ref field_425;
+  426: struct_terse_map_string_i16_cpp_ref field_426;
+  427: struct_terse_map_string_i32_cpp_ref field_427;
+  428: struct_terse_map_string_i64_cpp_ref field_428;
+  429: struct_terse_map_string_float_cpp_ref field_429;
+  430: struct_terse_map_string_double_cpp_ref field_430;
+  431: struct_terse_map_string_binary_cpp_ref field_431;
+  432: struct_terse_map_string_string_cpp_ref field_432;
+  433: struct_terse_map_i64_bool_cpp_ref field_433;
+  434: struct_terse_map_i64_byte_cpp_ref field_434;
+  435: struct_terse_map_i64_i16_cpp_ref field_435;
+  436: struct_terse_map_i64_i32_cpp_ref field_436;
+  437: struct_terse_map_i64_i64_cpp_ref field_437;
+  438: struct_terse_map_i64_float_cpp_ref field_438;
+  439: struct_terse_map_i64_double_cpp_ref field_439;
+  440: struct_terse_map_i64_binary_cpp_ref field_440;
+  441: struct_terse_map_i64_string_cpp_ref field_441;
+  442: struct_terse_map_string_set_string_cpp_ref field_442;
+  443: struct_terse_map_string_set_i64_cpp_ref field_443;
+  444: struct_terse_map_i64_set_string_cpp_ref field_444;
+  445: struct_terse_map_i64_set_i64_cpp_ref field_445;
+  446: struct_terse_list_bool_shared_cpp_ref field_446;
+  447: struct_terse_list_byte_shared_cpp_ref field_447;
+  448: struct_terse_list_i16_shared_cpp_ref field_448;
+  449: struct_terse_list_i32_shared_cpp_ref field_449;
+  450: struct_terse_list_i64_shared_cpp_ref field_450;
+  451: struct_terse_list_float_shared_cpp_ref field_451;
+  452: struct_terse_list_double_shared_cpp_ref field_452;
+  453: struct_terse_list_binary_shared_cpp_ref field_453;
+  454: struct_terse_list_string_shared_cpp_ref field_454;
+  455: struct_terse_set_string_shared_cpp_ref field_455;
+  456: struct_terse_set_i64_shared_cpp_ref field_456;
+  457: struct_terse_map_string_bool_shared_cpp_ref field_457;
+  458: struct_terse_map_string_byte_shared_cpp_ref field_458;
+  459: struct_terse_map_string_i16_shared_cpp_ref field_459;
+  460: struct_terse_map_string_i32_shared_cpp_ref field_460;
+  461: struct_terse_map_string_i64_shared_cpp_ref field_461;
+  462: struct_terse_map_string_float_shared_cpp_ref field_462;
+  463: struct_terse_map_string_double_shared_cpp_ref field_463;
+  464: struct_terse_map_string_binary_shared_cpp_ref field_464;
+  465: struct_terse_map_string_string_shared_cpp_ref field_465;
+  466: struct_terse_map_i64_bool_shared_cpp_ref field_466;
+  467: struct_terse_map_i64_byte_shared_cpp_ref field_467;
+  468: struct_terse_map_i64_i16_shared_cpp_ref field_468;
+  469: struct_terse_map_i64_i32_shared_cpp_ref field_469;
+  470: struct_terse_map_i64_i64_shared_cpp_ref field_470;
+  471: struct_terse_map_i64_float_shared_cpp_ref field_471;
+  472: struct_terse_map_i64_double_shared_cpp_ref field_472;
+  473: struct_terse_map_i64_binary_shared_cpp_ref field_473;
+  474: struct_terse_map_i64_string_shared_cpp_ref field_474;
+  475: struct_terse_map_string_set_string_shared_cpp_ref field_475;
+  476: struct_terse_map_string_set_i64_shared_cpp_ref field_476;
+  477: struct_terse_map_i64_set_string_shared_cpp_ref field_477;
+  478: struct_terse_map_i64_set_i64_shared_cpp_ref field_478;
+  479: struct_terse_bool field_479;
+  480: struct_terse_byte field_480;
+  481: struct_terse_i16 field_481;
+  482: struct_terse_i32 field_482;
+  483: struct_terse_i64 field_483;
+  484: struct_terse_float field_484;
+  485: struct_terse_double field_485;
+  486: struct_terse_binary field_486;
+  487: struct_terse_string field_487;
+  488: struct_terse_bool_custom_default field_488;
+  489: struct_terse_byte_custom_default field_489;
+  490: struct_terse_i16_custom_default field_490;
+  491: struct_terse_i32_custom_default field_491;
+  492: struct_terse_i64_custom_default field_492;
+  493: struct_terse_float_custom_default field_493;
+  494: struct_terse_double_custom_default field_494;
+  495: struct_terse_binary_custom_default field_495;
+  496: struct_terse_string_custom_default field_496;
+  497: struct_terse_bool_alternative_custom_default field_497;
+  498: struct_terse_byte_alternative_custom_default field_498;
+  499: struct_terse_i16_alternative_custom_default field_499;
+  500: struct_terse_i32_alternative_custom_default field_500;
+  501: struct_terse_i64_alternative_custom_default field_501;
+  502: struct_terse_float_alternative_custom_default field_502;
+  503: struct_terse_double_alternative_custom_default field_503;
+  504: struct_terse_binary_alternative_custom_default field_504;
+  505: struct_terse_string_alternative_custom_default field_505;
+  506: struct_optional_list_bool_box field_506;
+  507: struct_optional_list_byte_box field_507;
+  508: struct_optional_list_i16_box field_508;
+  509: struct_optional_list_i32_box field_509;
+  510: struct_optional_list_i64_box field_510;
+  511: struct_optional_list_float_box field_511;
+  512: struct_optional_list_double_box field_512;
+  513: struct_optional_list_binary_box field_513;
+  514: struct_optional_list_string_box field_514;
+  515: struct_optional_set_string_box field_515;
+  516: struct_optional_set_i64_box field_516;
+  517: struct_optional_map_string_bool_box field_517;
+  518: struct_optional_map_string_byte_box field_518;
+  519: struct_optional_map_string_i16_box field_519;
+  520: struct_optional_map_string_i32_box field_520;
+  521: struct_optional_map_string_i64_box field_521;
+  522: struct_optional_map_string_float_box field_522;
+  523: struct_optional_map_string_double_box field_523;
+  524: struct_optional_map_string_binary_box field_524;
+  525: struct_optional_map_string_string_box field_525;
+  526: struct_optional_map_i64_bool_box field_526;
+  527: struct_optional_map_i64_byte_box field_527;
+  528: struct_optional_map_i64_i16_box field_528;
+  529: struct_optional_map_i64_i32_box field_529;
+  530: struct_optional_map_i64_i64_box field_530;
+  531: struct_optional_map_i64_float_box field_531;
+  532: struct_optional_map_i64_double_box field_532;
+  533: struct_optional_map_i64_binary_box field_533;
+  534: struct_optional_map_i64_string_box field_534;
+  535: struct_optional_map_string_set_string_box field_535;
+  536: struct_optional_map_string_set_i64_box field_536;
+  537: struct_optional_map_i64_set_string_box field_537;
+  538: struct_optional_map_i64_set_i64_box field_538;
+  539: struct_list_bool_lazy field_539;
+  540: struct_list_byte_lazy field_540;
+  541: struct_list_i16_lazy field_541;
+  542: struct_list_i32_lazy field_542;
+  543: struct_list_i64_lazy field_543;
+  544: struct_list_float_lazy field_544;
+  545: struct_list_double_lazy field_545;
+  546: struct_list_binary_lazy field_546;
+  547: struct_list_string_lazy field_547;
+  548: struct_set_string_lazy field_548;
+  549: struct_set_i64_lazy field_549;
+  550: struct_map_string_bool_lazy field_550;
+  551: struct_map_string_byte_lazy field_551;
+  552: struct_map_string_i16_lazy field_552;
+  553: struct_map_string_i32_lazy field_553;
+  554: struct_map_string_i64_lazy field_554;
+  555: struct_map_string_float_lazy field_555;
+  556: struct_map_string_double_lazy field_556;
+  557: struct_map_string_binary_lazy field_557;
+  558: struct_map_string_string_lazy field_558;
+  559: struct_map_i64_bool_lazy field_559;
+  560: struct_map_i64_byte_lazy field_560;
+  561: struct_map_i64_i16_lazy field_561;
+  562: struct_map_i64_i32_lazy field_562;
+  563: struct_map_i64_i64_lazy field_563;
+  564: struct_map_i64_float_lazy field_564;
+  565: struct_map_i64_double_lazy field_565;
+  566: struct_map_i64_binary_lazy field_566;
+  567: struct_map_i64_string_lazy field_567;
+  568: struct_map_string_set_string_lazy field_568;
+  569: struct_map_string_set_i64_lazy field_569;
+  570: struct_map_i64_set_string_lazy field_570;
+  571: struct_map_i64_set_i64_lazy field_571;
+  572: struct_string_lazy field_572;
+  573: union_empty field_573;
+  574: union_list_bool field_574;
+  575: union_list_byte field_575;
+  576: union_list_i16 field_576;
+  577: union_list_i32 field_577;
+  578: union_list_i64 field_578;
+  579: union_list_float field_579;
+  580: union_list_double field_580;
+  581: union_list_binary field_581;
+  582: union_list_string field_582;
+  583: union_set_string field_583;
+  584: union_set_i64 field_584;
+  585: union_map_string_bool field_585;
+  586: union_map_string_byte field_586;
+  587: union_map_string_i16 field_587;
+  588: union_map_string_i32 field_588;
+  589: union_map_string_i64 field_589;
+  590: union_map_string_float field_590;
+  591: union_map_string_double field_591;
+  592: union_map_string_binary field_592;
+  593: union_map_string_string field_593;
+  594: union_map_i64_bool field_594;
+  595: union_map_i64_byte field_595;
+  596: union_map_i64_i16 field_596;
+  597: union_map_i64_i32 field_597;
+  598: union_map_i64_i64 field_598;
+  599: union_map_i64_float field_599;
+  600: union_map_i64_double field_600;
+  601: union_map_i64_binary field_601;
+  602: union_map_i64_string field_602;
+  603: union_map_string_set_string field_603;
+  604: union_map_string_set_i64 field_604;
+  605: union_map_i64_set_string field_605;
+  606: union_map_i64_set_i64 field_606;
+  607: union_list_bool_cpp_ref field_607;
+  608: union_list_byte_cpp_ref field_608;
+  609: union_list_i16_cpp_ref field_609;
+  610: union_list_i32_cpp_ref field_610;
+  611: union_list_i64_cpp_ref field_611;
+  612: union_list_float_cpp_ref field_612;
+  613: union_list_double_cpp_ref field_613;
+  614: union_list_binary_cpp_ref field_614;
+  615: union_list_string_cpp_ref field_615;
+  616: union_set_string_cpp_ref field_616;
+  617: union_set_i64_cpp_ref field_617;
+  618: union_map_string_bool_cpp_ref field_618;
+  619: union_map_string_byte_cpp_ref field_619;
+  620: union_map_string_i16_cpp_ref field_620;
+  621: union_map_string_i32_cpp_ref field_621;
+  622: union_map_string_i64_cpp_ref field_622;
+  623: union_map_string_float_cpp_ref field_623;
+  624: union_map_string_double_cpp_ref field_624;
+  625: union_map_string_binary_cpp_ref field_625;
+  626: union_map_string_string_cpp_ref field_626;
+  627: union_map_i64_bool_cpp_ref field_627;
+  628: union_map_i64_byte_cpp_ref field_628;
+  629: union_map_i64_i16_cpp_ref field_629;
+  630: union_map_i64_i32_cpp_ref field_630;
+  631: union_map_i64_i64_cpp_ref field_631;
+  632: union_map_i64_float_cpp_ref field_632;
+  633: union_map_i64_double_cpp_ref field_633;
+  634: union_map_i64_binary_cpp_ref field_634;
+  635: union_map_i64_string_cpp_ref field_635;
+  636: union_map_string_set_string_cpp_ref field_636;
+  637: union_map_string_set_i64_cpp_ref field_637;
+  638: union_map_i64_set_string_cpp_ref field_638;
+  639: union_map_i64_set_i64_cpp_ref field_639;
+  640: union_list_bool_shared_cpp_ref field_640;
+  641: union_list_byte_shared_cpp_ref field_641;
+  642: union_list_i16_shared_cpp_ref field_642;
+  643: union_list_i32_shared_cpp_ref field_643;
+  644: union_list_i64_shared_cpp_ref field_644;
+  645: union_list_float_shared_cpp_ref field_645;
+  646: union_list_double_shared_cpp_ref field_646;
+  647: union_list_binary_shared_cpp_ref field_647;
+  648: union_list_string_shared_cpp_ref field_648;
+  649: union_set_string_shared_cpp_ref field_649;
+  650: union_set_i64_shared_cpp_ref field_650;
+  651: union_map_string_bool_shared_cpp_ref field_651;
+  652: union_map_string_byte_shared_cpp_ref field_652;
+  653: union_map_string_i16_shared_cpp_ref field_653;
+  654: union_map_string_i32_shared_cpp_ref field_654;
+  655: union_map_string_i64_shared_cpp_ref field_655;
+  656: union_map_string_float_shared_cpp_ref field_656;
+  657: union_map_string_double_shared_cpp_ref field_657;
+  658: union_map_string_binary_shared_cpp_ref field_658;
+  659: union_map_string_string_shared_cpp_ref field_659;
+  660: union_map_i64_bool_shared_cpp_ref field_660;
+  661: union_map_i64_byte_shared_cpp_ref field_661;
+  662: union_map_i64_i16_shared_cpp_ref field_662;
+  663: union_map_i64_i32_shared_cpp_ref field_663;
+  664: union_map_i64_i64_shared_cpp_ref field_664;
+  665: union_map_i64_float_shared_cpp_ref field_665;
+  666: union_map_i64_double_shared_cpp_ref field_666;
+  667: union_map_i64_binary_shared_cpp_ref field_667;
+  668: union_map_i64_string_shared_cpp_ref field_668;
+  669: union_map_string_set_string_shared_cpp_ref field_669;
+  670: union_map_string_set_i64_shared_cpp_ref field_670;
+  671: union_map_i64_set_string_shared_cpp_ref field_671;
+  672: union_map_i64_set_i64_shared_cpp_ref field_672;
+  673: union_bool field_673;
+  674: union_byte field_674;
+  675: union_i16 field_675;
+  676: union_i32 field_676;
+  677: union_i64 field_677;
+  678: union_float field_678;
+  679: union_double field_679;
+  680: union_binary field_680;
+  681: union_string field_681;
 } (thrift.uri="facebook.com/thrift/test/testset/struct_all")

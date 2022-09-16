@@ -46,7 +46,6 @@ jobs:
     - run: nix-build --no-sandbox
     - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - run: hhvm --version
-    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - name: Build the deb package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1"

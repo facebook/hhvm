@@ -16,7 +16,6 @@
 , gd
 , gdb
 , gettext
-, gflags
 , git
 , glog
 , gmp

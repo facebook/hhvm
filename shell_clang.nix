@@ -10,4 +10,4 @@
       }
     )
     { src = ./.; }
-).shellNix.devShells.x86_64-linux.clang
+).shellNix.devShells.${builtins.currentSystem}.clang

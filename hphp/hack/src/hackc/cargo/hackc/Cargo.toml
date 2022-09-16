@@ -54,4 +54,4 @@ serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_dep
 strum = "0.21"
 strum_macros = "0.21"
 textual = { path = "../../ir/conversions/textual" }
-thiserror = "1.0.34"
+thiserror = "=1.0.30"

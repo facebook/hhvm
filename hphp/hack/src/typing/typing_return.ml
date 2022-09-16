@@ -162,6 +162,12 @@ let make_return_type
           | Tprim Aast.Tvoid -> ty
           | _ -> Typing_utils.make_like env ty
         in
+        let et_type =
+          if wrap then
+            wrap_awaitable (get_pos et_type) et_type
+          else
+            et_type
+        in
         (env, { et_type; et_enforced = Unenforced })
       ) else
         let et_enforced = Typing_enforceability.get_enforcement env dty in

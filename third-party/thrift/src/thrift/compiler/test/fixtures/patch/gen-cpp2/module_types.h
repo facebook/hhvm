@@ -3843,14 +3843,11 @@ class InnerUnionPatchStruct final  {
 
  public:
 
-  InnerUnionPatchStruct() :
-      __fbthrift_field_clear() {
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
-  }
+  InnerUnionPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  InnerUnionPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::InnerUnion assign__arg, bool clear__arg, ::test::fixtures::patch::InnerUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::InnerUnion ensure__arg, ::test::fixtures::patch::InnerUnionFieldPatch patch__arg);
+  InnerUnionPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion> assign__arg, bool clear__arg, ::test::fixtures::patch::InnerUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::InnerUnion ensure__arg, ::test::fixtures::patch::InnerUnionFieldPatch patch__arg);
 
   InnerUnionPatchStruct(InnerUnionPatchStruct&&) noexcept;
   InnerUnionPatchStruct(const InnerUnionPatchStruct& src);
@@ -3858,8 +3855,11 @@ class InnerUnionPatchStruct final  {
 
   InnerUnionPatchStruct& operator=(InnerUnionPatchStruct&&) noexcept;
   InnerUnionPatchStruct& operator=(const InnerUnionPatchStruct& src);
+
+  ~InnerUnionPatchStruct();
+
  private:
-  ::test::fixtures::patch::InnerUnion __fbthrift_field_assign;
+  ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion> __fbthrift_field_assign;
  private:
   bool __fbthrift_field_clear;
  private:
@@ -3869,220 +3869,211 @@ class InnerUnionPatchStruct final  {
  private:
   ::test::fixtures::patch::InnerUnionFieldPatch __fbthrift_field_patch;
  private:
-  apache::thrift::detail::isset_bitset<5, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
   bool operator==(const InnerUnionPatchStruct&) const;
   bool operator<(const InnerUnionPatchStruct&) const;
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> assign_ref() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> assign_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> assign_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> assign_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> assign_ref() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> assign_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> assign_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> assign_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> assign() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> assign() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> assign() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> assign() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> assign() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> assign() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> assign() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> assign() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_assign)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> clear_ref() const& {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> clear_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> clear_ref() & {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> clear_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> clear() const& {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> clear() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> clear() & {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> clear() && {
-    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patchPrior_ref() const& {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patchPrior_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patchPrior_ref() & {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patchPrior_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patchPrior() const& {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patchPrior() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patchPrior() & {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patchPrior() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ensure_ref() const& {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ensure_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ensure_ref() & {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ensure_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ensure() const& {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ensure() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ensure() & {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ensure() && {
-    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patch_ref() const& {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patch_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patch_ref() & {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patch_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patch() const& {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patch() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patch() & {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::InnerUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patch() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
-  }
-  const ::test::fixtures::patch::InnerUnion& get_assign() const&;
-  ::test::fixtures::patch::InnerUnion get_assign() &&;
-
-  template <typename T_InnerUnionPatchStruct_assign_struct_setter = ::test::fixtures::patch::InnerUnion>
-  [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::test::fixtures::patch::InnerUnion& set_assign(T_InnerUnionPatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_InnerUnionPatchStruct_assign_struct_setter>(assign_);
-    return __fbthrift_field_assign;
+    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   bool get_clear() const {
@@ -4485,14 +4476,11 @@ class MyUnionPatchStruct final  {
 
  public:
 
-  MyUnionPatchStruct() :
-      __fbthrift_field_clear() {
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
-  }
+  MyUnionPatchStruct();
+
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyUnionPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::MyUnion assign__arg, bool clear__arg, ::test::fixtures::patch::MyUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::MyUnion ensure__arg, ::test::fixtures::patch::MyUnionFieldPatch patch__arg);
+  MyUnionPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion> assign__arg, bool clear__arg, ::test::fixtures::patch::MyUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::MyUnion ensure__arg, ::test::fixtures::patch::MyUnionFieldPatch patch__arg);
 
   MyUnionPatchStruct(MyUnionPatchStruct&&) noexcept;
   MyUnionPatchStruct(const MyUnionPatchStruct& src);
@@ -4500,8 +4488,11 @@ class MyUnionPatchStruct final  {
 
   MyUnionPatchStruct& operator=(MyUnionPatchStruct&&) noexcept;
   MyUnionPatchStruct& operator=(const MyUnionPatchStruct& src);
+
+  ~MyUnionPatchStruct();
+
  private:
-  ::test::fixtures::patch::MyUnion __fbthrift_field_assign;
+  ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion> __fbthrift_field_assign;
  private:
   bool __fbthrift_field_clear;
  private:
@@ -4511,220 +4502,211 @@ class MyUnionPatchStruct final  {
  private:
   ::test::fixtures::patch::MyUnionFieldPatch __fbthrift_field_patch;
  private:
-  apache::thrift::detail::isset_bitset<5, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+  apache::thrift::detail::isset_bitset<4, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
  public:
 
   bool operator==(const MyUnionPatchStruct&) const;
   bool operator<(const MyUnionPatchStruct&) const;
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> assign_ref() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> assign_ref() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> assign_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> assign_ref() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> assign_ref() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> assign_ref() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> assign_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> assign_ref() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&> assign() const& {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> assign() const& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> assign() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> assign() const&& {
+    return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_assign)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&> assign() & {
-    return {this->__fbthrift_field_assign, __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> assign() & {
+    return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_assign};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyUnion>
-  FOLLY_ERASE ::apache::thrift::field_ref<T&&> assign() && {
-    return {static_cast<T&&>(this->__fbthrift_field_assign), __isset.at(0), __isset.bit(0)};
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion>>
+  FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> assign() && {
+    return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_assign)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> clear_ref() const& {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> clear_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> clear_ref() & {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> clear_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> clear() const& {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> clear() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<const T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> clear() & {
-    return {this->__fbthrift_field_clear, __isset.at(1), __isset.bit(1)};
+    return {this->__fbthrift_field_clear, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = bool>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> clear() && {
-    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(1), __isset.bit(1)};
+    return {static_cast<T&&>(this->__fbthrift_field_clear), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patchPrior_ref() const& {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patchPrior_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patchPrior_ref() & {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patchPrior_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patchPrior() const& {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patchPrior() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patchPrior() & {
-    return {this->__fbthrift_field_patchPrior, __isset.at(2), __isset.bit(2)};
+    return {this->__fbthrift_field_patchPrior, __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patchPrior() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(2), __isset.bit(2)};
+    return {static_cast<T&&>(this->__fbthrift_field_patchPrior), __isset.at(1), __isset.bit(1)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ensure_ref() const& {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ensure_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ensure_ref() & {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ensure_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> ensure() const& {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> ensure() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<const T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> ensure() & {
-    return {this->__fbthrift_field_ensure, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_ensure, __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnion>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> ensure() && {
-    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(3), __isset.bit(3)};
+    return {static_cast<T&&>(this->__fbthrift_field_ensure), __isset.at(2), __isset.bit(2)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patch_ref() const& {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patch_ref() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patch_ref() & {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patch_ref() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> patch() const& {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> patch() const&& {
-    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
+    return {static_cast<const T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> patch() & {
-    return {this->__fbthrift_field_patch, __isset.at(4), __isset.bit(4)};
+    return {this->__fbthrift_field_patch, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::patch::MyUnionFieldPatch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> patch() && {
-    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(4), __isset.bit(4)};
-  }
-  const ::test::fixtures::patch::MyUnion& get_assign() const&;
-  ::test::fixtures::patch::MyUnion get_assign() &&;
-
-  template <typename T_MyUnionPatchStruct_assign_struct_setter = ::test::fixtures::patch::MyUnion>
-  [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::test::fixtures::patch::MyUnion& set_assign(T_MyUnionPatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_MyUnionPatchStruct_assign_struct_setter>(assign_);
-    return __fbthrift_field_assign;
+    return {static_cast<T&&>(this->__fbthrift_field_patch), __isset.at(3), __isset.bit(3)};
   }
 
   bool get_clear() const {

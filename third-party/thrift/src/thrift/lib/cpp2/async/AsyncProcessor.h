@@ -419,6 +419,10 @@ struct ServerRequestData {
   // for thrift internal usage only
   // user should not try to modify these members
   std::chrono::steady_clock::time_point queueBegin;
+
+  // user data
+  intptr_t requestPileUserData;
+  intptr_t concurrencyControllerUserData;
 };
 
 // The ServerRequest is used to hold all the information about a request that we
@@ -481,23 +485,18 @@ class ServerRequest {
 
   // Set this if the request pile should be notified (via
   // RequestPileInterfaceo::onRequestFinished) when the request is completed.
-  void setRequestPileNotification(
-      RequestPileInterface* requestPile,
-      RequestPileInterface::UserData requestPileUserData) {
+  void setRequestPileNotification(RequestPileInterface* requestPile) {
     DCHECK(notifyRequestPile_ == nullptr);
     notifyRequestPile_ = requestPile;
-    notifyRequestPileUserData_ = requestPileUserData;
   }
 
   // Set this if the concurrency controller should be notified (via
   // ConcurrencyControllerInterface::onRequestFinished) when the request is
   // completed.
   void setConcurrencyControllerNotification(
-      ConcurrencyControllerInterface* concurrencyController,
-      ConcurrencyControllerInterface::UserData concurrencyControllerUserData) {
+      ConcurrencyControllerInterface* concurrencyController) {
     DCHECK(notifyConcurrencyController_ == nullptr);
     notifyConcurrencyController_ = concurrencyController;
-    notifyConcurrencyControllerUserData_ = concurrencyControllerUserData;
   }
 
  protected:
@@ -544,18 +543,13 @@ class ServerRequest {
     return sr.protocol_;
   }
 
-  static std::pair<RequestPileInterface*, RequestPileInterface::UserData>
-  requestPileNotification(ServerRequest& sr) {
-    return {sr.notifyRequestPile_, sr.notifyRequestPileUserData_};
+  static RequestPileInterface* requestPileNotification(ServerRequest& sr) {
+    return sr.notifyRequestPile_;
   }
 
-  static std::pair<
-      ConcurrencyControllerInterface*,
-      ConcurrencyControllerInterface::UserData>
-  concurrencyControllerNotification(ServerRequest& sr) {
-    return {
-        sr.notifyConcurrencyController_,
-        sr.notifyConcurrencyControllerUserData_};
+  static ConcurrencyControllerInterface* concurrencyControllerNotification(
+      ServerRequest& sr) {
+    return sr.notifyConcurrencyController_;
   }
 
   static intptr_t& queueObserverPayload(ServerRequest& sr) {
@@ -572,9 +566,7 @@ class ServerRequest {
   AsyncProcessor* asyncProcessor_;
   const AsyncProcessor::MethodMetadata* methodMetadata_;
   RequestPileInterface* notifyRequestPile_{nullptr};
-  RequestPileInterface::UserData notifyRequestPileUserData_;
   ConcurrencyControllerInterface* notifyConcurrencyController_{nullptr};
-  ConcurrencyControllerInterface::UserData notifyConcurrencyControllerUserData_;
   ServerRequestData requestData_;
   intptr_t queueObserverPayload_;
 };
@@ -1139,12 +1131,11 @@ class HandlerCallbackBase {
   void maybeNotifyComplete() {
     // We do not expect this to be reentrant
     if (notifyRequestPile_) {
-      notifyRequestPile_->onRequestFinished(notifyRequestPileUserData_);
+      notifyRequestPile_->onRequestFinished(requestData_);
       notifyRequestPile_ = nullptr;
     }
     if (notifyConcurrencyController_) {
-      notifyConcurrencyController_->onRequestFinished(
-          notifyConcurrencyControllerUserData_);
+      notifyConcurrencyController_->onRequestFinished(requestData_);
       notifyConcurrencyController_ = nullptr;
     }
   }
@@ -1182,10 +1173,8 @@ class HandlerCallbackBase {
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
       RequestPileInterface* notifyRequestPile,
-      RequestPileInterface::UserData notifyRequestPileUserData,
       ConcurrencyControllerInterface* notifyConcurrencyController,
-      ConcurrencyControllerInterface::UserData
-          notifyConcurrencyControllerUserData,
+      ServerRequestData requestData,
       TilePtr&& interaction = {})
       : req_(std::move(req)),
         ctx_(std::move(ctx)),
@@ -1196,10 +1185,8 @@ class HandlerCallbackBase {
         reqCtx_(reqCtx),
         protoSeqId_(0),
         notifyRequestPile_(notifyRequestPile),
-        notifyRequestPileUserData_(notifyRequestPileUserData),
         notifyConcurrencyController_(notifyConcurrencyController),
-        notifyConcurrencyControllerUserData_(
-            notifyConcurrencyControllerUserData) {}
+        requestData_(std::move(requestData)) {}
 
   virtual ~HandlerCallbackBase();
 
@@ -1309,10 +1296,8 @@ class HandlerCallbackBase {
   int32_t protoSeqId_;
 
   RequestPileInterface* notifyRequestPile_{nullptr};
-  RequestPileInterface::UserData notifyRequestPileUserData_{0};
   ConcurrencyControllerInterface* notifyConcurrencyController_{nullptr};
-  ConcurrencyControllerInterface::UserData notifyConcurrencyControllerUserData_{
-      0};
+  ServerRequestData requestData_;
 };
 
 template <typename T>
@@ -1348,10 +1333,8 @@ class HandlerCallback : public HandlerCallbackBase {
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
       RequestPileInterface* notifyRequestPile,
-      RequestPileInterface::UserData notifyRequestPileUserData,
       ConcurrencyControllerInterface* notifyConcurrencyController,
-      ConcurrencyControllerInterface::UserData
-          notifyConcurrencyControllerUserData,
+      ServerRequestData requestData,
       TilePtr&& interaction = {});
 
   void result(InputType r) { doResult(std::forward<InputType>(r)); }
@@ -1396,10 +1379,8 @@ class HandlerCallback<void> : public HandlerCallbackBase {
       folly::Executor::KeepAlive<> executor,
       Cpp2RequestContext* reqCtx,
       RequestPileInterface* notifyRequestPile,
-      RequestPileInterface::UserData notifyRequestPileUserData,
       ConcurrencyControllerInterface* notifyConcurrencyController,
-      ConcurrencyControllerInterface::UserData
-          notifyConcurrencyControllerUserData,
+      ServerRequestData requestData,
       TilePtr&& interaction = {});
 
   void done() { doDone(); }
@@ -1749,10 +1730,8 @@ HandlerCallback<T>::HandlerCallback(
     folly::Executor::KeepAlive<> executor,
     Cpp2RequestContext* reqCtx,
     RequestPileInterface* notifyRequestPile,
-    RequestPileInterface::UserData notifyRequestPileUserData,
     ConcurrencyControllerInterface* notifyConcurrencyController,
-    ConcurrencyControllerInterface::UserData
-        notifyConcurrencyControllerUserData,
+    ServerRequestData requestData,
     TilePtr&& interaction)
     : HandlerCallbackBase(
           std::move(req),
@@ -1762,9 +1741,8 @@ HandlerCallback<T>::HandlerCallback(
           std::move(executor),
           reqCtx,
           notifyRequestPile,
-          notifyRequestPileUserData,
           notifyConcurrencyController,
-          notifyConcurrencyControllerUserData,
+          std::move(requestData),
           std::move(interaction)),
       cp_(cp) {
   this->protoSeqId_ = protoSeqId;

@@ -56,8 +56,8 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_init(std::move(callback), args.get<0>().ref());
 }

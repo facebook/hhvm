@@ -58,8 +58,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey0(apache::t
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_getDataByKey0(std::move(callback), std::move(uarg_key));
 }
@@ -128,8 +128,8 @@ void DbMixedStackArgumentsAsyncProcessor::executeRequest_getDataByKey1(apache::t
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_getDataByKey1(std::move(callback), std::move(uarg_key));
 }

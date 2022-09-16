@@ -108,8 +108,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_get(apache::thrift
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_get(std::move(callback));
 }
@@ -176,8 +176,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_getter(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_getter(std::move(callback));
 }
@@ -244,8 +244,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_lists(apache::thri
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_lists(std::move(callback));
 }
@@ -312,8 +312,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_maps(apache::thrif
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_maps(std::move(callback));
 }
@@ -380,8 +380,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name(apache::thrif
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_name(std::move(callback));
 }
@@ -448,8 +448,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_name_to_value(apac
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_name_to_value(std::move(callback));
 }
@@ -516,8 +516,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_names(apache::thri
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_names(std::move(callback));
 }
@@ -584,8 +584,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_prefix_tree(apache
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_prefix_tree(std::move(callback));
 }
@@ -652,8 +652,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_sets(apache::thrif
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_sets(std::move(callback));
 }
@@ -720,8 +720,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_setter(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_setter(std::move(callback));
 }
@@ -788,8 +788,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_str(apache::thrift
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_str(std::move(callback));
 }
@@ -856,8 +856,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_strings(apache::th
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_strings(std::move(callback));
 }
@@ -924,8 +924,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_type(apache::thrif
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_type(std::move(callback));
 }
@@ -992,8 +992,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value(apache::thri
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_value(std::move(callback));
 }
@@ -1060,8 +1060,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_value_to_name(apac
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_value_to_name(std::move(callback));
 }
@@ -1128,8 +1128,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_values(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_values(std::move(callback));
 }
@@ -1196,8 +1196,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_id(apache::thrift:
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_id(std::move(callback));
 }
@@ -1264,8 +1264,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_ids(apache::thrift
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_ids(std::move(callback));
 }
@@ -1332,8 +1332,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptor(apache:
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_descriptor(std::move(callback));
 }
@@ -1400,8 +1400,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_descriptors(apache
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_descriptors(std::move(callback));
 }
@@ -1468,8 +1468,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_key(apache::thrift
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_key(std::move(callback));
 }
@@ -1536,8 +1536,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_keys(apache::thrif
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_keys(std::move(callback));
 }
@@ -1604,8 +1604,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotation(apache:
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_annotation(std::move(callback));
 }
@@ -1672,8 +1672,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_annotations(apache
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_annotations(std::move(callback));
 }
@@ -1740,8 +1740,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_member(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_member(std::move(callback));
 }
@@ -1808,8 +1808,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_members(apache::th
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_members(std::move(callback));
 }
@@ -1876,8 +1876,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_field(apache::thri
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_field(std::move(callback));
 }
@@ -1944,8 +1944,8 @@ void service_with_special_namesAsyncProcessor::executeRequest_fields(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_fields(std::move(callback));
 }

@@ -64,8 +64,8 @@ void MyServiceFastAsyncProcessor::executeRequest_hasDataById(apache::thrift::Ser
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , nullptr
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_eb_hasDataById(std::move(callback), args.get<0>().ref());
 }
@@ -137,8 +137,8 @@ void MyServiceFastAsyncProcessor::executeRequest_getDataById(apache::thrift::Ser
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , nullptr
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_eb_getDataById(std::move(callback), args.get<0>().ref());
 }
@@ -212,8 +212,8 @@ void MyServiceFastAsyncProcessor::executeRequest_putDataById(apache::thrift::Ser
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , nullptr
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_eb_putDataById(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }
@@ -274,8 +274,8 @@ void MyServiceFastAsyncProcessor::executeRequest_lobDataById(apache::thrift::Ser
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_eb_lobDataById(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }

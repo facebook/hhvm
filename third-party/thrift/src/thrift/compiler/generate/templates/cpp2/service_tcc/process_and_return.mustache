@@ -96,8 +96,8 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     <%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
 <%/function:oneway?%>
 <%^function:oneway?%>
@@ -121,8 +121,8 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , <%^function:eb%>apache::thrift::detail::ServerRequestHelper::executor(serverRequest)<%/function:eb%><%#function:eb%>nullptr<%/function:eb%>
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     <%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
 <%/function:oneway?%>
   <%^service:interaction?%>iface_-><%/service:interaction?%><%#service:interaction?%>iface.<%/service:interaction?%><%#function:eb%>async_eb<%/function:eb%><%^function:eb%>async_tm<%/function:eb%>_<%function:cpp_name%>(std::move(callback)<% > service_tcc/get_args_ref%>);

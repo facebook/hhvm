@@ -78,16 +78,15 @@ class FIFORequestPile : public RequestPileInterface {
     return std::nullopt;
   }
 
-  std::pair<std::optional<ServerRequest>, std::optional<intptr_t>> dequeue()
-      override {
+  std::optional<ServerRequest> dequeue() override {
     if (auto res = queue_.try_dequeue()) {
-      return std::make_pair(std::move(*res), std::nullopt);
+      return std::move(*res);
     } else {
-      return std::make_pair(std::nullopt, std::nullopt);
+      return std::nullopt;
     }
   }
 
-  void onRequestFinished(intptr_t /* userData */) override {}
+  void onRequestFinished(ServerRequestData&) override {}
 
   uint64_t requestCount() const override { return queue_.size(); }
 
@@ -154,7 +153,8 @@ Func blockingTaskGen(
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.wait();
-    controller.onRequestFinished(0);
+    static ServerRequestData data;
+    controller.onRequestFinished(data);
   };
 
   return waitingTask;
@@ -164,7 +164,8 @@ Func endingTaskGen(
     folly::Baton<>& baton, ParallelConcurrencyController& controller) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
-    controller.onRequestFinished(0);
+    static ServerRequestData data;
+    controller.onRequestFinished(data);
     baton.post();
   };
 
@@ -252,7 +253,8 @@ Func edgeTaskGen(
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.wait();
-    controller.onRequestFinished(0);
+    static ServerRequestData data;
+    controller.onRequestFinished(data);
 
     latch.count_down();
   };

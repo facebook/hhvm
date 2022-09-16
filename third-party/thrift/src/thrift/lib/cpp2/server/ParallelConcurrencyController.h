@@ -44,7 +44,7 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
 
   void onEnqueued() override;
 
-  void onRequestFinished(UserData userData) override;
+  void onRequestFinished(ServerRequestData&) override;
 
   void stop() override;
 

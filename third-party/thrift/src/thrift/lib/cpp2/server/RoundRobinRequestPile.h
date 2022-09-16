@@ -97,14 +97,11 @@ class RoundRobinRequestPile : public RequestPileBase {
   std::optional<ServerRequestRejection> enqueue(
       ServerRequest&& request) override;
 
-  std::pair<
-      std::optional<ServerRequest>,
-      std::optional<RequestPileInterface::UserData>>
-  dequeue() override;
+  std::optional<ServerRequest> dequeue() override;
 
   uint64_t requestCount() const override;
 
-  void onRequestFinished(intptr_t /* userData */) override {}
+  void onRequestFinished(ServerRequestData&) override {}
 
   std::string describe() const override;
 

@@ -96,8 +96,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_returnstream(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }
@@ -169,8 +169,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_streamthrows(std::move(callback), args.get<0>().ref());
 }
@@ -252,8 +252,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_servicethrows(std::move(callback), args.get<0>().ref());
 }
@@ -342,8 +342,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_boththrows(std::move(callback), args.get<0>().ref());
 }
@@ -442,8 +442,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_responseandstreamstreamthrows(std::move(callback), args.get<0>().ref());
 }
@@ -527,8 +527,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_responseandstreamservicethrows(std::move(callback), args.get<0>().ref());
 }
@@ -619,8 +619,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_responseandstreamboththrows(std::move(callback), args.get<0>().ref());
 }
@@ -726,8 +726,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , nullptr
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_eb_returnstreamFast(std::move(callback), args.get<0>().ref(), args.get<1>().ref());
 }

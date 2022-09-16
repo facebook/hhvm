@@ -287,7 +287,7 @@ struct BitmaskEnum {}
  * annotated type. Optionally specify name to override default
  * schema<structName>.
  */
-@scope.Struct
+@scope.Structured
 @scope.Service
 @Experimental
 struct GenerateRuntimeSchema {

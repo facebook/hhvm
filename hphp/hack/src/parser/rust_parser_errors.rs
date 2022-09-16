@@ -100,6 +100,7 @@ enum UnstableFeatures {
     MethodTraitDiamond,
     UpcastExpression,
     RequireClass,
+    EnumClassTypeConstants,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -124,6 +125,7 @@ impl UnstableFeatures {
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Unstable,
+            UnstableFeatures::EnumClassTypeConstants => Unstable,
         }
     }
 }
@@ -3708,12 +3710,20 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
     }
 
     fn enum_class_errors(&mut self, node: S<'a>) {
-        if let EnumClassDeclaration(_) = &node.children {
+        if let EnumClassDeclaration(c) = &node.children {
             self.invalid_modifier_errors("Enum classes", node, |kind| {
                 kind == TokenKind::Abstract
                     || kind == TokenKind::Internal
                     || kind == TokenKind::Public
             });
+            for n in c.elements.syntax_node_to_list_skip_separator() {
+                match &n.children {
+                    TypeConstDeclaration(_) => {
+                        self.check_can_use_feature(n, &UnstableFeatures::EnumClassTypeConstants)
+                    }
+                    _ => {}
+                }
+            }
         }
     }
 

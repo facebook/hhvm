@@ -43,7 +43,7 @@ std::unordered_map<std::string, t_const_value*> flatten_map(
   for (const auto& pair : val.get_map()) {
     map[pair.first->get_string()] = pair.second;
   }
-  if (auto def = map.find("definition"); def != map.end()) {
+  if (auto def = map.find("attrs"); def != map.end()) {
     for (const auto& pair : def->second->get_map()) {
       map[pair.first->get_string()] = pair.second;
     }

@@ -1353,6 +1353,15 @@ InnerUnionPatchStruct& InnerUnionPatchStruct::operator=(const InnerUnionPatchStr
   return *this;
 }
 
+InnerUnionPatchStruct::InnerUnionPatchStruct() :
+      __fbthrift_field_clear() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
+}
+
+
+InnerUnionPatchStruct::~InnerUnionPatchStruct() {}
+
 InnerUnionPatchStruct::InnerUnionPatchStruct(FOLLY_MAYBE_UNUSED InnerUnionPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
@@ -1375,7 +1384,7 @@ InnerUnionPatchStruct& InnerUnionPatchStruct::operator=(FOLLY_MAYBE_UNUSED Inner
 }
 
 
-InnerUnionPatchStruct::InnerUnionPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::InnerUnion assign__arg, bool clear__arg, ::test::fixtures::patch::InnerUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::InnerUnion ensure__arg, ::test::fixtures::patch::InnerUnionFieldPatch patch__arg) :
+InnerUnionPatchStruct::InnerUnionPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::InnerUnion> assign__arg, bool clear__arg, ::test::fixtures::patch::InnerUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::InnerUnion ensure__arg, ::test::fixtures::patch::InnerUnionFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -1387,13 +1396,12 @@ InnerUnionPatchStruct::InnerUnionPatchStruct(apache::thrift::FragileConstructor,
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
-  __isset.set(folly::index_constant<4>(), true);
 }
 
 
 void InnerUnionPatchStruct::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_assign);
+  this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::clear(this->__fbthrift_field_ensure);
@@ -1410,7 +1418,7 @@ bool InnerUnionPatchStruct::__fbthrift_is_empty() const {
 
 bool InnerUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionPatchStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
     return false;
   }
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
@@ -1430,8 +1438,8 @@ bool InnerUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const InnerUnionPatchS
 
 bool InnerUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionPatchStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
   }
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
     return lhs.clear_ref() < rhs.clear_ref();
@@ -1446,14 +1454,6 @@ bool InnerUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const InnerUnionPatchSt
     return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
   }
   return false;
-}
-
-const ::test::fixtures::patch::InnerUnion& InnerUnionPatchStruct::get_assign() const& {
-  return __fbthrift_field_assign;
-}
-
-::test::fixtures::patch::InnerUnion InnerUnionPatchStruct::get_assign() && {
-  return std::move(__fbthrift_field_assign);
 }
 
 const ::test::fixtures::patch::InnerUnion& InnerUnionPatchStruct::get_ensure() const& {
@@ -1722,6 +1722,15 @@ MyUnionPatchStruct& MyUnionPatchStruct::operator=(const MyUnionPatchStruct& othe
   return *this;
 }
 
+MyUnionPatchStruct::MyUnionPatchStruct() :
+      __fbthrift_field_clear() {
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
+  ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::FieldPatchAdapter, 6>(__fbthrift_field_patch, *this);
+}
+
+
+MyUnionPatchStruct::~MyUnionPatchStruct() {}
+
 MyUnionPatchStruct::MyUnionPatchStruct(FOLLY_MAYBE_UNUSED MyUnionPatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
@@ -1744,7 +1753,7 @@ MyUnionPatchStruct& MyUnionPatchStruct::operator=(FOLLY_MAYBE_UNUSED MyUnionPatc
 }
 
 
-MyUnionPatchStruct::MyUnionPatchStruct(apache::thrift::FragileConstructor, ::test::fixtures::patch::MyUnion assign__arg, bool clear__arg, ::test::fixtures::patch::MyUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::MyUnion ensure__arg, ::test::fixtures::patch::MyUnionFieldPatch patch__arg) :
+MyUnionPatchStruct::MyUnionPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::detail::boxed_value_ptr<::test::fixtures::patch::MyUnion> assign__arg, bool clear__arg, ::test::fixtures::patch::MyUnionFieldPatch patchPrior__arg, ::test::fixtures::patch::MyUnion ensure__arg, ::test::fixtures::patch::MyUnionFieldPatch patch__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
     __fbthrift_field_patchPrior(std::move(patchPrior__arg)),
@@ -1756,13 +1765,12 @@ MyUnionPatchStruct::MyUnionPatchStruct(apache::thrift::FragileConstructor, ::tes
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
-  __isset.set(folly::index_constant<4>(), true);
 }
 
 
 void MyUnionPatchStruct::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::clear(this->__fbthrift_field_assign);
+  this->__fbthrift_field_assign.reset();
   this->__fbthrift_field_clear = bool();
   ::apache::thrift::adapt_detail::clear<::apache::thrift::op::detail::FieldPatchAdapter, 3>(__fbthrift_field_patchPrior, *this);
   ::apache::thrift::clear(this->__fbthrift_field_ensure);
@@ -1779,7 +1787,7 @@ bool MyUnionPatchStruct::__fbthrift_is_empty() const {
 
 bool MyUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
     return false;
   }
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
@@ -1799,8 +1807,8 @@ bool MyUnionPatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct&
 
 bool MyUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.assign_ref() == rhs.assign_ref())) {
-    return lhs.assign_ref() < rhs.assign_ref();
+  if ((!::apache::thrift::detail::pointer_equal(lhs.assign_ref(), rhs.assign_ref()))) {
+    return ::apache::thrift::detail::pointer_less(lhs.assign_ref(), rhs.assign_ref());
   }
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
     return lhs.clear_ref() < rhs.clear_ref();
@@ -1815,14 +1823,6 @@ bool MyUnionPatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyUnionPatchStruct& 
     return ::apache::thrift::adapt_detail::less<::apache::thrift::op::detail::FieldPatchAdapter>(lhs.__fbthrift_field_patch, rhs.__fbthrift_field_patch);
   }
   return false;
-}
-
-const ::test::fixtures::patch::MyUnion& MyUnionPatchStruct::get_assign() const& {
-  return __fbthrift_field_assign;
-}
-
-::test::fixtures::patch::MyUnion MyUnionPatchStruct::get_assign() && {
-  return std::move(__fbthrift_field_assign);
 }
 
 const ::test::fixtures::patch::MyUnion& MyUnionPatchStruct::get_ensure() const& {

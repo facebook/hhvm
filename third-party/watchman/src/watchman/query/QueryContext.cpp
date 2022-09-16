@@ -50,7 +50,7 @@ const w_string& QueryContext::getWholeName() {
   if (!wholename_) {
     wholename_ = computeWholeName(file.get());
   }
-  return wholename_;
+  return *wholename_;
 }
 
 w_string QueryContext::computeWholeName(FileResult* file) const {

@@ -20,7 +20,7 @@ num-traits = "0.2"
 ordered-float = { version = "1.1.1", features = ["serde"] }
 panic-message = "0.3"
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-thiserror = "1.0.34"
+thiserror = "=1.0.30"
 
 [dev-dependencies]
 quickcheck = "1.0"

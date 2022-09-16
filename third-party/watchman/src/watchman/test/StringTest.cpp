@@ -79,8 +79,9 @@ TEST(String, strings) {
     EXPECT_TRUE(defaultStr.empty())
         << "default constructed string should be empty";
 
-    w_string nullStr(nullptr);
-    EXPECT_TRUE(nullStr.empty()) << "nullptr string should be empty";
+    w_string movedFrom{"hello"};
+    w_string{std::move(movedFrom)};
+    EXPECT_TRUE(movedFrom.empty()) << "moved-from string should be empty";
 
     EXPECT_TRUE(w_string_piece().empty())
         << "default constructed string piece shouldbe empty";
@@ -128,8 +129,7 @@ TEST(String, canon_path) {
 }
 
 TEST(String, concat) {
-  auto str =
-      w_string::build("one", 2, "three", 1.2, false, w_string(nullptr).view());
+  auto str = w_string::build("one", 2, "three", 1.2, false, w_string_piece{});
   EXPECT_EQ(str, w_string("one2three1.2false"));
 }
 
@@ -237,19 +237,24 @@ TEST(String, string_piece_lowercase_suffix) {
 
 TEST(String, path_cat) {
   auto str = w_string::pathCat({"foo", ""});
-  EXPECT_EQ(str, "foo");
+  EXPECT_EQ("foo", str);
+  EXPECT_EQ(3, str.size());
 
   str = w_string::pathCat({"", "foo"});
-  EXPECT_EQ(str, "foo");
+  EXPECT_EQ("foo", str);
+  EXPECT_EQ(3, str.size());
 
   str = w_string::pathCat({"foo", "bar"});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 
   str = w_string::pathCat({"foo", "bar", ""});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 
   str = w_string::pathCat({"foo", "", "bar"});
-  EXPECT_EQ(str, "foo/bar");
+  EXPECT_EQ("foo/bar", str);
+  EXPECT_EQ(7, str.size());
 }
 
 TEST(String, basename_dirname) {
@@ -328,6 +333,12 @@ TEST(String, operators) {
   EXPECT_LT(w_string_piece("A"), w_string_piece("a"));
 }
 
+TEST(String, piece_and_string_should_have_same_hash) {
+  EXPECT_EQ(w_string{""}.hashValue(), w_string_piece{""}.hashValue());
+  EXPECT_EQ(
+      w_string{"foobar"}.hashValue(), w_string_piece{"foobar"}.hashValue());
+}
+
 TEST(String, split) {
   {
     std::vector<std::string> expected{"a", "b", "c"};
@@ -369,10 +380,6 @@ TEST(String, split) {
         << "split as 0 elements, got " << result.size();
 
     w_string_piece(w_string()).split(result, ':');
-    EXPECT_TRUE(result.size() == 0)
-        << "split as 0 elements, got " << result.size();
-
-    w_string_piece(w_string(nullptr)).split(result, ':');
     EXPECT_TRUE(result.size() == 0)
         << "split as 0 elements, got " << result.size();
   }
@@ -443,4 +450,18 @@ TEST(String, contains) {
   EXPECT_TRUE(haystack.contains(""));
   EXPECT_TRUE(haystack.contains("watchman"));
   EXPECT_FALSE(haystack.contains("watchman2"));
+}
+
+TEST(String, allocate_many_sizes) {
+  // This strange test relies on ASAN to assert that our allocation size math is
+  // correct.
+  EXPECT_EQ(0, w_string("", 0).size());
+  EXPECT_EQ(1, w_string("x", 1).size());
+  EXPECT_EQ(2, w_string("xx", 2).size());
+  EXPECT_EQ(3, w_string("xxx", 3).size());
+  EXPECT_EQ(4, w_string("xxxx", 4).size());
+  EXPECT_EQ(5, w_string("xxxxx", 5).size());
+  EXPECT_EQ(6, w_string("xxxxxx", 6).size());
+  EXPECT_EQ(7, w_string("xxxxxxx", 7).size());
+  EXPECT_EQ(8, w_string("xxxxxxxx", 8).size());
 }

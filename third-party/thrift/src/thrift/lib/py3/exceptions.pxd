@@ -117,11 +117,11 @@ cdef object runHandlers(const cFollyExceptionWrapper& ex, RpcOptions options)
 cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)
 
 # cdef Inheritence sucks in cython
-cdef object create_Error(shared_ptr[cTException] ex)
-cdef object create_ApplicationError(shared_ptr[cTApplicationException] ex)
-cdef object create_LibraryError(shared_ptr[cTLibraryException] ex)
-cdef object create_TransportError(shared_ptr[cTTransportException] ex)
-cdef object create_ProtocolError(shared_ptr[cTProtocolException] ex)
+cdef object create_Error(const cTException* ex)
+cdef object create_ApplicationError(const cTApplicationException* ex)
+cdef object create_LibraryError(const cTLibraryException* ex)
+cdef object create_TransportError(const cTTransportException* ex)
+cdef object create_ProtocolError(const cTProtocolException* ex)
 
 
 cdef class Error(Exception):

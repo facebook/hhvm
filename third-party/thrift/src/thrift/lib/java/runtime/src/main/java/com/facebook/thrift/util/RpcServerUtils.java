@@ -16,6 +16,8 @@
 
 package com.facebook.thrift.util;
 
+import static com.facebook.thrift.util.PlatformUtils.getOS;
+
 import com.facebook.nifty.ssl.SslSession;
 import com.facebook.swift.service.ThriftServerConfig;
 import com.facebook.thrift.legacy.server.LegacyServerTransportFactory;
@@ -26,9 +28,11 @@ import com.facebook.thrift.server.ServerTransport;
 import com.facebook.thrift.server.ServerTransportFactory;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.ServerChannel;
+import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerDomainSocketChannel;
 import io.netty.channel.epoll.EpollServerSocketChannel;
+import io.netty.channel.kqueue.KQueue;
 import io.netty.channel.kqueue.KQueueEventLoopGroup;
 import io.netty.channel.kqueue.KQueueServerDomainSocketChannel;
 import io.netty.channel.kqueue.KQueueServerSocketChannel;
@@ -77,9 +81,21 @@ public class RpcServerUtils {
     if (socketAddress instanceof DomainSocketAddress) {
       if (group instanceof EpollEventLoopGroup) {
         return EpollServerDomainSocketChannel.class;
+      } else if (getOS() == PlatformUtils.OS.LINUX) {
+        throw new UnsupportedOperationException(
+            String.format(
+                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Epoll unavailable.",
+                group.getClass(), socketAddress.getClass()),
+            Epoll.unavailabilityCause());
       }
       if (group instanceof KQueueEventLoopGroup) {
         return KQueueServerDomainSocketChannel.class;
+      } else if (getOS() == PlatformUtils.OS.MAC) {
+        throw new UnsupportedOperationException(
+            String.format(
+                "Unsupported combination of EventLoopGroup-{%s} & SocketAddress-{%s}. Likely due to system support for Kqueue unavailable.",
+                group.getClass(), socketAddress.getClass()),
+            KQueue.unavailabilityCause());
       }
     }
     throw new UnsupportedOperationException(

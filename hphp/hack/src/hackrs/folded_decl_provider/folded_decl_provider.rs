@@ -27,6 +27,7 @@ mod inherit;
 mod provider;
 mod subst;
 
+pub use fold::DeclFolder;
 pub use provider::LazyFoldedDeclProvider;
 pub use subst::Substitution;
 

@@ -64,7 +64,7 @@ typedef list<id.ProgramId> IncludeIds
 typedef list<standard.UriStruct> PackageList
 
 /** The attributes that can be associated with any Thrift definition. */
-struct Definition {
+struct DefinitionAttrs {
   /**
    * The un-scoped 'name' for this definition.
    *
@@ -127,7 +127,7 @@ struct Definition {
 struct EnumValue {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The associated numeric value.
@@ -148,7 +148,7 @@ struct EnumValue {
 struct Enum {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The values, in the order as defined in the IDL/AST.
@@ -195,7 +195,7 @@ struct Field {
 
   /** The definition attributes. */
   @thrift.Mixin
-  4: Definition definition;
+  4: DefinitionAttrs attrs;
 
   /**
    * The custom default value for this field.
@@ -224,7 +224,7 @@ typedef list<Field> Fields
 struct Struct {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The fields, in the order as defined in the IDL/AST.
@@ -242,7 +242,7 @@ struct Struct {
 struct Union {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The fields, in the order as defined in the IDL/AST.
@@ -290,7 +290,7 @@ enum ErrorSafety {
 struct Exception {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The fields, in the order as defined in the IDL/AST.
@@ -379,7 +379,7 @@ struct Sink {
 struct Interaction {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The functions, in the order as defined in the IDL/AST.
@@ -397,7 +397,7 @@ union ReturnType {
   /** The sink return type. */
   3: Sink sinkType;
   /** The interaction return type. */
-  4: Interaction interactionType;
+  4: id.DefinitionId interactionType;
 }
 
 /** A container of Thrift function return type. */
@@ -420,7 +420,7 @@ struct Function {
 
   /** The definition attributes. */
   @thrift.Mixin
-  3: Definition definition;
+  3: DefinitionAttrs attrs;
 
   /** The paramlist of the function. */
   4: Paramlist paramlist;
@@ -445,7 +445,7 @@ typedef list<Function> Functions
 struct Service {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The functions, in the order as defined in the IDL/AST.
@@ -460,10 +460,40 @@ struct Service {
   3: optional Service inheritedService;
 }
 
+/**
+ * A Thrift constant.
+ *
+ *     const {type} {definition.name} = {value}
+ */
+struct Const {
+  /** The definition attributes. */
+  @thrift.Mixin
+  1: DefinitionAttrs attrs;
+
+  /** The type of the constant. */
+  2: type.Type type;
+
+  /** The value the const is initialized to. */
+  3: id.ValueId value;
+}
+
+/**
+  * Any Thrift definition.
+  *
+  * Each type must have DefinitionAttrs.
+  */
+union Definition {
+  1: Struct structDef;
+  2: Union unionDef;
+  3: Exception exceptionDef;
+  4: Enum enumDef;
+  5: Const constDef;
+  6: Service serviceDef;
+  7: Interaction interactionDef;
+}
+
 /** A list of definitions (Structs, Enums, Services, etc), accessible by `DefinitionId`. */
-// TODO(afuller): As this can only be one of a fixed set of types, consider
-// adding 'union types' to Thrift and use that instead of Any.
-typedef any.AnyValueList DefinitionList
+typedef list<Definition> DefinitionList
 
 /**
  * A Thrift program.
@@ -479,7 +509,7 @@ typedef any.AnyValueList DefinitionList
 struct Program {
   /** The definition attributes. */
   @thrift.Mixin
-  1: Definition definition;
+  1: DefinitionAttrs attrs;
 
   /**
    * The parsed package for the program, if available.

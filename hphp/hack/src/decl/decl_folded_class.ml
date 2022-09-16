@@ -592,9 +592,8 @@ let typeconst_fold
     Typing_defs.typeconst_type SMap.t * Typing_defs.class_const SMap.t =
   let (typeconsts, consts) = acc in
   match c.sc_kind with
+  | Ast_defs.Cenum -> acc
   | Ast_defs.Cenum_class _
-  | Ast_defs.Cenum ->
-    acc
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
   | Ast_defs.Cclass _ ->
@@ -837,7 +836,7 @@ and class_decl
       ~init:(typeconsts, consts)
   in
   let (typeconsts, consts) =
-    if Ast_defs.is_c_normal c.sc_kind then
+    if Ast_defs.is_c_concrete c.sc_kind then
       let consts = SMap.map synthesize_const_defaults consts in
       SMap.fold synthesize_typeconst_defaults typeconsts (typeconsts, consts)
     else

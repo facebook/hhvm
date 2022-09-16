@@ -326,7 +326,7 @@ class StandardProtocol(_fbthrift_python_types.Enum, enum.Enum):
     def _to_py_deprecated(self):
         return self.value
 class Void(_fbthrift_python_types.Enum, enum.Enum):
-    NoValue = 0
+    NoValueVoid = 0
     @staticmethod
     def __get_thrift_name__() -> str:
         return "standard.Void"

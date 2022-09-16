@@ -62,7 +62,10 @@ HTTPTransactionHandler* Dispatcher::getRequestHandler(HTTPMessage* msg) {
   if (!FLAGS_static_root.empty()) {
     return new StaticFileHandler(params_, FLAGS_static_root);
   }
-
+  if (boost::algorithm::starts_with(path, "/delay")) {
+    return new DelayHandler(params_,
+                            folly::EventBaseManager::get()->getEventBase());
+  }
   return new DummyHandler(params_);
 }
 

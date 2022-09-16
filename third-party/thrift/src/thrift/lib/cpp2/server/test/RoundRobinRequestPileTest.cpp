@@ -18,6 +18,7 @@
 
 #include <folly/Benchmark.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
+#include <folly/init/Init.h>
 #include <folly/portability/GTest.h>
 
 #include <thrift/lib/cpp/transport/THeader.h>
@@ -26,8 +27,6 @@
 #include <thrift/lib/cpp2/test/gen-cpp2/TestService.h>
 #include <thrift/lib/cpp2/test/gen-cpp2/TestServiceAsyncClient.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
-
-#include "common/init/Init.h"
 
 using namespace std;
 using namespace apache::thrift;
@@ -106,7 +105,7 @@ getScopeFunc() {
 }
 
 void checkResult(RoundRobinRequestPile& pile, int pri, int bucket) {
-  auto [req, _] = pile.dequeue();
+  auto req = pile.dequeue();
   auto ctx = req->requestContext();
 
   auto headers = ctx->getHeaders();
@@ -155,7 +154,7 @@ TEST(RoundRobinRequestPileTest, NormalCases) {
   check(0, 1);
   check(0, 0);
 
-  auto [req1, _] = pile.dequeue();
+  auto req1 = pile.dequeue();
   EXPECT_EQ(req1, std::nullopt);
 
   pile.enqueue(getRequest(0, 0));
@@ -176,7 +175,7 @@ TEST(RoundRobinRequestPileTest, NormalCases) {
   check(2, 1);
   check(2, 0);
 
-  auto [req2, __] = pile.dequeue();
+  auto req2 = pile.dequeue();
   EXPECT_EQ(req2, std::nullopt);
 
   EXPECT_EQ(pile.requestCount(), 0);
@@ -231,7 +230,7 @@ TEST(RoundRobinRequestPileTest, SingleBucket) {
   check(0, 0);
   check(0, 0);
 
-  auto [req1, _] = pile.dequeue();
+  auto req1 = pile.dequeue();
   EXPECT_EQ(req1, std::nullopt);
 }
 
@@ -318,7 +317,7 @@ BENCHMARK(DefaultPerf) {
 
   auto consumerFunc = [&]() {
     while (counter.load() != numThreads * numRoundEachWorker) {
-      auto [req, _] = pile.dequeue();
+      auto req = pile.dequeue();
       if (req) {
         ++counter;
       }
@@ -381,7 +380,7 @@ BENCHMARK(RoundRobinBehavior) {
 
   auto consumerFunc = [&]() {
     while (counter.load() != sum) {
-      auto [req, _] = pile.dequeue();
+      auto req = pile.dequeue();
       if (req) {
         ++counter;
       }
@@ -398,7 +397,7 @@ BENCHMARK(RoundRobinBehavior) {
 
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
-  facebook::initFacebook(&argc, &argv);
+  folly::init(&argc, &argv);
   auto ret = RUN_ALL_TESTS();
   folly::runBenchmarks();
   return ret;

@@ -332,18 +332,8 @@ macro_rules! common_impls {
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
-#[derive(
-    Eq,
-    PartialEq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    Clone,
-    Copy,
-    Hash,
-    Ord,
-    PartialOrd
-)]
-#[derive(Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize, EqModuloPos, EqModuloPosAndReason)]
 pub struct TypeName(pub Symbol);
 pub type BuildTypeNameHasher = BuildSymbolHasher;
 pub type TypeNameMap<V> = HashMap<TypeName, V, BuildTypeNameHasher>;

@@ -59,6 +59,15 @@ using CarbonThriftTestRoutableRequests = carbon::List<
     CustomRequest,
     DummyThriftRequest,
     ThriftTestRequest>;
+using CarbonThriftTestAllRequests = carbon::List<
+    CustomRequest,
+    DummyThriftRequest,
+    ThriftTestRequest,
+    facebook::memcache::McExecRequest,
+    facebook::memcache::McQuitRequest,
+    facebook::memcache::McShutdownRequest,
+    facebook::memcache::McStatsRequest,
+    facebook::memcache::McVersionRequest>;
 } // namespace detail
 
 struct CarbonThriftTestRouterInfo {
@@ -71,6 +80,7 @@ struct CarbonThriftTestRouterInfo {
   template <class Route>
   using RouteHandle = CarbonThriftTestRouteHandle<Route>;
   using RoutableRequests = detail::CarbonThriftTestRoutableRequests;
+  using AllRequests = detail::CarbonThriftTestAllRequests;
   
   using RouterStats = carbon::Stats<CarbonThriftTestRouterStatsConfig>;
 

@@ -2,8 +2,6 @@ use std::fmt;
 
 use anyhow::bail;
 use anyhow::Result;
-use ffi::Slice;
-use ffi::Str;
 use hash::HashMap;
 use hash::HashSet;
 
@@ -73,15 +71,15 @@ impl MapName for hhbc::TypeConstant<'_> {
     }
 }
 
-impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
+impl MapName for hhbc::Requirement<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::TypeInfo<'_>>> {
+impl MapName for hhbc::UpperBound<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 

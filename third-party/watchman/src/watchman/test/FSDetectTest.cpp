@@ -31,7 +31,8 @@ TEST(FSType, fstype) {
       "squashfuse_ll /mnt/xarfuse/uid-5537/326c1234-ns-4026531840 fuse.squashfuse_ll rw,nosuid,nodev,relatime,user_id=5537,group_id=100 0 0\n"
       "/dev/vda3 /data/users/wez/fbsource/buck-out btrfs rw,seclabel,relatime,compress-force=zstd:3,discard,space_cache,subvolid=5,subvol=/data/users/wez/scratch/dataZusersZwezZovrsource/edenfsZredirectionsZbuck-out 0 0\n";
 
-  EXPECT_EQ(nullptr, find_fstype_in_linux_proc_mounts("bleet", mount_data));
+  EXPECT_EQ(
+      std::nullopt, find_fstype_in_linux_proc_mounts("bleet", mount_data));
   EXPECT_EQ(
       w_string("btrfs"), find_fstype_in_linux_proc_mounts("/", mount_data));
   EXPECT_EQ(

@@ -16,6 +16,7 @@
 , gd
 , gdb
 , gettext
+, gflags
 , git
 , glog
 , gmp
@@ -116,25 +117,27 @@ stdenv.mkDerivation rec {
     ];
   buildInputs =
     [
-      boost
+      (boost.override { inherit stdenv; })
       brotli
       bzip2
       curl
-      double-conversion
+      (double-conversion.override { inherit stdenv; })
       editline
       expat
-      fmt
+      (fmt.override { inherit stdenv; })
       freetype
       fribidi
       gd
       gdb
       gettext
       git
+      # TODO: (glog.override { inherit stdenv; })
       glog
       gmp
+      # TODO: (gperf.override {inherit stdenv; })
       gperf
       gperftools
-      icu
+      (icu.override { inherit stdenv; })
       imagemagick6
       jemalloc
       libdwarf
@@ -161,7 +164,7 @@ stdenv.mkDerivation rec {
       re2
       re2c
       sqlite
-      tbb
+      (tbb.override { inherit stdenv; })
       tzdata
       unzip
       zlib

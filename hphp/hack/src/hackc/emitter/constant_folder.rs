@@ -16,7 +16,6 @@ use itertools::Itertools;
 use naming_special_names_rust::math;
 use naming_special_names_rust::members;
 use naming_special_names_rust::typehints;
-use options::HhvmFlags;
 use oxidized::aast_visitor::visit_mut;
 use oxidized::aast_visitor::AstParams;
 use oxidized::aast_visitor::NodeMut;
@@ -214,11 +213,7 @@ fn key_expr_to_typed_value<'arena, 'decl>(
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
     let tv = expr_to_typed_value(emitter, expr)?;
-    let fold_lc = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
+    let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
         TypedValue::LazyClass(_) if fold_lc => Ok(tv),
@@ -231,11 +226,7 @@ fn keyset_value_afield_to_typed_value<'arena, 'decl>(
     afield: &ast::Afield,
 ) -> Result<TypedValue<'arena>, Error> {
     let tv = value_afield_to_typed_value(emitter, afield)?;
-    let fold_lc = emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS);
+    let fold_lc = emitter.options().hhbc.fold_lazy_class_keys;
     match tv {
         TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
         TypedValue::LazyClass(_) if fold_lc => Ok(tv),
@@ -405,13 +396,7 @@ fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
             .map(|e| {
                 expr_to_typed_value(emitter, e).and_then(|tv| match tv {
                     TypedValue::Int(_) | TypedValue::String(_) => Ok(tv),
-                    TypedValue::LazyClass(_)
-                        if emitter
-                            .options()
-                            .hhvm
-                            .flags
-                            .contains(HhvmFlags::FOLD_LAZY_CLASS_KEYS) =>
-                    {
+                    TypedValue::LazyClass(_) if emitter.options().hhbc.fold_lazy_class_keys => {
                         Ok(tv)
                     }
                     _ => Err(Error::NotLiteral),

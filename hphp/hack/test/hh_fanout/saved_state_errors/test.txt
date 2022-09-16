@@ -1,9 +1,0 @@
-write foo.php
-  <?hh
-  // This file has an error as of the saved-state, but not due to any user
-  // change.
-  function foo(): string {
-    return 1;
-  }
-generate-saved-state
-calculate-errors

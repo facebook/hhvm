@@ -27,8 +27,8 @@ pub fn compute_predecessor_blocks(func: &Func<'_>, flags: PredecessorFlags) -> P
 
         // Handle the default params.
         for param in &func.params {
-            if let Some((bid, _)) = param.default_value {
-                mark_edge(&mut predecessors, BlockId::NONE, bid);
+            if let Some(dv) = param.default_value {
+                mark_edge(&mut predecessors, BlockId::NONE, dv.init);
             }
         }
     }
@@ -106,8 +106,8 @@ pub fn compute_num_predecessors(func: &Func<'_>, flags: PredecessorFlags) -> IdV
 
         // Default Params
         for param in &func.params {
-            if let Some((bid, _)) = param.default_value {
-                counts[bid] += 1;
+            if let Some(dv) = param.default_value {
+                counts[dv.init] += 1;
             }
         }
     }

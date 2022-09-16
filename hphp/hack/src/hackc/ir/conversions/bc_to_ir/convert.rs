@@ -7,6 +7,7 @@ use std::path::Path;
 
 use ffi::Maybe;
 use hash::HashMap;
+use hhbc::Fatal;
 use hhbc::Unit;
 
 /// Convert a hhbc::Unit to an ir::Unit.
@@ -80,12 +81,12 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         }
     }
 
-    if let Maybe::Just(ffi::Triple(op, loc, msg)) = unit.fatal {
+    if let Maybe::Just(Fatal { op, loc, message }) = unit.fatal {
         let loc = ir::func::SrcLoc::from_hhbc(filename, &loc);
         ir_unit.fatal = match op {
-            hhbc::FatalOp::Parse => ir::FatalOp::Parse(loc, msg),
-            hhbc::FatalOp::Runtime => ir::FatalOp::Runtime(loc, msg),
-            hhbc::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, msg),
+            hhbc::FatalOp::Parse => ir::FatalOp::Parse(loc, message),
+            hhbc::FatalOp::Runtime => ir::FatalOp::Runtime(loc, message),
+            hhbc::FatalOp::RuntimeOmitFrame => ir::FatalOp::RuntimeOmitFrame(loc, message),
             _ => panic!("bad FatalOp value"),
         };
     }

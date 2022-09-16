@@ -16,8 +16,6 @@ use std::path::PathBuf;
 
 use anyhow::Result;
 use compile::EnvFlags;
-use compile::HhbcFlags;
-use compile::ParserFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
 use direct_decl_parser::DeclParserOptions;
@@ -25,6 +23,9 @@ use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
 use facts_rust as facts;
 use hhbc::Unit;
+use options::HhbcFlags;
+use options::Hhvm;
+use options::ParserOptions;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
@@ -39,14 +40,19 @@ pub mod compile_ffi {
         decl_provider: usize,
 
         filepath: String,
-        aliased_namespaces: String,
-        include_roots: String,
+        aliased_namespaces: Vec<StringMapEntry>,
+        include_roots: Vec<StringMapEntry>,
         emit_class_pointers: i32,
         check_int_overflow: i32,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
         flags: EnvFlags,
+    }
+
+    struct StringMapEntry {
+        key: String,
+        value: String,
     }
 
     /// compiler::EnvFlags exposed to C++
@@ -87,7 +93,7 @@ pub mod compile_ffi {
     }
 
     struct DeclParserConfig {
-        aliased_namespaces: String,
+        aliased_namespaces: Vec<StringMapEntry>,
         disable_xhp_element_mangling: bool,
         interpret_soft_types_as_like_types: bool,
         allow_new_attribute_syntax: bool,
@@ -227,10 +233,40 @@ impl compile_ffi::NativeEnv {
                 Prefix::Dummy,
                 PathBuf::from(OsStr::from_bytes(self.filepath.as_bytes())),
             ),
-            aliased_namespaces: self.aliased_namespaces.clone(),
-            include_roots: self.include_roots.clone(),
-            emit_class_pointers: self.emit_class_pointers,
-            check_int_overflow: self.check_int_overflow,
+            hhvm: Hhvm {
+                include_roots: (self.include_roots.iter())
+                    .map(|e| (e.key.clone().into(), e.value.clone().into()))
+                    .collect(),
+                emit_class_pointers: self.emit_class_pointers,
+                check_int_overflow: self.check_int_overflow,
+                parser_options: ParserOptions {
+                    po_auto_namespace_map: (self.aliased_namespaces.iter())
+                        .map(|e| (e.key.clone(), e.value.clone()))
+                        .collect(),
+                    po_abstract_static_props: self.parser_flags.abstract_static_props,
+                    po_allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
+                    po_allow_unstable_features: self.parser_flags.allow_unstable_features,
+                    po_const_default_func_args: self.parser_flags.const_default_func_args,
+                    tco_const_static_props: self.parser_flags.const_static_props,
+                    po_disable_lval_as_an_expression: self
+                        .parser_flags
+                        .disable_lval_as_an_expression,
+                    po_disallow_inst_meth: self.parser_flags.disallow_inst_meth,
+                    po_disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
+                    po_disallow_fun_and_cls_meth_pseudo_funcs: self
+                        .parser_flags
+                        .disallow_fun_and_cls_meth_pseudo_funcs,
+                    po_disallow_func_ptrs_in_constants: self
+                        .parser_flags
+                        .disallow_func_ptrs_in_constants,
+                    po_enable_enum_classes: self.parser_flags.enable_enum_classes,
+                    po_enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
+                    po_enable_class_level_where_clauses: self
+                        .parser_flags
+                        .enable_class_level_where_clauses,
+                    ..Default::default()
+                },
+            },
             hhbc_flags: HhbcFlags {
                 ltr_assign: self.hhbc_flags.ltr_assign,
                 uvs: self.hhbc_flags.uvs,
@@ -241,26 +277,6 @@ impl compile_ffi::NativeEnv {
                 emit_cls_meth_pointers: self.hhbc_flags.emit_cls_meth_pointers,
                 emit_meth_caller_func_pointers: self.hhbc_flags.emit_meth_caller_func_pointers,
                 fold_lazy_class_keys: self.hhbc_flags.fold_lazy_class_keys,
-                ..Default::default()
-            },
-            parser_flags: ParserFlags {
-                abstract_static_props: self.parser_flags.abstract_static_props,
-                allow_new_attribute_syntax: self.parser_flags.allow_new_attribute_syntax,
-                allow_unstable_features: self.parser_flags.allow_unstable_features,
-                const_default_func_args: self.parser_flags.const_default_func_args,
-                const_static_props: self.parser_flags.const_static_props,
-                disable_lval_as_an_expression: self.parser_flags.disable_lval_as_an_expression,
-                disallow_inst_meth: self.parser_flags.disallow_inst_meth,
-                disable_xhp_element_mangling: self.parser_flags.disable_xhp_element_mangling,
-                disallow_fun_and_cls_meth_pseudo_funcs: self
-                    .parser_flags
-                    .disallow_fun_and_cls_meth_pseudo_funcs,
-                disallow_func_ptrs_in_constants: self.parser_flags.disallow_func_ptrs_in_constants,
-                enable_enum_classes: self.parser_flags.enable_enum_classes,
-                enable_xhp_class_modifier: self.parser_flags.enable_xhp_class_modifier,
-                enable_class_level_where_clauses: self
-                    .parser_flags
-                    .enable_class_level_where_clauses,
                 ..Default::default()
             },
             flags: EnvFlags {
@@ -330,13 +346,10 @@ pub fn direct_decl_parse(
     filename: &CxxString,
     text: &CxxString,
 ) -> compile_ffi::DeclResult {
-    let options = options::Options::from_configs(&[&config.aliased_namespaces]).unwrap();
-    let auto_namespace_map = match options.hhvm.aliased_namespaces.get().as_map() {
-        Some(m) => Vec::from_iter(m.iter().map(|(k, v)| (k.to_owned(), v.to_owned()))),
-        None => Vec::new(),
-    };
     let decl_opts = DeclParserOptions {
-        auto_namespace_map,
+        auto_namespace_map: (config.aliased_namespaces.iter())
+            .map(|e| (e.key.clone(), e.value.clone()))
+            .collect(),
         disable_xhp_element_mangling: config.disable_xhp_element_mangling,
         interpret_soft_types_as_like_types: config.interpret_soft_types_as_like_types,
         allow_new_attribute_syntax: config.allow_new_attribute_syntax,

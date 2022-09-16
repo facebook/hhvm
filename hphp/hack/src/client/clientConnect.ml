@@ -547,17 +547,11 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
 
 let connect (env : env) : conn Lwt.t =
   let start_time = Unix.time () in
-  try%lwt
-    let%lwt ({ channels = (_, oc); _ } as conn) = connect env start_time in
-    HackEventLogger.client_established_connection start_time;
-    if env.do_post_handoff_handshake then
-      ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
-    Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
-  with
-  | exn ->
-    let e = Exception.wrap exn in
-    HackEventLogger.client_establish_connection_exception e;
-    Exception.reraise e
+  let%lwt ({ channels = (_, oc); _ } as conn) = connect env start_time in
+  HackEventLogger.client_established_connection start_time;
+  if env.do_post_handoff_handshake then
+    ServerCommandLwt.send_connection_type oc ServerCommandTypes.Non_persistent;
+  Lwt.return { conn with t_sent_connection_type = Unix.gettimeofday () }
 
 let rpc :
     type a.

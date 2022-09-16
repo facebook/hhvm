@@ -44,12 +44,16 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
 
   void onEnqueued() override;
 
-  void onRequestFinished(UserData userData) override;
+  void onRequestFinished(ServerRequestData&) override;
 
   void stop() override;
 
   uint64_t numPendingDequeRequest() const override {
     return counters_.load().pendingDequeCalls;
+  }
+
+  void setExecutorSupportPriority(bool support) override {
+    executorSupportPriority = support;
   }
 
  private:
@@ -68,6 +72,7 @@ class ParallelConcurrencyController : public ConcurrencyControllerBase {
   folly::relaxed_atomic<uint64_t> executionLimit_{
       std::numeric_limits<uint64_t>::max()};
 
+  bool executorSupportPriority{true};
   RequestPileInterface& pile_;
   folly::Executor& executor_;
 

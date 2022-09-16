@@ -253,15 +253,25 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
 
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
-  sendImpl(
-      rpcOpts,
-      functionName,
-      std::move(args),
-      serviceAndFunction->first.c_str(),
-      serviceAndFunction->second.c_str(),
-      std::make_unique<SemiFutureCallback>(std::move(promise), channel_),
-      rpcKind,
-      std::move(metadata));
+  try {
+    sendImpl(
+        rpcOpts,
+        functionName,
+        std::move(args),
+        serviceAndFunction->first.c_str(),
+        serviceAndFunction->second.c_str(),
+        std::make_unique<SemiFutureCallback>(std::move(promise), channel_),
+        rpcKind,
+        std::move(metadata));
+  } catch (const std::exception& ex) {
+    return folly::makeSemiFutureWith(
+        [ew =
+             folly::exception_wrapper(std::current_exception(), ex)]() mutable {
+          OmniClientResponseWithHeaders resp;
+          resp.buf = folly::makeUnexpected(std::move(ew));
+          return resp;
+        });
+  }
   return std::move(future)
       .deferValue([serviceAndFunction = std::move(serviceAndFunction),
                    protocol = getChannelProtocolId(),

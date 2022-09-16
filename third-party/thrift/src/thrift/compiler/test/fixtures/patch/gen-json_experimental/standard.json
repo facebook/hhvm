@@ -143,8 +143,8 @@
       "Void" : {
         "name" : "Void",
         "constants" : {
-          "NoValue" : {
-            "name" : "NoValue",
+          "NoValueVoid" : {
+            "name" : "NoValueVoid",
             "lineno" : 83,
             "value" : 0
           }

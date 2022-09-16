@@ -55,10 +55,10 @@ struct StructuredOp : BaseOp<Tag> {
     return cond;
   }
 
-  static bool put(void* s, FieldId fid, const Dyn* n, const Dyn& val) {
+  static bool put(void* s, FieldId fid, const Dyn& n, const Dyn& val) {
     // TODO(afuller): Use a hash map lookups for these.
     if (n != nullptr) {
-      const auto& name = n->as<type::string_t>();
+      const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
         return putIf<Id>(op::get_name_v<Id, T> == name, ref(s), val);
@@ -80,11 +80,11 @@ struct StructuredOp : BaseOp<Tag> {
     return cond;
   }
 
-  static Ptr get(void* s, FieldId fid, size_t, const Dyn* n) {
+  static Ptr get(void* s, FieldId fid, size_t, const Dyn& n) {
     Ptr result;
     // TODO(afuller): Use a hash map for these lookups.
     if (n != nullptr) { // Get by name.
-      const auto& name = n->as<type::string_t>();
+      const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
         return getIf<Id>(op::get_name_v<Id, T> == name, ref(s), result);
@@ -98,12 +98,12 @@ struct StructuredOp : BaseOp<Tag> {
   }
 
   template <typename Id>
-  static bool ensureIf(bool cond, T& self, const Dyn* val, Ptr& result) {
+  static bool ensureIf(bool cond, T& self, const Dyn& val, Ptr& result) {
     if (cond) {
       auto&& field = op::get<Id>(self);
       if (isAbsent(field)) {
         if (val != nullptr) {
-          *field = val->as<FTag<Id>>();
+          *field = val.as<FTag<Id>>();
         } else {
           ensureValue(field);
         }
@@ -113,11 +113,11 @@ struct StructuredOp : BaseOp<Tag> {
     return cond;
   }
 
-  static Ptr ensure(void* s, FieldId fid, const Dyn* n, const Dyn* val) {
+  static Ptr ensure(void* s, FieldId fid, const Dyn& n, const Dyn& val) {
     // TODO(afuller): Use a hash map for these lookups.
     Ptr result;
     if (n != nullptr) { // Ensure by name.
-      const auto& name = n->as<type::string_t>();
+      const auto& name = n.as<type::string_t>();
       check_found(find_by_field_id<T>([&](auto id) {
         using Id = decltype(id);
         return ensureIf<Id>(op::get_name_v<Id, T> == name, ref(s), val, result);

@@ -23,6 +23,7 @@ namespace apache::thrift {
 
 class ServerRequestRejection;
 class ServerRequest;
+struct ServerRequestData;
 
 // The common interface to all request piles. The details of the construction
 // are left to implementations of this interface. A request pile is effectively
@@ -50,8 +51,6 @@ class RequestPileInterface {
   virtual std::optional<ServerRequestRejection> enqueue(
       ServerRequest&& request) = 0;
 
-  using UserData = intptr_t;
-
   // Return the next request to process from the request pile or nothing.
   //
   // A RequestPiles implementation can choose not to return a request even if it
@@ -64,12 +63,11 @@ class RequestPileInterface {
   // If a RequestPile returns a UserData value then it will
   // receive a callback to its onRequestFinished method when request processing
   // is finished.
-  virtual std::pair<std::optional<ServerRequest>, std::optional<UserData>>
-  dequeue() = 0;
+  virtual std::optional<ServerRequest> dequeue() = 0;
 
   // If a callback was requested this will be called when the request processing
   // has finished.
-  virtual void onRequestFinished(UserData userData);
+  virtual void onRequestFinished(ServerRequestData&);
 
   virtual std::string describe() const;
 };

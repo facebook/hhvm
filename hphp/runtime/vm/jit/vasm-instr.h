@@ -902,9 +902,10 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
 /*
  * Resume execution in the middle of a TC function.
  *
- * This must set up the native stack in the same way as a phplogue{} would,
- * before transferring control to `target'.  Before resumetc{} is executed,
- * the native stack will always be set up like this:
+ * This must set up the native stack in the same way as a phplogue{}
+ * would, before transferring control to `target'.  In architectures where
+ * calls push the return address on the stack, the native stack will
+ * always be set up like this before resumetc{} is executed:
  *
  *    +-----------------------+   <- 16-byte alignment
  *    |   <8 bytes of junk>   |
@@ -913,7 +914,8 @@ struct contenter { Vreg64 fp, target; RegSet args; Vlabel targets[2]; };
  * i.e., the native stack pointer will be misaligned coming in (but must, of
  * course, be aliged once phplogue{} finishes executing).  Using a native call
  * in the implementation (and likewise, using native returns for leavetc{}) is
- * recommended, in order to take advantage of return branch predictions.
+ * recommended, in order to take advantage of return branch predictions.  This
+ * is not required though.
  *
  * `exittc' is the address to resume execution at after returning from the TC.
  */
@@ -926,11 +928,13 @@ struct resumetc { Vreg64 target; TCA exittc; RegSet args; };
 struct inittc {};
 
 /*
- * Pop the address of enterTCExit off the stack, and return to it.
+ * Transfer control to enterTCExit stub.  Whether this is implemented via
+ * a return or a jump instruction is up to the target, but leavetc and
+ * resumetc must agree on the approach.
  *
  * Used to relinquish control to the async scheduler from an async function.
  */
-struct leavetc { RegSet args; };
+struct leavetc { RegSet args; TCA exittc; };
 
 ///////////////////////////////////////////////////////////////////////////////
 // Exception intrinsics.

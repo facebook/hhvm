@@ -17,6 +17,5 @@ hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
 itertools = "0.10.3"
 naming_special_names_rust = { path = "../../../../naming" }
-options = { path = "../../../compile/cargo/options" }
 oxidized = { path = "../../../../oxidized" }
 stack_limit = { path = "../../../../utils/stack_limit" }

@@ -149,8 +149,6 @@ struct TestHandleImpl {
 
   std::vector<int64_t> sawLeaseTokensSet;
 
-  std::vector<std::string> sawShadowIds;
-
   std::vector<uint64_t> sawFlags;
 
   std::vector<uint64_t> sawBucketIds;
@@ -252,15 +250,6 @@ struct TestHandleImpl {
 };
 
 template <class Request, typename = std::void_t<>>
-struct HasShadowId : public std::false_type {};
-
-template <class Request>
-struct HasShadowId<
-    Request,
-    std::void_t<decltype(std::declval<Request>().shadowId_ref())>>
-    : public std::true_type {};
-
-template <class Request, typename = std::void_t<>>
 struct HasBucketId : public std::false_type {};
 
 template <class Request>
@@ -299,15 +288,6 @@ struct RecordingRoute {
     h_->sawLeaseTokensSet.push_back(*req.leaseToken_ref());
     return routeInternal(req);
   }
-
-  template <class Request>
-  std::enable_if_t<HasShadowId<Request>::value, void> recordShadowId(
-      const Request& req) {
-    h_->sawShadowIds.push_back(*req.shadowId_ref());
-  }
-  template <class Request>
-  std::enable_if_t<!HasShadowId<Request>::value, void> recordShadowId(
-      const Request&) {}
 
   template <class Request>
   std::enable_if_t<HasBucketId<Request>::value, void> recordBucketId(
@@ -371,7 +351,6 @@ struct RecordingRoute {
     h_->sawFlags.push_back(getFlagsIfExist(req));
     h_->sawQueryTags.push_back(getQueryTagsIfExists(req));
     recordBucketId(req);
-    recordShadowId(req);
     if (carbon::GetLike<Request>::value) {
       reply.result_ref() = h_->resultGenerator_.hasValue()
           ? (*h_->resultGenerator_)(req.key_ref()->fullKey().str())

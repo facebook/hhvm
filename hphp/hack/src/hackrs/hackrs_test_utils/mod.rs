@@ -8,4 +8,7 @@ pub mod registrar;
 pub mod serde_store;
 pub mod store;
 
-pub use serde_store::SerializingStore;
+pub use decl_provider::*;
+pub use registrar::*;
+pub use serde_store::*;
+pub use store::*;

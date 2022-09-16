@@ -284,7 +284,7 @@ Optional<DumpFile> dump_file(const char* name) {
 }
 
 void AdminRequestHandler::handleRequest(Transport *transport) {
-  transport->addHeader("Content-Type", "text/plain");
+  transport->addHeader("Content-Type", "text/plain; charset=utf-8");
   std::string cmd = transport->getCommand();
 
   do {
@@ -406,9 +406,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/vm-dump-tc:      dump translation cache to /tmp/tc_dump_a and\n"
         "                  /tmp/tc_dump_astub\n"
         "/vm-namedentities:show size of the NamedEntityTable\n"
-        "/proxy:           set up request proxy\n"
-        "    origin        URL to proxy requests to\n"
-        "    percentage    percentage of requests to proxy\n"
         "/load-factor:     get or set load factor\n"
         "    set           optional, set new load factor (default 1.0,\n"
         "                  valid range [-1.0, 10.0])\n"
@@ -753,11 +750,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleVMRequest(cmd, transport)) {
       break;
     }
-    if (cmd == "proxy") {
-      handleProxyRequest(cmd, transport);
-      break;
-    }
-
     if (cmd == "statcache-clear") {
       StatCache::clearCache();
       break;
@@ -1434,21 +1426,6 @@ bool AdminRequestHandler::handleVMRequest(const std::string &cmd,
   return false;
 }
 
-void AdminRequestHandler::handleProxyRequest(const std::string& /*cmd*/,
-                                             Transport* transport) {
-  try {
-    auto const percentStr = transport->getParam("percentage");
-    auto const percent    = percentStr.empty() ? 0 : folly::to<int>(percentStr);
-    if (percent < 0 || percent > 100) {
-      throw std::range_error("must be in [0, 100]");
-    }
-
-    setProxyOriginPercentage(transport->getParam("origin"), percent);
-    transport->sendString("Origin and percentage updated");
-  } catch (const std::range_error& re) {
-    transport->sendString(folly::sformat("Invalid percentage: {}", re.what()));
-  }
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Dump cache content

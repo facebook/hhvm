@@ -1120,7 +1120,7 @@ pub const write_props_without_capability: Error = Cow::Borrowed(
 );
 
 pub const closure_in_local_context: Error = Cow::Borrowed(
-    "Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults].",
+    "Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults].",
 );
 
 pub const read_globals_without_capability: Error = Cow::Borrowed(

@@ -421,6 +421,10 @@ class mstch_program : public mstch_base {
             {"program:typedefs?", &mstch_program::has_typedefs},
             {"program:constants?", &mstch_program::has_constants},
             {"program:thrift_uris?", &mstch_program::has_thrift_uris},
+            {"program:interned_values?", &mstch_program::has_interned_values},
+            {"program:num_interned_values",
+             &mstch_program::num_interned_values},
+            {"program:interned_values", &mstch_program::interned_values},
         });
     register_has_option("program:frozen?", "frozen");
     register_has_option("program:json?", "json");
@@ -441,7 +445,9 @@ class mstch_program : public mstch_base {
   }
   mstch::node has_services() { return !program_->services().empty(); }
   mstch::node has_typedefs() { return !program_->typedefs().empty(); }
-  mstch::node has_constants() { return !program_->consts().empty(); }
+  mstch::node has_constants() {
+    return !program_->consts().empty() || context_.options.count("interning");
+  }
   mstch::node has_unions() {
     auto& structs = program_->structs();
     return std::any_of(
@@ -454,6 +460,12 @@ class mstch_program : public mstch_base {
   mstch::node services();
   mstch::node typedefs();
   mstch::node constants();
+
+  mstch::node has_interned_values() { return !program_->intern_list().empty(); }
+  mstch::node num_interned_values() {
+    return static_cast<int>(program_->intern_list().size());
+  }
+  mstch::node interned_values();
 
  protected:
   const t_program* program_;

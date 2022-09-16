@@ -58,8 +58,8 @@ void SomeServiceAsyncProcessor::executeRequest_bounce_map(apache::thrift::Server
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_bounce_map(std::move(callback), std::move(uarg_m));
 }
@@ -128,8 +128,8 @@ void SomeServiceAsyncProcessor::executeRequest_binary_keyed_map(apache::thrift::
     , apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)
     , apache::thrift::detail::ServerRequestHelper::executor(serverRequest)
     , serverRequest.requestContext()
-    , requestPileNotification.first, requestPileNotification.second
-    , concurrencyControllerNotification.first, concurrencyControllerNotification.second
+    , requestPileNotification
+    , concurrencyControllerNotification, std::move(serverRequest.requestData())
     );
   iface_->async_tm_binary_keyed_map(std::move(callback), std::move(uarg_r));
 }

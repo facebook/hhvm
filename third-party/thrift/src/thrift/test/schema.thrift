@@ -32,3 +32,23 @@ struct Fields {
   3: optional set<string> keyset;
   7: Empty strct;
 }
+
+@thrift.GenerateRuntimeSchema
+struct Defaults {
+  1: i32 none;
+  2: i32 some = 42;
+}
+
+@thrift.GenerateRuntimeSchema
+service EmptyService {
+}
+
+@thrift.GenerateRuntimeSchema
+union Union {}
+
+// @lint-ignore THRIFTCHECKS
+@thrift.GenerateRuntimeSchema
+exception SimpleException {}
+
+@thrift.GenerateRuntimeSchema
+safe transient server exception FancyException {}

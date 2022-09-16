@@ -8,6 +8,7 @@ mod crc;
 mod decls;
 mod expr_trees;
 mod facts;
+mod infer;
 mod parse;
 mod profile;
 mod util;
@@ -19,14 +20,14 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 use ::compile::EnvFlags;
-use ::compile::HhbcFlags;
 use ::compile::NativeEnv;
-use ::compile::ParserFlags;
 use anyhow::Result;
 use byte_unit::Byte;
 use clap::Parser;
 use hhvm_options::HhvmOptions;
 use log::info;
+use options::Hhvm;
+use options::ParserOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::relative_path;
 use oxidized::relative_path::RelativePath;
@@ -125,6 +126,9 @@ enum Command {
     /// Compute JSON facts for a set of Hack source files.
     Facts(facts::Opts),
 
+    /// Emit Infer SIL.
+    CompileInfer(infer::Opts),
+
     /// Render the source text parse tree for each given file.
     Parse(parse::Opts),
 
@@ -192,14 +196,8 @@ impl FileOpts {
 
 impl Opts {
     pub fn decl_opts(&self) -> DeclParserOptions {
-        // TODO: share this logic with hackc_create_decl_parse_options()
-        let config_opts = options::Options::from_configs(&[Self::AUTO_NAMESPACE_MAP]).unwrap();
-        let auto_namespace_map = match config_opts.hhvm.aliased_namespaces.get().as_map() {
-            Some(m) => m.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
-            None => Vec::new(),
-        };
         DeclParserOptions {
-            auto_namespace_map,
+            auto_namespace_map: auto_namespace_map().into_iter().collect(),
             disable_xhp_element_mangling: false,
             interpret_soft_types_as_like_types: true,
             allow_new_attribute_syntax: true,
@@ -213,43 +211,46 @@ impl Opts {
     pub fn native_env(&self, path: PathBuf) -> Result<NativeEnv> {
         let hhvm_options = &self.hhvm_options;
         let hhvm_config = hhvm_options.to_config()?;
-        let parser_flags = ParserFlags::from_hhvm_config(&hhvm_config)?;
-        let hhbc_flags = HhbcFlags::from_hhvm_config(&hhvm_config)?;
+        let parser_options = ParserOptions {
+            po_auto_namespace_map: auto_namespace_map().collect(),
+            ..hhvm_config::parser_options(&hhvm_config)?
+        };
+        let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
         Ok(NativeEnv {
             filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
-            aliased_namespaces: crate::Opts::AUTO_NAMESPACE_MAP.into(),
-            include_roots: crate::Opts::INCLUDE_ROOTS.into(),
-            hhbc_flags,
-            parser_flags,
+            hhvm: Hhvm {
+                include_roots: Default::default(),
+                parser_options,
+                emit_class_pointers: self.emit_class_pointers,
+                check_int_overflow: self.check_int_overflow,
+            },
             flags: self.env_flags.clone(),
-            emit_class_pointers: self.emit_class_pointers,
-            check_int_overflow: self.check_int_overflow,
+            hhbc_flags,
         })
     }
+}
 
-    // TODO (T118266805): get these from nearest .hhconfig enclosing each file.
-    pub(crate) const AUTO_NAMESPACE_MAP: &'static str = r#"{
-            "hhvm.aliased_namespaces": {
-                "global_value": {
-                    "Async": "HH\\Lib\\Async",
-                    "C": "FlibSL\\C",
-                    "Dict": "FlibSL\\Dict",
-                    "File": "HH\\Lib\\File",
-                    "IO": "HH\\Lib\\IO",
-                    "Keyset": "FlibSL\\Keyset",
-                    "Locale": "FlibSL\\Locale",
-                    "Math": "FlibSL\\Math",
-                    "OS": "HH\\Lib\\OS",
-                    "PHP": "FlibSL\\PHP",
-                    "PseudoRandom": "FlibSL\\PseudoRandom",
-                    "Regex": "FlibSL\\Regex",
-                    "SecureRandom": "FlibSL\\SecureRandom",
-                    "Str": "FlibSL\\Str",
-                    "Vec": "FlibSL\\Vec"
-                }
-            }
-        }"#;
-    pub(crate) const INCLUDE_ROOTS: &'static str = "";
+// TODO (T118266805): get these from nearest .hhconfig enclosing each file.
+fn auto_namespace_map() -> impl Iterator<Item = (String, String)> {
+    [
+        ("Async", "HH\\Lib\\Async"),
+        ("C", "FlibSL\\C"),
+        ("Dict", "FlibSL\\Dict"),
+        ("File", "HH\\Lib\\File"),
+        ("IO", "HH\\Lib\\IO"),
+        ("Keyset", "FlibSL\\Keyset"),
+        ("Locale", "FlibSL\\Locale"),
+        ("Math", "FlibSL\\Math"),
+        ("OS", "HH\\Lib\\OS"),
+        ("PHP", "FlibSL\\PHP"),
+        ("PseudoRandom", "FlibSL\\PseudoRandom"),
+        ("Regex", "FlibSL\\Regex"),
+        ("SecureRandom", "FlibSL\\SecureRandom"),
+        ("Str", "FlibSL\\Str"),
+        ("Vec", "FlibSL\\Vec"),
+    ]
+    .into_iter()
+    .map(|(k, v)| (k.into(), v.into()))
 }
 
 fn main() -> Result<()> {
@@ -269,6 +270,7 @@ fn main() -> Result<()> {
         Some(Command::Assemble(opts)) => assemble::run(opts),
         Some(Command::BinaryDecls(decls_opts)) => decls::binary_decls(opts, decls_opts),
         Some(Command::JsonDecls(decls_opts)) => decls::json_decls(opts, decls_opts),
+        Some(Command::CompileInfer(opts)) => infer::run(opts),
         Some(Command::Crc(opts)) => crc::run(opts),
         Some(Command::Parse(parse_opts)) => parse::run(parse_opts),
         Some(Command::ParseBench(bench_opts)) => parse::run_bench_command(bench_opts),

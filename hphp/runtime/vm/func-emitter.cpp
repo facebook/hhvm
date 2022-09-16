@@ -272,6 +272,44 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     preClass && name == s_construct.get());
   f->m_requiredCoeffects = coeffectsInfo.first.toRequired();
 
+  Func::MemoizeICType icType = Func::MemoizeICType::NoIC;
+  uint32_t softMakeICInaccessibleSampleRate = 1;
+  if (isMemoizeWrapper || isMemoizeWrapperLSB) {
+    auto const getICType = [&] (TypedValue tv) {
+      assertx(tvIsVec(tv));
+      IterateV(tv.m_data.parr, [&](TypedValue elem) {
+        if (tvIsString(elem)) {
+          assertx(icType == Func::MemoizeICType::NoIC);
+          if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::KeyedByIC;
+          } else if (elem.m_data.pstr->same(s_MakeICInaccessible.get())) {
+            assertx(tv.m_data.parr->size() == 1);
+            icType = Func::MemoizeICType::MakeICInaccessible;
+          } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
+            assertx(tv.m_data.parr->size() <= 2);
+            icType = Func::MemoizeICType::SoftMakeICInaccessible;
+          } else {
+            assertx(false && "invalid string");
+          }
+        } else if (tvIsInt(elem)) {
+          assertx(icType == Func::MemoizeICType::SoftMakeICInaccessible);
+          assertx(softMakeICInaccessibleSampleRate == 1);
+          softMakeICInaccessibleSampleRate =
+            std::max(1u, static_cast<uint32_t>(elem.m_data.num));
+        } else {
+          assertx(false && "invalid input");
+        }
+      });
+    };
+    auto const attrName = isMemoizeWrapperLSB ? s_MemoizeLSB : s_Memoize;
+    auto const it = userAttributes.find(attrName.get());
+    if (it != userAttributes.end()) {
+      getICType(it->second);
+      assertx((icType & 0x3) == icType);
+    }
+  }
+
   bool const needsExtendedSharedData =
     isNative ||
     line2 - line1 >= Func::kSmallDeltaLimit ||
@@ -281,6 +319,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     hasParamsWithMultiUBs ||
     hasReturnWithMultiUBs ||
     dynCallSampleRate ||
+    softMakeICInaccessibleSampleRate > 1 ||
     coeffectsInfo.second.value() != 0 ||
     !coeffectRules.empty() ||
     (docComment && !docComment->empty());
@@ -303,6 +342,7 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
     ex->m_sn = m_sn;
     ex->m_line2 = line2;
     ex->m_dynCallSampleRate = dynCallSampleRate.value_or(-1);
+    ex->m_softMakeICInaccessibleSampleRate = softMakeICInaccessibleSampleRate;
     ex->m_allFlags.m_returnByValue = false;
     ex->m_allFlags.m_isMemoizeWrapper = false;
     ex->m_allFlags.m_isMemoizeWrapperLSB = false;
@@ -361,33 +401,8 @@ Func* FuncEmitter::create(Unit& unit, PreClass* preClass /* = NULL */) const {
   f->shared()->m_repoAwaitedReturnType = repoAwaitedReturnType;
   f->shared()->m_allFlags.m_isMemoizeWrapper = isMemoizeWrapper;
   f->shared()->m_allFlags.m_isMemoizeWrapperLSB = isMemoizeWrapperLSB;
+  f->shared()->m_allFlags.m_memoizeICType = icType;
   f->shared()->m_allFlags.m_hasReifiedGenerics = hasReifiedGenerics;
-
-  if (isMemoizeWrapper || isMemoizeWrapperLSB) {
-    auto const getICType = [&] (TypedValue tv) {
-      assertx(tvIsVec(tv));
-      auto type = Func::MemoizeICType::NoIC;
-      IterateV(tv.m_data.parr, [&](TypedValue elem) {
-          if (tvIsString(elem)) {
-            if (elem.m_data.pstr->same(s_KeyedByIC.get())) {
-                type = Func::MemoizeICType::KeyedByIC;
-            } else if (elem.m_data.pstr->same(s_MakeICInaccessible.get())) {
-                type = Func::MemoizeICType::MakeICInaccessible;
-            } else if (elem.m_data.pstr->same(s_SoftMakeICInaccessible.get())) {
-                type = Func::MemoizeICType::SoftMakeICInaccessible;
-            }
-          }
-      });
-      return type;
-    };
-    auto const attrName = isMemoizeWrapperLSB ? s_MemoizeLSB : s_Memoize;
-    auto const it = userAttributes.find(attrName.get());
-    if (it != userAttributes.end()) {
-      auto const ic_type = getICType(it->second);
-      assertx((ic_type & 0x3) == ic_type);
-      f->shared()->m_allFlags.m_memoizeICType = ic_type;
-    }
-  }
 
   for (auto const& name : staticCoeffects) {
     f->shared()->m_staticCoeffectNames.push_back(name);

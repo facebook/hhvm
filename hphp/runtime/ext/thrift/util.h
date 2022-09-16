@@ -51,4 +51,31 @@ inline void set_with_intish_key_cast(
         ERR_INVALID_DATA);
   }
 }
+
+
+inline bool is_value_type_default(int8_t thrift_typeID, const Variant& value) {
+  switch(thrift_typeID){
+    case T_BOOL:
+      return value.toBoolean() == false;
+    case T_BYTE:
+    case T_I16:
+    case T_I32:
+    case T_U64:
+    case T_I64:
+      return value.toInt64() == 0;
+    case T_DOUBLE:
+    case T_FLOAT:
+      return value.toDouble() == 0.0;
+    case T_UTF8:
+    case T_UTF16:
+    case T_STRING:
+      return value.toString().empty();
+    case T_MAP:
+    case T_LIST:
+    case T_SET:
+      return value.toArray<IntishCast::Cast>().empty();
+    default:
+      return false;
+    }
+}
 }

@@ -165,7 +165,8 @@ void unblockParents(Vout& v, Vreg firstBl) {
   });
 }
 
-TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const char* /*name*/) {
+TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const UniqueStubs& us,
+                        const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
@@ -173,7 +174,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const char* 
     v << load{rvmfp()[AROFF(m_sfp)], rvmfp()};
   });
 
-  *inner = vwrap(cb, data, [] (Vout& v) {
+  *inner = vwrap(cb, data, [&] (Vout& v) {
     auto const slow_path = Vlabel(v.makeBlock());
 
     auto const afwh = v.makeReg();
@@ -240,7 +241,7 @@ TCA emitAsyncSwitchCtrl(CodeBlock& cb, DataBlock& data, TCA* inner, const char* 
     // populating top of the stack with the returned null.
     v = slow_path;
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   });
 
   return ret;
@@ -443,7 +444,8 @@ TCA emitAsyncFuncRet(CodeBlock& cb, DataBlock& data, TCA switchCtrl, const char*
   }, name);
 }
 
-TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet, const char* name) {
+TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet,
+                         const UniqueStubs& us, const char* name) {
   alignJmpTarget(cb);
 
   return vwrap(cb, data, [&] (Vout& v) {
@@ -466,12 +468,13 @@ TCA emitAsyncFuncRetSlow(CodeBlock& cb, DataBlock& data, TCA asyncFuncRet, const
     // properly deal with the surprise when resuming the next function.
     asyncFuncRetOnly(v, rarg(0), rarg(1), parentBl);
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   }, name);
 }
 
 TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
-                     TCA* asyncGenRetYieldR, const char* /*name*/) {
+                     TCA* asyncGenRetYieldR, const UniqueStubs& us,
+                     const char* /*name*/) {
   alignCacheLine(cb);
 
   auto const ret = vwrap(cb, data, [] (Vout& v) {
@@ -498,7 +501,7 @@ TCA emitAsyncGenRetR(CodeBlock& cb, DataBlock& data, TCA switchCtrl,
     // properly deal with the surprise when resuming the next function.
     asyncGenRetYieldOnly(v, rarg(0), rarg(1));
     v << syncvmrettype{v.cns(KindOfNull)};
-    v << leavetc{vm_regs_with_sp() | rret_type()};
+    v << leavetc{vm_regs_with_sp() | rret_type(), us.enterTCExit};
   });
 
   return ret;
@@ -572,13 +575,13 @@ void UniqueStubs::emitAllResumable(CodeCache& code, Debug::DebugInfo& dbg) {
   TCA switchCtrl;
   ADD(asyncSwitchCtrl,
       hotView(),
-      emitAsyncSwitchCtrl, hot(), data, &switchCtrl);
+      emitAsyncSwitchCtrl, hot(), data, &switchCtrl, *this);
   ADD(asyncFuncRet, hotView(), emitAsyncFuncRet, hot(), data, switchCtrl);
-  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow, cold, data, asyncFuncRet);
+  ADD(asyncFuncRetSlow, view, emitAsyncFuncRetSlow, cold, data, asyncFuncRet, *this);
 
   TCA asyncGenRetYieldR;
   ADD(asyncGenRetR, hotView(),
-      emitAsyncGenRetR, hot(), data, switchCtrl, &asyncGenRetYieldR);
+      emitAsyncGenRetR, hot(), data, switchCtrl, &asyncGenRetYieldR, *this);
   ADD(asyncGenYieldR, hotView(),
       emitAsyncGenYieldR, hot(), data, asyncGenRetYieldR);
 #undef ADD

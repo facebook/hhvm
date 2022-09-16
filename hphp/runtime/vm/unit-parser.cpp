@@ -68,7 +68,6 @@ namespace HPHP {
 TRACE_SET_MOD(unit_parse);
 
 UnitEmitterCacheHook g_unit_emitter_cache_hook = nullptr;
-static std::string s_misc_config;
 
 namespace {
 
@@ -150,27 +149,6 @@ CompilerResult assemble_string_handle_errors(const char* code,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-struct ConfigBuilder {
-  template<typename T>
-  ConfigBuilder& addField(folly::StringPiece key, const T& data) {
-    if (!m_config.isObject()) {
-      m_config = folly::dynamic::object();
-    }
-
-    m_config[key] = folly::dynamic::object(
-      "global_value", folly::toDynamic(data));
-
-    return *this;
-  }
-
-  std::string toString() const {
-    return m_config.isNull() ? "" : folly::toJson(m_config);
-  }
-
- private:
-  folly::dynamic m_config{nullptr};
-};
-
 CompilerResult hackc_compile(
   const char* code,
   const char* filename,
@@ -186,10 +164,8 @@ CompilerResult hackc_compile(
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .aliased_namespaces = options.getAliasedNamespacesConfig(),
-    .include_roots = s_misc_config,
-    .emit_class_pointers = RuntimeOption::EvalEmitClassPointers,
-    .check_int_overflow = RuntimeOption::CheckIntOverflow,
+    .emit_class_pointers = RO::EvalEmitClassPointers,
+    .check_int_overflow = RO::CheckIntOverflow,
     .hhbc_flags = hackc::HhbcFlags {
       .repo_authoritative = RO::RepoAuthoritative,
       .jit_enable_rename_function = RO::EvalJitEnableRenameFunction,
@@ -209,8 +185,14 @@ CompilerResult hackc_compile(
       .enable_ir = false,
     }
   };
+  options.initAliasedNamespaces(native_env);
   options.initHhbcFlags(native_env.hhbc_flags);
   options.initParserFlags(native_env.parser_flags);
+  if (RO::EvalHackCompilerInheritConfig) {
+    for (auto& [k, v] : RO::IncludeRoots) {
+      native_env.include_roots.emplace_back(hackc::StringMapEntry{k, v});
+    }
+  }
 
   // Invoke hackc, producing a rust Vec<u8> containing HHAS.
   rust::Vec<uint8_t> hhas_vec = [&] {
@@ -344,19 +326,6 @@ CompilerAbort::CompilerAbort(const std::string& filename,
       )
     }
 {
-}
-
-void compilers_start() {
-  // Some configs, like IncludeRoots, can't easily be Config::Bind(ed), so here
-  // we create a place to dump miscellaneous config values HackC might want.
-  s_misc_config = []() -> std::string {
-    if (RuntimeOption::EvalHackCompilerInheritConfig) {
-      return ConfigBuilder()
-        .addField("hhvm.include_roots", RuntimeOption::IncludeRoots)
-        .toString();
-    }
-    return "";
-  }();
 }
 
 ParseFactsResult extract_facts(

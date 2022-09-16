@@ -12,7 +12,8 @@ use std::ffi::OsString;
 use std::path::Path;
 
 use depgraph::reader::Dep;
-use deps_rust::DepGraphDelta;
+use deps_rust::dep_graph_delta_with;
+use deps_rust::dep_graph_delta_with_mut;
 use deps_rust::DepSet;
 use deps_rust::RawTypingDepsMode;
 use deps_rust::UnsafeDepGraph;
@@ -150,7 +151,7 @@ ocaml_ffi! {
 
     fn hh_custom_dep_graph_get_ideps_from_hash(mode: RawTypingDepsMode, dep: Dep) -> Custom<DepSet> {
         let mut deps = HashTrieSet::new();
-        DepGraphDelta::with(|delta| {
+        dep_graph_delta_with(|delta| {
             if let Some(delta_deps) = delta.get(dep) {
                 for delta_dep in delta_deps {
                     deps.insert_mut(*delta_dep)
@@ -179,7 +180,7 @@ ocaml_ffi! {
                 None => query.clone(),
             })
         };
-        DepGraphDelta::with(|delta| {
+        dep_graph_delta_with(|delta| {
             for dep in query.iter() {
                 if let Some(depies) = delta.get(*dep) {
                     for depy in depies {
@@ -234,13 +235,13 @@ ocaml_ffi! {
         dependent: Dep,
         dependency: Dep,
     ) {
-        DepGraphDelta::with_mut(move |s| {
+        dep_graph_delta_with_mut(move |s| {
             s.insert(dependent, dependency);
         });
     }
 
     fn hh_custom_dep_graph_dep_graph_delta_num_edges() -> usize {
-        DepGraphDelta::with(|s| s.num_edges())
+        dep_graph_delta_with(|s| s.num_edges())
     }
 
     fn hh_custom_dep_graph_save_delta(dest: OsString, reset_state_after_saving: bool) -> usize {
@@ -250,12 +251,12 @@ ocaml_ffi! {
             .append(true)
             .open(&dest).unwrap();
         let mut w = std::io::BufWriter::new(f);
-        let hashes_added = DepGraphDelta::with(move |s| {
+        let hashes_added = dep_graph_delta_with(move |s| {
             s.write_to(&mut w).unwrap()
         });
 
         if reset_state_after_saving {
-            DepGraphDelta::with_mut(|s| {
+            dep_graph_delta_with_mut(|s| {
                 s.clear();
             });
         }
@@ -271,7 +272,7 @@ ocaml_ffi! {
         // Safety: we don't call into OCaml again, so mode will remain valid.
         unsafe {
             UnsafeDepGraph::with_option(mode, move |g| {
-                DepGraphDelta::with_mut(|s| {
+                dep_graph_delta_with_mut(|s| {
                     let result = match g {
                         Some(g) => {
                             s.read_from(
@@ -333,7 +334,7 @@ unsafe fn get_extend_deps_visit(
             }
         }
     };
-    DepGraphDelta::with(|delta| {
+    dep_graph_delta_with(|delta| {
         if let Some(delta_deps) = delta.get(extends_hash) {
             delta_deps.iter().copied().for_each(&mut handle_extends_dep);
         }

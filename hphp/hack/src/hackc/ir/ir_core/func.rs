@@ -84,7 +84,7 @@ impl SrcLoc {
 }
 
 /// Func parameters.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Param<'a> {
     pub name: UnitBytesId,
     pub is_variadic: bool,
@@ -100,7 +100,16 @@ pub struct Param<'a> {
     ///   function myfn(int $a = 2 + 3)
     ///
     /// The block will initialize `$a` to 5 and the string will be "2 + 3".
-    pub default_value: Option<(BlockId, Str<'a>)>,
+    pub default_value: Option<DefaultValue<'a>>,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct DefaultValue<'a> {
+    /// What block to jump to to initialize this default value
+    pub init: BlockId,
+
+    /// Source text for the default value initializer expression (for reflection).
+    pub expr: Str<'a>,
 }
 
 newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);
@@ -122,7 +131,7 @@ newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);
 ///    to be an `invoke` in that model.  In addition reconstructing the HHVM
 ///    TryBegin/TryMiddle/TryEnd model directly from the LLVM style state can be
 ///    tricky.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ExFrame {
     /// The parent of this ExFrame. The parent is probably not strictly
     /// necessary and could be recomputed from the try/catch structure - but
@@ -194,7 +203,7 @@ impl Default for TryCatchId {
 /// Exception frames are tracked as a separate tree structure made up of Blocks.
 /// Each exception frame says where to jump in the case of a thrown exception.
 ///
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Func<'a> {
     pub blocks: IdVec<BlockId, Block>,
     pub doc_comment: Option<Str<'a>>,
@@ -395,8 +404,8 @@ impl<'a> Func<'a> {
     /// just references to b1 will be remapped to b2).
     pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
         for param in &mut self.params {
-            if let Some((bid, _)) = param.default_value.as_mut() {
-                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            if let Some(dv) = param.default_value.as_mut() {
+                dv.init = remap.get(&dv.init).copied().unwrap_or(dv.init);
             }
         }
 
@@ -449,7 +458,7 @@ pub struct Method<'a> {
     pub visibility: Visibility,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TParamBounds {
     pub bounds: Vec<UserType>,
 }

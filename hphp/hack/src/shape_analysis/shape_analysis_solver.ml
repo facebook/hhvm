@@ -452,7 +452,7 @@ let produce_results
         Pos.Set.add pos acc
       | Variable _
       | Inter (HT.Constant _)
-      | Inter (HT.Identifier _) ->
+      | Inter (HT.ConstantIdentifier _) ->
         acc
     in
     EntitySet.fold add dynamic_accesses Pos.Set.empty
@@ -488,7 +488,7 @@ let produce_results
       | Literal pos
       | Inter (HT.Param ((pos, _), _))
       | Inter (HT.Constant (pos, _))
-      | Inter (HT.Identifier (pos, _)) ->
+      | Inter (HT.ConstantIdentifier { HT.ident_pos = pos; _ }) ->
         Pos.Map.update pos (update_entity entity key ty) pos_map
       | Variable _ -> pos_map
     in
@@ -571,8 +571,17 @@ let substitute_inter_intra
         None
     in
     replace_intra intra_constr replace false
-  | HT.Identifier ident_ent ->
-    let ent = embed_entity (HT.Identifier ident_ent) in
+  | HT.ConstantIdentifier ident_ent ->
+    let ent = embed_entity (HT.ConstantIdentifier ident_ent) in
+    let replace intra_ent_2 =
+      if equal_entity_ ent intra_ent_2 then
+        Some ent
+      else
+        None
+    in
+    replace_intra intra_constr replace false
+  | HT.Constant const_ent ->
+    let ent = embed_entity (HT.Constant const_ent) in
     let replace intra_ent_2 =
       if equal_entity_ ent intra_ent_2 then
         Some ent

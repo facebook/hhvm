@@ -76,7 +76,7 @@ cdef class Error(Exception):
         super().__init__(*args)
 
 
-cdef create_Error(shared_ptr[cTException] ex):
+cdef create_Error(const cTException* ex):
     if not ex:
         return
     message = (<bytes>deref(ex).what()).decode('utf-8')
@@ -180,7 +180,7 @@ cdef class ApplicationError(Error):
         return self.args[1]
 
 
-cdef create_ApplicationError(shared_ptr[cTApplicationException] ex):
+cdef create_ApplicationError(const cTApplicationException* ex):
     if not ex:
         return
     type = ApplicationErrorType(deref(ex).getType())
@@ -201,7 +201,7 @@ cdef class LibraryError(Error):
         super().__init__(*args)
 
 
-cdef create_LibraryError(shared_ptr[cTLibraryException] ex):
+cdef create_LibraryError(const cTLibraryException* ex):
     if not ex:
         return
     message = (<bytes>deref(ex).what()).decode('utf-8')
@@ -223,7 +223,7 @@ cdef class ProtocolError(LibraryError):
         return self.args[1]
 
 
-cdef create_ProtocolError(shared_ptr[cTProtocolException] ex):
+cdef create_ProtocolError(const cTProtocolException* ex):
     if not ex:
         return
     type = ProtocolErrorType(deref(ex).getType())
@@ -255,7 +255,7 @@ cdef class TransportError(LibraryError):
         return self.args[3]
 
 
-cdef create_TransportError(shared_ptr[cTTransportException] ex):
+cdef create_TransportError(const cTTransportException* ex):
     if not ex:
         return
     type = TransportErrorType(deref(ex).getType())
@@ -295,23 +295,23 @@ cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions opt
     if pyex:
         return pyex
 
-    pyex = create_ApplicationError(try_make_shared_exception[cTApplicationException](ex))
+    pyex = create_ApplicationError(ex.get_exception[cTApplicationException]())
     if pyex:
         return pyex
 
-    pyex = create_TransportError(try_make_shared_exception[cTTransportException](ex))
+    pyex = create_TransportError(ex.get_exception[cTTransportException]())
     if pyex:
         return pyex
 
-    pyex = create_ProtocolError(try_make_shared_exception[cTProtocolException](ex))
+    pyex = create_ProtocolError(ex.get_exception[cTProtocolException]())
     if pyex:
         return pyex
 
-    pyex = create_LibraryError(try_make_shared_exception[cTLibraryException](ex))
+    pyex = create_LibraryError(ex.get_exception[cTLibraryException]())
     if pyex:
         return pyex
 
-    pyex = create_Error(try_make_shared_exception[cTException](ex))
+    pyex = create_Error(ex.get_exception[cTException]())
     if pyex:
         return pyex
 

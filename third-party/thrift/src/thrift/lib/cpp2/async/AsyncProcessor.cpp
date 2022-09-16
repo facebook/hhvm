@@ -625,9 +625,8 @@ HandlerCallback<void>::HandlerCallback(
     folly::Executor::KeepAlive<> executor,
     Cpp2RequestContext* reqCtx,
     RequestPileInterface* notifyRequestPile,
-    RequestPileInterface::UserData notifyRequestPileUserData,
     ConcurrencyControllerInterface* notifyConcurrencyController,
-    ConcurrencyControllerInterface::UserData notifyConcurrencyControllerData,
+    ServerRequestData requestData,
     TilePtr&& interaction)
     : HandlerCallbackBase(
           std::move(req),
@@ -637,9 +636,8 @@ HandlerCallback<void>::HandlerCallback(
           std::move(executor),
           reqCtx,
           notifyRequestPile,
-          notifyRequestPileUserData,
           notifyConcurrencyController,
-          notifyConcurrencyControllerData,
+          std::move(requestData),
           std::move(interaction)),
       cp_(cp) {
   this->protoSeqId_ = protoSeqId;

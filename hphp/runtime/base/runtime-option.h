@@ -78,6 +78,7 @@ enum class RepoMode {
 };
 
 namespace hackc {
+  struct NativeEnv;
   struct HhbcFlags;
   struct ParserFlags;
   struct DeclParserConfig;
@@ -124,7 +125,7 @@ struct RepoOptionsFlags {
   void initDeclConfig(hackc::DeclParserConfig&) const;
   void initHhbcFlags(hackc::HhbcFlags&) const;
   void initParserFlags(hackc::ParserFlags&) const;
-  std::string getAliasedNamespacesConfig() const;
+  void initAliasedNamespaces(hackc::NativeEnv&) const;
 
   std::string autoloadQuery() const { return Query; }
   std::string trustedDBPath() const { return TrustedDBPath; }

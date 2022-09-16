@@ -60,9 +60,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::CompilerFlags;
-use options::HhvmFlags;
-use options::LangFlags;
 use options::Options;
 use oxidized::aast;
 use oxidized::aast_defs;
@@ -709,7 +706,7 @@ fn emit_import<'a, 'arena, 'decl>(
         ImportFlavor::Require => (emit_expr(e, env, expr)?, instr::req()),
         ImportFlavor::IncludeOnce => (emit_expr(e, env, expr)?, instr::incl_once()),
         ImportFlavor::RequireOnce => {
-            match inc.into_doc_root_relative(alloc, e.options().hhvm.include_roots.get()) {
+            match inc.into_doc_root_relative(alloc, &e.options().hhvm.include_roots) {
                 IncludePath::DocRootRelative(path) => {
                     let expr = ast::Expr(
                         (),
@@ -835,11 +832,7 @@ pub fn emit_await<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     let ast::Expr(_, _, e) = expr;
 
-    let cant_inline_gen_functions = !emitter
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    let cant_inline_gen_functions = !emitter.options().hhbc.jit_enable_rename_function;
     match e.as_call() {
         Some((ast::Expr(_, _, ast::Expr_::Id(id)), _, args, None))
             if (cant_inline_gen_functions
@@ -1357,7 +1350,7 @@ fn is_struct_init<'arena, 'decl>(
         are_all_keys_non_numeric_strings = false;
     }
     let num_keys = fields.len();
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     Ok((allow_numerics || are_all_keys_non_numeric_strings)
         && uniq_keys.len() == num_keys
         && num_keys <= limit
@@ -1537,7 +1530,7 @@ fn emit_value_only_collection<'a, 'arena, 'decl, F: FnOnce(u32) -> Instruct<'are
     fields: &[ast::Afield],
     constructor: F,
 ) -> Result<InstrSeq<'arena>> {
-    let limit = *(e.options().max_array_elem_size_on_the_stack.get()) as usize;
+    let limit = e.options().max_array_elem_size_on_the_stack;
     let inline =
         |e: &mut Emitter<'arena, 'decl>, exprs: &[ast::Afield]| -> Result<InstrSeq<'arena>> {
             let mut instrs = vec![];
@@ -2557,12 +2550,8 @@ fn emit_special_function<'a, 'arena, 'decl>(
     use ast::Expr_;
     let alloc = env.arena;
     let nargs = args.len() + uarg.map_or(0, |_| 1);
-    let fun_and_clsmeth_disabled = e
-        .options()
-        .hhvm
-        .hack_lang
-        .flags
-        .contains(LangFlags::DISALLOW_FUN_AND_CLS_METH_PSEUDO_FUNCS);
+    let fun_and_clsmeth_disabled =
+        (e.options().hhvm.parser_options).po_disallow_fun_and_cls_meth_pseudo_funcs;
     match (lower_fq_name, args) {
         (id, _) if id == special_functions::ECHO => Ok(Some(InstrSeq::gather(
             args.iter()
@@ -2956,11 +2945,7 @@ fn emit_class_meth<'a, 'arena, 'decl>(
 ) -> Result<InstrSeq<'arena>> {
     use ast::Expr_;
     let alloc = env.arena;
-    if e.options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::EMIT_CLS_METH_POINTERS)
-    {
+    if e.options().hhbc.emit_cls_meth_pointers {
         let method_name = match &meth.2 {
             Expr_::String(method_name) => {
                 hhbc::MethodName::new(Str::new_str(alloc, method_name.to_string().as_str()))
@@ -3474,11 +3459,7 @@ fn emit_call_expr<'a, 'arena, 'decl>(
         Option<ast::Expr>,
     ),
 ) -> Result<InstrSeq<'arena>> {
-    let jit_enable_rename_function = e
-        .options()
-        .hhvm
-        .flags
-        .contains(HhvmFlags::JIT_ENABLE_RENAME_FUNCTION);
+    let jit_enable_rename_function = e.options().hhbc.jit_enable_rename_function;
     use ast::Expr;
     use ast::Expr_;
     match (&expr.2, &args[..], uarg) {
@@ -4927,9 +4908,7 @@ fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
 }
 
 fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
-    e.options()
-        .hack_compiler_flags
-        .contains(CompilerFlags::OPTIMIZE_NULL_CHECKS)
+    e.options().compiler_flags.optimize_null_checks
 }
 
 fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
@@ -6150,9 +6129,8 @@ pub fn emit_lval_op_list<'a, 'arena, 'decl>(
     rhs_readonly: bool,
 ) -> Result<(InstrSeq<'arena>, InstrSeq<'arena>)> {
     use ast::Expr_;
-    use options::Php7Flags;
 
-    let is_ltr = e.options().php7_flags.contains(Php7Flags::LTR_ASSIGN);
+    let is_ltr = e.options().hhbc.ltr_assign;
     match &expr.2 {
         Expr_::List(exprs) => {
             let last_non_omitted = if last_usage {

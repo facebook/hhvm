@@ -18,6 +18,13 @@ class ThriftStruct {
 }
 
 class HackStruct {
+  const SPEC = darray[
+    1 => darray[
+      'var' => 'str_value',
+      'type' => \TType::STRING,
+    ],
+  ];
+
   public ?string $str_value = null;
 
   public function __construct(?string $str_value = null)[] {

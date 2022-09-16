@@ -53,7 +53,7 @@ pub struct Class<'a> {
 
     pub name: ClassId,
     pub properties: Vec<Property<'a>>,
-    pub requirements: Vec<(ClassId, TraitReqKind)>,
+    pub requirements: Vec<Requirement>,
     pub span: Span,
     pub type_constants: Vec<TypeConstant<'a>>,
 
@@ -61,4 +61,10 @@ pub struct Class<'a> {
     pub upper_bounds: Vec<(Str<'a>, Vec<UserType>)>,
 
     pub uses: Vec<ClassId>,
+}
+
+#[derive(Debug)]
+pub struct Requirement {
+    pub name: ClassId,
+    pub kind: TraitReqKind,
 }

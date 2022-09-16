@@ -20,7 +20,6 @@ emit_unit = { path = "../../../emitter/cargo/emit_unit" }
 env = { path = "../../../emitter/cargo/env" }
 error = { path = "../../../error/cargo/error" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
-hhvm_options = { path = "../../../../utils/hhvm_options" }
 ir = { path = "../../../ir" }
 ir_to_bc = { path = "../../../ir/conversions/ir_to_bc" }
 ocamlrep = { path = "../../../../ocamlrep" }
@@ -30,6 +29,7 @@ parser_core_types = { path = "../../../../parser/cargo/core_types" }
 print_expr = { path = "../../../print_expr" }
 profile_rust = { path = "../../../../utils/perf/cargo/profile" }
 rewrite_program = { path = "../rewrite_program" }
+serde = { version = "1.0.136", features = ["derive", "rc"] }
 stack_limit = { path = "../../../../utils/stack_limit" }
-thiserror = "1.0.34"
+thiserror = "=1.0.30"
 types = { path = "../../../types/cargo/types" }

@@ -113,6 +113,9 @@ stdenv.mkDerivation rec {
       python3
       unixtools.getconf
       which
+    ] ++ lib.optionals hostPlatform.isMacOS [
+      # `system_cmds` provides `sysctl`, which is used in hphp/test/run.php on macOS
+      darwin.system_cmds
     ];
   buildInputs =
     [
@@ -182,7 +185,7 @@ stdenv.mkDerivation rec {
     [
       "-DFOLLY_MOBILE=0"
     ]
-    ++ lib.optionals hostPlatform.isMacOS [
+    ++ lib.optionals stdenv.cc.isClang [
       # Workaround for dtoa.0.3.2
       "-Wno-error=unused-command-line-argument"
     ];
@@ -221,6 +224,17 @@ stdenv.mkDerivation rec {
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch
       patchShebangs \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen
+    '';
+
+  doCheck = true;
+
+  checkPhase =
+    ''
+      set -ex
+      runHook preCheck
+      export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
+      (cd ${./.} && "$HHVM_BIN" hphp/test/run.php quick)
+      runHook postCheck
     '';
 
   meta = {

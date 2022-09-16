@@ -14,6 +14,7 @@ type aggregate_type =
   | AttributeSpecification
   | Parameter
   | ClassBodyDeclaration
+  | EnumClassBodyDeclaration
   | RefinementMember
   | Statement
   | SwitchLabel
@@ -227,7 +228,7 @@ let schema : schema_node list =
           ("extends", ZeroOrOne Token);
           ("extends_list", ZeroOrMore (Aggregate Specifier));
           ("left_brace", Token);
-          ("elements", ZeroOrMore (Just "EnumClassEnumerator"));
+          ("elements", ZeroOrMore (Aggregate EnumClassBodyDeclaration));
           ("right_brace", Token);
         ];
     };
@@ -237,7 +238,7 @@ let schema : schema_node list =
       func_name = "enum_class_enumerator";
       description = "enum_class_enumerator";
       prefix = "enum_class_enumerator";
-      aggregates = [];
+      aggregates = [EnumClassBodyDeclaration];
       fields =
         [
           ("modifiers", ZeroOrOne Token);
@@ -614,7 +615,7 @@ let schema : schema_node list =
       func_name = "type_const_declaration";
       description = "type_const_declaration";
       prefix = "type_const";
-      aggregates = [ClassBodyDeclaration];
+      aggregates = [ClassBodyDeclaration; EnumClassBodyDeclaration];
       fields =
         [
           ("attribute_spec", ZeroOrOne (Aggregate AttributeSpecification));
@@ -2451,6 +2452,7 @@ let generated_aggregate_types =
     Specifier;
     Parameter;
     ClassBodyDeclaration;
+    EnumClassBodyDeclaration;
     RefinementMember;
     Statement;
     SwitchLabel;
@@ -2470,6 +2472,7 @@ let string_of_aggregate_type = function
   | Parameter -> "Parameter"
   | AttributeSpecification -> "AttributeSpecification"
   | ClassBodyDeclaration -> "ClassBodyDeclaration"
+  | EnumClassBodyDeclaration -> "EnumClassBodyDeclaration"
   | RefinementMember -> "RefinementMember"
   | Statement -> "Statement"
   | SwitchLabel -> "SwitchLabel"
@@ -2506,6 +2509,9 @@ let aggregation_of_attribute_specification =
 
 let aggregation_of_class_body_declaration =
   List.filter (fun x -> List.mem ClassBodyDeclaration x.aggregates) schema
+
+let aggregation_of_enum_class_body_declaration =
+  List.filter (fun x -> List.mem EnumClassBodyDeclaration x.aggregates) schema
 
 let aggregation_of_refinement_member =
   List.filter (fun x -> List.mem RefinementMember x.aggregates) schema
@@ -2544,6 +2550,7 @@ let aggregation_of = function
   | Parameter -> aggregation_of_parameter
   | AttributeSpecification -> aggregation_of_attribute_specification
   | ClassBodyDeclaration -> aggregation_of_class_body_declaration
+  | EnumClassBodyDeclaration -> aggregation_of_enum_class_body_declaration
   | RefinementMember -> aggregation_of_refinement_member
   | Statement -> aggregation_of_statement
   | SwitchLabel -> aggregation_of_switch_label
@@ -2562,6 +2569,7 @@ let aggregate_type_name = function
   | Parameter -> "parameter"
   | AttributeSpecification -> "attribute_specification"
   | ClassBodyDeclaration -> "class_body_declaration"
+  | EnumClassBodyDeclaration -> "enum_class_body_declaration"
   | RefinementMember -> "refinement_member"
   | Statement -> "statement"
   | SwitchLabel -> "switch_label"
@@ -2580,6 +2588,7 @@ let aggregate_type_pfx_trim = function
   | Parameter -> ("Param", "")
   | AttributeSpecification -> ("AttrSpec", "")
   | ClassBodyDeclaration -> ("Body", "Declaration")
+  | EnumClassBodyDeclaration -> ("ECBody", "Declaration")
   | RefinementMember -> ("TypeRefinementMember", "InRefinement$")
   | Statement -> ("Stmt", "Statement$")
   | SwitchLabel -> ("Switch", "Label$")

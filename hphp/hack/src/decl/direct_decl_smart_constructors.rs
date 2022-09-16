@@ -4256,7 +4256,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                     // Annoyingly, the <<__SupportDynamicType>> annotation on a
                     // class implicitly changes the decls of every method inside
                     // it, so we have to reallocate them here.
-                    let method = if class_attributes.support_dynamic_type
+                    let method = if (self.opts.everything_sdt
+                        || class_attributes.support_dynamic_type)
                         && !method.flags.contains(MethodFlags::SUPPORT_DYNAMIC_TYPE)
                     {
                         let type_ = match method.type_.1 {
@@ -4903,6 +4904,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             _ => None,
         }));
 
+        let typeconsts = self.slice(elements.iter().filter_map(|node| match *node {
+            Node::TypeConstant(tconst) => Some(tconst),
+            _ => None,
+        }));
+
         let mut extends = bump::Vec::with_capacity_in(extends_list.len() + 1, self.arena);
         extends.push(builtin_enum_class_ty);
         extends.extend(extends_list.iter().filter_map(|&n| self.node_to_ty(n)));
@@ -4961,7 +4967,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             implements: &[],
             support_dynamic_type: parsed_attributes.support_dynamic_type,
             consts,
-            typeconsts: &[],
+            typeconsts,
             props: &[],
             sprops: &[],
             constructor: None,

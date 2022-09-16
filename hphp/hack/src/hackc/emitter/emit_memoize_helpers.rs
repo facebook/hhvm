@@ -88,33 +88,39 @@ pub fn get_implicit_context_memo_key<'arena>(
 }
 
 fn ic_set<'arena>(alloc: &'arena bumpalo::Bump, local: Local, soft: bool) -> InstrSeq<'arena> {
-    let cns_id = hhbc::ConstName::from_raw_string(
-        alloc,
-        if soft {
-            "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE"
-        } else {
-            "HH\\MEMOIZE_IC_TYPE_INACCESSIBLE"
-        },
-    );
+    let (fn_name, num_args, args) = if soft {
+        (
+            "HH\\ImplicitContext\\_Private\\create_special_implicit_context",
+            1,
+            instr::cns_e(hhbc::ConstName::from_raw_string(
+                alloc,
+                "HH\\MEMOIZE_IC_TYPE_SOFT_INACCESSIBLE",
+            )),
+        )
+    } else {
+        (
+            "HH\\ImplicitContext\\_Private\\create_ic_inaccessible_context",
+            0,
+            instr::empty(),
+        )
+    };
     InstrSeq::gather(vec![
         instr::null_uninit(),
         instr::null_uninit(),
-        instr::cns_e(cns_id),
+        args,
         instr::f_call_func_d(
             FCallArgs::new(
                 FCallArgsFlags::default(),
                 1,
-                1,
+                num_args,
                 Slice::empty(),
                 Slice::empty(),
                 None,
                 None,
             ),
-            hhbc::FunctionName::from_raw_string(
-                alloc,
-                "HH\\ImplicitContext\\_Private\\set_special_implicit_context",
-            ),
+            hhbc::FunctionName::from_raw_string(alloc, fn_name),
         ),
+        instr::set_implicit_context_by_value(),
         instr::set_l(local),
         instr::pop_c(),
     ])

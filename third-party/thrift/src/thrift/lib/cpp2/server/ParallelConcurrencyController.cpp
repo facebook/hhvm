@@ -52,7 +52,7 @@ void ParallelConcurrencyController::onExecuteFinish(bool dequeueSuccess) {
   trySchedule();
 }
 
-void ParallelConcurrencyController::onRequestFinished(intptr_t /*requestTag*/) {
+void ParallelConcurrencyController::onRequestFinished(ServerRequestData&) {
   onExecuteFinish(true);
 }
 
@@ -94,11 +94,15 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
         continue;
       }
 
-      // by default we have 2 prios, external requests should go to
-      // lower priority queue to yield to the internal ones
-      unsigned requestPrio = folly::Executor::LO_PRI;
-      // If the swap succeeded we schedule the task on the executor
-      executor_.addWithPriority([this]() { executeRequest(); }, requestPrio);
+      if (executorSupportPriority) {
+        // If the swap succeeded we schedule the task on the executor
+        // and by default we have 2 prios, external requests should go to
+        // lower priority queue to yield to the internal ones
+        executor_.addWithPriority(
+            [this]() { executeRequest(); }, folly::Executor::LO_PRI);
+      } else {
+        executor_.add([this]() { executeRequest(); });
+      }
       return true;
     }
 
@@ -115,7 +119,7 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
 }
 
 void ParallelConcurrencyController::executeRequest() {
-  auto [req, userData] = pile_.dequeue();
+  auto req = pile_.dequeue();
   if (req) {
     ServerRequest& serverRequest = req.value();
     // Only continue when the request has not
@@ -130,10 +134,8 @@ void ParallelConcurrencyController::executeRequest() {
       return;
     }
 
-    if (userData) {
-      serverRequest.setRequestPileNotification(&pile_, userData.value());
-    }
-    serverRequest.setConcurrencyControllerNotification(this, 0);
+    serverRequest.setRequestPileNotification(&pile_);
+    serverRequest.setConcurrencyControllerNotification(this);
     auto stats = ConcurrencyControllerBase::onExecute(serverRequest);
     AsyncProcessorHelper::executeRequest(std::move(*req));
     if (stats) {

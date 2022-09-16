@@ -3,9 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Pair;
 use ffi::Slice;
-use ffi::Triple;
 use hhbc::Method;
 use log::trace;
 
@@ -69,10 +67,16 @@ pub(crate) fn convert_func<'a>(
         func.params.into_iter().map(|param| {
             let name = strings.lookup_ffi_str(param.name);
             let user_attributes = convert::convert_attributes(alloc, param.user_attributes);
-            let dv = param.default_value.map(|(bid, value)| {
-                let label = labeler.lookup_bid(bid);
-                ffi::Pair(label, value)
-            });
+            let default_value = param
+                .default_value
+                .map(|dv| {
+                    let label = labeler.lookup_bid(dv.init);
+                    hhbc::DefaultValue {
+                        label,
+                        expr: dv.expr,
+                    }
+                })
+                .into();
             hhbc::Param {
                 name,
                 is_variadic: param.is_variadic,
@@ -80,7 +84,7 @@ pub(crate) fn convert_func<'a>(
                 is_readonly: param.is_readonly,
                 user_attributes,
                 type_info: crate::types::convert(alloc, &param.ty, strings),
-                default_value: dv.into(),
+                default_value,
             }
         }),
     );
@@ -91,14 +95,17 @@ pub(crate) fn convert_func<'a>(
         alloc,
         func.tparams.iter().map(|(name, tparam)| {
             let name = strings.lookup_class_name(*name);
-            let type_info = Slice::fill_iter(
+            let bounds = Slice::fill_iter(
                 alloc,
                 tparam
                     .bounds
                     .iter()
                     .map(|ty| crate::types::convert(alloc, ty, strings).unwrap()),
             );
-            Pair(name.as_ffi_str(), type_info)
+            hhbc::UpperBound {
+                name: name.as_ffi_str(),
+                bounds,
+            }
         }),
     );
 
@@ -173,22 +180,19 @@ fn convert_coeffects<'a>(
     let unenforced_static_coeffects =
         Slice::fill_iter(alloc, coeffects.unenforced_static_coeffects.iter().copied());
     let fun_param = Slice::fill_iter(alloc, coeffects.fun_param.iter().copied());
-    let cc_param = Slice::fill_iter(
-        alloc,
-        coeffects.cc_param.iter().copied().map(|(a, b)| Pair(a, b)),
-    );
+    let cc_param = Slice::fill_iter(alloc, coeffects.cc_param.iter().copied());
     let cc_this = Slice::fill_iter(
         alloc,
-        coeffects
-            .cc_this
-            .iter()
-            .map(|inner| Slice::fill_iter(alloc, inner.iter().copied())),
+        coeffects.cc_this.iter().map(|inner| hhbc::CcThis {
+            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
+        }),
     );
     let cc_reified = Slice::fill_iter(
         alloc,
-        coeffects.cc_reified.iter().map(|(a, b, c)| {
-            let c = Slice::fill_iter(alloc, c.iter().copied());
-            Triple(*a, *b, c)
+        coeffects.cc_reified.iter().map(|inner| hhbc::CcReified {
+            is_class: inner.is_class,
+            index: inner.index,
+            types: Slice::fill_iter(alloc, inner.types.iter().copied()),
         }),
     );
     let closure_parent_scope = coeffects.closure_parent_scope;

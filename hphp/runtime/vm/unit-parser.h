@@ -36,8 +36,6 @@ struct HhvmDeclProvider;
 struct LazyUnitContentsLoader;
 struct SHA1;
 
-void compilers_start();
-
 // On success return a verified unit, and on failure return a string stating the
 // type of error encountered
 using CompilerResult = boost::variant<std::unique_ptr<UnitEmitter>,std::string>;

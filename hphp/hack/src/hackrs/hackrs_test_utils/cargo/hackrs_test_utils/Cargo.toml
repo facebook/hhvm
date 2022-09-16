@@ -19,7 +19,7 @@ folded_decl_provider = { path = "../../../folded_decl_provider/cargo/folded_decl
 indicatif = { version = "0.16", features = ["with_rayon"] }
 intern = { path = "../../../../../../../relay/oss/crates/intern" }
 lz4 = "1.23.1"
-moka = { version = "0.8", features = ["future"] }
+moka = { version = "0.9.3", features = ["future"] }
 naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 pos = { path = "../../../pos/cargo/pos" }
 rayon = "1.2"

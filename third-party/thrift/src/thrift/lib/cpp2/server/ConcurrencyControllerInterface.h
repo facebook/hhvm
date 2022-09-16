@@ -24,6 +24,7 @@
 namespace apache::thrift {
 
 class ServerRequest;
+struct ServerRequestData;
 
 // This common interface to all concurrency controllers. The details of
 // construction are left to implementations and/or factories.
@@ -58,7 +59,7 @@ class ConcurrencyControllerInterface {
   using UserData = intptr_t;
 
   // This will be called when the request processing has finished.
-  virtual void onRequestFinished(UserData userData);
+  virtual void onRequestFinished(ServerRequestData&);
 
   // Stops the concurrency controller. Stops dispatching new requests. This is
   // thread safe and does not block.
@@ -69,6 +70,8 @@ class ConcurrencyControllerInterface {
   virtual uint64_t numPendingDequeRequest() const { return 0; }
 
   virtual std::string describe() const;
+
+  virtual void setExecutorSupportPriority(bool support) = 0;
 };
 
 } // namespace apache::thrift

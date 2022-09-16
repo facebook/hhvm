@@ -1,8 +1,14 @@
 on:
   schedule:
     - cron: "0 3 * * *"
+permissions:
+  contents: read
+
 jobs:
   nix-flake-update:
+    permissions:
+      contents: write  # for peter-evans/create-pull-request to create branch
+      pull-requests: write  # for peter-evans/create-pull-request to create a PR
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.4.0

@@ -114,6 +114,9 @@ struct mark_set_fn {
   void operator()(required_field_ref<T>, bool) const {}
 
   template <class T>
+  void operator()(terse_field_ref<T>, bool) const {}
+
+  template <class T>
   void operator()(field_ref<T> ref, bool b) const {
     if (b) {
       ref.ensure();

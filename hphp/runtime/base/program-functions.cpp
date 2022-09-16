@@ -1797,7 +1797,6 @@ static int execute_program_impl(int argc, char** argv) {
       registrationComplete = true;
     }
 
-    compilers_start();
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
@@ -1991,7 +1990,6 @@ static int execute_program_impl(int argc, char** argv) {
       registrationComplete = true;
     }
 
-    compilers_start();
     hphp_thread_init();
     g_context.getCheck();
     SCOPE_EXIT { hphp_thread_exit(); };
@@ -2423,10 +2421,6 @@ void hphp_process_init(bool skipModules) {
   // initialize the tzinfo cache.
   timezone_init();
   BootStats::mark("timezone_init");
-
-  // start any external compilers
-  compilers_start();
-  BootStats::mark("compilers_start");
 
   rds::processInit();
 

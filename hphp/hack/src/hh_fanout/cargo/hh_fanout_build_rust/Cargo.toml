@@ -5,17 +5,11 @@ version = "0.0.0"
 edition = "2021"
 
 [lib]
-path = "../../hh_fanout_build_rust/build.rs"
+path = "../../hh_fanout_build_rust/ffi.rs"
 test = false
 doctest = false
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-depgraph = { path = "../../../depgraph/cargo/depgraph" }
-depgraph_writer = { path = "../../../depgraph/cargo/depgraph_writer" }
-deps_rust = { path = "../../../deps/cargo/deps_rust" }
-env_logger = "0.7"
-log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
+hh_fanout_build = { path = "../hh_fanout_build" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
-parking_lot = { version = "0.11.2", features = ["send_guard"] }
-rayon = "1.2"

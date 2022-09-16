@@ -15,7 +15,7 @@ pub use hhvm_types_ffi::ffi::Attr;
 /// <<Attribute1, Attribute2(1, 2, 3)>>
 /// class MyAttributedClass { ... }
 /// ```
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Attribute<'a> {
     pub name: Str<'a>,
     pub arguments: Vec<TypedValue<'a>>,

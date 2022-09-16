@@ -144,9 +144,8 @@ stdenv.mkDerivation rec {
         })
       )
       gmp
-      # TODO: (gperf.override {inherit stdenv; })
-      gperf
-      gperftools
+      (gperf.override { inherit stdenv; })
+      (gperftools.override { inherit stdenv; })
       (icu.override { inherit stdenv; })
       imagemagick6
       jemalloc

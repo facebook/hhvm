@@ -28,6 +28,7 @@ use hhbc::Local;
 use hhbc::Param;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
+use hhbc::UpperBound;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexSet;
 use instruction_sequence::instr;
@@ -364,7 +365,7 @@ pub fn make_body<'a, 'arena, 'decl>(
     decl_vars: Vec<Str<'arena>>,
     is_memoize_wrapper: bool,
     is_memoize_wrapper_lsb: bool,
-    upper_bounds: Vec<Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>>,
+    upper_bounds: Vec<UpperBound<'arena>>,
     shadowed_tparams: Vec<String>,
     mut params: Vec<(Param<'arena>, Option<(Label, ast::Expr)>)>,
     return_type_info: Option<TypeInfo<'arena>>,
@@ -697,7 +698,7 @@ pub fn emit_generics_upper_bounds<'arena>(
     immediate_tparams: &[ast::Tparam],
     class_tparam_names: &[&str],
     skip_awaitable: bool,
-) -> Vec<Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>> {
+) -> Vec<UpperBound<'arena>> {
     let constraint_filter = |(kind, hint): &(ast_defs::ConstraintKind, ast::Hint)| {
         if let ast_defs::ConstraintKind::ConstraintAs = &kind {
             let mut tparam_names = get_tp_names(immediate_tparams);
@@ -723,13 +724,10 @@ pub fn emit_generics_upper_bounds<'arena>(
             .collect::<Vec<_>>();
         match &ubs[..] {
             [] => None,
-            _ => Some(
-                (
-                    Str::new_str(alloc, get_tp_name(tparam)),
-                    Slice::fill_iter(alloc, ubs.into_iter()),
-                )
-                    .into(),
-            ),
+            _ => Some(UpperBound {
+                name: Str::new_str(alloc, get_tp_name(tparam)),
+                bounds: Slice::fill_iter(alloc, ubs.into_iter()),
+            }),
         }
     };
     immediate_tparams

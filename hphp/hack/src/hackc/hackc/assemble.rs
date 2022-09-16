@@ -1281,7 +1281,7 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 fn assemble_upper_bounds<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, Pair<Str<'arena>, Slice<'arena, hhbc::TypeInfo<'arena>>>>> {
+) -> Result<Slice<'arena, hhbc::UpperBound<'arena>>> {
     token_iter.expect(Token::into_open_curly)?;
     let mut ubs = Vec::new();
     while !token_iter.peek_if(Token::is_close_curly) {
@@ -1298,7 +1298,7 @@ fn assemble_upper_bounds<'arena>(
 fn assemble_upper_bound<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Pair<Str<'arena>, Slice<'arena, hhbc::TypeInfo<'arena>>>> {
+) -> Result<hhbc::UpperBound<'arena>> {
     token_iter.expect(Token::into_open_paren)?;
     let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
     token_iter.expect_is_str(Token::into_identifier, "as")?;
@@ -1316,7 +1316,10 @@ fn assemble_upper_bound<'arena>(
         }
     }
     token_iter.expect(Token::into_close_paren)?;
-    Ok(Pair(id, Slice::from_vec(alloc, tis)))
+    Ok(hhbc::UpperBound {
+        name: id,
+        bounds: Slice::from_vec(alloc, tis),
+    })
 }
 
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs

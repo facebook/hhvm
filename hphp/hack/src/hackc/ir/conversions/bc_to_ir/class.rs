@@ -51,10 +51,8 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, cls: &Class<'a>) {
     let upper_bounds = cls
         .upper_bounds
         .iter()
-        .map(|Pair(name, tys)| {
-            let tys = tys
-                .as_ref()
-                .iter()
+        .map(|hhbc::UpperBound { name, bounds }| {
+            let tys = (bounds.as_ref().iter())
                 .map(|ty| types::convert_type(ty, &mut unit.strings))
                 .collect_vec();
             (*name, tys)

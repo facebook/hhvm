@@ -47,6 +47,7 @@ use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
+use hhbc::UpperBound;
 use hhbc_string_utils::float;
 use hhvm_types_ffi::ffi::*;
 use itertools::Itertools;
@@ -1067,35 +1068,29 @@ fn print_special_and_user_attrs(
 
 fn print_upper_bounds<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[UpperBound<'arena>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound))
 }
 
-fn print_upper_bound<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'_>>>,
-) -> Result<()> {
+fn print_upper_bound<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+        write_bytes!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 
 fn print_upper_bounds_<'arena>(
     w: &mut dyn Write,
-    ubs: impl AsRef<[Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>]>,
+    ubs: impl AsRef<[UpperBound<'arena>]>,
 ) -> Result<()> {
     braces(w, |w| concat_by(w, ", ", ubs, print_upper_bound_))
 }
 
-fn print_upper_bound_<'arena>(
-    w: &mut dyn Write,
-    Pair(id, tys): &Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>,
-) -> Result<()> {
+fn print_upper_bound_<'arena>(w: &mut dyn Write, ub: &UpperBound<'arena>) -> Result<()> {
     paren(w, |w| {
-        write_bytes!(w, "{} as ", id)?;
-        concat_by(w, ", ", &tys, print_type_info)
+        write_bytes!(w, "{} as ", ub.name)?;
+        concat_by(w, ", ", &ub.bounds, print_type_info)
     })
 }
 

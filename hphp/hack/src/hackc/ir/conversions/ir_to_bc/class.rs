@@ -70,15 +70,13 @@ pub(crate) fn convert_class<'a>(
 
     let upper_bounds = Slice::fill_iter(
         alloc,
-        upper_bounds.iter().map(|(name, tys)| {
-            Pair(
-                *name,
-                Slice::fill_iter(
-                    alloc,
-                    tys.iter()
-                        .map(|ty| types::convert(alloc, ty, strings).unwrap()),
-                ),
-            )
+        upper_bounds.iter().map(|(name, tys)| hhbc::UpperBound {
+            name: *name,
+            bounds: Slice::fill_iter(
+                alloc,
+                tys.iter()
+                    .map(|ty| types::convert(alloc, ty, strings).unwrap()),
+            ),
         }),
     );
 

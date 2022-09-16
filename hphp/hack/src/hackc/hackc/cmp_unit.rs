@@ -176,9 +176,9 @@ impl MapName for ffi::Pair<hhbc::ClassName<'_>, hhbc::TraitReqKind> {
     }
 }
 
-impl MapName for ffi::Pair<Str<'_>, Slice<'_, hhbc::TypeInfo<'_>>> {
+impl MapName for hhbc::UpperBound<'_> {
     fn get_name(&self) -> &str {
-        self.0.unsafe_as_str()
+        self.name.unsafe_as_str()
     }
 }
 
@@ -585,7 +585,7 @@ fn cmp_class(a: &Class<'_>, b: &Class<'_>) -> Result<()> {
     cmp_map_t(a_requirements, b_requirements, |a, b| cmp_eq(&a.1, &b.1))
         .qualified("requirements")?;
     cmp_map_t(a_upper_bounds, b_upper_bounds, |a, b| {
-        cmp_slice(&a.1, &b.1, cmp_eq)
+        cmp_slice(&a.bounds, &b.bounds, cmp_eq)
     })
     .qualified("upper_bounds")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;

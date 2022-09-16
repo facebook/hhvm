@@ -363,7 +363,7 @@ fn sem_diff_class<'arena>(
         &path.qualified("upper_bounds"),
         a_upper_bounds,
         b_upper_bounds,
-        |path, a, b| sem_diff_slice(path, &a.1, &b.1, sem_diff_eq),
+        |path, a, b| sem_diff_slice(path, &a.bounds, &b.bounds, sem_diff_eq),
     )?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;

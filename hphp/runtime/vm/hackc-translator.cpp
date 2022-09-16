@@ -489,13 +489,11 @@ void translateClassBody(TranslationState& ts,
   }
 }
 
-using TypeInfoPair = Pair<Str, Slice<hhbc::TypeInfo>>;
-
-void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
-  auto const& name = toStaticString(ub._0);
+void translateUbs(const hhbc::UpperBound& ub, UpperBoundMap& ubs) {
+  auto const& name = toStaticString(ub.name);
   CompactVector<TypeConstraint> ret;
 
-  auto infos = range(ub._1);
+  auto infos = range(ub.bounds);
   for (auto const& i : infos) {
     ubs[name].emplace_back(translateTypeInfo(i).second);
   }

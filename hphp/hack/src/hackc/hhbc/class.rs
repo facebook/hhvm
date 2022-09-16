@@ -19,6 +19,7 @@ use crate::Property;
 use crate::Span;
 use crate::TypeConstant;
 use crate::TypeInfo;
+use crate::UpperBound;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
@@ -45,7 +46,7 @@ pub struct Class<'arena> {
     pub type_constants: Slice<'arena, TypeConstant<'arena>>,
     pub ctx_constants: Slice<'arena, CtxConstant<'arena>>, // TODO(SF, 2021-0811): CtxConstant is part of Steve's Coeffect work
     pub requirements: Slice<'arena, Pair<ClassName<'arena>, TraitReqKind>>,
-    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>>,
+    pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
     pub flags: Attr,
 }

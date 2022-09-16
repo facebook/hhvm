@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Pair;
 use ffi::Slice;
 use hhbc::Method;
 use log::trace;
@@ -90,14 +89,17 @@ pub(crate) fn convert_func<'a>(
         alloc,
         func.tparams.iter().map(|(name, tparam)| {
             let name = strings.lookup_class_name(*name);
-            let type_info = Slice::fill_iter(
+            let bounds = Slice::fill_iter(
                 alloc,
                 tparam
                     .bounds
                     .iter()
                     .map(|ty| crate::types::convert(alloc, ty, strings).unwrap()),
             );
-            Pair(name.as_ffi_str(), type_info)
+            hhbc::UpperBound {
+                name: name.as_ffi_str(),
+                bounds,
+            }
         }),
     );
 

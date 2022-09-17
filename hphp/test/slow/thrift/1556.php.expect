@@ -71,3 +71,55 @@ object(TestStruct) (10) {
   ["anI16"]=>
   int(1234)
 }
+---- terse: compact ----
+object(TestStruct) (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(0)
+  ["aString"]=>
+  string(0) ""
+  ["aDouble"]=>
+  float(0)
+  ["anInt64"]=>
+  int(0)
+  ["aList"]=>
+  vec(0) {
+  }
+  ["aMap"]=>
+  dict(0) {
+  }
+  ["aSet"]=>
+  dict(0) {
+  }
+  ["anByte"]=>
+  int(0)
+  ["anI16"]=>
+  int(0)
+}
+---- terse: binary ----
+object(TestStruct) (10) {
+  ["aBool"]=>
+  bool(true)
+  ["anInt"]=>
+  int(0)
+  ["aString"]=>
+  string(0) ""
+  ["aDouble"]=>
+  float(0)
+  ["anInt64"]=>
+  int(0)
+  ["aList"]=>
+  vec(0) {
+  }
+  ["aMap"]=>
+  dict(0) {
+  }
+  ["aSet"]=>
+  dict(0) {
+  }
+  ["anByte"]=>
+  int(0)
+  ["anI16"]=>
+  int(0)
+}

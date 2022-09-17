@@ -16,7 +16,7 @@
 
 #include <folly/Traits.h>
 #include <folly/Utility.h>
-#include <thrift/lib/cpp2/FieldPath.h>
+#include <thrift/lib/cpp2/protocol/FieldPath.h>
 
 namespace apache::thrift::protocol {
 namespace {

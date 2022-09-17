@@ -34,7 +34,7 @@ const Mask noneMask = {"includes": {}}; // Masks no fields.`
 
 ### APIs
 
-Currently it provides the following APIs (APIs are in [`thrift/lib/cpp2/FieldMask.h`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/FieldMask.h)). These APIs are available for both schemaful (ThriftStruct) and schemaless (protocol::Object) Thrift structs.
+Currently it provides the following APIs (APIs are in [`thrift/lib/cpp2/protocol/FieldMask.h`](https://github.com/facebook/fbthrift/blob/main/thrift/lib/cpp2/protocol/FieldMask.h)). These APIs are available for both schemaful (ThriftStruct) and schemaless (protocol::Object) Thrift structs.
 [Package](../spec/definition/program/#packages) name must be defined in thrift file to use field mask APIs. It will give a compile-error without a package name.
 ```
 // Whether field mask is compatible with thrift struct (the masked fields exist

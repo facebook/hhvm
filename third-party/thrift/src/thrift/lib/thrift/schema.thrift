@@ -478,6 +478,20 @@ struct Const {
 }
 
 /**
+ * A Thrift typedef.
+ *
+ *     typedef {type} {definition.name}
+ */
+struct Typedef {
+  /** The definition attributes. */
+  @thrift.Mixin
+  1: DefinitionAttrs attrs;
+
+  /** The underlying type. */
+  2: type.Type type;
+}
+
+/**
   * Any Thrift definition.
   *
   * Each type must have DefinitionAttrs.
@@ -487,9 +501,10 @@ union Definition {
   2: Union unionDef;
   3: Exception exceptionDef;
   4: Enum enumDef;
-  5: Const constDef;
-  6: Service serviceDef;
-  7: Interaction interactionDef;
+  5: Typedef typedefDef;
+  6: Const constDef;
+  7: Service serviceDef;
+  8: Interaction interactionDef;
 }
 
 /** A list of definitions (Structs, Enums, Services, etc), accessible by `DefinitionId`. */

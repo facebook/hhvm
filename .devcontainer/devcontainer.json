@@ -34,7 +34,7 @@
   // build development environment on creation, make sure you already have shell.nix
   // "onCreateCommand": "nix-shell --command 'echo done building nix dev environment'",
 
-  "updateContentCommand": "git submodule update --init && nix-shell --command 'echo done building nix dev environment'",
+  "updateContentCommand": "git submodule update --init --depth 1 --recursive",
 
   // Add the IDs of extensions you want installed when the container is created.postCreateCommand
   "extensions": [

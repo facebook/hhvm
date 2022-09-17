@@ -27,10 +27,10 @@
 #include <thrift/lib/cpp/util/EnumUtils.h>
 #include <thrift/lib/cpp/util/SaturatingMath.h>
 #include <thrift/lib/cpp/util/VarintUtils.h>
-#include <thrift/lib/cpp2/FieldMask.h>
 #include <thrift/lib/cpp2/op/Get.h>
 #include <thrift/lib/cpp2/protocol/BinaryProtocol.h>
 #include <thrift/lib/cpp2/protocol/CompactProtocol.h>
+#include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/Object.h>
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/NativeType.h>

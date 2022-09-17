@@ -292,12 +292,18 @@ struct CompactWriter {
           }
           if (!fieldVal.isNull()) {
             TType fieldType = fields[slot].type;
+            if (fields[slot].adapter) {
+              fieldVal = transformToThriftType(fieldVal, *fields[slot].adapter);
+            }
+            if(fields[slot].isTerse && is_value_type_default(fieldType, fieldVal)) {
+              continue;
+            }
             writeFieldBegin(fields[slot].fieldNum, fieldType);
             auto fieldInfo = FieldInfo();
             fieldInfo.cls = cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
-            writeField(fieldVal, fields[slot], fieldType, fieldInfo);
+            writeFieldInternal(fieldVal, fields[slot], fieldType, fieldInfo);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {

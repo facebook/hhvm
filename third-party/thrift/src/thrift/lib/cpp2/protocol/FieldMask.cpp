@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include <thrift/lib/cpp2/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/FieldMask.h>
 
 using apache::thrift::protocol::FieldIdToMask;
 

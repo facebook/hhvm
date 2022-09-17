@@ -48,7 +48,7 @@
 , numactl
 , oniguruma
 , openldap
-, openssl
+, openssl_1_1
 , pcre
 , perl
 , pkg-config
@@ -155,7 +155,7 @@ stdenv.mkDerivation rec {
       lz4
       oniguruma
       openldap
-      openssl
+      openssl_1_1
       pcre
       perl
       re2

@@ -42,7 +42,6 @@ pub type uintnat = c_ulong;
 type asize_t = size_t;
 type value = intnat;
 type header_t = uintnat;
-type mlsize_t = uintnat;
 type tag_t = c_uint;
 
 #[derive(Copy, Clone)]
@@ -160,7 +159,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         res
     }
 
-    unsafe fn read64u(&mut self) -> uintnat {
+    unsafe fn read64u(&mut self) -> u64 {
         let res = u64::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(8);
         res
@@ -193,7 +192,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     // `len` is a number of floats
-    unsafe fn readfloats(&mut self, dest: *mut c_double, len: mlsize_t, code: u8) {
+    unsafe fn readfloats(&mut self, dest: *mut c_double, len: usize, code: u8) {
         if std::mem::size_of::<c_double>() != 8 {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
@@ -224,8 +223,8 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         let mut code: u8;
 
         let mut tag: tag_t = 0;
-        let mut size: mlsize_t = 0;
-        let mut len: mlsize_t = 0;
+        let mut size: usize = 0;
+        let mut len: usize = 0;
         let mut v: Value<'a> = Value::from_bits(0);
         let mut ofs: asize_t = 0;
 
@@ -263,7 +262,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                         if code >= PREFIX_SMALL_BLOCK {
                             // Small block
                             tag = (code & 0xf) as tag_t;
-                            size = (code >> 4 & 0x7) as mlsize_t;
+                            size = (code >> 4 & 0x7) as usize;
                             current_block = READ_BLOCK_LABEL;
                         } else {
                             // Small integer
@@ -273,7 +272,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                     } else {
                         if code >= PREFIX_SMALL_STRING {
                             // Small string
-                            len = (code & 0x1f) as mlsize_t;
+                            len = (code & 0x1f) as usize;
                             current_block = READ_STRING_LABEL;
                         } else {
                             match code {
@@ -320,25 +319,25 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                 CODE_BLOCK32 => {
                                     header = self.read32u() as header_t;
                                     tag = (header & 0xff) as tag_t;
-                                    size = header >> 10;
+                                    size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_BLOCK64 => {
                                     header = self.read64u();
                                     tag = (header & 0xff) as tag_t;
-                                    size = header >> 10;
+                                    size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_STRING8 => {
-                                    len = self.read8u() as mlsize_t;
+                                    len = self.read8u() as usize;
                                     current_block = READ_STRING_LABEL;
                                 }
                                 CODE_STRING32 => {
-                                    len = self.read32u() as mlsize_t;
+                                    len = self.read32u() as usize;
                                     current_block = READ_STRING_LABEL;
                                 }
                                 CODE_STRING64 => {
-                                    len = self.read64u();
+                                    len = self.read64u() as usize;
                                     current_block = READ_STRING_LABEL;
                                 }
                                 CODE_DOUBLE_LITTLE | CODE_DOUBLE_BIG => {
@@ -356,15 +355,15 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY8_BIG => {
-                                    len = self.read8u() as mlsize_t;
+                                    len = self.read8u() as usize;
                                     current_block = READ_DOUBLE_ARRAY_LABEL;
                                 }
                                 CODE_DOUBLE_ARRAY32_LITTLE | CODE_DOUBLE_ARRAY32_BIG => {
-                                    len = self.read32u() as mlsize_t;
+                                    len = self.read32u() as usize;
                                     current_block = READ_DOUBLE_ARRAY_LABEL;
                                 }
                                 CODE_DOUBLE_ARRAY64_LITTLE | CODE_DOUBLE_ARRAY64_BIG => {
-                                    len = self.read64u();
+                                    len = self.read64u() as usize;
                                     current_block = READ_DOUBLE_ARRAY_LABEL;
                                 }
                                 CODE_CODEPOINTER => {
@@ -402,7 +401,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                             v = self.intern_obj_table[(self.obj_counter - ofs) as usize];
                                         }
                                         _ /* READ_DOUBLE_ARRAY_LABEL */ => {
-                                            size = len * ocamlrep::DOUBLE_WOSIZE as c_ulong;
+                                            size = len * ocamlrep::DOUBLE_WOSIZE;
                                             let mut builder = self.alloc.block_with_size_and_tag(
                                                 size as usize,
                                                 ocamlrep::DOUBLE_ARRAY_TAG,
@@ -425,7 +424,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                             NOTHING_TO_DO_LABEL => {}
                             READ_BLOCK_LABEL => {}
                             _ /* READ_STRING_LABEL */ => {
-                                size = (len + (std::mem::size_of::<value>() as c_ulong)) / (std::mem::size_of::<value>() as c_ulong);
+                                size = (len + std::mem::size_of::<value>()) / std::mem::size_of::<value>();
                                 v = Value::from_bits(ocamlrep::bytes_to_ocamlrep(std::slice::from_raw_parts(self.intern_src as *const u8, len as usize), self.alloc).to_bits());
                                 self.intern_src = self.intern_src.offset(len as isize);
                                 self.obj_counter += 1;

@@ -22,7 +22,6 @@ use ocamlrep::Value;
 
 use crate::intext::*;
 
-pub type size_t = c_ulong;
 pub type __int16_t = c_short;
 pub type __uint16_t = c_ushort;
 pub type __int32_t = c_int;
@@ -39,7 +38,6 @@ pub type uint32_t = __uint32_t;
 pub type intnat = c_long;
 pub type uintnat = c_ulong;
 
-type asize_t = size_t;
 type value = intnat;
 type header_t = uintnat;
 type tag_t = c_uint;
@@ -87,7 +85,7 @@ struct State<'a, A> {
     alloc: &'a A,
 
     /// Count how many objects seen so far.
-    obj_counter: asize_t,
+    obj_counter: usize,
 
     /// Objects already seen.
     intern_obj_table: Vec<Value<'a>>,
@@ -226,7 +224,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         let mut size: usize = 0;
         let mut len: usize = 0;
         let mut v: Value<'a> = Value::from_bits(0);
-        let mut ofs: asize_t = 0;
+        let mut ofs: usize = 0;
 
         use InternItemStackOp::*;
 
@@ -301,19 +299,19 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_SHARED8 => {
-                                    ofs = self.read8u() as asize_t;
+                                    ofs = self.read8u() as usize;
                                     current_block = READ_SHARED_LABEL;
                                 }
                                 CODE_SHARED16 => {
-                                    ofs = self.read16u() as asize_t;
+                                    ofs = self.read16u() as usize;
                                     current_block = READ_SHARED_LABEL;
                                 }
                                 CODE_SHARED32 => {
-                                    ofs = self.read32u() as asize_t;
+                                    ofs = self.read32u() as usize;
                                     current_block = READ_SHARED_LABEL;
                                 }
                                 CODE_SHARED64 => {
-                                    ofs = self.read64u();
+                                    ofs = self.read64u() as usize;
                                     current_block = READ_SHARED_LABEL;
                                 }
                                 CODE_BLOCK32 => {
@@ -370,7 +368,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     unimplemented!()
                                 }
                                 CODE_INFIXPOINTER => {
-                                    ofs = self.read32u() as asize_t;
+                                    ofs = self.read32u() as usize;
                                     self.stack.push(intern_item {
                                         op: Shift,
                                         dest,

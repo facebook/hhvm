@@ -124,7 +124,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypeRefinements => Unstable,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
-            UnstableFeatures::RequireClass => Unstable,
+            UnstableFeatures::RequireClass => Preview,
             UnstableFeatures::EnumClassTypeConstants => Unstable,
         }
     }

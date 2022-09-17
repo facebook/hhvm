@@ -35,11 +35,9 @@ pub type int16_t = __int16_t;
 pub type int32_t = __int32_t;
 pub type uint16_t = __uint16_t;
 pub type uint32_t = __uint32_t;
-pub type intnat = c_long;
-pub type uintnat = c_ulong;
 
-type value = intnat;
-type header_t = uintnat;
+type value = usize;
+type header_t = usize;
 type tag_t = c_uint;
 
 #[derive(Copy, Clone)]
@@ -47,9 +45,9 @@ type tag_t = c_uint;
 pub struct marshal_header {
     pub magic: uint32_t,
     pub header_len: c_int,
-    pub data_len: uintnat,
-    pub num_objects: uintnat,
-    pub whsize: uintnat,
+    pub data_len: usize,
+    pub num_objects: usize,
+    pub whsize: usize,
 }
 
 // ---
@@ -67,7 +65,7 @@ unsafe fn Val_int<'a>(x: isize) -> Value<'a> {
 
 struct intern_item<'a> {
     pub dest: *mut Value<'a>,
-    pub arg: intnat,
+    pub arg: usize,
     pub op: InternItemStackOp,
 }
 
@@ -164,7 +162,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     #[inline]
-    unsafe fn readblock(&mut self, dest: *mut c_void, len: intnat) {
+    unsafe fn readblock(&mut self, dest: *mut c_void, len: usize) {
         memcpy(dest, self.intern_src as *const c_void, len as usize);
         self.intern_src = self.intern_src.offset(len as isize);
     }
@@ -179,7 +177,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut c_void, 8 as intnat);
+        self.readblock(dest as *mut c_void, 8);
 
         let bytes = *(dest as *const [u8; 8]);
         *dest = match code {
@@ -195,7 +193,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut c_void, (len * 8) as intnat);
+        self.readblock(dest as *mut c_void, len * 8);
 
         let mut i = 0;
         while i < len as usize {
@@ -276,25 +274,25 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                             match code {
                                 CODE_INT8 => {
                                     v = Value::from_bits(
-                                        (((self.read8s() as uintnat) << 1) as intnat + 1) as usize,
+                                        (((self.read8s() as usize) << 1) as usize + 1) as usize,
                                     );
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT16 => {
                                     v = Value::from_bits(
-                                        (((self.read16s() as uintnat) << 1) as intnat + 1) as usize,
+                                        (((self.read16s() as usize) << 1) as usize + 1) as usize,
                                     );
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT32 => {
                                     v = Value::from_bits(
-                                        (((self.read32s() as uintnat) << 1) as intnat + 1) as usize,
+                                        (((self.read32s() as usize) << 1) as usize + 1) as usize,
                                     );
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
                                 CODE_INT64 => {
                                     v = Value::from_bits(
-                                        (((self.read64u() as uintnat) << 1) as intnat + 1) as usize,
+                                        (((self.read64u() as usize) << 1) as usize + 1) as usize,
                                     );
                                     current_block = NOTHING_TO_DO_LABEL;
                                 }
@@ -321,7 +319,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_BLOCK64 => {
-                                    header = self.read64u();
+                                    header = self.read64u() as usize;
                                     tag = (header & 0xff) as tag_t;
                                     size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
@@ -372,7 +370,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     self.stack.push(intern_item {
                                         op: Shift,
                                         dest,
-                                        arg: ofs as intnat,
+                                        arg: ofs as usize,
                                     });
                                     self.stack.push(intern_item {
                                         op: ReadItems,
@@ -446,7 +444,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                         op: ReadItems,
                                         dest: self.alloc.block_ptr_mut(&mut builder)
                                             as *mut Value<'a>,
-                                        arg: size as i64,
+                                        arg: size,
                                     });
                                 }
                                 v = Value::from_bits(builder.build().to_bits());
@@ -467,24 +465,24 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         match (*h).magic {
             MAGIC_NUMBER_SMALL => {
                 (*h).header_len = 20;
-                (*h).data_len = self.read32u() as uintnat;
-                (*h).num_objects = self.read32u() as uintnat;
+                (*h).data_len = self.read32u() as usize;
+                (*h).num_objects = self.read32u() as usize;
                 self.read32u();
-                (*h).whsize = self.read32u() as uintnat
+                (*h).whsize = self.read32u() as usize
             }
             MAGIC_NUMBER_BIG => {
                 (*h).header_len = 32;
                 self.read32u();
-                (*h).data_len = self.read64u();
-                (*h).num_objects = self.read64u();
-                (*h).whsize = self.read64u()
+                (*h).data_len = self.read64u() as usize;
+                (*h).num_objects = self.read64u() as usize;
+                (*h).whsize = self.read64u() as usize
             }
             _ => self.failwith("input_value_from_string: bad object"),
         };
     }
 
     unsafe fn input_val_from_string(&mut self, str: &[u8]) -> value {
-        let mut obj: value = ((0 as uintnat) << 1) as intnat + 1 as c_long;
+        let mut obj: value = ((0 as usize) << 1) + 1;
 
         let mut h: marshal_header = marshal_header {
             magic: 0,

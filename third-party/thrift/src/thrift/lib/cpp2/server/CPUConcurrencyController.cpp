@@ -34,26 +34,6 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 } // namespace detail
 
-namespace {
-
-struct ModeInfo {
-  std::string_view name;
-  std::string_view concurrencyUnit;
-};
-
-ModeInfo getModeInfo(CPUConcurrencyController::Mode mode) {
-  if (mode == CPUConcurrencyController::Mode::ENABLED_CONCURRENCY_LIMITS) {
-    return {"CONCURRENCY_LIMITS", "Active Requests"};
-  } else if (mode == CPUConcurrencyController::Mode::ENABLED_TOKEN_BUCKET) {
-    return {"TOKEN_BUCKET", "QPS"};
-  }
-
-  DCHECK(false);
-  return {"UNKNOWN", "UNKNOWN"};
-}
-
-} // namespace
-
 void CPUConcurrencyController::cycleOnce() {
   if (config().mode == Mode::DISABLED) {
     return;
@@ -132,19 +112,13 @@ void CPUConcurrencyController::cycleOnce() {
 
 void CPUConcurrencyController::schedule() {
   using time_point = std::chrono::steady_clock::time_point;
-
   if (config().mode == Mode::DISABLED) {
     return;
   }
 
-  auto modeInfo = getModeInfo(config().mode);
-  LOG(INFO) << "Enabling CPUConcurrencyController. Mode: " << modeInfo.name
-            << " CPU Target: " << static_cast<int32_t>(this->config().cpuTarget)
-            << " Refresh Period (Ms): "
-            << this->config().refreshPeriodMs.count()
-            << " Concurrency Upper Bound (" << modeInfo.concurrencyUnit
-            << "): " << this->config().concurrencyUpperBound;
-  this->setLimit(this->config().concurrencyUpperBound);
+  LOG(INFO) << "Enabling CPUConcurrencyController. CPU Target: "
+            << static_cast<int32_t>(this->config().cpuTarget)
+            << " Refresh Period Ms: " << this->config().refreshPeriodMs.count();
   scheduler_.addFunctionGenericNextRunTimeFunctor(
       [this] { this->cycleOnce(); },
       [this](time_point, time_point now) {

@@ -156,23 +156,23 @@ const folly::StringPiece AStructB::__fbthrift_get_field_name(::apache::thrift::F
 AStructB::AStructB(const AStructB&) = default;
 AStructB& AStructB::operator=(const AStructB&) = default;
 AStructB::AStructB(FOLLY_MAYBE_UNUSED AStructB&& other) noexcept :
-    FieldA(std::move(other.FieldA)) {
+    __fbthrift_field_FieldA(std::move(other.__fbthrift_field_FieldA)) {
 }
 
 AStructB& AStructB::operator=(FOLLY_MAYBE_UNUSED AStructB&& other) noexcept {
-    this->FieldA = std::move(other.FieldA);
+    this->__fbthrift_field_FieldA = std::move(other.__fbthrift_field_FieldA);
     return *this;
 }
 
 
 AStructB::AStructB(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::a::different::ns::AStruct> FieldA__arg) :
-    FieldA(std::move(FieldA__arg)) {
+    __fbthrift_field_FieldA(std::move(FieldA__arg)) {
 }
 
 
 void AStructB::__fbthrift_clear() {
   // clear all fields
-  if (this->FieldA) this->FieldA = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::a::different::ns::AStruct>>();
+  if (this->__fbthrift_field_FieldA) this->__fbthrift_field_FieldA = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::a::different::ns::AStruct>>();
 }
 
 void AStructB::__fbthrift_clear_terse_fields() {
@@ -201,7 +201,7 @@ bool AStructB::operator<(FOLLY_MAYBE_UNUSED const AStructB& rhs) const {
 
 void swap(FOLLY_MAYBE_UNUSED AStructB& a, FOLLY_MAYBE_UNUSED AStructB& b) {
   using ::std::swap;
-  swap(a.FieldA, b.FieldA);
+  swap(a.__fbthrift_field_FieldA, b.__fbthrift_field_FieldA);
 }
 
 template void AStructB::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

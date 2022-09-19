@@ -5132,7 +5132,7 @@ _readField_ARefField:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::some::valid::ns::AStruct>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::readWithContext(*iprot, *ptr, _readState);
-    this->ARefField = std::move(ptr);
+    this->__fbthrift_field_ARefField = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
@@ -5230,10 +5230,10 @@ uint32_t MyIncludedStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("MyIncludedStruct", apache::thrift::protocol::T_STRUCT, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<false>(*prot_, this->__fbthrift_field_MyIncludedStruct);
   }
-  if (this->ARefField) {
+  if (this->__fbthrift_field_ARefField) {
     xfer += prot_->serializedFieldSize("ARefField", apache::thrift::protocol::T_STRUCT, 3);
-    if (this->ARefField) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<false>(*prot_, *this->ARefField);
+    if (this->__fbthrift_field_ARefField) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<false>(*prot_, *this->__fbthrift_field_ARefField);
     } else {
       xfer += prot_->serializedStructSize("AStruct");
       xfer += prot_->serializedSizeStop();
@@ -5259,10 +5259,10 @@ uint32_t MyIncludedStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("MyIncludedStruct", apache::thrift::protocol::T_STRUCT, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<true>(*prot_, this->__fbthrift_field_MyIncludedStruct);
   }
-  if (this->ARefField) {
+  if (this->__fbthrift_field_ARefField) {
     xfer += prot_->serializedFieldSize("ARefField", apache::thrift::protocol::T_STRUCT, 3);
-    if (this->ARefField) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<true>(*prot_, *this->ARefField);
+    if (this->__fbthrift_field_ARefField) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::serializedSize<true>(*prot_, *this->__fbthrift_field_ARefField);
     } else {
       xfer += prot_->serializedStructSize("AStruct");
       xfer += prot_->serializedSizeStop();
@@ -5297,12 +5297,12 @@ uint32_t MyIncludedStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::write(*prot_, this->__fbthrift_field_MyIncludedStruct);
     xfer += prot_->writeFieldEnd();
   }
-  if (this->ARefField) {
+  if (this->__fbthrift_field_ARefField) {
     constexpr int16_t kPrevFieldId = 2;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 3, kPrevFieldId>(*prot_, "ARefField", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->ARefField) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::write(*prot_, *this->ARefField);
+    if (this->__fbthrift_field_ARefField) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::some::valid::ns::AStruct>::write(*prot_, *this->__fbthrift_field_ARefField);
     } else {
       xfer += prot_->writeStructBegin("AStruct");
       xfer += prot_->writeStructEnd();

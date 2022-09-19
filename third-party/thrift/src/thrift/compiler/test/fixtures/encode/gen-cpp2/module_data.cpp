@@ -101,7 +101,7 @@ const std::array<folly::StringPiece, 12> TStructDataStorage<::facebook::thrift::
   "__fbthrift_field_foo_field",
   "__fbthrift_field_adapted_field",
   "__fbthrift_field_list_field",
-  "list_shared_ptr_field",
+  "__fbthrift_field_list_shared_ptr_field",
   "__fbthrift_field_list_cpp_type_field",
   "__fbthrift_field_set_field",
   "__fbthrift_field_map_field",

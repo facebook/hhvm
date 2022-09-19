@@ -2478,9 +2478,9 @@ class StructWithFieldAdapter final  {
 
   StructWithFieldAdapter() :
       __fbthrift_field_field(),
-      shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
+      __fbthrift_field_shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
     ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
-    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*shared_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2494,10 +2494,10 @@ class StructWithFieldAdapter final  {
   StructWithFieldAdapter& operator=(const StructWithFieldAdapter& src);
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
- public:
-  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field;
- public:
-  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field;
+ private:
+  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_shared_field;
+ private:
+  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_opt_shared_field;
  private:
   ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_opt_boxed_field;
  private:
@@ -2549,41 +2549,81 @@ class StructWithFieldAdapter final  {
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T& shared_field_ref() & {
-    return shared_field;
+    return __fbthrift_field_shared_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T& shared_field_ref() const& {
-    return shared_field;
+    return __fbthrift_field_shared_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T&& shared_field_ref() && {
-    return static_cast<T&&>(shared_field);
+    return static_cast<T&&>(__fbthrift_field_shared_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T&& shared_field_ref() const&& {
-    return static_cast<const T&&>(shared_field);
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T& shared_field() & {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T& shared_field() const& {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T&& shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T&& shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T& opt_shared_field_ref() & {
-    return opt_shared_field;
+    return __fbthrift_field_opt_shared_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T& opt_shared_field_ref() const& {
-    return opt_shared_field;
+    return __fbthrift_field_opt_shared_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T&& opt_shared_field_ref() && {
-    return static_cast<T&&>(opt_shared_field);
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T&& opt_shared_field_ref() const&& {
-    return static_cast<const T&&>(opt_shared_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T& opt_shared_field() & {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T& opt_shared_field() const& {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T&& opt_shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T&& opt_shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
   }
 
   template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>

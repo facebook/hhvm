@@ -84,7 +84,7 @@ const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::OptionalR
   TType::T_STRING,
 }};
 const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::storage_names = {{
-  "optional_blob",
+  "__fbthrift_field_optional_blob",
 }};
 const std::array<int, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::isset_indexes = {{
   0,

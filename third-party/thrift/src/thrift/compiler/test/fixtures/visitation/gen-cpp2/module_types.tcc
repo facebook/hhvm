@@ -4054,7 +4054,7 @@ _readField_field3:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>();
     ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::readWithContext(*iprot, *ptr, _readState);
-    this->field3 = std::move(ptr);
+    this->__fbthrift_field_field3 = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
@@ -4143,8 +4143,8 @@ uint32_t struct4::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_STRUCT, 6);
-    if (this->field3) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::serializedSize<false>(*prot_, *this->field3);
+    if (this->__fbthrift_field_field3) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::serializedSize<false>(*prot_, *this->__fbthrift_field_field3);
     } else {
       xfer += prot_->serializedStructSize("structA");
       xfer += prot_->serializedSizeStop();
@@ -4172,8 +4172,8 @@ uint32_t struct4::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("field3", apache::thrift::protocol::T_STRUCT, 6);
-    if (this->field3) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::serializedSize<true>(*prot_, *this->field3);
+    if (this->__fbthrift_field_field3) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::serializedSize<true>(*prot_, *this->__fbthrift_field_field3);
     } else {
       xfer += prot_->serializedStructSize("structA");
       xfer += prot_->serializedSizeStop();
@@ -4215,8 +4215,8 @@ uint32_t struct4::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 3;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 6, kPrevFieldId>(*prot_, "field3", previousFieldHasValue);
     previousFieldHasValue = true;
-    if (this->field3) {
-      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::write(*prot_, *this->field3);
+    if (this->__fbthrift_field_field3) {
+      xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::structure, ::test_cpp2::cpp_reflection::structA>::write(*prot_, *this->__fbthrift_field_field3);
     } else {
       xfer += prot_->writeStructBegin("structA");
       xfer += prot_->writeStructEnd();

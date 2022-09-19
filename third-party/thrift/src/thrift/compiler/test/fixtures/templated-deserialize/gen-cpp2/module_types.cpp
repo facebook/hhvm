@@ -177,14 +177,14 @@ containerStruct::containerStruct(const containerStruct& srcObj) :
     __fbthrift_field_fieldO(srcObj.__fbthrift_field_fieldO),
     __fbthrift_field_fieldP(srcObj.__fbthrift_field_fieldP),
     __fbthrift_field_fieldQ(srcObj.__fbthrift_field_fieldQ),
-    fieldR(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>>(srcObj.fieldR)),
-    fieldS(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.fieldS)),
-    fieldT(srcObj.fieldT),
-    fieldU(srcObj.fieldU),
-    fieldX(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.fieldX)),
+    __fbthrift_field_fieldR(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_fieldR)),
+    __fbthrift_field_fieldS(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_fieldS)),
+    __fbthrift_field_fieldT(srcObj.__fbthrift_field_fieldT),
+    __fbthrift_field_fieldU(srcObj.__fbthrift_field_fieldU),
+    __fbthrift_field_fieldX(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_fieldX)),
     __isset(srcObj.__isset) {
 }
 
@@ -211,11 +211,11 @@ containerStruct::containerStruct() :
   9,
   13}}})),
       __fbthrift_field_fieldQ(),
-      fieldR(std::make_unique<::std::map<::std::string, bool>>()),
-      fieldS(std::make_unique<::cpp2::SmallStruct>()),
-      fieldT(std::make_shared<::cpp2::SmallStruct>()),
-      fieldU(std::make_shared<::cpp2::SmallStruct>()),
-      fieldX(std::make_unique<::cpp2::SmallStruct>()) {
+      __fbthrift_field_fieldR(std::make_unique<::std::map<::std::string, bool>>()),
+      __fbthrift_field_fieldS(std::make_unique<::cpp2::SmallStruct>()),
+      __fbthrift_field_fieldT(std::make_shared<::cpp2::SmallStruct>()),
+      __fbthrift_field_fieldU(std::make_shared<::cpp2::SmallStruct>()),
+      __fbthrift_field_fieldX(std::make_unique<::cpp2::SmallStruct>()) {
 }
 
 
@@ -239,11 +239,11 @@ containerStruct::containerStruct(FOLLY_MAYBE_UNUSED containerStruct&& other) noe
     __fbthrift_field_fieldO(std::move(other.__fbthrift_field_fieldO)),
     __fbthrift_field_fieldP(std::move(other.__fbthrift_field_fieldP)),
     __fbthrift_field_fieldQ(std::move(other.__fbthrift_field_fieldQ)),
-    fieldR(std::move(other.fieldR)),
-    fieldS(std::move(other.fieldS)),
-    fieldT(std::move(other.fieldT)),
-    fieldU(std::move(other.fieldU)),
-    fieldX(std::move(other.fieldX)),
+    __fbthrift_field_fieldR(std::move(other.__fbthrift_field_fieldR)),
+    __fbthrift_field_fieldS(std::move(other.__fbthrift_field_fieldS)),
+    __fbthrift_field_fieldT(std::move(other.__fbthrift_field_fieldT)),
+    __fbthrift_field_fieldU(std::move(other.__fbthrift_field_fieldU)),
+    __fbthrift_field_fieldX(std::move(other.__fbthrift_field_fieldX)),
     __isset(other.__isset) {
 }
 
@@ -265,11 +265,11 @@ containerStruct& containerStruct::operator=(FOLLY_MAYBE_UNUSED containerStruct&&
     this->__fbthrift_field_fieldO = std::move(other.__fbthrift_field_fieldO);
     this->__fbthrift_field_fieldP = std::move(other.__fbthrift_field_fieldP);
     this->__fbthrift_field_fieldQ = std::move(other.__fbthrift_field_fieldQ);
-    this->fieldR = std::move(other.fieldR);
-    this->fieldS = std::move(other.fieldS);
-    this->fieldT = std::move(other.fieldT);
-    this->fieldU = std::move(other.fieldU);
-    this->fieldX = std::move(other.fieldX);
+    this->__fbthrift_field_fieldR = std::move(other.__fbthrift_field_fieldR);
+    this->__fbthrift_field_fieldS = std::move(other.__fbthrift_field_fieldS);
+    this->__fbthrift_field_fieldT = std::move(other.__fbthrift_field_fieldT);
+    this->__fbthrift_field_fieldU = std::move(other.__fbthrift_field_fieldU);
+    this->__fbthrift_field_fieldX = std::move(other.__fbthrift_field_fieldX);
     __isset = other.__isset;
     return *this;
 }
@@ -293,11 +293,11 @@ containerStruct::containerStruct(apache::thrift::FragileConstructor, bool fieldA
     __fbthrift_field_fieldO(std::move(fieldO__arg)),
     __fbthrift_field_fieldP(std::move(fieldP__arg)),
     __fbthrift_field_fieldQ(std::move(fieldQ__arg)),
-    fieldR(std::move(fieldR__arg)),
-    fieldS(std::move(fieldS__arg)),
-    fieldT(std::move(fieldT__arg)),
-    fieldU(std::move(fieldU__arg)),
-    fieldX(std::move(fieldX__arg)) {
+    __fbthrift_field_fieldR(std::move(fieldR__arg)),
+    __fbthrift_field_fieldS(std::move(fieldS__arg)),
+    __fbthrift_field_fieldT(std::move(fieldT__arg)),
+    __fbthrift_field_fieldU(std::move(fieldU__arg)),
+    __fbthrift_field_fieldX(std::move(fieldX__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -337,11 +337,11 @@ void containerStruct::__fbthrift_clear() {
   this->__fbthrift_field_fieldO.clear();
   this->__fbthrift_field_fieldP.clear();
   this->__fbthrift_field_fieldQ = ::cpp2::MyEnumA();
-  this->fieldR = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::string, bool>>>();
-  if (this->fieldS) ::apache::thrift::clear(*this->fieldS);
-  if (this->fieldT) this->fieldT = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::cpp2::SmallStruct>>();
-  if (this->fieldU) this->fieldU = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::SmallStruct>>();
-  if (this->fieldX) ::apache::thrift::clear(*this->fieldX);
+  this->__fbthrift_field_fieldR = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::string, bool>>>();
+  if (this->__fbthrift_field_fieldS) ::apache::thrift::clear(*this->__fbthrift_field_fieldS);
+  if (this->__fbthrift_field_fieldT) this->__fbthrift_field_fieldT = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::cpp2::SmallStruct>>();
+  if (this->__fbthrift_field_fieldU) this->__fbthrift_field_fieldU = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::SmallStruct>>();
+  if (this->__fbthrift_field_fieldX) ::apache::thrift::clear(*this->__fbthrift_field_fieldX);
   __isset = {};
 }
 
@@ -610,11 +610,11 @@ void swap(FOLLY_MAYBE_UNUSED containerStruct& a, FOLLY_MAYBE_UNUSED containerStr
   swap(a.__fbthrift_field_fieldO, b.__fbthrift_field_fieldO);
   swap(a.__fbthrift_field_fieldP, b.__fbthrift_field_fieldP);
   swap(a.__fbthrift_field_fieldQ, b.__fbthrift_field_fieldQ);
-  swap(a.fieldR, b.fieldR);
-  swap(a.fieldS, b.fieldS);
-  swap(a.fieldT, b.fieldT);
-  swap(a.fieldU, b.fieldU);
-  swap(a.fieldX, b.fieldX);
+  swap(a.__fbthrift_field_fieldR, b.__fbthrift_field_fieldR);
+  swap(a.__fbthrift_field_fieldS, b.__fbthrift_field_fieldS);
+  swap(a.__fbthrift_field_fieldT, b.__fbthrift_field_fieldT);
+  swap(a.__fbthrift_field_fieldU, b.__fbthrift_field_fieldU);
+  swap(a.__fbthrift_field_fieldX, b.__fbthrift_field_fieldX);
   swap(a.__isset, b.__isset);
 }
 

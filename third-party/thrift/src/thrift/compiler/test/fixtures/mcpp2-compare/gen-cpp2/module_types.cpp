@@ -2598,8 +2598,8 @@ const folly::StringPiece MyIncludedStruct::__fbthrift_get_field_name(::apache::t
 MyIncludedStruct::MyIncludedStruct(const MyIncludedStruct& srcObj) :
     __fbthrift_field_MyIncludedInt(srcObj.__fbthrift_field_MyIncludedInt),
     __fbthrift_field_MyIncludedStruct(srcObj.__fbthrift_field_MyIncludedStruct),
-    ARefField(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.ARefField)),
+    __fbthrift_field_ARefField(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_ARefField)),
     __fbthrift_field_ARequiredField(srcObj.__fbthrift_field_ARequiredField),
     __isset(srcObj.__isset) {
 }
@@ -2613,7 +2613,7 @@ MyIncludedStruct& MyIncludedStruct::operator=(const MyIncludedStruct& other) {
 MyIncludedStruct::MyIncludedStruct(FOLLY_MAYBE_UNUSED MyIncludedStruct&& other) noexcept :
     __fbthrift_field_MyIncludedInt(std::move(other.__fbthrift_field_MyIncludedInt)),
     __fbthrift_field_MyIncludedStruct(std::move(other.__fbthrift_field_MyIncludedStruct)),
-    ARefField(std::move(other.ARefField)),
+    __fbthrift_field_ARefField(std::move(other.__fbthrift_field_ARefField)),
     __fbthrift_field_ARequiredField(std::move(other.__fbthrift_field_ARequiredField)),
     __isset(other.__isset) {
 }
@@ -2621,7 +2621,7 @@ MyIncludedStruct::MyIncludedStruct(FOLLY_MAYBE_UNUSED MyIncludedStruct&& other) 
 MyIncludedStruct& MyIncludedStruct::operator=(FOLLY_MAYBE_UNUSED MyIncludedStruct&& other) noexcept {
     this->__fbthrift_field_MyIncludedInt = std::move(other.__fbthrift_field_MyIncludedInt);
     this->__fbthrift_field_MyIncludedStruct = std::move(other.__fbthrift_field_MyIncludedStruct);
-    this->ARefField = std::move(other.ARefField);
+    this->__fbthrift_field_ARefField = std::move(other.__fbthrift_field_ARefField);
     this->__fbthrift_field_ARequiredField = std::move(other.__fbthrift_field_ARequiredField);
     __isset = other.__isset;
     return *this;
@@ -2631,7 +2631,7 @@ MyIncludedStruct& MyIncludedStruct::operator=(FOLLY_MAYBE_UNUSED MyIncludedStruc
 MyIncludedStruct::MyIncludedStruct(apache::thrift::FragileConstructor, ::a::different::ns::IncludedInt64 MyIncludedInt__arg, ::some::valid::ns::AStruct MyIncludedStruct__arg, ::std::unique_ptr<::some::valid::ns::AStruct> ARefField__arg, ::some::valid::ns::AStruct ARequiredField__arg) :
     __fbthrift_field_MyIncludedInt(std::move(MyIncludedInt__arg)),
     __fbthrift_field_MyIncludedStruct(std::move(MyIncludedStruct__arg)),
-    ARefField(std::move(ARefField__arg)),
+    __fbthrift_field_ARefField(std::move(ARefField__arg)),
     __fbthrift_field_ARequiredField(std::move(ARequiredField__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -2642,7 +2642,7 @@ void MyIncludedStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_MyIncludedInt = ::a::different::ns::IncludedInt64();
   ::apache::thrift::clear(this->__fbthrift_field_MyIncludedStruct);
-  if (this->ARefField) ::apache::thrift::clear(*this->ARefField);
+  if (this->__fbthrift_field_ARefField) ::apache::thrift::clear(*this->__fbthrift_field_ARefField);
   ::apache::thrift::clear(this->__fbthrift_field_ARequiredField);
   __isset = {};
 }
@@ -2709,7 +2709,7 @@ void swap(FOLLY_MAYBE_UNUSED MyIncludedStruct& a, FOLLY_MAYBE_UNUSED MyIncludedS
   using ::std::swap;
   swap(a.__fbthrift_field_MyIncludedInt, b.__fbthrift_field_MyIncludedInt);
   swap(a.__fbthrift_field_MyIncludedStruct, b.__fbthrift_field_MyIncludedStruct);
-  swap(a.ARefField, b.ARefField);
+  swap(a.__fbthrift_field_ARefField, b.__fbthrift_field_ARefField);
   swap(a.__fbthrift_field_ARequiredField, b.__fbthrift_field_ARequiredField);
   swap(a.__isset, b.__isset);
 }

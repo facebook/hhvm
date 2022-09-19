@@ -2442,8 +2442,8 @@ struct4::struct4(const struct4& srcObj) :
     __fbthrift_field_field0(srcObj.__fbthrift_field_field0),
     __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
     __fbthrift_field_field2(srcObj.__fbthrift_field_field2),
-    field3(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.field3)),
+    __fbthrift_field_field3(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_field3)),
     __isset(srcObj.__isset) {
 }
 
@@ -2457,7 +2457,7 @@ struct4::struct4(FOLLY_MAYBE_UNUSED struct4&& other) noexcept :
     __fbthrift_field_field0(std::move(other.__fbthrift_field_field0)),
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
-    field3(std::move(other.field3)),
+    __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)),
     __isset(other.__isset) {
 }
 
@@ -2465,7 +2465,7 @@ struct4& struct4::operator=(FOLLY_MAYBE_UNUSED struct4&& other) noexcept {
     this->__fbthrift_field_field0 = std::move(other.__fbthrift_field_field0);
     this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
     this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
-    this->field3 = std::move(other.field3);
+    this->__fbthrift_field_field3 = std::move(other.__fbthrift_field_field3);
     __isset = other.__isset;
     return *this;
 }
@@ -2475,7 +2475,7 @@ struct4::struct4(apache::thrift::FragileConstructor, ::std::int32_t field0__arg,
     __fbthrift_field_field0(std::move(field0__arg)),
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
-    field3(std::move(field3__arg)) {
+    __fbthrift_field_field3(std::move(field3__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -2486,7 +2486,7 @@ void struct4::__fbthrift_clear() {
   this->__fbthrift_field_field0 = ::std::int32_t();
   this->__fbthrift_field_field1 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_field2 = ::test_cpp2::cpp_reflection::enum1();
-  if (this->field3) ::apache::thrift::clear(*this->field3);
+  if (this->__fbthrift_field_field3) ::apache::thrift::clear(*this->__fbthrift_field_field3);
   __isset = {};
 }
 
@@ -2537,7 +2537,7 @@ void swap(FOLLY_MAYBE_UNUSED struct4& a, FOLLY_MAYBE_UNUSED struct4& b) {
   swap(a.__fbthrift_field_field0, b.__fbthrift_field_field0);
   swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
   swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
-  swap(a.field3, b.field3);
+  swap(a.__fbthrift_field_field3, b.__fbthrift_field_field3);
   swap(a.__isset, b.__isset);
 }
 

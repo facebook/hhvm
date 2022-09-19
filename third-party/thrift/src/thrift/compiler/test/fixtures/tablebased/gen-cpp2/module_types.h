@@ -215,8 +215,8 @@ class TrivialTypesStruct final  {
   ::std::string __fbthrift_field_fieldB;
  private:
   ::std::string __fbthrift_field_fieldC;
- public:
-  ::test::fixtures::tablebased::IOBufPtr fieldD;
+ private:
+  ::test::fixtures::tablebased::IOBufPtr __fbthrift_field_fieldD;
  private:
   ::test::fixtures::tablebased::ExampleEnum __fbthrift_field_fieldE;
  private:
@@ -349,22 +349,42 @@ class TrivialTypesStruct final  {
 
   template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> fieldD_ref() const& {
-    return {this->fieldD, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_fieldD, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> fieldD_ref() const&& {
-    return {static_cast<const T&&>(this->fieldD), __isset.at(3), __isset.bit(3)};
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldD), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> fieldD_ref() & {
-    return {this->fieldD, __isset.at(3), __isset.bit(3)};
+    return {this->__fbthrift_field_fieldD, __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> fieldD_ref() && {
-    return {static_cast<T&&>(this->fieldD), __isset.at(3), __isset.bit(3)};
+    return {static_cast<T&&>(this->__fbthrift_field_fieldD), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> fieldD() const& {
+    return {this->__fbthrift_field_fieldD, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> fieldD() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_fieldD), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> fieldD() & {
+    return {this->__fbthrift_field_fieldD, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::test::fixtures::tablebased::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> fieldD() && {
+    return {static_cast<T&&>(this->__fbthrift_field_fieldD), __isset.at(3), __isset.bit(3)};
   }
 
   template <typename..., typename T = ::test::fixtures::tablebased::ExampleEnum>
@@ -455,11 +475,11 @@ class TrivialTypesStruct final  {
   }
 
   const ::test::fixtures::tablebased::IOBufPtr* get_fieldD() const& {
-    return fieldD_ref() ? std::addressof(fieldD) : nullptr;
+    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
 
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() & {
-    return fieldD_ref() ? std::addressof(fieldD) : nullptr;
+    return fieldD_ref() ? std::addressof(__fbthrift_field_fieldD) : nullptr;
   }
   ::test::fixtures::tablebased::IOBufPtr* get_fieldD() && = delete;
 
@@ -467,7 +487,7 @@ class TrivialTypesStruct final  {
   [[deprecated("Use `FOO.fieldD_ref() = BAR;` instead of `FOO.set_fieldD(BAR);`")]]
   ::test::fixtures::tablebased::IOBufPtr& set_fieldD(T_TrivialTypesStruct_fieldD_struct_setter&& fieldD_) {
     fieldD_ref() = std::forward<T_TrivialTypesStruct_fieldD_struct_setter>(fieldD_);
-    return fieldD;
+    return __fbthrift_field_fieldD;
   }
 
   ::test::fixtures::tablebased::ExampleEnum get_fieldE() const {

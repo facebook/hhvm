@@ -134,11 +134,11 @@ const std::array<folly::StringPiece, 22> TStructDataStorage<::cpp2::containerStr
   "__fbthrift_field_fieldO",
   "__fbthrift_field_fieldP",
   "__fbthrift_field_fieldQ",
-  "fieldR",
-  "fieldS",
-  "fieldT",
-  "fieldU",
-  "fieldX",
+  "__fbthrift_field_fieldR",
+  "__fbthrift_field_fieldS",
+  "__fbthrift_field_fieldT",
+  "__fbthrift_field_fieldU",
+  "__fbthrift_field_fieldX",
 }};
 const std::array<int, 22> TStructDataStorage<::cpp2::containerStruct>::isset_indexes = {{
   0,

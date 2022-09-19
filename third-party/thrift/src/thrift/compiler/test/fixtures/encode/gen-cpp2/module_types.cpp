@@ -271,7 +271,7 @@ OpEncodeStruct::OpEncodeStruct(const OpEncodeStruct& srcObj) :
     __fbthrift_field_foo_field(srcObj.__fbthrift_field_foo_field),
     __fbthrift_field_adapted_field(srcObj.__fbthrift_field_adapted_field),
     __fbthrift_field_list_field(srcObj.__fbthrift_field_list_field),
-    list_shared_ptr_field(srcObj.list_shared_ptr_field),
+    __fbthrift_field_list_shared_ptr_field(srcObj.__fbthrift_field_list_shared_ptr_field),
     __fbthrift_field_list_cpp_type_field(srcObj.__fbthrift_field_list_cpp_type_field),
     __fbthrift_field_set_field(srcObj.__fbthrift_field_set_field),
     __fbthrift_field_map_field(srcObj.__fbthrift_field_map_field),
@@ -305,7 +305,7 @@ OpEncodeStruct::OpEncodeStruct(FOLLY_MAYBE_UNUSED OpEncodeStruct&& other) noexce
     __fbthrift_field_foo_field(std::move(other.__fbthrift_field_foo_field)),
     __fbthrift_field_adapted_field(std::move(other.__fbthrift_field_adapted_field)),
     __fbthrift_field_list_field(std::move(other.__fbthrift_field_list_field)),
-    list_shared_ptr_field(std::move(other.list_shared_ptr_field)),
+    __fbthrift_field_list_shared_ptr_field(std::move(other.__fbthrift_field_list_shared_ptr_field)),
     __fbthrift_field_list_cpp_type_field(std::move(other.__fbthrift_field_list_cpp_type_field)),
     __fbthrift_field_set_field(std::move(other.__fbthrift_field_set_field)),
     __fbthrift_field_map_field(std::move(other.__fbthrift_field_map_field)),
@@ -323,7 +323,7 @@ OpEncodeStruct& OpEncodeStruct::operator=(FOLLY_MAYBE_UNUSED OpEncodeStruct&& ot
     this->__fbthrift_field_foo_field = std::move(other.__fbthrift_field_foo_field);
     this->__fbthrift_field_adapted_field = std::move(other.__fbthrift_field_adapted_field);
     this->__fbthrift_field_list_field = std::move(other.__fbthrift_field_list_field);
-    this->list_shared_ptr_field = std::move(other.list_shared_ptr_field);
+    this->__fbthrift_field_list_shared_ptr_field = std::move(other.__fbthrift_field_list_shared_ptr_field);
     this->__fbthrift_field_list_cpp_type_field = std::move(other.__fbthrift_field_list_cpp_type_field);
     this->__fbthrift_field_set_field = std::move(other.__fbthrift_field_set_field);
     this->__fbthrift_field_map_field = std::move(other.__fbthrift_field_map_field);
@@ -341,7 +341,7 @@ OpEncodeStruct::OpEncodeStruct(apache::thrift::FragileConstructor, ::std::int32_
     __fbthrift_field_foo_field(std::move(foo_field__arg)),
     __fbthrift_field_adapted_field(std::move(adapted_field__arg)),
     __fbthrift_field_list_field(std::move(list_field__arg)),
-    list_shared_ptr_field(std::move(list_shared_ptr_field__arg)),
+    __fbthrift_field_list_shared_ptr_field(std::move(list_shared_ptr_field__arg)),
     __fbthrift_field_list_cpp_type_field(std::move(list_cpp_type_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)),
     __fbthrift_field_map_field(std::move(map_field__arg)),
@@ -371,7 +371,7 @@ void OpEncodeStruct::__fbthrift_clear() {
   ::apache::thrift::clear(this->__fbthrift_field_foo_field);
   ::apache::thrift::adapt_detail::clear<::apache::thrift::test::TemplatedTestAdapter, 4>(__fbthrift_field_adapted_field, *this);
   this->__fbthrift_field_list_field.clear();
-  this->list_shared_ptr_field.reset();
+  this->__fbthrift_field_list_shared_ptr_field.reset();
   this->__fbthrift_field_list_cpp_type_field.clear();
   this->__fbthrift_field_set_field.clear();
   this->__fbthrift_field_map_field.clear();
@@ -534,7 +534,7 @@ void swap(FOLLY_MAYBE_UNUSED OpEncodeStruct& a, FOLLY_MAYBE_UNUSED OpEncodeStruc
   swap(a.__fbthrift_field_foo_field, b.__fbthrift_field_foo_field);
   swap(a.__fbthrift_field_adapted_field, b.__fbthrift_field_adapted_field);
   swap(a.__fbthrift_field_list_field, b.__fbthrift_field_list_field);
-  swap(a.list_shared_ptr_field, b.list_shared_ptr_field);
+  swap(a.__fbthrift_field_list_shared_ptr_field, b.__fbthrift_field_list_shared_ptr_field);
   swap(a.__fbthrift_field_list_cpp_type_field, b.__fbthrift_field_list_cpp_type_field);
   swap(a.__fbthrift_field_set_field, b.__fbthrift_field_set_field);
   swap(a.__fbthrift_field_map_field, b.__fbthrift_field_map_field);

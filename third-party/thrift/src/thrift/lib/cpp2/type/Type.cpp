@@ -54,45 +54,6 @@ void Type::checkName(const std::string& name) {
   validateUniversalName(name);
 }
 
-folly::Optional<protocol::TType> Type::toTType() const noexcept {
-  switch (data_.name()->getType()) {
-    case TypeName::Type::boolType:
-      return protocol::TType::T_BOOL;
-    case TypeName::Type::byteType:
-      return protocol::TType::T_BYTE;
-    case TypeName::Type::i16Type:
-      return protocol::TType::T_I16;
-    case TypeName::Type::i32Type:
-      return protocol::TType::T_I32;
-    case TypeName::Type::i64Type:
-      return protocol::TType::T_I64;
-    case TypeName::Type::floatType:
-      return protocol::TType::T_FLOAT;
-    case TypeName::Type::doubleType:
-      return protocol::TType::T_DOUBLE;
-    case TypeName::Type::stringType:
-      return protocol::TType::T_STRING;
-    case TypeName::Type::binaryType:
-      return protocol::TType::T_STRING;
-    case TypeName::Type::enumType:
-      return protocol::TType::T_I32;
-    case TypeName::Type::structType:
-      return protocol::TType::T_STRUCT;
-    case TypeName::Type::unionType:
-      return protocol::TType::T_STRUCT;
-    case TypeName::Type::exceptionType:
-      return protocol::TType::T_STRUCT;
-    case TypeName::Type::listType:
-      return protocol::TType::T_LIST;
-    case TypeName::Type::setType:
-      return protocol::TType::T_SET;
-    case TypeName::Type::mapType:
-      return protocol::TType::T_MAP;
-    default:
-      return {};
-  }
-}
-
 } // namespace type
 } // namespace thrift
 } // namespace apache

@@ -10,6 +10,7 @@ use error::Result;
 use hhbc::DictEntry;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
+use hhvm_types_ffi::ffi::TypeStructureKind;
 use naming_special_names_rust::classes;
 use options::Options;
 use oxidized::aast;
@@ -20,75 +21,78 @@ use oxidized::aast_defs::ShapeFieldInfo;
 use oxidized::ast_defs;
 use oxidized::ast_defs::ShapeFieldName;
 
-fn get_kind_num(tparams: &[&str], mut p: &str) -> i64 {
+fn get_kind_num(tparams: &[&str], p: &str) -> TypeStructureKind {
     if tparams.contains(&p) {
-        p = "$$internal$$typevar";
-    };
-    (match p.to_lowercase().as_str() {
-        "hh\\void" => 0,
-        "hh\\int" => 1,
-        "hh\\bool" => 2,
-        "hh\\float" => 3,
-        "hh\\string" => 4,
-        "hh\\resource" => 5,
-        "hh\\num" => 6,
-        "hh\\noreturn" => 8,
-        "hh\\arraykey" => 7,
-        "hh\\mixed" => 9,
-        "tuple" => 10,
-        "$$internal$$fun" => 11,
-        "$$internal$$typevar" | "_" => 13, // corresponds to user OF_GENERIC
-        "shape" => 14,
-        "class" => 15,
-        "interface" => 16,
-        "trait" => 17,
-        "enum" => 18,
-        "hh\\dict" => 19,
-        "hh\\vec" => 20,
-        "hh\\keyset" => 21,
-        "hh\\vec_or_dict" => 22,
-        "hh\\nonnull" => 23,
-        "hh\\darray" => 24,
-        "hh\\varray" => 25,
-        "hh\\varray_or_darray" => 26,
-        "hh\\anyarray" => 27,
-        "hh\\null" => 28,
-        "hh\\nothing" => 29,
-        "hh\\dynamic" => 30,
-        "unresolved" => 101,
-        "$$internal$$typeaccess" => 102,
-        "$$internal$$reifiedtype" => 104,
-        _ => {
-            if p.len() > 4 && p.starts_with("xhp_") {
-                103
-            } else {
-                101
-            }
+        TypeStructureKind::T_typevar
+    } else {
+        match p.to_lowercase().as_str() {
+            "hh\\void" => TypeStructureKind::T_void,
+            "hh\\int" => TypeStructureKind::T_int,
+            "hh\\bool" => TypeStructureKind::T_bool,
+            "hh\\float" => TypeStructureKind::T_float,
+            "hh\\string" => TypeStructureKind::T_string,
+            "hh\\resource" => TypeStructureKind::T_resource,
+            "hh\\num" => TypeStructureKind::T_num,
+            "hh\\noreturn" => TypeStructureKind::T_noreturn,
+            "hh\\arraykey" => TypeStructureKind::T_arraykey,
+            "hh\\mixed" => TypeStructureKind::T_mixed,
+            "tuple" => TypeStructureKind::T_tuple,
+            "$$internal$$fun" => TypeStructureKind::T_fun,
+            "_" | "$$internal$$typevar" => TypeStructureKind::T_typevar,
+            "shape" => TypeStructureKind::T_shape,
+            "class" => TypeStructureKind::T_class,
+            "interface" => TypeStructureKind::T_interface,
+            "trait" => TypeStructureKind::T_trait,
+            "enum" => TypeStructureKind::T_enum,
+            "hh\\dict" => TypeStructureKind::T_dict,
+            "hh\\vec" => TypeStructureKind::T_vec,
+            "hh\\keyset" => TypeStructureKind::T_keyset,
+            "hh\\vec_or_dict" => TypeStructureKind::T_vec_or_dict,
+            "hh\\nonnull" => TypeStructureKind::T_nonnull,
+            "hh\\darray" => TypeStructureKind::T_darray,
+            "hh\\varray" => TypeStructureKind::T_varray,
+            "hh\\varray_or_darray" => TypeStructureKind::T_varray_or_darray,
+            "hh\\anyarray" => TypeStructureKind::T_any_array,
+            "hh\\null" => TypeStructureKind::T_null,
+            "hh\\nothing" => TypeStructureKind::T_nothing,
+            "hh\\dynamic" => TypeStructureKind::T_dynamic,
+            "unresolved" => TypeStructureKind::T_unresolved,
+            "$$internal$$typeaccess" => TypeStructureKind::T_typeaccess,
+            "$$internal$$reifiedtype" => TypeStructureKind::T_reifiedtype,
+            _ if p.len() > 4 && p.starts_with("xhp_") => TypeStructureKind::T_xhp,
+            _ => TypeStructureKind::T_unresolved,
         }
-    }) as i64
-}
-
-fn is_prim(s: &str) -> bool {
-    match s {
-        "HH\\void" | "HH\\int" | "HH\\bool" | "HH\\float" | "HH\\string" | "HH\\resource"
-        | "HH\\num" | "HH\\noreturn" | "HH\\arraykey" | "HH\\mixed" | "HH\\nonnull"
-        | "HH\\null" | "HH\\nothing" | "HH\\dynamic" => true,
-        _ => false,
     }
 }
 
-fn is_resolved_classname(s: &str) -> bool {
-    match s {
-        "HH\\darray"
-        | "HH\\varray"
-        | "HH\\varray_or_darray"
-        | "HH\\vec"
-        | "HH\\dict"
-        | "HH\\keyset"
-        | "HH\\vec_or_dict"
-        | "HH\\AnyArray" => true,
-        _ => false,
-    }
+fn is_prim_or_resolved_classname(kind: TypeStructureKind) -> bool {
+    matches!(
+        kind,
+        // primitives
+        TypeStructureKind::T_void
+            | TypeStructureKind::T_int
+            | TypeStructureKind::T_bool
+            | TypeStructureKind::T_float
+            | TypeStructureKind::T_string
+            | TypeStructureKind::T_resource
+            | TypeStructureKind::T_num
+            | TypeStructureKind::T_noreturn
+            | TypeStructureKind::T_arraykey
+            | TypeStructureKind::T_mixed
+            | TypeStructureKind::T_nonnull
+            | TypeStructureKind::T_null
+            | TypeStructureKind::T_nothing
+            | TypeStructureKind::T_dynamic
+            // resolved classnames
+            | TypeStructureKind::T_darray
+            | TypeStructureKind::T_varray
+            | TypeStructureKind::T_varray_or_darray
+            | TypeStructureKind::T_vec
+            | TypeStructureKind::T_dict
+            | TypeStructureKind::T_keyset
+            | TypeStructureKind::T_vec_or_dict
+            | TypeStructureKind::T_any_array
+    )
 }
 
 fn shape_field_name<'arena>(alloc: &'arena bumpalo::Bump, sf: &ShapeFieldName) -> (String, bool) {
@@ -185,22 +189,22 @@ fn resolve_classname<'arena>(
     tparams: &[&str],
     mut s: String,
 ) -> (Option<DictEntry<'arena>>, String) {
-    let is_tparam = s == "_" || tparams.contains(&s.as_str());
-    if !is_tparam {
-        s = hhbc::ClassName::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string()
-    };
-    if is_prim(&s) || is_resolved_classname(&s) {
-        (None, s)
+    let kind = get_kind_num(tparams, &s);
+    let name_key = if kind != TypeStructureKind::T_typevar {
+        s = hhbc::ClassName::from_ast_name_and_mangle(alloc, s.as_str()).unsafe_into_string();
+        "classname"
     } else {
-        let id = if is_tparam { "name" } else { "classname" };
-        (
-            Some(DictEntry {
-                key: TypedValue::string(id),
-                value: TypedValue::alloc_string(s.as_str(), alloc),
-            }),
-            s,
-        )
-    }
+        "name"
+    };
+    let entry = if is_prim_or_resolved_classname(get_kind_num(tparams, &s)) {
+        None
+    } else {
+        Some(DictEntry {
+            key: TypedValue::string(name_key),
+            value: TypedValue::alloc_string(s.as_str(), alloc),
+        })
+    };
+    (entry, s)
 }
 
 fn get_generic_types<'arena>(
@@ -227,7 +231,7 @@ fn get_kind<'arena>(
 ) -> bumpalo::collections::vec::Vec<'arena, DictEntry<'arena>> {
     bumpalo::vec![in alloc; DictEntry{
         key: TypedValue::string("kind"),
-        value: TypedValue::Int(get_kind_num(tparams, s)),
+        value: TypedValue::Int(get_kind_num(tparams, s).repr as i64),
     }]
 }
 
@@ -392,7 +396,7 @@ fn hint_to_type_constant_list<'arena>(
         // TODO(coeffects) actually handle emission of context constants
         Hint_::Hintersection(_) => bumpalo::vec![in alloc; DictEntry {
             key: TypedValue::string("kind"),
-            value: TypedValue::Int(get_kind_num(tparams, "HH\\mixed")),
+            value: TypedValue::Int(get_kind_num(tparams, "HH\\mixed").repr as i64),
         }],
         _ => {
             return Err(Error::unrecoverable(

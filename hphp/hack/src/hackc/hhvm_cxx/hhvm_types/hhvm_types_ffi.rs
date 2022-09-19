@@ -91,11 +91,62 @@ pub mod ffi {
         UpperBound = 0x200,
     }
 
+    #[repr(u8)]
+    #[derive(Debug, Copy, Clone, Hash, Serialize)]
+    enum TypeStructureKind {
+        T_void = 0,
+        T_int = 1,
+        T_bool = 2,
+        T_float = 3,
+        T_string = 4,
+        T_resource = 5,
+        T_num = 6,
+        T_arraykey = 7,
+        T_noreturn = 8,
+        T_mixed = 9,
+        T_tuple = 10,
+        T_fun = 11,
+        T_typevar = 13, // corresponds to user OF_GENERIC
+        T_shape = 14,
+
+        // These values are only used after resolution in ext_reflection.cpp
+        T_class = 15,
+        T_interface = 16,
+        T_trait = 17,
+        T_enum = 18,
+
+        // Hack array types
+        T_dict = 19,
+        T_vec = 20,
+        T_keyset = 21,
+        T_vec_or_dict = 22,
+
+        T_nonnull = 23,
+
+        T_darray = 24,
+        T_varray = 25,
+        T_varray_or_darray = 26,
+        T_any_array = 27,
+
+        T_null = 28,
+        T_nothing = 29,
+        T_dynamic = 30,
+
+        // The following kinds needs class/alias resolution, and
+        // are generally not exposed to the users.
+        // Unfortunately this is a bit leaky, and a few of these are needed by tooling.
+        T_unresolved = 101,
+        T_typeaccess = 102,
+        T_xhp = 103,
+        T_reifiedtype = 104,
+    }
+
     unsafe extern "C++" {
         include!("hphp/hack/src/hackc/hhvm_cxx/hhvm_types/as-base-ffi.h");
         type Attr;
-        type TypeConstraintFlags;
         type AttrContext;
+        type TypeConstraintFlags;
+        type TypeStructureKind;
         fn attrs_to_string_ffi(ctx: AttrContext, attrs: Attr) -> String;
         fn type_flags_to_string_ffi(flags: TypeConstraintFlags) -> String;
     }

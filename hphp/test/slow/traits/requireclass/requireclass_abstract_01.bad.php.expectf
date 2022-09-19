@@ -1,0 +1,1 @@
+Fatal error: Trait 'T' may only be used from class 'C', which must be final in %s/requireclass_abstract_01.bad.php on line 6

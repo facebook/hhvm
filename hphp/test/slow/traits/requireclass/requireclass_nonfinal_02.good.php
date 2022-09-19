@@ -3,9 +3,13 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-trait MyTrait {
-  require class C<int>;
+class C {}
+
+trait T {
+  require class C;
 }
 
-final class C<T> {
+<<__EntryPoint>>
+function main(): void {
+  echo "done\n";
 }

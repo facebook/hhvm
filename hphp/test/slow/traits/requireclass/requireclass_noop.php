@@ -7,7 +7,7 @@ trait T {
   require class C;
 }
 
-class C {
+final class C {
   use T;
 
   public function foo(): void {

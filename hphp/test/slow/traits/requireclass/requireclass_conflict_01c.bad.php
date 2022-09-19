@@ -3,12 +3,10 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-final class C {}
+class C { use T1, T2; }
 
 trait T1 { require class C; }
-trait T2 { require implements C; }
-
-trait T { use T1, T2; }
+trait T2 { require extends C; }
 
 <<__EntryPoint>>
 function main(): void {

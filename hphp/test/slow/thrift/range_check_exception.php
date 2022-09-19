@@ -22,7 +22,7 @@ function test() {
   $v1 = new TestStruct();
   $v1->anI32 = 1 << 31;
   try {
-    thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20, true);
+    thrift_protocol_write_compact2($p, 'foomethod', 1, $v1, 20, true);
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }

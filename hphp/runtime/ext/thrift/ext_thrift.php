@@ -32,6 +32,15 @@ function thrift_protocol_write_compact(object $transportobj,
                                        bool $oneway = false): void;
 
 <<__Native>>
+function thrift_protocol_write_compact2(object $transportobj,
+                                        string $method_name,
+                                        int $msgtype,
+                                        object $request_struct,
+                                        int $seqid,
+                                        bool $oneway = false,
+                                        int $version = 2): void;
+
+<<__Native>>
 function thrift_protocol_read_compact(object $transportobj,
                                       string $obj_typename,
                                       int $options = 0): mixed;

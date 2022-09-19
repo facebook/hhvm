@@ -202,7 +202,7 @@ function testBadSpec($bad) {
   $v1->timeCreated = 5678;
   $v1->actionSource = 42;
   $v1->type = 87;
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v1, 20);
   var_dump(md5($p->getTransport()->buff));
 
   $p->getTransport()->pos = 0;

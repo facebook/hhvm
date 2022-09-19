@@ -58,10 +58,18 @@ impl<'a> FuncBuilder<'a> {
             .enumerate()
             .map(|(idx, constant)| (constant.clone(), ConstantId::from_usize(idx)))
             .collect();
+
+        let loc_lookup: HashMap<SrcLoc, LocId> = func
+            .locs
+            .iter()
+            .enumerate()
+            .map(|(idx, loc)| (loc.clone(), LocId::from_usize(idx)))
+            .collect();
+
         FuncBuilder {
             func,
             cur_bid: BlockId::NONE,
-            loc_lookup: Default::default(),
+            loc_lookup,
             constant_lookup,
             block_rewrite_stopped: false,
             changed: false,

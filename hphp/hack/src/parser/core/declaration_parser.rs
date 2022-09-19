@@ -227,9 +227,9 @@ where
         // We need to identify an element of an enum class. Possibilities
         // are:
         //
-        // // type-constant-declaration
-        // const type T = X;
-        // abstract const type T;
+        // // type-constant-declaration:
+        // const type name = type-specifier ;
+        // abstract const type name ;
         //
         // // enum-class-enumerator:
         // type-specifier name = expression ;
@@ -248,8 +248,9 @@ where
                 self.parse_type_const_declaration(attr, modifiers, const_)
             }
             _ => {
-                // TODO: dropping attr on the floor if any, because we currently
-                // don't have attributes on enum class members
+                if !attr.is_missing() {
+                    self.with_error(Errors::no_attributes_on_enum_class_enumerator)
+                }
                 self.parse_enum_class_enumerator()
             }
         }

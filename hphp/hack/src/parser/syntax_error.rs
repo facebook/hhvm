@@ -574,6 +574,8 @@ pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` 
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
+pub const no_attributes_on_enum_class_enumerator: Error =
+    Cow::Borrowed("Attributes on enum class enumerators are not allowed");
 pub const invalid_constant_initializer: Error =
     Cow::Borrowed("Expected constant expression for initializer");
 pub const parent_static_prop_decl: Error =

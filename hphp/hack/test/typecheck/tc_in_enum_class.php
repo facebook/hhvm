@@ -100,7 +100,7 @@ abstract class PPPAjoux {
     return $r;
   }
   public static function bar(IAntParent $ant): arraykey {
-    // except an error here
+    // expect an error here
     $r = $ant->get(#Bar);
     //              ^ hover-at-caret
     hh_show($r);

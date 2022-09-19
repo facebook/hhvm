@@ -7,8 +7,8 @@ use std::fmt;
 
 use env::emitter::Emitter;
 use env::ClassExpr;
-use ffi::Pair;
 use ffi::Str;
+use hhbc::DictEntry;
 use hhbc::TypedValue;
 use hhbc_string_utils as string_utils;
 use indexmap::IndexMap;
@@ -276,9 +276,10 @@ fn shape_to_typed_value<'arena, 'decl>(
                         )?
                     }
                 };
-                Ok((key, expr_to_typed_value(emitter, expr)?).into())
+                let value = expr_to_typed_value(emitter, expr)?;
+                Ok(DictEntry { key, value })
             })
-            .collect::<Result<Vec<Pair<_, _>>, _>>()?
+            .collect::<Result<Vec<_>, _>>()?
             .into_iter(),
     );
     Ok(TypedValue::dict(a))
@@ -563,14 +564,12 @@ fn int_expr_to_typed_value<'arena>(s: &str) -> Result<TypedValue<'arena>, Error>
 
 fn update_duplicates_in_map<'arena>(
     kvs: Vec<(TypedValue<'arena>, TypedValue<'arena>)>,
-) -> impl IntoIterator<
-    Item = Pair<TypedValue<'arena>, TypedValue<'arena>>,
-    IntoIter = impl ExactSizeIterator + 'arena,
-> + 'arena {
+) -> impl IntoIterator<Item = DictEntry<'arena>, IntoIter = impl ExactSizeIterator + 'arena> + 'arena
+{
     kvs.into_iter()
         .collect::<IndexMap<_, _, RandomState>>()
         .into_iter()
-        .map(std::convert::Into::into)
+        .map(|(key, value)| DictEntry { key, value })
 }
 
 fn cast_value<'arena>(

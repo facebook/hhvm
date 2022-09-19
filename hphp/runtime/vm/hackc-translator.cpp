@@ -250,21 +250,21 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         DictInit d(tv.Dict._0.len);
         auto set = range(tv.Dict._0);
         for (auto const& elt : set) {
-          switch (elt._0.tag) {
+          switch (elt.key.tag) {
             case kind::Int:
-              d.set(elt._0.Int._0, toTypedValue(elt._1));
+              d.set(elt.key.Int._0, toTypedValue(elt.value));
               break;
             case kind::String: {
-              auto const s = toStaticString(elt._0.String._0);
-              d.set(s, toTypedValue(elt._1));
+              auto const s = toStaticString(elt.key.String._0);
+              d.set(s, toTypedValue(elt.value));
               break;
             }
             case kind::LazyClass:{
               if (RuntimeOption::EvalRaiseClassConversionWarning) {
                 raise_class_to_string_conversion_warning();
               }
-              auto const s = toStaticString(elt._0.LazyClass._0);
-              d.set(s, toTypedValue(elt._1));
+              auto const s = toStaticString(elt.key.LazyClass._0);
+              d.set(s, toTypedValue(elt.value));
               break;
             }
             default:

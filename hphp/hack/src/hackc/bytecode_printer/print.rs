@@ -11,7 +11,6 @@ use std::write;
 
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use hash::HashSet;
@@ -25,6 +24,7 @@ use hhbc::ConstName;
 use hhbc::Constant;
 use hhbc::CtxConstant;
 use hhbc::DefaultValue;
+use hhbc::DictEntry;
 use hhbc::FCallArgs;
 use hhbc::Fatal;
 use hhbc::FatalOp;
@@ -679,11 +679,11 @@ fn print_adata_dict_collection_argument(
     w: &mut dyn Write,
     col_type: &str,
     loc: Option<&ast_defs::Pos>,
-    pairs: &[Pair<TypedValue<'_>, TypedValue<'_>>],
+    pairs: &[DictEntry<'_>],
 ) -> Result<()> {
-    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, Pair(v1, v2)| {
-        print_adata(ctx, w, v1)?;
-        print_adata(ctx, w, v2)
+    print_adata_mapped_argument(ctx, w, col_type, loc, pairs, |ctx, w, e| {
+        print_adata(ctx, w, &e.key)?;
+        print_adata(ctx, w, &e.value)
     })
 }
 
@@ -717,8 +717,8 @@ fn print_adata(ctx: &Context<'_>, w: &mut dyn Write, tv: &TypedValue<'_>) -> Res
         TypedValue::Vec(values) => {
             print_adata_collection_argument(ctx, w, Adata::VEC_PREFIX, None, values.as_ref())
         }
-        TypedValue::Dict(pairs) => {
-            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, None, pairs.as_ref())
+        TypedValue::Dict(entries) => {
+            print_adata_dict_collection_argument(ctx, w, Adata::DICT_PREFIX, None, entries.as_ref())
         }
         TypedValue::Keyset(values) => {
             print_adata_collection_argument(ctx, w, Adata::KEYSET_PREFIX, None, values.as_ref())

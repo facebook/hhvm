@@ -167,6 +167,4 @@ let to_json ?with_value:_ ?ignore_missing:_ node =
 
 let rust_parse _ _ = failwith "not implemented"
 
-let rust_parse_with_verify_sc _ _ = failwith "not implemented"
-
 let rust_parser_errors _ _ _ = failwith "not implemented"

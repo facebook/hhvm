@@ -1429,7 +1429,6 @@ version = "3.49.0"
 dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
- "verify_parser_ffi",
 ]
 
 [[package]]
@@ -3706,37 +3705,6 @@ dependencies = [
  "ir_core",
  "itertools 0.10.3",
  "print",
-]
-
-[[package]]
-name = "verify_parser"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "parser",
- "verify_smart_constructors",
-]
-
-[[package]]
-name = "verify_parser_ffi"
-version = "0.0.0"
-dependencies = [
- "ocamlrep",
- "ocamlrep_ocamlpool",
- "oxidized",
- "rust_parser_ffi",
- "verify_parser",
-]
-
-[[package]]
-name = "verify_smart_constructors"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ocamlrep",
- "parser_core_types",
- "smart_constructors",
- "syntax_smart_constructors",
 ]
 
 [[package]]

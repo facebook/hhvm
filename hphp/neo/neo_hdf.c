@@ -142,21 +142,6 @@ static NEOERR *_alloc_hdf (HDF **hdf, const char *name, size_t nlen,
   return STATUS_OK;
 }
 
-static void _dealloc_hdf_attr(HDF_ATTR **attr)
-{
-  HDF_ATTR *next;
-
-  while ((*attr) != NULL)
-  {
-    next = (*attr)->next;
-    if ((*attr)->key) free((*attr)->key);
-    if ((*attr)->value) free((*attr)->value);
-    free(*attr);
-    *attr = next;
-  }
-  *attr = NULL;
-}
-
 static void _dealloc_hdf (HDF **hdf)
 {
   HDF *myhdf = *hdf;
@@ -186,10 +171,6 @@ static void _dealloc_hdf (HDF **hdf)
     if (myhdf->alloc_value)
       free (myhdf->value);
     myhdf->value = NULL;
-  }
-  if (myhdf->attr != NULL)
-  {
-    _dealloc_hdf_attr(&(myhdf->attr));
   }
   if (myhdf->hash != NULL)
   {
@@ -347,49 +328,6 @@ char* hdf_obj_value (HDF *hdf, NEOERR** err)
   return hdf->value;
 }
 
-void _merge_attr (HDF_ATTR *dest, HDF_ATTR *src)
-{
-  HDF_ATTR *da, *ld;
-  HDF_ATTR *sa, *ls;
-  char found;
-
-  sa = src;
-  ls = src;
-  while (sa != NULL)
-  {
-    da = dest;
-    ld = da;
-    found = 0;
-    while (da != NULL)
-    {
-      if (!strcmp(da->key, sa->key))
-      {
-	if (da->value) free(da->value);
-	da->value = sa->value;
-	sa->value = NULL;
-	found = 1;
-	break;
-      }
-      ld = da;
-      da = da->next;
-    }
-    if (!found)
-    {
-      ld->next = sa;
-      ls->next = sa->next;
-      if (src == sa) src = sa->next;
-      ld->next->next = NULL;
-      sa = ls->next;
-    }
-    else
-    {
-      ls = sa;
-      sa = sa->next;
-    }
-  }
-  _dealloc_hdf_attr(&src);
-}
-
 NEOERR* _hdf_hash_level(HDF *hdf)
 {
   NEOERR *err;
@@ -409,8 +347,7 @@ NEOERR* _hdf_hash_level(HDF *hdf)
 }
 
 static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
-                           int dupl, int wf, HDF_ATTR *attr,
-                           HDF **set_node)
+                           int dupl, int wf, HDF **set_node)
 {
   NEOERR *err;
   HDF *hn, *hp, *hs;
@@ -429,15 +366,6 @@ static NEOERR* _set_value (HDF *hdf, const char *name, const char *value,
   /* HACK: allow setting of this node by passing an empty name */
   if (name == NULL || name[0] == '\0')
   {
-    /* handle setting attr first */
-    if (hdf->attr == NULL)
-    {
-      hdf->attr = attr;
-    }
-    else
-    {
-      _merge_attr(hdf->attr, attr);
-    }
     /* if we're setting ourselves to ourselves... */
     if (hdf->value == value)
     {
@@ -542,7 +470,6 @@ skip_search:
       else
       {
 	err = _alloc_hdf (&hp, n, x, value, dupl, wf, hdf->top);
-	hp->attr = attr;
       }
       if (err != STATUS_OK)
 	return nerr_pass (err);
@@ -569,15 +496,6 @@ skip_search:
     {
       /* If there is a matching node and we're at the end of the HDF
        * name, then we update the value of the node */
-      /* handle setting attr first */
-      if (hp->attr == NULL)
-      {
-	hp->attr = attr;
-      }
-      else
-      {
-	_merge_attr(hp->attr, attr);
-      }
       if (hp->value != value)
       {
 	if (hp->alloc_value)
@@ -625,7 +543,7 @@ skip_search:
 
 NEOERR* hdf_set_value (HDF *hdf, const char *name, const char *value)
 {
-  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL, NULL));
+  return nerr_pass(_set_value (hdf, name, value, 1, 1, NULL));
 }
 
 NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
@@ -635,7 +553,7 @@ NEOERR* hdf_get_node (HDF *hdf, const char *name, HDF **ret)
   if (*ret == NULL)
   {
     if (err != STATUS_OK) return err;
-    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, NULL, ret));
+    return nerr_pass(_set_value (hdf, name, NULL, 0, 1, ret));
   }
   return STATUS_OK;
 }
@@ -714,54 +632,17 @@ NEOERR* hdf_remove_tree (HDF *hdf, const char *name)
   return STATUS_OK;
 }
 
-static NEOERR * _copy_attr (HDF_ATTR **dest, HDF_ATTR *src)
-{
-  HDF_ATTR *copy, *last = NULL;
-
-  *dest = NULL;
-  while (src != NULL)
-  {
-    copy = (HDF_ATTR *)malloc(sizeof(HDF_ATTR));
-    if (copy == NULL)
-    {
-      _dealloc_hdf_attr(dest);
-      return nerr_raise(NERR_NOMEM, "Unable to allocate copy of HDF_ATTR");
-    }
-    copy->key = strdup(src->key);
-    copy->value = strdup(src->value);
-    copy->next = NULL;
-    if ((copy->key == NULL) || (copy->value == NULL))
-    {
-      _dealloc_hdf_attr(dest);
-      return nerr_raise(NERR_NOMEM, "Unable to allocate copy of HDF_ATTR");
-    }
-    if (last) {
-      last->next = copy;
-    }
-    else
-    {
-      *dest = copy;
-    }
-    last = copy;
-    src = src->next;
-  }
-  return STATUS_OK;
-}
-
 static NEOERR * _copy_nodes (HDF *dest, HDF *src)
 {
   NEOERR *err = STATUS_OK;
   HDF *dt, *st;
-  HDF_ATTR *attr_copy;
 
   st = src->child;
   while (st != NULL)
   {
-    err = _copy_attr(&attr_copy, st->attr);
     if (err) return nerr_pass(err);
-    err = _set_value(dest, st->name, st->value, 1, 1, attr_copy, &dt);
+    err = _set_value(dest, st->name, st->value, 1, 1, &dt);
     if (err) {
-      _dealloc_hdf_attr(&attr_copy);
       return nerr_pass(err);
     }
     if (src->child)
@@ -778,25 +659,19 @@ NEOERR* hdf_copy (HDF *dest, const char *name, HDF *src)
 {
   NEOERR *err;
   HDF *node;
-  HDF_ATTR *attr_copy;
 
   err = STATUS_OK;
   if (_walk_hdf(dest, name, &node, &err) == -1)
   {
     if (err) return err;
-    err = _copy_attr(&attr_copy, src->attr);
     if (err) return nerr_pass(err);
-    err = _set_value (dest, name, src->value, 1, 1, attr_copy, &node);
+    err = _set_value (dest, name, src->value, 1, 1, &node);
     if (err) {
-      _dealloc_hdf_attr(&attr_copy);
       return nerr_pass(err);
     }
   }
   return nerr_pass (_copy_nodes (node, src));
 }
-
-/* BUG: currently, this only prints something if there is a value...
- * but we now allow attributes on nodes with no value... */
 
 static void gen_ml_break(char *ml, size_t len)
 {
@@ -880,38 +755,6 @@ static NEOERR* hdf_dump_cb(HDF *hdf, const char *prefix, int dtype, int lvl,
 	err = dump_cbf(rock, "%s%s", whsp, hdf->name);
       }
       if (err) return nerr_pass (err);
-      if (hdf->attr)
-      {
-	HDF_ATTR *attr = hdf->attr;
-	char *v = NULL;
-
-	err = dump_cbf(rock, " [");
-	if (err) return nerr_pass(err);
-	while (attr != NULL)
-	{
-    //#undef strcmp
-	  if (attr->value == NULL || !strcmp(attr->value, "1"))
-	    err = dump_cbf(rock, "%s", attr->key);
-	  else
-	  {
-	    v = repr_string_alloc(attr->value);
-
-	    if (v == NULL)
-	      return nerr_raise(NERR_NOMEM, "Unable to repr attr %s value %s", attr->key, attr->value);
-	    err = dump_cbf(rock, "%s=%s", attr->key, v);
-	    free(v);
-	  }
-	  if (err) return nerr_pass(err);
-	  if (attr->next)
-	  {
-	    err = dump_cbf(rock, ", ");
-	    if (err) return nerr_pass(err);
-	  }
-	  attr = attr->next;
-	}
-	err = dump_cbf(rock, "] ");
-	if (err) return nerr_pass(err);
-      }
       if (strchr (hdf->value, '\n'))
       {
 	int vlen = strlen(hdf->value);
@@ -1084,146 +927,6 @@ char *_strndup(const char *s, int len) {
   return dupl;
 }
 
-/* attributes are of the form [key1, key2, key3=value, key4="repr"] */
-static NEOERR* parse_attr(char **str, HDF_ATTR **attr)
-{
-  NEOERR *err = STATUS_OK;
-  char *s = *str;
-  char *k, *v;
-  int k_l, v_l;
-  NEOSTRING buf;
-  char c;
-  HDF_ATTR *ha, *hal = NULL;
-
-  *attr = NULL;
-
-  string_init(&buf);
-  while (*s && *s != ']')
-  {
-    k = s;
-    k_l = 0;
-    v = NULL;
-    v_l = 0;
-    while (*s && isalnum(*s)) s++;
-    k_l = s-k;
-    if (*s == '\0' || k_l == 0)
-    {
-      _dealloc_hdf_attr(attr);
-      return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
-    }
-    SKIPWS(s);
-    if (*s == '=')
-    {
-      s++;
-      SKIPWS(s);
-      if (*s == '"')
-      {
-	s++;
-	while (*s && *s != '"')
-	{
-	  if (*s == '\\')
-	  {
-	    if (isdigit(*(s+1)))
-	    {
-	      s++;
-	      c = *s - '0';
-	      if (isdigit(*(s+1)))
-	      {
-		s++;
-		c = (c * 8) + (*s - '0');
-		if (isdigit(*(s+1)))
-		{
-		  s++;
-		  c = (c * 8) + (*s - '0');
-		}
-	      }
-	    }
-	    else
-	    {
-	      s++;
-	      if (*s == 'n') c = '\n';
-	      else if (*s == 't') c = '\t';
-	      else if (*s == 'r') c = '\r';
-	      else c = *s;
-	    }
-	    err = string_append_char(&buf, c);
-	  }
-	  else
-	  {
-	    err = string_append_char(&buf, *s);
-	  }
-	  if (err)
-	  {
-	    string_clear(&buf);
-	    _dealloc_hdf_attr(attr);
-	    return nerr_pass(err);
-	  }
-	  s++;
-	}
-	if (*s == '\0')
-	{
-	  _dealloc_hdf_attr(attr);
-	  string_clear(&buf);
-	  return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
-	}
-	s++;
-	v = buf.buf;
-        v_l = buf.len;
-      }
-      else
-      {
-	v = s;
-	while (*s && *s != ' ' && *s != ',' && *s != ']') s++;
-	if (*s == '\0')
-	{
-	  _dealloc_hdf_attr(attr);
-	  return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
-	}
-        v_l = s-v;
-      }
-    }
-    else
-    {
-      v = "1";
-    }
-    ha = (HDF_ATTR*) calloc (1, sizeof(HDF_ATTR));
-    if (ha == NULL)
-    {
-      _dealloc_hdf_attr(attr);
-      string_clear(&buf);
-      return nerr_raise(NERR_NOMEM, "Unable to load attributes: %s", s);
-    }
-    if (*attr == NULL) *attr = ha;
-    ha->key = _strndup(k, k_l);
-    if (v)
-      ha->value = _strndup(v, v_l);
-    else
-      ha->value = strdup("");
-    if (ha->key == NULL || ha->value == NULL)
-    {
-      _dealloc_hdf_attr(attr);
-      string_clear(&buf);
-      return nerr_raise(NERR_NOMEM, "Unable to load attributes: %s", s);
-    }
-    if (hal != NULL) hal->next = ha;
-    hal = ha;
-    string_clear(&buf);
-    SKIPWS(s);
-    if (*s == ',')
-    {
-      s++;
-      SKIPWS(s);
-    }
-  }
-  if (*s == '\0')
-  {
-    _dealloc_hdf_attr(attr);
-    return nerr_raise(NERR_PARSE, "Malformed attribute specification: %s", *str);
-  }
-  *str = s+1;
-  return STATUS_OK;
-}
-
 #define INCLUDE_ERROR -1
 #define INCLUDE_IGNORE -2
 #define INCLUDE_FILE 0
@@ -1236,7 +939,6 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
   HDF *lower;
   char *s;
   char *name, *value;
-  HDF_ATTR *attr = NULL;
 
   while (**str != '\0')
   {
@@ -1244,7 +946,6 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     line->len = 0;
     err = _copy_line_advance(str, line);
     if (err) return nerr_pass(err);
-    attr = NULL;
     (*lineno)++;
     s = line->buf;
     SKIPWS(s);
@@ -1378,7 +1079,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
 	name = neos_strip(name);
 	s++;
 	value = neos_strip(s);
-	err = _set_value (hdf, name, value, 1, 1, attr, NULL);
+	err = _set_value (hdf, name, value, 1, 1, NULL);
 	if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
@@ -1403,11 +1104,11 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
 	lower = hdf_get_obj (hdf, name, &err);
 	if (lower == NULL)
 	{
-	  err = _set_value (hdf, name, NULL, 1, 1, attr, &lower);
+	  err = _set_value (hdf, name, NULL, 1, 1, &lower);
 	}
 	else
 	{
-	  err = _set_value (lower, NULL, lower->value, 1, 1, attr, NULL);
+	  err = _set_value (lower, NULL, lower->value, 1, 1, NULL);
 	}
 	if (err != STATUS_OK)
         {
@@ -1470,7 +1171,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
       m = (char *) new_ptr;
 	  }
 	}
-	err = _set_value (hdf, name, m, 0, 1, attr, NULL);
+	err = _set_value (hdf, name, m, 0, 1, NULL);
 	if (err != STATUS_OK)
 	{
 	  free (m);

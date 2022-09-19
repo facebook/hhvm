@@ -1318,24 +1318,34 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     {
       /* Valid hdf name is [0-9a-zA-Z_.*\]+ */
       int splice = *s == '@';
-      if (splice) s++;
-      name = s;
-      while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '*' || *s == '\\')) s++;
-      SKIPWS(s);
-
       char num[256];
       static int counter = 0;
-      char *p;
-      int i = 0;
-      for (p = name; p < s && i < 200; p++) {
-        if (*p != '*') {
-          num[i++] = *p;
-        } else {
-          i += snprintf(num + i, 256 - i, "%d", counter++);
-          name = num;
+      if (splice) s++;
+      name = s;
+      if (*s == '*') {
+        if (*s++ && (isalnum(*s) || *s == '_' || *s == '.' || *s == '\\')) {
+          return nerr_raise(NERR_PARSE, "Illegal name containing '*'");
+        }
+        snprintf(num, 256, "%d", counter++);
+        name = num;
+      } else {
+        int saw_star = 0;
+        while (*s && (isalnum(*s) || *s == '_' || *s == '.' || *s == '\\')) {
+          if (saw_star || (*s++ != '.' && *s == '*')) {
+            return nerr_raise(NERR_PARSE, "Illegal name containing '*'");
+          } else if (*s == '*') {
+            if (splice) {
+              return nerr_raise(NERR_PARSE,
+                                "Illegal splice name containing '*'");
+            }
+            *s++ = '\0';
+            snprintf(num, 256, "%s%i", name, counter++);
+            name = num;
+            saw_star = 1;
+          }
         }
       }
-      num[i] = '\0';
+      SKIPWS(s);
 
       if (s[0] == '[') /* attributes */
       {

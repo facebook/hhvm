@@ -22,6 +22,7 @@ import thrift.annotation.thrift.ttypes
 import thrift.annotation.scope.ttypes
 import thrift.annotation.hack.ttypes
 
+import ::my
 import my
 
 
@@ -890,7 +891,7 @@ class Bar:
         if ftype == TType.STRUCT:
           self.structField = Foo()
           self.structField.read(iprot)
-          self.structField = my.Adapter1.from_thrift(self.structField)
+          self.structField = ::my.Adapter1.from_thrift(self.structField)
         else:
           iprot.skip(ftype)
       elif fid == 2:
@@ -973,7 +974,7 @@ class Bar:
     oprot.writeStructBegin('Bar')
     if self.structField != None:
       oprot.writeFieldBegin('structField', TType.STRUCT, 1)
-      adpt134 = my.Adapter1.to_thrift(self.structField)
+      adpt134 = ::my.Adapter1.to_thrift(self.structField)
       adpt134.write(oprot)
       oprot.writeFieldEnd()
     if self.optionalStructField != None:
@@ -2139,7 +2140,7 @@ Baz.__init__ = Baz__init__
 all_structs.append(Bar)
 Bar.thrift_spec = (
   None, # 0
-  (1, TType.STRUCT, 'structField', [Foo, Foo.thrift_spec, False, my.Adapter1], None, 2, ), # 1
+  (1, TType.STRUCT, 'structField', [Foo, Foo.thrift_spec, False, ::my.Adapter1], None, 2, ), # 1
   (2, TType.STRUCT, 'optionalStructField', [Foo, Foo.thrift_spec, False, my.Adapter1], None, 1, ), # 2
   (3, TType.LIST, 'structListField', (TType.STRUCT,[Foo, Foo.thrift_spec, False, my.Adapter1]), None, 2, ), # 3
   (4, TType.LIST, 'optionalStructListField', (TType.STRUCT,[Foo, Foo.thrift_spec, False, my.Adapter1]), None, 1, ), # 4

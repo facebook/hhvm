@@ -1391,9 +1391,9 @@ AdaptedFields::AdaptedFields(const AdaptedFields& srcObj) :
     __fbthrift_field_field1(srcObj.__fbthrift_field_field1),
     __fbthrift_field_field2(srcObj.__fbthrift_field_field2),
     __fbthrift_field_field3(srcObj.__fbthrift_field_field3) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_field1, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 2>(__fbthrift_field_field2, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 3>(__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 2>(__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
 AdaptedFields& AdaptedFields::operator=(const AdaptedFields& other) {
@@ -1406,9 +1406,9 @@ AdaptedFields::AdaptedFields(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept 
     __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
     __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
     __fbthrift_field_field3(std::move(other.__fbthrift_field_field3)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_field1, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 2>(__fbthrift_field_field2, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 3>(__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 2>(__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
 AdaptedFields& AdaptedFields::operator=(FOLLY_MAYBE_UNUSED AdaptedFields&& other) noexcept {
@@ -1419,27 +1419,27 @@ AdaptedFields& AdaptedFields::operator=(FOLLY_MAYBE_UNUSED AdaptedFields&& other
 }
 
 
-AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thrift::test::terse_write::MyInteger field1__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter, 2, ::std::int32_t, AdaptedFields> field2__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields> field3__arg) :
+AdaptedFields::AdaptedFields(apache::thrift::FragileConstructor, ::facebook::thrift::test::terse_write::MyInteger field1__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 2, ::std::int32_t, AdaptedFields> field2__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::facebook::thrift::test::terse_write::MyInteger, AdaptedFields> field3__arg) :
     __fbthrift_field_field1(std::move(field1__arg)),
     __fbthrift_field_field2(std::move(field2__arg)),
     __fbthrift_field_field3(std::move(field3__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_field1, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 2>(__fbthrift_field_field2, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 3>(__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 2>(__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
 
 void AdaptedFields::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 1>(__fbthrift_field_field1, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 2>(__fbthrift_field_field2, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 3>(__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 1>(__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 2>(__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
 void AdaptedFields::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 1>(__fbthrift_field_field1, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 2>(__fbthrift_field_field2, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 3>(__fbthrift_field_field3, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 1>(__fbthrift_field_field1, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 2>(__fbthrift_field_field2, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_field3, *this);
 }
 
 bool AdaptedFields::__fbthrift_is_empty() const {
@@ -1450,13 +1450,13 @@ bool AdaptedFields::__fbthrift_is_empty() const {
 
 bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3)) {
     return false;
   }
   return true;
@@ -1464,14 +1464,14 @@ bool AdaptedFields::operator==(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) cons
 
 bool AdaptedFields::operator<(FOLLY_MAYBE_UNUSED const AdaptedFields& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_field1, rhs.__fbthrift_field_field1);
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_field2, rhs.__fbthrift_field_field2);
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_field3, rhs.__fbthrift_field_field3);
   }
   return false;
 }
@@ -1604,8 +1604,8 @@ template uint32_t TerseException::serializedSizeZC<>(apache::thrift::CompactProt
 
 namespace facebook { namespace thrift { namespace test { namespace terse_write { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter, 1, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter, 2, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 2, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int32_t, ::facebook::thrift::test::terse_write::AdaptedFields>();
 }
 }}}}} // facebook::thrift::test::terse_write

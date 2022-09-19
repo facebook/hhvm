@@ -79,7 +79,7 @@
       },
       "Adapter" : {
         "name" : "Adapter",
-        "docstring" : "An annotation that applies a C++ adapter to typedef, field, or struct.\n\nFor example:\n\n  @cpp.Adapter{name = \"IdAdapter\"}\n  typedef i64 MyI64;\n\nHere the type `MyI64` has the C++ adapter `IdAdapter`.\n\n  struct User {\n    @cpp.Adapter{name = \"IdAdapter\"}\n    1: i64 id;\n  }\n\nHere the field `id` has the C++ adapter `IdAdapter`.\n",
+        "docstring" : "An annotation that applies a C++ adapter to typedef, field, or struct.\n\nFor example:\n\n  @cpp.Adapter{name = \"::ns::IdAdapter\"}\n  typedef i64 MyI64;\n\nHere the type `MyI64` has the C++ adapter `IdAdapter`.\n\n  struct User {\n    @cpp.Adapter{name = \"::ns::IdAdapter\"}\n    1: i64 id;\n  }\n\nHere the field `id` has the C++ adapter `IdAdapter`.\n",
         "fields" : {
           "name" : {
             "name" : "name",

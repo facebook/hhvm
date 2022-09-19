@@ -1124,7 +1124,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 typedef ::a::different::ns::AStruct AStruct;
-typedef ::apache::thrift::adapt_detail::adapted_t<CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
+typedef ::apache::thrift::adapt_detail::adapted_t<::CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
 typedef ::std::int32_t simpleTypeDef;
 typedef ::std::map<::std::int16_t, ::std::string> containerTypeDef;
 typedef ::std::vector<::std::map<::std::int16_t, ::std::string>> complexContainerTypeDef;

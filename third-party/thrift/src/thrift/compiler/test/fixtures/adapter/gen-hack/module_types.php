@@ -712,7 +712,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -727,7 +727,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -742,7 +742,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -758,7 +758,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
           ],
@@ -773,7 +773,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
           ],
@@ -787,7 +787,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter3",
+                "name" => "::my::Adapter3",
               )
             ),
           ],
@@ -802,7 +802,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter3",
+                "name" => "::my::Adapter3",
               )
             ),
           ],
@@ -817,7 +817,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter3",
+                "name" => "::my::Adapter3",
               )
             ),
           ],
@@ -828,7 +828,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
@@ -842,7 +842,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
             '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
@@ -855,7 +855,7 @@ class Foo implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
@@ -1477,7 +1477,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -1493,7 +1493,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
           ],
@@ -1507,7 +1507,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter3",
+                "name" => "::my::Adapter3",
               )
             ),
           ],
@@ -1522,7 +1522,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -1533,7 +1533,7 @@ class Baz implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\BazEnum>, \I
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\test\MyAnnotation' => \thrift\test\MyAnnotation::fromShape(
@@ -2029,8 +2029,8 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
-                "adaptedType" => "my::Cpp::Type1",
+                "name" => "::my::Adapter1",
+                "adaptedType" => "::my::Cpp::Type1",
               )
             ),
           ],
@@ -2045,7 +2045,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -2060,7 +2060,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -2075,7 +2075,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
           ],
@@ -2086,7 +2086,7 @@ class Bar implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
             '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
@@ -2288,7 +2288,7 @@ class DirectlyAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "my::Adapter",
+            "name" => "::my::Adapter",
           )
         ),
         '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
@@ -2494,7 +2494,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\python\Adapter' => \thrift\annotation\python\Adapter::fromShape(
@@ -2510,7 +2510,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
@@ -2525,7 +2525,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
@@ -2540,7 +2540,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\Box' => \thrift\annotation\Box::fromShape(
@@ -2764,7 +2764,7 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
@@ -2778,7 +2778,7 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
@@ -2792,7 +2792,7 @@ class TerseAdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter1",
+                "name" => "::my::Adapter1",
               )
             ),
             '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
@@ -2975,7 +2975,7 @@ class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
           ],
@@ -3356,7 +3356,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
           ],

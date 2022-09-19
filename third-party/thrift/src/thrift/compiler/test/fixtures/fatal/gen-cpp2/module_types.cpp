@@ -4011,7 +4011,7 @@ const folly::StringPiece StructWithFieldAdapter::__fbthrift_get_field_name(::apa
 StructWithFieldAdapter::StructWithFieldAdapter(const StructWithFieldAdapter& srcObj) :
     __fbthrift_field_field(srcObj.__fbthrift_field_field),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
 }
 
 StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldAdapter& other) {
@@ -4021,16 +4021,16 @@ StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldA
 }
 
 
-StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg) :
+StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg) :
     __fbthrift_field_field(std::move(field__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void StructWithFieldAdapter::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_field, *this);
   __isset = {};
 }
 
@@ -4043,7 +4043,7 @@ bool StructWithFieldAdapter::__fbthrift_is_empty() const {
 
 bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
     return false;
   }
   return true;
@@ -4051,8 +4051,8 @@ bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithField
 
 bool StructWithFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field);
   }
   return false;
 }
@@ -4179,7 +4179,7 @@ template uint32_t UnionWithTypedefFieldAdapter::serializedSizeZC<>(apache::thrif
 
 namespace test_cpp2 { namespace cpp_reflection { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::test_cpp2::cpp_reflection::UnionWithTypedefFieldAdapter>();
 }
 }}} // test_cpp2::cpp_reflection

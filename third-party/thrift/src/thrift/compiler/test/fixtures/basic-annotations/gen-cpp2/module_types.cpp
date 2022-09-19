@@ -360,7 +360,7 @@ YourStruct::YourStruct(const YourStruct& srcObj) :
     __fbthrift_field_my_union(srcObj.__fbthrift_field_my_union),
     __fbthrift_field_my_id(srcObj.__fbthrift_field_my_id),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<StaticCast, 9>(__fbthrift_field_my_union, *this);
+  ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
 YourStruct& YourStruct::operator=(const YourStruct& other) {
@@ -373,7 +373,7 @@ YourStruct::YourStruct() :
       __fbthrift_field_majorVer(),
       __fbthrift_field_my_enum(),
       __fbthrift_field_my_id() {
-  ::apache::thrift::adapt_detail::construct<StaticCast, 9>(__fbthrift_field_my_union, *this);
+  ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
 
@@ -391,7 +391,7 @@ YourStruct::YourStruct(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept :
     __fbthrift_field_my_union(std::move(other.__fbthrift_field_my_union)),
     __fbthrift_field_my_id(std::move(other.__fbthrift_field_my_id)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<StaticCast, 9>(__fbthrift_field_my_union, *this);
+  ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
 }
 
 YourStruct& YourStruct::operator=(FOLLY_MAYBE_UNUSED YourStruct&& other) noexcept {
@@ -421,7 +421,7 @@ YourStruct::YourStruct(apache::thrift::FragileConstructor, ::std::int64_t majorV
     __fbthrift_field_cpp_type_annotation(std::move(cpp_type_annotation__arg)),
     __fbthrift_field_my_union(std::move(my_union__arg)),
     __fbthrift_field_my_id(std::move(my_id__arg)) {
-  ::apache::thrift::adapt_detail::construct<StaticCast, 9>(__fbthrift_field_my_union, *this);
+  ::apache::thrift::adapt_detail::construct<::StaticCast, 9>(__fbthrift_field_my_union, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -482,7 +482,7 @@ bool YourStruct::operator==(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
   if (!(lhs.cpp_type_annotation_ref() == rhs.cpp_type_annotation_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
+  if (::apache::thrift::adapt_detail::not_equal<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
     return false;
   }
   if (!(lhs.my_id_ref() == rhs.my_id_ref())) {
@@ -517,8 +517,8 @@ bool YourStruct::operator<(FOLLY_MAYBE_UNUSED const YourStruct& rhs) const {
   if (!(lhs.cpp_type_annotation_ref() == rhs.cpp_type_annotation_ref())) {
     return lhs.cpp_type_annotation_ref() < rhs.cpp_type_annotation_ref();
   }
-  if (::apache::thrift::adapt_detail::not_equal<StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
-    return ::apache::thrift::adapt_detail::less<StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union);
+  if (::apache::thrift::adapt_detail::not_equal<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union)) {
+    return ::apache::thrift::adapt_detail::less<::StaticCast>(lhs.__fbthrift_field_my_union, rhs.__fbthrift_field_my_union);
   }
   if (!(lhs.my_id_ref() == rhs.my_id_ref())) {
     return lhs.my_id_ref() < rhs.my_id_ref();
@@ -679,6 +679,6 @@ template uint32_t SecretStruct::serializedSizeZC<>(apache::thrift::CompactProtoc
 
 namespace cpp2 { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<StaticCast, 9, ::cpp2::detail::YourUnion, ::cpp2::detail::YourStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::StaticCast, 9, ::cpp2::detail::YourUnion, ::cpp2::detail::YourStruct>();
 }
 }} // cpp2

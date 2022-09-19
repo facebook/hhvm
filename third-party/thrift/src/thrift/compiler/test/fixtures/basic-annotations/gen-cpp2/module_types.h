@@ -429,7 +429,7 @@ unsigned long YourUnion::read(Protocol_* iprot) {
 }
 } // namespace detail
 
-using YourUnion = ::apache::thrift::adapt_detail::adapted_t<StaticCast, ::cpp2::detail::YourUnion>;
+using YourUnion = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourUnion>;
 
 
 namespace detail {
@@ -511,7 +511,7 @@ unsigned long YourException::read(Protocol_* iprot) {
 }
 } // namespace detail
 
-using YourException = ::apache::thrift::adapt_detail::adapted_t<StaticCast, ::cpp2::detail::YourException>;
+using YourException = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourException>;
 
 
 namespace detail {
@@ -551,7 +551,7 @@ class YourStruct final  {
                                                          ::apache::thrift::type::string_t,
                                                          ::apache::thrift::type::enum_t<::cpp2::YourEnum>,
                                                          ::apache::thrift::type::cpp_type<std::deque<std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::adapted<StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>,
+                                                         ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>,
                                                          ::apache::thrift::type::cpp_type<::cpp2::MyId, ::apache::thrift::type::i16_t>>;
 
   template<class T>
@@ -627,7 +627,7 @@ class YourStruct final  {
     template<class T> struct Impl<::apache::thrift::type::string_t, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
     template<class T> struct Impl<::apache::thrift::type::enum_t<::cpp2::YourEnum>, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
     template<class T> struct Impl<::apache::thrift::type::cpp_type<std::deque<std::string>, ::apache::thrift::type::list<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -8>> { static constexpr int value = 8; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::union_t<::cpp2::detail::YourUnion>>, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
     template<class T> struct Impl<::apache::thrift::type::cpp_type<::cpp2::MyId, ::apache::thrift::type::i16_t>, T, std::enable_if_t<sizeof(T) != -10>> { static constexpr int value = 10; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
@@ -1240,7 +1240,7 @@ unsigned long YourStruct::read(Protocol_* iprot) {
 }
 } // namespace detail
 
-using YourStruct = ::apache::thrift::adapt_detail::adapted_t<StaticCast, ::cpp2::detail::YourStruct>;
+using YourStruct = ::apache::thrift::adapt_detail::adapted_t<::StaticCast, ::cpp2::detail::YourStruct>;
 
 
 class SecretStruct final  {

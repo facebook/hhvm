@@ -397,8 +397,8 @@ MyStruct::MyStruct(const MyStruct& srcObj) :
     __fbthrift_field_MyCustomField(srcObj.__fbthrift_field_MyCustomField),
     __fbthrift_field_MyOptCustomField(srcObj.__fbthrift_field_MyOptCustomField),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 MyStruct& MyStruct::operator=(const MyStruct& other) {
@@ -414,8 +414,8 @@ MyStruct::MyStruct() :
       __fbthrift_field_MyMapEnumAndInt(static_cast<::std::map<::some::valid::ns::MyEnumA, ::std::string>>(std::initializer_list<std::pair<const ::some::valid::ns::MyEnumA, ::std::string>>{{ ::some::valid::ns::MyEnumA::fieldA, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldA")},
   { ::some::valid::ns::MyEnumA::fieldC, apache::thrift::StringTraits<std::string>::fromStringLiteral("fieldC")},
   {static_cast< ::some::valid::ns::MyEnumA>(9), apache::thrift::StringTraits<std::string>::fromStringLiteral("nothing")}})) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 
@@ -434,8 +434,8 @@ MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_MyCustomField(std::move(other.__fbthrift_field_MyCustomField)),
     __fbthrift_field_MyOptCustomField(std::move(other.__fbthrift_field_MyOptCustomField)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
@@ -467,8 +467,8 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, bool MyBoolField__arg, ::
     __fbthrift_field_MyMapEnumAndInt(std::move(MyMapEnumAndInt__arg)),
     __fbthrift_field_MyCustomField(std::move(MyCustomField__arg)),
     __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -493,8 +493,8 @@ void MyStruct::__fbthrift_clear() {
   this->__fbthrift_field_MyBinaryField3 = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_MyBinaryListField4.clear();
   this->__fbthrift_field_MyMapEnumAndInt.clear();
-  ::apache::thrift::adapt_detail::clear<CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::clear<CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::clear<::CustomProtocolAdapter, 10>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::clear<::CustomProtocolAdapter, 11>(__fbthrift_field_MyOptCustomField, *this);
   __isset = {};
 }
 
@@ -534,10 +534,10 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.MyMapEnumAndInt_ref() == rhs.MyMapEnumAndInt_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
     return false;
   }
   return true;
@@ -572,11 +572,11 @@ bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.MyMapEnumAndInt_ref() == rhs.MyMapEnumAndInt_ref())) {
     return lhs.MyMapEnumAndInt_ref() < rhs.MyMapEnumAndInt_ref();
   }
-  if (::apache::thrift::adapt_detail::not_equal<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
-    return ::apache::thrift::adapt_detail::less<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
+  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
+    return ::apache::thrift::adapt_detail::less<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
-    return ::apache::thrift::adapt_detail::neq_less_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
+  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
+    return ::apache::thrift::adapt_detail::neq_less_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
   }
   return false;
 }
@@ -1165,8 +1165,8 @@ AnException::AnException(const AnException& srcObj) :
     __fbthrift_field_MyCustomField(srcObj.__fbthrift_field_MyCustomField),
     __fbthrift_field_MyOptCustomField(srcObj.__fbthrift_field_MyOptCustomField),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 AnException& AnException::operator=(const AnException& other) {
@@ -1182,8 +1182,8 @@ AnException::AnException() :
   2,
   3})),
       __fbthrift_field_enum_field() {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 AnException::AnException(std::string __message) : AnException() {
@@ -1212,8 +1212,8 @@ AnException::AnException(FOLLY_MAYBE_UNUSED AnException&& other) noexcept :
     __fbthrift_field_MyCustomField(std::move(other.__fbthrift_field_MyCustomField)),
     __fbthrift_field_MyOptCustomField(std::move(other.__fbthrift_field_MyOptCustomField)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
 }
 
 AnException& AnException::operator=(FOLLY_MAYBE_UNUSED AnException&& other) noexcept {
@@ -1257,8 +1257,8 @@ AnException::AnException(apache::thrift::FragileConstructor, ::std::int32_t code
     __fbthrift_field_a_union_typedef_list(std::move(a_union_typedef_list__arg)),
     __fbthrift_field_MyCustomField(std::move(MyCustomField__arg)),
     __fbthrift_field_MyOptCustomField(std::move(MyOptCustomField__arg)) {
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::construct<CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::construct<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -1293,8 +1293,8 @@ void AnException::__fbthrift_clear() {
   this->__fbthrift_field_a_union_list.clear();
   this->__fbthrift_field_union_typedef.clear();
   this->__fbthrift_field_a_union_typedef_list.clear();
-  ::apache::thrift::adapt_detail::clear<CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
-  ::apache::thrift::adapt_detail::clear<CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
+  ::apache::thrift::adapt_detail::clear<::CustomProtocolAdapter, 20>(__fbthrift_field_MyCustomField, *this);
+  ::apache::thrift::adapt_detail::clear<::CustomProtocolAdapter, 21>(__fbthrift_field_MyOptCustomField, *this);
   __isset = {};
 }
 
@@ -1352,10 +1352,10 @@ bool AnException::operator==(FOLLY_MAYBE_UNUSED const AnException& rhs) const {
   if (!(lhs.a_union_typedef_list_ref() == rhs.a_union_typedef_list_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
     return false;
   }
   return true;
@@ -1408,11 +1408,11 @@ bool AnException::operator<(FOLLY_MAYBE_UNUSED const AnException& rhs) const {
   if (!(lhs.a_union_typedef_list_ref() == rhs.a_union_typedef_list_ref())) {
     return lhs.a_union_typedef_list_ref() < rhs.a_union_typedef_list_ref();
   }
-  if (::apache::thrift::adapt_detail::not_equal<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
-    return ::apache::thrift::adapt_detail::less<CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
+  if (::apache::thrift::adapt_detail::not_equal<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField)) {
+    return ::apache::thrift::adapt_detail::less<::CustomProtocolAdapter>(lhs.__fbthrift_field_MyCustomField, rhs.__fbthrift_field_MyCustomField);
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
-    return ::apache::thrift::adapt_detail::neq_less_opt<CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
+  if (::apache::thrift::adapt_detail::not_equal_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref())) {
+    return ::apache::thrift::adapt_detail::neq_less_opt<::CustomProtocolAdapter>(lhs.MyOptCustomField_ref(), rhs.MyOptCustomField_ref());
   }
   return false;
 }
@@ -3759,10 +3759,10 @@ template uint32_t AllRequiredNoExceptMoveCtrStruct::serializedSizeZC<>(apache::t
 
 namespace some { namespace valid { namespace ns { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<CustomProtocolAdapter, 10, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<CustomProtocolAdapter, 11, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<CustomProtocolAdapter, 27, ::folly::IOBuf, ::some::valid::ns::ComplexUnion>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<CustomProtocolAdapter, 20, ::folly::IOBuf, ::some::valid::ns::AnException>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<CustomProtocolAdapter, 21, ::folly::IOBuf, ::some::valid::ns::AnException>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 10, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 11, ::folly::IOBuf, ::some::valid::ns::MyStruct>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 27, ::folly::IOBuf, ::some::valid::ns::ComplexUnion>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 20, ::folly::IOBuf, ::some::valid::ns::AnException>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::CustomProtocolAdapter, 21, ::folly::IOBuf, ::some::valid::ns::AnException>();
 }
 }}}} // some::valid::ns

@@ -23,6 +23,7 @@ import thrift.annotation.thrift.ttypes
 import thrift.annotation.scope.ttypes
 import thrift.annotation.hack.ttypes
 
+import ::my
 import my
 
 from thrift.Thrift import TProcessor

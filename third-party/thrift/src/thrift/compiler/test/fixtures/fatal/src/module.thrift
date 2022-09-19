@@ -406,11 +406,11 @@ struct struct_with_indirections {
 } (thrift.uri = "facebook.com/thrift/test/fixtures")
 
 struct StructWithFieldAdapter {
-  @cpp.Adapter{name = "my::Adapter1"}
+  @cpp.Adapter{name = "::my::Adapter1"}
   1: i32 field;
 }
 
-@cpp.Adapter{name = "my::Adapter1"}
+@cpp.Adapter{name = "::my::Adapter1"}
 typedef i32 I32
 
 union UnionWithTypedefFieldAdapter {

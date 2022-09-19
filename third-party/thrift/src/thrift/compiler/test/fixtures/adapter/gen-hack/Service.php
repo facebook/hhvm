@@ -280,7 +280,7 @@ class Service_func_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter2",
+                "name" => "::my::Adapter2",
               )
             ),
           ],

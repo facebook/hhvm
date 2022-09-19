@@ -397,12 +397,18 @@ function set_implicit_context(
  * If $memo_key is provided, it is used for keying the memoization key,
  * otherwise name of the caller is used.
  * Returns the previous implicit context.
+ *
+ * NOTE: This code is actually [zoned] but it is safe to call from
+ * [leak_safe_shallow] since leak_safe_shallow can call it via a level of
+ * indirection. However, this happens in HackC generated memoized wrapped code.
+ * Mark this code as [leak_safe] to avoid this level of indirection.
+ * This code should not be called from userland.
  */
 <<__Native>>
 function create_special_implicit_context(
   int $type /* SpecialImplicitContextType */,
   ?string $memo_key = null,
-)[zoned]: object /* ImplicitContextData */;
+)[leak_safe]: object /* ImplicitContextData */;
 
 /*
  * Singleton memoization wrapper over create_special_implicit_context for

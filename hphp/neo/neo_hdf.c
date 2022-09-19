@@ -949,9 +949,8 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
     (*lineno)++;
     s = line->buf;
     SKIPWS(s);
-    if ((!strncmp(s, "#include ", 9) || !strncmp(s, "-include ", 9)) && include_handle != INCLUDE_IGNORE)
+    if (!strncmp(s, "#include ", 9) && include_handle != INCLUDE_IGNORE)
     {
-      int required = !strncmp(s, "#include ", 9);
       if (include_handle == INCLUDE_ERROR)
       {
 	return nerr_raise (NERR_PARSE,
@@ -987,7 +986,7 @@ static NEOERR* _hdf_read_string (HDF *hdf, const char **str, NEOSTRING *line,
           name = fullpath;
         }
         err = hdf_read_file_internal(hdf, name, include_handle + 1);
-        if (err != STATUS_OK && required)
+        if (err != STATUS_OK)
         {
           return nerr_pass_ctx(err, "In file %s:%d", path, *lineno);
         }
@@ -1206,66 +1205,18 @@ NEOERR * hdf_read_string (HDF *hdf, const char *str)
   return nerr_pass(err);
 }
 
-/* The search path is part of the HDF by convention */
-NEOERR* hdf_search_path (HDF *hdf, const char *path, char *full, int full_len)
-{
-  HDF *paths;
-  struct stat s;
-  NEOERR* err = STATUS_OK;
-
-  paths = hdf_get_child (hdf, "hdf.loadpaths", &err);
-  if (err != STATUS_OK) return err;
-
-  for (; paths; paths = hdf_obj_next (paths))
-  {
-    char* value = hdf_obj_value(paths, &err);
-    if (err != STATUS_OK) return err;
-    snprintf (full, full_len, "%s/%s", value, path);
-    errno = 0;
-    if (stat (full, &s) == -1)
-    {
-      if (errno != ENOENT)
-	return nerr_raise_errno (NERR_SYSTEM, "Stat of %s failed", full);
-    }
-    else
-    {
-      return STATUS_OK;
-    }
-  }
-
-  strncpy (full, path, full_len);
-  full[full_len > 0 ? full_len-1 : full_len] = '\0';
-
-  if (stat (full, &s) == -1)
-  {
-    if (errno != ENOENT)
-      return nerr_raise_errno (NERR_SYSTEM, "Stat of %s failed", full);
-  }
-  else return STATUS_OK;
-
-  return nerr_raise (NERR_NOT_FOUND, "Path %s not found", path);
-}
-
 static NEOERR* hdf_read_file_internal (HDF *hdf, const char *path,
                                        int include_handle)
 {
   NEOERR *err;
   int lineno = 0;
-  char fpath[PATH_BUF_SIZE];
   char *ibuf = NULL;
   const char *ptr = NULL;
   NEOSTRING line;
 
   string_init(&line);
 
-  if (path == NULL)
-    return nerr_raise(NERR_ASSERT, "Can't read NULL file");
-  if (path[0] != '/')
-  {
-    err = hdf_search_path (hdf, path, fpath, PATH_BUF_SIZE);
-    if (err != STATUS_OK) return nerr_pass(err);
-    path = fpath;
-  }
+  if (path == NULL) return nerr_raise(NERR_ASSERT, "Can't read NULL file");
 
   err = ne_load_file (path, &ibuf);
   if (err) return nerr_pass(err);

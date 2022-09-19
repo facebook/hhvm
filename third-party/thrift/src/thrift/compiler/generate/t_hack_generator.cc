@@ -416,10 +416,6 @@ class t_hack_generator : public t_concat_generator {
   void generate_service_client(const t_service* tservice, bool mangle);
   void _generate_service_client(
       std::ofstream& out, const t_service* tservice, bool mangle);
-  void _generate_recvImpl(
-      std::ofstream& out,
-      const t_service* tservice,
-      const t_function* tfunction);
   void _generate_sendImpl(
       std::ofstream& out,
       const t_service* tservice,
@@ -5995,10 +5991,6 @@ void t_hack_generator::generate_service_interactions(
       }
       _generate_service_client_child_fn(f_service_, interaction, function);
       _generate_sendImpl(f_service_, interaction, function);
-      if (function->qualifier() != t_function_qualifier::one_way &&
-          is_client_only_function(function)) {
-        _generate_recvImpl(f_service_, interaction, function);
-      }
     }
 
     indent_down();
@@ -6848,17 +6840,6 @@ void t_hack_generator::_generate_service_client(
       << "  require extends \\ThriftClientBase;\n\n";
   indent_up();
 
-  // Generate client method implementations
-  for (const auto* function : get_supported_client_functions(tservice)) {
-    if (skip_codegen(function)) {
-      continue;
-    }
-    if (function->qualifier() != t_function_qualifier::one_way &&
-        is_client_only_function(function)) {
-      _generate_recvImpl(out, tservice, function);
-    }
-  }
-
   // Generate factory method for interactions
   const std::vector<const t_service*>& interactions =
       get_interactions(tservice);
@@ -6889,181 +6870,6 @@ void t_hack_generator::_generate_service_client(
 
   _generate_service_client_children(out, tservice, mangle, /*async*/ true);
   _generate_service_client_children(out, tservice, mangle, /*async*/ false);
-}
-
-void t_hack_generator::_generate_recvImpl(
-    std::ofstream& out,
-    const t_service* tservice,
-    const t_function* tfunction) {
-  auto ttype = tfunction->get_returntype();
-  std::string return_typehint;
-  std::string resultname;
-  std::string recvImpl_method_name;
-  bool is_void = false;
-  if (const auto* tstream = dynamic_cast<const t_stream_response*>(ttype)) {
-    return;
-  } else if (const auto* tsink = dynamic_cast<const t_sink*>(ttype)) {
-    return;
-  } else {
-    resultname = generate_function_helper_name(
-        tservice, tfunction, PhpFunctionNameSuffix::RESULT);
-    recvImpl_method_name = std::string("recvImpl_") + find_hack_name(tfunction);
-    return_typehint = type_to_typehint(ttype);
-
-    is_void = ttype->is_void();
-  }
-
-  const std::string& rpc_function_name =
-      generate_rpc_function_name(tservice, tfunction);
-
-  t_function recv_function(
-      tfunction->get_returntype(),
-      recvImpl_method_name,
-      std::make_unique<t_paramlist>(program_));
-
-  // Open function
-  out << "\n";
-  out << indent() << "protected function "
-      << function_signature(
-             &recv_function,
-             "?int $expectedsequenceid = null"
-             ", shape(?'read_options' => int) $options = shape()",
-             return_typehint)
-      << " {\n";
-  indent_up();
-
-  out << indent() << "try {\n";
-  indent_up();
-
-  out << indent() << "$this->eventHandler_->preRecv('" << rpc_function_name
-      << "', $expectedsequenceid);\n";
-
-  out << indent() << "if ($this->input_ is \\TBinaryProtocolAccelerated) {\n";
-
-  indent_up();
-
-  out << indent() << "$result = \\thrift_protocol_read_binary("
-      << "$this->input_"
-      << ", '" << resultname << "'"
-      << ", $this->input_->isStrictRead()"
-      << ", Shapes::idx($options, 'read_options', 0)"
-      << ");\n";
-
-  indent_down();
-
-  out << indent()
-      << "} else if ($this->input_ is \\TCompactProtocolAccelerated)\n";
-  scope_up(out);
-  out << indent() << "$result = \\thrift_protocol_read_compact("
-      << "$this->input_"
-      << ", '" << resultname << "'"
-      << ", Shapes::idx($options, 'read_options', 0)"
-      << ");\n";
-  scope_down(out);
-
-  out << indent() << "else\n";
-  scope_up(out);
-
-  out << indent() << "$rseqid = 0;\n"
-      << indent() << "$fname = '';\n"
-      << indent() << "$mtype = 0;\n\n";
-
-  out << indent() << "$this->input_->readMessageBegin(\n"
-      << indent() << "  inout $fname,\n"
-      << indent() << "  inout $mtype,\n"
-      << indent() << "  inout $rseqid,\n"
-      << indent() << ");\n"
-      << indent() << "if ($mtype === \\TMessageType::EXCEPTION) {\n"
-      << indent() << "  $x = new \\TApplicationException();\n"
-      << indent() << "  $x->read($this->input_);\n"
-      << indent() << "  $this->input_->readMessageEnd();\n"
-      << indent() << "  throw $x;\n"
-      << indent() << "}\n";
-
-  out << indent() << "$result = " << resultname << "::withDefaultValues();\n"
-      << indent() << "$result->read($this->input_);\n";
-
-  out << indent() << "$this->input_->readMessageEnd();\n";
-
-  out << indent()
-      << "if ($expectedsequenceid !== null && ($rseqid !== "
-         "$expectedsequenceid)) {\n"
-      << indent() << "  throw new \\TProtocolException(\""
-      << find_hack_name(tfunction)
-      << " failed: sequence id is out of order\");\n"
-      << indent() << "}\n";
-
-  scope_down(out);
-  indent_down();
-  indent(out) << "} catch (\\THandlerShortCircuitException $ex) {\n";
-  indent_up();
-  out << indent() << "switch ($ex->resultType) {\n"
-      << indent() << "  case \\THandlerShortCircuitException::R_EXPECTED_EX:\n"
-      << indent() << "    $this->eventHandler_->recvException('"
-      << rpc_function_name << "', $expectedsequenceid, $ex->result);\n"
-      << indent() << "    throw $ex->result;\n"
-      << indent()
-      << "  case \\THandlerShortCircuitException::R_UNEXPECTED_EX:\n"
-      << indent() << "    $this->eventHandler_->recvError('"
-      << rpc_function_name << "', $expectedsequenceid, $ex->result);\n"
-      << indent() << "    throw $ex->result;\n"
-      << indent() << "  case \\THandlerShortCircuitException::R_SUCCESS:\n"
-      << indent() << "  default:\n"
-      << indent() << "    $this->eventHandler_->postRecv('" << rpc_function_name
-      << "', $expectedsequenceid, $ex->result);\n"
-      << indent() << "    return";
-
-  if (!is_void) {
-    out << " $ex->result";
-  }
-  out << ";\n" << indent() << "}\n";
-  indent_down();
-  out << indent() << "} catch (\\Exception $ex) {\n";
-  indent_up();
-  out << indent() << "$this->eventHandler_->recvError('" << rpc_function_name
-      << "', $expectedsequenceid, $ex);\n"
-      << indent() << "throw $ex;\n";
-  indent_down();
-  out << indent() << "}\n";
-
-  // Careful, only return result if not a void function
-  if (!is_void) {
-    out << indent() << "if ($result->success !== null) {\n"
-        << indent() << "  $success = $result->success;\n"
-        << indent() << "  $this->eventHandler_->postRecv('" << rpc_function_name
-        << "', $expectedsequenceid, $success);"
-        << "\n"
-        << indent() << "  return $success;\n"
-        << indent() << "}\n";
-  }
-
-  for (const auto& x : tfunction->get_xceptions()->fields()) {
-    out << indent() << "if ($result->" << x.name() << " !== null) {\n"
-        << indent() << "  $x = $result->" << x.name() << ";"
-        << "\n"
-        << indent() << "  $this->eventHandler_->recvException('"
-        << rpc_function_name << "', $expectedsequenceid, $x);\n"
-        << indent() << "  throw $x;\n"
-        << indent() << "}\n";
-  }
-
-  // Careful, only return _result if not a void function
-  if (is_void) {
-    out << indent() << "$this->eventHandler_->postRecv('" << rpc_function_name
-        << "', $expectedsequenceid, null);\n"
-        << indent() << "return;\n";
-  } else {
-    out << indent() << "$x = new \\TApplicationException(\""
-        << find_hack_name(tfunction) << " failed: unknown result\""
-        << ", \\TApplicationException::MISSING_RESULT"
-        << ");\n"
-        << indent() << "$this->eventHandler_->recvError('" << rpc_function_name
-        << "', $expectedsequenceid, $x);\n"
-        << indent() << "throw $x;\n";
-  }
-
-  // Close function
-  scope_down(out);
 }
 
 void t_hack_generator::_generate_current_seq_id(

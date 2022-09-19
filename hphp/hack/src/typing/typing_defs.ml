@@ -1328,6 +1328,11 @@ let class_elt_is_private_or_protected_not_lsb elt =
 let error_Tunapplied_alias_in_illegal_context () =
   failwith "Found Tunapplied_alias in a context where it must not occur"
 
+let is_typeconst_type_abstract tc =
+  match tc.ttc_kind with
+  | TCConcrete _ -> false
+  | TCAbstract _ -> true
+
 module Attributes = struct
   let mem x xs =
     List.exists xs ~f:(fun { ua_name; _ } -> String.equal x (snd ua_name))

@@ -885,7 +885,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Special::Select(..) => {
                 // Select is entirely handled during the push/pop phase.
             }
-            Special::Copy(_) | Special::Tmp(..) | Special::Tombstone => {
+            Special::Copy(_) | Special::Textual(_) | Special::Tmp(..) | Special::Tombstone => {
                 panic!("shouldn't be trying to emit {special:?}")
             }
         }

@@ -26,6 +26,7 @@ impl<'a> PushCount<'a> for Instr {
             // --- 0 pushed values
             Instr::Special(
                 Special::Copy(_)
+                | Special::Textual(_)
                 | Special::IrToBc(
                     IrToBc::PopC
                     | IrToBc::PopL(_)

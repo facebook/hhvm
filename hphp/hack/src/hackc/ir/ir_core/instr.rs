@@ -1,7 +1,10 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+use std::borrow::Cow;
+
 // Re-export some types in from hhbc so users of `ir` don't have to figure out
 // which random stuff to get from `ir` and which to get elsewhere.
+use ascii::AsciiString;
 pub use hhbc::BareThisOp;
 pub use hhbc::ClassishKind;
 pub use hhbc::CollectionType;
@@ -1091,12 +1094,46 @@ pub enum IrToBc {
     UnsetL(LocalId),
 }
 
+#[derive(Clone, Debug)]
+pub enum TextualHackBuiltinParam {
+    Null,
+    False,
+    HackInt(i64),
+    HackString(Vec<u8>),
+    Int(i64),
+    True,
+    String(AsciiString),
+    // A ValueId from the values field.
+    Value,
+}
+
+/// Instructions used during conversions/textual.
+#[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
+#[has_locals(none)]
+pub enum Textual {
+    /// If the expression is not true then halt execution along this path.
+    /// (this is what Textual calls 'prune')
+    AssertTrue(ValueId, LocId),
+    /// If the expression is true then halt execution along this path.
+    /// (this is what Textual calls 'prune not')
+    AssertFalse(ValueId, LocId),
+    /// Special call to a Hack builtin function (like `hack_string`) skipping
+    /// the normal Hack function ABI.
+    HackBuiltin {
+        target: Cow<'static, str>,
+        params: Box<[TextualHackBuiltinParam]>,
+        values: Box<[ValueId]>,
+        loc: LocId,
+    },
+}
+
 #[derive(Clone, Debug, HasLoc, HasLocals, HasOperands)]
 pub enum Special {
     Copy(ValueId),
     IrToBc(IrToBc),
     Param,
     Select(ValueId, u32),
+    Textual(Textual),
     // Used to build SSA.
     #[has_locals(none)]
     #[has_loc(none)]

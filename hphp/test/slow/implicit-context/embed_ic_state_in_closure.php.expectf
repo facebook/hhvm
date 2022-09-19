@@ -1,0 +1,10 @@
+(no warning expected)
+Warning: memo is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context in %s on line %d
+memo is a [defaults] memoized function, but it is called with an inaccessible state implicit context
+Warning: memo is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line %d
+Calling closure with IC value: 42
+(no warning expected)
+Warning: memo is a [defaults] memoized function, but it is called with a soft inaccessible state implicit context in %s on line %d
+memo is a [defaults] memoized function, but it is called with an inaccessible state implicit context
+Warning: memo is a [defaults] memoized function, but it is called with a soft set state implicit context in %s on line %d
+Calling closure with IC value: 42

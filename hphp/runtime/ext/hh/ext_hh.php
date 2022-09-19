@@ -368,6 +368,37 @@ function soft_run_with<Tout>(
   }
 }
 
+function embed_implicit_context_state_in_closure(
+  (function ()[defaults]: void) $f,
+)[zoned]: (function ()[defaults]: void) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+  };
+}
+
+function embed_implicit_context_state_in_async_closure(
+  (function ()[defaults]: Awaitable<void>) $f,
+)[zoned]: (function ()[defaults]: Awaitable<void>) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return async ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $awaitable = $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    await $awaitable;
+  };
+}
+
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {
@@ -380,6 +411,9 @@ final class ImplicitContextData {}
  */
 <<__Native>>
 function get_implicit_context(string $key)[zoned]: mixed;
+
+<<__Native>>
+function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
 
 /**
  * Sets implicit context $context keyed by $key.

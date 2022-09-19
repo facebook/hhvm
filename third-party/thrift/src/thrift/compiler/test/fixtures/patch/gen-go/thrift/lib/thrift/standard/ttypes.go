@@ -760,7 +760,6 @@ func (p *TypeUri) String() string {
 //  - StringType
 //  - BinaryType
 //  - EnumType
-//  - TypedefType
 //  - StructType
 //  - UnionType
 //  - ExceptionType
@@ -778,13 +777,12 @@ type TypeName struct {
   StringType *Void `thrift:"stringType,8,optional" db:"stringType" json:"stringType,omitempty"`
   BinaryType *Void `thrift:"binaryType,9,optional" db:"binaryType" json:"binaryType,omitempty"`
   EnumType *TypeUri `thrift:"enumType,10,optional" db:"enumType" json:"enumType,omitempty"`
-  TypedefType *TypeUri `thrift:"typedefType,11,optional" db:"typedefType" json:"typedefType,omitempty"`
-  StructType *TypeUri `thrift:"structType,12,optional" db:"structType" json:"structType,omitempty"`
-  UnionType *TypeUri `thrift:"unionType,13,optional" db:"unionType" json:"unionType,omitempty"`
-  ExceptionType *TypeUri `thrift:"exceptionType,14,optional" db:"exceptionType" json:"exceptionType,omitempty"`
-  ListType *Void `thrift:"listType,15,optional" db:"listType" json:"listType,omitempty"`
-  SetType *Void `thrift:"setType,16,optional" db:"setType" json:"setType,omitempty"`
-  MapType *Void `thrift:"mapType,17,optional" db:"mapType" json:"mapType,omitempty"`
+  StructType *TypeUri `thrift:"structType,11,optional" db:"structType" json:"structType,omitempty"`
+  UnionType *TypeUri `thrift:"unionType,12,optional" db:"unionType" json:"unionType,omitempty"`
+  ExceptionType *TypeUri `thrift:"exceptionType,13,optional" db:"exceptionType" json:"exceptionType,omitempty"`
+  ListType *Void `thrift:"listType,14,optional" db:"listType" json:"listType,omitempty"`
+  SetType *Void `thrift:"setType,15,optional" db:"setType" json:"setType,omitempty"`
+  MapType *Void `thrift:"mapType,16,optional" db:"mapType" json:"mapType,omitempty"`
 }
 
 func NewTypeName() *TypeName {
@@ -861,13 +859,6 @@ func (p *TypeName) GetEnumType() *TypeUri {
   }
 return p.EnumType
 }
-var TypeName_TypedefType_DEFAULT *TypeUri
-func (p *TypeName) GetTypedefType() *TypeUri {
-  if !p.IsSetTypedefType() {
-    return TypeName_TypedefType_DEFAULT
-  }
-return p.TypedefType
-}
 var TypeName_StructType_DEFAULT *TypeUri
 func (p *TypeName) GetStructType() *TypeUri {
   if !p.IsSetStructType() {
@@ -942,9 +933,6 @@ func (p *TypeName) CountSetFieldsTypeName() int {
   if (p.IsSetEnumType()) {
     count++
   }
-  if (p.IsSetTypedefType()) {
-    count++
-  }
   if (p.IsSetStructType()) {
     count++
   }
@@ -1007,10 +995,6 @@ func (p *TypeName) IsSetEnumType() bool {
   return p != nil && p.EnumType != nil
 }
 
-func (p *TypeName) IsSetTypedefType() bool {
-  return p != nil && p.TypedefType != nil
-}
-
 func (p *TypeName) IsSetStructType() bool {
   return p != nil && p.StructType != nil
 }
@@ -1057,7 +1041,6 @@ func (p TypeNameBuilder) Emit() *TypeName{
     StringType: p.obj.StringType,
     BinaryType: p.obj.BinaryType,
     EnumType: p.obj.EnumType,
-    TypedefType: p.obj.TypedefType,
     StructType: p.obj.StructType,
     UnionType: p.obj.UnionType,
     ExceptionType: p.obj.ExceptionType,
@@ -1114,11 +1097,6 @@ func (t *TypeNameBuilder) BinaryType(binaryType *Void) *TypeNameBuilder {
 
 func (t *TypeNameBuilder) EnumType(enumType *TypeUri) *TypeNameBuilder {
   t.obj.EnumType = enumType
-  return t
-}
-
-func (t *TypeNameBuilder) TypedefType(typedefType *TypeUri) *TypeNameBuilder {
-  t.obj.TypedefType = typedefType
   return t
 }
 
@@ -1199,11 +1177,6 @@ func (t *TypeName) SetBinaryType(binaryType *Void) *TypeName {
 
 func (t *TypeName) SetEnumType(enumType *TypeUri) *TypeName {
   t.EnumType = enumType
-  return t
-}
-
-func (t *TypeName) SetTypedefType(typedefType *TypeUri) *TypeName {
-  t.TypedefType = typedefType
   return t
 }
 
@@ -1312,10 +1285,6 @@ func (p *TypeName) Read(iprot thrift.Protocol) error {
       }
     case 16:
       if err := p.ReadField16(iprot); err != nil {
-        return err
-      }
-    case 17:
-      if err := p.ReadField17(iprot); err != nil {
         return err
       }
     default:
@@ -1432,14 +1401,6 @@ func (p *TypeName)  ReadField10(iprot thrift.Protocol) error {
 }
 
 func (p *TypeName)  ReadField11(iprot thrift.Protocol) error {
-  p.TypedefType = NewTypeUri()
-  if err := p.TypedefType.Read(iprot); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.TypedefType), err)
-  }
-  return nil
-}
-
-func (p *TypeName)  ReadField12(iprot thrift.Protocol) error {
   p.StructType = NewTypeUri()
   if err := p.StructType.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.StructType), err)
@@ -1447,7 +1408,7 @@ func (p *TypeName)  ReadField12(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *TypeName)  ReadField13(iprot thrift.Protocol) error {
+func (p *TypeName)  ReadField12(iprot thrift.Protocol) error {
   p.UnionType = NewTypeUri()
   if err := p.UnionType.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.UnionType), err)
@@ -1455,10 +1416,20 @@ func (p *TypeName)  ReadField13(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *TypeName)  ReadField14(iprot thrift.Protocol) error {
+func (p *TypeName)  ReadField13(iprot thrift.Protocol) error {
   p.ExceptionType = NewTypeUri()
   if err := p.ExceptionType.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ExceptionType), err)
+  }
+  return nil
+}
+
+func (p *TypeName)  ReadField14(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 14: ", err)
+  } else {
+    temp := Void(v)
+    p.ListType = &temp
   }
   return nil
 }
@@ -1468,7 +1439,7 @@ func (p *TypeName)  ReadField15(iprot thrift.Protocol) error {
     return thrift.PrependError("error reading field 15: ", err)
   } else {
     temp := Void(v)
-    p.ListType = &temp
+    p.SetType = &temp
   }
   return nil
 }
@@ -1476,16 +1447,6 @@ func (p *TypeName)  ReadField15(iprot thrift.Protocol) error {
 func (p *TypeName)  ReadField16(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 16: ", err)
-  } else {
-    temp := Void(v)
-    p.SetType = &temp
-  }
-  return nil
-}
-
-func (p *TypeName)  ReadField17(iprot thrift.Protocol) error {
-  if v, err := iprot.ReadI32(); err != nil {
-    return thrift.PrependError("error reading field 17: ", err)
   } else {
     temp := Void(v)
     p.MapType = &temp
@@ -1515,7 +1476,6 @@ func (p *TypeName) Write(oprot thrift.Protocol) error {
   if err := p.writeField14(oprot); err != nil { return err }
   if err := p.writeField15(oprot); err != nil { return err }
   if err := p.writeField16(oprot); err != nil { return err }
-  if err := p.writeField17(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -1645,89 +1605,76 @@ func (p *TypeName) writeField10(oprot thrift.Protocol) (err error) {
 }
 
 func (p *TypeName) writeField11(oprot thrift.Protocol) (err error) {
-  if p.IsSetTypedefType() {
-    if err := oprot.WriteFieldBegin("typedefType", thrift.STRUCT, 11); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 11:typedefType: ", p), err) }
-    if err := p.TypedefType.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.TypedefType), err)
+  if p.IsSetStructType() {
+    if err := oprot.WriteFieldBegin("structType", thrift.STRUCT, 11); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 11:structType: ", p), err) }
+    if err := p.StructType.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.StructType), err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 11:typedefType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 11:structType: ", p), err) }
   }
   return err
 }
 
 func (p *TypeName) writeField12(oprot thrift.Protocol) (err error) {
-  if p.IsSetStructType() {
-    if err := oprot.WriteFieldBegin("structType", thrift.STRUCT, 12); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 12:structType: ", p), err) }
-    if err := p.StructType.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.StructType), err)
+  if p.IsSetUnionType() {
+    if err := oprot.WriteFieldBegin("unionType", thrift.STRUCT, 12); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 12:unionType: ", p), err) }
+    if err := p.UnionType.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.UnionType), err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 12:structType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 12:unionType: ", p), err) }
   }
   return err
 }
 
 func (p *TypeName) writeField13(oprot thrift.Protocol) (err error) {
-  if p.IsSetUnionType() {
-    if err := oprot.WriteFieldBegin("unionType", thrift.STRUCT, 13); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 13:unionType: ", p), err) }
-    if err := p.UnionType.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.UnionType), err)
+  if p.IsSetExceptionType() {
+    if err := oprot.WriteFieldBegin("exceptionType", thrift.STRUCT, 13); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 13:exceptionType: ", p), err) }
+    if err := p.ExceptionType.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ExceptionType), err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 13:unionType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 13:exceptionType: ", p), err) }
   }
   return err
 }
 
 func (p *TypeName) writeField14(oprot thrift.Protocol) (err error) {
-  if p.IsSetExceptionType() {
-    if err := oprot.WriteFieldBegin("exceptionType", thrift.STRUCT, 14); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 14:exceptionType: ", p), err) }
-    if err := p.ExceptionType.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.ExceptionType), err)
-    }
+  if p.IsSetListType() {
+    if err := oprot.WriteFieldBegin("listType", thrift.I32, 14); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 14:listType: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.ListType)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.listType (14) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 14:exceptionType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 14:listType: ", p), err) }
   }
   return err
 }
 
 func (p *TypeName) writeField15(oprot thrift.Protocol) (err error) {
-  if p.IsSetListType() {
-    if err := oprot.WriteFieldBegin("listType", thrift.I32, 15); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 15:listType: ", p), err) }
-    if err := oprot.WriteI32(int32(*p.ListType)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.listType (15) field write error: ", p), err) }
+  if p.IsSetSetType() {
+    if err := oprot.WriteFieldBegin("setType", thrift.I32, 15); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 15:setType: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.SetType)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.setType (15) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 15:listType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 15:setType: ", p), err) }
   }
   return err
 }
 
 func (p *TypeName) writeField16(oprot thrift.Protocol) (err error) {
-  if p.IsSetSetType() {
-    if err := oprot.WriteFieldBegin("setType", thrift.I32, 16); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 16:setType: ", p), err) }
-    if err := oprot.WriteI32(int32(*p.SetType)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.setType (16) field write error: ", p), err) }
-    if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 16:setType: ", p), err) }
-  }
-  return err
-}
-
-func (p *TypeName) writeField17(oprot thrift.Protocol) (err error) {
   if p.IsSetMapType() {
-    if err := oprot.WriteFieldBegin("mapType", thrift.I32, 17); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error 17:mapType: ", p), err) }
+    if err := oprot.WriteFieldBegin("mapType", thrift.I32, 16); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 16:mapType: ", p), err) }
     if err := oprot.WriteI32(int32(*p.MapType)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.mapType (17) field write error: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T.mapType (16) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error 17:mapType: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 16:mapType: ", p), err) }
   }
   return err
 }
@@ -1797,12 +1744,6 @@ func (p *TypeName) String() string {
   } else {
     enumTypeVal = fmt.Sprintf("%v", p.EnumType)
   }
-  var typedefTypeVal string
-  if p.TypedefType == nil {
-    typedefTypeVal = "<nil>"
-  } else {
-    typedefTypeVal = fmt.Sprintf("%v", p.TypedefType)
-  }
   var structTypeVal string
   if p.StructType == nil {
     structTypeVal = "<nil>"
@@ -1839,6 +1780,6 @@ func (p *TypeName) String() string {
   } else {
     mapTypeVal = fmt.Sprintf("%v", *p.MapType)
   }
-  return fmt.Sprintf("TypeName({BoolType:%s ByteType:%s I16Type:%s I32Type:%s I64Type:%s FloatType:%s DoubleType:%s StringType:%s BinaryType:%s EnumType:%s TypedefType:%s StructType:%s UnionType:%s ExceptionType:%s ListType:%s SetType:%s MapType:%s})", boolTypeVal, byteTypeVal, i16TypeVal, i32TypeVal, i64TypeVal, floatTypeVal, doubleTypeVal, stringTypeVal, binaryTypeVal, enumTypeVal, typedefTypeVal, structTypeVal, unionTypeVal, exceptionTypeVal, listTypeVal, setTypeVal, mapTypeVal)
+  return fmt.Sprintf("TypeName({BoolType:%s ByteType:%s I16Type:%s I32Type:%s I64Type:%s FloatType:%s DoubleType:%s StringType:%s BinaryType:%s EnumType:%s StructType:%s UnionType:%s ExceptionType:%s ListType:%s SetType:%s MapType:%s})", boolTypeVal, byteTypeVal, i16TypeVal, i32TypeVal, i64TypeVal, floatTypeVal, doubleTypeVal, stringTypeVal, binaryTypeVal, enumTypeVal, structTypeVal, unionTypeVal, exceptionTypeVal, listTypeVal, setTypeVal, mapTypeVal)
 }
 

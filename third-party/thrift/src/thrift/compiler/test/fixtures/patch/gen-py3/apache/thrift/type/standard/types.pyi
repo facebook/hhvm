@@ -131,7 +131,7 @@ class TypeUri(thrift.py3.types.Union, _typing.Hashable):
     def _to_py3(self) -> TypeUri: ...
     def _to_py_deprecated(self) -> "thrift.lib.thrift.standard.ttypes.TypeUri": ...   # type: ignore
 
-_TypeNameValueType = _typing.Union[None, Void, Void, Void, Void, Void, Void, Void, Void, Void, TypeUri, TypeUri, TypeUri, TypeUri, TypeUri, Void, Void, Void]
+_TypeNameValueType = _typing.Union[None, Void, Void, Void, Void, Void, Void, Void, Void, Void, TypeUri, TypeUri, TypeUri, TypeUri, Void, Void, Void]
 
 class TypeName(thrift.py3.types.Union, _typing.Hashable):
     class __fbthrift_IsSet:
@@ -145,7 +145,6 @@ class TypeName(thrift.py3.types.Union, _typing.Hashable):
         stringType: bool
         binaryType: bool
         enumType: bool
-        typedefType: bool
         structType: bool
         unionType: bool
         exceptionType: bool
@@ -174,8 +173,6 @@ class TypeName(thrift.py3.types.Union, _typing.Hashable):
 
     enumType: Final[TypeUri] = ...
 
-    typedefType: Final[TypeUri] = ...
-
     structType: Final[TypeUri] = ...
 
     unionType: Final[TypeUri] = ...
@@ -200,7 +197,6 @@ class TypeName(thrift.py3.types.Union, _typing.Hashable):
         stringType: _typing.Optional[Void]=None,
         binaryType: _typing.Optional[Void]=None,
         enumType: _typing.Optional[TypeUri]=None,
-        typedefType: _typing.Optional[TypeUri]=None,
         structType: _typing.Optional[TypeUri]=None,
         unionType: _typing.Optional[TypeUri]=None,
         exceptionType: _typing.Optional[TypeUri]=None,
@@ -229,7 +225,6 @@ class TypeName(thrift.py3.types.Union, _typing.Hashable):
         stringType: TypeName.Type = ...
         binaryType: TypeName.Type = ...
         enumType: TypeName.Type = ...
-        typedefType: TypeName.Type = ...
         structType: TypeName.Type = ...
         unionType: TypeName.Type = ...
         exceptionType: TypeName.Type = ...

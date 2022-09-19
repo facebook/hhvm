@@ -135,7 +135,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         cTypeName__type_stringType "::apache::thrift::type::TypeName::Type::stringType",
         cTypeName__type_binaryType "::apache::thrift::type::TypeName::Type::binaryType",
         cTypeName__type_enumType "::apache::thrift::type::TypeName::Type::enumType",
-        cTypeName__type_typedefType "::apache::thrift::type::TypeName::Type::typedefType",
         cTypeName__type_structType "::apache::thrift::type::TypeName::Type::structType",
         cTypeName__type_unionType "::apache::thrift::type::TypeName::Type::unionType",
         cTypeName__type_exceptionType "::apache::thrift::type::TypeName::Type::exceptionType",
@@ -173,8 +172,6 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         cVoid& set_binaryType "set_binaryType" (const cVoid&)
         const cTypeUri& get_enumType "get_enumType" () const
         cTypeUri& set_enumType "set_enumType" (const cTypeUri&)
-        const cTypeUri& get_typedefType "get_typedefType" () const
-        cTypeUri& set_typedefType "set_typedefType" (const cTypeUri&)
         const cTypeUri& get_structType "get_structType" () const
         cTypeUri& set_structType "set_structType" (const cTypeUri&)
         const cTypeUri& get_unionType "get_unionType" () const
@@ -253,7 +250,6 @@ cdef class TypeName(thrift.py3.types.Union):
         Void stringType,
         Void binaryType,
         TypeUri enumType,
-        TypeUri typedefType,
         TypeUri structType,
         TypeUri unionType,
         TypeUri exceptionType,

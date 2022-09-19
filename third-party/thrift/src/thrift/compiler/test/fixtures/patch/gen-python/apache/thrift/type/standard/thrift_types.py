@@ -224,7 +224,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
         (
             11,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "typedefType",  # name
+            "structType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -232,7 +232,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
         (
             12,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "structType",  # name
+            "unionType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -240,7 +240,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
         (
             13,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "unionType",  # name
+            "exceptionType",  # name
             lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
             None,  # default value
             None,  # adapter info
@@ -248,21 +248,13 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
         (
             14,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
-            "exceptionType",  # name
-            lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
-            None,  # default value
-            None,  # adapter info
-        ),
-        (
-            15,  # id
-            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "listType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
         (
-            16,  # id
+            15,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "setType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo
@@ -270,7 +262,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # adapter info
         ),
         (
-            17,  # id
+            16,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "mapType",  # name
             lambda: _fbthrift_python_types.EnumTypeInfo(Void),  # typeinfo

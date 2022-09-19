@@ -35,7 +35,6 @@ cdef class TypeName_Builder(thrift.py3.builder.StructBuilder):
         yield "stringType", self.stringType
         yield "binaryType", self.binaryType
         yield "enumType", self.enumType
-        yield "typedefType", self.typedefType
         yield "structType", self.structType
         yield "unionType", self.unionType
         yield "exceptionType", self.exceptionType

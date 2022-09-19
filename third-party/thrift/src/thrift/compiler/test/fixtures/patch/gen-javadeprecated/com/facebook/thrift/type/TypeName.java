@@ -36,13 +36,12 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   private static final TField STRING_TYPE_FIELD_DESC = new TField("stringType", TType.I32, (short)8);
   private static final TField BINARY_TYPE_FIELD_DESC = new TField("binaryType", TType.I32, (short)9);
   private static final TField ENUM_TYPE_FIELD_DESC = new TField("enumType", TType.STRUCT, (short)10);
-  private static final TField TYPEDEF_TYPE_FIELD_DESC = new TField("typedefType", TType.STRUCT, (short)11);
-  private static final TField STRUCT_TYPE_FIELD_DESC = new TField("structType", TType.STRUCT, (short)12);
-  private static final TField UNION_TYPE_FIELD_DESC = new TField("unionType", TType.STRUCT, (short)13);
-  private static final TField EXCEPTION_TYPE_FIELD_DESC = new TField("exceptionType", TType.STRUCT, (short)14);
-  private static final TField LIST_TYPE_FIELD_DESC = new TField("listType", TType.I32, (short)15);
-  private static final TField SET_TYPE_FIELD_DESC = new TField("setType", TType.I32, (short)16);
-  private static final TField MAP_TYPE_FIELD_DESC = new TField("mapType", TType.I32, (short)17);
+  private static final TField STRUCT_TYPE_FIELD_DESC = new TField("structType", TType.STRUCT, (short)11);
+  private static final TField UNION_TYPE_FIELD_DESC = new TField("unionType", TType.STRUCT, (short)12);
+  private static final TField EXCEPTION_TYPE_FIELD_DESC = new TField("exceptionType", TType.STRUCT, (short)13);
+  private static final TField LIST_TYPE_FIELD_DESC = new TField("listType", TType.I32, (short)14);
+  private static final TField SET_TYPE_FIELD_DESC = new TField("setType", TType.I32, (short)15);
+  private static final TField MAP_TYPE_FIELD_DESC = new TField("mapType", TType.I32, (short)16);
 
   public static final int BOOLTYPE = 1;
   public static final int BYTETYPE = 2;
@@ -54,13 +53,12 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   public static final int STRINGTYPE = 8;
   public static final int BINARYTYPE = 9;
   public static final int ENUMTYPE = 10;
-  public static final int TYPEDEFTYPE = 11;
-  public static final int STRUCTTYPE = 12;
-  public static final int UNIONTYPE = 13;
-  public static final int EXCEPTIONTYPE = 14;
-  public static final int LISTTYPE = 15;
-  public static final int SETTYPE = 16;
-  public static final int MAPTYPE = 17;
+  public static final int STRUCTTYPE = 11;
+  public static final int UNIONTYPE = 12;
+  public static final int EXCEPTIONTYPE = 13;
+  public static final int LISTTYPE = 14;
+  public static final int SETTYPE = 15;
+  public static final int MAPTYPE = 16;
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -85,8 +83,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
     tmpMetaDataMap.put(BINARYTYPE, new FieldMetaData("binaryType", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I32)));
     tmpMetaDataMap.put(ENUMTYPE, new FieldMetaData("enumType", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, TypeUri.class)));
-    tmpMetaDataMap.put(TYPEDEFTYPE, new FieldMetaData("typedefType", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, TypeUri.class)));
     tmpMetaDataMap.put(STRUCTTYPE, new FieldMetaData("structType", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, TypeUri.class)));
@@ -176,12 +172,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
   public static TypeName enumType(TypeUri __value) {
     TypeName x = new TypeName();
     x.setEnumType(__value);
-    return x;
-  }
-
-  public static TypeName typedefType(TypeUri __value) {
-    TypeName x = new TypeName();
-    x.setTypedefType(__value);
     return x;
   }
 
@@ -275,11 +265,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
           break;
         }
         throw new ClassCastException("Was expecting value of type TypeUri for field 'enumType', but got " + __value.getClass().getSimpleName());
-      case TYPEDEFTYPE:
-        if (__value instanceof TypeUri) {
-          break;
-        }
-        throw new ClassCastException("Was expecting value of type TypeUri for field 'typedefType', but got " + __value.getClass().getSimpleName());
       case STRUCTTYPE:
         if (__value instanceof TypeUri) {
           break;
@@ -374,11 +359,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
             break;
           case ENUMTYPE:
             if (__field.type == ENUM_TYPE_FIELD_DESC.type) {
-              setField_ = __field.id;
-            }
-            break;
-          case TYPEDEFTYPE:
-            if (__field.type == TYPEDEF_TYPE_FIELD_DESC.type) {
               setField_ = __field.id;
             }
             break;
@@ -497,14 +477,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
           return enumType;
         }
         break;
-      case TYPEDEFTYPE:
-        if (__field.type == TYPEDEF_TYPE_FIELD_DESC.type) {
-          TypeUri typedefType;
-          typedefType = new TypeUri();
-          typedefType.read(iprot);
-          return typedefType;
-        }
-        break;
       case STRUCTTYPE:
         if (__field.type == STRUCT_TYPE_FIELD_DESC.type) {
           TypeUri structType;
@@ -598,10 +570,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
         TypeUri enumType = (TypeUri)getFieldValue();
         enumType.write(oprot);
         return;
-      case TYPEDEFTYPE:
-        TypeUri typedefType = (TypeUri)getFieldValue();
-        typedefType.write(oprot);
-        return;
       case STRUCTTYPE:
         TypeUri structType = (TypeUri)getFieldValue();
         structType.write(oprot);
@@ -654,8 +622,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
         return BINARY_TYPE_FIELD_DESC;
       case ENUMTYPE:
         return ENUM_TYPE_FIELD_DESC;
-      case TYPEDEFTYPE:
-        return TYPEDEF_TYPE_FIELD_DESC;
       case STRUCTTYPE:
         return STRUCT_TYPE_FIELD_DESC;
       case UNIONTYPE:
@@ -845,14 +811,6 @@ public class TypeName extends TUnion<TypeName> implements Comparable<TypeName> {
 
   public void setEnumType(TypeUri __value) {
     __setValue(ENUMTYPE, __value);
-  }
-
-  public TypeUri getTypedefType() {
-    return (TypeUri) __getValue(TYPEDEFTYPE);
-  }
-
-  public void setTypedefType(TypeUri __value) {
-    __setValue(TYPEDEFTYPE, __value);
   }
 
   public TypeUri getStructType() {

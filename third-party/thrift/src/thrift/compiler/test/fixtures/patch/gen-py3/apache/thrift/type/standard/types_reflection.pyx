@@ -260,18 +260,6 @@ cdef __StructSpec get_reflection__TypeName():
     spec.add_field(
         __FieldSpec._fbthrift_create(
             id=11,
-            name="typedefType",
-            type=_apache_thrift_type_standard_types.TypeUri,
-            kind=__NumberType.NOT_A_NUMBER,
-            qualifier=__Qualifier.UNQUALIFIED,
-            default=None,
-            annotations={
-            },
-        ),
-    )
-    spec.add_field(
-        __FieldSpec._fbthrift_create(
-            id=12,
             name="structType",
             type=_apache_thrift_type_standard_types.TypeUri,
             kind=__NumberType.NOT_A_NUMBER,
@@ -283,7 +271,7 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=13,
+            id=12,
             name="unionType",
             type=_apache_thrift_type_standard_types.TypeUri,
             kind=__NumberType.NOT_A_NUMBER,
@@ -295,7 +283,7 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=14,
+            id=13,
             name="exceptionType",
             type=_apache_thrift_type_standard_types.TypeUri,
             kind=__NumberType.NOT_A_NUMBER,
@@ -307,7 +295,7 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=15,
+            id=14,
             name="listType",
             type=_apache_thrift_type_standard_types.Void,
             kind=__NumberType.NOT_A_NUMBER,
@@ -319,7 +307,7 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=16,
+            id=15,
             name="setType",
             type=_apache_thrift_type_standard_types.Void,
             kind=__NumberType.NOT_A_NUMBER,
@@ -331,7 +319,7 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
-            id=17,
+            id=16,
             name="mapType",
             type=_apache_thrift_type_standard_types.Void,
             kind=__NumberType.NOT_A_NUMBER,

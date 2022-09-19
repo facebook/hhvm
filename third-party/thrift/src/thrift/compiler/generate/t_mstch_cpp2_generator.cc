@@ -1097,7 +1097,6 @@ class cpp_mstch_struct : public mstch_struct {
              &cpp_mstch_struct::scoped_enum_as_union_type},
             {"struct:extra_namespace", &cpp_mstch_struct::extra_namespace},
             {"struct:type_tag", &cpp_mstch_struct::type_tag},
-            {"struct:thrift_uri?", &cpp_mstch_struct::thrift_uri},
             {"struct:cpp_use_op_encode", &cpp_mstch_struct::cpp_use_op_encode},
         });
   }
@@ -1419,8 +1418,6 @@ class cpp_mstch_struct : public mstch_struct {
   mstch::node type_tag() {
     return cpp_context_->resolver().get_type_tag(*struct_);
   }
-
-  mstch::node thrift_uri() { return !struct_->uri().empty(); }
 
   mstch::node cpp_use_op_encode() {
     return struct_->find_structured_annotation_or_null(kCppUseOpEncodeUri) !=

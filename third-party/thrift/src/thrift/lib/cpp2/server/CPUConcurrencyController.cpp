@@ -65,9 +65,9 @@ void CPUConcurrencyController::cycleOnce() {
     auto lim = this->getLimit();
     auto newLim =
         lim -
-        std::max<int64_t>(
-            static_cast<int64_t>(lim * config().decreaseMultiplier), 1);
-    this->setLimit(std::max<int64_t>(newLim, config().concurrencyLowerBound));
+        std::max<uint32_t>(
+            static_cast<uint32_t>(lim * config().decreaseMultiplier), 1);
+    this->setLimit(std::max<uint32_t>(newLim, config().concurrencyLowerBound));
   } else {
     auto currentLimitUsage = this->getLimitUsage();
     if (currentLimitUsage == 0 || load <= 0) {
@@ -99,7 +99,7 @@ void CPUConcurrencyController::cycleOnce() {
             stableConcurrencySamples_.begin(),
             pct,
             stableConcurrencySamples_.end());
-        auto result = std::clamp<int64_t>(
+        auto result = std::clamp<uint32_t>(
             *pct,
             config().concurrencyLowerBound,
             config().concurrencyUpperBound);
@@ -122,9 +122,10 @@ void CPUConcurrencyController::cycleOnce() {
     if (nearExistingLimit || shouldConvergeStable) {
       auto newLim =
           lim +
-          std::max<int64_t>(
-              static_cast<int64_t>(lim * config().additiveMultiplier), 1);
-      this->setLimit(std::min<int64_t>(config().concurrencyUpperBound, newLim));
+          std::max<uint32_t>(
+              static_cast<uint32_t>(lim * config().additiveMultiplier), 1);
+      this->setLimit(
+          std::min<uint32_t>(config().concurrencyUpperBound, newLim));
     }
   }
 }

@@ -211,6 +211,9 @@ template <class T>
   if (std::is_same_v<T, mod_set<FieldModifier::Required>>) {
     return "Required";
   }
+  if (std::is_same_v<T, mod_set<FieldModifier::Terse>>) {
+    return "Terse";
+  }
   throw std::runtime_error("Unknown ModSet");
 }
 
@@ -492,6 +495,10 @@ Test createCompatibilityTest(const Protocol& protocol) {
   addToTest(changeQualifierTestCase<
             mod_set<FieldModifier::Required>,
             mod_set<FieldModifier::Optional>>(protocol));
+  addToTest(changeQualifierTestCase<mod_set<>, mod_set<FieldModifier::Terse>>(
+      protocol));
+  addToTest(changeQualifierTestCase<mod_set<FieldModifier::Terse>, mod_set<>>(
+      protocol));
 
   addToTest(changeEnumValueTestCases(protocol));
 

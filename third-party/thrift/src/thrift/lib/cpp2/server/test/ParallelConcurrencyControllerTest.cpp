@@ -518,6 +518,7 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
     baton.post();
 
     std::move(res).get();
+    ADD_FAILURE() << "Shouldn't have reached here!";
   } catch (...) {
     // in this case, an exception is thrown and HandlerCallback was not
     // constructed, we should still decrement the requestInExecution count

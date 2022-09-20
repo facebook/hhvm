@@ -107,19 +107,17 @@ def _fbthrift_gen_metadata_struct_TypeName(metadata_struct: _fbthrift_metadata.T
         ]),
         _fbthrift_metadata.ThriftField(id=10, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="enumType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=11, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="typedefType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=11, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="structType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=12, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="structType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=12, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="unionType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=13, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="unionType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=13, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="exceptionType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=14, type=_fbthrift_metadata.ThriftType(t_union=_fbthrift_metadata.ThriftUnionType(name="standard.TypeUri")), name="exceptionType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=14, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="listType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=15, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="listType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=15, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="setType", is_optional=False, structured_annotations=[
         ]),
-        _fbthrift_metadata.ThriftField(id=16, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="setType", is_optional=False, structured_annotations=[
-        ]),
-        _fbthrift_metadata.ThriftField(id=17, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="mapType", is_optional=False, structured_annotations=[
+        _fbthrift_metadata.ThriftField(id=16, type=_fbthrift_metadata.ThriftType(t_enum=_fbthrift_metadata.ThriftEnumType(name="standard.Void")), name="mapType", is_optional=False, structured_annotations=[
         ]),
     ]
     struct_dict = dict(metadata_struct.structs)
@@ -139,7 +137,6 @@ def _fbthrift_gen_metadata_struct_TypeName(metadata_struct: _fbthrift_metadata.T
     new_struct = _fbthrift_gen_metadata_enum_Void(new_struct) # stringType
     new_struct = _fbthrift_gen_metadata_enum_Void(new_struct) # binaryType
     new_struct = _fbthrift_gen_metadata_struct_TypeUri(new_struct) # enumType
-    new_struct = _fbthrift_gen_metadata_struct_TypeUri(new_struct) # typedefType
     new_struct = _fbthrift_gen_metadata_struct_TypeUri(new_struct) # structType
     new_struct = _fbthrift_gen_metadata_struct_TypeUri(new_struct) # unionType
     new_struct = _fbthrift_gen_metadata_struct_TypeUri(new_struct) # exceptionType

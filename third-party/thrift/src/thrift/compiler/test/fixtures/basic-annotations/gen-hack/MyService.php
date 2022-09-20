@@ -1352,7 +1352,7 @@ class MyService_ping_result extends \ThriftSyncStructWithoutResult {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "StaticCast",
+                "name" => "::StaticCast",
               )
             ),
           ],

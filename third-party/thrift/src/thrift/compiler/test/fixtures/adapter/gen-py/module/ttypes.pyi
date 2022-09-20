@@ -19,6 +19,7 @@ import thrift.annotation.python.ttypes
 import thrift.annotation.thrift.ttypes
 import thrift.annotation.scope.ttypes
 import thrift.annotation.hack.ttypes
+import ::my
 import my
 
 UTF8STRINGS: bool
@@ -219,7 +220,7 @@ class Bar:
 
     def __init__(
         self,
-        structField: __T.Optional[my.Adapter1.Type] = ...,
+        structField: __T.Optional[::my.Adapter1.Type] = ...,
         optionalStructField: __T.Optional[my.Adapter1.Type] = ...,
         structListField: __T.Optional[__T.List[my.Adapter1.Type]] = ...,
         optionalStructListField: __T.Optional[__T.List[my.Adapter1.Type]] = ...,
@@ -230,9 +231,9 @@ class Bar:
         ...
 
     @__property__
-    def structField(self) -> my.Adapter1.Type: ...
+    def structField(self) -> ::my.Adapter1.Type: ...
     @structField.setter
-    def structField(self, value: __T.Optional[my.Adapter1.Type]) -> None: ...
+    def structField(self, value: __T.Optional[::my.Adapter1.Type]) -> None: ...
     @__property__
     def optionalStructField(self) -> __T.Optional[my.Adapter1.Type]: ...
     @optionalStructField.setter

@@ -32,13 +32,13 @@ struct MyStructNestedAnnotation {
   1: string name;
 }
 
-@cpp.Adapter{name = 'StaticCast'}
+@cpp.Adapter{name = '::StaticCast'}
 union MyUnion {} (cpp.name = "YourUnion")
-@cpp.Adapter{name = 'StaticCast'}
+@cpp.Adapter{name = '::StaticCast'}
 safe exception MyException {} (cpp.name = "YourException")
 
 # We intentionally keep field IDs out of order to check whether this case is handled correctly
-@cpp.Adapter{name = 'StaticCast'}
+@cpp.Adapter{name = '::StaticCast'}
 struct MyStruct {
   # glibc has macros with this name, Thrift should be able to prevent collisions
   2: i64 major (cpp.name = 'majorVer');

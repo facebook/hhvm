@@ -368,6 +368,37 @@ function soft_run_with<Tout>(
   }
 }
 
+function embed_implicit_context_state_in_closure(
+  (function ()[defaults]: void) $f,
+)[zoned]: (function ()[defaults]: void) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+  };
+}
+
+function embed_implicit_context_state_in_async_closure(
+  (function ()[defaults]: Awaitable<void>) $f,
+)[zoned]: (function ()[defaults]: Awaitable<void>) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return async ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $awaitable = $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    await $awaitable;
+  };
+}
+
 } // namespace ImplicitContext
 
 namespace ImplicitContext\_Private {
@@ -380,6 +411,9 @@ final class ImplicitContextData {}
  */
 <<__Native>>
 function get_implicit_context(string $key)[zoned]: mixed;
+
+<<__Native>>
+function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
 
 /**
  * Sets implicit context $context keyed by $key.
@@ -397,12 +431,18 @@ function set_implicit_context(
  * If $memo_key is provided, it is used for keying the memoization key,
  * otherwise name of the caller is used.
  * Returns the previous implicit context.
+ *
+ * NOTE: This code is actually [zoned] but it is safe to call from
+ * [leak_safe_shallow] since leak_safe_shallow can call it via a level of
+ * indirection. However, this happens in HackC generated memoized wrapped code.
+ * Mark this code as [leak_safe] to avoid this level of indirection.
+ * This code should not be called from userland.
  */
 <<__Native>>
 function create_special_implicit_context(
   int $type /* SpecialImplicitContextType */,
   ?string $memo_key = null,
-)[zoned]: object /* ImplicitContextData */;
+)[leak_safe]: object /* ImplicitContextData */;
 
 /*
  * Singleton memoization wrapper over create_special_implicit_context for

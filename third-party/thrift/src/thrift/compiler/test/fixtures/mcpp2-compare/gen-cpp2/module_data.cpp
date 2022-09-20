@@ -796,7 +796,7 @@ const std::array<protocol::TType, 4> TStructDataStorage<::some::valid::ns::MyInc
 const std::array<folly::StringPiece, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::storage_names = {{
   "__fbthrift_field_MyIncludedInt",
   "__fbthrift_field_MyIncludedStruct",
-  "ARefField",
+  "__fbthrift_field_ARefField",
   "__fbthrift_field_ARequiredField",
 }};
 const std::array<int, 4> TStructDataStorage<::some::valid::ns::MyIncludedStruct>::isset_indexes = {{

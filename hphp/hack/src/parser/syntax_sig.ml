@@ -1039,11 +1039,6 @@ module type Syntax_S = sig
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
 
-  val rust_parse_with_verify_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    t list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-
   val rust_parser_errors :
     Full_fidelity_source_text.t ->
     Rust_pointer.t ->

@@ -192,6 +192,10 @@ void emitCalleeGenericsChecks(IRGS& env, const Func* callee,
       env.irb->exceptionStackBoundary();
     }
   );
+
+  // FIXME: ifThenElse() doesn't save/restore marker and stack boundary.
+  updateMarker(env);
+  env.irb->exceptionStackBoundary();
 }
 
 /*

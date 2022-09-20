@@ -2300,6 +2300,7 @@ void in(ISS& env, const bc::CGetS& op) {
 
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
+      lookup.internal == TriBool::No &&
       !lookup.classInitMightRaise &&
       !mightReadOnlyThrow &&
       tcls.subtypeOf(BCls) &&
@@ -2657,6 +2658,7 @@ void in(ISS& env, const bc::IssetS& op) {
   );
 
   if (!lookup.classInitMightRaise &&
+      lookup.internal == TriBool::No &&
       tcls.subtypeOf(BCls) &&
       tname.subtypeOf(BStr)) {
     effect_free(env);
@@ -3412,6 +3414,7 @@ void in(ISS& env, const bc::IncDecS& op) {
 
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
+      lookup.internal == TriBool::No &&
       !lookup.classInitMightRaise &&
       merge.throws == TriBool::No &&
       tcls.subtypeOf(BCls) &&

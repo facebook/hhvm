@@ -236,6 +236,14 @@ struct Class : AtomicCountable {
 
     /* Used if (cls == this). */
     TypedValue val;
+
+    bool isInternal() const {
+      return (attrs & AttrInternal);
+    }
+
+    const StringData* moduleName() const {
+      return cls.get()->moduleName();
+    }
   };
 
   /*
@@ -1009,6 +1017,7 @@ public:
     bool accessible;
     bool constant;
     bool readonly;
+    bool internal;
   };
 
   struct PropSlotLookup {

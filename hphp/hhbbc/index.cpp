@@ -5103,6 +5103,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
       yesOrNo(prop.attrs & AttrIsConst),
       yesOrNo(prop.attrs & AttrIsReadonly),
       yesOrNo(prop.attrs & AttrLateInit),
+      yesOrNo(prop.attrs & AttrInternal),
       initMightRaise
     };
   };
@@ -5112,6 +5113,7 @@ PropLookupResult<> lookup_static_impl(IndexData& data,
     return PropLookupResult<>{
       TBottom,
       propName,
+      TriBool::No,
       TriBool::No,
       TriBool::No,
       TriBool::No,
@@ -5249,6 +5251,14 @@ PropMergeResult<> merge_static_type_impl(IndexData& data,
       case AttrPublic:
       case AttrProtected:
         mergePublic(ci, prop, unctx(effects.adjusted));
+         // If the property is internal, accessing it may throw
+         // TODO(T131951529): we can do better by checking modules here
+        if ((prop.attrs & AttrInternal) && effects.throws == TriBool::No) {
+          return PropMergeResult<>{
+            effects.adjusted,
+            TriBool::Maybe
+          };
+        }
         return effects;
       case AttrPrivate: {
         assertx(clsCtx == ci);
@@ -7982,6 +7992,7 @@ PropLookupResult<> Index::lookup_static(Context ctx,
     return R{
       TInitCell,
       sname,
+      TriBool::Maybe,
       TriBool::Maybe,
       TriBool::Maybe,
       TriBool::Maybe,

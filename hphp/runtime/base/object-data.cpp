@@ -1210,7 +1210,7 @@ ObjectData::PropLookup ObjectData::getPropImpl(
     // If the prop is internal, check that modules are compatible
     if (lookup.internal &&
         will_symbol_raise_module_boundary_violation(&declProp, &propCtx)) {
-      raiseModuleBoundaryViolation(m_cls, key, propCtx.moduleName());
+      raiseModulePropertyViolation(m_cls, key, propCtx.moduleName(), false);
     }
 
     return {

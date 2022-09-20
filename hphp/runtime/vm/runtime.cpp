@@ -452,20 +452,32 @@ void moduleBoundaryViolationImpl(
 
 } // namespace
 
-void raiseModuleBoundaryViolation(const Class* cls,
-                                  const StringData* prop,
-                                  const StringData* callerModule) {
+void raiseModulePropertyViolation(
+  const Class* cls,
+  const StringData* prop,
+  const StringData* callerModule,
+  bool is_static = false
+) {
   if (!RO::EvalEnforceModules) return;
   assertx(cls);
   assertx(prop);
-  auto const propSlot = cls->lookupDeclProp(prop);
-  auto const attrs = cls->declProperties()[propSlot].attrs;
+  auto const attrs = [&] {
+    if (is_static) {
+      auto const propSlot = cls->lookupSProp(prop);
+      return cls->staticProperties()[propSlot].attrs;
+    }
+    auto const propSlot = cls->lookupDeclProp(prop);
+    return cls->declProperties()[propSlot].attrs;
+  }();
   assertx(attrs & AttrInternal);
+  auto const soft = attrs & AttrInternalSoft;
+
+  auto const msg = is_static ? "static property {}::${}" : "property {}::${}";
   return moduleBoundaryViolationImpl(
-    folly::sformat("property {}::${}", cls->name(), prop->data()),
+    folly::sformat(msg, cls->name(), prop->data()),
     cls->moduleName(),
     callerModule,
-    attrs & AttrInternalSoft
+    soft
   );
 }
 

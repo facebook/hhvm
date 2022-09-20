@@ -1253,8 +1253,17 @@ template<>
 void emitModuleBoundaryCheckKnown(IRGS& env, const Class::Prop* prop) {
   auto const caller = curFunc(env);
   if (will_symbol_raise_module_boundary_violation(prop, caller)) {
-      auto const data = OptClassAndFuncData { curClass(env), caller };
-      gen(env, RaiseModulePropertyViolation, data, cns(env, prop->cls.get()), cns(env, prop->name.get()));
+      auto const data = ModulePropAccessData { caller, prop->cls.get(), prop->name.get(), false };
+      gen(env, RaiseModulePropertyViolation, data);
+  }
+}
+
+template<>
+void emitModuleBoundaryCheckKnown(IRGS& env, const Class::SProp* prop) {
+  auto const caller = curFunc(env);
+  if (will_symbol_raise_module_boundary_violation(prop, caller)) {
+      auto const data = ModulePropAccessData { caller, prop->cls.get(), prop->name.get(), true };
+      gen(env, RaiseModulePropertyViolation, data);
   }
 }
 

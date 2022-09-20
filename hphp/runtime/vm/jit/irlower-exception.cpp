@@ -14,7 +14,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/vm/jit/irlower-internal.h"
 
 #include "hphp/runtime/base/stats.h"
 
@@ -23,8 +22,10 @@
 #include "hphp/runtime/vm/jit/types.h"
 #include "hphp/runtime/vm/jit/abi.h"
 #include "hphp/runtime/vm/jit/code-gen-helpers.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
 #include "hphp/runtime/vm/jit/ir-instruction.h"
 #include "hphp/runtime/vm/jit/ir-opcode.h"
+#include "hphp/runtime/vm/jit/irlower-internal.h"
 #include "hphp/runtime/vm/jit/ssa-tmp.h"
 #include "hphp/runtime/vm/jit/tc.h"
 #include "hphp/runtime/vm/jit/translator-inline.h"
@@ -238,12 +239,14 @@ void cgRaiseModuleBoundaryViolation(IRLS& env, const IRInstruction* inst) {
 }
 
 void cgRaiseModulePropertyViolation(IRLS& env, const IRInstruction* inst) {
-  auto const data = inst->extra<OptClassAndFuncData>();
-  assertx(inst->src(0)->isA(TCls));
-  assertx(inst->src(1)->isA(TStr));
-  using Fn = void(*)(const Class*, const StringData* prop, const StringData*);
-  auto const target = CallSpec::direct(static_cast<Fn>(raiseModuleBoundaryViolation));
-  auto const args = argGroup(env, inst).ssa(0).ssa(1).imm(data->func->moduleName());
+  auto const data = inst->extra<ModulePropAccessData>();
+  using Fn = void(*)(const Class*, const StringData* prop, const StringData*, bool);
+  auto const target = CallSpec::direct(static_cast<Fn>(raiseModulePropertyViolation));
+  auto const args = argGroup(env, inst)
+    .imm(data->propCls)
+    .imm(data->propName)
+    .imm(data->caller->moduleName())
+    .imm(data->is_static);
   cgCallHelper(vmain(env), env, target, kVoidDest, SyncOptions::Sync, args);
 }
 ///////////////////////////////////////////////////////////////////////////////

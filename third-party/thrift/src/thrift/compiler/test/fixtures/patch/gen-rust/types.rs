@@ -202,6 +202,8 @@ pub struct MyStructField21Patch {
     pub assign: ::std::option::Option<::std::vec::Vec<::std::primitive::i16>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::std::vec::Vec<::std::primitive::i16>,
     #[doc = "Prepends to the front of a given list."]
     pub prepend: ::std::vec::Vec<::std::primitive::i16>,
     #[doc = "Appends to the back of a given list."]
@@ -1698,6 +1700,7 @@ impl ::std::default::Default for self::MyStructField21Patch {
         Self {
             assign: ::std::option::Option::None,
             clear: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             prepend: ::std::default::Default::default(),
             append: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
@@ -1711,6 +1714,7 @@ impl ::std::fmt::Debug for self::MyStructField21Patch {
             .debug_struct("MyStructField21Patch")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
+            .field("remove", &self.remove)
             .field("prepend", &self.prepend)
             .field("append", &self.append)
             .finish()
@@ -1744,6 +1748,9 @@ where
         p.write_field_begin("clear", ::fbthrift::TType::Bool, 2);
         ::fbthrift::Serialize::write(&self.clear, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::List, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_begin("prepend", ::fbthrift::TType::List, 8);
         ::fbthrift::Serialize::write(&self.prepend, p);
         p.write_field_end();
@@ -1765,9 +1772,11 @@ where
             ::fbthrift::Field::new("assign", ::fbthrift::TType::List, 1),
             ::fbthrift::Field::new("clear", ::fbthrift::TType::Bool, 2),
             ::fbthrift::Field::new("prepend", ::fbthrift::TType::List, 8),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let mut field_prepend = ::std::option::Option::None;
         let mut field_append = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
@@ -1777,6 +1786,7 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::List, 1) => field_assign = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Bool, 2) => field_clear = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 8) => field_prepend = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 9) => field_append = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
@@ -1787,6 +1797,7 @@ where
         ::std::result::Result::Ok(Self {
             assign: field_assign,
             clear: field_clear.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             prepend: field_prepend.unwrap_or_default(),
             append: field_append.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),

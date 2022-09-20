@@ -1914,9 +1914,17 @@ const folly::StringPiece MyStructField21PatchStruct::__fbthrift_get_field_name(:
 
 MyStructField21PatchStruct::MyStructField21PatchStruct(const MyStructField21PatchStruct&) = default;
 MyStructField21PatchStruct& MyStructField21PatchStruct::operator=(const MyStructField21PatchStruct&) = default;
+MyStructField21PatchStruct::MyStructField21PatchStruct() :
+      __fbthrift_field_clear() {
+}
+
+
+MyStructField21PatchStruct::~MyStructField21PatchStruct() {}
+
 MyStructField21PatchStruct::MyStructField21PatchStruct(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
+    __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
     __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
     __isset(other.__isset) {
@@ -1925,6 +1933,7 @@ MyStructField21PatchStruct::MyStructField21PatchStruct(FOLLY_MAYBE_UNUSED MyStru
 MyStructField21PatchStruct& MyStructField21PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
+    this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
     this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
     __isset = other.__isset;
@@ -1932,15 +1941,17 @@ MyStructField21PatchStruct& MyStructField21PatchStruct::operator=(FOLLY_MAYBE_UN
 }
 
 
-MyStructField21PatchStruct::MyStructField21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg) :
+MyStructField21PatchStruct::MyStructField21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
+    __fbthrift_field_remove(std::move(remove__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
     __fbthrift_field_append(std::move(append__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
 }
 
 
@@ -1948,6 +1959,7 @@ void MyStructField21PatchStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_assign.clear();
   this->__fbthrift_field_clear = bool();
+  this->__fbthrift_field_remove.clear();
   this->__fbthrift_field_prepend.clear();
   this->__fbthrift_field_append.clear();
   __isset = {};
@@ -1968,6 +1980,9 @@ bool MyStructField21PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
     return false;
   }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return false;
+  }
   if (!(lhs.prepend_ref() == rhs.prepend_ref())) {
     return false;
   }
@@ -1985,6 +2000,9 @@ bool MyStructField21PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructFiel
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
     return lhs.clear_ref() < rhs.clear_ref();
   }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return lhs.remove_ref() < rhs.remove_ref();
+  }
   if (!(lhs.prepend_ref() == rhs.prepend_ref())) {
     return lhs.prepend_ref() < rhs.prepend_ref();
   }
@@ -2000,6 +2018,14 @@ const ::std::vector<::std::int16_t>* MyStructField21PatchStruct::get_assign() co
 
 ::std::vector<::std::int16_t>* MyStructField21PatchStruct::get_assign() & {
   return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
+}
+
+const ::std::vector<::std::int16_t>& MyStructField21PatchStruct::get_remove() const& {
+  return __fbthrift_field_remove;
+}
+
+::std::vector<::std::int16_t> MyStructField21PatchStruct::get_remove() && {
+  return std::move(__fbthrift_field_remove);
 }
 
 const ::std::vector<::std::int16_t>& MyStructField21PatchStruct::get_prepend() const& {
@@ -2023,6 +2049,7 @@ void swap(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct& a, FOLLY_MAYBE_UNUSED M
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
+  swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
   swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
   swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
   swap(a.__isset, b.__isset);

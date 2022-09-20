@@ -4349,6 +4349,15 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
       'var' => 'clear',
       'type' => \TType::BOOL,
     ),
+    7 => shape(
+      'var' => 'remove',
+      'type' => \TType::LST,
+      'etype' => \TType::I16,
+      'elem' => shape(
+        'type' => \TType::I16,
+      ),
+      'format' => 'collection',
+    ),
     8 => shape(
       'var' => 'prepend',
       'type' => \TType::LST,
@@ -4371,6 +4380,7 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
     'clear' => 2,
+    'remove' => 7,
     'prepend' => 8,
     'append' => 9,
   ];
@@ -4378,6 +4388,7 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
   const type TConstructorShape = shape(
     ?'assign' => ?Vector<int>,
     ?'clear' => ?bool,
+    ?'remove' => ?Vector<int>,
     ?'prepend' => ?Vector<int>,
     ?'append' => ?Vector<int>,
   );
@@ -4385,11 +4396,12 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
   const type TShape = shape(
     ?'assign' => ?vec<int>,
     'clear' => bool,
+    'remove' => vec<int>,
     'prepend' => vec<int>,
     'append' => vec<int>,
     ...
   );
-  const int STRUCTURAL_ID = 5634180843570988954;
+  const int STRUCTURAL_ID = 6645680550365314285;
   /**
    * Assigns a value. If set, all other operations are ignored.
    * 
@@ -4405,6 +4417,13 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
    */
   public bool $clear;
   /**
+   * Removes entries, if present. Applies third.
+   * 
+   * Original thrift field:-
+   * 7: list<i16> remove
+   */
+  public Vector<int> $remove;
+  /**
    * Prepends to the front of a given list.
    * 
    * Original thrift field:-
@@ -4419,9 +4438,10 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
    */
   public Vector<int> $append;
 
-  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $remove = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
+    $this->remove = $remove ?? Vector {};
     $this->prepend = $prepend ?? Vector {};
     $this->append = $append ?? Vector {};
   }
@@ -4434,6 +4454,7 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
     return new static(
       Shapes::idx($shape, 'assign'),
       Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'remove'),
       Shapes::idx($shape, 'prepend'),
       Shapes::idx($shape, 'append'),
     );
@@ -4477,6 +4498,25 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
                 )
               ),
               "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "remove",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -4543,6 +4583,7 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
     return new static(
       Shapes::idx($shape, 'assign') === null ? null : ((new Vector($shape['assign']))),
       $shape['clear'],
+      (new Vector($shape['remove'])),
       (new Vector($shape['prepend'])),
       (new Vector($shape['append'])),
     );
@@ -4553,6 +4594,7 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
       'assign' => $this->assign
         |> $$ === null ? null : vec($$),
       'clear' => $this->clear,
+      'remove' => vec($this->remove),
       'prepend' => vec($this->prepend),
       'append' => vec($this->append),
     );
@@ -4586,8 +4628,8 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
     if (idx($parsed, 'clear') !== null) {
       $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
-    if (idx($parsed, 'prepend') !== null) {
-      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+    if (idx($parsed, 'remove') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
       $_container11 = Vector {};
       foreach($_json10 as $_key8 => $_value9) {
         $_elem12 = 0;
@@ -4599,10 +4641,10 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
         }
         $_container11 []= $_elem12;
       }
-      $this->prepend = $_container11;
+      $this->remove = $_container11;
     }
-    if (idx($parsed, 'append') !== null) {
-      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+    if (idx($parsed, 'prepend') !== null) {
+      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
       $_container18 = Vector {};
       foreach($_json17 as $_key15 => $_value16) {
         $_elem19 = 0;
@@ -4614,7 +4656,22 @@ class MyStructField21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStr
         }
         $_container18 []= $_elem19;
       }
-      $this->append = $_container18;
+      $this->prepend = $_container18;
+    }
+    if (idx($parsed, 'append') !== null) {
+      $_json24 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container25 = Vector {};
+      foreach($_json24 as $_key22 => $_value23) {
+        $_elem26 = 0;
+        $_tmp27 = (int)$_value23;
+        if ($_tmp27 > 0x7fff) {
+          throw new \TProtocolException("number exceeds limit in field");
+        } else {
+          $_elem26 = (int)$_tmp27;
+        }
+        $_container25 []= $_elem26;
+      }
+      $this->append = $_container25;
     }
   }
 

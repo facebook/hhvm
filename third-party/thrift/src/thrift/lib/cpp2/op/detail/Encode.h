@@ -669,24 +669,7 @@ struct Decode<type::map<Key, Value>> {
 };
 
 template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, Tag>> {
-  template <typename Protocol>
-  void operator()(Protocol& prot, T& t) const {
-    type::native_type<Tag> u;
-    Decode<Tag>{}(prot, u);
-    t = static_cast<T>(u);
-  }
-};
-
-template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, type::list<Tag>>> : Decode<type::list<Tag>> {};
-
-template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, type::set<Tag>>> : Decode<type::set<Tag>> {};
-
-template <typename T, typename Key, typename Value>
-struct Decode<type::cpp_type<T, type::map<Key, Value>>>
-    : Decode<type::map<Key, Value>> {};
+struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {};
 
 // TODO: Use inplace adapter deserialization as optimization.
 template <typename Adapter, typename Tag>

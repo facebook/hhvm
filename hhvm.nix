@@ -119,7 +119,7 @@ stdenv.mkDerivation rec {
       boost
       brotli
       bzip2
-      curl
+      (curl.override { openssl = openssl_1_1; })
       double-conversion
       editline
       expat

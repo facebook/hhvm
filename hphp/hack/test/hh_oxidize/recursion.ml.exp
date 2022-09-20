@@ -5,7 +5,6 @@
 //
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
@@ -21,7 +20,6 @@ use crate::*;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -43,7 +41,6 @@ pub enum IntList {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,

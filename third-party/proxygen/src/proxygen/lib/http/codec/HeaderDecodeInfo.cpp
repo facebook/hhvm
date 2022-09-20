@@ -121,6 +121,11 @@ bool HeaderDecodeInfo::onHeader(const HPACKHeaderName& name,
     // Add the (name, value) pair to headers
     if (headerCode == HTTP_HEADER_OTHER) {
       msg->getHeaders().add(nameSp, valueSp);
+    } else if (headerCode == HTTP_HEADER_HOST && verifier.hasAuthority()) {
+      if (msg->getHeaders().getSingleOrEmpty(HTTP_HEADER_HOST) != valueSp) {
+        parsingError = ":authority/Host header mismatch";
+        return false;
+      }
     } else {
       msg->getHeaders().add(headerCode, valueSp);
     }

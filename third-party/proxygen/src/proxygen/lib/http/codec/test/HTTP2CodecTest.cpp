@@ -505,6 +505,47 @@ TEST_F(HTTP2CodecTest, BadHeaderValues) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
+TEST_F(HTTP2CodecTest, HostAuthority) {
+  static const std::string v1("GET");
+  static const std::string v2("/");
+  static const std::string v3("http");
+  static const std::string v4("foo.com");
+
+  static const vector<proxygen::compress::Header> reqHeaders = {
+      Header::makeHeaderForTest(headers::kMethod, v1),
+      Header::makeHeaderForTest(headers::kPath, v2),
+      Header::makeHeaderForTest(headers::kScheme, v3),
+      Header::makeHeaderForTest(headers::kAuthority, v4),
+  };
+
+  HTTPCodec::StreamID stream = 1;
+  for (auto i = 0; i < 2; i++, stream += 2) {
+    auto allHeaders = reqHeaders;
+    std::string v5(i == 0 ? v4 : "nope");
+    allHeaders.emplace_back(HTTP_HEADER_HOST, v5);
+    HPACKCodec headerCodec(TransportDirection::UPSTREAM);
+    auto encodedHeaders = headerCodec.encode(allHeaders);
+    writeHeaders(output_,
+                 std::move(encodedHeaders),
+                 stream,
+                 folly::none,
+                 http2::kNoPadding,
+                 true,
+                 true);
+    parse();
+    if (i == 0) {
+      // same value, ok
+      callbacks_.expectMessage(true, stream, "/");
+      const auto& headers = callbacks_.msg->getHeaders();
+      EXPECT_EQ(v4, headers.getSingleOrEmpty(HTTP_HEADER_HOST));
+    } else {
+      // different values, error
+      EXPECT_EQ(callbacks_.streamErrors, 1);
+      EXPECT_EQ(callbacks_.lastParseError->getHttpStatusCode(), 400);
+    }
+  }
+}
+
 TEST_F(HTTP2CodecTest, HighAscii) {
   auto g =
       folly::makeGuard([this] { downstreamCodec_.setStrictValidation(false); });

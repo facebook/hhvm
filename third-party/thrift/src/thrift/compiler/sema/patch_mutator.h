@@ -120,12 +120,25 @@ class patch_generator {
   t_struct& gen_prefix_struct(
       const t_node& annot, const t_named& orig, const char* prefix);
 
+  t_struct& gen_patch(
+      const t_node& annot,
+      const t_named& orig,
+      const std::string& suffix,
+      t_type_ref type);
+
   // Attempts to resolve the associated patch type for the given field.
   //
-  // If a shared representation cannot be found, a new field-specific one may be
-  // generated. Otherwise an empty t_type_ref is returned.
+  // If a shared representation cannot be found, a new one may be generated.
+  // Otherwise an empty t_type_ref is returned.
+  t_type_ref find_patch_type(
+      const t_const& annot, const t_structured& parent, t_type_ref type);
   t_type_ref find_patch_type(
       const t_const& annot, const t_structured& parent, const t_field& field);
+
+  t_type_ref find_patch_override(t_type_ref type) const;
+  t_type_ref find_patch_override(const t_named& node) const;
+  t_type_ref find_patch_override(
+      const t_node& node, const std::string& uri) const;
 
   // Injects prefix immediately after the last '/'
   //

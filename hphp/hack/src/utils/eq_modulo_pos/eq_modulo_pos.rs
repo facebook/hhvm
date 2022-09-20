@@ -8,6 +8,14 @@ use std::sync::Arc;
 
 pub use eq_modulo_pos_derive::EqModuloPos;
 
+/// An implementation of `Eq` which is insensitive to positions
+/// (e.g., `pos::BPos`) and reasons (e.g., `ty::reason::BReason`).
+///
+/// If `PartialOrd` or `Ord` are also implemented for `Self`, their methods must
+/// be consistent with `EqModuloPos`. For any two values for which
+/// `eq_modulo_pos` or `eq_modulo_pos_and_reason` returns `false`, it must be
+/// the case that their ordering cannot be changed by modifying positions or
+/// reasons inside them.
 pub trait EqModuloPos {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool;
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool;
@@ -188,12 +196,21 @@ impl_with_iter! { <T> Vec<T>, len }
 impl_with_iter! {
     <K, V> arena_collections::SortedAssocList<'_, K, V>, len
 }
+
+// The arena_collections Set and Map are ordered collections, and rely on the
+// invariant that the impl of `Ord` is consistent with the impl of
+// `EqModuloPos`.
 impl_with_iter! {
     <T> arena_collections::set::Set<'_, T>, count
 }
 impl_with_iter! {
     <K, V> arena_collections::map::Map<'_, K, V>, count
 }
+
+// `BTreeSet` and `BTreeMap` also rely on the invariant that the impl of `Ord`
+// is consistent with the impl of `EqModuloPos`. We can iterate over both
+// collections and expect their keys to be in the same order, even if they
+// differ in positions.
 impl_with_iter! {
     <T> std::collections::BTreeSet<T>, len
 }
@@ -206,6 +223,13 @@ where
     K: Eq + std::hash::Hash,
     V: EqModuloPos,
     S: std::hash::BuildHasher,
+    // This impl (and the impls for IndexMap, {Hash,Index}Set below) is
+    // restricted to collections whose keys implement AsRef<str>. The intent is
+    // to exclude maps and sets whose key types contain positions or reasons,
+    // since this implementation does not compare keys modulo pos. In practice,
+    // we only use maps and sets with string keys in types which need to
+    // implement EqModuloPos.
+    K: AsRef<str>,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {
         if self.len() != other.len() {
@@ -233,7 +257,7 @@ where
 
 impl<K, V, S> EqModuloPos for indexmap::IndexMap<K, V, S>
 where
-    K: Eq + std::hash::Hash,
+    K: Eq + std::hash::Hash + AsRef<str>,
     V: EqModuloPos,
     S: std::hash::BuildHasher,
 {
@@ -258,7 +282,7 @@ where
 
 impl<T, S> EqModuloPos for std::collections::HashSet<T, S>
 where
-    T: Eq + std::hash::Hash,
+    T: Eq + std::hash::Hash + AsRef<str>,
     S: std::hash::BuildHasher,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {
@@ -274,7 +298,7 @@ where
 
 impl<T, S> EqModuloPos for indexmap::IndexSet<T, S>
 where
-    T: Eq + std::hash::Hash,
+    T: Eq + std::hash::Hash + AsRef<str>,
     S: std::hash::BuildHasher,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {

@@ -32,7 +32,7 @@ function hphp_throw_fatal_error(string $error_msg)[]: noreturn;
 <<__PHPStdLib>>
 function hphp_clear_unflushed();
 <<__PHPStdLib>>
-function hphp_debug_caller_info();
+function hphp_debug_caller_info()[leak_safe];
 <<__PHPStdLib>>
 function hphp_debug_backtrace_hash(int $options = 0)[leak_safe]: int;
 <<__PHPStdLib>>

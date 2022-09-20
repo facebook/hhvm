@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "folly/sorted_vector_types.h"
 
@@ -252,7 +251,7 @@ class AStructB final  {
  public:
 
   AStructB() :
-      FieldA(std::make_shared<::a::different::ns::AStruct>()) {
+      __fbthrift_field_FieldA(std::make_shared<::a::different::ns::AStruct>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -265,8 +264,8 @@ class AStructB final  {
 
   AStructB& operator=(AStructB&&) noexcept;
   AStructB& operator=(const AStructB& src);
- public:
-  ::std::shared_ptr<const ::a::different::ns::AStruct> FieldA;
+ private:
+  ::std::shared_ptr<const ::a::different::ns::AStruct> __fbthrift_field_FieldA;
 
  public:
 
@@ -274,22 +273,42 @@ class AStructB final  {
   bool operator<(const AStructB&) const;
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T& FieldA_ref() & {
-    return FieldA;
+    return __fbthrift_field_FieldA;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T& FieldA_ref() const& {
-    return FieldA;
+    return __fbthrift_field_FieldA;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE T&& FieldA_ref() && {
-    return static_cast<T&&>(FieldA);
+    return static_cast<T&&>(__fbthrift_field_FieldA);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
   FOLLY_ERASE const T&& FieldA_ref() const&& {
-    return static_cast<const T&&>(FieldA);
+    return static_cast<const T&&>(__fbthrift_field_FieldA);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE T& FieldA() & {
+    return __fbthrift_field_FieldA;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const T& FieldA() const& {
+    return __fbthrift_field_FieldA;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE T&& FieldA() && {
+    return static_cast<T&&>(__fbthrift_field_FieldA);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::a::different::ns::AStruct>>
+  FOLLY_ERASE const T&& FieldA() const&& {
+    return static_cast<const T&&>(__fbthrift_field_FieldA);
   }
 
   template <class Protocol_>

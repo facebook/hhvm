@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/compiler/test/fixtures/includes/gen-cpp2/transitive_types.h"
 

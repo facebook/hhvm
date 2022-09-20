@@ -1,17 +1,18 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use anyhow::Result;
-use ffi::Pair;
-use ffi::Str;
-use ffi::Triple;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
 use hhbc::Constant;
-use hhbc::FatalOp;
+use hhbc::Fatal;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
-use hhbc::SrcLoc;
 use hhbc::SymbolRefs;
 use hhbc::Typedef;
 use hhbc::Unit;
@@ -264,7 +265,7 @@ fn sem_diff_param<'arena>(
         &path.qualified("default_value"),
         a_default_value.as_ref().into_option(),
         b_default_value.as_ref().into_option(),
-        |path, Pair(_, a_text), Pair(_, b_text)| sem_diff_eq(path, a_text, b_text),
+        |path, a, b| sem_diff_eq(path, &a.expr, &b.expr),
     )?;
 
     Ok(())
@@ -360,13 +361,13 @@ fn sem_diff_class<'arena>(
         &path.qualified("requirements"),
         a_requirements,
         b_requirements,
-        |path, a, b| sem_diff_eq(path, &a.1, &b.1),
+        |path, a, b| sem_diff_eq(path, &a.kind, &b.kind),
     )?;
     sem_diff_map_t(
         &path.qualified("upper_bounds"),
         a_upper_bounds,
         b_upper_bounds,
-        |path, a, b| sem_diff_slice(path, &a.1, &b.1, sem_diff_eq),
+        |path, a, b| sem_diff_slice(path, &a.bounds, &b.bounds, sem_diff_eq),
     )?;
     sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
@@ -403,14 +404,10 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
     Ok(())
 }
 
-fn sem_diff_fatal(
-    path: &CodePath<'_>,
-    a: &Triple<FatalOp, SrcLoc, Str<'_>>,
-    b: &Triple<FatalOp, SrcLoc, Str<'_>>,
-) -> Result<()> {
-    sem_diff_eq(&path.index(0), &a.0, &b.0)?;
-    sem_diff_eq(&path.index(1), &a.1, &b.1)?;
-    sem_diff_eq(&path.index(2), &a.2, &b.2)?;
+fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {
+    sem_diff_eq(&path.index(0), &a.op, &b.op)?;
+    sem_diff_eq(&path.index(1), &a.loc, &b.loc)?;
+    sem_diff_eq(&path.index(2), &a.message, &b.message)?;
     Ok(())
 }
 

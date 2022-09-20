@@ -1308,6 +1308,10 @@ struct
     | BodyXHPCategory of xhp_category_declaration
     | BodyXHPClassAttribute of xhp_class_attribute_declaration
 
+  and enum_class_body_declaration =
+    | ECBodyEnumClassEnumerator of enum_class_enumerator
+    | ECBodyTypeConst of type_const_declaration
+
   and refinement_member =
     | TypeRefinementMemberType of type_in_refinement
     | TypeRefinementMemberCtx of ctx_in_refinement
@@ -1532,7 +1536,7 @@ struct
     enum_class_extends: Token.t option value;
     enum_class_extends_list: specifier listesque value;
     enum_class_left_brace: Token.t value;
-    enum_class_elements: enum_class_enumerator listesque value;
+    enum_class_elements: enum_class_body_declaration listesque value;
     enum_class_right_brace: Token.t value;
   }
 

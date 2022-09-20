@@ -1093,6 +1093,25 @@ SSATmp* opt_meth_caller_get_method(IRGS& env, const ParamPrep& params) {
   return meth_caller_get_name<false>(env, params[0].value);
 }
 
+SSATmp* opt_get_implicit_context_memo_key(IRGS& env, const ParamPrep& params) {
+  if (params.size() != 0) return nullptr;
+  return cond(
+    env,
+    [&] (Block* taken) {
+      auto const ctx = gen(env, LdImplicitContext);
+      return gen(env, CheckType, TObj, taken, ctx);
+    },
+    [&] (SSATmp* ctx) {
+      auto const key = gen(env, LdImplicitContextMemoKey, ctx);
+      gen(env, IncRef, key);
+      return key;
+    },
+    [&] {
+      return cns(env, staticEmptyString());
+    }
+  );
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // Whitelists of builtins that we have optimized HHIR emitters for.
@@ -1144,6 +1163,8 @@ const hphp_fast_string_imap<OptEmitFn> s_opt_emit_fns{
   {"HH\\is_meth_caller", opt_is_meth_caller},
   {"HH\\meth_caller_get_class", opt_meth_caller_get_class},
   {"HH\\meth_caller_get_method", opt_meth_caller_get_method},
+  {"HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key",
+     opt_get_implicit_context_memo_key},
 };
 
 // This second whitelist, a subset of the first, records which parameter

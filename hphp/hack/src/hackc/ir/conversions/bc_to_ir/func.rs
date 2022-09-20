@@ -4,18 +4,19 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Pair;
-use ffi::Str;
-use ffi::Triple;
 use hhbc::Body;
 use hhbc::Function;
 use hhbc::Method;
 use hhbc::Param;
+use ir::func::DefaultValue;
 use ir::instr::Terminator;
+use ir::CcReified;
+use ir::CcThis;
 use ir::ClassIdMap;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
+use newtype::IdVec;
 
 use crate::context::Context;
 use crate::convert;
@@ -29,7 +30,8 @@ pub(crate) fn convert_function<'a>(
 ) {
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
-    let func = convert_body(unit, filename, &src.body);
+    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let func = convert_body(unit, filename, &src.body, span);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -46,7 +48,6 @@ pub(crate) fn convert_function<'a>(
         func,
         flags: src.flags,
         name: src.name,
-        span: ir::SrcLoc::from_span(filename, &src.span),
     };
 
     unit.functions.push(function);
@@ -61,7 +62,8 @@ pub(crate) fn convert_method<'a>(
 ) {
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
-    let func = convert_body(unit, filename, &src.body);
+    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let func = convert_body(unit, filename, &src.body, span);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -81,7 +83,6 @@ pub(crate) fn convert_method<'a>(
         flags: src.flags,
         func,
         name: src.name,
-        span: ir::SrcLoc::from_span(filename, &src.span),
         visibility: src.visibility,
     };
 
@@ -93,6 +94,7 @@ fn convert_body<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     body: &Body<'a>,
+    span: ir::SrcLoc,
 ) -> ir::Func<'a> {
     let Body {
         ref body_instrs,
@@ -109,7 +111,7 @@ fn convert_body<'a>(
 
     let tparams: ClassIdMap<_> = upper_bounds
         .iter()
-        .map(|Pair(name, bounds)| {
+        .map(|hhbc::UpperBound { name, bounds }| {
             let id = unit.strings.intern_bytes(name.as_ref());
             let name = ir::ClassId::new(id);
             let bounds = bounds
@@ -128,6 +130,9 @@ fn convert_body<'a>(
         })
         .collect();
 
+    let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
+    locs.push(span);
+
     let func = ir::Func {
         blocks: Default::default(),
         doc_comment: doc_comment.clone().into_option(),
@@ -141,6 +146,7 @@ fn convert_body<'a>(
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),
         shadowed_tparams,
+        span: ir::LocId::from_usize(0),
         tparams,
     };
 
@@ -149,10 +155,10 @@ fn convert_body<'a>(
     for param in params.as_ref() {
         let ir_param = convert_param(&mut ctx, param);
         ctx.builder.func.params.push(ir_param);
-        if let ffi::Just(Pair(label, _)) = param.default_value.as_ref() {
+        if let ffi::Just(dv) = param.default_value.as_ref() {
             // This default value will jump to a different start than the
             // Func::ENTRY_BID.
-            let addr = ctx.label_to_addr[label];
+            let addr = ctx.label_to_addr[&dv.label];
             ctx.add_work_addr(addr);
         }
     }
@@ -205,10 +211,13 @@ fn convert_body<'a>(
 }
 
 fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Param<'a> {
-    let default_value = match param.default_value {
-        Maybe::Just(Pair(label, value)) => {
-            let bid = ctx.target_from_label(label, 0);
-            Some((bid, value))
+    let default_value = match &param.default_value {
+        Maybe::Just(dv) => {
+            let init = ctx.target_from_label(dv.label, 0);
+            Some(DefaultValue {
+                init,
+                expr: dv.expr,
+            })
         }
         Maybe::Nothing => None,
     };
@@ -238,24 +247,21 @@ fn convert_coeffects<'a>(coeffects: &hhbc::Coeffects<'a>) -> ir::Coeffects<'a> {
         static_coeffects: coeffects.get_static_coeffects().to_vec(),
         unenforced_static_coeffects: coeffects.get_unenforced_static_coeffects().to_vec(),
         fun_param: coeffects.get_fun_param().to_vec(),
-        cc_param: coeffects
-            .get_cc_param()
-            .iter()
-            .copied()
-            .map(|Pair(a, b)| (a, b))
-            .collect(),
+        cc_param: coeffects.get_cc_param().to_vec(),
         cc_this: coeffects
             .get_cc_this()
             .iter()
-            .map(|inner| inner.iter().copied().collect::<Vec<Str<'a>>>())
+            .map(|inner| CcThis {
+                types: inner.types.iter().copied().collect(),
+            })
             .collect(),
         cc_reified: coeffects
             .get_cc_reified()
             .iter()
-            .copied()
-            .map(|Triple(a, b, c)| {
-                let c: Vec<Str<'a>> = c.iter().copied().collect();
-                (a, b, c)
+            .map(|inner| CcReified {
+                is_class: inner.is_class,
+                index: inner.index,
+                types: inner.types.iter().copied().collect(),
             })
             .collect(),
         closure_parent_scope: coeffects.is_closure_parent_scope(),

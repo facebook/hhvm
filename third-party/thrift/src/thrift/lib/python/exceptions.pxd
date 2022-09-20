@@ -78,10 +78,6 @@ cdef extern from "thrift/lib/cpp/transport/TTransportException.h" namespace "apa
         int getErrno()
 
 
-cdef extern from "thrift/lib/python/exceptions.h" namespace "::thrift::python::exception":
-    cdef unique_ptr[T] try_make_unique_exception[T](const cFollyExceptionWrapper& ex)
-
-
 cdef class Error(Exception):
     """base class for all Thrift exceptions"""
     pass
@@ -93,13 +89,13 @@ cdef class LibraryError(Error):
 cdef class ApplicationError(Error):
     pass
 
-cdef ApplicationError create_ApplicationError(unique_ptr[cTApplicationException] ex)
+cdef ApplicationError create_ApplicationError(const cTApplicationException* ex)
 
 
 cdef class TransportError(LibraryError):
     pass
 
-cdef TransportError create_TransportError(unique_ptr[cTTransportException] ex)
+cdef TransportError create_TransportError(const cTTransportException* ex)
 
 
 cdef object create_py_exception(const cFollyExceptionWrapper& ex, RpcOptions options)

@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/included_types.h"
 #include "thrift/compiler/test/fixtures/basic-structured-annotations/gen-cpp2/namespaced_types.h"

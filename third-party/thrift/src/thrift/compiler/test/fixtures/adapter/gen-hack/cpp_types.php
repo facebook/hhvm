@@ -362,13 +362,13 @@ class DisableLazyChecksum implements \IThriftSyncStruct, \IThriftShapishSyncStru
  * 
  * For example:
  * 
- *   @cpp.Adapter{name = "IdAdapter"}
+ *   @cpp.Adapter{name = "::ns::IdAdapter"}
  *   typedef i64 MyI64;
  * 
  * Here the type `MyI64` has the C++ adapter `IdAdapter`.
  * 
  *   struct User {
- *     @cpp.Adapter{name = "IdAdapter"}
+ *     @cpp.Adapter{name = "::ns::IdAdapter"}
  *     1: i64 id;
  *   }
  * 

@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 
 namespace apache {
@@ -468,8 +467,8 @@ class OptionalRefStruct final  {
 
   OptionalRefStruct& operator=(OptionalRefStruct&&) noexcept;
   OptionalRefStruct& operator=(const OptionalRefStruct& src);
- public:
-  ::py3::simple::IOBufPtr optional_blob;
+ private:
+  ::py3::simple::IOBufPtr __fbthrift_field_optional_blob;
  private:
   apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -480,30 +479,50 @@ class OptionalRefStruct final  {
 
   template <typename..., typename T = ::py3::simple::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob_ref() const& {
-    return {this->optional_blob, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::py3::simple::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob_ref() const&& {
-    return {static_cast<const T&&>(this->optional_blob), __isset.at(0), __isset.bit(0)};
+    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::py3::simple::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob_ref() & {
-    return {this->optional_blob, __isset.at(0), __isset.bit(0)};
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
   }
 
   template <typename..., typename T = ::py3::simple::IOBufPtr>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob_ref() && {
-    return {static_cast<T&&>(this->optional_blob), __isset.at(0), __isset.bit(0)};
+    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optional_blob() const& {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optional_blob() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optional_blob() & {
+    return {this->__fbthrift_field_optional_blob, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::py3::simple::IOBufPtr>
+  FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optional_blob() && {
+    return {static_cast<T&&>(this->__fbthrift_field_optional_blob), __isset.at(0), __isset.bit(0)};
   }
 
   const ::py3::simple::IOBufPtr* get_optional_blob() const& {
-    return optional_blob_ref() ? std::addressof(optional_blob) : nullptr;
+    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
   }
 
   ::py3::simple::IOBufPtr* get_optional_blob() & {
-    return optional_blob_ref() ? std::addressof(optional_blob) : nullptr;
+    return optional_blob_ref() ? std::addressof(__fbthrift_field_optional_blob) : nullptr;
   }
   ::py3::simple::IOBufPtr* get_optional_blob() && = delete;
 
@@ -511,7 +530,7 @@ class OptionalRefStruct final  {
   [[deprecated("Use `FOO.optional_blob_ref() = BAR;` instead of `FOO.set_optional_blob(BAR);`")]]
   ::py3::simple::IOBufPtr& set_optional_blob(T_OptionalRefStruct_optional_blob_struct_setter&& optional_blob_) {
     optional_blob_ref() = std::forward<T_OptionalRefStruct_optional_blob_struct_setter>(optional_blob_);
-    return optional_blob;
+    return __fbthrift_field_optional_blob;
   }
 
   template <class Protocol_>

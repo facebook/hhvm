@@ -70,9 +70,9 @@ class CPUConcurrencyController {
     // How many samples to collect for the initial estimate
     uint32_t collectionSampleSize = 500;
     // Don't go above this concurrency limit, ever.
-    int64_t concurrencyUpperBound = 1 << 16;
+    uint32_t concurrencyUpperBound = 1 << 16;
     // Don't go below this concurrency limit, ever.
-    int64_t concurrencyLowerBound = 1;
+    uint32_t concurrencyLowerBound = 1;
   };
 
   CPUConcurrencyController(
@@ -135,7 +135,7 @@ class CPUConcurrencyController {
   std::chrono::steady_clock::time_point lastOverloadStart_{
       std::chrono::steady_clock::now()};
 
-  std::vector<int64_t> stableConcurrencySamples_;
+  std::vector<uint32_t> stableConcurrencySamples_;
   std::atomic<int64_t> stableEstimate_{-1};
 
   // Keeps track of total requests seen. We use this to compute

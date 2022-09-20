@@ -223,9 +223,42 @@ where
         self.parse_terminated_list(|x: &mut Self| x.parse_enumerator(), TokenKind::RightBrace)
     }
 
-    fn parse_enum_class_enumerator_list_opt(&mut self) -> S::Output {
+    fn parse_enum_class_element(&mut self) -> S::Output {
+        // We need to identify an element of an enum class. Possibilities
+        // are:
+        //
+        // // type-constant-declaration:
+        // const type name = type-specifier ;
+        // abstract const type name ;
+        //
+        // // enum-class-enumerator:
+        // type-specifier name = expression ;
+        // abstract type-specifier name ;
+        let attr = self.parse_attribute_specification_opt();
+
+        let kind0 = self.peek_token_kind_with_lookahead(0);
+        let kind1 = self.peek_token_kind_with_lookahead(1);
+        let kind2 = self.peek_token_kind_with_lookahead(2);
+
+        match (kind0, kind1, kind2) {
+            (TokenKind::Abstract, TokenKind::Const, TokenKind::Type)
+            | (TokenKind::Const, TokenKind::Type, _) => {
+                let modifiers = self.parse_modifiers();
+                let const_ = self.assert_token(TokenKind::Const);
+                self.parse_type_const_declaration(attr, modifiers, const_)
+            }
+            _ => {
+                if !attr.is_missing() {
+                    self.with_error(Errors::no_attributes_on_enum_class_enumerator)
+                }
+                self.parse_enum_class_enumerator()
+            }
+        }
+    }
+
+    fn parse_enum_class_element_list_opt(&mut self) -> S::Output {
         self.parse_terminated_list(
-            |x: &mut Self| x.parse_enum_class_enumerator(),
+            |x: &mut Self| x.parse_enum_class_element(),
             TokenKind::RightBrace,
         )
     }
@@ -283,7 +316,7 @@ where
             self.parse_type_specifier(false /* allow_var */, false /* allow_attr */);
         let (classish_extends, classish_extends_list) = self.parse_extends_opt();
         let left_brace = self.require_left_brace();
-        let enumerators = self.parse_enum_class_enumerator_list_opt();
+        let elements = self.parse_enum_class_element_list_opt();
         let right_brace = self.require_right_brace();
         self.sc_mut().make_enum_class_declaration(
             attrs,
@@ -296,7 +329,7 @@ where
             classish_extends,
             classish_extends_list,
             left_brace,
-            enumerators,
+            elements,
             right_brace,
         )
     }

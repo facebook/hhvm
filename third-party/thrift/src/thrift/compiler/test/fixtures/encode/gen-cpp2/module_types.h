@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/annotation/gen-cpp2/cpp_types.h"
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
@@ -676,8 +675,8 @@ class OpEncodeStruct final  {
   ::facebook::thrift::test::AdaptedFoo __fbthrift_field_adapted_field;
  private:
   ::std::vector<::facebook::thrift::test::AdaptedFoo> __fbthrift_field_list_field;
- public:
-  ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> list_shared_ptr_field;
+ private:
+  ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>> __fbthrift_field_list_shared_ptr_field;
  private:
   ::std::vector<::facebook::thrift::test::AdaptedFoo> __fbthrift_field_list_cpp_type_field;
  private:
@@ -899,22 +898,42 @@ class OpEncodeStruct final  {
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T& list_shared_ptr_field_ref() & {
-    return list_shared_ptr_field;
+    return __fbthrift_field_list_shared_ptr_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T& list_shared_ptr_field_ref() const& {
-    return list_shared_ptr_field;
+    return __fbthrift_field_list_shared_ptr_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE T&& list_shared_ptr_field_ref() && {
-    return static_cast<T&&>(list_shared_ptr_field);
+    return static_cast<T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
   FOLLY_ERASE const T&& list_shared_ptr_field_ref() const&& {
-    return static_cast<const T&&>(list_shared_ptr_field);
+    return static_cast<const T&&>(__fbthrift_field_list_shared_ptr_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE T& list_shared_ptr_field() & {
+    return __fbthrift_field_list_shared_ptr_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const T& list_shared_ptr_field() const& {
+    return __fbthrift_field_list_shared_ptr_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE T&& list_shared_ptr_field() && {
+    return static_cast<T&&>(__fbthrift_field_list_shared_ptr_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>
+  FOLLY_ERASE const T&& list_shared_ptr_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_list_shared_ptr_field);
   }
 
   template <typename..., typename T = ::std::vector<::facebook::thrift::test::AdaptedFoo>>

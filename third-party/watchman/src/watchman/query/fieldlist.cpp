@@ -25,7 +25,11 @@ std::optional<json_ref> make_symlink(FileResult* file, const QueryContext*) {
   if (!target.has_value()) {
     return std::nullopt;
   }
-  return *target ? w_string_to_json(*target) : json_null();
+  if (std::holds_alternative<NotSymlink>(*target)) {
+    return json_null();
+  } else {
+    return w_string_to_json(std::get<w_string>(*target));
+  }
 }
 
 std::optional<json_ref> make_sha1_hex(FileResult* file, const QueryContext*) {

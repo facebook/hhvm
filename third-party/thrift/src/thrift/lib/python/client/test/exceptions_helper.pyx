@@ -16,10 +16,10 @@ from folly cimport cFollyExceptionWrapper
 from cpython.ref cimport PyObject
 from libcpp.memory cimport unique_ptr
 
-from thrift.python.exceptions cimport cTTransportException, try_make_unique_exception, addHandler, removeAllHandlers
+from thrift.python.exceptions cimport cTTransportException, addHandler, removeAllHandlers
 
 cdef object hijack_transport_exception_handler(const cFollyExceptionWrapper& ex, PyObject* user_data):
-      cdef unique_ptr[cTTransportException] te = try_make_unique_exception[cTTransportException](ex)
+      cdef const cTTransportException* te = ex.get_exception[cTTransportException]()
       if te:
         raise HijackTestException()
 

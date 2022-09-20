@@ -335,9 +335,11 @@ async function soft_run_with_async<Tout>(
   (function ()[_]: Awaitable<Tout>) $f,
   string $key,
 )[zoned, ctx $f]: Awaitable<Tout> {
-  $prev = _Private\set_special_implicit_context(
-    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-    $key
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
+      $key
+    ),
   );
   try {
     $result = $f();
@@ -353,15 +355,48 @@ function soft_run_with<Tout>(
   (function ()[_]: Tout) $f,
   string $key,
 )[zoned, ctx $f]: Tout {
-  $prev = _Private\set_special_implicit_context(
-    \HH\MEMOIZE_IC_TYPE_SOFT_SET,
-    $key
+  $prev = _Private\set_implicit_context_by_value(
+    _Private\create_special_implicit_context(
+      \HH\MEMOIZE_IC_TYPE_SOFT_SET,
+      $key
+    ),
   );
   try {
     return $f();
   } finally {
     _Private\set_implicit_context_by_value($prev);
   }
+}
+
+function embed_implicit_context_state_in_closure(
+  (function ()[defaults]: void) $f,
+)[zoned]: (function ()[defaults]: void) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+  };
+}
+
+function embed_implicit_context_state_in_async_closure(
+  (function ()[defaults]: Awaitable<void>) $f,
+)[zoned]: (function ()[defaults]: Awaitable<void>) {
+  $captured_ic_state = _Private\get_whole_implicit_context();
+  return async ()[defaults] ==> {
+    $prev = _Private\set_implicit_context_by_value($captured_ic_state);
+    try {
+      $awaitable = $f();
+    } finally {
+      _Private\set_implicit_context_by_value($prev);
+    }
+    // Needs to be awaited here so that context dependency is established
+    // between parent/child functions
+    await $awaitable;
+  };
 }
 
 } // namespace ImplicitContext
@@ -376,6 +411,9 @@ final class ImplicitContextData {}
  */
 <<__Native>>
 function get_implicit_context(string $key)[zoned]: mixed;
+
+<<__Native>>
+function get_whole_implicit_context()[zoned]: object /* ImplicitContextData */;
 
 /**
  * Sets implicit context $context keyed by $key.
@@ -393,15 +431,37 @@ function set_implicit_context(
  * If $memo_key is provided, it is used for keying the memoization key,
  * otherwise name of the caller is used.
  * Returns the previous implicit context.
+ *
+ * NOTE: This code is actually [zoned] but it is safe to call from
+ * [leak_safe_shallow] since leak_safe_shallow can call it via a level of
+ * indirection. However, this happens in HackC generated memoized wrapped code.
+ * Mark this code as [leak_safe] to avoid this level of indirection.
+ * This code should not be called from userland.
  */
 <<__Native>>
-function set_special_implicit_context(
+function create_special_implicit_context(
   int $type /* SpecialImplicitContextType */,
   ?string $memo_key = null,
-)[zoned]: object /* ImplicitContextData */;
+)[leak_safe]: object /* ImplicitContextData */;
 
 /*
- * Returns the currently implicit context hash or emptry string if
+ * Singleton memoization wrapper over create_special_implicit_context for
+ * ic inaccessible case
+ */
+<<__Memoize>>
+function create_ic_inaccessible_context()[] {
+  // Note: This function needs a backdoor since it needs to call zoned code
+  // but it does not actually inspect the IC
+  // The parent function cannot be zoned since zoned requires a memoization
+  // category which will result in infinite loop since MakeICInaccessible
+  // uses this function.
+  return \HH\Coeffects\backdoor(
+    ()[zoned] ==> create_special_implicit_context(\HH\MEMOIZE_IC_TYPE_INACCESSIBLE),
+  );
+}
+
+/*
+ * Returns the currently implicit context hash or empty string if
  * no implicit context is set
  */
 <<__Native>>

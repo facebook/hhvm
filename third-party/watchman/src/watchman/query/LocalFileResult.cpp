@@ -88,7 +88,7 @@ std::optional<bool> LocalFileResult::exists() {
   return exists_;
 }
 
-std::optional<w_string> LocalFileResult::readLink() {
+std::optional<ResolvedSymlink> LocalFileResult::readLink() {
   if (symlinkTarget_.has_value()) {
     return symlinkTarget_;
   }
@@ -119,16 +119,14 @@ void LocalFileResult::batchFetchProperties(
     localFile->getInfo();
 
     if (localFile->neededProperties() & FileResult::Property::SymlinkTarget) {
-      if (!localFile->info_->isSymlink()) {
-        // If this file is not a symlink then we immediately yield
-        // a nullptr w_string instance rather than propagating an error.
-        // This behavior is relied upon by the field rendering code and
-        // checked in test_symlink.py.
-        localFile->symlinkTarget_ = w_string();
-      } else {
-        localFile->symlinkTarget_ =
-            readSymbolicLink(localFile->fullPath_.c_str());
+      ResolvedSymlink target = NotSymlink{};
+      // If this file is not a symlink then we immediately yield a "not a
+      // symlink" rather than propagating an error. This behavior is relied
+      // upon by the field rendering code and checked in test_symlink.py.
+      if (localFile->info_->isSymlink()) {
+        target = readSymbolicLink(localFile->fullPath_.c_str());
       }
+      localFile->symlinkTarget_ = target;
     }
 
     if (localFile->neededProperties() & FileResult::Property::ContentSha1) {

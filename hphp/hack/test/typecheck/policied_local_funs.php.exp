@@ -1,4 +1,8 @@
 File "policied_local_funs.php", line 7, characters 8-30:
-Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults]. (Parsing[1002])
+Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
 File "policied_local_funs.php", line 9, characters 8-16:
-Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults]. (Parsing[1002])
+Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
+File "policied_local_funs.php", line 13, characters 8-30:
+Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])
+File "policied_local_funs.php", line 15, characters 8-16:
+Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults]. (Parsing[1002])

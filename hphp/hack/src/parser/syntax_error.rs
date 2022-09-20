@@ -574,6 +574,8 @@ pub const no_silence: Error = Cow::Borrowed("The error suppression operator `@` 
 pub const const_mutation: Error = Cow::Borrowed("Cannot mutate a class constant");
 pub const no_attributes_on_variadic_parameter: Error =
     Cow::Borrowed("Attributes on variadic parameters are not allowed");
+pub const no_attributes_on_enum_class_enumerator: Error =
+    Cow::Borrowed("Attributes on enum class enumerators are not allowed");
 pub const invalid_constant_initializer: Error =
     Cow::Borrowed("Expected constant expression for initializer");
 pub const parent_static_prop_decl: Error =
@@ -1016,7 +1018,7 @@ pub fn policy_sharded_memoized_without_policied(kind: &str) -> Error {
 
 pub fn memoize_make_ic_inaccessible_without_defaults(kind: &str) -> Error {
     Cow::Owned(format!(
-        "This {} requires the defaults context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible",
+        "This {} requires the defaults, leak_safe, or leak_safe_local context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible",
         kind
     ))
 }
@@ -1120,7 +1122,7 @@ pub const write_props_without_capability: Error = Cow::Borrowed(
 );
 
 pub const closure_in_local_context: Error = Cow::Borrowed(
-    "Closures in zoned local contexts require explicit annotation. Consider adding [zoned_local] or [defaults].",
+    "Closures in local contexts require explicit annotation. Consider adding explicit contexts to this closure e.g. [leak_safe_local] or [zoned_local] or [defaults].",
 );
 
 pub const read_globals_without_capability: Error = Cow::Borrowed(

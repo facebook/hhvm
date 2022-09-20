@@ -44,12 +44,12 @@ pub fn run(func: &mut Func<'_>) -> bool {
 
     // Function params
     for idx in 0..func.params.len() {
-        if let Some((edge, _)) = func.params[idx].default_value {
-            let target = forward_edge(func, edge, 1, &predecesors);
-            if target != edge {
-                predecesors[edge] -= 1;
+        if let Some(dv) = func.params[idx].default_value {
+            let target = forward_edge(func, dv.init, 1, &predecesors);
+            if target != dv.init {
+                predecesors[dv.init] -= 1;
                 predecesors[target] += 1;
-                func.params[idx].default_value.as_mut().unwrap().0 = target;
+                func.params[idx].default_value.as_mut().unwrap().init = target;
             }
         }
     }

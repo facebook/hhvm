@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 
 namespace apache {
@@ -705,24 +704,24 @@ class MyField final  {
 
   ~MyField();
 
- public:
-  ::std::unique_ptr<::std::int64_t> opt_value;
- public:
-  ::std::unique_ptr<::std::int64_t> value;
- public:
-  ::std::unique_ptr<::std::int64_t> req_value;
- public:
-  ::std::unique_ptr<::cpp2::MyEnum> opt_enum_value;
- public:
-  ::std::unique_ptr<::cpp2::MyEnum> enum_value;
- public:
-  ::std::unique_ptr<::cpp2::MyEnum> req_enum_value;
- public:
-  ::std::unique_ptr<::std::string> opt_str_value;
- public:
-  ::std::unique_ptr<::std::string> str_value;
- public:
-  ::std::unique_ptr<::std::string> req_str_value;
+ private:
+  ::std::unique_ptr<::std::int64_t> __fbthrift_field_opt_value;
+ private:
+  ::std::unique_ptr<::std::int64_t> __fbthrift_field_value;
+ private:
+  ::std::unique_ptr<::std::int64_t> __fbthrift_field_req_value;
+ private:
+  ::std::unique_ptr<::cpp2::MyEnum> __fbthrift_field_opt_enum_value;
+ private:
+  ::std::unique_ptr<::cpp2::MyEnum> __fbthrift_field_enum_value;
+ private:
+  ::std::unique_ptr<::cpp2::MyEnum> __fbthrift_field_req_enum_value;
+ private:
+  ::std::unique_ptr<::std::string> __fbthrift_field_opt_str_value;
+ private:
+  ::std::unique_ptr<::std::string> __fbthrift_field_str_value;
+ private:
+  ::std::unique_ptr<::std::string> __fbthrift_field_req_str_value;
 
  public:
 
@@ -730,174 +729,354 @@ class MyField final  {
   bool operator<(const MyField&) const;
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T& opt_value_ref() & {
-    return opt_value;
+    return __fbthrift_field_opt_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T& opt_value_ref() const& {
-    return opt_value;
+    return __fbthrift_field_opt_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T&& opt_value_ref() && {
-    return static_cast<T&&>(opt_value);
+    return static_cast<T&&>(__fbthrift_field_opt_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T&& opt_value_ref() const&& {
-    return static_cast<const T&&>(opt_value);
+    return static_cast<const T&&>(__fbthrift_field_opt_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T& opt_value() & {
+    return __fbthrift_field_opt_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T& opt_value() const& {
+    return __fbthrift_field_opt_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T&& opt_value() && {
+    return static_cast<T&&>(__fbthrift_field_opt_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T&& opt_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T& value_ref() & {
-    return value;
+    return __fbthrift_field_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T& value_ref() const& {
-    return value;
+    return __fbthrift_field_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T&& value_ref() && {
-    return static_cast<T&&>(value);
+    return static_cast<T&&>(__fbthrift_field_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T&& value_ref() const&& {
-    return static_cast<const T&&>(value);
+    return static_cast<const T&&>(__fbthrift_field_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T& value() & {
+    return __fbthrift_field_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T& value() const& {
+    return __fbthrift_field_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T&& value() && {
+    return static_cast<T&&>(__fbthrift_field_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T&& value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T& req_value_ref() & {
-    return req_value;
+    return __fbthrift_field_req_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T& req_value_ref() const& {
-    return req_value;
+    return __fbthrift_field_req_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE T&& req_value_ref() && {
-    return static_cast<T&&>(req_value);
+    return static_cast<T&&>(__fbthrift_field_req_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
   FOLLY_ERASE const T&& req_value_ref() const&& {
-    return static_cast<const T&&>(req_value);
+    return static_cast<const T&&>(__fbthrift_field_req_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T& req_value() & {
+    return __fbthrift_field_req_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T& req_value() const& {
+    return __fbthrift_field_req_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE T&& req_value() && {
+    return static_cast<T&&>(__fbthrift_field_req_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int64_t>>
+  FOLLY_ERASE const T&& req_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T& opt_enum_value_ref() & {
-    return opt_enum_value;
+    return __fbthrift_field_opt_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T& opt_enum_value_ref() const& {
-    return opt_enum_value;
+    return __fbthrift_field_opt_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T&& opt_enum_value_ref() && {
-    return static_cast<T&&>(opt_enum_value);
+    return static_cast<T&&>(__fbthrift_field_opt_enum_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T&& opt_enum_value_ref() const&& {
-    return static_cast<const T&&>(opt_enum_value);
+    return static_cast<const T&&>(__fbthrift_field_opt_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T& opt_enum_value() & {
+    return __fbthrift_field_opt_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T& opt_enum_value() const& {
+    return __fbthrift_field_opt_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T&& opt_enum_value() && {
+    return static_cast<T&&>(__fbthrift_field_opt_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T&& opt_enum_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_enum_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T& enum_value_ref() & {
-    return enum_value;
+    return __fbthrift_field_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T& enum_value_ref() const& {
-    return enum_value;
+    return __fbthrift_field_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T&& enum_value_ref() && {
-    return static_cast<T&&>(enum_value);
+    return static_cast<T&&>(__fbthrift_field_enum_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T&& enum_value_ref() const&& {
-    return static_cast<const T&&>(enum_value);
+    return static_cast<const T&&>(__fbthrift_field_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T& enum_value() & {
+    return __fbthrift_field_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T& enum_value() const& {
+    return __fbthrift_field_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T&& enum_value() && {
+    return static_cast<T&&>(__fbthrift_field_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T&& enum_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_enum_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T& req_enum_value_ref() & {
-    return req_enum_value;
+    return __fbthrift_field_req_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T& req_enum_value_ref() const& {
-    return req_enum_value;
+    return __fbthrift_field_req_enum_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE T&& req_enum_value_ref() && {
-    return static_cast<T&&>(req_enum_value);
+    return static_cast<T&&>(__fbthrift_field_req_enum_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
   FOLLY_ERASE const T&& req_enum_value_ref() const&& {
-    return static_cast<const T&&>(req_enum_value);
+    return static_cast<const T&&>(__fbthrift_field_req_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T& req_enum_value() & {
+    return __fbthrift_field_req_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T& req_enum_value() const& {
+    return __fbthrift_field_req_enum_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE T&& req_enum_value() && {
+    return static_cast<T&&>(__fbthrift_field_req_enum_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyEnum>>
+  FOLLY_ERASE const T&& req_enum_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_enum_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T& opt_str_value_ref() & {
-    return opt_str_value;
+    return __fbthrift_field_opt_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T& opt_str_value_ref() const& {
-    return opt_str_value;
+    return __fbthrift_field_opt_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T&& opt_str_value_ref() && {
-    return static_cast<T&&>(opt_str_value);
+    return static_cast<T&&>(__fbthrift_field_opt_str_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T&& opt_str_value_ref() const&& {
-    return static_cast<const T&&>(opt_str_value);
+    return static_cast<const T&&>(__fbthrift_field_opt_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T& opt_str_value() & {
+    return __fbthrift_field_opt_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T& opt_str_value() const& {
+    return __fbthrift_field_opt_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T&& opt_str_value() && {
+    return static_cast<T&&>(__fbthrift_field_opt_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T&& opt_str_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_str_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T& str_value_ref() & {
-    return str_value;
+    return __fbthrift_field_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T& str_value_ref() const& {
-    return str_value;
+    return __fbthrift_field_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T&& str_value_ref() && {
-    return static_cast<T&&>(str_value);
+    return static_cast<T&&>(__fbthrift_field_str_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T&& str_value_ref() const&& {
-    return static_cast<const T&&>(str_value);
+    return static_cast<const T&&>(__fbthrift_field_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T& str_value() & {
+    return __fbthrift_field_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T& str_value() const& {
+    return __fbthrift_field_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T&& str_value() && {
+    return static_cast<T&&>(__fbthrift_field_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T&& str_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_str_value);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T& req_str_value_ref() & {
-    return req_str_value;
+    return __fbthrift_field_req_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T& req_str_value_ref() const& {
-    return req_str_value;
+    return __fbthrift_field_req_str_value;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T&& req_str_value_ref() && {
-    return static_cast<T&&>(req_str_value);
+    return static_cast<T&&>(__fbthrift_field_req_str_value);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T&& req_str_value_ref() const&& {
-    return static_cast<const T&&>(req_str_value);
+    return static_cast<const T&&>(__fbthrift_field_req_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T& req_str_value() & {
+    return __fbthrift_field_req_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T& req_str_value() const& {
+    return __fbthrift_field_req_str_value;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T&& req_str_value() && {
+    return static_cast<T&&>(__fbthrift_field_req_str_value);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T&& req_str_value() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_str_value);
   }
 
   template <class Protocol_>
@@ -947,8 +1126,8 @@ class MyStruct final  {
  public:
 
   MyStruct() :
-      ref(std::make_unique<::cpp2::MyField>()),
-      req_ref(std::make_unique<::cpp2::MyField>()) {
+      __fbthrift_field_ref(std::make_unique<::cpp2::MyField>()),
+      __fbthrift_field_req_ref(std::make_unique<::cpp2::MyField>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -960,12 +1139,12 @@ class MyStruct final  {
 
   MyStruct& operator=(MyStruct&&) noexcept;
   MyStruct& operator=(const MyStruct& src);
- public:
-  ::std::unique_ptr<::cpp2::MyField> opt_ref;
- public:
-  ::std::unique_ptr<::cpp2::MyField> ref;
- public:
-  ::std::unique_ptr<::cpp2::MyField> req_ref;
+ private:
+  ::std::unique_ptr<::cpp2::MyField> __fbthrift_field_opt_ref;
+ private:
+  ::std::unique_ptr<::cpp2::MyField> __fbthrift_field_ref;
+ private:
+  ::std::unique_ptr<::cpp2::MyField> __fbthrift_field_req_ref;
 
  public:
 
@@ -973,60 +1152,120 @@ class MyStruct final  {
   bool operator<(const MyStruct&) const;
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T& opt_ref_ref() & {
-    return opt_ref;
+    return __fbthrift_field_opt_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T& opt_ref_ref() const& {
-    return opt_ref;
+    return __fbthrift_field_opt_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T&& opt_ref_ref() && {
-    return static_cast<T&&>(opt_ref);
+    return static_cast<T&&>(__fbthrift_field_opt_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T&& opt_ref_ref() const&& {
-    return static_cast<const T&&>(opt_ref);
+    return static_cast<const T&&>(__fbthrift_field_opt_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T& opt_ref() & {
+    return __fbthrift_field_opt_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T& opt_ref() const& {
+    return __fbthrift_field_opt_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T&& opt_ref() && {
+    return static_cast<T&&>(__fbthrift_field_opt_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T&& opt_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T& ref_ref() & {
-    return ref;
+    return __fbthrift_field_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T& ref_ref() const& {
-    return ref;
+    return __fbthrift_field_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T&& ref_ref() && {
-    return static_cast<T&&>(ref);
+    return static_cast<T&&>(__fbthrift_field_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T&& ref_ref() const&& {
-    return static_cast<const T&&>(ref);
+    return static_cast<const T&&>(__fbthrift_field_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T& ref() & {
+    return __fbthrift_field_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T& ref() const& {
+    return __fbthrift_field_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T&& ref() && {
+    return static_cast<T&&>(__fbthrift_field_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T&& ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T& req_ref_ref() & {
-    return req_ref;
+    return __fbthrift_field_req_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T& req_ref_ref() const& {
-    return req_ref;
+    return __fbthrift_field_req_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE T&& req_ref_ref() && {
-    return static_cast<T&&>(req_ref);
+    return static_cast<T&&>(__fbthrift_field_req_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
   FOLLY_ERASE const T&& req_ref_ref() const&& {
-    return static_cast<const T&&>(req_ref);
+    return static_cast<const T&&>(__fbthrift_field_req_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T& req_ref() & {
+    return __fbthrift_field_req_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T& req_ref() const& {
+    return __fbthrift_field_req_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE T&& req_ref() && {
+    return static_cast<T&&>(__fbthrift_field_req_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyField>>
+  FOLLY_ERASE const T&& req_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_ref);
   }
 
   template <class Protocol_>
@@ -1076,8 +1315,8 @@ class StructWithUnion final  {
  public:
 
   StructWithUnion() :
-      u(std::make_unique<::cpp2::MyUnion>()),
-      aDouble(std::make_unique<double>()) {
+      __fbthrift_field_u(std::make_unique<::cpp2::MyUnion>()),
+      __fbthrift_field_aDouble(std::make_unique<double>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1089,10 +1328,10 @@ class StructWithUnion final  {
 
   StructWithUnion& operator=(StructWithUnion&&) noexcept;
   StructWithUnion& operator=(const StructWithUnion& src);
- public:
-  ::std::unique_ptr<::cpp2::MyUnion> u;
- public:
-  ::std::unique_ptr<double> aDouble;
+ private:
+  ::std::unique_ptr<::cpp2::MyUnion> __fbthrift_field_u;
+ private:
+  ::std::unique_ptr<double> __fbthrift_field_aDouble;
  private:
   ::cpp2::MyField __fbthrift_field_f;
  private:
@@ -1104,41 +1343,81 @@ class StructWithUnion final  {
   bool operator<(const StructWithUnion&) const;
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
   FOLLY_ERASE T& u_ref() & {
-    return u;
+    return __fbthrift_field_u;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
   FOLLY_ERASE const T& u_ref() const& {
-    return u;
+    return __fbthrift_field_u;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
   FOLLY_ERASE T&& u_ref() && {
-    return static_cast<T&&>(u);
+    return static_cast<T&&>(__fbthrift_field_u);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
   FOLLY_ERASE const T&& u_ref() const&& {
-    return static_cast<const T&&>(u);
+    return static_cast<const T&&>(__fbthrift_field_u);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
+  FOLLY_ERASE T& u() & {
+    return __fbthrift_field_u;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
+  FOLLY_ERASE const T& u() const& {
+    return __fbthrift_field_u;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
+  FOLLY_ERASE T&& u() && {
+    return static_cast<T&&>(__fbthrift_field_u);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::MyUnion>>
+  FOLLY_ERASE const T&& u() const&& {
+    return static_cast<const T&&>(__fbthrift_field_u);
   }
   template <typename ..., typename T = ::std::unique_ptr<double>>
   FOLLY_ERASE T& aDouble_ref() & {
-    return aDouble;
+    return __fbthrift_field_aDouble;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<double>>
   FOLLY_ERASE const T& aDouble_ref() const& {
-    return aDouble;
+    return __fbthrift_field_aDouble;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<double>>
   FOLLY_ERASE T&& aDouble_ref() && {
-    return static_cast<T&&>(aDouble);
+    return static_cast<T&&>(__fbthrift_field_aDouble);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<double>>
   FOLLY_ERASE const T&& aDouble_ref() const&& {
-    return static_cast<const T&&>(aDouble);
+    return static_cast<const T&&>(__fbthrift_field_aDouble);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<double>>
+  FOLLY_ERASE T& aDouble() & {
+    return __fbthrift_field_aDouble;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<double>>
+  FOLLY_ERASE const T& aDouble() const& {
+    return __fbthrift_field_aDouble;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<double>>
+  FOLLY_ERASE T&& aDouble() && {
+    return static_cast<T&&>(__fbthrift_field_aDouble);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<double>>
+  FOLLY_ERASE const T&& aDouble() const&& {
+    return static_cast<const T&&>(__fbthrift_field_aDouble);
   }
 
   template <typename..., typename T = ::cpp2::MyField>
@@ -1370,18 +1649,18 @@ class StructWithContainers final  {
 
   ~StructWithContainers();
 
- public:
-  ::std::unique_ptr<::std::vector<::std::int32_t>> list_ref;
- public:
-  ::std::unique_ptr<::std::set<::std::int32_t>> set_ref;
- public:
-  ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>> map_ref;
- public:
-  ::std::unique_ptr<::std::vector<::std::int32_t>> list_ref_unique;
- public:
-  ::std::shared_ptr<::std::set<::std::int32_t>> set_ref_shared;
- public:
-  ::std::shared_ptr<const ::std::vector<::std::int32_t>> list_ref_shared_const;
+ private:
+  ::std::unique_ptr<::std::vector<::std::int32_t>> __fbthrift_field_list_ref;
+ private:
+  ::std::unique_ptr<::std::set<::std::int32_t>> __fbthrift_field_set_ref;
+ private:
+  ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>> __fbthrift_field_map_ref;
+ private:
+  ::std::unique_ptr<::std::vector<::std::int32_t>> __fbthrift_field_list_ref_unique;
+ private:
+  ::std::shared_ptr<::std::set<::std::int32_t>> __fbthrift_field_set_ref_shared;
+ private:
+  ::std::shared_ptr<const ::std::vector<::std::int32_t>> __fbthrift_field_list_ref_shared_const;
 
  public:
 
@@ -1389,117 +1668,237 @@ class StructWithContainers final  {
   bool operator<(const StructWithContainers&) const;
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE T& list_ref_ref() & {
-    return list_ref;
+    return __fbthrift_field_list_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T& list_ref_ref() const& {
-    return list_ref;
+    return __fbthrift_field_list_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE T&& list_ref_ref() && {
-    return static_cast<T&&>(list_ref);
+    return static_cast<T&&>(__fbthrift_field_list_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T&& list_ref_ref() const&& {
-    return static_cast<const T&&>(list_ref);
+    return static_cast<const T&&>(__fbthrift_field_list_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T& list_ref() & {
+    return __fbthrift_field_list_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T& list_ref() const& {
+    return __fbthrift_field_list_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T&& list_ref() && {
+    return static_cast<T&&>(__fbthrift_field_list_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T&& list_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_list_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE T& set_ref_ref() & {
-    return set_ref;
+    return __fbthrift_field_set_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE const T& set_ref_ref() const& {
-    return set_ref;
+    return __fbthrift_field_set_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE T&& set_ref_ref() && {
-    return static_cast<T&&>(set_ref);
+    return static_cast<T&&>(__fbthrift_field_set_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE const T&& set_ref_ref() const&& {
-    return static_cast<const T&&>(set_ref);
+    return static_cast<const T&&>(__fbthrift_field_set_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE T& set_ref() & {
+    return __fbthrift_field_set_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE const T& set_ref() const& {
+    return __fbthrift_field_set_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE T&& set_ref() && {
+    return static_cast<T&&>(__fbthrift_field_set_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE const T&& set_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_set_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
   FOLLY_ERASE T& map_ref_ref() & {
-    return map_ref;
+    return __fbthrift_field_map_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
   FOLLY_ERASE const T& map_ref_ref() const& {
-    return map_ref;
+    return __fbthrift_field_map_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
   FOLLY_ERASE T&& map_ref_ref() && {
-    return static_cast<T&&>(map_ref);
+    return static_cast<T&&>(__fbthrift_field_map_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
   FOLLY_ERASE const T&& map_ref_ref() const&& {
-    return static_cast<const T&&>(map_ref);
+    return static_cast<const T&&>(__fbthrift_field_map_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
+  FOLLY_ERASE T& map_ref() & {
+    return __fbthrift_field_map_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
+  FOLLY_ERASE const T& map_ref() const& {
+    return __fbthrift_field_map_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
+  FOLLY_ERASE T&& map_ref() && {
+    return static_cast<T&&>(__fbthrift_field_map_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>
+  FOLLY_ERASE const T&& map_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_map_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE T& list_ref_unique_ref() & {
-    return list_ref_unique;
+    return __fbthrift_field_list_ref_unique;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T& list_ref_unique_ref() const& {
-    return list_ref_unique;
+    return __fbthrift_field_list_ref_unique;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE T&& list_ref_unique_ref() && {
-    return static_cast<T&&>(list_ref_unique);
+    return static_cast<T&&>(__fbthrift_field_list_ref_unique);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T&& list_ref_unique_ref() const&& {
-    return static_cast<const T&&>(list_ref_unique);
+    return static_cast<const T&&>(__fbthrift_field_list_ref_unique);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T& list_ref_unique() & {
+    return __fbthrift_field_list_ref_unique;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T& list_ref_unique() const& {
+    return __fbthrift_field_list_ref_unique;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T&& list_ref_unique() && {
+    return static_cast<T&&>(__fbthrift_field_list_ref_unique);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T&& list_ref_unique() const&& {
+    return static_cast<const T&&>(__fbthrift_field_list_ref_unique);
   }
   template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE T& set_ref_shared_ref() & {
-    return set_ref_shared;
+    return __fbthrift_field_set_ref_shared;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE const T& set_ref_shared_ref() const& {
-    return set_ref_shared;
+    return __fbthrift_field_set_ref_shared;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE T&& set_ref_shared_ref() && {
-    return static_cast<T&&>(set_ref_shared);
+    return static_cast<T&&>(__fbthrift_field_set_ref_shared);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
   FOLLY_ERASE const T&& set_ref_shared_ref() const&& {
-    return static_cast<const T&&>(set_ref_shared);
+    return static_cast<const T&&>(__fbthrift_field_set_ref_shared);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE T& set_ref_shared() & {
+    return __fbthrift_field_set_ref_shared;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE const T& set_ref_shared() const& {
+    return __fbthrift_field_set_ref_shared;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE T&& set_ref_shared() && {
+    return static_cast<T&&>(__fbthrift_field_set_ref_shared);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::set<::std::int32_t>>>
+  FOLLY_ERASE const T&& set_ref_shared() const&& {
+    return static_cast<const T&&>(__fbthrift_field_set_ref_shared);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
   FOLLY_ERASE T& list_ref_shared_const_ref() & {
-    return list_ref_shared_const;
+    return __fbthrift_field_list_ref_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T& list_ref_shared_const_ref() const& {
-    return list_ref_shared_const;
+    return __fbthrift_field_list_ref_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
   FOLLY_ERASE T&& list_ref_shared_const_ref() && {
-    return static_cast<T&&>(list_ref_shared_const);
+    return static_cast<T&&>(__fbthrift_field_list_ref_shared_const);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
   FOLLY_ERASE const T&& list_ref_shared_const_ref() const&& {
-    return static_cast<const T&&>(list_ref_shared_const);
+    return static_cast<const T&&>(__fbthrift_field_list_ref_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T& list_ref_shared_const() & {
+    return __fbthrift_field_list_ref_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T& list_ref_shared_const() const& {
+    return __fbthrift_field_list_ref_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
+  FOLLY_ERASE T&& list_ref_shared_const() && {
+    return static_cast<T&&>(__fbthrift_field_list_ref_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::vector<::std::int32_t>>>
+  FOLLY_ERASE const T&& list_ref_shared_const() const&& {
+    return static_cast<const T&&>(__fbthrift_field_list_ref_shared_const);
   }
 
   template <class Protocol_>
@@ -1549,8 +1948,8 @@ class StructWithSharedConst final  {
  public:
 
   StructWithSharedConst() :
-      shared_const(std::make_shared<::cpp2::MyField>()),
-      req_shared_const(std::make_shared<::cpp2::MyField>()) {
+      __fbthrift_field_shared_const(std::make_shared<::cpp2::MyField>()),
+      __fbthrift_field_req_shared_const(std::make_shared<::cpp2::MyField>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1563,12 +1962,12 @@ class StructWithSharedConst final  {
 
   StructWithSharedConst& operator=(StructWithSharedConst&&) noexcept;
   StructWithSharedConst& operator=(const StructWithSharedConst& src);
- public:
-  ::std::shared_ptr<const ::cpp2::MyField> opt_shared_const;
- public:
-  ::std::shared_ptr<const ::cpp2::MyField> shared_const;
- public:
-  ::std::shared_ptr<const ::cpp2::MyField> req_shared_const;
+ private:
+  ::std::shared_ptr<const ::cpp2::MyField> __fbthrift_field_opt_shared_const;
+ private:
+  ::std::shared_ptr<const ::cpp2::MyField> __fbthrift_field_shared_const;
+ private:
+  ::std::shared_ptr<const ::cpp2::MyField> __fbthrift_field_req_shared_const;
 
  public:
 
@@ -1576,60 +1975,120 @@ class StructWithSharedConst final  {
   bool operator<(const StructWithSharedConst&) const;
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T& opt_shared_const_ref() & {
-    return opt_shared_const;
+    return __fbthrift_field_opt_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T& opt_shared_const_ref() const& {
-    return opt_shared_const;
+    return __fbthrift_field_opt_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T&& opt_shared_const_ref() && {
-    return static_cast<T&&>(opt_shared_const);
+    return static_cast<T&&>(__fbthrift_field_opt_shared_const);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T&& opt_shared_const_ref() const&& {
-    return static_cast<const T&&>(opt_shared_const);
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T& opt_shared_const() & {
+    return __fbthrift_field_opt_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T& opt_shared_const() const& {
+    return __fbthrift_field_opt_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T&& opt_shared_const() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T&& opt_shared_const() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_const);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T& shared_const_ref() & {
-    return shared_const;
+    return __fbthrift_field_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T& shared_const_ref() const& {
-    return shared_const;
+    return __fbthrift_field_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T&& shared_const_ref() && {
-    return static_cast<T&&>(shared_const);
+    return static_cast<T&&>(__fbthrift_field_shared_const);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T&& shared_const_ref() const&& {
-    return static_cast<const T&&>(shared_const);
+    return static_cast<const T&&>(__fbthrift_field_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T& shared_const() & {
+    return __fbthrift_field_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T& shared_const() const& {
+    return __fbthrift_field_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T&& shared_const() && {
+    return static_cast<T&&>(__fbthrift_field_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T&& shared_const() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_const);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T& req_shared_const_ref() & {
-    return req_shared_const;
+    return __fbthrift_field_req_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T& req_shared_const_ref() const& {
-    return req_shared_const;
+    return __fbthrift_field_req_shared_const;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE T&& req_shared_const_ref() && {
-    return static_cast<T&&>(req_shared_const);
+    return static_cast<T&&>(__fbthrift_field_req_shared_const);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
   FOLLY_ERASE const T&& req_shared_const_ref() const&& {
-    return static_cast<const T&&>(req_shared_const);
+    return static_cast<const T&&>(__fbthrift_field_req_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T& req_shared_const() & {
+    return __fbthrift_field_req_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T& req_shared_const() const& {
+    return __fbthrift_field_req_shared_const;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE T&& req_shared_const() && {
+    return static_cast<T&&>(__fbthrift_field_req_shared_const);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::MyField>>
+  FOLLY_ERASE const T&& req_shared_const() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_shared_const);
   }
 
   template <class Protocol_>
@@ -1745,8 +2204,8 @@ class StructWithRef final  {
  public:
 
   StructWithRef() :
-      def_field(std::make_unique<::cpp2::Empty>()),
-      req_field(std::make_unique<::cpp2::Empty>()) {
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -1758,12 +2217,12 @@ class StructWithRef final  {
 
   StructWithRef& operator=(StructWithRef&&) noexcept;
   StructWithRef& operator=(const StructWithRef& src);
- public:
-  ::std::unique_ptr<::cpp2::Empty> def_field;
- public:
-  ::std::unique_ptr<::cpp2::Empty> opt_field;
- public:
-  ::std::unique_ptr<::cpp2::Empty> req_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_opt_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_req_field;
 
  public:
 
@@ -1771,60 +2230,120 @@ class StructWithRef final  {
   bool operator<(const StructWithRef&) const;
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& def_field_ref() & {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& def_field_ref() const& {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& def_field_ref() && {
-    return static_cast<T&&>(def_field);
+    return static_cast<T&&>(__fbthrift_field_def_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& def_field_ref() const&& {
-    return static_cast<const T&&>(def_field);
+    return static_cast<const T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& def_field() & {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& def_field() const& {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& def_field() && {
+    return static_cast<T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& def_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_field);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& opt_field_ref() & {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& opt_field_ref() const& {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& opt_field_ref() && {
-    return static_cast<T&&>(opt_field);
+    return static_cast<T&&>(__fbthrift_field_opt_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& opt_field_ref() const&& {
-    return static_cast<const T&&>(opt_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& opt_field() & {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& opt_field() const& {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& opt_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& opt_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& req_field_ref() & {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& req_field_ref() const& {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& req_field_ref() && {
-    return static_cast<T&&>(req_field);
+    return static_cast<T&&>(__fbthrift_field_req_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& req_field_ref() const&& {
-    return static_cast<const T&&>(req_field);
+    return static_cast<const T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& req_field() & {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& req_field() const& {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& req_field() && {
+    return static_cast<T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& req_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_field);
   }
 
   template <class Protocol_>
@@ -2065,8 +2584,8 @@ class StructWithRefTypeUnique final  {
  public:
 
   StructWithRefTypeUnique() :
-      def_field(std::make_unique<::cpp2::Empty>()),
-      req_field(std::make_unique<::cpp2::Empty>()) {
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_unique<::cpp2::Empty>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2078,12 +2597,12 @@ class StructWithRefTypeUnique final  {
 
   StructWithRefTypeUnique& operator=(StructWithRefTypeUnique&&) noexcept;
   StructWithRefTypeUnique& operator=(const StructWithRefTypeUnique& src);
- public:
-  ::std::unique_ptr<::cpp2::Empty> def_field;
- public:
-  ::std::unique_ptr<::cpp2::Empty> opt_field;
- public:
-  ::std::unique_ptr<::cpp2::Empty> req_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_opt_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_req_field;
 
  public:
 
@@ -2091,60 +2610,120 @@ class StructWithRefTypeUnique final  {
   bool operator<(const StructWithRefTypeUnique&) const;
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& def_field_ref() & {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& def_field_ref() const& {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& def_field_ref() && {
-    return static_cast<T&&>(def_field);
+    return static_cast<T&&>(__fbthrift_field_def_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& def_field_ref() const&& {
-    return static_cast<const T&&>(def_field);
+    return static_cast<const T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& def_field() & {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& def_field() const& {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& def_field() && {
+    return static_cast<T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& def_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_field);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& opt_field_ref() & {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& opt_field_ref() const& {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& opt_field_ref() && {
-    return static_cast<T&&>(opt_field);
+    return static_cast<T&&>(__fbthrift_field_opt_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& opt_field_ref() const&& {
-    return static_cast<const T&&>(opt_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& opt_field() & {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& opt_field() const& {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& opt_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& opt_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
   }
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& req_field_ref() & {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& req_field_ref() const& {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& req_field_ref() && {
-    return static_cast<T&&>(req_field);
+    return static_cast<T&&>(__fbthrift_field_req_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& req_field_ref() const&& {
-    return static_cast<const T&&>(req_field);
+    return static_cast<const T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& req_field() & {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& req_field() const& {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& req_field() && {
+    return static_cast<T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& req_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_field);
   }
 
   template <class Protocol_>
@@ -2194,8 +2773,8 @@ class StructWithRefTypeShared final  {
  public:
 
   StructWithRefTypeShared() :
-      def_field(std::make_shared<::cpp2::Empty>()),
-      req_field(std::make_shared<::cpp2::Empty>()) {
+      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2208,12 +2787,12 @@ class StructWithRefTypeShared final  {
 
   StructWithRefTypeShared& operator=(StructWithRefTypeShared&&) noexcept;
   StructWithRefTypeShared& operator=(const StructWithRefTypeShared& src);
- public:
-  ::std::shared_ptr<::cpp2::Empty> def_field;
- public:
-  ::std::shared_ptr<::cpp2::Empty> opt_field;
- public:
-  ::std::shared_ptr<::cpp2::Empty> req_field;
+ private:
+  ::std::shared_ptr<::cpp2::Empty> __fbthrift_field_def_field;
+ private:
+  ::std::shared_ptr<::cpp2::Empty> __fbthrift_field_opt_field;
+ private:
+  ::std::shared_ptr<::cpp2::Empty> __fbthrift_field_req_field;
 
  public:
 
@@ -2221,60 +2800,120 @@ class StructWithRefTypeShared final  {
   bool operator<(const StructWithRefTypeShared&) const;
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& def_field_ref() & {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& def_field_ref() const& {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& def_field_ref() && {
-    return static_cast<T&&>(def_field);
+    return static_cast<T&&>(__fbthrift_field_def_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& def_field_ref() const&& {
-    return static_cast<const T&&>(def_field);
+    return static_cast<const T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& def_field() & {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& def_field() const& {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& def_field() && {
+    return static_cast<T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& def_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_field);
   }
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& opt_field_ref() & {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& opt_field_ref() const& {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& opt_field_ref() && {
-    return static_cast<T&&>(opt_field);
+    return static_cast<T&&>(__fbthrift_field_opt_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& opt_field_ref() const&& {
-    return static_cast<const T&&>(opt_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& opt_field() & {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& opt_field() const& {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& opt_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& opt_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
   }
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& req_field_ref() & {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& req_field_ref() const& {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& req_field_ref() && {
-    return static_cast<T&&>(req_field);
+    return static_cast<T&&>(__fbthrift_field_req_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& req_field_ref() const&& {
-    return static_cast<const T&&>(req_field);
+    return static_cast<const T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& req_field() & {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& req_field() const& {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& req_field() && {
+    return static_cast<T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& req_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_field);
   }
 
   template <class Protocol_>
@@ -2324,8 +2963,8 @@ class StructWithRefTypeSharedConst final  {
  public:
 
   StructWithRefTypeSharedConst() :
-      def_field(std::make_shared<::cpp2::Empty>()),
-      req_field(std::make_shared<::cpp2::Empty>()) {
+      __fbthrift_field_def_field(std::make_shared<::cpp2::Empty>()),
+      __fbthrift_field_req_field(std::make_shared<::cpp2::Empty>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2338,12 +2977,12 @@ class StructWithRefTypeSharedConst final  {
 
   StructWithRefTypeSharedConst& operator=(StructWithRefTypeSharedConst&&) noexcept;
   StructWithRefTypeSharedConst& operator=(const StructWithRefTypeSharedConst& src);
- public:
-  ::std::shared_ptr<const ::cpp2::Empty> def_field;
- public:
-  ::std::shared_ptr<const ::cpp2::Empty> opt_field;
- public:
-  ::std::shared_ptr<const ::cpp2::Empty> req_field;
+ private:
+  ::std::shared_ptr<const ::cpp2::Empty> __fbthrift_field_def_field;
+ private:
+  ::std::shared_ptr<const ::cpp2::Empty> __fbthrift_field_opt_field;
+ private:
+  ::std::shared_ptr<const ::cpp2::Empty> __fbthrift_field_req_field;
 
  public:
 
@@ -2351,60 +2990,120 @@ class StructWithRefTypeSharedConst final  {
   bool operator<(const StructWithRefTypeSharedConst&) const;
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T& def_field_ref() & {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T& def_field_ref() const& {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T&& def_field_ref() && {
-    return static_cast<T&&>(def_field);
+    return static_cast<T&&>(__fbthrift_field_def_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T&& def_field_ref() const&& {
-    return static_cast<const T&&>(def_field);
+    return static_cast<const T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T& def_field() & {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T& def_field() const& {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T&& def_field() && {
+    return static_cast<T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T&& def_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_field);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T& opt_field_ref() & {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T& opt_field_ref() const& {
-    return opt_field;
+    return __fbthrift_field_opt_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T&& opt_field_ref() && {
-    return static_cast<T&&>(opt_field);
+    return static_cast<T&&>(__fbthrift_field_opt_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T&& opt_field_ref() const&& {
-    return static_cast<const T&&>(opt_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T& opt_field() & {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T& opt_field() const& {
+    return __fbthrift_field_opt_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T&& opt_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T&& opt_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_field);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T& req_field_ref() & {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T& req_field_ref() const& {
-    return req_field;
+    return __fbthrift_field_req_field;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE T&& req_field_ref() && {
-    return static_cast<T&&>(req_field);
+    return static_cast<T&&>(__fbthrift_field_req_field);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
   FOLLY_ERASE const T&& req_field_ref() const&& {
-    return static_cast<const T&&>(req_field);
+    return static_cast<const T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T& req_field() & {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T& req_field() const& {
+    return __fbthrift_field_req_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE T&& req_field() && {
+    return static_cast<T&&>(__fbthrift_field_req_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::cpp2::Empty>>
+  FOLLY_ERASE const T&& req_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_req_field);
   }
 
   template <class Protocol_>
@@ -2454,7 +3153,7 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
  public:
 
   StructWithRefAndAnnotCppNoexceptMoveCtor() :
-      def_field(std::make_unique<::cpp2::Empty>()) {
+      __fbthrift_field_def_field(std::make_unique<::cpp2::Empty>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -2466,8 +3165,8 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
 
   StructWithRefAndAnnotCppNoexceptMoveCtor& operator=(StructWithRefAndAnnotCppNoexceptMoveCtor&&) noexcept;
   StructWithRefAndAnnotCppNoexceptMoveCtor& operator=(const StructWithRefAndAnnotCppNoexceptMoveCtor& src);
- public:
-  ::std::unique_ptr<::cpp2::Empty> def_field;
+ private:
+  ::std::unique_ptr<::cpp2::Empty> __fbthrift_field_def_field;
 
  public:
 
@@ -2475,22 +3174,42 @@ class StructWithRefAndAnnotCppNoexceptMoveCtor final  {
   bool operator<(const StructWithRefAndAnnotCppNoexceptMoveCtor&) const;
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T& def_field_ref() & {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T& def_field_ref() const& {
-    return def_field;
+    return __fbthrift_field_def_field;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE T&& def_field_ref() && {
-    return static_cast<T&&>(def_field);
+    return static_cast<T&&>(__fbthrift_field_def_field);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
   FOLLY_ERASE const T&& def_field_ref() const&& {
-    return static_cast<const T&&>(def_field);
+    return static_cast<const T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T& def_field() & {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T& def_field() const& {
+    return __fbthrift_field_def_field;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE T&& def_field() && {
+    return static_cast<T&&>(__fbthrift_field_def_field);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::cpp2::Empty>>
+  FOLLY_ERASE const T&& def_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_field);
   }
 
   template <class Protocol_>
@@ -2554,16 +3273,16 @@ class StructWithString final  {
 
   ~StructWithString();
 
- public:
-  ::std::unique_ptr<::std::string> def_unique_string_ref;
- public:
-  ::std::shared_ptr<::std::string> def_shared_string_ref;
- public:
-  ::std::shared_ptr<const ::std::string> def_shared_string_const_ref;
- public:
-  ::std::unique_ptr<::std::string> unique_string_ref;
- public:
-  ::std::shared_ptr<::std::string> shared_string_ref;
+ private:
+  ::std::unique_ptr<::std::string> __fbthrift_field_def_unique_string_ref;
+ private:
+  ::std::shared_ptr<::std::string> __fbthrift_field_def_shared_string_ref;
+ private:
+  ::std::shared_ptr<const ::std::string> __fbthrift_field_def_shared_string_const_ref;
+ private:
+  ::std::unique_ptr<::std::string> __fbthrift_field_unique_string_ref;
+ private:
+  ::std::shared_ptr<::std::string> __fbthrift_field_shared_string_ref;
 
  public:
 
@@ -2571,98 +3290,198 @@ class StructWithString final  {
   bool operator<(const StructWithString&) const;
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T& def_unique_string_ref_ref() & {
-    return def_unique_string_ref;
+    return __fbthrift_field_def_unique_string_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T& def_unique_string_ref_ref() const& {
-    return def_unique_string_ref;
+    return __fbthrift_field_def_unique_string_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T&& def_unique_string_ref_ref() && {
-    return static_cast<T&&>(def_unique_string_ref);
+    return static_cast<T&&>(__fbthrift_field_def_unique_string_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T&& def_unique_string_ref_ref() const&& {
-    return static_cast<const T&&>(def_unique_string_ref);
+    return static_cast<const T&&>(__fbthrift_field_def_unique_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T& def_unique_string_ref() & {
+    return __fbthrift_field_def_unique_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T& def_unique_string_ref() const& {
+    return __fbthrift_field_def_unique_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T&& def_unique_string_ref() && {
+    return static_cast<T&&>(__fbthrift_field_def_unique_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T&& def_unique_string_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_unique_string_ref);
   }
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE T& def_shared_string_ref_ref() & {
-    return def_shared_string_ref;
+    return __fbthrift_field_def_shared_string_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE const T& def_shared_string_ref_ref() const& {
-    return def_shared_string_ref;
+    return __fbthrift_field_def_shared_string_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE T&& def_shared_string_ref_ref() && {
-    return static_cast<T&&>(def_shared_string_ref);
+    return static_cast<T&&>(__fbthrift_field_def_shared_string_ref);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE const T&& def_shared_string_ref_ref() const&& {
-    return static_cast<const T&&>(def_shared_string_ref);
+    return static_cast<const T&&>(__fbthrift_field_def_shared_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE T& def_shared_string_ref() & {
+    return __fbthrift_field_def_shared_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE const T& def_shared_string_ref() const& {
+    return __fbthrift_field_def_shared_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE T&& def_shared_string_ref() && {
+    return static_cast<T&&>(__fbthrift_field_def_shared_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE const T&& def_shared_string_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_shared_string_ref);
   }
   template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
   FOLLY_ERASE T& def_shared_string_const_ref_ref() & {
-    return def_shared_string_const_ref;
+    return __fbthrift_field_def_shared_string_const_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
   FOLLY_ERASE const T& def_shared_string_const_ref_ref() const& {
-    return def_shared_string_const_ref;
+    return __fbthrift_field_def_shared_string_const_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
   FOLLY_ERASE T&& def_shared_string_const_ref_ref() && {
-    return static_cast<T&&>(def_shared_string_const_ref);
+    return static_cast<T&&>(__fbthrift_field_def_shared_string_const_ref);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
   FOLLY_ERASE const T&& def_shared_string_const_ref_ref() const&& {
-    return static_cast<const T&&>(def_shared_string_const_ref);
+    return static_cast<const T&&>(__fbthrift_field_def_shared_string_const_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
+  FOLLY_ERASE T& def_shared_string_const_ref() & {
+    return __fbthrift_field_def_shared_string_const_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
+  FOLLY_ERASE const T& def_shared_string_const_ref() const& {
+    return __fbthrift_field_def_shared_string_const_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
+  FOLLY_ERASE T&& def_shared_string_const_ref() && {
+    return static_cast<T&&>(__fbthrift_field_def_shared_string_const_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::std::string>>
+  FOLLY_ERASE const T&& def_shared_string_const_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_def_shared_string_const_ref);
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T& unique_string_ref_ref() & {
-    return unique_string_ref;
+    return __fbthrift_field_unique_string_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T& unique_string_ref_ref() const& {
-    return unique_string_ref;
+    return __fbthrift_field_unique_string_ref;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE T&& unique_string_ref_ref() && {
-    return static_cast<T&&>(unique_string_ref);
+    return static_cast<T&&>(__fbthrift_field_unique_string_ref);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::string>>
   FOLLY_ERASE const T&& unique_string_ref_ref() const&& {
-    return static_cast<const T&&>(unique_string_ref);
+    return static_cast<const T&&>(__fbthrift_field_unique_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T& unique_string_ref() & {
+    return __fbthrift_field_unique_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T& unique_string_ref() const& {
+    return __fbthrift_field_unique_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE T&& unique_string_ref() && {
+    return static_cast<T&&>(__fbthrift_field_unique_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::string>>
+  FOLLY_ERASE const T&& unique_string_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_unique_string_ref);
   }
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE T& shared_string_ref_ref() & {
-    return shared_string_ref;
+    return __fbthrift_field_shared_string_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE const T& shared_string_ref_ref() const& {
-    return shared_string_ref;
+    return __fbthrift_field_shared_string_ref;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE T&& shared_string_ref_ref() && {
-    return static_cast<T&&>(shared_string_ref);
+    return static_cast<T&&>(__fbthrift_field_shared_string_ref);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::string>>
   FOLLY_ERASE const T&& shared_string_ref_ref() const&& {
-    return static_cast<const T&&>(shared_string_ref);
+    return static_cast<const T&&>(__fbthrift_field_shared_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE T& shared_string_ref() & {
+    return __fbthrift_field_shared_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE const T& shared_string_ref() const& {
+    return __fbthrift_field_shared_string_ref;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE T&& shared_string_ref() && {
+    return static_cast<T&&>(__fbthrift_field_shared_string_ref);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::string>>
+  FOLLY_ERASE const T&& shared_string_ref() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_string_ref);
   }
 
   template <class Protocol_>

@@ -155,12 +155,27 @@ let make_return_type
            and all enforceable ones for the purpose of checking the function body also get a like type
            when the function is __SupportDynamicType, which all functions are during implicit pessimisation.
            Hence we don't need to check enforcement here. Don't pessimise void. *)
+        let dty =
+          match get_node dty with
+          | Tfun _ ->
+            Typing_utils.make_supportdyn_decl_type
+              (get_pos dty)
+              (get_reason dty)
+              dty
+          | _ -> dty
+        in
         let ((env, ty_err_opt), ty) = Typing_phase.localize ~ety_env env dty in
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
         let et_type =
           match get_node ty with
           | Tprim Aast.Tvoid -> ty
           | _ -> Typing_utils.make_like env ty
+        in
+        let et_type =
+          if wrap then
+            wrap_awaitable (get_pos et_type) et_type
+          else
+            et_type
         in
         (env, { et_type; et_enforced = Unenforced })
       ) else

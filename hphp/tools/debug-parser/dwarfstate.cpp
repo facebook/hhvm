@@ -1150,7 +1150,7 @@ DwarfState::getRanges(Dwarf_Attribute attr) const -> std::vector<Dwarf_Ranges> {
   X(DW_OP_regx, -1)                             \
   X(DW_OP_fbreg, -1)                            \
   X(DW_OP_bregx, -1, -1)                        \
-  X(DW_OP_piece, 1)                             \
+  X(DW_OP_piece, -1)                             \
   X(DW_OP_deref_size, 1)                        \
   X(DW_OP_xderef_size, 1)                       \
   X(DW_OP_nop)                                  \

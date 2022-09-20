@@ -1,5 +1,9 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
 use ffi::Maybe;
-use ffi::Pair;
 use hash::HashSet;
 use hhbc::Local;
 use log::trace;
@@ -40,11 +44,11 @@ impl<'arena, 'a> WorkQueue<'arena, 'a> {
             a_state.local_set(&local, value);
             b_state.local_set(&local, value);
 
-            match (param_a.default_value, param_b.default_value) {
-                (Maybe::Just(Pair(a_target, _)), Maybe::Just(Pair(b_target, _))) => {
+            match (&param_a.default_value, &param_b.default_value) {
+                (Maybe::Just(a), Maybe::Just(b)) => {
                     // The text should have already been compared.
-                    let a_state = a_state.clone_with_jmp(&a_target);
-                    let b_state = b_state.clone_with_jmp(&b_target);
+                    let a_state = a_state.clone_with_jmp(&a.label);
+                    let b_state = b_state.clone_with_jmp(&b.label);
                     self.add(a_state, b_state);
                 }
                 (Maybe::Nothing, Maybe::Nothing) => {}

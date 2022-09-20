@@ -128,7 +128,7 @@ inline char *string_duplicate(const char *s, int len) {
 char *string_rot13(const char *input, int len);
 int   string_crc32(const char *p, int len);
 char *string_crypt(const char *key, const char *salt);
-char *string_sha1(const char *arg, int arg_len, bool raw, int &out_len);
+char *string_sha1(const char *data, size_t data_len, bool raw, int &out_len);
 
 struct Md5Digest {
   Md5Digest(const char* s, int len);

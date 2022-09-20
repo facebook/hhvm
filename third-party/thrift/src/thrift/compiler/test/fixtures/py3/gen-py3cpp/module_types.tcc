@@ -9,9 +9,6 @@
 #include "thrift/compiler/test/fixtures/py3/gen-py3cpp/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-#include <thrift/lib/cpp2/op/Clear.h>
-#include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/op/Encode.h>
 
 
 namespace apache {
@@ -205,7 +202,7 @@ void OptionalRefStruct::readNoXfer(Protocol_* iprot) {
   }
 _readField_optional_blob:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::readWithContext(*iprot, this->optional_blob, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::readWithContext(*iprot, this->__fbthrift_field_optional_blob, _readState);
     
   }
  this->__isset.set(0, true);
@@ -258,7 +255,7 @@ uint32_t OptionalRefStruct::serializedSize(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("OptionalRefStruct");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("optional_blob", apache::thrift::protocol::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::serializedSize<false>(*prot_, this->optional_blob);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::serializedSize<false>(*prot_, this->__fbthrift_field_optional_blob);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -270,7 +267,7 @@ uint32_t OptionalRefStruct::serializedSizeZC(Protocol_ const* prot_) const {
   xfer += prot_->serializedStructSize("OptionalRefStruct");
   if (this->__isset.get(0)) {
     xfer += prot_->serializedFieldSize("optional_blob", apache::thrift::protocol::T_STRING, 1);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::serializedSize<true>(*prot_, this->optional_blob);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::serializedSize<true>(*prot_, this->__fbthrift_field_optional_blob);
   }
   xfer += prot_->serializedSizeStop();
   return xfer;
@@ -285,7 +282,7 @@ uint32_t OptionalRefStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 0;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, 1, kPrevFieldId>(*prot_, "optional_blob", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::write(*prot_, this->optional_blob);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::py3::simple::IOBufPtr>::write(*prot_, this->__fbthrift_field_optional_blob);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

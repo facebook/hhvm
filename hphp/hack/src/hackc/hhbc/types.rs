@@ -5,6 +5,7 @@
 
 use ffi::Maybe;
 use ffi::Maybe::Just;
+use ffi::Slice;
 use ffi::Str;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
 use serde::Serialize;
@@ -22,6 +23,13 @@ pub struct TypeInfo<'arena> {
 pub struct Constraint<'arena> {
     pub name: Maybe<Str<'arena>>,
     pub flags: TypeConstraintFlags,
+}
+
+#[derive(Debug, Default, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct UpperBound<'arena> {
+    pub name: Str<'arena>,
+    pub bounds: Slice<'arena, TypeInfo<'arena>>,
 }
 
 impl<'arena> Constraint<'arena> {

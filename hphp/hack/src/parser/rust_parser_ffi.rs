@@ -106,27 +106,6 @@ where
     unsafe { UnsafeOcamlPtr::new(res.build().to_bits()) }
 }
 
-#[macro_export]
-macro_rules! parse_with_arena {
-    ($name:ident, $parse_script:expr $(,)?) => {
-        // We don't use the ocaml_ffi! macro here because we want precise
-        // control over the Pool--when a parse fails, we want to free the old
-        // pool and create a new one.
-        #[no_mangle]
-        pub extern "C" fn $name<'a>(ocaml_source_text: usize, env: usize) -> usize {
-            ocamlrep_ocamlpool::catch_unwind(|| {
-                use ocamlrep::ptr::UnsafeOcamlPtr;
-                use ocamlrep::FromOcamlRep;
-                use oxidized::full_fidelity_parser_env::FullFidelityParserEnv;
-
-                let ocaml_source_text = unsafe { UnsafeOcamlPtr::new(ocaml_source_text) };
-                let env = unsafe { FullFidelityParserEnv::from_ocaml(env).unwrap() };
-                $crate::parse(ocaml_source_text, env, |a, s, e| $parse_script(a, s, e)).as_usize()
-            })
-        }
-    };
-}
-
 pub fn scan_trivia<'a, F>(
     source_text: SourceText<'a>,
     offset: usize,

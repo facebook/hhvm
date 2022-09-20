@@ -42,6 +42,7 @@ use error::Result;
 use ffi::Maybe::*;
 use ffi::Slice;
 use ffi::Str;
+use hhbc::Fatal;
 use hhbc::FatalOp;
 use hhbc::Unit;
 use ocamlrep::rc::RcOc;
@@ -59,7 +60,11 @@ pub fn emit_fatal_unit<'arena>(
     msg: impl AsRef<str> + 'arena,
 ) -> Result<Unit<'arena>> {
     Ok(Unit {
-        fatal: Just((op, pos.into(), Str::new_str(alloc, msg.as_ref())).into()),
+        fatal: Just(Fatal {
+            op,
+            loc: pos.into(),
+            message: Str::new_str(alloc, msg.as_ref()),
+        }),
         ..Unit::default()
     })
 }

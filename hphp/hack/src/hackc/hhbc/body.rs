@@ -4,7 +4,6 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
@@ -12,6 +11,7 @@ use serde::Serialize;
 use crate::Instruct;
 use crate::Param;
 use crate::TypeInfo;
+use crate::UpperBound;
 
 #[derive(Debug, Default, Serialize)]
 #[repr(C)]
@@ -22,7 +22,7 @@ pub struct Body<'arena> {
     pub num_iters: usize,
     pub is_memoize_wrapper: bool,
     pub is_memoize_wrapper_lsb: bool,
-    pub upper_bounds: Slice<'arena, Pair<Str<'arena>, Slice<'arena, TypeInfo<'arena>>>>,
+    pub upper_bounds: Slice<'arena, UpperBound<'arena>>,
     pub shadowed_tparams: Slice<'arena, Str<'arena>>,
     pub params: Slice<'arena, Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo<'arena>>,

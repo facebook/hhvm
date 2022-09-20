@@ -9,9 +9,6 @@
 #include "thrift/compiler/test/fixtures/basic-annotations/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-#include <thrift/lib/cpp2/op/Clear.h>
-#include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/op/Encode.h>
 
 
 namespace apache {
@@ -472,14 +469,14 @@ _readField_cpp_type_annotation:
 _readField_my_union:
   {
     _readState.beforeSubobject(iprot);
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<StaticCast, folly::remove_cvref_t<decltype(this->__fbthrift_field_my_union)>>::value;
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::StaticCast, folly::remove_cvref_t<decltype(this->__fbthrift_field_my_union)>>::value;
     ::folly::if_constexpr<hasInplaceToThrift>(
-      [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::readWithContext(*iprot, StaticCast::toThrift(field), _readState); },
+      [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::readWithContext(*iprot, ::StaticCast::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_my_union);
     if (!hasInplaceToThrift) {
       ::cpp2::detail::YourUnion tvalue;
       ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::readWithContext(*iprot, tvalue, _readState);
-      this->__fbthrift_field_my_union = ::apache::thrift::adapt_detail::fromThriftField<StaticCast, 9>(::std::move(tvalue), *this);
+      this->__fbthrift_field_my_union = ::apache::thrift::adapt_detail::fromThriftField<::StaticCast, 9>(::std::move(tvalue), *this);
     }
     _readState.afterSubobject(iprot);
     
@@ -652,7 +649,7 @@ uint32_t YourStruct::serializedSize(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<false, StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<false>(*prot_, StaticCast::toThrift(this->__fbthrift_field_my_union));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<false, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<false>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
   }
   {
     xfer += prot_->serializedFieldSize("my_id", apache::thrift::protocol::T_I16, 10);
@@ -700,7 +697,7 @@ uint32_t YourStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   {
     xfer += prot_->serializedFieldSize("my_union", apache::thrift::protocol::T_STRUCT, 9);
-    xfer += ::apache::thrift::adapt_detail::serializedSize<true, StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<true>(*prot_, StaticCast::toThrift(this->__fbthrift_field_my_union));});
+    xfer += ::apache::thrift::adapt_detail::serializedSize<true, ::StaticCast>(*prot_, this->__fbthrift_field_my_union, [&] {return ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::serializedSize<true>(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));});
   }
   {
     xfer += prot_->serializedFieldSize("my_id", apache::thrift::protocol::T_I16, 10);
@@ -775,7 +772,7 @@ uint32_t YourStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = 8;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRUCT, 9, kPrevFieldId>(*prot_, "my_union", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::write(*prot_, StaticCast::toThrift(this->__fbthrift_field_my_union));
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::variant, ::cpp2::detail::YourUnion>::write(*prot_, ::StaticCast::toThrift(this->__fbthrift_field_my_union));
     xfer += prot_->writeFieldEnd();
   }
   {

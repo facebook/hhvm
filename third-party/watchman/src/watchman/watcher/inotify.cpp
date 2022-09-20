@@ -257,7 +257,7 @@ bool InotifyWatcher::process_inotify_event(
     w_string name;
     char buf[WATCHMAN_NAME_MAX];
     PendingFlags pending_flags = W_PENDING_VIA_NOTIFY;
-    w_string dir_name;
+    std::optional<w_string> dir_name;
 
     {
       auto rlock = maps.rlock();
@@ -274,12 +274,12 @@ bool InotifyWatcher::process_inotify_event(
             buf,
             sizeof(buf),
             "%.*s/%s",
-            int(dir_name.size()),
-            dir_name.data(),
+            int(dir_name->size()),
+            dir_name->data(),
             ine->name);
         name = w_string(buf, W_STRING_BYTE);
       } else {
-        name = dir_name;
+        name = *dir_name;
       }
     }
 
@@ -378,7 +378,7 @@ bool InotifyWatcher::process_inotify_event(
             "mask={:x}: remove watch {} {}\n",
             ine->mask,
             ine->wd,
-            dir_name);
+            dir_name.value());
         auto wlock = maps.wlock();
         wlock->wd_to_name.erase(ine->wd);
       }

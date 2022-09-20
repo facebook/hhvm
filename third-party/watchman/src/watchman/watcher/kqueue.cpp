@@ -256,8 +256,7 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
     w_expand_flags(kflags, fflags, flags_label, sizeof(flags_label));
     auto wlock = maps_.wlock();
     auto it = wlock->fd_to_name.find(fd);
-    w_string path = it == wlock->fd_to_name.end() ? nullptr : it->second;
-    if (!path) {
+    if (it == wlock->fd_to_name.end()) {
       // Was likely a buffered notification for something that we decided
       // to stop watching
       logf(
@@ -268,6 +267,7 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
           flags_label);
       continue;
     }
+    w_string path = it->second;
 
     logf(DBG, " KQ fd={} path {} [{:x} {}]\n", fd, path, fflags, flags_label);
     if ((fflags & (NOTE_DELETE | NOTE_RENAME | NOTE_REVOKE))) {
@@ -301,7 +301,6 @@ Watcher::ConsumeNotifyRet KQueueWatcher::consumeNotify(
 }
 
 bool KQueueWatcher::waitNotify(int timeoutms) {
-  int n;
   std::array<struct pollfd, 2> pfd;
 
   pfd[0].fd = kq_fd.fd();
@@ -309,7 +308,7 @@ bool KQueueWatcher::waitNotify(int timeoutms) {
   pfd[1].fd = terminatePipe_.read.fd();
   pfd[1].events = POLLIN;
 
-  n = poll(pfd.data(), pfd.size(), timeoutms);
+  int n = poll(pfd.data(), pfd.size(), timeoutms);
 
   if (n > 0) {
     if (pfd[1].revents) {

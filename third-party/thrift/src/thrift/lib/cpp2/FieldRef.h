@@ -1192,6 +1192,14 @@ FOLLY_ERASE apache::thrift::field_ref<T&&> make_field_ref(
 
 } // namespace detail
 
+//  get_pointer
+//
+//  Access optional fields without throwing. If the field is set, it returns the
+//  pointer to the field. If the field is not set, it returns nullptr.
+//
+//  Example:
+//
+//    auto* ptr = apache::thrift::get_pointer(obj.optional_field());
 constexpr apache::thrift::detail::get_pointer_fn get_pointer;
 
 //  can_throw

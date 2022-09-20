@@ -20,11 +20,6 @@
 #include "<%program:include_prefix%><%program:name%>_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-<%^program:deprecated_tag_incompatible?%>
-#include <thrift/lib/cpp2/op/Clear.h>
-#include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/op/Encode.h>
-<%/program:deprecated_tag_incompatible?%>
 
 <%^program:tablebased?%>
 <% > module_types_tcc/tcc_struct_traits%>

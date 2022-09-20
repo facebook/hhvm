@@ -272,7 +272,7 @@ static UntypedResponse cmd_watch(Client* client, const json_ref& args) {
   UntypedResponse resp;
 
   if (root->failure_reason) {
-    resp.set("error", w_string_to_json(root->failure_reason));
+    resp.set("error", w_string_to_json(*root->failure_reason));
   } else if (root->inner.cancelled) {
     resp.set(
         "error", typed_string_to_json("root was cancelled", W_STRING_UNICODE));
@@ -306,7 +306,7 @@ static UntypedResponse cmd_watch_project(Client* client, const json_ref& args) {
   UntypedResponse resp;
 
   if (root->failure_reason) {
-    resp.set("error", w_string_to_json(root->failure_reason));
+    resp.set("error", w_string_to_json(*root->failure_reason));
   } else if (root->inner.cancelled) {
     resp.set(
         "error", typed_string_to_json("root was cancelled", W_STRING_UNICODE));

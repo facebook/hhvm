@@ -9,9 +9,6 @@
 #include "thrift/compiler/test/fixtures/lazy_deserialization/gen-cpp2/terse_writes_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-#include <thrift/lib/cpp2/op/Clear.h>
-#include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/op/Encode.h>
 
 
 namespace apache {

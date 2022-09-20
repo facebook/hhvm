@@ -26,8 +26,13 @@ jobs:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
       matrix:
+        package:
+        - hhvm
+        - hhvm_clang
         os:
         - ubuntu-latest
+    # Building hhvm_clang is expected to fail because we have not fully ported HHVM OSS to Clang yet
+    continue-on-error: ${{ matrix.package == 'hhvm_clang' }}
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0
@@ -43,13 +48,13 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
-    - run: nix-build --no-sandbox
-    - run: nix profile install --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+          sandbox = false
+    - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+    - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version
-    - run: nix flake check --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
     - name: Build the deb package
       if: runner.os == 'Linux'
-      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the deb package's information
       if: runner.os == 'Linux'
       run: dpkg-deb --info bundle.deb
@@ -57,14 +62,14 @@ jobs:
       if: runner.os == 'Linux'
       run: dpkg-deb --contents bundle.deb
     - name: Save the deb package as build artifact
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
         name: bundle.deb
         path: bundle.deb
     - name: Build the rpm package
       if: runner.os == 'Linux'
-      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the rpm package's information
       if: runner.os == 'Linux'
       run: rpm --query --info --package bundle.rpm
@@ -72,7 +77,7 @@ jobs:
       if: runner.os == 'Linux'
       run: rpm --query --list --package bundle.rpm
     - name: Save the rpm package as build artifact
-      if: runner.os == 'Linux'
+      if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
         name: bundle.rpm
@@ -87,10 +92,10 @@ jobs:
         aws-region: us-west-2
     - name: Sign Nix binaries with a private key downloaded from AWS Secrets Manager
       if: steps.configure-aws-credentials.outcome == 'success'
-      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix store sign --recursive --key-file <(aws secretsmanager get-secret-value --secret-id hhvm-nix-cache-1 --query SecretString --output text) --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
-      run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs --no-sandbox "git+file://$(pwd)?submodules=1&shallow=1"
+      run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

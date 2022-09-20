@@ -59,7 +59,9 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_param {};",
             indent,
-            fmt_separated_with(" ", cc_params, |w, c| write_bytes!(w, "{} {}", c.0, c.1))
+            fmt_separated_with(" ", cc_params, |w, c| write_bytes!(
+                w, "{} {}", c.index, c.ctx_name
+            ))
         )?;
     }
 
@@ -68,7 +70,7 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_this {};",
             indent,
-            fmt_separated(" ", v.iter())
+            fmt_separated(" ", v.types.iter())
         )?;
     }
 
@@ -77,9 +79,9 @@ pub(crate) fn coeffects_to_hhas(
             w,
             "\n{}.coeffects_cc_reified {}{} {};",
             indent,
-            if v.0 { "isClass " } else { "" },
-            v.1,
-            fmt_separated(" ", v.2.iter())
+            if v.is_class { "isClass " } else { "" },
+            v.index,
+            fmt_separated(" ", v.types.iter())
         )?;
     }
 

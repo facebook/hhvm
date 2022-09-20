@@ -39,7 +39,7 @@ struct ModuleB {
   2: EnumB inclEnumB;
 }
 
-@cpp.Adapter{name = "my::Adapter"}
+@cpp.Adapter{name = "::my::Adapter"}
 struct DirectlyAdapted {
   1: i32 field;
 }

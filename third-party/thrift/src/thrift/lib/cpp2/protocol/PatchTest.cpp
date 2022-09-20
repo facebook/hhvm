@@ -28,29 +28,50 @@
 #include <thrift/lib/cpp2/type/Id.h>
 #include <thrift/lib/cpp2/type/Tag.h>
 #include <thrift/lib/thrift/gen-cpp2/patch_types.h>
+#include <thrift/test/gen-cpp2/StructPatchTest_fatal_types.h>
+#include <thrift/test/gen-cpp2/StructPatchTest_types.h>
 #include <thrift/test/testset/Testset.h>
 #include <thrift/test/testset/gen-cpp2/testset_types_custom_protocol.h>
 
 namespace apache::thrift::protocol {
 namespace {
 
+using ListPatch = std::decay_t<
+    decltype(*std::declval<test::patch::MyStructFieldPatch>()->optListVal())>;
+using SetPatch = std::decay_t<
+    decltype(*std::declval<test::patch::MyStructFieldPatch>()->optSetVal())>;
+using MapPatch = std::decay_t<
+    decltype(*std::declval<test::patch::MyStructFieldPatch>()->optMapVal())>;
+
 class PatchTest : public testing::Test {
  protected:
   static Value asVal(bool val) { return asValueStruct<type::bool_t>(val); }
 
-  template <typename P>
-  static Object convertToObject(const P& patchStruct) {
+  template <typename S>
+  static Object convertToObject(const S& structObj) {
     // Serialize to compact.
     std::string buffer;
-    CompactSerializer::serialize(patchStruct.toThrift(), &buffer);
+    CompactSerializer::serialize(structObj, &buffer);
     auto binaryObj = folly::IOBuf::wrapBuffer(buffer.data(), buffer.size());
     // Parse to Object.
     return parseObject<CompactProtocolReader>(*binaryObj);
   }
 
+  template <typename S>
+  static Value convertToValueObject(const S& structObj) {
+    Value value;
+    value.objectValue_ref() = convertToObject(structObj);
+    return value;
+  }
+
+  template <typename P>
+  static Object convertPatchToObject(const P& patchStruct) {
+    return convertToObject(patchStruct.toThrift());
+  }
+
   template <typename P>
   static Value apply(const P& patchStruct, Value val) {
-    Object patchObj = convertToObject(patchStruct);
+    Object patchObj = convertPatchToObject(patchStruct);
     applyPatch(patchObj, val);
     return val;
   }
@@ -62,7 +83,7 @@ class PatchTest : public testing::Test {
 
   template <typename P>
   static ExtractedMasks getMasks(const P& patchStruct) {
-    Object patchObj = convertToObject(patchStruct);
+    Object patchObj = convertPatchToObject(patchStruct);
     return extractMaskFromPatch(patchObj);
   }
 
@@ -102,12 +123,14 @@ class PatchTest : public testing::Test {
     EXPECT_THROW(apply(PatchType{}, true), std::runtime_error);
 
     // Test getting mask from patch
-    EXPECT_TRUE(isMaskNoop(convertToObject(PatchType{})));
-    EXPECT_TRUE(isMaskNoop(convertToObject(PatchType{} + 0)));
-    EXPECT_TRUE(isMaskNoop(convertToObject(PatchType{} - 0)));
-    EXPECT_TRUE(isMaskWriteOperation(convertToObject(PatchType{} = 43)));
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(PatchType{} + 1)));
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(PatchType{} - 1)));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(PatchType{})));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(PatchType{} + 0)));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(PatchType{} - 0)));
+    EXPECT_TRUE(isMaskWriteOperation(convertPatchToObject(PatchType{} = 43)));
+    EXPECT_TRUE(
+        isMaskReadWriteOperation(convertPatchToObject(PatchType{} + 1)));
+    EXPECT_TRUE(
+        isMaskReadWriteOperation(convertPatchToObject(PatchType{} - 1)));
   }
 
   static Object patchAddOperation(Object&& patch, auto operation, auto value) {
@@ -159,10 +182,12 @@ TEST_F(PatchTest, Bool) {
       std::runtime_error);
 
   // Test getting mask from patch
-  EXPECT_TRUE(isMaskNoop(convertToObject(op::BoolPatch{})));
-  EXPECT_TRUE(isMaskWriteOperation(convertToObject(op::BoolPatch{} = true)));
-  EXPECT_TRUE(isMaskWriteOperation(convertToObject(op::BoolPatch{} = false)));
-  EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(!op::BoolPatch{})));
+  EXPECT_TRUE(isMaskNoop(convertPatchToObject(op::BoolPatch{})));
+  EXPECT_TRUE(
+      isMaskWriteOperation(convertPatchToObject(op::BoolPatch{} = true)));
+  EXPECT_TRUE(
+      isMaskWriteOperation(convertPatchToObject(op::BoolPatch{} = false)));
+  EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(!op::BoolPatch{})));
 
   // Should we check non-patch objects passed as patch? Previous checks kind of
   // cover this.
@@ -229,14 +254,14 @@ TEST_F(PatchTest, Binary) {
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
         *apply(binPatch, binaryData).binaryValue_ref()));
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(binPatch)));
+    EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(binPatch)));
   }
   {
     op::BinaryPatch binPatch;
     binPatch.append("");
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
-    EXPECT_TRUE(isMaskNoop(convertToObject(binPatch)));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(binPatch)));
   }
 
   // Prepend
@@ -247,14 +272,14 @@ TEST_F(PatchTest, Binary) {
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         folly::IOBuf::wrapBufferAsValue(appended.data(), appended.size()),
         *apply(binPatch, binaryData).binaryValue_ref()));
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(binPatch)));
+    EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(binPatch)));
   }
   {
     op::BinaryPatch binPatch;
     binPatch.prepend("");
     EXPECT_TRUE(folly::IOBufEqualTo{}(
         toPatch, *apply(binPatch, binaryData).binaryValue_ref()));
-    EXPECT_TRUE(isMaskNoop(convertToObject(binPatch)));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(binPatch)));
   }
 
   // Wrong patch provided
@@ -266,9 +291,9 @@ TEST_F(PatchTest, Binary) {
       std::runtime_error);
 
   // Test getting mask from patch
-  EXPECT_TRUE(isMaskNoop(convertToObject(op::BinaryPatch{})));
+  EXPECT_TRUE(isMaskNoop(convertPatchToObject(op::BinaryPatch{})));
   EXPECT_TRUE(isMaskWriteOperation(
-      convertToObject(op::BinaryPatch{} = folly::IOBuf())));
+      convertPatchToObject(op::BinaryPatch{} = folly::IOBuf())));
 }
 
 TEST_F(PatchTest, String) {
@@ -276,19 +301,20 @@ TEST_F(PatchTest, String) {
   auto stringData = asValueStruct<type::string_t>(data);
   // Noop
   EXPECT_EQ(data, *apply(op::StringPatch{}, stringData).stringValue_ref());
-  EXPECT_TRUE(isMaskNoop(convertToObject(op::StringPatch{})));
+  EXPECT_TRUE(isMaskNoop(convertPatchToObject(op::StringPatch{})));
 
   // Assign
   EXPECT_EQ(
       patch, *apply(op::StringPatch{} = patch, stringData).stringValue_ref());
-  EXPECT_TRUE(isMaskWriteOperation(convertToObject(op::StringPatch{} = patch)));
+  EXPECT_TRUE(
+      isMaskWriteOperation(convertPatchToObject(op::StringPatch{} = patch)));
 
   // Clear
   {
     op::StringPatch strPatch;
     strPatch.clear();
     EXPECT_TRUE(apply(strPatch, stringData).stringValue_ref()->empty());
-    EXPECT_TRUE(isMaskWriteOperation(convertToObject(strPatch)));
+    EXPECT_TRUE(isMaskWriteOperation(convertPatchToObject(strPatch)));
   }
 
   // Append
@@ -296,13 +322,13 @@ TEST_F(PatchTest, String) {
     op::StringPatch strPatch;
     strPatch.append(patch);
     EXPECT_EQ(data + patch, *apply(strPatch, stringData).stringValue_ref());
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(strPatch)));
+    EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(strPatch)));
   }
   {
     op::StringPatch strPatch;
     strPatch.append("");
     EXPECT_EQ(data, *apply(strPatch, stringData).stringValue_ref());
-    EXPECT_TRUE(isMaskNoop(convertToObject(op::StringPatch{})));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(op::StringPatch{})));
   }
 
   // Prepend
@@ -310,13 +336,13 @@ TEST_F(PatchTest, String) {
     op::StringPatch strPatch;
     strPatch.prepend(patch);
     EXPECT_EQ(patch + data, *apply(strPatch, stringData).stringValue_ref());
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(strPatch)));
+    EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(strPatch)));
   }
   {
     op::StringPatch strPatch;
     strPatch.prepend("");
     EXPECT_EQ(data, *apply(strPatch, stringData).stringValue_ref());
-    EXPECT_TRUE(isMaskNoop(convertToObject(op::StringPatch{})));
+    EXPECT_TRUE(isMaskNoop(convertPatchToObject(op::StringPatch{})));
   }
 
   // Clear, Append and Prepend in one
@@ -326,7 +352,7 @@ TEST_F(PatchTest, String) {
     strPatch.append(patch);
     strPatch.prepend(patch);
     EXPECT_EQ(patch + patch, *apply(strPatch, stringData).stringValue_ref());
-    EXPECT_TRUE(isMaskReadWriteOperation(convertToObject(strPatch)));
+    EXPECT_TRUE(isMaskReadWriteOperation(convertPatchToObject(strPatch)));
   }
 
   // Wrong patch provided
@@ -978,6 +1004,43 @@ TEST_F(PatchTest, Struct) {
   }
 }
 
+TEST_F(PatchTest, GeneratedStructPatch) {
+  test::patch::MyStruct original;
+  original.boolVal() = true;
+  original.byteVal() = 42;
+  original.stringVal() = "test";
+
+  test::patch::MyStructPatch patch;
+  patch.patchIfSet<ident::boolVal>() = !op::BoolPatch{};
+  patch.patchIfSet<ident::byteVal>() = original.byteVal();
+  patch.patchIfSet<ident::i16Val>() += 2;
+  patch.patchIfSet<ident::i32Val>() += 3;
+  patch.patchIfSet<ident::i64Val>() += 4;
+  patch.patchIfSet<ident::floatVal>() += 5;
+  patch.patchIfSet<ident::doubleVal>() += 6;
+  patch.patchIfSet<ident::stringVal>() = "_" + op::StringPatch{} + "_";
+  patch.patchIfSet<ident::structVal>().patchIfSet<ident::data1>().append("Na");
+
+  auto valueObject = convertToValueObject(original);
+  applyPatch(convertPatchToObject(patch), valueObject);
+
+  auto buffer = serializeObject<CompactSerializer::ProtocolWriter>(
+      *valueObject.objectValue_ref());
+
+  test::patch::MyStruct patched;
+  CompactSerializer::deserialize(buffer.get(), patched);
+
+  EXPECT_FALSE(*patched.boolVal());
+  EXPECT_EQ("_test_", *patched.stringVal());
+  EXPECT_EQ(*original.byteVal(), *patched.byteVal());
+  EXPECT_EQ(2, *patched.i16Val());
+  EXPECT_EQ(3, *patched.i32Val());
+  EXPECT_EQ(4, *patched.i64Val());
+  EXPECT_EQ(5, *patched.floatVal());
+  EXPECT_EQ(6, *patched.doubleVal());
+  EXPECT_EQ("Na", *patched.structVal()->data1());
+}
+
 TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct
   test::testset::union_with<type::i32_t> valueObject;
   test::testset::union_with<type::i32_t> patchObject;
@@ -1111,14 +1174,15 @@ TEST_F(PatchTest, ExtractMaskFromPatchNested) {
   mapPatch.mapValue_ref().ensure()[asValueStruct<type::binary_t>("key")] =
       fieldPatchValue;
   Value fieldPatchValue2, bytePatchValue;
-  bytePatchValue.objectValue_ref() = convertToObject(op::BytePatch{} - 1);
+  bytePatchValue.objectValue_ref() = convertPatchToObject(op::BytePatch{} - 1);
   fieldPatchValue2.objectValue_ref().ensure().members().ensure()[1] =
       bytePatchValue;
   Value objectPatchValue;
   objectPatchValue.objectValue_ref() =
       makePatch(op::PatchOp::PatchPrior, fieldPatchValue2);
   Value nestedPatchValue, boolPatchValue, fieldPatchValue3;
-  boolPatchValue.objectValue_ref() = convertToObject(op::BoolPatch{} = true);
+  boolPatchValue.objectValue_ref() =
+      convertPatchToObject(op::BoolPatch{} = true);
   fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("a")] =
       boolPatchValue;
   fieldPatchValue3.mapValue_ref().ensure()[asValueStruct<type::binary_t>("b")] =

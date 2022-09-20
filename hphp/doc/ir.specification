@@ -1353,6 +1353,10 @@ To string conversions:
 
   Loads implicit context from RDS.
 
+| LdImplicitContextMemoKey, D(Str), S(Obj), NF
+
+  Loads memo key from implicit context in S0.
+
 7. Allocation
 
 | AllocInitROM<rom>, D(VoidPtr), NA, NF

@@ -739,6 +739,7 @@ bool opcodeMayRaise(Opcode opc) {
   case LdGenericsFromRFunc:
   case LdIfaceMethod:
   case LdImplicitContext:
+  case LdImplicitContextMemoKey:
   case LdInitPropAddr:
   case LdInitRDSAddr:
   case LdIterBase:

@@ -147,7 +147,7 @@ struct QueryContext : QueryContextBase {
   bool dirMatchesRelativeRoot(w_string_piece fullDirectoryPath);
 
  private:
-  w_string wholename_;
+  std::optional<w_string> wholename_;
 
   // Number of files considered as part of running this query
   int64_t numWalked_{0};

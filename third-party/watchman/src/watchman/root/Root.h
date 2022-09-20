@@ -250,7 +250,7 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
     // Last recrawl reason
     w_string reason{"startup"};
     // Last ad-hoc warning message
-    w_string warning;
+    std::optional<w_string> warning;
     std::chrono::steady_clock::time_point crawlStart;
     std::chrono::steady_clock::time_point crawlFinish;
     // Number of statPath() called during recrawl
@@ -259,7 +259,7 @@ class Root : public RootConfig, public std::enable_shared_from_this<Root> {
   folly::Synchronized<RecrawlInfo> recrawlInfo;
 
   // Why we failed to watch
-  w_string failure_reason;
+  std::optional<w_string> failure_reason;
 
   // State transition counter to allow identification of concurrent state
   // transitions

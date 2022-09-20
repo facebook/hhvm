@@ -9,9 +9,6 @@
 #include "thrift/compiler/test/fixtures/encode/gen-cpp2/module_types.h"
 
 #include <thrift/lib/cpp2/gen/module_types_tcc.h>
-#include <thrift/lib/cpp2/op/Clear.h>
-#include <thrift/lib/cpp2/op/Get.h>
-#include <thrift/lib/cpp2/op/Encode.h>
 
 
 namespace apache {
@@ -383,7 +380,7 @@ _readField_list_shared_ptr_field:
     _readState.beforeSubobject(iprot);
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::facebook::thrift::test::AdaptedFoo>>>();
     ::apache::thrift::op::decode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*iprot, *ptr);
-    this->list_shared_ptr_field = std::move(ptr);
+    this->__fbthrift_field_list_shared_ptr_field = std::move(ptr);
     _readState.afterSubobject(iprot);
     
   }
@@ -638,9 +635,9 @@ uint32_t OpEncodeStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 5);
     xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
   }
-  if (this->list_shared_ptr_field) {
+  if (this->__fbthrift_field_list_shared_ptr_field) {
     xfer += prot_->serializedFieldSize("list_shared_ptr_field", apache::thrift::protocol::T_LIST, 6);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->list_shared_ptr_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->__fbthrift_field_list_shared_ptr_field);
   }
   {
     xfer += prot_->serializedFieldSize("list_cpp_type_field", apache::thrift::protocol::T_LIST, 7);
@@ -694,9 +691,9 @@ uint32_t OpEncodeStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("list_field", apache::thrift::protocol::T_LIST, 5);
     xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
   }
-  if (this->list_shared_ptr_field) {
+  if (this->__fbthrift_field_list_shared_ptr_field) {
     xfer += prot_->serializedFieldSize("list_shared_ptr_field", apache::thrift::protocol::T_LIST, 6);
-    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->list_shared_ptr_field);
+    xfer += ::apache::thrift::op::serialized_size<false, ::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->__fbthrift_field_list_shared_ptr_field);
   }
   {
     xfer += prot_->serializedFieldSize("list_cpp_type_field", apache::thrift::protocol::T_LIST, 7);
@@ -766,11 +763,11 @@ uint32_t OpEncodeStruct::write(Protocol_* prot_) const {
     xfer += ::apache::thrift::op::encode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, this->__fbthrift_field_list_field);
     xfer += prot_->writeFieldEnd();
   }
-  if (this->list_shared_ptr_field) {
+  if (this->__fbthrift_field_list_shared_ptr_field) {
     constexpr int16_t kPrevFieldId = 5;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 6, kPrevFieldId>(*prot_, "list_shared_ptr_field", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::op::encode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->list_shared_ptr_field);
+    xfer += ::apache::thrift::op::encode<::apache::thrift::type::list<::apache::thrift::type::adapted<::apache::thrift::test::TemplatedTestAdapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>>(*prot_, *this->__fbthrift_field_list_shared_ptr_field);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

@@ -51,7 +51,7 @@ fn compute_general_po(
 
     for param in &func.params {
         if let Some(dv) = param.default_value.as_ref() {
-            mark_block(&mut stack, &mut already_pushed, func, dv.0);
+            mark_block(&mut stack, &mut already_pushed, func, dv.init);
         }
     }
 

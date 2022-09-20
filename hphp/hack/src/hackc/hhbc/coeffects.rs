@@ -4,10 +4,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
-use ffi::Triple;
 use hhbc_string_utils::strip_ns;
 use naming_special_names_rust::coeffects as c;
 use naming_special_names_rust::coeffects::Ctx;
@@ -27,15 +25,36 @@ pub struct CtxConstant<'arena> {
     pub is_abstract: bool,
 }
 
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct CcParam<'arena> {
+    pub index: u32,
+    pub ctx_name: Str<'arena>,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct CcThis<'arena> {
+    pub types: Slice<'arena, Str<'arena>>,
+}
+
+#[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct CcReified<'arena> {
+    pub is_class: bool,
+    pub index: u32,
+    pub types: Slice<'arena, Str<'arena>>,
+}
+
 #[derive(Clone, Debug, Default, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Coeffects<'arena> {
     pub static_coeffects: Slice<'arena, Ctx>,
     pub unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
-    pub fun_param: Slice<'arena, usize>,
-    pub cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
-    pub cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
-    pub cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    pub fun_param: Slice<'arena, u32>,
+    pub cc_param: Slice<'arena, CcParam<'arena>>,
+    pub cc_this: Slice<'arena, CcThis<'arena>>,
+    pub cc_reified: Slice<'arena, CcReified<'arena>>,
     pub closure_parent_scope: bool,
     pub generator_this: bool,
     pub caller: bool,
@@ -45,10 +64,10 @@ impl<'arena> Coeffects<'arena> {
     pub fn new(
         static_coeffects: Slice<'arena, Ctx>,
         unenforced_static_coeffects: Slice<'arena, Str<'arena>>,
-        fun_param: Slice<'arena, usize>,
-        cc_param: Slice<'arena, Pair<usize, Str<'arena>>>,
-        cc_this: Slice<'arena, Slice<'arena, Str<'arena>>>,
-        cc_reified: Slice<'arena, Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+        fun_param: Slice<'arena, u32>,
+        cc_param: Slice<'arena, CcParam<'arena>>,
+        cc_this: Slice<'arena, CcThis<'arena>>,
+        cc_reified: Slice<'arena, CcReified<'arena>>,
         closure_parent_scope: bool,
         generator_this: bool,
         caller: bool,
@@ -147,13 +166,13 @@ impl<'arena> Coeffects<'arena> {
         let mut static_coeffects = vec![];
         let mut unenforced_static_coeffects: Vec<Str<'arena>> = vec![];
         let mut fun_param = vec![];
-        let mut cc_param: Vec<Pair<usize, Str<'arena>>> = vec![];
-        let mut cc_this: Vec<Slice<'arena, Str<'arena>>> = vec![];
-        let mut cc_reified: Vec<Triple<bool, usize, Slice<'arena, Str<'arena>>>> = vec![];
+        let mut cc_param: Vec<CcParam<'arena>> = vec![];
+        let mut cc_this: Vec<CcThis<'arena>> = vec![];
+        let mut cc_reified: Vec<CcReified<'arena>> = vec![];
 
-        let get_arg_pos = |name: &String| -> usize {
+        let get_arg_pos = |name: &String| -> u32 {
             if let Some(pos) = params.as_ref().iter().position(|x| x.name == *name) {
-                pos
+                pos as u32
             } else {
                 panic!("Invalid context");
             }
@@ -190,46 +209,43 @@ impl<'arena> Coeffects<'arena> {
                     Hint_::Haccess(Hint(_, hint), sids) => match &**hint {
                         Hint_::Happly(Id(_, id), _) if !sids.is_empty() => {
                             if strip_ns(id.as_str()) == sn::typehints::THIS {
-                                cc_this.push(Slice::from_vec(
-                                    alloc,
-                                    sids.iter()
-                                        .map(|Id(_, id)| alloc.alloc_str(id).into())
-                                        .collect(),
-                                ));
+                                cc_this.push(CcThis {
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
+                                });
                             } else if let Some(idx) = is_reified_tparam(id.as_str(), false) {
-                                cc_reified.push(
-                                    (
-                                        false,
-                                        idx,
-                                        Slice::from_vec(
-                                            alloc,
-                                            sids.iter()
-                                                .map(|Id(_, id)| alloc.alloc_str(id).into())
-                                                .collect(),
-                                        ),
-                                    )
-                                        .into(),
-                                );
+                                cc_reified.push(CcReified {
+                                    is_class: false,
+                                    index: idx as u32,
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
+                                });
                             } else if let Some(idx) = is_reified_tparam(id.as_str(), true) {
-                                cc_reified.push(
-                                    (
-                                        true,
-                                        idx,
-                                        Slice::from_vec(
-                                            alloc,
-                                            sids.iter()
-                                                .map(|Id(_, id)| alloc.alloc_str(id).into())
-                                                .collect(),
-                                        ),
-                                    )
-                                        .into(),
-                                );
+                                cc_reified.push(CcReified {
+                                    is_class: true,
+                                    index: idx as u32,
+                                    types: Slice::from_vec(
+                                        alloc,
+                                        sids.iter()
+                                            .map(|Id(_, id)| alloc.alloc_str(id).into())
+                                            .collect(),
+                                    ),
+                                });
                             }
                         }
                         Hint_::Hvar(name) if sids.len() == 1 => {
-                            let pos = get_arg_pos(name);
+                            let index = get_arg_pos(name);
                             let Id(_, sid_name) = &sids[0];
-                            cc_param.push((pos, alloc.alloc_str(sid_name).into()).into());
+                            let ctx_name = alloc.alloc_str(sid_name).into();
+                            cc_param.push(CcParam { index, ctx_name });
                         }
                         _ => {}
                     },
@@ -332,19 +348,19 @@ impl<'arena> Coeffects<'arena> {
         self.unenforced_static_coeffects.as_ref()
     }
 
-    pub fn get_fun_param(&self) -> &[usize] {
+    pub fn get_fun_param(&self) -> &[u32] {
         self.fun_param.as_ref()
     }
 
-    pub fn get_cc_param(&self) -> &[Pair<usize, Str<'arena>>] {
+    pub fn get_cc_param(&self) -> &[CcParam<'arena>] {
         self.cc_param.as_ref()
     }
 
-    pub fn get_cc_this(&self) -> &[Slice<'arena, Str<'arena>>] {
+    pub fn get_cc_this(&self) -> &[CcThis<'arena>] {
         self.cc_this.as_ref()
     }
 
-    pub fn get_cc_reified(&self) -> &[Triple<bool, usize, Slice<'arena, Str<'arena>>>] {
+    pub fn get_cc_reified(&self) -> &[CcReified<'arena>] {
         self.cc_reified.as_ref()
     }
 

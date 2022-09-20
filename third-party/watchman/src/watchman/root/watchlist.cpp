@@ -173,7 +173,7 @@ RootDebugStatus Root::getStatus() const {
       recrawl_info.completed_at = -finish_ago;
       crawl_status = folly::to<std::string>(
           "needs recrawl: ",
-          info->warning.view(),
+          info->warning ? info->warning->view() : std::string_view{},
           ". Last crawl was ",
           finish_ago,
           "ms ago");

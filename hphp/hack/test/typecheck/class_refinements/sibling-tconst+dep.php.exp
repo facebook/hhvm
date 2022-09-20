@@ -1,0 +1,10 @@
+File "sibling-tconst+dep.php", line 15, characters 21-38:
+Some type arguments violate their constraints (Typing[4323])
+  File "sibling-tconst+dep.php", line 5, characters 17-20:
+  `TBox` is a constrained type parameter
+  File "sibling-tconst+dep.php", line 5, characters 25-47:
+  This type constraint is violated
+  File "sibling-tconst+dep.php", line 5, characters 25-47:
+  Expected an object with `type T = this::T`
+  File "sibling-tconst+dep.php", line 15, characters 25-28:
+  But got `this as BoxWithCtx`

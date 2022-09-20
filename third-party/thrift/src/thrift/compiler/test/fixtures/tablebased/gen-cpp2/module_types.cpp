@@ -48,7 +48,7 @@ constexpr ptrdiff_t fieldOffset<::test::fixtures::tablebased::TrivialTypesStruct
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldA),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldB),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldC),
-    offsetof(::test::fixtures::tablebased::TrivialTypesStruct, fieldD),
+    offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldD),
     offsetof(::test::fixtures::tablebased::TrivialTypesStruct, __fbthrift_field_fieldE)};
   return offsets[fieldIndex];
 }
@@ -111,8 +111,8 @@ TrivialTypesStruct::TrivialTypesStruct(const TrivialTypesStruct& srcObj) :
     __fbthrift_field_fieldA(srcObj.__fbthrift_field_fieldA),
     __fbthrift_field_fieldB(srcObj.__fbthrift_field_fieldB),
     __fbthrift_field_fieldC(srcObj.__fbthrift_field_fieldC),
-    fieldD(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::binary>(srcObj.fieldD)),
+    __fbthrift_field_fieldD(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_fieldD)),
     __fbthrift_field_fieldE(srcObj.__fbthrift_field_fieldE),
     __isset(srcObj.__isset) {
 }
@@ -135,7 +135,7 @@ TrivialTypesStruct::TrivialTypesStruct(FOLLY_MAYBE_UNUSED TrivialTypesStruct&& o
     __fbthrift_field_fieldA(std::move(other.__fbthrift_field_fieldA)),
     __fbthrift_field_fieldB(std::move(other.__fbthrift_field_fieldB)),
     __fbthrift_field_fieldC(std::move(other.__fbthrift_field_fieldC)),
-    fieldD(std::move(other.fieldD)),
+    __fbthrift_field_fieldD(std::move(other.__fbthrift_field_fieldD)),
     __fbthrift_field_fieldE(std::move(other.__fbthrift_field_fieldE)),
     __isset(other.__isset) {
 }
@@ -144,7 +144,7 @@ TrivialTypesStruct& TrivialTypesStruct::operator=(FOLLY_MAYBE_UNUSED TrivialType
     this->__fbthrift_field_fieldA = std::move(other.__fbthrift_field_fieldA);
     this->__fbthrift_field_fieldB = std::move(other.__fbthrift_field_fieldB);
     this->__fbthrift_field_fieldC = std::move(other.__fbthrift_field_fieldC);
-    this->fieldD = std::move(other.fieldD);
+    this->__fbthrift_field_fieldD = std::move(other.__fbthrift_field_fieldD);
     this->__fbthrift_field_fieldE = std::move(other.__fbthrift_field_fieldE);
     __isset = other.__isset;
     return *this;
@@ -155,7 +155,7 @@ TrivialTypesStruct::TrivialTypesStruct(apache::thrift::FragileConstructor, ::std
     __fbthrift_field_fieldA(std::move(fieldA__arg)),
     __fbthrift_field_fieldB(std::move(fieldB__arg)),
     __fbthrift_field_fieldC(std::move(fieldC__arg)),
-    fieldD(std::move(fieldD__arg)),
+    __fbthrift_field_fieldD(std::move(fieldD__arg)),
     __fbthrift_field_fieldE(std::move(fieldE__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
@@ -170,7 +170,7 @@ void TrivialTypesStruct::__fbthrift_clear() {
   this->__fbthrift_field_fieldA = ::std::int32_t();
   this->__fbthrift_field_fieldB = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_fieldC = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->fieldD = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->__fbthrift_field_fieldD = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
   this->__fbthrift_field_fieldE = ::test::fixtures::tablebased::ExampleEnum();
   __isset = {};
 }
@@ -193,7 +193,7 @@ bool TrivialTypesStruct::operator==(FOLLY_MAYBE_UNUSED const TrivialTypesStruct&
   if (lhs.fieldC_ref().has_value() != rhs.fieldC_ref().has_value() || (lhs.fieldC_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC))) {
     return false;
   }
-  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.fieldD, rhs.fieldD))) {
+  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD))) {
     return false;
   }
   if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
@@ -213,8 +213,8 @@ bool TrivialTypesStruct::operator<(FOLLY_MAYBE_UNUSED const TrivialTypesStruct& 
   if (lhs.fieldC_ref().has_value() != rhs.fieldC_ref().has_value() || (lhs.fieldC_ref().has_value() && !apache::thrift::StringTraits<std::string>::isEqual(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC))) {
     return !lhs.fieldC_ref().has_value() || (rhs.fieldC_ref().has_value() && apache::thrift::StringTraits<std::string>::isLess(lhs.__fbthrift_field_fieldC, rhs.__fbthrift_field_fieldC));
   }
-  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.fieldD, rhs.fieldD))) {
-    return !lhs.fieldD_ref().has_value() || (rhs.fieldD_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.fieldD, rhs.fieldD));
+  if (lhs.fieldD_ref().has_value() != rhs.fieldD_ref().has_value() || (lhs.fieldD_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD))) {
+    return !lhs.fieldD_ref().has_value() || (rhs.fieldD_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.__fbthrift_field_fieldD, rhs.__fbthrift_field_fieldD));
   }
   if (!(lhs.fieldE_ref() == rhs.fieldE_ref())) {
     return lhs.fieldE_ref() < rhs.fieldE_ref();
@@ -228,7 +228,7 @@ void swap(FOLLY_MAYBE_UNUSED TrivialTypesStruct& a, FOLLY_MAYBE_UNUSED TrivialTy
   swap(a.__fbthrift_field_fieldA, b.__fbthrift_field_fieldA);
   swap(a.__fbthrift_field_fieldB, b.__fbthrift_field_fieldB);
   swap(a.__fbthrift_field_fieldC, b.__fbthrift_field_fieldC);
-  swap(a.fieldD, b.fieldD);
+  swap(a.__fbthrift_field_fieldD, b.__fbthrift_field_fieldD);
   swap(a.__fbthrift_field_fieldE, b.__fbthrift_field_fieldE);
   swap(a.__isset, b.__isset);
 }

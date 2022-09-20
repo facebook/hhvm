@@ -6,7 +6,7 @@ This spec discusses the semantics when the readers and writers interpret data us
 
 The following outlines the compatibility for changes to data:
 
-|Change    |Wire compatible    |Code compatible    |Notes    |
+|Change    |Wire compatible  [^1] |Code compatible  [^2] |Notes    |
 |---    |---    |---    |---    |
 |Add a field    |yes    |yes    |Dropped by old    |
 |Remove a field    |yes    |no    |Dropped by new    |
@@ -52,4 +52,7 @@ The following changes to interfaces are supported.
 |Add a method    |Unimplemented error from old servers    |
 |Remove a method    |Unimplemented error from new servers    |
 |Change arguments    |See ['Data'](https://github.com/facebook/fbthrift/blob/main/thrift/doc/spec/definition/compatibility.md#data)    |
+
+[^1]: Whether the data is changed over the wire.
+[^2]: Whether the code change is needed.
 

@@ -125,7 +125,7 @@ TEST(LocalSavedStateInterfaceTest, path) {
            {"project", w_string_to_json("foo")}}),
       nullptr);
   auto path = interface.getLocalPath("hash");
-  auto expectedPath = FAKEFS_ROOT "absolute/path/foo/hash";
+  w_string_piece expectedPath = FAKEFS_ROOT "absolute/path/foo/hash";
   EXPECT_EQ(path, expectedPath);
   interface = LocalSavedStateInterface(
       json_object(

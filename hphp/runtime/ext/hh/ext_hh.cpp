@@ -1182,6 +1182,11 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   not_reached();
 }
 
+Object HHVM_FUNCTION(get_whole_implicit_context) {
+  auto const obj = *ImplicitContext::activeCtx;
+  return Object::attach(obj);
+}
+
 String HHVM_FUNCTION(get_implicit_context_memo_key) {
   auto const obj = *ImplicitContext::activeCtx;
   if (!obj) return empty_string();
@@ -1235,7 +1240,7 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
   return ImplicitContext::setByValue(std::move(obj));
 }
 
-Object HHVM_FUNCTION(set_special_implicit_context,
+Object HHVM_FUNCTION(create_special_implicit_context,
                      int64_t type_enum,
                      const Variant& memo_key /* = null_string */) {
   auto const prev_obj = *ImplicitContext::activeCtx;
@@ -1301,7 +1306,7 @@ Object HHVM_FUNCTION(set_special_implicit_context,
     }
     return sb.detach().detach();
   }();
-  return ImplicitContext::setByValue(std::move(obj));
+  return Object{obj};
 }
 
 namespace {
@@ -1759,10 +1764,12 @@ static struct HHExtension final : Extension {
 
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context,
                   HHVM_FN(get_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_whole_implicit_context,
+                  HHVM_FN(get_whole_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
                   HHVM_FN(set_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_special_implicit_context,
-                  HHVM_FN(set_special_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_special_implicit_context,
+                  HHVM_FN(create_special_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,
                   HHVM_FN(get_implicit_context_memo_key));
 

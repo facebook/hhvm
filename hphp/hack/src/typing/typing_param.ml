@@ -114,6 +114,20 @@ let make_param_local_ty ~dynamic_mode env decl_hint param =
         | (Tlike ty, Enforced, Ast_defs.Pnormal) -> ty
         | _ -> ty
       in
+      let ty =
+        if TypecheckerOptions.everything_sdt Typing_env_types.(env.genv.tcopt)
+        then
+          (* For implicit pessimisation, wrap supportdyn around parameters with function types. *)
+          match get_node ty with
+          | Tfun _ ->
+            Typing_utils.make_supportdyn_decl_type
+              (get_pos ty)
+              (get_reason ty)
+              ty
+          | _ -> ty
+        else
+          ty
+      in
       Phase.localize_no_subst env ~ignore_errors:false ty
   in
   Option.iter ty_err_opt ~f:Errors.add_typing_error;

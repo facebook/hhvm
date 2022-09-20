@@ -250,21 +250,21 @@ HPHP::TypedValue toTypedValue(const hackc::hhbc::TypedValue& tv) {
         DictInit d(tv.Dict._0.len);
         auto set = range(tv.Dict._0);
         for (auto const& elt : set) {
-          switch (elt._0.tag) {
+          switch (elt.key.tag) {
             case kind::Int:
-              d.set(elt._0.Int._0, toTypedValue(elt._1));
+              d.set(elt.key.Int._0, toTypedValue(elt.value));
               break;
             case kind::String: {
-              auto const s = toStaticString(elt._0.String._0);
-              d.set(s, toTypedValue(elt._1));
+              auto const s = toStaticString(elt.key.String._0);
+              d.set(s, toTypedValue(elt.value));
               break;
             }
             case kind::LazyClass:{
               if (RuntimeOption::EvalRaiseClassConversionWarning) {
                 raise_class_to_string_conversion_warning();
               }
-              auto const s = toStaticString(elt._0.LazyClass._0);
-              d.set(s, toTypedValue(elt._1));
+              auto const s = toStaticString(elt.key.LazyClass._0);
+              d.set(s, toTypedValue(elt.value));
               break;
             }
             default:
@@ -489,13 +489,11 @@ void translateClassBody(TranslationState& ts,
   }
 }
 
-using TypeInfoPair = Pair<Str, Slice<hhbc::TypeInfo>>;
-
-void translateUbs(const TypeInfoPair& ub, UpperBoundMap& ubs) {
-  auto const& name = toStaticString(ub._0);
+void translateUbs(const hhbc::UpperBound& ub, UpperBoundMap& ubs) {
+  auto const& name = toStaticString(ub.name);
   CompactVector<TypeConstraint> ret;
 
-  auto infos = range(ub._1);
+  auto infos = range(ub.bounds);
   for (auto const& i : infos) {
     ubs[name].emplace_back(translateTypeInfo(i).second);
   }
@@ -508,13 +506,13 @@ void translateEnumType(TranslationState& ts, const Maybe<hhbc::TypeInfo>& t) {
   }
 }
 
-void translateRequirements(TranslationState& ts, Pair<ClassName, TraitReqKind> requirement) {
-  auto const name = toStaticString(requirement._0._0);
+void translateRequirements(TranslationState& ts, const hhbc::Requirement& req) {
+  auto const name = toStaticString(req.name._0);
   auto const requirementKind = [&] {
-    switch (requirement._1) {
-      case TraitReqKind::MustExtend: return PreClass::RequirementExtends;
-      case TraitReqKind::MustImplement: return PreClass::RequirementImplements;
-      case TraitReqKind::MustBeClass: return PreClass::RequirementClass;
+    switch (req.kind) {
+      case hhbc::TraitReqKind::MustExtend: return PreClass::RequirementExtends;
+      case hhbc::TraitReqKind::MustImplement: return PreClass::RequirementImplements;
+      case hhbc::TraitReqKind::MustBeClass: return PreClass::RequirementClass;
     }
     not_reached();
   }();
@@ -935,10 +933,10 @@ void translateInstruction(TranslationState& ts, const Instruct& i) {
 }
 
 void translateDefaultParameterValue(TranslationState& ts,
-                                    const Pair<Label,Str>& dv,
+                                    const hhbc::DefaultValue& dv,
                                     FuncEmitter::ParamInfo& param) {
-  auto const str = toStaticString(dv._1);
-  ts.labelMap[dv._0].dvInits.push_back(ts.fe->params.size());
+  auto const str = toStaticString(dv.expr);
+  ts.labelMap[dv.label].dvInits.push_back(ts.fe->params.size());
   parse_default_value(param, str);
 }
 
@@ -1084,28 +1082,31 @@ void translateCoeffects(TranslationState& ts, const hhbc::Coeffects& coeffects) 
   auto cc_param = range(coeffects.cc_param);
   for (auto const& c : cc_param) {
     ts.fe->coeffectRules.emplace_back(
-      CoeffectRule(CoeffectRule::CCParam{}, c._0, toStaticString(c._1)));
+      CoeffectRule(CoeffectRule::CCParam{}, c.index, toStaticString(c.ctx_name)));
   }
 
   auto cc_this_vec = range(coeffects.cc_this);
   for (auto const& cc_this : cc_this_vec) {
+    auto const& types = cc_this.types;
 
     std::vector<LowStringPtr> names;
-    for (int i = 0; i < cc_this.len - 1; i++) {
-      names.push_back(toStaticString(cc_this.data[i]));
+    names.reserve(types.len - 1);
+    for (int i = 0; i < types.len - 1; i++) {
+      names.push_back(toStaticString(types.data[i]));
     }
-    auto const ctx_name = toStaticString(cc_this.data[cc_this.len - 1]);
+    auto const ctx_name = toStaticString(types.data[types.len - 1]);
     ts.fe->coeffectRules.emplace_back(
         CoeffectRule(CoeffectRule::CCThis{}, names, ctx_name));
   }
 
   auto cc_reified_vec = range(coeffects.cc_reified);
   for (auto const& cc_reified : cc_reified_vec) {
-    auto const isClass = cc_reified._0;
-    auto const pos = cc_reified._1;
-    auto types = cc_reified._2;
+    auto const isClass = cc_reified.is_class;
+    auto const pos = cc_reified.index;
+    auto const& types = cc_reified.types;
 
     std::vector<LowStringPtr> names;
+    names.reserve(types.len - 1);
     for (int i = 0; i < types.len - 1; i++) {
       names.push_back(toStaticString(types.data[i]));
     }
@@ -1350,13 +1351,13 @@ void translate(TranslationState& ts, const hhbc::Unit& unit) {
   }
 
   translateUserAttributes(unit.file_attributes, ts.ue->m_fileAttributes);
-  maybeThen(unit.fatal, [&](Triple<FatalOp, hhbc::SrcLoc, Str> fatal) {
-    auto const pos = fatal._1;
-    auto const msg = toString(fatal._2);
+  maybeThen(unit.fatal, [&](Fatal fatal) {
+    auto const loc = fatal.loc;
+    auto const msg = toString(fatal.message);
     throw FatalUnitError(
       msg, ts.ue->m_filepath,
-      Location::Range(pos.line_begin, pos.col_begin, pos.line_end, pos.col_end),
-      fatal._0
+      Location::Range(loc.line_begin, loc.col_begin, loc.line_end, loc.col_end),
+      fatal.op
     );
   });
 

@@ -777,6 +777,9 @@ let rec make_supportdyn r env ty =
     else
       (env, Typing_make_type.supportdyn r ty)
 
+let make_supportdyn_decl_type p r ty =
+  mk (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [ty]))
+
 let make_like env ty =
   if Typing_defs.is_dynamic ty || Option.is_some (try_strip_dynamic env ty) then
     ty

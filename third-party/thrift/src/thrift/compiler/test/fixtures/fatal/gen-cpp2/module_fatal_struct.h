@@ -2302,7 +2302,7 @@ class StructWithFieldAdapter_struct_traits {
   struct __fbthrift_member_field {
     using owner = ::test_cpp2::cpp_reflection::StructWithFieldAdapter;
     using name = __fbthrift_strings_module::__fbthrift_hash_c0d2856b74d0df05b9d4456b177950351bd88e98b77f12574dfb7a911acee0d0;
-    using type = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>;
+    using type = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>;
     using tag = ::apache::thrift::ident::field;
     static constexpr ::apache::thrift::field_id_t id = 1;
     static constexpr auto optional = ::apache::thrift::optionality::required_of_writer;

@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use ffi::Str;
+pub use hhbc::CcParam;
 pub use naming_special_names_rust::coeffects::Ctx;
 
 #[derive(Debug)]
@@ -18,11 +19,23 @@ pub struct CtxConstant<'a> {
 pub struct Coeffects<'a> {
     pub static_coeffects: Vec<Ctx>,
     pub unenforced_static_coeffects: Vec<Str<'a>>,
-    pub fun_param: Vec<usize>,
-    pub cc_param: Vec<(usize, Str<'a>)>,
-    pub cc_this: Vec<Vec<Str<'a>>>,
-    pub cc_reified: Vec<(bool, usize, Vec<Str<'a>>)>,
+    pub fun_param: Vec<u32>,
+    pub cc_param: Vec<CcParam<'a>>,
+    pub cc_this: Vec<CcThis<'a>>,
+    pub cc_reified: Vec<CcReified<'a>>,
     pub closure_parent_scope: bool,
     pub generator_this: bool,
     pub caller: bool,
+}
+
+#[derive(Debug)]
+pub struct CcThis<'arena> {
+    pub types: Vec<Str<'arena>>,
+}
+
+#[derive(Debug)]
+pub struct CcReified<'arena> {
+    pub is_class: bool,
+    pub index: u32,
+    pub types: Vec<Str<'arena>>,
 }

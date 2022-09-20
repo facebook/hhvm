@@ -459,6 +459,29 @@ class ServerRequest {
         asyncProcessor_(asyncProcessor),
         methodMetadata_(methodMetadata) {}
 
+  ServerRequest(const ServerRequest&) = delete;
+
+  ServerRequest& operator=(const ServerRequest&) = delete;
+
+  ServerRequest(ServerRequest&&) = default;
+
+  ServerRequest& operator=(ServerRequest&&) = default;
+
+  // in most cases, the completion callback should be done
+  // on the thread where HandlerCallback destructor is run
+  // e.g. on CPU thread.
+  // This short-cut could make the callback run on different threads
+  // e.g. on IO thread pool, which is ok.
+  ~ServerRequest() {
+    if (notifyRequestPile_) {
+      notifyRequestPile_->onRequestFinished(requestData_);
+    }
+
+    if (notifyConcurrencyController_) {
+      notifyConcurrencyController_->onRequestFinished(requestData_);
+    }
+  }
+
   // The public accessors are available to user code that receives the
   // ServerRequest through various customization points.
 
@@ -544,12 +567,12 @@ class ServerRequest {
   }
 
   static RequestPileInterface* requestPileNotification(ServerRequest& sr) {
-    return sr.notifyRequestPile_;
+    return std::exchange(sr.notifyRequestPile_, nullptr);
   }
 
   static ConcurrencyControllerInterface* concurrencyControllerNotification(
       ServerRequest& sr) {
-    return sr.notifyConcurrencyController_;
+    return std::exchange(sr.notifyConcurrencyController_, nullptr);
   }
 
   static intptr_t& queueObserverPayload(ServerRequest& sr) {

@@ -38,12 +38,15 @@ fn awaitable_type_args(hint: &ast::Hint) -> Option<&[ast::Hint]> {
     }
 }
 
-fn is_policied_local(ctxs: Option<&ast::Contexts>) -> bool {
+fn is_any_local(ctxs: Option<&ast::Contexts>) -> bool {
     match ctxs {
         Some(c) => {
             for hint in &c.1 {
                 if let aast::Hint_::Happly(ast_defs::Id(_, id), _) = &*hint.1 {
-                    if id.as_str() == coeffects::ZONED_LOCAL {
+                    if id.as_str() == coeffects::ZONED_LOCAL
+                        || id.as_str() == coeffects::LEAK_SAFE_LOCAL
+                        || id.as_str() == coeffects::RX_LOCAL
+                    {
                         return true;
                     }
                 }
@@ -58,7 +61,7 @@ struct Context {
     in_methodish: bool,
     in_classish: bool,
     in_static_methodish: bool,
-    is_policied_local_fun: bool,
+    is_any_local_fun: bool,
     is_typechecker: bool,
 }
 
@@ -152,7 +155,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: m.static_,
-                is_policied_local_fun: is_policied_local(m.ctxs.as_ref()),
+                is_any_local_fun: is_any_local(m.ctxs.as_ref()),
                 ..*c
             },
             self,
@@ -168,7 +171,7 @@ impl<'ast> Visitor<'ast> for Checker {
             &mut Context {
                 in_methodish: true,
                 in_static_methodish: c.in_static_methodish,
-                is_policied_local_fun: is_policied_local(f.ctxs.as_ref()),
+                is_any_local_fun: is_any_local(f.ctxs.as_ref()),
                 ..*c
             },
             self,
@@ -215,14 +218,14 @@ impl<'ast> Visitor<'ast> for Checker {
             }
         } else if let Some((f, ..)) = p.2.as_efun() {
             match f.ctxs {
-                None if c.is_policied_local_fun && c.is_typechecker => {
+                None if c.is_any_local_fun && c.is_typechecker => {
                     self.add_error(&f.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
             }
         } else if let Some((f, ..)) = p.2.as_lfun() {
             match f.ctxs {
-                None if c.is_policied_local_fun && c.is_typechecker => {
+                None if c.is_any_local_fun && c.is_typechecker => {
                     self.add_error(&f.span, syntax_error::closure_in_local_context)
                 }
                 _ => {}
@@ -238,7 +241,7 @@ pub fn check_program(program: &aast::Program<(), ()>, is_typechecker: bool) -> V
         in_methodish: false,
         in_classish: false,
         in_static_methodish: false,
-        is_policied_local_fun: false,
+        is_any_local_fun: false,
         is_typechecker,
     };
     visit(&mut checker, &mut context, program).unwrap();

@@ -8,7 +8,6 @@
 
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
-#include <thrift/lib/cpp2/type/Tag.h>
 
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_B_types.h"
 #include "thrift/compiler/test/fixtures/visitation/gen-cpp2/reflection_dep_C_types.h"
@@ -6587,7 +6586,7 @@ class struct4 final  {
   struct4() :
       __fbthrift_field_field0(),
       __fbthrift_field_field2(),
-      field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
+      __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -6605,8 +6604,8 @@ class struct4 final  {
   ::std::string __fbthrift_field_field1;
  private:
   ::test_cpp2::cpp_reflection::enum1 __fbthrift_field_field2;
- public:
-  ::std::unique_ptr<::test_cpp2::cpp_reflection::structA> field3;
+ private:
+  ::std::unique_ptr<::test_cpp2::cpp_reflection::structA> __fbthrift_field_field3;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -6736,22 +6735,42 @@ class struct4 final  {
   }
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE T& field3_ref() & {
-    return field3;
+    return __fbthrift_field_field3;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE const T& field3_ref() const& {
-    return field3;
+    return __fbthrift_field_field3;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE T&& field3_ref() && {
-    return static_cast<T&&>(field3);
+    return static_cast<T&&>(__fbthrift_field_field3);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE const T&& field3_ref() const&& {
-    return static_cast<const T&&>(field3);
+    return static_cast<const T&&>(__fbthrift_field_field3);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE T& field3() & {
+    return __fbthrift_field_field3;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE const T& field3() const& {
+    return __fbthrift_field_field3;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE T&& field3() && {
+    return static_cast<T&&>(__fbthrift_field_field3);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE const T&& field3() const&& {
+    return static_cast<const T&&>(__fbthrift_field_field3);
   }
 
   ::std::int32_t get_field0() const {

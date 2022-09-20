@@ -169,9 +169,10 @@ let is_enforceable (ctx : Provider_context.t) (ty : decl_ty) =
 
 let make_like_type ty = Typing_make_type.like (get_reason ty) ty
 
-let supportdyn_mixed p r =
-  mk
-    (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [mk (r, Tmixed)]))
+let make_supportdyn_type p r ty =
+  mk (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [ty]))
+
+let supportdyn_mixed p r = make_supportdyn_type p r (mk (r, Tmixed))
 
 let add_supportdyn_constraints p tparams =
   let r = Reason.Rwitness_from_decl p in
@@ -201,19 +202,30 @@ let maybe_pessimise_type ctx ty =
   else
     ty
 
-let dynamic_param_to_supportdyn param =
+let update_param_ty param ty =
+  { param with fp_type = { param.fp_type with et_type = ty } }
+
+let add_supportdyn_to_params param =
   let ty = param.fp_type.et_type in
   match get_node ty with
   | Tdynamic ->
-    {
-      param with
-      fp_type =
-        {
-          param.fp_type with
-          et_type = supportdyn_mixed (get_pos ty) (get_reason ty);
-        };
-    }
+    update_param_ty param (supportdyn_mixed (get_pos ty) (get_reason ty))
+  | Tfun _ ->
+    update_param_ty param (make_supportdyn_type (get_pos ty) (get_reason ty) ty)
   | _ -> param
+
+let update_return_ty ft ty =
+  { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
+
+let add_supportdyn_to_ret_ty ret_ty =
+  let ty = ret_ty.et_type in
+  match get_node ty with
+  | Tfun _ ->
+    {
+      ret_ty with
+      et_type = make_supportdyn_type (get_pos ty) (get_reason ty) ty;
+    }
+  | _ -> ret_ty
 
 let pessimise_fun_type ctx p ty =
   match get_node ty with
@@ -223,20 +235,14 @@ let pessimise_fun_type ctx p ty =
       {
         ft with
         ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
-        ft_params = List.map ~f:dynamic_param_to_supportdyn ft.ft_params;
+        ft_params = List.map ~f:add_supportdyn_to_params ft.ft_params;
+        ft_ret = add_supportdyn_to_ret_ty ft.ft_ret;
       }
     in
     if is_enforceable ctx ret_ty then
       mk (get_reason ty, Tfun ft)
     else
-      mk
-        ( get_reason ty,
-          Tfun
-            {
-              ft with
-              ft_ret =
-                { et_type = make_like_type ret_ty; et_enforced = Unenforced };
-            } )
+      mk (get_reason ty, Tfun (update_return_ty ft (make_like_type ret_ty)))
   | _ -> ty
 
 let maybe_pessimise_fun_type ctx p ty =

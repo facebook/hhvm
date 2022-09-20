@@ -33,10 +33,10 @@ use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
 
-#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct Filename(pub UnitBytesId);
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SrcLoc {
     pub filename: Filename,
     pub line_begin: i32,
@@ -100,7 +100,16 @@ pub struct Param<'a> {
     ///   function myfn(int $a = 2 + 3)
     ///
     /// The block will initialize `$a` to 5 and the string will be "2 + 3".
-    pub default_value: Option<(BlockId, Str<'a>)>,
+    pub default_value: Option<DefaultValue<'a>>,
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct DefaultValue<'a> {
+    /// What block to jump to to initialize this default value
+    pub init: BlockId,
+
+    /// Source text for the default value initializer expression (for reflection).
+    pub expr: Str<'a>,
 }
 
 newtype_int!(ExFrameId, u32, ExFrameIdMap, ExFrameIdSet);
@@ -210,6 +219,7 @@ pub struct Func<'a> {
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassId>,
+    pub span: LocId,
     pub tparams: ClassIdMap<TParamBounds>,
 }
 
@@ -395,8 +405,8 @@ impl<'a> Func<'a> {
     /// just references to b1 will be remapped to b2).
     pub fn remap_bids(&mut self, remap: &BlockIdMap<BlockId>) {
         for param in &mut self.params {
-            if let Some((bid, _)) = param.default_value.as_mut() {
-                *bid = remap.get(bid).copied().unwrap_or(*bid);
+            if let Some(dv) = param.default_value.as_mut() {
+                dv.init = remap.get(&dv.init).copied().unwrap_or(dv.init);
             }
         }
 
@@ -433,7 +443,6 @@ pub struct Function<'a> {
     pub flags: FunctionFlags,
     pub name: FunctionName<'a>,
     pub func: Func<'a>,
-    pub span: SrcLoc,
 }
 
 /// A Hack method contained within a Class.
@@ -445,7 +454,6 @@ pub struct Method<'a> {
     pub flags: MethodFlags,
     pub func: Func<'a>,
     pub name: MethodName<'a>,
-    pub span: SrcLoc,
     pub visibility: Visibility,
 }
 

@@ -118,9 +118,8 @@ let typeconst env c tc =
    * ones.
    *)
   match c.c_kind with
+  | Ast_defs.Cenum -> None
   | Ast_defs.Cenum_class _
-  | Ast_defs.Cenum ->
-    None
   | Ast_defs.Ctrait
   | Ast_defs.Cinterface
   | Ast_defs.Cclass _ ->

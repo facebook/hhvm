@@ -44,7 +44,7 @@ void add_root_warnings_to_response(
   response.set(
       "warning",
       w_string_to_json(w_string::build(
-          info->warning,
+          info->warning.value(),
           "\n",
           "To clear this warning, run:\n"
           "`watchman watch-del '",

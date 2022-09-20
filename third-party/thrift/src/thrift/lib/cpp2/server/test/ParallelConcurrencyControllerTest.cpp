@@ -148,24 +148,18 @@ ServerRequest getRequest(AsyncProcessor* ap, folly::EventBase*) {
   return req;
 }
 
-Func blockingTaskGen(
-    folly::Baton<>& baton, ParallelConcurrencyController& controller) {
+Func blockingTaskGen(folly::Baton<>& baton, ParallelConcurrencyController&) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.wait();
-    static ServerRequestData data;
-    controller.onRequestFinished(data);
   };
 
   return waitingTask;
 }
 
-Func endingTaskGen(
-    folly::Baton<>& baton, ParallelConcurrencyController& controller) {
+Func endingTaskGen(folly::Baton<>& baton, ParallelConcurrencyController&) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
-    static ServerRequestData data;
-    controller.onRequestFinished(data);
     baton.post();
   };
 
@@ -208,6 +202,8 @@ TEST(ParallelConcurrencyControllerTest, NormalCases) {
 
   baton2.wait();
   EXPECT_EQ(controller.requestCount(), 0);
+
+  ex.join();
 }
 
 // This tests when the concurrency limit is set to 2
@@ -244,18 +240,17 @@ TEST(ParallelConcurrencyControllerTest, LimitedTasks) {
 
   baton3.wait();
   EXPECT_EQ(controller.requestCount(), 0);
+
+  ex.join();
 }
 
 Func edgeTaskGen(
     folly::Latch& latch,
     folly::Baton<>& baton,
-    ParallelConcurrencyController& controller) {
+    ParallelConcurrencyController&) {
   Func waitingTask = [&](ServerRequest&& /* request */,
                          const AsyncProcessorFactory::MethodMetadata&) {
     baton.wait();
-    static ServerRequestData data;
-    controller.onRequestFinished(data);
-
     latch.count_down();
   };
 
@@ -310,6 +305,8 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering1) {
   latch.wait();
   EXPECT_EQ(controller.requestCount(), 0);
   EXPECT_EQ(pile.requestCount(), 0);
+
+  ex.join();
 }
 
 TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
@@ -348,6 +345,8 @@ TEST(ParallelConcurrencyControllerTest, DifferentOrdering2) {
   latch.wait();
   EXPECT_EQ(controller.requestCount(), 0);
   EXPECT_EQ(pile.requestCount(), 0);
+
+  ex.join();
 }
 
 TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
@@ -421,4 +420,108 @@ TEST(ParallelConcurrencyControllerTest, InternalPrioritization) {
   blockingBaton.post();
 
   EXPECT_EQ(std::move(res).get(), 1);
+}
+
+TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
+  THRIFT_FLAG_SET_MOCK(allow_resource_pools_for_wildcards, true);
+
+  class DummyTestService : public apache::thrift::ServiceHandler<TestService> {
+  };
+
+  class BadAsyncProcessor : public AsyncProcessor {
+   public:
+    BadAsyncProcessor(folly::Baton<>& baton) : baton_(baton) {}
+
+    void processSerializedRequest(
+        ResponseChannelRequest::UniquePtr,
+        SerializedRequest&&,
+        protocol::PROTOCOL_TYPES,
+        Cpp2RequestContext*,
+        folly::EventBase*,
+        concurrency::ThreadManager*) override {}
+
+    void processSerializedCompressedRequestWithMetadata(
+        apache::thrift::ResponseChannelRequest::UniquePtr,
+        apache::thrift::SerializedCompressedRequest&&,
+        const apache::thrift::AsyncProcessorFactory::MethodMetadata&,
+        apache::thrift::protocol::PROTOCOL_TYPES,
+        apache::thrift::Cpp2RequestContext*,
+        folly::EventBase*,
+        apache::thrift::concurrency::ThreadManager*) override {}
+
+    void executeRequest(
+        ServerRequest&& serverRequest,
+        const AsyncProcessorFactory::MethodMetadata&) override {
+      baton_.wait();
+
+      using apache::thrift::detail::ServerRequestHelper;
+
+      auto request = ServerRequestHelper::request(std::move(serverRequest));
+      auto eb = ServerRequestHelper::eventBase(serverRequest);
+
+      eb->runInEventBaseThread([request = std::move(request)]() {
+        request->sendErrorWrapped(
+            folly::make_exception_wrapper<TApplicationException>("bad news"),
+            "1");
+      });
+    }
+
+   private:
+    folly::Baton<>& baton_;
+  };
+
+  class BadAsyncProcessorFactory : public AsyncProcessorFactory {
+   public:
+    BadAsyncProcessorFactory(folly::Baton<>& baton) : baton_(baton) {}
+
+    std::unique_ptr<apache::thrift::AsyncProcessor> getProcessor() override {
+      return std::make_unique<BadAsyncProcessor>(baton_);
+    }
+
+    std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
+        override {
+      return {};
+    }
+
+   private:
+    folly::Baton<>& baton_;
+  };
+
+  auto handler = std::make_shared<DummyTestService>();
+
+  folly::Baton<> baton;
+
+  auto fac = std::make_shared<BadAsyncProcessorFactory>(baton);
+
+  auto config = [&](apache::thrift::ThriftServer& server) mutable {
+    server.requireResourcePools();
+    server.setInterface(fac);
+  };
+
+  ScopedServerInterfaceThread runner(handler, config);
+
+  auto client = runner.newClient<TestServiceAsyncClient>();
+
+  auto& thriftServer = dynamic_cast<ThriftServer&>(runner.getThriftServer());
+  auto& rpSet = thriftServer.resourcePoolSet();
+  auto& rp = rpSet.resourcePool(ResourcePoolHandle::defaultAsync());
+  ConcurrencyControllerInterface& cc = *rp.concurrencyController();
+
+  try {
+    auto res = client->semifuture_echoInt(0);
+
+    // make sure requestCount ever hit 1
+    while (cc.requestCount() == 0) {
+    }
+    EXPECT_EQ(cc.requestCount(), 1);
+
+    baton.post();
+
+    std::move(res).get();
+  } catch (...) {
+    // in this case, an exception is thrown and HandlerCallback was not
+    // constructed, we should still decrement the requestInExecution count
+    // correctly
+    EXPECT_EQ(cc.requestCount(), 0);
+  }
 }

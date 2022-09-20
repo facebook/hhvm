@@ -209,8 +209,11 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
     ) {
         // note(sf, 2022-02-10): c.f. Decl_folded_class.typeconst_fold
         match self.child.kind {
-            ClassishKind::Cenum | ClassishKind::CenumClass(_) => {}
-            ClassishKind::Ctrait | ClassishKind::Cinterface | ClassishKind::Cclass(_) => {
+            ClassishKind::Cenum => {}
+            ClassishKind::CenumClass(_)
+            | ClassishKind::Ctrait
+            | ClassishKind::Cinterface
+            | ClassishKind::Cclass(_) => {
                 let TypeConstName(name) = stc.name.id();
                 let ptc = type_consts.get(stc.name.id_ref());
                 let ptc_enforceable = ptc.and_then(|tc| tc.enforceable.as_ref());
@@ -801,7 +804,9 @@ impl<'a, R: Reason> DeclFolder<'a, R> {
             self.decl_type_const(&mut type_consts, &mut consts, tc);
         }
 
-        if self.child.kind == ClassishKind::Cclass(Abstraction::Concrete) {
+        if self.child.kind == ClassishKind::Cclass(Abstraction::Concrete)
+            || self.child.kind == ClassishKind::CenumClass(Abstraction::Concrete)
+        {
             self.synthesize_const_defaults(&mut consts);
             self.synthesize_type_const_defaults(&mut type_consts, &mut consts);
         }

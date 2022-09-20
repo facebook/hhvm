@@ -22,6 +22,7 @@ use hash::HashSet;
 use itertools::Either;
 use itertools::Itertools;
 use lint_rust::LintError;
+use naming_special_names_rust as sn;
 use naming_special_names_rust::classes as special_classes;
 use naming_special_names_rust::literal;
 use naming_special_names_rust::special_functions;
@@ -3556,12 +3557,10 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
     }
 }
 
-fn has_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                id == naming_special_names_rust::coeffects::DEFAULTS
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
             _ => false,
         });
     } else {
@@ -4743,47 +4742,13 @@ fn p_xhp_class_attr<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Either<ast::Xh
     }
 }
 
-/// Given an FFP `node` that represents a class element (e.g a
-/// property, a method or a class constant), lower it to the
-/// equivalent AAST representation and store in `class`.
-///
-/// If we encounter an error, write the error to `env` and don't add
-/// anything to `class`.
-fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
-    let doc_comment_opt = extract_docblock(node, env);
-
+fn p_type_constant<'a>(
+    node: S<'a>,
+    doc_comment_opt: Option<DocComment>,
+    env: &mut Env<'a>,
+    cls: &mut ast::Class_,
+) {
     match &node.children {
-        ConstDeclaration(c) => {
-            let user_attributes = p_user_attributes(&c.attribute_spec, env);
-            let kinds = p_kinds(&c.modifiers, env);
-            let has_abstract = kinds.has(modifier::ABSTRACT);
-            // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
-            let type_ = map_optional_emit_error(&c.type_specifier, env, p_hint);
-            let span = p_pos(node, env);
-
-            let mut class_consts =
-                could_map_emit_error(&c.declarators, env, |n, e| match &n.children {
-                    ConstantDeclarator(c) => {
-                        let id = pos_name(&c.name, e)?;
-                        use aast::ClassConstKind::*;
-                        let kind = if has_abstract {
-                            CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
-                        } else {
-                            CCConcrete(p_simple_initializer(&c.initializer, e)?)
-                        };
-                        Ok(ast::ClassConst {
-                            user_attributes: user_attributes.clone(),
-                            type_: type_.clone(),
-                            id,
-                            kind,
-                            span: span.clone(),
-                            doc_comment: doc_comment_opt.clone(),
-                        })
-                    }
-                    _ => missing_syntax("constant declarator", n, e),
-                });
-            class.consts.append(&mut class_consts)
-        }
         TypeConstDeclaration(c) => {
             use ast::ClassTypeconst::TCAbstract;
             use ast::ClassTypeconst::TCConcrete;
@@ -4840,7 +4805,7 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 raise_missing_syntax("value for the type constant", node, env);
                 return;
             };
-            class.typeconsts.push(ast::ClassTypeconstDef {
+            cls.typeconsts.push(ast::ClassTypeconstDef {
                 name,
                 kind,
                 user_attributes: user_attributes.to_vec(),
@@ -4849,6 +4814,52 @@ fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
                 is_ctx: false,
             })
         }
+        _ => {}
+    }
+}
+
+/// Given an FFP `node` that represents a class element (e.g a
+/// property, a method or a class constant), lower it to the
+/// equivalent AAST representation and store in `class`.
+///
+/// If we encounter an error, write the error to `env` and don't add
+/// anything to `class`.
+fn p_class_elt<'a>(class: &mut ast::Class_, node: S<'a>, env: &mut Env<'a>) {
+    let doc_comment_opt = extract_docblock(node, env);
+
+    match &node.children {
+        ConstDeclaration(c) => {
+            let user_attributes = p_user_attributes(&c.attribute_spec, env);
+            let kinds = p_kinds(&c.modifiers, env);
+            let has_abstract = kinds.has(modifier::ABSTRACT);
+            // TODO: make wrap `type_` `doc_comment` by `Rc` in ClassConst to avoid clone
+            let type_ = map_optional_emit_error(&c.type_specifier, env, p_hint);
+            let span = p_pos(node, env);
+
+            let mut class_consts =
+                could_map_emit_error(&c.declarators, env, |n, e| match &n.children {
+                    ConstantDeclarator(c) => {
+                        let id = pos_name(&c.name, e)?;
+                        use aast::ClassConstKind::*;
+                        let kind = if has_abstract {
+                            CCAbstract(map_optional(&c.initializer, e, p_simple_initializer)?)
+                        } else {
+                            CCConcrete(p_simple_initializer(&c.initializer, e)?)
+                        };
+                        Ok(ast::ClassConst {
+                            user_attributes: user_attributes.clone(),
+                            type_: type_.clone(),
+                            id,
+                            kind,
+                            span: span.clone(),
+                            doc_comment: doc_comment_opt.clone(),
+                        })
+                    }
+                    _ => missing_syntax("constant declarator", n, e),
+                });
+            class.consts.append(&mut class_consts)
+        }
+        TypeConstDeclaration(_) => p_type_constant(node, doc_comment_opt, env, class),
         ContextConstDeclaration(c) => {
             use ast::ClassTypeconst::TCAbstract;
             use ast::ClassTypeconst::TCConcrete;
@@ -5414,7 +5425,14 @@ fn check_effect_memoized<'a>(
         is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
             || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
     }) {
-        if !has_defaults_context(contexts) {
+        if !has_any_context(
+            contexts,
+            vec![
+                sn::coeffects::DEFAULTS,
+                sn::coeffects::LEAK_SAFE_LOCAL,
+                sn::coeffects::LEAK_SAFE_SHALLOW,
+            ],
+        ) {
             raise_parsing_error_pos(
                 &u.name.0,
                 env,
@@ -5904,6 +5922,10 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                             doc_comment: None,
                         };
                         enum_class.consts.push(class_const)
+                    }
+                    TypeConstDeclaration(_) => {
+                        let doc_comment_opt = extract_docblock(n, env);
+                        p_type_constant(n, doc_comment_opt, env, &mut enum_class)
                     }
                     _ => {
                         let pos = p_pos(n, env);

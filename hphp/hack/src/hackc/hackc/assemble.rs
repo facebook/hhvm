@@ -26,7 +26,6 @@ use bstr::ByteSlice;
 use bumpalo::Bump;
 use clap::Parser;
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use log::trace;
@@ -448,19 +447,19 @@ fn assemble_ctx_constant<'arena>(
 fn assemble_requirement<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Pair<hhbc::ClassName<'arena>, hhbc::TraitReqKind>> {
+) -> Result<hhbc::Requirement<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".require")?;
-    let trq = match token_iter.expect(Token::into_identifier)? {
+    let kind = match token_iter.expect(Token::into_identifier)? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
         b"class" => hhbc::TraitReqKind::MustBeClass,
         trq => bail!("Expected TraitReqKind, saw: {:?}", trq),
     };
     token_iter.expect(Token::into_lt)?;
-    let cn = assemble_class_name(alloc, token_iter)?;
+    let name = assemble_class_name(alloc, token_iter)?;
     token_iter.expect(Token::into_gt)?;
     token_iter.expect(Token::into_semicolon)?;
-    Ok(Pair(cn, trq))
+    Ok(hhbc::Requirement { name, kind })
 }
 
 /// Ex:
@@ -872,7 +871,7 @@ fn assemble_enum_ty<'arena>(
 fn assemble_fatal<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<ffi::Triple<hhbc::FatalOp, hhbc::SrcLoc, Str<'arena>>> {
+) -> Result<hhbc::Fatal<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".fatal")?;
     let loc = hhbc::SrcLoc {
         line_begin: token_iter.expect_and_get_number()?,
@@ -889,22 +888,19 @@ fn assemble_fatal<'arena>(
             token_iter.expect_and_get_number()?
         },
     };
-    let fat_op = token_iter.expect(Token::into_identifier)?;
-    let fat_op = match fat_op {
+    let op = token_iter.expect(Token::into_identifier)?;
+    let op = match op {
         b"Parse" => hhbc::FatalOp::Parse,
         b"Runtime" => hhbc::FatalOp::Runtime,
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
-        _ => bail!("Unknown fatal op: {:?}", fat_op),
+        _ => bail!("Unknown fatal op: {:?}", op),
     };
     let msg = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
         token_iter.expect(Token::into_str_literal)?,
     ))?;
     token_iter.expect(Token::into_semicolon)?;
-    Ok(ffi::Triple::from((
-        fat_op,
-        loc,
-        Str::new_slice(alloc, &msg),
-    )))
+    let message = Str::new_slice(alloc, &msg);
+    Ok(hhbc::Fatal { op, loc, message })
 }
 
 /// A line of adata looks like:
@@ -1107,13 +1103,13 @@ fn assemble_typed_value<'arena>(
             let (len, src) = expect_usize(src)?;
             let src = expect(src, b":")?;
             let mut src = expect(src, b"{")?;
-            let mut tv0;
-            let mut tv1;
+            let mut key;
+            let mut value;
             let mut tv_vec = Vec::new();
             for _ in 0..len {
-                (src, tv0) = deserialize_tv(alloc, src)?;
-                (src, tv1) = deserialize_tv(alloc, src)?;
-                tv_vec.push(Pair::from((tv0, tv1)));
+                (src, key) = deserialize_tv(alloc, src)?;
+                (src, value) = deserialize_tv(alloc, src)?;
+                tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
             Ok((src, hhbc::TypedValue::Dict(Slice::from_vec(alloc, tv_vec))))
@@ -1284,7 +1280,7 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 fn assemble_upper_bounds<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Slice<'arena, Pair<Str<'arena>, Slice<'arena, hhbc::TypeInfo<'arena>>>>> {
+) -> Result<Slice<'arena, hhbc::UpperBound<'arena>>> {
     token_iter.expect(Token::into_open_curly)?;
     let mut ubs = Vec::new();
     while !token_iter.peek_if(Token::is_close_curly) {
@@ -1301,7 +1297,7 @@ fn assemble_upper_bounds<'arena>(
 fn assemble_upper_bound<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Pair<Str<'arena>, Slice<'arena, hhbc::TypeInfo<'arena>>>> {
+) -> Result<hhbc::UpperBound<'arena>> {
     token_iter.expect(Token::into_open_paren)?;
     let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
     token_iter.expect_is_str(Token::into_identifier, "as")?;
@@ -1319,7 +1315,10 @@ fn assemble_upper_bound<'arena>(
         }
     }
     token_iter.expect(Token::into_close_paren)?;
-    Ok(Pair(id, Slice::from_vec(alloc, tis)))
+    Ok(hhbc::UpperBound {
+        name: id,
+        bounds: Slice::from_vec(alloc, tis),
+    })
 }
 
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs
@@ -1564,13 +1563,13 @@ fn assemble_param<'arena>(
 fn assemble_default_value<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-) -> Result<Maybe<Pair<hhbc::Label, Str<'arena>>>> {
+) -> Result<Maybe<hhbc::DefaultValue<'arena>>> {
     let tr = if token_iter.next_if(Token::is_equal) {
-        let lbl = assemble_label(token_iter, false)?; // false: not expecting colon
+        let label = assemble_label(token_iter, false)?; // false: not expecting colon
         token_iter.expect(Token::into_open_paren)?;
-        let st = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
+        let expr = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
         token_iter.expect(Token::into_close_paren)?;
-        Maybe::Just(Pair(lbl, st))
+        Maybe::Just(hhbc::DefaultValue { label, expr })
     } else {
         Maybe::Nothing
     };
@@ -1747,7 +1746,7 @@ fn assemble_static_coeffects<'arena>(
 /// .coeffects_fun_param 0;
 fn assemble_coeffects_fun_param(
     token_iter: &mut Lexer<'_>,
-    fun_param: &mut Vec<usize>,
+    fun_param: &mut Vec<u32>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_fun_param")?;
     while !token_iter.peek_if(Token::is_semicolon) {
@@ -1762,13 +1761,13 @@ fn assemble_coeffects_fun_param(
 fn assemble_coeffects_cc_param<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_param: &mut Vec<Pair<usize, Str<'arena>>>,
+    cc_param: &mut Vec<hhbc::CcParam<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_param")?;
     while !token_iter.peek_if(Token::is_semicolon) {
-        let num: usize = token_iter.expect_and_get_number()?;
-        let st = token_iter.expect_identifier_into_ffi_str(alloc)?;
-        cc_param.push(Pair(num, st));
+        let index = token_iter.expect_and_get_number()?;
+        let ctx_name = token_iter.expect_identifier_into_ffi_str(alloc)?;
+        cc_param.push(hhbc::CcParam { index, ctx_name });
     }
     token_iter.expect(Token::into_semicolon)?;
     Ok(())
@@ -1779,7 +1778,7 @@ fn assemble_coeffects_cc_param<'arena>(
 fn assemble_coeffects_cc_this<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_this: &mut Vec<Slice<'arena, Str<'arena>>>,
+    cc_this: &mut Vec<hhbc::CcThis<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_this")?;
     let mut params = Vec::new();
@@ -1787,7 +1786,9 @@ fn assemble_coeffects_cc_this<'arena>(
         params.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
     }
     token_iter.expect(Token::into_semicolon)?;
-    cc_this.push(Slice::from_vec(alloc, params));
+    cc_this.push(hhbc::CcThis {
+        types: Slice::from_vec(alloc, params),
+    });
     Ok(())
 }
 
@@ -1795,17 +1796,21 @@ fn assemble_coeffects_cc_this<'arena>(
 fn assemble_coeffects_cc_reified<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    cc_reified: &mut Vec<ffi::Triple<bool, usize, Slice<'arena, Str<'arena>>>>,
+    cc_reified: &mut Vec<hhbc::CcReified<'arena>>,
 ) -> Result<()> {
     token_iter.expect_is_str(Token::into_decl, ".coeffects_cc_reified")?;
-    let isc = token_iter.next_if_str(Token::is_identifier, "isClass");
-    let us = token_iter.expect_and_get_number()?;
-    let mut sl = Vec::new();
+    let is_class = token_iter.next_if_str(Token::is_identifier, "isClass");
+    let index = token_iter.expect_and_get_number()?;
+    let mut types = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
-        sl.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
+        types.push(token_iter.expect_identifier_into_ffi_str(alloc)?);
     }
     token_iter.expect(Token::into_semicolon)?;
-    cc_reified.push(ffi::Triple(isc, us, Slice::from_vec(alloc, sl)));
+    cc_reified.push(hhbc::CcReified {
+        is_class,
+        index,
+        types: Slice::from_vec(alloc, types),
+    });
     Ok(())
 }
 

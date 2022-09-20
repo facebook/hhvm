@@ -5,7 +5,6 @@
 
 use ffi::Maybe;
 use ffi::Maybe::*;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
@@ -24,13 +23,20 @@ pub struct Param<'arena> {
     pub is_readonly: bool,
     pub user_attributes: Slice<'arena, Attribute<'arena>>,
     pub type_info: Maybe<TypeInfo<'arena>>,
-    pub default_value: Maybe<Pair<Label, Str<'arena>>>,
+    pub default_value: Maybe<DefaultValue<'arena>>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq, Serialize)]
+#[repr(C)]
+pub struct DefaultValue<'arena> {
+    pub label: Label,
+    pub expr: Str<'arena>,
 }
 
 impl<'arena> Param<'arena> {
     pub fn replace_default_value_label(&mut self, new_label: Label) {
-        if let Just(Pair(label, _)) = self.default_value.as_mut() {
-            *label = new_label;
+        if let Just(dv) = self.default_value.as_mut() {
+            dv.label = new_label;
         }
     }
 

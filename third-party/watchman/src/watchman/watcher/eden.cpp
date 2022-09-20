@@ -312,7 +312,7 @@ class EdenFileResult : public FileResult {
     return exists_;
   }
 
-  std::optional<w_string> readLink() override {
+  std::optional<ResolvedSymlink> readLink() override {
     if (symlinkTarget_.has_value()) {
       return symlinkTarget_;
     }
@@ -463,7 +463,7 @@ class EdenFileResult : public FileResult {
   ClockStamp ctime_;
   ClockStamp otime_;
   std::optional<SHA1Result> sha1_;
-  std::optional<w_string> symlinkTarget_;
+  std::optional<ResolvedSymlink> symlinkTarget_;
   DType dtype_{DType::Unknown};
 
   // Read the symlink targets for each of the provided `files`.  The files
@@ -474,15 +474,14 @@ class EdenFileResult : public FileResult {
       StreamingEdenServiceAsyncClient*,
       const std::vector<EdenFileResult*>& files) {
     for (auto& edenFile : files) {
-      if (!edenFile->stat_->isSymlink()) {
-        // If this file is not a symlink then we immediately yield
-        // a nullptr w_string instance rather than propagating an error.
-        // This behavior is relied upon by the field rendering code and
-        // checked in test_symlink.py.
-        edenFile->symlinkTarget_ = w_string();
-        continue;
+      ResolvedSymlink target = NotSymlink{};
+      // If this file is not a symlink then we immediately yield a "not a
+      // symlink" rather than propagating an error. This behavior is relied
+      // upon by the field rendering code and checked in test_symlink.py.
+      if (edenFile->stat_->isSymlink()) {
+        target = readSymbolicLink(edenFile->fullName_.c_str());
       }
-      edenFile->symlinkTarget_ = readSymbolicLink(edenFile->fullName_.c_str());
+      edenFile->symlinkTarget_ = target;
     }
   }
 
@@ -1339,9 +1338,9 @@ bool isProjfs(const w_string& path) {
   }
 }
 
-w_string findEdenFSRoot(w_string_piece root_path) {
+std::optional<w_string> findEdenFSRoot(w_string_piece root_path) {
   w_string path = root_path.asWString();
-  w_string result = nullptr;
+  std::optional<w_string> result;
   while (true) {
     if (isProjfs(path)) {
       result = path;
@@ -1367,12 +1366,13 @@ std::shared_ptr<QueryableView> detectEden(
     const Configuration& config) {
 #ifdef _WIN32
   (void)fstype;
-  auto edenRoot = findEdenFSRoot(root_path);
-  log(DBG, "detected eden root: ", edenRoot, "\n");
-  if (!edenRoot) {
+  auto maybeEdenRoot = findEdenFSRoot(root_path);
+  if (!maybeEdenRoot) {
     throw std::runtime_error(
         to<std::string>("Not an Eden clone: ", root_path.view()));
   }
+  auto edenRoot = *maybeEdenRoot;
+  log(DBG, "detected eden root: ", edenRoot, "\n");
 
   if (isEdenStopped(root_path)) {
     throw TerminalWatcherError(to<std::string>(

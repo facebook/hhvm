@@ -1,0 +1,1 @@
+Fatal error: Trait '<<flattened>>' may only be used from class 'C', which must be final in %s/requireclass/requireclass_nonfinal_01.bad.php on line 6

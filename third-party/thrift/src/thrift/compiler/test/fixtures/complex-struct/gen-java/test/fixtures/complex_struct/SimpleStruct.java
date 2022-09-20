@@ -123,7 +123,7 @@ public final class SimpleStruct implements com.facebook.thrift.payload.ThriftSer
     
         return
             Objects.equals(age, other.age) &&
-    Objects.equals(name, other.name) &&
+            Objects.equals(name, other.name) &&
             true;
     }
     

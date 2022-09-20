@@ -178,9 +178,9 @@ public final class MyStructField22Patch implements com.facebook.thrift.payload.T
     
         return
             Objects.equals(assign, other.assign) &&
-    Objects.equals(clear, other.clear) &&
-    Objects.equals(remove, other.remove) &&
-    Objects.equals(add, other.add) &&
+            Objects.equals(clear, other.clear) &&
+            Objects.equals(remove, other.remove) &&
+            Objects.equals(add, other.add) &&
             true;
     }
     

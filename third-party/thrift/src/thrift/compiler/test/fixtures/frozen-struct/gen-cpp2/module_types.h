@@ -825,7 +825,7 @@ unsigned long DirectlyAdapted::read(Protocol_* iprot) {
 }
 } // namespace detail
 
-using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<my::Adapter, ::some::ns::detail::DirectlyAdapted>;
+using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::some::ns::detail::DirectlyAdapted>;
 
 
 }} // some::ns

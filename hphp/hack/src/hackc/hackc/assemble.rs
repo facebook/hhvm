@@ -26,7 +26,6 @@ use bstr::ByteSlice;
 use bumpalo::Bump;
 use clap::Parser;
 use ffi::Maybe;
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use log::trace;
@@ -1104,13 +1103,13 @@ fn assemble_typed_value<'arena>(
             let (len, src) = expect_usize(src)?;
             let src = expect(src, b":")?;
             let mut src = expect(src, b"{")?;
-            let mut tv0;
-            let mut tv1;
+            let mut key;
+            let mut value;
             let mut tv_vec = Vec::new();
             for _ in 0..len {
-                (src, tv0) = deserialize_tv(alloc, src)?;
-                (src, tv1) = deserialize_tv(alloc, src)?;
-                tv_vec.push(Pair::from((tv0, tv1)));
+                (src, key) = deserialize_tv(alloc, src)?;
+                (src, value) = deserialize_tv(alloc, src)?;
+                tv_vec.push(hhbc::DictEntry { key, value })
             }
             let src = expect(src, b"}")?;
             Ok((src, hhbc::TypedValue::Dict(Slice::from_vec(alloc, tv_vec))))

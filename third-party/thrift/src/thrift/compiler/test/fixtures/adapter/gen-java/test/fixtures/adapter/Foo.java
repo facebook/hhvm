@@ -360,16 +360,16 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     
         return
             Objects.equals(intField, other.intField) &&
-    Objects.equals(optionalIntField, other.optionalIntField) &&
-    Objects.equals(intFieldWithDefault, other.intFieldWithDefault) &&
-    Objects.equals(setField, other.setField) &&
-    Objects.equals(optionalSetField, other.optionalSetField) &&
-    Objects.equals(mapField, other.mapField) &&
-    Objects.equals(optionalMapField, other.optionalMapField) &&
-    Arrays.equals(binaryField, other.binaryField) &&
-    Objects.equals(longField, other.longField) &&
-    Objects.equals(adaptedLongField, other.adaptedLongField) &&
-    Objects.equals(doubleAdaptedField, other.doubleAdaptedField) &&
+            Objects.equals(optionalIntField, other.optionalIntField) &&
+            Objects.equals(intFieldWithDefault, other.intFieldWithDefault) &&
+            Objects.equals(setField, other.setField) &&
+            Objects.equals(optionalSetField, other.optionalSetField) &&
+            Objects.equals(mapField, other.mapField) &&
+            Objects.equals(optionalMapField, other.optionalMapField) &&
+            Arrays.equals(binaryField, other.binaryField) &&
+            Objects.equals(longField, other.longField) &&
+            Objects.equals(adaptedLongField, other.adaptedLongField) &&
+            Objects.equals(doubleAdaptedField, other.doubleAdaptedField) &&
             true;
     }
     

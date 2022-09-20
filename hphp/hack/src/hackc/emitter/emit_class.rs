@@ -36,7 +36,6 @@ use hhbc::TypeConstant;
 use hhbc::TypeInfo;
 use hhbc::TypedValue;
 use hhbc::Visibility;
-use hhbc::XhpAttribute;
 use hhbc_string_utils as string_utils;
 use hhvm_types_ffi::ffi::Attr;
 use hhvm_types_ffi::ffi::TypeConstraintFlags;
@@ -60,6 +59,7 @@ use crate::emit_method;
 use crate::emit_property;
 use crate::emit_type_constant;
 use crate::emit_xhp;
+use crate::xhp_attribute::XhpAttribute;
 
 fn add_symbol_refs<'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

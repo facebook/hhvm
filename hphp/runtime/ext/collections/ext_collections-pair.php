@@ -160,11 +160,7 @@ final class Pair<+Tv1, +Tv2> implements \ConstVector<mixed> {
   }
 
   public function toDArray()[]: darray<int, mixed> {
-    // TODO(T121595529) The Hack Array constructors aren't typed properly so we
-    // have to do this nonsense.
-    return HH\FIXME\UNSAFE_CAST<dict<arraykey, mixed>, dict<int, mixed>>(
-      dict($this)
-    );
+    return dict($this);
   }
 
   /**

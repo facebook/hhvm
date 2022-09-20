@@ -7,13 +7,17 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 pub use eq_modulo_pos_derive::EqModuloPos;
-pub use eq_modulo_pos_derive::EqModuloPosAndReason;
 
+/// An implementation of `Eq` which is insensitive to positions
+/// (e.g., `pos::BPos`) and reasons (e.g., `ty::reason::BReason`).
+///
+/// If `PartialOrd` or `Ord` are also implemented for `Self`, their methods must
+/// be consistent with `EqModuloPos`. For any two values for which
+/// `eq_modulo_pos` or `eq_modulo_pos_and_reason` returns `false`, it must be
+/// the case that their ordering cannot be changed by modifying positions or
+/// reasons inside them.
 pub trait EqModuloPos {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool;
-}
-
-pub trait EqModuloPosAndReason {
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool;
 }
 
@@ -25,9 +29,6 @@ impl<T: EqModuloPos> EqModuloPos for Option<T> {
             _ => false,
         }
     }
-}
-
-impl<T: EqModuloPosAndReason> EqModuloPosAndReason for Option<T> {
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         match (self, rhs) {
             (Some(lhs), Some(rhs)) => lhs.eq_modulo_pos_and_reason(rhs),
@@ -50,9 +51,6 @@ impl<T: EqModuloPos> EqModuloPos for [T] {
             true
         }
     }
-}
-
-impl<T: EqModuloPosAndReason> EqModuloPosAndReason for [T] {
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         if self.len() != rhs.len() {
             false
@@ -71,9 +69,6 @@ impl<T: EqModuloPos> EqModuloPos for hcons::Hc<T> {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
         (**self).eq_modulo_pos(&**rhs)
     }
-}
-
-impl<T: EqModuloPosAndReason> EqModuloPosAndReason for hcons::Hc<T> {
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         (**self).eq_modulo_pos_and_reason(&**rhs)
     }
@@ -85,9 +80,6 @@ macro_rules! impl_with_equal {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
                 self == rhs
             }
-        }
-
-        impl EqModuloPosAndReason for $ty {
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 self == rhs
             }
@@ -124,9 +116,6 @@ macro_rules! impl_deref {
             fn eq_modulo_pos(&self, rhs: &Self) -> bool {
                 (**self).eq_modulo_pos(&**rhs)
             }
-        }
-
-        impl<T: EqModuloPosAndReason + ?Sized> EqModuloPosAndReason for $ty {
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 (**self).eq_modulo_pos_and_reason(&**rhs)
             }
@@ -144,9 +133,6 @@ macro_rules! impl_tuple {
     () => (
         impl EqModuloPos for () {
             fn eq_modulo_pos(&self, _rhs: &Self) -> bool { true }
-        }
-
-        impl EqModuloPosAndReason for () {
             fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool { true }
         }
     );
@@ -158,17 +144,12 @@ macro_rules! impl_tuple {
                 let ($(ref $rhs,)+) = rhs;
                 true
                 $(&& $lhs.eq_modulo_pos($rhs))+
-
             }
-        }
-
-        impl< $($name: EqModuloPosAndReason),+ > EqModuloPosAndReason for ($($name,)+) {
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 let ($(ref $lhs,)+) = self;
                 let ($(ref $rhs,)+) = rhs;
                 true
                 $(&& $lhs.eq_modulo_pos_and_reason($rhs))+
-
             }
         }
     );
@@ -193,9 +174,6 @@ macro_rules! impl_with_iter {
                     res
                 }
             }
-        }
-
-        impl<$($gen: EqModuloPosAndReason,)* $($unbounded,)*> EqModuloPosAndReason for $ty {
             fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
                 if self.$size() != rhs.$size() {
                     false
@@ -218,12 +196,21 @@ impl_with_iter! { <T> Vec<T>, len }
 impl_with_iter! {
     <K, V> arena_collections::SortedAssocList<'_, K, V>, len
 }
+
+// The arena_collections Set and Map are ordered collections, and rely on the
+// invariant that the impl of `Ord` is consistent with the impl of
+// `EqModuloPos`.
 impl_with_iter! {
     <T> arena_collections::set::Set<'_, T>, count
 }
 impl_with_iter! {
     <K, V> arena_collections::map::Map<'_, K, V>, count
 }
+
+// `BTreeSet` and `BTreeMap` also rely on the invariant that the impl of `Ord`
+// is consistent with the impl of `EqModuloPos`. We can iterate over both
+// collections and expect their keys to be in the same order, even if they
+// differ in positions.
 impl_with_iter! {
     <T> std::collections::BTreeSet<T>, len
 }
@@ -236,6 +223,13 @@ where
     K: Eq + std::hash::Hash,
     V: EqModuloPos,
     S: std::hash::BuildHasher,
+    // This impl (and the impls for IndexMap, {Hash,Index}Set below) is
+    // restricted to collections whose keys implement AsRef<str>. The intent is
+    // to exclude maps and sets whose key types contain positions or reasons,
+    // since this implementation does not compare keys modulo pos. In practice,
+    // we only use maps and sets with string keys in types which need to
+    // implement EqModuloPos.
+    K: AsRef<str>,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {
         if self.len() != other.len() {
@@ -249,13 +243,6 @@ where
         self.iter()
             .all(|(key, value)| other.get(key).map_or(false, |v| value.eq_modulo_pos(v)))
     }
-}
-impl<K, V, S> EqModuloPosAndReason for std::collections::HashMap<K, V, S>
-where
-    K: Eq + std::hash::Hash,
-    V: EqModuloPosAndReason,
-    S: std::hash::BuildHasher,
-{
     fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
         if self.len() != other.len() {
             return false;
@@ -270,7 +257,7 @@ where
 
 impl<K, V, S> EqModuloPos for indexmap::IndexMap<K, V, S>
 where
-    K: Eq + std::hash::Hash,
+    K: Eq + std::hash::Hash + AsRef<str>,
     V: EqModuloPos,
     S: std::hash::BuildHasher,
 {
@@ -281,13 +268,6 @@ where
         self.iter()
             .all(|(key, value)| other.get(key).map_or(false, |v| value.eq_modulo_pos(v)))
     }
-}
-impl<K, V, S> EqModuloPosAndReason for indexmap::IndexMap<K, V, S>
-where
-    K: Eq + std::hash::Hash,
-    V: EqModuloPosAndReason,
-    S: std::hash::BuildHasher,
-{
     fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
         if self.len() != other.len() {
             return false;
@@ -302,7 +282,7 @@ where
 
 impl<T, S> EqModuloPos for std::collections::HashSet<T, S>
 where
-    T: Eq + std::hash::Hash,
+    T: Eq + std::hash::Hash + AsRef<str>,
     S: std::hash::BuildHasher,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {
@@ -311,11 +291,14 @@ where
         }
         self.iter().all(|key| other.contains(key))
     }
+    fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
+        self.eq_modulo_pos(other)
+    }
 }
 
 impl<T, S> EqModuloPos for indexmap::IndexSet<T, S>
 where
-    T: Eq + std::hash::Hash,
+    T: Eq + std::hash::Hash + AsRef<str>,
     S: std::hash::BuildHasher,
 {
     fn eq_modulo_pos(&self, other: &Self) -> bool {
@@ -323,5 +306,8 @@ where
             return false;
         }
         self.iter().all(|key| other.contains(key))
+    }
+    fn eq_modulo_pos_and_reason(&self, other: &Self) -> bool {
+        self.eq_modulo_pos(other)
     }
 }

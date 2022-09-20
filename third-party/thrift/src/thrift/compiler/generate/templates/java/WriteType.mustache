@@ -83,8 +83,8 @@
 
 }}{{#type:binary?}}{{!
 }}{{#field:isNested?}}{{!
-}}{{^field:hasAdapter?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));{{/field:hasAdapter?}}
-{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/field:hasAdapter?}}
+}}{{^field:hasAdapter?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}(_iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}}));{{/field:hasAdapter?}}{{!
+}}{{#field:hasAdapter?}}org.apache.thrift.protocol.TProtocolUtil.writeBinary(oprot, _iter{{field:nestedDepth}}{{#type:isMapKey?}}.getKey(){{/type:isMapKey?}}{{#type:isMapValue?}}.getValue(){{/type:isMapValue?}});{{/field:hasAdapter?}}
 {{/field:isNested?}}{{!
 }}{{^field:isNested?}}{{!
 }}{{^field:hasAdapter?}}oprot.writeBinary({{^type:javaType}}java.nio.ByteBuffer.wrap{{/type:javaType}}({{^struct:isUnion?}}this.{{/struct:isUnion?}}{{field:javaName}}));{{/field:hasAdapter?}}{{!

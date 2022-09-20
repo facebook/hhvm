@@ -9,7 +9,6 @@ use std::result::Result::*;
 
 use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_pos::FilePos;
@@ -444,9 +443,6 @@ impl EqModuloPos for Pos<'_> {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
         true
     }
-}
-
-impl EqModuloPosAndReason for Pos<'_> {
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }

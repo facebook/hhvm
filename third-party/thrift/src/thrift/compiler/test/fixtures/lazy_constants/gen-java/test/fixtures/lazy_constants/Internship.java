@@ -149,8 +149,8 @@ public final class Internship implements com.facebook.thrift.payload.ThriftSeria
     
         return
             Objects.equals(weeks, other.weeks) &&
-    Objects.equals(title, other.title) &&
-    Objects.equals(employer, other.employer) &&
+            Objects.equals(title, other.title) &&
+            Objects.equals(employer, other.employer) &&
             true;
     }
     

@@ -719,6 +719,32 @@ function exec_find(vec<string> $files, string $extra): vec<string> {
   return $results;
 }
 
+function is_facebook_build(Options $options): bool {
+  if (!is_dir(hphp_home() . '/hphp/facebook/test')) return false;
+
+  // We want to test for the presence of an extension in the build, so turn off
+  // a bunch of features in order to do this as simply and reliably as possible.
+  $simplified_options = clone $options;
+  $simplified_options->repo = false;
+  $simplified_options->server = false;
+  $simplified_options->cli_server = false;
+  // Use a bogus test name so we don't find any config overrides
+  $result = runif_extension_matches(
+    $simplified_options,
+    'not_a_real_test.php',
+    vec['facebook'],
+  );
+  if (!$result['valid']) {
+    invariant(Shapes::keyExists($result, 'error'), 'RunifResult contract');
+    invariant_violation(
+      "is_facebook_build is calling runif_extension_matches incorrectly: %s",
+      $result['error'],
+    );
+  }
+  invariant(Shapes::keyExists($result, 'match'), 'RunifResult contract');
+  return $result['match'];
+}
+
 function find_tests(
   vec<string> $files,
   Options $options,
@@ -728,7 +754,7 @@ function find_tests(
   }
   if ($files == vec['all']) {
     $files = vec['quick', 'slow', 'zend', 'fastcgi', 'http', 'debugger'];
-    if (is_dir(hphp_home() . '/hphp/facebook/test')) {
+    if (is_facebook_build($options)) {
       $files[] = 'facebook';
     }
   }
@@ -3747,6 +3773,9 @@ function main(vec<string> $argv): int {
   if ($options->help) {
     error(help());
   }
+
+  Status::createTmpDir($options->working_dir);
+
   if ($options->list_tests) {
     list_tests($files, $options);
     print "\n";
@@ -3774,8 +3803,6 @@ function main(vec<string> $argv): int {
   if ($options->verbose) {
     print "You are using the binary located at: " . $binary_path . "\n";
   }
-
-  Status::createTmpDir($options->working_dir);
 
   $servers = null;
   if ($options->server || $options->cli_server) {

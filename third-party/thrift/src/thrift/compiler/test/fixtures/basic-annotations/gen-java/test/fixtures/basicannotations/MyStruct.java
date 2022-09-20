@@ -334,15 +334,15 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(major, other.major) &&
-    Objects.equals(_package, other._package) &&
-    Objects.equals(annotationWithQuote, other.annotationWithQuote) &&
-    Objects.equals(class_, other.class_) &&
-    Objects.equals(annotationWithTrailingComma, other.annotationWithTrailingComma) &&
-    Objects.equals(emptyAnnotations, other.emptyAnnotations) &&
-    Objects.equals(myEnum, other.myEnum) &&
-    Objects.equals(cppTypeAnnotation, other.cppTypeAnnotation) &&
-    Objects.equals(myUnion, other.myUnion) &&
-    Objects.equals(myId, other.myId) &&
+            Objects.equals(_package, other._package) &&
+            Objects.equals(annotationWithQuote, other.annotationWithQuote) &&
+            Objects.equals(class_, other.class_) &&
+            Objects.equals(annotationWithTrailingComma, other.annotationWithTrailingComma) &&
+            Objects.equals(emptyAnnotations, other.emptyAnnotations) &&
+            Objects.equals(myEnum, other.myEnum) &&
+            Objects.equals(cppTypeAnnotation, other.cppTypeAnnotation) &&
+            Objects.equals(myUnion, other.myUnion) &&
+            Objects.equals(myId, other.myId) &&
             true;
     }
     

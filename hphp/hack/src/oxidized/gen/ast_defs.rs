@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a2d5c262affb20acb440bc2460e1460e>>
+// @generated SignedSource<<844a1e10bc318dd69e56e541d49f4db7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -31,7 +30,6 @@ pub type Id_ = String;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -56,7 +54,6 @@ pub type PositionedByteString = (Pos, bstr::BString);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -83,7 +80,6 @@ pub enum ShapeFieldName {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -110,7 +106,6 @@ arena_deserializer::impl_deserialize_in_arena!(Variance);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -142,7 +137,6 @@ pub type Reified = bool;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -168,7 +162,6 @@ arena_deserializer::impl_deserialize_in_arena!(Abstraction);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -201,7 +194,6 @@ pub enum ClassishKind {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -228,7 +220,6 @@ pub enum ParamKind {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -253,7 +244,6 @@ arena_deserializer::impl_deserialize_in_arena!(ReadonlyKind);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -281,7 +271,6 @@ arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -309,7 +298,6 @@ arena_deserializer::impl_deserialize_in_arena!(PropOrMethod);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -336,7 +324,6 @@ arena_deserializer::impl_deserialize_in_arena!(FunKind);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -407,7 +394,6 @@ pub enum Bop {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -449,7 +435,6 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -485,7 +470,6 @@ arena_deserializer::impl_deserialize_in_arena!(Visibility);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -514,7 +498,6 @@ pub enum XhpEnumValue {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -548,7 +531,6 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -575,7 +557,6 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,

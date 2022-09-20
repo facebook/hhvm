@@ -11,7 +11,6 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use indexmap::IndexMap;
@@ -88,9 +87,6 @@ impl EqModuloPos for Symbol {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
         self == rhs
     }
-}
-
-impl EqModuloPosAndReason for Symbol {
     fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         self == rhs
     }
@@ -200,6 +196,9 @@ impl From<&str> for Bytes {
 
 impl EqModuloPos for Bytes {
     fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self == rhs
+    }
+    fn eq_modulo_pos_and_reason(&self, rhs: &Self) -> bool {
         self == rhs
     }
 }
@@ -332,8 +331,8 @@ macro_rules! common_impls {
 
 /// A TypeName is the name of a class, interface, trait, type parameter,
 /// type alias, newtype, or primitive type names like int, arraykey, etc.
-#[derive(Eq, PartialEq, Clone, Copy, Hash, Ord, PartialOrd)]
-#[derive(Serialize, Deserialize, EqModuloPos, EqModuloPosAndReason)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
+#[derive(Serialize, Deserialize)]
 pub struct TypeName(pub Symbol);
 pub type BuildTypeNameHasher = BuildSymbolHasher;
 pub type TypeNameMap<V> = HashMap<TypeName, V, BuildTypeNameHasher>;
@@ -425,17 +424,7 @@ pub type ClassConstNameIndexMap<V> = IndexMap<ClassConstName, V, BuildClassConst
 pub type ClassConstNameIndexSet = IndexSet<ClassConstName, BuildClassConstNameHasher>;
 common_impls!(ClassConstName);
 
-#[derive(
-    Eq,
-    PartialEq,
-    EqModuloPos,
-    EqModuloPosAndReason,
-    Clone,
-    Copy,
-    Hash,
-    Ord,
-    PartialOrd
-)]
+#[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeConstName(pub Symbol);
 pub type BuildTypeConstNameHasher = BuildSymbolHasher;

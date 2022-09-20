@@ -201,24 +201,24 @@ const folly::StringPiece MyField::__fbthrift_get_field_name(::apache::thrift::Fi
 }
 
 MyField::MyField(const MyField& srcObj) :
-    opt_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::integral>(srcObj.opt_value)),
-    value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::integral>(srcObj.value)),
-    req_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::integral>(srcObj.req_value)),
-    opt_enum_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::enumeration>(srcObj.opt_enum_value)),
-    enum_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::enumeration>(srcObj.enum_value)),
-    req_enum_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::enumeration>(srcObj.req_enum_value)),
-    opt_str_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::string>(srcObj.opt_str_value)),
-    str_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::string>(srcObj.str_value)),
-    req_str_value(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::string>(srcObj.req_str_value)) {
+    __fbthrift_field_opt_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(srcObj.__fbthrift_field_opt_value)),
+    __fbthrift_field_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(srcObj.__fbthrift_field_value)),
+    __fbthrift_field_req_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(srcObj.__fbthrift_field_req_value)),
+    __fbthrift_field_opt_enum_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::enumeration>(srcObj.__fbthrift_field_opt_enum_value)),
+    __fbthrift_field_enum_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::enumeration>(srcObj.__fbthrift_field_enum_value)),
+    __fbthrift_field_req_enum_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::enumeration>(srcObj.__fbthrift_field_req_enum_value)),
+    __fbthrift_field_opt_str_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_opt_str_value)),
+    __fbthrift_field_str_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_str_value)),
+    __fbthrift_field_req_str_value(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_req_str_value)) {
 }
 
 MyField& MyField::operator=(const MyField& other) {
@@ -228,67 +228,67 @@ MyField& MyField::operator=(const MyField& other) {
 }
 
 MyField::MyField() :
-      value(std::make_unique<::std::int64_t>()),
-      req_value(std::make_unique<::std::int64_t>()),
-      enum_value(std::make_unique<::cpp2::MyEnum>()),
-      req_enum_value(std::make_unique<::cpp2::MyEnum>()),
-      str_value(std::make_unique<::std::string>()),
-      req_str_value(std::make_unique<::std::string>()) {
+      __fbthrift_field_value(std::make_unique<::std::int64_t>()),
+      __fbthrift_field_req_value(std::make_unique<::std::int64_t>()),
+      __fbthrift_field_enum_value(std::make_unique<::cpp2::MyEnum>()),
+      __fbthrift_field_req_enum_value(std::make_unique<::cpp2::MyEnum>()),
+      __fbthrift_field_str_value(std::make_unique<::std::string>()),
+      __fbthrift_field_req_str_value(std::make_unique<::std::string>()) {
 }
 
 
 MyField::~MyField() {}
 
 MyField::MyField(FOLLY_MAYBE_UNUSED MyField&& other) noexcept :
-    opt_value(std::move(other.opt_value)),
-    value(std::move(other.value)),
-    req_value(std::move(other.req_value)),
-    opt_enum_value(std::move(other.opt_enum_value)),
-    enum_value(std::move(other.enum_value)),
-    req_enum_value(std::move(other.req_enum_value)),
-    opt_str_value(std::move(other.opt_str_value)),
-    str_value(std::move(other.str_value)),
-    req_str_value(std::move(other.req_str_value)) {
+    __fbthrift_field_opt_value(std::move(other.__fbthrift_field_opt_value)),
+    __fbthrift_field_value(std::move(other.__fbthrift_field_value)),
+    __fbthrift_field_req_value(std::move(other.__fbthrift_field_req_value)),
+    __fbthrift_field_opt_enum_value(std::move(other.__fbthrift_field_opt_enum_value)),
+    __fbthrift_field_enum_value(std::move(other.__fbthrift_field_enum_value)),
+    __fbthrift_field_req_enum_value(std::move(other.__fbthrift_field_req_enum_value)),
+    __fbthrift_field_opt_str_value(std::move(other.__fbthrift_field_opt_str_value)),
+    __fbthrift_field_str_value(std::move(other.__fbthrift_field_str_value)),
+    __fbthrift_field_req_str_value(std::move(other.__fbthrift_field_req_str_value)) {
 }
 
 MyField& MyField::operator=(FOLLY_MAYBE_UNUSED MyField&& other) noexcept {
-    this->opt_value = std::move(other.opt_value);
-    this->value = std::move(other.value);
-    this->req_value = std::move(other.req_value);
-    this->opt_enum_value = std::move(other.opt_enum_value);
-    this->enum_value = std::move(other.enum_value);
-    this->req_enum_value = std::move(other.req_enum_value);
-    this->opt_str_value = std::move(other.opt_str_value);
-    this->str_value = std::move(other.str_value);
-    this->req_str_value = std::move(other.req_str_value);
+    this->__fbthrift_field_opt_value = std::move(other.__fbthrift_field_opt_value);
+    this->__fbthrift_field_value = std::move(other.__fbthrift_field_value);
+    this->__fbthrift_field_req_value = std::move(other.__fbthrift_field_req_value);
+    this->__fbthrift_field_opt_enum_value = std::move(other.__fbthrift_field_opt_enum_value);
+    this->__fbthrift_field_enum_value = std::move(other.__fbthrift_field_enum_value);
+    this->__fbthrift_field_req_enum_value = std::move(other.__fbthrift_field_req_enum_value);
+    this->__fbthrift_field_opt_str_value = std::move(other.__fbthrift_field_opt_str_value);
+    this->__fbthrift_field_str_value = std::move(other.__fbthrift_field_str_value);
+    this->__fbthrift_field_req_str_value = std::move(other.__fbthrift_field_req_str_value);
     return *this;
 }
 
 
 MyField::MyField(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::int64_t> opt_value__arg, ::std::unique_ptr<::std::int64_t> value__arg, ::std::unique_ptr<::std::int64_t> req_value__arg, ::std::unique_ptr<::cpp2::MyEnum> opt_enum_value__arg, ::std::unique_ptr<::cpp2::MyEnum> enum_value__arg, ::std::unique_ptr<::cpp2::MyEnum> req_enum_value__arg, ::std::unique_ptr<::std::string> opt_str_value__arg, ::std::unique_ptr<::std::string> str_value__arg, ::std::unique_ptr<::std::string> req_str_value__arg) :
-    opt_value(std::move(opt_value__arg)),
-    value(std::move(value__arg)),
-    req_value(std::move(req_value__arg)),
-    opt_enum_value(std::move(opt_enum_value__arg)),
-    enum_value(std::move(enum_value__arg)),
-    req_enum_value(std::move(req_enum_value__arg)),
-    opt_str_value(std::move(opt_str_value__arg)),
-    str_value(std::move(str_value__arg)),
-    req_str_value(std::move(req_str_value__arg)) {
+    __fbthrift_field_opt_value(std::move(opt_value__arg)),
+    __fbthrift_field_value(std::move(value__arg)),
+    __fbthrift_field_req_value(std::move(req_value__arg)),
+    __fbthrift_field_opt_enum_value(std::move(opt_enum_value__arg)),
+    __fbthrift_field_enum_value(std::move(enum_value__arg)),
+    __fbthrift_field_req_enum_value(std::move(req_enum_value__arg)),
+    __fbthrift_field_opt_str_value(std::move(opt_str_value__arg)),
+    __fbthrift_field_str_value(std::move(str_value__arg)),
+    __fbthrift_field_req_str_value(std::move(req_str_value__arg)) {
 }
 
 
 void MyField::__fbthrift_clear() {
   // clear all fields
-  this->opt_value.reset();
-  this->value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int64_t>>();
-  this->req_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int64_t>>();
-  this->opt_enum_value.reset();
-  this->enum_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::cpp2::MyEnum>>();
-  this->req_enum_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::cpp2::MyEnum>>();
-  this->opt_str_value.reset();
-  this->str_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
-  this->req_str_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
+  this->__fbthrift_field_opt_value.reset();
+  this->__fbthrift_field_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int64_t>>();
+  this->__fbthrift_field_req_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int64_t>>();
+  this->__fbthrift_field_opt_enum_value.reset();
+  this->__fbthrift_field_enum_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::cpp2::MyEnum>>();
+  this->__fbthrift_field_req_enum_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::cpp2::MyEnum>>();
+  this->__fbthrift_field_opt_str_value.reset();
+  this->__fbthrift_field_str_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
+  this->__fbthrift_field_req_str_value = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
 }
 
 void MyField::__fbthrift_clear_terse_fields() {
@@ -365,15 +365,15 @@ bool MyField::operator<(FOLLY_MAYBE_UNUSED const MyField& rhs) const {
 
 void swap(FOLLY_MAYBE_UNUSED MyField& a, FOLLY_MAYBE_UNUSED MyField& b) {
   using ::std::swap;
-  swap(a.opt_value, b.opt_value);
-  swap(a.value, b.value);
-  swap(a.req_value, b.req_value);
-  swap(a.opt_enum_value, b.opt_enum_value);
-  swap(a.enum_value, b.enum_value);
-  swap(a.req_enum_value, b.req_enum_value);
-  swap(a.opt_str_value, b.opt_str_value);
-  swap(a.str_value, b.str_value);
-  swap(a.req_str_value, b.req_str_value);
+  swap(a.__fbthrift_field_opt_value, b.__fbthrift_field_opt_value);
+  swap(a.__fbthrift_field_value, b.__fbthrift_field_value);
+  swap(a.__fbthrift_field_req_value, b.__fbthrift_field_req_value);
+  swap(a.__fbthrift_field_opt_enum_value, b.__fbthrift_field_opt_enum_value);
+  swap(a.__fbthrift_field_enum_value, b.__fbthrift_field_enum_value);
+  swap(a.__fbthrift_field_req_enum_value, b.__fbthrift_field_req_enum_value);
+  swap(a.__fbthrift_field_opt_str_value, b.__fbthrift_field_opt_str_value);
+  swap(a.__fbthrift_field_str_value, b.__fbthrift_field_str_value);
+  swap(a.__fbthrift_field_req_str_value, b.__fbthrift_field_req_str_value);
 }
 
 template void MyField::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -417,12 +417,12 @@ const folly::StringPiece MyStruct::__fbthrift_get_field_name(::apache::thrift::F
 }
 
 MyStruct::MyStruct(const MyStruct& srcObj) :
-    opt_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.opt_ref)),
-    ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.ref)),
-    req_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.req_ref)) {
+    __fbthrift_field_opt_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_opt_ref)),
+    __fbthrift_field_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_ref)),
+    __fbthrift_field_req_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_ref)) {
 }
 
 MyStruct& MyStruct::operator=(const MyStruct& other) {
@@ -432,31 +432,31 @@ MyStruct& MyStruct::operator=(const MyStruct& other) {
 }
 
 MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
-    opt_ref(std::move(other.opt_ref)),
-    ref(std::move(other.ref)),
-    req_ref(std::move(other.req_ref)) {
+    __fbthrift_field_opt_ref(std::move(other.__fbthrift_field_opt_ref)),
+    __fbthrift_field_ref(std::move(other.__fbthrift_field_ref)),
+    __fbthrift_field_req_ref(std::move(other.__fbthrift_field_req_ref)) {
 }
 
 MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
-    this->opt_ref = std::move(other.opt_ref);
-    this->ref = std::move(other.ref);
-    this->req_ref = std::move(other.req_ref);
+    this->__fbthrift_field_opt_ref = std::move(other.__fbthrift_field_opt_ref);
+    this->__fbthrift_field_ref = std::move(other.__fbthrift_field_ref);
+    this->__fbthrift_field_req_ref = std::move(other.__fbthrift_field_req_ref);
     return *this;
 }
 
 
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyField> opt_ref__arg, ::std::unique_ptr<::cpp2::MyField> ref__arg, ::std::unique_ptr<::cpp2::MyField> req_ref__arg) :
-    opt_ref(std::move(opt_ref__arg)),
-    ref(std::move(ref__arg)),
-    req_ref(std::move(req_ref__arg)) {
+    __fbthrift_field_opt_ref(std::move(opt_ref__arg)),
+    __fbthrift_field_ref(std::move(ref__arg)),
+    __fbthrift_field_req_ref(std::move(req_ref__arg)) {
 }
 
 
 void MyStruct::__fbthrift_clear() {
   // clear all fields
-  this->opt_ref.reset();
-  if (this->ref) ::apache::thrift::clear(*this->ref);
-  if (this->req_ref) ::apache::thrift::clear(*this->req_ref);
+  this->__fbthrift_field_opt_ref.reset();
+  if (this->__fbthrift_field_ref) ::apache::thrift::clear(*this->__fbthrift_field_ref);
+  if (this->__fbthrift_field_req_ref) ::apache::thrift::clear(*this->__fbthrift_field_req_ref);
 }
 
 void MyStruct::__fbthrift_clear_terse_fields() {
@@ -497,9 +497,9 @@ bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
 
 void swap(FOLLY_MAYBE_UNUSED MyStruct& a, FOLLY_MAYBE_UNUSED MyStruct& b) {
   using ::std::swap;
-  swap(a.opt_ref, b.opt_ref);
-  swap(a.ref, b.ref);
-  swap(a.req_ref, b.req_ref);
+  swap(a.__fbthrift_field_opt_ref, b.__fbthrift_field_opt_ref);
+  swap(a.__fbthrift_field_ref, b.__fbthrift_field_ref);
+  swap(a.__fbthrift_field_req_ref, b.__fbthrift_field_req_ref);
 }
 
 template void MyStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -561,10 +561,10 @@ const folly::StringPiece StructWithUnion::__fbthrift_get_field_name(::apache::th
 }
 
 StructWithUnion::StructWithUnion(const StructWithUnion& srcObj) :
-    u(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::variant>(srcObj.u)),
-    aDouble(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::floating_point>(srcObj.aDouble)),
+    __fbthrift_field_u(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::variant>(srcObj.__fbthrift_field_u)),
+    __fbthrift_field_aDouble(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::floating_point>(srcObj.__fbthrift_field_aDouble)),
     __fbthrift_field_f(srcObj.__fbthrift_field_f),
     __isset(srcObj.__isset) {
 }
@@ -576,15 +576,15 @@ StructWithUnion& StructWithUnion::operator=(const StructWithUnion& other) {
 }
 
 StructWithUnion::StructWithUnion(FOLLY_MAYBE_UNUSED StructWithUnion&& other) noexcept :
-    u(std::move(other.u)),
-    aDouble(std::move(other.aDouble)),
+    __fbthrift_field_u(std::move(other.__fbthrift_field_u)),
+    __fbthrift_field_aDouble(std::move(other.__fbthrift_field_aDouble)),
     __fbthrift_field_f(std::move(other.__fbthrift_field_f)),
     __isset(other.__isset) {
 }
 
 StructWithUnion& StructWithUnion::operator=(FOLLY_MAYBE_UNUSED StructWithUnion&& other) noexcept {
-    this->u = std::move(other.u);
-    this->aDouble = std::move(other.aDouble);
+    this->__fbthrift_field_u = std::move(other.__fbthrift_field_u);
+    this->__fbthrift_field_aDouble = std::move(other.__fbthrift_field_aDouble);
     this->__fbthrift_field_f = std::move(other.__fbthrift_field_f);
     __isset = other.__isset;
     return *this;
@@ -592,8 +592,8 @@ StructWithUnion& StructWithUnion::operator=(FOLLY_MAYBE_UNUSED StructWithUnion&&
 
 
 StructWithUnion::StructWithUnion(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::MyUnion> u__arg, ::std::unique_ptr<double> aDouble__arg, ::cpp2::MyField f__arg) :
-    u(std::move(u__arg)),
-    aDouble(std::move(aDouble__arg)),
+    __fbthrift_field_u(std::move(u__arg)),
+    __fbthrift_field_aDouble(std::move(aDouble__arg)),
     __fbthrift_field_f(std::move(f__arg)) {
   __isset.set(folly::index_constant<0>(), true);
 }
@@ -601,8 +601,8 @@ StructWithUnion::StructWithUnion(apache::thrift::FragileConstructor, ::std::uniq
 
 void StructWithUnion::__fbthrift_clear() {
   // clear all fields
-  if (this->u) ::apache::thrift::clear(*this->u);
-  this->aDouble = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<double>>();
+  if (this->__fbthrift_field_u) ::apache::thrift::clear(*this->__fbthrift_field_u);
+  this->__fbthrift_field_aDouble = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<double>>();
   ::apache::thrift::clear(this->__fbthrift_field_f);
   __isset = {};
 }
@@ -653,8 +653,8 @@ const ::cpp2::MyField& StructWithUnion::get_f() const& {
 
 void swap(FOLLY_MAYBE_UNUSED StructWithUnion& a, FOLLY_MAYBE_UNUSED StructWithUnion& b) {
   using ::std::swap;
-  swap(a.u, b.u);
-  swap(a.aDouble, b.aDouble);
+  swap(a.__fbthrift_field_u, b.__fbthrift_field_u);
+  swap(a.__fbthrift_field_aDouble, b.__fbthrift_field_aDouble);
   swap(a.__fbthrift_field_f, b.__fbthrift_field_f);
   swap(a.__isset, b.__isset);
 }
@@ -816,16 +816,16 @@ const folly::StringPiece StructWithContainers::__fbthrift_get_field_name(::apach
 }
 
 StructWithContainers::StructWithContainers(const StructWithContainers& srcObj) :
-    list_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.list_ref)),
-    set_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>(srcObj.set_ref)),
-    map_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>(srcObj.map_ref)),
-    list_ref_unique(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.list_ref_unique)),
-    set_ref_shared(srcObj.set_ref_shared),
-    list_ref_shared_const(srcObj.list_ref_shared_const) {
+    __fbthrift_field_list_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_list_ref)),
+    __fbthrift_field_set_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::set<::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_set_ref)),
+    __fbthrift_field_map_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_map_ref)),
+    __fbthrift_field_list_ref_unique(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::list<::apache::thrift::type_class::integral>>(srcObj.__fbthrift_field_list_ref_unique)),
+    __fbthrift_field_set_ref_shared(srcObj.__fbthrift_field_set_ref_shared),
+    __fbthrift_field_list_ref_shared_const(srcObj.__fbthrift_field_list_ref_shared_const) {
 }
 
 StructWithContainers& StructWithContainers::operator=(const StructWithContainers& other) {
@@ -835,55 +835,55 @@ StructWithContainers& StructWithContainers::operator=(const StructWithContainers
 }
 
 StructWithContainers::StructWithContainers() :
-      list_ref(std::make_unique<::std::vector<::std::int32_t>>()),
-      set_ref(std::make_unique<::std::set<::std::int32_t>>()),
-      map_ref(std::make_unique<::std::map<::std::int32_t, ::std::int32_t>>()),
-      list_ref_unique(std::make_unique<::std::vector<::std::int32_t>>()),
-      set_ref_shared(std::make_shared<::std::set<::std::int32_t>>()),
-      list_ref_shared_const(std::make_shared<::std::vector<::std::int32_t>>()) {
+      __fbthrift_field_list_ref(std::make_unique<::std::vector<::std::int32_t>>()),
+      __fbthrift_field_set_ref(std::make_unique<::std::set<::std::int32_t>>()),
+      __fbthrift_field_map_ref(std::make_unique<::std::map<::std::int32_t, ::std::int32_t>>()),
+      __fbthrift_field_list_ref_unique(std::make_unique<::std::vector<::std::int32_t>>()),
+      __fbthrift_field_set_ref_shared(std::make_shared<::std::set<::std::int32_t>>()),
+      __fbthrift_field_list_ref_shared_const(std::make_shared<::std::vector<::std::int32_t>>()) {
 }
 
 
 StructWithContainers::~StructWithContainers() {}
 
 StructWithContainers::StructWithContainers(FOLLY_MAYBE_UNUSED StructWithContainers&& other) noexcept :
-    list_ref(std::move(other.list_ref)),
-    set_ref(std::move(other.set_ref)),
-    map_ref(std::move(other.map_ref)),
-    list_ref_unique(std::move(other.list_ref_unique)),
-    set_ref_shared(std::move(other.set_ref_shared)),
-    list_ref_shared_const(std::move(other.list_ref_shared_const)) {
+    __fbthrift_field_list_ref(std::move(other.__fbthrift_field_list_ref)),
+    __fbthrift_field_set_ref(std::move(other.__fbthrift_field_set_ref)),
+    __fbthrift_field_map_ref(std::move(other.__fbthrift_field_map_ref)),
+    __fbthrift_field_list_ref_unique(std::move(other.__fbthrift_field_list_ref_unique)),
+    __fbthrift_field_set_ref_shared(std::move(other.__fbthrift_field_set_ref_shared)),
+    __fbthrift_field_list_ref_shared_const(std::move(other.__fbthrift_field_list_ref_shared_const)) {
 }
 
 StructWithContainers& StructWithContainers::operator=(FOLLY_MAYBE_UNUSED StructWithContainers&& other) noexcept {
-    this->list_ref = std::move(other.list_ref);
-    this->set_ref = std::move(other.set_ref);
-    this->map_ref = std::move(other.map_ref);
-    this->list_ref_unique = std::move(other.list_ref_unique);
-    this->set_ref_shared = std::move(other.set_ref_shared);
-    this->list_ref_shared_const = std::move(other.list_ref_shared_const);
+    this->__fbthrift_field_list_ref = std::move(other.__fbthrift_field_list_ref);
+    this->__fbthrift_field_set_ref = std::move(other.__fbthrift_field_set_ref);
+    this->__fbthrift_field_map_ref = std::move(other.__fbthrift_field_map_ref);
+    this->__fbthrift_field_list_ref_unique = std::move(other.__fbthrift_field_list_ref_unique);
+    this->__fbthrift_field_set_ref_shared = std::move(other.__fbthrift_field_set_ref_shared);
+    this->__fbthrift_field_list_ref_shared_const = std::move(other.__fbthrift_field_list_ref_shared_const);
     return *this;
 }
 
 
 StructWithContainers::StructWithContainers(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::vector<::std::int32_t>> list_ref__arg, ::std::unique_ptr<::std::set<::std::int32_t>> set_ref__arg, ::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>> map_ref__arg, ::std::unique_ptr<::std::vector<::std::int32_t>> list_ref_unique__arg, ::std::shared_ptr<::std::set<::std::int32_t>> set_ref_shared__arg, ::std::shared_ptr<const ::std::vector<::std::int32_t>> list_ref_shared_const__arg) :
-    list_ref(std::move(list_ref__arg)),
-    set_ref(std::move(set_ref__arg)),
-    map_ref(std::move(map_ref__arg)),
-    list_ref_unique(std::move(list_ref_unique__arg)),
-    set_ref_shared(std::move(set_ref_shared__arg)),
-    list_ref_shared_const(std::move(list_ref_shared_const__arg)) {
+    __fbthrift_field_list_ref(std::move(list_ref__arg)),
+    __fbthrift_field_set_ref(std::move(set_ref__arg)),
+    __fbthrift_field_map_ref(std::move(map_ref__arg)),
+    __fbthrift_field_list_ref_unique(std::move(list_ref_unique__arg)),
+    __fbthrift_field_set_ref_shared(std::move(set_ref_shared__arg)),
+    __fbthrift_field_list_ref_shared_const(std::move(list_ref_shared_const__arg)) {
 }
 
 
 void StructWithContainers::__fbthrift_clear() {
   // clear all fields
-  this->list_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
-  this->set_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::set<::std::int32_t>>>();
-  this->map_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>();
-  this->list_ref_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
-  this->set_ref_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::set<::std::int32_t>>>();
-  this->list_ref_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_list_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_set_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::set<::std::int32_t>>>();
+  this->__fbthrift_field_map_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::map<::std::int32_t, ::std::int32_t>>>();
+  this->__fbthrift_field_list_ref_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::vector<::std::int32_t>>>();
+  this->__fbthrift_field_set_ref_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::set<::std::int32_t>>>();
+  this->__fbthrift_field_list_ref_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::vector<::std::int32_t>>>();
 }
 
 void StructWithContainers::__fbthrift_clear_terse_fields() {
@@ -942,12 +942,12 @@ bool StructWithContainers::operator<(FOLLY_MAYBE_UNUSED const StructWithContaine
 
 void swap(FOLLY_MAYBE_UNUSED StructWithContainers& a, FOLLY_MAYBE_UNUSED StructWithContainers& b) {
   using ::std::swap;
-  swap(a.list_ref, b.list_ref);
-  swap(a.set_ref, b.set_ref);
-  swap(a.map_ref, b.map_ref);
-  swap(a.list_ref_unique, b.list_ref_unique);
-  swap(a.set_ref_shared, b.set_ref_shared);
-  swap(a.list_ref_shared_const, b.list_ref_shared_const);
+  swap(a.__fbthrift_field_list_ref, b.__fbthrift_field_list_ref);
+  swap(a.__fbthrift_field_set_ref, b.__fbthrift_field_set_ref);
+  swap(a.__fbthrift_field_map_ref, b.__fbthrift_field_map_ref);
+  swap(a.__fbthrift_field_list_ref_unique, b.__fbthrift_field_list_ref_unique);
+  swap(a.__fbthrift_field_set_ref_shared, b.__fbthrift_field_set_ref_shared);
+  swap(a.__fbthrift_field_list_ref_shared_const, b.__fbthrift_field_list_ref_shared_const);
 }
 
 template void StructWithContainers::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -993,31 +993,31 @@ const folly::StringPiece StructWithSharedConst::__fbthrift_get_field_name(::apac
 StructWithSharedConst::StructWithSharedConst(const StructWithSharedConst&) = default;
 StructWithSharedConst& StructWithSharedConst::operator=(const StructWithSharedConst&) = default;
 StructWithSharedConst::StructWithSharedConst(FOLLY_MAYBE_UNUSED StructWithSharedConst&& other) noexcept :
-    opt_shared_const(std::move(other.opt_shared_const)),
-    shared_const(std::move(other.shared_const)),
-    req_shared_const(std::move(other.req_shared_const)) {
+    __fbthrift_field_opt_shared_const(std::move(other.__fbthrift_field_opt_shared_const)),
+    __fbthrift_field_shared_const(std::move(other.__fbthrift_field_shared_const)),
+    __fbthrift_field_req_shared_const(std::move(other.__fbthrift_field_req_shared_const)) {
 }
 
 StructWithSharedConst& StructWithSharedConst::operator=(FOLLY_MAYBE_UNUSED StructWithSharedConst&& other) noexcept {
-    this->opt_shared_const = std::move(other.opt_shared_const);
-    this->shared_const = std::move(other.shared_const);
-    this->req_shared_const = std::move(other.req_shared_const);
+    this->__fbthrift_field_opt_shared_const = std::move(other.__fbthrift_field_opt_shared_const);
+    this->__fbthrift_field_shared_const = std::move(other.__fbthrift_field_shared_const);
+    this->__fbthrift_field_req_shared_const = std::move(other.__fbthrift_field_req_shared_const);
     return *this;
 }
 
 
 StructWithSharedConst::StructWithSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::MyField> opt_shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> shared_const__arg, ::std::shared_ptr<const ::cpp2::MyField> req_shared_const__arg) :
-    opt_shared_const(std::move(opt_shared_const__arg)),
-    shared_const(std::move(shared_const__arg)),
-    req_shared_const(std::move(req_shared_const__arg)) {
+    __fbthrift_field_opt_shared_const(std::move(opt_shared_const__arg)),
+    __fbthrift_field_shared_const(std::move(shared_const__arg)),
+    __fbthrift_field_req_shared_const(std::move(req_shared_const__arg)) {
 }
 
 
 void StructWithSharedConst::__fbthrift_clear() {
   // clear all fields
-  this->opt_shared_const.reset();
-  if (this->shared_const) this->shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::MyField>>();
-  if (this->req_shared_const) this->req_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::MyField>>();
+  this->__fbthrift_field_opt_shared_const.reset();
+  if (this->__fbthrift_field_shared_const) this->__fbthrift_field_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::MyField>>();
+  if (this->__fbthrift_field_req_shared_const) this->__fbthrift_field_req_shared_const = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::cpp2::MyField>>();
 }
 
 void StructWithSharedConst::__fbthrift_clear_terse_fields() {
@@ -1058,9 +1058,9 @@ bool StructWithSharedConst::operator<(FOLLY_MAYBE_UNUSED const StructWithSharedC
 
 void swap(FOLLY_MAYBE_UNUSED StructWithSharedConst& a, FOLLY_MAYBE_UNUSED StructWithSharedConst& b) {
   using ::std::swap;
-  swap(a.opt_shared_const, b.opt_shared_const);
-  swap(a.shared_const, b.shared_const);
-  swap(a.req_shared_const, b.req_shared_const);
+  swap(a.__fbthrift_field_opt_shared_const, b.__fbthrift_field_opt_shared_const);
+  swap(a.__fbthrift_field_shared_const, b.__fbthrift_field_shared_const);
+  swap(a.__fbthrift_field_req_shared_const, b.__fbthrift_field_req_shared_const);
 }
 
 template void StructWithSharedConst::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1192,12 +1192,12 @@ const folly::StringPiece StructWithRef::__fbthrift_get_field_name(::apache::thri
 }
 
 StructWithRef::StructWithRef(const StructWithRef& srcObj) :
-    def_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.def_field)),
-    opt_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.opt_field)),
-    req_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.req_field)) {
+    __fbthrift_field_def_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_field)) {
 }
 
 StructWithRef& StructWithRef::operator=(const StructWithRef& other) {
@@ -1207,23 +1207,23 @@ StructWithRef& StructWithRef::operator=(const StructWithRef& other) {
 }
 
 StructWithRef::StructWithRef(FOLLY_MAYBE_UNUSED StructWithRef&& other) noexcept :
-    def_field(std::move(other.def_field)),
-    opt_field(std::move(other.opt_field)),
-    req_field(std::move(other.req_field)) {
+    __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(std::move(other.__fbthrift_field_req_field)) {
 }
 
 StructWithRef& StructWithRef::operator=(FOLLY_MAYBE_UNUSED StructWithRef&& other) noexcept {
-    this->def_field = std::move(other.def_field);
-    this->opt_field = std::move(other.opt_field);
-    this->req_field = std::move(other.req_field);
+    this->__fbthrift_field_def_field = std::move(other.__fbthrift_field_def_field);
+    this->__fbthrift_field_opt_field = std::move(other.__fbthrift_field_opt_field);
+    this->__fbthrift_field_req_field = std::move(other.__fbthrift_field_req_field);
     return *this;
 }
 
 
 StructWithRef::StructWithRef(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg) :
-    def_field(std::move(def_field__arg)),
-    opt_field(std::move(opt_field__arg)),
-    req_field(std::move(req_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)),
+    __fbthrift_field_opt_field(std::move(opt_field__arg)),
+    __fbthrift_field_req_field(std::move(req_field__arg)) {
 }
 
 
@@ -1269,9 +1269,9 @@ bool StructWithRef::operator<(FOLLY_MAYBE_UNUSED const StructWithRef& rhs) const
 
 void swap(FOLLY_MAYBE_UNUSED StructWithRef& a, FOLLY_MAYBE_UNUSED StructWithRef& b) {
   using ::std::swap;
-  swap(a.def_field, b.def_field);
-  swap(a.opt_field, b.opt_field);
-  swap(a.req_field, b.req_field);
+  swap(a.__fbthrift_field_def_field, b.__fbthrift_field_def_field);
+  swap(a.__fbthrift_field_opt_field, b.__fbthrift_field_opt_field);
+  swap(a.__fbthrift_field_req_field, b.__fbthrift_field_req_field);
 }
 
 template void StructWithRef::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1454,12 +1454,12 @@ const folly::StringPiece StructWithRefTypeUnique::__fbthrift_get_field_name(::ap
 }
 
 StructWithRefTypeUnique::StructWithRefTypeUnique(const StructWithRefTypeUnique& srcObj) :
-    def_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.def_field)),
-    opt_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.opt_field)),
-    req_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.req_field)) {
+    __fbthrift_field_def_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_req_field)) {
 }
 
 StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(const StructWithRefTypeUnique& other) {
@@ -1469,23 +1469,23 @@ StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(const StructWithRefT
 }
 
 StructWithRefTypeUnique::StructWithRefTypeUnique(FOLLY_MAYBE_UNUSED StructWithRefTypeUnique&& other) noexcept :
-    def_field(std::move(other.def_field)),
-    opt_field(std::move(other.opt_field)),
-    req_field(std::move(other.req_field)) {
+    __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(std::move(other.__fbthrift_field_req_field)) {
 }
 
 StructWithRefTypeUnique& StructWithRefTypeUnique::operator=(FOLLY_MAYBE_UNUSED StructWithRefTypeUnique&& other) noexcept {
-    this->def_field = std::move(other.def_field);
-    this->opt_field = std::move(other.opt_field);
-    this->req_field = std::move(other.req_field);
+    this->__fbthrift_field_def_field = std::move(other.__fbthrift_field_def_field);
+    this->__fbthrift_field_opt_field = std::move(other.__fbthrift_field_opt_field);
+    this->__fbthrift_field_req_field = std::move(other.__fbthrift_field_req_field);
     return *this;
 }
 
 
 StructWithRefTypeUnique::StructWithRefTypeUnique(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg, ::std::unique_ptr<::cpp2::Empty> opt_field__arg, ::std::unique_ptr<::cpp2::Empty> req_field__arg) :
-    def_field(std::move(def_field__arg)),
-    opt_field(std::move(opt_field__arg)),
-    req_field(std::move(req_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)),
+    __fbthrift_field_opt_field(std::move(opt_field__arg)),
+    __fbthrift_field_req_field(std::move(req_field__arg)) {
 }
 
 
@@ -1531,9 +1531,9 @@ bool StructWithRefTypeUnique::operator<(FOLLY_MAYBE_UNUSED const StructWithRefTy
 
 void swap(FOLLY_MAYBE_UNUSED StructWithRefTypeUnique& a, FOLLY_MAYBE_UNUSED StructWithRefTypeUnique& b) {
   using ::std::swap;
-  swap(a.def_field, b.def_field);
-  swap(a.opt_field, b.opt_field);
-  swap(a.req_field, b.req_field);
+  swap(a.__fbthrift_field_def_field, b.__fbthrift_field_def_field);
+  swap(a.__fbthrift_field_opt_field, b.__fbthrift_field_opt_field);
+  swap(a.__fbthrift_field_req_field, b.__fbthrift_field_req_field);
 }
 
 template void StructWithRefTypeUnique::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1597,23 +1597,23 @@ const folly::StringPiece StructWithRefTypeShared::__fbthrift_get_field_name(::ap
 StructWithRefTypeShared::StructWithRefTypeShared(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared& StructWithRefTypeShared::operator=(const StructWithRefTypeShared&) = default;
 StructWithRefTypeShared::StructWithRefTypeShared(FOLLY_MAYBE_UNUSED StructWithRefTypeShared&& other) noexcept :
-    def_field(std::move(other.def_field)),
-    opt_field(std::move(other.opt_field)),
-    req_field(std::move(other.req_field)) {
+    __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(std::move(other.__fbthrift_field_req_field)) {
 }
 
 StructWithRefTypeShared& StructWithRefTypeShared::operator=(FOLLY_MAYBE_UNUSED StructWithRefTypeShared&& other) noexcept {
-    this->def_field = std::move(other.def_field);
-    this->opt_field = std::move(other.opt_field);
-    this->req_field = std::move(other.req_field);
+    this->__fbthrift_field_def_field = std::move(other.__fbthrift_field_def_field);
+    this->__fbthrift_field_opt_field = std::move(other.__fbthrift_field_opt_field);
+    this->__fbthrift_field_req_field = std::move(other.__fbthrift_field_req_field);
     return *this;
 }
 
 
 StructWithRefTypeShared::StructWithRefTypeShared(apache::thrift::FragileConstructor, ::std::shared_ptr<::cpp2::Empty> def_field__arg, ::std::shared_ptr<::cpp2::Empty> opt_field__arg, ::std::shared_ptr<::cpp2::Empty> req_field__arg) :
-    def_field(std::move(def_field__arg)),
-    opt_field(std::move(opt_field__arg)),
-    req_field(std::move(req_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)),
+    __fbthrift_field_opt_field(std::move(opt_field__arg)),
+    __fbthrift_field_req_field(std::move(req_field__arg)) {
 }
 
 
@@ -1659,9 +1659,9 @@ bool StructWithRefTypeShared::operator<(FOLLY_MAYBE_UNUSED const StructWithRefTy
 
 void swap(FOLLY_MAYBE_UNUSED StructWithRefTypeShared& a, FOLLY_MAYBE_UNUSED StructWithRefTypeShared& b) {
   using ::std::swap;
-  swap(a.def_field, b.def_field);
-  swap(a.opt_field, b.opt_field);
-  swap(a.req_field, b.req_field);
+  swap(a.__fbthrift_field_def_field, b.__fbthrift_field_def_field);
+  swap(a.__fbthrift_field_opt_field, b.__fbthrift_field_opt_field);
+  swap(a.__fbthrift_field_req_field, b.__fbthrift_field_req_field);
 }
 
 template void StructWithRefTypeShared::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1725,23 +1725,23 @@ const folly::StringPiece StructWithRefTypeSharedConst::__fbthrift_get_field_name
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(const StructWithRefTypeSharedConst&) = default;
 StructWithRefTypeSharedConst& StructWithRefTypeSharedConst::operator=(const StructWithRefTypeSharedConst&) = default;
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(FOLLY_MAYBE_UNUSED StructWithRefTypeSharedConst&& other) noexcept :
-    def_field(std::move(other.def_field)),
-    opt_field(std::move(other.opt_field)),
-    req_field(std::move(other.req_field)) {
+    __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)),
+    __fbthrift_field_opt_field(std::move(other.__fbthrift_field_opt_field)),
+    __fbthrift_field_req_field(std::move(other.__fbthrift_field_req_field)) {
 }
 
 StructWithRefTypeSharedConst& StructWithRefTypeSharedConst::operator=(FOLLY_MAYBE_UNUSED StructWithRefTypeSharedConst&& other) noexcept {
-    this->def_field = std::move(other.def_field);
-    this->opt_field = std::move(other.opt_field);
-    this->req_field = std::move(other.req_field);
+    this->__fbthrift_field_def_field = std::move(other.__fbthrift_field_def_field);
+    this->__fbthrift_field_opt_field = std::move(other.__fbthrift_field_opt_field);
+    this->__fbthrift_field_req_field = std::move(other.__fbthrift_field_req_field);
     return *this;
 }
 
 
 StructWithRefTypeSharedConst::StructWithRefTypeSharedConst(apache::thrift::FragileConstructor, ::std::shared_ptr<const ::cpp2::Empty> def_field__arg, ::std::shared_ptr<const ::cpp2::Empty> opt_field__arg, ::std::shared_ptr<const ::cpp2::Empty> req_field__arg) :
-    def_field(std::move(def_field__arg)),
-    opt_field(std::move(opt_field__arg)),
-    req_field(std::move(req_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)),
+    __fbthrift_field_opt_field(std::move(opt_field__arg)),
+    __fbthrift_field_req_field(std::move(req_field__arg)) {
 }
 
 
@@ -1787,9 +1787,9 @@ bool StructWithRefTypeSharedConst::operator<(FOLLY_MAYBE_UNUSED const StructWith
 
 void swap(FOLLY_MAYBE_UNUSED StructWithRefTypeSharedConst& a, FOLLY_MAYBE_UNUSED StructWithRefTypeSharedConst& b) {
   using ::std::swap;
-  swap(a.def_field, b.def_field);
-  swap(a.opt_field, b.opt_field);
-  swap(a.req_field, b.req_field);
+  swap(a.__fbthrift_field_def_field, b.__fbthrift_field_def_field);
+  swap(a.__fbthrift_field_opt_field, b.__fbthrift_field_opt_field);
+  swap(a.__fbthrift_field_req_field, b.__fbthrift_field_req_field);
 }
 
 template void StructWithRefTypeSharedConst::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1851,8 +1851,8 @@ const folly::StringPiece StructWithRefAndAnnotCppNoexceptMoveCtor::__fbthrift_ge
 }
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(const StructWithRefAndAnnotCppNoexceptMoveCtor& srcObj) :
-    def_field(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.def_field)) {
+    __fbthrift_field_def_field(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_def_field)) {
 }
 
 StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCtor::operator=(const StructWithRefAndAnnotCppNoexceptMoveCtor& other) {
@@ -1862,17 +1862,17 @@ StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCt
 }
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(FOLLY_MAYBE_UNUSED StructWithRefAndAnnotCppNoexceptMoveCtor&& other) noexcept :
-    def_field(std::move(other.def_field)) {
+    __fbthrift_field_def_field(std::move(other.__fbthrift_field_def_field)) {
 }
 
 StructWithRefAndAnnotCppNoexceptMoveCtor& StructWithRefAndAnnotCppNoexceptMoveCtor::operator=(FOLLY_MAYBE_UNUSED StructWithRefAndAnnotCppNoexceptMoveCtor&& other) noexcept {
-    this->def_field = std::move(other.def_field);
+    this->__fbthrift_field_def_field = std::move(other.__fbthrift_field_def_field);
     return *this;
 }
 
 
 StructWithRefAndAnnotCppNoexceptMoveCtor::StructWithRefAndAnnotCppNoexceptMoveCtor(apache::thrift::FragileConstructor, ::std::unique_ptr<::cpp2::Empty> def_field__arg) :
-    def_field(std::move(def_field__arg)) {
+    __fbthrift_field_def_field(std::move(def_field__arg)) {
 }
 
 
@@ -1906,7 +1906,7 @@ bool StructWithRefAndAnnotCppNoexceptMoveCtor::operator<(FOLLY_MAYBE_UNUSED cons
 
 void swap(FOLLY_MAYBE_UNUSED StructWithRefAndAnnotCppNoexceptMoveCtor& a, FOLLY_MAYBE_UNUSED StructWithRefAndAnnotCppNoexceptMoveCtor& b) {
   using ::std::swap;
-  swap(a.def_field, b.def_field);
+  swap(a.__fbthrift_field_def_field, b.__fbthrift_field_def_field);
 }
 
 template void StructWithRefAndAnnotCppNoexceptMoveCtor::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -1956,13 +1956,13 @@ const folly::StringPiece StructWithString::__fbthrift_get_field_name(::apache::t
 }
 
 StructWithString::StructWithString(const StructWithString& srcObj) :
-    def_unique_string_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::string>(srcObj.def_unique_string_ref)),
-    def_shared_string_ref(srcObj.def_shared_string_ref),
-    def_shared_string_const_ref(srcObj.def_shared_string_const_ref),
-    unique_string_ref(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::string>(srcObj.unique_string_ref)),
-    shared_string_ref(srcObj.shared_string_ref) {
+    __fbthrift_field_def_unique_string_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_def_unique_string_ref)),
+    __fbthrift_field_def_shared_string_ref(srcObj.__fbthrift_field_def_shared_string_ref),
+    __fbthrift_field_def_shared_string_const_ref(srcObj.__fbthrift_field_def_shared_string_const_ref),
+    __fbthrift_field_unique_string_ref(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::string>(srcObj.__fbthrift_field_unique_string_ref)),
+    __fbthrift_field_shared_string_ref(srcObj.__fbthrift_field_shared_string_ref) {
 }
 
 StructWithString& StructWithString::operator=(const StructWithString& other) {
@@ -1972,50 +1972,50 @@ StructWithString& StructWithString::operator=(const StructWithString& other) {
 }
 
 StructWithString::StructWithString() :
-      def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
-      unique_string_ref(std::make_unique<::std::string>()),
-      shared_string_ref(std::make_shared<::std::string>()) {
+      __fbthrift_field_def_unique_string_ref(std::make_unique<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+      __fbthrift_field_def_shared_string_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+      __fbthrift_field_def_shared_string_const_ref(std::make_shared<::std::string>(apache::thrift::StringTraits<std::string>::fromStringLiteral("..."))),
+      __fbthrift_field_unique_string_ref(std::make_unique<::std::string>()),
+      __fbthrift_field_shared_string_ref(std::make_shared<::std::string>()) {
 }
 
 
 StructWithString::~StructWithString() {}
 
 StructWithString::StructWithString(FOLLY_MAYBE_UNUSED StructWithString&& other) noexcept :
-    def_unique_string_ref(std::move(other.def_unique_string_ref)),
-    def_shared_string_ref(std::move(other.def_shared_string_ref)),
-    def_shared_string_const_ref(std::move(other.def_shared_string_const_ref)),
-    unique_string_ref(std::move(other.unique_string_ref)),
-    shared_string_ref(std::move(other.shared_string_ref)) {
+    __fbthrift_field_def_unique_string_ref(std::move(other.__fbthrift_field_def_unique_string_ref)),
+    __fbthrift_field_def_shared_string_ref(std::move(other.__fbthrift_field_def_shared_string_ref)),
+    __fbthrift_field_def_shared_string_const_ref(std::move(other.__fbthrift_field_def_shared_string_const_ref)),
+    __fbthrift_field_unique_string_ref(std::move(other.__fbthrift_field_unique_string_ref)),
+    __fbthrift_field_shared_string_ref(std::move(other.__fbthrift_field_shared_string_ref)) {
 }
 
 StructWithString& StructWithString::operator=(FOLLY_MAYBE_UNUSED StructWithString&& other) noexcept {
-    this->def_unique_string_ref = std::move(other.def_unique_string_ref);
-    this->def_shared_string_ref = std::move(other.def_shared_string_ref);
-    this->def_shared_string_const_ref = std::move(other.def_shared_string_const_ref);
-    this->unique_string_ref = std::move(other.unique_string_ref);
-    this->shared_string_ref = std::move(other.shared_string_ref);
+    this->__fbthrift_field_def_unique_string_ref = std::move(other.__fbthrift_field_def_unique_string_ref);
+    this->__fbthrift_field_def_shared_string_ref = std::move(other.__fbthrift_field_def_shared_string_ref);
+    this->__fbthrift_field_def_shared_string_const_ref = std::move(other.__fbthrift_field_def_shared_string_const_ref);
+    this->__fbthrift_field_unique_string_ref = std::move(other.__fbthrift_field_unique_string_ref);
+    this->__fbthrift_field_shared_string_ref = std::move(other.__fbthrift_field_shared_string_ref);
     return *this;
 }
 
 
 StructWithString::StructWithString(apache::thrift::FragileConstructor, ::std::unique_ptr<::std::string> def_unique_string_ref__arg, ::std::shared_ptr<::std::string> def_shared_string_ref__arg, ::std::shared_ptr<const ::std::string> def_shared_string_const_ref__arg, ::std::unique_ptr<::std::string> unique_string_ref__arg, ::std::shared_ptr<::std::string> shared_string_ref__arg) :
-    def_unique_string_ref(std::move(def_unique_string_ref__arg)),
-    def_shared_string_ref(std::move(def_shared_string_ref__arg)),
-    def_shared_string_const_ref(std::move(def_shared_string_const_ref__arg)),
-    unique_string_ref(std::move(unique_string_ref__arg)),
-    shared_string_ref(std::move(shared_string_ref__arg)) {
+    __fbthrift_field_def_unique_string_ref(std::move(def_unique_string_ref__arg)),
+    __fbthrift_field_def_shared_string_ref(std::move(def_shared_string_ref__arg)),
+    __fbthrift_field_def_shared_string_const_ref(std::move(def_shared_string_const_ref__arg)),
+    __fbthrift_field_unique_string_ref(std::move(unique_string_ref__arg)),
+    __fbthrift_field_shared_string_ref(std::move(shared_string_ref__arg)) {
 }
 
 
 void StructWithString::__fbthrift_clear() {
   // clear all fields
-  this->def_unique_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
-  this->def_shared_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::string>>();
-  this->def_shared_string_const_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::string>>();
-  this->unique_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
-  this->shared_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::string>>();
+  this->__fbthrift_field_def_unique_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
+  this->__fbthrift_field_def_shared_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::string>>();
+  this->__fbthrift_field_def_shared_string_const_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::std::string>>();
+  this->__fbthrift_field_unique_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::string>>();
+  this->__fbthrift_field_shared_string_ref = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::string>>();
 }
 
 void StructWithString::__fbthrift_clear_terse_fields() {
@@ -2068,11 +2068,11 @@ bool StructWithString::operator<(FOLLY_MAYBE_UNUSED const StructWithString& rhs)
 
 void swap(FOLLY_MAYBE_UNUSED StructWithString& a, FOLLY_MAYBE_UNUSED StructWithString& b) {
   using ::std::swap;
-  swap(a.def_unique_string_ref, b.def_unique_string_ref);
-  swap(a.def_shared_string_ref, b.def_shared_string_ref);
-  swap(a.def_shared_string_const_ref, b.def_shared_string_const_ref);
-  swap(a.unique_string_ref, b.unique_string_ref);
-  swap(a.shared_string_ref, b.shared_string_ref);
+  swap(a.__fbthrift_field_def_unique_string_ref, b.__fbthrift_field_def_unique_string_ref);
+  swap(a.__fbthrift_field_def_shared_string_ref, b.__fbthrift_field_def_shared_string_ref);
+  swap(a.__fbthrift_field_def_shared_string_const_ref, b.__fbthrift_field_def_shared_string_const_ref);
+  swap(a.__fbthrift_field_unique_string_ref, b.__fbthrift_field_unique_string_ref);
+  swap(a.__fbthrift_field_shared_string_ref, b.__fbthrift_field_shared_string_ref);
 }
 
 template void StructWithString::readNoXfer<>(apache::thrift::BinaryProtocolReader*);

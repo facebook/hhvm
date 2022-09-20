@@ -80,7 +80,7 @@ enum StandardProtocol {
 
 // TODO(afuller): Allow 'void' type for union fields.
 enum Void {
-  NoValueVoid = 0,
+  NoValue = 0 (cpp.name = "NoValueVoid"),
 }
 
 /**
@@ -234,12 +234,10 @@ union TypeName {
   // 32-bit signed integer, with named values.
   10: TypeUri enumType;
 
-  11: TypeUri typedefType;
-  12: TypeUri structType;
-  13: TypeUri unionType;
-  14: TypeUri exceptionType;
-
-  15: Void listType;
-  16: Void setType;
-  17: Void mapType;
+  11: TypeUri structType;
+  12: TypeUri unionType;
+  13: TypeUri exceptionType;
+  14: Void listType;
+  15: Void setType;
+  16: Void mapType;
 }

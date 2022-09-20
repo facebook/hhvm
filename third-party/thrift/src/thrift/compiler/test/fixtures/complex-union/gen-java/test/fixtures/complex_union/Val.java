@@ -149,8 +149,8 @@ public final class Val implements com.facebook.thrift.payload.ThriftSerializable
     
         return
             Objects.equals(strVal, other.strVal) &&
-    Objects.equals(intVal, other.intVal) &&
-    Objects.equals(typedefValue, other.typedefValue) &&
+            Objects.equals(intVal, other.intVal) &&
+            Objects.equals(typedefValue, other.typedefValue) &&
             true;
     }
     

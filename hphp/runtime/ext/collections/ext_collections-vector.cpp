@@ -29,7 +29,7 @@ static Variant HHVM_METHOD(VectorIterator, current) {
   return Native::data<VectorIterator>(this_)->current();
 }
 
-static Variant HHVM_METHOD(VectorIterator, key) {
+static int64_t HHVM_METHOD(VectorIterator, key) {
   return Native::data<VectorIterator>(this_)->key();
 }
 

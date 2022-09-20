@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d61e5466b38106df39c3019b272c8453>>
+// @generated SignedSource<<0329e6d0225cc139bdef835e939c15df>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -28,7 +27,6 @@ use crate::*;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -66,7 +64,6 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowClassConst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -99,7 +96,6 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowTypeconst<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -130,7 +126,6 @@ arena_deserializer::impl_deserialize_in_arena!(ShallowProp<'arena>);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -167,7 +162,6 @@ pub type XhpEnumValues<'a> = s_map::SMap<'a, &'a [ast_defs::XhpEnumValue<'a>]>;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,
@@ -256,7 +250,6 @@ pub type ModuleDecl<'a> = typing_defs::ModuleDefType<'a>;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRepIn,
     Hash,
     NoPosHash,

@@ -6050,7 +6050,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         clauses: Self::Output,
         _right_brace: Self::Output,
     ) -> Self::Output {
-        clauses
+        match clauses {
+            Node::List(_) => clauses,
+            _ => Node::List(self.alloc(bumpalo::vec![in self.arena;].into_bump_slice())),
+        }
     }
 
     fn make_module_imports(
@@ -6060,7 +6063,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         clauses: Self::Output,
         _right_brace: Self::Output,
     ) -> Self::Output {
-        clauses
+        match clauses {
+            Node::List(_) => clauses,
+            _ => Node::List(self.alloc(bumpalo::vec![in self.arena;].into_bump_slice())),
+        }
     }
 
     fn make_module_membership_declaration(

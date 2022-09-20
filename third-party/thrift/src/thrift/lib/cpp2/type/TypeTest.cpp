@@ -168,30 +168,5 @@ TEST(TypeTest, NameValidation) {
   EXPECT_THROW(Type::create<exception_c>("BadName"), std::invalid_argument);
 }
 
-TEST(TypeTest, toTType) {
-  EXPECT_EQ(Type::get<bool_t>().toTType(), protocol::TType::T_BOOL);
-  EXPECT_EQ(Type::get<byte_t>().toTType(), protocol::TType::T_BYTE);
-  EXPECT_EQ(Type::get<i16_t>().toTType(), protocol::TType::T_I16);
-  EXPECT_EQ(Type::get<i32_t>().toTType(), protocol::TType::T_I32);
-  EXPECT_EQ(Type::get<i64_t>().toTType(), protocol::TType::T_I64);
-  EXPECT_EQ(Type::get<string_t>().toTType(), protocol::TType::T_STRING);
-  EXPECT_EQ(Type::get<binary_t>().toTType(), protocol::TType::T_STRING);
-  EXPECT_EQ(Type::get<list<i16_t>>().toTType(), protocol::TType::T_LIST);
-  EXPECT_EQ(Type::get<set<i16_t>>().toTType(), protocol::TType::T_SET);
-  EXPECT_EQ(Type::get<set<list<i16_t>>>().toTType(), protocol::TType::T_SET);
-  EXPECT_EQ(
-      (Type::get<map<string_t, string_t>>().toTType()), protocol::TType::T_MAP);
-  EXPECT_EQ(
-      (Type::get<map<set<string_t>, list<string_t>>>().toTType()),
-      protocol::TType::T_MAP);
-  EXPECT_EQ(
-      Type::get<struct_t<MyStruct>>().toTType(), protocol::TType::T_STRUCT);
-  EXPECT_EQ(
-      Type::get<union_t<MyStruct>>().toTType(), protocol::TType::T_STRUCT);
-  EXPECT_EQ(
-      Type::get<exception_t<MyStruct>>().toTType(), protocol::TType::T_STRUCT);
-  EXPECT_EQ(Type::get<void_t>().toTType(), folly::none);
-}
-
 } // namespace
 } // namespace apache::thrift::type

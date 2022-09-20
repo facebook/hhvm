@@ -132,7 +132,7 @@
         }
       },
       "structured_annotations" : {
-        "cpp.Adapter" : { "name" : "StaticCast" }
+        "cpp.Adapter" : { "name" : "::StaticCast" }
       },
       "fields" : {
 
@@ -168,7 +168,7 @@
         }
       },
       "structured_annotations" : {
-        "cpp.Adapter" : { "name" : "StaticCast" }
+        "cpp.Adapter" : { "name" : "::StaticCast" }
       },
       "fields" : {
 
@@ -260,7 +260,7 @@
         }
       },
       "structured_annotations" : {
-        "cpp.Adapter" : { "name" : "StaticCast" }
+        "cpp.Adapter" : { "name" : "::StaticCast" }
       },
       "fields" : {
         "major" : {

@@ -3,14 +3,13 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<e4bdc778d0e399ed0a7b6c7706d68895>>
+// @generated SignedSource<<1606b692d206644e2d67301089b47142>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -35,7 +34,6 @@ pub type ErrorCode = isize;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,
@@ -65,7 +63,6 @@ arena_deserializer::impl_deserialize_in_arena!(Phase);
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,

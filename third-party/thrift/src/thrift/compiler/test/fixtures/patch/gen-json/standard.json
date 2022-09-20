@@ -67,7 +67,7 @@
     "Void" : {
       "lineno" : 82,
       "constants" : {
-        "NoValueVoid" : 0
+        "NoValue" : 0
       },
       "source_range" : {
         "begin" : {
@@ -543,32 +543,17 @@
             }
           }
         },
-        "typedefType" : {
-          "type_enum" : "STRUCT",
-          "spec_args" : "TypeUri",
-          "required" : true,
-          "source_range" : {
-            "begin" : {
-              "line" : 237,
-              "column" : 3
-            },
-            "end" : {
-              "line" : 237,
-              "column" : 27
-            }
-          }
-        },
         "structType" : {
           "type_enum" : "STRUCT",
           "spec_args" : "TypeUri",
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 238,
+              "line" : 237,
               "column" : 3
             },
             "end" : {
-              "line" : 238,
+              "line" : 237,
               "column" : 26
             }
           }
@@ -579,11 +564,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 239,
+              "line" : 238,
               "column" : 3
             },
             "end" : {
-              "line" : 239,
+              "line" : 238,
               "column" : 25
             }
           }
@@ -594,11 +579,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 240,
+              "line" : 239,
               "column" : 3
             },
             "end" : {
-              "line" : 240,
+              "line" : 239,
               "column" : 29
             }
           }
@@ -609,11 +594,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 242,
+              "line" : 240,
               "column" : 3
             },
             "end" : {
-              "line" : 242,
+              "line" : 240,
               "column" : 21
             }
           }
@@ -624,11 +609,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 243,
+              "line" : 241,
               "column" : 3
             },
             "end" : {
-              "line" : 243,
+              "line" : 241,
               "column" : 20
             }
           }
@@ -639,11 +624,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 244,
+              "line" : 242,
               "column" : 3
             },
             "end" : {
-              "line" : 244,
+              "line" : 242,
               "column" : 20
             }
           }
@@ -655,7 +640,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 245,
+          "line" : 243,
           "column" : 2
         }
       }

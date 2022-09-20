@@ -123,7 +123,7 @@ public final class FieldsInjectedToStruct implements com.facebook.thrift.payload
     
         return
             Objects.equals(stringField, other.stringField) &&
-    Objects.equals(injectedField, other.injectedField) &&
+            Objects.equals(injectedField, other.injectedField) &&
             true;
     }
     

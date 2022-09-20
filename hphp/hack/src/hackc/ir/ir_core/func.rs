@@ -33,10 +33,10 @@ use crate::UserType;
 use crate::ValueId;
 use crate::ValueIdMap;
 
-#[derive(Copy, Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Copy, Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct Filename(pub UnitBytesId);
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Hash, Eq, PartialEq)]
 pub struct SrcLoc {
     pub filename: Filename,
     pub line_begin: i32,
@@ -219,6 +219,7 @@ pub struct Func<'a> {
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassId>,
+    pub span: LocId,
     pub tparams: ClassIdMap<TParamBounds>,
 }
 
@@ -442,7 +443,6 @@ pub struct Function<'a> {
     pub flags: FunctionFlags,
     pub name: FunctionName<'a>,
     pub func: Func<'a>,
-    pub span: SrcLoc,
 }
 
 /// A Hack method contained within a Class.
@@ -454,7 +454,6 @@ pub struct Method<'a> {
     pub flags: MethodFlags,
     pub func: Func<'a>,
     pub name: MethodName<'a>,
-    pub span: SrcLoc,
     pub visibility: Visibility,
 }
 

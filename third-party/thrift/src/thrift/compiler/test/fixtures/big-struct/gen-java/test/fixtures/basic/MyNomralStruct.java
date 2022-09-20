@@ -851,35 +851,35 @@ public final class MyNomralStruct implements com.facebook.thrift.payload.ThriftS
     
         return
             Objects.equals(msg1, other.msg1) &&
-    Objects.equals(msg2, other.msg2) &&
-    Objects.equals(msg3, other.msg3) &&
-    Objects.equals(msg4, other.msg4) &&
-    Objects.equals(msg5, other.msg5) &&
-    Objects.equals(msg6, other.msg6) &&
-    Objects.equals(msg7, other.msg7) &&
-    Objects.equals(msg8, other.msg8) &&
-    Objects.equals(msg9, other.msg9) &&
-    Objects.equals(myIntField10, other.myIntField10) &&
-    Objects.equals(myIntField11, other.myIntField11) &&
-    Objects.equals(myIntField12, other.myIntField12) &&
-    Objects.equals(myIntField13, other.myIntField13) &&
-    Objects.equals(myIntField14, other.myIntField14) &&
-    Objects.equals(myIntField15, other.myIntField15) &&
-    Objects.equals(myIntField16, other.myIntField16) &&
-    Objects.equals(myIntField17, other.myIntField17) &&
-    Objects.equals(myIntField18, other.myIntField18) &&
-    Objects.equals(myIntField19, other.myIntField19) &&
-    Objects.equals(myIntField20, other.myIntField20) &&
-    Objects.equals(myDoubleField21, other.myDoubleField21) &&
-    Objects.equals(myDoubleField22, other.myDoubleField22) &&
-    Objects.equals(myDoubleField23, other.myDoubleField23) &&
-    Objects.equals(myDoubleField24, other.myDoubleField24) &&
-    Objects.equals(myDoubleField25, other.myDoubleField25) &&
-    Objects.equals(myDoubleField26, other.myDoubleField26) &&
-    Objects.equals(myDoubleField27, other.myDoubleField27) &&
-    Objects.equals(myDoubleField28, other.myDoubleField28) &&
-    Objects.equals(myDoubleField29, other.myDoubleField29) &&
-    Objects.equals(myDoubleField30, other.myDoubleField30) &&
+            Objects.equals(msg2, other.msg2) &&
+            Objects.equals(msg3, other.msg3) &&
+            Objects.equals(msg4, other.msg4) &&
+            Objects.equals(msg5, other.msg5) &&
+            Objects.equals(msg6, other.msg6) &&
+            Objects.equals(msg7, other.msg7) &&
+            Objects.equals(msg8, other.msg8) &&
+            Objects.equals(msg9, other.msg9) &&
+            Objects.equals(myIntField10, other.myIntField10) &&
+            Objects.equals(myIntField11, other.myIntField11) &&
+            Objects.equals(myIntField12, other.myIntField12) &&
+            Objects.equals(myIntField13, other.myIntField13) &&
+            Objects.equals(myIntField14, other.myIntField14) &&
+            Objects.equals(myIntField15, other.myIntField15) &&
+            Objects.equals(myIntField16, other.myIntField16) &&
+            Objects.equals(myIntField17, other.myIntField17) &&
+            Objects.equals(myIntField18, other.myIntField18) &&
+            Objects.equals(myIntField19, other.myIntField19) &&
+            Objects.equals(myIntField20, other.myIntField20) &&
+            Objects.equals(myDoubleField21, other.myDoubleField21) &&
+            Objects.equals(myDoubleField22, other.myDoubleField22) &&
+            Objects.equals(myDoubleField23, other.myDoubleField23) &&
+            Objects.equals(myDoubleField24, other.myDoubleField24) &&
+            Objects.equals(myDoubleField25, other.myDoubleField25) &&
+            Objects.equals(myDoubleField26, other.myDoubleField26) &&
+            Objects.equals(myDoubleField27, other.myDoubleField27) &&
+            Objects.equals(myDoubleField28, other.myDoubleField28) &&
+            Objects.equals(myDoubleField29, other.myDoubleField29) &&
+            Objects.equals(myDoubleField30, other.myDoubleField30) &&
             true;
     }
     

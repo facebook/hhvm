@@ -32,8 +32,8 @@ from testing.thrift_clients import TestingService
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy, SimpleError
 from thrift.py3.server import get_context, SocketAddress
-from thrift.python.client import ClientType, get_client
-from thrift.python.exceptions import ApplicationError, TransportError
+from thrift.python.client import get_client
+from thrift.python.exceptions import ApplicationError
 from thrift.python.server import ServiceInterface, ThriftServer
 
 

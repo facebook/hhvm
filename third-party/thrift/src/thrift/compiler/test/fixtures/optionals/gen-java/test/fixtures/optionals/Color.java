@@ -175,9 +175,9 @@ public final class Color implements com.facebook.thrift.payload.ThriftSerializab
     
         return
             Objects.equals(red, other.red) &&
-    Objects.equals(green, other.green) &&
-    Objects.equals(blue, other.blue) &&
-    Objects.equals(alpha, other.alpha) &&
+            Objects.equals(green, other.green) &&
+            Objects.equals(blue, other.blue) &&
+            Objects.equals(alpha, other.alpha) &&
             true;
     }
     

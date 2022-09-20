@@ -71,7 +71,7 @@ static {
         MyDataItem other = (MyDataItem)o;
     
         return
-                    true;
+            true;
     }
     
     @java.lang.Override

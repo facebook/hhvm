@@ -19,11 +19,17 @@ NestedContainersClientWrapper::mapList(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapList, channel_);
-  client->mapList(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->mapList(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -36,11 +42,17 @@ NestedContainersClientWrapper::mapSet(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_mapSet, channel_);
-  client->mapSet(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->mapSet(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -53,11 +65,17 @@ NestedContainersClientWrapper::listMap(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listMap, channel_);
-  client->listMap(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->listMap(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -70,11 +88,17 @@ NestedContainersClientWrapper::listSet(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_listSet, channel_);
-  client->listSet(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->listSet(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -87,11 +111,17 @@ NestedContainersClientWrapper::turtles(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_turtles, channel_);
-  client->turtles(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->turtles(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

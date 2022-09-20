@@ -114,15 +114,15 @@ struct TerseStructWithCustomDefault {
   14: MyStructWithCustomDefault struct_field;
 }
 
-@cpp.Adapter{name = "my::Adapter"}
+@cpp.Adapter{name = "::my::Adapter"}
 typedef i32 MyInteger
 
 @thrift.TerseWrite
 struct AdaptedFields {
   1: MyInteger field1;
-  @cpp.Adapter{name = "my::Adapter"}
+  @cpp.Adapter{name = "::my::Adapter"}
   2: i32 field2;
-  @cpp.Adapter{name = "my::Adapter"}
+  @cpp.Adapter{name = "::my::Adapter"}
   3: MyInteger field3;
 }
 

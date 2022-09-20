@@ -94,7 +94,7 @@ function test() {
   $v1->anByte = 123;
   $v1->anI16 = 1234;
   $v1->aFloat = 1.25;
-  thrift_protocol_write_compact($p, 'foomethod', 1, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 1, $v1, 20);
   var_dump(md5($p->getTransport()->buff));
 }
 

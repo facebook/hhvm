@@ -124,8 +124,10 @@ trait BaseException {
   final protected function __prependTrace(
     \HH\Container<this::TFrame> $trace,
   )[write_props]: void {
-    $this->trace = HH\FIXME\UNSAFE_CAST<vec<mixed>, vec<this::TFrame>>(
-      vec(\array_merge(\array_values($trace), $this->trace))
+    $this->trace = vec(
+      HH\FIXME\UNSAFE_CAST<mixed, dict<arraykey, this::TFrame>>(
+        \array_merge(\array_values($trace), $this->trace)
+      )
     );
   }
 

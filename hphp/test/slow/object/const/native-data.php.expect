@@ -33,7 +33,7 @@ object(C) (4) {
 Cannot modify const property ci of class C after construction
 Cannot modify const property cv of class C after construction
 -- test behavior of inherited-from native class --
-string(8) "hi there"
+int(42)
 -- at the end --
 object(C) (5) {
   ["ci"]=>

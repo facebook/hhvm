@@ -33,7 +33,7 @@ function test_binary($var) {
 function test_compact($var) {
   $p = new DummyProtocol();
   $v1 = new TestStruct($var);
-  thrift_protocol_write_compact($p, 'foo', 2, $v1, 20);
+  thrift_protocol_write_compact2($p, 'foo', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
 }
 

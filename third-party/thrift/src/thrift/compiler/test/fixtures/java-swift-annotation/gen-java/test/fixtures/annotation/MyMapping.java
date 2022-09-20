@@ -175,9 +175,9 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
     
         return
             Objects.equals(lsMap, other.lsMap) &&
-    Objects.equals(ioMap, other.ioMap) &&
-    Objects.equals(binaryMap, other.binaryMap) &&
-    Objects.equals(regularBinary, other.regularBinary) &&
+            Objects.equals(ioMap, other.ioMap) &&
+            Objects.equals(binaryMap, other.binaryMap) &&
+            Objects.equals(regularBinary, other.regularBinary) &&
             true;
     }
     
@@ -356,7 +356,6 @@ public final class MyMapping implements com.facebook.thrift.payload.ThriftSerial
         for (Map.Entry<String, byte[]> _iter1 : _iter0.entrySet()) {
           oprot.writeString(_iter1.getKey());
           oprot.writeBinary(java.nio.ByteBuffer.wrap(_iter1.getValue()));
-
         }
         oprot.writeMapEnd();
         oprot.writeFieldEnd();

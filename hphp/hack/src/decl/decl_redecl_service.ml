@@ -110,10 +110,10 @@ let compare_gconsts_and_get_fanout
 
 (* Given a set of modules, compare the old and the new decl and
   deduce what must be rechecked accordingly. *)
-let compare_module_and_get_fanout
-    ctx old_modules new_modules { changed; to_redecl; to_recheck } modules =
+let compare_modules_and_get_fanout
+    ctx old_modules { changed; to_redecl; to_recheck } modules =
   let ((rc, rdd, rdc), old_modules_missing) =
-    Decl_compare.get_module_deps ~ctx ~old_modules ~new_modules ~modules
+    Decl_compare.get_modules_deps ~ctx ~old_modules ~modules
   in
   let changed = DepSet.union rc changed in
   let to_redecl = DepSet.union rdd to_redecl in
@@ -172,10 +172,9 @@ let compare_decls_and_get_fanout
       compare_classes_and_get_fanout ctx old_classes new_classes acc n_classes
   in
 
+  let old_modules = Decl_heap.Modules.get_old_batch n_modules in
   let (acc, old_modules_missing) =
-    let old_modules = Decl_heap.Modules.get_old_batch n_modules in
-    let new_modules = Decl_heap.Modules.get_batch n_modules in
-    compare_module_and_get_fanout ctx old_modules new_modules acc n_modules
+    compare_modules_and_get_fanout ctx old_modules acc n_modules
   in
 
   let old_decl_missing_count =

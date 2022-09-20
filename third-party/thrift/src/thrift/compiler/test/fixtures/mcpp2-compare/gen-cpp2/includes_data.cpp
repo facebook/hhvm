@@ -47,7 +47,7 @@ const std::array<protocol::TType, 1> TStructDataStorage<::a::different::ns::AStr
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 1> TStructDataStorage<::a::different::ns::AStructB>::storage_names = {{
-  "FieldA",
+  "__fbthrift_field_FieldA",
 }};
 const std::array<int, 1> TStructDataStorage<::a::different::ns::AStructB>::isset_indexes = {{
   -1,

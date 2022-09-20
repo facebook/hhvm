@@ -148,6 +148,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "ascii"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
+
+[[package]]
 name = "ast_and_decl_parser"
 version = "0.0.0"
 dependencies = [
@@ -1429,7 +1435,6 @@ version = "3.49.0"
 dependencies = [
  "aast_parser_ffi",
  "positioned_by_ref_parser_ffi",
- "verify_parser_ffi",
 ]
 
 [[package]]
@@ -1877,6 +1882,7 @@ dependencies = [
 name = "ir_core"
 version = "0.0.0"
 dependencies = [
+ "ascii",
  "bstr",
  "ffi",
  "hash",
@@ -1991,9 +1997,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.125"
+version = "0.2.132"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5916d2ae698f6de9bfb891ad7a8d65c09d232dc58cc4ac433c7da3b2fd84bc2b"
+checksum = "8371e4e5341c3a96db127eb2465ac681ced4c433e01dd0e938adbef26ba93ba5"
 
 [[package]]
 name = "libsqlite3-sys"
@@ -2131,9 +2137,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.4.1"
+version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "308cc39be01b73d0d18f82a0e7b2a3df85245f84af96fdddc5d202d27e47b86a"
+checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "memmap"
@@ -3495,7 +3501,12 @@ name = "textual"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "ascii",
+ "hash",
  "ir",
+ "itertools 0.10.3",
+ "log",
+ "newtype",
 ]
 
 [[package]]
@@ -3706,37 +3717,6 @@ dependencies = [
  "ir_core",
  "itertools 0.10.3",
  "print",
-]
-
-[[package]]
-name = "verify_parser"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "parser",
- "verify_smart_constructors",
-]
-
-[[package]]
-name = "verify_parser_ffi"
-version = "0.0.0"
-dependencies = [
- "ocamlrep",
- "ocamlrep_ocamlpool",
- "oxidized",
- "rust_parser_ffi",
- "verify_parser",
-]
-
-[[package]]
-name = "verify_smart_constructors"
-version = "0.0.0"
-dependencies = [
- "bumpalo",
- "ocamlrep",
- "parser_core_types",
- "smart_constructors",
- "syntax_smart_constructors",
 ]
 
 [[package]]

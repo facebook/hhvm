@@ -17,7 +17,7 @@
     %><% > field/member%> && <%!
 %><%/field:cpp_ref?%><%!
   // TODO(dokwon): Remove this after removing all deprecated_tag_incompatible thrift_cpp2_option.
-%><%^struct:thrift_uri?%><%!
+%><%^struct:thrift_uri%><%!
   %><%#field:cpp_first_adapter%><%!
     // Must use == operator, and check against the default constructor (ignoring any IDL-specified default).
     %><% >  module_types_tcc/field_ref %> == <%field:cpp_type%>()<%!
@@ -36,8 +36,8 @@
     %><% >  module_types_tcc/field_ref %> == <% > field/intrinsic_default%><%!
   %><%/type:struct?%><%/field:raw_string_or_binary?%><%/type:resolves_to_container?%><%!
   %><%/field:cpp_first_adapter%><%!
-%><%/struct:thrift_uri?%><%!
-%><%#struct:thrift_uri?%><%!
+%><%/struct:thrift_uri%><%!
+%><%#struct:thrift_uri%><%!
   // Note: All adapted fields need to use field tag.
   %><%#field:cpp_first_adapter%><%!
     %>::apache::thrift::op::isEmpty<::apache::thrift::op::get_field_tag<::apache::thrift::field_id<<%field:key%>>, <%struct:cpp_underlying_name%>>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
@@ -45,5 +45,5 @@
   %><%^field:cpp_first_adapter%><%!
     %>::apache::thrift::op::isEmpty<<%field:type_tag%>>(<%#field:cpp_ref?%>*<%/field:cpp_ref?%><% > field/member%>)<%!
   %><%/field:cpp_first_adapter%><%!
-%><%/struct:thrift_uri?%><%!
+%><%/struct:thrift_uri%><%!
 %>

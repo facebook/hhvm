@@ -216,7 +216,7 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<MyUnionEnum>, \IThrif
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "StaticCast",
+            "name" => "::StaticCast",
           )
         ),
       ],
@@ -297,7 +297,7 @@ class MyException extends \TException implements \IThriftSyncStruct {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "StaticCast",
+            "name" => "::StaticCast",
           )
         ),
       ],
@@ -656,7 +656,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'struct' => dict[
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
-            "name" => "StaticCast",
+            "name" => "::StaticCast",
           )
         ),
       ],
@@ -666,7 +666,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "StaticCast",
+                "name" => "::StaticCast",
               )
             ),
           ],

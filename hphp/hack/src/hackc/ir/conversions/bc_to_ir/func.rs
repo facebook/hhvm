@@ -16,6 +16,7 @@ use ir::ClassIdMap;
 use ir::Instr;
 use ir::LocalId;
 use log::trace;
+use newtype::IdVec;
 
 use crate::context::Context;
 use crate::convert;
@@ -29,7 +30,8 @@ pub(crate) fn convert_function<'a>(
 ) {
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
-    let func = convert_body(unit, filename, &src.body);
+    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let func = convert_body(unit, filename, &src.body, span);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -46,7 +48,6 @@ pub(crate) fn convert_function<'a>(
         func,
         flags: src.flags,
         name: src.name,
-        span: ir::SrcLoc::from_span(filename, &src.span),
     };
 
     unit.functions.push(function);
@@ -61,7 +62,8 @@ pub(crate) fn convert_method<'a>(
 ) {
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
-    let func = convert_body(unit, filename, &src.body);
+    let span = ir::SrcLoc::from_span(filename, &src.span);
+    let func = convert_body(unit, filename, &src.body, span);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -81,7 +83,6 @@ pub(crate) fn convert_method<'a>(
         flags: src.flags,
         func,
         name: src.name,
-        span: ir::SrcLoc::from_span(filename, &src.span),
         visibility: src.visibility,
     };
 
@@ -93,6 +94,7 @@ fn convert_body<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     body: &Body<'a>,
+    span: ir::SrcLoc,
 ) -> ir::Func<'a> {
     let Body {
         ref body_instrs,
@@ -128,6 +130,9 @@ fn convert_body<'a>(
         })
         .collect();
 
+    let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
+    locs.push(span);
+
     let func = ir::Func {
         blocks: Default::default(),
         doc_comment: doc_comment.clone().into_option(),
@@ -141,6 +146,7 @@ fn convert_body<'a>(
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),
         shadowed_tparams,
+        span: ir::LocId::from_usize(0),
         tparams,
     };
 

@@ -539,23 +539,23 @@ public final class ComplexNestedStruct implements com.facebook.thrift.payload.Th
     
         return
             Objects.equals(setOfSetOfInt, other.setOfSetOfInt) &&
-    Objects.equals(listofListOfListOfListOfEnum, other.listofListOfListOfListOfEnum) &&
-    Objects.equals(listOfListOfMyStruct, other.listOfListOfMyStruct) &&
-    Objects.equals(setOfListOfListOfLong, other.setOfListOfListOfLong) &&
-    Objects.equals(setOfSetOfsetOfLong, other.setOfSetOfsetOfLong) &&
-    Objects.equals(mapStructListOfListOfLong, other.mapStructListOfListOfLong) &&
-    Objects.equals(mKeyStructValInt, other.mKeyStructValInt) &&
-    Objects.equals(listOfMapKeyIntValInt, other.listOfMapKeyIntValInt) &&
-    Objects.equals(listOfMapKeyStrValList, other.listOfMapKeyStrValList) &&
-    Objects.equals(mapKeySetValLong, other.mapKeySetValLong) &&
-    Objects.equals(mapKeyListValLong, other.mapKeyListValLong) &&
-    Objects.equals(mapKeyMapValMap, other.mapKeyMapValMap) &&
-    Objects.equals(mapKeySetValMap, other.mapKeySetValMap) &&
-    Objects.equals(nestedMaps, other.nestedMaps) &&
-    Objects.equals(mapKeyIntValList, other.mapKeyIntValList) &&
-    Objects.equals(mapKeyIntValSet, other.mapKeyIntValSet) &&
-    Objects.equals(mapKeySetValInt, other.mapKeySetValInt) &&
-    Objects.equals(mapKeyListValSet, other.mapKeyListValSet) &&
+            Objects.equals(listofListOfListOfListOfEnum, other.listofListOfListOfListOfEnum) &&
+            Objects.equals(listOfListOfMyStruct, other.listOfListOfMyStruct) &&
+            Objects.equals(setOfListOfListOfLong, other.setOfListOfListOfLong) &&
+            Objects.equals(setOfSetOfsetOfLong, other.setOfSetOfsetOfLong) &&
+            Objects.equals(mapStructListOfListOfLong, other.mapStructListOfListOfLong) &&
+            Objects.equals(mKeyStructValInt, other.mKeyStructValInt) &&
+            Objects.equals(listOfMapKeyIntValInt, other.listOfMapKeyIntValInt) &&
+            Objects.equals(listOfMapKeyStrValList, other.listOfMapKeyStrValList) &&
+            Objects.equals(mapKeySetValLong, other.mapKeySetValLong) &&
+            Objects.equals(mapKeyListValLong, other.mapKeyListValLong) &&
+            Objects.equals(mapKeyMapValMap, other.mapKeyMapValMap) &&
+            Objects.equals(mapKeySetValMap, other.mapKeySetValMap) &&
+            Objects.equals(nestedMaps, other.nestedMaps) &&
+            Objects.equals(mapKeyIntValList, other.mapKeyIntValList) &&
+            Objects.equals(mapKeyIntValSet, other.mapKeyIntValSet) &&
+            Objects.equals(mapKeySetValInt, other.mapKeySetValInt) &&
+            Objects.equals(mapKeyListValSet, other.mapKeyListValSet) &&
             true;
     }
     

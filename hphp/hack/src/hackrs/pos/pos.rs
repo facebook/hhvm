@@ -7,7 +7,6 @@ use std::fmt;
 use std::hash::Hash;
 
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use ocamlrep_derive::FromOcamlRep;
@@ -40,7 +39,6 @@ pub trait Pos:
     + ToOcamlRep
     + FromOcamlRep
     + EqModuloPos
-    + EqModuloPosAndReason
     + 'static
 {
     /// Make a new instance. If the implementing Pos is stateful,
@@ -222,9 +220,6 @@ impl EqModuloPos for BPos {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
         true
     }
-}
-
-impl EqModuloPosAndReason for BPos {
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }
@@ -415,9 +410,6 @@ impl EqModuloPos for NPos {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
         true
     }
-}
-
-impl EqModuloPosAndReason for NPos {
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }
@@ -458,7 +450,7 @@ impl FromOcamlRep for NPos {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, EqModuloPos, EqModuloPosAndReason, Hash)]
+#[derive(Clone, PartialEq, Eq, EqModuloPos, Hash)]
 #[derive(Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub struct Positioned<S, P> {

@@ -6,7 +6,6 @@
 // @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -65,7 +64,6 @@ pub type D = isize;
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     Hash,
     NoPosHash,
@@ -91,7 +89,6 @@ pub struct Record {
     Deserialize,
     Eq,
     EqModuloPos,
-    EqModuloPosAndReason,
     FromOcamlRep,
     FromOcamlRepIn,
     Hash,

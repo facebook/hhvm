@@ -414,7 +414,7 @@ const std::array<protocol::TType, 2> TStructDataStorage<::apache::thrift::fixtur
 }};
 const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::storage_names = {{
   "__fbthrift_field_ForwardUsageStruct",
-  "ForwardUsageByRef",
+  "__fbthrift_field_ForwardUsageByRef",
 }};
 const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = {{
   0,
@@ -574,8 +574,8 @@ const std::array<folly::StringPiece, 7> TStructDataStorage<::apache::thrift::fix
   "__fbthrift_field_aa_map",
   "__fbthrift_field_aa_string",
   "__fbthrift_field_not_a_container",
-  "aa_unique",
-  "aa_shared",
+  "__fbthrift_field_aa_unique",
+  "__fbthrift_field_aa_shared",
 }};
 const std::array<int, 7> TStructDataStorage<::apache::thrift::fixtures::types::AllocatorAware>::isset_indexes = {{
   0,

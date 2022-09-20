@@ -1448,34 +1448,29 @@ namespace __SystemLib {
 
 namespace HH {
   <<__Native, __IsFoldable>>
-  function dict(
-    mixed
-      $arr,
-  )[]: dict<arraykey, mixed>;
+  function dict<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: dict<Tk, Tv>;
 
   <<__Native, __IsFoldable>>
-  function vec(
-    mixed
-      $arr,
-  )[]: vec<mixed>;
+  function vec<T>(
+    Traversable<T> $arr,
+  )[]: vec<T>;
 
   <<__Native, __IsFoldable>>
-  function keyset(
-    mixed
-      $arr,
-  )[]: keyset<arraykey>;
+  function keyset<T as arraykey>(
+    Traversable<T> $arr,
+  )[]: keyset<T>;
 
   <<__Native, __IsFoldable>>
-  function varray(
-    mixed
-      $arr,
-  )[]: varray<mixed>;
+  function varray<T>(
+    Traversable<T> $arr,
+  )[]: varray<T>;
 
   <<__Native, __IsFoldable>>
-  function darray(
-    mixed
-      $arr,
-  )[]: darray<arraykey, mixed>;
+  function darray<Tk as arraykey, Tv>(
+    KeyedTraversable<Tk, Tv> $arr,
+  )[]: darray<Tk, Tv>;
 
   /**
    * array_key_cast() can be used to convert a given value to the equivalent

@@ -3,7 +3,7 @@
 function expectDynamic(dynamic $d): void {}
 
 function returnDynamic(): dynamic {
-  expectDynamic(1); // error
+  expectDynamic(1);
 
-  return 1; // error
+  return 1;
 }

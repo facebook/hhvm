@@ -9,7 +9,6 @@ use std::ops::Range;
 use std::path::PathBuf;
 
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use ocamlrep::rc::RcOc;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
@@ -406,9 +405,6 @@ impl EqModuloPos for Pos {
     fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
         true
     }
-}
-
-impl EqModuloPosAndReason for Pos {
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }

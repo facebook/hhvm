@@ -85,6 +85,13 @@ function fb_set_exit_callback($function);
 function fb_get_last_flush_size();
 <<__PHPStdLib>>
 function fb_setprofile($callback, int $flags = SETPROFILE_FLAGS_DEFAULT, vec<string> $functions = vec[]);
+
+function fb_call_user_func_async(string $initialDoc,
+                                 mixed $function,
+                                 mixed ...$func_args): resource;
+function fb_gen_user_func(string $initialDoc,
+                          mixed $function,
+                          mixed ...$func_args): Awaitable<dynamic>;
 } // namespace
 
 namespace HH {

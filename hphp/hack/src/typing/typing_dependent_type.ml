@@ -108,7 +108,7 @@ module ExprDepTy = struct
         *)
         if
           Option.value_map class_ ~default:false ~f:(fun class_ty ->
-              TUtils.class_is_final_and_not_contravariant class_ty)
+              TUtils.class_is_final_and_invariant class_ty)
         then
           (env, ty)
         else (

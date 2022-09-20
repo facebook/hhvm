@@ -305,14 +305,14 @@ public final class MyStructTypeDef implements com.facebook.thrift.payload.Thrift
     
         return
             Objects.equals(myLongField, other.myLongField) &&
-    Objects.equals(myLongTypeDef, other.myLongTypeDef) &&
-    Objects.equals(myStringField, other.myStringField) &&
-    Objects.equals(myStringTypedef, other.myStringTypedef) &&
-    Objects.equals(myMapField, other.myMapField) &&
-    Objects.equals(myMapTypedef, other.myMapTypedef) &&
-    Objects.equals(myListField, other.myListField) &&
-    Objects.equals(myListTypedef, other.myListTypedef) &&
-    Objects.equals(myMapListOfTypeDef, other.myMapListOfTypeDef) &&
+            Objects.equals(myLongTypeDef, other.myLongTypeDef) &&
+            Objects.equals(myStringField, other.myStringField) &&
+            Objects.equals(myStringTypedef, other.myStringTypedef) &&
+            Objects.equals(myMapField, other.myMapField) &&
+            Objects.equals(myMapTypedef, other.myMapTypedef) &&
+            Objects.equals(myListField, other.myListField) &&
+            Objects.equals(myListTypedef, other.myListTypedef) &&
+            Objects.equals(myMapListOfTypeDef, other.myMapListOfTypeDef) &&
             true;
     }
     

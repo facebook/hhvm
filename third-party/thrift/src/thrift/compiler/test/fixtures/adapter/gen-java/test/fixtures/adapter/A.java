@@ -71,7 +71,7 @@ static {
         A other = (A)o;
     
         return
-                    true;
+            true;
     }
     
     @java.lang.Override

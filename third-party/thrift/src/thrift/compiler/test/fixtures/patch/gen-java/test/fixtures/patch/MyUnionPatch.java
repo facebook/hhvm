@@ -204,10 +204,10 @@ public final class MyUnionPatch implements com.facebook.thrift.payload.ThriftSer
     
         return
             Objects.equals(assign, other.assign) &&
-    Objects.equals(clear, other.clear) &&
-    Objects.equals(patchPrior, other.patchPrior) &&
-    Objects.equals(ensure, other.ensure) &&
-    Objects.equals(patch, other.patch) &&
+            Objects.equals(clear, other.clear) &&
+            Objects.equals(patchPrior, other.patchPrior) &&
+            Objects.equals(ensure, other.ensure) &&
+            Objects.equals(patch, other.patch) &&
             true;
     }
     

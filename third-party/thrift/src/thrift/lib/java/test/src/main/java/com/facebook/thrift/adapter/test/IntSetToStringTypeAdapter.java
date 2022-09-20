@@ -17,6 +17,7 @@
 package com.facebook.thrift.adapter.test;
 
 import com.facebook.thrift.adapter.common.SetTypeAdapter;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,8 +30,12 @@ public class IntSetToStringTypeAdapter implements SetTypeAdapter<Integer, String
 
   @Override
   public Set<Integer> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(",")).map(Integer::parseInt).collect(Collectors.toSet());
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptySet();
+    }
+    return Stream.of(s.split(",")).map(Integer::parseInt).collect(Collectors.toSet());
   }
 }

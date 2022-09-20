@@ -149,8 +149,8 @@ public final class Foo2 implements com.facebook.thrift.payload.ThriftSerializabl
     
         return
             Objects.equals(field1, other.field1) &&
-    Objects.equals(field2, other.field2) &&
-    Objects.equals(field3, other.field3) &&
+            Objects.equals(field2, other.field2) &&
+            Objects.equals(field3, other.field3) &&
             true;
     }
     

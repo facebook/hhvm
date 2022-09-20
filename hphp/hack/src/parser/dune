@@ -98,7 +98,6 @@
   ; from smart_constructors
   smartConstructors
   smartConstructorsWrappers
-  verifySmartConstructors
   syntaxSmartConstructors)
  (libraries
   common

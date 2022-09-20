@@ -10,10 +10,10 @@ open Hh_prelude
 open Aast
 open Typing_defs
 open Utils
+open Typing_error.Primary.Modules
 module Env = Typing_env
 module TUtils = Typing_utils
 module Cls = Decl_provider.Class
-module Module = Typing_modules
 
 (* Is a private member defined on class/trait [origin_id] visible
  * from code in class/trait [self_id]?
@@ -93,7 +93,7 @@ let is_private_visible_for_class env x self_id cid class_ =
 
 let is_internal_visible env target =
   match
-    Module.can_access
+    Typing_modules.can_access_internal
       ~env
       ~current:(Env.get_current_module env)
       ~target:(Some target)
@@ -109,61 +109,65 @@ let is_internal_visible env target =
   | `OutsideViaTrait _ ->
     Some "You cannot access internal members inside a public trait"
 
-let check_internal_access ~use_pos ~in_signature ~def_pos env internal module_ =
+let check_internal_access ~in_signature env target pos decl_pos =
   let module_err_opt =
-    if internal then
-      let open Typing_error.Primary.Modules in
-      match
-        Module.can_access
-          ~env
-          ~current:(Env.get_current_module env)
-          ~target:module_
-      with
-      | `Yes when in_signature && not (Env.get_internal env) ->
-        Some (Module_hint { pos = use_pos; decl_pos = def_pos })
-      | `Yes -> None
-      | `Disjoint (current, target) ->
-        Some
-          (Module_mismatch
-             {
-               pos = use_pos;
-               decl_pos = def_pos;
-               current_module_opt = Some current;
-               target_module = target;
-             })
-      | `Outside target ->
-        Some
-          (Module_mismatch
-             {
-               pos = use_pos;
-               decl_pos = def_pos;
-               current_module_opt = None;
-               target_module = target;
-             })
-      | `OutsideViaTrait trait_pos ->
-        Some (Module_unsafe_trait_access { access_pos = use_pos; trait_pos })
-    else
-      None
+    match
+      Typing_modules.can_access_internal
+        ~env
+        ~current:(Env.get_current_module env)
+        ~target
+    with
+    | `Yes when in_signature && not (Env.get_internal env) ->
+      Some (Module_hint { pos; decl_pos })
+    | `Yes -> None
+    | `Disjoint (current, target) ->
+      Some
+        (Module_mismatch
+           {
+             pos;
+             decl_pos;
+             current_module_opt = Some current;
+             target_module = target;
+           })
+    | `Outside target ->
+      Some
+        (Module_mismatch
+           { pos; decl_pos; current_module_opt = None; target_module = target })
+    | `OutsideViaTrait trait_pos ->
+      Some (Module_unsafe_trait_access { access_pos = pos; trait_pos })
   in
   Option.map ~f:Typing_error.modules module_err_opt
 
-let check_classname_access ~use_pos ~in_signature env cls =
-  check_internal_access
-    ~use_pos
-    ~in_signature
-    ~def_pos:(Cls.pos cls)
-    env
-    (Cls.internal cls)
-    (Cls.get_module cls)
-
-let check_typedef_access ~use_pos ~in_signature env td =
-  check_internal_access
-    ~use_pos
-    ~in_signature
-    ~def_pos:td.td_pos
-    env
-    td.td_internal
-    (Option.map td.td_module ~f:snd)
+let check_public_access env use_pos def_pos target =
+  match
+    Typing_modules.can_access_public
+      ~env
+      ~current:(Env.get_current_module env)
+      ~target
+  with
+  | `Yes -> None
+  | `ImportsNotSatisfied (module_name, module_pos) ->
+    Some
+      (Typing_error.modules
+         (Module_missing_import
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              module_pos;
+              current_module = module_name;
+              target_module_opt = target;
+            }))
+  | `ExportsNotSatisfied (module_name, module_pos) ->
+    Some
+      (Typing_error.modules
+         (Module_missing_export
+            {
+              pos = use_pos;
+              decl_pos = def_pos;
+              module_pos;
+              current_module_opt = Env.get_current_module env;
+              target_module = module_name;
+            }))
 
 let is_visible_for_obj ~is_method env vis =
   let member_ty =
@@ -239,6 +243,13 @@ let is_visible_for_class ~is_method env (vis, lsb) cid cty =
         | _ -> is_protected_visible env x self_id))
     | Vinternal m -> is_internal_visible env m
 
+let is_visible_for_top_level
+    ~in_signature env is_internal target_module pos decl_pos =
+  if is_internal then
+    check_internal_access ~in_signature env target_module pos decl_pos
+  else
+    check_public_access env pos decl_pos target_module
+
 let is_visible ~is_method env (vis, lsb) cid class_ =
   let msg_opt =
     match cid with
@@ -258,6 +269,16 @@ let visibility_error p msg (p_vis, vis) =
 let check_obj_access ~is_method ~use_pos ~def_pos env vis =
   Option.map (is_visible_for_obj ~is_method env vis) ~f:(fun msg ->
       visibility_error use_pos msg (def_pos, vis))
+
+let check_top_level_access
+    ~in_signature ~use_pos ~def_pos env is_internal target_module =
+  is_visible_for_top_level
+    ~in_signature
+    env
+    is_internal
+    target_module
+    use_pos
+    def_pos
 
 let check_expression_tree_vis ~use_pos ~def_pos env vis =
   let open Typing_error in

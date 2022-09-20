@@ -138,6 +138,7 @@ pub(crate) fn convert_function<'a>(
 ) {
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
+    let span = function.func.loc(function.func.span).to_span();
     let body = convert_func(alloc, function.func, strings);
     let attributes = convert::convert_attributes(alloc, function.attributes);
     let hhas_func = hhbc::Function {
@@ -146,7 +147,7 @@ pub(crate) fn convert_function<'a>(
         coeffects: convert_coeffects(alloc, &function.coeffects),
         flags: function.flags,
         name,
-        span: function.span.to_span(),
+        span,
         attrs: function.attrs,
     };
     unit.functions.push(hhas_func);
@@ -158,13 +159,14 @@ pub(crate) fn convert_method<'a>(
     strings: &StringCache<'a, '_>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());
+    let span = method.func.loc(method.func.span).to_span();
     let body = convert_func(alloc, method.func, strings);
     let attributes = convert::convert_attributes(alloc, method.attributes);
     hhbc::Method {
         attributes,
         name: method.name,
         body,
-        span: method.span.to_span(),
+        span,
         coeffects: convert_coeffects(alloc, &method.coeffects),
         flags: method.flags,
         visibility: method.visibility,

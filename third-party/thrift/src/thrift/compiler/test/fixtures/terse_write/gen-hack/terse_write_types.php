@@ -2942,7 +2942,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
           ],
@@ -2951,7 +2951,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
           ],
@@ -2961,14 +2961,14 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           'field' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
           ],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
-                "name" => "my::Adapter",
+                "name" => "::my::Adapter",
               )
             ),
           ],

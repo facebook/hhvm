@@ -33,6 +33,8 @@
 #include <thrift/lib/cpp2/transport/rocket/server/RocketServerConnection.h>
 #include <thrift/lib/cpp2/transport/rocket/server/ThriftRocketServerHandler.h>
 
+THRIFT_FLAG_DEFINE_bool(rocket_set_idle_connection_timeout, true);
+
 namespace apache {
 namespace thrift {
 namespace detail {
@@ -147,7 +149,9 @@ void RocketRoutingHandler::handleConnection(
       cfg);
   onConnection(*connection);
   connectionManager->addConnection(
-      connection, /* idleTimeout */ false, /* connectionAgeTimeout */ true);
+      connection,
+      THRIFT_FLAG(rocket_set_idle_connection_timeout),
+      /* connectionAgeTimeout */ true);
 
   if (auto* observer = server->getObserver()) {
     observer->connAccepted(tinfo);

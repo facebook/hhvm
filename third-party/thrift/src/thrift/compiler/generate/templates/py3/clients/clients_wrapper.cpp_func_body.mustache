@@ -9,9 +9,15 @@ auto callback = std::make_unique<::thrift::py3::FutureCallback<{{#function:retur
 auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
   std::move(_promise), channel_);
 {{/function:oneway?}}
-client->{{function:cppName}}(
-  rpcOptions,
-  std::move(callback){{#function:args}},
-  arg_{{field:py_name}}{{/function:args}}
-);
+try {
+  client->{{function:cppName}}(
+    rpcOptions,
+    std::move(callback){{#function:args}},
+    arg_{{field:py_name}}{{/function:args}}
+  );
+} catch (const std::exception& ex) {
+  return folly::makeFuture<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>(folly::exception_wrapper(
+    std::current_exception(), ex
+  ));
+}
 return _future;

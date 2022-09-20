@@ -61,14 +61,14 @@ class StandardProtocol:
   }
 
 class Void:
-  NoValueVoid = 0
+  NoValue = 0
 
   _VALUES_TO_NAMES = {
-    0: "NoValueVoid",
+    0: "NoValue",
   }
 
   _NAMES_TO_VALUES = {
-    "NoValueVoid": 0,
+    "NoValue": 0,
   }
 
 class UriStruct:

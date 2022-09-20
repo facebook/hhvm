@@ -875,6 +875,13 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   bool runtimeResourcePoolsChecks();
 
   /**
+   * Adds resource pools for any priorities not specified in allocated to this
+   * server.
+   */
+  void ensureResourcePoolsDefaultPrioritySetup(
+      std::vector<concurrency::PRIORITY> allocated = {concurrency::NORMAL});
+
+  /**
    * Ensure that this Thrift Server has ResourcePools set up. If there is
    * already a non-empty ResourcePoolSet, nothing will be done. Otherwise, the
    * default setup of ResourcePools will be created.

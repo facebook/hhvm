@@ -55,7 +55,7 @@ const std::array<folly::StringPiece, 5> TStructDataStorage<::test::fixtures::tab
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
-  "fieldD",
+  "__fbthrift_field_fieldD",
   "__fbthrift_field_fieldE",
 }};
 const std::array<int, 5> TStructDataStorage<::test::fixtures::tablebased::TrivialTypesStruct>::isset_indexes = {{

@@ -28,6 +28,15 @@ val check_obj_access :
   ce_visibility ->
   Typing_error.t option
 
+val check_top_level_access :
+  in_signature:bool ->
+  use_pos:Pos.t ->
+  def_pos:Pos_or_decl.t ->
+  env ->
+  bool ->
+  string option ->
+  Typing_error.t option
+
 val check_inst_meth_access :
   use_pos:Pos.t ->
   def_pos:Pos_or_decl.t ->
@@ -62,27 +71,3 @@ val is_visible :
   Nast.class_id_ option ->
   Decl_provider.class_decl ->
   bool
-
-(* Can the class in a type hint be accessed from code or signature checked under [env]?
- *   If class is public, then yes
- *   If class is internal, then only if modules match, and in the case that
- *     we are in a signature, the signature had better be internal too.
- *)
-val check_classname_access :
-  use_pos:Pos.t ->
-  in_signature:bool ->
-  env ->
-  Decl_provider.class_decl ->
-  Typing_error.t option
-
-(* Can the typdef in a type hint be accessed from code or signature checked under [env]?
- *   If type is public, then yes
- *   If type is internal, then only if modules match, and in the case that
- *     we are in a signature, the signature had better be internal too.
- *)
-val check_typedef_access :
-  use_pos:Pos.t ->
-  in_signature:bool ->
-  env ->
-  Decl_provider.typedef_decl ->
-  Typing_error.t option

@@ -227,8 +227,8 @@ const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test
 }};
 const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::storage_names = {{
   "__fbthrift_field_field",
-  "shared_field",
-  "opt_shared_field",
+  "__fbthrift_field_shared_field",
+  "__fbthrift_field_opt_shared_field",
   "__fbthrift_field_opt_boxed_field",
 }};
 const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::isset_indexes = {{

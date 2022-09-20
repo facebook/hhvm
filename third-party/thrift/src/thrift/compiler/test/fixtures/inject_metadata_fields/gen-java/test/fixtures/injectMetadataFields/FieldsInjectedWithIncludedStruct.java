@@ -175,9 +175,9 @@ public final class FieldsInjectedWithIncludedStruct implements com.facebook.thri
     
         return
             Objects.equals(stringField, other.stringField) &&
-    Objects.equals(injectedField, other.injectedField) &&
-    Objects.equals(injectedStructuredAnnotationField, other.injectedStructuredAnnotationField) &&
-    Objects.equals(injectedUnstructuredAnnotationField, other.injectedUnstructuredAnnotationField) &&
+            Objects.equals(injectedField, other.injectedField) &&
+            Objects.equals(injectedStructuredAnnotationField, other.injectedStructuredAnnotationField) &&
+            Objects.equals(injectedUnstructuredAnnotationField, other.injectedUnstructuredAnnotationField) &&
             true;
     }
     

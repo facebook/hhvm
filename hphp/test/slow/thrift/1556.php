@@ -5,22 +5,27 @@ class TestStruct {
     -1 => darray[
       'var' => 'aBool',
       'type' => TType::BOOL,
+      'is_terse' => true,
     ],
     1 => darray[
       'var' => 'anInt',
       'type' => TType::I32,
+      'is_terse' => true,
     ],
     2 => darray[
       'var' => 'aString',
       'type' => TType::STRING,
+      'is_terse' => true,
     ],
     3 => darray[
       'var' => 'aDouble',
       'type' => TType::DOUBLE,
+      'is_terse' => true,
     ],
     4 => darray[
       'var' => 'anInt64',
       'type' => TType::I64,
+      'is_terse' => true,
     ],
     5 => darray[
       'var' => 'aList',
@@ -29,11 +34,13 @@ class TestStruct {
       'elem' => darray[
         'type' => TType::DOUBLE,
       ],
+      'is_terse' => true,
     ],
     6 => darray[
       'var' => 'aMap',
       'type' => TType::MAP,
       'ktype' => TType::I32,
+      'is_terse' => true,
       'vtype' => TType::DOUBLE,
       'key' => darray[
         'type' => TType::I32,
@@ -46,6 +53,7 @@ class TestStruct {
       'var' => 'aSet',
       'type' => TType::SET,
       'etype' => TType::I32,
+      'is_terse' => true,
       'elem' => darray[
         'type' => TType::I32,
       ],
@@ -53,10 +61,12 @@ class TestStruct {
     8 => darray[
       'var' => 'anByte',
       'type' => TType::BYTE,
+      'is_terse' => true,
     ],
     9 => darray[
       'var' => 'anI16',
       'type' => TType::I16,
+      'is_terse' => true,
     ],
   ];
   public $aBool = null;
@@ -91,6 +101,29 @@ function test() {
   var_dump($v1);
   thrift_protocol_write_binary($p, 'foomethod', 1, $v1, 20, true);
   var_dump(md5($p->getTransport()->buff));
+  var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
+
+  // Terse struct
+  $v1 = new TestStruct();
+  $v1->aBool = true;
+  $v1->anInt = 0;
+  $v1->aString = '';
+  $v1->aDouble = 0.0;
+  $v1->anInt64 = 0;
+  $v1->aList = varray[];
+  $v1->aMap = darray[];
+  $v1->aSet = darray[];
+  $v1->anByte = 0;
+  $v1->anI16 = 0;
+
+  echo "---- terse: compact ----\n";
+  $p = new DummyProtocol();
+  thrift_protocol_write_compact($p, 'foo', 2, $v1, 20);
+  var_dump(thrift_protocol_read_compact($p, 'TestStruct'));
+
+  echo "---- terse: binary ----\n";
+  $p = new DummyProtocol();
+  thrift_protocol_write_binary($p, 'foo', 1, $v1, 20, true);
   var_dump(thrift_protocol_read_binary($p, 'TestStruct', true));
 }
 

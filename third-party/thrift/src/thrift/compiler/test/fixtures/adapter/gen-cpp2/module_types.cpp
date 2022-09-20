@@ -157,17 +157,17 @@ Foo::Foo(const Foo& srcObj) :
     __fbthrift_field_adaptedLongField(srcObj.__fbthrift_field_adaptedLongField),
     __fbthrift_field_doubleAdaptedField(srcObj.__fbthrift_field_doubleAdaptedField),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_intField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 4>(__fbthrift_field_setField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 6>(__fbthrift_field_mapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 9>(__fbthrift_field_longField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 4>(__fbthrift_field_setField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 6>(__fbthrift_field_mapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
 }
 
 Foo& Foo::operator=(const Foo& other) {
@@ -179,21 +179,21 @@ Foo& Foo::operator=(const Foo& other) {
 Foo::Foo() :
       __fbthrift_field_intField(),
       __fbthrift_field_optionalIntField(),
-      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<my::Adapter1, 3>(static_cast<::std::int32_t>(13), *this)),
+      __fbthrift_field_intFieldWithDefault(::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 3>(static_cast<::std::int32_t>(13), *this)),
       __fbthrift_field_longField(),
       __fbthrift_field_adaptedLongField(),
       __fbthrift_field_doubleAdaptedField() {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_intField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 4>(__fbthrift_field_setField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 6>(__fbthrift_field_mapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 9>(__fbthrift_field_longField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 4>(__fbthrift_field_setField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 6>(__fbthrift_field_mapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
 }
 
 
@@ -212,17 +212,17 @@ Foo::Foo(FOLLY_MAYBE_UNUSED Foo&& other) noexcept :
     __fbthrift_field_adaptedLongField(std::move(other.__fbthrift_field_adaptedLongField)),
     __fbthrift_field_doubleAdaptedField(std::move(other.__fbthrift_field_doubleAdaptedField)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_intField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 4>(__fbthrift_field_setField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 6>(__fbthrift_field_mapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 9>(__fbthrift_field_longField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 4>(__fbthrift_field_setField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 6>(__fbthrift_field_mapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
 }
 
 Foo& Foo::operator=(FOLLY_MAYBE_UNUSED Foo&& other) noexcept {
@@ -242,7 +242,7 @@ Foo& Foo::operator=(FOLLY_MAYBE_UNUSED Foo&& other) noexcept {
 }
 
 
-Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg) :
+Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg) :
     __fbthrift_field_intField(std::move(intField__arg)),
     __fbthrift_field_optionalIntField(std::move(optionalIntField__arg)),
     __fbthrift_field_intFieldWithDefault(std::move(intFieldWithDefault__arg)),
@@ -254,17 +254,17 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
     __fbthrift_field_longField(std::move(longField__arg)),
     __fbthrift_field_adaptedLongField(std::move(adaptedLongField__arg)),
     __fbthrift_field_doubleAdaptedField(std::move(doubleAdaptedField__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_intField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 4>(__fbthrift_field_setField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 6>(__fbthrift_field_mapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 9>(__fbthrift_field_longField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 4>(__fbthrift_field_setField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 6>(__fbthrift_field_mapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -281,17 +281,17 @@ Foo::Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::ada
 
 void Foo::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_intField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter2, 4>(__fbthrift_field_setField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter3, 6>(__fbthrift_field_mapField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 9>(__fbthrift_field_longField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_intField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 2>(__fbthrift_field_optionalIntField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 3>(__fbthrift_field_intFieldWithDefault, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter2, 4>(__fbthrift_field_setField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter2, 5>(__fbthrift_field_optionalSetField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter3, 6>(__fbthrift_field_mapField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter3, 7>(__fbthrift_field_optionalMapField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter3, 8>(__fbthrift_field_binaryField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 9>(__fbthrift_field_longField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter2, 10>(__fbthrift_field_adaptedLongField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 11>(__fbthrift_field_doubleAdaptedField, *this);
   __isset = {};
 }
 
@@ -304,37 +304,37 @@ bool Foo::__fbthrift_is_empty() const {
 
 bool Foo::operator==(FOLLY_MAYBE_UNUSED const Foo& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_intField, rhs.__fbthrift_field_intField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_intField, rhs.__fbthrift_field_intField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<my::Adapter1>(lhs.optionalIntField_ref(), rhs.optionalIntField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalIntField_ref(), rhs.optionalIntField_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_intFieldWithDefault, rhs.__fbthrift_field_intFieldWithDefault)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_intFieldWithDefault, rhs.__fbthrift_field_intFieldWithDefault)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter2>(lhs.__fbthrift_field_setField, rhs.__fbthrift_field_setField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_setField, rhs.__fbthrift_field_setField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<my::Adapter2>(lhs.optionalSetField_ref(), rhs.optionalSetField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter2>(lhs.optionalSetField_ref(), rhs.optionalSetField_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter3>(lhs.__fbthrift_field_mapField, rhs.__fbthrift_field_mapField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter3>(lhs.__fbthrift_field_mapField, rhs.__fbthrift_field_mapField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<my::Adapter3>(lhs.optionalMapField_ref(), rhs.optionalMapField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter3>(lhs.optionalMapField_ref(), rhs.optionalMapField_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter3>(lhs.__fbthrift_field_binaryField, rhs.__fbthrift_field_binaryField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter3>(lhs.__fbthrift_field_binaryField, rhs.__fbthrift_field_binaryField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_longField, rhs.__fbthrift_field_longField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_longField, rhs.__fbthrift_field_longField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter2>(lhs.__fbthrift_field_adaptedLongField, rhs.__fbthrift_field_adaptedLongField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_adaptedLongField, rhs.__fbthrift_field_adaptedLongField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_doubleAdaptedField, rhs.__fbthrift_field_doubleAdaptedField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_doubleAdaptedField, rhs.__fbthrift_field_doubleAdaptedField)) {
     return false;
   }
   return true;
@@ -611,11 +611,11 @@ Bar::Bar(const Bar& srcObj) :
     __fbthrift_field_optionalUnionField(srcObj.__fbthrift_field_optionalUnionField),
     __fbthrift_field_adaptedStructField(srcObj.__fbthrift_field_adaptedStructField),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_structField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 5>(__fbthrift_field_unionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
 }
 
 Bar& Bar::operator=(const Bar& other) {
@@ -625,11 +625,11 @@ Bar& Bar::operator=(const Bar& other) {
 }
 
 Bar::Bar() {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_structField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 5>(__fbthrift_field_unionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
 }
 
 
@@ -644,11 +644,11 @@ Bar::Bar(FOLLY_MAYBE_UNUSED Bar&& other) noexcept :
     __fbthrift_field_optionalUnionField(std::move(other.__fbthrift_field_optionalUnionField)),
     __fbthrift_field_adaptedStructField(std::move(other.__fbthrift_field_adaptedStructField)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_structField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 5>(__fbthrift_field_unionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
 }
 
 Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
@@ -664,7 +664,7 @@ Bar& Bar::operator=(FOLLY_MAYBE_UNUSED Bar&& other) noexcept {
 }
 
 
-Bar::Bar(apache::thrift::FragileConstructor, my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg) :
+Bar::Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg) :
     __fbthrift_field_structField(std::move(structField__arg)),
     __fbthrift_field_optionalStructField(std::move(optionalStructField__arg)),
     __fbthrift_field_structListField(std::move(structListField__arg)),
@@ -672,11 +672,11 @@ Bar::Bar(apache::thrift::FragileConstructor, my::Cpp::Type1 structField__arg, ::
     __fbthrift_field_unionField(std::move(unionField__arg)),
     __fbthrift_field_optionalUnionField(std::move(optionalUnionField__arg)),
     __fbthrift_field_adaptedStructField(std::move(adaptedStructField__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_structField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 5>(__fbthrift_field_unionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -689,13 +689,13 @@ Bar::Bar(apache::thrift::FragileConstructor, my::Cpp::Type1 structField__arg, ::
 
 void Bar::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_structField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_structField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 2>(__fbthrift_field_optionalStructField, *this);
   this->__fbthrift_field_structListField.clear();
   this->__fbthrift_field_optionalStructListField.clear();
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 5>(__fbthrift_field_unionField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 5>(__fbthrift_field_unionField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 6>(__fbthrift_field_optionalUnionField, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 7>(__fbthrift_field_adaptedStructField, *this);
   __isset = {};
 }
 
@@ -708,10 +708,10 @@ bool Bar::__fbthrift_is_empty() const {
 
 bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_structField, rhs.__fbthrift_field_structField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_structField, rhs.__fbthrift_field_structField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<my::Adapter1>(lhs.optionalStructField_ref(), rhs.optionalStructField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalStructField_ref(), rhs.optionalStructField_ref())) {
     return false;
   }
   if (!(lhs.structListField_ref() == rhs.structListField_ref())) {
@@ -720,13 +720,13 @@ bool Bar::operator==(FOLLY_MAYBE_UNUSED const Bar& rhs) const {
   if (!(lhs.optionalStructListField_ref() == rhs.optionalStructListField_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_unionField, rhs.__fbthrift_field_unionField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_unionField, rhs.__fbthrift_field_unionField)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal_opt<my::Adapter1>(lhs.optionalUnionField_ref(), rhs.optionalUnionField_ref())) {
+  if (::apache::thrift::adapt_detail::not_equal_opt<::my::Adapter1>(lhs.optionalUnionField_ref(), rhs.optionalUnionField_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_adaptedStructField, rhs.__fbthrift_field_adaptedStructField)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_adaptedStructField, rhs.__fbthrift_field_adaptedStructField)) {
     return false;
   }
   return true;
@@ -837,14 +837,14 @@ const folly::StringPiece StructWithFieldAdapter::__fbthrift_get_field_name(::apa
 
 StructWithFieldAdapter::StructWithFieldAdapter(const StructWithFieldAdapter& srcObj) :
     __fbthrift_field_field(srcObj.__fbthrift_field_field),
-    shared_field(srcObj.shared_field),
-    opt_shared_field(srcObj.opt_shared_field),
+    __fbthrift_field_shared_field(srcObj.__fbthrift_field_shared_field),
+    __fbthrift_field_opt_shared_field(srcObj.__fbthrift_field_opt_shared_field),
     __fbthrift_field_opt_boxed_field(srcObj.__fbthrift_field_opt_boxed_field),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(*shared_field, *this);
-  if (opt_shared_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(*opt_shared_field, *this);
-  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
+  if (__fbthrift_field_opt_shared_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_opt_shared_field, *this);
+  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
 }
 
 StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldAdapter& other) {
@@ -855,44 +855,44 @@ StructWithFieldAdapter& StructWithFieldAdapter::operator=(const StructWithFieldA
 
 StructWithFieldAdapter::StructWithFieldAdapter(FOLLY_MAYBE_UNUSED StructWithFieldAdapter&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
-    shared_field(std::move(other.shared_field)),
-    opt_shared_field(std::move(other.opt_shared_field)),
+    __fbthrift_field_shared_field(std::move(other.__fbthrift_field_shared_field)),
+    __fbthrift_field_opt_shared_field(std::move(other.__fbthrift_field_opt_shared_field)),
     __fbthrift_field_opt_boxed_field(std::move(other.__fbthrift_field_opt_boxed_field)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(*shared_field, *this);
-  if (opt_shared_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(*opt_shared_field, *this);
-  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
+  if (__fbthrift_field_opt_shared_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_opt_shared_field, *this);
+  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
 }
 
 StructWithFieldAdapter& StructWithFieldAdapter::operator=(FOLLY_MAYBE_UNUSED StructWithFieldAdapter&& other) noexcept {
     this->__fbthrift_field_field = std::move(other.__fbthrift_field_field);
-    this->shared_field = std::move(other.shared_field);
-    this->opt_shared_field = std::move(other.opt_shared_field);
+    this->__fbthrift_field_shared_field = std::move(other.__fbthrift_field_shared_field);
+    this->__fbthrift_field_opt_shared_field = std::move(other.__fbthrift_field_opt_shared_field);
     this->__fbthrift_field_opt_boxed_field = std::move(other.__fbthrift_field_opt_boxed_field);
     __isset = other.__isset;
     return *this;
 }
 
 
-StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field__arg, ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> opt_boxed_field__arg) :
+StructWithFieldAdapter::StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field__arg, ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> opt_boxed_field__arg) :
     __fbthrift_field_field(std::move(field__arg)),
-    shared_field(std::move(shared_field__arg)),
-    opt_shared_field(std::move(opt_shared_field__arg)),
+    __fbthrift_field_shared_field(std::move(shared_field__arg)),
+    __fbthrift_field_opt_shared_field(std::move(opt_shared_field__arg)),
     __fbthrift_field_opt_boxed_field(std::move(opt_boxed_field__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(*shared_field, *this);
-  if (opt_shared_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(*opt_shared_field, *this);
-  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
+  if (__fbthrift_field_opt_shared_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(*__fbthrift_field_opt_shared_field, *this);
+  if (__fbthrift_field_opt_boxed_field) ::apache::thrift::adapt_detail::construct<::my::Adapter1, 4>(*__fbthrift_field_opt_boxed_field, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void StructWithFieldAdapter::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_field, *this);
-  this->shared_field = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>();
-  this->opt_shared_field.reset();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+  this->__fbthrift_field_shared_field = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>();
+  this->__fbthrift_field_opt_shared_field.reset();
   this->__fbthrift_field_opt_boxed_field.reset();
   __isset = {};
 }
@@ -906,7 +906,7 @@ bool StructWithFieldAdapter::__fbthrift_is_empty() const {
 
 bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
     return false;
   }
   if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
@@ -923,8 +923,8 @@ bool StructWithFieldAdapter::operator==(FOLLY_MAYBE_UNUSED const StructWithField
 
 bool StructWithFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const StructWithFieldAdapter& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter1>(lhs.__fbthrift_field_field, rhs.__fbthrift_field_field);
   }
   if ((!::apache::thrift::detail::pointer_equal(lhs.shared_field_ref(), rhs.shared_field_ref()))) {
     return ::apache::thrift::detail::pointer_less(lhs.shared_field_ref(), rhs.shared_field_ref());
@@ -942,8 +942,8 @@ bool StructWithFieldAdapter::operator<(FOLLY_MAYBE_UNUSED const StructWithFieldA
 void swap(FOLLY_MAYBE_UNUSED StructWithFieldAdapter& a, FOLLY_MAYBE_UNUSED StructWithFieldAdapter& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
-  swap(a.shared_field, b.shared_field);
-  swap(a.opt_shared_field, b.opt_shared_field);
+  swap(a.__fbthrift_field_shared_field, b.__fbthrift_field_shared_field);
+  swap(a.__fbthrift_field_opt_shared_field, b.__fbthrift_field_opt_shared_field);
   swap(a.__fbthrift_field_opt_boxed_field, b.__fbthrift_field_opt_boxed_field);
   swap(a.__isset, b.__isset);
 }
@@ -996,9 +996,9 @@ TerseAdaptedFields::TerseAdaptedFields(const TerseAdaptedFields& srcObj) :
     __fbthrift_field_int_field(srcObj.__fbthrift_field_int_field),
     __fbthrift_field_string_field(srcObj.__fbthrift_field_string_field),
     __fbthrift_field_set_field(srcObj.__fbthrift_field_set_field) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
 TerseAdaptedFields& TerseAdaptedFields::operator=(const TerseAdaptedFields& other) {
@@ -1011,9 +1011,9 @@ TerseAdaptedFields::TerseAdaptedFields(FOLLY_MAYBE_UNUSED TerseAdaptedFields&& o
     __fbthrift_field_int_field(std::move(other.__fbthrift_field_int_field)),
     __fbthrift_field_string_field(std::move(other.__fbthrift_field_string_field)),
     __fbthrift_field_set_field(std::move(other.__fbthrift_field_set_field)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
 TerseAdaptedFields& TerseAdaptedFields::operator=(FOLLY_MAYBE_UNUSED TerseAdaptedFields&& other) noexcept {
@@ -1024,27 +1024,27 @@ TerseAdaptedFields& TerseAdaptedFields::operator=(FOLLY_MAYBE_UNUSED TerseAdapte
 }
 
 
-TerseAdaptedFields::TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg) :
+TerseAdaptedFields::TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg) :
     __fbthrift_field_int_field(std::move(int_field__arg)),
     __fbthrift_field_string_field(std::move(string_field__arg)),
     __fbthrift_field_set_field(std::move(set_field__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-  ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
 
 void TerseAdaptedFields::__fbthrift_clear() {
   // clear all fields
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
 void TerseAdaptedFields::__fbthrift_clear_terse_fields() {
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-  ::apache::thrift::adapt_detail::clear<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
 }
 
 bool TerseAdaptedFields::__fbthrift_is_empty() const {
@@ -1055,13 +1055,13 @@ bool TerseAdaptedFields::__fbthrift_is_empty() const {
 
 bool TerseAdaptedFields::operator==(FOLLY_MAYBE_UNUSED const TerseAdaptedFields& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field)) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field)) {
     return false;
   }
   return true;
@@ -1069,14 +1069,14 @@ bool TerseAdaptedFields::operator==(FOLLY_MAYBE_UNUSED const TerseAdaptedFields&
 
 bool TerseAdaptedFields::operator<(FOLLY_MAYBE_UNUSED const TerseAdaptedFields& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter1>(lhs.__fbthrift_field_int_field, rhs.__fbthrift_field_int_field);
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter1>(lhs.__fbthrift_field_string_field, rhs.__fbthrift_field_string_field);
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter1>(lhs.__fbthrift_field_set_field, rhs.__fbthrift_field_set_field);
   }
   return false;
 }
@@ -1210,7 +1210,7 @@ const folly::StringPiece B::__fbthrift_get_field_name(::apache::thrift::FieldOrd
 B::B(const B& srcObj) :
     __fbthrift_field_a(srcObj.__fbthrift_field_a),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_a, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
 }
 
 B& B::operator=(const B& other) {
@@ -1222,7 +1222,7 @@ B& B::operator=(const B& other) {
 B::B(FOLLY_MAYBE_UNUSED B&& other) noexcept :
     __fbthrift_field_a(std::move(other.__fbthrift_field_a)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_a, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
 }
 
 B& B::operator=(FOLLY_MAYBE_UNUSED B&& other) noexcept {
@@ -1234,7 +1234,7 @@ B& B::operator=(FOLLY_MAYBE_UNUSED B&& other) noexcept {
 
 B::B(apache::thrift::FragileConstructor, ::facebook::thrift::test::AdaptedA a__arg) :
     __fbthrift_field_a(std::move(a__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_a, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -1253,7 +1253,7 @@ bool B::__fbthrift_is_empty() const {
 
 bool B::operator==(FOLLY_MAYBE_UNUSED const B& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a)) {
     return false;
   }
   return true;
@@ -1261,8 +1261,8 @@ bool B::operator==(FOLLY_MAYBE_UNUSED const B& rhs) const {
 
 bool B::operator<(FOLLY_MAYBE_UNUSED const B& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a)) {
-    return ::apache::thrift::adapt_detail::less<my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a);
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_a, rhs.__fbthrift_field_a);
   }
   return false;
 }
@@ -1428,7 +1428,7 @@ MyStruct::MyStruct(const MyStruct& srcObj) :
     __fbthrift_field_field(srcObj.__fbthrift_field_field),
     __fbthrift_field_set_string(srcObj.__fbthrift_field_set_string),
     __isset(srcObj.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
 }
 
 MyStruct& MyStruct::operator=(const MyStruct& other) {
@@ -1441,7 +1441,7 @@ MyStruct::MyStruct(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept :
     __fbthrift_field_field(std::move(other.__fbthrift_field_field)),
     __fbthrift_field_set_string(std::move(other.__fbthrift_field_set_string)),
     __isset(other.__isset) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
 }
 
 MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
@@ -1455,7 +1455,7 @@ MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
 MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg, ::facebook::thrift::test::SetWithAdapter set_string__arg) :
     __fbthrift_field_field(std::move(field__arg)),
     __fbthrift_field_set_string(std::move(set_string__arg)) {
-  ::apache::thrift::adapt_detail::construct<my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+  ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
 }
@@ -1464,7 +1464,7 @@ MyStruct::MyStruct(apache::thrift::FragileConstructor, ::std::int32_t field__arg
 void MyStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_field = ::std::int32_t();
-  ::apache::thrift::adapt_detail::clear<my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
   __isset = {};
 }
 
@@ -1480,7 +1480,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.field_ref() == rhs.field_ref())) {
     return false;
   }
-  if (::apache::thrift::adapt_detail::not_equal<my::Adapter2>(lhs.__fbthrift_field_set_string, rhs.__fbthrift_field_set_string)) {
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter2>(lhs.__fbthrift_field_set_string, rhs.__fbthrift_field_set_string)) {
     return false;
   }
   return true;
@@ -1508,36 +1508,36 @@ template uint32_t MyStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWr
 
 namespace facebook { namespace thrift { namespace test { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter2, 5, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter3, 8, ::std::string, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter2, 10, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 11, ::std::int64_t, ::facebook::thrift::test::Foo>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 8, ::std::string, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Baz>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 2, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 5, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 6, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter, 7, ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook::thrift::test::Bar>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 4, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 2, ::std::string, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter1, 3, ::std::set<::std::int32_t>, ::facebook::thrift::test::TerseAdaptedFields>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter, 1, ::facebook::thrift::test::A, ::facebook::thrift::test::B>();
-  ::apache::thrift::adapt_detail::validateFieldAdapter<my::Adapter2, 2, ::std::set<::std::string>, ::facebook::thrift::test::MyStruct>();
-  ::apache::thrift::adapt_detail::validateAdapter<my::Adapter1, ::std::int64_t>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 5, ::std::set<::std::string>, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 8, ::std::string, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 10, ::std::int64_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 11, ::std::int64_t, ::facebook::thrift::test::Foo>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 4, ::std::set<::std::string>, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter>, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 8, ::std::string, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 9, ::std::int64_t, ::facebook::thrift::test::Baz>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::facebook::thrift::test::Foo, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 5, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 6, ::facebook::thrift::test::Baz, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 7, ::facebook::thrift::test::detail::DirectlyAdapted, ::facebook::thrift::test::Bar>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 4, ::std::int32_t, ::facebook::thrift::test::StructWithFieldAdapter>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 1, ::std::int32_t, ::facebook::thrift::test::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 2, ::std::string, ::facebook::thrift::test::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter1, 3, ::std::set<::std::int32_t>, ::facebook::thrift::test::TerseAdaptedFields>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 1, ::facebook::thrift::test::A, ::facebook::thrift::test::B>();
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter2, 2, ::std::set<::std::string>, ::facebook::thrift::test::MyStruct>();
+  ::apache::thrift::adapt_detail::validateAdapter<::my::Adapter1, ::std::int64_t>();
 }
 }}}} // facebook::thrift::test

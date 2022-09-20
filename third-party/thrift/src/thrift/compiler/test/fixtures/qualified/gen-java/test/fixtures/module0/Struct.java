@@ -123,7 +123,7 @@ public final class Struct implements com.facebook.thrift.payload.ThriftSerializa
     
         return
             Objects.equals(first, other.first) &&
-    Objects.equals(second, other.second) &&
+            Objects.equals(second, other.second) &&
             true;
     }
     

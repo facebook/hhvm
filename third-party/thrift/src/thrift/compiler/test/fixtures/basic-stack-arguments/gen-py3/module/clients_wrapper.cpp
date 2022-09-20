@@ -19,11 +19,17 @@ MyServiceClientWrapper::hasDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_hasDataById, channel_);
-  client->hasDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id
-  );
+  try {
+    client->hasDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<bool>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -36,11 +42,17 @@ MyServiceClientWrapper::getDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataById, channel_);
-  client->getDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id
-  );
+  try {
+    client->getDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -54,12 +66,18 @@ MyServiceClientWrapper::putDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_putDataById, channel_);
-  client->putDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id,
-    arg_data
-  );
+  try {
+    client->putDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id,
+      arg_data
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -73,12 +91,18 @@ MyServiceClientWrapper::lobDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
     std::move(_promise), channel_);
-  client->lobDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id,
-    arg_data
-  );
+  try {
+    client->lobDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id,
+      arg_data
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -91,11 +115,17 @@ MyServiceFastClientWrapper::hasDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_hasDataById, channel_);
-  client->hasDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id
-  );
+  try {
+    client->hasDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<bool>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -108,11 +138,17 @@ MyServiceFastClientWrapper::getDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataById, channel_);
-  client->getDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id
-  );
+  try {
+    client->getDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -126,12 +162,18 @@ MyServiceFastClientWrapper::putDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_putDataById, channel_);
-  client->putDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id,
-    arg_data
-  );
+  try {
+    client->putDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id,
+      arg_data
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -145,12 +187,18 @@ MyServiceFastClientWrapper::lobDataById(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::apache::thrift::OneWayFutureCallback>(
     std::move(_promise), channel_);
-  client->lobDataById(
-    rpcOptions,
-    std::move(callback),
-    arg_id,
-    arg_data
-  );
+  try {
+    client->lobDataById(
+      rpcOptions,
+      std::move(callback),
+      arg_id,
+      arg_data
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -163,11 +211,17 @@ DbMixedStackArgumentsClientWrapper::getDataByKey0(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataByKey0, channel_);
-  client->getDataByKey0(
-    rpcOptions,
-    std::move(callback),
-    arg_key
-  );
+  try {
+    client->getDataByKey0(
+      rpcOptions,
+      std::move(callback),
+      arg_key
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -180,11 +234,17 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_getDataByKey1, channel_);
-  client->getDataByKey1(
-    rpcOptions,
-    std::move(callback),
-    arg_key
-  );
+  try {
+    client->getDataByKey1(
+      rpcOptions,
+      std::move(callback),
+      arg_key
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

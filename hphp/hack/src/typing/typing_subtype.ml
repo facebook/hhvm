@@ -242,10 +242,10 @@ let log_subtype ~this_ty ~function_name env ty_sub ty_super =
     (LoclType ty_sub)
     (LoclType ty_super)
 
-let is_final_and_not_contravariant env id =
+let is_final_and_invariant env id =
   let class_def = Env.get_class env id in
   match class_def with
-  | Some class_ty -> TUtils.class_is_final_and_not_contravariant class_ty
+  | Some class_ty -> TUtils.class_is_final_and_invariant class_ty
   | None -> false
 
 let is_tprim_disjoint tp1 tp2 =
@@ -1642,10 +1642,10 @@ and simplify_subtype_i
       | LoclType ty_sub ->
         (match (deref ty_sub, get_node bound_sup) with
         | ((_, Tclass _), Tclass ((_, x), _, _))
-          when is_final_and_not_contravariant env x ->
+          when is_final_and_invariant env x ->
           (* For final class C, there is no difference between `this as X` and `X`,
            * and `expr<#n> as X` and `X`.
-           * But we need to take care with contravariant classes, since we can't
+           * But we need to take care with variant classes, since we can't
            * statically guarantee their runtime type.
            *)
           simplify_subtype ~subtype_env ~this_ty ty_sub bound_sup env

@@ -6,7 +6,7 @@
 use std::sync::Arc;
 
 use depgraph_api::DepGraphWriter;
-use eq_modulo_pos::EqModuloPosAndReason;
+use eq_modulo_pos::EqModuloPos;
 use oxidized::global_options::GlobalOptions;
 use pos::ClassConstName;
 use pos::ClassConstNameIndexMap;

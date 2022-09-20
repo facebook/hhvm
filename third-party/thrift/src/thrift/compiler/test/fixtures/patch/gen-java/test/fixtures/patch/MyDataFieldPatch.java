@@ -126,7 +126,7 @@ public final class MyDataFieldPatch implements com.facebook.thrift.payload.Thrif
     
         return
             Objects.equals(data1, other.data1) &&
-    Objects.equals(data2, other.data2) &&
+            Objects.equals(data2, other.data2) &&
             true;
     }
     

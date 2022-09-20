@@ -14,8 +14,8 @@ module Env = Typing_env
 module SN = Naming_special_names
 module MakeType = Typing_make_type
 
-let check_param : policy_sharded:bool -> env -> Nast.fun_param -> unit =
- fun ~policy_sharded env { param_type_hint; param_pos; param_name; _ } ->
+let check_param : env -> Nast.fun_param -> unit =
+ fun env { param_type_hint; param_pos; param_name; _ } ->
   let error ty =
     let ty_name = lazy (Typing_print.error env ty) in
     let msgl =
@@ -42,11 +42,8 @@ let check_param : policy_sharded:bool -> env -> Nast.fun_param -> unit =
       | Terr
       | Tdynamic
       | Tneg _ ->
-        if not policy_sharded then
-          let (_ : env) = Typing_local_ops.enforce_memoize_object pos env in
-          ()
-        else
-          ()
+        let (_ : env) = Typing_local_ops.enforce_memoize_object pos env in
+        ()
       | Tprim (Tvoid | Tresource | Tnoreturn) ->
         Errors.add_typing_error @@ Typing_error.primary @@ error ty
       | Toption ty -> check_memoizable env ty
@@ -95,9 +92,7 @@ let check_param : policy_sharded:bool -> env -> Nast.fun_param -> unit =
         let hackarray = MakeType.any_array Reason.none mixed mixed in
         let is_hackarray = Typing_utils.is_sub_type env ty hackarray in
         let env =
-          if policy_sharded then
-            env
-          else if not is_hackarray then
+          if not is_hackarray then
             (* Check if it's a UNSAFEsingleton memoize param *)
             let singleton =
               MakeType.class_type
@@ -173,7 +168,7 @@ let check : env -> Nast.user_attribute list -> Nast.fun_param list -> unit =
     Naming_attributes.mem SN.UserAttributes.uaMemoize user_attributes
     || Naming_attributes.mem SN.UserAttributes.uaMemoizeLSB user_attributes
   then
-    List.iter ~f:(check_param ~policy_sharded:false env) params
+    List.iter ~f:(check_param env) params
 
 let check_function : env -> Nast.fun_ -> unit =
  fun env { f_user_attributes; f_params; _ } ->

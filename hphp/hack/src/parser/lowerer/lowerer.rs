@@ -22,6 +22,7 @@ use hash::HashSet;
 use itertools::Either;
 use itertools::Itertools;
 use lint_rust::LintError;
+use naming_special_names_rust as sn;
 use naming_special_names_rust::classes as special_classes;
 use naming_special_names_rust::literal;
 use naming_special_names_rust::special_functions;
@@ -861,11 +862,11 @@ fn p_hint_<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<ast::Hint_> {
                 suggest(&name, special_typehints::FLOAT);
             }
 
-            use naming_special_names_rust::coeffects::CAPABILITIES;
-            use naming_special_names_rust::coeffects::CONTEXTS;
             if env.file_mode() != file_info::Mode::Mhhi && !env.codegen() {
                 let sn = strip_ns(&name);
-                if sn.starts_with(CONTEXTS) || sn.starts_with(CAPABILITIES) {
+                if sn.starts_with(sn::coeffects::CONTEXTS)
+                    || sn.starts_with(sn::coeffects::CAPABILITIES)
+                {
                     raise_parsing_error(node, env, &syntax_error::direct_coeffects_reference);
                 }
             }
@@ -3509,7 +3510,7 @@ fn is_polymorphic_context<'a>(env: &mut Env<'a>, hint: &ast::Hint, ignore_this: 
                 /* TODO(coeffects) There is an opportunity to represent this structurally
                  * in the AST if we refactor so generic hints lower as Habstr instead of
                  * Happly, like we do in the direct decl parser. */
-                (strip_ns(s) == naming_special_names_rust::typehints::THIS && !ignore_this)
+                (strip_ns(s) == sn::typehints::THIS && !ignore_this)
                     || env.fn_generics_mut().contains_key(s)
                     || env.cls_generics_mut().contains_key(s)
             }
@@ -3533,9 +3534,7 @@ fn has_polymorphic_context<'a>(env: &mut Env<'a>, contexts: Option<&ast::Context
 fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                naming_special_names_rust::coeffects::is_any_zoned(id)
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned(id),
             _ => false,
         });
     } else {
@@ -3546,9 +3545,7 @@ fn has_any_policied_context(contexts: Option<&ast::Contexts>) -> bool {
 fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
     if let Some(ast::Contexts(_, ref context_hints)) = contexts {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                naming_special_names_rust::coeffects::is_any_zoned_or_defaults(id)
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => sn::coeffects::is_any_zoned_or_defaults(id),
             _ => false,
         });
     } else {
@@ -3556,12 +3553,10 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
     }
 }
 
-fn has_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                id == naming_special_names_rust::coeffects::DEFAULTS
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
             _ => false,
         });
     } else {
@@ -4295,7 +4290,7 @@ fn process_attribute_constructor_call<'a>(
             > 0
     {
         raise_parsing_error(node, env, &syntax_error::soft_no_arguments);
-    } else if naming_special_names_rust::user_attributes::is_memoized(&name.1) {
+    } else if sn::user_attributes::is_memoized(&name.1) {
         let list: Vec<_> = constructor_call_argument_list
             .syntax_node_to_list_skip_separator()
             .collect();
@@ -4318,7 +4313,7 @@ fn process_attribute_constructor_call<'a>(
     }
     let params = could_map(constructor_call_argument_list, env, |n, e| {
         is_valid_attribute_arg(n, e, &name.1);
-        if naming_special_names_rust::user_attributes::is_memoized(&name.1) {
+        if sn::user_attributes::is_memoized(&name.1) {
             if let Ok(Some(str)) = memoized_attribute_arg_to_string(n, e) {
                 Ok(str)
             } else {
@@ -4347,7 +4342,7 @@ fn is_valid_attribute_arg<'a>(node: S<'a>, env: &mut Env<'a>, attr_name: &str) {
         LiteralExpression(_) => {}
         // Special tokens for memoization
         EnumClassLabelExpression(_)
-            if naming_special_names_rust::user_attributes::is_memoized(attr_name)
+            if sn::user_attributes::is_memoized(attr_name)
                 && memoized_attribute_arg_to_string(node, env) != Ok(None) => {}
         // ::class strings
         ScopeResolutionExpression(c) => {
@@ -4429,7 +4424,7 @@ fn p_docs_url<'a>(attrs: &[ast::UserAttribute], env: &mut Env<'a>) -> Option<Str
     let mut url = None;
 
     for attr in attrs {
-        if attr.name.1 == naming_special_names_rust::user_attributes::DOCS {
+        if attr.name.1 == sn::user_attributes::DOCS {
             match attr.params.as_slice() {
                 [param] => match &param.2 {
                     ast::Expr_::String(s) => match String::from_utf8(s.to_vec()) {
@@ -5284,7 +5279,7 @@ fn p_namespace_use_clause<'a>(
 }
 
 fn is_memoize_attribute_with_flavor(u: &aast::UserAttribute<(), ()>, flavor: Option<&str>) -> bool {
-    naming_special_names_rust::user_attributes::is_memoized(&u.name.1)
+    sn::user_attributes::is_memoized(&u.name.1)
         && (match flavor {
             Some(flavor) => u
                 .params
@@ -5386,7 +5381,7 @@ fn check_effect_memoized<'a>(
     if has_polymorphic_context(env, contexts) {
         if let Some(u) = user_attributes
             .iter()
-            .find(|u| naming_special_names_rust::user_attributes::is_memoized(&u.name.1))
+            .find(|u| sn::user_attributes::is_memoized(&u.name.1))
         {
             raise_parsing_error_pos(
                 &u.name.0,
@@ -5426,7 +5421,14 @@ fn check_effect_memoized<'a>(
         is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
             || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
     }) {
-        if !has_defaults_context(contexts) {
+        if !has_any_context(
+            contexts,
+            vec![
+                sn::coeffects::DEFAULTS,
+                sn::coeffects::LEAK_SAFE_LOCAL,
+                sn::coeffects::LEAK_SAFE_SHALLOW,
+            ],
+        ) {
             raise_parsing_error_pos(
                 &u.name.0,
                 env,
@@ -5443,7 +5445,7 @@ fn check_context_has_this<'a>(contexts: Option<&ast::Contexts>, env: &mut Env<'a
         context_hints.iter().for_each(|c| match *c.1 {
             Haccess(ref root, _) => match &*root.1 {
                 Happly(oxidized::ast::Id(_, id), _)
-                    if strip_ns(id.as_str()) == naming_special_names_rust::typehints::THIS =>
+                    if strip_ns(id.as_str()) == sn::typehints::THIS =>
                 {
                     raise_parsing_error_pos(
                         pos,

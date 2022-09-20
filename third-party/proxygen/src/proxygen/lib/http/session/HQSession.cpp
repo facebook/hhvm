@@ -1443,6 +1443,7 @@ void HQSession::clearStreamCallbacks(quic::StreamId id) {
   if (sock_) {
     sock_->setReadCallback(id, nullptr, folly::none);
     sock_->setPeekCallback(id, nullptr);
+    sock_->setDSRPacketizationRequestSender(id, nullptr);
 
   } else {
     VLOG(4) << "Attempt to clear callbacks on closed socket";

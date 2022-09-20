@@ -42,6 +42,8 @@ using SetPatch = std::decay_t<
     decltype(*std::declval<test::patch::MyStructFieldPatch>()->optSetVal())>;
 using MapPatch = std::decay_t<
     decltype(*std::declval<test::patch::MyStructFieldPatch>()->optMapVal())>;
+using UnionPatch = std::decay_t<
+    decltype(*std::declval<test::patch::MyStructFieldPatch>()->unionVal())>;
 
 class PatchTest : public testing::Test {
  protected:
@@ -67,6 +69,19 @@ class PatchTest : public testing::Test {
   template <typename P>
   static Object convertPatchToObject(const P& patchStruct) {
     return convertToObject(patchStruct.toThrift());
+  }
+
+  template <typename T, typename Patch>
+  T applyGeneratedPatch(T value, Patch patch) {
+    auto valueObject = convertToValueObject(value);
+    applyPatch(convertPatchToObject(patch), valueObject);
+
+    auto buffer = serializeObject<CompactSerializer::ProtocolWriter>(
+        *valueObject.objectValue_ref());
+
+    T patched;
+    CompactSerializer::deserialize(buffer.get(), patched);
+    return patched;
   }
 
   template <typename P>
@@ -1021,14 +1036,7 @@ TEST_F(PatchTest, GeneratedStructPatch) {
   patch.patchIfSet<ident::stringVal>() = "_" + op::StringPatch{} + "_";
   patch.patchIfSet<ident::structVal>().patchIfSet<ident::data1>().append("Na");
 
-  auto valueObject = convertToValueObject(original);
-  applyPatch(convertPatchToObject(patch), valueObject);
-
-  auto buffer = serializeObject<CompactSerializer::ProtocolWriter>(
-      *valueObject.objectValue_ref());
-
-  test::patch::MyStruct patched;
-  CompactSerializer::deserialize(buffer.get(), patched);
+  auto patched = applyGeneratedPatch(original, patch);
 
   EXPECT_FALSE(*patched.boolVal());
   EXPECT_EQ("_test_", *patched.stringVal());
@@ -1039,6 +1047,80 @@ TEST_F(PatchTest, GeneratedStructPatch) {
   EXPECT_EQ(5, *patched.floatVal());
   EXPECT_EQ(6, *patched.doubleVal());
   EXPECT_EQ("Na", *patched.structVal()->data1());
+}
+
+TEST_F(PatchTest, GeneratedUnionEnsurePatch) {
+  test::patch::MyUnion original;
+
+  test::patch::MyUnionPatch patch;
+  patch.ensure().option1_ref() = "test";
+
+  auto patched = applyGeneratedPatch(original, patch);
+  ASSERT_TRUE(patched.option1_ref().has_value());
+  EXPECT_EQ("test", *patched.option1_ref());
+
+  patched.option1_ref() = "updated";
+  patched = applyGeneratedPatch(patched, patch);
+  ASSERT_TRUE(patched.option1_ref().has_value());
+  EXPECT_EQ("updated", *patched.option1_ref());
+
+  patched.option2_ref() = 42;
+  patched = applyGeneratedPatch(patched, patch);
+  ASSERT_TRUE(patched.option1_ref().has_value());
+  EXPECT_EQ("test", *patched.option1_ref());
+}
+
+TEST_F(PatchTest, GeneratedUnionClearAndAssign) {
+  test::patch::MyUnionPatch noop;
+  test::patch::MyUnion actual;
+  test::patch::MyUnionPatch assignEmpty =
+      test::patch::MyUnionPatch::createAssign(actual);
+
+  EXPECT_EQ(applyGeneratedPatch(actual, noop), test::patch::MyUnion{});
+  EXPECT_EQ(applyGeneratedPatch(actual, assignEmpty), test::patch::MyUnion{});
+
+  actual.option1_ref() = "test";
+  auto assign = test::patch::MyUnionPatch::createAssign(actual);
+
+  EXPECT_EQ(applyGeneratedPatch(actual, noop), actual);
+  EXPECT_EQ(applyGeneratedPatch(actual, assignEmpty), test::patch::MyUnion{});
+  EXPECT_EQ(applyGeneratedPatch(actual, assign), actual);
+  EXPECT_EQ(applyGeneratedPatch(test::patch::MyUnion{}, assign), actual);
+}
+
+TEST_F(PatchTest, GeneratedUnionPatch) {
+  test::patch::MyUnionPatch patch;
+  *patch.patchIfSet()->option1() = "Hi";
+  patch.ensure().option1_ref() = "Bye";
+  *patch.patchIfSet()->option1() += " World!";
+
+  test::patch::MyUnion hi, bye;
+  hi.option1_ref() = "Hi World!";
+  bye.option1_ref() = "Bye World!";
+
+  EXPECT_EQ(applyGeneratedPatch(test::patch::MyUnion{}, patch), bye);
+  EXPECT_EQ(
+      applyGeneratedPatch(
+          applyGeneratedPatch(test::patch::MyUnion{}, patch), patch),
+      hi);
+
+  test::patch::MyUnion op1;
+  op1.option1_ref() = "Yo";
+  EXPECT_EQ(applyGeneratedPatch(op1, patch), hi);
+  EXPECT_EQ(applyGeneratedPatch(applyGeneratedPatch(op1, patch), patch), hi);
+
+  EXPECT_EQ(applyGeneratedPatch(bye, patch), hi);
+}
+
+TEST_F(PatchTest, GeneratedUnionPatchInner) {
+  test::patch::MyUnionPatch patch;
+  *patch.patchIfSet()->option3()->patchIfSet()->option1() = "World";
+
+  test::patch::MyUnion a, b;
+  a.option3_ref().ensure().option1_ref() = "Hello";
+  b.option3_ref().ensure().option1_ref() = "World";
+
+  EXPECT_EQ(applyGeneratedPatch(a, patch), b);
 }
 
 TEST_F(PatchTest, Union) { // Shuold mostly behave like a struct

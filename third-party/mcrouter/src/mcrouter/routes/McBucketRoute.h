@@ -72,7 +72,7 @@ class McBucketRoute {
     auto bucketId = ch3_(getRoutingKey<Request>(req, salt_));
     if (bucketId < bucketizeUntil_) {
       if (auto* ctx = fiber_local<MemcacheRouterInfo>::getTraverseCtx()) {
-        ctx->recordBucketId(bucketId);
+        ctx->recordBucketIdAndKeyspace(bucketId, bucketizationKeyspace_);
       }
       return fiber_local<MemcacheRouterInfo>::runWithLocals(
           [this, &req, &t, bucketId]() {

@@ -726,18 +726,62 @@ class mstch_java_field : public mstch_field {
           &mstch_java_field::get_structured_adapter_class_name},
          {"field:typeClassName",
           &mstch_java_field::get_structured_type_class_name},
+         {"field:hasMultipleTypeAdapters?",
+          &mstch_java_field::has_multiple_type_adapters},
+         {"field:secondAdapterClassName",
+          &mstch_java_field::get_second_structured_adapter_class_name},
+         {"field:secondTypeClassName",
+          &mstch_java_field::get_second_structured_adapter_type_name},
          {"field:hasAdapter?", &mstch_java_field::has_type_adapter}});
   }
 
   int32_t nestedDepth = 0;
   bool isNestedContainerFlag = false;
 
+  mstch::node has_multiple_type_adapters() {
+    bool hasFieldAdapter =
+        field_->find_structured_annotation_or_null(kJavaAdapterUri);
+
+    bool hasTypeAdapter = false;
+
+    auto type = field_->get_type();
+    if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+            type, kJavaAdapterUri)) {
+      hasTypeAdapter = true;
+    }
+
+    return hasFieldAdapter && hasTypeAdapter;
+  }
+
+  mstch::node get_second_structured_adapter_class_name() {
+    return get_second_structed_annotation_attribute("adapterClassName");
+  }
+
+  mstch::node get_second_structured_adapter_type_name() {
+    return get_second_structed_annotation_attribute("typeClassName");
+  }
+
+  mstch::node get_second_structed_annotation_attribute(
+      const std::string& field) {
+    if (auto annotation =
+            field_->find_structured_annotation_or_null(kJavaAdapterUri)) {
+      for (const auto& item : annotation->value()->get_map()) {
+        if (item.first->get_string() == field) {
+          return item.second->get_string();
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
   mstch::node has_type_adapter() {
     auto type = field_->get_type();
     if (type->is_typedef()) {
-      auto has_annotation =
-          type->find_structured_annotation_or_null(kJavaAdapterUri);
-      return has_annotation != nullptr;
+      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+              type, kJavaAdapterUri)) {
+        return true;
+      }
     }
     auto has_annotation =
         field_->find_structured_annotation_or_null(kJavaAdapterUri);
@@ -755,8 +799,8 @@ class mstch_java_field : public mstch_field {
   mstch::node get_structed_annotation_attribute(const std::string& field) {
     auto type = field_->get_type();
     if (type->is_typedef()) {
-      if (auto annotation =
-              type->find_structured_annotation_or_null(kJavaAdapterUri)) {
+      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+              type, kJavaAdapterUri)) {
         for (const auto& item : annotation->value()->get_map()) {
           if (item.first->get_string() == field) {
             return item.second->get_string();

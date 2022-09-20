@@ -1124,7 +1124,7 @@ using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
 typedef ::a::different::ns::AStruct AStruct;
-typedef ::apache::thrift::adapt_detail::adapted_t<CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
+typedef ::apache::thrift::adapt_detail::adapted_t<::CustomProtocolAdapter, ::folly::IOBuf> CustomProtocolType;
 typedef ::std::int32_t simpleTypeDef;
 typedef ::std::map<::std::int16_t, ::std::string> containerTypeDef;
 typedef ::std::vector<::std::map<::std::int16_t, ::std::string>> complexContainerTypeDef;
@@ -7362,7 +7362,7 @@ class MyIncludedStruct final  {
 
   MyIncludedStruct() :
       __fbthrift_field_MyIncludedInt(static_cast<::a::different::ns::IncludedInt64>(42)),
-      ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
+      __fbthrift_field_ARefField(std::make_unique<::some::valid::ns::AStruct>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -7378,8 +7378,8 @@ class MyIncludedStruct final  {
   ::a::different::ns::IncludedInt64 __fbthrift_field_MyIncludedInt;
  private:
   ::some::valid::ns::AStruct __fbthrift_field_MyIncludedStruct;
- public:
-  ::std::unique_ptr<::some::valid::ns::AStruct> ARefField;
+ private:
+  ::std::unique_ptr<::some::valid::ns::AStruct> __fbthrift_field_ARefField;
  private:
   ::some::valid::ns::AStruct __fbthrift_field_ARequiredField;
  private:
@@ -7471,22 +7471,42 @@ class MyIncludedStruct final  {
   }
   template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
   FOLLY_ERASE T& ARefField_ref() & {
-    return ARefField;
+    return __fbthrift_field_ARefField;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
   FOLLY_ERASE const T& ARefField_ref() const& {
-    return ARefField;
+    return __fbthrift_field_ARefField;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
   FOLLY_ERASE T&& ARefField_ref() && {
-    return static_cast<T&&>(ARefField);
+    return static_cast<T&&>(__fbthrift_field_ARefField);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
   FOLLY_ERASE const T&& ARefField_ref() const&& {
-    return static_cast<const T&&>(ARefField);
+    return static_cast<const T&&>(__fbthrift_field_ARefField);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
+  FOLLY_ERASE T& ARefField() & {
+    return __fbthrift_field_ARefField;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
+  FOLLY_ERASE const T& ARefField() const& {
+    return __fbthrift_field_ARefField;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
+  FOLLY_ERASE T&& ARefField() && {
+    return static_cast<T&&>(__fbthrift_field_ARefField);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::some::valid::ns::AStruct>>
+  FOLLY_ERASE const T&& ARefField() const&& {
+    return static_cast<const T&&>(__fbthrift_field_ARefField);
   }
 
   template <typename..., typename T = ::some::valid::ns::AStruct>
@@ -7618,41 +7638,41 @@ class AnnotatedStruct  {
 
  private:
   ::some::valid::ns::containerStruct no_annotation;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> cpp_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> cpp2_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> container_with_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> req_cpp2_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::std::vector<::std::string>> req_container_with_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> opt_cpp2_unique_ref;
- public:
+ private:
   ::std::unique_ptr<::std::set<::std::int32_t>> opt_container_with_ref;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> ref_type_unique;
- public:
+ private:
   ::std::shared_ptr<::some::valid::ns::containerStruct> ref_type_shared;
- public:
+ private:
   ::std::shared_ptr<const ::std::map<::std::int32_t, ::std::vector<::std::string>>> ref_type_const;
- public:
+ private:
   ::std::shared_ptr<::some::valid::ns::containerStruct> req_ref_type_shared;
- public:
+ private:
   ::std::shared_ptr<const ::some::valid::ns::containerStruct> req_ref_type_const;
- public:
+ private:
   ::std::unique_ptr<::std::vector<::std::string>> req_ref_type_unique;
- public:
+ private:
   ::std::shared_ptr<const ::some::valid::ns::containerStruct> opt_ref_type_const;
- public:
+ private:
   ::std::unique_ptr<::some::valid::ns::containerStruct> opt_ref_type_unique;
- public:
+ private:
   ::std::shared_ptr<::std::set<::std::int32_t>> opt_ref_type_shared;
  private:
   ::some::valid::ns::CppFakeI32 base_type;
@@ -7666,7 +7686,7 @@ class AnnotatedStruct  {
   ::some::valid::ns::UnorderedMapStruct map_struct_type;
  private:
   ::some::valid::ns::IOBuf iobuf_type;
- public:
+ private:
   ::some::valid::ns::IOBufPtr iobuf_ptr;
  private:
   std::list<::std::int32_t> list_i32_template;
@@ -7692,7 +7712,7 @@ class AnnotatedStruct  {
   ::std::set<::some::valid::ns::IndirectionC> indirection_c;
  private:
   ::some::valid::ns::IOBuf iobuf_type_val;
- public:
+ private:
   ::some::valid::ns::IOBufPtr iobuf_ptr_val;
  private:
   ::some::valid::ns::containerStruct struct_struct;

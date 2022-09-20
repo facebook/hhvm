@@ -256,12 +256,12 @@ public final class Bar implements com.facebook.thrift.payload.ThriftSerializable
     
         return
             Objects.equals(structField, other.structField) &&
-    Objects.equals(optionalStructField, other.optionalStructField) &&
-    Objects.equals(structListField, other.structListField) &&
-    Objects.equals(optionalStructListField, other.optionalStructListField) &&
-    Objects.equals(unionField, other.unionField) &&
-    Objects.equals(optionalUnionField, other.optionalUnionField) &&
-    Objects.equals(adaptedStructField, other.adaptedStructField) &&
+            Objects.equals(optionalStructField, other.optionalStructField) &&
+            Objects.equals(structListField, other.structListField) &&
+            Objects.equals(optionalStructListField, other.optionalStructListField) &&
+            Objects.equals(unionField, other.unionField) &&
+            Objects.equals(optionalUnionField, other.optionalUnionField) &&
+            Objects.equals(adaptedStructField, other.adaptedStructField) &&
             true;
     }
     

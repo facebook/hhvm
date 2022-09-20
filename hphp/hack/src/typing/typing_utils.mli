@@ -108,7 +108,7 @@ val try_unwrap_class_type :
   * Typing_defs.decl_ty list)
   option
 
-val class_is_final_and_not_contravariant : Decl_provider.Class.t -> bool
+val class_is_final_and_invariant : Decl_provider.Class.t -> bool
 
 module HasTany : sig
   val check : Typing_defs.locl_ty -> bool

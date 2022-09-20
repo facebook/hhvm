@@ -79,6 +79,7 @@ exception TerseException {
 }
 
 //@thrift.TerseWrite
+// Terse write is not supported in Unions.
 //union TerseUnion {
 //  1: i32 int_field1;
 //  2: i32 int_field2;
@@ -241,4 +242,98 @@ struct TerseStructWithDateAdapter {
   1: string string_field;
   @thrift.TerseWrite
   2: Date date_field;
+}
+
+struct TestV0 {
+  1: bool boolean_field;
+  2: byte byte_field;
+  3: i16 short_field;
+  4: i32 int_field = 5;
+}
+
+struct TestV1 {
+  1: bool boolean_field;
+  2: byte byte_field;
+  3: i16 short_field;
+  @thrift.TerseWrite
+  4: i32 int_field = 5;
+}
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.BooleanToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef bool adaptedBoolean
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.ShortToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef i16 adaptedShort
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.IntToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef i32 Integer
+typedef Integer adaptedInt
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.LongToStringTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef i64 adaptedLong
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
+  typeClassName = "io.netty.buffer.ByteBuf",
+}
+typedef binary SlicedByteBuf
+
+@java.Adapter{
+  adapterClassName = "com.facebook.thrift.adapter.test.ListToHexTypeAdapter",
+  typeClassName = "java.lang.String",
+}
+typedef list<binary> adaptedBinaryList
+
+typedef adaptedInt doubleTypedefInt
+
+@thrift.TerseWrite
+struct AdaptedTerseStruct {
+  1: adaptedBoolean adaptedBoolean_field;
+  3: adaptedShort adaptedShort_field;
+  4: adaptedInt adaptedInt_field;
+  5: adaptedLong adaptedLong_field;
+  10: SlicedByteBuf b1;
+  21: adaptedBinaryList adaptedBinaryList_field;
+  55: adaptedLong adaptedLong_default = 5000;
+  101: optional adaptedBoolean optionalAdaptedBoolean_field;
+  102: optional SlicedByteBuf optional_b1;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  204: adaptedInt doubleAdaptedInt_field;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  205: adaptedInt doubleAdaptedInt_default = 3000;
+  206: doubleTypedefInt doubleTypedefAdaptedInt_field;
+}
+
+@thrift.TerseWrite
+struct TerseStruct {
+  1: bool boolean_field;
+  3: i16 short_field;
+  4: i32 int_field;
+  5: i64 long_field;
+  10: binary b1;
+  21: list<binary> binaryList_field;
+  55: i64 long_default = 5000;
+  101: optional bool optionalBoolean_field;
+  102: optional binary optional_b1;
+  204: i32 int_field2;
+  205: i32 int_default2;
+  206: i32 doubleTypedefInt_field;
 }

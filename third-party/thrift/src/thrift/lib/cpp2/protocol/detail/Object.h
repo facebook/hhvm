@@ -22,7 +22,7 @@
 #include <fatal/type/same_reference_as.h>
 #include <folly/CPortability.h>
 #include <folly/Utility.h>
-#include <thrift/lib/cpp2/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/FieldMask.h>
 #include <thrift/lib/cpp2/protocol/GetStandardProtocol.h>
 #include <thrift/lib/cpp2/type/BaseType.h>
 #include <thrift/lib/cpp2/type/ThriftType.h>

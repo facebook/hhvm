@@ -149,8 +149,8 @@ public final class StructWithRefTypeShared implements com.facebook.thrift.payloa
     
         return
             Objects.equals(defField, other.defField) &&
-    Objects.equals(optField, other.optField) &&
-    Objects.equals(reqField, other.reqField) &&
+            Objects.equals(optField, other.optField) &&
+            Objects.equals(reqField, other.reqField) &&
             true;
     }
     

@@ -25,6 +25,10 @@ import unittest
 
 from testing.clients import TestingService
 from testing.types import Color, easy, I32List
+
+from thrift.lib.python.client.test.event_handler_helper import (
+    client_handler_that_throws,
+)
 from thrift.py3.client import (
     Client,
     get_client,
@@ -226,6 +230,18 @@ class ClientTests(unittest.TestCase):
                 except TransportError:
                     pass
                 self.assertTrue(test_helper.is_handler_called())
+
+        loop.run_until_complete(test())
+
+    def test_exception_in_client_event_handler(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def test() -> None:
+            with client_handler_that_throws():
+                async with get_client(TestingService, port=1) as cli:
+                    with self.assertRaises(RuntimeError) as cm:
+                        await cli.getName()
+            self.assertEqual(cm.exception.args[0], "from postWrite")
 
         loop.run_until_complete(test())
 

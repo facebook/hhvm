@@ -108,8 +108,6 @@ class Type : public detail::Wrap<TypeStruct> {
   // human-readable, Thrift URIs.
   bool isFull() const { return isFull(data_); }
 
-  folly::Optional<protocol::TType> toTType() const noexcept;
-
  private:
   static bool isFull(const TypeUri& typeUri);
   static bool isFull(const TypeName& typeName);

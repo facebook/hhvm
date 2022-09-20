@@ -22,20 +22,12 @@ __BEGIN_DECLS
 
 typedef struct _hdf HDF;
 
-typedef struct _attr
-{
-  char *key;
-  char *value;
-  struct _attr *next;
-} HDF_ATTR;
-
 struct _hdf
 {
   int alloc_value;
   char *name;
   int name_len;
   char *value;
-  struct _attr *attr;
   struct _hdf *top;
   struct _hdf *next;
   struct _hdf *child;

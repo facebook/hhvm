@@ -1755,6 +1755,30 @@ TEST_P(HeaderOrRocket, QueueTimeoutOnServerShutdown) {
       *folly::get_ptr(th.getHeaders(), "ex"), kServerQueueTimeoutErrorCode);
 }
 
+TEST_P(HeaderOrRocket, ConnectionIdleTimeoutTestSSL) {
+  using namespace std::chrono_literals;
+  folly::ScopedEventBaseThread clientEvbThread;
+  ScopedServerInterfaceThread runner(
+      std::make_shared<TestInterface>(), "::1", 0, [](auto& server) {
+        server.setIdleTimeout(std::chrono::milliseconds(20));
+        auto sslConfig = std::make_shared<wangle::SSLContextConfig>();
+        sslConfig->setCertificate(folly::kTestCert, folly::kTestKey, "");
+        sslConfig->clientCAFiles = std::vector<std::string>{folly::kTestCA};
+        sslConfig->sessionContext = "ThriftServerTest";
+        sslConfig->setNextProtocols({"rs"});
+        server.setSSLConfig(std::move(sslConfig));
+      });
+
+  auto client = makeStickyClient(runner, clientEvbThread.getEventBase());
+  std::string response;
+  std::this_thread::sleep_for(10ms);
+  // succeeds because connection is still a live
+  EXPECT_NO_THROW(client->sync_sendResponse(response, 200));
+  std::this_thread::sleep_for(200ms);
+  // throws an exception because connection is dropped
+  EXPECT_THROW(client->sync_sendResponse(response, 200), TTransportException);
+}
+
 TEST_P(HeaderOrRocket, ConnectionAgeTimeout) {
   using namespace std::chrono_literals;
   folly::ScopedEventBaseThread clientEvbThread;

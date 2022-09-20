@@ -178,9 +178,9 @@ public final class StructWithFieldAdapter implements com.facebook.thrift.payload
     
         return
             Objects.equals(field, other.field) &&
-    Objects.equals(sharedField, other.sharedField) &&
-    Objects.equals(optSharedField, other.optSharedField) &&
-    Objects.equals(optBoxedField, other.optBoxedField) &&
+            Objects.equals(sharedField, other.sharedField) &&
+            Objects.equals(optSharedField, other.optSharedField) &&
+            Objects.equals(optBoxedField, other.optBoxedField) &&
             true;
     }
     

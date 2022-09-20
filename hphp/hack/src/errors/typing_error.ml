@@ -1470,6 +1470,20 @@ module Primary = struct
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
+      | Module_missing_import of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module: string;
+          target_module_opt: string option;
+        }
+      | Module_missing_export of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          target_module: string;
+        }
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1505,12 +1519,82 @@ module Primary = struct
           ],
         [] )
 
+    let module_missing_import
+        pos decl_pos module_pos current_module target_module_opt =
+      let target_module =
+        match target_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not import the public members of module '%s'"
+                current_module
+                target_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
+    let module_missing_export
+        pos decl_pos module_pos current_module_opt target_module =
+      let current_module =
+        match current_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not export its public members to module '%s'"
+                target_module
+                current_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
         module_mismatch pos current_module_opt decl_pos target_module
       | Module_unsafe_trait_access { access_pos; trait_pos } ->
         module_unsafe_trait_access access_pos trait_pos
+      | Module_missing_import
+          { pos; decl_pos; module_pos; current_module; target_module_opt } ->
+        module_missing_import
+          pos
+          decl_pos
+          module_pos
+          current_module
+          target_module_opt
+      | Module_missing_export
+          { pos; decl_pos; module_pos; current_module_opt; target_module } ->
+        module_missing_export
+          pos
+          decl_pos
+          module_pos
+          current_module_opt
+          target_module
   end
 
   module Xhp = struct

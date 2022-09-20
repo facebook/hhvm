@@ -1,1 +1,1 @@
-Fatal error: This function requires the defaults context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible in %s on line 3
+Fatal error: This function requires the defaults, leak_safe, or leak_safe_local context to be memoized using #MakeICInaccessible or #SoftMakeICInaccessible in %s on line 3

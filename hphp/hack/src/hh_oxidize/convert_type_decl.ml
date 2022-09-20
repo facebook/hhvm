@@ -72,7 +72,6 @@ let default_derives () =
       (None, "PartialOrd");
       (Some "no_pos_hash", "NoPosHash");
       (Some "eq_modulo_pos", "EqModuloPos");
-      (Some "eq_modulo_pos", "EqModuloPosAndReason");
       (Some "ocamlrep_derive", "ToOcamlRep");
       (Some "serde", "Serialize");
       (Some "serde", "Deserialize");
@@ -100,16 +99,15 @@ end = struct
     (* GlobalOptions contains a couple floats, which only implement PartialEq
        and PartialOrd, and do not implement Hash. *)
     | "global_options::GlobalOptions" ->
-      ["Eq"; "EqModuloPos"; "EqModuloPosAndReason"; "Hash"; "NoPosHash"; "Ord"]
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     (* And GlobalOptions is used in Genv which is used in Env. We
      * don't care about comparison or hashing on environments *)
     | "typing_env_types::Env" ->
-      ["Eq"; "EqModuloPos"; "EqModuloPosAndReason"; "Hash"; "NoPosHash"; "Ord"]
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "typing_env_types::Genv" ->
-      ["Eq"; "EqModuloPos"; "EqModuloPosAndReason"; "Hash"; "NoPosHash"; "Ord"]
+      ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     (* And GlobalOptions is used in SavedEnv. *)
-    | "tast::SavedEnv" ->
-      ["Eq"; "EqModuloPos"; "EqModuloPosAndReason"; "Hash"; "NoPosHash"; "Ord"]
+    | "tast::SavedEnv" -> ["Eq"; "EqModuloPos"; "Hash"; "NoPosHash"; "Ord"]
     | "ast_defs::Id" when is_by_ref -> ["Debug"]
     | "errors::Errors" when is_by_ref -> ["Debug"]
     | "typing_defs_core::Ty" when is_by_ref ->
@@ -121,8 +119,7 @@ end = struct
 
   let skip_list_for_trait trait =
     match trait with
-    | "EqModuloPos"
-    | "EqModuloPosAndReason" ->
+    | "EqModuloPos" ->
       [
         "scoured_comments::*";
         "pos_or_decl::*";

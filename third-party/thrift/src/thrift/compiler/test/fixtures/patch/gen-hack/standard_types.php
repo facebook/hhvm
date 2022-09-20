@@ -50,7 +50,7 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Void'))>>
 enum apache_thrift_type_standard_Void: int {
-  NoValueVoid = 0;
+  NoValue = 0;
 }
 
 class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
@@ -59,7 +59,7 @@ class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEn
       shape(
         "name" => "standard.Void",
         "elements" => dict[
-          0 => "NoValueVoid",
+          0 => "NoValue",
         ],
       )
     );

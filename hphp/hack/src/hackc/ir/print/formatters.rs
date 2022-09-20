@@ -19,7 +19,6 @@ use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
 
-use ffi::Pair;
 use ffi::Str;
 use ir_core::func::SrcLoc;
 use ir_core::instr::BareThisOp;
@@ -632,8 +631,13 @@ impl Display for FmtTypedValue<'_> {
                 write!(
                     f,
                     "dict[{}]",
-                    FmtSep::comma(values.as_ref(), |f, Pair(k, v)| {
-                        write!(f, "{} => {}", FmtTypedValue(k), FmtTypedValue(v))
+                    FmtSep::comma(values.as_ref(), |f, e| {
+                        write!(
+                            f,
+                            "{} => {}",
+                            FmtTypedValue(&e.key),
+                            FmtTypedValue(&e.value)
+                        )
                     })
                 )
             }

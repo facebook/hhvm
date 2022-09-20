@@ -768,7 +768,7 @@ const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_refl
   "__fbthrift_field_field0",
   "__fbthrift_field_field1",
   "__fbthrift_field_field2",
-  "field3",
+  "__fbthrift_field_field3",
 }};
 const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::isset_indexes = {{
   -1,

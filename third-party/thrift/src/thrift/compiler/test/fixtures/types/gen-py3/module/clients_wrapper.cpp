@@ -22,11 +22,17 @@ SomeServiceClientWrapper::bounce_map(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::unordered_map<int32_t,std::string>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_bounce_map, channel_);
-  client->bounce_map(
-    rpcOptions,
-    std::move(callback),
-    arg_m
-  );
+  try {
+    client->bounce_map(
+      rpcOptions,
+      std::move(callback),
+      arg_m
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::unordered_map<int32_t,std::string>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -39,11 +45,17 @@ SomeServiceClientWrapper::binary_keyed_map(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::map<std::string,int64_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_binary_keyed_map, channel_);
-  client->binary_keyed_map(
-    rpcOptions,
-    std::move(callback),
-    arg_r
-  );
+  try {
+    client->binary_keyed_map(
+      rpcOptions,
+      std::move(callback),
+      arg_r
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::map<std::string,int64_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

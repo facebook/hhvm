@@ -310,13 +310,16 @@ std::string readFile(folly::StringPiece path) {
 std::shared_ptr<SSLContext> createClientSSLContext(
     SecurityOptions opts,
     SecurityMech mech) {
-  auto context = std::make_shared<ClientSSLContext>(ticketCache.get());
+  // The TLSv1_2 constructor argument sets the min version, while the call to
+  // disableTLS13() sets the max version, also to TLS 1.2, essentially disabling
+  // TLS 1.3 entirely. We need this particularly for StopTLS handling which
+  // expects a TLS 1.2 connection.
+  auto context = std::make_shared<ClientSSLContext>(
+      ticketCache.get(), folly::SSLContext::SSLVersion::TLSv1_2);
+  context->disableTLS13();
+  // TODO: When enabling TLS 1.3, set TLS 1.3 ciphersuites from SSLCommonOptions
   auto ciphers = folly::ssl::SSLCommonOptions::ciphers();
   std::vector<std::string> cVec(ciphers.begin(), ciphers.end());
-  // Explicitly disable TLS 1.3 because of assumption in codebase that
-  // AsyncSSLSocket == TLS 1.2 (e.g. tls_to_plain).
-  // TODO: When enabling TLS 1.3, set TLS 1.3 ciphersuites from SSLCommonOptions
-  context->disableTLS13();
 #if FOLLY_OPENSSL_HAS_ALPN
   if (mech == SecurityMech::TLS_TO_PLAINTEXT) {
     // Prepend ECDHE-RSA-NULL-SHA to make it obvious from the ClientHello

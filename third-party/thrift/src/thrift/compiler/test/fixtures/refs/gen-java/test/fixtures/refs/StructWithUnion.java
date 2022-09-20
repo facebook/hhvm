@@ -149,8 +149,8 @@ public final class StructWithUnion implements com.facebook.thrift.payload.Thrift
     
         return
             Objects.equals(u, other.u) &&
-    Objects.equals(aDouble, other.aDouble) &&
-    Objects.equals(f, other.f) &&
+            Objects.equals(aDouble, other.aDouble) &&
+            Objects.equals(f, other.f) &&
             true;
     }
     

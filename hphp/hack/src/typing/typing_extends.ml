@@ -209,7 +209,7 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
   | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
       match
-        Typing_modules.can_access
+        Typing_modules.can_access_internal
           ~env
           ~current:(Some child_m)
           ~target:(Some parent_m)
@@ -1145,7 +1145,40 @@ let check_class_against_parent_class_elt
     class_
     parent_class
     (member_kind, member_name, parent_class_elt.ce_origin);
-  match get_member member_kind class_ member_name with
+
+  let member_element_opt =
+    let member_element = get_member member_kind class_ member_name in
+    if Ast_defs.is_c_trait (Cls.kind class_) then
+      (* If a trait does not define the element itself, but will inherit the element from a
+       * require class constraint then eagerly compare the element from the required class
+       * against the parent class elements.
+       *)
+      Option.map member_element ~f:(fun member_element ->
+          if String.equal member_element.ce_origin (Cls.name class_) then
+            member_element
+          else
+            let member_element_in_req_class =
+              List.find_map
+                (Cls.all_ancestor_req_class_requirements class_)
+                ~f:(fun (_, req_ty) ->
+                  let (_, (_, cn), _) = TUtils.unwrap_class_type req_ty in
+                  Decl_provider.get_class (Env.get_ctx env) cn >>= fun cnc ->
+                  get_member member_kind cnc member_name)
+            in
+            match member_element_in_req_class with
+            | Some member_element_in_req_class ->
+              {
+                member_element_in_req_class with
+                ce_flags =
+                  Typing_defs_flags.ClassElt.set_synthesized
+                    member_element_in_req_class.ce_flags;
+              }
+            | None -> member_element)
+    else
+      member_element
+  in
+
+  match member_element_opt with
   | Some class_elt ->
     if String.equal parent_class_elt.ce_origin class_elt.ce_origin then (
       (* Case where the child's element comes from the parent being checked. *)
@@ -1624,11 +1657,7 @@ let check_typeconst_override
              tconst.ttc_origin
              name
       then
-        let child_is_abstract =
-          match tconst.ttc_kind with
-          | TCConcrete _ -> false
-          | TCAbstract _ -> true
-        in
+        let child_is_abstract = is_typeconst_type_abstract tconst in
         let err =
           Typing_error.Secondary.Interface_typeconst_multiple_defs
             {
@@ -2071,40 +2100,45 @@ let check_class_extends_parents_typeconsts
           (* If class_ is a trait that has a require class C constraint, and C provides a concrete definition
            * for the type constant, and the parent definition is abstract, then compare the parent type constant
            * against the type constant defined in the required class.
-           * Otherwise compare it against the type constant defined in class_, if any *)
+           * Otherwise compare it against the type constant defined in class_, if any.
+           * However, if the parent definition is a concrete type constant, then we can skip checking type constants
+           * inherited via require class constants, as these must be concrete and a conflict check will be
+           * performed on the class itself *)
+          let is_parent_tconst_abstract =
+            is_typeconst_type_abstract parent_tconst
+          in
           let class_tconst_opt =
-            (* if the parent definition is a concrete type constant, then we can skip checking type constants
-             * inherited via require class constants, as these must be concrete and a conflict check will be
-             * performed on the class itself *)
-            let is_parent_tconst_abstract =
-              match parent_tconst.ttc_kind with
-              | TCAbstract _ -> true
-              | TCConcrete _ -> false
-            in
-            let class_req_tconst_opt =
-              if
-                Ast_defs.is_c_trait (Cls.kind class_)
-                && is_parent_tconst_abstract
-              then
-                List.find_map
-                  (Cls.all_ancestor_req_class_requirements class_)
-                  ~f:(fun (_, req_ty) ->
-                    match deref req_ty with
-                    | (_, Tapply ((_, cn), _)) ->
-                      Decl_provider.get_class (Env.get_ctx env) cn
-                      >>= fun cnc ->
-                      (* Since only final classes can satisfy require class constraints, if the type constant is
-                       * found in the require class then it must be concrete.  No need to check that here. *)
-                      Cls.get_typeconst cnc tconst_name
-                    | _ ->
-                      (* We ensure elsewhere that require class constraints can only be used with class names *)
-                      None)
-              else
-                None
-            in
-            match class_req_tconst_opt with
-            | None -> Cls.get_typeconst class_ tconst_name
-            | Some _ -> class_req_tconst_opt
+            let tconst_element = Cls.get_typeconst class_ tconst_name in
+            if
+              Ast_defs.is_c_trait (Cls.kind class_) && is_parent_tconst_abstract
+            then
+              Option.map tconst_element ~f:(fun tconst_element ->
+                  if String.equal tconst_element.ttc_origin (Cls.name class_)
+                  then
+                    tconst_element
+                  else
+                    let tconst_element_in_req_class =
+                      List.find_map
+                        (Cls.all_ancestor_req_class_requirements class_)
+                        ~f:(fun (_, req_ty) ->
+                          let (_, (_, cn), _) =
+                            TUtils.unwrap_class_type req_ty
+                          in
+                          Decl_provider.get_class (Env.get_ctx env) cn
+                          >>= fun cnc ->
+                          (* Since only final classes can satisfy require class constraints, if the type constant is
+                           * found in the require class then it must be concrete.  No need to check that here. *)
+                          Cls.get_typeconst cnc tconst_name)
+                    in
+                    match tconst_element_in_req_class with
+                    | Some tconst_element_in_req_class ->
+                      {
+                        tconst_element_in_req_class with
+                        ttc_synthesized = true;
+                      }
+                    | None -> tconst_element)
+            else
+              tconst_element
           in
 
           match class_tconst_opt with

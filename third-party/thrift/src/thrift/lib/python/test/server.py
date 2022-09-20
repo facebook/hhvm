@@ -17,14 +17,12 @@
 from __future__ import annotations
 
 import asyncio
-import sys
-import types
 import unittest
 from typing import Optional, Sequence
 
 from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy
-from thrift.py3.server import getServiceName, RequestContext, SocketAddress
+from thrift.py3.server import SocketAddress
 from thrift.python.server import ThriftServer
 
 

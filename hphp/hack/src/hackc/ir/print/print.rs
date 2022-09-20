@@ -1234,6 +1234,7 @@ pub(crate) fn print_instr(
         Instr::Special(Special::IrToBc(ir_to_bc)) => {
             print_ir_to_bc(w, ctx, func, ir_to_bc)?;
         }
+        Instr::Special(Special::Textual(textual)) => print_textual(w, ctx, func, textual)?,
         Instr::Special(Special::Tmp(Tmp::GetVar(var))) => {
             write!(w, "get_var &{}", var.as_usize())?;
         }
@@ -1256,6 +1257,51 @@ pub(crate) fn print_instr(
         Instr::Terminator(t) => print_terminator(w, ctx, func, iid, t)?,
     }
     Ok(true)
+}
+
+pub(crate) fn print_textual(
+    w: &mut dyn Write,
+    ctx: &mut FuncContext<'_>,
+    func: &Func<'_>,
+    textual: &instr::Textual,
+) -> std::result::Result<(), Error> {
+    use instr::Textual;
+    use instr::TextualHackBuiltinParam;
+    let verbose = ctx.verbose;
+    match textual {
+        Textual::AssertFalse(vid, _) => {
+            write!(w, "textual::assert_false {}", FmtVid(func, *vid, verbose))?;
+        }
+        Textual::AssertTrue(vid, _) => {
+            write!(w, "textual::assert_true {}", FmtVid(func, *vid, verbose))?;
+        }
+        Textual::HackBuiltin {
+            values,
+            target,
+            params,
+            loc: _,
+        } => {
+            let mut values = values.iter();
+            write!(w, "textual::hack_builtin({target}")?;
+            for p in params.iter() {
+                match p {
+                    TextualHackBuiltinParam::Null => write!(w, ", null")?,
+                    TextualHackBuiltinParam::False => write!(w, ", false")?,
+                    TextualHackBuiltinParam::HackInt(i) => write!(w, "hack_int({i})")?,
+                    TextualHackBuiltinParam::HackString(s) => write!(w, "hack_string({s:?})")?,
+                    TextualHackBuiltinParam::Int(i) => write!(w, ", {i}")?,
+                    TextualHackBuiltinParam::String(s) => write!(w, ", \"{s}\"")?,
+                    TextualHackBuiltinParam::True => write!(w, ", true")?,
+                    TextualHackBuiltinParam::Value => {
+                        let vid = values.next().unwrap();
+                        write!(w, ", {}", FmtVid(func, *vid, verbose))?
+                    }
+                }
+            }
+            write!(w, ")")?;
+        }
+    }
+    Ok(())
 }
 
 pub(crate) fn print_ir_to_bc(

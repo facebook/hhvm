@@ -292,12 +292,18 @@ struct CompactWriter {
           }
           if (!fieldVal.isNull()) {
             TType fieldType = fields[slot].type;
+            if (fields[slot].adapter) {
+              fieldVal = transformToThriftType(fieldVal, *fields[slot].adapter);
+            }
+            if(fields[slot].isTerse && is_value_type_default(fieldType, fieldVal)) {
+              continue;
+            }
             writeFieldBegin(fields[slot].fieldNum, fieldType);
             auto fieldInfo = FieldInfo();
             fieldInfo.cls = cls;
             fieldInfo.prop = &prop[slot];
             fieldInfo.fieldNum = fields[slot].fieldNum;
-            writeField(fieldVal, fields[slot], fieldType, fieldInfo);
+            writeFieldInternal(fieldVal, fields[slot], fieldType, fieldInfo);
             writeFieldEnd();
           } else if (UNLIKELY(fieldVal.is(KindOfUninit)) &&
                      (prop[slot].attrs & AttrLateInit)) {
@@ -1230,6 +1236,33 @@ void HHVM_FUNCTION(thrift_protocol_write_compact,
 
   CompactWriter writer(&transport);
   writer.setWriteVersion(s_compact_request_data->version);
+  writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
+  writer.write(request_struct);
+
+  if (oneway) {
+    transport.onewayFlush();
+  } else {
+    transport.flush();
+  }
+}
+
+void HHVM_FUNCTION(thrift_protocol_write_compact2,
+                   const Object& transportobj,
+                   const String& method_name,
+                   int64_t msgtype,
+                   const Object& request_struct,
+                   int64_t seqid,
+                   bool oneway,
+                   int64_t version) {
+  CoeffectsAutoGuard _;
+  // Suppress class-to-string conversion warnings that occur during
+  // serialization and deserialization.
+  SuppressClassConversionWarning suppressor;
+
+  PHPOutputTransport transport(transportobj);
+
+  CompactWriter writer(&transport);
+  writer.setWriteVersion(version);
   writer.writeHeader(method_name, (uint8_t)msgtype, (uint32_t)seqid);
   writer.write(request_struct);
 

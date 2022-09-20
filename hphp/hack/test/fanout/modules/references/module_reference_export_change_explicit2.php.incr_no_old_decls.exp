@@ -1,0 +1,9 @@
+=== base errors ===
+foo-use.php:5:19,21: Cannot access a public element from module 'A' in module 'B' (Typing[4444])
+  foo-defn.php:5:14,16: This is from module `A`
+  a-decl.php:5:12,12: Module 'A' does not export its public members to module 'B'
+=== changed errors ===
+No errors!
+=== fanout ===
+Fun call_foo
+Type Foo

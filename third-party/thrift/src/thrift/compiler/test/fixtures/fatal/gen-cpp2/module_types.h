@@ -1094,7 +1094,7 @@ typedef CppFakeI32 FakeI32;
 typedef CppHasANumber HasANumber;
 typedef CppHasAResult HasAResult;
 typedef CppHasAPhrase HasAPhrase;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int32_t> I32;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int32_t> I32;
 
 class union1 final  {
  private:
@@ -6602,7 +6602,7 @@ class struct4 final  {
   struct4() :
       __fbthrift_field_field0(),
       __fbthrift_field_field2(),
-      field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
+      __fbthrift_field_field3(std::make_unique<::test_cpp2::cpp_reflection::structA>()) {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -6620,8 +6620,8 @@ class struct4 final  {
   ::std::string __fbthrift_field_field1;
  private:
   ::test_cpp2::cpp_reflection::enum1 __fbthrift_field_field2;
- public:
-  ::std::unique_ptr<::test_cpp2::cpp_reflection::structA> field3;
+ private:
+  ::std::unique_ptr<::test_cpp2::cpp_reflection::structA> __fbthrift_field_field3;
  private:
   apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -6751,22 +6751,42 @@ class struct4 final  {
   }
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE T& field3_ref() & {
-    return field3;
+    return __fbthrift_field_field3;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE const T& field3_ref() const& {
-    return field3;
+    return __fbthrift_field_field3;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE T&& field3_ref() && {
-    return static_cast<T&&>(field3);
+    return static_cast<T&&>(__fbthrift_field_field3);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
   FOLLY_ERASE const T&& field3_ref() const&& {
-    return static_cast<const T&&>(field3);
+    return static_cast<const T&&>(__fbthrift_field_field3);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE T& field3() & {
+    return __fbthrift_field_field3;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE const T& field3() const& {
+    return __fbthrift_field_field3;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE T&& field3() && {
+    return static_cast<T&&>(__fbthrift_field_field3);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::test_cpp2::cpp_reflection::structA>>
+  FOLLY_ERASE const T&& field3() const&& {
+    return static_cast<const T&&>(__fbthrift_field_field3);
   }
 
   ::std::int32_t get_field0() const {
@@ -11792,11 +11812,11 @@ class StructWithFieldAdapter final  {
 
   StructWithFieldAdapter() :
       __fbthrift_field_field() {
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg);
+  StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg);
 
   StructWithFieldAdapter(StructWithFieldAdapter&&) = default;
   StructWithFieldAdapter(const StructWithFieldAdapter& src);
@@ -11805,7 +11825,7 @@ class StructWithFieldAdapter final  {
   StructWithFieldAdapter& operator=(StructWithFieldAdapter&&) = default;
   StructWithFieldAdapter& operator=(const StructWithFieldAdapter& src);
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
  private:
   apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -11814,42 +11834,42 @@ class StructWithFieldAdapter final  {
   bool operator==(const StructWithFieldAdapter&) const;
   bool operator<(const StructWithFieldAdapter&) const;
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field_ref() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field_ref() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }

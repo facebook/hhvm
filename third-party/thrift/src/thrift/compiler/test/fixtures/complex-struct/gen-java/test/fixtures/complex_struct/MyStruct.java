@@ -799,33 +799,33 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(myIntField, other.myIntField) &&
-    Objects.equals(myStringField, other.myStringField) &&
-    Objects.equals(myDataField, other.myDataField) &&
-    Objects.equals(myEnum, other.myEnum) &&
-    Objects.equals(myBoolField, other.myBoolField) &&
-    Objects.equals(myByteField, other.myByteField) &&
-    Objects.equals(myShortField, other.myShortField) &&
-    Objects.equals(myLongField, other.myLongField) &&
-    Objects.equals(myDoubleField, other.myDoubleField) &&
-    Objects.equals(lDouble, other.lDouble) &&
-    Objects.equals(lShort, other.lShort) &&
-    Objects.equals(lInteger, other.lInteger) &&
-    Objects.equals(lLong, other.lLong) &&
-    Objects.equals(lString, other.lString) &&
-    Objects.equals(lBool, other.lBool) &&
-    Objects.equals(lByte, other.lByte) &&
-    Objects.equals(mShortString, other.mShortString) &&
-    Objects.equals(mIntegerString, other.mIntegerString) &&
-    Objects.equals(mStringMyStruct, other.mStringMyStruct) &&
-    Objects.equals(mStringBool, other.mStringBool) &&
-    Objects.equals(mIntegerInteger, other.mIntegerInteger) &&
-    Objects.equals(mIntegerBool, other.mIntegerBool) &&
-    Objects.equals(sShort, other.sShort) &&
-    Objects.equals(sMyStruct, other.sMyStruct) &&
-    Objects.equals(sLong, other.sLong) &&
-    Objects.equals(sString, other.sString) &&
-    Objects.equals(sByte, other.sByte) &&
-    Objects.equals(mListList, other.mListList) &&
+            Objects.equals(myStringField, other.myStringField) &&
+            Objects.equals(myDataField, other.myDataField) &&
+            Objects.equals(myEnum, other.myEnum) &&
+            Objects.equals(myBoolField, other.myBoolField) &&
+            Objects.equals(myByteField, other.myByteField) &&
+            Objects.equals(myShortField, other.myShortField) &&
+            Objects.equals(myLongField, other.myLongField) &&
+            Objects.equals(myDoubleField, other.myDoubleField) &&
+            Objects.equals(lDouble, other.lDouble) &&
+            Objects.equals(lShort, other.lShort) &&
+            Objects.equals(lInteger, other.lInteger) &&
+            Objects.equals(lLong, other.lLong) &&
+            Objects.equals(lString, other.lString) &&
+            Objects.equals(lBool, other.lBool) &&
+            Objects.equals(lByte, other.lByte) &&
+            Objects.equals(mShortString, other.mShortString) &&
+            Objects.equals(mIntegerString, other.mIntegerString) &&
+            Objects.equals(mStringMyStruct, other.mStringMyStruct) &&
+            Objects.equals(mStringBool, other.mStringBool) &&
+            Objects.equals(mIntegerInteger, other.mIntegerInteger) &&
+            Objects.equals(mIntegerBool, other.mIntegerBool) &&
+            Objects.equals(sShort, other.sShort) &&
+            Objects.equals(sMyStruct, other.sMyStruct) &&
+            Objects.equals(sLong, other.sLong) &&
+            Objects.equals(sString, other.sString) &&
+            Objects.equals(sByte, other.sByte) &&
+            Objects.equals(mListList, other.mListList) &&
             true;
     }
     

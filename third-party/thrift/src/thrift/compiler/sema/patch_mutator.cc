@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <thrift/compiler/sema/patch_mutator.h>
 
 #include <thrift/compiler/ast/diagnostic_context.h>
@@ -162,6 +163,13 @@ struct PatchGen : StructGen {
   }
   t_field& clearUnion() {
     return doc("Clears any set value. Applies first.", clear());
+  }
+
+  // {kPatchPriorId}: {patch_type} patch;
+  t_field& patchList(t_type_ref patch_type) {
+    return doc(
+        "Patches list values by index. Applies second.",
+        field(kPatchPriorId, patch_type, "patch"));
   }
 
   // {kPatchPriorId}: {patch_type} patch;
@@ -438,45 +446,58 @@ t_struct& patch_generator::gen_prefix_struct(
 }
 
 t_struct& patch_generator::gen_patch(
-    const t_node& annot,
-    const t_named& orig,
+    const t_const& annot,
+    const t_structured& orig,
     const std::string& suffix,
     t_type_ref type) {
   PatchGen gen{{annot, gen_suffix_struct(annot, orig, suffix.c_str())}};
   // All value patches have an assign and clear field.
   gen.assign(type);
   gen.clear();
-  auto* ttype = type->get_true_type();
-  if (auto* container = dynamic_cast<const t_container*>(ttype)) {
-    switch (container->container_type()) {
-      case t_container::type::t_list:
-        // TODO(afuller): support 'patch'.
-        // TODO(afuller): support 'remove' op.
-        // TODO(afuller): support 'replace' op.
-        gen.prepend(type);
-        gen.append(type);
-        gen.set_adapter("ListPatchAdapter", program_);
-        break;
-      case t_container::type::t_set:
-        // TODO(afuller): support 'replace' op.
-        gen.remove(type);
-        gen.addSet(type);
-        gen.set_adapter("SetPatchAdapter", program_);
-        break;
-      case t_container::type::t_map:
-        // TODO(afuller): support 'patch' op.
-        // TODO(afuller): support 'remove' op.
-        // TODO(afuller): support 'removeIf' op.
-        // TODO(afuller): support 'replace' op.
-        gen.addMap(type);
-        gen.put(type);
-        gen.set_adapter("MapPatchAdapter", program_);
-        break;
-    }
+
+  const auto* ttype = type->get_true_type();
+  if (auto* list = dynamic_cast<const t_list*>(ttype)) {
+    // TODO(afuller): support 'remove' op.
+    // TODO(afuller): support 'replace' op.
+    // TODO(afuller): support 'patch' op once map values can be adapted.
+    // auto elem_patch_type = find_patch_type(annot, orig, list->elem_type());
+    // gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    gen.prepend(type);
+    gen.append(type);
+    gen.set_adapter("ListPatchAdapter", program_);
+  } else if (auto* set = dynamic_cast<const t_set*>(ttype)) {
+    // TODO(afuller): support 'replace' op.
+    gen.remove(type);
+    gen.addSet(type);
+    gen.set_adapter("SetPatchAdapter", program_);
+  } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
+    // TODO(afuller): support 'remove' op.
+    // TODO(afuller): support 'removeIf' op.
+    // TODO(afuller): support 'replace' op.
+    // TODO(afuller): support 'patch' op once map values can be adapted.
+    // auto val_patch_type = find_patch_type(annot, orig, map->val_type());
+    // gen.patchPrior(inst_map(map->key_type(), val_patch_type));
+    gen.addMap(type);
+    // gen.patchAfter(inst_map(map->key_type(), val_patch_type));
+    gen.put(type);
+    gen.set_adapter("MapPatchAdapter", program_);
   } else {
     gen.set_adapter("AssignPatchAdapter", program_);
   }
   return gen;
+}
+
+t_type_ref patch_generator::inst_list(t_type_ref val) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_list>(val));
+}
+t_type_ref patch_generator::inst_set(t_type_ref key) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_set>(key));
+}
+t_type_ref patch_generator::inst_map(t_type_ref key, t_type_ref val) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_map>(key, val));
 }
 
 } // namespace compiler

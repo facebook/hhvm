@@ -121,8 +121,8 @@ class patch_generator {
       const t_node& annot, const t_named& orig, const char* prefix);
 
   t_struct& gen_patch(
-      const t_node& annot,
-      const t_named& orig,
+      const t_const& annot,
+      const t_structured& orig,
       const std::string& suffix,
       t_type_ref type);
 
@@ -148,6 +148,10 @@ class patch_generator {
     size_t pos = uri.rfind('/') + 1;
     return pos > 0 ? uri.substr(0, pos) + prefix + uri.substr(pos) : "";
   }
+
+  t_type_ref inst_list(t_type_ref val);
+  t_type_ref inst_set(t_type_ref key);
+  t_type_ref inst_map(t_type_ref val, t_type_ref key);
 };
 
 } // namespace compiler

@@ -46,7 +46,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
     
     @ThriftConstructor
     protected TerseException() {
-      this.msg = null;
+      this.msg = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
     }
     
     public static class Builder {

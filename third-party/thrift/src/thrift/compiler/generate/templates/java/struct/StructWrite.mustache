@@ -24,7 +24,12 @@ public void write0(TProtocol oprot) throws TException {
   {{/struct:hasTerseField?}}
   {{#struct:fields_in_serialization_order}}
   {{#field:hasAdapter?}}
+  {{#field:hasMultipleTypeAdapters?}}
+  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(_{{field:javaName}}_Adapter2.toThrift(this.{{field:javaName}}));
+  {{/field:hasMultipleTypeAdapters?}}
+  {{^field:hasMultipleTypeAdapters?}}
   {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(this.{{field:javaName}});
+  {{/field:hasMultipleTypeAdapters?}}
   {{/field:hasAdapter?}}
   {{#field:isNullableOrOptionalNotEnum?}}
   {{#field:terse?}}  

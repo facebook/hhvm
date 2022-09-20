@@ -20,6 +20,7 @@ import com.facebook.thrift.adapter.common.MapTypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,13 +35,17 @@ public class IntBinaryMapToStringTypeAdapter implements MapTypeAdapter<Integer, 
 
   @Override
   public Map<Integer, ByteBuf> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(","))
-            .map(p -> p.split("="))
-            .collect(
-                Collectors.toMap(
-                    p -> Integer.parseInt(p[0]),
-                    p -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(p[1]))));
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptyMap();
+    }
+    return Stream.of(s.split(","))
+        .map(p -> p.split("="))
+        .collect(
+            Collectors.toMap(
+                p -> Integer.parseInt(p[0]),
+                p -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(p[1]))));
   }
 }

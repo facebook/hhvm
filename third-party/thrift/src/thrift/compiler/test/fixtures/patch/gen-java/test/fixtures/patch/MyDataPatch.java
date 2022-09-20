@@ -204,10 +204,10 @@ public final class MyDataPatch implements com.facebook.thrift.payload.ThriftSeri
     
         return
             Objects.equals(assign, other.assign) &&
-    Objects.equals(clear, other.clear) &&
-    Objects.equals(patchPrior, other.patchPrior) &&
-    Objects.equals(ensure, other.ensure) &&
-    Objects.equals(patch, other.patch) &&
+            Objects.equals(clear, other.clear) &&
+            Objects.equals(patchPrior, other.patchPrior) &&
+            Objects.equals(ensure, other.ensure) &&
+            Objects.equals(patch, other.patch) &&
             true;
     }
     

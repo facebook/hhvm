@@ -6,7 +6,7 @@ namespace {
 /** An iterator implementation for iterating over a Vector/ImmVector.
  */
 <<__NativeData("VectorIterator")>>
-final class VectorIterator implements HH\KeyedIterator {
+final class VectorIterator<T> implements HH\KeyedIterator<int, T> {
 
   /** Do nothing */
   public function __construct()[]: void { }
@@ -15,13 +15,13 @@ final class VectorIterator implements HH\KeyedIterator {
    * @return mixed
    */
   <<__Native>>
-  public function current()[]: mixed;
+  public function current()[]: T;
 
   /** Returns the current key that the iterator points to.
    * @return mixed
    */
   <<__Native>>
-  public function key()[]: mixed;
+  public function key()[]: int;
 
   /** Returns true if the iterator points to a valid value, returns false
    * otherwise.
@@ -47,7 +47,7 @@ namespace HH {
 /** An ordered collection where values are keyed using integers 0 thru n-1 in
  * order.
  */
-final class Vector implements \MutableVector {
+final class Vector<T> implements \MutableVector<T> {
 
   /** Returns a Vector built from the values produced by the specified Iterable.
    * @param mixed $iterable
@@ -72,14 +72,16 @@ final class Vector implements \MutableVector {
   /** Returns an Iterable that produces the values from this Vector.
    * @return object
    */
+  /* HH_FIXME[2049] */
   public function items()[]: \LazyIterableView {
+    /* HH_FIXME[2049] */
     return new \LazyIterableView($this);
   }
 
   /** Returns a Vector built from the keys of this Vector.
    * @return object
    */
-  public readonly function keys()[]: this {
+  public readonly function keys()[]: Vector<int> {
     return new self($this->toKeysArray());
   }
 
@@ -93,7 +95,9 @@ final class Vector implements \MutableVector {
   /** Returns a lazy iterable view of this Vector.
    * @return object
    */
+  /* HH_FIXME[2049] */
   public function lazy()[]: \LazyKeyedIterableView {
+    /* HH_FIXME[2049] */
     return new \LazyKeyedIterableView($this);
   }
 
@@ -102,8 +106,8 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return mixed
    */
-  public function at(mixed $key)[]: mixed {
-    return $this[$key];
+  public function at(mixed $key)[]: T {
+    return $this[HH\FIXME\UNSAFE_CAST<mixed, int>($key)];
   }
 
   /** Returns the value at the specified key. If the key is not present, null is
@@ -111,8 +115,11 @@ final class Vector implements \MutableVector {
    * @param mixed $key
    * @return mixed
    */
-  public function get(mixed $key)[]: mixed {
-    return idx($this, $key);
+  public function get(mixed $key)[]: ?T {
+    // TODO(T125421081) `idx` is special cased in the typechecker, I don't think
+    // it quite understands how to deal with the input being `$this`, for some
+    // reason.
+    return HH\FIXME\UNSAFE_CAST<mixed, ?T>(idx($this, $key));
   }
 
   /** Stores a value into the Vector with the specified key, overwriting any
@@ -122,9 +129,9 @@ final class Vector implements \MutableVector {
    * @param mixed $value
    * @return object
    */
-  public function set(mixed $key, mixed $value)[write_props]: this {
+  public function set(mixed $key, T $value)[write_props]: this {
     $result = $this;
-    $result[$key] = $value;
+    $result[HH\FIXME\UNSAFE_CAST<mixed, int>($key)] = $value;
     return $result;
   }
 
@@ -139,7 +146,10 @@ final class Vector implements \MutableVector {
     if ($iterable === null) {
       return $this;
     }
-    foreach ($iterable as $key => $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<nonnull, KeyedTraversable<int, T>>($iterable)
+        as $key => $value
+    ) {
       $this->set($key, $value);
     }
     return $this;
@@ -165,7 +175,7 @@ final class Vector implements \MutableVector {
     "Use Vector::containsKey() for key search or Vector::linearSearch() for value search"
   )>>
   public readonly function contains(mixed $key): bool {
-    if (!\is_int($key)) {
+    if (!($key is int)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
       );
@@ -179,7 +189,7 @@ final class Vector implements \MutableVector {
    * @return bool
    */
   public readonly function containsKey(mixed $key)[]: bool {
-    if (!\is_int($key)) {
+    if (!($key is int)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
       );
@@ -203,7 +213,7 @@ final class Vector implements \MutableVector {
   /** @param mixed $value
    * @return object
    */
-  public function append(mixed $value)[write_props]: this {
+  public function append(T $value)[write_props]: this {
     $result = $this;
     $result[] = $value;
     return $result;
@@ -214,7 +224,7 @@ final class Vector implements \MutableVector {
    * @param mixed $value
    * @return object
    */
-  public function add(mixed $value)[write_props]: this {
+  public function add(T $value)[write_props]: this {
     return $this->append($value);
   }
 
@@ -227,7 +237,10 @@ final class Vector implements \MutableVector {
     if ($iterable === null) {
       return $this;
     }
-    foreach ($iterable as $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<nonnull, KeyedTraversable<mixed, T>>($iterable)
+        as $value
+    ) {
       $this->append($value);
     }
     return $this;
@@ -238,11 +251,16 @@ final class Vector implements \MutableVector {
    * @param mixed $container
    * @return object
    */
-  public function addAllKeysOf(mixed $container)[write_props]: this {
+  public function addAllKeysOf(
+    mixed $container,
+  )[write_props]: this {
     if ($container === null) {
       return $this;
     }
-    foreach ($container as $key => $_) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<nonnull, KeyedTraversable<T, mixed>>($container)
+        as $key => $_
+    ) {
       $this->append($key);
     }
     return $this;
@@ -270,75 +288,85 @@ final class Vector implements \MutableVector {
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  public function toVArray()[]: varray {
+  public function toVArray()[]: varray<T> {
     return varray($this);
   }
 
-  public function toDArray()[]: darray {
+  public function toDArray()[]: darray<int, T> {
     return darray($this);
   }
 
   /** Returns a copy of this Vector.
    * @return object
    */
-  public function toVector()[]: Vector {
+  public function toVector()[]: Vector<T> {
     return new self($this);
   }
 
   /** Returns a ImmVector built from the values of this Vector.
    * @return object
    */
-  public function toImmVector()[]: ImmVector {
+  public function toImmVector()[]: ImmVector<T> {
     return new ImmVector($this);
   }
 
   /** Returns an immutable version of this collection.
    * @return object
    */
-  public function immutable()[]: ImmVector {
+  public function immutable()[]: ImmVector<T> {
     return $this->toImmVector();
   }
 
   /** Returns a Map built from the keys and values of this Vector.
    * @return object
    */
-  public function toMap()[]: Map {
+  /* HH_FIXME[2049] */
+  public function toMap()[]: Map<int, T> {
+    /* HH_FIXME[2049] */
     return new Map($this);
   }
 
   /** Returns a ImmMap built from the keys and values of this Vector.
    * @return object
    */
-  public function toImmMap()[]: ImmMap {
+  /* HH_FIXME[2049] */
+  public function toImmMap()[]: ImmMap<int, T> {
+    /* HH_FIXME[2049] */
     return new ImmMap($this);
   }
 
   /** Returns a Set built from the values of this Vector.
    * @return object
    */
-  public function toSet()[]: Set {
+  /* HH_FIXME[2049] */
+  public function toSet()[]: Set<T> where T as arraykey {
+    /* HH_FIXME[2049] */
     return new Set($this);
   }
 
   /** Returns a ImmSet built from the values of this Vector.
    * @return object
    */
-  public function toImmSet()[]: ImmSet {
+  /* HH_FIXME[2049] */
+  public function toImmSet()[]: ImmSet<T> where T as arraykey {
+    /* HH_FIXME[2049] */
     return new ImmSet($this);
   }
 
   /** Returns a varray built from the keys from this Vector.
    * @return varray
    */
-  public readonly function toKeysArray()[]: varray {
+  public readonly function toKeysArray()[]: varray<int> {
     $count = $this->count();
-    return $count ? varray(\range(0, $count - 1)) : varray[];
+    return $count
+      ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
+      : varray[];
   }
 
   /** Returns a varray built from the values from this Vector.
    * @return varray
    */
-  public function toValuesArray()[]: varray {
+  public function toValuesArray()[]: varray<T> {
     return $this->toVArray();
   }
 
@@ -346,14 +374,16 @@ final class Vector implements \MutableVector {
    * @return object
    */
   <<__Native>>
-  public function getIterator()[]: object;
+  public function getIterator()[]: Iterator<T>;
 
   /** Returns a Vector of the values produced by applying the specified callback
    * on each value from this Vector.
    * @param mixed $callback
    * @return object
    */
-  public function map((function()[_]: void) $callback)[ctx $callback]: Vector {
+  public function map<To>(
+    (function(T)[_]: To) $callback,
+  )[ctx $callback]: Vector<To> {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -366,7 +396,9 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: Vector {
+  public function mapWithKey<To>(
+    (function(int, T)[_]: To) $callback,
+  )[ctx $callback]: Vector<To> {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -379,7 +411,9 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  public function filter((function()[_]: void) $callback)[ctx $callback]: Vector {
+  public function filter(
+    (function(T)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -394,7 +428,9 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: Vector {
+  public function filterWithKey(
+    (function(int, T)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -409,11 +445,15 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  public function zip(mixed $iterable)[]: this {
+  public function zip<To>(
+    mixed $iterable,
+  )[]: Vector<Pair<T, To>> {
     $i = 0;
     $result = vec[];
     $count = $this->count();
-    foreach ($iterable as $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<mixed, Traversable<To>>($iterable) as $value
+    ) {
       if ($i === $count) {
         break;
       }
@@ -429,7 +469,7 @@ final class Vector implements \MutableVector {
    */
   public function take(mixed $n)[]: this {
     if (!($n is int)) {
-      throw new InvalidArgumentException("Parameter n must be an integer");
+      throw new \InvalidArgumentException("Parameter n must be an integer");
     }
     $count = $this->count();
     $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
@@ -446,7 +486,9 @@ final class Vector implements \MutableVector {
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: Vector {
+  public function takeWhile(
+    (function(T)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -464,7 +506,7 @@ final class Vector implements \MutableVector {
    */
   public function skip(mixed $n)[]: this {
     if (!($n is int)) {
-      throw new InvalidArgumentException("Parameter n must be an integer");
+      throw new \InvalidArgumentException("Parameter n must be an integer");
     }
     $count = $this->count();
     $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
@@ -480,7 +522,7 @@ final class Vector implements \MutableVector {
    * @param mixed $fn
    * @return object
    */
-  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: Vector {
+  public function skipWhile((function(T)[_]: bool) $fn)[ctx $fn]: this {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -504,11 +546,11 @@ final class Vector implements \MutableVector {
    */
   public function slice(mixed $start, mixed $len)[]: this {
     if (!($start is int) || $start < 0) {
-      throw new InvalidArgumentException(
+      throw new \InvalidArgumentException(
         "Parameter start must be a non-negative integer");
     }
     if (!($len is int) || $len < 0) {
-      throw new InvalidArgumentException(
+      throw new \InvalidArgumentException(
         "Parameter len must be a non-negative integer");
     }
     $count = $this->count();
@@ -526,9 +568,13 @@ final class Vector implements \MutableVector {
    * @param mixed $iterable
    * @return object
    */
-  public function concat(mixed $iterable)[]: this {
+  public function concat<To super T>(
+    mixed $iterable,
+  )[]: Vector<To> {
     $result = vec($this);
-    foreach ($iterable as $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<mixed, Traversable<To>>($iterable) as $value
+    ) {
       $result[] = $value;
     }
     return new self($result);
@@ -640,7 +686,7 @@ final class Vector implements \MutableVector {
 /** An immutable ordered collection where values are keyed using integers 0
  * thru n-1 in order.
  */
-final class ImmVector implements \ConstVector {
+final class ImmVector<T> implements \ConstVector<T> {
 
   /** Returns a ImmVector built from the values produced by the specified
    * Iterable.
@@ -693,7 +739,9 @@ final class ImmVector implements \ConstVector {
   /** Returns an Iterable that produces the values from this ImmVector.
    * @return object
    */
+  /* HH_FIXME[2049] */
   public function items()[]: \LazyIterableView {
+  /* HH_FIXME[2049] */
     return new \LazyIterableView($this);
   }
 
@@ -703,7 +751,7 @@ final class ImmVector implements \ConstVector {
    * @return bool
    */
   public readonly function containsKey(mixed $key)[]: bool {
-    if (!\is_int($key)) {
+    if (!($key is int)) {
       throw new \InvalidArgumentException(
         "Only integer keys may be used with Vectors"
       );
@@ -716,8 +764,8 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return mixed
    */
-  public function at(mixed $key)[]: mixed {
-    return $this[$key];
+  public function at(mixed $key)[]: T {
+    return $this[HH\FIXME\UNSAFE_CAST<mixed, int>($key)];
   }
 
   /** Returns the value at the specified key. If the key is not present, null is
@@ -725,22 +773,24 @@ final class ImmVector implements \ConstVector {
    * @param mixed $key
    * @return mixed
    */
-  public function get(mixed $key)[]: mixed {
-    return idx($this, $key);
+  public function get(mixed $key)[]: ?T {
+    return HH\FIXME\UNSAFE_CAST<mixed, ?T>(idx($this, $key));
   }
 
   /** Returns an iterator that points to beginning of this ImmVector.
    * @return object
    */
   <<__Native>>
-  public function getIterator()[]: object;
+  public function getIterator()[]: Iterator<T>;
 
   /** Returns a Vector of the values produced by applying the specified callback
    * on each value from this ImmVector.
    * @param mixed $callback
    * @return object
    */
-  public function map((function()[_]: void) $callback)[ctx $callback]: ImmVector {
+  public function map<To>(
+    (function(T)[_]: To) $callback,
+  )[ctx $callback]: ImmVector<To> {
     $ret = vec[];
     foreach ($this as $v) {
       $ret[] = $callback($v);
@@ -753,7 +803,9 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  public function mapWithKey((function()[_]: void) $callback)[ctx $callback]: ImmVector {
+  public function mapWithKey<To>(
+    (function(int, T)[_]: To) $callback,
+  )[ctx $callback]: ImmVector<To> {
     $ret = vec[];
     foreach ($this as $k => $v) {
       $ret[] = $callback($k, $v);
@@ -766,7 +818,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  public function filter((function()[_]: void) $callback)[ctx $callback]: ImmVector {
+  public function filter((function(T)[_]: bool) $callback)[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $v) {
       if ($callback($v)) {
@@ -781,7 +833,9 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  public function filterWithKey((function()[_]: void) $callback)[ctx $callback]: ImmVector {
+  public function filterWithKey(
+    (function(int, T)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $k => $v) {
       if ($callback($k, $v)) {
@@ -796,11 +850,15 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  public function zip(mixed $iterable)[]: this {
+  public function zip<To>(
+    mixed $iterable,
+  )[]: ImmVector<Pair<T, To>> {
     $i = 0;
     $result = vec[];
     $count = $this->count();
-    foreach ($iterable as $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<mixed, Traversable<To>>($iterable) as $value
+    ) {
       if ($i === $count) {
         break;
       }
@@ -816,7 +874,7 @@ final class ImmVector implements \ConstVector {
    */
   public function take(mixed $n)[]: this {
     if (!($n is int)) {
-      throw new InvalidArgumentException("Parameter n must be an integer");
+      throw new \InvalidArgumentException("Parameter n must be an integer");
     }
     $count = $this->count();
     $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
@@ -833,7 +891,9 @@ final class ImmVector implements \ConstVector {
    * @param mixed $callback
    * @return object
    */
-  public function takeWhile((function()[_]: void) $callback)[ctx $callback]: ImmVector {
+  public function takeWhile(
+    (function(T)[_]: bool) $callback,
+  )[ctx $callback]: this {
     $ret = vec[];
     foreach ($this as $v) {
       if (!$callback($v)) {
@@ -851,7 +911,7 @@ final class ImmVector implements \ConstVector {
    */
   public function skip(mixed $n)[]: this {
     if (!($n is int)) {
-      throw new InvalidArgumentException("Parameter n must be an integer");
+      throw new \InvalidArgumentException("Parameter n must be an integer");
     }
     $count = $this->count();
     $n = $n < 0 ? 0 : ($n > $count ? $count : $n);
@@ -867,7 +927,7 @@ final class ImmVector implements \ConstVector {
    * @param mixed $fn
    * @return object
    */
-  public function skipWhile((function()[_]: void) $fn)[ctx $fn]: ImmVector {
+  public function skipWhile((function(T)[_]: bool) $fn)[ctx $fn]: this {
     $ret = vec[];
     $skipping = true;
     foreach ($this as $v) {
@@ -889,13 +949,13 @@ final class ImmVector implements \ConstVector {
    * @param mixed $len
    * @return object
    */
-  public function slice(mixed $start, mixed $len)[]: ImmVector {
+  public function slice(mixed $start, mixed $len)[]: this {
     if (!($start is int) || $start < 0) {
-      throw new InvalidArgumentException(
+      throw new \InvalidArgumentException(
         "Parameter start must be a non-negative integer");
     }
     if (!($len is int) || $len < 0) {
-      throw new InvalidArgumentException(
+      throw new \InvalidArgumentException(
         "Parameter len must be a non-negative integer");
     }
     $count = $this->count();
@@ -913,9 +973,13 @@ final class ImmVector implements \ConstVector {
    * @param mixed $iterable
    * @return object
    */
-  public function concat(mixed $iterable)[]: this {
+  public function concat<To super T>(
+    mixed $iterable,
+  )[]: ImmVector<To> {
     $result = vec($this);
-    foreach ($iterable as $value) {
+    foreach (
+      HH\FIXME\UNSAFE_CAST<mixed, Traversable<To>>($iterable) as $value
+    ) {
       $result[] = $value;
     }
     return new self($result);
@@ -958,7 +1022,7 @@ final class ImmVector implements \ConstVector {
   /** Returns an Iterable that produces the keys from this ImmVector.
    * @return object
    */
-  public function keys()[]: this {
+  public function keys()[]: ImmVector<int> {
     return new self($this->toKeysArray());
   }
 
@@ -969,7 +1033,7 @@ final class ImmVector implements \ConstVector {
   /** Returns a Vector built from the values of this ImmVector.
    * @return object
    */
-  public function toVector()[]: Vector {
+  public function toVector()[]: Vector<T> {
     return new Vector($this);
   }
 
@@ -983,28 +1047,36 @@ final class ImmVector implements \ConstVector {
   /** Returns a Map built from the keys and values of this ImmVector.
    * @return object
    */
-  public function toMap()[]: Map {
+  /* HH_FIXME[2049] */
+  public function toMap()[]: Map<int, T> {
+    /* HH_FIXME[2049] */
     return new Map($this);
   }
 
   /** Returns a ImmMap built from the keys and values of this ImmVector.
    * @return object
    */
-  public function toImmMap()[]: ImmMap {
+  /* HH_FIXME[2049] */
+  public function toImmMap()[]: ImmMap<int, T> {
+    /* HH_FIXME[2049] */
     return new ImmMap($this);
   }
 
   /** Returns a Set built from the values of this ImmVector.
    * @return object
    */
-  public function toSet()[]: Set {
+  /* HH_FIXME[2049] */
+  public function toSet()[]: Set<T> where T as arraykey {
+    /* HH_FIXME[2049] */
     return new Set($this);
   }
 
   /** Returns a ImmSet built from the values of this ImmVector.
    * @return object
    */
-  public function toImmSet()[]: ImmSet {
+  /* HH_FIXME[2049] */
+  public function toImmSet()[]: ImmSet<T> where T as arraykey {
+    /* HH_FIXME[2049] */
     return new ImmSet($this);
   }
 
@@ -1025,33 +1097,37 @@ final class ImmVector implements \ConstVector {
   /** Returns a lazy iterable view of this ImmVector.
    * @return object
    */
+  /* HH_FIXME[2049] */
   public function lazy()[]: \LazyKeyedIterableView {
+    /* HH_FIXME[2049] */
     return new \LazyKeyedIterableView($this);
   }
 
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  public function toVArray()[]: varray {
+  public function toVArray()[]: varray<T> {
     return varray($this);
   }
 
-  public function toDArray()[]: darray {
+  public function toDArray()[]: darray<int, T> {
     return darray($this);
   }
 
   /** Returns a varray built from the keys from this ImmVector.
    * @return varray
    */
-  public readonly function toKeysArray()[]: varray {
+  public readonly function toKeysArray()[]: varray<int> {
     $count = $this->count();
-    return $count ? varray(\range(0, $count - 1)) : varray[];
+    return $count
+      ? varray(HH\FIXME\UNSAFE_CAST<mixed, varray<int>>(\range(0, $count - 1)))
+      : varray[];
   }
 
   /** Returns a varray built from the values from this ImmVector.
    * @return varray
    */
-  public function toValuesArray()[]: varray {
+  public function toValuesArray()[]: varray<T> {
     return $this->toVArray();
   }
 

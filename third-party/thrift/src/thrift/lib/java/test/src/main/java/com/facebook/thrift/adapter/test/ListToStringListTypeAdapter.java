@@ -17,6 +17,7 @@
 package com.facebook.thrift.adapter.test;
 
 import com.facebook.thrift.adapter.common.ListTypeAdapter;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,10 +32,14 @@ public class ListToStringListTypeAdapter implements ListTypeAdapter<List<Integer
 
   @Override
   public List<List<Integer>> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(":"))
-            .map(i -> Stream.of(i.split(",")).map(Integer::parseInt).collect(Collectors.toList()))
-            .collect(Collectors.toList());
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptyList();
+    }
+    return Stream.of(s.split(":"))
+        .map(i -> Stream.of(i.split(",")).map(Integer::parseInt).collect(Collectors.toList()))
+        .collect(Collectors.toList());
   }
 }

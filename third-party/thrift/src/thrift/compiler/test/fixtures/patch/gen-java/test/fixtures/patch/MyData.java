@@ -34,7 +34,7 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
     
     @ThriftConstructor
     protected MyData() {
-      this.data1 = null;
+      this.data1 = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
       this.data2 = 0;
     }
     
@@ -126,7 +126,7 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
     
         return
             Objects.equals(data1, other.data1) &&
-    Objects.equals(data2, other.data2) &&
+            Objects.equals(data2, other.data2) &&
             true;
     }
     

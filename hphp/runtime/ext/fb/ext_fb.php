@@ -229,6 +229,58 @@ function fb_lazy_lstat(string $filename): mixed;
 <<__Native>>
 function fb_lazy_realpath(string $filename): mixed;
 
+/* Similar as call_user_func_array(), except that it executes the function on
+ * a separate worker thread and returns an object immediately without waiting
+ * for the function to finish. The object can be used with
+ * fb_end_user_func_async() to eventually retrieve function's return value, if
+ * needed. NULL is returned if the call fails.
+ */
+<<__Native>>
+function fb_call_user_func_array_async(string $initialDoc,
+                                       mixed $function,
+                                       vec<mixed> $params): mixed;
+
+/* Similar to call_user_func(), except that it executes the function on a
+ * separate worker thread and returns an object immediately without waiting
+ * for the function to finish. The object can be used with
+ * fb_end_user_func_async() to eventually retrieve function's return value, if
+ * needed. NULL is returned if the call fails.
+ */
+function fb_call_user_func_async(string $initialDoc,
+                                 mixed $function,
+                                 mixed ...$args): resource {
+  $ret = fb_call_user_func_array_async($initialDoc, $function, $args);
+  if ($ret is resource) {
+    return $ret;
+  }
+  throw new \InvalidArgumentException('Invalid initialDoc or function');
+}
+
+/* Check to see if a specified job is done or not.
+ */
+<<__Native>>
+function fb_check_user_func_async(resource $handle): mixed;
+
+/* Block until function returns. Used with fb_call_user_func_async() or
+ * fb_call_user_func_array_async().
+ */
+<<__Native("NoFCallBuiltin")>>
+function fb_end_user_func_async(resource $handle): mixed;
+
+/* Similar to fb_call_user_func_async(), except that the invocation is treated
+ * as an async function call and returns a wait handle.
+ */
+<<__Native>>
+function fb_gen_user_func_array(string $initialDoc,
+                                mixed $function,
+                                vec<mixed> $argv): mixed;
+
+function fb_gen_user_func(string $initialDoc,
+                          mixed $function,
+                          mixed ...$args): mixed {
+  return fb_gen_user_func_array($initialDoc, $function, $args);
+}
+
 } // namespace
 
 namespace HH {

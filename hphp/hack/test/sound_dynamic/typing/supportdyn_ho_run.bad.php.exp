@@ -13,13 +13,13 @@ Typing error (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
   Expected `dynamic`
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `~<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "supportdyn_ho_run.bad.php", line 17, characters 6-7:
 Typing error (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
   Expected `dynamic`
   File "supportdyn_ho_run.bad.php", line 9, characters 3-9:
-  Type `~vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
+  Type `~<expr#1> as vec<C>` is not a subtype of `dynamic` under dynamic-aware subtyping
 File "supportdyn_ho_run.bad.php", line 18, characters 3-8:
 Typing error (Typing[4110])
   File "supportdyn_ho_run.bad.php", line 18, characters 3-8:

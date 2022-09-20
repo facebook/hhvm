@@ -20,6 +20,7 @@ import com.facebook.thrift.adapter.common.ListTypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,10 +33,14 @@ public class ListToHexTypeAdapter implements ListTypeAdapter<ByteBuf, String> {
 
   @Override
   public List<ByteBuf> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(":"))
-            .map(hex -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex)))
-            .collect(Collectors.toList());
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptyList();
+    }
+    return Stream.of(s.split(":"))
+        .map(hex -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex)))
+        .collect(Collectors.toList());
   }
 }

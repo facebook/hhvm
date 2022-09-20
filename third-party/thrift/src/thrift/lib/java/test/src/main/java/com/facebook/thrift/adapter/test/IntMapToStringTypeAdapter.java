@@ -17,6 +17,7 @@
 package com.facebook.thrift.adapter.test;
 
 import com.facebook.thrift.adapter.common.MapTypeAdapter;
+import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,10 +32,14 @@ public class IntMapToStringTypeAdapter implements MapTypeAdapter<Integer, Intege
 
   @Override
   public Map<Integer, Integer> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(","))
-            .map(p -> p.split("="))
-            .collect(Collectors.toMap(p -> Integer.parseInt(p[0]), p -> Integer.parseInt(p[1])));
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptyMap();
+    }
+    return Stream.of(s.split(","))
+        .map(p -> p.split("="))
+        .collect(Collectors.toMap(p -> Integer.parseInt(p[0]), p -> Integer.parseInt(p[1])));
   }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <thrift/compiler/sema/patch_mutator.h>
 
 #include <thrift/compiler/ast/diagnostic_context.h>
@@ -162,6 +163,13 @@ struct PatchGen : StructGen {
   }
   t_field& clearUnion() {
     return doc("Clears any set value. Applies first.", clear());
+  }
+
+  // {kPatchPriorId}: {patch_type} patch;
+  t_field& patchList(t_type_ref patch_type) {
+    return doc(
+        "Patches list values by index. Applies second.",
+        field(kPatchPriorId, patch_type, "patch"));
   }
 
   // {kPatchPriorId}: {patch_type} patch;
@@ -314,10 +322,16 @@ t_struct& patch_generator::add_struct_patch(
 }
 
 t_type_ref patch_generator::find_patch_type(
-    const t_const& annot, const t_structured& parent, const t_field& field) {
+    const t_const& annot, const t_structured& parent, t_type_ref type) {
+  if (auto custom = find_patch_override(type)) {
+    return custom;
+  }
+
+  // Look for a patch for the underlying type.
+  const auto* ttype = type->get_true_type();
+
   // Base types use a shared representation defined in patch.thrift.
-  const auto* type = field.type()->get_true_type();
-  if (auto* base_type = dynamic_cast<const t_base_type*>(type)) {
+  if (auto* base_type = dynamic_cast<const t_base_type*>(ttype)) {
     const char* name = getPatchTypeName(base_type->base_type());
     if (const auto* result = program_.scope()->find_type(name)) {
       return t_type_ref::from_ptr(result);
@@ -326,36 +340,18 @@ t_type_ref patch_generator::find_patch_type(
     // TODO(afuller): This look up hack only works for 'built-in' patch types.
     // Use a shared uri type registry instead.
     t_type_ref result = annot.type()->program()->scope()->ref_type(
-        *annot.type()->program(), name, field.src_range());
+        *annot.type()->program(), name, parent.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
-      ph->set_src_range(field.src_range());
+      ph->set_src_range(parent.src_range());
       ph->set_generated();
     }
 
     return result;
   }
 
-  // Check the field for a custom patch type.
-  if (auto* custom = field.find_annotation_or_null("thrift.patch.uri")) {
-    if (const auto* result =
-            dynamic_cast<const t_type*>(program_.scope()->find_def(*custom))) {
-      return t_type_ref::from_ptr(result);
-    }
-    ctx_.warning(field, "Could not find custom type: {}", *custom);
-  }
-
-  // Check the field type for a custom patch type.
-  if (auto* custom = t_typedef::get_first_annotation_or_null(
-          field.type().get_type(), {"thrift.patch.uri"})) {
-    if (const auto* result =
-            dynamic_cast<const t_type*>(program_.scope()->find_def(*custom))) {
-      return t_type_ref::from_ptr(result);
-    }
-    ctx_.warning(*field.type(), "Could not find custom type: {}", *custom);
-  }
-
-  if (auto* structured = dynamic_cast<const t_structured*>(type)) {
+  // Structured types use generated patch types..
+  if (auto* structured = dynamic_cast<const t_structured*>(ttype)) {
     std::string name = structured->name() + "Patch";
     if (!structured->uri().empty()) { // Try to look up by URI.
       if (auto* result = dynamic_cast<const t_type*>(program_.scope()->find_def(
@@ -367,52 +363,54 @@ t_type_ref patch_generator::find_patch_type(
     // Try to look up by Name.
     // Look for it in the same program as the type itself.
     t_type_ref result = program_.scope()->ref_type(
-        *structured->program(), name, field.src_range());
+        *structured->program(), name, parent.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
-      ph->set_src_range(field.src_range());
+      ph->set_src_range(parent.src_range());
       ph->set_generated();
     }
     return result;
   }
 
-  // Could not resolve a shared patch type, so generate a field specific one.
-  // Give it a stable name.
-  std::string suffix = "Field" + std::to_string(field.id()) + "Patch";
-  PatchGen gen{{annot, gen_suffix_struct(annot, parent, suffix.c_str())}};
-  // All value patches have an assign and clear field.
-  gen.assign(field.type());
-  gen.clear();
-  if (auto* container = dynamic_cast<const t_container*>(type)) {
-    switch (container->container_type()) {
-      case t_container::type::t_list:
-        // TODO(afuller): support 'patch'.
-        // TODO(afuller): support 'remove' op.
-        // TODO(afuller): support 'replace' op.
-        gen.prepend(field.type());
-        gen.append(field.type());
-        gen.set_adapter("ListPatchAdapter", program_);
-        break;
-      case t_container::type::t_set:
-        // TODO(afuller): support 'replace' op.
-        gen.remove(field.type());
-        gen.addSet(field.type());
-        gen.set_adapter("SetPatchAdapter", program_);
-        break;
-      case t_container::type::t_map:
-        // TODO(afuller): support 'patch' op.
-        // TODO(afuller): support 'remove' op.
-        // TODO(afuller): support 'removeIf' op.
-        // TODO(afuller): support 'replace' op.
-        gen.addMap(field.type());
-        gen.put(field.type());
-        gen.set_adapter("MapPatchAdapter", program_);
-        break;
-    }
-  } else {
-    gen.set_adapter("AssignPatchAdapter", program_);
+  return {}; // Not found.
+}
+
+t_type_ref patch_generator::find_patch_type(
+    const t_const& annot, const t_structured& parent, const t_field& field) {
+  if (auto custom = find_patch_override(field)) {
+    return custom;
+  } else if (auto existing = find_patch_type(annot, parent, field.type())) {
+    return existing;
   }
-  return gen;
+
+  // Could not resolve a shared patch type, so generate a field specific one.
+  std::string suffix = "Field" + std::to_string(field.id()) + "Patch";
+  return gen_patch(annot, parent, suffix, field.type());
+}
+
+t_type_ref patch_generator::find_patch_override(t_type_ref type) const {
+  if (auto* uri = t_typedef::get_first_annotation_or_null(
+          type.get_type(), {"thrift.patch.uri"})) {
+    return find_patch_override(*type, *uri);
+  }
+  return {};
+}
+
+t_type_ref patch_generator::find_patch_override(const t_named& node) const {
+  if (auto* uri = node.find_annotation_or_null("thrift.patch.uri")) {
+    return find_patch_override(node, *uri);
+  }
+  return {};
+}
+
+t_type_ref patch_generator::find_patch_override(
+    const t_node& node, const std::string& uri) const {
+  if (const auto* result =
+          dynamic_cast<const t_type*>(program_.scope()->find_def(uri))) {
+    return t_type_ref::from_ptr(result);
+  }
+  ctx_.warning(node, "Could not find custom type: {}", uri);
+  return {};
 }
 
 t_struct& patch_generator::gen_struct(
@@ -445,6 +443,61 @@ t_struct& patch_generator::gen_prefix_struct(
     generated.set_annotation("cpp.name", prefix + *cpp_name);
   }
   return generated;
+}
+
+t_struct& patch_generator::gen_patch(
+    const t_const& annot,
+    const t_structured& orig,
+    const std::string& suffix,
+    t_type_ref type) {
+  PatchGen gen{{annot, gen_suffix_struct(annot, orig, suffix.c_str())}};
+  // All value patches have an assign and clear field.
+  gen.assign(type);
+  gen.clear();
+
+  const auto* ttype = type->get_true_type();
+  if (auto* list = dynamic_cast<const t_list*>(ttype)) {
+    // TODO(afuller): support 'remove' op.
+    // TODO(afuller): support 'replace' op.
+    // TODO(afuller): support 'patch' op once map values can be adapted.
+    // auto elem_patch_type = find_patch_type(annot, orig, list->elem_type());
+    // gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    gen.prepend(type);
+    gen.append(type);
+    gen.set_adapter("ListPatchAdapter", program_);
+  } else if (auto* set = dynamic_cast<const t_set*>(ttype)) {
+    // TODO(afuller): support 'replace' op.
+    gen.remove(type);
+    gen.addSet(type);
+    gen.set_adapter("SetPatchAdapter", program_);
+  } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
+    // TODO(afuller): support 'remove' op.
+    // TODO(afuller): support 'removeIf' op.
+    // TODO(afuller): support 'replace' op.
+    // TODO(afuller): support 'patch' op once map values can be adapted.
+    // auto val_patch_type = find_patch_type(annot, orig, map->val_type());
+    // gen.patchPrior(inst_map(map->key_type(), val_patch_type));
+    gen.addMap(type);
+    // gen.patchAfter(inst_map(map->key_type(), val_patch_type));
+    gen.put(type);
+    gen.set_adapter("MapPatchAdapter", program_);
+  } else {
+    gen.set_adapter("AssignPatchAdapter", program_);
+  }
+  return gen;
+}
+
+t_type_ref patch_generator::inst_list(t_type_ref val) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_list>(val));
+}
+t_type_ref patch_generator::inst_set(t_type_ref key) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_set>(key));
+}
+t_type_ref patch_generator::inst_map(t_type_ref key, t_type_ref val) {
+  // TODO(afuller): Consider caching.
+  return program_.add_type_instantiation(std::make_unique<t_map>(key, val));
 }
 
 } // namespace compiler

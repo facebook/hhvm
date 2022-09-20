@@ -123,7 +123,7 @@ public final class MyStructMapFloatThrowExp implements com.facebook.thrift.paylo
     
         return
             Objects.equals(myLongField, other.myLongField) &&
-    Objects.equals(mapListOfFloats, other.mapListOfFloats) &&
+            Objects.equals(mapListOfFloats, other.mapListOfFloats) &&
             true;
     }
     

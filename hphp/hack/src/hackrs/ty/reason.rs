@@ -7,7 +7,6 @@ use std::hash::Hash;
 use std::sync::Arc;
 
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use hcons::Conser;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
@@ -37,7 +36,6 @@ use crate::visitor::Walkable;
 pub trait Reason:
     Eq
     + EqModuloPos
-    + EqModuloPosAndReason
     + Hash
     + Clone
     + Walkable<Self>
@@ -391,7 +389,7 @@ pub enum ReasonImpl<R, P> {
     RopaqueTypeFromModule(P, Symbol, R),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 pub struct BReason(Arc<ReasonImpl<BReason, BPos>>);
 
@@ -635,14 +633,17 @@ impl<'a> ToOxidized<'a> for BReason {
     }
 }
 
-impl EqModuloPosAndReason for BReason {
+impl EqModuloPos for BReason {
+    fn eq_modulo_pos(&self, rhs: &Self) -> bool {
+        self.0.eq_modulo_pos(&rhs.0)
+    }
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }
 }
 
 /// A stateless sentinal Reason.
-#[derive(Debug, Clone, PartialEq, Eq, EqModuloPos, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct NReason;
 
 impl Reason for NReason {
@@ -711,7 +712,10 @@ impl FromOcamlRep for NReason {
     }
 }
 
-impl EqModuloPosAndReason for NReason {
+impl EqModuloPos for NReason {
+    fn eq_modulo_pos(&self, _rhs: &Self) -> bool {
+        true
+    }
     fn eq_modulo_pos_and_reason(&self, _rhs: &Self) -> bool {
         true
     }

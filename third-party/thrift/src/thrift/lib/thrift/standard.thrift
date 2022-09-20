@@ -80,7 +80,7 @@ enum StandardProtocol {
 
 // TODO(afuller): Allow 'void' type for union fields.
 enum Void {
-  NoValueVoid = 0,
+  NoValue = 0 (cpp.name = "NoValueVoid"),
 }
 
 /**

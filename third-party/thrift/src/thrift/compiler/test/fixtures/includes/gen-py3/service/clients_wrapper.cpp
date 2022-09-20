@@ -20,12 +20,18 @@ MyServiceClientWrapper::query(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_query, channel_);
-  client->query(
-    rpcOptions,
-    std::move(callback),
-    arg_s,
-    arg_i
-  );
+  try {
+    client->query(
+      rpcOptions,
+      std::move(callback),
+      arg_s,
+      arg_i
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -39,12 +45,18 @@ MyServiceClientWrapper::has_arg_docs(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_has_arg_docs, channel_);
-  client->has_arg_docs(
-    rpcOptions,
-    std::move(callback),
-    arg_s,
-    arg_i
-  );
+  try {
+    client->has_arg_docs(
+      rpcOptions,
+      std::move(callback),
+      arg_s,
+      arg_i
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

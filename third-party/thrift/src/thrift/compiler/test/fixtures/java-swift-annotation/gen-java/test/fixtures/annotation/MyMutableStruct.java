@@ -125,7 +125,7 @@ static {
     
         return
             Objects.equals(intField, other.intField) &&
-    Objects.equals(stringField, other.stringField) &&
+            Objects.equals(stringField, other.stringField) &&
             true;
     }
     

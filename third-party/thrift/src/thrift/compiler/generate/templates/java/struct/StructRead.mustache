@@ -24,18 +24,6 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
   TField __field;
   oprot.readStructBegin({{struct:javaCapitalName}}.NAMES_TO_IDS, {{struct:javaCapitalName}}.THRIFT_NAMES_TO_IDS, {{struct:javaCapitalName}}.FIELD_METADATA);
   {{struct:javaCapitalName}}.Builder builder = new {{struct:javaCapitalName}}.Builder();
-  {{#struct:fields}}
-  {{#field:terse?}}
-  {{#field:value}}  
-  {{#field:hasAdapter?}}
-  {{^field:isObject?}}builder.{{> SetterName}}(Builder.{{field:javaAllCapsName}}_INTRINSIC_DEFAULT);{{/field:isObject?}}
-  {{/field:hasAdapter?}}
-  {{^field:hasAdapter?}}
-  {{^field:isObject?}}builder.{{> SetterName}}({{#field:type}}{{> struct/IntrinsicDefault}}{{/field:type}});{{/field:isObject?}}
-  {{/field:hasAdapter?}}
-  {{/field:value}}
-  {{/field:terse?}}  
-  {{/struct:fields}}
   while (true) {
     __field = oprot.readFieldBegin();
     if (__field.type == TType.STOP) { break; }
@@ -46,8 +34,17 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
         {{#field:type}}
         {{field:nestedDepth++}}{{> ReadType}}{{field:nestedDepth--}}
         {{/field:type}}
-        {{#field:hasAdapter?}}builder.{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));{{/field:hasAdapter?}}{{!
-        }}{{^field:hasAdapter?}}builder.{{> SetterName}}({{field:javaName}});{{/field:hasAdapter?}}
+        {{#field:hasAdapter?}}
+        {{#field:hasMultipleTypeAdapters?}}
+        builder.{{> SetterName}}(_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}})));
+        {{/field:hasMultipleTypeAdapters?}}
+        {{^field:hasMultipleTypeAdapters?}}
+        builder.{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));
+        {{/field:hasMultipleTypeAdapters?}}
+        {{/field:hasAdapter?}}
+        {{^field:hasAdapter?}}
+        builder.{{> SetterName}}({{field:javaName}});
+        {{/field:hasAdapter?}}
       } else {
         TProtocolUtil.skip(oprot, __field.type);
       }

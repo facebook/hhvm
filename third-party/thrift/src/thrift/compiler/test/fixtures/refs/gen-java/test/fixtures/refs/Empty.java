@@ -68,7 +68,7 @@ static {
         Empty other = (Empty)o;
     
         return
-                    true;
+            true;
     }
     
     @java.lang.Override

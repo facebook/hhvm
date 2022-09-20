@@ -5,12 +5,11 @@
 
 use bitflags::bitflags;
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 
 // NB: Keep the values of these flags in sync with shallow_decl_defs.ml.
 
 bitflags! {
-    #[derive(EqModuloPos, EqModuloPosAndReason)]
+    #[derive(EqModuloPos)]
     pub struct PropFlags: u8 {
         const ABSTRACT    = 1 << 0;
         const CONST       = 1 << 1;

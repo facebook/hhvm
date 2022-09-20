@@ -71,7 +71,7 @@ static {
         MyStruct other = (MyStruct)o;
     
         return
-                    true;
+            true;
     }
     
     @java.lang.Override

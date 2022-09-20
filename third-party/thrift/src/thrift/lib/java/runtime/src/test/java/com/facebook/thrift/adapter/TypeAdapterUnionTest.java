@@ -375,4 +375,34 @@ public class TypeAdapterUnionTest {
     assertEquals("ddee", hexDump(received.getBinaryListField2().get(1)));
     assertEquals("a1a2a3a4", hexDump(received.getBinaryListField2().get(2)));
   }
+
+  @Test
+  public void testDoubleAdaptedIntTypeAdapter() {
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromDoubleAdaptedIntField(5000L));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals((Long) 5000L, (Long) adapted.getDoubleAdaptedIntField());
+    assertEquals(5000, received.getIntField2());
+  }
+
+  @Test
+  public void testDoubleTypeDefIntTypeAdapter() {
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromDoubleTypedefAdaptedIntField("75"));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals("75", adapted.getDoubleTypedefAdaptedIntField());
+    assertEquals(75, received.getDoubleTypedefIntField());
+  }
+
+  @Test
+  public void testMultipleTypeDefIntTypeAdapter() {
+    byte[] bytes = serializeAdapted(AdaptedTestUnion.fromMultipleTypedefAdaptedIntField("60"));
+    AdaptedTestUnion adapted = deserializeAdapted(bytes);
+    TestUnion received = deserialize(bytes);
+
+    assertEquals("60", adapted.getMultipleTypedefAdaptedIntField());
+    assertEquals(60, received.getMultipleTypedefIntField());
+  }
 }

@@ -16,6 +16,7 @@
 , gd
 , gdb
 , gettext
+, gflags
 , git
 , glog
 , gmp
@@ -119,25 +120,33 @@ stdenv.mkDerivation rec {
     ];
   buildInputs =
     [
-      boost
+      (boost.override { inherit stdenv; })
       brotli
       bzip2
       (curl.override { openssl = openssl_1_1; })
-      double-conversion
+      (double-conversion.override { inherit stdenv; })
       editline
       expat
-      fmt
+      (fmt.override { inherit stdenv; })
       freetype
       fribidi
       gd
       gdb
       gettext
       git
-      glog
+      (
+        (glog.override {
+          inherit stdenv;
+          gflags = gflags.override { inherit stdenv; };
+        }).overrideAttrs (finalAttrs: previousAttrs: {
+          # Workaround for https://github.com/google/glog/issues/709
+          doCheck = !stdenv.cc.isClang;
+        })
+      )
       gmp
-      gperf
-      gperftools
-      icu
+      (gperf.override { inherit stdenv; })
+      (gperftools.override { inherit stdenv; })
+      (icu.override { inherit stdenv; })
       imagemagick6
       jemalloc
       libdwarf
@@ -164,7 +173,7 @@ stdenv.mkDerivation rec {
       re2
       re2c
       sqlite
-      tbb
+      (tbb.override { inherit stdenv; })
       tzdata
       unzip
       zlib

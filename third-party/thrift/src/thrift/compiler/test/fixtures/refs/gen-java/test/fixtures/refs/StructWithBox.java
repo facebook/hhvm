@@ -149,8 +149,8 @@ public final class StructWithBox implements com.facebook.thrift.payload.ThriftSe
     
         return
             Objects.equals(a, other.a) &&
-    Objects.equals(b, other.b) &&
-    Objects.equals(c, other.c) &&
+            Objects.equals(b, other.b) &&
+            Objects.equals(c, other.c) &&
             true;
     }
     

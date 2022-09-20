@@ -1470,6 +1470,20 @@ module Primary = struct
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
+      | Module_missing_import of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module: string;
+          target_module_opt: string option;
+        }
+      | Module_missing_export of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          target_module: string;
+        }
 
     let module_hint pos decl_pos =
       let claim = lazy (pos, "You cannot use this type in a public declaration.")
@@ -1505,12 +1519,82 @@ module Primary = struct
           ],
         [] )
 
+    let module_missing_import
+        pos decl_pos module_pos current_module target_module_opt =
+      let target_module =
+        match target_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not import the public members of module '%s'"
+                current_module
+                target_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
+    let module_missing_export
+        pos decl_pos module_pos current_module_opt target_module =
+      let current_module =
+        match current_module_opt with
+        | Some m -> m
+        | None -> "global"
+      in
+      let claim =
+        lazy
+          ( pos,
+            Printf.sprintf
+              "Cannot access a public element from module '%s' in module '%s'"
+              target_module
+              current_module )
+      and reason =
+        lazy
+          [
+            (decl_pos, Printf.sprintf "This is from module `%s`" target_module);
+            ( module_pos,
+              Printf.sprintf
+                "Module '%s' does not export its public members to module '%s'"
+                target_module
+                current_module );
+          ]
+      in
+      (Error_code.ModuleError, claim, reason, [])
+
     let to_error : t -> error = function
       | Module_hint { pos; decl_pos } -> module_hint pos decl_pos
       | Module_mismatch { pos; current_module_opt; decl_pos; target_module } ->
         module_mismatch pos current_module_opt decl_pos target_module
       | Module_unsafe_trait_access { access_pos; trait_pos } ->
         module_unsafe_trait_access access_pos trait_pos
+      | Module_missing_import
+          { pos; decl_pos; module_pos; current_module; target_module_opt } ->
+        module_missing_import
+          pos
+          decl_pos
+          module_pos
+          current_module
+          target_module_opt
+      | Module_missing_export
+          { pos; decl_pos; module_pos; current_module_opt; target_module } ->
+        module_missing_export
+          pos
+          decl_pos
+          module_pos
+          current_module_opt
+          target_module
   end
 
   module Xhp = struct
@@ -1974,7 +2058,10 @@ module Primary = struct
       }
     | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
-    | Illegal_type_structure of Pos.t
+    | Illegal_type_structure of {
+        pos: Pos.t;
+        msg: string;
+      }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {
         pos: Pos.t;
@@ -3776,17 +3863,15 @@ module Primary = struct
       lazy [],
       [] )
 
-  let illegal_type_structure pos =
+  let illegal_type_structure pos msg =
     let claim =
       lazy
-        (let errmsg = "second argument is not a string" in
-         let msg =
+        (let msg =
            "The two arguments to `type_structure()` must be:"
            ^ "\n - first: `ValidClassname::class` or an object of that class"
            ^ "\n - second: a single-quoted string literal containing the name"
-           ^ " of a type constant of that class"
-           ^ "\n"
-           ^ errmsg
+           ^ " of a type constant of that class\n"
+           ^ msg
          in
          (pos, msg))
     in
@@ -5712,7 +5797,7 @@ module Primary = struct
       local_variable_modified_twice pos pos_modifieds
     | Assign_during_case pos -> assign_during_case pos
     | Invalid_classname pos -> invalid_classname pos
-    | Illegal_type_structure pos -> illegal_type_structure pos
+    | Illegal_type_structure { pos; msg } -> illegal_type_structure pos msg
     | Illegal_typeconst_direct_access pos -> illegal_typeconst_direct_access pos
     | Wrong_expression_kind_attribute
         {

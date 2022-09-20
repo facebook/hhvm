@@ -16,6 +16,7 @@
 
 #include "hphp/runtime/vm/native.h"
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/req-ptr.h"
 #include "hphp/runtime/base/tv-type.h"
 #include "hphp/runtime/base/type-variant.h"
@@ -326,6 +327,13 @@ void coerceFCallArgsImpl(int32_t numArgs, const Func* func, F args) {
 
     auto tc = pi.typeConstraint;
     auto targetType = pi.builtinType;
+
+    if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+      // If we're dealing with an array-like interface, then there's no need to
+      // coerce the input type: it's going to be mixed on the C++ side anyhow.
+      continue;
+    }
+
     if (tc.isNullable()) {
       if (tvIsNull(tv)) {
         // No need to coerce when passed a null for a nullable type
@@ -580,6 +588,14 @@ Optional<TypedValue> builtinInValue(const Func* builtin, uint32_t i) {
 
 static bool tcCheckNative(const TypeConstraint& tc, const NativeSig::Type ty) {
   using T = NativeSig::Type;
+
+  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+    // TODO(T116301380): If native builtins resolved properly, we could probably
+    // do something smarter here. As it stands we match on whether the type here
+    // is _exactly_ one of the magic interfaces that supports array like things,
+    // including Hack Collections.
+    return ty == T::Mixed || ty == T::MixedTV;
+  }
 
   if (!tc.hasConstraint() || tc.isNullable() || tc.isCallable() ||
       tc.isArrayKey() || tc.isNumber() || tc.isVecOrDict() ||

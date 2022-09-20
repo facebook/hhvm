@@ -18,10 +18,16 @@ AClientWrapper::foo(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::cpp2::Foo>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_foo, channel_);
-  client->foo(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->foo(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<::cpp2::Foo>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -45,10 +51,16 @@ AClientWrapper::IInteractionWrapper::interact(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_interact, channel_);
-  client->interact(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->interact(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -61,11 +73,17 @@ BClientWrapper::bar(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_bar, channel_);
-  client->bar(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->bar(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -77,10 +95,16 @@ BClientWrapper::stream_stuff(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_stream_stuff, channel_);
-  client->stream_stuff(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->stream_stuff(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -104,10 +128,16 @@ CClientWrapper::IInteractionWrapper::interact(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_interact, channel_);
-  client->interact(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->interact(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

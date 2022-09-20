@@ -24,6 +24,7 @@
 #include "hphp/runtime/base/unit-cache.h"
 
 #include "hphp/runtime/vm/super-inlining-bros.h"
+#include "hphp/runtime/vm/native-data.h"
 #include "hphp/runtime/vm/vm-regs.h"
 
 #include "hphp/runtime/ext/asio/asio-external-thread-event.h"
@@ -452,6 +453,27 @@ Array HHVM_FUNCTION(non_repo_unit_cache_info) {
 
 }
 
+struct DummyNativeData {
+  int64_t dummy;
+};
+
+namespace {
+
+const StaticString s_DummyNativeData("DummyNativeData");
+
+void
+HHVM_METHOD(ExtensibleNewableClassWithNativeData, setDummyValue, int64_t v) {
+  Native::data<DummyNativeData>(this_)->dummy = v;
+}
+
+int64_t HHVM_METHOD(ExtensibleNewableClassWithNativeData, getDumyValue) {
+  return Native::data<DummyNativeData>(this_)->dummy;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+}
+
 void StandardExtension::initIntrinsics() {
   if (!RuntimeOption::EnableIntrinsicsExtension) return;
 
@@ -504,6 +526,14 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
   HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);
   HHVM_FALIAS(__hhvm_intrinsics\\non_repo_unit_cache_info, non_repo_unit_cache_info);
+
+  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                setDummyValue,
+                HHVM_MN(ExtensibleNewableClassWithNativeData, setDummyValue));
+  HHVM_NAMED_ME(__hhvm_intrinsics\\ExtensibleNewableClassWithNativeData,
+                getDumyValue,
+                HHVM_MN(ExtensibleNewableClassWithNativeData,getDumyValue));
+  Native::registerNativeDataInfo<DummyNativeData>(s_DummyNativeData.get());
 
   loadSystemlib("std_intrinsics");
 }

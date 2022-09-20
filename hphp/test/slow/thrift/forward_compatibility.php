@@ -62,13 +62,13 @@ function testCompact() {
   $p1 = new DummyProtocol();
   $v1 = new OldStruct();
   $v1->features = darray[1 => 314, 2 => 271.8];
-  thrift_protocol_write_compact($p1, 'foomethod', 2, $v1, 20);
+  thrift_protocol_write_compact2($p1, 'foomethod', 2, $v1, 20);
   var_dump(thrift_protocol_read_compact($p1, 'NewStruct'));
 
   $p2 = new DummyProtocol();
   $v2 = new NewStruct();
   $v2->features = darray[1 => 314, 2 => 271.8];
-  thrift_protocol_write_compact($p2, 'foomethod', 2, $v2, 20);
+  thrift_protocol_write_compact2($p2, 'foomethod', 2, $v2, 20);
   var_dump(thrift_protocol_read_compact($p2, 'OldStruct'));
 }
 

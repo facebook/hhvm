@@ -465,7 +465,6 @@ class TypeName(object):
    - stringType
    - binaryType
    - enumType
-   - typedefType
    - structType
    - unionType
    - exceptionType
@@ -488,13 +487,12 @@ class TypeName(object):
   STRINGTYPE = 8
   BINARYTYPE = 9
   ENUMTYPE = 10
-  TYPEDEFTYPE = 11
-  STRUCTTYPE = 12
-  UNIONTYPE = 13
-  EXCEPTIONTYPE = 14
-  LISTTYPE = 15
-  SETTYPE = 16
-  MAPTYPE = 17
+  STRUCTTYPE = 11
+  UNIONTYPE = 12
+  EXCEPTIONTYPE = 13
+  LISTTYPE = 14
+  SETTYPE = 15
+  MAPTYPE = 16
   
   @staticmethod
   def isUnion():
@@ -540,32 +538,28 @@ class TypeName(object):
     assert self.field == 10
     return self.value
 
-  def get_typedefType(self):
+  def get_structType(self):
     assert self.field == 11
     return self.value
 
-  def get_structType(self):
+  def get_unionType(self):
     assert self.field == 12
     return self.value
 
-  def get_unionType(self):
+  def get_exceptionType(self):
     assert self.field == 13
     return self.value
 
-  def get_exceptionType(self):
+  def get_listType(self):
     assert self.field == 14
     return self.value
 
-  def get_listType(self):
+  def get_setType(self):
     assert self.field == 15
     return self.value
 
-  def get_setType(self):
-    assert self.field == 16
-    return self.value
-
   def get_mapType(self):
-    assert self.field == 17
+    assert self.field == 16
     return self.value
 
   def set_boolType(self, value):
@@ -608,32 +602,28 @@ class TypeName(object):
     self.field = 10
     self.value = value
 
-  def set_typedefType(self, value):
+  def set_structType(self, value):
     self.field = 11
     self.value = value
 
-  def set_structType(self, value):
+  def set_unionType(self, value):
     self.field = 12
     self.value = value
 
-  def set_unionType(self, value):
+  def set_exceptionType(self, value):
     self.field = 13
     self.value = value
 
-  def set_exceptionType(self, value):
+  def set_listType(self, value):
     self.field = 14
     self.value = value
 
-  def set_listType(self, value):
+  def set_setType(self, value):
     self.field = 15
     self.value = value
 
-  def set_setType(self, value):
-    self.field = 16
-    self.value = value
-
   def set_mapType(self, value):
-    self.field = 17
+    self.field = 16
     self.value = value
 
   def getType(self):
@@ -683,30 +673,26 @@ class TypeName(object):
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('enumType', value)
     if self.field == 11:
-      padding = ' ' * 12
-      value = padding.join(value.splitlines(True))
-      member = '\n    %s=%s' % ('typedefType', value)
-    if self.field == 12:
       padding = ' ' * 11
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('structType', value)
-    if self.field == 13:
+    if self.field == 12:
       padding = ' ' * 10
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('unionType', value)
-    if self.field == 14:
+    if self.field == 13:
       padding = ' ' * 14
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('exceptionType', value)
-    if self.field == 15:
+    if self.field == 14:
       padding = ' ' * 9
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('listType', value)
-    if self.field == 16:
+    if self.field == 15:
       padding = ' ' * 8
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('setType', value)
-    if self.field == 17:
+    if self.field == 16:
       padding = ' ' * 8
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('mapType', value)
@@ -800,21 +786,13 @@ class TypeName(object):
           iprot.skip(ftype)
       elif fid == 11:
         if ftype == TType.STRUCT:
-          _fbthrift_typedefType = TypeUri()
-          _fbthrift_typedefType.read(iprot)
-          assert self.field == 0 and self.value is None
-          self.set_typedefType(_fbthrift_typedefType)
-        else:
-          iprot.skip(ftype)
-      elif fid == 12:
-        if ftype == TType.STRUCT:
           _fbthrift_structType = TypeUri()
           _fbthrift_structType.read(iprot)
           assert self.field == 0 and self.value is None
           self.set_structType(_fbthrift_structType)
         else:
           iprot.skip(ftype)
-      elif fid == 13:
+      elif fid == 12:
         if ftype == TType.STRUCT:
           _fbthrift_unionType = TypeUri()
           _fbthrift_unionType.read(iprot)
@@ -822,7 +800,7 @@ class TypeName(object):
           self.set_unionType(_fbthrift_unionType)
         else:
           iprot.skip(ftype)
-      elif fid == 14:
+      elif fid == 13:
         if ftype == TType.STRUCT:
           _fbthrift_exceptionType = TypeUri()
           _fbthrift_exceptionType.read(iprot)
@@ -830,21 +808,21 @@ class TypeName(object):
           self.set_exceptionType(_fbthrift_exceptionType)
         else:
           iprot.skip(ftype)
-      elif fid == 15:
+      elif fid == 14:
         if ftype == TType.I32:
           _fbthrift_listType = iprot.readI32()
           assert self.field == 0 and self.value is None
           self.set_listType(_fbthrift_listType)
         else:
           iprot.skip(ftype)
-      elif fid == 16:
+      elif fid == 15:
         if ftype == TType.I32:
           _fbthrift_setType = iprot.readI32()
           assert self.field == 0 and self.value is None
           self.set_setType(_fbthrift_setType)
         else:
           iprot.skip(ftype)
-      elif fid == 17:
+      elif fid == 16:
         if ftype == TType.I32:
           _fbthrift_mapType = iprot.readI32()
           assert self.field == 0 and self.value is None
@@ -915,37 +893,32 @@ class TypeName(object):
       enumType.write(oprot)
       oprot.writeFieldEnd()
     if self.field == 11:
-      oprot.writeFieldBegin('typedefType', TType.STRUCT, 11)
-      typedefType = self.value
-      typedefType.write(oprot)
-      oprot.writeFieldEnd()
-    if self.field == 12:
-      oprot.writeFieldBegin('structType', TType.STRUCT, 12)
+      oprot.writeFieldBegin('structType', TType.STRUCT, 11)
       structType = self.value
       structType.write(oprot)
       oprot.writeFieldEnd()
-    if self.field == 13:
-      oprot.writeFieldBegin('unionType', TType.STRUCT, 13)
+    if self.field == 12:
+      oprot.writeFieldBegin('unionType', TType.STRUCT, 12)
       unionType = self.value
       unionType.write(oprot)
       oprot.writeFieldEnd()
-    if self.field == 14:
-      oprot.writeFieldBegin('exceptionType', TType.STRUCT, 14)
+    if self.field == 13:
+      oprot.writeFieldBegin('exceptionType', TType.STRUCT, 13)
       exceptionType = self.value
       exceptionType.write(oprot)
       oprot.writeFieldEnd()
-    if self.field == 15:
-      oprot.writeFieldBegin('listType', TType.I32, 15)
+    if self.field == 14:
+      oprot.writeFieldBegin('listType', TType.I32, 14)
       listType = self.value
       oprot.writeI32(listType)
       oprot.writeFieldEnd()
-    if self.field == 16:
-      oprot.writeFieldBegin('setType', TType.I32, 16)
+    if self.field == 15:
+      oprot.writeFieldBegin('setType', TType.I32, 15)
       setType = self.value
       oprot.writeI32(setType)
       oprot.writeFieldEnd()
-    if self.field == 17:
-      oprot.writeFieldBegin('mapType', TType.I32, 17)
+    if self.field == 16:
+      oprot.writeFieldBegin('mapType', TType.I32, 16)
       mapType = self.value
       oprot.writeI32(mapType)
       oprot.writeFieldEnd()
@@ -1054,10 +1027,6 @@ class TypeName(object):
       _fbthrift_enumType = TypeUri()
       _fbthrift_enumType.readFromJson(obj['enumType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
       self.set_enumType(_fbthrift_enumType)
-    if 'typedefType' in obj:
-      _fbthrift_typedefType = TypeUri()
-      _fbthrift_typedefType.readFromJson(obj['typedefType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
-      self.set_typedefType(_fbthrift_typedefType)
     if 'structType' in obj:
       _fbthrift_structType = TypeUri()
       _fbthrift_structType.readFromJson(obj['structType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -1209,13 +1178,12 @@ TypeName.thrift_spec = (
   (8, TType.I32, 'stringType', Void, None, 2, ), # 8
   (9, TType.I32, 'binaryType', Void, None, 2, ), # 9
   (10, TType.STRUCT, 'enumType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 10
-  (11, TType.STRUCT, 'typedefType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 11
-  (12, TType.STRUCT, 'structType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 12
-  (13, TType.STRUCT, 'unionType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 13
-  (14, TType.STRUCT, 'exceptionType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 14
-  (15, TType.I32, 'listType', Void, None, 2, ), # 15
-  (16, TType.I32, 'setType', Void, None, 2, ), # 16
-  (17, TType.I32, 'mapType', Void, None, 2, ), # 17
+  (11, TType.STRUCT, 'structType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 11
+  (12, TType.STRUCT, 'unionType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 12
+  (13, TType.STRUCT, 'exceptionType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 13
+  (14, TType.I32, 'listType', Void, None, 2, ), # 14
+  (15, TType.I32, 'setType', Void, None, 2, ), # 15
+  (16, TType.I32, 'mapType', Void, None, 2, ), # 16
 )
 
 TypeName.thrift_struct_annotations = {
@@ -1223,7 +1191,7 @@ TypeName.thrift_struct_annotations = {
 TypeName.thrift_field_annotations = {
 }
 
-def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=None, i64Type=None, floatType=None, doubleType=None, stringType=None, binaryType=None, enumType=None, typedefType=None, structType=None, unionType=None, exceptionType=None, listType=None, setType=None, mapType=None,):
+def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=None, i64Type=None, floatType=None, doubleType=None, stringType=None, binaryType=None, enumType=None, structType=None, unionType=None, exceptionType=None, listType=None, setType=None, mapType=None,):
   self.field = 0
   self.value = None
   if boolType is not None:
@@ -1266,33 +1234,29 @@ def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=N
     assert self.field == 0 and self.value is None
     self.field = 10
     self.value = enumType
-  if typedefType is not None:
-    assert self.field == 0 and self.value is None
-    self.field = 11
-    self.value = typedefType
   if structType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 12
+    self.field = 11
     self.value = structType
   if unionType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 13
+    self.field = 12
     self.value = unionType
   if exceptionType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 14
+    self.field = 13
     self.value = exceptionType
   if listType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 15
+    self.field = 14
     self.value = listType
   if setType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 16
+    self.field = 15
     self.value = setType
   if mapType is not None:
     assert self.field == 0 and self.value is None
-    self.field = 17
+    self.field = 16
     self.value = mapType
 
 TypeName.__init__ = TypeName__init__

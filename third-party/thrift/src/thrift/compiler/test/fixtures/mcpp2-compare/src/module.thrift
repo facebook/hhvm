@@ -22,7 +22,7 @@ namespace cpp2 some.valid.ns
 
 typedef includes.AStruct AStruct
 
-@cpp.Adapter{name = 'CustomProtocolAdapter'}
+@cpp.Adapter{name = '::CustomProtocolAdapter'}
 typedef binary (cpp.type = "::folly::IOBuf") CustomProtocolType
 
 // Generate base consts

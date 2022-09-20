@@ -48,12 +48,12 @@ function testBinary() {
 function testCompact() {
   $p = new DummyProtocol();
   try {
-    thrift_protocol_write_compact($p, 'foomethod', 2, new Struct1(42), 20);
+    thrift_protocol_write_compact2($p, 'foomethod', 2, new Struct1(42), 20);
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }
   try {
-    thrift_protocol_write_compact($p, 'foomethod', 2, new Struct2(42), 20);
+    thrift_protocol_write_compact2($p, 'foomethod', 2, new Struct2(42), 20);
   } catch (TProtocolException $e) {
     echo $e->getMessage() . "\n";
   }

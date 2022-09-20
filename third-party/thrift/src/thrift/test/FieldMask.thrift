@@ -36,7 +36,7 @@ struct Bar {
 }
 
 struct Baz {
-  @cpp.Adapter{name = "TemplatedTestAdapter"}
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   1: Foo foo;
 }
 

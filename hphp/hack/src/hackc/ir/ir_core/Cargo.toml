@@ -8,6 +8,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
+ascii = "1.0"
 bstr = { version = "0.2", features = ["serde1"] }
 ffi = { path = "../../../utils/ffi" }
 hash = { path = "../../../utils/hash" }

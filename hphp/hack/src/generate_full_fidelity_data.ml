@@ -1175,10 +1175,6 @@ SYNTAX
     Full_fidelity_source_text.t ->
     Full_fidelity_parser_env.t ->
     unit * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
-  val rust_parse_with_verify_sc :
-    Full_fidelity_source_text.t ->
-    Full_fidelity_parser_env.t ->
-    t list * t * Full_fidelity_syntax_error.t list * Rust_pointer.t option
   val rust_parser_errors :
     Full_fidelity_source_text.t ->
     Rust_pointer.t ->
@@ -1435,107 +1431,6 @@ CONSTRUCTOR_METHODS}
       ~template:positioned_smart_constructors_template
       ()
 end
-
-(* GenerateFFRustPositionedSmartConstructors *)
-
-module GenerateFFRustVerifySmartConstructors = struct
-  let to_constructor_methods x =
-    let args =
-      List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d: Self::Output" i)
-    in
-    let args = String.concat ~sep:", " args in
-    let fwd_args = List.mapi x.fields ~f:(fun i _ -> sprintf "arg%d" i) in
-    let fwd_args = String.concat ~sep:", " fwd_args in
-    sprintf
-      "    fn make_%s(&mut self, %s) -> Self::Output {
-        let args = arg_kinds!(%s);
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_%s(self, %s);
-        self.state_mut().verify(&args);
-        self.state_mut().push(r.kind());
-        r
-    }\n\n"
-      x.type_name
-      args
-      fwd_args
-      x.type_name
-      fwd_args
-
-  let verify_smart_constructors_template : string =
-    make_header CStyle ""
-    ^ "
-use crate::*;
-use parser_core_types::syntax_by_ref::{
-    positioned_syntax::PositionedSyntax,
-    positioned_token::TokenFactory,
-};
-use smart_constructors::SmartConstructors;
-use syntax_smart_constructors::SyntaxSmartConstructors;
-
-macro_rules! arg_kinds {
-    ($a0:ident) => (
-        vec![$a0.kind()]
-    );
-    ($a0:ident, $($a1:ident),+) => (
-        vec![$a0.kind(), $($a1.kind()),+]
-    );
-}
-
-impl<'a> SmartConstructors for VerifySmartConstructors<'a>
-{
-    type State = State<'a>;
-    type Factory = TokenFactory<'a>;
-    type Output = PositionedSyntax<'a>;
-
-    fn state_mut(&mut self) -> &mut State<'a> {
-       &mut self.state
-    }
-
-    fn into_state(self) -> State<'a> {
-      self.state
-    }
-
-    fn token_factory_mut(&mut self) -> &mut Self::Factory {
-        &mut self.token_factory
-    }
-
-    fn make_missing(&mut self, offset: usize) -> Self::Output {
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_missing(self, offset);
-        self.state_mut().push(r.kind());
-        r
-    }
-
-    fn make_token(&mut self, offset: PositionedToken<'a>) -> Self::Output {
-        let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_token(self, offset);
-        self.state_mut().push(r.kind());
-        r
-    }
-
-    fn make_list(&mut self, lst: Vec<Self::Output>, offset: usize) -> Self::Output {
-        if !lst.is_empty() {
-            let args: Vec<_> = (&lst).iter().map(|s| s.kind()).collect();
-            let r = <Self as SyntaxSmartConstructors<PositionedSyntax<'a>, TokenFactory<'a>, State<'a>>>::make_list(self, lst, offset);
-            self.state_mut().verify(&args);
-            self.state_mut().push(r.kind());
-            r
-        } else {
-            <Self as SmartConstructors>::make_missing(self, offset)
-        }
-    }
-
-CONSTRUCTOR_METHODS}
-"
-
-  let verify_smart_constructors =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "CONSTRUCTOR_METHODS"; func = to_constructor_methods }]
-      ~filename:
-        (full_fidelity_path_prefix ^ "verify_smart_constructors_generated.rs")
-      ~template:verify_smart_constructors_template
-      ()
-end
-
-(* GenerateFFVerifySmartConstructors *)
 
 module GenerateFFSyntaxSmartConstructors = struct
   let full_fidelity_syntax_smart_constructors_template : string =
@@ -3263,7 +3158,6 @@ let templates =
     GenerateFFSmartConstructors.full_fidelity_smart_constructors;
     GenerateFFRustSmartConstructors.full_fidelity_smart_constructors;
     GenerateFFRustPositionedSmartConstructors.positioned_smart_constructors;
-    GenerateFFRustVerifySmartConstructors.verify_smart_constructors;
     GenerateFFSyntaxSmartConstructors.full_fidelity_syntax_smart_constructors;
     GenerateFFRustSyntaxSmartConstructors
     .full_fidelity_syntax_smart_constructors;

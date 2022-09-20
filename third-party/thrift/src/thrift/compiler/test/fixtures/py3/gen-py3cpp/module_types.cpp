@@ -222,8 +222,8 @@ const folly::StringPiece OptionalRefStruct::__fbthrift_get_field_name(::apache::
 }
 
 OptionalRefStruct::OptionalRefStruct(const OptionalRefStruct& srcObj) :
-    optional_blob(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::binary>(srcObj.optional_blob)),
+    __fbthrift_field_optional_blob(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::binary>(srcObj.__fbthrift_field_optional_blob)),
     __isset(srcObj.__isset) {
 }
 
@@ -234,26 +234,26 @@ OptionalRefStruct& OptionalRefStruct::operator=(const OptionalRefStruct& other) 
 }
 
 OptionalRefStruct::OptionalRefStruct(FOLLY_MAYBE_UNUSED OptionalRefStruct&& other) noexcept :
-    optional_blob(std::move(other.optional_blob)),
+    __fbthrift_field_optional_blob(std::move(other.__fbthrift_field_optional_blob)),
     __isset(other.__isset) {
 }
 
 OptionalRefStruct& OptionalRefStruct::operator=(FOLLY_MAYBE_UNUSED OptionalRefStruct&& other) noexcept {
-    this->optional_blob = std::move(other.optional_blob);
+    this->__fbthrift_field_optional_blob = std::move(other.__fbthrift_field_optional_blob);
     __isset = other.__isset;
     return *this;
 }
 
 
 OptionalRefStruct::OptionalRefStruct(apache::thrift::FragileConstructor, ::py3::simple::IOBufPtr optional_blob__arg) :
-    optional_blob(std::move(optional_blob__arg)) {
+    __fbthrift_field_optional_blob(std::move(optional_blob__arg)) {
   __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void OptionalRefStruct::__fbthrift_clear() {
   // clear all fields
-  this->optional_blob = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
+  this->__fbthrift_field_optional_blob = apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::fromStringLiteral("");
   __isset = {};
 }
 
@@ -266,7 +266,7 @@ bool OptionalRefStruct::__fbthrift_is_empty() const {
 
 bool OptionalRefStruct::operator==(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.optional_blob, rhs.optional_blob))) {
+  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob))) {
     return false;
   }
   return true;
@@ -274,8 +274,8 @@ bool OptionalRefStruct::operator==(FOLLY_MAYBE_UNUSED const OptionalRefStruct& r
 
 bool OptionalRefStruct::operator<(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rhs) const {
   FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.optional_blob, rhs.optional_blob))) {
-    return !lhs.optional_blob_ref().has_value() || (rhs.optional_blob_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.optional_blob, rhs.optional_blob));
+  if (lhs.optional_blob_ref().has_value() != rhs.optional_blob_ref().has_value() || (lhs.optional_blob_ref().has_value() && !apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isEqual(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob))) {
+    return !lhs.optional_blob_ref().has_value() || (rhs.optional_blob_ref().has_value() && apache::thrift::StringTraits<std::unique_ptr<folly::IOBuf>>::isLess(lhs.__fbthrift_field_optional_blob, rhs.__fbthrift_field_optional_blob));
   }
   return false;
 }
@@ -283,7 +283,7 @@ bool OptionalRefStruct::operator<(FOLLY_MAYBE_UNUSED const OptionalRefStruct& rh
 
 void swap(FOLLY_MAYBE_UNUSED OptionalRefStruct& a, FOLLY_MAYBE_UNUSED OptionalRefStruct& b) {
   using ::std::swap;
-  swap(a.optional_blob, b.optional_blob);
+  swap(a.__fbthrift_field_optional_blob, b.__fbthrift_field_optional_blob);
   swap(a.__isset, b.__isset);
 }
 

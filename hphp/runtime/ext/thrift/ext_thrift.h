@@ -75,6 +75,16 @@ void HHVM_FUNCTION(
     int64_t seqid,
     bool oneway = false);
 
+void HHVM_FUNCTION(
+    thrift_protocol_write_compact2,
+    const Object& transportobj,
+    const String& method_name,
+    int64_t msgtype,
+    const Object& request_struct,
+    int64_t seqid,
+    bool oneway = false,
+    int64_t version = 2);
+
 Variant HHVM_FUNCTION(
     thrift_protocol_read_compact,
     const Object& transportobj,

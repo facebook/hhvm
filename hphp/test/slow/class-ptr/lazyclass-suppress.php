@@ -28,7 +28,7 @@ function main() {
 
   $v = new Foo();
   $v->nested = new NestedStruct("bang baz bar foo");
-  thrift_protocol_write_compact($p, 'FooMethod', 2, $v, 20);
+  thrift_protocol_write_compact2($p, 'FooMethod', 2, $v, 20);
   var_dump(thrift_protocol_read_compact($p, 'Foo'));
 
   $foo = Foo::class;

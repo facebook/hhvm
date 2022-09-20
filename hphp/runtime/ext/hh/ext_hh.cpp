@@ -1182,6 +1182,11 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
   not_reached();
 }
 
+Object HHVM_FUNCTION(get_whole_implicit_context) {
+  auto const obj = *ImplicitContext::activeCtx;
+  return Object::attach(obj);
+}
+
 String HHVM_FUNCTION(get_implicit_context_memo_key) {
   auto const obj = *ImplicitContext::activeCtx;
   if (!obj) return empty_string();
@@ -1759,6 +1764,8 @@ static struct HHExtension final : Extension {
 
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context,
                   HHVM_FN(get_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_whole_implicit_context,
+                  HHVM_FN(get_whole_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
                   HHVM_FN(set_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_special_implicit_context,

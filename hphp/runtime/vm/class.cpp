@@ -4025,7 +4025,7 @@ void Class::setRequirements() {
             }
             break;
           }
-          case PreClass::RequirementClass: {
+          case PreClass::RequirementClass:
             if (reqCls->attrs() & (AttrInterface | AttrTrait)) {
               raise_error("Trait '%s' may only be used from '%s', but '%s' is not a class",
                           m_preClass->name()->data(),
@@ -4034,7 +4034,6 @@ void Class::setRequirements() {
             }
             break;
           }
-        }
       }
       addReq(&req);
     }
@@ -4389,10 +4388,22 @@ void Class::raiseUnsatisfiedRequirement(const PreClass::ClassRequirement* req)  
       break;
     }
     case PreClass::RequirementClass: {
-      assertx(m_preClass->name() != reqName);
-      raise_error("Trait '%s' may only be used from the class '%s'",
-                  reqName->data(),
-                  m_preClass->name()->data());
+      assertx(m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal));
+      for (auto const& traitCls : m_extra->m_usedTraits) {
+        if (traitCls->allRequirements().contains(reqName)) {
+          raise_error("Trait '%s' may only be used from class '%s', which must be final",
+                      traitCls->preClass()->name()->data(),
+                      reqName->data());
+        }
+      }
+
+      if (attrs() & AttrNoExpandTrait) {
+        // A result of trait flattening, analogous to the RequirementImplements case above
+        assertx(!m_extra || m_extra->m_usedTraits.size() == 0);
+        assertx(m_preClass->requirements().size() > 0);
+        raise_error("Trait '<<flattened>>' may only be used from class '%s', which must be final",
+                    reqName->data());
+      }
       break;
     }
     case PreClass::RequirementExtends: {
@@ -4456,7 +4467,7 @@ void Class::checkRequirementConstraints() const {
         break;
       }
       case PreClass::RequirementClass: {
-        if (m_preClass->name() != reqName) {
+        if (m_preClass->name() != reqName || !(m_preClass->attrs() & AttrFinal))  {
           raiseUnsatisfiedRequirement(req);
         }
         break;

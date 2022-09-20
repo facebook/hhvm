@@ -94,15 +94,15 @@ const std::array<protocol::TType, 9> TStructDataStorage<::cpp2::MyField>::fields
   TType::T_STRING,
 }};
 const std::array<folly::StringPiece, 9> TStructDataStorage<::cpp2::MyField>::storage_names = {{
-  "opt_value",
-  "value",
-  "req_value",
-  "opt_enum_value",
-  "enum_value",
-  "req_enum_value",
-  "opt_str_value",
-  "str_value",
-  "req_str_value",
+  "__fbthrift_field_opt_value",
+  "__fbthrift_field_value",
+  "__fbthrift_field_req_value",
+  "__fbthrift_field_opt_enum_value",
+  "__fbthrift_field_enum_value",
+  "__fbthrift_field_req_enum_value",
+  "__fbthrift_field_opt_str_value",
+  "__fbthrift_field_str_value",
+  "__fbthrift_field_req_str_value",
 }};
 const std::array<int, 9> TStructDataStorage<::cpp2::MyField>::isset_indexes = {{
   -1,
@@ -132,9 +132,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::MyStruct>::field
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyStruct>::storage_names = {{
-  "opt_ref",
-  "ref",
-  "req_ref",
+  "__fbthrift_field_opt_ref",
+  "__fbthrift_field_ref",
+  "__fbthrift_field_req_ref",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {{
   -1,
@@ -158,8 +158,8 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithUnion>
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithUnion>::storage_names = {{
-  "u",
-  "aDouble",
+  "__fbthrift_field_u",
+  "__fbthrift_field_aDouble",
   "__fbthrift_field_f",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithUnion>::isset_indexes = {{
@@ -209,12 +209,12 @@ const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::StructWithContai
   TType::T_LIST,
 }};
 const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::StructWithContainers>::storage_names = {{
-  "list_ref",
-  "set_ref",
-  "map_ref",
-  "list_ref_unique",
-  "set_ref_shared",
-  "list_ref_shared_const",
+  "__fbthrift_field_list_ref",
+  "__fbthrift_field_set_ref",
+  "__fbthrift_field_map_ref",
+  "__fbthrift_field_list_ref_unique",
+  "__fbthrift_field_set_ref_shared",
+  "__fbthrift_field_list_ref_shared_const",
 }};
 const std::array<int, 6> TStructDataStorage<::cpp2::StructWithContainers>::isset_indexes = {{
   -1,
@@ -241,9 +241,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithShared
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::storage_names = {{
-  "opt_shared_const",
-  "shared_const",
-  "req_shared_const",
+  "__fbthrift_field_opt_shared_const",
+  "__fbthrift_field_shared_const",
+  "__fbthrift_field_req_shared_const",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithSharedConst>::isset_indexes = {{
   -1,
@@ -278,9 +278,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRef>::
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRef>::storage_names = {{
-  "def_field",
-  "opt_field",
-  "req_field",
+  "__fbthrift_field_def_field",
+  "__fbthrift_field_opt_field",
+  "__fbthrift_field_req_field",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRef>::isset_indexes = {{
   -1,
@@ -330,9 +330,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::storage_names = {{
-  "def_field",
-  "opt_field",
-  "req_field",
+  "__fbthrift_field_def_field",
+  "__fbthrift_field_opt_field",
+  "__fbthrift_field_req_field",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::isset_indexes = {{
   -1,
@@ -356,9 +356,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::storage_names = {{
-  "def_field",
-  "opt_field",
-  "req_field",
+  "__fbthrift_field_def_field",
+  "__fbthrift_field_opt_field",
+  "__fbthrift_field_req_field",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeShared>::isset_indexes = {{
   -1,
@@ -382,9 +382,9 @@ const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithRefTyp
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::storage_names = {{
-  "def_field",
-  "opt_field",
-  "req_field",
+  "__fbthrift_field_def_field",
+  "__fbthrift_field_opt_field",
+  "__fbthrift_field_req_field",
 }};
 const std::array<int, 3> TStructDataStorage<::cpp2::StructWithRefTypeSharedConst>::isset_indexes = {{
   -1,
@@ -402,7 +402,7 @@ const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::StructWithRefAnd
   TType::T_STRUCT,
 }};
 const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::storage_names = {{
-  "def_field",
+  "__fbthrift_field_def_field",
 }};
 const std::array<int, 1> TStructDataStorage<::cpp2::StructWithRefAndAnnotCppNoexceptMoveCtor>::isset_indexes = {{
   -1,
@@ -430,11 +430,11 @@ const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::StructWithString
   TType::T_STRING,
 }};
 const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::StructWithString>::storage_names = {{
-  "def_unique_string_ref",
-  "def_shared_string_ref",
-  "def_shared_string_const_ref",
-  "unique_string_ref",
-  "shared_string_ref",
+  "__fbthrift_field_def_unique_string_ref",
+  "__fbthrift_field_def_shared_string_ref",
+  "__fbthrift_field_def_shared_string_const_ref",
+  "__fbthrift_field_unique_string_ref",
+  "__fbthrift_field_shared_string_ref",
 }};
 const std::array<int, 5> TStructDataStorage<::cpp2::StructWithString>::isset_indexes = {{
   -1,

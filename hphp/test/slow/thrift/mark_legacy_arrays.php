@@ -133,7 +133,7 @@ function test_thrift_protocol_read_compact() {
   log_markings(struct());
 
   $p = new DummyProtocol();
-  thrift_protocol_write_compact($p, 'foo', 2, struct(), 20);
+  thrift_protocol_write_compact2($p, 'foo', 2, struct(), 20);
   $struct = thrift_protocol_read_compact(
     $p,
     TestStruct::class,
@@ -142,7 +142,7 @@ function test_thrift_protocol_read_compact() {
   log_markings($struct);
 
   $p = new DummyProtocol();
-  thrift_protocol_write_compact($p, 'foo', 2, struct(), 20);
+  thrift_protocol_write_compact2($p, 'foo', 2, struct(), 20);
   $struct = thrift_protocol_read_compact(
     $p,
     TestStruct::class,

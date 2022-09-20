@@ -41,7 +41,6 @@ cdef class TypeName_Builder(thrift.py3.builder.StructBuilder):
     cdef public _apache_thrift_type_standard_types.Void stringType
     cdef public _apache_thrift_type_standard_types.Void binaryType
     cdef public object enumType
-    cdef public object typedefType
     cdef public object structType
     cdef public object unionType
     cdef public object exceptionType

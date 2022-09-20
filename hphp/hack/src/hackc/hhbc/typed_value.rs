@@ -3,13 +3,12 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Pair;
 use ffi::Slice;
 use ffi::Str;
 use serde::Serialize;
 
-/// Raw IEEE floating point bits. We use this rather than f64 so that the default
-/// hash/equality have the right interning behavior: -0.0 != 0.0, NaN == NaN.
+/// Raw IEEE floating point bits. We use this rather than f64 so that
+/// hash/equality have bitwise interning behavior: -0.0 != 0.0, NaN == NaN.
 /// If we ever implement Ord/PartialOrd, we'd need to base it on the raw bits
 /// (u64), not floating point partial order.
 #[derive(Copy, Clone, Debug, Serialize)]
@@ -56,7 +55,7 @@ impl From<f64> for FloatBits {
 pub enum TypedValue<'arena> {
     /// Used for fields that are initialized in the 86pinit method
     Uninit,
-    /// Hack/PHP integers are 64-bit
+    /// Hack/PHP integers are signed 64-bit
     Int(i64),
     Bool(bool),
     /// Hack, C++, PHP, and Caml floats are IEEE754 64-bit
@@ -67,8 +66,20 @@ pub enum TypedValue<'arena> {
     // Hack arrays: vectors, keysets, and dictionaries
     Vec(Slice<'arena, TypedValue<'arena>>),
     Keyset(Slice<'arena, TypedValue<'arena>>),
-    Dict(Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>),
+    Dict(Slice<'arena, Entry<TypedValue<'arena>, TypedValue<'arena>>>),
 }
+
+// This is declared as a generic type to work around cbindgen's topo-sort,
+// which outputs Entry before TypedValue. This violates C++ ordering rules:
+// A struct field type must be declared before the field.
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Serialize)]
+#[repr(C)]
+pub struct Entry<K, V> {
+    pub key: K,
+    pub value: V,
+}
+
+pub type DictEntry<'a> = Entry<TypedValue<'a>, TypedValue<'a>>;
 
 impl<'arena> TypedValue<'arena> {
     pub fn string(x: impl Into<Str<'arena>>) -> Self {
@@ -83,7 +94,7 @@ impl<'arena> TypedValue<'arena> {
         Self::Keyset(x.into())
     }
 
-    pub fn dict(x: impl Into<Slice<'arena, Pair<TypedValue<'arena>, TypedValue<'arena>>>>) -> Self {
+    pub fn dict(x: impl Into<Slice<'arena, DictEntry<'arena>>>) -> Self {
         Self::Dict(x.into())
     }
 

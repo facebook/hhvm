@@ -3440,8 +3440,8 @@ class ForwardUsageRoot final  {
   ForwardUsageRoot& operator=(const ForwardUsageRoot& src);
  private:
   ::apache::thrift::fixtures::types::ForwardUsageStruct __fbthrift_field_ForwardUsageStruct;
- public:
-  ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef> ForwardUsageByRef;
+ private:
+  ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef> __fbthrift_field_ForwardUsageByRef;
  private:
   apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -3491,22 +3491,42 @@ class ForwardUsageRoot final  {
   }
   template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
   FOLLY_ERASE T& ForwardUsageByRef_ref() & {
-    return ForwardUsageByRef;
+    return __fbthrift_field_ForwardUsageByRef;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
   FOLLY_ERASE const T& ForwardUsageByRef_ref() const& {
-    return ForwardUsageByRef;
+    return __fbthrift_field_ForwardUsageByRef;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
   FOLLY_ERASE T&& ForwardUsageByRef_ref() && {
-    return static_cast<T&&>(ForwardUsageByRef);
+    return static_cast<T&&>(__fbthrift_field_ForwardUsageByRef);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
   FOLLY_ERASE const T&& ForwardUsageByRef_ref() const&& {
-    return static_cast<const T&&>(ForwardUsageByRef);
+    return static_cast<const T&&>(__fbthrift_field_ForwardUsageByRef);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
+  FOLLY_ERASE T& ForwardUsageByRef() & {
+    return __fbthrift_field_ForwardUsageByRef;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
+  FOLLY_ERASE const T& ForwardUsageByRef() const& {
+    return __fbthrift_field_ForwardUsageByRef;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
+  FOLLY_ERASE T&& ForwardUsageByRef() && {
+    return static_cast<T&&>(__fbthrift_field_ForwardUsageByRef);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef>>
+  FOLLY_ERASE const T&& ForwardUsageByRef() const&& {
+    return static_cast<const T&&>(__fbthrift_field_ForwardUsageByRef);
   }
   const ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() const&;
   ::apache::thrift::fixtures::types::ForwardUsageStruct* get_ForwardUsageStruct() &;
@@ -4731,8 +4751,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(alloc),
     __fbthrift_field_aa_string(alloc),
     __fbthrift_field_not_a_container(),
-    aa_unique(folly::allocate_unique<::std::int32_t>(alloc)),
-    aa_shared(std::allocate_shared<::std::int32_t>(alloc)) {}
+    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc)) {}
 
   explicit AllocatorAware(const AllocatorAware& other, const allocator_type& alloc) :
     __fbthrift_alloc(alloc),
@@ -4741,8 +4761,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(other.__fbthrift_field_aa_map, alloc),
     __fbthrift_field_aa_string(other.__fbthrift_field_aa_string, alloc),
     __fbthrift_field_not_a_container(other.__fbthrift_field_not_a_container),
-    aa_unique(folly::allocate_unique<::std::int32_t>(alloc, *other.aa_unique)),
-    aa_shared(std::allocate_shared<::std::int32_t>(alloc, *other.aa_shared)),
+    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc, *other.__fbthrift_field_aa_unique)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc, *other.__fbthrift_field_aa_shared)),
     __isset(other.__isset) {}
 
   explicit AllocatorAware(AllocatorAware&& other, const allocator_type& alloc) :
@@ -4752,8 +4772,8 @@ class AllocatorAware final  {
     __fbthrift_field_aa_map(std::move(other.__fbthrift_field_aa_map), alloc),
     __fbthrift_field_aa_string(std::move(other.__fbthrift_field_aa_string), alloc),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    aa_unique(folly::allocate_unique<::std::int32_t>(alloc, std::move(*other.aa_unique))),
-    aa_shared(std::allocate_shared<::std::int32_t>(alloc, std::move(*other.aa_shared))),
+    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(alloc, std::move(*other.__fbthrift_field_aa_unique))),
+    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(alloc, std::move(*other.__fbthrift_field_aa_shared))),
     __isset(other.__isset) {}
 
   AllocatorAware& operator=(AllocatorAware&&) noexcept;
@@ -4771,10 +4791,10 @@ class AllocatorAware final  {
   ::std::string __fbthrift_field_aa_string;
  private:
   ::std::int32_t __fbthrift_field_not_a_container;
- public:
-  ::std::unique_ptr<::std::int32_t> aa_unique;
- public:
-  ::std::shared_ptr<::std::int32_t> aa_shared;
+ private:
+  ::std::unique_ptr<::std::int32_t> __fbthrift_field_aa_unique;
+ private:
+  ::std::shared_ptr<::std::int32_t> __fbthrift_field_aa_shared;
  private:
   apache::thrift::detail::isset_bitset<5, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -4984,41 +5004,81 @@ class AllocatorAware final  {
   }
   template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
   FOLLY_ERASE T& aa_unique_ref() & {
-    return aa_unique;
+    return __fbthrift_field_aa_unique;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
   FOLLY_ERASE const T& aa_unique_ref() const& {
-    return aa_unique;
+    return __fbthrift_field_aa_unique;
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
   FOLLY_ERASE T&& aa_unique_ref() && {
-    return static_cast<T&&>(aa_unique);
+    return static_cast<T&&>(__fbthrift_field_aa_unique);
   }
 
   template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
   FOLLY_ERASE const T&& aa_unique_ref() const&& {
-    return static_cast<const T&&>(aa_unique);
+    return static_cast<const T&&>(__fbthrift_field_aa_unique);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T& aa_unique() & {
+    return __fbthrift_field_aa_unique;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& aa_unique() const& {
+    return __fbthrift_field_aa_unique;
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& aa_unique() && {
+    return static_cast<T&&>(__fbthrift_field_aa_unique);
+  }
+
+  template <typename ..., typename T = ::std::unique_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& aa_unique() const&& {
+    return static_cast<const T&&>(__fbthrift_field_aa_unique);
   }
   template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
   FOLLY_ERASE T& aa_shared_ref() & {
-    return aa_shared;
+    return __fbthrift_field_aa_shared;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
   FOLLY_ERASE const T& aa_shared_ref() const& {
-    return aa_shared;
+    return __fbthrift_field_aa_shared;
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
   FOLLY_ERASE T&& aa_shared_ref() && {
-    return static_cast<T&&>(aa_shared);
+    return static_cast<T&&>(__fbthrift_field_aa_shared);
   }
 
   template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
   FOLLY_ERASE const T&& aa_shared_ref() const&& {
-    return static_cast<const T&&>(aa_shared);
+    return static_cast<const T&&>(__fbthrift_field_aa_shared);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T& aa_shared() & {
+    return __fbthrift_field_aa_shared;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T& aa_shared() const& {
+    return __fbthrift_field_aa_shared;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE T&& aa_shared() && {
+    return static_cast<T&&>(__fbthrift_field_aa_shared);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<::std::int32_t>>
+  FOLLY_ERASE const T&& aa_shared() const&& {
+    return static_cast<const T&&>(__fbthrift_field_aa_shared);
   }
   const ::std::vector<::std::int32_t>& get_aa_list() const&;
   ::std::vector<::std::int32_t> get_aa_list() &&;

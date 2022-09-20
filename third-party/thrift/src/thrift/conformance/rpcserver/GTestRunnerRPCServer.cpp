@@ -21,6 +21,7 @@
 
 namespace apache::thrift::conformance {
 
+// Specialization for consuming pluggable function.
 template <>
 std::unique_ptr<Client<RPCConformanceService>>
 createClient<Client<RPCConformanceService>>(std::string service_name) {

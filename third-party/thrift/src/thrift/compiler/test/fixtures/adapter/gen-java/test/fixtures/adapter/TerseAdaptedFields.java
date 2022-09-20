@@ -37,8 +37,8 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     @ThriftConstructor
     protected TerseAdaptedFields() {
       this.intField = 0;
-      this.stringField = null;
-      this.setField = null;
+      this.stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
+      this.setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     }
     
     public static class Builder {
@@ -152,8 +152,8 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     
         return
             Objects.equals(intField, other.intField) &&
-    Objects.equals(stringField, other.stringField) &&
-    Objects.equals(setField, other.setField) &&
+            Objects.equals(stringField, other.stringField) &&
+            Objects.equals(setField, other.setField) &&
             true;
     }
     

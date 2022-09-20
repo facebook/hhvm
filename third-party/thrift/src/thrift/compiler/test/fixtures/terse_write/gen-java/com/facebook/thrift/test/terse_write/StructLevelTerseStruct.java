@@ -59,19 +59,19 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
     @ThriftConstructor
     protected StructLevelTerseStruct() {
       this.boolField = false;
-      this.byteField = 0;
-      this.shortField = 0;
+      this.byteField = (byte)0;
+      this.shortField = (short)0;
       this.intField = 0;
       this.longField = 0L;
       this.floatField = 0.f;
       this.doubleField = 0.;
-      this.stringField = null;
-      this.binaryField = null;
+      this.stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
+      this.binaryField = com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray();
       this.enumField = com.facebook.thrift.test.terse_write.MyEnum.fromInteger(0);
-      this.listField = null;
-      this.setField = null;
-      this.mapField = null;
-      this.structField = null;
+      this.listField = com.facebook.thrift.util.IntrinsicDefaults.defaultList();
+      this.setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
+      this.mapField = com.facebook.thrift.util.IntrinsicDefaults.defaultMap();
+      this.structField = com.facebook.thrift.test.terse_write.MyStruct.defaultInstance();
     }
     
     public static class Builder {
@@ -438,19 +438,19 @@ public final class StructLevelTerseStruct implements com.facebook.thrift.payload
     
         return
             Objects.equals(boolField, other.boolField) &&
-    Objects.equals(byteField, other.byteField) &&
-    Objects.equals(shortField, other.shortField) &&
-    Objects.equals(intField, other.intField) &&
-    Objects.equals(longField, other.longField) &&
-    Objects.equals(floatField, other.floatField) &&
-    Objects.equals(doubleField, other.doubleField) &&
-    Objects.equals(stringField, other.stringField) &&
-    Arrays.equals(binaryField, other.binaryField) &&
-    Objects.equals(enumField, other.enumField) &&
-    Objects.equals(listField, other.listField) &&
-    Objects.equals(setField, other.setField) &&
-    Objects.equals(mapField, other.mapField) &&
-    Objects.equals(structField, other.structField) &&
+            Objects.equals(byteField, other.byteField) &&
+            Objects.equals(shortField, other.shortField) &&
+            Objects.equals(intField, other.intField) &&
+            Objects.equals(longField, other.longField) &&
+            Objects.equals(floatField, other.floatField) &&
+            Objects.equals(doubleField, other.doubleField) &&
+            Objects.equals(stringField, other.stringField) &&
+            Arrays.equals(binaryField, other.binaryField) &&
+            Objects.equals(enumField, other.enumField) &&
+            Objects.equals(listField, other.listField) &&
+            Objects.equals(setField, other.setField) &&
+            Objects.equals(mapField, other.mapField) &&
+            Objects.equals(structField, other.structField) &&
             true;
     }
     

@@ -14,9 +14,24 @@
  * limitations under the License.
  */
 
-package com.facebook.thrift.adapter.common;
+package com.facebook.thrift.adapter.test;
 
 import com.facebook.thrift.adapter.TypeAdapter;
-import com.facebook.thrift.payload.ThriftSerializable;
 
-public interface StructTypeAdapter<T> extends TypeAdapter<ThriftSerializable, T> {}
+public class StringToLongTypeAdapter implements TypeAdapter<String, Long> {
+  @Override
+  public Long fromThrift(String s) {
+    if (s == null) {
+      return null;
+    }
+    return Long.parseLong(s);
+  }
+
+  @Override
+  public String toThrift(Long aLong) {
+    if (aLong == null) {
+      return null;
+    }
+    return String.valueOf(aLong);
+  }
+}

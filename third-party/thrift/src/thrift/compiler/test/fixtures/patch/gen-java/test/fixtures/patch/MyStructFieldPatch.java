@@ -698,29 +698,29 @@ public final class MyStructFieldPatch implements com.facebook.thrift.payload.Thr
     
         return
             Objects.equals(boolVal, other.boolVal) &&
-    Objects.equals(byteVal, other.byteVal) &&
-    Objects.equals(i16Val, other.i16Val) &&
-    Objects.equals(i32Val, other.i32Val) &&
-    Objects.equals(i64Val, other.i64Val) &&
-    Objects.equals(floatVal, other.floatVal) &&
-    Objects.equals(doubleVal, other.doubleVal) &&
-    Objects.equals(stringVal, other.stringVal) &&
-    Objects.equals(binaryVal, other.binaryVal) &&
-    Objects.equals(structVal, other.structVal) &&
-    Objects.equals(optBoolVal, other.optBoolVal) &&
-    Objects.equals(optByteVal, other.optByteVal) &&
-    Objects.equals(optI16Val, other.optI16Val) &&
-    Objects.equals(optI32Val, other.optI32Val) &&
-    Objects.equals(optI64Val, other.optI64Val) &&
-    Objects.equals(optFloatVal, other.optFloatVal) &&
-    Objects.equals(optDoubleVal, other.optDoubleVal) &&
-    Objects.equals(optStringVal, other.optStringVal) &&
-    Objects.equals(optBinaryVal, other.optBinaryVal) &&
-    Objects.equals(optStructVal, other.optStructVal) &&
-    Objects.equals(optListVal, other.optListVal) &&
-    Objects.equals(optSetVal, other.optSetVal) &&
-    Objects.equals(optMapVal, other.optMapVal) &&
-    Objects.equals(unionVal, other.unionVal) &&
+            Objects.equals(byteVal, other.byteVal) &&
+            Objects.equals(i16Val, other.i16Val) &&
+            Objects.equals(i32Val, other.i32Val) &&
+            Objects.equals(i64Val, other.i64Val) &&
+            Objects.equals(floatVal, other.floatVal) &&
+            Objects.equals(doubleVal, other.doubleVal) &&
+            Objects.equals(stringVal, other.stringVal) &&
+            Objects.equals(binaryVal, other.binaryVal) &&
+            Objects.equals(structVal, other.structVal) &&
+            Objects.equals(optBoolVal, other.optBoolVal) &&
+            Objects.equals(optByteVal, other.optByteVal) &&
+            Objects.equals(optI16Val, other.optI16Val) &&
+            Objects.equals(optI32Val, other.optI32Val) &&
+            Objects.equals(optI64Val, other.optI64Val) &&
+            Objects.equals(optFloatVal, other.optFloatVal) &&
+            Objects.equals(optDoubleVal, other.optDoubleVal) &&
+            Objects.equals(optStringVal, other.optStringVal) &&
+            Objects.equals(optBinaryVal, other.optBinaryVal) &&
+            Objects.equals(optStructVal, other.optStructVal) &&
+            Objects.equals(optListVal, other.optListVal) &&
+            Objects.equals(optSetVal, other.optSetVal) &&
+            Objects.equals(optMapVal, other.optMapVal) &&
+            Objects.equals(unionVal, other.unionVal) &&
             true;
     }
     

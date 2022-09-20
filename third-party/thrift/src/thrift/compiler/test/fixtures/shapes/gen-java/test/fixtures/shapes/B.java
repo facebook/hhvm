@@ -1049,41 +1049,41 @@ public final class B implements com.facebook.thrift.payload.ThriftSerializable {
     
         return
             Objects.equals(justAnA, other.justAnA) &&
-    Objects.equals(setOfI32, other.setOfI32) &&
-    Objects.equals(listOfI32, other.listOfI32) &&
-    Objects.equals(listOfString, other.listOfString) &&
-    Objects.equals(mapOfStringToI32, other.mapOfStringToI32) &&
-    Objects.equals(mapOfStringToA, other.mapOfStringToA) &&
-    Objects.equals(mapOfStringToListOfI32, other.mapOfStringToListOfI32) &&
-    Objects.equals(mapOfStringToListOfA, other.mapOfStringToListOfA) &&
-    Objects.equals(mapOfStringToSetOfI32, other.mapOfStringToSetOfI32) &&
-    Objects.equals(mapOfStringToMapOfStringToI32, other.mapOfStringToMapOfStringToI32) &&
-    Objects.equals(mapOfStringToMapOfStringToA, other.mapOfStringToMapOfStringToA) &&
-    Objects.equals(listOfSetOfI32, other.listOfSetOfI32) &&
-    Objects.equals(listOfMapOfStringToListOfA, other.listOfMapOfStringToListOfA) &&
-    Objects.equals(listOfMapOfStringToA, other.listOfMapOfStringToA) &&
-    Objects.equals(justAnEnum, other.justAnEnum) &&
-    Objects.equals(justAUnion, other.justAUnion) &&
-    Objects.equals(optionalJustAnA, other.optionalJustAnA) &&
-    Objects.equals(optionalSetOfI32, other.optionalSetOfI32) &&
-    Objects.equals(optionalListOfI32, other.optionalListOfI32) &&
-    Objects.equals(optionalListOfString, other.optionalListOfString) &&
-    Objects.equals(optionalMapOfStringToI32, other.optionalMapOfStringToI32) &&
-    Objects.equals(optionalMapOfStringToA, other.optionalMapOfStringToA) &&
-    Objects.equals(optionalMapOfStringToListOfI32, other.optionalMapOfStringToListOfI32) &&
-    Objects.equals(optionalMapOfStringToListOfA, other.optionalMapOfStringToListOfA) &&
-    Objects.equals(optionalMapOfStringToSetOfI32, other.optionalMapOfStringToSetOfI32) &&
-    Objects.equals(optionalEnum, other.optionalEnum) &&
-    Objects.equals(requiredEnumWithDefault, other.requiredEnumWithDefault) &&
-    Objects.equals(stringWithDefaultValue, other.stringWithDefaultValue) &&
-    Objects.equals(i32WithDefaultValue, other.i32WithDefaultValue) &&
-    Objects.equals(doubleWithDefaultValue, other.doubleWithDefaultValue) &&
-    Objects.equals(enumWithDefaultValue, other.enumWithDefaultValue) &&
-    Objects.equals(aWithDefaultValue, other.aWithDefaultValue) &&
-    Objects.equals(setOfI32WithDefaultValue, other.setOfI32WithDefaultValue) &&
-    Objects.equals(mapOfI32ToStringWithDefaultValue, other.mapOfI32ToStringWithDefaultValue) &&
-    Objects.equals(listOfStringWithDefaultValue, other.listOfStringWithDefaultValue) &&
-    Objects.equals(mapOfStringToListOfI32WithDefaultValue, other.mapOfStringToListOfI32WithDefaultValue) &&
+            Objects.equals(setOfI32, other.setOfI32) &&
+            Objects.equals(listOfI32, other.listOfI32) &&
+            Objects.equals(listOfString, other.listOfString) &&
+            Objects.equals(mapOfStringToI32, other.mapOfStringToI32) &&
+            Objects.equals(mapOfStringToA, other.mapOfStringToA) &&
+            Objects.equals(mapOfStringToListOfI32, other.mapOfStringToListOfI32) &&
+            Objects.equals(mapOfStringToListOfA, other.mapOfStringToListOfA) &&
+            Objects.equals(mapOfStringToSetOfI32, other.mapOfStringToSetOfI32) &&
+            Objects.equals(mapOfStringToMapOfStringToI32, other.mapOfStringToMapOfStringToI32) &&
+            Objects.equals(mapOfStringToMapOfStringToA, other.mapOfStringToMapOfStringToA) &&
+            Objects.equals(listOfSetOfI32, other.listOfSetOfI32) &&
+            Objects.equals(listOfMapOfStringToListOfA, other.listOfMapOfStringToListOfA) &&
+            Objects.equals(listOfMapOfStringToA, other.listOfMapOfStringToA) &&
+            Objects.equals(justAnEnum, other.justAnEnum) &&
+            Objects.equals(justAUnion, other.justAUnion) &&
+            Objects.equals(optionalJustAnA, other.optionalJustAnA) &&
+            Objects.equals(optionalSetOfI32, other.optionalSetOfI32) &&
+            Objects.equals(optionalListOfI32, other.optionalListOfI32) &&
+            Objects.equals(optionalListOfString, other.optionalListOfString) &&
+            Objects.equals(optionalMapOfStringToI32, other.optionalMapOfStringToI32) &&
+            Objects.equals(optionalMapOfStringToA, other.optionalMapOfStringToA) &&
+            Objects.equals(optionalMapOfStringToListOfI32, other.optionalMapOfStringToListOfI32) &&
+            Objects.equals(optionalMapOfStringToListOfA, other.optionalMapOfStringToListOfA) &&
+            Objects.equals(optionalMapOfStringToSetOfI32, other.optionalMapOfStringToSetOfI32) &&
+            Objects.equals(optionalEnum, other.optionalEnum) &&
+            Objects.equals(requiredEnumWithDefault, other.requiredEnumWithDefault) &&
+            Objects.equals(stringWithDefaultValue, other.stringWithDefaultValue) &&
+            Objects.equals(i32WithDefaultValue, other.i32WithDefaultValue) &&
+            Objects.equals(doubleWithDefaultValue, other.doubleWithDefaultValue) &&
+            Objects.equals(enumWithDefaultValue, other.enumWithDefaultValue) &&
+            Objects.equals(aWithDefaultValue, other.aWithDefaultValue) &&
+            Objects.equals(setOfI32WithDefaultValue, other.setOfI32WithDefaultValue) &&
+            Objects.equals(mapOfI32ToStringWithDefaultValue, other.mapOfI32ToStringWithDefaultValue) &&
+            Objects.equals(listOfStringWithDefaultValue, other.listOfStringWithDefaultValue) &&
+            Objects.equals(mapOfStringToListOfI32WithDefaultValue, other.mapOfStringToListOfI32WithDefaultValue) &&
             true;
     }
     

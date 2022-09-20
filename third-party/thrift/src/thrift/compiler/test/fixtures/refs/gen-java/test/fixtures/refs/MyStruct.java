@@ -149,8 +149,8 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(optRef, other.optRef) &&
-    Objects.equals(ref, other.ref) &&
-    Objects.equals(reqRef, other.reqRef) &&
+            Objects.equals(ref, other.ref) &&
+            Objects.equals(reqRef, other.reqRef) &&
             true;
     }
     

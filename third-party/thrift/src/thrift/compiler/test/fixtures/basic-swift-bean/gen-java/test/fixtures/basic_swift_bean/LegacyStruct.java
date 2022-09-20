@@ -125,7 +125,7 @@ static {
     
         return
             Objects.equals(normal, other.normal) &&
-    Objects.equals(bad, other.bad) &&
+            Objects.equals(bad, other.bad) &&
             true;
     }
     

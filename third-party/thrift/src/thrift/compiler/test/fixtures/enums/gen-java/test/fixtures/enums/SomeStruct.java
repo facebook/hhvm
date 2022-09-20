@@ -180,9 +180,9 @@ public final class SomeStruct implements com.facebook.thrift.payload.ThriftSeria
     
         return
             Objects.equals(reasonable, other.reasonable) &&
-    Objects.equals(fine, other.fine) &&
-    Objects.equals(questionable, other.questionable) &&
-    Objects.equals(tags, other.tags) &&
+            Objects.equals(fine, other.fine) &&
+            Objects.equals(questionable, other.questionable) &&
+            Objects.equals(tags, other.tags) &&
             true;
     }
     

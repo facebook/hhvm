@@ -308,14 +308,14 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(myIntField, other.myIntField) &&
-    Objects.equals(myStringField, other.myStringField) &&
-    Objects.equals(myDataField, other.myDataField) &&
-    Objects.equals(myEnum, other.myEnum) &&
-    Objects.equals(oneway, other.oneway) &&
-    Objects.equals(readonly, other.readonly) &&
-    Objects.equals(idempotent, other.idempotent) &&
-    Objects.equals(floatSet, other.floatSet) &&
-    Objects.equals(noHackCodegenField, other.noHackCodegenField) &&
+            Objects.equals(myStringField, other.myStringField) &&
+            Objects.equals(myDataField, other.myDataField) &&
+            Objects.equals(myEnum, other.myEnum) &&
+            Objects.equals(oneway, other.oneway) &&
+            Objects.equals(readonly, other.readonly) &&
+            Objects.equals(idempotent, other.idempotent) &&
+            Objects.equals(floatSet, other.floatSet) &&
+            Objects.equals(noHackCodegenField, other.noHackCodegenField) &&
             true;
     }
     

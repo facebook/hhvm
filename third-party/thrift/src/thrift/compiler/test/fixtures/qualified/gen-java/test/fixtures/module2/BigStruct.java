@@ -123,7 +123,7 @@ public final class BigStruct implements com.facebook.thrift.payload.ThriftSerial
     
         return
             Objects.equals(s, other.s) &&
-    Objects.equals(id, other.id) &&
+            Objects.equals(id, other.id) &&
             true;
     }
     

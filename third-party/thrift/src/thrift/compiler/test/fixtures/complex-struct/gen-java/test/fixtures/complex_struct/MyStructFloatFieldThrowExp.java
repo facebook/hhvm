@@ -175,9 +175,9 @@ public final class MyStructFloatFieldThrowExp implements com.facebook.thrift.pay
     
         return
             Objects.equals(myLongField, other.myLongField) &&
-    Objects.equals(myByteField, other.myByteField) &&
-    Objects.equals(myStringField, other.myStringField) &&
-    Objects.equals(myFloatField, other.myFloatField) &&
+            Objects.equals(myByteField, other.myByteField) &&
+            Objects.equals(myStringField, other.myStringField) &&
+            Objects.equals(myFloatField, other.myFloatField) &&
             true;
     }
     

@@ -20,6 +20,7 @@ import com.facebook.thrift.adapter.common.SetTypeAdapter;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -32,10 +33,14 @@ public class BinarySetToStringTypeAdapter implements SetTypeAdapter<ByteBuf, Str
 
   @Override
   public Set<ByteBuf> toThrift(String s) {
-    return s == null
-        ? null
-        : Stream.of(s.split(","))
-            .map(hex -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex)))
-            .collect(Collectors.toSet());
+    if (s == null) {
+      return null;
+    }
+    if ("".equals(s)) {
+      return Collections.emptySet();
+    }
+    return Stream.of(s.split(","))
+        .map(hex -> Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(hex)))
+        .collect(Collectors.toSet());
   }
 }

@@ -125,7 +125,7 @@ static {
     
         return
             Objects.equals(myStruct1, other.myStruct1) &&
-    Objects.equals(myString, other.myString) &&
+            Objects.equals(myString, other.myString) &&
             true;
     }
     

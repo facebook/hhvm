@@ -71,14 +71,14 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       Proxy<RouterInfo>& proxy,
       ClientCallback clientCallback,
       ShardSplitCallback shardSplitCallback = nullptr,
-      BucketIdCallback bucketIdCallback = nullptr) {
+      BucketizationCallback bucketizationCallback = nullptr) {
     return std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>(
         new ProxyRequestContextWithInfo<RouterInfo>(
             Recording,
             proxy,
             std::move(clientCallback),
             std::move(shardSplitCallback),
-            std::move(bucketIdCallback)));
+            std::move(bucketizationCallback)));
   }
 
   /**
@@ -92,14 +92,14 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       folly::fibers::Baton& baton,
       ClientCallback clientCallback,
       ShardSplitCallback shardSplitCallback = nullptr,
-      BucketIdCallback bucketIdCallback = nullptr) {
+      BucketizationCallback bucketizationCallback = nullptr) {
     return std::shared_ptr<ProxyRequestContextWithInfo<RouterInfo>>(
         new ProxyRequestContextWithInfo<RouterInfo>(
             Recording,
             proxy,
             std::move(clientCallback),
             std::move(shardSplitCallback),
-            std::move(bucketIdCallback)),
+            std::move(bucketizationCallback)),
         [&baton](ProxyRequestContext* ctx) {
           delete ctx;
           baton.post();
@@ -243,13 +243,13 @@ class ProxyRequestContextWithInfo : public ProxyRequestContext {
       Proxy<RouterInfo>& pr,
       ClientCallback clientCallback,
       ShardSplitCallback shardSplitCallback = nullptr,
-      BucketIdCallback bucketIdCallback = nullptr)
+      BucketizationCallback bucketizationCallback = nullptr)
       : ProxyRequestContext(
             Recording,
             pr,
             std::move(clientCallback),
             std::move(shardSplitCallback),
-            std::move(bucketIdCallback)),
+            std::move(bucketizationCallback)),
         proxy_(pr) {}
 
   int64_t startDurationUs_{nowUs()};

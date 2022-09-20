@@ -283,7 +283,7 @@ async function testCompact() {
   $p = new DummyProtocol();
   $v = await getStructWithWrapper();
   $v->print();
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v, 20);
   var_dump(md5($p->getTransport()->buff));
   $new_value = thrift_protocol_read_compact($p, 'OuterStructWithWrapper');
   await $new_value->print();

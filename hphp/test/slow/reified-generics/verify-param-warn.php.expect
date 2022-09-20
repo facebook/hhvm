@@ -1,0 +1,3 @@
+ERROR: string(55) "Argument 1 to test() must be of type @int, string given"
+object(C) (0) {
+}

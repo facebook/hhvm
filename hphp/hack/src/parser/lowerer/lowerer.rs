@@ -22,6 +22,7 @@ use hash::HashSet;
 use itertools::Either;
 use itertools::Itertools;
 use lint_rust::LintError;
+use naming_special_names_rust as sn;
 use naming_special_names_rust::classes as special_classes;
 use naming_special_names_rust::literal;
 use naming_special_names_rust::special_functions;
@@ -3556,12 +3557,10 @@ fn has_any_policied_or_defaults_context(contexts: Option<&ast::Contexts>) -> boo
     }
 }
 
-fn has_defaults_context(contexts: Option<&ast::Contexts>) -> bool {
-    if let Some(ast::Contexts(_, ref context_hints)) = contexts {
+fn has_any_context(haystack: Option<&ast::Contexts>, needles: Vec<&str>) -> bool {
+    if let Some(ast::Contexts(_, ref context_hints)) = haystack {
         return context_hints.iter().any(|hint| match &*hint.1 {
-            ast::Hint_::Happly(ast::Id(_, id), _) => {
-                id == naming_special_names_rust::coeffects::DEFAULTS
-            }
+            ast::Hint_::Happly(ast::Id(_, id), _) => needles.iter().any(|&context| id == context),
             _ => false,
         });
     } else {
@@ -5426,7 +5425,14 @@ fn check_effect_memoized<'a>(
         is_memoize_attribute_with_flavor(u, Some("MakeICInaccessible"))
             || is_memoize_attribute_with_flavor(u, Some("SoftMakeICInaccessible"))
     }) {
-        if !has_defaults_context(contexts) {
+        if !has_any_context(
+            contexts,
+            vec![
+                sn::coeffects::DEFAULTS,
+                sn::coeffects::LEAK_SAFE_LOCAL,
+                sn::coeffects::LEAK_SAFE_SHALLOW,
+            ],
+        ) {
             raise_parsing_error_pos(
                 &u.name.0,
                 env,

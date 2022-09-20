@@ -476,6 +476,8 @@ val class_elt_is_private_or_protected_not_lsb : class_elt -> bool
 
 val error_Tunapplied_alias_in_illegal_context : unit -> 'a
 
+val is_typeconst_type_abstract : typeconst_type -> bool
+
 module Attributes : sig
   val mem : string -> user_attribute Hh_prelude.List.t -> bool
 

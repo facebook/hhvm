@@ -86,7 +86,6 @@ enum UnstableFeatures {
     UnionIntersectionTypeHints,
     ClassLevelWhere,
     ExpressionTrees,
-    EnumClassLabel,
     Ifc,
     Readonly,
     Modules,
@@ -111,7 +110,6 @@ impl UnstableFeatures {
             UnstableFeatures::UnionIntersectionTypeHints => Unstable,
             UnstableFeatures::ClassLevelWhere => Unstable,
             UnstableFeatures::ExpressionTrees => Unstable,
-            UnstableFeatures::EnumClassLabel => Preview,
             UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => Preview,
@@ -124,7 +122,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypeRefinements => Unstable,
             UnstableFeatures::MethodTraitDiamond => Preview,
             UnstableFeatures::UpcastExpression => Unstable,
-            UnstableFeatures::RequireClass => Unstable,
+            UnstableFeatures::RequireClass => Preview,
             UnstableFeatures::EnumClassTypeConstants => Unstable,
         }
     }

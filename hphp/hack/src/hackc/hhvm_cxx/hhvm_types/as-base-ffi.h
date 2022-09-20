@@ -15,6 +15,7 @@
 */
 #pragma once
 
+#include "hphp/runtime/base/type-structure-kinds.h"
 #include "hphp/runtime/vm/as-base.h"
 #include "hphp/runtime/vm/type-constraint-flags.h"
 

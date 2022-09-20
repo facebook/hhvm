@@ -160,7 +160,7 @@ function testCompact() {
   $p = new DummyProtocol();
   $v = getStruct();
   var_dump($v);
-  thrift_protocol_write_compact($p, 'foomethod', 2, $v, 20);
+  thrift_protocol_write_compact2($p, 'foomethod', 2, $v, 20);
   var_dump(md5($p->getTransport()->buff));
   var_dump(thrift_protocol_read_compact($p, 'OuterStruct'));
 

@@ -233,13 +233,13 @@ using ::apache::thrift::detail::operator>;
 using ::apache::thrift::detail::operator<=;
 using ::apache::thrift::detail::operator>=;
 
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::std::set<::std::string>> SetWithAdapter;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::string> StringWithAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::std::set<::std::string>> SetWithAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::string> StringWithAdapter;
 typedef ::std::vector<::facebook::thrift::test::StringWithAdapter> ListWithElemAdapter;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter> ListWithElemAdapter_withAdapter;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int64_t> MyI64;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::ListWithElemAdapter> ListWithElemAdapter_withAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int64_t> MyI64;
 typedef ::facebook::thrift::test::MyI64 DoubleTypedefI64;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::std::int32_t> MyI32;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::std::int32_t> MyI32;
 
 class Foo final  {
  private:
@@ -270,17 +270,17 @@ class Foo final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::binary_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::binary_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -352,17 +352,17 @@ class Foo final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::binary_t>, T, std::enable_if_t<sizeof(T) != -8>> { static constexpr int value = 8; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>>, T, std::enable_if_t<sizeof(T) != -10>> { static constexpr int value = 10; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -11>> { static constexpr int value = 11; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::binary_t>, T, std::enable_if_t<sizeof(T) != -8>> { static constexpr int value = 8; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -9>> { static constexpr int value = 9; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>, T, std::enable_if_t<sizeof(T) != -10>> { static constexpr int value = 10; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -11>> { static constexpr int value = 11; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -390,7 +390,7 @@ class Foo final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg);
+  Foo(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo> intField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo> optionalIntField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo> intFieldWithDefault__arg, ::facebook::thrift::test::SetWithAdapter setField__arg, ::facebook::thrift::test::SetWithAdapter optionalSetField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> mapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> optionalMapField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo> binaryField__arg, ::facebook::thrift::test::MyI64 longField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> adaptedLongField__arg, ::facebook::thrift::test::DoubleTypedefI64 doubleAdaptedField__arg);
 
   Foo(Foo&&) noexcept;
   Foo(const Foo& src);
@@ -402,25 +402,25 @@ class Foo final  {
   ~Foo();
 
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo> __fbthrift_field_intField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo> __fbthrift_field_intField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo> __fbthrift_field_optionalIntField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo> __fbthrift_field_optionalIntField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo> __fbthrift_field_intFieldWithDefault;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo> __fbthrift_field_intFieldWithDefault;
  private:
   ::facebook::thrift::test::SetWithAdapter __fbthrift_field_setField;
  private:
   ::facebook::thrift::test::SetWithAdapter __fbthrift_field_optionalSetField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> __fbthrift_field_mapField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> __fbthrift_field_mapField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> __fbthrift_field_optionalMapField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo> __fbthrift_field_optionalMapField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo> __fbthrift_field_binaryField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo> __fbthrift_field_binaryField;
  private:
   ::facebook::thrift::test::MyI64 __fbthrift_field_longField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> __fbthrift_field_adaptedLongField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo> __fbthrift_field_adaptedLongField;
  private:
   ::facebook::thrift::test::DoubleTypedefI64 __fbthrift_field_doubleAdaptedField;
  private:
@@ -431,122 +431,122 @@ class Foo final  {
   bool operator==(const Foo&) const;
   bool operator<(const Foo&) const;
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intField_ref() const& {
     return {this->__fbthrift_field_intField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intField_ref() & {
     return {this->__fbthrift_field_intField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_intField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intField() const& {
     return {this->__fbthrift_field_intField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intField() & {
     return {this->__fbthrift_field_intField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intField() && {
     return {static_cast<T&&>(this->__fbthrift_field_intField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalIntField_ref() const& {
     return {this->__fbthrift_field_optionalIntField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalIntField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalIntField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalIntField_ref() & {
     return {this->__fbthrift_field_optionalIntField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalIntField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalIntField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalIntField() const& {
     return {this->__fbthrift_field_optionalIntField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalIntField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalIntField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalIntField() & {
     return {this->__fbthrift_field_optionalIntField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalIntField() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalIntField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intFieldWithDefault_ref() const& {
     return {this->__fbthrift_field_intFieldWithDefault, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intFieldWithDefault_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intFieldWithDefault), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intFieldWithDefault_ref() & {
     return {this->__fbthrift_field_intFieldWithDefault, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intFieldWithDefault_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_intFieldWithDefault), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> intFieldWithDefault() const& {
     return {this->__fbthrift_field_intFieldWithDefault, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> intFieldWithDefault() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_intFieldWithDefault), __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> intFieldWithDefault() & {
     return {this->__fbthrift_field_intFieldWithDefault, __isset.at(2), __isset.bit(2)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> intFieldWithDefault() && {
     return {static_cast<T&&>(this->__fbthrift_field_intFieldWithDefault), __isset.at(2), __isset.bit(2)};
   }
@@ -631,122 +631,122 @@ class Foo final  {
     return {static_cast<T&&>(this->__fbthrift_field_optionalSetField), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapField_ref() const& {
     return {this->__fbthrift_field_mapField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_mapField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> mapField_ref() & {
     return {this->__fbthrift_field_mapField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_mapField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> mapField() const& {
     return {this->__fbthrift_field_mapField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> mapField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_mapField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> mapField() & {
     return {this->__fbthrift_field_mapField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> mapField() && {
     return {static_cast<T&&>(this->__fbthrift_field_mapField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalMapField_ref() const& {
     return {this->__fbthrift_field_optionalMapField, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalMapField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalMapField), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalMapField_ref() & {
     return {this->__fbthrift_field_optionalMapField, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalMapField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalMapField), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalMapField() const& {
     return {this->__fbthrift_field_optionalMapField, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalMapField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalMapField), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalMapField() & {
     return {this->__fbthrift_field_optionalMapField, __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 7, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Foo>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalMapField() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalMapField), __isset.at(6), __isset.bit(6)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryField_ref() const& {
     return {this->__fbthrift_field_binaryField, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binaryField), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryField_ref() & {
     return {this->__fbthrift_field_binaryField, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_binaryField), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> binaryField() const& {
     return {this->__fbthrift_field_binaryField, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> binaryField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_binaryField), __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> binaryField() & {
     return {this->__fbthrift_field_binaryField, __isset.at(7), __isset.bit(7)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 8, ::std::string, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 8, ::std::string, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> binaryField() && {
     return {static_cast<T&&>(this->__fbthrift_field_binaryField), __isset.at(7), __isset.bit(7)};
   }
@@ -791,42 +791,42 @@ class Foo final  {
     return {static_cast<T&&>(this->__fbthrift_field_longField), __isset.at(8), __isset.bit(8)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adaptedLongField_ref() const& {
     return {this->__fbthrift_field_adaptedLongField, __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adaptedLongField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adaptedLongField), __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adaptedLongField_ref() & {
     return {this->__fbthrift_field_adaptedLongField, __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adaptedLongField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_adaptedLongField), __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> adaptedLongField() const& {
     return {this->__fbthrift_field_adaptedLongField, __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> adaptedLongField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_adaptedLongField), __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> adaptedLongField() & {
     return {this->__fbthrift_field_adaptedLongField, __isset.at(9), __isset.bit(9)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter2, 10, ::facebook::thrift::test::MyI64, Foo>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> adaptedLongField() && {
     return {static_cast<T&&>(this->__fbthrift_field_adaptedLongField), __isset.at(9), __isset.bit(9)};
   }
@@ -895,7 +895,7 @@ unsigned long Foo::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter1, ::facebook::thrift::test::Foo> FooWithAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter1, ::facebook::thrift::test::Foo> FooWithAdapter;
 
 namespace detail {
 class DirectlyAdapted final  {
@@ -1063,7 +1063,7 @@ unsigned long DirectlyAdapted::read(Protocol_* iprot) {
 }
 } // namespace detail
 
-using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<my::Adapter, ::facebook::thrift::test::detail::DirectlyAdapted>;
+using DirectlyAdapted = ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::facebook::thrift::test::detail::DirectlyAdapted>;
 
 
 class Baz final  {
@@ -1089,11 +1089,11 @@ class Baz final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::binary_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::binary_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1135,11 +1135,11 @@ class Baz final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::binary_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter3, ::apache::thrift::type::map<::apache::thrift::type::string_t, ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>>>>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::binary_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i64_t>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -1335,10 +1335,10 @@ class Baz final  {
   }
 
   union storage_type {
-    ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz> intField;
+    ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz> intField;
     ::facebook::thrift::test::SetWithAdapter setField;
-    ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> mapField;
-    ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz> binaryField;
+    ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> mapField;
+    ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz> binaryField;
     ::facebook::thrift::test::MyI64 longField;
 
     storage_type() {}
@@ -1397,21 +1397,21 @@ class Baz final  {
     return value_.mapField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string const &t) {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string const &t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
     ::new (std::addressof(value_.binaryField)) ::std::string(t);
     return value_.binaryField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string&& t) {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(::std::string&& t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
     ::new (std::addressof(value_.binaryField)) ::std::string(std::move(t));
     return value_.binaryField;
   }
 
-  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>& set_binaryField(T&&... t) {
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::std::string, T...>> ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& set_binaryField(T&&... t) {
     __fbthrift_clear();
     type_ = folly::to_underlying(Type::binaryField);
     ::new (std::addressof(value_.binaryField)) ::std::string(std::forward<T>(t)...);
@@ -1425,7 +1425,7 @@ class Baz final  {
     return value_.longField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz> const& get_intField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz> const& get_intField() const {
     if (getType() != Type::intField) {
       ::apache::thrift::detail::throw_on_bad_field_access();
     }
@@ -1439,14 +1439,14 @@ class Baz final  {
     return value_.setField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> const& get_mapField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> const& get_mapField() const {
     if (getType() != Type::mapField) {
       ::apache::thrift::detail::throw_on_bad_field_access();
     }
     return value_.mapField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz> const& get_binaryField() const {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz> const& get_binaryField() const {
     if (getType() != Type::binaryField) {
       ::apache::thrift::detail::throw_on_bad_field_access();
     }
@@ -1460,7 +1460,7 @@ class Baz final  {
     return value_.longField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz>& mutable_intField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>& mutable_intField() {
     assert(getType() == Type::intField);
     return value_.intField;
   }
@@ -1470,12 +1470,12 @@ class Baz final  {
     return value_.setField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>& mutable_mapField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>& mutable_mapField() {
     assert(getType() == Type::mapField);
     return value_.mapField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>& mutable_binaryField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>& mutable_binaryField() {
     assert(getType() == Type::binaryField);
     return value_.binaryField;
   }
@@ -1485,7 +1485,7 @@ class Baz final  {
     return value_.longField;
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz> move_intField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz> move_intField() {
     assert(getType() == Type::intField);
     return std::move(value_.intField);
   }
@@ -1495,12 +1495,12 @@ class Baz final  {
     return std::move(value_.setField);
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> move_mapField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz> move_mapField() {
     assert(getType() == Type::mapField);
     return std::move(value_.mapField);
   }
 
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz> move_binaryField() {
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz> move_binaryField() {
     assert(getType() == Type::binaryField);
     return std::move(value_.binaryField);
   }
@@ -1510,22 +1510,22 @@ class Baz final  {
     return std::move(value_.longField);
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> intField_ref() const& {
     return {value_.intField, type_, folly::to_underlying(Type::intField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> intField_ref() const&& {
     return {std::move(value_.intField), type_, folly::to_underlying(Type::intField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> intField_ref() & {
     return {value_.intField, type_, folly::to_underlying(Type::intField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> intField_ref() && {
     return {std::move(value_.intField), type_, folly::to_underlying(Type::intField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1548,41 +1548,41 @@ class Baz final  {
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> setField_ref() && {
     return {std::move(value_.setField), type_, folly::to_underlying(Type::setField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> mapField_ref() const& {
     return {value_.mapField, type_, folly::to_underlying(Type::mapField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> mapField_ref() const&& {
     return {std::move(value_.mapField), type_, folly::to_underlying(Type::mapField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> mapField_ref() & {
     return {value_.mapField, type_, folly::to_underlying(Type::mapField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter3, 6, ::std::map<::std::string, ::facebook::thrift::test::ListWithElemAdapter_withAdapter>, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> mapField_ref() && {
     return {std::move(value_.mapField), type_, folly::to_underlying(Type::mapField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> binaryField_ref() const& {
     return {value_.binaryField, type_, folly::to_underlying(Type::binaryField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> binaryField_ref() const&& {
     return {std::move(value_.binaryField), type_, folly::to_underlying(Type::binaryField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&> binaryField_ref() & {
     return {value_.binaryField, type_, folly::to_underlying(Type::binaryField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 8, ::std::string, Baz>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 8, ::std::string, Baz>>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> binaryField_ref() && {
     return {std::move(value_.binaryField), type_, folly::to_underlying(Type::binaryField), this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
@@ -1665,13 +1665,13 @@ class Bar final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
-                                                         ::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>,
-                                                         ::apache::thrift::type::adapted<my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>,
+                                                         ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
+                                                         ::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1723,13 +1723,13 @@ class Bar final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::list<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::struct_t<::facebook::thrift::test::Foo>>>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>, T, std::enable_if_t<sizeof(T) != -5>> { static constexpr int value = 5; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::union_t<::facebook::thrift::test::Baz>>, T, std::enable_if_t<sizeof(T) != -6>> { static constexpr int value = 6; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::detail::DirectlyAdapted>>, T, std::enable_if_t<sizeof(T) != -7>> { static constexpr int value = 7; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -1757,7 +1757,7 @@ class Bar final  {
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  Bar(apache::thrift::FragileConstructor, my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg);
+  Bar(apache::thrift::FragileConstructor, ::my::Cpp::Type1 structField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> optionalStructField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> structListField__arg, ::std::vector<::facebook::thrift::test::FooWithAdapter> optionalStructListField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> unionField__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> optionalUnionField__arg, ::facebook::thrift::test::DirectlyAdapted adaptedStructField__arg);
 
   Bar(Bar&&) noexcept;
   Bar(const Bar& src);
@@ -1769,17 +1769,17 @@ class Bar final  {
   ~Bar();
 
  private:
-  my::Cpp::Type1 __fbthrift_field_structField;
+  ::my::Cpp::Type1 __fbthrift_field_structField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> __fbthrift_field_optionalStructField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar> __fbthrift_field_optionalStructField;
  private:
   ::std::vector<::facebook::thrift::test::FooWithAdapter> __fbthrift_field_structListField;
  private:
   ::std::vector<::facebook::thrift::test::FooWithAdapter> __fbthrift_field_optionalStructListField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> __fbthrift_field_unionField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar> __fbthrift_field_unionField;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> __fbthrift_field_optionalUnionField;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar> __fbthrift_field_optionalUnionField;
  private:
   ::facebook::thrift::test::DirectlyAdapted __fbthrift_field_adaptedStructField;
  private:
@@ -1790,82 +1790,82 @@ class Bar final  {
   bool operator==(const Bar&) const;
   bool operator<(const Bar&) const;
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structField_ref() const& {
     return {this->__fbthrift_field_structField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> structField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_structField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> structField_ref() & {
     return {this->__fbthrift_field_structField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_structField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> structField() const& {
     return {this->__fbthrift_field_structField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> structField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_structField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> structField() & {
     return {this->__fbthrift_field_structField, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = my::Cpp::Type1>
+  template <typename..., typename T = ::my::Cpp::Type1>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> structField() && {
     return {static_cast<T&&>(this->__fbthrift_field_structField), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalStructField_ref() const& {
     return {this->__fbthrift_field_optionalStructField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalStructField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalStructField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalStructField_ref() & {
     return {this->__fbthrift_field_optionalStructField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalStructField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalStructField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalStructField() const& {
     return {this->__fbthrift_field_optionalStructField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalStructField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalStructField), __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalStructField() & {
     return {this->__fbthrift_field_optionalStructField, __isset.at(1), __isset.bit(1)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::facebook::thrift::test::Foo, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalStructField() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalStructField), __isset.at(1), __isset.bit(1)};
   }
@@ -1950,82 +1950,82 @@ class Bar final  {
     return {static_cast<T&&>(this->__fbthrift_field_optionalStructListField), __isset.at(3), __isset.bit(3)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> unionField_ref() const& {
     return {this->__fbthrift_field_unionField, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unionField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_unionField), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> unionField_ref() & {
     return {this->__fbthrift_field_unionField, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> unionField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_unionField), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> unionField() const& {
     return {this->__fbthrift_field_unionField, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> unionField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_unionField), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> unionField() & {
     return {this->__fbthrift_field_unionField, __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> unionField() && {
     return {static_cast<T&&>(this->__fbthrift_field_unionField), __isset.at(4), __isset.bit(4)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalUnionField_ref() const& {
     return {this->__fbthrift_field_optionalUnionField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalUnionField_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalUnionField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalUnionField_ref() & {
     return {this->__fbthrift_field_optionalUnionField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalUnionField_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalUnionField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> optionalUnionField() const& {
     return {this->__fbthrift_field_optionalUnionField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&&> optionalUnionField() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optionalUnionField), __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&> optionalUnionField() & {
     return {this->__fbthrift_field_optionalUnionField, __isset.at(5), __isset.bit(5)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 6, ::facebook::thrift::test::Baz, Bar>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<T&&> optionalUnionField() && {
     return {static_cast<T&&>(this->__fbthrift_field_optionalUnionField), __isset.at(5), __isset.bit(5)};
   }
@@ -2113,8 +2113,8 @@ unsigned long Bar::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::facebook::thrift::test::Bar> StructWithAdapter;
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter2, ::facebook::thrift::test::Baz> UnionWithAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::Bar> StructWithAdapter;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter2, ::facebook::thrift::test::Baz> UnionWithAdapter;
 
 class A final  {
  private:
@@ -2217,7 +2217,7 @@ unsigned long A::read(Protocol_* iprot) {
   return iprot->getCursorPosition() - _xferStart;
 }
 
-typedef ::apache::thrift::adapt_detail::adapted_t<my::Adapter, ::facebook::thrift::test::A> AdaptedA;
+typedef ::apache::thrift::adapt_detail::adapted_t<::my::Adapter, ::facebook::thrift::test::A> AdaptedA;
 
 class MyAnnotation final  {
  private:
@@ -2409,10 +2409,10 @@ class StructWithFieldAdapter final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -2449,10 +2449,10 @@ class StructWithFieldAdapter final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -4>> { static constexpr int value = 4; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -2478,13 +2478,13 @@ class StructWithFieldAdapter final  {
 
   StructWithFieldAdapter() :
       __fbthrift_field_field(),
-      shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_field, *this);
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(*shared_field, *this);
+      __fbthrift_field_shared_field(std::make_shared<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>()) {
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(*__fbthrift_field_shared_field, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field__arg, ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> opt_boxed_field__arg);
+  StructWithFieldAdapter(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field__arg, ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field__arg, ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> opt_boxed_field__arg);
 
   StructWithFieldAdapter(StructWithFieldAdapter&&) noexcept;
   StructWithFieldAdapter(const StructWithFieldAdapter& src);
@@ -2493,13 +2493,13 @@ class StructWithFieldAdapter final  {
   StructWithFieldAdapter& operator=(StructWithFieldAdapter&&) noexcept;
   StructWithFieldAdapter& operator=(const StructWithFieldAdapter& src);
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
- public:
-  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> shared_field;
- public:
-  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> opt_shared_field;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter> __fbthrift_field_field;
  private:
-  ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_opt_boxed_field;
+  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_shared_field;
+ private:
+  ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_opt_shared_field;
+ private:
+  ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>> __fbthrift_field_opt_boxed_field;
  private:
   apache::thrift::detail::isset_bitset<1, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
 
@@ -2508,120 +2508,160 @@ class StructWithFieldAdapter final  {
   bool operator==(const StructWithFieldAdapter&) const;
   bool operator<(const StructWithFieldAdapter&) const;
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field_ref() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field_ref() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> field() const& {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> field() & {
     return {this->__fbthrift_field_field, __isset.at(0), __isset.bit(0)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, StructWithFieldAdapter>>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> field() && {
     return {static_cast<T&&>(this->__fbthrift_field_field), __isset.at(0), __isset.bit(0)};
   }
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T& shared_field_ref() & {
-    return shared_field;
+    return __fbthrift_field_shared_field;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T& shared_field_ref() const& {
-    return shared_field;
+    return __fbthrift_field_shared_field;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T&& shared_field_ref() && {
-    return static_cast<T&&>(shared_field);
+    return static_cast<T&&>(__fbthrift_field_shared_field);
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T&& shared_field_ref() const&& {
-    return static_cast<const T&&>(shared_field);
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
   }
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T& shared_field() & {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T& shared_field() const& {
+    return __fbthrift_field_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T&& shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T&& shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_shared_field);
+  }
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T& opt_shared_field_ref() & {
-    return opt_shared_field;
+    return __fbthrift_field_opt_shared_field;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T& opt_shared_field_ref() const& {
-    return opt_shared_field;
+    return __fbthrift_field_opt_shared_field;
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE T&& opt_shared_field_ref() && {
-    return static_cast<T&&>(opt_shared_field);
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
   }
 
-  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE const T&& opt_shared_field_ref() const&& {
-    return static_cast<const T&&>(opt_shared_field);
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T& opt_shared_field() & {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T& opt_shared_field() const& {
+    return __fbthrift_field_opt_shared_field;
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE T&& opt_shared_field() && {
+    return static_cast<T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename ..., typename T = ::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>
+  FOLLY_ERASE const T&& opt_shared_field() const&& {
+    return static_cast<const T&&>(__fbthrift_field_opt_shared_field);
+  }
+
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> opt_boxed_field_ref() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_opt_boxed_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> opt_boxed_field_ref() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_opt_boxed_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> opt_boxed_field_ref() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_opt_boxed_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> opt_boxed_field_ref() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_opt_boxed_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&> opt_boxed_field() const& {
     return ::apache::thrift::optional_boxed_field_ref<const T&>{this->__fbthrift_field_opt_boxed_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<const T&&> opt_boxed_field() const&& {
     return ::apache::thrift::optional_boxed_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_opt_boxed_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&> opt_boxed_field() & {
     return ::apache::thrift::optional_boxed_field_ref<T&>{this->__fbthrift_field_opt_boxed_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
+  template <typename..., typename T = ::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>
   FOLLY_ERASE ::apache::thrift::optional_boxed_field_ref<T&&> opt_boxed_field() && {
     return ::apache::thrift::optional_boxed_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_opt_boxed_field)};
   }
@@ -2672,9 +2712,9 @@ class TerseAdaptedFields final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>,
-                                                         ::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>,
+                                                         ::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -2706,9 +2746,9 @@ class TerseAdaptedFields final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter1, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::i32_t>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::string_t>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter1, ::apache::thrift::type::set<::apache::thrift::type::i32_t>>, T, std::enable_if_t<sizeof(T) != -3>> { static constexpr int value = 3; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -2734,13 +2774,13 @@ class TerseAdaptedFields final  {
 
   TerseAdaptedFields() :
       __fbthrift_field_int_field() {
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 1>(__fbthrift_field_int_field, *this);
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 2>(__fbthrift_field_string_field, *this);
-    ::apache::thrift::adapt_detail::construct<my::Adapter1, 3>(__fbthrift_field_set_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 1>(__fbthrift_field_int_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 2>(__fbthrift_field_string_field, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter1, 3>(__fbthrift_field_set_field, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg);
+  TerseAdaptedFields(apache::thrift::FragileConstructor, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> int_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields> string_field__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> set_field__arg);
 
   TerseAdaptedFields(TerseAdaptedFields&&) noexcept;
   TerseAdaptedFields(const TerseAdaptedFields& src);
@@ -2749,133 +2789,133 @@ class TerseAdaptedFields final  {
   TerseAdaptedFields& operator=(TerseAdaptedFields&&) noexcept;
   TerseAdaptedFields& operator=(const TerseAdaptedFields& src);
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> __fbthrift_field_int_field;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields> __fbthrift_field_int_field;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields> __fbthrift_field_string_field;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields> __fbthrift_field_string_field;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> __fbthrift_field_set_field;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields> __fbthrift_field_set_field;
 
  public:
 
   bool operator==(const TerseAdaptedFields&) const;
   bool operator<(const TerseAdaptedFields&) const;
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> int_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_int_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> int_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_int_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> int_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_int_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 1, ::std::int32_t, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> int_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_int_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> string_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_string_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> string_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_string_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> string_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_string_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::string, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> string_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_string_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field_ref() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field_ref() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field_ref() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field_ref() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> set_field() const& {
     return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_set_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> set_field() const&& {
     return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_set_field)};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> set_field() & {
     return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_set_field};
   }
 
-  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
+  template <typename..., typename T = ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::set<::std::int32_t>, TerseAdaptedFields>>
   FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> set_field() && {
     return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_set_field)};
   }
@@ -2924,7 +2964,7 @@ class B final  {
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
-                                                         ::apache::thrift::type::adapted<my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::A>>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::A>>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -2946,7 +2986,7 @@ class B final  {
 
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::A>>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter, ::apache::thrift::type::struct_t<::facebook::thrift::test::A>>, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -2971,7 +3011,7 @@ class B final  {
  public:
 
   B() {
-    ::apache::thrift::adapt_detail::construct<my::Adapter, 1>(__fbthrift_field_a, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter, 1>(__fbthrift_field_a, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
@@ -3247,7 +3287,7 @@ class MyStruct final  {
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                          void,
                                                          ::apache::thrift::type::i32_t,
-                                                         ::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>;
+                                                         ::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>>;
 
   template<class T>
   using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -3275,7 +3315,7 @@ class MyStruct final  {
   struct __fbthrift_ordinal_impl_for_non_unique_type {
     template<class, class, class> struct Impl { static constexpr int value = 0; };
     template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::my::Adapter2, ::apache::thrift::type::set<::apache::thrift::type::string_t>>, T, std::enable_if_t<sizeof(T) != -2>> { static constexpr int value = 2; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
   };
@@ -3301,7 +3341,7 @@ class MyStruct final  {
 
   MyStruct() :
       __fbthrift_field_field() {
-    ::apache::thrift::adapt_detail::construct<my::Adapter2, 2>(__fbthrift_field_set_string, *this);
+    ::apache::thrift::adapt_detail::construct<::my::Adapter2, 2>(__fbthrift_field_set_string, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]

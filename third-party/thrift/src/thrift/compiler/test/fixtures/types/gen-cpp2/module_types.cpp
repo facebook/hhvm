@@ -1817,8 +1817,8 @@ const folly::StringPiece ForwardUsageRoot::__fbthrift_get_field_name(::apache::t
 
 ForwardUsageRoot::ForwardUsageRoot(const ForwardUsageRoot& srcObj) :
     __fbthrift_field_ForwardUsageStruct(srcObj.__fbthrift_field_ForwardUsageStruct),
-    ForwardUsageByRef(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::structure>(srcObj.ForwardUsageByRef)),
+    __fbthrift_field_ForwardUsageByRef(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::structure>(srcObj.__fbthrift_field_ForwardUsageByRef)),
     __isset(srcObj.__isset) {
 }
 
@@ -1830,13 +1830,13 @@ ForwardUsageRoot& ForwardUsageRoot::operator=(const ForwardUsageRoot& other) {
 
 ForwardUsageRoot::ForwardUsageRoot(FOLLY_MAYBE_UNUSED ForwardUsageRoot&& other) noexcept :
     __fbthrift_field_ForwardUsageStruct(std::move(other.__fbthrift_field_ForwardUsageStruct)),
-    ForwardUsageByRef(std::move(other.ForwardUsageByRef)),
+    __fbthrift_field_ForwardUsageByRef(std::move(other.__fbthrift_field_ForwardUsageByRef)),
     __isset(other.__isset) {
 }
 
 ForwardUsageRoot& ForwardUsageRoot::operator=(FOLLY_MAYBE_UNUSED ForwardUsageRoot&& other) noexcept {
     this->__fbthrift_field_ForwardUsageStruct = std::move(other.__fbthrift_field_ForwardUsageStruct);
-    this->ForwardUsageByRef = std::move(other.ForwardUsageByRef);
+    this->__fbthrift_field_ForwardUsageByRef = std::move(other.__fbthrift_field_ForwardUsageByRef);
     __isset = other.__isset;
     return *this;
 }
@@ -1844,7 +1844,7 @@ ForwardUsageRoot& ForwardUsageRoot::operator=(FOLLY_MAYBE_UNUSED ForwardUsageRoo
 
 ForwardUsageRoot::ForwardUsageRoot(apache::thrift::FragileConstructor, ::apache::thrift::fixtures::types::ForwardUsageStruct ForwardUsageStruct__arg, ::std::unique_ptr<::apache::thrift::fixtures::types::ForwardUsageByRef> ForwardUsageByRef__arg) :
     __fbthrift_field_ForwardUsageStruct(std::move(ForwardUsageStruct__arg)),
-    ForwardUsageByRef(std::move(ForwardUsageByRef__arg)) {
+    __fbthrift_field_ForwardUsageByRef(std::move(ForwardUsageByRef__arg)) {
   __isset.set(folly::index_constant<0>(), true);
 }
 
@@ -1852,7 +1852,7 @@ ForwardUsageRoot::ForwardUsageRoot(apache::thrift::FragileConstructor, ::apache:
 void ForwardUsageRoot::__fbthrift_clear() {
   // clear all fields
   ::apache::thrift::clear(this->__fbthrift_field_ForwardUsageStruct);
-  this->ForwardUsageByRef.reset();
+  this->__fbthrift_field_ForwardUsageByRef.reset();
   __isset = {};
 }
 
@@ -1861,7 +1861,7 @@ void ForwardUsageRoot::__fbthrift_clear_terse_fields() {
 
 bool ForwardUsageRoot::__fbthrift_is_empty() const {
   return !(this->__isset.get(0)) &&
- !(this->ForwardUsageByRef);
+ !(this->__fbthrift_field_ForwardUsageByRef);
 }
 
 bool ForwardUsageRoot::operator==(FOLLY_MAYBE_UNUSED const ForwardUsageRoot& rhs) const {
@@ -1898,7 +1898,7 @@ const ::apache::thrift::fixtures::types::ForwardUsageStruct* ForwardUsageRoot::g
 void swap(FOLLY_MAYBE_UNUSED ForwardUsageRoot& a, FOLLY_MAYBE_UNUSED ForwardUsageRoot& b) {
   using ::std::swap;
   swap(a.__fbthrift_field_ForwardUsageStruct, b.__fbthrift_field_ForwardUsageStruct);
-  swap(a.ForwardUsageByRef, b.ForwardUsageByRef);
+  swap(a.__fbthrift_field_ForwardUsageByRef, b.__fbthrift_field_ForwardUsageByRef);
   swap(a.__isset, b.__isset);
 }
 
@@ -2550,9 +2550,9 @@ AllocatorAware::AllocatorAware(const AllocatorAware& srcObj) :
     __fbthrift_field_aa_map(srcObj.__fbthrift_field_aa_map),
     __fbthrift_field_aa_string(srcObj.__fbthrift_field_aa_string),
     __fbthrift_field_not_a_container(srcObj.__fbthrift_field_not_a_container),
-    aa_unique(::apache::thrift::detail::st::copy_field<
-          ::apache::thrift::type_class::integral>(srcObj.aa_unique)),
-    aa_shared(srcObj.aa_shared),
+    __fbthrift_field_aa_unique(::apache::thrift::detail::st::copy_field<
+          ::apache::thrift::type_class::integral>(srcObj.__fbthrift_field_aa_unique)),
+    __fbthrift_field_aa_shared(srcObj.__fbthrift_field_aa_shared),
     __isset(srcObj.__isset) {
 }
 
@@ -2570,8 +2570,8 @@ AllocatorAware::AllocatorAware() :
     __fbthrift_field_aa_map(__fbthrift_alloc),
     __fbthrift_field_aa_string(__fbthrift_alloc),
     __fbthrift_field_not_a_container(),
-    aa_unique(folly::allocate_unique<::std::int32_t>(__fbthrift_alloc)),
-    aa_shared(std::allocate_shared<::std::int32_t>(__fbthrift_alloc)) {
+    __fbthrift_field_aa_unique(folly::allocate_unique<::std::int32_t>(__fbthrift_alloc)),
+    __fbthrift_field_aa_shared(std::allocate_shared<::std::int32_t>(__fbthrift_alloc)) {
 }
 
 
@@ -2584,8 +2584,8 @@ AllocatorAware::AllocatorAware(FOLLY_MAYBE_UNUSED AllocatorAware&& other) noexce
     __fbthrift_field_aa_map(std::move(other.__fbthrift_field_aa_map)),
     __fbthrift_field_aa_string(std::move(other.__fbthrift_field_aa_string)),
     __fbthrift_field_not_a_container(std::move(other.__fbthrift_field_not_a_container)),
-    aa_unique(std::move(other.aa_unique)),
-    aa_shared(std::move(other.aa_shared)),
+    __fbthrift_field_aa_unique(std::move(other.__fbthrift_field_aa_unique)),
+    __fbthrift_field_aa_shared(std::move(other.__fbthrift_field_aa_shared)),
     __isset(other.__isset) {
 }
 
@@ -2595,8 +2595,8 @@ AllocatorAware& AllocatorAware::operator=(FOLLY_MAYBE_UNUSED AllocatorAware&& ot
     this->__fbthrift_field_aa_map = std::move(other.__fbthrift_field_aa_map);
     this->__fbthrift_field_aa_string = std::move(other.__fbthrift_field_aa_string);
     this->__fbthrift_field_not_a_container = std::move(other.__fbthrift_field_not_a_container);
-    this->aa_unique = std::move(other.aa_unique);
-    this->aa_shared = std::move(other.aa_shared);
+    this->__fbthrift_field_aa_unique = std::move(other.__fbthrift_field_aa_unique);
+    this->__fbthrift_field_aa_shared = std::move(other.__fbthrift_field_aa_shared);
     __isset = other.__isset;
   ::apache::thrift::detail::move_allocator(__fbthrift_alloc, other.__fbthrift_alloc);
     return *this;
@@ -2609,8 +2609,8 @@ AllocatorAware::AllocatorAware(apache::thrift::FragileConstructor, ::std::vector
     __fbthrift_field_aa_map(std::move(aa_map__arg)),
     __fbthrift_field_aa_string(std::move(aa_string__arg)),
     __fbthrift_field_not_a_container(std::move(not_a_container__arg)),
-    aa_unique(std::move(aa_unique__arg)),
-    aa_shared(std::move(aa_shared__arg)) {
+    __fbthrift_field_aa_unique(std::move(aa_unique__arg)),
+    __fbthrift_field_aa_shared(std::move(aa_shared__arg)) {
   __isset.set(folly::index_constant<0>(), true);
   __isset.set(folly::index_constant<1>(), true);
   __isset.set(folly::index_constant<2>(), true);
@@ -2626,8 +2626,8 @@ void AllocatorAware::__fbthrift_clear() {
   this->__fbthrift_field_aa_map.clear();
   this->__fbthrift_field_aa_string = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
   this->__fbthrift_field_not_a_container = ::std::int32_t();
-  this->aa_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int32_t>>(this->get_allocator());
-  this->aa_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>(this->get_allocator());
+  this->__fbthrift_field_aa_unique = ::apache::thrift::detail::make_mutable_smart_ptr<::std::unique_ptr<::std::int32_t>>(this->get_allocator());
+  this->__fbthrift_field_aa_shared = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<::std::int32_t>>(this->get_allocator());
   __isset = {};
 }
 
@@ -2722,8 +2722,8 @@ void swap(FOLLY_MAYBE_UNUSED AllocatorAware& a, FOLLY_MAYBE_UNUSED AllocatorAwar
   swap(a.__fbthrift_field_aa_map, b.__fbthrift_field_aa_map);
   swap(a.__fbthrift_field_aa_string, b.__fbthrift_field_aa_string);
   swap(a.__fbthrift_field_not_a_container, b.__fbthrift_field_not_a_container);
-  swap(a.aa_unique, b.aa_unique);
-  swap(a.aa_shared, b.aa_shared);
+  swap(a.__fbthrift_field_aa_unique, b.__fbthrift_field_aa_unique);
+  swap(a.__fbthrift_field_aa_shared, b.__fbthrift_field_aa_shared);
   swap(a.__isset, b.__isset);
   ::apache::thrift::detail::swap_allocators(a.__fbthrift_alloc, b.__fbthrift_alloc);
 }

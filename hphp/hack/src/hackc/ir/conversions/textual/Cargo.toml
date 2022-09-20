@@ -9,4 +9,9 @@ path = "lib.rs"
 
 [dependencies]
 anyhow = "1.0.56"
+ascii = "1.0"
+hash = { path = "../../../../utils/hash" }
 ir = { path = "../.." }
+itertools = "0.10.3"
+log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
+newtype = { path = "../../../../utils/newtype" }

@@ -85,23 +85,23 @@ func StandardProtocolPtr(v StandardProtocol) *StandardProtocol { return &v }
 
 type Void int64
 const (
-  Void_NoValueVoid Void = 0
+  Void_NoValue Void = 0
 )
 
 var VoidToName = map[Void]string {
-  Void_NoValueVoid: "NoValueVoid",
+  Void_NoValue: "NoValue",
 }
 
 var VoidToValue = map[string]Void {
-  "NoValueVoid": Void_NoValueVoid,
+  "NoValue": Void_NoValue,
 }
 
 var VoidNames = []string {
-  "NoValueVoid",
+  "NoValue",
 }
 
 var VoidValues = []Void {
-  Void_NoValueVoid,
+  Void_NoValue,
 }
 
 func (p Void) String() string {

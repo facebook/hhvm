@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 @SuppressWarnings({ "unused" })
 public enum Void implements com.facebook.thrift.TEnum {
-  NoValueVoid(0);
+  NoValue(0);
 
   private final int value;
 
@@ -35,7 +35,7 @@ public enum Void implements com.facebook.thrift.TEnum {
   public static Void findByValue(int value) { 
     switch (value) {
       case 0:
-        return NoValueVoid;
+        return NoValue;
       default:
         return null;
     }

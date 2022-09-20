@@ -2058,7 +2058,10 @@ module Primary = struct
       }
     | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
-    | Illegal_type_structure of Pos.t
+    | Illegal_type_structure of {
+        pos: Pos.t;
+        msg: string;
+      }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {
         pos: Pos.t;
@@ -3860,17 +3863,15 @@ module Primary = struct
       lazy [],
       [] )
 
-  let illegal_type_structure pos =
+  let illegal_type_structure pos msg =
     let claim =
       lazy
-        (let errmsg = "second argument is not a string" in
-         let msg =
+        (let msg =
            "The two arguments to `type_structure()` must be:"
            ^ "\n - first: `ValidClassname::class` or an object of that class"
            ^ "\n - second: a single-quoted string literal containing the name"
-           ^ " of a type constant of that class"
-           ^ "\n"
-           ^ errmsg
+           ^ " of a type constant of that class\n"
+           ^ msg
          in
          (pos, msg))
     in
@@ -5796,7 +5797,7 @@ module Primary = struct
       local_variable_modified_twice pos pos_modifieds
     | Assign_during_case pos -> assign_during_case pos
     | Invalid_classname pos -> invalid_classname pos
-    | Illegal_type_structure pos -> illegal_type_structure pos
+    | Illegal_type_structure { pos; msg } -> illegal_type_structure pos msg
     | Illegal_typeconst_direct_access pos -> illegal_typeconst_direct_access pos
     | Wrong_expression_kind_attribute
         {

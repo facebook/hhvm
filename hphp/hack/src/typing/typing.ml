@@ -6956,10 +6956,23 @@ and dispatch_call
                 ((), p1, CIexpr e1_)
             in
             let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
+            let () =
+              match result with
+              | (_, (ty, _, _), _) when Typing_utils.is_any env ty ->
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Illegal_type_structure
+                         { pos; msg = "Could not resolve the type constant" })
+              | _ -> ()
+            in
             (result, should_forget_fakes)
           | _ ->
             Errors.add_typing_error
-              Typing_error.(primary @@ Primary.Illegal_type_structure pos);
+              Typing_error.(
+                primary
+                @@ Primary.Illegal_type_structure
+                     { pos; msg = "Second argument is not a string" });
             let result = expr_error env (Reason.Rwitness pos) e in
             (result, should_forget_fakes))
         | _ -> assert false)

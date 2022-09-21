@@ -23,7 +23,13 @@ public void write0(TProtocol oprot) throws TException {
   switch (this.id) {
   {{#struct:fields}}
   case _{{field:javaAllCapsName}}: {
-{{#field:hasAdapter?}}{{#field:type}}    {{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(({{> FieldType}})this.value);
+    {{#field:hasAdapter?}}
+    {{#field:hasMultipleTypeAdapters?}}
+    {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(_{{field:javaName}}_Adapter2.toThrift(({{> FieldType}})this.value));
+    {{/field:hasMultipleTypeAdapters?}}
+    {{^field:hasMultipleTypeAdapters?}}
+    {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(({{> FieldType}})this.value);
+    {{/field:hasMultipleTypeAdapters?}}
     if ({{field:javaName}} != null) {
       oprot.writeFieldBegin({{field:javaTFieldName}});
       {{#field:isContainer?}}

@@ -1,3 +1,4 @@
+==== brown_fox ====
 string(32) "1072638ba8fc6f2ff06c251b62f426fd"
 string(32) "a1e0224d596927a56c8bae416b2ef23e"
 string(32) "5c6ffbdd40d9556b73a21e63c3e0e904"
@@ -34,12 +35,16 @@ string(40) "51341aa150d38695628491580d8d6dc9850201f7"
 string(48) "da27cf4bdb2decd4731c69a017534535eecd6d9b9015fc41"
 string(56) "f8a5d442ef5b82e062599fe38ddbf46999b29f0a15caa8bebabbff68"
 string(64) "16e1688c75cf09338fce299455ec0f6f783ca1cbb2006203ae6ae98b23f9294a"
+string(8) "7bf1105e"
+string(8) "4246a382"
 bool(true)
-bool(true)
-bool(true)
+==== test_hash_init ====
 string(32) "5c6ffbdd40d9556b73a21e63c3e0e904"
+==== test_hash_file ====
 string(32) "5c6ffbdd40d9556b73a21e63c3e0e904"
 string(32) "7eb2b5c37443418fc77c136dd20e859c"
+==== test_furchash ====
 bool(true)
+==== test_hash_hmac ====
 string(32) "a5e7661a0da3d265700cc17e0dc0400a"
 string(32) "2d1cc1832eef32d7fbe4805ab585fb4a"

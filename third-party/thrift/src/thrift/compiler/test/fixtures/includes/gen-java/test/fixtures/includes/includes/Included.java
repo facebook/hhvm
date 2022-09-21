@@ -123,7 +123,7 @@ public final class Included implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(myIntField, other.myIntField) &&
-    Objects.equals(myTransitiveField, other.myTransitiveField) &&
+            Objects.equals(myTransitiveField, other.myTransitiveField) &&
             true;
     }
     

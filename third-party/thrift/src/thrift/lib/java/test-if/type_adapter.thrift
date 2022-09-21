@@ -23,6 +23,8 @@ enum TestEnum {
   ONE = 1,
 }
 
+typedef i32 Integer
+
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.RetainedSlicedPooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
@@ -69,7 +71,7 @@ typedef i16 adaptedShort
   adapterClassName = "com.facebook.thrift.adapter.test.IntToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
-typedef i32 adaptedInt
+typedef Integer adaptedInt
 
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.LongToStringTypeAdapter",
@@ -149,23 +151,15 @@ typedef map<i32, string> adaptedIntStringMap
 }
 typedef map<i32, string (java.swift.binary_string)> adaptedIntBinaryStringMap
 
-struct InnerTestStruct {
-  1: i32 int_field;
-}
-
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.test.IntBinaryListMapToStringTypeAdapter",
   typeClassName = "java.lang.String",
 }
 typedef map<i32, list<binary>> adaptedIntBinaryListMap
 
-//@java.Adapter{
-//  adapterClassName = "com.facebook.thrift.adapter.test.StructToStringTypeAdapter",
-//  typeClassName = "java.lang.String",
-//}
-//typedef InnerTestStruct adaptedStruct
-
 typedef adaptedBoolean doubleTypedefBoolean
+typedef adaptedInt doubleTypedefInt
+typedef doubleTypedefInt multipleTypedefInt
 
 struct TestStruct {
   1: bool boolean_field;
@@ -176,7 +170,7 @@ struct TestStruct {
   6: float float_field;
   7: double double_field;
   8: string string_field;
-  //9: TestEnum testEnum_field;
+  9: TestEnum testEnum_field;
   10: binary b1;
   11: binary b2;
   12: binary b3;
@@ -191,7 +185,6 @@ struct TestStruct {
   27: map<i32, string> intStringMap_field;
   28: map<i32, string (java.swift.binary_string)> intBinaryStringMap_field;
   29: map<i32, list<binary>> intBinaryListMap_field;
-  //30: InnerTestStruct testStruct_field;
   51: bool boolean_default = true;
   52: byte byte_default = 9;
   53: i16 short_default = 101;
@@ -214,7 +207,11 @@ struct TestStruct {
   102: optional binary optional_b1;
   201: bool boolean_field2;
   202: list<binary> binaryList_field2;
-//203: bool boolean_field3;
+  204: i32 int_field2;
+  205: i32 int_default2;
+  206: i32 doubleTypedefInt_field;
+  207: i32 multipleTypedefInt_field;
+  208: i32 multipleTypedefInt_default;
 }
 
 // Adapted version of TestStruct.
@@ -227,7 +224,7 @@ struct AdaptedTestStruct {
   6: adaptedFloat adaptedFloat_field;
   7: adaptedDouble adaptedDouble_field;
   8: adaptedString adaptedString_field;
-  //9: TestEnum testEnum_field;
+  9: TestEnum testEnum_field;
   10: SlicedByteBuf b1;
   11: CopiedByteBuf b2;
   12: UnpooledByteBuf b3;
@@ -242,7 +239,6 @@ struct AdaptedTestStruct {
   27: adaptedIntStringMap adaptedIntStringMap_field;
   28: adaptedIntBinaryStringMap adaptedIntBinaryStringMap_field;
   29: adaptedIntBinaryListMap adaptedIntBinaryListMap_field;
-  //30: adaptedStruct testStruct_field;
   51: adaptedBoolean adaptedBoolean_default = true;
   52: adaptedByte adaptedByte_default = 9;
   53: adaptedShort adaptedShort_default = 101;
@@ -275,7 +271,54 @@ struct AdaptedTestStruct {
     typeClassName = "java.lang.String",
   }
   202: list<binary> adaptedBinaryList_field2;
-//203: doubleTypedefBoolean adaptedBoolean_field3;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  204: adaptedInt doubleAdaptedInt_field;
+
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  205: adaptedInt doubleAdaptedInt_default = 3000;
+
+  206: doubleTypedefInt doubleTypedefAdaptedInt_field;
+  207: multipleTypedefInt multipleTypedefAdaptedInt_field;
+  208: multipleTypedefInt multipleTypedefAdaptedInt_default = 50;
+}
+
+struct AdaptedTestStructWithoutDefaults {
+  1: adaptedBoolean adaptedBoolean_field;
+  2: adaptedByte adaptedByte_field;
+  10: SlicedByteBuf b1;
+  11: CopiedByteBuf b2;
+  12: UnpooledByteBuf b3;
+  13: Date date_field;
+  20: adaptedIntList adaptedIntList_field;
+  21: adaptedBinaryList adaptedBinaryList_field;
+  24: adaptedBinarySet adaptedBinarySet_field;
+  25: adaptedIntMap adaptedIntMap_field;
+  26: adaptedIntBinaryMap adaptedIntBinaryMap_field;
+  101: optional adaptedBoolean optionalAdaptedBoolean_field;
+  102: optional SlicedByteBuf optional_b1;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.BooleanToStringTypeAdapter",
+    typeClassName = "java.lang.String",
+  }
+  201: bool adaptedBoolean_field2;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.ListToHexTypeAdapter",
+    typeClassName = "java.lang.String",
+  }
+  202: list<binary> adaptedBinaryList_field2;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  204: adaptedInt doubleAdaptedInt_field;
+  205: doubleTypedefInt doubleTypedefAdaptedInt_field;
 }
 
 union TestUnion {
@@ -304,7 +347,10 @@ union TestUnion {
   29: map<i32, list<binary>> intBinaryListMap_field;
   201: bool boolean_field2;
   202: list<binary> binaryList_field2;
-//203: bool boolean_field3;
+  204: i32 int_field2;
+  205: i32 int_default2 = 3000;
+  206: i32 doubleTypedefInt_field;
+  207: i32 multipleTypedefInt_field;
 }
 
 // Adapted version of TestUnion.
@@ -342,5 +388,16 @@ union AdaptedTestUnion {
     typeClassName = "java.lang.String",
   }
   202: list<binary> adaptedBinaryList_field2;
-//203: doubleTypedefBoolean adaptedBoolean_field3;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  204: adaptedInt doubleAdaptedInt_field;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  205: adaptedInt doubleAdaptedInt_default = 3000;
+  206: doubleTypedefInt doubleTypedefAdaptedInt_field;
+  207: multipleTypedefInt multipleTypedefAdaptedInt_field;
 }

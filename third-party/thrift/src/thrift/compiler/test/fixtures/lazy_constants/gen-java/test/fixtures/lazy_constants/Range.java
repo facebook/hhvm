@@ -123,7 +123,7 @@ public final class Range implements com.facebook.thrift.payload.ThriftSerializab
     
         return
             Objects.equals(min, other.min) &&
-    Objects.equals(max, other.max) &&
+            Objects.equals(max, other.max) &&
             true;
     }
     

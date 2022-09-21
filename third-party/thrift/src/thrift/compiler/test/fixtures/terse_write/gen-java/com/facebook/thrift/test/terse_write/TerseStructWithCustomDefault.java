@@ -77,7 +77,7 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       this.mapField = ImmutableMap.<Short, Short>builder()
         .put((short)1, (short)1)
         .build();
-      this.structField = null;
+      this.structField = com.facebook.thrift.test.terse_write.MyStructWithCustomDefault.defaultInstance();
     }
     
     public static class Builder {
@@ -450,19 +450,19 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
     
         return
             Objects.equals(boolField, other.boolField) &&
-    Objects.equals(byteField, other.byteField) &&
-    Objects.equals(shortField, other.shortField) &&
-    Objects.equals(intField, other.intField) &&
-    Objects.equals(longField, other.longField) &&
-    Objects.equals(floatField, other.floatField) &&
-    Objects.equals(doubleField, other.doubleField) &&
-    Objects.equals(stringField, other.stringField) &&
-    Arrays.equals(binaryField, other.binaryField) &&
-    Objects.equals(enumField, other.enumField) &&
-    Objects.equals(listField, other.listField) &&
-    Objects.equals(setField, other.setField) &&
-    Objects.equals(mapField, other.mapField) &&
-    Objects.equals(structField, other.structField) &&
+            Objects.equals(byteField, other.byteField) &&
+            Objects.equals(shortField, other.shortField) &&
+            Objects.equals(intField, other.intField) &&
+            Objects.equals(longField, other.longField) &&
+            Objects.equals(floatField, other.floatField) &&
+            Objects.equals(doubleField, other.doubleField) &&
+            Objects.equals(stringField, other.stringField) &&
+            Arrays.equals(binaryField, other.binaryField) &&
+            Objects.equals(enumField, other.enumField) &&
+            Objects.equals(listField, other.listField) &&
+            Objects.equals(setField, other.setField) &&
+            Objects.equals(mapField, other.mapField) &&
+            Objects.equals(structField, other.structField) &&
             true;
     }
     
@@ -495,19 +495,6 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       TField __field;
       oprot.readStructBegin(TerseStructWithCustomDefault.NAMES_TO_IDS, TerseStructWithCustomDefault.THRIFT_NAMES_TO_IDS, TerseStructWithCustomDefault.FIELD_METADATA);
       TerseStructWithCustomDefault.Builder builder = new TerseStructWithCustomDefault.Builder();
-      builder.setBoolField(false);
-      builder.setByteField((byte)0);
-      builder.setShortField((short)0);
-      builder.setIntField(0);
-      builder.setLongField(0L);
-      builder.setFloatField(0.f);
-      builder.setDoubleField(0.);
-      builder.setStringField(com.facebook.thrift.util.IntrinsicDefaults.defaultString());
-      builder.setBinaryField(com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray());
-      builder.setEnumField(com.facebook.thrift.test.terse_write.MyEnum.fromInteger(0));
-      builder.setListField(com.facebook.thrift.util.IntrinsicDefaults.defaultList());
-      builder.setSetField(com.facebook.thrift.util.IntrinsicDefaults.defaultSet());
-      builder.setMapField(com.facebook.thrift.util.IntrinsicDefaults.defaultMap());
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }

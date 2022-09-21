@@ -149,8 +149,8 @@ public final class StructWithRef implements com.facebook.thrift.payload.ThriftSe
     
         return
             Objects.equals(defField, other.defField) &&
-    Objects.equals(optField, other.optField) &&
-    Objects.equals(reqField, other.reqField) &&
+            Objects.equals(optField, other.optField) &&
+            Objects.equals(reqField, other.reqField) &&
             true;
     }
     

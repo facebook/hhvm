@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/jit/opt.h"
 
 #include "hphp/runtime/base/perf-warning.h"
@@ -168,6 +169,23 @@ struct GVNState {
   NameTable* nameTable{nullptr};
 };
 
+bool ldClsPropSupportsGVN(const IRInstruction* inst) {
+   if (RO::EvalEnforceModules != 1) return true;
+   if (!(inst->src(0)->hasConstVal(TCls) &&
+         inst->src(1)->hasConstVal(TStr))) {
+     return false;
+   }
+   auto const cls = inst->src(0)->clsVal();
+   auto const prop = inst->src(1)->strVal();
+   // Using the prop's own context here is fine, we're
+   // just deciding whether or not to apply an optimization
+   auto const ctx = MemberLookupContext(cls);
+   auto const sprop = cls->findSProp(ctx, prop);
+   if (!sprop.internal) return true;
+   if (!inst->src(2)->hasConstVal(TFunc)) return false;
+   return inst->src(2)->funcVal()->moduleName() == cls->moduleName();
+}
+
 bool supportsGVN(const IRInstruction* inst) {
   switch (inst->op()) {
   case AssertType:
@@ -278,8 +296,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case LdClsMethod:
   case LdIfaceMethod:
   case LdPropAddr:
-  case LdClsPropAddrOrNull:
-  case LdClsPropAddrOrRaise:
   case LdObjClass:
   case LdClsName:
   case LdLazyCls:
@@ -343,7 +359,9 @@ bool supportsGVN(const IRInstruction* inst) {
     // Keyset equality comparisons never re-enter or throw
     return inst->src(0)->type() <= TKeyset && inst->src(1)->type() <= TKeyset;
 
-
+  case LdClsPropAddrOrNull:
+  case LdClsPropAddrOrRaise:
+    return ldClsPropSupportsGVN(inst);
   case IsTypeStruct:
     // Resources can change type without generating a new SSATmp,
     // so its not safe to GVN

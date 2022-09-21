@@ -350,6 +350,20 @@ module Primary : sig
           access_pos: Pos.t;
           trait_pos: Pos_or_decl.t;
         }
+      | Module_missing_import of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module: string;
+          target_module_opt: string option;
+        }
+      | Module_missing_export of {
+          pos: Pos.t;
+          decl_pos: Pos_or_decl.t;
+          module_pos: Pos_or_decl.t;
+          current_module_opt: string option;
+          target_module: string;
+        }
   end
 
   module Xhp : sig
@@ -789,7 +803,10 @@ module Primary : sig
       }
     | Assign_during_case of Pos.t
     | Invalid_classname of Pos.t
-    | Illegal_type_structure of Pos.t
+    | Illegal_type_structure of {
+        pos: Pos.t;
+        msg: string;
+      }
     | Illegal_typeconst_direct_access of Pos.t
     | Wrong_expression_kind_attribute of {
         pos: Pos.t;

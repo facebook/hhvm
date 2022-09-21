@@ -18,6 +18,7 @@
 #pragma once
 
 #include "hphp/runtime/ext/extension.h"
+#include "hphp/runtime/base/string-buffer.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -32,6 +33,11 @@ TypedValue serialize_memoize_param_col(ObjectData*);
 TypedValue serialize_memoize_param_str(StringData*);
 TypedValue serialize_memoize_param_lazycls(LazyClassData);
 TypedValue serialize_memoize_param_dbl(double);
+
+// Temporarily to be used in ext_implicit_context
+void serialize_memoize_string_data(StringBuffer&, const StringData*);
+void serialize_memoize_tv(StringBuffer&, int, const TypedValue*);
+void serialize_memoize_tv(StringBuffer&, int, TypedValue);
 
 extern const StaticString
   s_nullMemoKey,

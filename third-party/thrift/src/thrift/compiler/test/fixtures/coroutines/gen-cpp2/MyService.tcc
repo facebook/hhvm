@@ -51,8 +51,8 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
         , "ping");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::requestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::concurrencyControllerNotification(serverRequest);
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -117,8 +117,8 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
         , "getRandomData");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::requestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::concurrencyControllerNotification(serverRequest);
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -187,8 +187,8 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
         , "hasDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::requestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::concurrencyControllerNotification(serverRequest);
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallback<bool>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -260,8 +260,8 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
         , "getDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::requestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::concurrencyControllerNotification(serverRequest);
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)
@@ -332,8 +332,8 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
         , "putDataById");
     return;
   }
-  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::requestPileNotification(serverRequest);
-  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::concurrencyControllerNotification(serverRequest);
+  auto requestPileNotification = apache::thrift::detail::ServerRequestHelper::moveRequestPileNotification(serverRequest);
+  auto concurrencyControllerNotification = apache::thrift::detail::ServerRequestHelper::moveConcurrencyControllerNotification(serverRequest);
   auto callback = std::make_unique<apache::thrift::HandlerCallback<void>>(
     apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
     , std::move(ctxStack)

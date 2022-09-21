@@ -207,4 +207,17 @@ function drain_unit_prefetcher(): void;
 <<__Native>>
 function non_repo_unit_cache_info(): dict;
 
+/*
+ * We need to be able to unit test functionality of __NativeData classes
+ * without tripping over the funky behavior or (intentional) limitations
+ * of the __NativeData classes that actually do something.
+ */
+<<__NativeData("DummyNativeData")>>
+class ExtensibleNewableClassWithNativeData {
+  <<__Native>>
+  public function setDummyValue(int $v): void;
+  <<__Native>>
+  public function getDumyValue(): int;
+}
+
 }

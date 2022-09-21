@@ -61,7 +61,17 @@ let coerce_type_impl
       in
       Typing_utils.sub_type ~coerce:None env ty_have tunion on_error
     else
-      Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
+      let (env, ety_expect) = Typing_env.expand_type env ty_expect.et_type in
+      match get_node ety_expect with
+      | Tdynamic ->
+        Typing_utils.sub_type
+          ~coerce:(Some Typing_logic.CoerceToDynamic)
+          env
+          ty_have
+          ty_expect.et_type
+          on_error
+      | _ ->
+        Typing_utils.sub_type ~coerce env ty_have ty_expect.et_type on_error
   else
     let complex_coercion =
       TypecheckerOptions.complex_coercion (Typing_env.get_tcopt env)

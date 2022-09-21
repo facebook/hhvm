@@ -111,6 +111,7 @@
 #include "hphp/runtime/vm/member-operations.h"
 #include "hphp/runtime/vm/memo-cache.h"
 #include "hphp/runtime/vm/method-lookup.h"
+#include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/reified-generics.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -919,7 +920,19 @@ static inline tv_lval lookupd_gbl(ActRec* /*fp*/, StringData*& name,
   }
   return val;
 }
-
+namespace {
+void checkStaticPropertyInternal(
+  const Class* cls,
+  const StringData* name,
+  const MemberLookupContext& ctx
+) {
+    auto const slot = cls->lookupSProp(name);
+    auto const prop = cls->staticProperties()[slot];
+    if (will_symbol_raise_module_boundary_violation(&prop, &ctx)) {
+      raiseModulePropertyViolation(cls, name, ctx.moduleName(), true);
+    }
+}
+}
 static inline void lookup_sprop(ActRec* fp,
                                 Class* cls,
                                 StringData*& name,
@@ -937,6 +950,10 @@ static inline void lookup_sprop(ActRec* fp,
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(ctx, name)
     : cls->getSProp(ctx, name);
+
+  if (lookup.internal) {
+    checkStaticPropertyInternal(cls, name, ctx);
+  }
 
   val = lookup.val;
   slot = lookup.slot;
@@ -2341,6 +2358,7 @@ struct SpropState {
   bool accessible;
   bool constant;
   bool readonly;
+  bool internal;
   Stack& vmstack;
 };
 
@@ -2431,6 +2449,9 @@ OPTBLD_INLINE void iopBaseSC(uint32_t keyIdx,
     raise_error("Invalid static property access: %s::%s",
                 class_->name()->data(),
                 name->data());
+  }
+  if (lookup.internal) {
+    checkStaticPropertyInternal(class_, name, ctx);
   }
   assertx(mode != MOpMode::InOut);
   auto const writeMode = mode == MOpMode::Define || mode == MOpMode::Unset;

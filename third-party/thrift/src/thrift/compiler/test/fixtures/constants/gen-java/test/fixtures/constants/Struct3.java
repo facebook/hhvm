@@ -149,8 +149,8 @@ public final class Struct3 implements com.facebook.thrift.payload.ThriftSerializ
     
         return
             Objects.equals(a, other.a) &&
-    Objects.equals(b, other.b) &&
-    Objects.equals(c, other.c) &&
+            Objects.equals(b, other.b) &&
+            Objects.equals(c, other.c) &&
             true;
     }
     

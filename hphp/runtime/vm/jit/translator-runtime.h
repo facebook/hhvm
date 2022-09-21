@@ -139,13 +139,13 @@ tv_lval ldGblAddrDefHelper(StringData* name);
 TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
-                           Class* ctx,
+                           const Func* ctx,
                            bool ignoreLateInit,
                            bool writeMode);
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
-                            Class* ctx,
+                            const Func* ctx,
                             bool ignoreLateInit,
                             bool writeMode);
 

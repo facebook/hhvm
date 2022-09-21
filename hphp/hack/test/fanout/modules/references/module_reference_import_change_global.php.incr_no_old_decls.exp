@@ -1,0 +1,8 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+foo-defn.php:7:5,7: Cannot access a public element from module 'global' in module 'A' (Typing[4444])
+  foo-use.php:3:10,12: This is from module `global`
+  a-decl.php:5:12,12: Module 'A' does not import the public members of module 'global'
+=== fanout ===
+Type Foo

@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import unittest
 
-from blank_interaction.thrift_services import BlankServiceInterface
 from interaction.thrift_clients import Calculator
 from interaction.thrift_types import Point
 from thrift.python.client import ClientType, get_client

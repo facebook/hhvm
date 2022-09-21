@@ -114,6 +114,8 @@ class CPUConcurrencyController {
         100);
   }
 
+  bool enabled() const { return config().mode != Mode::DISABLED; }
+
  private:
   void cycleOnce();
 

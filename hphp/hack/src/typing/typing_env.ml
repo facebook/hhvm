@@ -605,6 +605,18 @@ let make_depend_on_class_def env x cd =
   | Some cd when Pos_or_decl.is_hhi (Cls.pos cd) -> ()
   | _ -> make_depend_on_class env x
 
+let make_depend_on_module env module_name =
+  let dep = Dep.Module module_name in
+  Option.iter env.decl_env.droot ~f:(fun root ->
+      Typing_deps.add_idep (get_deps_mode env) root dep);
+  add_fine_dep_if_enabled env dep;
+  ()
+
+let make_depend_on_module_def env x md =
+  match md with
+  | Some md when Pos_or_decl.is_hhi md.mdt_pos -> ()
+  | _ -> make_depend_on_module env x
+
 let make_depend_on_current_module env =
   let f (_, mid) =
     let dep = Dep.Module mid in
@@ -629,6 +641,17 @@ let env_with_constructor_droot_member env =
   let member = Typing_pessimisation_deps.Constructor in
   let decl_env = { env.decl_env with droot_member = Some member } in
   { env with decl_env }
+
+let get_module (env : env) (name : Decl_provider.module_key) :
+    module_def_type option =
+  let res =
+    Decl_provider.get_module
+      ?tracing_info:(get_tracing_info env)
+      (get_ctx env)
+      name
+  in
+  make_depend_on_module_def env name res;
+  res
 
 let set_current_module env m =
   { env with genv = { env.genv with current_module = m } }

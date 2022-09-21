@@ -19,11 +19,17 @@ HsTestServiceClientWrapper::init(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int64_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_init, channel_);
-  client->init(
-    rpcOptions,
-    std::move(callback),
-    arg_int1
-  );
+  try {
+    client->init(
+      rpcOptions,
+      std::move(callback),
+      arg_int1
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<int64_t>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

@@ -16,6 +16,8 @@
 #include "hphp/runtime/vm/jit/irgen-sprop-global.h"
 
 #include "hphp/runtime/base/datatype.h"
+#include "hphp/runtime/vm/jit/extra-data.h"
+#include "hphp/runtime/vm/jit/irgen-call.h"
 #include "hphp/runtime/vm/jit/irgen-create.h"
 #include "hphp/runtime/vm/jit/irgen-exit.h"
 #include "hphp/runtime/vm/jit/irgen-incdec.h"
@@ -80,6 +82,10 @@ ClsPropLookup ldClsPropAddrKnown(IRGS& env,
     } else {
       knownType -= TUninit;
     }
+  }
+
+  if (prop.attrs & AttrInternal) {
+    emitModuleBoundaryCheckKnown(env, &prop);
   }
 
   profileRDSAccess(env, handle);
@@ -209,8 +215,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     if (lookup.propPtr) return lookup;
   }
 
-  auto const ctxClass = curClass(env);
-  auto const ctxTmp = ctxClass ? cns(env, ctxClass) : cns(env, nullptr);
+  auto const ctxFunc = cns(env, curFunc(env));
   auto const data = ReadonlyData{ opts.readOnlyCheck };
   auto const knownType = opts.ignoreLateInit ? TCell : TInitCell;
   auto const propAddr = gen(
@@ -220,7 +225,7 @@ ClsPropLookup ldClsPropAddr(IRGS& env, SSATmp* ssaCls, SSATmp* ssaName,
     knownType,
     ssaCls,
     ssaName,
-    ctxTmp,
+    ctxFunc,
     cns(env, opts.ignoreLateInit),
     cns(env, opts.writeMode)
   );

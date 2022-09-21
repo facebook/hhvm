@@ -9,7 +9,6 @@ use error::Result;
 use hack_macro::hack_expr;
 use hack_macro::hack_stmts;
 use hhbc::Method;
-use hhbc::XhpAttribute;
 use hhbc_string_utils as string_utils;
 use oxidized::ast::*;
 use oxidized::ast_defs;
@@ -17,6 +16,7 @@ use oxidized::pos::Pos;
 
 use crate::emit_method;
 use crate::emit_property;
+use crate::xhp_attribute::XhpAttribute;
 
 pub fn properties_for_cache<'a, 'arena, 'decl>(
     emitter: &mut Emitter<'arena, 'decl>,

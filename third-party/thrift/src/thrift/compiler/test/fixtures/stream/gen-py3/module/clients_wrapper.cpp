@@ -20,12 +20,18 @@ PubSubStreamingServiceClientWrapper::returnstream(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_returnstream, channel_);
-  client->returnstream(
-    rpcOptions,
-    std::move(callback),
-    arg_i32_from,
-    arg_i32_to
-  );
+  try {
+    client->returnstream(
+      rpcOptions,
+      std::move(callback),
+      arg_i32_from,
+      arg_i32_to
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -38,11 +44,17 @@ PubSubStreamingServiceClientWrapper::streamthrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_streamthrows, channel_);
-  client->streamthrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->streamthrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -55,11 +67,17 @@ PubSubStreamingServiceClientWrapper::servicethrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_servicethrows, channel_);
-  client->servicethrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->servicethrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -72,11 +90,17 @@ PubSubStreamingServiceClientWrapper::boththrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_boththrows, channel_);
-  client->boththrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->boththrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -89,11 +113,17 @@ PubSubStreamingServiceClientWrapper::responseandstreamstreamthrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamstreamthrows, channel_);
-  client->responseandstreamstreamthrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->responseandstreamstreamthrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -106,11 +136,17 @@ PubSubStreamingServiceClientWrapper::responseandstreamservicethrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamservicethrows, channel_);
-  client->responseandstreamservicethrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->responseandstreamservicethrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -123,11 +159,17 @@ PubSubStreamingServiceClientWrapper::responseandstreamboththrows(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_responseandstreamboththrows, channel_);
-  client->responseandstreamboththrows(
-    rpcOptions,
-    std::move(callback),
-    arg_foo
-  );
+  try {
+    client->responseandstreamboththrows(
+      rpcOptions,
+      std::move(callback),
+      arg_foo
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -141,12 +183,18 @@ PubSubStreamingServiceClientWrapper::returnstreamFast(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<apache::thrift::ClientBufferedStream<int32_t>>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_returnstreamFast, channel_);
-  client->returnstreamFast(
-    rpcOptions,
-    std::move(callback),
-    arg_i32_from,
-    arg_i32_to
-  );
+  try {
+    client->returnstreamFast(
+      rpcOptions,
+      std::move(callback),
+      arg_i32_from,
+      arg_i32_to
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

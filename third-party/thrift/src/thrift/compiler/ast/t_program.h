@@ -109,9 +109,10 @@ class t_program : public t_named {
   node_list_view<const t_templated_type> type_instantiations() const {
     return type_insts_;
   }
-  void add_type_instantiation(std::unique_ptr<t_templated_type> type_inst) {
+  t_type_ref add_type_instantiation(
+      std::unique_ptr<t_templated_type> type_inst) {
     assert(type_inst != nullptr);
-    type_insts_.emplace_back(std::move(type_inst));
+    return *type_insts_.emplace_back(std::move(type_inst));
   }
 
   void add_unnamed_typedef(std::unique_ptr<t_typedef> td) {

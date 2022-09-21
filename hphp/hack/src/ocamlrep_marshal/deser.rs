@@ -7,28 +7,9 @@
 
 #![allow(non_camel_case_types, non_snake_case)]
 
-use libc::c_double;
-use libc::c_int;
-use libc::c_long;
-use libc::c_short;
-use libc::c_uchar;
-use libc::c_uint;
-use libc::c_ulong;
-use libc::c_ushort;
-use libc::c_void;
-use libc::memcpy;
 use ocamlrep::Value;
 
 use crate::intext::*;
-
-pub type __int16_t = c_short;
-pub type __uint16_t = c_ushort;
-pub type __int32_t = c_int;
-pub type __uint32_t = c_uint;
-pub type __int64_t = c_long;
-pub type __uint64_t = c_ulong;
-pub type __off_t = c_long;
-pub type __off64_t = c_long;
 
 type value = usize;
 type header_t = usize;
@@ -37,7 +18,7 @@ type header_t = usize;
 #[repr(C)]
 pub struct marshal_header {
     pub magic: u32,
-    pub header_len: c_int,
+    pub header_len: i32,
     pub data_len: usize,
     pub num_objects: usize,
     pub whsize: usize,
@@ -69,7 +50,7 @@ enum InternItemStackOp {
 
 struct State<'a, A> {
     /// Reading pointer in block holding input data.
-    intern_src: *const c_uchar,
+    intern_src: *const u8,
 
     /// The allocator of OCaml objects, e.g. `ocamlrep::Arena` or
     /// `ocamlrep_ocamlpool::Pool`.
@@ -88,7 +69,7 @@ struct State<'a, A> {
 impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     const INTERN_STACK_INIT_SIZE: usize = 256;
 
-    unsafe fn new(alloc: &'a A, src: *const c_uchar) -> Self {
+    unsafe fn new(alloc: &'a A, src: *const u8) -> Self {
         Self {
             intern_src: src,
             alloc,
@@ -107,7 +88,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     #[inline]
-    unsafe fn read8u(&mut self) -> c_uchar {
+    unsafe fn read8u(&mut self) -> u8 {
         let res = u8::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(1);
         res
@@ -148,6 +129,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         res
     }
 
+    #[inline]
     unsafe fn read64u(&mut self) -> u64 {
         let res = u64::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(8);
@@ -155,9 +137,10 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     #[inline]
-    unsafe fn readblock(&mut self, dest: *mut c_void, len: usize) {
-        memcpy(dest, self.intern_src as *const c_void, len as usize);
-        self.intern_src = self.intern_src.offset(len as isize);
+    unsafe fn readblock(&mut self, dst: *mut u8, count: usize) {
+        let src = self.intern_src;
+        std::intrinsics::copy_nonoverlapping(src, dst, count);
+        self.intern_src = self.intern_src.add(count);
     }
 
     unsafe fn intern_cleanup(&mut self) {
@@ -165,13 +148,12 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         self.stack.clear()
     }
 
-    unsafe fn readfloat(&mut self, dest: *mut c_double, code: u8) {
-        if std::mem::size_of::<c_double>() != 8 {
+    unsafe fn readfloat(&mut self, dest: *mut f64, code: u8) {
+        if std::mem::size_of::<f64>() != 8 {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut c_void, 8);
-
+        self.readblock(dest as *mut u8, 8);
         let bytes = *(dest as *const [u8; 8]);
         *dest = match code {
             CODE_DOUBLE_BIG => f64::from_be_bytes(bytes),
@@ -181,12 +163,12 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     // `len` is a number of floats
-    unsafe fn readfloats(&mut self, dest: *mut c_double, len: usize, code: u8) {
-        if std::mem::size_of::<c_double>() != 8 {
+    unsafe fn readfloats(&mut self, dest: *mut f64, len: usize, code: u8) {
+        if std::mem::size_of::<f64>() != 8 {
             self.intern_cleanup();
             self.invalid_argument("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut c_void, len * 8);
+        self.readblock(dest as *mut u8, len * 8);
 
         let mut i = 0;
         while i < len as usize {
@@ -335,7 +317,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                         ocamlrep::DOUBLE_TAG,
                                     );
                                     self.readfloat(
-                                        self.alloc.block_ptr_mut(&mut builder) as *mut c_double,
+                                        self.alloc.block_ptr_mut(&mut builder) as *mut f64,
                                         code,
                                     );
                                     v = Value::from_bits(builder.build().to_bits());
@@ -396,7 +378,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                                 ocamlrep::DOUBLE_ARRAY_TAG,
                                             );
                                             self.readfloats(
-                                                self.alloc.block_ptr_mut(&mut builder) as *mut c_double,
+                                                self.alloc.block_ptr_mut(&mut builder) as *mut f64,
                                                 len,
                                                 code,
                                             );

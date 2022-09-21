@@ -187,6 +187,6 @@ fn test_nonutf8_string() {
     let repr = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
     let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(repr));
     let error = WrapString::read(&mut deserializer).unwrap_err();
-    let expected = "invalid utf-8 sequence of 1 bytes from index 2";
+    let expected = "deserializing `string` from Thrift compact protocol got invalid utf-8, you need to use `binary` instead: invalid utf-8 sequence of 1 bytes from index 2";
     assert_eq!(expected, error.to_string());
 }

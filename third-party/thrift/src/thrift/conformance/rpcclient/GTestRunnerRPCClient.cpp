@@ -14,14 +14,24 @@
  * limitations under the License.
  */
 
+#include <utility>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/rpcclient/GTestHarnessRPCClient.h>
 
 namespace apache::thrift::conformance {
 namespace {
 
-std::map<std::string_view, std::string_view> getClientCmds() {
-  return parseCmds(getEnvOrThrow("THRIFT_CONFORMANCE_CLIENT_BINARIES"));
+std::map<std::string_view, std::pair<std::string_view, bool>> getClientCmds() {
+  std::map<std::string_view, std::pair<std::string_view, bool>> result;
+  auto cmds = parseCmds(getEnvOrThrow("THRIFT_CONFORMANCE_CLIENT_BINARIES"));
+  for (const auto& entry : cmds) {
+    result.emplace(entry.first, std::make_pair(entry.second, false));
+  }
+  cmds = parseCmds(getEnvOrThrow("THRIFT_CONFORMANCE_SETUP_SERVERS"));
+  for (const auto& entry : cmds) {
+    result.emplace(entry.first, std::make_pair(entry.second, true));
+  }
+  return result;
 }
 
 // Register the tests with gtest.

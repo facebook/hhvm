@@ -30,6 +30,7 @@ using Ptr = type::detail::Ptr;
 using Dyn = type::detail::Dyn;
 using RuntimeType = type::detail::RuntimeType;
 using TypeInfo = type::detail::TypeInfo;
+using IterType = type::detail::IterType;
 
 template <typename Tag>
 const TypeInfo& getAnyTypeInfo();

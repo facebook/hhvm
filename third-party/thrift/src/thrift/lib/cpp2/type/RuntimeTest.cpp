@@ -136,20 +136,38 @@ TEST(RuntimeTest, List) {
 TEST(RuntimeTest, Set) {
   std::set<std::string> value;
   auto ref = Ref::to<set<string_t>>(value);
+  auto dump = [&]() {
+    std::set<std::string> result;
+    auto cur = ref.keys();
+    for (auto key = cur.next(); key.has_value(); key = cur.next()) {
+      result.emplace(key.as<string_t>());
+    }
+    return result;
+  };
+
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
-  EXPECT_TRUE(ref.add("hi"));
-  EXPECT_THAT(value, ::testing::ElementsAre("hi"));
+  EXPECT_TRUE(ref.add("best"));
+  EXPECT_THAT(value, ::testing::ElementsAre("best"));
+  EXPECT_THAT(dump(), ::testing::ElementsAre("best"));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
   EXPECT_THROW(ref.get(FieldId{1}), std::runtime_error);
-  EXPECT_THROW(ref.get("hi"), std::runtime_error);
-  EXPECT_THROW(ref.get(Ref::to<string_t>("hi")), std::runtime_error);
+  EXPECT_THROW(ref.get("best"), std::runtime_error);
+  EXPECT_THROW(ref.get(Ref::to<string_t>("best")), std::runtime_error);
+
+  ref.add("the");
+  ref.add("test");
+  EXPECT_THAT(dump(), ::testing::UnorderedElementsAre("the", "best", "test"));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
+  EXPECT_THAT(dump(), ::testing::IsEmpty());
+
+  auto cur = ref.values();
+  EXPECT_THROW(cur.next(), std::logic_error); // lazy
 }
 
 TEST(RuntimeTest, Map) {

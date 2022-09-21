@@ -146,14 +146,13 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
     return get(std::forward<IdT>(id));
   }
 
+  explicit Ref(detail::Ptr data) noexcept : Base(data) {}
+
  private:
   friend class detail::Ptr;
-  template <typename, typename, typename>
-  friend class detail::BaseDyn;
   friend Base;
   using Base::asRef;
 
-  explicit Ref(detail::Ptr data) noexcept : Base(data) {}
   template <typename Tag, typename T>
   Ref(Tag, T&& val) : Base(op::detail::getAnyType<Tag>(), &val) {}
 };

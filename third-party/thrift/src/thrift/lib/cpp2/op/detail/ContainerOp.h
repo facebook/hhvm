@@ -34,13 +34,13 @@ namespace detail {
 
 template <typename Tag>
 struct ContainerOp : BaseOp<Tag> {
+  using T = type::native_type<Tag>;
+  using I = typename T::iterator;
   using Base = BaseOp<Tag>;
   using Base::ref;
 
   static size_t size(const void* s) { return ref(s).size(); }
 
-  // TODO(afuller): This is O(n) for non-random access iterators, expose
-  // some form of type-erased iterators directly as well.
   static auto find(void* s, size_t pos) {
     if (pos >= ref(s).size()) {
       // TODO(afuller): Consider returning 'end' instead.
@@ -49,6 +49,15 @@ struct ContainerOp : BaseOp<Tag> {
     auto itr = ref(s).begin();
     std::advance(itr, pos);
     return itr;
+  }
+
+  // Get or begin iterator.
+  static I iter(T& self, const std::any& i) {
+    if (i.has_value()) { // Continue
+      return std::any_cast<typename T::iterator>(i);
+    } else { // Begin
+      return self.begin();
+    }
   }
 };
 
@@ -95,7 +104,9 @@ template <typename KTag, typename Tag = type::set<KTag>>
 struct SetOp : ContainerOp<Tag> {
   using T = type::native_type<Tag>;
   using Base = ContainerOp<Tag>;
+  using Base::check_op;
   using Base::find;
+  using Base::iter;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -110,11 +121,19 @@ struct SetOp : ContainerOp<Tag> {
   static bool contains(const T& self, K&& key) {
     return self.find(std::forward<K>(key)) != self.end();
   }
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
-    if (pos != std::string::npos) {
-      return ret(KTag{}, *find(s, pos));
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) {
+    unimplemented(); // TODO(afuller): Get by key (aka contains/intern set).
+  }
+
+  static Ptr next(void* s, IterType t, std::any& i) {
+    check_op(t == IterType::Key);
+    Ptr result;
+    auto itr = iter(ref(s), i);
+    if (itr != ref(s).end()) {
+      result = ret(KTag{}, *itr++);
     }
-    unimplemented(); // TODO(afuller): Get by key (aka contains).
+    i = itr; // Save state.
+    return result;
   }
 };
 

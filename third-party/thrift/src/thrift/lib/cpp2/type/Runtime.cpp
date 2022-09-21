@@ -48,6 +48,10 @@ Ptr TypeInfo::ensure(void* ptr, const Dyn& key, const Dyn& defVal) const {
   return ensure_(ptr, {}, key, defVal);
 }
 
+Ptr Cursor::next() {
+  return type_->next(ptr_, iterType_, itr_);
+}
+
 Ptr Dyn::ensure(const Dyn& key) const {
   return type_.mut().ensure(ptr_, key);
 }

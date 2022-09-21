@@ -88,6 +88,25 @@ class RuntimeType {
   }
 };
 
+// TODO(afuller): Expose a more standard iterator iterface.
+// TODO(afuller): Benchmark and and consider optimizing.
+class Cursor {
+ public:
+  // Returns the next value, or nullPtr() if there are no more values.
+  Ptr next();
+
+ private:
+  friend class Dyn;
+
+  RuntimeType type_;
+  void* ptr_ = nullptr; // Only needed for end().
+  IterType iterType_;
+  std::any itr_;
+
+  Cursor(RuntimeType type, void* ptr, IterType iterType)
+      : type_(type), ptr_(ptr), iterType_(iterType) {}
+};
+
 // A base class for qualifier-preserving type-erased runtime-typed dynamic
 // value.
 class Dyn {
@@ -138,6 +157,7 @@ class Dyn {
   FOLLY_NODISCARD bool has_value() const { return !type().empty(); }
 
  protected:
+  friend class Cursor;
   RuntimeType type_;
   void* ptr_ = nullptr;
 
@@ -178,6 +198,15 @@ class Dyn {
   Ptr get(const Dyn& key, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(FieldId id, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
+
+  Cursor keys() const { return {type_, ptr_, IterType::Key}; }
+  Cursor keys(bool ctxConst, bool ctxRvalue = false) const {
+    return {type_.withContext(ctxConst, ctxRvalue), ptr_, IterType::Key};
+  }
+  Cursor values() const { return {type_, ptr_, IterType::Value}; }
+  Cursor values(bool ctxConst, bool ctxRvalue = false) const {
+    return {type_.withContext(ctxConst, ctxRvalue), ptr_, IterType::Value};
+  }
 
   void mergeContext(bool ctxConst, bool ctxRvalue = false) {
     type_ = type_.withContext(ctxConst, ctxRvalue);
@@ -224,9 +253,11 @@ class Ptr final : public Dyn {
   using Dyn::clear;
   using Dyn::ensure;
   using Dyn::get;
+  using Dyn::keys;
   using Dyn::mut;
   using Dyn::put;
   using Dyn::tryMut;
+  using Dyn::values;
 
   // Deref.
   Ref operator*() const noexcept;
@@ -270,6 +301,7 @@ struct BaseErasedOp {
   [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn&, const Dyn&) {
     bad_op();
   }
+  [[noreturn]] static Ptr next(void*, IterType, std::any&) { bad_op(); }
   [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) { bad_op(); }
   [[noreturn]] static size_t size(const void*) { bad_op(); }
 };
@@ -297,6 +329,14 @@ template <typename T1, typename T2 = T1>
 class DynCmp : public BaseDynCmp<T1, T2>, public BaseDynCmp<T2, T1> {};
 template <typename T>
 class DynCmp<T, T> : public BaseDynCmp<T, T> {};
+
+template <typename RefT>
+class RefCursor : Cursor {
+ public:
+  /*implicit*/ RefCursor(Cursor&& cur) : Cursor(cur) {}
+
+  RefT next() { return RefT{Cursor::next()}; }
+};
 
 // TODO(afuller): Consider adding asMap(), asList(), etc, to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
@@ -346,6 +386,18 @@ class BaseDyn : private DynCmp<Derived>,
   ConstT get(Ordinal ord) const&& { return get(type::toPosition(ord)); }
 
   size_t size() const { return type_->size(ptr_); }
+
+  // Iterate over keys.
+  RefCursor<MutT> keys() & { return Base::keys(); }
+  RefCursor<MutT> keys() && { return Base::keys(false, true); }
+  RefCursor<ConstT> keys() const& { return Base::keys(true); }
+  RefCursor<ConstT> keys() const&& { return Base::keys(true, true); }
+
+  // Iterate over values.
+  RefCursor<MutT> values() & { return Base::values(); }
+  RefCursor<MutT> values() && { return Base::values(false, true); }
+  RefCursor<ConstT> values() const& { return Base::values(true); }
+  RefCursor<ConstT> values() const&& { return Base::values(true, true); }
 
  protected:
   using BaseDerived<Derived>::derived;

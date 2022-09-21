@@ -105,8 +105,9 @@ fn main() {
 fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: TempDir) {
     let names = collect_file_or_class_names(opts, &ctx);
 
-    let file_provider: Arc<dyn file_provider::FileProvider> =
-        Arc::new(file_provider::DiskProvider::new(Arc::clone(&ctx)));
+    let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
+        file_provider::DiskProvider::new(Arc::clone(&ctx), Some(hhi_root)),
+    );
     let parser = DeclParser::new(file_provider);
     let shallow_decl_store = make_shallow_decl_store::<R>(if opts.no_serialize {
         StoreOpts::Unserialized
@@ -157,8 +158,7 @@ fn decl_repo<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, hhi_root: 
 
     // Avoid running the decl provider's destructor or destructors for hcons
     // tables, since our stores are huge and full of Arcs which reference one
-    // another. Do destroy the hhi_root, so the tempdir gets cleaned up.
-    drop(hhi_root);
+    // another.
     std::process::exit(0);
 }
 

@@ -17,6 +17,8 @@
 #pragma once
 
 #include <utility>
+
+#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -178,12 +180,21 @@ struct SerializedSize<false, type::binary_t> {
   uint32_t operator()(Protocol& prot, const std::string& s) const {
     return prot.serializedSizeBinary(s);
   }
+
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
+    return prot.serializedSizeBinary(s);
+  }
 };
 
 template <>
 struct SerializedSize<true, type::binary_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.serializedSizeZCBinary(s);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.serializedSizeZCBinary(s);
   }
 };
@@ -384,6 +395,10 @@ template <>
 struct Encode<type::binary_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.writeBinary(s);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.writeBinary(s);
   }
 };

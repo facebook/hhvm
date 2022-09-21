@@ -89,6 +89,9 @@ template bool will_symbol_raise_module_boundary_violation(const Func*, const Mem
 template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, const MemberLookupContext*);
 template bool will_symbol_raise_module_boundary_violation(const Class::Prop*, const Func*);
 template bool will_symbol_raise_module_boundary_violation(const Class*, const Func*);
+template bool will_symbol_raise_module_boundary_violation(const Class::SProp*, const MemberLookupContext*);
+template bool will_symbol_raise_module_boundary_violation(const Class::SProp*, const Func*);
+
 
 bool Module::warningsEnabled(const Func* f) {
   if (RO::EvalEnforceModules == 0) return false;

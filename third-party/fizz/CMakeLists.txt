@@ -72,7 +72,7 @@ ExternalProject_Add(
     -DZSTD_INCLUDE_DIR=${ZSTD_INCLUDE_DIR}
     -DZSTD_LIBRARY_RELEASE=${ZSTD_LIBRARY}
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
     "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"

@@ -49,7 +49,7 @@ ExternalProject_Add(
     "-DZSTD_LIBRARIES=${ZSTD_LIBRARY}"
 
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
 

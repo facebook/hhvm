@@ -47,7 +47,7 @@ ExternalProject_Add(
     -DBoost_INCLUDE_DIR=${BOOST_INCLUDE_DIR}
     "-DBOOST_LIBRARYDIR=${BOOST_LIBRARY_DIR}"
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
     "-Dfbmysqlclient_INCLUDE_DIR=${fbmysqlclient_INCLUDE_DIR}"

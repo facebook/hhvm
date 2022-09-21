@@ -1867,6 +1867,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "intern"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "fnv",
+ "hashbrown 0.12.3",
+ "indexmap",
+ "once_cell",
+ "parking_lot",
+ "rand",
+ "serde",
+ "serde_bytes",
+ "serde_derive",
+ "serde_json",
+ "smallvec",
+]
+
+[[package]]
 name = "ir"
 version = "0.0.0"
 dependencies = [
@@ -3212,6 +3230,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7af873f2c95b99fcb0bd0fe622a43e29514658873c8ceba88c4cb88833a22500"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde_bytes"
+version = "0.11.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16ae07dd2f88a366f15bd0632ba725227018c69a1c8550a927324f8eb8368bb9"
+dependencies = [
+ "serde",
 ]
 
 [[package]]

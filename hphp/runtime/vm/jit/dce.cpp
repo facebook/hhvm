@@ -165,10 +165,6 @@ bool canDCE(const IRInstruction& inst) {
   case LdTVFromRDS:
   case ConvFuncPrologueFlagsToARFlags:
   case DefConst:
-  case DefFuncPrologueCallee:
-  case DefFuncPrologueCtx:
-  case DefFuncPrologueFlags:
-  case DefFuncPrologueNumArgs:
   case Conjure:
   case LdClsInitData:
   case LookupClsRDS:
@@ -494,6 +490,10 @@ bool canDCE(const IRInstruction& inst) {
   case DefFuncEntryFP:
   case DefFrameRelSP:
   case DefRegSP:
+  case DefFuncPrologueCallee:
+  case DefFuncPrologueCtx:
+  case DefFuncPrologueFlags:
+  case DefFuncPrologueNumArgs:
   case InitFrame:
   case Count:
   case VerifyParam:

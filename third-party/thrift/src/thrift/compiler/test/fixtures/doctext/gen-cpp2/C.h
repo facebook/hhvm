@@ -47,6 +47,7 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_f();
   virtual void f();
   virtual folly::Future<folly::Unit> future_f();
   virtual folly::SemiFuture<folly::Unit> semifuture_f();
@@ -55,6 +56,7 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<void> co_f(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_f(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual ::apache::thrift::ServerStream<::cpp2::number> sync_numbers();
   virtual ::apache::thrift::ServerStream<::cpp2::number> numbers();
   virtual folly::Future<::apache::thrift::ServerStream<::cpp2::number>> future_numbers();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::cpp2::number>> semifuture_numbers();
@@ -63,6 +65,7 @@ class ServiceHandler<::cpp2::C> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<::apache::thrift::ServerStream<::cpp2::number>> co_numbers(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_numbers(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::cpp2::number>>> callback);
+  virtual void sync_thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/);
   virtual void thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_thing(::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_thing(::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c);

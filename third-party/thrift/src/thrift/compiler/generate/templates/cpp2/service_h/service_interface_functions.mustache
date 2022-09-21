@@ -17,6 +17,7 @@
 %>
 <%#service:functions%><%#function:return_type%><%^function:starts_interaction?%>
 <%^function:eb%>
+  virtual <% > service_common/sync_function_return_type_server%> sync_<%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>);
   virtual <% > service_common/sync_function_return_type_server%> <%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>);
 <%^service:interaction?%>
   virtual folly::Future<<% > types/return_type_server_lift_unit%>> future_<%function:cpp_name%>(<% > service_common/function_param_list_server%>);

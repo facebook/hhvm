@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyLeafServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyLeaf>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::do_leaf() {
+void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::sync_do_leaf() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_leaf");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::do_leaf() {
+  return sync_do_leaf();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyLeaf>::semifuture_do_leaf() {

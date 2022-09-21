@@ -47,6 +47,7 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/);
   virtual void bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/);
   virtual folly::Future<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>> future_bounce_map(std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m);
   virtual folly::SemiFuture<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>> semifuture_bounce_map(std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m);
@@ -55,6 +56,7 @@ class ServiceHandler<::apache::thrift::fixtures::types::SomeService> : public ap
   virtual folly::coro::Task<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>> co_bounce_map(apache::thrift::RequestParams params, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m);
 #endif
   virtual void async_tm_bounce_map(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>>> callback, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m);
+  virtual void sync_binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/);
   virtual void binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/);
   virtual folly::Future<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>> future_binary_keyed_map(std::unique_ptr<::std::vector<::std::int64_t>> p_r);
   virtual folly::SemiFuture<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>> semifuture_binary_keyed_map(std::unique_ptr<::std::vector<::std::int64_t>> p_r);

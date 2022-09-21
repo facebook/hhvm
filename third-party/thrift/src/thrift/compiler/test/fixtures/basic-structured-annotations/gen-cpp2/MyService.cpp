@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic-structured-annotations::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("first");
+}
+
+void apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::first(::test::fixtures::basic-structured-annotations::annotated_inline_string& _return) {
+  return sync_first(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::semifuture_first() {
@@ -133,8 +137,12 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::second(::std::int64_t /*count*/) {
+bool apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::sync_second(::std::int64_t /*count*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("second");
+}
+
+bool apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::second(::std::int64_t p_count) {
+  return sync_second(p_count);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::test::fixtures::basic-structured-annotations::MyService>::semifuture_second(::std::int64_t p_count) {

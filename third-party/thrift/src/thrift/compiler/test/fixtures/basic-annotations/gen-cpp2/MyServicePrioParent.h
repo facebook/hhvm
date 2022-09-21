@@ -47,6 +47,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_ping();
   virtual void ping();
   virtual folly::Future<folly::Unit> future_ping();
   virtual folly::SemiFuture<folly::Unit> semifuture_ping();
@@ -55,6 +56,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void sync_pong();
   virtual void pong();
   virtual folly::Future<folly::Unit> future_pong();
   virtual folly::SemiFuture<folly::Unit> semifuture_pong();

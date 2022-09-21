@@ -46,10 +46,12 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_foo();
   virtual void foo();
   virtual folly::Future<folly::Unit> future_foo();
   virtual folly::SemiFuture<folly::Unit> semifuture_foo();
   virtual void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
+  virtual void sync_bar();
   virtual void bar();
   virtual folly::Future<folly::Unit> future_bar();
   virtual folly::SemiFuture<folly::Unit> semifuture_bar();

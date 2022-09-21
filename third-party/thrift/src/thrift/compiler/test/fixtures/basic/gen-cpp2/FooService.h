@@ -51,6 +51,7 @@ class ServiceHandler<::test::fixtures::basic::FooService> : public apache::thrif
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_simple_rpc();
   virtual void simple_rpc();
   virtual folly::Future<folly::Unit> future_simple_rpc();
   virtual folly::SemiFuture<folly::Unit> semifuture_simple_rpc();

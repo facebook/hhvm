@@ -66,6 +66,7 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
+  virtual void sync_foo();
   virtual void foo();
   virtual folly::SemiFuture<folly::Unit> semifuture_foo();
 #if FOLLY_HAS_COROUTINES
@@ -77,6 +78,7 @@ class BadInteractionIf : public apache::thrift::Tile, public apache::thrift::Ser
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_foo{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
   virtual std::unique_ptr<BadInteractionIf> createBadInteraction();
+  virtual ::std::int32_t sync_bar();
   virtual ::std::int32_t bar();
   virtual folly::Future<::std::int32_t> future_bar();
   virtual folly::SemiFuture<::std::int32_t> semifuture_bar();

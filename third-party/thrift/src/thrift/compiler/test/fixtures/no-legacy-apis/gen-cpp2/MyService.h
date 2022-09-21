@@ -51,6 +51,7 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
   virtual void query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
   virtual folly::Future<std::unique_ptr<::test::fixtures::basic::MyStruct>> future_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
   virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic::MyStruct>> semifuture_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);

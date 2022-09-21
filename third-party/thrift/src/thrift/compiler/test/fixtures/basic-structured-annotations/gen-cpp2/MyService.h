@@ -52,6 +52,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/);
   virtual void first(::test::fixtures::basic-structured-annotations::annotated_inline_string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> future_first();
   virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> semifuture_first();
@@ -60,6 +61,7 @@ class ServiceHandler<::test::fixtures::basic-structured-annotations::MyService> 
   virtual folly::coro::Task<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>> co_first(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_first(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test::fixtures::basic-structured-annotations::annotated_inline_string>>> callback);
+  virtual bool sync_second(::std::int64_t /*count*/);
   virtual bool second(::std::int64_t /*count*/);
   virtual folly::Future<bool> future_second(::std::int64_t p_count);
   virtual folly::SemiFuture<bool> semifuture_second(::std::int64_t p_count);

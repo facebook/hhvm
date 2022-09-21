@@ -75,6 +75,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
+  virtual void sync_interact();
   virtual void interact();
   virtual folly::SemiFuture<folly::Unit> semifuture_interact();
 #if FOLLY_HAS_COROUTINES
@@ -86,6 +87,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
   std::atomic<apache::thrift::detail::si::InvocationType> __fbthrift_invocation_interact{apache::thrift::detail::si::InvocationType::AsyncTm};
 };
   virtual std::unique_ptr<IIf> createI();
+  virtual void sync_foo(::cpp2::Foo& /*_return*/);
   virtual void foo(::cpp2::Foo& /*_return*/);
   virtual folly::Future<std::unique_ptr<::cpp2::Foo>> future_foo();
   virtual folly::SemiFuture<std::unique_ptr<::cpp2::Foo>> semifuture_foo();
@@ -188,6 +190,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
+  virtual void sync_bar(std::unique_ptr<::cpp2::Foo> /*foo*/);
   virtual void bar(std::unique_ptr<::cpp2::Foo> /*foo*/);
   virtual folly::Future<folly::Unit> future_bar(std::unique_ptr<::cpp2::Foo> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_bar(std::unique_ptr<::cpp2::Foo> p_foo);
@@ -196,6 +199,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
   virtual folly::coro::Task<void> co_bar(apache::thrift::RequestParams params, std::unique_ptr<::cpp2::Foo> p_foo);
 #endif
   virtual void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::Foo> p_foo);
+  virtual ::apache::thrift::ServerStream<::std::int32_t> sync_stream_stuff();
   virtual ::apache::thrift::ServerStream<::std::int32_t> stream_stuff();
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_stream_stuff();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_stream_stuff();
@@ -204,6 +208,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
   virtual folly::coro::Task<::apache::thrift::ServerStream<::std::int32_t>> co_stream_stuff(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_stream_stuff(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback);
+  virtual ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> sync_sink_stuff();
   virtual ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> sink_stuff();
   virtual folly::Future<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> future_sink_stuff();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> semifuture_sink_stuff();
@@ -326,6 +331,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
+  virtual void sync_interact();
   virtual void interact();
   virtual folly::SemiFuture<folly::Unit> semifuture_interact();
 #if FOLLY_HAS_COROUTINES

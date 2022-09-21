@@ -78,7 +78,7 @@ TEST(AlignedPtr, InfoPointer) {
   EXPECT_EQ(full.get(), fullPtr);
 }
 
-TEST(RuntimeRefTest, Void) {
+TEST(RuntimeTest, Void) {
   Ref ref;
   EXPECT_EQ(ref.type(), Type::get<void_t>());
   EXPECT_TRUE(ref.empty());
@@ -91,7 +91,7 @@ TEST(RuntimeRefTest, Void) {
   EXPECT_TRUE(ref.tryAs<string_t>() == nullptr);
 }
 
-TEST(RuntimeRefTest, Int) {
+TEST(RuntimeTest, Int) {
   int32_t value = 1;
   Ref ref = Ref::to(value);
   EXPECT_EQ(ref.type(), Type::get<i32_t>());
@@ -109,7 +109,7 @@ TEST(RuntimeRefTest, Int) {
   EXPECT_EQ(ref, Value::create<i32_t>());
 }
 
-TEST(RuntimeRefTest, InterOp_Int) {
+TEST(RuntimeTest, InterOp_Int) {
   int8_t data = 1;
   auto smallInt = Ref::to(data);
   auto largeInt = Value::of<i64_t>(2);
@@ -125,7 +125,7 @@ TEST(RuntimeRefTest, InterOp_Int) {
   EXPECT_THROW(largeInt = 4, std::bad_any_cast);
 }
 
-TEST(RuntimeRefTest, List) {
+TEST(RuntimeTest, List) {
   std::vector<std::string> value;
   std::string elem = "hi";
   auto ref = Ref::to<list<string_t>>(value);
@@ -149,7 +149,7 @@ TEST(RuntimeRefTest, List) {
   EXPECT_TRUE(value.empty());
 }
 
-TEST(RuntimeRefTest, Set) {
+TEST(RuntimeTest, Set) {
   std::set<std::string> value;
   auto ref = Ref::to<set<string_t>>(value);
   EXPECT_TRUE(ref.empty());
@@ -168,7 +168,7 @@ TEST(RuntimeRefTest, Set) {
   EXPECT_TRUE(value.empty());
 }
 
-TEST(RuntimeRefTest, Map) {
+TEST(RuntimeTest, Map) {
   std::map<std::string, int> value;
   auto ref = Ref::to<map<string_t, i32_t>>(value);
   EXPECT_TRUE(ref.empty());
@@ -176,7 +176,7 @@ TEST(RuntimeRefTest, Map) {
   EXPECT_FALSE(ref.put("one", 1));
   EXPECT_EQ(value["one"], 1);
 
-  EXPECT_TRUE(ref.put("one", 2));
+  ref["one"] = 2;
   EXPECT_EQ(value["one"], 2);
 
   EXPECT_FALSE(ref.empty());
@@ -191,7 +191,28 @@ TEST(RuntimeRefTest, Map) {
   EXPECT_TRUE(value.empty());
 }
 
-TEST(RuntimeRefTest, Map_Add) {
+TEST(RuntimeTest, Map_Dyn) {
+  using Tag = type::map<type::string_t, type::string_t>;
+  auto map = Value::create<Tag>();
+  map["hi"] = "bye";
+  EXPECT_EQ(map.size(), 1);
+  EXPECT_TRUE(map["empty"].empty());
+  EXPECT_EQ(map.size(), 2);
+  EXPECT_EQ(map["hi"], Ref::to<string_t>("bye"));
+  EXPECT_THROW(map.get("bye"), std::out_of_range);
+}
+
+TEST(RuntimeTest, Struct_Dyn) {
+  using Tag = type::struct_t<type::UriStruct>;
+  auto obj = Value::create<Tag>();
+  obj["scheme"] = "http";
+  type::UriStruct& data = obj.as<Tag>();
+  EXPECT_EQ(data.scheme(), "http");
+  data.scheme() = "ftp";
+  EXPECT_EQ(obj["scheme"], Ref::to<string_t>("ftp"));
+}
+
+TEST(RuntimeTest, Map_Add) {
   std::map<std::string, int> value;
   auto ref = Ref::to<map<string_t, i32_t>>(value);
 
@@ -204,7 +225,7 @@ TEST(RuntimeRefTest, Map_Add) {
 }
 
 // TODO(afuller): Add test for ensuring an optional field.
-TEST(RuntimeRefTest, Struct) {
+TEST(RuntimeTest, Struct) {
   type::UriStruct actual;
   auto ref = Ref::to(actual);
   EXPECT_FALSE(ref.empty());
@@ -239,7 +260,7 @@ TEST(RuntimeRefTest, Struct) {
   EXPECT_THROW(ref.put("bad", ""), std::out_of_range);
 }
 
-TEST(RuntimeRefTest, Identical) {
+TEST(RuntimeTest, Identical) {
   float value = 1.0f;
   auto ref = Ref::to(value);
   EXPECT_FALSE(ref.empty());
@@ -253,7 +274,7 @@ TEST(RuntimeRefTest, Identical) {
   EXPECT_FALSE(ref.identical(dblZero));
 }
 
-TEST(RuntimeRefTest, ConstRef) {
+TEST(RuntimeTest, ConstRef) {
   constexpr int32_t one = 1;
   auto ref = Ref::to(one);
   EXPECT_FALSE(ref.empty());
@@ -372,21 +393,23 @@ TEST(RuntimeValueTest, StringBinary_InterOp) {
   auto binaryByeBuf = folly::IOBuf::wrapBufferAsValue("bye", 3);
   auto binaryBye = ConstRef::to<BTag>(binaryByeBuf);
 
-  // Compare.
+  // Compare
   EXPECT_EQ(stringHi, binaryHi);
   EXPECT_EQ(binaryBye, stringBye);
   EXPECT_NE(binaryHi, stringBye);
   EXPECT_GT(stringHi, binaryBye);
 
-  // TODO(afuller): Support inter-op 'assign' op.
-  EXPECT_THROW(binaryHi = stringBye, std::bad_any_cast);
-  // EXPECT_LT(binaryHi, stringHi);
-  EXPECT_THROW(stringHi.assign(binaryBye), std::bad_any_cast);
-  // EXPECT_EQ(stringHi.type(), stringBye.type());
-  // EXPECT_EQ(binaryHi, stringHi);
-  EXPECT_THROW(stringHi = binaryBye, std::bad_any_cast);
-  // EXPECT_NE(stringHi.type(), stringBye.type());
-  // EXPECT_EQ(binaryHi, stringHi);
+  // Assign
+  binaryHi = stringBye;
+  EXPECT_EQ(binaryHi, stringBye);
+  EXPECT_EQ(binaryHi, binaryBye);
+  binaryHi.assign("hi");
+  EXPECT_EQ(binaryHi, stringHi);
+  stringHi.assign(binaryBye);
+  EXPECT_EQ(stringHi, stringBye);
+  EXPECT_EQ(stringHi, binaryBye);
+  stringHi = "hi";
+  EXPECT_EQ(stringHi, binaryHi);
 }
 
 } // namespace

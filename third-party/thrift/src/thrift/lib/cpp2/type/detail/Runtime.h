@@ -355,12 +355,14 @@ class BaseDyn : private DynCmp<Derived>,
   void assign(ConstT val) { Base::assign(val); }
   void assign(const std::string& val) { assign(asRef<binary_t>(val)); }
   Derived& operator=(ConstT val) & { return (assign(val), derived()); }
-  Derived&& operator=(ConstT val) && { return (assign(val), derived()); }
+  Derived&& operator=(ConstT val) && {
+    return (assign(val), std::move(derived()));
+  }
   Derived& operator=(const std::string& val) & {
     return (assign(val), derived());
   }
   Derived&& operator=(const std::string& val) && {
-    return (assign(val), derived());
+    return (assign(val), std::move(derived()));
   }
 
   void append(ConstT val) { Base::append(val); }

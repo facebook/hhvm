@@ -124,6 +124,32 @@ struct StringOp : BaseOp<Tag> {
   using Base::ref;
   using Base::unimplemented;
 
+  static void assign(std::string& self, std::string val) {
+    self = std::move(val);
+  }
+  static void assign(folly::IOBuf& self, const folly::IOBuf& val) {
+    self = val;
+  }
+  static void assign(folly::IOBuf& self, const std::string& val) {
+    // TODO(afuller): Use the existing buffer instead of a new heap allocation.
+    self = *folly::IOBuf::copyBuffer(val.data(), val.length());
+  }
+  static void assign(std::string& self, const folly::IOBuf& val) {
+    assign(self, val.to<std::string>());
+  }
+  static void assign(
+      std::string& self, const std::unique_ptr<folly::IOBuf>& val) {
+    assign(self, *val);
+  }
+  static void assign(
+      folly::IOBuf& self, const std::unique_ptr<folly::IOBuf>& val) {
+    assign(self, *val);
+  }
+  template <typename T>
+  static void assign(const std::unique_ptr<folly::IOBuf>& self, T&& val) {
+    assign(*self, std::forward<T>(val));
+  }
+
   static partial_ordering compare(const void* lhs, const Dyn& rhs) {
     StringCompare cmp;
     // TODO(afuller): Consider using a ~map.
@@ -135,6 +161,21 @@ struct StringOp : BaseOp<Tag> {
       return to_partial_ordering(cmp(ref(lhs), *ptr));
     } else if (const auto* ptr = rhs.tryAs<IOBufPtrTag>()) {
       return to_partial_ordering(cmp(ref(lhs), **ptr));
+    }
+    // TODO(afuller): Implement compatibility with any type convertable to
+    // fmt::string_view.
+    unimplemented();
+  }
+
+  static void assign(void* s, const Dyn& val) {
+    if (const T* ptr = val.tryAs<Tag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<StdTag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufTag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufPtrTag>()) {
+      return assign(ref(s), *ptr);
     }
     // TODO(afuller): Implement compatibility with any type convertable to
     // fmt::string_view.

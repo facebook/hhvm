@@ -37,6 +37,7 @@ struct FizzConfig {
   bool preferKTLS{false};
 
   folly::Optional<uint16_t> maxRecord;
+  folly::Optional<uint16_t> paddingModulo;
   std::vector<fizz::CertificateCompressionAlgorithm>
       supportedCompressionAlgorithms;
 };

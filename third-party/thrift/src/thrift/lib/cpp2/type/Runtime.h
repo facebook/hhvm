@@ -87,6 +87,10 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   // field defaults).
   using Base::clear;
 
+  // Assign to the given value.
+  using Base::assign;
+  using Base::operator=;
+
   // Append to a list, string, etc.
   using Base::append;
 
@@ -301,6 +305,10 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   // Sets the referenced value to it's intrinsic default (e.g. ignoring custom
   // field defaults).
   using Base::clear;
+
+  // Assign to the given value.
+  using Base::assign;
+  using Base::operator=;
 
   // Append to a list, string, etc.
   using Base::append;

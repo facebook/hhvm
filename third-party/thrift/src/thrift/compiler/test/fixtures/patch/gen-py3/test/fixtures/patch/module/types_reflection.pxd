@@ -28,4 +28,6 @@ cdef __SetSpec get_reflection__Set__string()
 
 cdef __MapSpec get_reflection__Map__string_string()
 
+cdef __MapSpec get_reflection___std_unordered_map__Map__i32_patch_I16Patch()
+
 cdef __SetSpec get_reflection___std_unordered_set__Set__string()

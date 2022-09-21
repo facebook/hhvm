@@ -447,6 +447,14 @@ cdef __MapSpec get_reflection__Map__string_string():
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 
+cdef __MapSpec get_reflection___std_unordered_map__Map__i32_patch_I16Patch():
+    return __MapSpec._fbthrift_create(
+        key=int,
+        key_kind=__NumberType.I32,
+        value=_apache_thrift_op_patch_types.I16Patch,
+        value_kind=__NumberType.NOT_A_NUMBER,
+    )
+
 cdef __SetSpec get_reflection___std_unordered_set__Set__string():
     return __SetSpec._fbthrift_create(
         value=str,

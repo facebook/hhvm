@@ -38,6 +38,7 @@ struct ContainerOp : BaseOp<Tag> {
   using I = typename T::iterator;
   using Base = BaseOp<Tag>;
   using Base::ref;
+  using Base::ret;
 
   static size_t size(const void* s) { return ref(s).size(); }
 
@@ -59,6 +60,17 @@ struct ContainerOp : BaseOp<Tag> {
       return self.begin();
     }
   }
+
+  template <typename ITag>
+  static Ptr next(ITag tag, T& self, std::any& i) {
+    Ptr result;
+    auto itr = iter(self, i);
+    if (itr != self.end()) {
+      result = ret(tag, *itr++);
+    }
+    i = itr; // Save state.
+    return result;
+  }
 };
 
 template <typename VTag, typename Tag = type::list<VTag>>
@@ -67,6 +79,7 @@ struct ListOp : ContainerOp<Tag> {
   using Base = ContainerOp<Tag>;
   using Base::check_op;
   using Base::find;
+  using Base::next;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -92,6 +105,11 @@ struct ListOp : ContainerOp<Tag> {
     check_op(pos != std::string::npos);
     return ret(VTag{}, *find(s, pos));
   }
+
+  static Ptr next(void* s, IterType t, std::any& i) {
+    check_op(t == IterType::Value);
+    return next(VTag{}, ref(s), i);
+  }
 };
 
 template <typename VTag>
@@ -106,7 +124,7 @@ struct SetOp : ContainerOp<Tag> {
   using Base = ContainerOp<Tag>;
   using Base::check_op;
   using Base::find;
-  using Base::iter;
+  using Base::next;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -127,13 +145,7 @@ struct SetOp : ContainerOp<Tag> {
 
   static Ptr next(void* s, IterType t, std::any& i) {
     check_op(t == IterType::Key);
-    Ptr result;
-    auto itr = iter(ref(s), i);
-    if (itr != ref(s).end()) {
-      result = ret(KTag{}, *itr++);
-    }
-    i = itr; // Save state.
-    return result;
+    return next(KTag{}, ref(s), i);
   }
 };
 
@@ -194,6 +206,8 @@ struct MapOp : ContainerOp<Tag> {
     }
     bad_op();
   }
+
+  [[noreturn]] static Ptr next(void*, IterType, std::any&) { unimplemented(); }
 };
 template <typename KTag, typename VTag>
 struct AnyOp<type::map<KTag, VTag>> : MapOp<KTag, VTag> {};

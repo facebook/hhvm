@@ -566,11 +566,11 @@ class ServerRequest {
     return sr.protocol_;
   }
 
-  static RequestPileInterface* requestPileNotification(ServerRequest& sr) {
+  static RequestPileInterface* moveRequestPileNotification(ServerRequest& sr) {
     return std::exchange(sr.notifyRequestPile_, nullptr);
   }
 
-  static ConcurrencyControllerInterface* concurrencyControllerNotification(
+  static ConcurrencyControllerInterface* moveConcurrencyControllerNotification(
       ServerRequest& sr) {
     return std::exchange(sr.notifyConcurrencyController_, nullptr);
   }
@@ -600,14 +600,14 @@ class ServerRequestHelper : public ServerRequest {
  public:
   using ServerRequest::asyncProcessor;
   using ServerRequest::compressedRequest;
-  using ServerRequest::concurrencyControllerNotification;
   using ServerRequest::eventBase;
   using ServerRequest::executor;
+  using ServerRequest::moveConcurrencyControllerNotification;
+  using ServerRequest::moveRequestPileNotification;
   using ServerRequest::protocol;
   using ServerRequest::queueObserverPayload;
   using ServerRequest::request;
   using ServerRequest::requestContext;
-  using ServerRequest::requestPileNotification;
   using ServerRequest::setExecutor;
 };
 

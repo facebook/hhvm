@@ -137,6 +137,49 @@ struct ClassData : IRExtraData {
   const Class* cls;
 };
 
+struct ModulePropAccessData : IRExtraData {
+  ModulePropAccessData(const Func* callerFunc, const Class* propCls,
+                       const StringData* propName, bool is_static)
+    : caller(callerFunc)
+    , propCls(propCls)
+    , propName(propName)
+    , is_static(is_static)
+    {}
+
+  std::string show() const {
+    return folly::to<std::string>(
+      caller->fullName()->data(),
+      ",",
+      propCls->name()->data(),
+      ",",
+      propName->data(),
+      ",",
+      is_static ? "1" : "0"
+    );
+  }
+
+  bool equals(const ModulePropAccessData& o) const {
+    return caller == o.caller &&
+           propCls == o.propCls &&
+           propName->same(o.propName) &&
+           is_static == o.is_static;
+  }
+
+  size_t stableHash() const {
+    return folly::hash::hash_combine(
+      caller->stableHash(),
+      propCls->stableHash(),
+      propName->hash(),
+      is_static ? 1 : 0
+    );
+  }
+
+  const Func* caller;
+  const Class* propCls;
+  const StringData* propName;
+  bool is_static;
+};
+
 struct OptClassAndFuncData : IRExtraData {
   OptClassAndFuncData(const Class* cls, const Func* func)
     : cls(cls)
@@ -2867,7 +2910,7 @@ X(RaiseCoeffectsCallViolation,  FuncData);
 X(RaiseCoeffectsFunParamTypeViolation,
                                 ParamData);
 X(RaiseModuleBoundaryViolation, OptClassAndFuncData);
-X(RaiseModulePropertyViolation, OptClassAndFuncData);
+X(RaiseModulePropertyViolation, ModulePropAccessData);
 X(CallViolatesModuleBoundary,   FuncData);
 X(CheckInOutMismatch,           BoolVecArgsData);
 X(ThrowInOutMismatch,           ParamData);

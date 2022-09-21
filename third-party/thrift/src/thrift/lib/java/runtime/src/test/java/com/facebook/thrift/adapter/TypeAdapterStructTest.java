@@ -19,6 +19,7 @@ package com.facebook.thrift.adapter;
 import static org.junit.Assert.*;
 
 import com.facebook.thrift.test.adapter.AdaptedTestStruct;
+import com.facebook.thrift.test.adapter.AdaptedTestStructWithoutDefaults;
 import com.facebook.thrift.test.adapter.TestStruct;
 import com.facebook.thrift.util.SerializationProtocol;
 import com.facebook.thrift.util.SerializerUtil;
@@ -50,15 +51,6 @@ public class TypeAdapterStructTest {
   public TypeAdapterStructTest(SerializationProtocol protocol) {
     this.protocol = protocol;
   }
-
-  //  @Test
-  //  public void testSerializeTypeAdapterWithEmptyByteBufs() {
-  //    AdaptedTestStruct struct = AdaptedTestStruct.defaultInstance();
-  //    byte[] bytes = SerializerUtil.toByteArray(struct, protocol);
-  //    AdaptedTestStruct fromBytes =
-  //        SerializerUtil.fromByteArray(AdaptedTestStruct.asReader(), bytes, protocol);
-  //    assertEquals(struct, fromBytes);
-  //  }
 
   private static ByteBuf generateByteBuf() {
     byte[] bytes = new byte[32];
@@ -432,7 +424,6 @@ public class TypeAdapterStructTest {
     byte[] bytes = serializeAdapted(defaultInstance().setAdaptedBooleanField2("true").build());
     AdaptedTestStruct adapted = deserializeAdapted(bytes);
     TestStruct received = deserialize(bytes);
-
     assertEquals("true", adapted.isAdaptedBooleanField2());
     assertEquals(true, received.isBooleanField2());
   }
@@ -451,13 +442,95 @@ public class TypeAdapterStructTest {
     assertEquals("a1a2a3a4", hexDump(received.getBinaryListField2().get(2)));
   }
 
-  //  @Test
-  //  public void testBooleanToStringDoubleTypeAdapter() {
-  //    byte[] bytes = serializeAdapted(defaultInstance().setAdaptedBooleanField3("true").build());
-  //    AdaptedTestStruct adapted = deserializeAdapted(bytes);
-  //    TestStruct received = deserialize(bytes);
-  //
-  //    assertEquals("true", adapted.isAdaptedBooleanField2());
-  //    assertEquals(true, received.isBooleanField2());
-  //  }
+  private AdaptedTestStructWithoutDefaults createAdaptedTestStructWithoutDefaults() {
+    return new AdaptedTestStructWithoutDefaults.Builder()
+        .setAdaptedBinaryListField("ab0503:ddee:a1a2a3a4")
+        .setAdaptedBinaryListField2("abddee")
+        .setAdaptedByteField("9")
+        .setAdaptedBooleanField("true")
+        .setDateField(new Date())
+        .setAdaptedBooleanField2("true")
+        .setDoubleAdaptedIntField(2000L)
+        .setAdaptedIntMapField("7=12")
+        .setAdaptedIntBinaryMapField("3=aabb")
+        .setAdaptedIntListField("5,6,7")
+        .build();
+  }
+
+  @Test
+  public void testEquals() {
+    AdaptedTestStructWithoutDefaults adapted = createAdaptedTestStructWithoutDefaults();
+    byte[] bytes = SerializerUtil.toByteArray(adapted, protocol);
+    AdaptedTestStructWithoutDefaults adapted2 =
+        SerializerUtil.fromByteArray(AdaptedTestStructWithoutDefaults.asReader(), bytes, protocol);
+    assertEquals(adapted, adapted2);
+
+    AdaptedTestStructWithoutDefaults adapted3 =
+        new AdaptedTestStructWithoutDefaults.Builder(adapted2).setDoubleAdaptedIntField(5L).build();
+    assertNotEquals(adapted, adapted3);
+
+    AdaptedTestStructWithoutDefaults adapted4 =
+        new AdaptedTestStructWithoutDefaults.Builder(adapted)
+            .setB1(Unpooled.wrappedBuffer("foo".getBytes()))
+            .setB1(Unpooled.wrappedBuffer("bar".getBytes()))
+            .setB1(Unpooled.wrappedBuffer("baz".getBytes()))
+            .build();
+
+    AdaptedTestStructWithoutDefaults adapted5 =
+        new AdaptedTestStructWithoutDefaults.Builder(adapted)
+            .setB1(Unpooled.wrappedBuffer("foo".getBytes()))
+            .setB1(Unpooled.wrappedBuffer("bar".getBytes()))
+            .setB1(Unpooled.wrappedBuffer("baz".getBytes()))
+            .build();
+    assertEquals(adapted4, adapted5);
+  }
+
+  @Test
+  public void testHashCode() {
+    AdaptedTestStructWithoutDefaults adapted = createAdaptedTestStructWithoutDefaults();
+    byte[] bytes = SerializerUtil.toByteArray(adapted, protocol);
+    AdaptedTestStructWithoutDefaults adapted2 =
+        SerializerUtil.fromByteArray(AdaptedTestStructWithoutDefaults.asReader(), bytes, protocol);
+    assertEquals(adapted.hashCode(), adapted2.hashCode());
+
+    AdaptedTestStructWithoutDefaults adapted3 =
+        new AdaptedTestStructWithoutDefaults.Builder(adapted2).setDoubleAdaptedIntField(5L).build();
+    assertNotEquals(adapted.hashCode(), adapted3.hashCode());
+  }
+
+  @Test
+  public void testDoubleAdaptedIntTypeAdapter() {
+    byte[] bytes = serializeAdapted(defaultInstance().setDoubleAdaptedIntField(5000L).build());
+    AdaptedTestStruct adapted = deserializeAdapted(bytes);
+    TestStruct received = deserialize(bytes);
+
+    assertEquals((Long) 5000L, (Long) adapted.getDoubleAdaptedIntField());
+    assertEquals(5000, received.getIntField2());
+    assertEquals((Long) 3000L, (Long) adapted.getDoubleAdaptedIntDefault());
+    assertEquals(3000, received.getIntDefault2());
+  }
+
+  @Test
+  public void testDoubleTypeDefIntTypeAdapter() {
+    byte[] bytes =
+        serializeAdapted(defaultInstance().setDoubleTypedefAdaptedIntField("75").build());
+    AdaptedTestStruct adapted = deserializeAdapted(bytes);
+    TestStruct received = deserialize(bytes);
+
+    assertEquals("75", adapted.getDoubleTypedefAdaptedIntField());
+    assertEquals(75, received.getDoubleTypedefIntField());
+  }
+
+  @Test
+  public void testMultipleTypeDefIntTypeAdapter() {
+    byte[] bytes =
+        serializeAdapted(defaultInstance().setMultipleTypedefAdaptedIntField("60").build());
+    AdaptedTestStruct adapted = deserializeAdapted(bytes);
+    TestStruct received = deserialize(bytes);
+
+    assertEquals("60", adapted.getMultipleTypedefAdaptedIntField());
+    assertEquals(60, received.getMultipleTypedefIntField());
+    assertEquals("50", adapted.getMultipleTypedefAdaptedIntDefault());
+    assertEquals(50, received.getMultipleTypedefIntDefault());
+  }
 }

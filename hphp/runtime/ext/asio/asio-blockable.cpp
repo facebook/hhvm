@@ -67,6 +67,7 @@ inline c_ConditionWaitHandle* getConditionWaitHandle(
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_WaitableWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -82,29 +83,32 @@ inline void exitContextImpl(
   // Move the wait handle to the parent context.
   waitHandle->setContextIdx(ctx_idx - 1);
 
-  // Recursively move all the parents to the parent context.
-  waitHandle->getParentChain().exitContext(ctx_idx);
+  // Request exit to the parent context for all parents.
+  worklist.emplace_back(waitHandle->getParentChain());
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AsyncFunctionWaitHandle::Node* node,
   context_idx_t ctx_idx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_AwaitAllWaitHandle::Node* node,
   context_idx_t ctx_idx
 ) {
   if (node->isFirstUnfinishedChild()) {
-    exitContextImpl(node->getWaitHandle(), ctx_idx);
+    exitContextImpl(worklist, node->getWaitHandle(), ctx_idx);
   }
 }
 
 inline void exitContextImpl(
+  std::vector<AsioBlockableChain>& worklist,
   c_ConditionWaitHandle* waitHandle,
   context_idx_t ctx_idx
 ) {
@@ -113,7 +117,8 @@ inline void exitContextImpl(
     return;
   }
 
-  exitContextImpl(static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
+  exitContextImpl(
+    worklist, static_cast<c_WaitableWaitHandle*>(waitHandle), ctx_idx);
 }
 
 } // anon namespace
@@ -155,20 +160,27 @@ void AsioBlockableChain::unblock() {
 }
 
 void AsioBlockableChain::exitContext(context_idx_t ctx_idx) {
-  for (auto cur = m_firstParent; cur; cur = cur->getNextParent()) {
-    switch (cur->getKind()) {
-      case Kind::AsyncFunctionWaitHandleNode:
-        exitContextImpl(getAsyncFunctionWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::AsyncGeneratorWaitHandle:
-        exitContextImpl(getAsyncGeneratorWaitHandle(cur), ctx_idx);
-        break;
-      case Kind::AwaitAllWaitHandleNode:
-        exitContextImpl(getAwaitAllWaitHandleNode(cur), ctx_idx);
-        break;
-      case Kind::ConditionWaitHandle:
-        exitContextImpl(getConditionWaitHandle(cur), ctx_idx);
-        break;
+  std::vector<AsioBlockableChain> worklist = { *this };
+  while (!worklist.empty()) {
+    auto const firstParent = worklist.back().m_firstParent;
+    worklist.pop_back();
+
+    for (auto cur = firstParent; cur; cur = cur->getNextParent()) {
+      switch (cur->getKind()) {
+        case Kind::AsyncFunctionWaitHandleNode:
+          exitContextImpl(
+            worklist, getAsyncFunctionWaitHandleNode(cur), ctx_idx);
+          break;
+        case Kind::AsyncGeneratorWaitHandle:
+          exitContextImpl(worklist, getAsyncGeneratorWaitHandle(cur), ctx_idx);
+          break;
+        case Kind::AwaitAllWaitHandleNode:
+          exitContextImpl(worklist, getAwaitAllWaitHandleNode(cur), ctx_idx);
+          break;
+        case Kind::ConditionWaitHandle:
+          exitContextImpl(worklist, getConditionWaitHandle(cur), ctx_idx);
+          break;
+      }
     }
   }
 }

@@ -21,11 +21,17 @@ MyServiceClientWrapper::query(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<::test::fixtures::nolegacy::TestStruct>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_query, channel_);
-  client->query(
-    rpcOptions,
-    std::move(callback),
-    arg_val
-  );
+  try {
+    client->query(
+      rpcOptions,
+      std::move(callback),
+      arg_val
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<::test::fixtures::nolegacy::TestStruct>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

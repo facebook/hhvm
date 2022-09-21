@@ -1125,17 +1125,8 @@ let fun_type_of_id env x tal el =
   | None ->
     let (env, _, ty) = unbound_name env x ((), Pos.none, Aast.Null) in
     (env, ty, [])
-  | Some
-      {
-        fe_type;
-        fe_pos;
-        fe_deprecated;
-        fe_support_dynamic_type;
-        fe_internal;
-        fe_module;
-        _;
-      } ->
-    (match get_node fe_type with
+  | Some fd ->
+    (match get_node fd.fe_type with
     | Tfun ft ->
       let ft =
         let pessimise =
@@ -1152,7 +1143,7 @@ let fun_type_of_id env x tal el =
         Phase.localize_targs
           ~check_well_kinded:true
           ~is_method:true
-          ~def_pos:fe_pos
+          ~def_pos:fd.fe_pos
           ~use_pos:(fst x)
           ~use_name:(strip_ns (snd x))
           env
@@ -1164,7 +1155,7 @@ let fun_type_of_id env x tal el =
         Typing_enforceability.compute_enforced_and_pessimize_fun_type env ft
       in
       let use_pos = fst x in
-      let def_pos = fe_pos in
+      let def_pos = fd.fe_pos in
       let ((env, ty_err_opt2), ft) =
         Phase.(
           localize_ft
@@ -1180,48 +1171,22 @@ let fun_type_of_id env x tal el =
         Typing_dynamic.maybe_wrap_with_supportdyn
           ~should_wrap:
             (TypecheckerOptions.enable_sound_dynamic (Env.get_tcopt env)
-            && fe_support_dynamic_type)
-          (Typing_reason.localize (get_reason fe_type))
+            && fd.fe_support_dynamic_type)
+          (Typing_reason.localize (get_reason fd.fe_type))
           ft
       in
       Option.iter
         ~f:Errors.add_typing_error
-        (TVis.check_deprecated ~use_pos ~def_pos env fe_deprecated);
-      let err_opt =
-        let open Typing_error.Primary.Modules in
-        if fe_internal then
-          match
-            Typing_modules.can_access
-              ~env
-              ~current:(Env.get_current_module env)
-              ~target:(Option.map fe_module ~f:snd)
-          with
-          | `Yes -> None
-          | `Disjoint (current, target) ->
-            Some
-              (Module_mismatch
-                 {
-                   pos = fst x;
-                   decl_pos = fe_pos;
-                   current_module_opt = Some current;
-                   target_module = target;
-                 })
-          | `Outside target ->
-            Some
-              (Module_mismatch
-                 {
-                   pos = fst x;
-                   decl_pos = fe_pos;
-                   current_module_opt = None;
-                   target_module = target;
-                 })
-          | `OutsideViaTrait trait_pos ->
-            Some (Module_unsafe_trait_access { access_pos = fst x; trait_pos })
-        else
-          None
-      in
-      Option.iter err_opt ~f:(fun err ->
-          Errors.add_typing_error @@ Typing_error.modules err);
+        (TVis.check_deprecated ~use_pos ~def_pos env fd.fe_deprecated);
+      Option.iter
+        ~f:Errors.add_typing_error
+        (TVis.check_top_level_access
+           ~in_signature:false
+           ~use_pos:(fst x)
+           ~def_pos:fd.fe_pos
+           env
+           fd.fe_internal
+           (Option.map fd.fe_module ~f:snd));
       (env, fty, tal)
     | _ -> failwith "Expected function type")
 
@@ -6991,10 +6956,23 @@ and dispatch_call
                 ((), p1, CIexpr e1_)
             in
             let result = class_const ~incl_tc:true env p (cid, (p, cst)) in
+            let () =
+              match result with
+              | (_, (ty, _, _), _) when Typing_utils.is_any env ty ->
+                Errors.add_typing_error
+                  Typing_error.(
+                    primary
+                    @@ Primary.Illegal_type_structure
+                         { pos; msg = "Could not resolve the type constant" })
+              | _ -> ()
+            in
             (result, should_forget_fakes)
           | _ ->
             Errors.add_typing_error
-              Typing_error.(primary @@ Primary.Illegal_type_structure pos);
+              Typing_error.(
+                primary
+                @@ Primary.Illegal_type_structure
+                     { pos; msg = "Second argument is not a string" });
             let result = expr_error env (Reason.Rwitness pos) e in
             (result, should_forget_fakes))
         | _ -> assert false)
@@ -8107,11 +8085,13 @@ and class_expr
         | Some class_ ->
           Option.iter
             ~f:Errors.add_typing_error
-            (TVis.check_classname_access
-               ~use_pos:p
+            (TVis.check_top_level_access
                ~in_signature:false
+               ~use_pos:p
+               ~def_pos:(Cls.pos class_)
                env
-               class_);
+               (Cls.internal class_)
+               (Cls.get_module class_));
           (* Don't add Exact superfluously to class type if it's final *)
           let exact =
             if Cls.final class_ then

@@ -484,17 +484,16 @@ struct protocol_methods<type_class::list<ElemClass>, Type> {
     using WireTypeInfo = ProtocolReaderWireTypeInfo<Protocol>;
     using WireType = typename WireTypeInfo::WireType;
 
+    WireType reported_type = WireTypeInfo::defaultValue();
+
+    protocol.readListBegin(reported_type, list_size);
     if (protocol.kOmitsContainerSizes()) {
-      WireType reported_type = WireTypeInfo::defaultValue();
-      protocol.readListBegin(reported_type, list_size);
       // list size unknown, SimpleJSON protocol won't know type, either
       // so let's just hope that it spits out something that makes sense
       while (protocol.peekList()) {
         elem_methods::read(protocol, emplace_back_default(out));
       }
     } else {
-      WireType reported_type = WireTypeInfo::defaultValue();
-      protocol.readListBegin(reported_type, list_size);
       if (reported_type != WireTypeInfo::fromTType(elem_ttype::value)) {
         apache::thrift::skip_n(protocol, list_size, {reported_type});
       } else {
@@ -573,15 +572,14 @@ struct protocol_methods<type_class::set<ElemClass>, Type> {
     using WireTypeInfo = ProtocolReaderWireTypeInfo<Protocol>;
     using WireType = typename WireTypeInfo::WireType;
 
+    WireType reported_type = WireTypeInfo::defaultValue();
+
+    protocol.readSetBegin(reported_type, set_size);
     if (protocol.kOmitsContainerSizes()) {
-      WireType reported_type = WireTypeInfo::defaultValue();
-      protocol.readSetBegin(reported_type, set_size);
       while (protocol.peekSet()) {
         consume_elem(protocol, out);
       }
     } else {
-      WireType reported_type = WireTypeInfo::defaultValue();
-      protocol.readSetBegin(reported_type, set_size);
       if (reported_type != WireTypeInfo::fromTType(elem_ttype::value)) {
         apache::thrift::skip_n(protocol, set_size, {reported_type});
       } else {
@@ -680,17 +678,15 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
     using WireTypeInfo = ProtocolReaderWireTypeInfo<Protocol>;
     using WireType = typename WireTypeInfo::WireType;
 
+    WireType rpt_key_type = WireTypeInfo::defaultValue(),
+             rpt_mapped_type = WireTypeInfo::defaultValue();
+
+    protocol.readMapBegin(rpt_key_type, rpt_mapped_type, map_size);
     if (protocol.kOmitsContainerSizes()) {
-      WireType rpt_key_type = WireTypeInfo::defaultValue(),
-               rpt_mapped_type = WireTypeInfo::defaultValue();
-      protocol.readMapBegin(rpt_key_type, rpt_mapped_type, map_size);
       while (protocol.peekMap()) {
         consume_elem(protocol, out);
       }
     } else {
-      WireType rpt_key_type = WireTypeInfo::defaultValue(),
-               rpt_mapped_type = WireTypeInfo::defaultValue();
-      protocol.readMapBegin(rpt_key_type, rpt_mapped_type, map_size);
       // CompactProtocol does not transmit key/mapped types if
       // the map is empty
       if (map_size > 0 &&

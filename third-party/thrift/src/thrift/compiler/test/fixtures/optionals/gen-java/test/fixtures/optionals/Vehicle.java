@@ -201,10 +201,10 @@ public final class Vehicle implements com.facebook.thrift.payload.ThriftSerializ
     
         return
             Objects.equals(color, other.color) &&
-    Objects.equals(licensePlate, other.licensePlate) &&
-    Objects.equals(description, other.description) &&
-    Objects.equals(name, other.name) &&
-    Objects.equals(hasAC, other.hasAC) &&
+            Objects.equals(licensePlate, other.licensePlate) &&
+            Objects.equals(description, other.description) &&
+            Objects.equals(name, other.name) &&
+            Objects.equals(hasAC, other.hasAC) &&
             true;
     }
     

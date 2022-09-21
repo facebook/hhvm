@@ -414,21 +414,25 @@ module Simple = struct
         | Some (Env.ClassResult class_info) ->
           Option.iter
             ~f:Errors.add_typing_error
-            (Typing_visibility.check_classname_access
-               ~use_pos
+            (Typing_visibility.check_top_level_access
                ~in_signature
+               ~use_pos
+               ~def_pos:(Cls.pos class_info)
                env
-               class_info);
+               (Cls.internal class_info)
+               (Cls.get_module class_info));
           let tparams = Cls.tparams class_info in
           check_against_tparams ~in_signature (Cls.pos class_info) argl tparams
         | Some (Env.TypedefResult typedef) ->
           Option.iter
             ~f:Errors.add_typing_error
-            (Typing_visibility.check_typedef_access
-               ~use_pos
+            (Typing_visibility.check_top_level_access
                ~in_signature
+               ~use_pos
+               ~def_pos:typedef.td_pos
                env
-               typedef);
+               typedef.td_internal
+               (Option.map typedef.td_module ~f:snd));
           check_against_tparams
             ~in_signature
             typedef.td_pos

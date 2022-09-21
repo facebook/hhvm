@@ -201,10 +201,10 @@ public final class StructWithString implements com.facebook.thrift.payload.Thrif
     
         return
             Objects.equals(defUniqueStringRef, other.defUniqueStringRef) &&
-    Objects.equals(defSharedStringRef, other.defSharedStringRef) &&
-    Objects.equals(defSharedStringConstRef, other.defSharedStringConstRef) &&
-    Objects.equals(uniqueStringRef, other.uniqueStringRef) &&
-    Objects.equals(sharedStringRef, other.sharedStringRef) &&
+            Objects.equals(defSharedStringRef, other.defSharedStringRef) &&
+            Objects.equals(defSharedStringConstRef, other.defSharedStringConstRef) &&
+            Objects.equals(uniqueStringRef, other.uniqueStringRef) &&
+            Objects.equals(sharedStringRef, other.sharedStringRef) &&
             true;
     }
     

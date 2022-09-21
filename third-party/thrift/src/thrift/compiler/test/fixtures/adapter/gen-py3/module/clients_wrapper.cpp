@@ -23,13 +23,19 @@ ServiceClientWrapper::func(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<int32_t>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_func, channel_);
-  client->func(
-    rpcOptions,
-    std::move(callback),
-    arg_arg1,
-    arg_arg2,
-    arg_arg3
-  );
+  try {
+    client->func(
+      rpcOptions,
+      std::move(callback),
+      arg_arg1,
+      arg_arg2,
+      arg_arg3
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<int32_t>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

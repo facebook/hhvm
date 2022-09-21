@@ -18,10 +18,16 @@ RaiserClientWrapper::doBland(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_doBland, channel_);
-  client->doBland(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->doBland(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -33,10 +39,16 @@ RaiserClientWrapper::doRaise(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<folly::Unit>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_doRaise, channel_);
-  client->doRaise(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->doRaise(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -48,10 +60,16 @@ RaiserClientWrapper::get200(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_get200, channel_);
-  client->get200(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->get200(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 
@@ -63,10 +81,16 @@ RaiserClientWrapper::get500(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<std::string>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_get500, channel_);
-  client->get500(
-    rpcOptions,
-    std::move(callback)
-  );
+  try {
+    client->get500(
+      rpcOptions,
+      std::move(callback)
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<std::string>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

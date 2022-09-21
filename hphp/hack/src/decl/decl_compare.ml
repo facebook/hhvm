@@ -21,6 +21,7 @@
 open Hh_prelude
 open Decl_defs
 open Typing_deps
+open Typing_defs
 
 (*****************************************************************************)
 (* Given two classes give back the set of functions or classes that need
@@ -536,28 +537,49 @@ let get_classes_deps ~ctx old_classes new_classes classes =
     classes
     ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)
 
-let get_all_module_dependencies ~mode _ mid (changed, to_redecl, to_recheck) =
-  let dep = Dep.Module mid in
-  let where_module_referenced = Typing_deps.get_ideps mode dep in
-  let to_recheck = DepSet.union where_module_referenced to_recheck in
-  (add_changed changed dep, to_redecl, to_recheck)
+let rule_changed rule1 rule2 =
+  match (rule1, rule2) with
+  | (MRGlobal, MRGlobal) -> false
+  | (MRExact m1, MRExact m2) -> not (String.equal m1 m2)
+  | (MRPrefix p1, MRPrefix p2) -> not (String.equal p1 p2)
+  | _ -> true
 
-let get_module_deps ~ctx ~old_modules ~new_modules ~modules =
+let rules_changed rules1 rules2 =
+  match (rules1, rules2) with
+  | (None, None) -> false
+  | (_, None)
+  | (None, _) ->
+    true
+  | (Some rules_list1, Some rules_list2) ->
+    (match List.exists2 rules_list1 rules_list2 ~f:rule_changed with
+    | List.Or_unequal_lengths.Ok res -> res
+    | List.Or_unequal_lengths.Unequal_lengths -> true)
+
+let get_module_deps
+    ~mode old_modules mid ((changed, to_redecl, to_recheck), old_modules_missing)
+    =
+  match (SMap.find mid old_modules, Decl_heap.Modules.get mid) with
+  | (None, _)
+  | (_, None) ->
+    let dep = Dep.Module mid in
+    let where_module_referenced = Typing_deps.get_ideps mode dep in
+    let to_recheck = DepSet.union where_module_referenced to_recheck in
+    ((add_changed changed dep, to_redecl, to_recheck), old_modules_missing + 1)
+  | (Some module1, Some module2) ->
+    if
+      rules_changed module1.mdt_exports module2.mdt_exports
+      || rules_changed module1.mdt_imports module2.mdt_imports
+    then
+      let dep = Dep.Module mid in
+      let where_module_referenced = Typing_deps.get_ideps mode dep in
+      let to_recheck = DepSet.union where_module_referenced to_recheck in
+      ((add_changed changed dep, to_redecl, to_recheck), old_modules_missing)
+    else
+      ((changed, to_redecl, to_recheck), old_modules_missing)
+
+let get_modules_deps ~ctx ~old_modules ~modules =
   let mode = Provider_context.get_deps_mode ctx in
-  let get_module_deps_
-      _old_modules
-      _new_modules
-      trace
-      mid
-      ((changed, to_redecl, to_recheck), old_modules_missing) =
-    ( get_all_module_dependencies
-        ~mode
-        trace
-        mid
-        (changed, to_redecl, to_recheck),
-      old_modules_missing + 1 )
-  in
   SSet.fold
-    (get_module_deps_ old_modules new_modules (VisitedSet.make ()))
+    (get_module_deps ~mode old_modules)
     modules
     ((DepSet.make (), DepSet.make (), DepSet.make ()), 0)

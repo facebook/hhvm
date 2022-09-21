@@ -16,7 +16,6 @@
 
 package com.facebook.thrift.adapter;
 
-import com.facebook.thrift.adapter.common.EnumTypeAdapter;
 import com.facebook.thrift.adapter.common.ListTypeAdapter;
 import com.facebook.thrift.adapter.common.MapTypeAdapter;
 import com.facebook.thrift.adapter.common.SetTypeAdapter;
@@ -43,11 +42,9 @@ import com.facebook.thrift.adapter.common.SetTypeAdapter;
  *       <li>{@link com.facebook.thrift.adapter.common.StringTypeAdapter StringTypeAdapter}
  *       <li>{@link com.facebook.thrift.adapter.common.BinaryStringTypeAdapter
  *           BinaryStringTypeAdapter}
- *       <li>{@link EnumTypeAdapter EnumAdapter}
  *       <li>{@link MapTypeAdapter MapAdapter}
  *       <li>{@link ListTypeAdapter ListAdapter}
  *       <li>{@link SetTypeAdapter SetAdapter}
- *       <li>{@link com.facebook.thrift.adapter.common.StructTypeAdapter StructTypeAdapter}
  *       <li>{@link com.facebook.thrift.adapter.common.CopiedPooledByteBufTypeAdapter
  *           CopiedPooledByteBufTypeAdapter}
  *       <li>{@link com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter

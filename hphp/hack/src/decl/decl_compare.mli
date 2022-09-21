@@ -52,9 +52,8 @@ val get_gconsts_deps :
   SSet.t ->
   (DepSet.t * DepSet.t * DepSet.t) * int
 
-val get_module_deps :
+val get_modules_deps :
   ctx:Provider_context.t ->
   old_modules:Modules.value option SMap.t ->
-  new_modules:Modules.value option SMap.t ->
   modules:SSet.t ->
   (DepSet.t * DepSet.t * DepSet.t) * int

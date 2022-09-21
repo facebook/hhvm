@@ -175,9 +175,9 @@ public final class Foo implements com.facebook.thrift.payload.ThriftSerializable
     
         return
             Objects.equals(myInteger, other.myInteger) &&
-    Objects.equals(myString, other.myString) &&
-    Objects.equals(myBools, other.myBools) &&
-    Objects.equals(myNumbers, other.myNumbers) &&
+            Objects.equals(myString, other.myString) &&
+            Objects.equals(myBools, other.myBools) &&
+            Objects.equals(myNumbers, other.myNumbers) &&
             true;
     }
     

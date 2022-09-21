@@ -2131,6 +2131,8 @@ class cpp_mstch_const_value : public mstch_const_value {
         {
             {"value:default_construct?",
              &cpp_mstch_const_value::default_construct},
+            {"value:enum_value_cpp_name",
+             &cpp_mstch_const_value::enum_value_cpp_name},
         });
   }
 
@@ -2139,6 +2141,15 @@ class cpp_mstch_const_value : public mstch_const_value {
     return boost::get<bool>(is_empty_container()) &&
         !gen::cpp::type_resolver::find_first_adapter(
                *const_value_->get_owner()->type());
+  }
+
+  mstch::node enum_value_cpp_name() {
+    // reference: mstch_const_value::enum_value_name
+    if (type_ == cv::CV_INTEGER && const_value_->is_enum() &&
+        const_value_->get_enum_value() != nullptr) {
+      return cpp2::get_name(const_value_->get_enum_value());
+    }
+    return mstch::node();
   }
 
   bool same_type_as_expected() const override {

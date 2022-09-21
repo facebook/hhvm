@@ -420,16 +420,22 @@ template TypedValue arrFirstLast<false, true>(ArrayData*);
 TypedValue* getSPropOrNull(ReadonlyOp op,
                            const Class* cls,
                            const StringData* name,
-                           Class* ctx,
+                           const Func* ctx,
                            bool ignoreLateInit,
                            bool writeMode) {
-  // TODO(T126821336): Populate with module name
-  auto const propCtx = MemberLookupContext(ctx);
+  auto const propCtx = MemberLookupContext(ctx->cls(), ctx->moduleName());
   auto const lookup = ignoreLateInit
     ? cls->getSPropIgnoreLateInit(propCtx, name)
     : cls->getSProp(propCtx, name);
   if (writeMode && UNLIKELY(lookup.constant)) {
     throw_cannot_modify_static_const_prop(cls->name()->data(), name->data());
+  }
+  if (lookup.internal) {
+    auto const slot = cls->lookupSProp(name);
+    auto const prop = cls->staticProperties()[slot];
+    if (will_symbol_raise_module_boundary_violation(&prop, ctx)) {
+      raiseModulePropertyViolation(cls, name, ctx->moduleName(), true);
+    }
   }
   checkReadonly(lookup.val, cls, name, lookup.readonly, op, writeMode);
   if (UNLIKELY(!lookup.val || !lookup.accessible)) return nullptr;
@@ -440,7 +446,7 @@ TypedValue* getSPropOrNull(ReadonlyOp op,
 TypedValue* getSPropOrRaise(ReadonlyOp op,
                             const Class* cls,
                             const StringData* name,
-                            Class* ctx,
+                            const Func* ctx,
                             bool ignoreLateInit,
                             bool writeMode) {
   auto sprop = getSPropOrNull(op, cls, name, ctx, ignoreLateInit, writeMode);

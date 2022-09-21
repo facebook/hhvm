@@ -180,6 +180,7 @@ struct PropLookupResult {
   TriBool isConst; // If the property is AttrConst
   TriBool readOnly; // If the property is AttrIsReadonly
   TriBool lateInit; // If the property is AttrLateInit
+  TriBool internal; // If the property is Internal
   bool classInitMightRaise; // If class initialization during the
                             // property access can raise (unlike the
                             // others, this is only no or maybe).
@@ -194,6 +195,7 @@ inline PropLookupResult<T>& operator|=(PropLookupResult<T>& a,
   a.isConst |= b.isConst;
   a.readOnly |= b.readOnly;
   a.lateInit |= b.lateInit;
+  a.internal |= b.internal;
   a.classInitMightRaise |= b.classInitMightRaise;
   return a;
 }

@@ -67,7 +67,7 @@
     "Void" : {
       "lineno" : 82,
       "constants" : {
-        "NoValueVoid" : 0
+        "NoValue" : 0
       },
       "source_range" : {
         "begin" : {

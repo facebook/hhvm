@@ -68,14 +68,6 @@ Invalid type hint (Typing[4062])
   Definition is here
 File "supportdyn.bad.php", line 28, characters 6-6:
 Enums must be `int` or `string` or `arraykey`, not `supportdyn<nonnull>` (Typing[4024])
-File "supportdyn.bad.php", line 33, characters 13-15:
-Invalid argument (Typing[4110])
-  File "supportdyn.bad.php", line 30, characters 20-26:
-  Expected `dynamic`
-  File "supportdyn.bad.php", line 32, characters 27-31:
-  But got `mixed`
-  File "supportdynamic.hhi", line 6, characters 29-29:
-    via this generic `T`
 File "supportdyn.bad.php", line 38, characters 10-18:
 Invalid return type (Typing[4110])
   File "supportdyn.bad.php", line 37, characters 42-48:

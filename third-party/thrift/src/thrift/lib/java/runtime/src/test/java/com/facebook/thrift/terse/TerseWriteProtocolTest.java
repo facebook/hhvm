@@ -24,6 +24,7 @@ import static org.junit.Assert.assertTrue;
 import com.facebook.thrift.any.LazyAny;
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
+import com.facebook.thrift.test.terse.AdaptedTerseStruct;
 import com.facebook.thrift.test.terse.MyStruct;
 import com.facebook.thrift.test.terse.MyUnion;
 import com.facebook.thrift.test.terse.NestedStruct;
@@ -33,6 +34,7 @@ import com.facebook.thrift.test.terse.Structv1;
 import com.facebook.thrift.test.terse.Structv2;
 import com.facebook.thrift.test.terse.Structv3;
 import com.facebook.thrift.test.terse.TerseException;
+import com.facebook.thrift.test.terse.TerseStruct;
 import com.facebook.thrift.test.terse.TerseStructSingleField;
 import com.facebook.thrift.test.terse.TerseStructWithDateAdapter;
 import com.facebook.thrift.test.terse.TerseStructWithPrimitiveTypeAdapter;
@@ -85,6 +87,11 @@ public class TerseWriteProtocolTest {
     protocol = SerializerUtil.toByteBufProtocol(serializationProtocol, dest);
     t.write0(protocol);
     return dest.readableBytes();
+  }
+
+  private boolean protocolNotSupported() {
+    return (serializationProtocol != SerializationProtocol.TCompact
+        && serializationProtocol != SerializationProtocol.TBinary);
   }
 
   @Test
@@ -143,8 +150,7 @@ public class TerseWriteProtocolTest {
 
   @Test
   public void testEmptyStructWIthAdapter() {
-    if (serializationProtocol != SerializationProtocol.TCompact
-        && serializationProtocol != SerializationProtocol.TBinary) {
+    if (protocolNotSupported()) {
       return;
     }
     // Inner struct not empty
@@ -176,8 +182,7 @@ public class TerseWriteProtocolTest {
 
   @Test
   public void testTerseStructWithStructTypeAdapter() {
-    if (serializationProtocol != SerializationProtocol.TCompact
-        && serializationProtocol != SerializationProtocol.TBinary) {
+    if (protocolNotSupported()) {
       return;
     }
     TerseStructSingleField base = new TerseStructSingleField.Builder().setIntField(300).build();
@@ -290,5 +295,28 @@ public class TerseWriteProtocolTest {
     // deserialize it
     StructLevelTerseStruct read = StructLevelTerseStruct.read0(protocol);
     assertNotNull(read.getExceptionField());
+  }
+
+  @Test
+  public void testAdaptedTerseStruct() {
+    if (protocolNotSupported()) {
+      return;
+    }
+    AdaptedTerseStruct st = new AdaptedTerseStruct.Builder().build();
+    serialize(st);
+
+    TerseStruct received = TerseStruct.read0(protocol);
+    assertEquals(IntrinsicDefaults.defaultBoolean(), received.isBooleanField());
+    assertEquals(IntrinsicDefaults.defaultShort(), received.getShortField());
+    assertEquals(IntrinsicDefaults.defaultInt(), received.getIntField());
+    assertEquals(IntrinsicDefaults.defaultLong(), received.getLongField());
+    assertEquals(IntrinsicDefaults.defaultByteArray(), received.getB1());
+    assertEquals(IntrinsicDefaults.defaultList(), received.getBinaryListField());
+    assertEquals(5000, received.getLongDefault());
+    assertEquals(null, received.isOptionalBooleanField());
+    assertEquals(null, received.getOptionalB1());
+    assertEquals(IntrinsicDefaults.defaultInt(), received.getIntField2());
+    assertEquals(3000, received.getIntDefault2());
+    assertEquals(IntrinsicDefaults.defaultInt(), received.getDoubleTypedefIntField());
   }
 }

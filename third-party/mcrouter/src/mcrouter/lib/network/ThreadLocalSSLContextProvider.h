@@ -28,8 +28,10 @@ class SSLContextConfig;
 
 class ClientSSLContext : public folly::SSLContext {
  public:
-  explicit ClientSSLContext(wangle::SSLSessionCallbacks& cache)
-      : cache_(cache) {
+  explicit ClientSSLContext(
+      wangle::SSLSessionCallbacks& cache,
+      folly::SSLContext::SSLVersion minVersion)
+      : folly::SSLContext(minVersion), cache_(cache) {
     wangle::SSLSessionCallbacks::attachCallbacksToContext(this, &cache_);
   }
 

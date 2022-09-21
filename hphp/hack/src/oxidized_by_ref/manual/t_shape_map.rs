@@ -6,7 +6,6 @@
 use std::cmp::Ordering;
 
 use eq_modulo_pos::EqModuloPos;
-use eq_modulo_pos::EqModuloPosAndReason;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
@@ -25,7 +24,6 @@ use crate::typing_defs_core::TshapeFieldName;
     FromOcamlRepIn,
     Hash,
     EqModuloPos,
-    EqModuloPosAndReason,
     NoPosHash,
     Serialize,
     ToOcamlRep

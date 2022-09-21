@@ -209,7 +209,7 @@ let check_visibility env parent_vis c_vis parent_pos pos on_error =
   | (Vinternal parent_m, Vinternal child_m) ->
     let err_opt =
       match
-        Typing_modules.can_access
+        Typing_modules.can_access_internal
           ~env
           ~current:(Some child_m)
           ~target:(Some parent_m)

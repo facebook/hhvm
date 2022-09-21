@@ -152,8 +152,8 @@ public final class MyUnionFieldPatch implements com.facebook.thrift.payload.Thri
     
         return
             Objects.equals(option1, other.option1) &&
-    Objects.equals(option2, other.option2) &&
-    Objects.equals(option3, other.option3) &&
+            Objects.equals(option2, other.option2) &&
+            Objects.equals(option3, other.option3) &&
             true;
     }
     

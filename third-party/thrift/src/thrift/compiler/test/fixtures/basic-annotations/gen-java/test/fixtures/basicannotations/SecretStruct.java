@@ -125,7 +125,7 @@ public final class SecretStruct implements com.facebook.thrift.payload.ThriftSer
     
         return
             Objects.equals(id, other.id) &&
-    Objects.equals(password, other.password) &&
+            Objects.equals(password, other.password) &&
             true;
     }
     

@@ -27,7 +27,6 @@ mod typed_value;
 mod typedef;
 mod types;
 mod unit;
-mod xhp_attribute;
 
 pub use adata::*;
 pub use attribute::*;
@@ -51,4 +50,3 @@ pub use typed_value::*;
 pub use typedef::*;
 pub use types::*;
 pub use unit::*;
-pub use xhp_attribute::*;

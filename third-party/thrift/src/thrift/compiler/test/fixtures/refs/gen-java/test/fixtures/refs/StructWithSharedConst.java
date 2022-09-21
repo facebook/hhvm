@@ -149,8 +149,8 @@ public final class StructWithSharedConst implements com.facebook.thrift.payload.
     
         return
             Objects.equals(optSharedConst, other.optSharedConst) &&
-    Objects.equals(sharedConst, other.sharedConst) &&
-    Objects.equals(reqSharedConst, other.reqSharedConst) &&
+            Objects.equals(sharedConst, other.sharedConst) &&
+            Objects.equals(reqSharedConst, other.reqSharedConst) &&
             true;
     }
     

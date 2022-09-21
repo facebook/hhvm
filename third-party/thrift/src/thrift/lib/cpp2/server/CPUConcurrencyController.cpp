@@ -35,7 +35,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 } // namespace detail
 
 void CPUConcurrencyController::cycleOnce() {
-  if (config().mode == Mode::DISABLED) {
+  if (!enabled()) {
     return;
   }
 
@@ -112,7 +112,7 @@ void CPUConcurrencyController::cycleOnce() {
 
 void CPUConcurrencyController::schedule() {
   using time_point = std::chrono::steady_clock::time_point;
-  if (config().mode == Mode::DISABLED) {
+  if (!enabled()) {
     return;
   }
 
@@ -136,7 +136,7 @@ void CPUConcurrencyController::cancel() {
 }
 
 void CPUConcurrencyController::requestStarted() {
-  if (config().mode == Mode::DISABLED) {
+  if (!enabled()) {
     return;
   }
 

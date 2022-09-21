@@ -123,7 +123,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         return
             Objects.equals(myEnum, other.myEnum) &&
-    Objects.equals(myBigEnum, other.myBigEnum) &&
+            Objects.equals(myBigEnum, other.myBigEnum) &&
             true;
     }
     

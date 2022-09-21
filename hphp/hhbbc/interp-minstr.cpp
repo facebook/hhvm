@@ -2027,6 +2027,7 @@ void in(ISS& env, const bc::BaseSC& op) {
   // types.
   if (lookup.found == TriBool::Yes &&
       lookup.lateInit == TriBool::No &&
+      lookup.internal == TriBool::No &&
       !lookup.classInitMightRaise &&
       !mightConstThrow &&
       !mightReadOnlyThrow &&

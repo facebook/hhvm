@@ -19,11 +19,17 @@ ExtendTestServiceClientWrapper::check(
   auto _future = _promise.getFuture();
   auto callback = std::make_unique<::thrift::py3::FutureCallback<bool>>(
     std::move(_promise), rpcOptions, client->recv_wrapped_check, channel_);
-  client->check(
-    rpcOptions,
-    std::move(callback),
-    arg_struct1
-  );
+  try {
+    client->check(
+      rpcOptions,
+      std::move(callback),
+      arg_struct1
+    );
+  } catch (const std::exception& ex) {
+    return folly::makeFuture<bool>(folly::exception_wrapper(
+      std::current_exception(), ex
+    ));
+  }
   return _future;
 }
 

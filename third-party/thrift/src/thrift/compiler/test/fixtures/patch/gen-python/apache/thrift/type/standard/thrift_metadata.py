@@ -176,7 +176,7 @@ def _fbthrift_gen_metadata_enum_Void(metadata_struct: _fbthrift_metadata.ThriftM
     if qualified_name in metadata_struct.enums:
         return metadata_struct
     elements = {
-        0: "NoValueVoid",
+        0: "NoValue",
     }
     enum_dict = dict(metadata_struct.enums)
     enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])

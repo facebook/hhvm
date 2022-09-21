@@ -26,6 +26,7 @@ mod emit_xhp;
 mod generator;
 mod reified_generics_helpers;
 mod try_finally_rewriter;
+mod xhp_attribute;
 
 use emit_class::emit_classes_from_program;
 use emit_constant::emit_constants_from_program;

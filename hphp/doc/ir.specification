@@ -1194,10 +1194,10 @@ To string conversions:
   Profile an (attempted) access of a global with name S0.
 
 | LdClsPropAddrOrNull<readonly op>, D(PtrToSProp|Nullptr), S(Cls) S(Str)
-|                     C(Cls|Nullptr) C(Bool) C(Bool), NF
+|                     C(Func) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
-  property name, and S2 is the class representing the context of the code
+  property name, and S2 is the function representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
@@ -1206,10 +1206,10 @@ To string conversions:
   readonly violation with the readonly op.
 
 | LdClsPropAddrOrRaise<readonly op>, D(PtrToSProp), S(Cls) S(Str)
-|                       C(Cls|Nullptr) C(Bool) C(Bool), NF
+|                       C(Func) C(Bool) C(Bool), NF
 
   Loads a pointer to a static class property. S0 points to the class, S1 is the
-  property name, and S2 is the class representing the context of the code
+  property name, and S2 is the function representing the context of the code
   accessing the property. If class S0 does not have a visible and accessible
   static property named S1, then nullptr is returned. An exception
   will be thrown if the property is marked LateInit and its value is
@@ -2258,9 +2258,9 @@ To string conversions:
   attempting to either call, if S0 is Func, or create a pointer to the callee in
   S0 in context `ctx`.
 
-| RaiseModulePropertyViolation<ctx, caller>, ND, S(Cls) S(Str), NF
+| RaiseModulePropertyViolation<caller, propCls, propName, is_static>, ND, NA, NF
   Raises a warning to indicate a module boundary violation resulting from caller
-  attempting to access a property S1 from class S0.
+  attempting to access a property propName from class propCls.
 
 | RaiseImplicitContextStateInvalid<func>, ND, NA, NF
 

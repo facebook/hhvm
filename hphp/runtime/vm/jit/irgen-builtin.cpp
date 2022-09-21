@@ -15,6 +15,7 @@
 */
 #include "hphp/runtime/vm/jit/irgen-builtin.h"
 
+#include "hphp/runtime/base/annot-type.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/bespoke-array.h"
 #include "hphp/runtime/base/collections.h"
@@ -1292,6 +1293,11 @@ SSATmp* optimizedFCallBuiltin(IRGS& env,
 Optional<Type> param_target_type(const Func* callee, uint32_t paramIdx) {
   auto const& pi = callee->params()[paramIdx];
   auto const& tc = pi.typeConstraint;
+  if (tc.typeName() && interface_supports_arrlike(tc.typeName())) {
+    // If we're dealing with an array-like interface, then there's no need to
+    // check the input type: it's going to be mixed on the C++ side anyhow.
+    return std::nullopt;
+  }
   if (tc.isNullable()) {
     // FIXME(T116301380): native builtins don't resolve properly
     auto const dt = tc.isUnresolved() ? KindOfObject : tc.underlyingDataType();

@@ -17,6 +17,8 @@
 #pragma once
 
 #include <utility>
+
+#include <folly/io/IOBuf.h>
 #include <thrift/lib/cpp/protocol/TType.h>
 #include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -178,12 +180,21 @@ struct SerializedSize<false, type::binary_t> {
   uint32_t operator()(Protocol& prot, const std::string& s) const {
     return prot.serializedSizeBinary(s);
   }
+
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
+    return prot.serializedSizeBinary(s);
+  }
 };
 
 template <>
 struct SerializedSize<true, type::binary_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.serializedSizeZCBinary(s);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.serializedSizeZCBinary(s);
   }
 };
@@ -384,6 +395,10 @@ template <>
 struct Encode<type::binary_t> {
   template <typename Protocol>
   uint32_t operator()(Protocol& prot, const std::string& s) const {
+    return prot.writeBinary(s);
+  }
+  template <typename Protocol>
+  uint32_t operator()(Protocol& prot, const folly::IOBuf& s) const {
     return prot.writeBinary(s);
   }
 };
@@ -669,24 +684,7 @@ struct Decode<type::map<Key, Value>> {
 };
 
 template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, Tag>> {
-  template <typename Protocol>
-  void operator()(Protocol& prot, T& t) const {
-    type::native_type<Tag> u;
-    Decode<Tag>{}(prot, u);
-    t = static_cast<T>(u);
-  }
-};
-
-template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, type::list<Tag>>> : Decode<type::list<Tag>> {};
-
-template <typename T, typename Tag>
-struct Decode<type::cpp_type<T, type::set<Tag>>> : Decode<type::set<Tag>> {};
-
-template <typename T, typename Key, typename Value>
-struct Decode<type::cpp_type<T, type::map<Key, Value>>>
-    : Decode<type::map<Key, Value>> {};
+struct Decode<type::cpp_type<T, Tag>> : Decode<Tag> {};
 
 // TODO: Use inplace adapter deserialization as optimization.
 template <typename Adapter, typename Tag>

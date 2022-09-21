@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic::FooServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::simple_rpc() {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::sync_simple_rpc() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simple_rpc");
+}
+
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::simple_rpc() {
+  return sync_simple_rpc();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::semifuture_simple_rpc() {

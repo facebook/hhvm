@@ -176,13 +176,18 @@ class ['a, 'b, 'c, 'd] generic_elaborator =
       let env = { env with namespace = td.t_namespace } in
       let env = extend_tparams env td.t_tparams in
       if td.t_is_ctx then
-        let ctx_constr =
-          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) td.t_constraint
+        let t_as_constraint =
+          Option.map ~f:(self#on_ctx_hint_ns contexts_ns env) td.t_as_constraint
         in
-        let ctx_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
+        let t_super_constraint =
+          Option.map
+            ~f:(self#on_ctx_hint_ns contexts_ns env)
+            td.t_super_constraint
+        in
+        let t_kind = self#on_ctx_hint_ns contexts_ns env td.t_kind in
         super#on_typedef
           env
-          { td with t_constraint = ctx_constr; t_kind = ctx_kind }
+          { td with t_as_constraint; t_super_constraint; t_kind }
       else
         super#on_typedef env td
 

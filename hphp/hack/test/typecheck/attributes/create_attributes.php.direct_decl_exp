@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,408 +1,404 @@
+@@ -1,409 +1,405 @@
  [("\\C",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -366,7 +366,8 @@
    ("\\tt",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [46:6-8];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+         td_super_constraint = None;
          td_type = (Rhint ([46:11-14]), (Tprim Tint)); td_is_ctx = false;
 -        td_attributes =
 -        [{ Typing_defs_core.ua_name = ([45:3-4], "\\T");

@@ -50,6 +50,7 @@ struct TypeInfo {
   bool (*identical)(const void*, const Dyn&);
   partial_ordering (*compare_)(const void*, const Dyn&);
   void (*clear)(void*);
+  void (*assign)(void*, const Dyn&);
   void (*append)(void*, const Dyn&);
   bool (*add)(void*, const Dyn&);
   bool (*put_)(void*, FieldId, const Dyn&, const Dyn&);
@@ -111,6 +112,7 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::identical,
       &Op::compare,
       &Op::clear,
+      &Op::assign,
       &Op::append,
       &Op::add,
       &Op::put,

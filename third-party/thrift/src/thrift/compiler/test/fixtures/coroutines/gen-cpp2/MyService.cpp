@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::ping() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_ping() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ping");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::ping() {
+  return sync_ping();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_ping() {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::getRandomData(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_getRandomData(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getRandomData");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::getRandomData(::std::string& _return) {
+  return sync_getRandomData(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_getRandomData() {
@@ -239,8 +247,12 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::cpp2::MyService>::hasDataById(::std::int64_t /*id*/) {
+bool apache::thrift::ServiceHandler<::cpp2::MyService>::sync_hasDataById(::std::int64_t /*id*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("hasDataById");
+}
+
+bool apache::thrift::ServiceHandler<::cpp2::MyService>::hasDataById(::std::int64_t p_id) {
+  return sync_hasDataById(p_id);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_hasDataById(::std::int64_t p_id) {
@@ -347,8 +359,12 @@ void apache::thrift::ServiceHandler<::cpp2::MyService>::async_eb_getDataById(std
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("getDataById"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_putDataById(::std::int64_t /*id*/, std::unique_ptr<::std::string> /*data*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("putDataById");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::putDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {
+  return sync_putDataById(p_id, std::move(p_data));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_putDataById(::std::int64_t p_id, std::unique_ptr<::std::string> p_data) {

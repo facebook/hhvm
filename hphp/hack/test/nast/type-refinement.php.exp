@@ -56,7 +56,8 @@
       c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([10:6-10], "\\IBox"); t_tparams = []; 
-       t_constraint = None; t_kind = ([10:13-39], (Hrefinement (([10:13-16], (Happly (([10:13-16], "\\Box"), []))), [(Rtype (([10:29-31], "Tb"), (TRexact ([10:34-37], (Hprim Tint)))))])));
+       t_as_constraint = None; t_super_constraint = None;
+       t_kind = ([10:13-39], (Hrefinement (([10:13-16], (Happly (([10:13-16], "\\Box"), []))), [(Rtype (([10:29-31], "Tb"), (TRexact ([10:34-37], (Hprim Tint)))))]))); 
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -75,7 +76,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([11:6-13], "\\SubIBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind = ([11:16-43], (Hrefinement (([11:16-19], (Happly (([11:16-19], "\\Box"), []))), [(Rtype (([11:32-34], "Tb"), (TRloose { tr_lower = []; tr_upper = [([11:38-41], (Hprim Tint))] })))])));
        t_user_attributes = [];
        t_file_attributes =
@@ -95,7 +96,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([12:6-14], "\\SubISBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([12:17-54],
         (Hrefinement (([12:17-20], (Happly (([12:17-20], "\\Box"), []))),
@@ -118,7 +119,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([13:6-13], "\\SupIBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind = ([13:16-46], (Hrefinement (([13:16-19], (Happly (([13:16-19], "\\Box"), []))), [(Rtype (([13:32-34], "Tb"), (TRloose { tr_lower = [([13:41-44], (Hprim Tint))]; tr_upper = [] })))])));
        t_user_attributes = [];
        t_file_attributes =
@@ -138,7 +139,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([14:6-14], "\\SupISBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([14:17-60],
         (Hrefinement (([14:17-20], (Happly (([14:17-20], "\\Box"), []))),
@@ -161,7 +162,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([16:6-15], "\\SubSupBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([16:18-55],
         (Hrefinement (([16:18-21], (Happly (([16:18-21], "\\Box"), []))),
@@ -211,7 +212,8 @@
        c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([22:6-13], "\\PureBox"); t_tparams = []; 
-       t_constraint = None; t_kind = ([22:16-46], (Hrefinement (([22:16-26], (Happly (([22:16-26], "\\BoxWithCtx"), []))), [(Rctx (([22:38-39], "C"), (CRexact ([22:42-44], (Hintersection [])))))])));
+       t_as_constraint = None; t_super_constraint = None;
+       t_kind = ([22:16-46], (Hrefinement (([22:16-26], (Happly (([22:16-26], "\\BoxWithCtx"), []))), [(Rctx (([22:38-39], "C"), (CRexact ([22:42-44], (Hintersection [])))))])));
        t_user_attributes = [];
        t_file_attributes =
        [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-51], (String "type_refinements"))] }];
@@ -230,7 +232,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([23:6-14], "\\ZonedBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([23:17-52],
         (Hrefinement (([23:17-27], (Happly (([23:17-27], "\\BoxWithCtx"), []))),
@@ -253,7 +255,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([24:6-26], "\\BoxThatWritesGlobals"); 
-       t_tparams = []; t_constraint = None;
+       t_tparams = []; t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([24:29-67],
         (Hrefinement (([24:29-39], (Happly (([24:29-39], "\\BoxWithCtx"), []))),
@@ -276,7 +278,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([25:6-26], "\\WritePropsOrPurerBox"); 
-       t_tparams = []; t_constraint = None;
+       t_tparams = []; t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([25:29-74],
         (Hrefinement (([25:29-39], (Happly (([25:29-39], "\\BoxWithCtx"), []))),
@@ -299,7 +301,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([27:6-16], "\\WritingBox"); t_tparams = []; 
-       t_constraint = None;
+       t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([27:19-69],
         (Hrefinement (([27:19-29], (Happly (([27:19-29], "\\BoxWithCtx"), []))),
@@ -326,7 +328,7 @@
        t_module = None; t_docs_url = None });
   (Typedef
      { t_annotation = (); t_name = ([28:6-24], "\\BoxThatWritesStuff"); 
-       t_tparams = []; t_constraint = None;
+       t_tparams = []; t_as_constraint = None; t_super_constraint = None;
        t_kind =
        ([28:27-78],
         (Hrefinement (([28:27-37], (Happly (([28:27-37], "\\BoxWithCtx"), []))),

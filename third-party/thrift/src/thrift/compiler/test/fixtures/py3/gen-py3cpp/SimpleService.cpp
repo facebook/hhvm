@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::py3::simple::SimpleServiceServiceInfoHolder apache::thrift::ServiceHandler<::py3::simple::SimpleService>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_five() {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_five() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_five");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_five() {
+  return sync_get_five();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_five() {
@@ -129,8 +133,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::add_five(::std::int32_t /*num*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_add_five(::std::int32_t /*num*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("add_five");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::add_five(::std::int32_t p_num) {
+  return sync_add_five(p_num);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_add_five(::std::int32_t p_num) {
@@ -233,8 +241,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::do_nothing() {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_do_nothing() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_nothing");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::do_nothing() {
+  return sync_do_nothing();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_do_nothing() {
@@ -339,8 +351,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("concat");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::concat(::std::string& _return, std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second) {
+  return sync_concat(_return, std::move(p_first), std::move(p_second));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_concat(std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second) {
@@ -447,8 +463,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_value");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_value(std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct) {
+  return sync_get_value(std::move(p_simple_struct));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_value(std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct) {
@@ -551,8 +571,12 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::negate(bool /*input*/) {
+bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_negate(bool /*input*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("negate");
+}
+
+bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::negate(bool p_input) {
+  return sync_negate(p_input);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_negate(bool p_input) {
@@ -655,8 +679,12 @@ determineInvocationType:
   }
 }
 
-::std::int8_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::tiny(::std::int8_t /*input*/) {
+::std::int8_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_tiny(::std::int8_t /*input*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("tiny");
+}
+
+::std::int8_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::tiny(::std::int8_t p_input) {
+  return sync_tiny(p_input);
 }
 
 folly::SemiFuture<::std::int8_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_tiny(::std::int8_t p_input) {
@@ -759,8 +787,12 @@ determineInvocationType:
   }
 }
 
-::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::small(::std::int16_t /*input*/) {
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_small(::std::int16_t /*input*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("small");
+}
+
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::small(::std::int16_t p_input) {
+  return sync_small(p_input);
 }
 
 folly::SemiFuture<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_small(::std::int16_t p_input) {
@@ -863,8 +895,12 @@ determineInvocationType:
   }
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::big(::std::int64_t /*input*/) {
+::std::int64_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_big(::std::int64_t /*input*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("big");
+}
+
+::std::int64_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::big(::std::int64_t p_input) {
+  return sync_big(p_input);
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_big(::std::int64_t p_input) {
@@ -967,8 +1003,12 @@ determineInvocationType:
   }
 }
 
-double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::two(double /*input*/) {
+double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_two(double /*input*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("two");
+}
+
+double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::two(double p_input) {
+  return sync_two(p_input);
 }
 
 folly::SemiFuture<double> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_two(double p_input) {
@@ -1071,8 +1111,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::expected_exception() {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_expected_exception() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("expected_exception");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::expected_exception() {
+  return sync_expected_exception();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_expected_exception() {
@@ -1177,8 +1221,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::unexpected_exception() {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_unexpected_exception() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("unexpected_exception");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::unexpected_exception() {
+  return sync_unexpected_exception();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_unexpected_exception() {
@@ -1281,8 +1329,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sum_i16_list");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> p_numbers) {
+  return sync_sum_i16_list(std::move(p_numbers));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> p_numbers) {
@@ -1385,8 +1437,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sum_i32_list");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> p_numbers) {
+  return sync_sum_i32_list(std::move(p_numbers));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> p_numbers) {
@@ -1489,8 +1545,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sum_i64_list");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> p_numbers) {
+  return sync_sum_i64_list(std::move(p_numbers));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> p_numbers) {
@@ -1593,8 +1653,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("concat_many");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::concat_many(::std::string& _return, std::unique_ptr<::std::vector<::std::string>> p_words) {
+  return sync_concat_many(_return, std::move(p_words));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_concat_many(std::unique_ptr<::std::vector<::std::string>> p_words) {
@@ -1701,8 +1765,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("count_structs");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items) {
+  return sync_count_structs(std::move(p_items));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items) {
@@ -1805,8 +1873,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sum_set");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_set(std::unique_ptr<::std::set<::std::int32_t>> p_numbers) {
+  return sync_sum_set(std::move(p_numbers));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_sum_set(std::unique_ptr<::std::set<::std::int32_t>> p_numbers) {
@@ -1909,8 +1981,12 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/) {
+bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("contains_word");
+}
+
+bool apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contains_word(std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word) {
+  return sync_contains_word(std::move(p_words), std::move(p_word));
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_contains_word(std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word) {
@@ -2013,8 +2089,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_map_value");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_map_value(::std::string& _return, std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key) {
+  return sync_get_map_value(_return, std::move(p_words), std::move(p_key));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_map_value(std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key) {
@@ -2121,8 +2201,12 @@ determineInvocationType:
   }
 }
 
-::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/) {
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("map_length");
+}
+
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items) {
+  return sync_map_length(std::move(p_items));
 }
 
 folly::SemiFuture<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items) {
@@ -2225,8 +2309,12 @@ determineInvocationType:
   }
 }
 
-::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/) {
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sum_map_values");
+}
+
+::std::int16_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items) {
+  return sync_sum_map_values(std::move(p_items));
 }
 
 folly::SemiFuture<::std::int16_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items) {
@@ -2329,8 +2417,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("complex_sum_i32");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
+  return sync_complex_sum_i32(std::move(p_counter));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
@@ -2433,8 +2525,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("repeat_name");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::repeat_name(::std::string& _return, std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
+  return sync_repeat_name(_return, std::move(p_counter));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_repeat_name(std::unique_ptr<::py3::simple::ComplexStruct> p_counter) {
@@ -2541,8 +2637,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_struct(::py3::simple::SimpleStruct& /*_return*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_struct(::py3::simple::SimpleStruct& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_struct");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_struct(::py3::simple::SimpleStruct& _return) {
+  return sync_get_struct(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::py3::simple::SimpleStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_struct() {
@@ -2649,8 +2749,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("fib");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::fib(::std::vector<::std::int32_t>& _return, ::std::int16_t p_n) {
+  return sync_fib(_return, p_n);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::std::int32_t>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_fib(::std::int16_t p_n) {
@@ -2757,8 +2861,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("unique_words");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::unique_words(::std::set<::std::string>& _return, std::unique_ptr<::std::vector<::std::string>> p_words) {
+  return sync_unique_words(_return, std::move(p_words));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_unique_words(std::unique_ptr<::std::vector<::std::string>> p_words) {
@@ -2865,8 +2973,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("words_count");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::words_count(::std::map<::std::string, ::std::int16_t>& _return, std::unique_ptr<::std::vector<::std::string>> p_words) {
+  return sync_words_count(_return, std::move(p_words));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_words_count(std::unique_ptr<::std::vector<::std::string>> p_words) {
@@ -2973,8 +3085,12 @@ determineInvocationType:
   }
 }
 
-::py3::simple::AnEnum apache::thrift::ServiceHandler<::py3::simple::SimpleService>::set_enum(::py3::simple::AnEnum /*in_enum*/) {
+::py3::simple::AnEnum apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_set_enum(::py3::simple::AnEnum /*in_enum*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("set_enum");
+}
+
+::py3::simple::AnEnum apache::thrift::ServiceHandler<::py3::simple::SimpleService>::set_enum(::py3::simple::AnEnum p_in_enum) {
+  return sync_set_enum(p_in_enum);
 }
 
 folly::SemiFuture<::py3::simple::AnEnum> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_set_enum(::py3::simple::AnEnum p_in_enum) {
@@ -3077,8 +3193,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("list_of_lists");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::list_of_lists(::std::vector<::std::vector<::std::int32_t>>& _return, ::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
+  return sync_list_of_lists(_return, p_num_lists, p_num_items);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items) {
@@ -3185,8 +3305,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("word_character_frequency");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& _return, std::unique_ptr<::std::string> p_sentence) {
+  return sync_word_character_frequency(_return, std::move(p_sentence));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_word_character_frequency(std::unique_ptr<::std::string> p_sentence) {
@@ -3293,8 +3417,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("list_of_sets");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::list_of_sets(::std::vector<::std::set<::std::string>>& _return, std::unique_ptr<::std::string> p_some_words) {
+  return sync_list_of_sets(_return, std::move(p_some_words));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::std::set<::std::string>>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_list_of_sets(std::unique_ptr<::std::string> p_some_words) {
@@ -3401,8 +3529,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/) {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("nested_map_argument");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::SimpleService>::nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map) {
+  return sync_nested_map_argument(std::move(p_struct_map));
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map) {
@@ -3505,8 +3637,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("make_sentence");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::make_sentence(::std::string& _return, std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars) {
+  return sync_make_sentence(_return, std::move(p_word_chars));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_make_sentence(std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars) {
@@ -3613,8 +3749,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_union");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_union(::std::set<::std::int32_t>& _return, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets) {
+  return sync_get_union(_return, std::move(p_sets));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::std::int32_t>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_union(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets) {
@@ -3721,8 +3861,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_keys");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_keys(::std::set<::std::string>& _return, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map) {
+  return sync_get_keys(_return, std::move(p_string_map));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_keys(std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map) {
@@ -3829,8 +3973,12 @@ determineInvocationType:
   }
 }
 
-double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::lookup_double(::std::int32_t /*key*/) {
+double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_lookup_double(::std::int32_t /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("lookup_double");
+}
+
+double apache::thrift::ServiceHandler<::py3::simple::SimpleService>::lookup_double(::std::int32_t p_key) {
+  return sync_lookup_double(p_key);
 }
 
 folly::SemiFuture<double> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_lookup_double(::std::int32_t p_key) {
@@ -3933,8 +4081,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("retrieve_binary");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::retrieve_binary(::std::string& _return, std::unique_ptr<::std::string> p_something) {
+  return sync_retrieve_binary(_return, std::move(p_something));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_retrieve_binary(std::unique_ptr<::std::string> p_something) {
@@ -4041,8 +4193,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("contain_binary");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contain_binary(::std::set<::std::string>& _return, std::unique_ptr<::std::vector<::std::string>> p_binaries) {
+  return sync_contain_binary(_return, std::move(p_binaries));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_contain_binary(std::unique_ptr<::std::vector<::std::string>> p_binaries) {
@@ -4149,8 +4305,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("contain_enum");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::contain_enum(::std::vector<::py3::simple::AnEnum>& _return, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum) {
+  return sync_contain_enum(_return, std::move(p_the_enum));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_contain_enum(std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum) {
@@ -4257,8 +4417,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) {
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::sync_get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_binary_union_struct");
+}
+
+void apache::thrift::ServiceHandler<::py3::simple::SimpleService>::get_binary_union_struct(::py3::simple::BinaryUnionStruct& _return, std::unique_ptr<::py3::simple::BinaryUnion> p_u) {
+  return sync_get_binary_union_struct(_return, std::move(p_u));
 }
 
 folly::SemiFuture<std::unique_ptr<::py3::simple::BinaryUnionStruct>> apache::thrift::ServiceHandler<::py3::simple::SimpleService>::semifuture_get_binary_union_struct(std::unique_ptr<::py3::simple::BinaryUnion> p_u) {

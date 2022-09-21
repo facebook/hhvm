@@ -30,8 +30,12 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::A>::IIf> apache::thrift::
   apache::thrift::detail::si::throw_app_exn_unimplemented("createI");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::A>::foo(::cpp2::Foo& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::A>::sync_foo(::cpp2::Foo& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::A>::foo(::cpp2::Foo& _return) {
+  return sync_foo(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::cpp2::Foo>> apache::thrift::ServiceHandler<::cpp2::A>::semifuture_foo() {
@@ -139,8 +143,12 @@ determineInvocationType:
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::A>::IIf::interact() {
+void apache::thrift::ServiceHandler<::cpp2::A>::IIf::sync_interact() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interact");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::A>::IIf::interact() {
+  return sync_interact();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::A>::IIf::semifuture_interact() {
@@ -326,8 +334,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::BServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::B>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::B>::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::B>::sync_bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::B>::bar(std::unique_ptr<::cpp2::Foo> p_foo) {
+  return sync_bar(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_bar(std::unique_ptr<::cpp2::Foo> p_foo) {
@@ -432,8 +444,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::stream_stuff() {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_stream_stuff() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("stream_stuff");
+}
+
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::stream_stuff() {
+  return sync_stream_stuff();
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_stream_stuff() {
@@ -536,8 +552,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sink_stuff() {
+::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_sink_stuff() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sink_stuff");
+}
+
+::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sink_stuff() {
+  return sync_sink_stuff();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_sink_stuff() {
@@ -747,8 +767,12 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::C>::IIf> apache::thrift::
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::C>::IIf::interact() {
+void apache::thrift::ServiceHandler<::cpp2::C>::IIf::sync_interact() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interact");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::C>::IIf::interact() {
+  return sync_interact();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::C>::IIf::semifuture_interact() {

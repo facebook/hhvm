@@ -47,7 +47,8 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual void doBland();
+  virtual void sync_doBland();
+  [[deprecated("Use sync_doBland instead")]] virtual void doBland();
   virtual folly::Future<folly::Unit> future_doBland();
   virtual folly::SemiFuture<folly::Unit> semifuture_doBland();
 #if FOLLY_HAS_COROUTINES
@@ -55,7 +56,8 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<void> co_doBland(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_doBland(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
-  virtual void doRaise();
+  virtual void sync_doRaise();
+  [[deprecated("Use sync_doRaise instead")]] virtual void doRaise();
   virtual folly::Future<folly::Unit> future_doRaise();
   virtual folly::SemiFuture<folly::Unit> semifuture_doRaise();
 #if FOLLY_HAS_COROUTINES
@@ -63,7 +65,8 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<void> co_doRaise(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_doRaise(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
-  virtual void get200(::std::string& /*_return*/);
+  virtual void sync_get200(::std::string& /*_return*/);
+  [[deprecated("Use sync_get200 instead")]] virtual void get200(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get200();
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_get200();
 #if FOLLY_HAS_COROUTINES
@@ -71,7 +74,8 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
   virtual folly::coro::Task<std::unique_ptr<::std::string>> co_get200(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_get200(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
-  virtual void get500(::std::string& /*_return*/);
+  virtual void sync_get500(::std::string& /*_return*/);
+  [[deprecated("Use sync_get500 instead")]] virtual void get500(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get500();
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_get500();
 #if FOLLY_HAS_COROUTINES

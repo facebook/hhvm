@@ -572,8 +572,6 @@ void testDecodeStruct() {
 template <conformance::StandardProtocol Protocol>
 void testDecodeCppType() {
   SCOPED_TRACE(apache::thrift::util::enumNameSafe(Protocol));
-  // test cpp_type with primitive type
-  testDecode<Protocol, type::cpp_type<int, type::i16_t>>(1);
   {
     // test cpp_type with list
     using T = std::deque<int64_t>;

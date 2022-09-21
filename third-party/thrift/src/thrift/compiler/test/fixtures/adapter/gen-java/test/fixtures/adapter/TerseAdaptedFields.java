@@ -25,9 +25,9 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
 
     @ThriftConstructor
     public TerseAdaptedFields(
-        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.NONE) final int intField,
-        @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.NONE) final String stringField,
-        @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.NONE) final Set<Integer> setField
+        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE) final int intField,
+        @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE) final String stringField,
+        @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE) final Set<Integer> setField
     ) {
         this.intField = intField;
         this.stringField = stringField;
@@ -47,7 +47,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
         private String stringField = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
         private Set<Integer> setField = com.facebook.thrift.util.IntrinsicDefaults.defaultSet();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)
         public Builder setIntField(int intField) {
             this.intField = intField;
             return this;
@@ -55,7 +55,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     
         public int getIntField() { return intField; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)
         public Builder setStringField(String stringField) {
             this.stringField = stringField;
             return this;
@@ -63,7 +63,7 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     
         public String getStringField() { return stringField; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)
         public Builder setSetField(Set<Integer> setField) {
             this.setField = setField;
             return this;
@@ -117,17 +117,17 @@ public final class TerseAdaptedFields implements com.facebook.thrift.payload.Thr
     }
     
     
-    @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="int_field", requiredness=Requiredness.TERSE)
     public int getIntField() { return intField; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="string_field", requiredness=Requiredness.TERSE)
     public String getStringField() { return stringField; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="set_field", requiredness=Requiredness.TERSE)
     public Set<Integer> getSetField() { return setField; }
     
     @java.lang.Override

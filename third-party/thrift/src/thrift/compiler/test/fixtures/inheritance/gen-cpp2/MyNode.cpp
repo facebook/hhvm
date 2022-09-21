@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyNodeServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyNode>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyNode>::do_mid() {
+void apache::thrift::ServiceHandler<::cpp2::MyNode>::sync_do_mid() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_mid");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyNode>::do_mid() {
+  return sync_do_mid();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyNode>::semifuture_do_mid() {

@@ -1,6 +1,6 @@
 [(Typedef
     { t_annotation = (); t_name = ([3:6-11], "\\Point"); t_tparams = []; 
-      t_constraint = None;
+      t_as_constraint = None; t_super_constraint = None;
       t_kind =
       ([3:14-44],
        (Hshape

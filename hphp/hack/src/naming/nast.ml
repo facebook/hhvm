@@ -1170,7 +1170,12 @@ module Visitor_DEPRECATED = struct
         let acc = this#on_id acc t.t_name in
         let acc = this#on_hint acc t.t_kind in
         let acc =
-          match t.t_constraint with
+          match t.t_as_constraint with
+          | Some c -> this#on_hint acc c
+          | None -> acc
+        in
+        let acc =
+          match t.t_super_constraint with
           | Some c -> this#on_hint acc c
           | None -> acc
         in

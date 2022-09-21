@@ -796,6 +796,17 @@
             "required" : "opt-in-req-out",
             "type" : "bool"
           },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 21,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "list",
+  "inner_type" : "i16"
+}
+          },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepends to the front of a given list.\n",
@@ -905,6 +916,17 @@
   "type" : "map",
   "key_type" : "string",
   "value_type" : "string"
+}
+          },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 21,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "string"
 }
           },
           "put" : {

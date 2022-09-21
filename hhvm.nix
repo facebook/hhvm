@@ -10,7 +10,7 @@
 , editline
 , expat
 , flex
-, fmt
+, fmt_8
 , freetype
 , fribidi
 , gd
@@ -49,7 +49,7 @@
 , numactl
 , oniguruma
 , openldap
-, openssl
+, openssl_1_1
 , pcre
 , perl
 , pkg-config
@@ -123,11 +123,11 @@ stdenv.mkDerivation rec {
       (boost.override { inherit stdenv; })
       brotli
       bzip2
-      curl
+      (curl.override { openssl = openssl_1_1; })
       (double-conversion.override { inherit stdenv; })
       editline
       expat
-      (fmt.override { inherit stdenv; })
+      (fmt_8.override { inherit stdenv; })
       freetype
       fribidi
       gd
@@ -167,7 +167,7 @@ stdenv.mkDerivation rec {
       lz4
       oniguruma
       openldap
-      openssl
+      openssl_1_1
       pcre
       perl
       re2

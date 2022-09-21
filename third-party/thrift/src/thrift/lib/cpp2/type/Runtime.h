@@ -87,6 +87,10 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   // field defaults).
   using Base::clear;
 
+  // Assign to the given value.
+  using Base::assign;
+  using Base::operator=;
+
   // Append to a list, string, etc.
   using Base::append;
 
@@ -237,6 +241,51 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   }
   ~Value() { reset(); }
 
+  void reset();
+
+  // Sets the referenced value to it's intrinsic default (e.g. ignoring custom
+  // field defaults).
+  using Base::clear;
+
+  // Assign to the given value.
+  using Base::assign;
+  using Base::operator=;
+  Value& operator=(const Value& other) noexcept;
+  Value& operator=(Value&& other) noexcept;
+
+  // Append to a list, string, etc.
+  using Base::append;
+
+  // Add to a set, number, etc.
+  using Base::add;
+
+  // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
+  //
+  // Returns true if an existing value was replaced.
+  using Base::put;
+
+  // Add a key-value pair, if not already present, using the given default if
+  // provided.
+  //
+  // Returns a reference to the associated value.
+  using Base::ensure;
+
+  // Type-safe casting functions.
+  using Base::as;
+  template <typename Tag>
+  native_type<Tag>& as() & {
+    return type_->as<native_type<Tag>>(ptr_);
+  }
+  template <typename Tag>
+  native_type<Tag>&& as() && {
+    return std::move(type_->as<native_type<Tag>>(ptr_));
+  }
+  using Base::tryAs;
+  template <typename Tag>
+  native_type<Tag>* tryAs() noexcept {
+    return type_->tryAs<native_type<Tag>>(ptr_);
+  }
+
   Ref operator[](Ordinal ord) & { return get(ord); }
   Ref operator[](Ordinal ord) && { return get(ord); }
   Ref operator[](size_t pos) & { return get(pos); }
@@ -262,65 +311,80 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
     return get(std::forward<IdT>(id));
   }
 
-  Value& operator=(const Value& other) noexcept {
-    reset();
-    Base::reset(other.type_, other.type_->make(other.ptr_, false));
-    return *this;
-  }
-
-  Value& operator=(Value&& other) noexcept {
-    reset();
-    Base::reset(other.type_, other.ptr_);
-    other.Base::reset();
-    return *this;
-  }
-
-  void reset() {
-    if (ptr_ != nullptr) {
-      type_->delete_(ptr_);
-      Base::reset();
-    }
-  }
-  using Base::as;
-  template <typename Tag>
-  native_type<Tag>& as() & {
-    return type_->as<native_type<Tag>>(ptr_);
-  }
-  template <typename Tag>
-  native_type<Tag>&& as() && {
-    return std::move(type_->as<native_type<Tag>>(ptr_));
-  }
-
-  // Returns nullptr on mismatch.
-  template <typename Tag>
-  native_type<Tag>* tryAs() noexcept {
-    return type_->tryAs<native_type<Tag>>(ptr_);
-  }
-  using Base::tryAs;
-
-  // Sets the referenced value to it's intrinsic default (e.g. ignoring custom
-  // field defaults).
-  using Base::clear;
-
-  // Append to a list, string, etc.
-  using Base::append;
-
-  // Add to a set, number, etc.
-  using Base::add;
-
-  // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
-  //
-  // Returns true if an existing value was replaced.
-  using Base::put;
-
-  // Add a key-value pair, if not already present, using the given default if
-  // provided.
-  //
-  // Returns a reference to the associated value.
-  using Base::ensure;
-
  private:
   using Base::Base;
+  friend bool operator==(const ConstRef& lhs, const Value& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator==(const Ref& lhs, const Value& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator==(const Value& lhs, const ConstRef& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator==(const Value& lhs, const Ref& rhs) {
+    return lhs.equal(rhs);
+  }
+  friend bool operator!=(const ConstRef& lhs, const Value& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator!=(const Ref& lhs, const Value& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator!=(const Value& lhs, const ConstRef& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator!=(const Value& lhs, const Ref& rhs) {
+    return !lhs.equal(rhs);
+  }
+  friend bool operator<(const ConstRef& lhs, const Value& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<(const Ref& lhs, const Value& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<(const Value& lhs, const ConstRef& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<(const Value& lhs, const Ref& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const ConstRef& lhs, const Value& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator<=(const Ref& lhs, const Value& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator<=(const Value& lhs, const ConstRef& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator<=(const Value& lhs, const Ref& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const ConstRef& lhs, const Value& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>(const Ref& lhs, const Value& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>(const Value& lhs, const ConstRef& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>(const Value& lhs, const Ref& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const ConstRef& lhs, const Value& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+  friend bool operator>=(const Ref& lhs, const Value& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+  friend bool operator>=(const Value& lhs, const ConstRef& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+  friend bool operator>=(const Value& lhs, const Ref& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
 
   template <typename Tag, typename T = native_type<Tag>>
   explicit Value(Tag, std::nullptr_t)
@@ -347,10 +411,6 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
             op::detail::getAnyType<Tag, T>(),
             op::detail::getAnyType<Tag, T>()->make(&val, true)) {
     assert(ptr_ != nullptr);
-  }
-
-  static ConstRef asRef(const std::string& name) {
-    return ConstRef::to<type::string_t>(name);
   }
 };
 

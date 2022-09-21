@@ -136,7 +136,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     t_annotation = ();
     t_name = (name_pos, tid);
     t_tparams = params;
-    t_constraint = tcstr;
+    t_as_constraint = tascstr;
+    t_super_constraint = tsupercstr;
     t_kind = concrete_type;
     t_user_attributes;
     t_file_attributes = _;
@@ -157,7 +158,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
   let env = { Decl_env.mode; droot = Some dep; droot_member = None; ctx } in
   let td_tparams = List.map params ~f:(FunUtils.type_param env) in
   let td_type = Decl_hint.hint env concrete_type in
-  let td_constraint = Option.map tcstr ~f:(Decl_hint.hint env) in
+  let td_as_constraint = Option.map tascstr ~f:(Decl_hint.hint env) in
+  let td_super_constraint = Option.map tsupercstr ~f:(Decl_hint.hint env) in
   let td_pos = Decl_env.make_decl_pos env name_pos in
   let td_attributes =
     List.map
@@ -168,7 +170,8 @@ and typedef_decl (ctx : Provider_context.t) (tdef : Nast.typedef) :
     td_module;
     td_vis;
     td_tparams;
-    td_constraint;
+    td_as_constraint;
+    td_super_constraint;
     td_type;
     td_pos;
     td_is_ctx;

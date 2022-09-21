@@ -176,7 +176,8 @@ Client.prototype.connect = function() {
 
   try {
     proc = childProcess.spawn(this.watchmanBinaryPath, args, {
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
+      windowsHide: true
     });
   } catch (error) {
     spawnError(error);

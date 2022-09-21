@@ -32,7 +32,6 @@ pub type __off64_t = c_long;
 
 type value = usize;
 type header_t = usize;
-type tag_t = c_uint;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -212,7 +211,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         let mut header: header_t;
         let mut code: u8;
 
-        let mut tag: tag_t = 0;
+        let mut tag: u8 = 0;
         let mut size: usize = 0;
         let mut len: usize = 0;
         let mut v: Value<'a> = Value::from_bits(0);
@@ -251,7 +250,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                     if code >= PREFIX_SMALL_INT {
                         if code >= PREFIX_SMALL_BLOCK {
                             // Small block
-                            tag = (code & 0xf) as tag_t;
+                            tag = code & 0xf;
                             size = (code >> 4 & 0x7) as usize;
                             current_block = READ_BLOCK_LABEL;
                         } else {
@@ -308,13 +307,13 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                 }
                                 CODE_BLOCK32 => {
                                     header = self.read32u() as header_t;
-                                    tag = (header & 0xff) as tag_t;
+                                    tag = (header & 0xff) as u8;
                                     size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
                                 CODE_BLOCK64 => {
                                     header = self.read64u() as usize;
-                                    tag = (header & 0xff) as tag_t;
+                                    tag = (header & 0xff) as u8;
                                     size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
                                 }
@@ -429,8 +428,8 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                 panic!("atoms are not supported");
                             } else {
                                 let mut builder =
-                                    self.alloc.block_with_size_and_tag(size as usize, tag as u8);
-                                if tag == ocamlrep::OBJECT_TAG as tag_t {
+                                    self.alloc.block_with_size_and_tag(size as usize, tag);
+                                if tag == ocamlrep::OBJECT_TAG {
                                     panic!("objects not supported");
                                 } else {
                                     // If it's not an object then read the conents of the block

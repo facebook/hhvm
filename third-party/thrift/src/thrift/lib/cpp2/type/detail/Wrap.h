@@ -121,7 +121,7 @@ class Wrap {
 };
 
 template <typename Derived, typename T, typename Tag = infer_tag<T>>
-class EqWrap : public Wrap<T, Tag>, protected BaseDerived<Derived> {
+class EqWrap : public Wrap<T, Tag>, public BaseDerived<Derived> {
   using Base = Wrap<T, Tag>;
 
  public:
@@ -138,8 +138,6 @@ class EqWrap : public Wrap<T, Tag>, protected BaseDerived<Derived> {
   ~EqWrap() = default; // abstract base class
 
  private:
-  friend class BaseDerived<Derived>;
-
   friend constexpr bool operator==(const Derived& lhs, const Derived& rhs) {
     return op::equal<Tag>(data(lhs), data(rhs));
   }

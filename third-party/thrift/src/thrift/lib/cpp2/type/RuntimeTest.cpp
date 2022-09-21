@@ -109,15 +109,6 @@ TEST(RuntimeTest, Int) {
   EXPECT_EQ(ref, Value::create<i32_t>());
 }
 
-template <typename Tag, typename T = std::vector<native_type<Tag>>>
-T dump(detail::Cursor cur) {
-  T result;
-  for (auto elem = cur.next(); elem.has_value(); elem = cur.next()) {
-    result.push_back(elem.as<Tag>());
-  }
-  return result;
-}
-
 TEST(RuntimeTest, List) {
   std::vector<std::string> value;
   std::string elem = "the";
@@ -139,9 +130,7 @@ TEST(RuntimeTest, List) {
 
   ref.append("best");
   ref.append("test");
-  EXPECT_THAT(
-      dump<string_t>(ref.values()),
-      ::testing::ElementsAre("the", "best", "test"));
+  EXPECT_THAT(ref.values(), ::testing::ElementsAre("the", "best", "test"));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
@@ -156,7 +145,7 @@ TEST(RuntimeTest, Set) {
   EXPECT_EQ(ref.size(), 0);
   EXPECT_TRUE(ref.add("best"));
   EXPECT_THAT(value, ::testing::ElementsAre("best"));
-  EXPECT_THAT(dump<string_t>(ref.keys()), ::testing::ElementsAre("best"));
+  EXPECT_THAT(ref.keys(), ::testing::ElementsAre("best"));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
@@ -167,16 +156,14 @@ TEST(RuntimeTest, Set) {
   ref.add("the");
   ref.add("test");
   EXPECT_THAT(
-      dump<string_t>(ref.keys()),
-      ::testing::UnorderedElementsAre("the", "best", "test"));
+      ref.keys(), ::testing::UnorderedElementsAre("the", "best", "test"));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
-  EXPECT_THAT(dump<string_t>(ref.keys()), ::testing::IsEmpty());
+  EXPECT_THAT(ref.keys(), ::testing::ElementsAre());
 
-  auto cur = ref.values();
-  EXPECT_THROW(cur.next(), std::logic_error); // lazy
+  EXPECT_THROW(ref.values().begin(), std::logic_error);
 }
 
 TEST(RuntimeTest, Map) {
@@ -197,10 +184,8 @@ TEST(RuntimeTest, Map) {
   EXPECT_EQ(ref["one"], 2);
   EXPECT_EQ(ref["two"], 0);
 
-  EXPECT_THAT(
-      dump<string_t>(ref.keys()),
-      ::testing::UnorderedElementsAre("one", "two"));
-  EXPECT_THAT(dump<i32_t>(ref.values()), ::testing::UnorderedElementsAre(2, 0));
+  EXPECT_THAT(ref.keys(), ::testing::UnorderedElementsAre("one", "two"));
+  EXPECT_THAT(ref.values(), ::testing::UnorderedElementsAre(2, 0));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());

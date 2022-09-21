@@ -88,10 +88,11 @@ class RuntimeType {
   }
 };
 
-// TODO(afuller): Expose a more standard iterator iterface.
-// TODO(afuller): Benchmark and and consider optimizing.
+// TODO(afuller): Benchmark and optimize.
 class Cursor {
  public:
+  Cursor() noexcept = default;
+
   // Returns the next value, or nullPtr() if there are no more values.
   Ptr next();
 
@@ -157,7 +158,13 @@ class Dyn {
   FOLLY_NODISCARD bool has_value() const { return !type().empty(); }
 
  protected:
+  // TODO(afuller): Simplify friends model.
   friend class Cursor;
+  template <typename, typename>
+  friend class Iter;
+  template <typename, typename>
+  friend class BaseIter;
+
   RuntimeType type_;
   void* ptr_ = nullptr;
 
@@ -212,6 +219,7 @@ class Dyn {
     type_ = type_.withContext(ctxConst, ctxRvalue);
   }
 
+  void reset(const Dyn& other) noexcept { reset(other.type_, other.ptr_); }
   void reset(RuntimeType type, void* ptr) noexcept {
     type_ = type;
     ptr_ = ptr;
@@ -330,24 +338,131 @@ class DynCmp : public BaseDynCmp<T1, T2>, public BaseDynCmp<T2, T1> {};
 template <typename T>
 class DynCmp<T, T> : public BaseDynCmp<T, T> {};
 
-template <typename RefT>
-class RefCursor : public Cursor {
+// A wrapper for a Cursor that support the standard iterator interface.
+template <typename RefT, typename Derived>
+class BaseIter : public BaseDerived<Derived> {
  public:
-  /*implicit*/ RefCursor(Cursor&& cur) : Cursor(cur) {}
+  using value_type = RefT;
+  using reference_type = const RefT&;
+  using pointer_type = const RefT*;
+  using difference_type = std::ptrdiff_t;
+  using iterator_category = std::forward_iterator_tag;
 
-  RefT next() { return RefT{Cursor::next()}; }
+  BaseIter() noexcept = default;
+  BaseIter(const BaseIter& other) = default;
+  BaseIter(BaseIter&& other) noexcept = default;
+  explicit BaseIter(Cursor cur) : cur_(std::move(cur)), next_(cur_.next()) {}
+  template <typename MutT, typename D>
+  explicit BaseIter(BaseIter<MutT, D>&& other) noexcept
+      : cur_(std::move(other.cur_)), next_(other.next_) {}
+
+  pointer_type operator->() const { return &next_; }
+  reference_type operator*() const { return next_; }
+  Derived& operator++() { return (next_.reset(cur_.next()), derived()); }
+  Derived operator++(int) {
+    Derived result = derived();
+    operator++();
+    return result;
+  }
+
+  Derived& operator=(const BaseIter& other) {
+    cur_ = other.cur_;
+    next_.reset(other.next_);
+    return derived();
+  }
+  Derived& operator=(BaseIter&& other) noexcept {
+    cur_ = std::move(other.cur_);
+    next_.reset(other.next_);
+    return derived();
+  }
+
+ protected:
+  using BaseDerived<Derived>::derived;
+  Cursor cur_;
+  RefT next_;
+
+  ~BaseIter() = default;
+
+ private:
+  template <typename, typename>
+  friend class BaseIter;
+  template <typename, typename>
+  friend class Iter;
+
+  friend bool operator==(const BaseIter& lhs, const BaseIter& rhs) noexcept {
+    return lhs.next_.ptr_ == rhs.next_.ptr_;
+  }
+  friend bool operator!=(const BaseIter& lhs, const BaseIter& rhs) noexcept {
+    return lhs.next_.ptr_ != rhs.next_.ptr_;
+  }
+};
+
+template <typename RefT, typename MutT = RefT>
+class Iter : public BaseIter<RefT, Iter<RefT, MutT>> {
+  using Base = BaseIter<RefT, Iter<RefT, MutT>>;
+
+ public:
+  using Base::Base;
+  using Base::operator=;
+
+  // Implicit conversion from MutT iterator.
+  /*implicit*/ Iter(const Iter<MutT>& other) : Base(other) {}
+  /*implicit*/ Iter(Iter<MutT>&& other) : Base(std::move(other)) {}
+
+ private:
+  friend bool operator==(const Iter& lhs, const Iter<MutT>& rhs) noexcept {
+    return lhs.next_.ptr_ == rhs.next_.ptr_;
+  }
+  friend bool operator==(const Iter<MutT>& lhs, const Iter& rhs) noexcept {
+    return lhs.next_.ptr_ == rhs.next_.ptr_;
+  }
+  friend bool operator!=(const Iter& lhs, const Iter<MutT>& rhs) noexcept {
+    return lhs.next_.ptr_ != rhs.next_.ptr_;
+  }
+  friend bool operator!=(const Iter<MutT>& lhs, const Iter& rhs) noexcept {
+    return lhs.next_.ptr_ != rhs.next_.ptr_;
+  }
+};
+template <typename MutT>
+class Iter<MutT> : public BaseIter<MutT, Iter<MutT>> {
+  using Base = BaseIter<MutT, Iter<MutT>>;
+
+ public:
+  using Base::Base;
+  using Base::operator=;
+};
+
+template <typename ConstT, typename MutT = ConstT>
+class Iterable {
+ public:
+  using iterator = Iter<MutT>;
+  using const_iterator = Iter<ConstT, MutT>;
+  using value_type = ConstT;
+
+  /*implicit*/ Iterable(Cursor cur) : cur_(cur) {}
+
+  iterator begin() const { return iterator(cur_); }
+  const_iterator cbegin() const { return const_iterator(cur_); }
+  iterator end() const { return {}; }
+  const_iterator cend() const { return {}; }
+
+ private:
+  Cursor cur_;
 };
 
 // TODO(afuller): Consider adding asMap(), asList(), etc, to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
-class BaseDyn : private DynCmp<Derived>,
+class BaseDyn : public Dyn,
                 public BaseDerived<Derived>,
-                public Dyn {
+                private DynCmp<Derived> {
   using Base = Dyn;
 
  public:
+  using iterable = Iterable<ConstT, MutT>;
+  using const_iterable = Iterable<ConstT>;
+
   using Base::Base;
   explicit BaseDyn(const Base& other) : Base(other) {}
 
@@ -388,16 +503,16 @@ class BaseDyn : private DynCmp<Derived>,
   size_t size() const { return type_->size(ptr_); }
 
   // Iterate over keys.
-  RefCursor<MutT> keys() & { return Base::keys(); }
-  RefCursor<MutT> keys() && { return Base::keys(false, true); }
-  RefCursor<ConstT> keys() const& { return Base::keys(true); }
-  RefCursor<ConstT> keys() const&& { return Base::keys(true, true); }
+  iterable keys() & { return Base::keys(); }
+  iterable keys() && { return Base::keys(false, true); }
+  const_iterable keys() const& { return Base::keys(true); }
+  const_iterable keys() const&& { return Base::keys(true, true); }
 
   // Iterate over values.
-  RefCursor<MutT> values() & { return Base::values(); }
-  RefCursor<MutT> values() && { return Base::values(false, true); }
-  RefCursor<ConstT> values() const& { return Base::values(true); }
-  RefCursor<ConstT> values() const&& { return Base::values(true, true); }
+  iterable values() & { return Base::values(); }
+  iterable values() && { return Base::values(false, true); }
+  const_iterable values() const& { return Base::values(true); }
+  const_iterable values() const&& { return Base::values(true, true); }
 
  protected:
   using BaseDerived<Derived>::derived;
@@ -470,8 +585,6 @@ class BaseDyn : private DynCmp<Derived>,
   void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
 
  private:
-  friend class BaseDerived<Derived>;
-
   // TODO(afuller): Support capturing string literals directly and remove these.
   friend bool operator==(const std::string& lhs, const Derived& rhs) {
     return asRef<binary_t>(lhs) == rhs;

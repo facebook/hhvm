@@ -29,8 +29,12 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteract
   apache::thrift::detail::si::throw_app_exn_unimplemented("createBadInteraction");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::bar() {
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::sync_bar() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::bar() {
+  return sync_bar();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService>::semifuture_bar() {
@@ -134,8 +138,12 @@ determineInvocationType:
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::foo() {
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::sync_foo() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::foo() {
+  return sync_foo();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::semifuture_foo() {

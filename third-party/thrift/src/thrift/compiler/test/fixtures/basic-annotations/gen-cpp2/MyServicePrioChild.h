@@ -52,7 +52,8 @@ class ServiceHandler<::cpp2::MyServicePrioChild> : virtual public ::cpp2::MyServ
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual void pang();
+  virtual void sync_pang();
+  [[deprecated("Use sync_pang instead")]] virtual void pang();
   virtual folly::Future<folly::Unit> future_pang();
   virtual folly::SemiFuture<folly::Unit> semifuture_pang();
 #if FOLLY_HAS_COROUTINES

@@ -65,28 +65,32 @@ class MyInteractionIf : public apache::thrift::Tile, public apache::thrift::Serv
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
-  virtual ::std::int32_t frobnicate();
+  virtual ::std::int32_t sync_frobnicate();
+  [[deprecated("Use sync_frobnicate instead")]] virtual ::std::int32_t frobnicate();
   virtual folly::SemiFuture<::std::int32_t> semifuture_frobnicate();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<::std::int32_t> co_frobnicate();
   virtual folly::coro::Task<::std::int32_t> co_frobnicate(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_frobnicate(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual void ping();
+  virtual void sync_ping();
+  [[deprecated("Use sync_ping instead")]] virtual void ping();
   virtual folly::SemiFuture<folly::Unit> semifuture_ping();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<void> co_ping();
   virtual folly::coro::Task<void> co_ping(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback);
-  virtual ::apache::thrift::ServerStream<bool> truthify();
+  virtual ::apache::thrift::ServerStream<bool> sync_truthify();
+  [[deprecated("Use sync_truthify instead")]] virtual ::apache::thrift::ServerStream<bool> truthify();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<bool>> semifuture_truthify();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<::apache::thrift::ServerStream<bool>> co_truthify();
   virtual folly::coro::Task<::apache::thrift::ServerStream<bool>> co_truthify(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_truthify(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<bool>>> callback);
-  virtual ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> encode();
+  virtual ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> sync_encode();
+  [[deprecated("Use sync_encode instead")]] virtual ::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> encode();
   virtual folly::SemiFuture<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>> semifuture_encode();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>> co_encode();
@@ -139,7 +143,8 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   CreateMethodMetadataResult createMethodMetadata() override {
     std::terminate();
   }
-  virtual void frobnicate();
+  virtual void sync_frobnicate();
+  [[deprecated("Use sync_frobnicate instead")]] virtual void frobnicate();
   virtual folly::SemiFuture<folly::Unit> semifuture_frobnicate();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<void> co_frobnicate();
@@ -152,7 +157,8 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   virtual std::unique_ptr<MyInteractionIf> createMyInteraction();
   virtual std::unique_ptr<MyInteractionFastIf> createMyInteractionFast();
   virtual std::unique_ptr<SerialInteractionIf> createSerialInteraction();
-  virtual void foo();
+  virtual void sync_foo();
+  [[deprecated("Use sync_foo instead")]] virtual void foo();
   virtual folly::Future<folly::Unit> future_foo();
   virtual folly::SemiFuture<folly::Unit> semifuture_foo();
 #if FOLLY_HAS_COROUTINES
@@ -160,7 +166,8 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   virtual folly::coro::Task<void> co_foo(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_foo(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
-  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> interact(::std::int32_t /*arg*/);
+  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> sync_interact(::std::int32_t /*arg*/);
+  [[deprecated("Use sync_interact instead")]] virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> interact(::std::int32_t /*arg*/);
   virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>> future_interact(::std::int32_t p_arg);
   virtual folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>> semifuture_interact(::std::int32_t p_arg);
 #if FOLLY_HAS_COROUTINES
@@ -168,7 +175,8 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>> co_interact(apache::thrift::RequestParams params, ::std::int32_t p_arg);
 #endif
   virtual void async_tm_interact(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>>> callback, ::std::int32_t p_arg);
-  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> interactFast();
+  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> sync_interactFast();
+  [[deprecated("Use sync_interactFast instead")]] virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> interactFast();
   virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>> future_interactFast();
   virtual folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>> semifuture_interactFast();
 #if FOLLY_HAS_COROUTINES
@@ -176,7 +184,8 @@ class SerialInteractionIf : public apache::thrift::SerialInteractionTile, public
   virtual folly::coro::Task<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>> co_interactFast(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_interactFast(std::unique_ptr<apache::thrift::HandlerCallback<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>>> callback);
-  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> serialize();
+  virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> sync_serialize();
+  [[deprecated("Use sync_serialize instead")]] virtual apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> serialize();
   virtual folly::Future<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> future_serialize();
   virtual folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> semifuture_serialize();
 #if FOLLY_HAS_COROUTINES

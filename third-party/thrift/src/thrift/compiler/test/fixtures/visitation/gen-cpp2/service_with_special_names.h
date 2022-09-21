@@ -49,7 +49,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual ::std::int32_t get();
+  virtual ::std::int32_t sync_get();
+  [[deprecated("Use sync_get instead")]] virtual ::std::int32_t get();
   virtual folly::Future<::std::int32_t> future_get();
   virtual folly::SemiFuture<::std::int32_t> semifuture_get();
 #if FOLLY_HAS_COROUTINES
@@ -57,7 +58,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_get(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_get(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t getter();
+  virtual ::std::int32_t sync_getter();
+  [[deprecated("Use sync_getter instead")]] virtual ::std::int32_t getter();
   virtual folly::Future<::std::int32_t> future_getter();
   virtual folly::SemiFuture<::std::int32_t> semifuture_getter();
 #if FOLLY_HAS_COROUTINES
@@ -65,7 +67,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_getter(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_getter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t lists();
+  virtual ::std::int32_t sync_lists();
+  [[deprecated("Use sync_lists instead")]] virtual ::std::int32_t lists();
   virtual folly::Future<::std::int32_t> future_lists();
   virtual folly::SemiFuture<::std::int32_t> semifuture_lists();
 #if FOLLY_HAS_COROUTINES
@@ -73,7 +76,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_lists(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_lists(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t maps();
+  virtual ::std::int32_t sync_maps();
+  [[deprecated("Use sync_maps instead")]] virtual ::std::int32_t maps();
   virtual folly::Future<::std::int32_t> future_maps();
   virtual folly::SemiFuture<::std::int32_t> semifuture_maps();
 #if FOLLY_HAS_COROUTINES
@@ -81,7 +85,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_maps(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_maps(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t name();
+  virtual ::std::int32_t sync_name();
+  [[deprecated("Use sync_name instead")]] virtual ::std::int32_t name();
   virtual folly::Future<::std::int32_t> future_name();
   virtual folly::SemiFuture<::std::int32_t> semifuture_name();
 #if FOLLY_HAS_COROUTINES
@@ -89,7 +94,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_name(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t name_to_value();
+  virtual ::std::int32_t sync_name_to_value();
+  [[deprecated("Use sync_name_to_value instead")]] virtual ::std::int32_t name_to_value();
   virtual folly::Future<::std::int32_t> future_name_to_value();
   virtual folly::SemiFuture<::std::int32_t> semifuture_name_to_value();
 #if FOLLY_HAS_COROUTINES
@@ -97,7 +103,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_name_to_value(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_name_to_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t names();
+  virtual ::std::int32_t sync_names();
+  [[deprecated("Use sync_names instead")]] virtual ::std::int32_t names();
   virtual folly::Future<::std::int32_t> future_names();
   virtual folly::SemiFuture<::std::int32_t> semifuture_names();
 #if FOLLY_HAS_COROUTINES
@@ -105,7 +112,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_names(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_names(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t prefix_tree();
+  virtual ::std::int32_t sync_prefix_tree();
+  [[deprecated("Use sync_prefix_tree instead")]] virtual ::std::int32_t prefix_tree();
   virtual folly::Future<::std::int32_t> future_prefix_tree();
   virtual folly::SemiFuture<::std::int32_t> semifuture_prefix_tree();
 #if FOLLY_HAS_COROUTINES
@@ -113,7 +121,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_prefix_tree(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_prefix_tree(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t sets();
+  virtual ::std::int32_t sync_sets();
+  [[deprecated("Use sync_sets instead")]] virtual ::std::int32_t sets();
   virtual folly::Future<::std::int32_t> future_sets();
   virtual folly::SemiFuture<::std::int32_t> semifuture_sets();
 #if FOLLY_HAS_COROUTINES
@@ -121,7 +130,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_sets(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_sets(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t setter();
+  virtual ::std::int32_t sync_setter();
+  [[deprecated("Use sync_setter instead")]] virtual ::std::int32_t setter();
   virtual folly::Future<::std::int32_t> future_setter();
   virtual folly::SemiFuture<::std::int32_t> semifuture_setter();
 #if FOLLY_HAS_COROUTINES
@@ -129,7 +139,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_setter(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_setter(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t str();
+  virtual ::std::int32_t sync_str();
+  [[deprecated("Use sync_str instead")]] virtual ::std::int32_t str();
   virtual folly::Future<::std::int32_t> future_str();
   virtual folly::SemiFuture<::std::int32_t> semifuture_str();
 #if FOLLY_HAS_COROUTINES
@@ -137,7 +148,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_str(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_str(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t strings();
+  virtual ::std::int32_t sync_strings();
+  [[deprecated("Use sync_strings instead")]] virtual ::std::int32_t strings();
   virtual folly::Future<::std::int32_t> future_strings();
   virtual folly::SemiFuture<::std::int32_t> semifuture_strings();
 #if FOLLY_HAS_COROUTINES
@@ -145,7 +157,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_strings(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_strings(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t type();
+  virtual ::std::int32_t sync_type();
+  [[deprecated("Use sync_type instead")]] virtual ::std::int32_t type();
   virtual folly::Future<::std::int32_t> future_type();
   virtual folly::SemiFuture<::std::int32_t> semifuture_type();
 #if FOLLY_HAS_COROUTINES
@@ -153,7 +166,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_type(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_type(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t value();
+  virtual ::std::int32_t sync_value();
+  [[deprecated("Use sync_value instead")]] virtual ::std::int32_t value();
   virtual folly::Future<::std::int32_t> future_value();
   virtual folly::SemiFuture<::std::int32_t> semifuture_value();
 #if FOLLY_HAS_COROUTINES
@@ -161,7 +175,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_value(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t value_to_name();
+  virtual ::std::int32_t sync_value_to_name();
+  [[deprecated("Use sync_value_to_name instead")]] virtual ::std::int32_t value_to_name();
   virtual folly::Future<::std::int32_t> future_value_to_name();
   virtual folly::SemiFuture<::std::int32_t> semifuture_value_to_name();
 #if FOLLY_HAS_COROUTINES
@@ -169,7 +184,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_value_to_name(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_value_to_name(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t values();
+  virtual ::std::int32_t sync_values();
+  [[deprecated("Use sync_values instead")]] virtual ::std::int32_t values();
   virtual folly::Future<::std::int32_t> future_values();
   virtual folly::SemiFuture<::std::int32_t> semifuture_values();
 #if FOLLY_HAS_COROUTINES
@@ -177,7 +193,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_values(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_values(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t id();
+  virtual ::std::int32_t sync_id();
+  [[deprecated("Use sync_id instead")]] virtual ::std::int32_t id();
   virtual folly::Future<::std::int32_t> future_id();
   virtual folly::SemiFuture<::std::int32_t> semifuture_id();
 #if FOLLY_HAS_COROUTINES
@@ -185,7 +202,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_id(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_id(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t ids();
+  virtual ::std::int32_t sync_ids();
+  [[deprecated("Use sync_ids instead")]] virtual ::std::int32_t ids();
   virtual folly::Future<::std::int32_t> future_ids();
   virtual folly::SemiFuture<::std::int32_t> semifuture_ids();
 #if FOLLY_HAS_COROUTINES
@@ -193,7 +211,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_ids(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_ids(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t descriptor();
+  virtual ::std::int32_t sync_descriptor();
+  [[deprecated("Use sync_descriptor instead")]] virtual ::std::int32_t descriptor();
   virtual folly::Future<::std::int32_t> future_descriptor();
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptor();
 #if FOLLY_HAS_COROUTINES
@@ -201,7 +220,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_descriptor(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_descriptor(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t descriptors();
+  virtual ::std::int32_t sync_descriptors();
+  [[deprecated("Use sync_descriptors instead")]] virtual ::std::int32_t descriptors();
   virtual folly::Future<::std::int32_t> future_descriptors();
   virtual folly::SemiFuture<::std::int32_t> semifuture_descriptors();
 #if FOLLY_HAS_COROUTINES
@@ -209,7 +229,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_descriptors(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_descriptors(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t key();
+  virtual ::std::int32_t sync_key();
+  [[deprecated("Use sync_key instead")]] virtual ::std::int32_t key();
   virtual folly::Future<::std::int32_t> future_key();
   virtual folly::SemiFuture<::std::int32_t> semifuture_key();
 #if FOLLY_HAS_COROUTINES
@@ -217,7 +238,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_key(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_key(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t keys();
+  virtual ::std::int32_t sync_keys();
+  [[deprecated("Use sync_keys instead")]] virtual ::std::int32_t keys();
   virtual folly::Future<::std::int32_t> future_keys();
   virtual folly::SemiFuture<::std::int32_t> semifuture_keys();
 #if FOLLY_HAS_COROUTINES
@@ -225,7 +247,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_keys(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_keys(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t annotation();
+  virtual ::std::int32_t sync_annotation();
+  [[deprecated("Use sync_annotation instead")]] virtual ::std::int32_t annotation();
   virtual folly::Future<::std::int32_t> future_annotation();
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotation();
 #if FOLLY_HAS_COROUTINES
@@ -233,7 +256,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_annotation(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_annotation(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t annotations();
+  virtual ::std::int32_t sync_annotations();
+  [[deprecated("Use sync_annotations instead")]] virtual ::std::int32_t annotations();
   virtual folly::Future<::std::int32_t> future_annotations();
   virtual folly::SemiFuture<::std::int32_t> semifuture_annotations();
 #if FOLLY_HAS_COROUTINES
@@ -241,7 +265,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_annotations(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_annotations(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t member();
+  virtual ::std::int32_t sync_member();
+  [[deprecated("Use sync_member instead")]] virtual ::std::int32_t member();
   virtual folly::Future<::std::int32_t> future_member();
   virtual folly::SemiFuture<::std::int32_t> semifuture_member();
 #if FOLLY_HAS_COROUTINES
@@ -249,7 +274,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_member(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_member(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t members();
+  virtual ::std::int32_t sync_members();
+  [[deprecated("Use sync_members instead")]] virtual ::std::int32_t members();
   virtual folly::Future<::std::int32_t> future_members();
   virtual folly::SemiFuture<::std::int32_t> semifuture_members();
 #if FOLLY_HAS_COROUTINES
@@ -257,7 +283,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_members(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_members(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t field();
+  virtual ::std::int32_t sync_field();
+  [[deprecated("Use sync_field instead")]] virtual ::std::int32_t field();
   virtual folly::Future<::std::int32_t> future_field();
   virtual folly::SemiFuture<::std::int32_t> semifuture_field();
 #if FOLLY_HAS_COROUTINES
@@ -265,7 +292,8 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names> : 
   virtual folly::coro::Task<::std::int32_t> co_field(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_field(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
-  virtual ::std::int32_t fields();
+  virtual ::std::int32_t sync_fields();
+  [[deprecated("Use sync_fields instead")]] virtual ::std::int32_t fields();
   virtual folly::Future<::std::int32_t> future_fields();
   virtual folly::SemiFuture<::std::int32_t> semifuture_fields();
 #if FOLLY_HAS_COROUTINES

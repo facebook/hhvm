@@ -16,6 +16,9 @@
 
 #include <thrift/lib/cpp2/type/Runtime.h>
 
+#include <any>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <set>
@@ -104,6 +107,22 @@ TEST(RuntimeRefTest, Int) {
   EXPECT_EQ(ref.as<i32_t>(), 0);
   EXPECT_EQ(ref, Ref::to(0));
   EXPECT_EQ(ref, Value::create<i32_t>());
+}
+
+TEST(RuntimeRefTest, InterOp_Int) {
+  int8_t data = 1;
+  auto smallInt = Ref::to(data);
+  auto largeInt = Value::of<i64_t>(2);
+
+  EXPECT_EQ(smallInt, int8_t(1));
+  EXPECT_LT(largeInt, 5L);
+
+  // TODO(afuller): Support interop compare.
+  EXPECT_THROW(smallInt == 1, std::runtime_error);
+  EXPECT_THROW(largeInt == 2, std::runtime_error);
+  // TODO(afuller): Support interop assign.
+  EXPECT_THROW(smallInt = 3, std::bad_any_cast);
+  EXPECT_THROW(largeInt = 4, std::bad_any_cast);
 }
 
 TEST(RuntimeRefTest, List) {
@@ -264,6 +283,12 @@ TEST(RuntimeValueTest, Int) {
   EXPECT_EQ(value.as<i32_t>(), 0);
   value.as<i32_t>() = 2;
   EXPECT_FALSE(value.empty());
+
+  EXPECT_EQ(value.as<i32_t>(), 2);
+  value.assign(3);
+  EXPECT_EQ(value.as<i32_t>(), 3);
+  value = 4;
+  EXPECT_EQ(value.as<i32_t>(), 4);
 }
 
 TEST(RuntimeValueTest, List) {
@@ -326,6 +351,14 @@ TEST(RuntimeValueTest, Float_InterOp) {
       Ref::to<double_t>(std::numeric_limits<double>::infinity()),
       Ref::to<float_t>(-std::numeric_limits<float>::infinity()));
 }
+TEST(RuntimeValueTest, Binary) {
+  std::string data;
+  auto ref = Ref::to<binary_t>(data);
+  ref.assign("hi");
+  EXPECT_EQ(data, "hi");
+  ref = "bye";
+  EXPECT_EQ(data, "bye");
+}
 
 TEST(RuntimeValueTest, StringBinary_InterOp) {
   using STag = type::string_t;
@@ -345,13 +378,13 @@ TEST(RuntimeValueTest, StringBinary_InterOp) {
   EXPECT_NE(binaryHi, stringBye);
   EXPECT_GT(stringHi, binaryBye);
 
-  // TODO(afuller): Support 'assign' op.
-  // binaryHi = stringBye;
+  // TODO(afuller): Support inter-op 'assign' op.
+  EXPECT_THROW(binaryHi = stringBye, std::bad_any_cast);
   // EXPECT_LT(binaryHi, stringHi);
-  // stringHi.assign(binaryBye);
+  EXPECT_THROW(stringHi.assign(binaryBye), std::bad_any_cast);
   // EXPECT_EQ(stringHi.type(), stringBye.type());
   // EXPECT_EQ(binaryHi, stringHi);
-  // stringHi = binaryBye;
+  EXPECT_THROW(stringHi = binaryBye, std::bad_any_cast);
   // EXPECT_NE(stringHi.type(), stringBye.type());
   // EXPECT_EQ(binaryHi, stringHi);
 }

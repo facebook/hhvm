@@ -211,7 +211,7 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
     logOrThrow(object);
 
     if (auto const cls = clsFromCallerSkipBuiltins()) {
-      return Variant{LazyClassData::create(cls->name())};
+      return Variant{cls->name(), Variant::PersistentStrInit{}};
     }
 
     raise_warning("get_class() called without object from outside a class");
@@ -221,7 +221,8 @@ Variant HHVM_FUNCTION(get_class, const Variant& object /* = uninit_variant */) {
     logOrThrow(object);
     return false;
   }
-  return Variant{LazyClassData::create(object.asCObjRef()->getVMClass()->name())};
+  return Variant{object.asCObjRef()->getVMClass()->name(),
+                 Variant::PersistentStrInit{}};
 }
 
 Variant HHVM_FUNCTION(get_parent_class,
@@ -264,7 +265,7 @@ Variant HHVM_FUNCTION(get_parent_class,
 
   if (!cls->parent()) return false;
 
-  return Variant{LazyClassData::create(cls->parentStr().get())};
+  return Variant{cls->parentStr().get(), Variant::PersistentStrInit{}};
 }
 
 static bool is_a_impl(const Variant& class_or_object, const String& class_name,

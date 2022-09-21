@@ -109,31 +109,6 @@ TEST(RuntimeTest, Int) {
   EXPECT_EQ(ref, Value::create<i32_t>());
 }
 
-TEST(RuntimeTest, InterOp_Int) {
-  int8_t data = 1;
-  auto smallInt = Ref::to(data);
-  auto largeInt = Value::of<i64_t>(2);
-
-  EXPECT_EQ(smallInt, int8_t(1));
-  EXPECT_LT(largeInt, 5L);
-
-  EXPECT_EQ(smallInt, 1);
-  EXPECT_EQ(smallInt, 1.0);
-  EXPECT_EQ(largeInt, 2);
-  EXPECT_EQ(largeInt, 2.0f);
-  EXPECT_NE(largeInt, 2.1f);
-  EXPECT_NE(smallInt, 0.9);
-  EXPECT_LT(smallInt, 1.5f);
-  EXPECT_GT(largeInt, 1.5);
-
-  smallInt = 3;
-  EXPECT_EQ(data, 3);
-  smallInt = 500;
-  EXPECT_EQ(data, -12); // TODO(afuller): Clamp or throw.
-  largeInt = 4.5;
-  EXPECT_EQ(largeInt, 4.0);
-}
-
 TEST(RuntimeTest, List) {
   std::vector<std::string> value;
   std::string elem = "hi";
@@ -200,7 +175,7 @@ TEST(RuntimeTest, Map) {
   EXPECT_TRUE(value.empty());
 }
 
-TEST(RuntimeTest, Map_Dyn) {
+TEST(RuntimeTest, DynMap) {
   using Tag = type::map<type::string_t, type::string_t>;
   auto map = Value::create<Tag>();
   map["hi"] = "bye";
@@ -211,9 +186,9 @@ TEST(RuntimeTest, Map_Dyn) {
   EXPECT_THROW(map.get("bye"), std::out_of_range);
 }
 
-TEST(RuntimeTest, Struct_Dyn) {
+TEST(RuntimeTest, DynStruct) {
   using Tag = type::struct_t<type::UriStruct>;
-  auto obj = Value::create<Tag>();
+  auto obj = Value::create<type::UriStruct>();
   obj["scheme"] = "http";
   type::UriStruct& data = obj.as<Tag>();
   EXPECT_EQ(data.scheme(), "http");
@@ -221,7 +196,7 @@ TEST(RuntimeTest, Struct_Dyn) {
   EXPECT_EQ(obj["scheme"], "ftp");
 }
 
-TEST(RuntimeTest, Map_Add) {
+TEST(RuntimeTest, MapAdd) {
   std::map<std::string, int> value;
   auto ref = Ref::to<map<string_t, i32_t>>(value);
 
@@ -269,7 +244,7 @@ TEST(RuntimeTest, Struct) {
   EXPECT_THROW(ref.put("bad", ""), std::out_of_range);
 }
 
-TEST(RuntimeTest, Identical) {
+TEST(RuntimeTest, IdenticalRef) {
   float value = 1.0f;
   auto ref = Ref::to(value);
   EXPECT_FALSE(ref.empty());
@@ -292,7 +267,27 @@ TEST(RuntimeTest, ConstRef) {
   EXPECT_THROW(ref.clear(), std::logic_error);
 }
 
-TEST(RuntimeValueTest, Void) {
+TEST(RuntimeTest, BinaryRef) {
+  std::string data;
+  auto ref = Ref::to<binary_t>(data);
+  ref.assign("hi");
+  EXPECT_EQ(data, "hi");
+  ref = "bye";
+  EXPECT_EQ(data, "bye");
+}
+
+TEST(RuntimeTest, IdenticalValue) {
+  Value value;
+  value = Value::of<float_t>(1.0f);
+  EXPECT_FALSE(value.empty());
+  value.clear();
+  EXPECT_TRUE(value.empty());
+  EXPECT_TRUE(value.identical(0.0f));
+  EXPECT_FALSE(value.identical(-0.0f));
+  EXPECT_FALSE(value.identical(0.0));
+}
+
+TEST(RuntimeTest, VoidValue) {
   Value value;
   EXPECT_EQ(value.type(), Type::get<void_t>());
   EXPECT_TRUE(value.empty());
@@ -303,7 +298,7 @@ TEST(RuntimeValueTest, Void) {
   EXPECT_TRUE(value.tryAs<string_t>() == nullptr);
 }
 
-TEST(RuntimeValueTest, Int) {
+TEST(RuntimeTest, IntValue) {
   Value value = Value::of<i32_t>(1);
   EXPECT_EQ(value.type(), Type::get<i32_t>());
   EXPECT_FALSE(value.empty());
@@ -321,7 +316,7 @@ TEST(RuntimeValueTest, Int) {
   EXPECT_EQ(value.as<i32_t>(), 4);
 }
 
-TEST(RuntimeValueTest, List) {
+TEST(RuntimeTest, ListValue) {
   Value value;
   value = Value::create<list<string_t>>();
   EXPECT_TRUE(value.empty());
@@ -336,18 +331,7 @@ TEST(RuntimeValueTest, List) {
   EXPECT_FALSE(value.empty());
 }
 
-TEST(RuntimeValueTest, Identical) {
-  Value value;
-  value = Value::of<float_t>(1.0f);
-  EXPECT_FALSE(value.empty());
-  value.clear();
-  EXPECT_TRUE(value.empty());
-  EXPECT_TRUE(value.identical(0.0f));
-  EXPECT_FALSE(value.identical(-0.0f));
-  EXPECT_FALSE(value.identical(0.0));
-}
-
-TEST(RuntimeValueTest, CppType_List) {
+TEST(RuntimeTest, ListCppType) {
   using T = std::list<std::string>;
   using Tag = cpp_type<T, type::list<string_t>>;
   auto list = Value::create<Tag>();
@@ -355,7 +339,7 @@ TEST(RuntimeValueTest, CppType_List) {
   EXPECT_EQ(list[0], "foo");
 }
 
-TEST(RuntimeValueTest, CppType_Map) {
+TEST(RuntimeTest, MapCppType) {
   using T = std::unordered_map<std::string, int>;
   using Tag = cpp_type<T, type::map<string_t, i32_t>>;
 
@@ -374,23 +358,40 @@ TEST(RuntimeValueTest, CppType_Map) {
   EXPECT_THROW(map < otherMap, std::logic_error);
 }
 
-TEST(RuntimeValueTest, Float_InterOp) {
+TEST(RuntimeTest, IntInterOp) {
+  int8_t data = 1;
+  auto smallInt = Ref::to(data);
+  auto largeInt = Value::of<i64_t>(2);
+
+  EXPECT_EQ(smallInt, int8_t(1));
+  EXPECT_LT(largeInt, 5L);
+
+  EXPECT_EQ(smallInt, 1);
+  EXPECT_EQ(smallInt, 1.0);
+  EXPECT_EQ(largeInt, 2);
+  EXPECT_EQ(largeInt, 2.0f);
+  EXPECT_NE(largeInt, 2.1f);
+  EXPECT_NE(smallInt, 0.9);
+  EXPECT_LT(smallInt, 1.5f);
+  EXPECT_GT(largeInt, 1.5);
+
+  smallInt = 3;
+  EXPECT_EQ(data, 3);
+  smallInt = 500;
+  EXPECT_EQ(data, -12); // TODO(afuller): Clamp or throw.
+  largeInt = 4.5;
+  EXPECT_EQ(largeInt, 4.0);
+}
+
+TEST(RuntimeTest, FloatInterOp) {
   EXPECT_EQ(Ref::to<double_t>(2.0), Ref::to<float_t>(2.0f));
   EXPECT_LT(Ref::to<float_t>(1.0), Ref::to<double_t>(2.0f));
   EXPECT_GT(
       Ref::to<double_t>(std::numeric_limits<double>::infinity()),
       Ref::to<float_t>(-std::numeric_limits<float>::infinity()));
 }
-TEST(RuntimeValueTest, Binary) {
-  std::string data;
-  auto ref = Ref::to<binary_t>(data);
-  ref.assign("hi");
-  EXPECT_EQ(data, "hi");
-  ref = "bye";
-  EXPECT_EQ(data, "bye");
-}
 
-TEST(RuntimeValueTest, StringBinary_InterOp) {
+TEST(RuntimeTest, StringBinaryInterOp) {
   using STag = type::string_t;
   using BTag = type::cpp_type<folly::IOBuf, type::binary_t>;
 

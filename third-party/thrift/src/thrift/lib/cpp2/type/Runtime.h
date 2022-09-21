@@ -175,8 +175,12 @@ class Value : private detail::DynCmp<Value, ConstRef>,
 
  public:
   template <typename Tag>
-  static Value create() {
+  static if_thrift_type_tag<Tag, Value> create() {
     return Value{Tag{}, nullptr};
+  }
+  template <typename T>
+  static if_not_thrift_type_tag<T, Value> create() {
+    return create<infer_tag<T>>();
   }
   template <typename Tag>
   static Value of(const native_type<Tag>& val) {
@@ -196,6 +200,10 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   template <typename U>
   static Value of(U&& val) {
     return of<infer_tag<U>>(std::forward<U>(val));
+  }
+  template <typename U>
+  static Value of(std::unique_ptr<U> val) {
+    return of<infer_tag<U>>(std::move(val));
   }
 
   Value() noexcept = default; // A void/null value.

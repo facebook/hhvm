@@ -340,12 +340,6 @@ void ThriftServerConfig::setUseClientTimeout(
   useClientTimeout_.set(useClientTimeout, source);
 }
 
-void ThriftServerConfig::setEnableCodel(
-    folly::observer::Observer<std::optional<bool>> enableCodel,
-    AttributeSource source) {
-  enableCodel_.set(enableCodel, source);
-}
-
 void ThriftServerConfig::setTaskExpireTime(
     folly::observer::Observer<std::optional<std::chrono::milliseconds>> timeout,
     AttributeSource source) {

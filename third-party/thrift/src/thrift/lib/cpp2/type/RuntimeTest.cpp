@@ -117,9 +117,13 @@ TEST(RuntimeTest, InterOp_Int) {
   EXPECT_EQ(smallInt, int8_t(1));
   EXPECT_LT(largeInt, 5L);
 
-  // TODO(afuller): Support interop compare.
-  EXPECT_THROW(smallInt == 1, std::runtime_error);
-  EXPECT_THROW(largeInt == 2, std::runtime_error);
+  EXPECT_EQ(smallInt, 1);
+  EXPECT_EQ(smallInt, 1.0);
+  EXPECT_EQ(largeInt, 2);
+  EXPECT_EQ(largeInt, 2.0f);
+  EXPECT_LT(smallInt, 1.5f);
+  EXPECT_GT(largeInt, 1.5);
+
   // TODO(afuller): Support interop assign.
   EXPECT_THROW(smallInt = 3, std::bad_any_cast);
   EXPECT_THROW(largeInt = 4, std::bad_any_cast);

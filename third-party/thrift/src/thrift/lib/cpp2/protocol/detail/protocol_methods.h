@@ -78,6 +78,14 @@
 
 namespace apache {
 namespace thrift {
+
+namespace type {
+namespace detail {
+template <typename, typename>
+class Wrap;
+}
+} // namespace type
+
 namespace detail {
 namespace pm {
 
@@ -664,16 +672,16 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
   using mapped_ttype = protocol_type<MappedClass, mapped_type>;
 
  protected:
-  template <typename Protocol>
-  static void consume_elem(Protocol& protocol, Type& out) {
+  template <typename Protocol, typename U>
+  static void consume_elem(Protocol& protocol, U& out) {
     key_type key_tmp;
     key_methods::read(protocol, key_tmp);
     mapped_methods::read(protocol, out[std::move(key_tmp)]);
   }
 
  public:
-  template <typename Protocol>
-  static void read(Protocol& protocol, Type& out) {
+  template <typename Protocol, typename U>
+  static void read(Protocol& protocol, U& out) {
     std::uint32_t map_size = -1;
     using WireTypeInfo = ProtocolReaderWireTypeInfo<Protocol>;
     using WireType = typename WireTypeInfo::WireType;
@@ -711,13 +719,13 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
     protocol.readMapEnd();
   }
 
-  template <typename Protocol, typename Context>
-  static void readWithContext(Protocol& protocol, Type& out, Context&) {
+  template <typename Protocol, typename Context, typename U>
+  static void readWithContext(Protocol& protocol, U& out, Context&) {
     read(protocol, out);
   }
 
-  template <typename Protocol>
-  static std::size_t write(Protocol& protocol, const Type& out) {
+  template <typename Protocol, typename U>
+  static std::size_t write(Protocol& protocol, const U& out) {
     std::size_t xfer = 0;
 
     xfer += protocol.writeMapBegin(
@@ -727,7 +735,7 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
 
     if (!folly::is_detected_v<detect_key_compare, Type> &&
         protocol.kSortKeys()) {
-      std::vector<typename Type::const_iterator> iters;
+      std::vector<typename U::const_iterator> iters;
       iters.reserve(out.size());
       for (auto it = out.begin(); it != out.end(); ++it) {
         iters.push_back(it);
@@ -755,11 +763,9 @@ struct protocol_methods<type_class::map<KeyClass, MappedClass>, Type> {
     return xfer;
   }
 
-  template <bool ZeroCopy, typename Protocol>
-  static std::size_t serializedSize(Protocol& protocol, const Type& out) {
-    std::size_t xfer = 0;
-
-    xfer += protocol.serializedSizeMapBegin(
+  template <bool ZeroCopy, typename Protocol, typename U>
+  static std::size_t serializedSize(Protocol& protocol, const U& out) {
+    std::size_t xfer = protocol.serializedSizeMapBegin(
         key_ttype::value,
         mapped_ttype::value,
         folly::to_narrow(folly::to_unsigned(out.size())));
@@ -846,24 +852,37 @@ struct protocol_methods<indirection_tag<ElemClass, Indirection>, Type> {
  */
 template <typename Type>
 struct protocol_methods<type_class::structure, Type> {
-  template <typename Protocol>
-  static void read(Protocol& protocol, Type& out) {
-    Cpp2Ops<Type>::read(&protocol, &out);
+  template <typename Tag>
+  using Wrap = type::detail::Wrap<Type, Tag>;
+  static Type& unwrap(Type& inst) { return inst; }
+  static const Type& unwrap(const Type& inst) { return inst; }
+  template <typename Tag>
+  static Type& unwrap(Wrap<Tag>& inst) {
+    return inst.toThrift();
   }
-  template <typename Protocol, typename Context>
-  static void readWithContext(Protocol& protocol, Type& out, Context&) {
+  template <typename Tag>
+  static const Type& unwrap(const Wrap<Tag>& inst) {
+    return inst.toThrift();
+  }
+
+  template <typename Protocol, typename U>
+  static void read(Protocol& protocol, U& out) {
+    Cpp2Ops<Type>::read(&protocol, &unwrap(out));
+  }
+  template <typename Protocol, typename Context, typename U>
+  static void readWithContext(Protocol& protocol, U& out, Context&) {
     read(protocol, out);
   }
-  template <typename Protocol>
-  static std::size_t write(Protocol& protocol, const Type& in) {
-    return Cpp2Ops<Type>::write(&protocol, &in);
+  template <typename Protocol, typename U>
+  static std::size_t write(Protocol& protocol, const U& in) {
+    return Cpp2Ops<Type>::write(&protocol, &unwrap(in));
   }
-  template <bool ZeroCopy, typename Protocol>
-  static std::size_t serializedSize(Protocol& protocol, const Type& in) {
+  template <bool ZeroCopy, typename Protocol, typename U>
+  static std::size_t serializedSize(Protocol& protocol, const U& in) {
     if (ZeroCopy) {
-      return Cpp2Ops<Type>::serializedSizeZC(&protocol, &in);
+      return Cpp2Ops<Type>::serializedSizeZC(&protocol, &unwrap(in));
     } else {
-      return Cpp2Ops<Type>::serializedSize(&protocol, &in);
+      return Cpp2Ops<Type>::serializedSize(&protocol, &unwrap(in));
     }
   }
 };

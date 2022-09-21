@@ -241,3 +241,16 @@ fn good_boxed_tuple_variant() {
     let peach = Fruit::from_ocamlrep(peach);
     assert_eq!(peach, Ok(Fruit::Peach(Box::new((42, true)))));
 }
+
+#[test]
+fn round_trip_through_ocaml_value_unsigned_int() {
+    let num = 7334234036144964024u64;
+    let value = Value::int(num as isize);
+    let num_int: isize = ocamlrep::from::expect_int(value).ok().unwrap();
+    let num_uint: usize =
+        !(1usize << 63) & ocamlrep::from::expect_int(value).ok().unwrap() as usize;
+
+    assert!(num_int < 0);
+    assert_eq!((num_int as u64) & !(1 << 63), num);
+    assert_eq!(num_uint as u64, num);
+}

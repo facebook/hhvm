@@ -40,9 +40,8 @@ public class LazyAnyStandardProtocolTest {
         SerializationProtocol.TCompact,
         SerializationProtocol.TBinary,
         SerializationProtocol.TSimpleJSONBase64,
-        SerializationProtocol.TSimpleJSON
-        /** SerializationProtocol.TJSON * */
-        );
+        SerializationProtocol.TSimpleJSON,
+        SerializationProtocol.TJSON);
   }
 
   private final SerializationProtocol serializationProtocol;

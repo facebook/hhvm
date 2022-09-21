@@ -27,11 +27,13 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
     public MyStructField21Patch(
         @com.facebook.swift.codec.ThriftField(value=1, name="assign", requiredness=Requiredness.OPTIONAL) final List<Short> assign,
         @com.facebook.swift.codec.ThriftField(value=2, name="clear", requiredness=Requiredness.NONE) final boolean clear,
+        @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE) final List<Short> remove,
         @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE) final List<Short> prepend,
         @com.facebook.swift.codec.ThriftField(value=9, name="append", requiredness=Requiredness.NONE) final List<Short> append
     ) {
         this.assign = assign;
         this.clear = clear;
+        this.remove = remove;
         this.prepend = prepend;
         this.append = append;
     }
@@ -40,6 +42,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
     protected MyStructField21Patch() {
       this.assign = null;
       this.clear = false;
+      this.remove = null;
       this.prepend = null;
       this.append = null;
     }
@@ -48,6 +51,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
     
         private List<Short> assign = null;
         private boolean clear = false;
+        private List<Short> remove = null;
         private List<Short> prepend = null;
         private List<Short> append = null;
     
@@ -66,6 +70,14 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         }
     
         public boolean isClear() { return clear; }
+    
+            @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+        public Builder setRemove(List<Short> remove) {
+            this.remove = remove;
+            return this;
+        }
+    
+        public List<Short> getRemove() { return remove; }
     
             @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
         public Builder setPrepend(List<Short> prepend) {
@@ -87,6 +99,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         public Builder(MyStructField21Patch other) {
             this.assign = other.assign;
             this.clear = other.clear;
+            this.remove = other.remove;
             this.prepend = other.prepend;
             this.append = other.append;
         }
@@ -96,13 +109,14 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
             MyStructField21Patch result = new MyStructField21Patch (
                 this.assign,
                 this.clear,
+                this.remove,
                 this.prepend,
                 this.append
             );
             return result;
         }
     }
-                    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
+                        public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStructField21Patch");
@@ -112,6 +126,9 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         private final boolean clear;
     public static final int _CLEAR = 2;
     private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
+        private final List<Short> remove;
+    public static final int _REMOVE = 7;
+    private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
         private final List<Short> prepend;
     public static final int _PREPEND = 8;
     private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
@@ -125,6 +142,9 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
       NAMES_TO_IDS.put("clear", 2);
       THRIFT_NAMES_TO_IDS.put("clear", 2);
       FIELD_METADATA.put(2, CLEAR_FIELD_DESC);
+      NAMES_TO_IDS.put("remove", 7);
+      THRIFT_NAMES_TO_IDS.put("remove", 7);
+      FIELD_METADATA.put(7, REMOVE_FIELD_DESC);
       NAMES_TO_IDS.put("prepend", 8);
       THRIFT_NAMES_TO_IDS.put("prepend", 8);
       FIELD_METADATA.put(8, PREPEND_FIELD_DESC);
@@ -147,6 +167,11 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
     
     
     @Nullable
+    @com.facebook.swift.codec.ThriftField(value=7, name="remove", requiredness=Requiredness.NONE)
+    public List<Short> getRemove() { return remove; }
+    
+    
+    @Nullable
     @com.facebook.swift.codec.ThriftField(value=8, name="prepend", requiredness=Requiredness.NONE)
     public List<Short> getPrepend() { return prepend; }
     
@@ -160,6 +185,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         ToStringHelper helper = toStringHelper(this);
         helper.add("assign", assign);
         helper.add("clear", clear);
+        helper.add("remove", remove);
         helper.add("prepend", prepend);
         helper.add("append", append);
         return helper.toString();
@@ -179,6 +205,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         return
             Objects.equals(assign, other.assign) &&
             Objects.equals(clear, other.clear) &&
+            Objects.equals(remove, other.remove) &&
             Objects.equals(prepend, other.prepend) &&
             Objects.equals(append, other.append) &&
             true;
@@ -189,6 +216,7 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
         return Arrays.deepHashCode(new java.lang.Object[] {
             assign,
             clear,
+            remove,
             prepend,
             append
         });
@@ -229,6 +257,24 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
           if (__field.type == TType.BOOL) {
             boolean clear = oprot.readBool();
             builder.setClear(clear);
+          } else {
+            TProtocolUtil.skip(oprot, __field.type);
+          }
+          break;
+        case _REMOVE:
+          if (__field.type == TType.LIST) {
+            List<Short> remove;
+            {
+            TList _list = oprot.readListBegin();
+            remove = new ArrayList<Short>(Math.max(0, _list.size));
+            for (int _i = 0; (_list.size < 0) ? oprot.peekList() : (_i < _list.size); _i++) {
+                
+                short _value1 = oprot.readI16();
+                remove.add(_value1);
+            }
+            oprot.readListEnd();
+            }
+            builder.setRemove(remove);
           } else {
             TProtocolUtil.skip(oprot, __field.type);
           }
@@ -294,6 +340,16 @@ public final class MyStructField21Patch implements com.facebook.thrift.payload.T
       oprot.writeFieldBegin(CLEAR_FIELD_DESC);
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
+      if (remove != null) {
+        oprot.writeFieldBegin(REMOVE_FIELD_DESC);
+        List<Short> _iter0 = remove;
+        oprot.writeListBegin(new TList(TType.I16, _iter0.size()));
+        for (short _iter1 : _iter0) {
+          oprot.writeI16(_iter1);
+        }
+        oprot.writeListEnd();
+        oprot.writeFieldEnd();
+      }
       if (prepend != null) {
         oprot.writeFieldBegin(PREPEND_FIELD_DESC);
         List<Short> _iter0 = prepend;

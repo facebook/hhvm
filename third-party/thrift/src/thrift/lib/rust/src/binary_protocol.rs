@@ -16,6 +16,8 @@
 
 use std::io::Cursor;
 
+use anyhow::anyhow;
+use anyhow::Result;
 use bufsize::SizeCounter;
 use bytes::Bytes;
 use bytes::BytesMut;
@@ -36,7 +38,6 @@ use crate::serialize::Serialize;
 use crate::thrift_protocol::MessageType;
 use crate::thrift_protocol::ProtocolID;
 use crate::ttype::TType;
-use crate::Result;
 
 pub const BINARY_VERSION_MASK: u32 = 0xffff_0000;
 pub const BINARY_VERSION_1: u32 = 0x8001_0000;
@@ -441,7 +442,8 @@ impl<B: BufExt> ProtocolReader for BinaryProtocolDeserializer<B> {
     fn read_string(&mut self) -> Result<String> {
         let vec = self.read_binary::<Vec<u8>>()?;
 
-        Ok(String::from_utf8(vec)?)
+        String::from_utf8(vec)
+            .map_err(|utf8_error| anyhow!("deserializing `string` from Thrift binary protocol got invalid utf-8, you need to use `binary` instead: {utf8_error}"))
     }
 
     fn read_binary<V: CopyFromBuf>(&mut self) -> Result<V> {

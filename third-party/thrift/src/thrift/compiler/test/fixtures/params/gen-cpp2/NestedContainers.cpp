@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::NestedContainersServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::NestedContainers>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapList");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo) {
+  return sync_mapList(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo) {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapSet");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo) {
+  return sync_mapSet(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo) {
@@ -237,8 +245,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listMap");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo) {
+  return sync_listMap(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo) {
@@ -343,8 +355,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listSet");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo) {
+  return sync_listSet(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo) {
@@ -449,8 +465,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("turtles");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo) {
+  return sync_turtles(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo) {

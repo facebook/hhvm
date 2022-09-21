@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test_cpp2::cpp_reflection::service2ServiceInfoHolder apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodA() {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodA() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodA");
+}
+
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodA() {
+  return sync_methodA();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodA() {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodB");
+}
+
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z) {
+  return sync_methodB(p_x, std::move(p_y), p_z);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z) {
@@ -237,8 +245,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodC() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodC() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodC");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodC() {
+  return sync_methodC();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodC() {
@@ -341,8 +353,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodD");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
+  return sync_methodD(p_i, std::move(p_j), p_k);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
@@ -445,8 +461,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodE");
+}
+
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodE(::test_cpp2::cpp_reflection::struct2& _return) {
+  return sync_methodE(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodE() {
@@ -553,8 +573,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodF(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodF(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodF");
+}
+
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodF(::test_cpp2::cpp_reflection::struct2& _return, ::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n) {
+  return sync_methodF(_return, p_l, std::move(p_m), p_n);
 }
 
 folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodF(::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n) {

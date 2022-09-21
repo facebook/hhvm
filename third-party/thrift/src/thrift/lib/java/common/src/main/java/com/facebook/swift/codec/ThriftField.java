@@ -89,6 +89,12 @@ public @interface ThriftField {
      * this happens). As such, primitive types should be replaced with boxed types, so that null is
      * always a possibility.
      */
-    OPTIONAL
+    OPTIONAL,
+    /**
+     * This behavior indicates that the field will be serialized only when the value is not
+     * intrinsic default. (it is an error if the value is {@code null}). The deserialization
+     * behavior is similar. When no value is read, the field will be set to intrinsic default.
+     */
+    TERSE
   }
 }

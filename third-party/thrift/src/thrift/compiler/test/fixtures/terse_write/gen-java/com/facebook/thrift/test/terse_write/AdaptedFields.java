@@ -25,9 +25,9 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
 
     @ThriftConstructor
     public AdaptedFields(
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE) final int field1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE) final int field2,
-        @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.NONE) final int field3
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE) final int field1,
+        @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE) final int field2,
+        @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE) final int field3
     ) {
         this.field1 = field1;
         this.field2 = field2;
@@ -47,7 +47,7 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
         private int field2 = 0;
         private int field3 = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
         public Builder setField1(int field1) {
             this.field1 = field1;
             return this;
@@ -55,7 +55,7 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
     
         public int getField1() { return field1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
         public Builder setField2(int field2) {
             this.field2 = field2;
             return this;
@@ -63,7 +63,7 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
     
         public int getField2() { return field2; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE)
         public Builder setField3(int field3) {
             this.field3 = field3;
             return this;
@@ -117,17 +117,17 @@ public final class AdaptedFields implements com.facebook.thrift.payload.ThriftSe
     }
     
     
-    @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="field1", requiredness=Requiredness.TERSE)
     public int getField1() { return field1; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="field2", requiredness=Requiredness.TERSE)
     public int getField2() { return field2; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="field3", requiredness=Requiredness.TERSE)
     public int getField3() { return field3; }
     
     @java.lang.Override

@@ -74,7 +74,17 @@ const MAX_BEGINNING_OF_LINE_INCREMENT: u64 = mask(BEGINNING_OF_LINE_INCREMENT_BI
 const MAX_LINE_NUMBER_INCREMENT: u64 = mask(LINE_NUMBER_INCREMENT_BITS);
 const MAX_WIDTH: u64 = mask(WIDTH_BITS);
 
-const DUMMY: u64 = u64::max_value();
+/// We only have 63 bits to work with, since OCaml reserves one bit for the
+/// integer tag. On the OCaml side, the integer tag is the low bit, but when
+/// converting ints from OCaml to Rust, we shift them right one bit, making the
+/// spare bit the high bit. Since OCaml integers are signed, when we convert a
+/// PosSpanTiny value from OCaml, the high bit is filled with a sign bit via the
+/// arithmetic shift in `ocamlrep::ocaml_int_to_isize`. Since this high bit
+/// isn't meaningful, we want to mask it off (to prevent construction of
+/// equivalent values with differing high bits).
+const MASK: u64 = !(1 << 63);
+
+const DUMMY: u64 = MASK;
 
 impl PosSpanTiny {
     #[inline]
@@ -141,7 +151,7 @@ impl PosSpanTiny {
 
     pub fn start_column(self) -> usize {
         if self.is_dummy() {
-            DUMMY as usize
+            usize::MAX
         } else {
             mask_by(
                 START_COLUMN_NUMBER_BITS,
@@ -244,7 +254,7 @@ impl ToOcamlRep for PosSpanTiny {
 
 impl FromOcamlRep for PosSpanTiny {
     fn from_ocamlrep(value: ocamlrep::Value<'_>) -> Result<Self, ocamlrep::FromError> {
-        Ok(Self(ocamlrep::from::expect_int(value)? as u64))
+        Ok(Self(MASK & ocamlrep::from::expect_int(value)? as u64))
     }
 }
 
@@ -414,6 +424,28 @@ mod test {
                 assert_eq!(end, end_);
             }
         }
+    }
+
+    #[test]
+    fn test_round_trip_through_ocaml_value_large_tiny_span() {
+        // This marks a span between columns 6 and 62 of line 49110 (where the
+        // beginning of the line is character 1667611 from the beginning of the
+        // file).
+        let line = 49110usize;
+        let bol = 1667611usize;
+        let start_offset = 1667617usize;
+        let end_offset = 1667673usize;
+        let start = FilePosLarge::from_lnum_bol_offset(line, bol, start_offset);
+        let end = FilePosLarge::from_lnum_bol_offset(line, bol, end_offset);
+        let span = PosSpanTiny::make(&start, &end).unwrap();
+
+        // Though the span fits nicely into 63-bits, the resulting value is > 2^62 -
+        // 1, OCaml's max (signed) int.
+        let alloc = ocamlrep::Arena::new();
+        let value = unsafe { ocamlrep::Arena::make_transparent(span.to_ocamlrep(&alloc)) };
+        let span_read_back = PosSpanTiny::from_ocamlrep(value).ok().unwrap();
+
+        assert_eq!(span, span_read_back);
     }
 }
 

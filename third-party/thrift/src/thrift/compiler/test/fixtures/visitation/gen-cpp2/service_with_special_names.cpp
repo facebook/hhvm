@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test_cpp2::cpp_reflection::service_with_special_namesServiceInfoHolder apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::get() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_get() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::get() {
+  return sync_get();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_get() {
@@ -129,8 +133,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getter() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_getter() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getter");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getter() {
+  return sync_getter();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_getter() {
@@ -233,8 +241,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::lists() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_lists() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("lists");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::lists() {
+  return sync_lists();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_lists() {
@@ -337,8 +349,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::maps() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_maps() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("maps");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::maps() {
+  return sync_maps();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_maps() {
@@ -441,8 +457,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("name");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name() {
+  return sync_name();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_name() {
@@ -545,8 +565,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name_to_value() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name_to_value() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("name_to_value");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name_to_value() {
+  return sync_name_to_value();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_name_to_value() {
@@ -649,8 +673,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::names() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_names() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("names");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::names() {
+  return sync_names();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_names() {
@@ -753,8 +781,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::prefix_tree() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_prefix_tree() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("prefix_tree");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::prefix_tree() {
+  return sync_prefix_tree();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_prefix_tree() {
@@ -857,8 +889,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sets() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_sets() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sets");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sets() {
+  return sync_sets();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_sets() {
@@ -961,8 +997,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::setter() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_setter() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("setter");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::setter() {
+  return sync_setter();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_setter() {
@@ -1065,8 +1105,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::str() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_str() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("str");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::str() {
+  return sync_str();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_str() {
@@ -1169,8 +1213,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::strings() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_strings() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("strings");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::strings() {
+  return sync_strings();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_strings() {
@@ -1273,8 +1321,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::type() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_type() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("type");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::type() {
+  return sync_type();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_type() {
@@ -1377,8 +1429,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("value");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value() {
+  return sync_value();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_value() {
@@ -1481,8 +1537,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value_to_name() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value_to_name() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("value_to_name");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value_to_name() {
+  return sync_value_to_name();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_value_to_name() {
@@ -1585,8 +1645,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::values() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_values() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("values");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::values() {
+  return sync_values();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_values() {
@@ -1689,8 +1753,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::id() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_id() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("id");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::id() {
+  return sync_id();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_id() {
@@ -1793,8 +1861,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::ids() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_ids() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ids");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::ids() {
+  return sync_ids();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_ids() {
@@ -1897,8 +1969,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptor() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptor() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("descriptor");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptor() {
+  return sync_descriptor();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_descriptor() {
@@ -2001,8 +2077,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptors() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptors() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("descriptors");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptors() {
+  return sync_descriptors();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_descriptors() {
@@ -2105,8 +2185,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::key() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_key() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("key");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::key() {
+  return sync_key();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_key() {
@@ -2209,8 +2293,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::keys() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_keys() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("keys");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::keys() {
+  return sync_keys();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_keys() {
@@ -2313,8 +2401,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotation() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotation() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("annotation");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotation() {
+  return sync_annotation();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_annotation() {
@@ -2417,8 +2509,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotations() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotations() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("annotations");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotations() {
+  return sync_annotations();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_annotations() {
@@ -2521,8 +2617,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::member() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_member() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("member");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::member() {
+  return sync_member();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_member() {
@@ -2625,8 +2725,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::members() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_members() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("members");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::members() {
+  return sync_members();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_members() {
@@ -2729,8 +2833,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::field() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_field() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("field");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::field() {
+  return sync_field();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_field() {
@@ -2833,8 +2941,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fields() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_fields() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("fields");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fields() {
+  return sync_fields();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_fields() {

@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyRootServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyRoot>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyRoot>::do_root() {
+void apache::thrift::ServiceHandler<::cpp2::MyRoot>::sync_do_root() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_root");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyRoot>::do_root() {
+  return sync_do_root();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyRoot>::semifuture_do_root() {

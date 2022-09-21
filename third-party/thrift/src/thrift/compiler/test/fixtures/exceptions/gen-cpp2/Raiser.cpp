@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::RaiserServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::Raiser>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::doBland() {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doBland() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("doBland");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::doBland() {
+  return sync_doBland();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_doBland() {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::doRaise() {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doRaise() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("doRaise");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::doRaise() {
+  return sync_doRaise();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_doRaise() {
@@ -237,8 +245,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::get200(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get200(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get200");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::get200(::std::string& _return) {
+  return sync_get200(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_get200() {
@@ -345,8 +357,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::get500(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get500(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get500");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::get500(::std::string& _return) {
+  return sync_get500(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_get500() {

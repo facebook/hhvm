@@ -109,7 +109,7 @@ class Dyn {
 
   // Returns nullptr on mismatch.
   template <typename Tag>
-  const native_type<Tag>* tryAs() const noexcept {
+  FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
 
@@ -146,6 +146,7 @@ class Dyn {
   }
 
   void clear() const { type_.mut().clear(ptr_); }
+  void assign(const Dyn& val) const { type_.mut().assign(ptr_, val); }
   void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
   bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
   bool put(const Dyn& key, const Dyn& val) const {
@@ -209,6 +210,7 @@ class Ptr final : public Dyn {
   // directly.
   using Dyn::add;
   using Dyn::append;
+  using Dyn::assign;
   using Dyn::clear;
   using Dyn::ensure;
   using Dyn::get;
@@ -225,69 +227,6 @@ class Ptr final : public Dyn {
 
 inline Ptr nullPtr() {
   return {};
-}
-
-inline Ptr TypeInfo::get(void* ptr, FieldId id) const {
-  return get_(ptr, id, std::string::npos, nullPtr());
-}
-inline Ptr TypeInfo::get(void* ptr, size_t pos) const {
-  return get_(ptr, {}, pos, nullPtr());
-}
-inline Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
-  return get_(ptr, {}, std::string::npos, val);
-}
-
-inline bool TypeInfo::put(void* ptr, FieldId id, const Dyn& val) const {
-  return put_(ptr, id, nullPtr(), val);
-}
-inline bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
-  return put_(ptr, {}, key, val);
-}
-
-inline Ptr TypeInfo::ensure(void* ptr, FieldId id) const {
-  return ensure(ptr, id, nullPtr());
-}
-inline Ptr TypeInfo::ensure(void* ptr, FieldId id, const Dyn& defVal) const {
-  return ensure_(ptr, id, nullPtr(), defVal);
-}
-inline Ptr TypeInfo::ensure(void* ptr, const Dyn& key) const {
-  return ensure(ptr, key, nullPtr());
-}
-inline Ptr TypeInfo::ensure(
-    void* ptr, const Dyn& key, const Dyn& defVal) const {
-  return ensure_(ptr, {}, key, defVal);
-}
-
-inline Ptr Dyn::ensure(const Dyn& key) const {
-  return type_.mut().ensure(ptr_, key);
-}
-inline Ptr Dyn::ensure(const Dyn& key, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, key, val);
-}
-inline Ptr Dyn::ensure(FieldId id) const {
-  return type_.mut().ensure(ptr_, id);
-}
-inline Ptr Dyn::ensure(FieldId id, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, id, val);
-}
-
-inline Ptr Dyn::get(const Dyn& key) const {
-  return type_->get(ptr_, key);
-}
-inline Ptr Dyn::get(FieldId id) const {
-  return type_->get(ptr_, id);
-}
-inline Ptr Dyn::get(size_t pos) const {
-  return type_->get(ptr_, pos);
-}
-inline Ptr Dyn::get(const Dyn& key, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, key);
-}
-inline Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, id);
-}
-inline Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
 }
 
 // A base struct provides helpers for throwing exceptions and default throwing
@@ -373,25 +312,36 @@ class BaseDyn : public Dyn, protected BaseDerived<Derived> {
   size_t size() const { return type_->size(ptr_); }
 
  protected:
+  using BaseDerived<Derived>::derived;
   template <typename IdT>
   constexpr static bool is_index_type_v =
       std::is_same<IdT, Ordinal>::value || std::is_integral<IdT>::value;
   template <typename IdT, typename R = ConstT>
   using if_not_index = std::enable_if_t<!is_index_type_v<IdT>, R>;
 
+  template <typename Tag = type::string_t>
   static ConstT asRef(const std::string& name) {
-    return ConstT::template to<type::string_t>(name);
+    return ConstT::template to<Tag>(name);
+  }
+
+  // Re-map mut calls from base, without 'const' qualifier.
+
+  void assign(ConstT val) { Base::assign(val); }
+  void assign(const std::string& val) { assign(asRef<binary_t>(val)); }
+  Derived& operator=(ConstT val) & { return (assign(val), derived()); }
+  Derived&& operator=(ConstT val) && { return (assign(val), derived()); }
+  Derived& operator=(const std::string& val) & {
+    return (assign(val), derived());
+  }
+  Derived&& operator=(const std::string& val) && {
+    return (assign(val), derived());
   }
 
   void append(ConstT val) { Base::append(val); }
-  void append(const std::string& val) {
-    append(ConstT::template to<binary_t>(val));
-  }
+  void append(const std::string& val) { append(asRef<binary_t>(val)); }
 
   bool add(ConstT val) { return Base::add(val); }
-  bool add(const std::string& val) {
-    return add(ConstT::template to<binary_t>(val));
-  }
+  bool add(const std::string& val) { return add(asRef<binary_t>(val)); }
 
   bool put(FieldId id, ConstT val) { return Base::put(id, val); }
   bool put(ConstT key, ConstT val) { return Base::put(key, val); }
@@ -430,6 +380,8 @@ class BaseDyn : public Dyn, protected BaseDerived<Derived> {
   void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
 
  private:
+  friend class BaseDerived<Derived>;
+
   friend bool operator==(const Derived& lhs, const Derived& rhs) {
     return lhs.equal(rhs);
   }
@@ -477,6 +429,9 @@ class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
   static Derived to(T&& val) {
     return to<type::infer_tag<T>>(std::forward<T>(val));
   }
+
+ protected:
+  using Base::operator=;
 };
 
 // The ops for the empty type 'void'.
@@ -489,10 +444,11 @@ struct VoidErasedOp : BaseErasedOp {
   static bool empty(const void*) { return true; }
   static bool identical(const void*, const Dyn&) { return true; }
   static partial_ordering compare(const void*, const Dyn& rhs) {
-    check_op(rhs.type().empty());
+    check_op(!rhs.has_value());
     return partial_ordering::eq;
   }
   static void clear(void*) {}
+  static void assign(void*, const Dyn& val) { check_op(!val.has_value()); }
 };
 
 inline const TypeInfo& voidTypeInfo() {

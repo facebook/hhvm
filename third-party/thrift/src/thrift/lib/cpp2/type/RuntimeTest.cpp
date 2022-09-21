@@ -187,10 +187,9 @@ TEST(RuntimeTest, DynMap) {
 }
 
 TEST(RuntimeTest, DynStruct) {
-  using Tag = type::struct_t<type::UriStruct>;
-  auto obj = Value::create<type::UriStruct>();
+  Value obj = Value::create<type::UriStruct>();
   obj["scheme"] = "http";
-  type::UriStruct& data = obj.as<Tag>();
+  type::UriStruct& data = obj.as<type::UriStruct>();
   EXPECT_EQ(data.scheme(), "http");
   data.scheme() = "ftp";
   EXPECT_EQ(obj["scheme"], "ftp");

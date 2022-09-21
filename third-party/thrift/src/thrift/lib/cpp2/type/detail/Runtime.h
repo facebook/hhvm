@@ -107,12 +107,20 @@ class Dyn {
     // TODO(afuller): Check thrift types match.
     return type_->as<native_type<Tag>>(ptr_);
   }
+  template <typename T>
+  if_not_thrift_type_tag<T, const T&> as() const {
+    return as<infer_tag<T>>();
+  }
 
   // Returns nullptr on mismatch.
   template <typename Tag>
   FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
     // TODO(afuller): Check thrift types match.
     return type_->tryAs<native_type<Tag>>(ptr_);
+  }
+  template <typename T>
+  if_not_thrift_type_tag<T, const T*> tryAs() const {
+    return tryAs<infer_tag<T>>();
   }
 
   FOLLY_NODISCARD bool empty() const { return type_->empty(ptr_); }

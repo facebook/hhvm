@@ -367,6 +367,13 @@ let () =
     in
     let all_matched =
       let files = List.map files ~f:fst in
+      let () =
+        List.iter files ~f:(fun filename ->
+            let _ =
+              Direct_decl_utils.direct_decl_parse_and_cache ctx filename
+            in
+            ())
+      in
       (* Compute OCaml folded decls *)
       List.iter files ~f:(fun filename ->
           Errors.run_in_context filename Errors.Decl (fun () ->

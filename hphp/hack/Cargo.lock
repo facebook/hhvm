@@ -1823,12 +1823,12 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.8.0"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "282a6247722caba404c065016bbfa522806e51714c34f5dfc3e4a3a46fcb4223"
+checksum = "10a35a97730320ffe8e2d410b5d3b69279b98d2c14bdb8b70ea89ecf7888d41e"
 dependencies = [
  "autocfg",
- "hashbrown 0.11.2",
+ "hashbrown 0.12.3",
  "rayon",
  "serde",
 ]
@@ -2398,7 +2398,6 @@ name = "ocamlrep_marshal"
 version = "0.0.0"
 dependencies = [
  "bitflags",
- "libc",
  "ocamlrep",
  "ocamlrep_derive",
 ]

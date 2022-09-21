@@ -480,8 +480,9 @@ t_struct& patch_generator::gen_patch(
   const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {
     // TODO(afuller): support 'replace' op.
-    auto elem_patch_type = find_patch_type(annot, orig, list->elem_type());
-    gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    // TODO(afuller): Fix py3 issues and re-enable
+    // auto elem_patch_type = find_patch_type(annot, orig, list->elem_type());
+    // gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
     // TODO(afuller): Support sets for all types in all languages, and switch
     // this to a set instead of a list.
     gen.remove(inst_list(list->elem_type()));

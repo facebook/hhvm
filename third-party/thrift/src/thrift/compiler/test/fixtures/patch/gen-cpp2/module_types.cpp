@@ -1924,7 +1924,6 @@ MyStructField21PatchStruct::~MyStructField21PatchStruct() {}
 MyStructField21PatchStruct::MyStructField21PatchStruct(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct&& other) noexcept :
     __fbthrift_field_assign(std::move(other.__fbthrift_field_assign)),
     __fbthrift_field_clear(std::move(other.__fbthrift_field_clear)),
-    __fbthrift_field_patch(std::move(other.__fbthrift_field_patch)),
     __fbthrift_field_remove(std::move(other.__fbthrift_field_remove)),
     __fbthrift_field_prepend(std::move(other.__fbthrift_field_prepend)),
     __fbthrift_field_append(std::move(other.__fbthrift_field_append)),
@@ -1934,7 +1933,6 @@ MyStructField21PatchStruct::MyStructField21PatchStruct(FOLLY_MAYBE_UNUSED MyStru
 MyStructField21PatchStruct& MyStructField21PatchStruct::operator=(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct&& other) noexcept {
     this->__fbthrift_field_assign = std::move(other.__fbthrift_field_assign);
     this->__fbthrift_field_clear = std::move(other.__fbthrift_field_clear);
-    this->__fbthrift_field_patch = std::move(other.__fbthrift_field_patch);
     this->__fbthrift_field_remove = std::move(other.__fbthrift_field_remove);
     this->__fbthrift_field_prepend = std::move(other.__fbthrift_field_prepend);
     this->__fbthrift_field_append = std::move(other.__fbthrift_field_append);
@@ -1943,10 +1941,9 @@ MyStructField21PatchStruct& MyStructField21PatchStruct::operator=(FOLLY_MAYBE_UN
 }
 
 
-MyStructField21PatchStruct::MyStructField21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch> patch__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg) :
+MyStructField21PatchStruct::MyStructField21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg) :
     __fbthrift_field_assign(std::move(assign__arg)),
     __fbthrift_field_clear(std::move(clear__arg)),
-    __fbthrift_field_patch(std::move(patch__arg)),
     __fbthrift_field_remove(std::move(remove__arg)),
     __fbthrift_field_prepend(std::move(prepend__arg)),
     __fbthrift_field_append(std::move(append__arg)) {
@@ -1955,7 +1952,6 @@ MyStructField21PatchStruct::MyStructField21PatchStruct(apache::thrift::FragileCo
   __isset.set(folly::index_constant<2>(), true);
   __isset.set(folly::index_constant<3>(), true);
   __isset.set(folly::index_constant<4>(), true);
-  __isset.set(folly::index_constant<5>(), true);
 }
 
 
@@ -1963,7 +1959,6 @@ void MyStructField21PatchStruct::__fbthrift_clear() {
   // clear all fields
   this->__fbthrift_field_assign.clear();
   this->__fbthrift_field_clear = bool();
-  this->__fbthrift_field_patch.clear();
   this->__fbthrift_field_remove.clear();
   this->__fbthrift_field_prepend.clear();
   this->__fbthrift_field_append.clear();
@@ -1985,9 +1980,6 @@ bool MyStructField21PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
   if (!(lhs.clear_ref() == rhs.clear_ref())) {
     return false;
   }
-  if (!(lhs.patch_ref() == rhs.patch_ref())) {
-    return false;
-  }
   if (!(lhs.remove_ref() == rhs.remove_ref())) {
     return false;
   }
@@ -2000,20 +1992,32 @@ bool MyStructField21PatchStruct::operator==(FOLLY_MAYBE_UNUSED const MyStructFie
   return true;
 }
 
+bool MyStructField21PatchStruct::operator<(FOLLY_MAYBE_UNUSED const MyStructField21PatchStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.assign_ref() == rhs.assign_ref())) {
+    return lhs.assign_ref() < rhs.assign_ref();
+  }
+  if (!(lhs.clear_ref() == rhs.clear_ref())) {
+    return lhs.clear_ref() < rhs.clear_ref();
+  }
+  if (!(lhs.remove_ref() == rhs.remove_ref())) {
+    return lhs.remove_ref() < rhs.remove_ref();
+  }
+  if (!(lhs.prepend_ref() == rhs.prepend_ref())) {
+    return lhs.prepend_ref() < rhs.prepend_ref();
+  }
+  if (!(lhs.append_ref() == rhs.append_ref())) {
+    return lhs.append_ref() < rhs.append_ref();
+  }
+  return false;
+}
+
 const ::std::vector<::std::int16_t>* MyStructField21PatchStruct::get_assign() const& {
   return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
 }
 
 ::std::vector<::std::int16_t>* MyStructField21PatchStruct::get_assign() & {
   return assign_ref().has_value() ? std::addressof(__fbthrift_field_assign) : nullptr;
-}
-
-const ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>& MyStructField21PatchStruct::get_patch() const& {
-  return __fbthrift_field_patch;
-}
-
-::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch> MyStructField21PatchStruct::get_patch() && {
-  return std::move(__fbthrift_field_patch);
 }
 
 const ::std::vector<::std::int16_t>& MyStructField21PatchStruct::get_remove() const& {
@@ -2045,7 +2049,6 @@ void swap(FOLLY_MAYBE_UNUSED MyStructField21PatchStruct& a, FOLLY_MAYBE_UNUSED M
   using ::std::swap;
   swap(a.__fbthrift_field_assign, b.__fbthrift_field_assign);
   swap(a.__fbthrift_field_clear, b.__fbthrift_field_clear);
-  swap(a.__fbthrift_field_patch, b.__fbthrift_field_patch);
   swap(a.__fbthrift_field_remove, b.__fbthrift_field_remove);
   swap(a.__fbthrift_field_prepend, b.__fbthrift_field_prepend);
   swap(a.__fbthrift_field_append, b.__fbthrift_field_append);
@@ -2061,12 +2064,6 @@ template uint32_t MyStructField21PatchStruct::write<>(apache::thrift::CompactPro
 template uint32_t MyStructField21PatchStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t MyStructField21PatchStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyStructField21PatchStruct,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::structure>,
-        ::std::unordered_map<::std::int32_t, ::apache::thrift::op::I16Patch>>,
-    "inconsistent use of json option");
 
 }}} // test::fixtures::patch
 

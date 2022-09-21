@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ use interface::TestEnum;
 use interface::TestEnumEmpty;
 use interface::TestSkipV1;
 use interface::TestSkipV2;
+use interface::WrapBinary;
+use interface::WrapString;
 use smallvec::SmallVec;
 
 #[test]
@@ -163,4 +165,28 @@ fn test_bytes_shared() {
     let mut deserializer2 = <CompactProtocol>::deserializer(Cursor::new(bytes));
     let shared2: TestBytesShared = Deserialize::read(&mut deserializer2).unwrap();
     assert_eq!(shared1.b.as_ptr() as usize, shared2.b.as_ptr() as usize);
+}
+
+#[test]
+fn test_nonutf8_string() {
+    // Serializing `binary` and deserializing to `string` is okay, as long as
+    // the data is valid UTF-8. Thrift intentionally uses the same on-wire
+    // format for these two types.
+    let data = b"...".to_vec();
+    let value = WrapBinary { data };
+    let repr = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
+    let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(repr));
+    let value2 = WrapString::read(&mut deserializer).unwrap();
+    assert_eq!("...", value2.data);
+
+    // Same thing with non-UTF-8 data is not okay. It happens to work in C++
+    // because their only string type holds arbitrary bytes, but not Rust or
+    // other languages which enforce a string encoding.
+    let data = b"..\xff".to_vec();
+    let value = WrapBinary { data };
+    let repr = serialize!(CompactProtocol, |w| Serialize::write(&value, w));
+    let mut deserializer = <CompactProtocol>::deserializer(Cursor::new(repr));
+    let error = WrapString::read(&mut deserializer).unwrap_err();
+    let expected = "invalid utf-8 sequence of 1 bytes from index 2";
+    assert_eq!(expected, error.to_string());
 }

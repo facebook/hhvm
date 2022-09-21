@@ -69,6 +69,35 @@ struct NumberOp : BaseOp<Tag> {
         bad_op();
     }
   }
+
+  // TODO(afuller): Detect and 'handle' bad conversions.
+  static void assign(void* lhs, const Dyn& rhs) {
+    switch (rhs.type().baseType()) {
+      case type::BaseType::Bool:
+        ref(lhs) = static_cast<T>(rhs.as<type::bool_t>());
+        return;
+      case type::BaseType::Byte:
+        ref(lhs) = static_cast<T>(rhs.as<type::byte_t>());
+        return;
+      case type::BaseType::I16:
+        ref(lhs) = static_cast<T>(rhs.as<type::i16_t>());
+        return;
+      case type::BaseType::I32:
+        ref(lhs) = static_cast<T>(rhs.as<type::i32_t>());
+        return;
+      case type::BaseType::I64:
+        ref(lhs) = static_cast<T>(rhs.as<type::i64_t>());
+        return;
+      case type::BaseType::Float:
+        ref(lhs) = static_cast<T>(rhs.as<type::float_t>());
+        return;
+      case type::BaseType::Double:
+        ref(lhs) = static_cast<T>(rhs.as<type::double_t>());
+        return;
+      default:
+        bad_op();
+    }
+  }
 };
 
 template <>

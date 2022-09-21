@@ -121,12 +121,17 @@ TEST(RuntimeTest, InterOp_Int) {
   EXPECT_EQ(smallInt, 1.0);
   EXPECT_EQ(largeInt, 2);
   EXPECT_EQ(largeInt, 2.0f);
+  EXPECT_NE(largeInt, 2.1f);
+  EXPECT_NE(smallInt, 0.9);
   EXPECT_LT(smallInt, 1.5f);
   EXPECT_GT(largeInt, 1.5);
 
-  // TODO(afuller): Support interop assign.
-  EXPECT_THROW(smallInt = 3, std::bad_any_cast);
-  EXPECT_THROW(largeInt = 4, std::bad_any_cast);
+  smallInt = 3;
+  EXPECT_EQ(data, 3);
+  smallInt = 500;
+  EXPECT_EQ(data, -12); // TODO(afuller): Clamp or throw.
+  largeInt = 4.5;
+  EXPECT_EQ(largeInt, 4.0);
 }
 
 TEST(RuntimeTest, List) {

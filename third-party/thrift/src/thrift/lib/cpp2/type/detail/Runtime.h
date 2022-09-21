@@ -104,12 +104,14 @@ class Dyn {
   // Throws on mismatch.
   template <typename Tag>
   const native_type<Tag>& as() const {
+    // TODO(afuller): Check thrift types match.
     return type_->as<native_type<Tag>>(ptr_);
   }
 
   // Returns nullptr on mismatch.
   template <typename Tag>
   FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
+    // TODO(afuller): Check thrift types match.
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
 

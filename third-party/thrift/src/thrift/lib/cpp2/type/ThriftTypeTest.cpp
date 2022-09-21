@@ -149,10 +149,10 @@ static_assert(is_thrift_type_tag_v<adapted<int, void_t>>);
 static_assert(is_thrift_type_tag_v<list<adapted<int, void_t>>>);
 
 static_assert(
-    !is_thrift_type_tag_v<field<adapted<int, int>, FieldContext<void, 0>>>);
+    is_thrift_type_tag_v<field<adapted<int, int>, FieldContext<void, 0>>>);
 static_assert(
-    !is_thrift_type_tag_v<field<adapted<int, void_t>, FieldContext<void, 0>>>);
-static_assert(!is_thrift_type_tag_v<
+    is_thrift_type_tag_v<field<adapted<int, void_t>, FieldContext<void, 0>>>);
+static_assert(is_thrift_type_tag_v<
               field<list<adapted<int, void_t>>, FieldContext<void, 0>>>);
 
 static_assert(!is_thrift_type_tag_v<cpp_type<int, int>>);

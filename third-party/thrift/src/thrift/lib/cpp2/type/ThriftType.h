@@ -101,7 +101,9 @@ constexpr bool is_a_v =
 template <typename Tag, typename R = void, typename...>
 using if_concrete = std::enable_if_t<is_concrete_v<Tag>, R>;
 template <typename Tag, typename R = void, typename...>
-using if_not_concrete = std::enable_if_t<is_abstract_v<Tag>, R>;
+using if_abstract = std::enable_if_t<is_abstract_v<Tag>, R>;
+template <typename Tag, typename R = void, typename...>
+using if_not_concrete = if_abstract<Tag, R>;
 template <typename CTag, typename Tag, typename R = void, typename...>
 using if_is_a = std::enable_if_t<is_a_v<CTag, Tag>, R>;
 template <typename Tag, typename R = void, typename...>
@@ -240,9 +242,8 @@ template <typename T, typename Tag>
 struct is_thrift_type_tag<cpp_type<T, Tag>>
     : folly::bool_constant<is_thrift_type_tag_v<Tag>> {};
 
-// field tag is not thrift type tag.
 template <typename Tag, typename Context>
-struct is_thrift_type_tag<field<Tag, Context>> : folly::bool_constant<false> {};
+struct is_thrift_type_tag<field<Tag, Context>> : std::true_type {};
 
 template <typename V1, typename V2>
 FOLLY_INLINE_VARIABLE constexpr bool is_a_v<list<V1>, list<V2>> =

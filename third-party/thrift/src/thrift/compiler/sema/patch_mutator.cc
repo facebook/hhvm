@@ -76,6 +76,28 @@ t_field& box(t_field& node) {
   return node;
 }
 
+// A fluent function to set the cpp.template string on a given node.
+template <typename N>
+std::unique_ptr<N> cpp_template(
+    const std::string& cls, std::unique_ptr<N> node) {
+  node->set_annotation("cpp.template", cls);
+  return std::move(node);
+}
+template <typename N>
+std::unique_ptr<N> rust_type(const std::string& cls, std::unique_ptr<N> node) {
+  node->set_annotation("rust.type", cls);
+  return std::move(node);
+}
+
+inline std::unique_ptr<t_set> unordered(std::unique_ptr<t_set> node) {
+  return cpp_template(
+      "::std::unordered_set", rust_type("HashSet", std::move(node)));
+}
+inline std::unique_ptr<t_map> unordered(std::unique_ptr<t_map> node) {
+  return cpp_template(
+      "::std::unordered_map", rust_type("HashMap", std::move(node)));
+}
+
 // Helper for generating a struct.
 struct StructGen {
   // The annotation we are generating for.
@@ -473,7 +495,6 @@ t_struct& patch_generator::gen_patch(
     gen.addSet(type);
     gen.set_adapter("SetPatchAdapter", program_);
   } else if (auto* map = dynamic_cast<const t_map*>(ttype)) {
-    // TODO(afuller): support 'remove' op.
     // TODO(afuller): support 'removeIf' op.
     // TODO(afuller): support 'replace' op.
     // TODO(afuller): support 'patch' op once map values can be adapted.
@@ -481,6 +502,7 @@ t_struct& patch_generator::gen_patch(
     // gen.patchPrior(inst_map(map->key_type(), val_patch_type));
     gen.addMap(type);
     // gen.patchAfter(inst_map(map->key_type(), val_patch_type));
+    gen.remove(inst_set(map->key_type()));
     gen.put(type);
     gen.set_adapter("MapPatchAdapter", program_);
   } else {
@@ -495,11 +517,13 @@ t_type_ref patch_generator::inst_list(t_type_ref val) {
 }
 t_type_ref patch_generator::inst_set(t_type_ref key) {
   // TODO(afuller): Consider caching.
-  return program_.add_type_instantiation(std::make_unique<t_set>(key));
+  return program_.add_type_instantiation(
+      unordered(std::make_unique<t_set>(key)));
 }
 t_type_ref patch_generator::inst_map(t_type_ref key, t_type_ref val) {
   // TODO(afuller): Consider caching.
-  return program_.add_type_instantiation(std::make_unique<t_map>(key, val));
+  return program_.add_type_instantiation(
+      unordered(std::make_unique<t_map>(key, val)));
 }
 
 } // namespace compiler

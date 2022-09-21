@@ -164,7 +164,8 @@ struct ForEachField<::test::fixtures::patch::MyStructField23PatchStruct> {
     f(0, static_cast<T&&>(t).assign_ref()...);
     f(1, static_cast<T&&>(t).clear_ref()...);
     f(2, static_cast<T&&>(t).add_ref()...);
-    f(3, static_cast<T&&>(t).put_ref()...);
+    f(3, static_cast<T&&>(t).remove_ref()...);
+    f(4, static_cast<T&&>(t).put_ref()...);
   }
 };
 

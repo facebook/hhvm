@@ -242,6 +242,8 @@ pub struct MyStructField23Patch {
     pub clear: ::std::primitive::bool,
     #[doc = "Add the given values, if the keys are not already present. Applies forth."]
     pub add: ::std::collections::BTreeMap<::std::string::String, ::std::string::String>,
+    #[doc = "Removes entries, if present. Applies third."]
+    pub remove: ::fbthrift::builtin_types::HashSet<::std::string::String>,
     #[doc = "Adds or replaces the given key/value pairs. Applies fifth."]
     pub put: ::std::collections::BTreeMap<::std::string::String, ::std::string::String>,
     // This field forces `..Default::default()` when instantiating this
@@ -1916,6 +1918,7 @@ impl ::std::default::Default for self::MyStructField23Patch {
             assign: ::std::option::Option::None,
             clear: ::std::default::Default::default(),
             add: ::std::default::Default::default(),
+            remove: ::std::default::Default::default(),
             put: ::std::default::Default::default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         }
@@ -1929,6 +1932,7 @@ impl ::std::fmt::Debug for self::MyStructField23Patch {
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("add", &self.add)
+            .field("remove", &self.remove)
             .field("put", &self.put)
             .finish()
     }
@@ -1964,6 +1968,9 @@ where
         p.write_field_begin("add", ::fbthrift::TType::Map, 5);
         ::fbthrift::Serialize::write(&self.add, p);
         p.write_field_end();
+        p.write_field_begin("remove", ::fbthrift::TType::Set, 7);
+        ::fbthrift::Serialize::write(&self.remove, p);
+        p.write_field_end();
         p.write_field_begin("put", ::fbthrift::TType::Map, 9);
         ::fbthrift::Serialize::write(&self.put, p);
         p.write_field_end();
@@ -1982,10 +1989,12 @@ where
             ::fbthrift::Field::new("assign", ::fbthrift::TType::Map, 1),
             ::fbthrift::Field::new("clear", ::fbthrift::TType::Bool, 2),
             ::fbthrift::Field::new("put", ::fbthrift::TType::Map, 9),
+            ::fbthrift::Field::new("remove", ::fbthrift::TType::Set, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
         let mut field_add = ::std::option::Option::None;
+        let mut field_remove = ::std::option::Option::None;
         let mut field_put = ::std::option::Option::None;
         let _ = p.read_struct_begin(|_| ())?;
         loop {
@@ -1995,6 +2004,7 @@ where
                 (::fbthrift::TType::Map, 1) => field_assign = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Bool, 2) => field_clear = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 5) => field_add = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Map, 9) => field_put = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
@@ -2005,6 +2015,7 @@ where
             assign: field_assign,
             clear: field_clear.unwrap_or_default(),
             add: field_add.unwrap_or_default(),
+            remove: field_remove.unwrap_or_default(),
             put: field_put.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })

@@ -918,6 +918,17 @@
   "value_type" : "string"
 }
           },
+          "remove" : {
+            "name" : "remove",
+            "docstring" : "Removes entries, if present. Applies third.\n",
+            "key" : 7,
+            "lineno" : 21,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "set",
+  "inner_type" : "string"
+}
+          },
           "put" : {
             "name" : "put",
             "docstring" : "Adds or replaces the given key/value pairs. Applies fifth.\n",

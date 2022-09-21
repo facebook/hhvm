@@ -1541,6 +1541,21 @@
             }
           }
         },
+        "remove" : {
+          "type_enum" : "SET",
+          "spec_args" : { "type_enum" : "STRING", "spec_args" : null} ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 21,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 21,
+              "column" : 21
+            }
+          }
+        },
         "put" : {
           "type_enum" : "MAP",
           "spec_args" : { "key_type" : { "type_enum" : "STRING", "spec_args" : null }, "val_type" : { "type_enum" : "STRING", "spec_args" : null} } ,

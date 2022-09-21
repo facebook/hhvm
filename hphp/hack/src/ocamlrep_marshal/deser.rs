@@ -10,7 +10,6 @@
 use libc::c_double;
 use libc::c_int;
 use libc::c_long;
-use libc::c_schar;
 use libc::c_short;
 use libc::c_uchar;
 use libc::c_uint;
@@ -31,11 +30,6 @@ pub type __uint64_t = c_ulong;
 pub type __off_t = c_long;
 pub type __off64_t = c_long;
 
-pub type int16_t = __int16_t;
-pub type int32_t = __int32_t;
-pub type uint16_t = __uint16_t;
-pub type uint32_t = __uint32_t;
-
 type value = usize;
 type header_t = usize;
 type tag_t = c_uint;
@@ -43,7 +37,7 @@ type tag_t = c_uint;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct marshal_header {
-    pub magic: uint32_t,
+    pub magic: u32,
     pub header_len: c_int,
     pub data_len: usize,
     pub num_objects: usize,
@@ -121,35 +115,35 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     #[inline]
-    unsafe fn read8s(&mut self) -> c_schar {
+    unsafe fn read8s(&mut self) -> i8 {
         let res = i8::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(1);
         res
     }
 
     #[inline]
-    unsafe fn read16u(&mut self) -> uint16_t {
+    unsafe fn read16u(&mut self) -> u16 {
         let res = u16::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(2);
         res
     }
 
     #[inline]
-    unsafe fn read16s(&mut self) -> int16_t {
+    unsafe fn read16s(&mut self) -> i16 {
         let res = i16::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(2);
         res
     }
 
     #[inline]
-    unsafe fn read32u(&mut self) -> uint32_t {
+    unsafe fn read32u(&mut self) -> u32 {
         let res = u32::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(4);
         res
     }
 
     #[inline]
-    unsafe fn read32s(&mut self) -> int32_t {
+    unsafe fn read32s(&mut self) -> i32 {
         let res = i32::from_be_bytes(*(self.intern_src as *const _));
         self.intern_src = self.intern_src.offset(4);
         res

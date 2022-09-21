@@ -486,7 +486,7 @@ int main() {
 
   if(NOT "${NOT_REQUIRE_ATOMIC_LINKER_FLAG}")
       message(STATUS "-latomic is required to link hhvm")
-      find_library(ATOMIC_LIBRARY NAMES atomic)
+      find_library(ATOMIC_LIBRARY NAMES atomic libatomic.so.1)
       if (ATOMIC_LIBRARY STREQUAL "ATOMIC_LIBRARY-NOTFOUND")
         # -latomic should be available for gcc even when libatomic.so.1 is not
         # in the library search path

@@ -109,7 +109,7 @@ class Dyn {
 
   // Returns nullptr on mismatch.
   template <typename Tag>
-  const native_type<Tag>* tryAs() const noexcept {
+  FOLLY_NODISCARD const native_type<Tag>* tryAs() const noexcept {
     return type_->tryAs<native_type<Tag>>(ptr_);
   }
 
@@ -227,69 +227,6 @@ class Ptr final : public Dyn {
 
 inline Ptr nullPtr() {
   return {};
-}
-
-inline Ptr TypeInfo::get(void* ptr, FieldId id) const {
-  return get_(ptr, id, std::string::npos, nullPtr());
-}
-inline Ptr TypeInfo::get(void* ptr, size_t pos) const {
-  return get_(ptr, {}, pos, nullPtr());
-}
-inline Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
-  return get_(ptr, {}, std::string::npos, val);
-}
-
-inline bool TypeInfo::put(void* ptr, FieldId id, const Dyn& val) const {
-  return put_(ptr, id, nullPtr(), val);
-}
-inline bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
-  return put_(ptr, {}, key, val);
-}
-
-inline Ptr TypeInfo::ensure(void* ptr, FieldId id) const {
-  return ensure(ptr, id, nullPtr());
-}
-inline Ptr TypeInfo::ensure(void* ptr, FieldId id, const Dyn& defVal) const {
-  return ensure_(ptr, id, nullPtr(), defVal);
-}
-inline Ptr TypeInfo::ensure(void* ptr, const Dyn& key) const {
-  return ensure(ptr, key, nullPtr());
-}
-inline Ptr TypeInfo::ensure(
-    void* ptr, const Dyn& key, const Dyn& defVal) const {
-  return ensure_(ptr, {}, key, defVal);
-}
-
-inline Ptr Dyn::ensure(const Dyn& key) const {
-  return type_.mut().ensure(ptr_, key);
-}
-inline Ptr Dyn::ensure(const Dyn& key, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, key, val);
-}
-inline Ptr Dyn::ensure(FieldId id) const {
-  return type_.mut().ensure(ptr_, id);
-}
-inline Ptr Dyn::ensure(FieldId id, const Dyn& val) const {
-  return type_.mut().ensure(ptr_, id, val);
-}
-
-inline Ptr Dyn::get(const Dyn& key) const {
-  return type_->get(ptr_, key);
-}
-inline Ptr Dyn::get(FieldId id) const {
-  return type_->get(ptr_, id);
-}
-inline Ptr Dyn::get(size_t pos) const {
-  return type_->get(ptr_, pos);
-}
-inline Ptr Dyn::get(const Dyn& key, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, key);
-}
-inline Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, id);
-}
-inline Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
-  return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
 }
 
 // A base struct provides helpers for throwing exceptions and default throwing

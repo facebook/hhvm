@@ -17,6 +17,8 @@
 #include <thrift/lib/cpp2/type/Runtime.h>
 
 #include <any>
+#include <cstddef>
+#include <cstdint>
 #include <limits>
 #include <map>
 #include <set>
@@ -105,6 +107,22 @@ TEST(RuntimeRefTest, Int) {
   EXPECT_EQ(ref.as<i32_t>(), 0);
   EXPECT_EQ(ref, Ref::to(0));
   EXPECT_EQ(ref, Value::create<i32_t>());
+}
+
+TEST(RuntimeRefTest, InterOp_Int) {
+  int8_t data = 1;
+  auto smallInt = Ref::to(data);
+  auto largeInt = Value::of<i64_t>(2);
+
+  EXPECT_EQ(smallInt, int8_t(1));
+  EXPECT_LT(largeInt, 5L);
+
+  // TODO(afuller): Support interop compare.
+  EXPECT_THROW(smallInt == 1, std::runtime_error);
+  EXPECT_THROW(largeInt == 2, std::runtime_error);
+  // TODO(afuller): Support interop assign.
+  EXPECT_THROW(smallInt = 3, std::bad_any_cast);
+  EXPECT_THROW(largeInt = 4, std::bad_any_cast);
 }
 
 TEST(RuntimeRefTest, List) {

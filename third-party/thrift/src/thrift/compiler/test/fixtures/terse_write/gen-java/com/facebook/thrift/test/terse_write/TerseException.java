@@ -39,7 +39,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
 
     @ThriftConstructor
     public TerseException(
-        @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.NONE) final String msg
+        @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.TERSE) final String msg
     ) {
         this.msg = msg;
     }
@@ -53,7 +53,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
     
         private String msg = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.TERSE)
         public Builder setMsg(String msg) {
             this.msg = msg;
             return this;
@@ -77,7 +77,7 @@ public final class TerseException extends org.apache.thrift.TBaseException imple
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="msg", requiredness=Requiredness.TERSE)
     public String getMsg() { return msg; }
         
     @java.lang.Override

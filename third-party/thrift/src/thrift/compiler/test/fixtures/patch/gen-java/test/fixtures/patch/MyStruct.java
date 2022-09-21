@@ -25,16 +25,16 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
 
     @ThriftConstructor
     public MyStruct(
-        @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.NONE) final boolean boolVal,
-        @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.NONE) final byte byteVal,
-        @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.NONE) final short i16Val,
-        @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.NONE) final int i32Val,
-        @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.NONE) final long i64Val,
-        @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.NONE) final float floatVal,
-        @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.NONE) final double doubleVal,
-        @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.NONE) final String stringVal,
-        @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.NONE) final byte[] binaryVal,
-        @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.NONE) final test.fixtures.patch.MyData structVal,
+        @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.TERSE) final boolean boolVal,
+        @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.TERSE) final byte byteVal,
+        @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.TERSE) final short i16Val,
+        @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.TERSE) final int i32Val,
+        @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.TERSE) final long i64Val,
+        @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.TERSE) final float floatVal,
+        @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.TERSE) final double doubleVal,
+        @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.TERSE) final String stringVal,
+        @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.TERSE) final byte[] binaryVal,
+        @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyData structVal,
         @com.facebook.swift.codec.ThriftField(value=11, name="optBoolVal", requiredness=Requiredness.OPTIONAL) final Boolean optBoolVal,
         @com.facebook.swift.codec.ThriftField(value=12, name="optByteVal", requiredness=Requiredness.OPTIONAL) final Byte optByteVal,
         @com.facebook.swift.codec.ThriftField(value=13, name="optI16Val", requiredness=Requiredness.OPTIONAL) final Short optI16Val,
@@ -48,7 +48,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         @com.facebook.swift.codec.ThriftField(value=21, name="optListVal", requiredness=Requiredness.OPTIONAL) final List<Short> optListVal,
         @com.facebook.swift.codec.ThriftField(value=22, name="optSetVal", requiredness=Requiredness.OPTIONAL) final Set<String> optSetVal,
         @com.facebook.swift.codec.ThriftField(value=23, name="optMapVal", requiredness=Requiredness.OPTIONAL) final Map<String, String> optMapVal,
-        @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.NONE) final test.fixtures.patch.MyUnion unionVal
+        @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.TERSE) final test.fixtures.patch.MyUnion unionVal
     ) {
         this.boolVal = boolVal;
         this.byteVal = byteVal;
@@ -131,7 +131,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
         private Map<String, String> optMapVal = null;
         private test.fixtures.patch.MyUnion unionVal = test.fixtures.patch.MyUnion.defaultInstance();
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.TERSE)
         public Builder setBoolVal(boolean boolVal) {
             this.boolVal = boolVal;
             return this;
@@ -139,7 +139,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public boolean isBoolVal() { return boolVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.TERSE)
         public Builder setByteVal(byte byteVal) {
             this.byteVal = byteVal;
             return this;
@@ -147,7 +147,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public byte getByteVal() { return byteVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.TERSE)
         public Builder setI16Val(short i16Val) {
             this.i16Val = i16Val;
             return this;
@@ -155,7 +155,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public short getI16Val() { return i16Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.TERSE)
         public Builder setI32Val(int i32Val) {
             this.i32Val = i32Val;
             return this;
@@ -163,7 +163,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public int getI32Val() { return i32Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.TERSE)
         public Builder setI64Val(long i64Val) {
             this.i64Val = i64Val;
             return this;
@@ -171,7 +171,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public long getI64Val() { return i64Val; }
     
-            @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.TERSE)
         public Builder setFloatVal(float floatVal) {
             this.floatVal = floatVal;
             return this;
@@ -179,7 +179,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public float getFloatVal() { return floatVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.TERSE)
         public Builder setDoubleVal(double doubleVal) {
             this.doubleVal = doubleVal;
             return this;
@@ -187,7 +187,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public double getDoubleVal() { return doubleVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.TERSE)
         public Builder setStringVal(String stringVal) {
             this.stringVal = stringVal;
             return this;
@@ -195,7 +195,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public String getStringVal() { return stringVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.TERSE)
         public Builder setBinaryVal(byte[] binaryVal) {
             this.binaryVal = binaryVal;
             return this;
@@ -203,7 +203,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public byte[] getBinaryVal() { return binaryVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.TERSE)
         public Builder setStructVal(test.fixtures.patch.MyData structVal) {
             this.structVal = structVal;
             return this;
@@ -315,7 +315,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
         public Map<String, String> getOptMapVal() { return optMapVal; }
     
-            @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.TERSE)
         public Builder setUnionVal(test.fixtures.patch.MyUnion unionVal) {
             this.unionVal = unionVal;
             return this;
@@ -537,52 +537,52 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     }
     
     
-    @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="boolVal", requiredness=Requiredness.TERSE)
     public boolean isBoolVal() { return boolVal; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="byteVal", requiredness=Requiredness.TERSE)
     public byte getByteVal() { return byteVal; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=3, name="i16Val", requiredness=Requiredness.TERSE)
     public short getI16Val() { return i16Val; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=4, name="i32Val", requiredness=Requiredness.TERSE)
     public int getI32Val() { return i32Val; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=5, name="i64Val", requiredness=Requiredness.TERSE)
     public long getI64Val() { return i64Val; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=6, name="floatVal", requiredness=Requiredness.TERSE)
     public float getFloatVal() { return floatVal; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=7, name="doubleVal", requiredness=Requiredness.TERSE)
     public double getDoubleVal() { return doubleVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=8, name="stringVal", requiredness=Requiredness.TERSE)
     public String getStringVal() { return stringVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=9, name="binaryVal", requiredness=Requiredness.TERSE)
     public byte[] getBinaryVal() { return binaryVal; }
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=10, name="structVal", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.MyData getStructVal() { return structVal; }
     
     
@@ -652,7 +652,7 @@ public final class MyStruct implements com.facebook.thrift.payload.ThriftSeriali
     
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=30, name="unionVal", requiredness=Requiredness.TERSE)
     public test.fixtures.patch.MyUnion getUnionVal() { return unionVal; }
     
     @java.lang.Override

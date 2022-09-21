@@ -565,6 +565,7 @@ cdef class TypeName(thrift.py3.types.Union):
         Void stringType=None,
         Void binaryType=None,
         TypeUri enumType=None,
+        TypeUri typedefType=None,
         TypeUri structType=None,
         TypeUri unionType=None,
         TypeUri exceptionType=None,
@@ -584,6 +585,7 @@ cdef class TypeName(thrift.py3.types.Union):
           stringType,
           binaryType,
           enumType,
+          typedefType,
           structType,
           unionType,
           exceptionType,
@@ -618,6 +620,8 @@ cdef class TypeName(thrift.py3.types.Union):
         if isinstance(value, TypeUri):
             return TypeName(enumType=value)
         if isinstance(value, TypeUri):
+            return TypeName(typedefType=value)
+        if isinstance(value, TypeUri):
             return TypeName(structType=value)
         if isinstance(value, TypeUri):
             return TypeName(unionType=value)
@@ -644,6 +648,7 @@ cdef class TypeName(thrift.py3.types.Union):
         Void stringType,
         Void binaryType,
         TypeUri enumType,
+        TypeUri typedefType,
         TypeUri structType,
         TypeUri unionType,
         TypeUri exceptionType,
@@ -702,6 +707,11 @@ cdef class TypeName(thrift.py3.types.Union):
             if any_set:
                 raise TypeError("At most one field may be set when initializing a union")
             deref(c_inst).set_enumType(deref((<TypeUri?> enumType)._cpp_obj))
+            any_set = True
+        if typedefType is not None:
+            if any_set:
+                raise TypeError("At most one field may be set when initializing a union")
+            deref(c_inst).set_typedefType(deref((<TypeUri?> typedefType)._cpp_obj))
             any_set = True
         if structType is not None:
             if any_set:
@@ -805,6 +815,12 @@ cdef class TypeName(thrift.py3.types.Union):
         return self.value
 
     @property
+    def typedefType(self):
+        if self.type.value != 17:
+            raise AttributeError(f'Union contains a value of type {self.type.name}, not typedefType')
+        return self.value
+
+    @property
     def structType(self):
         if self.type.value != 11:
             raise AttributeError(f'Union contains a value of type {self.type.name}, not structType')
@@ -869,6 +885,8 @@ cdef class TypeName(thrift.py3.types.Union):
             self.value = translate_cpp_enum_to_python(Void, <int>deref(self._cpp_obj).get_binaryType())
         elif type == 10:
             self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_enumType()))
+        elif type == 17:
+            self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_typedefType()))
         elif type == 11:
             self.value = TypeUri._fbthrift_create(make_shared[cTypeUri](deref(self._cpp_obj).get_structType()))
         elif type == 12:
@@ -916,7 +934,7 @@ cdef class TypeName(thrift.py3.types.Union):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 16
+        return 17
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(TypeName self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

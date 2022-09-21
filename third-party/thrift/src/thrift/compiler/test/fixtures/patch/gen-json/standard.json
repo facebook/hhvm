@@ -543,7 +543,7 @@
             }
           }
         },
-        "structType" : {
+        "typedefType" : {
           "type_enum" : "STRUCT",
           "spec_args" : "TypeUri",
           "required" : true,
@@ -554,6 +554,21 @@
             },
             "end" : {
               "line" : 237,
+              "column" : 27
+            }
+          }
+        },
+        "structType" : {
+          "type_enum" : "STRUCT",
+          "spec_args" : "TypeUri",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 238,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 238,
               "column" : 26
             }
           }
@@ -564,11 +579,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 238,
+              "line" : 239,
               "column" : 3
             },
             "end" : {
-              "line" : 238,
+              "line" : 239,
               "column" : 25
             }
           }
@@ -579,11 +594,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 239,
+              "line" : 240,
               "column" : 3
             },
             "end" : {
-              "line" : 239,
+              "line" : 240,
               "column" : 29
             }
           }
@@ -594,11 +609,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 240,
+              "line" : 241,
               "column" : 3
             },
             "end" : {
-              "line" : 240,
+              "line" : 241,
               "column" : 21
             }
           }
@@ -609,11 +624,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 241,
+              "line" : 242,
               "column" : 3
             },
             "end" : {
-              "line" : 241,
+              "line" : 242,
               "column" : 20
             }
           }
@@ -624,11 +639,11 @@
           "required" : true,
           "source_range" : {
             "begin" : {
-              "line" : 242,
+              "line" : 243,
               "column" : 3
             },
             "end" : {
-              "line" : 242,
+              "line" : 243,
               "column" : 20
             }
           }
@@ -640,7 +655,7 @@
           "column" : 1
         },
         "end" : {
-          "line" : 243,
+          "line" : 244,
           "column" : 2
         }
       }

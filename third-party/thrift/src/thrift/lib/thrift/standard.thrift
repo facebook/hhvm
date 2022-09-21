@@ -234,6 +234,7 @@ union TypeName {
   // 32-bit signed integer, with named values.
   10: TypeUri enumType;
 
+  17: TypeUri typedefType;
   11: TypeUri structType;
   12: TypeUri unionType;
   13: TypeUri exceptionType;

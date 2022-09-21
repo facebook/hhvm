@@ -8,12 +8,9 @@
 
 #![allow(non_camel_case_types, non_snake_case)]
 
-use ocamlrep::Value;
-
 use crate::intext::*;
 
-type value = usize;
-type header_t = usize;
+use ocamlrep::Value;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -65,14 +62,6 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
             intern_obj_table: Vec::new(),
             stack: Vec::with_capacity(Self::INTERN_STACK_INIT_SIZE),
         }
-    }
-
-    fn invalid_argument(&mut self, msg: &str) -> ! {
-        panic!("{}", msg);
-    }
-
-    fn failwith(&mut self, msg: &str) -> ! {
-        panic!("{}", msg);
     }
 
     #[inline]
@@ -131,15 +120,9 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         self.intern_src = self.intern_src.add(count);
     }
 
-    unsafe fn intern_cleanup(&mut self) {
-        self.intern_obj_table.clear();
-        self.stack.clear()
-    }
-
     unsafe fn readfloat(&mut self, dest: *mut f64, code: u8) {
         if std::mem::size_of::<f64>() != 8 {
-            self.intern_cleanup();
-            self.invalid_argument("input_value: non-standard floats");
+            panic!("input_value: non-standard floats");
         }
         self.readblock(dest as *mut u8, 8);
         let bytes = *(dest as *const [u8; 8]);
@@ -153,8 +136,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     // `len` is a number of floats
     unsafe fn readfloats(&mut self, dest: *mut f64, len: usize, code: u8) {
         if std::mem::size_of::<f64>() != 8 {
-            self.intern_cleanup();
-            self.invalid_argument("input_value: non-standard floats");
+            panic!("input_value: non-standard floats");
         }
         self.readblock(dest as *mut u8, len * 8);
 
@@ -178,7 +160,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         const NOTHING_TO_DO_LABEL: u64 = 8288085890650723895;
 
         let mut current_block: u64;
-        let mut header: header_t;
+        let mut header: usize;
         let mut code: u8;
 
         let mut tag: u8 = 0;
@@ -225,7 +207,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                             current_block = READ_BLOCK_LABEL;
                         } else {
                             // Small integer
-                            v = ocamlrep::Value::int((code & 0x3F) as isize);
+                            v = Value::int((code & 0x3F) as isize);
                             current_block = NOTHING_TO_DO_LABEL;
                         }
                     } else {
@@ -276,7 +258,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     current_block = READ_SHARED_LABEL;
                                 }
                                 CODE_BLOCK32 => {
-                                    header = self.read32u() as header_t;
+                                    header = self.read32u() as usize;
                                     tag = (header & 0xff) as u8;
                                     size = header as usize >> 10;
                                     current_block = READ_BLOCK_LABEL;
@@ -346,8 +328,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     unimplemented!()
                                 }
                                 _ => {
-                                    self.intern_cleanup();
-                                    self.failwith("input_value_from_string: ill-formed message");
+                                    panic!("input_value_from_string: ill-formed message");
                                 }
                             }
                             match current_block {
@@ -383,7 +364,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                             NOTHING_TO_DO_LABEL => {}
                             READ_BLOCK_LABEL => {}
                             _ /* READ_STRING_LABEL */ => {
-                                size = (len + std::mem::size_of::<value>()) / std::mem::size_of::<value>();
+                                size = (len + std::mem::size_of::<Value<'_>>()) / std::mem::size_of::<Value<'_>>();
                                 v = Value::from_bits(ocamlrep::bytes_to_ocamlrep(std::slice::from_raw_parts(self.intern_src as *const u8, len as usize), self.alloc).to_bits());
                                 self.intern_src = self.intern_src.offset(len as isize);
                                 self.obj_counter += 1;
@@ -438,14 +419,14 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                 self.read32u();
                 (*h).data_len = self.read64u() as usize;
                 (*h).num_objects = self.read64u() as usize;
-                (*h).whsize = self.read64u() as usize
+                (*h).whsize = self.read64u() as usize;
             }
-            _ => self.failwith("input_value_from_string: bad object"),
+            _ => panic!("input_value_from_string: bad object"),
         };
     }
 
-    unsafe fn input_val_from_string(&mut self, str: &[u8]) -> value {
-        let mut obj: value = ((0 as usize) << 1) + 1;
+    unsafe fn input_val_from_string(&mut self, str: &[u8]) -> usize {
+        let mut obj: usize = (0_usize << 1) + 1;
 
         let mut h: marshal_header = marshal_header {
             magic: 0,
@@ -457,12 +438,12 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
 
         self.parse_header(&mut h);
         if h.header_len as usize + h.data_len as usize > str.len() {
-            self.failwith("input_val_from_string: bad length");
+            panic!("input_val_from_string: bad length");
         }
 
         self.intern_src = (&str[(h.header_len as usize)..]).as_ptr();
         // Fill it in
-        self.intern_rec(&mut obj as *mut value as *mut Value<'a>);
+        self.intern_rec(&mut obj as *mut usize as *mut Value<'a>);
 
         obj
     }
@@ -473,5 +454,5 @@ pub unsafe fn input_value<'a, A: ocamlrep::Allocator>(
     alloc: &'a A,
 ) -> ocamlrep::OpaqueValue<'a> {
     let mut state = State::new(alloc, str.as_ptr());
-    ocamlrep::OpaqueValue::from_bits(state.input_val_from_string(str) as usize)
+    ocamlrep::OpaqueValue::from_bits(state.input_val_from_string(str))
 }

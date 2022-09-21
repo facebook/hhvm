@@ -299,14 +299,14 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
 
-  # This is required by Homebrew's libc. See
-  # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
-  # for more info.
-  find_package(Libpam)
-  if (PAM_INCLUDE_PATH)
-    include_directories(${PAM_INCLUDE_PATH})
-  endif()
+# This is required by Homebrew's libc. See
+# https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
+# for more info.
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 include_directories(${HPHP_HOME}/hphp)

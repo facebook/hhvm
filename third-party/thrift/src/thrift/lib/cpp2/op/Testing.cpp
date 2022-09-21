@@ -37,7 +37,7 @@ const type::Protocol& Number1Serializer::getProtocol() const {
 
 void MultiSerializer::encode(
     type::ConstRef value, folly::io::QueueAppender&& appender) const {
-  switch (value.type().base_type()) {
+  switch (value.type().baseType()) {
     case BaseType::I32:
       ++intEncCount;
       FollyToStringSerializer<type::i32_t>().encode(value, std::move(appender));
@@ -54,7 +54,7 @@ void MultiSerializer::encode(
 
 void MultiSerializer::encode(
     const type::AnyValue& value, folly::io::QueueAppender&& appender) const {
-  switch (value.type().base_type()) {
+  switch (value.type().baseType()) {
     case BaseType::I32:
       ++intEncCount;
       FollyToStringSerializer<type::i32_t>().encode(value, std::move(appender));
@@ -73,7 +73,7 @@ void MultiSerializer::decode(
     const Type& type, folly::io::Cursor& cursor, AnyValue& value) const {
   // It is being decoded into an anyvalues.
   ++anyDecCount;
-  switch (type.base_type()) {
+  switch (type.baseType()) {
     case BaseType::I32:
       ++intDecCount;
       FollyToStringSerializer<type::i32_t>().decode(type, cursor, value);
@@ -88,7 +88,7 @@ void MultiSerializer::decode(
 }
 
 void MultiSerializer::decode(folly::io::Cursor& cursor, Ref value) const {
-  switch (value.type().base_type()) {
+  switch (value.type().baseType()) {
     case BaseType::I32:
       ++intDecCount;
       FollyToStringSerializer<type::i32_t>().decode(cursor, value);

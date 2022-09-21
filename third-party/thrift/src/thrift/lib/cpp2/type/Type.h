@@ -97,7 +97,9 @@ class Type : public detail::Wrap<TypeStruct> {
     static const Type& kInst = *new Type(Tag{});
     return kInst;
   }
-  auto base_type() const noexcept { return BaseType{data_.name()->getType()}; }
+  BaseType baseType() const noexcept {
+    return BaseType{data_.name()->getType()};
+  }
 
   Type& operator=(const Type&) = default;
   Type& operator=(Type&&) noexcept = default;

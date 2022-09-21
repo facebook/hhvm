@@ -1,0 +1,44 @@
+File root|multifile_decl_ordering.php--b1.php
+--- ocaml
++++ rupro
+@@ -1,23 +1,40 @@
+ FoldedClass {
+     name: "\\B1",
+     pos: Pos(root|multifile_decl_ordering.php--b1.php, 3:7-9),
+     kind: Cclass(
+         Concrete,
+     ),
++    substs: {
++        "\\A1": SubstContext {
++            subst: Subst(
++                {},
++            ),
++            class_context: "\\B1",
++            from_req_extends: false,
++        },
++    },
+     ancestors: {
+         "\\A1": A1,
+     },
++    methods: {
++        "foo": FoldedElement {
++            flags: (empty),
++            origin: "\\A1",
++            visibility: Public,
++            deprecated: None,
++        },
++    },
+     consts: {
+         "class": ClassConst {
+             is_synthesized: true,
+             kind: CCConcrete,
+             pos: Pos(root|multifile_decl_ordering.php--b1.php, 3:7-9),
+             ty: HH\classname<this>,
+             origin: "\\B1",
+             refs: [],
+         },
+     },
+     extends: {
+         "\\A1",
+     },
+ }

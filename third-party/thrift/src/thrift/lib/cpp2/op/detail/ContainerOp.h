@@ -53,23 +53,20 @@ struct ContainerOp : BaseOp<Tag> {
   }
 
   // Get or begin iterator.
-  static I iter(T& self, const std::any& i) {
-    if (i.has_value()) { // Continue
-      return std::any_cast<typename T::iterator>(i);
-    } else { // Begin
-      return self.begin();
+  static I& iter(T& self, std::any& i) {
+    if (!i.has_value()) {
+      i = self.begin();
     }
+    return std::any_cast<I&>(i);
   }
 
   template <typename ITag>
   static Ptr next(ITag tag, T& self, std::any& i) {
-    Ptr result;
-    auto itr = iter(self, i);
+    auto& itr = iter(self, i);
     if (itr != self.end()) {
-      result = ret(tag, *itr++);
+      return ret(tag, *itr++);
     }
-    i = itr; // Save state.
-    return result;
+    return {};
   }
 };
 
@@ -160,6 +157,7 @@ struct MapOp : ContainerOp<Tag> {
   using Base = ContainerOp<Tag>;
   using Base::bad_op;
   using Base::check_op;
+  using Base::iter;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -198,17 +196,31 @@ struct MapOp : ContainerOp<Tag> {
     }
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn& k) {
+  static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
     if (k != nullptr) {
       return ret(VTag{}, ref(s).at(k.as<KTag>()));
-    } else if (pos != std::string::npos) {
-      return ret(KTag{}, Base::find(s, pos)->first);
     }
     bad_op();
   }
 
-  [[noreturn]] static Ptr next(void*, IterType, std::any&) { unimplemented(); }
+  static Ptr next(T& self, IterType type, typename T::iterator& itr) {
+    if (itr == self.end()) {
+      return {};
+    }
+    auto& entry = *itr++;
+    switch (type) {
+      case IterType::Key:
+        return ret(KTag{}, entry.first);
+      case IterType::Value:
+        return ret(VTag{}, entry.second);
+    }
+  }
+
+  static Ptr next(void* s, IterType type, std::any& i) {
+    return next(ref(s), type, iter(ref(s), i));
+  }
 };
+
 template <typename KTag, typename VTag>
 struct AnyOp<type::map<KTag, VTag>> : MapOp<KTag, VTag> {};
 template <typename T, typename KTag, typename VTag>

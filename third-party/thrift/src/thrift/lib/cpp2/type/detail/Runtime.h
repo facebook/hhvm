@@ -331,7 +331,7 @@ template <typename T>
 class DynCmp<T, T> : public BaseDynCmp<T, T> {};
 
 template <typename RefT>
-class RefCursor : Cursor {
+class RefCursor : public Cursor {
  public:
   /*implicit*/ RefCursor(Cursor&& cur) : Cursor(cur) {}
 

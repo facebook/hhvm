@@ -15,7 +15,7 @@ eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { path = "../../../../utils/hh24_types" }
 im = { version = "14.2", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
-intern = { path = "../../../../../../../relay/oss/crates/intern" }
+intern = { path = "../../../../utils/intern" }
 ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }

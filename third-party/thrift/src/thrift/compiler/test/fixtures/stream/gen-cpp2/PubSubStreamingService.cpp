@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::PubSubStreamingServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::__fbthrift_serviceInfoHolder;
 
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("returnstream");
+}
+
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
+  return sync_returnstream(p_i32_from, p_i32_to);
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to) {
@@ -129,8 +133,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::streamthrows(::std::int32_t /*foo*/) {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_streamthrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("streamthrows");
+}
+
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::streamthrows(::std::int32_t p_foo) {
+  return sync_streamthrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_streamthrows(::std::int32_t p_foo) {
@@ -233,8 +241,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::servicethrows(::std::int32_t /*foo*/) {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_servicethrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("servicethrows");
+}
+
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::servicethrows(::std::int32_t p_foo) {
+  return sync_servicethrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_servicethrows(::std::int32_t p_foo) {
@@ -337,8 +349,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::boththrows(::std::int32_t /*foo*/) {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_boththrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("boththrows");
+}
+
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::boththrows(::std::int32_t p_foo) {
+  return sync_boththrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_boththrows(::std::int32_t p_foo) {
@@ -441,8 +457,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamstreamthrows(::std::int32_t /*foo*/) {
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_responseandstreamstreamthrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamstreamthrows");
+}
+
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamstreamthrows(::std::int32_t p_foo) {
+  return sync_responseandstreamstreamthrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamstreamthrows(::std::int32_t p_foo) {
@@ -545,8 +565,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamservicethrows(::std::int32_t /*foo*/) {
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_responseandstreamservicethrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamservicethrows");
+}
+
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamservicethrows(::std::int32_t p_foo) {
+  return sync_responseandstreamservicethrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamservicethrows(::std::int32_t p_foo) {
@@ -649,8 +673,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamboththrows(::std::int32_t /*foo*/) {
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::sync_responseandstreamboththrows(::std::int32_t /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("responseandstreamboththrows");
+}
+
+::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::responseandstreamboththrows(::std::int32_t p_foo) {
+  return sync_responseandstreamboththrows(p_foo);
 }
 
 folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::PubSubStreamingService>::semifuture_responseandstreamboththrows(::std::int32_t p_foo) {

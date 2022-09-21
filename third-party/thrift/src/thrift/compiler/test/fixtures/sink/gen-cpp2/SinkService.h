@@ -47,7 +47,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const>> getServiceRequestInfoMap() const;
  public:
 
-  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> method();
+  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_method();
+  [[deprecated("Use sync_method instead")]] virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> method();
   virtual folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_method();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_method();
 #if FOLLY_HAS_COROUTINES
@@ -55,7 +56,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_method(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_method(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback);
-  virtual ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> methodAndReponse();
+  virtual ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_methodAndReponse();
+  [[deprecated("Use sync_methodAndReponse instead")]] virtual ::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> methodAndReponse();
   virtual folly::Future<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_methodAndReponse();
   virtual folly::SemiFuture<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_methodAndReponse();
 #if FOLLY_HAS_COROUTINES
@@ -63,7 +65,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodAndReponse(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_methodAndReponse(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback);
-  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodThrow();
+  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_methodThrow();
+  [[deprecated("Use sync_methodThrow instead")]] virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodThrow();
   virtual folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_methodThrow();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_methodThrow();
 #if FOLLY_HAS_COROUTINES
@@ -71,7 +74,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodThrow(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_methodThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback);
-  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodSinkThrow();
+  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_methodSinkThrow();
+  [[deprecated("Use sync_methodSinkThrow instead")]] virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodSinkThrow();
   virtual folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_methodSinkThrow();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_methodSinkThrow();
 #if FOLLY_HAS_COROUTINES
@@ -79,7 +83,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodSinkThrow(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_methodSinkThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback);
-  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodFinalThrow();
+  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_methodFinalThrow();
+  [[deprecated("Use sync_methodFinalThrow instead")]] virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodFinalThrow();
   virtual folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_methodFinalThrow();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_methodFinalThrow();
 #if FOLLY_HAS_COROUTINES
@@ -87,7 +92,8 @@ class ServiceHandler<::cpp2::SinkService> : public apache::thrift::ServerInterfa
   virtual folly::coro::Task<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> co_methodFinalThrow(apache::thrift::RequestParams params);
 #endif
   virtual void async_tm_methodFinalThrow(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>>> callback);
-  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodBothThrow();
+  virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> sync_methodBothThrow();
+  [[deprecated("Use sync_methodBothThrow instead")]] virtual ::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> methodBothThrow();
   virtual folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> future_methodBothThrow();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> semifuture_methodBothThrow();
 #if FOLLY_HAS_COROUTINES

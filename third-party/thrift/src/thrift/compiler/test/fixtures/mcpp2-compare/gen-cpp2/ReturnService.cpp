@@ -29,8 +29,12 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::async_eb_
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("noReturn"));
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::boolReturn() {
+bool apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_boolReturn() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("boolReturn");
+}
+
+bool apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::boolReturn() {
+  return sync_boolReturn();
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_boolReturn() {
@@ -133,8 +137,12 @@ determineInvocationType:
   }
 }
 
-::std::int16_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i16Return() {
+::std::int16_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_i16Return() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("i16Return");
+}
+
+::std::int16_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i16Return() {
+  return sync_i16Return();
 }
 
 folly::SemiFuture<::std::int16_t> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_i16Return() {
@@ -237,8 +245,12 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i32Return() {
+::std::int32_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_i32Return() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("i32Return");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i32Return() {
+  return sync_i32Return();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_i32Return() {
@@ -341,8 +353,12 @@ determineInvocationType:
   }
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i64Return() {
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_i64Return() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("i64Return");
+}
+
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::i64Return() {
+  return sync_i64Return();
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_i64Return() {
@@ -445,8 +461,12 @@ determineInvocationType:
   }
 }
 
-float apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::floatReturn() {
+float apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_floatReturn() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("floatReturn");
+}
+
+float apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::floatReturn() {
+  return sync_floatReturn();
 }
 
 folly::SemiFuture<float> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_floatReturn() {
@@ -549,8 +569,12 @@ determineInvocationType:
   }
 }
 
-double apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::doubleReturn() {
+double apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_doubleReturn() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("doubleReturn");
+}
+
+double apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::doubleReturn() {
+  return sync_doubleReturn();
 }
 
 folly::SemiFuture<double> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_doubleReturn() {
@@ -657,8 +681,12 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::async_eb_
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("stringReturn"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::binaryReturn(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_binaryReturn(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("binaryReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::binaryReturn(::std::string& _return) {
+  return sync_binaryReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_binaryReturn() {
@@ -765,8 +793,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::mapReturn(::std::map<::std::string, ::std::int64_t>& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_mapReturn(::std::map<::std::string, ::std::int64_t>& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::mapReturn(::std::map<::std::string, ::std::int64_t>& _return) {
+  return sync_mapReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_mapReturn() {
@@ -873,8 +905,12 @@ determineInvocationType:
   }
 }
 
-::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::simpleTypedefReturn() {
+::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_simpleTypedefReturn() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simpleTypedefReturn");
+}
+
+::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::simpleTypedefReturn() {
+  return sync_simpleTypedefReturn();
 }
 
 folly::SemiFuture<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_simpleTypedefReturn() {
@@ -977,8 +1013,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::complexTypedefReturn(::some::valid::ns::complexStructTypeDef& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_complexTypedefReturn(::some::valid::ns::complexStructTypeDef& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("complexTypedefReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::complexTypedefReturn(::some::valid::ns::complexStructTypeDef& _return) {
+  return sync_complexTypedefReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::some::valid::ns::complexStructTypeDef>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_complexTypedefReturn() {
@@ -1085,8 +1125,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("list_mostComplexTypedefReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::list_mostComplexTypedefReturn(::std::vector<::some::valid::ns::mostComplexTypeDef>& _return) {
+  return sync_list_mostComplexTypedefReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::mostComplexTypeDef>>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_list_mostComplexTypedefReturn() {
@@ -1201,8 +1245,12 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::async_eb_
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("list_EnumReturn"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::structReturn(::some::valid::ns::MyStruct& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_structReturn(::some::valid::ns::MyStruct& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("structReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::structReturn(::some::valid::ns::MyStruct& _return) {
+  return sync_structReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::some::valid::ns::MyStruct>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_structReturn() {
@@ -1309,8 +1357,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::set_StructReturn(::std::set<::some::valid::ns::MyStruct>& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_set_StructReturn(::std::set<::some::valid::ns::MyStruct>& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("set_StructReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::set_StructReturn(::std::set<::some::valid::ns::MyStruct>& _return) {
+  return sync_set_StructReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_set_StructReturn() {
@@ -1421,8 +1473,12 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::async_eb_
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("unionReturn"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("list_UnionReturn");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::list_UnionReturn(::std::vector<::some::valid::ns::ComplexUnion>& _return) {
+  return sync_list_UnionReturn(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_list_UnionReturn() {
@@ -1533,8 +1589,12 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::async_eb_
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("readDataEb"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::sync_readData(::some::valid::ns::IOBufPtr& /*_return*/, ::std::int64_t /*size*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("readData");
+}
+
+void apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::readData(::some::valid::ns::IOBufPtr& _return, ::std::int64_t p_size) {
+  return sync_readData(_return, p_size);
 }
 
 folly::SemiFuture<std::unique_ptr<::some::valid::ns::IOBufPtr>> apache::thrift::ServiceHandler<::some::valid::ns::ReturnService>::semifuture_readData(::std::int64_t p_size) {

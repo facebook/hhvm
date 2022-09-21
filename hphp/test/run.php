@@ -995,7 +995,7 @@ function hhvm_cmd_impl(
     }
 
     if ($options->dump_tc) {
-      $args[] = '-vEval.DumpIR=1';
+      $args[] = '-vEval.DumpIR=2';
       $args[] = '-vEval.DumpTC=1';
     }
 

@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::CServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::C>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::C>::f() {
+void apache::thrift::ServiceHandler<::cpp2::C>::sync_f() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("f");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::C>::f() {
+  return sync_f();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_f() {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::numbers() {
+::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::sync_numbers() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("numbers");
+}
+
+::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::numbers() {
+  return sync_numbers();
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::cpp2::number>> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_numbers() {
@@ -235,8 +243,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::C>::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {
+void apache::thrift::ServiceHandler<::cpp2::C>::sync_thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("thing");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::C>::thing(::std::string& _return, ::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c) {
+  return sync_thing(_return, p_a, std::move(p_b), std::move(p_c));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_thing(::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c) {

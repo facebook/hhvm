@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::DbMixedStackArgumentsServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::sync_getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getDataByKey0");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::getDataByKey0(::std::string& _return, std::unique_ptr<::std::string> p_key) {
+  return sync_getDataByKey0(_return, std::move(p_key));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey0(std::unique_ptr<::std::string> p_key) {
@@ -133,8 +137,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::getDataByKey1(::std::string& /*_return*/, const ::std::string& /*key*/) {
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::sync_getDataByKey1(::std::string& /*_return*/, const ::std::string& /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getDataByKey1");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::getDataByKey1(::std::string& _return, const ::std::string& p_key) {
+  return sync_getDataByKey1(_return, p_key);
 }
 
 folly::SemiFuture<::std::string> apache::thrift::ServiceHandler<::cpp2::DbMixedStackArguments>::semifuture_getDataByKey1(const ::std::string& p_key) {

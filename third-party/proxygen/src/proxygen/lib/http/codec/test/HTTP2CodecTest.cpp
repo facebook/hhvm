@@ -505,6 +505,47 @@ TEST_F(HTTP2CodecTest, BadHeaderValues) {
   EXPECT_EQ(callbacks_.sessionErrors, 0);
 }
 
+TEST_F(HTTP2CodecTest, HostAuthority) {
+  static const std::string v1("GET");
+  static const std::string v2("/");
+  static const std::string v3("http");
+  static const std::string v4("foo.com");
+
+  static const vector<proxygen::compress::Header> reqHeaders = {
+      Header::makeHeaderForTest(headers::kMethod, v1),
+      Header::makeHeaderForTest(headers::kPath, v2),
+      Header::makeHeaderForTest(headers::kScheme, v3),
+      Header::makeHeaderForTest(headers::kAuthority, v4),
+  };
+
+  HTTPCodec::StreamID stream = 1;
+  for (auto i = 0; i < 2; i++, stream += 2) {
+    auto allHeaders = reqHeaders;
+    std::string v5(i == 0 ? v4 : "nope");
+    allHeaders.emplace_back(HTTP_HEADER_HOST, v5);
+    HPACKCodec headerCodec(TransportDirection::UPSTREAM);
+    auto encodedHeaders = headerCodec.encode(allHeaders);
+    writeHeaders(output_,
+                 std::move(encodedHeaders),
+                 stream,
+                 folly::none,
+                 http2::kNoPadding,
+                 true,
+                 true);
+    parse();
+    if (i == 0) {
+      // same value, ok
+      callbacks_.expectMessage(true, stream, "/");
+      const auto& headers = callbacks_.msg->getHeaders();
+      EXPECT_EQ(v4, headers.getSingleOrEmpty(HTTP_HEADER_HOST));
+    } else {
+      // different values, error
+      EXPECT_EQ(callbacks_.streamErrors, 1);
+      EXPECT_EQ(callbacks_.lastParseError->getHttpStatusCode(), 400);
+    }
+  }
+}
+
 TEST_F(HTTP2CodecTest, HighAscii) {
   auto g =
       folly::makeGuard([this] { downstreamCodec_.setStrictValidation(false); });
@@ -2395,6 +2436,39 @@ TEST_F(HTTP2CodecTest, TrailersReply) {
             callbacks_.msg->getTrailers()->getSingleOrEmpty("x-trailer-1"));
   EXPECT_EQ("chicken-kyiv",
             callbacks_.msg->getTrailers()->getSingleOrEmpty("x-trailer-2"));
+#ifndef NDEBUG
+  EXPECT_EQ(upstreamCodec_.getReceivedFrameCount(), 4);
+#endif
+}
+
+TEST_F(HTTP2CodecTest, TrailersReplyEmpty) {
+  SetUpUpstreamTest();
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  resp.setStatusMessage("nifty-nice");
+  resp.getHeaders().add(HTTP_HEADER_CONTENT_TYPE, "x-coolio");
+  downstreamCodec_.generateHeader(output_, 1, resp);
+
+  string data("abcde");
+  auto buf = folly::IOBuf::copyBuffer(data.data(), data.length());
+  downstreamCodec_.generateBody(
+      output_, 1, std::move(buf), HTTPCodec::NoPadding, false);
+
+  HTTPHeaders trailers;
+  auto trailerSz = downstreamCodec_.generateTrailers(output_, 1, trailers);
+  // Just a frame header (DATA + END_STREAM).
+  EXPECT_EQ(trailerSz, 9);
+
+  parseUpstream();
+
+  callbacks_.expectMessage(true, 2, 200);
+  EXPECT_EQ(callbacks_.bodyCalls, 1);
+  EXPECT_EQ(callbacks_.bodyLength, 5);
+  const auto& headers = callbacks_.msg->getHeaders();
+  EXPECT_TRUE(callbacks_.msg->getHeaders().exists(HTTP_HEADER_DATE));
+  EXPECT_EQ("x-coolio", headers.getSingleOrEmpty(HTTP_HEADER_CONTENT_TYPE));
+  EXPECT_EQ(0, callbacks_.trailers);
+  EXPECT_EQ(nullptr, callbacks_.msg->getTrailers());
 #ifndef NDEBUG
   EXPECT_EQ(upstreamCodec_.getReceivedFrameCount(), 4);
 #endif

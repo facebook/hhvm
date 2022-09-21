@@ -37,8 +37,12 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInterac
   apache::thrift::detail::si::throw_app_exn_unimplemented("createSerialInteraction");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_foo() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
+  return sync_foo();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_foo() {
@@ -143,8 +147,12 @@ determineInvocationType:
   }
 }
 
-apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> apache::thrift::ServiceHandler<::cpp2::MyService>::interact(::std::int32_t /*arg*/) {
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> apache::thrift::ServiceHandler<::cpp2::MyService>::sync_interact(::std::int32_t /*arg*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interact");
+}
+
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void> apache::thrift::ServiceHandler<::cpp2::MyService>::interact(::std::int32_t p_arg) {
+  return sync_interact(p_arg);
 }
 
 folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf, void>> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_interact(::std::int32_t p_arg) {
@@ -247,8 +255,12 @@ determineInvocationType:
   }
 }
 
-apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::MyService>::interactFast() {
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::MyService>::sync_interactFast() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interactFast");
+}
+
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::MyService>::interactFast() {
+  return sync_interactFast();
 }
 
 folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_interactFast() {
@@ -351,8 +363,12 @@ determineInvocationType:
   }
 }
 
-apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::MyService>::serialize() {
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::MyService>::sync_serialize() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("serialize");
+}
+
+apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::MyService>::serialize() {
+  return sync_serialize();
 }
 
 folly::SemiFuture<apache::thrift::TileAndResponse<apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf, ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_serialize() {
@@ -456,8 +472,12 @@ determineInvocationType:
 }
 
 
-::std::int32_t apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::frobnicate() {
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::sync_frobnicate() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("frobnicate");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::frobnicate() {
+  return sync_frobnicate();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::semifuture_frobnicate() {
@@ -548,8 +568,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::ping() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::sync_ping() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ping");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::ping() {
+  return sync_ping();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::semifuture_ping() {
@@ -641,8 +665,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::truthify() {
+::apache::thrift::ServerStream<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::sync_truthify() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("truthify");
+}
+
+::apache::thrift::ServerStream<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::truthify() {
+  return sync_truthify();
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<bool>> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::semifuture_truthify() {
@@ -733,8 +761,12 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::encode() {
+::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::sync_encode() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("encode");
+}
+
+::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::encode() {
+  return sync_encode();
 }
 
 folly::SemiFuture<::apache::thrift::ResponseAndSinkConsumer<::std::set<::std::int32_t>, ::std::string, ::std::string>> apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionIf::semifuture_encode() {
@@ -841,8 +873,12 @@ void apache::thrift::ServiceHandler<::cpp2::MyService>::MyInteractionFastIf::asy
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("encode"));
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf::frobnicate() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf::sync_frobnicate() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("frobnicate");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf::frobnicate() {
+  return sync_frobnicate();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::SerialInteractionIf::semifuture_frobnicate() {

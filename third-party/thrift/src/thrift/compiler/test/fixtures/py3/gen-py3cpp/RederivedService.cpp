@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::py3::simple::RederivedServiceServiceInfoHolder apache::thrift::ServiceHandler<::py3::simple::RederivedService>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::get_seven() {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::sync_get_seven() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_seven");
+}
+
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::get_seven() {
+  return sync_get_seven();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::RederivedService>::semifuture_get_seven() {

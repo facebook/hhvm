@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+struct WrapBinary {
+  1: binary data;
+} (rust.exhaustive)
+
+struct WrapString {
+  1: string data;
+} (rust.exhaustive)
 
 struct NonstandardCollectionTypes {
   10: set<string> defaultset;

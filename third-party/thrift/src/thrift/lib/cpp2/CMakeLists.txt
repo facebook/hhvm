@@ -146,6 +146,7 @@ add_library(
   type/Any.cpp
   type/BaseType.cpp
   type/Protocol.cpp
+  type/Runtime.cpp
   type/Type.cpp
   type/TypeRegistry.cpp
   type/UniversalName.cpp

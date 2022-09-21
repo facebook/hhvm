@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::namespace_from_package::module::TestServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::__fbthrift_serviceInfoHolder;
 
 
-::std::int64_t apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::init(::std::int64_t /*int1*/) {
+::std::int64_t apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::sync_init(::std::int64_t /*int1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("init");
+}
+
+::std::int64_t apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::init(::std::int64_t p_int1) {
+  return sync_init(p_int1);
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::ServiceHandler<::test::namespace_from_package::module::TestService>::semifuture_init(::std::int64_t p_int1) {

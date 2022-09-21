@@ -25,8 +25,8 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
 
     @ThriftConstructor
     public MyData(
-        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE) final String data1,
-        @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE) final int data2
+        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE) final String data1,
+        @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE) final int data2
     ) {
         this.data1 = data1;
         this.data2 = data2;
@@ -43,7 +43,7 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
         private String data1 = com.facebook.thrift.util.IntrinsicDefaults.defaultString();
         private int data2 = 0;
     
-        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE)
+        @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE)
         public Builder setData1(String data1) {
             this.data1 = data1;
             return this;
@@ -51,7 +51,7 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
     
         public String getData1() { return data1; }
     
-            @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE)
+            @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE)
         public Builder setData2(int data2) {
             this.data2 = data2;
             return this;
@@ -97,12 +97,12 @@ public final class MyData implements com.facebook.thrift.payload.ThriftSerializa
     }
     
     @Nullable
-    @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=1, name="data1", requiredness=Requiredness.TERSE)
     public String getData1() { return data1; }
     
     
     
-    @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.NONE)
+    @com.facebook.swift.codec.ThriftField(value=2, name="data2", requiredness=Requiredness.TERSE)
     public int getData2() { return data2; }
     
     @java.lang.Override

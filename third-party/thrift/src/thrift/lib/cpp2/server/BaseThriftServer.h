@@ -991,16 +991,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return thriftConfig_.getNumCPUWorkerThreads();
   }
 
-  /**
-   * Codel queuing timeout - limit queueing time before overload
-   * http://en.wikipedia.org/wiki/CoDel
-   */
-  virtual void setEnableCodel(bool enableCodel) {
-    thriftConfig_.setEnableCodel(
-        folly::observer::makeStaticObserver(std::optional{enableCodel}),
-        AttributeSource::OVERRIDE);
-  }
-
   bool getEnableCodel() const { return thriftConfig_.getEnableCodel().get(); }
 
   /**

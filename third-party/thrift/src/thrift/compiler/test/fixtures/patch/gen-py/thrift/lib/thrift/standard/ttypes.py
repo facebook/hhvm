@@ -465,6 +465,7 @@ class TypeName(object):
    - stringType
    - binaryType
    - enumType
+   - typedefType
    - structType
    - unionType
    - exceptionType
@@ -493,6 +494,7 @@ class TypeName(object):
   LISTTYPE = 14
   SETTYPE = 15
   MAPTYPE = 16
+  TYPEDEFTYPE = 17
   
   @staticmethod
   def isUnion():
@@ -536,6 +538,10 @@ class TypeName(object):
 
   def get_enumType(self):
     assert self.field == 10
+    return self.value
+
+  def get_typedefType(self):
+    assert self.field == 17
     return self.value
 
   def get_structType(self):
@@ -600,6 +606,10 @@ class TypeName(object):
 
   def set_enumType(self, value):
     self.field = 10
+    self.value = value
+
+  def set_typedefType(self, value):
+    self.field = 17
     self.value = value
 
   def set_structType(self, value):
@@ -696,6 +706,10 @@ class TypeName(object):
       padding = ' ' * 8
       value = padding.join(value.splitlines(True))
       member = '\n    %s=%s' % ('mapType', value)
+    if self.field == 17:
+      padding = ' ' * 12
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('typedefType', value)
     return "%s(%s)" % (self.__class__.__name__, member)
 
   def read(self, iprot):
@@ -829,6 +843,14 @@ class TypeName(object):
           self.set_mapType(_fbthrift_mapType)
         else:
           iprot.skip(ftype)
+      elif fid == 17:
+        if ftype == TType.STRUCT:
+          _fbthrift_typedefType = TypeUri()
+          _fbthrift_typedefType.read(iprot)
+          assert self.field == 0 and self.value is None
+          self.set_typedefType(_fbthrift_typedefType)
+        else:
+          iprot.skip(ftype)
       else:
         iprot.skip(ftype)
       iprot.readFieldEnd()
@@ -921,6 +943,11 @@ class TypeName(object):
       oprot.writeFieldBegin('mapType', TType.I32, 16)
       mapType = self.value
       oprot.writeI32(mapType)
+      oprot.writeFieldEnd()
+    if self.field == 17:
+      oprot.writeFieldBegin('typedefType', TType.STRUCT, 17)
+      typedefType = self.value
+      typedefType.write(oprot)
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
     oprot.writeUnionEnd()
@@ -1027,6 +1054,10 @@ class TypeName(object):
       _fbthrift_enumType = TypeUri()
       _fbthrift_enumType.readFromJson(obj['enumType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
       self.set_enumType(_fbthrift_enumType)
+    if 'typedefType' in obj:
+      _fbthrift_typedefType = TypeUri()
+      _fbthrift_typedefType.readFromJson(obj['typedefType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+      self.set_typedefType(_fbthrift_typedefType)
     if 'structType' in obj:
       _fbthrift_structType = TypeUri()
       _fbthrift_structType.readFromJson(obj['structType'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
@@ -1184,6 +1215,7 @@ TypeName.thrift_spec = (
   (14, TType.I32, 'listType', Void, None, 2, ), # 14
   (15, TType.I32, 'setType', Void, None, 2, ), # 15
   (16, TType.I32, 'mapType', Void, None, 2, ), # 16
+  (17, TType.STRUCT, 'typedefType', [TypeUri, TypeUri.thrift_spec, True], None, 2, ), # 17
 )
 
 TypeName.thrift_struct_annotations = {
@@ -1191,7 +1223,7 @@ TypeName.thrift_struct_annotations = {
 TypeName.thrift_field_annotations = {
 }
 
-def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=None, i64Type=None, floatType=None, doubleType=None, stringType=None, binaryType=None, enumType=None, structType=None, unionType=None, exceptionType=None, listType=None, setType=None, mapType=None,):
+def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=None, i64Type=None, floatType=None, doubleType=None, stringType=None, binaryType=None, enumType=None, typedefType=None, structType=None, unionType=None, exceptionType=None, listType=None, setType=None, mapType=None,):
   self.field = 0
   self.value = None
   if boolType is not None:
@@ -1258,6 +1290,10 @@ def TypeName__init__(self, boolType=None, byteType=None, i16Type=None, i32Type=N
     assert self.field == 0 and self.value is None
     self.field = 16
     self.value = mapType
+  if typedefType is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 17
+    self.value = typedefType
 
 TypeName.__init__ = TypeName__init__
 

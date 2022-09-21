@@ -264,11 +264,37 @@ struct BaseErasedOp {
   [[noreturn]] static size_t size(const void*) { bad_op(); }
 };
 
+template <typename L, typename R>
+class BaseDynCmp {
+ private:
+  friend bool operator==(const L& lhs, const R& rhs) { return lhs.equal(rhs); }
+  friend bool operator!=(const L& lhs, const R& rhs) { return !lhs.equal(rhs); }
+  friend bool operator<(const L& lhs, const R& rhs) {
+    return op::detail::is_lt(lhs.compare(rhs));
+  }
+  friend bool operator<=(const L& lhs, const R& rhs) {
+    return op::detail::is_lteq(lhs.compare(rhs));
+  }
+  friend bool operator>(const L& lhs, const R& rhs) {
+    return op::detail::is_gt(lhs.compare(rhs));
+  }
+  friend bool operator>=(const L& lhs, const R& rhs) {
+    return op::detail::is_gteq(lhs.compare(rhs));
+  }
+};
+
+template <typename T1, typename T2 = T1>
+class DynCmp : public BaseDynCmp<T1, T2>, public BaseDynCmp<T2, T1> {};
+template <typename T>
+class DynCmp<T, T> : public BaseDynCmp<T, T> {};
+
 // TODO(afuller): Consider adding asMap(), asList(), etc, to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
-class BaseDyn : public Dyn, protected BaseDerived<Derived> {
+class BaseDyn : private DynCmp<Derived>,
+                public BaseDerived<Derived>,
+                public Dyn {
   using Base = Dyn;
 
  public:
@@ -378,28 +404,6 @@ class BaseDyn : public Dyn, protected BaseDerived<Derived> {
   void clear(FieldId id) { Base::put(id, ConstT{}); }
   void clear(ConstT key) { Base::put(key, ConstT{}); }
   void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
-
- private:
-  friend class BaseDerived<Derived>;
-
-  friend bool operator==(const Derived& lhs, const Derived& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator!=(const Derived& lhs, const Derived& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator<(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const Derived& lhs, const Derived& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
 };
 
 template <typename Derived, typename ConstT = Derived>

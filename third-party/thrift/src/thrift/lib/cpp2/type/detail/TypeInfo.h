@@ -37,7 +37,7 @@ using op::detail::partial_ordering;
 class Dyn;
 class Ptr;
 
-enum class IterType { Key = 1, Value };
+enum class IterType { Default = 0, Key, Value };
 
 // Runtime type information for a Thrift type.
 struct TypeInfo {

@@ -104,7 +104,7 @@ struct ListOp : ContainerOp<Tag> {
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
-    check_op(t == IterType::Value);
+    check_op(t != IterType::Key);
     return next(VTag{}, ref(s), i);
   }
 };
@@ -141,7 +141,7 @@ struct SetOp : ContainerOp<Tag> {
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
-    check_op(t == IterType::Key);
+    check_op(t != IterType::Value);
     return next(KTag{}, ref(s), i);
   }
 };
@@ -213,10 +213,15 @@ struct MapOp : ContainerOp<Tag> {
         return ret(KTag{}, entry.first);
       case IterType::Value:
         return ret(VTag{}, entry.second);
+      case IterType::Default:
+        unimplemented();
     }
   }
 
   static Ptr next(void* s, IterType type, std::any& i) {
+    if (type == IterType::Default) {
+      unimplemented(); // TODO(afuller): Key-value pair?
+    }
     return next(ref(s), type, iter(ref(s), i));
   }
 };

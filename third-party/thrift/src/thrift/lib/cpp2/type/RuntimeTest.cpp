@@ -117,6 +117,8 @@ TEST(RuntimeTest, List) {
   EXPECT_EQ(ref.size(), 0);
   ref.append(Ref::to<string_t>(elem));
   EXPECT_THAT(value, ::testing::ElementsAre("the"));
+  EXPECT_THAT(ref, ::testing::ElementsAre("the"));
+  EXPECT_THAT(ref, ::testing::SizeIs(1));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
@@ -130,11 +132,15 @@ TEST(RuntimeTest, List) {
 
   ref.append("best");
   ref.append("test");
-  EXPECT_THAT(ref.values(), ::testing::ElementsAre("the", "best", "test"));
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "best", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(3));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
+  EXPECT_THAT(ref, ::testing::ElementsAre());
+  EXPECT_THAT(ref, ::testing::IsEmpty());
+  EXPECT_THAT(ref, ::testing::SizeIs(0));
 }
 
 TEST(RuntimeTest, Set) {
@@ -145,7 +151,8 @@ TEST(RuntimeTest, Set) {
   EXPECT_EQ(ref.size(), 0);
   EXPECT_TRUE(ref.add("best"));
   EXPECT_THAT(value, ::testing::ElementsAre("best"));
-  EXPECT_THAT(ref.keys(), ::testing::ElementsAre("best"));
+  EXPECT_THAT(ref, ::testing::ElementsAre("best"));
+  EXPECT_THAT(ref, ::testing::SizeIs(1));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
@@ -155,13 +162,15 @@ TEST(RuntimeTest, Set) {
 
   ref.add("the");
   ref.add("test");
-  EXPECT_THAT(
-      ref.keys(), ::testing::UnorderedElementsAre("the", "best", "test"));
+  EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "best", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(3));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
-  EXPECT_THAT(ref.keys(), ::testing::ElementsAre());
+  EXPECT_THAT(ref, ::testing::ElementsAre());
+  EXPECT_THAT(ref, ::testing::IsEmpty());
+  EXPECT_THAT(ref, ::testing::SizeIs(0));
 
   EXPECT_THROW(ref.values().begin(), std::logic_error);
 }
@@ -190,6 +199,8 @@ TEST(RuntimeTest, Map) {
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
+
+  EXPECT_THROW(ref.begin(), std::runtime_error);
 }
 
 TEST(RuntimeTest, DynMap) {

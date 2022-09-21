@@ -104,7 +104,7 @@ class Cursor {
   IterType iterType_;
   std::any itr_;
 
-  Cursor(RuntimeType type, void* ptr, IterType iterType)
+  Cursor(RuntimeType type, void* ptr, IterType iterType = IterType::Default)
       : type_(type), ptr_(ptr), iterType_(iterType) {}
 };
 
@@ -206,6 +206,10 @@ class Dyn {
   Ptr get(FieldId id, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
 
+  Cursor items() const { return {type_, ptr_}; }
+  Cursor items(bool ctxConst, bool ctxRvalue = false) const {
+    return {type_.withContext(ctxConst, ctxRvalue), ptr_};
+  }
   Cursor keys() const { return {type_, ptr_, IterType::Key}; }
   Cursor keys(bool ctxConst, bool ctxRvalue = false) const {
     return {type_.withContext(ctxConst, ctxRvalue), ptr_, IterType::Key};
@@ -462,11 +466,22 @@ class BaseDyn : public Dyn,
  public:
   using iterable = Iterable<ConstT, MutT>;
   using const_iterable = Iterable<ConstT>;
+  using iterator = Iter<MutT>;
+  using const_iterator = Iter<ConstT, MutT>;
+  using value_type = ConstT;
+  using size_type = size_t;
 
   using Base::Base;
   explicit BaseDyn(const Base& other) : Base(other) {}
 
   bool identical(const ConstT& rhs) const { return Base::identical(rhs); }
+
+  size_t size() const { return type_->size(ptr_); }
+
+  iterator begin() const { return iterator(Base::items()); }
+  const_iterator cbegin() const { return const_iterator(Base::items()); }
+  iterator end() const { return {}; }
+  const_iterator cend() const { return {}; }
 
   // Get by value.
   MutT get(const Base& key) & { return MutT{Base::get(key)}; }
@@ -499,8 +514,6 @@ class BaseDyn : public Dyn,
   MutT get(Ordinal ord) && { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const& { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const&& { return get(type::toPosition(ord)); }
-
-  size_t size() const { return type_->size(ptr_); }
 
   // Iterate over keys.
   iterable keys() & { return Base::keys(); }

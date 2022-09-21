@@ -406,6 +406,47 @@ class BaseDyn : private DynCmp<Derived>,
   void clear(FieldId id) { Base::put(id, ConstT{}); }
   void clear(ConstT key) { Base::put(key, ConstT{}); }
   void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
+
+ private:
+  friend class BaseDerived<Derived>;
+
+  // TODO(afuller): Support capturing string literals directly and remove these.
+  friend bool operator==(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) == rhs;
+  }
+  friend bool operator!=(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) != rhs;
+  }
+  friend bool operator<(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) < rhs;
+  }
+  friend bool operator<=(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) <= rhs;
+  }
+  friend bool operator>(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) > rhs;
+  }
+  friend bool operator>=(const std::string& lhs, const Derived& rhs) {
+    return asRef<binary_t>(lhs) >= rhs;
+  }
+  friend bool operator==(const Derived& lhs, const std::string& rhs) {
+    return lhs == asRef<binary_t>(rhs);
+  }
+  friend bool operator!=(const Derived& lhs, const std::string& rhs) {
+    return lhs != asRef<binary_t>(rhs);
+  }
+  friend bool operator<(const Derived& lhs, const std::string& rhs) {
+    return lhs < asRef<binary_t>(rhs);
+  }
+  friend bool operator<=(const Derived& lhs, const std::string& rhs) {
+    return lhs <= asRef<binary_t>(rhs);
+  }
+  friend bool operator>(const Derived& lhs, const std::string& rhs) {
+    return lhs > asRef<binary_t>(rhs);
+  }
+  friend bool operator>=(const Derived& lhs, const std::string& rhs) {
+    return lhs >= asRef<binary_t>(rhs);
+  }
 };
 
 template <typename Derived, typename ConstT = Derived>

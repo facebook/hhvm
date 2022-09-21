@@ -138,8 +138,8 @@ TEST(RuntimeTest, List) {
   EXPECT_EQ(ref.size(), 1);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
   EXPECT_THROW(ref["field1"], std::logic_error);
-  EXPECT_EQ(ref[0], Ref::to<string_t>("hi"));
-  EXPECT_EQ(ref[Ordinal{1}], Ref::to<string_t>("hi"));
+  EXPECT_EQ(ref[0], "hi");
+  EXPECT_EQ(ref[Ordinal{1}], "hi");
   EXPECT_THROW(ref[1], std::out_of_range);
   EXPECT_THROW(ref.add(Ref::to<string_t>(value[0])), std::runtime_error);
   EXPECT_THROW(ref[Ref::to(0)], std::logic_error);
@@ -198,7 +198,7 @@ TEST(RuntimeTest, Map_Dyn) {
   EXPECT_EQ(map.size(), 1);
   EXPECT_TRUE(map["empty"].empty());
   EXPECT_EQ(map.size(), 2);
-  EXPECT_EQ(map["hi"], Ref::to<string_t>("bye"));
+  EXPECT_EQ(map["hi"], "bye");
   EXPECT_THROW(map.get("bye"), std::out_of_range);
 }
 
@@ -209,7 +209,7 @@ TEST(RuntimeTest, Struct_Dyn) {
   type::UriStruct& data = obj.as<Tag>();
   EXPECT_EQ(data.scheme(), "http");
   data.scheme() = "ftp";
-  EXPECT_EQ(obj["scheme"], Ref::to<string_t>("ftp"));
+  EXPECT_EQ(obj["scheme"], "ftp");
 }
 
 TEST(RuntimeTest, Map_Add) {
@@ -231,24 +231,24 @@ TEST(RuntimeTest, Struct) {
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 5);
   EXPECT_EQ(*actual.scheme(), "");
-  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>(""));
-  EXPECT_EQ(ref.ensure("scheme", "baz"), Ref::to<string_t>(""));
+  EXPECT_EQ(ref[FieldId{1}], "");
+  EXPECT_EQ(ref.ensure("scheme", "baz"), "");
 
   EXPECT_TRUE(ref.put(FieldId{1}, "foo"));
   EXPECT_EQ(*actual.scheme(), "foo");
-  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>("foo"));
-  EXPECT_EQ(ref.ensure(FieldId{1}, "baz"), Ref::to<string_t>("foo"));
+  EXPECT_EQ(ref[FieldId{1}], "foo");
+  EXPECT_EQ(ref.ensure(FieldId{1}, "baz"), "foo");
   ref.clear(FieldId{1});
   EXPECT_EQ(*actual.scheme(), "");
-  EXPECT_EQ(ref[FieldId{1}], Ref::to<string_t>(""));
+  EXPECT_EQ(ref[FieldId{1}], "");
 
   EXPECT_TRUE(ref.put("scheme", "bar"));
   EXPECT_EQ(*actual.scheme(), "bar");
-  EXPECT_EQ(ref["scheme"], Ref::to<string_t>("bar"));
+  EXPECT_EQ(ref["scheme"], "bar");
   EXPECT_EQ(ref.ensure("scheme"), std::string("bar"));
   ref.clear("scheme");
   EXPECT_EQ(*actual.scheme(), "");
-  EXPECT_EQ(ref["scheme"], Ref::to<string_t>(""));
+  EXPECT_EQ(ref["scheme"], "");
 
   EXPECT_THROW(ref[FieldId{}], std::out_of_range);
   EXPECT_THROW(ref["bad"], std::out_of_range);
@@ -343,7 +343,7 @@ TEST(RuntimeValueTest, CppType_List) {
   using Tag = cpp_type<T, type::list<string_t>>;
   auto list = Value::create<Tag>();
   list.append("foo");
-  EXPECT_EQ(list[0], Ref::to<string_t>("foo"));
+  EXPECT_EQ(list[0], "foo");
 }
 
 TEST(RuntimeValueTest, CppType_Map) {

@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServicePrioParentServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::ping() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_ping() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ping");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::ping() {
+  return sync_ping();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::semifuture_ping() {
@@ -131,8 +135,12 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::pong() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_pong() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("pong");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::pong() {
+  return sync_pong();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::semifuture_pong() {

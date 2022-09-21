@@ -159,7 +159,8 @@ let handler =
 
     method! at_typedef env t =
       check_hint env t.t_kind;
-      Option.iter t.t_constraint ~f:(check_hint env)
+      Option.iter t.t_as_constraint ~f:(check_hint env);
+      Option.iter t.t_super_constraint ~f:(check_hint env)
 
     method! at_class_ env c =
       let check_class_vars cvar =

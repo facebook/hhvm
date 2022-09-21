@@ -76,6 +76,7 @@ struct BaseOp : type::detail::BaseErasedOp {
   }
   static bool empty(const void* ptr) { return op::isEmpty<Tag>(ref(ptr)); }
   static void clear(void* ptr) { op::clear<Tag>(ref(ptr)); }
+  static void assign(void* ptr, const Dyn& val) { ref(ptr) = val.as<Tag>(); }
   static bool identical(const void* lhs, const Dyn& rhs) {
     // Caller should have already checked the types match.
     assert(rhs.type() == Tag{});

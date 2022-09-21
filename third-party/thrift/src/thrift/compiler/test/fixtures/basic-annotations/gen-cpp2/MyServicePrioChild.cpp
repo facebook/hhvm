@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServicePrioChildServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::pang() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::sync_pang() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("pang");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::pang() {
+  return sync_pang();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::semifuture_pang() {

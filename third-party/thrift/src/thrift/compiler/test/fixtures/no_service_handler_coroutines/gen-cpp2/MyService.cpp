@@ -25,8 +25,12 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_foo() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
+  return sync_foo();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_foo() {
@@ -84,8 +88,12 @@ void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_foo(std::unique
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::bar() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_bar() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
+}
+
+void apache::thrift::ServiceHandler<::cpp2::MyService>::bar() {
+  return sync_bar();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_bar() {

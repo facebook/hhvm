@@ -1,7 +1,8 @@
 [("\\HH\\Lib\\Dict\\MixedDict",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = None; td_pos = [5:10-19];
-       td_vis = Transparent; td_tparams = []; td_constraint = None;
+       td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+       td_super_constraint = None;
        td_type =
        (Rhint ([5:22-43]),
         (Tapply (([5:22-26], "\\HH\\dict"),
@@ -77,7 +78,8 @@
   ("\\MyDict",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [16:8-14];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+        td_super_constraint = None;
         td_type =
         (Rhint ([16:17-31]),
          (Tapply (([16:17-31], "\\HH\\Lib\\Dict\\MixedDict"), [])));

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6b1943f18760a66a5897e76805141eaa>>
+// @generated SignedSource<<0e95b0268a9a38b93d9811e4efeccc6d>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1141,12 +1141,13 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 pos: ref __binding_1,
                 vis: ref __binding_2,
                 tparams: ref __binding_3,
-                constraint: ref __binding_4,
-                type_: ref __binding_5,
-                is_ctx: ref __binding_6,
-                attributes: ref __binding_7,
-                internal: ref __binding_8,
-                docs_url: ref __binding_9,
+                as_constraint: ref __binding_4,
+                super_constraint: ref __binding_5,
+                type_: ref __binding_6,
+                is_ctx: ref __binding_7,
+                attributes: ref __binding_8,
+                internal: ref __binding_9,
+                docs_url: ref __binding_10,
             } => {
                 {
                     __binding_0.accept(v)
@@ -1175,7 +1176,10 @@ impl<'a> Node<'a> for TypedefType<'a> {
                 {
                     __binding_8.accept(v)
                 }
-                { __binding_9.accept(v) }
+                {
+                    __binding_9.accept(v)
+                }
+                { __binding_10.accept(v) }
             }
         }
     }

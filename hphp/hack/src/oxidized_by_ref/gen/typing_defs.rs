@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a76301ba5d8c1f7942a2e4ca68ec137b>>
+// @generated SignedSource<<60535165087fd50f656c268f9de0953c>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -540,7 +540,9 @@ pub struct TypedefType<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tparams: &'a [&'a Tparam<'a>],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub constraint: Option<&'a Ty<'a>>,
+    pub as_constraint: Option<&'a Ty<'a>>,
+    #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
+    pub super_constraint: Option<&'a Ty<'a>>,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub type_: &'a Ty<'a>,
     pub is_ctx: bool,

@@ -305,7 +305,8 @@ struct
       td_pos = pos_or_decl tdef.td_pos;
       td_vis = tdef.td_vis;
       td_tparams = List.map tdef.td_tparams ~f:type_param;
-      td_constraint = ty_opt tdef.td_constraint;
+      td_as_constraint = ty_opt tdef.td_as_constraint;
+      td_super_constraint = ty_opt tdef.td_super_constraint;
       td_type = ty tdef.td_type;
       td_is_ctx = tdef.td_is_ctx;
       td_attributes = List.map tdef.td_attributes ~f:user_attribute;

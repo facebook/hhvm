@@ -1,6 +1,6 @@
 --- legacy
 +++ direct decl
-@@ -1,417 +1,389 @@
+@@ -1,422 +1,394 @@
  [("\\Foo",
    (Shallow_decl_defs.Class
       { Shallow_decl_defs.sc_mode = Mstrict; sc_final = false;
@@ -331,7 +331,8 @@
    ("\\T1",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [21:6-8];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+         td_super_constraint = None;
          td_type = (Rhint ([21:11-14]), (Tprim Tint)); td_is_ctx = false;
 -        td_attributes =
 -        [{ Typing_defs_core.ua_name = ([20:15-18], "\\Bar");
@@ -344,7 +345,8 @@
    ("\\T2",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [24:6-8];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+         td_super_constraint = None;
          td_type =
          (Rhint ([24:11-18]), (Toption (Rhint ([24:12-18]), (Tprim Tstring))));
 -        td_is_ctx = false;
@@ -359,7 +361,8 @@
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [27:9-11]; td_vis = Opaque;
          td_tparams = [];
-         td_constraint = (Some (Rhint ([27:15-18]), (Tprim Tint)));
+         td_as_constraint = (Some (Rhint ([27:15-18]), (Tprim Tint)));
+         td_super_constraint = None;
          td_type = (Rhint ([27:21-24]), (Tprim Tint)); td_is_ctx = false;
 -        td_attributes =
 -        [{ Typing_defs_core.ua_name =
@@ -371,7 +374,8 @@
    ("\\T4",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [30:6-8];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+         td_super_constraint = None;
          td_type =
          (Rhint ([30:11-22]),
           (Tapply (([30:11-17], "\\HH\\vec"),
@@ -388,7 +392,8 @@
    ("\\T5",
     (Shallow_decl_defs.Typedef
        { Typing_defs.td_module = None; td_pos = [33:6-8];
-         td_vis = Transparent; td_tparams = []; td_constraint = None;
+         td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+         td_super_constraint = None;
          td_type =
          (Rhint ([33:11-32]),
           (Tfun

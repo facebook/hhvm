@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0c38e8b38f6e9179511079f2cf12eb58>>
+// @generated SignedSource<<d20d753dd323d2afc0ffd4ad9c7d7868>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -480,7 +480,8 @@ pub struct TypedefType {
     pub pos: pos_or_decl::PosOrDecl,
     pub vis: ast_defs::TypedefVisibility,
     pub tparams: Vec<Tparam>,
-    pub constraint: Option<Ty>,
+    pub as_constraint: Option<Ty>,
+    pub super_constraint: Option<Ty>,
     pub type_: Ty,
     pub is_ctx: bool,
     pub attributes: Vec<UserAttribute>,

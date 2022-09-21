@@ -2524,6 +2524,7 @@ class MyStructField21Patch:
   Attributes:
    - assign: Assigns a value. If set, all other operations are ignored.
    - clear: Clears a value. Applies first.
+   - remove: Removes entries, if present. Applies third.
    - prepend: Prepends to the front of a given list.
    - append: Appends to the back of a given list.
   """
@@ -2568,33 +2569,48 @@ class MyStructField21Patch:
           self.clear = iprot.readBool()
         else:
           iprot.skip(ftype)
-      elif fid == 8:
+      elif fid == 7:
         if ftype == TType.LIST:
-          self.prepend = []
+          self.remove = []
           (_etype42, _size39) = iprot.readListBegin()
           if _size39 >= 0:
             for _i43 in range(_size39):
               _elem44 = iprot.readI16()
-              self.prepend.append(_elem44)
+              self.remove.append(_elem44)
           else: 
             while iprot.peekList():
               _elem45 = iprot.readI16()
-              self.prepend.append(_elem45)
+              self.remove.append(_elem45)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.LIST:
+          self.prepend = []
+          (_etype49, _size46) = iprot.readListBegin()
+          if _size46 >= 0:
+            for _i50 in range(_size46):
+              _elem51 = iprot.readI16()
+              self.prepend.append(_elem51)
+          else: 
+            while iprot.peekList():
+              _elem52 = iprot.readI16()
+              self.prepend.append(_elem52)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
       elif fid == 9:
         if ftype == TType.LIST:
           self.append = []
-          (_etype49, _size46) = iprot.readListBegin()
-          if _size46 >= 0:
-            for _i50 in range(_size46):
-              _elem51 = iprot.readI16()
-              self.append.append(_elem51)
+          (_etype56, _size53) = iprot.readListBegin()
+          if _size53 >= 0:
+            for _i57 in range(_size53):
+              _elem58 = iprot.readI16()
+              self.append.append(_elem58)
           else: 
             while iprot.peekList():
-              _elem52 = iprot.readI16()
-              self.append.append(_elem52)
+              _elem59 = iprot.readI16()
+              self.append.append(_elem59)
           iprot.readListEnd()
         else:
           iprot.skip(ftype)
@@ -2614,26 +2630,33 @@ class MyStructField21Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.LIST, 1)
       oprot.writeListBegin(TType.I16, len(self.assign))
-      for iter53 in self.assign:
-        oprot.writeI16(iter53)
+      for iter60 in self.assign:
+        oprot.writeI16(iter60)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
       oprot.writeFieldBegin('clear', TType.BOOL, 2)
       oprot.writeBool(self.clear)
       oprot.writeFieldEnd()
+    if self.remove != None:
+      oprot.writeFieldBegin('remove', TType.LIST, 7)
+      oprot.writeListBegin(TType.I16, len(self.remove))
+      for iter61 in self.remove:
+        oprot.writeI16(iter61)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
     if self.prepend != None:
       oprot.writeFieldBegin('prepend', TType.LIST, 8)
       oprot.writeListBegin(TType.I16, len(self.prepend))
-      for iter54 in self.prepend:
-        oprot.writeI16(iter54)
+      for iter62 in self.prepend:
+        oprot.writeI16(iter62)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     if self.append != None:
       oprot.writeFieldBegin('append', TType.LIST, 9)
       oprot.writeListBegin(TType.I16, len(self.append))
-      for iter55 in self.append:
-        oprot.writeI16(iter55)
+      for iter63 in self.append:
+        oprot.writeI16(iter63)
       oprot.writeListEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2653,24 +2676,30 @@ class MyStructField21Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = []
-      for _tmp_e56 in json_obj['assign']:
-        if _tmp_e56 > 0x7fff or _tmp_e56 < -0x8000:
+      for _tmp_e64 in json_obj['assign']:
+        if _tmp_e64 > 0x7fff or _tmp_e64 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.assign.append(_tmp_e56)
+        self.assign.append(_tmp_e64)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
+    if 'remove' in json_obj and json_obj['remove'] is not None:
+      self.remove = []
+      for _tmp_e65 in json_obj['remove']:
+        if _tmp_e65 > 0x7fff or _tmp_e65 < -0x8000:
+          raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+        self.remove.append(_tmp_e65)
     if 'prepend' in json_obj and json_obj['prepend'] is not None:
       self.prepend = []
-      for _tmp_e57 in json_obj['prepend']:
-        if _tmp_e57 > 0x7fff or _tmp_e57 < -0x8000:
+      for _tmp_e66 in json_obj['prepend']:
+        if _tmp_e66 > 0x7fff or _tmp_e66 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.prepend.append(_tmp_e57)
+        self.prepend.append(_tmp_e66)
     if 'append' in json_obj and json_obj['append'] is not None:
       self.append = []
-      for _tmp_e58 in json_obj['append']:
-        if _tmp_e58 > 0x7fff or _tmp_e58 < -0x8000:
+      for _tmp_e67 in json_obj['append']:
+        if _tmp_e67 > 0x7fff or _tmp_e67 < -0x8000:
           raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
-        self.append.append(_tmp_e58)
+        self.append.append(_tmp_e67)
 
   def __repr__(self):
     L = []
@@ -2683,6 +2712,10 @@ class MyStructField21Patch:
       value = pprint.pformat(self.clear, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    clear=%s' % (value))
+    if self.remove is not None:
+      value = pprint.pformat(self.remove, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    remove=%s' % (value))
     if self.prepend is not None:
       value = pprint.pformat(self.prepend, indent=0)
       value = padding.join(value.splitlines(True))
@@ -2706,6 +2739,7 @@ class MyStructField21Patch:
     return (
       'assign',
       'clear',
+      'remove',
       'prepend',
       'append',
     )
@@ -2760,15 +2794,15 @@ class MyStructField22Patch:
       if fid == 1:
         if ftype == TType.SET:
           self.assign = set()
-          (_etype62, _size59) = iprot.readSetBegin()
-          if _size59 >= 0:
-            for _i63 in range(_size59):
-              _elem64 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign.add(_elem64)
+          (_etype71, _size68) = iprot.readSetBegin()
+          if _size68 >= 0:
+            for _i72 in range(_size68):
+              _elem73 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign.add(_elem73)
           else: 
             while iprot.peekSet():
-              _elem65 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign.add(_elem65)
+              _elem74 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign.add(_elem74)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -2780,30 +2814,30 @@ class MyStructField22Patch:
       elif fid == 7:
         if ftype == TType.SET:
           self.remove = set()
-          (_etype69, _size66) = iprot.readSetBegin()
-          if _size66 >= 0:
-            for _i70 in range(_size66):
-              _elem71 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem71)
+          (_etype78, _size75) = iprot.readSetBegin()
+          if _size75 >= 0:
+            for _i79 in range(_size75):
+              _elem80 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem80)
           else: 
             while iprot.peekSet():
-              _elem72 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.remove.add(_elem72)
+              _elem81 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem81)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
       elif fid == 8:
         if ftype == TType.SET:
           self.add = set()
-          (_etype76, _size73) = iprot.readSetBegin()
-          if _size73 >= 0:
-            for _i77 in range(_size73):
-              _elem78 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add.add(_elem78)
+          (_etype85, _size82) = iprot.readSetBegin()
+          if _size82 >= 0:
+            for _i86 in range(_size82):
+              _elem87 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add.add(_elem87)
           else: 
             while iprot.peekSet():
-              _elem79 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add.add(_elem79)
+              _elem88 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.add.add(_elem88)
           iprot.readSetEnd()
         else:
           iprot.skip(ftype)
@@ -2823,8 +2857,8 @@ class MyStructField22Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.SET, 1)
       oprot.writeSetBegin(TType.STRING, len(self.assign))
-      for iter80 in self.assign:
-        oprot.writeString(iter80.encode('utf-8')) if UTF8STRINGS and not isinstance(iter80, bytes) else oprot.writeString(iter80)
+      for iter89 in self.assign:
+        oprot.writeString(iter89.encode('utf-8')) if UTF8STRINGS and not isinstance(iter89, bytes) else oprot.writeString(iter89)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -2834,15 +2868,15 @@ class MyStructField22Patch:
     if self.remove != None:
       oprot.writeFieldBegin('remove', TType.SET, 7)
       oprot.writeSetBegin(TType.STRING, len(self.remove))
-      for iter81 in self.remove:
-        oprot.writeString(iter81.encode('utf-8')) if UTF8STRINGS and not isinstance(iter81, bytes) else oprot.writeString(iter81)
+      for iter90 in self.remove:
+        oprot.writeString(iter90.encode('utf-8')) if UTF8STRINGS and not isinstance(iter90, bytes) else oprot.writeString(iter90)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.add != None:
       oprot.writeFieldBegin('add', TType.SET, 8)
       oprot.writeSetBegin(TType.STRING, len(self.add))
-      for iter82 in self.add:
-        oprot.writeString(iter82.encode('utf-8')) if UTF8STRINGS and not isinstance(iter82, bytes) else oprot.writeString(iter82)
+      for iter91 in self.add:
+        oprot.writeString(iter91.encode('utf-8')) if UTF8STRINGS and not isinstance(iter91, bytes) else oprot.writeString(iter91)
       oprot.writeSetEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -2862,18 +2896,18 @@ class MyStructField22Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = set_cls()
-      for _tmp_e83 in json_obj['assign']:
-        self.assign.add(_tmp_e83)
+      for _tmp_e92 in json_obj['assign']:
+        self.assign.add(_tmp_e92)
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'remove' in json_obj and json_obj['remove'] is not None:
       self.remove = set_cls()
-      for _tmp_e84 in json_obj['remove']:
-        self.remove.add(_tmp_e84)
+      for _tmp_e93 in json_obj['remove']:
+        self.remove.add(_tmp_e93)
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = set_cls()
-      for _tmp_e85 in json_obj['add']:
-        self.add.add(_tmp_e85)
+      for _tmp_e94 in json_obj['add']:
+        self.add.add(_tmp_e94)
 
   def __repr__(self):
     L = []
@@ -2937,6 +2971,7 @@ class MyStructField23Patch:
    - assign: Assigns a value. If set, all other operations are ignored.
    - clear: Clears a value. Applies first.
    - add: Add the given values, if the keys are not already present. Applies forth.
+   - remove: Removes entries, if present. Applies third.
    - put: Adds or replaces the given key/value pairs. Applies fifth.
   """
 
@@ -2963,17 +2998,17 @@ class MyStructField23Patch:
       if fid == 1:
         if ftype == TType.MAP:
           self.assign = {}
-          (_ktype87, _vtype88, _size86 ) = iprot.readMapBegin() 
-          if _size86 >= 0:
-            for _i90 in range(_size86):
-              _key91 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val92 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign[_key91] = _val92
+          (_ktype96, _vtype97, _size95 ) = iprot.readMapBegin() 
+          if _size95 >= 0:
+            for _i99 in range(_size95):
+              _key100 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val101 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign[_key100] = _val101
           else: 
             while iprot.peekMap():
-              _key93 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val94 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.assign[_key93] = _val94
+              _key102 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val103 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.assign[_key102] = _val103
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -2985,34 +3020,49 @@ class MyStructField23Patch:
       elif fid == 5:
         if ftype == TType.MAP:
           self.add = {}
-          (_ktype96, _vtype97, _size95 ) = iprot.readMapBegin() 
-          if _size95 >= 0:
-            for _i99 in range(_size95):
-              _key100 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val101 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add[_key100] = _val101
-          else: 
-            while iprot.peekMap():
-              _key102 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              _val103 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.add[_key102] = _val103
-          iprot.readMapEnd()
-        else:
-          iprot.skip(ftype)
-      elif fid == 9:
-        if ftype == TType.MAP:
-          self.put = {}
           (_ktype105, _vtype106, _size104 ) = iprot.readMapBegin() 
           if _size104 >= 0:
             for _i108 in range(_size104):
               _key109 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
               _val110 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.put[_key109] = _val110
+              self.add[_key109] = _val110
           else: 
             while iprot.peekMap():
               _key111 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
               _val112 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
-              self.put[_key111] = _val112
+              self.add[_key111] = _val112
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.SET:
+          self.remove = set()
+          (_etype116, _size113) = iprot.readSetBegin()
+          if _size113 >= 0:
+            for _i117 in range(_size113):
+              _elem118 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem118)
+          else: 
+            while iprot.peekSet():
+              _elem119 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.remove.add(_elem119)
+          iprot.readSetEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.MAP:
+          self.put = {}
+          (_ktype121, _vtype122, _size120 ) = iprot.readMapBegin() 
+          if _size120 >= 0:
+            for _i124 in range(_size120):
+              _key125 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val126 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.put[_key125] = _val126
+          else: 
+            while iprot.peekMap():
+              _key127 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              _val128 = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+              self.put[_key127] = _val128
           iprot.readMapEnd()
         else:
           iprot.skip(ftype)
@@ -3032,9 +3082,9 @@ class MyStructField23Patch:
     if self.assign != None:
       oprot.writeFieldBegin('assign', TType.MAP, 1)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.assign))
-      for kiter113,viter114 in self.assign.items():
-        oprot.writeString(kiter113.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter113, bytes) else oprot.writeString(kiter113)
-        oprot.writeString(viter114.encode('utf-8')) if UTF8STRINGS and not isinstance(viter114, bytes) else oprot.writeString(viter114)
+      for kiter129,viter130 in self.assign.items():
+        oprot.writeString(kiter129.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter129, bytes) else oprot.writeString(kiter129)
+        oprot.writeString(viter130.encode('utf-8')) if UTF8STRINGS and not isinstance(viter130, bytes) else oprot.writeString(viter130)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     if self.clear != None:
@@ -3044,17 +3094,24 @@ class MyStructField23Patch:
     if self.add != None:
       oprot.writeFieldBegin('add', TType.MAP, 5)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.add))
-      for kiter115,viter116 in self.add.items():
-        oprot.writeString(kiter115.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter115, bytes) else oprot.writeString(kiter115)
-        oprot.writeString(viter116.encode('utf-8')) if UTF8STRINGS and not isinstance(viter116, bytes) else oprot.writeString(viter116)
+      for kiter131,viter132 in self.add.items():
+        oprot.writeString(kiter131.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter131, bytes) else oprot.writeString(kiter131)
+        oprot.writeString(viter132.encode('utf-8')) if UTF8STRINGS and not isinstance(viter132, bytes) else oprot.writeString(viter132)
       oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.remove != None:
+      oprot.writeFieldBegin('remove', TType.SET, 7)
+      oprot.writeSetBegin(TType.STRING, len(self.remove))
+      for iter133 in self.remove:
+        oprot.writeString(iter133.encode('utf-8')) if UTF8STRINGS and not isinstance(iter133, bytes) else oprot.writeString(iter133)
+      oprot.writeSetEnd()
       oprot.writeFieldEnd()
     if self.put != None:
       oprot.writeFieldBegin('put', TType.MAP, 9)
       oprot.writeMapBegin(TType.STRING, TType.STRING, len(self.put))
-      for kiter117,viter118 in self.put.items():
-        oprot.writeString(kiter117.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter117, bytes) else oprot.writeString(kiter117)
-        oprot.writeString(viter118.encode('utf-8')) if UTF8STRINGS and not isinstance(viter118, bytes) else oprot.writeString(viter118)
+      for kiter134,viter135 in self.put.items():
+        oprot.writeString(kiter134.encode('utf-8')) if UTF8STRINGS and not isinstance(kiter134, bytes) else oprot.writeString(kiter134)
+        oprot.writeString(viter135.encode('utf-8')) if UTF8STRINGS and not isinstance(viter135, bytes) else oprot.writeString(viter135)
       oprot.writeMapEnd()
       oprot.writeFieldEnd()
     oprot.writeFieldStop()
@@ -3074,21 +3131,25 @@ class MyStructField23Patch:
       json_obj = loads(json)
     if 'assign' in json_obj and json_obj['assign'] is not None:
       self.assign = dict_cls()
-      for _tmp_k119, _tmp_v120 in json_obj['assign'].items():
-        _tmp_kp121 = _tmp_k119
-        self.assign[_tmp_kp121] = _tmp_v120
+      for _tmp_k136, _tmp_v137 in json_obj['assign'].items():
+        _tmp_kp138 = _tmp_k136
+        self.assign[_tmp_kp138] = _tmp_v137
     if 'clear' in json_obj and json_obj['clear'] is not None:
       self.clear = json_obj['clear']
     if 'add' in json_obj and json_obj['add'] is not None:
       self.add = dict_cls()
-      for _tmp_k122, _tmp_v123 in json_obj['add'].items():
-        _tmp_kp124 = _tmp_k122
-        self.add[_tmp_kp124] = _tmp_v123
+      for _tmp_k139, _tmp_v140 in json_obj['add'].items():
+        _tmp_kp141 = _tmp_k139
+        self.add[_tmp_kp141] = _tmp_v140
+    if 'remove' in json_obj and json_obj['remove'] is not None:
+      self.remove = set_cls()
+      for _tmp_e142 in json_obj['remove']:
+        self.remove.add(_tmp_e142)
     if 'put' in json_obj and json_obj['put'] is not None:
       self.put = dict_cls()
-      for _tmp_k125, _tmp_v126 in json_obj['put'].items():
-        _tmp_kp127 = _tmp_k125
-        self.put[_tmp_kp127] = _tmp_v126
+      for _tmp_k143, _tmp_v144 in json_obj['put'].items():
+        _tmp_kp145 = _tmp_k143
+        self.put[_tmp_kp145] = _tmp_v144
 
   def __repr__(self):
     L = []
@@ -3105,6 +3166,10 @@ class MyStructField23Patch:
       value = pprint.pformat(self.add, indent=0)
       value = padding.join(value.splitlines(True))
       L.append('    add=%s' % (value))
+    if self.remove is not None:
+      value = pprint.pformat(self.remove, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    remove=%s' % (value))
     if self.put is not None:
       value = pprint.pformat(self.put, indent=0)
       value = padding.join(value.splitlines(True))
@@ -3125,6 +3190,7 @@ class MyStructField23Patch:
       'assign',
       'clear',
       'add',
+      'remove',
       'put',
     )
 
@@ -3807,7 +3873,7 @@ MyStructField21Patch.thrift_spec = (
   None, # 4
   None, # 5
   None, # 6
-  None, # 7
+  (7, TType.LIST, 'remove', (TType.I16,None), None, 2, ), # 7
   (8, TType.LIST, 'prepend', (TType.I16,None), None, 2, ), # 8
   (9, TType.LIST, 'append', (TType.I16,None), None, 2, ), # 9
 )
@@ -3817,9 +3883,10 @@ MyStructField21Patch.thrift_struct_annotations = {
 MyStructField21Patch.thrift_field_annotations = {
 }
 
-def MyStructField21Patch__init__(self, assign=None, clear=None, prepend=None, append=None,):
+def MyStructField21Patch__init__(self, assign=None, clear=None, remove=None, prepend=None, append=None,):
   self.assign = assign
   self.clear = clear
+  self.remove = remove
   self.prepend = prepend
   self.append = append
 
@@ -3828,6 +3895,7 @@ MyStructField21Patch.__init__ = MyStructField21Patch__init__
 def MyStructField21Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
+  state.setdefault('remove', None)
   state.setdefault('prepend', None)
   state.setdefault('append', None)
   self.__dict__ = state
@@ -3880,7 +3948,7 @@ MyStructField23Patch.thrift_spec = (
   None, # 4
   (5, TType.MAP, 'add', (TType.STRING,True,TType.STRING,True), None, 2, ), # 5
   None, # 6
-  None, # 7
+  (7, TType.SET, 'remove', (TType.STRING,True), None, 2, ), # 7
   None, # 8
   (9, TType.MAP, 'put', (TType.STRING,True,TType.STRING,True), None, 2, ), # 9
 )
@@ -3890,10 +3958,11 @@ MyStructField23Patch.thrift_struct_annotations = {
 MyStructField23Patch.thrift_field_annotations = {
 }
 
-def MyStructField23Patch__init__(self, assign=None, clear=None, add=None, put=None,):
+def MyStructField23Patch__init__(self, assign=None, clear=None, add=None, remove=None, put=None,):
   self.assign = assign
   self.clear = clear
   self.add = add
+  self.remove = remove
   self.put = put
 
 MyStructField23Patch.__init__ = MyStructField23Patch__init__
@@ -3902,6 +3971,7 @@ def MyStructField23Patch__setstate__(self, state):
   state.setdefault('assign', None)
   state.setdefault('clear', None)
   state.setdefault('add', None)
+  state.setdefault('remove', None)
   state.setdefault('put', None)
   self.__dict__ = state
 

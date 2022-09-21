@@ -53,7 +53,7 @@ ExternalProject_Add(
 
     "-Dragel_EXECUTABLE=$<TARGET_FILE:ragel>"
 
-    "-Dfmt_DIR=${FMT_INSTALL_DIR}/lib/cmake/fmt"
+    "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dfizz_DIR=${FIZZ_INSTALL_DIR}/lib/cmake/fizz"
     "-DFBThrift_DIR=${THRIFT_INSTALL_DIR}/lib/cmake/fbthrift"

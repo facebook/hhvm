@@ -1003,7 +1003,8 @@ and ('ex, 'en) typedef = {
   t_annotation: 'en;
   t_name: sid;
   t_tparams: ('ex, 'en) tparam list;
-  t_constraint: hint option;
+  t_as_constraint: hint option;
+  t_super_constraint: hint option;
   t_kind: hint;
   t_user_attributes: ('ex, 'en) user_attribute list;
   t_file_attributes: ('ex, 'en) file_attribute list;

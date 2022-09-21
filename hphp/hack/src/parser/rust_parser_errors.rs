@@ -100,6 +100,7 @@ enum UnstableFeatures {
     UpcastExpression,
     RequireClass,
     EnumClassTypeConstants,
+    NewtypeSuperBounds,
 }
 impl UnstableFeatures {
     // Preview features are allowed to run in prod. This function decides
@@ -124,6 +125,7 @@ impl UnstableFeatures {
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Preview,
             UnstableFeatures::EnumClassTypeConstants => Unstable,
+            UnstableFeatures::NewtypeSuperBounds => Unstable,
         }
     }
 }
@@ -4090,6 +4092,17 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             if token_kind(&ad.keyword) == Some(TokenKind::Type) && !ad.constraint.is_missing() {
                 self.errors
                     .push(make_error_from_node(&ad.keyword, errors::error2034))
+            }
+
+            if token_kind(&ad.keyword) == Some(TokenKind::Newtype) {
+                for n in ad.constraint.syntax_node_to_list_skip_separator() {
+                    if let TypeConstraint(c) = &n.children {
+                        if let Some(TokenKind::Super) = token_kind(&c.keyword) {
+                            self.check_can_use_feature(n, &UnstableFeatures::NewtypeSuperBounds);
+                            break;
+                        }
+                    };
+                }
             }
             if !ad.name.is_missing() {
                 let name = self.text(&ad.name);

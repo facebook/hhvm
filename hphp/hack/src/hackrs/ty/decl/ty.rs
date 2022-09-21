@@ -631,7 +631,8 @@ pub struct TypedefType<R: Reason> {
     pub pos: R::Pos,
     pub vis: aast::TypedefVisibility,
     pub tparams: Box<[Tparam<R, Ty<R>>]>,
-    pub constraint: Option<Ty<R>>,
+    pub as_constraint: Option<Ty<R>>,
+    pub super_constraint: Option<Ty<R>>,
     pub ty: Ty<R>,
     pub is_ctx: bool,
     pub attributes: Box<[UserAttribute<R::Pos>]>,
@@ -639,7 +640,7 @@ pub struct TypedefType<R: Reason> {
     pub docs_url: Option<String>,
 }
 
-walkable!(TypedefType<R> => [tparams, constraint, ty]);
+walkable!(TypedefType<R> => [tparams, as_constraint, super_constraint, ty]);
 
 walkable!(ast_defs::ConstraintKind);
 

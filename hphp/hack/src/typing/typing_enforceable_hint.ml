@@ -65,9 +65,9 @@ let validator =
       else
         this#check_generic acc r name
 
-    method! on_newtype acc r sid _ ty _ =
+    method! on_newtype acc r sid _ as_cstr _super_cstr _ =
       if String.equal (snd sid) SN.Classes.cSupportDyn then
-        this#on_type acc ty
+        this#on_type acc as_cstr
       else if acc.Type_validator.like_context then
         acc
       else

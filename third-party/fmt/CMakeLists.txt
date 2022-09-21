@@ -1,5 +1,5 @@
 find_package(fmt 8 CONFIG)
-if (fmt_DIR)
+if (fmt)
   message(STATUS "Using system fmt: ${fmt_DIR}")
 else()
   message(STATUS "Using third-party bundled fmt")

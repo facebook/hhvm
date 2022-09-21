@@ -28,9 +28,12 @@ option(CPACK_GENERATOR "Enable build of distribution packages using CPack" OFF)
 
 option(ENABLE_COTIRE "Speed up the build by precompiling headers" OFF)
 
+include(CheckCXXSymbolExists)
+
 # Mcrouter uses Folly's AtomicSharedPtr, which only supports libstdc++
 # See https://github.com/facebook/hhvm/blob/156a77d5a301033200601ddefb4dcaf26eb1ff9c/third-party/folly/src/folly/concurrency/detail/AtomicSharedPtr-detail.h#L28-L34
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CLANG_FORCE_LIBSTDCXX)
+check_cxx_symbol_exists(__GLIBCXX__ cstdlib DEFAULT_STDLIB_IS_LIBSTDCXX)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND CLANG_FORCE_LIBSTDCXX OR DEFAULT_STDLIB_IS_LIBSTDCXX)
   option(ENABLE_MCROUTER "Build the mcrouter library and extension" ON)
 else()
   option(ENABLE_MCROUTER "Build the mcrouter library and extension" OFF)

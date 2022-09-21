@@ -52,7 +52,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
  public:
 
   virtual void sync_getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
-  virtual void getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
+  [[deprecated("Use sync_getDataByKey0 instead")]] virtual void getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataByKey0(std::unique_ptr<::std::string> p_key);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_getDataByKey0(std::unique_ptr<::std::string> p_key);
 #if FOLLY_HAS_COROUTINES
@@ -61,7 +61,7 @@ class ServiceHandler<::test::fixtures::basic::DbMixedStackArguments> : public ap
 #endif
   virtual void async_tm_getDataByKey0(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_key);
   virtual void sync_getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
-  virtual void getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
+  [[deprecated("Use sync_getDataByKey1 instead")]] virtual void getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_getDataByKey1(std::unique_ptr<::std::string> p_key);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_getDataByKey1(std::unique_ptr<::std::string> p_key);
 #if FOLLY_HAS_COROUTINES

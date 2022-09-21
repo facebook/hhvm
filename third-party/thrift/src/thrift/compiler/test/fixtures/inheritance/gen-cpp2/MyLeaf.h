@@ -52,7 +52,7 @@ class ServiceHandler<::cpp2::MyLeaf> : virtual public ::cpp2::MyNodeSvIf {
  public:
 
   virtual void sync_do_leaf();
-  virtual void do_leaf();
+  [[deprecated("Use sync_do_leaf instead")]] virtual void do_leaf();
   virtual folly::Future<folly::Unit> future_do_leaf();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_leaf();
 #if FOLLY_HAS_COROUTINES

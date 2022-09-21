@@ -52,7 +52,7 @@ class ServiceHandler<::test::fixtures::basic::FooService> : public apache::thrif
  public:
 
   virtual void sync_simple_rpc();
-  virtual void simple_rpc();
+  [[deprecated("Use sync_simple_rpc instead")]] virtual void simple_rpc();
   virtual folly::Future<folly::Unit> future_simple_rpc();
   virtual folly::SemiFuture<folly::Unit> semifuture_simple_rpc();
 #if FOLLY_HAS_COROUTINES

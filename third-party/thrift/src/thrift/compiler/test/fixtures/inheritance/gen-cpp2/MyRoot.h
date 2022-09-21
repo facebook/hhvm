@@ -47,7 +47,7 @@ class ServiceHandler<::cpp2::MyRoot> : public apache::thrift::ServerInterface {
  public:
 
   virtual void sync_do_root();
-  virtual void do_root();
+  [[deprecated("Use sync_do_root instead")]] virtual void do_root();
   virtual folly::Future<folly::Unit> future_do_root();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_root();
 #if FOLLY_HAS_COROUTINES

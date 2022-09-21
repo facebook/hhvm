@@ -49,7 +49,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
  public:
 
   virtual void sync_query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
-  virtual void query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
+  [[deprecated("Use sync_query instead")]] virtual void query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
   virtual folly::Future<folly::Unit> future_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual folly::SemiFuture<folly::Unit> semifuture_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
 #if FOLLY_HAS_COROUTINES
@@ -58,7 +58,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 #endif
   virtual void async_tm_query(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual void sync_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
-  virtual void has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
+  [[deprecated("Use sync_has_arg_docs instead")]] virtual void has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/);
   virtual folly::Future<folly::Unit> future_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
   virtual folly::SemiFuture<folly::Unit> semifuture_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i);
 #if FOLLY_HAS_COROUTINES

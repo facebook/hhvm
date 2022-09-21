@@ -52,7 +52,7 @@ class ServiceHandler<::test::fixtures::basic::MyService> : public apache::thrift
  public:
 
   virtual void sync_query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
-  virtual void query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
+  [[deprecated("Use sync_query instead")]] virtual void query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/);
   virtual folly::Future<std::unique_ptr<::test::fixtures::basic::MyStruct>> future_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
   virtual folly::SemiFuture<std::unique_ptr<::test::fixtures::basic::MyStruct>> semifuture_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u);
 #if FOLLY_HAS_COROUTINES

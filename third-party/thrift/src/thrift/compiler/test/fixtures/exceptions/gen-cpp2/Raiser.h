@@ -48,7 +48,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
  public:
 
   virtual void sync_doBland();
-  virtual void doBland();
+  [[deprecated("Use sync_doBland instead")]] virtual void doBland();
   virtual folly::Future<folly::Unit> future_doBland();
   virtual folly::SemiFuture<folly::Unit> semifuture_doBland();
 #if FOLLY_HAS_COROUTINES
@@ -57,7 +57,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
 #endif
   virtual void async_tm_doBland(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void sync_doRaise();
-  virtual void doRaise();
+  [[deprecated("Use sync_doRaise instead")]] virtual void doRaise();
   virtual folly::Future<folly::Unit> future_doRaise();
   virtual folly::SemiFuture<folly::Unit> semifuture_doRaise();
 #if FOLLY_HAS_COROUTINES
@@ -66,7 +66,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
 #endif
   virtual void async_tm_doRaise(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void sync_get200(::std::string& /*_return*/);
-  virtual void get200(::std::string& /*_return*/);
+  [[deprecated("Use sync_get200 instead")]] virtual void get200(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get200();
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_get200();
 #if FOLLY_HAS_COROUTINES
@@ -75,7 +75,7 @@ class ServiceHandler<::cpp2::Raiser> : public apache::thrift::ServerInterface {
 #endif
   virtual void async_tm_get200(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback);
   virtual void sync_get500(::std::string& /*_return*/);
-  virtual void get500(::std::string& /*_return*/);
+  [[deprecated("Use sync_get500 instead")]] virtual void get500(::std::string& /*_return*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get500();
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_get500();
 #if FOLLY_HAS_COROUTINES

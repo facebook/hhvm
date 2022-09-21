@@ -56,7 +56,7 @@ class ServiceHandler<::facebook::thrift::test::Service> : public apache::thrift:
  public:
 
   virtual ::facebook::thrift::test::MyI32 sync_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
-  virtual ::facebook::thrift::test::MyI32 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
+  [[deprecated("Use sync_func instead")]] virtual ::facebook::thrift::test::MyI32 func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/);
   virtual folly::Future<::facebook::thrift::test::MyI32> future_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
   virtual folly::SemiFuture<::facebook::thrift::test::MyI32> semifuture_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3);
 #if FOLLY_HAS_COROUTINES

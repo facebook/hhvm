@@ -53,7 +53,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
  public:
 
   virtual bool sync_simple_function();
-  virtual bool simple_function();
+  [[deprecated("Use sync_simple_function instead")]] virtual bool simple_function();
   virtual folly::Future<bool> future_simple_function();
   virtual folly::SemiFuture<bool> semifuture_simple_function();
 #if FOLLY_HAS_COROUTINES
@@ -63,7 +63,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual void async_tm_simple_function(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback);
   virtual void async_eb_throws_function(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual bool sync_throws_function2(bool /*param1*/);
-  virtual bool throws_function2(bool /*param1*/);
+  [[deprecated("Use sync_throws_function2 instead")]] virtual bool throws_function2(bool /*param1*/);
   virtual folly::Future<bool> future_throws_function2(bool p_param1);
   virtual folly::SemiFuture<bool> semifuture_throws_function2(bool p_param1);
 #if FOLLY_HAS_COROUTINES
@@ -72,7 +72,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 #endif
   virtual void async_tm_throws_function2(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, bool p_param1);
   virtual void sync_throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/);
-  virtual void throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/);
+  [[deprecated("Use sync_throws_function3 instead")]] virtual void throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/);
   virtual folly::Future<::std::map<::std::int32_t, ::std::string>> future_throws_function3(bool p_param1, const ::std::string& p_param2);
   virtual folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> semifuture_throws_function3(bool p_param1, const ::std::string& p_param2);
 #if FOLLY_HAS_COROUTINES
@@ -81,7 +81,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 #endif
   virtual void async_tm_throws_function3(std::unique_ptr<apache::thrift::HandlerCallback<::std::map<::std::int32_t, ::std::string>>> callback, bool p_param1, const ::std::string& p_param2);
   virtual void sync_oneway_void_ret();
-  virtual void oneway_void_ret();
+  [[deprecated("Use sync_oneway_void_ret instead")]] virtual void oneway_void_ret();
   virtual folly::Future<folly::Unit> future_oneway_void_ret();
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret();
 #if FOLLY_HAS_COROUTINES
@@ -90,7 +90,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 #endif
   virtual void async_tm_oneway_void_ret(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback);
   virtual void sync_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/);
-  virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/);
+  [[deprecated("Use sync_oneway_void_ret_i32_i32_i32_i32_i32_param instead")]] virtual void oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
 #if FOLLY_HAS_COROUTINES
@@ -100,7 +100,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
   virtual void async_tm_oneway_void_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   virtual void async_eb_oneway_void_ret_map_setlist_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   virtual void sync_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/);
-  virtual void oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/);
+  [[deprecated("Use sync_oneway_void_ret_struct_param instead")]] virtual void oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1);
 #if FOLLY_HAS_COROUTINES
@@ -109,7 +109,7 @@ class ServiceHandler<::extra::svc::ExtraService> : virtual public ::some::valid:
 #endif
   virtual void async_tm_oneway_void_ret_struct_param(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, const ::some::valid::ns::MyStruct& p_param1);
   virtual void sync_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/);
-  virtual void oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/);
+  [[deprecated("Use sync_oneway_void_ret_listunion_param instead")]] virtual void oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/);
   virtual folly::Future<folly::Unit> future_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   virtual folly::SemiFuture<folly::Unit> semifuture_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
 #if FOLLY_HAS_COROUTINES

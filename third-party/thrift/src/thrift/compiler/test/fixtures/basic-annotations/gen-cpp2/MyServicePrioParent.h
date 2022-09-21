@@ -48,7 +48,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
  public:
 
   virtual void sync_ping();
-  virtual void ping();
+  [[deprecated("Use sync_ping instead")]] virtual void ping();
   virtual folly::Future<folly::Unit> future_ping();
   virtual folly::SemiFuture<folly::Unit> semifuture_ping();
 #if FOLLY_HAS_COROUTINES
@@ -57,7 +57,7 @@ class ServiceHandler<::cpp2::MyServicePrioParent> : public apache::thrift::Serve
 #endif
   virtual void async_tm_ping(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void sync_pong();
-  virtual void pong();
+  [[deprecated("Use sync_pong instead")]] virtual void pong();
   virtual folly::Future<folly::Unit> future_pong();
   virtual folly::SemiFuture<folly::Unit> semifuture_pong();
 #if FOLLY_HAS_COROUTINES

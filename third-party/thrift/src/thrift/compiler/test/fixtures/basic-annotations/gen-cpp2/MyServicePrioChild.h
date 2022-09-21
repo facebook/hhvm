@@ -53,7 +53,7 @@ class ServiceHandler<::cpp2::MyServicePrioChild> : virtual public ::cpp2::MyServ
  public:
 
   virtual void sync_pang();
-  virtual void pang();
+  [[deprecated("Use sync_pang instead")]] virtual void pang();
   virtual folly::Future<folly::Unit> future_pang();
   virtual folly::SemiFuture<folly::Unit> semifuture_pang();
 #if FOLLY_HAS_COROUTINES

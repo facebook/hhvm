@@ -48,7 +48,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
  public:
 
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/);
-  virtual ::apache::thrift::ServerStream<::std::int32_t> returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/);
+  [[deprecated("Use sync_returnstream instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> returnstream(::std::int32_t /*i32_from*/, ::std::int32_t /*i32_to*/);
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_returnstream(::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
 #if FOLLY_HAS_COROUTINES
@@ -57,7 +57,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_returnstream(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_i32_from, ::std::int32_t p_i32_to);
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_streamthrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ServerStream<::std::int32_t> streamthrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_streamthrows instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> streamthrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_streamthrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_streamthrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -66,7 +66,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_streamthrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_servicethrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ServerStream<::std::int32_t> servicethrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_servicethrows instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> servicethrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_servicethrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_servicethrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -75,7 +75,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_servicethrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_boththrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ServerStream<::std::int32_t> boththrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_boththrows instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> boththrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_boththrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_boththrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -84,7 +84,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_boththrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> sync_responseandstreamstreamthrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamstreamthrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_responseandstreamstreamthrows instead")]] virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamstreamthrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> future_responseandstreamstreamthrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> semifuture_responseandstreamstreamthrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -93,7 +93,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_responseandstreamstreamthrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> sync_responseandstreamservicethrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamservicethrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_responseandstreamservicethrows instead")]] virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamservicethrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> future_responseandstreamservicethrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> semifuture_responseandstreamservicethrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -102,7 +102,7 @@ class ServiceHandler<::cpp2::PubSubStreamingService> : public apache::thrift::Se
 #endif
   virtual void async_tm_responseandstreamservicethrows(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>>> callback, ::std::int32_t p_foo);
   virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> sync_responseandstreamboththrows(::std::int32_t /*foo*/);
-  virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamboththrows(::std::int32_t /*foo*/);
+  [[deprecated("Use sync_responseandstreamboththrows instead")]] virtual ::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t> responseandstreamboththrows(::std::int32_t /*foo*/);
   virtual folly::Future<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> future_responseandstreamboththrows(::std::int32_t p_foo);
   virtual folly::SemiFuture<::apache::thrift::ResponseAndServerStream<::std::int32_t, ::std::int32_t>> semifuture_responseandstreamboththrows(::std::int32_t p_foo);
 #if FOLLY_HAS_COROUTINES

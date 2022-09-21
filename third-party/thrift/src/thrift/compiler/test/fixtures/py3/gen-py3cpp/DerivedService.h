@@ -52,7 +52,7 @@ class ServiceHandler<::py3::simple::DerivedService> : virtual public ::py3::simp
  public:
 
   virtual ::std::int32_t sync_get_six();
-  virtual ::std::int32_t get_six();
+  [[deprecated("Use sync_get_six instead")]] virtual ::std::int32_t get_six();
   virtual folly::Future<::std::int32_t> future_get_six();
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_six();
 #if FOLLY_HAS_COROUTINES

@@ -52,7 +52,7 @@ class ServiceHandler<::cpp2::MyNode> : virtual public ::cpp2::MyRootSvIf {
  public:
 
   virtual void sync_do_mid();
-  virtual void do_mid();
+  [[deprecated("Use sync_do_mid instead")]] virtual void do_mid();
   virtual folly::Future<folly::Unit> future_do_mid();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_mid();
 #if FOLLY_HAS_COROUTINES

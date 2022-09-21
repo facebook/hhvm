@@ -76,7 +76,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
     std::terminate();
   }
   virtual void sync_interact();
-  virtual void interact();
+  [[deprecated("Use sync_interact instead")]] virtual void interact();
   virtual folly::SemiFuture<folly::Unit> semifuture_interact();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<void> co_interact();
@@ -88,7 +88,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
 };
   virtual std::unique_ptr<IIf> createI();
   virtual void sync_foo(::cpp2::Foo& /*_return*/);
-  virtual void foo(::cpp2::Foo& /*_return*/);
+  [[deprecated("Use sync_foo instead")]] virtual void foo(::cpp2::Foo& /*_return*/);
   virtual folly::Future<std::unique_ptr<::cpp2::Foo>> future_foo();
   virtual folly::SemiFuture<std::unique_ptr<::cpp2::Foo>> semifuture_foo();
 #if FOLLY_HAS_COROUTINES
@@ -191,7 +191,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
  public:
 
   virtual void sync_bar(std::unique_ptr<::cpp2::Foo> /*foo*/);
-  virtual void bar(std::unique_ptr<::cpp2::Foo> /*foo*/);
+  [[deprecated("Use sync_bar instead")]] virtual void bar(std::unique_ptr<::cpp2::Foo> /*foo*/);
   virtual folly::Future<folly::Unit> future_bar(std::unique_ptr<::cpp2::Foo> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_bar(std::unique_ptr<::cpp2::Foo> p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -200,7 +200,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 #endif
   virtual void async_tm_bar(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::cpp2::Foo> p_foo);
   virtual ::apache::thrift::ServerStream<::std::int32_t> sync_stream_stuff();
-  virtual ::apache::thrift::ServerStream<::std::int32_t> stream_stuff();
+  [[deprecated("Use sync_stream_stuff instead")]] virtual ::apache::thrift::ServerStream<::std::int32_t> stream_stuff();
   virtual folly::Future<::apache::thrift::ServerStream<::std::int32_t>> future_stream_stuff();
   virtual folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> semifuture_stream_stuff();
 #if FOLLY_HAS_COROUTINES
@@ -209,7 +209,7 @@ class ServiceHandler<::cpp2::B> : virtual public ::cpp2::ASvIf {
 #endif
   virtual void async_tm_stream_stuff(std::unique_ptr<apache::thrift::HandlerCallback<::apache::thrift::ServerStream<::std::int32_t>>> callback);
   virtual ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> sync_sink_stuff();
-  virtual ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> sink_stuff();
+  [[deprecated("Use sync_sink_stuff instead")]] virtual ::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> sink_stuff();
   virtual folly::Future<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> future_sink_stuff();
   virtual folly::SemiFuture<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> semifuture_sink_stuff();
 #if FOLLY_HAS_COROUTINES
@@ -332,7 +332,7 @@ class IIf : public apache::thrift::Tile, public apache::thrift::ServerInterface 
     std::terminate();
   }
   virtual void sync_interact();
-  virtual void interact();
+  [[deprecated("Use sync_interact instead")]] virtual void interact();
   virtual folly::SemiFuture<folly::Unit> semifuture_interact();
 #if FOLLY_HAS_COROUTINES
   virtual folly::coro::Task<void> co_interact();

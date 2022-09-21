@@ -47,7 +47,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
  public:
 
   virtual ::std::int32_t sync_get_five();
-  virtual ::std::int32_t get_five();
+  [[deprecated("Use sync_get_five instead")]] virtual ::std::int32_t get_five();
   virtual folly::Future<::std::int32_t> future_get_five();
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_five();
 #if FOLLY_HAS_COROUTINES
@@ -56,7 +56,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_five(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t sync_add_five(::std::int32_t /*num*/);
-  virtual ::std::int32_t add_five(::std::int32_t /*num*/);
+  [[deprecated("Use sync_add_five instead")]] virtual ::std::int32_t add_five(::std::int32_t /*num*/);
   virtual folly::Future<::std::int32_t> future_add_five(::std::int32_t p_num);
   virtual folly::SemiFuture<::std::int32_t> semifuture_add_five(::std::int32_t p_num);
 #if FOLLY_HAS_COROUTINES
@@ -65,7 +65,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_add_five(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, ::std::int32_t p_num);
   virtual void sync_do_nothing();
-  virtual void do_nothing();
+  [[deprecated("Use sync_do_nothing instead")]] virtual void do_nothing();
   virtual folly::Future<folly::Unit> future_do_nothing();
   virtual folly::SemiFuture<folly::Unit> semifuture_do_nothing();
 #if FOLLY_HAS_COROUTINES
@@ -74,7 +74,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_do_nothing(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void sync_concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/);
-  virtual void concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/);
+  [[deprecated("Use sync_concat instead")]] virtual void concat(::std::string& /*_return*/, std::unique_ptr<::std::string> /*first*/, std::unique_ptr<::std::string> /*second*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_concat(std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_concat(std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second);
 #if FOLLY_HAS_COROUTINES
@@ -83,7 +83,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_concat(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_first, std::unique_ptr<::std::string> p_second);
   virtual ::std::int32_t sync_get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/);
-  virtual ::std::int32_t get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/);
+  [[deprecated("Use sync_get_value instead")]] virtual ::std::int32_t get_value(std::unique_ptr<::py3::simple::SimpleStruct> /*simple_struct*/);
   virtual folly::Future<::std::int32_t> future_get_value(std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct);
   virtual folly::SemiFuture<::std::int32_t> semifuture_get_value(std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct);
 #if FOLLY_HAS_COROUTINES
@@ -92,7 +92,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_value(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::py3::simple::SimpleStruct> p_simple_struct);
   virtual bool sync_negate(bool /*input*/);
-  virtual bool negate(bool /*input*/);
+  [[deprecated("Use sync_negate instead")]] virtual bool negate(bool /*input*/);
   virtual folly::Future<bool> future_negate(bool p_input);
   virtual folly::SemiFuture<bool> semifuture_negate(bool p_input);
 #if FOLLY_HAS_COROUTINES
@@ -101,7 +101,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_negate(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, bool p_input);
   virtual ::std::int8_t sync_tiny(::std::int8_t /*input*/);
-  virtual ::std::int8_t tiny(::std::int8_t /*input*/);
+  [[deprecated("Use sync_tiny instead")]] virtual ::std::int8_t tiny(::std::int8_t /*input*/);
   virtual folly::Future<::std::int8_t> future_tiny(::std::int8_t p_input);
   virtual folly::SemiFuture<::std::int8_t> semifuture_tiny(::std::int8_t p_input);
 #if FOLLY_HAS_COROUTINES
@@ -110,7 +110,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_tiny(std::unique_ptr<apache::thrift::HandlerCallback<::std::int8_t>> callback, ::std::int8_t p_input);
   virtual ::std::int16_t sync_small(::std::int16_t /*input*/);
-  virtual ::std::int16_t small(::std::int16_t /*input*/);
+  [[deprecated("Use sync_small instead")]] virtual ::std::int16_t small(::std::int16_t /*input*/);
   virtual folly::Future<::std::int16_t> future_small(::std::int16_t p_input);
   virtual folly::SemiFuture<::std::int16_t> semifuture_small(::std::int16_t p_input);
 #if FOLLY_HAS_COROUTINES
@@ -119,7 +119,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_small(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, ::std::int16_t p_input);
   virtual ::std::int64_t sync_big(::std::int64_t /*input*/);
-  virtual ::std::int64_t big(::std::int64_t /*input*/);
+  [[deprecated("Use sync_big instead")]] virtual ::std::int64_t big(::std::int64_t /*input*/);
   virtual folly::Future<::std::int64_t> future_big(::std::int64_t p_input);
   virtual folly::SemiFuture<::std::int64_t> semifuture_big(::std::int64_t p_input);
 #if FOLLY_HAS_COROUTINES
@@ -128,7 +128,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_big(std::unique_ptr<apache::thrift::HandlerCallback<::std::int64_t>> callback, ::std::int64_t p_input);
   virtual double sync_two(double /*input*/);
-  virtual double two(double /*input*/);
+  [[deprecated("Use sync_two instead")]] virtual double two(double /*input*/);
   virtual folly::Future<double> future_two(double p_input);
   virtual folly::SemiFuture<double> semifuture_two(double p_input);
 #if FOLLY_HAS_COROUTINES
@@ -137,7 +137,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_two(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, double p_input);
   virtual void sync_expected_exception();
-  virtual void expected_exception();
+  [[deprecated("Use sync_expected_exception instead")]] virtual void expected_exception();
   virtual folly::Future<folly::Unit> future_expected_exception();
   virtual folly::SemiFuture<folly::Unit> semifuture_expected_exception();
 #if FOLLY_HAS_COROUTINES
@@ -146,7 +146,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_expected_exception(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual ::std::int32_t sync_unexpected_exception();
-  virtual ::std::int32_t unexpected_exception();
+  [[deprecated("Use sync_unexpected_exception instead")]] virtual ::std::int32_t unexpected_exception();
   virtual folly::Future<::std::int32_t> future_unexpected_exception();
   virtual folly::SemiFuture<::std::int32_t> semifuture_unexpected_exception();
 #if FOLLY_HAS_COROUTINES
@@ -155,7 +155,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_unexpected_exception(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t sync_sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/);
-  virtual ::std::int32_t sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/);
+  [[deprecated("Use sync_sum_i16_list instead")]] virtual ::std::int32_t sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> /*numbers*/);
   virtual folly::Future<::std::int32_t> future_sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> p_numbers);
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i16_list(std::unique_ptr<::std::vector<::std::int16_t>> p_numbers);
 #if FOLLY_HAS_COROUTINES
@@ -164,7 +164,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_sum_i16_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int16_t>> p_numbers);
   virtual ::std::int32_t sync_sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/);
-  virtual ::std::int32_t sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/);
+  [[deprecated("Use sync_sum_i32_list instead")]] virtual ::std::int32_t sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> /*numbers*/);
   virtual folly::Future<::std::int32_t> future_sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> p_numbers);
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i32_list(std::unique_ptr<::std::vector<::std::int32_t>> p_numbers);
 #if FOLLY_HAS_COROUTINES
@@ -173,7 +173,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_sum_i32_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int32_t>> p_numbers);
   virtual ::std::int32_t sync_sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/);
-  virtual ::std::int32_t sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/);
+  [[deprecated("Use sync_sum_i64_list instead")]] virtual ::std::int32_t sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> /*numbers*/);
   virtual folly::Future<::std::int32_t> future_sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> p_numbers);
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_i64_list(std::unique_ptr<::std::vector<::std::int64_t>> p_numbers);
 #if FOLLY_HAS_COROUTINES
@@ -182,7 +182,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_sum_i64_list(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::std::int64_t>> p_numbers);
   virtual void sync_concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
-  virtual void concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
+  [[deprecated("Use sync_concat_many instead")]] virtual void concat_many(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_concat_many(std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_concat_many(std::unique_ptr<::std::vector<::std::string>> p_words);
 #if FOLLY_HAS_COROUTINES
@@ -191,7 +191,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_concat_many(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual ::std::int32_t sync_count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/);
-  virtual ::std::int32_t count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/);
+  [[deprecated("Use sync_count_structs instead")]] virtual ::std::int32_t count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> /*items*/);
   virtual folly::Future<::std::int32_t> future_count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items);
   virtual folly::SemiFuture<::std::int32_t> semifuture_count_structs(std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items);
 #if FOLLY_HAS_COROUTINES
@@ -200,7 +200,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_count_structs(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::vector<::py3::simple::SimpleStruct>> p_items);
   virtual ::std::int32_t sync_sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/);
-  virtual ::std::int32_t sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/);
+  [[deprecated("Use sync_sum_set instead")]] virtual ::std::int32_t sum_set(std::unique_ptr<::std::set<::std::int32_t>> /*numbers*/);
   virtual folly::Future<::std::int32_t> future_sum_set(std::unique_ptr<::std::set<::std::int32_t>> p_numbers);
   virtual folly::SemiFuture<::std::int32_t> semifuture_sum_set(std::unique_ptr<::std::set<::std::int32_t>> p_numbers);
 #if FOLLY_HAS_COROUTINES
@@ -209,7 +209,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_sum_set(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::set<::std::int32_t>> p_numbers);
   virtual bool sync_contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/);
-  virtual bool contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/);
+  [[deprecated("Use sync_contains_word instead")]] virtual bool contains_word(std::unique_ptr<::std::set<::std::string>> /*words*/, std::unique_ptr<::std::string> /*word*/);
   virtual folly::Future<bool> future_contains_word(std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word);
   virtual folly::SemiFuture<bool> semifuture_contains_word(std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word);
 #if FOLLY_HAS_COROUTINES
@@ -218,7 +218,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_contains_word(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, std::unique_ptr<::std::set<::std::string>> p_words, std::unique_ptr<::std::string> p_word);
   virtual void sync_get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/);
-  virtual void get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/);
+  [[deprecated("Use sync_get_map_value instead")]] virtual void get_map_value(::std::string& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::string>> /*words*/, std::unique_ptr<::std::string> /*key*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_get_map_value(std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_get_map_value(std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key);
 #if FOLLY_HAS_COROUTINES
@@ -227,7 +227,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_map_value(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::map<::std::string, ::std::string>> p_words, std::unique_ptr<::std::string> p_key);
   virtual ::std::int16_t sync_map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/);
-  virtual ::std::int16_t map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/);
+  [[deprecated("Use sync_map_length instead")]] virtual ::std::int16_t map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> /*items*/);
   virtual folly::Future<::std::int16_t> future_map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items);
   virtual folly::SemiFuture<::std::int16_t> semifuture_map_length(std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items);
 #if FOLLY_HAS_COROUTINES
@@ -236,7 +236,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_map_length(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, std::unique_ptr<::std::map<::std::string, ::py3::simple::SimpleStruct>> p_items);
   virtual ::std::int16_t sync_sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/);
-  virtual ::std::int16_t sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/);
+  [[deprecated("Use sync_sum_map_values instead")]] virtual ::std::int16_t sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> /*items*/);
   virtual folly::Future<::std::int16_t> future_sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items);
   virtual folly::SemiFuture<::std::int16_t> semifuture_sum_map_values(std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items);
 #if FOLLY_HAS_COROUTINES
@@ -245,7 +245,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_sum_map_values(std::unique_ptr<apache::thrift::HandlerCallback<::std::int16_t>> callback, std::unique_ptr<::std::map<::std::string, ::std::int16_t>> p_items);
   virtual ::std::int32_t sync_complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
-  virtual ::std::int32_t complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
+  [[deprecated("Use sync_complex_sum_i32 instead")]] virtual ::std::int32_t complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
   virtual folly::Future<::std::int32_t> future_complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
   virtual folly::SemiFuture<::std::int32_t> semifuture_complex_sum_i32(std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
 #if FOLLY_HAS_COROUTINES
@@ -254,7 +254,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_complex_sum_i32(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
   virtual void sync_repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
-  virtual void repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
+  [[deprecated("Use sync_repeat_name instead")]] virtual void repeat_name(::std::string& /*_return*/, std::unique_ptr<::py3::simple::ComplexStruct> /*counter*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_repeat_name(std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_repeat_name(std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
 #if FOLLY_HAS_COROUTINES
@@ -263,7 +263,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_repeat_name(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::py3::simple::ComplexStruct> p_counter);
   virtual void sync_get_struct(::py3::simple::SimpleStruct& /*_return*/);
-  virtual void get_struct(::py3::simple::SimpleStruct& /*_return*/);
+  [[deprecated("Use sync_get_struct instead")]] virtual void get_struct(::py3::simple::SimpleStruct& /*_return*/);
   virtual folly::Future<std::unique_ptr<::py3::simple::SimpleStruct>> future_get_struct();
   virtual folly::SemiFuture<std::unique_ptr<::py3::simple::SimpleStruct>> semifuture_get_struct();
 #if FOLLY_HAS_COROUTINES
@@ -272,7 +272,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_struct(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::py3::simple::SimpleStruct>>> callback);
   virtual void sync_fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/);
-  virtual void fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/);
+  [[deprecated("Use sync_fib instead")]] virtual void fib(::std::vector<::std::int32_t>& /*_return*/, ::std::int16_t /*n*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::std::int32_t>>> future_fib(::std::int16_t p_n);
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::std::int32_t>>> semifuture_fib(::std::int16_t p_n);
 #if FOLLY_HAS_COROUTINES
@@ -281,7 +281,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_fib(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::int32_t>>>> callback, ::std::int16_t p_n);
   virtual void sync_unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
-  virtual void unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
+  [[deprecated("Use sync_unique_words instead")]] virtual void unique_words(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
   virtual folly::Future<std::unique_ptr<::std::set<::std::string>>> future_unique_words(std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> semifuture_unique_words(std::unique_ptr<::std::vector<::std::string>> p_words);
 #if FOLLY_HAS_COROUTINES
@@ -290,7 +290,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_unique_words(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual void sync_words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
-  virtual void words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
+  [[deprecated("Use sync_words_count instead")]] virtual void words_count(::std::map<::std::string, ::std::int16_t>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*words*/);
   virtual folly::Future<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>> future_words_count(std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>> semifuture_words_count(std::unique_ptr<::std::vector<::std::string>> p_words);
 #if FOLLY_HAS_COROUTINES
@@ -299,7 +299,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_words_count(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::int16_t>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_words);
   virtual ::py3::simple::AnEnum sync_set_enum(::py3::simple::AnEnum /*in_enum*/);
-  virtual ::py3::simple::AnEnum set_enum(::py3::simple::AnEnum /*in_enum*/);
+  [[deprecated("Use sync_set_enum instead")]] virtual ::py3::simple::AnEnum set_enum(::py3::simple::AnEnum /*in_enum*/);
   virtual folly::Future<::py3::simple::AnEnum> future_set_enum(::py3::simple::AnEnum p_in_enum);
   virtual folly::SemiFuture<::py3::simple::AnEnum> semifuture_set_enum(::py3::simple::AnEnum p_in_enum);
 #if FOLLY_HAS_COROUTINES
@@ -308,7 +308,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_set_enum(std::unique_ptr<apache::thrift::HandlerCallback<::py3::simple::AnEnum>> callback, ::py3::simple::AnEnum p_in_enum);
   virtual void sync_list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/);
-  virtual void list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/);
+  [[deprecated("Use sync_list_of_lists instead")]] virtual void list_of_lists(::std::vector<::std::vector<::std::int32_t>>& /*_return*/, ::std::int16_t /*num_lists*/, ::std::int16_t /*num_items*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>> future_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items);
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>> semifuture_list_of_lists(::std::int16_t p_num_lists, ::std::int16_t p_num_items);
 #if FOLLY_HAS_COROUTINES
@@ -317,7 +317,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_list_of_lists(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::vector<::std::int32_t>>>>> callback, ::std::int16_t p_num_lists, ::std::int16_t p_num_items);
   virtual void sync_word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/);
-  virtual void word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/);
+  [[deprecated("Use sync_word_character_frequency instead")]] virtual void word_character_frequency(::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>& /*_return*/, std::unique_ptr<::std::string> /*sentence*/);
   virtual folly::Future<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>> future_word_character_frequency(std::unique_ptr<::std::string> p_sentence);
   virtual folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>> semifuture_word_character_frequency(std::unique_ptr<::std::string> p_sentence);
 #if FOLLY_HAS_COROUTINES
@@ -326,7 +326,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_word_character_frequency(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::map<::std::string, ::std::map<::std::string, ::std::int32_t>>>>> callback, std::unique_ptr<::std::string> p_sentence);
   virtual void sync_list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/);
-  virtual void list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/);
+  [[deprecated("Use sync_list_of_sets instead")]] virtual void list_of_sets(::std::vector<::std::set<::std::string>>& /*_return*/, std::unique_ptr<::std::string> /*some_words*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::std::set<::std::string>>>> future_list_of_sets(std::unique_ptr<::std::string> p_some_words);
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::std::set<::std::string>>>> semifuture_list_of_sets(std::unique_ptr<::std::string> p_some_words);
 #if FOLLY_HAS_COROUTINES
@@ -335,7 +335,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_list_of_sets(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::std::set<::std::string>>>>> callback, std::unique_ptr<::std::string> p_some_words);
   virtual ::std::int32_t sync_nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/);
-  virtual ::std::int32_t nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/);
+  [[deprecated("Use sync_nested_map_argument instead")]] virtual ::std::int32_t nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> /*struct_map*/);
   virtual folly::Future<::std::int32_t> future_nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map);
   virtual folly::SemiFuture<::std::int32_t> semifuture_nested_map_argument(std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map);
 #if FOLLY_HAS_COROUTINES
@@ -344,7 +344,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_nested_map_argument(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, std::unique_ptr<::std::map<::std::string, ::std::vector<::py3::simple::SimpleStruct>>> p_struct_map);
   virtual void sync_make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/);
-  virtual void make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/);
+  [[deprecated("Use sync_make_sentence instead")]] virtual void make_sentence(::std::string& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::string>>> /*word_chars*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_make_sentence(std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_make_sentence(std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars);
 #if FOLLY_HAS_COROUTINES
@@ -353,7 +353,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_make_sentence(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::vector<::std::vector<::std::string>>> p_word_chars);
   virtual void sync_get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/);
-  virtual void get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/);
+  [[deprecated("Use sync_get_union instead")]] virtual void get_union(::std::set<::std::int32_t>& /*_return*/, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*sets*/);
   virtual folly::Future<std::unique_ptr<::std::set<::std::int32_t>>> future_get_union(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets);
   virtual folly::SemiFuture<std::unique_ptr<::std::set<::std::int32_t>>> semifuture_get_union(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets);
 #if FOLLY_HAS_COROUTINES
@@ -362,7 +362,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_union(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::int32_t>>>> callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_sets);
   virtual void sync_get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/);
-  virtual void get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/);
+  [[deprecated("Use sync_get_keys instead")]] virtual void get_keys(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> /*string_map*/);
   virtual folly::Future<std::unique_ptr<::std::set<::std::string>>> future_get_keys(std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map);
   virtual folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> semifuture_get_keys(std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map);
 #if FOLLY_HAS_COROUTINES
@@ -371,7 +371,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_get_keys(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::map<::std::string, ::std::string>>> p_string_map);
   virtual double sync_lookup_double(::std::int32_t /*key*/);
-  virtual double lookup_double(::std::int32_t /*key*/);
+  [[deprecated("Use sync_lookup_double instead")]] virtual double lookup_double(::std::int32_t /*key*/);
   virtual folly::Future<double> future_lookup_double(::std::int32_t p_key);
   virtual folly::SemiFuture<double> semifuture_lookup_double(::std::int32_t p_key);
 #if FOLLY_HAS_COROUTINES
@@ -380,7 +380,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_lookup_double(std::unique_ptr<apache::thrift::HandlerCallback<double>> callback, ::std::int32_t p_key);
   virtual void sync_retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/);
-  virtual void retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/);
+  [[deprecated("Use sync_retrieve_binary instead")]] virtual void retrieve_binary(::std::string& /*_return*/, std::unique_ptr<::std::string> /*something*/);
   virtual folly::Future<std::unique_ptr<::std::string>> future_retrieve_binary(std::unique_ptr<::std::string> p_something);
   virtual folly::SemiFuture<std::unique_ptr<::std::string>> semifuture_retrieve_binary(std::unique_ptr<::std::string> p_something);
 #if FOLLY_HAS_COROUTINES
@@ -389,7 +389,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_retrieve_binary(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::string>>> callback, std::unique_ptr<::std::string> p_something);
   virtual void sync_contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/);
-  virtual void contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/);
+  [[deprecated("Use sync_contain_binary instead")]] virtual void contain_binary(::std::set<::std::string>& /*_return*/, std::unique_ptr<::std::vector<::std::string>> /*binaries*/);
   virtual folly::Future<std::unique_ptr<::std::set<::std::string>>> future_contain_binary(std::unique_ptr<::std::vector<::std::string>> p_binaries);
   virtual folly::SemiFuture<std::unique_ptr<::std::set<::std::string>>> semifuture_contain_binary(std::unique_ptr<::std::vector<::std::string>> p_binaries);
 #if FOLLY_HAS_COROUTINES
@@ -398,7 +398,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_contain_binary(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::set<::std::string>>>> callback, std::unique_ptr<::std::vector<::std::string>> p_binaries);
   virtual void sync_contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/);
-  virtual void contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/);
+  [[deprecated("Use sync_contain_enum instead")]] virtual void contain_enum(::std::vector<::py3::simple::AnEnum>& /*_return*/, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> /*the_enum*/);
   virtual folly::Future<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>> future_contain_enum(std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum);
   virtual folly::SemiFuture<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>> semifuture_contain_enum(std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum);
 #if FOLLY_HAS_COROUTINES
@@ -407,7 +407,7 @@ class ServiceHandler<::py3::simple::SimpleService> : public apache::thrift::Serv
 #endif
   virtual void async_tm_contain_enum(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::std::vector<::py3::simple::AnEnum>>>> callback, std::unique_ptr<::std::vector<::py3::simple::AnEnum>> p_the_enum);
   virtual void sync_get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/);
-  virtual void get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/);
+  [[deprecated("Use sync_get_binary_union_struct instead")]] virtual void get_binary_union_struct(::py3::simple::BinaryUnionStruct& /*_return*/, std::unique_ptr<::py3::simple::BinaryUnion> /*u*/);
   virtual folly::Future<std::unique_ptr<::py3::simple::BinaryUnionStruct>> future_get_binary_union_struct(std::unique_ptr<::py3::simple::BinaryUnion> p_u);
   virtual folly::SemiFuture<std::unique_ptr<::py3::simple::BinaryUnionStruct>> semifuture_get_binary_union_struct(std::unique_ptr<::py3::simple::BinaryUnion> p_u);
 #if FOLLY_HAS_COROUTINES

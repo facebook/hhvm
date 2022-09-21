@@ -50,7 +50,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
  public:
 
   virtual void sync_methodA();
-  virtual void methodA();
+  [[deprecated("Use sync_methodA instead")]] virtual void methodA();
   virtual folly::Future<folly::Unit> future_methodA();
   virtual folly::SemiFuture<folly::Unit> semifuture_methodA();
 #if FOLLY_HAS_COROUTINES
@@ -59,7 +59,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 #endif
   virtual void async_tm_methodA(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback);
   virtual void sync_methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/);
-  virtual void methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/);
+  [[deprecated("Use sync_methodB instead")]] virtual void methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/);
   virtual folly::Future<folly::Unit> future_methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z);
   virtual folly::SemiFuture<folly::Unit> semifuture_methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z);
 #if FOLLY_HAS_COROUTINES
@@ -68,7 +68,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 #endif
   virtual void async_tm_methodB(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z);
   virtual ::std::int32_t sync_methodC();
-  virtual ::std::int32_t methodC();
+  [[deprecated("Use sync_methodC instead")]] virtual ::std::int32_t methodC();
   virtual folly::Future<::std::int32_t> future_methodC();
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodC();
 #if FOLLY_HAS_COROUTINES
@@ -77,7 +77,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 #endif
   virtual void async_tm_methodC(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback);
   virtual ::std::int32_t sync_methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/);
-  virtual ::std::int32_t methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/);
+  [[deprecated("Use sync_methodD instead")]] virtual ::std::int32_t methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/);
   virtual folly::Future<::std::int32_t> future_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k);
   virtual folly::SemiFuture<::std::int32_t> semifuture_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k);
 #if FOLLY_HAS_COROUTINES
@@ -86,7 +86,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 #endif
   virtual void async_tm_methodD(std::unique_ptr<apache::thrift::HandlerCallback<::std::int32_t>> callback, ::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k);
   virtual void sync_methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/);
-  virtual void methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/);
+  [[deprecated("Use sync_methodE instead")]] virtual void methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/);
   virtual folly::Future<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> future_methodE();
   virtual folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> semifuture_methodE();
 #if FOLLY_HAS_COROUTINES
@@ -95,7 +95,7 @@ class ServiceHandler<::test_cpp2::cpp_reflection::service3> : public apache::thr
 #endif
   virtual void async_tm_methodE(std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>>> callback);
   virtual void sync_methodF(::test_cpp2::cpp_reflection::struct3& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/);
-  virtual void methodF(::test_cpp2::cpp_reflection::struct3& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/);
+  [[deprecated("Use sync_methodF instead")]] virtual void methodF(::test_cpp2::cpp_reflection::struct3& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/);
   virtual folly::Future<std::unique_ptr<::test_cpp2::cpp_reflection::struct3>> future_methodF(::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n);
   virtual folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct3>> semifuture_methodF(::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n);
 #if FOLLY_HAS_COROUTINES

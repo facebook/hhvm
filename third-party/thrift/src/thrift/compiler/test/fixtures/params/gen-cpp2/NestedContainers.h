@@ -47,7 +47,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
  public:
 
   virtual void sync_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/);
-  virtual void mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/);
+  [[deprecated("Use sync_mapList instead")]] virtual void mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -56,7 +56,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
 #endif
   virtual void async_tm_mapList(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo);
   virtual void sync_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/);
-  virtual void mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/);
+  [[deprecated("Use sync_mapSet instead")]] virtual void mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -65,7 +65,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
 #endif
   virtual void async_tm_mapSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo);
   virtual void sync_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/);
-  virtual void listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/);
+  [[deprecated("Use sync_listMap instead")]] virtual void listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -74,7 +74,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
 #endif
   virtual void async_tm_listMap(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo);
   virtual void sync_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/);
-  virtual void listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/);
+  [[deprecated("Use sync_listSet instead")]] virtual void listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
 #if FOLLY_HAS_COROUTINES
@@ -83,7 +83,7 @@ class ServiceHandler<::cpp2::NestedContainers> : public apache::thrift::ServerIn
 #endif
   virtual void async_tm_listSet(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo);
   virtual void sync_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/);
-  virtual void turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/);
+  [[deprecated("Use sync_turtles instead")]] virtual void turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/);
   virtual folly::Future<folly::Unit> future_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
   virtual folly::SemiFuture<folly::Unit> semifuture_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo);
 #if FOLLY_HAS_COROUTINES

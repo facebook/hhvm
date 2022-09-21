@@ -47,7 +47,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
  public:
 
   virtual bool sync_hasDataById(::std::int64_t /*id*/);
-  virtual bool hasDataById(::std::int64_t /*id*/);
+  [[deprecated("Use sync_hasDataById instead")]] virtual bool hasDataById(::std::int64_t /*id*/);
   virtual folly::Future<bool> future_hasDataById(::std::int64_t p_id);
   virtual folly::SemiFuture<bool> semifuture_hasDataById(::std::int64_t p_id);
 #if FOLLY_HAS_COROUTINES
@@ -56,7 +56,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 #endif
   virtual void async_tm_hasDataById(std::unique_ptr<apache::thrift::HandlerCallback<bool>> callback, ::std::int64_t p_id);
   virtual void sync_getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
-  virtual void getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
+  [[deprecated("Use sync_getDataById instead")]] virtual void getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/);
   virtual folly::Future<::std::string> future_getDataById(::std::int64_t p_id);
   virtual folly::SemiFuture<::std::string> semifuture_getDataById(::std::int64_t p_id);
 #if FOLLY_HAS_COROUTINES
@@ -65,7 +65,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 #endif
   virtual void async_tm_getDataById(std::unique_ptr<apache::thrift::HandlerCallback<::std::string>> callback, ::std::int64_t p_id);
   virtual void sync_putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
-  virtual void putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
+  [[deprecated("Use sync_putDataById instead")]] virtual void putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
   virtual folly::Future<folly::Unit> future_putDataById(::std::int64_t p_id, const ::std::string& p_data);
   virtual folly::SemiFuture<folly::Unit> semifuture_putDataById(::std::int64_t p_id, const ::std::string& p_data);
 #if FOLLY_HAS_COROUTINES
@@ -74,7 +74,7 @@ class ServiceHandler<::cpp2::MyService> : public apache::thrift::ServerInterface
 #endif
   virtual void async_tm_putDataById(std::unique_ptr<apache::thrift::HandlerCallback<void>> callback, ::std::int64_t p_id, const ::std::string& p_data);
   virtual void sync_lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
-  virtual void lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
+  [[deprecated("Use sync_lobDataById instead")]] virtual void lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/);
   virtual folly::Future<folly::Unit> future_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
   virtual folly::SemiFuture<folly::Unit> semifuture_lobDataById(::std::int64_t p_id, const ::std::string& p_data);
 #if FOLLY_HAS_COROUTINES

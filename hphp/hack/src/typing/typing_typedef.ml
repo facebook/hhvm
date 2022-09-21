@@ -39,7 +39,8 @@ let typedef_def ctx typedef =
     t_annotation = ();
     t_name = (t_pos, t_name);
     t_tparams = _;
-    t_constraint = tcstr;
+    t_as_constraint = tascstr;
+    t_super_constraint = tsupercstr;
     t_kind = hint;
     t_user_attributes = _;
     t_vis = _;
@@ -63,7 +64,8 @@ let typedef_def ctx typedef =
       hint
   in
   Option.iter ~f:Errors.add_typing_error ty_err_opt2;
-  let (env, ty_err_opt3) =
+
+  let get_cnstr_errs env tcstr reverse =
     match tcstr with
     | Some tcstr ->
       let ((env, ty_err_opt1), cstr) =
@@ -74,14 +76,25 @@ let typedef_def ctx typedef =
           t_pos
           Reason.URnewtype_cstr
           env
-          ty
-          cstr
+          (if reverse then
+            cstr
+          else
+            ty)
+          (if reverse then
+            ty
+          else
+            cstr)
           Typing_error.Callback.newtype_alias_must_satisfy_constraint
       in
       (env, Option.merge ~f:Typing_error.both ty_err_opt1 ty_err_opt2)
     | _ -> (env, None)
   in
-  Option.iter ~f:Errors.add_typing_error ty_err_opt3;
+
+  let (env, ty_err_opt3) = get_cnstr_errs env tascstr false in
+  let (env, ty_err_opt4) = get_cnstr_errs env tsupercstr true in
+  Option.iter
+    ~f:Errors.add_typing_error
+    (Option.merge ~f:Typing_error.both ty_err_opt3 ty_err_opt4);
   let env =
     match hint with
     | (_pos, Hshape { nsi_allows_unknown_fields = _; nsi_field_map }) ->
@@ -109,7 +122,8 @@ let typedef_def ctx typedef =
     Aast.t_mode = typedef.t_mode;
     Aast.t_vis = typedef.t_vis;
     Aast.t_user_attributes = user_attributes;
-    Aast.t_constraint = typedef.t_constraint;
+    Aast.t_as_constraint = typedef.t_as_constraint;
+    Aast.t_super_constraint = typedef.t_super_constraint;
     Aast.t_kind = typedef.t_kind;
     Aast.t_tparams = tparams;
     Aast.t_namespace = typedef.t_namespace;

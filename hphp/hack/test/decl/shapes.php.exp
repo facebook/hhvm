@@ -1,7 +1,7 @@
 [("\\Coordinate",
   (Shallow_decl_defs.Typedef
      { Typing_defs.td_module = None; td_pos = [3:6-16]; td_vis = Transparent;
-       td_tparams = []; td_constraint = None;
+       td_tparams = []; td_as_constraint = None; td_super_constraint = None;
        td_type =
        (Rhint ([3:19-57]),
         (Tshape (Typing_defs_core.Open_shape,
@@ -149,7 +149,8 @@
   ("\\TaggedCoordinate",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = None; td_pos = [19:6-22];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+        td_super_constraint = None;
         td_type =
         (Rhint ([20:3-72]),
          (Tshape (Typing_defs_core.Closed_shape,

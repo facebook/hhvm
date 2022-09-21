@@ -2136,18 +2136,23 @@ module PrintTypedef = struct
         td_vis = _;
         td_attributes = _;
         td_tparams;
-        td_constraint;
+        td_as_constraint;
+        td_super_constraint;
         td_type;
         td_is_ctx;
         td_internal = _;
         td_docs_url = _;
       } ->
       let (fuel, tparaml_s) = PrintClass.tparam_list ~fuel td_tparams in
-      let (fuel, constr_s) =
-        match td_constraint with
-        | None -> (fuel, "[None]")
-        | Some constr -> Full.to_string_decl ~fuel constr
+      let constr_s fuel cnstr str =
+        match cnstr with
+        | None -> (fuel, str ^ " [None]")
+        | Some constr ->
+          let (fuel, res) = Full.to_string_decl ~fuel constr in
+          (fuel, str ^ " " ^ res)
       in
+      let (fuel, as_constr_s) = constr_s fuel td_as_constraint "as" in
+      let (fuel, super_constr_s) = constr_s fuel td_super_constraint "super" in
       let (fuel, ty_s) = Full.to_string_decl ~fuel td_type in
       let pos_s = PrintClass.pos_or_decl td_pos in
       let is_ctx_s = Bool.to_string td_is_ctx in
@@ -2158,8 +2163,10 @@ module PrintTypedef = struct
         ^ "tparaml: "
         ^ tparaml_s
         ^ "\n"
-        ^ "constraint: "
-        ^ constr_s
+        ^ "constraints: "
+        ^ as_constr_s
+        ^ " "
+        ^ super_constr_s
         ^ "\n"
         ^ "pos: "
         ^ pos_s

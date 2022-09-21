@@ -137,7 +137,8 @@ type typedef_type = {
   td_pos: Pos_or_decl.t;
   td_vis: Aast.typedef_visibility;
   td_tparams: decl_tparam list;
-  td_constraint: decl_ty option;
+  td_as_constraint: decl_ty option;
+  td_super_constraint: decl_ty option;
   td_type: decl_ty;
   td_is_ctx: bool;
   td_attributes: user_attribute list;

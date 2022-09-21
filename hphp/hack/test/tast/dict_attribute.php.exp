@@ -463,7 +463,7 @@
        c_doc_comment = None; c_emit_id = None; c_internal = false; c_module = None });
   (Typedef
      { t_annotation = (); t_name = ([36:6-8], "\\tt"); t_tparams = []; 
-       t_constraint = None; t_kind = ([36:11-14], (Hprim Tint));
+       t_as_constraint = None; t_super_constraint = None; t_kind = ([36:11-14], (Hprim Tint));
        t_user_attributes =
        [{ ua_name = ([35:3-9], "\\TAlias");
           ua_params =

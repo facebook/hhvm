@@ -278,38 +278,43 @@
           }
         },
         "alias_constraint":{
-          "kind":"type_constraint",
-          "constraint_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"as",
-              "text":"as",
-              "offset":81,
-              "leading_width":0,
-              "width":2,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":83,"width":1}],
-              "line_number":4
-            }
-          },
-          "constraint_type":{
-            "kind":"simple_type_specifier",
-            "simple_type_specifier":{
-              "kind":"token",
-              "token":{
-                "kind":"int",
-                "text":"int",
-                "offset":84,
-                "leading_width":0,
-                "width":3,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":87,"width":1}],
-                "line_number":4
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"type_constraint",
+              "constraint_keyword":{
+                "kind":"token",
+                "token":{
+                  "kind":"as",
+                  "text":"as",
+                  "offset":81,
+                  "leading_width":0,
+                  "width":2,
+                  "trailing_width":1,
+                  "leading":[],
+                  "trailing":[{"kind":"whitespace","text":" ","offset":83,"width":1}],
+                  "line_number":4
+                }
+              },
+              "constraint_type":{
+                "kind":"simple_type_specifier",
+                "simple_type_specifier":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"int",
+                    "text":"int",
+                    "offset":84,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":87,"width":1}],
+                    "line_number":4
+                  }
+                }
               }
             }
-          }
+          ]
         },
         "alias_equal":{
           "kind":"token",
@@ -458,38 +463,43 @@
           }
         },
         "alias_constraint":{
-          "kind":"type_constraint",
-          "constraint_keyword":{
-            "kind":"token",
-            "token":{
-              "kind":"as",
-              "text":"as",
-              "offset":123,
-              "leading_width":0,
-              "width":2,
-              "trailing_width":1,
-              "leading":[],
-              "trailing":[{"kind":"whitespace","text":" ","offset":125,"width":1}],
-              "line_number":7
-            }
-          },
-          "constraint_type":{
-            "kind":"simple_type_specifier",
-            "simple_type_specifier":{
-              "kind":"token",
-              "token":{
-                "kind":"int",
-                "text":"int",
-                "offset":126,
-                "leading_width":0,
-                "width":3,
-                "trailing_width":1,
-                "leading":[],
-                "trailing":[{"kind":"whitespace","text":" ","offset":129,"width":1}],
-                "line_number":7
+          "kind":"list",
+          "elements":[
+            {
+              "kind":"type_constraint",
+              "constraint_keyword":{
+                "kind":"token",
+                "token":{
+                  "kind":"as",
+                  "text":"as",
+                  "offset":123,
+                  "leading_width":0,
+                  "width":2,
+                  "trailing_width":1,
+                  "leading":[],
+                  "trailing":[{"kind":"whitespace","text":" ","offset":125,"width":1}],
+                  "line_number":7
+                }
+              },
+              "constraint_type":{
+                "kind":"simple_type_specifier",
+                "simple_type_specifier":{
+                  "kind":"token",
+                  "token":{
+                    "kind":"int",
+                    "text":"int",
+                    "offset":126,
+                    "leading_width":0,
+                    "width":3,
+                    "trailing_width":1,
+                    "leading":[],
+                    "trailing":[{"kind":"whitespace","text":" ","offset":129,"width":1}],
+                    "line_number":7
+                  }
+                }
               }
             }
-          }
+          ]
         },
         "alias_equal":{
           "kind":"token",

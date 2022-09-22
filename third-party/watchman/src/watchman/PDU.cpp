@@ -193,7 +193,6 @@ std::optional<json_ref> PduBuffer::readBserPdu(
     watchman_stream* stm,
     uint32_t bser_version,
     json_error_t* jerr) {
-  json_int_t needed;
   json_int_t val;
   json_int_t bser_capabilities;
   uint32_t ideal;
@@ -252,7 +251,7 @@ std::optional<json_ref> PduBuffer::readBserPdu(
 
   std::optional<json_ref> obj;
   try {
-    obj = bunser(buf + rpos, buf + wpos, &needed);
+    obj = bunser(buf + rpos, buf + wpos);
   } catch (const BserParseError& e) {
     // Deserialization failed. Log the message that failed to deserialize to
     // stderr.

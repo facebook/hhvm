@@ -176,8 +176,7 @@ struct ParseBenchmark {
     leaks.clear();
 
     for (auto _ : state) {
-      json_int_t needed;
-      leaks.push_back(bunser(data.data(), data.data() + data.size(), &needed));
+      leaks.push_back(bunser(data.data(), data.data() + data.size()));
     }
   }
 };

@@ -46,7 +46,7 @@ pub fn run(opts: Opts) -> Result<()> {
         let pre_alloc = bumpalo::Bump::default();
         let unit = compile_php_file(&pre_alloc, &path, &opts.single_file_opts)?;
 
-        textual::textual_writer(&mut stdout, &path, &unit)?;
+        textual::textual_writer(&mut stdout, &path, unit)?;
     }
 
     if !opts.no_builtins {

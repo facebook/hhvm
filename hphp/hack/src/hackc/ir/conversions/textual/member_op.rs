@@ -168,7 +168,7 @@ fn write_final_query_m(
         }
         MemberKey::ET(s) => {
             // $a["hello"]
-            let key = state.strings().lookup_bytes(s);
+            let key = state.strings.lookup_bytes(s);
             let key = textual::Expr::hack_string(key);
             w.call("hack_array_get", (base, key, op_name))
         }
@@ -189,7 +189,7 @@ fn write_final_query_m(
             // we know the actual type we may be able to use direct field
             // access.
 
-            let key = state.strings().lookup_bytes(prop.id);
+            let key = state.strings.lookup_bytes(prop.id);
             let key = textual::Expr::hack_string(key);
             w.call("hack_field_get", (base, key, op_name))
         }
@@ -241,7 +241,7 @@ fn write_entry(
         }
         MemberKey::ET(s) => {
             // $a["hello"]
-            let key = state.strings().lookup_bytes(s);
+            let key = state.strings.lookup_bytes(s);
             let key = textual::Expr::hack_string(key);
             w.call("hack_array_entry", (base, key, mode))
         }
@@ -255,7 +255,7 @@ fn write_entry(
         }
         MemberKey::PT(prop) => {
             // $a->hello
-            let key = state.strings().lookup_bytes(prop.id);
+            let key = state.strings.lookup_bytes(prop.id);
             let key = textual::Expr::hack_string(key);
             w.call("hack_field_entry", (base, key, mode))
         }

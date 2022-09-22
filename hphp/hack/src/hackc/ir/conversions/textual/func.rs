@@ -43,44 +43,45 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// f(params: HackParams): mixed;
 pub(crate) fn write_function(
     w: &mut dyn std::io::Write,
-    unit_state: &mut UnitState<'_>,
-    function: &ir::Function<'_>,
+    state: &mut UnitState,
+    function: ir::Function<'_>,
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr());
 
-    textual::write_function(
-        w,
-        &unit_state.unit.strings,
-        &function.name.mangle(),
-        function.func.loc(function.func.span),
-        &[("params", tx_ty!(HackParams))],
-        tx_ty!(mixed),
-        |w| write_func(w, unit_state, &function.func),
-    )?;
-
-    Ok(())
+    write_func(w, state, &function.name.mangle(), &function.func)
 }
 
 fn write_func(
-    w: &mut textual::FuncWriter<'_>,
-    unit_state: &mut UnitState<'_>,
+    w: &mut dyn std::io::Write,
+    unit_state: &mut UnitState,
+    name: &str,
     func: &ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let func = crate::lower::lower(func, &unit_state.unit.strings);
+    let func = crate::lower::lower(func, &unit_state.strings);
     let func = rewrite_prelude(func);
     let mut func = rewrite_jmp_ops(func);
     ir::passes::clean::run(&mut func);
 
-    let mut state = FuncState::new(unit_state.unit, &func);
+    textual::write_function(
+        w,
+        &unit_state.strings,
+        name,
+        func.loc(func.span),
+        &[("params", tx_ty!(HackParams))],
+        tx_ty!(mixed),
+        |w| {
+            let mut state = FuncState::new(&unit_state.strings, &func);
 
-    for bid in func.block_ids() {
-        write_block(w, &mut state, bid)?;
-    }
+            for bid in func.block_ids() {
+                write_block(w, &mut state, bid)?;
+            }
 
-    unit_state.external_funcs.extend(state.external_funcs);
+            unit_state.external_funcs.extend(state.external_funcs);
 
-    Ok(())
+            Ok(())
+        },
+    )
 }
 
 fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
@@ -239,7 +240,7 @@ fn write_call(
         loc: _,
     } = *call;
 
-    assert!(state.strings().lookup_bytes(context).is_empty());
+    assert!(state.strings.lookup_bytes(context).is_empty());
     assert!(inouts.as_ref().map_or(true, |inouts| inouts.is_empty()));
     assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
     assert!(num_rets < 2);
@@ -293,7 +294,7 @@ fn write_call(
         CallDetail::FCallCtor => todo!(),
         CallDetail::FCallFunc => todo!(),
         CallDetail::FCallFuncD { func } => {
-            let target = func.mangle(state.strings());
+            let target = func.mangle(state.strings);
             state.external_funcs.insert(target.to_string());
             let args = detail
                 .args(operands)
@@ -347,16 +348,16 @@ pub(crate) struct FuncState<'a> {
     external_funcs: HashSet<String>,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<Sid>,
-    unit: &'a ir::Unit<'a>,
+    pub(crate) strings: &'a StringInterner,
 }
 
 impl<'a> FuncState<'a> {
-    fn new(unit: &'a ir::Unit<'a>, func: &'a ir::Func<'a>) -> Self {
+    fn new(strings: &'a StringInterner, func: &'a ir::Func<'a>) -> Self {
         Self {
             external_funcs: Default::default(),
             func,
             iid_mapping: Default::default(),
-            unit,
+            strings,
         }
     }
 
@@ -374,10 +375,6 @@ impl<'a> FuncState<'a> {
     pub(crate) fn set_iid(&mut self, iid: InstrId, sid: Sid) {
         let old = self.iid_mapping.insert(iid, sid);
         assert!(old.is_none());
-    }
-
-    pub(crate) fn strings(&self) -> &StringInterner {
-        &self.unit.strings
     }
 
     pub(crate) fn update_loc(&mut self, w: &mut textual::FuncWriter<'_>, loc: LocId) -> Result {

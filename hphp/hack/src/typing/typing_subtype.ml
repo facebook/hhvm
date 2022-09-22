@@ -1887,7 +1887,12 @@ and simplify_subtype_i
                       SN.UserAttributes.uaRequireDynamic
                       tp.tp_user_attributes
                   in
-                  (if has_require_dynamic then
+                  (if
+                   has_require_dynamic
+                   (* Implicit pessimisation should ignore the RequireDynamic attribute
+                      because everything should be pessimised enough that it isn't necessary. *)
+                   && not (TypecheckerOptions.everything_sdt env.genv.tcopt)
+                  then
                     (* If the class is marked <<__SupportDynamicType>> then for any
                        * type parameters marked <<__RequireDynamic>> then the class does not
                        * unconditionally implement dynamic, but rather we must check that

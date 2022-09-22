@@ -49,9 +49,9 @@ pub fn run(opts: Opts) -> Result<()> {
         textual::textual_writer(&mut stdout, &path, &unit)?;
     }
 
-    // if !opts.no_builtins {
-    //     write!(&mut stdout, "{}", textual::BUILTIN_DECLS)?;
-    // }
+    if !opts.no_builtins {
+        textual::write_decls(&mut stdout)?;
+    }
 
     Ok(())
 }

@@ -34,6 +34,7 @@ use crate::mangle::MangleId;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
+use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -453,9 +454,9 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
                 loc,
             )),
             Constant::String(s) => {
-                let params = vec![TextualHackBuiltinParam::HackString(s.to_vec())];
+                let params = vec![TextualHackBuiltinParam::String(util::escaped_string(&s))];
                 builder.emit(hack::builtin_instr(
-                    hack::Builtin::Copy,
+                    hack::Builtin::String,
                     params,
                     vec![],
                     loc,

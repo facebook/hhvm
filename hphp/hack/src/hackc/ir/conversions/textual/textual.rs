@@ -504,3 +504,21 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 }
+
+pub(crate) fn declare_function(
+    w: &mut dyn std::io::Write,
+    name: &str,
+    tys: &[Ty],
+    ret_ty: Ty,
+) -> Result {
+    write!(w, "declare {name}(")?;
+
+    let mut sep = "";
+    for ty in tys {
+        write!(w, "{sep}{}", FmtTy(ty))?;
+        sep = ", ";
+    }
+
+    writeln!(w, "): {}", FmtTy(&ret_ty))?;
+    Ok(())
+}

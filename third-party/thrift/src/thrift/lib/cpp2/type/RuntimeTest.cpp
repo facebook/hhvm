@@ -140,6 +140,9 @@ TEST(RuntimeTest, List) {
   EXPECT_THAT(ref, ::testing::ElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
 
+  EXPECT_THROW(ref.remove(1), std::runtime_error);
+  EXPECT_THROW(ref.insert(1, "greatest"), std::runtime_error);
+
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
@@ -172,6 +175,8 @@ TEST(RuntimeTest, Set) {
   ref += ("test");
   EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
+
+  EXPECT_THROW(ref.remove("the"), std::runtime_error);
 
   ref.clear();
   EXPECT_TRUE(ref.empty());

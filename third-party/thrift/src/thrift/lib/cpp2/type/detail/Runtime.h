@@ -193,6 +193,13 @@ class Dyn {
   bool put(FieldId id, const Dyn& val) const {
     return type_.mut().put(ptr_, id, val);
   }
+  void insert(size_t pos, const Dyn& val) const {
+    type_.mut().insert(ptr_, pos, val);
+  }
+
+  bool remove(const Dyn& val) const { return type_.mut().remove(ptr_, val); }
+  bool remove(FieldId id) const { return type_.mut().remove(ptr_, id); }
+  void remove(size_t pos) const { type_.mut().remove(ptr_, pos); }
 
   Ptr ensure(const Dyn& key) const;
   Ptr ensure(const Dyn& key, const Dyn& val) const;
@@ -266,10 +273,12 @@ class Ptr final : public Dyn {
   using Dyn::clear;
   using Dyn::ensure;
   using Dyn::get;
+  using Dyn::insert;
   using Dyn::keys;
   using Dyn::mut;
   using Dyn::prepend;
   using Dyn::put;
+  using Dyn::remove;
   using Dyn::tryMut;
   using Dyn::values;
 
@@ -310,7 +319,7 @@ struct BaseErasedOp {
   [[noreturn]] static void prepend(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static void append(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static bool add(void*, const Dyn&) { bad_op(); }
-  [[noreturn]] static bool put(void*, FieldId, const Dyn&, const Dyn&) {
+  [[noreturn]] static bool put(void*, FieldId, size_t, const Dyn&, const Dyn&) {
     bad_op();
   }
   [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn&, const Dyn&) {
@@ -592,6 +601,15 @@ class BaseDyn : public Dyn,
     return put(asRef<string_t>(name), asRef(val));
   }
 
+  bool insert(size_t pos, ConstT val) { return Base::insert(pos, val); }
+  void insert(size_t pos, const std::string& val) {
+    Base::insert(pos, asRef(val));
+  }
+
+  bool remove(ConstT key) { return Base::remove(key); }
+  void remove(size_t pos) { Base::remove(pos); }
+  bool remove(const std::string& key) { return Base::remove(asRef(key)); }
+
   MutT ensure(FieldId id) { return MutT{Base::ensure(id)}; }
   MutT ensure(FieldId id, ConstT defVal) {
     return MutT{Base::ensure(id, defVal)};
@@ -612,9 +630,9 @@ class BaseDyn : public Dyn,
   }
 
   void clear() { Base::clear(); }
-  void clear(FieldId id) { Base::put(id, ConstT{}); }
-  void clear(ConstT key) { Base::put(key, ConstT{}); }
-  void clear(std::string name) { Base::put(asRef<string_t>(name), ConstT{}); }
+  void clear(FieldId id) { Base::remove(id); }
+  void clear(ConstT key) { Base::remove(key); }
+  void clear(std::string name) { Base::remove(asRef<string_t>(name)); }
 
  private:
   // TODO(afuller): Support capturing string literals directly and remove these.

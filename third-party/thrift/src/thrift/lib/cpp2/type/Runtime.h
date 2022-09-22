@@ -107,6 +107,14 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   // Returns true if an existing value was replaced.
   using Base::put;
 
+  // Insert a list element.
+  using Base::insert;
+
+  // Remove a list element or set key.
+  //
+  // Returns true if an existing value was removed.
+  using Base::remove;
+
   // Add a key-value pair, if not already present, using the given default if
   // provided.
   //
@@ -125,6 +133,7 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
     return Base::tryMut<Tag>();
   }
 
+  using Base::get;
   Ref operator[](Ordinal ord) & { return get(ord); }
   Ref operator[](Ordinal ord) && { return get(ord); }
   Ref operator[](size_t pos) & { return get(pos); }
@@ -244,6 +253,14 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   //
   // Returns true if an existing value was replaced.
   using Base::put;
+
+  // Insert a list element.
+  using Base::insert;
+
+  // Remove a list element or set key.
+  //
+  // Returns true if an existing value was removed.
+  using Base::remove;
 
   // Add a key-value pair, if not already present, using the given default if
   // provided.

@@ -98,6 +98,12 @@ struct ListOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<VTag>()); }
 
+  [[noreturn]] static bool put(
+      void*, FieldId, size_t pos, const Dyn&, const Dyn&) {
+    check_op(pos != std::string::npos);
+    unimplemented(); // TODO(afuller): Insert and remove!
+  }
+
   template <typename U>
   static decltype(auto) get(U&& self, size_t pos) {
     return folly::forward_like<U>(self.at(pos));
@@ -137,12 +143,14 @@ struct SetOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& k) { return add(ref(s), k.as<KTag>()); }
 
-  template <typename K = type::native_type<KTag>>
-  static bool contains(const T& self, K&& key) {
-    return self.find(std::forward<K>(key)) != self.end();
-  }
   [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) {
     unimplemented(); // TODO(afuller): Get by key (aka contains/intern set).
+  }
+  [[noreturn]] static bool put(
+      void*, FieldId, size_t, const Dyn& k, const Dyn& v) {
+    check_op(k != nullptr);
+    check_op(v == nullptr);
+    unimplemented(); // TODO(afuller): Remove by key.
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
@@ -187,7 +195,7 @@ struct MapOp : ContainerOp<Tag> {
     return itr->second;
   }
 
-  static bool put(void* s, FieldId, const Dyn& k, const Dyn& v) {
+  static bool put(void* s, FieldId, size_t, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
     return put(ref(s), k.as<KTag>(), v.as<VTag>());
   }

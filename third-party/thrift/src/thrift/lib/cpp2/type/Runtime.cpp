@@ -28,11 +28,24 @@ Ptr TypeInfo::get(void* ptr, size_t pos) const {
 Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
   return get_(ptr, {}, std::string::npos, val);
 }
+
 bool TypeInfo::put(void* ptr, FieldId id, const Dyn& val) const {
-  return put_(ptr, id, nullPtr(), val);
+  return put_(ptr, id, std::string::npos, nullPtr(), val);
 }
 bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
-  return put_(ptr, {}, key, val);
+  return put_(ptr, {}, std::string::npos, key, val);
+}
+void TypeInfo::insert(void* ptr, size_t pos, const Dyn& val) const {
+  put_(ptr, {}, pos, nullPtr(), val);
+}
+bool TypeInfo::remove(void* ptr, size_t pos) const {
+  return put_(ptr, {}, pos, nullPtr(), nullPtr());
+}
+bool TypeInfo::remove(void* ptr, const Dyn& key) const {
+  return put_(ptr, {}, std::string::npos, key, nullPtr());
+}
+bool TypeInfo::remove(void* ptr, FieldId id) const {
+  return put_(ptr, id, std::string::npos, nullPtr(), nullPtr());
 }
 
 Ptr TypeInfo::ensure(void* ptr, FieldId id) const {

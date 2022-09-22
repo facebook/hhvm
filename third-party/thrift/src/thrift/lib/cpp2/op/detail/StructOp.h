@@ -55,7 +55,7 @@ struct StructuredOp : BaseOp<Tag> {
     return cond;
   }
 
-  static bool put(void* s, FieldId fid, const Dyn& n, const Dyn& val) {
+  static bool put(void* s, FieldId fid, size_t, const Dyn& n, const Dyn& val) {
     // TODO(afuller): Use a hash map lookups for these.
     if (n != nullptr) {
       const auto& name = n.as<type::string_t>();

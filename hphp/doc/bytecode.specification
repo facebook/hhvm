@@ -149,8 +149,8 @@ default values are called "optional parameters".
 
 The metadata of each function specifies a set of non-overlapping ranges of
 bytecode that compose the function body, and it specifies the main entry point
-and 0 or more DV entry points (entry points are discussed in more detail in
-the "Entry points" section).
+and 0 or more default value ("DV") entry points (entry points are discussed in
+more detail in the "Entry points" section).
 
 The total size of the bytecode for the function body must not exceed 2^31 - 1
 bytes. The bytecode for a function must be one contiguous range of bytecode.
@@ -182,8 +182,8 @@ documented much here. See class.h.
 Closures
 --------
 
-Closures are implemented in hhbc as subclasses of Closure, in conjunction with
-the CreateCl opcode. It is legal hhbc to create other subclasses of Closure (to
+Closures are implemented in HHBC as subclasses of Closure, in conjunction with
+the CreateCl opcode. It is legal HHBC to create other subclasses of Closure (to
 represent user code that attempts to do the same), but attempting to
 instantiate one will result in a fatal error. The documentation of the CreateCl
 opcode below lists the requirements for a closure subclass to be usable with
@@ -242,8 +242,8 @@ change significantly, so this spec is staying light on details for now.
 Entry points
 ------------
 
-Entry points come in four varieties: the main entry point, DV entry points, and
-catch entry points.
+Entry points come in three varieties: the main entry point, default value ("DV")
+entry points, and catch entry points.
 
 Every function has exactly one main entry point. When a function is called, the
 dispatcher will set the PC of the new frame to point to the main entry point if
@@ -695,7 +695,8 @@ $1 is used to refer to the value at the top of the evaluation stack, $2 is used
 to refer to the value directly below $1 on the evaluation stack, $3 is used to
 refer to the value directly below $2, and so forth. Also, %1 is used to refer
 to the first immediate argument, and %2 is used to refer to the second
-immediate argument.
+immediate argument. Thus, the indices used to refer to values on both
+the evaluation stack and in the immediate arguments list are 1-indexed.
 
 Note that the relative offset immediate used by a Jmp*, Iter*, Switch,
 or SSwitch instruction is relative to the beginning of the instruction.
@@ -719,7 +720,7 @@ location descriptors is given below:
 
 There are several groups of similarly named instructions where the name of each
 instruction ends with a different location descriptor (for example, Set*). Each
-instruction in the group perform similar actions but take different kinds of
+instruction in the group performs similar actions but takes different kinds of
 inputs to specify the location to access.
 
 There are numerous instructions which incorporate a readonly immediate.
@@ -896,7 +897,7 @@ ColFromArray <coll type>    [C:Arr]  ->  [C:Obj]
   in packed mode if %1 is Vector or ImmVector, and must be in mixed mode
   otherwise.
 
-  Note that integer-like string keys are converted to integers in array, but
+  Note that integer-like string keys are converted to integers in arrays, but
   not in collections; thus not all collections can be created using this
   instruction.
 
@@ -1006,17 +1007,17 @@ Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Dbl]  ->  [C:Bool|Dbl]
 
   Division (/). Pushes ($2 / $1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Mod    [C C]  ->  [C:Bool|Int]
 
   Modulus (%). Pushes ((int)$2 % (int)$1) onto the stack. This instruction throws a
-  fatal error if either $1 or $2 is not numeric.
+  fatal error if either $1 or $2 is not numeric, or if $1 is zero.
 
 Pow    [C C]  ->  [C:Int|Dbl]
 
-  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction
-  never throws a fatal error.
+  Power. Pushes $2 raised to the power of $1 onto the stack. This instruction throws a
+  fatal error if either $1 or $2 is not numeric.
 
 Not    [C]  ->  [C:Bool]
 
@@ -1314,12 +1315,12 @@ CGetQuietL <local variable id>    []  ->  [C]
 
 CGetL2 <local variable id>    [<C>:<T>]  ->  [C <C>:<T>]
 
-  Get local as cell. If the local variable given by %1 is defined, this
-  instruction gets the value of the local variable, pushes it onto the stack as
-  a cell, and then pushes $1 onto the stack.
+  Get local as cell. First, $1 is popped off the stack. If the local variable
+  given by %1 is defined, this instruction then gets the value of the local variable,
+  pushes it onto the stack as a cell, and then pushes $1 back onto the stack.
 
   If the local variable is not defined, this instruction raises a warning,
-  pushes null onto the stack, and then pushes $1 onto the stack.
+  pushes null onto the stack, and then pushes $1 back onto the stack.
 
 CUGetL <local variable id>    []  ->  [C|U]
 
@@ -1422,6 +1423,7 @@ IsTypeC  <op>                     [C]  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If t is Obj, this instruction checks if the operand in an object.
     Instances of a special class __PHP_Incomplete_Class are not considered
@@ -1448,6 +1450,7 @@ IsTypeL  <local variable id> <op>     []  ->  [C:Bool]
       ArrLike  | Vec or Dict or Keyset
       Scalar   | Int or Dbl or Str or Bool
       Res      | Res
+      Class    | Class or LazyClass
 
   If the local variable given by %1 is defined, the logic is the same as for
     IsTypeC (see above).
@@ -1645,7 +1648,7 @@ FCall* opcodes
   FCall* first looks up the callee function according to the specific opcode.
 
   The vector %4 must be either empty or it must contain exactly %2 booleans.
-  If it is non-empty, FCall* checks whether inout-ness of parameters 0..(%2-1)
+  If it is non-empty, FCall* checks whether inout-ness of parameters 1..%2
   of the callee matches the corresponding inout-ness values specified by the
   vector %4. Throws an exception if there is a mismatch.
 
@@ -2903,14 +2906,14 @@ VerifyOutType <parameter id>    [C]  ->  [C]
   parameter type specified by the given parameter. In case of a mismatch
   a warning or recoverable error is raised.
 
-VerifyParamType <parameter id>    []  ->  []
+VerifyParamType <parameter id>    [C]  ->  [C]
 
   Verify parameter type. Functions and methods can optionally specify the types
   of arguments they will accept.
 
-  VerifyParamType checks the specified parameter against the enclosing
-  function's corresponding parameter constraints. In case of a mismatch, a
-  recoverable error is raised.
+  VerifyParamType checks the type of the parameter in $1 against the enclosing
+  function's corresponding parameter constraints for `parameter id`. In case
+  of a mismatch, a recoverable error is raised.
 
 VerifyRetTypeC    [C] -> [C]
 

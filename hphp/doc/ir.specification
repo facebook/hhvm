@@ -1228,12 +1228,12 @@ To string conversions:
   if a method named S1 is invoked on an instance of S0. Raises a fatal if the
   class does not have an accessible method with the given name.
 
-| LdObjMethodS<methodName, callerFunc>, D(Func), S(Cls) S(Smashable), NF
+| LdObjMethodS<methodName, ctx, callerFunc>, D(Func), S(Cls) S(Smashable), NF
 
   Loads a func pointer pointing to the instance method that would be called
-  if a `methodName` is invoked on an instance of S0. Caches the mapping in
-  the TC cache (using S1) and target cache. Raises a fatal if the class does
-  not have an accessible method with the given name.
+  if a `methodName` is invoked on an instance of S0 from the calling context `ctx`.
+  Caches the mapping in the TC cache (using S1) and target cache. Raises a fatal
+  if the class does not have an accessible method with the given name.
 
 | LdObjInvoke, D(Func), S(Cls), B
 

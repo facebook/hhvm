@@ -37,17 +37,15 @@ struct ContainerOp : BaseOp<Tag> {
   using T = type::native_type<Tag>;
   using I = typename T::iterator;
   using Base = BaseOp<Tag>;
+  using Base::check_found;
   using Base::ref;
   using Base::ret;
 
   static size_t size(const void* s) { return ref(s).size(); }
 
-  static auto find(void* s, size_t pos) {
-    if (pos >= ref(s).size()) {
-      // TODO(afuller): Consider returning 'end' instead.
-      folly::throw_exception<std::out_of_range>("out of range");
-    }
-    auto itr = ref(s).begin();
+  static auto find(T& self, size_t pos) {
+    check_found(pos < self.size());
+    auto itr = self.begin();
     std::advance(itr, pos);
     return itr;
   }
@@ -74,6 +72,7 @@ template <typename VTag, typename Tag = type::list<VTag>>
 struct ListOp : ContainerOp<Tag> {
   using T = type::native_type<Tag>;
   using Base = ContainerOp<Tag>;
+  using Base::check_found;
   using Base::check_op;
   using Base::find;
   using Base::next;
@@ -98,10 +97,17 @@ struct ListOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<VTag>()); }
 
-  [[noreturn]] static bool put(
-      void*, FieldId, size_t pos, const Dyn&, const Dyn&) {
+  static bool put(void* s, FieldId, size_t pos, const Dyn&, const Dyn& v) {
     check_op(pos != std::string::npos);
-    unimplemented(); // TODO(afuller): Insert and remove!
+    if (v == nullptr) { // Remove.
+      ref(s).erase(find(ref(s), pos));
+    } else { // Insert.
+      check_found(pos <= ref(s).size()); // Allow end().
+      auto itr = ref(s).begin();
+      std::advance(itr, pos);
+      ref(s).insert(itr, v.as<VTag>());
+    }
+    return true;
   }
 
   template <typename U>
@@ -111,7 +117,7 @@ struct ListOp : ContainerOp<Tag> {
 
   static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
     check_op(pos != std::string::npos);
-    return ret(VTag{}, *find(s, pos));
+    return ret(VTag{}, *find(ref(s), pos));
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {

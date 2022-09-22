@@ -140,8 +140,19 @@ TEST(RuntimeTest, List) {
   EXPECT_THAT(ref, ::testing::ElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
 
-  EXPECT_THROW(ref.remove(1), std::runtime_error);
-  EXPECT_THROW(ref.insert(1, "greatest"), std::runtime_error);
+  ref.remove(1);
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(2));
+  EXPECT_THROW(ref.remove(20), std::out_of_range);
+  EXPECT_THROW(ref.insert(20, "hi"), std::out_of_range);
+
+  ref.insert(1, "greatest");
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "greatest", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(3));
+  EXPECT_THROW(ref.insert(4, "never"), std::out_of_range);
+  ref.insert(3, "ever");
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "greatest", "test", "ever"));
+  EXPECT_THAT(ref, ::testing::SizeIs(4));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());

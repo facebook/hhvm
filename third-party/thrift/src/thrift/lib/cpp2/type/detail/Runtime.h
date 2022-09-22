@@ -626,9 +626,8 @@ class BaseDyn : public Dyn,
 
   bool put(FieldId id, ConstT val) { return Base::put(id, val); }
   bool put(ConstT key, ConstT val) { return Base::put(key, val); }
-  bool put(FieldId id, const std::string& val) {
-    return Base::put(id, asRef(val));
-  }
+  bool put(FieldId id, const std::string& val) { return put(id, asRef(val)); }
+  bool put(ConstT key, const std::string& val) { return put(key, asRef(val)); }
   bool put(const std::string& name, ConstT val) {
     return put(asRef<string_t>(name), val);
   }

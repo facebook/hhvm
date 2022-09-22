@@ -58,7 +58,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
 
   template <typename IdT>
   ConstRef operator[](IdT&& id) const {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
 
  private:
@@ -76,7 +76,8 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
 // Should typically be passed by value as it only holds two
 // ponters; a pointer to the value being reference and a pointer to the static
 // runtime metadata associated with the type of the value.
-class Ref final : public detail::BaseRef<Ref, ConstRef> {
+class Ref final : private detail::DynCmp<Ref, ConstRef>,
+                  public detail::BaseRef<Ref, ConstRef> {
   using Base = detail::BaseRef<Ref, ConstRef>;
   using Base::if_not_index;
 
@@ -91,16 +92,28 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   using Base::assign;
   using Base::operator=;
 
+  // Prepend to a list, string, etc.
+  using Base::prepend;
   // Append to a list, string, etc.
   using Base::append;
 
   // Add to a set, number, etc.
   using Base::add;
+  using Base::operator+=;
+  using Base::operator++;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
   using Base::put;
+
+  // Insert a list element.
+  using Base::insert;
+
+  // Remove a list element or set key.
+  //
+  // Returns true if an existing value was removed.
+  using Base::remove;
 
   // Add a key-value pair, if not already present, using the given default if
   // provided.
@@ -120,14 +133,16 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
     return Base::tryMut<Tag>();
   }
 
-  Ref operator[](Ordinal ord) & { return get(ord); }
-  Ref operator[](Ordinal ord) && { return get(ord); }
-  Ref operator[](size_t pos) & { return get(pos); }
-  Ref operator[](size_t pos) && { return get(pos); }
-  ConstRef operator[](Ordinal ord) const& { return get(ord); }
-  ConstRef operator[](Ordinal ord) const&& { return get(ord); }
-  ConstRef operator[](size_t pos) const& { return get(pos); }
-  ConstRef operator[](size_t pos) const&& { return get(pos); }
+  using Base::at;
+  using Base::get;
+  Ref operator[](Ordinal ord) & { return at(ord); }
+  Ref operator[](Ordinal ord) && { return at(ord); }
+  Ref operator[](size_t pos) & { return at(pos); }
+  Ref operator[](size_t pos) && { return at(pos); }
+  ConstRef operator[](Ordinal ord) const& { return at(ord); }
+  ConstRef operator[](Ordinal ord) const&& { return at(ord); }
+  ConstRef operator[](size_t pos) const& { return at(pos); }
+  ConstRef operator[](size_t pos) const&& { return at(pos); }
   template <typename IdT>
   if_not_index<IdT, Ref> operator[](IdT&& id) & {
     return ensure(std::forward<IdT>(id));
@@ -138,60 +153,22 @@ class Ref final : public detail::BaseRef<Ref, ConstRef> {
   }
   template <typename IdT>
   if_not_index<IdT> operator[](IdT&& id) const& {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
   template <typename IdT>
   if_not_index<IdT> operator[](IdT&& id) const&& {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
+
+  explicit Ref(detail::Ptr data) noexcept : Base(data) {}
 
  private:
   friend class detail::Ptr;
-  template <typename, typename, typename>
-  friend class detail::BaseDyn;
   friend Base;
   using Base::asRef;
 
-  explicit Ref(detail::Ptr data) noexcept : Base(data) {}
   template <typename Tag, typename T>
   Ref(Tag, T&& val) : Base(op::detail::getAnyType<Tag>(), &val) {}
-
-  friend bool operator==(const ConstRef& lhs, const Ref& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator==(const Ref& lhs, const ConstRef& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator!=(const ConstRef& lhs, const Ref& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator!=(const Ref& lhs, const ConstRef& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator<(const ConstRef& lhs, const Ref& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<(const Ref& lhs, const ConstRef& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const ConstRef& lhs, const Ref& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator<=(const Ref& lhs, const ConstRef& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const ConstRef& lhs, const Ref& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>(const Ref& lhs, const ConstRef& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const ConstRef& lhs, const Ref& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-  friend bool operator>=(const Ref& lhs, const ConstRef& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
 };
 
 namespace detail {
@@ -203,14 +180,20 @@ inline Ref Ptr::operator*() const noexcept {
 // A runtime Thrift value that owns it's own memory.
 //
 // TODO(afuller): Store small values in-situ.
-class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
+class Value : private detail::DynCmp<Value, ConstRef>,
+              private detail::DynCmp<Value, Ref>,
+              public detail::BaseDyn<ConstRef, Ref, Value> {
   using Base = detail::BaseDyn<ConstRef, Ref, Value>;
   using Dyn = detail::Dyn;
 
  public:
   template <typename Tag>
-  static Value create() {
+  static if_thrift_type_tag<Tag, Value> create() {
     return Value{Tag{}, nullptr};
+  }
+  template <typename T>
+  static if_not_thrift_type_tag<T, Value> create() {
+    return create<infer_tag<T>>();
   }
   template <typename Tag>
   static Value of(const native_type<Tag>& val) {
@@ -230,6 +213,10 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   template <typename U>
   static Value of(U&& val) {
     return of<infer_tag<U>>(std::forward<U>(val));
+  }
+  template <typename U>
+  static Value of(std::unique_ptr<U> val) {
+    return of<infer_tag<U>>(std::move(val));
   }
 
   Value() noexcept = default; // A void/null value.
@@ -253,16 +240,28 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   Value& operator=(const Value& other) noexcept;
   Value& operator=(Value&& other) noexcept;
 
+  // Prepend to a list, string, etc.
+  using Base::prepend;
   // Append to a list, string, etc.
   using Base::append;
 
   // Add to a set, number, etc.
   using Base::add;
+  using Base::operator+=;
+  using Base::operator++;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
   // Returns true if an existing value was replaced.
   using Base::put;
+
+  // Insert a list element.
+  using Base::insert;
+
+  // Remove a list element or set key.
+  //
+  // Returns true if an existing value was removed.
+  using Base::remove;
 
   // Add a key-value pair, if not already present, using the given default if
   // provided.
@@ -270,20 +269,34 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
   // Returns a reference to the associated value.
   using Base::ensure;
 
-  // Type-safe casting functions.
+  // Throwing type-safe casting functions.
   using Base::as;
   template <typename Tag>
   native_type<Tag>& as() & {
     return type_->as<native_type<Tag>>(ptr_);
   }
+  template <typename T>
+  if_not_thrift_type_tag<T, T&> as() & {
+    return as<infer_tag<T>>();
+  }
   template <typename Tag>
   native_type<Tag>&& as() && {
     return std::move(type_->as<native_type<Tag>>(ptr_));
   }
+  template <typename T>
+  if_not_thrift_type_tag<T, T&&> as() && {
+    return as<infer_tag<T>>();
+  }
+
+  // Non-throwing type-safe casting functions.
   using Base::tryAs;
   template <typename Tag>
   native_type<Tag>* tryAs() noexcept {
     return type_->tryAs<native_type<Tag>>(ptr_);
+  }
+  template <typename T>
+  if_not_thrift_type_tag<T, T*> tryAs() noexcept {
+    return tryAs<infer_tag<T>>();
   }
 
   Ref operator[](Ordinal ord) & { return get(ord); }
@@ -313,78 +326,6 @@ class Value : public detail::BaseDyn<ConstRef, Ref, Value> {
 
  private:
   using Base::Base;
-  friend bool operator==(const ConstRef& lhs, const Value& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator==(const Ref& lhs, const Value& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator==(const Value& lhs, const ConstRef& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator==(const Value& lhs, const Ref& rhs) {
-    return lhs.equal(rhs);
-  }
-  friend bool operator!=(const ConstRef& lhs, const Value& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator!=(const Ref& lhs, const Value& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator!=(const Value& lhs, const ConstRef& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator!=(const Value& lhs, const Ref& rhs) {
-    return !lhs.equal(rhs);
-  }
-  friend bool operator<(const ConstRef& lhs, const Value& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<(const Ref& lhs, const Value& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<(const Value& lhs, const ConstRef& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<(const Value& lhs, const Ref& rhs) {
-    return op::detail::is_lt(lhs.compare(rhs));
-  }
-  friend bool operator<=(const ConstRef& lhs, const Value& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator<=(const Ref& lhs, const Value& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator<=(const Value& lhs, const ConstRef& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator<=(const Value& lhs, const Ref& rhs) {
-    return op::detail::is_lteq(lhs.compare(rhs));
-  }
-  friend bool operator>(const ConstRef& lhs, const Value& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>(const Ref& lhs, const Value& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>(const Value& lhs, const ConstRef& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>(const Value& lhs, const Ref& rhs) {
-    return op::detail::is_gt(lhs.compare(rhs));
-  }
-  friend bool operator>=(const ConstRef& lhs, const Value& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-  friend bool operator>=(const Ref& lhs, const Value& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-  friend bool operator>=(const Value& lhs, const ConstRef& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
-  friend bool operator>=(const Value& lhs, const Ref& rhs) {
-    return op::detail::is_gteq(lhs.compare(rhs));
-  }
 
   template <typename Tag, typename T = native_type<Tag>>
   explicit Value(Tag, std::nullptr_t)

@@ -21,16 +21,14 @@
 #include <folly/io/SocketOptionMap.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 
 THRIFT_FLAG_DECLARE_int64(server_default_socket_queue_timeout_ms);
 THRIFT_FLAG_DECLARE_int64(server_default_queue_timeout_ms);
-
 THRIFT_FLAG_DECLARE_int64(server_polled_service_health_liveness_ms);
 THRIFT_FLAG_DECLARE_int64(
     server_ingress_memory_limit_enforcement_payload_size_min_bytes);
-
 THRIFT_FLAG_DECLARE_bool(server_reject_header_connections);
 
 namespace apache::thrift {
@@ -392,14 +390,6 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * Codel queuing timeout - limit queueing time before overload
-   * http://en.wikipedia.org/wiki/CoDel
-   */
-  void setEnableCodel(
-      folly::observer::Observer<std::optional<bool>> enableCodel,
-      AttributeSource source = AttributeSource::OVERRIDE);
-
-  /**
    * Set the task expire time
    *
    */
@@ -428,9 +418,9 @@ class ThriftServerConfig {
           timeout,
       AttributeSource source = AttributeSource::OVERRIDE);
   /**
-   * Sets the duration before which new connections waiting on a socket's queue
-   * are closed. A value of 0 represents an infinite duration.
-   * See `folly::AsyncServerSocket::setQueueTimeout`.
+   * Sets the duration before which new connections waiting on a socket's
+   * queue are closed. A value of 0 represents an infinite duration. See
+   * `folly::AsyncServerSocket::setQueueTimeout`.
    */
   void setSocketQueueTimeout(
       folly::observer::Observer<std::optional<std::chrono::nanoseconds>>
@@ -438,10 +428,11 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * How long a socket with outbound data will tolerate read inactivity from a
-   * client. Clients must read data from their end of the connection before this
-   * period expires or the server will drop the connection. The amount of data
-   * read by the client is irrelevant. Zero disables the timeout.
+   * How long a socket with outbound data will tolerate read inactivity from
+   * a client. Clients must read data from their end of the connection
+   * before this period expires or the server will drop the connection. The
+   * amount of data read by the client is irrelevant. Zero disables the
+   * timeout.
    */
   void setSocketWriteTimeout(
       folly::observer::Observer<std::optional<std::chrono::milliseconds>>
@@ -449,9 +440,9 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * Ingress memory is the total memory used for receiving inflight requests.
-   * If the memory limit is hit, the connection along with the violating request
-   * will be closed
+   * Ingress memory is the total memory used for receiving inflight
+   * requests. If the memory limit is hit, the connection along with the
+   * violating request will be closed
    */
   void setIngressMemoryLimit(
       folly::observer::Observer<std::optional<size_t>> ingressMemoryLimit,
@@ -459,19 +450,19 @@ class ThriftServerConfig {
 
   /**
    * Limit the amount of memory available for inflight responses, meaning
-   * responses that are queued on the server pending delivery to clients. This
-   * limit, divided by the number of IO threads, determines the effective egress
-   * limit of a connection. Once the per-connection limit is reached, a
-   * connection is dropped immediately and all outstanding responses are
-   * discarded.
+   * responses that are queued on the server pending delivery to clients.
+   * This limit, divided by the number of IO threads, determines the
+   * effective egress limit of a connection. Once the per-connection limit
+   * is reached, a connection is dropped immediately and all outstanding
+   * responses are discarded.
    */
   void setEgressMemoryLimit(
       folly::observer::Observer<std::optional<size_t>> max,
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * Connection close will only be enforced and triggered on those requests with
-   * size greater or equal than this attribute
+   * Connection close will only be enforced and triggered on those requests
+   * with size greater or equal than this attribute
    */
   void setMinPayloadSizeToEnforceIngressMemoryLimit(
       folly::observer::Observer<std::optional<size_t>>
@@ -479,17 +470,17 @@ class ThriftServerConfig {
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * Apply backpressure to all stream generators of a connection when combined
-   * allocation size of inflight writes for that connection exceeds the
-   * threshold.
+   * Apply backpressure to all stream generators of a connection when
+   * combined allocation size of inflight writes for that connection exceeds
+   * the threshold.
    */
   void setEgressBufferBackpressureThreshold(
       folly::observer::Observer<std::optional<size_t>> thresholdInBytes,
       AttributeSource source = AttributeSource::OVERRIDE);
 
   /**
-   * When egress buffer backpressure is enabled, resume normal operation once
-   * egress buffer size falls below this factor of the threshold.
+   * When egress buffer backpressure is enabled, resume normal operation
+   * once egress buffer size falls below this factor of the threshold.
    */
   void setEgressBufferRecoveryFactor(
       folly::observer::Observer<std::optional<double>> recoveryFactor,
@@ -624,16 +615,17 @@ class ThriftServerConfig {
             return std::chrono::milliseconds(**timeoutMs);
           })};
   /**
-   * The time we'll allow a new connection socket to wait on the queue before
-   * closing the connection. See `folly::AsyncServerSocket::setQueueTimeout`.
+   * The time we'll allow a new connection socket to wait on the queue
+   * before closing the connection. See
+   * `folly::AsyncServerSocket::setQueueTimeout`.
    */
   ServerAttributeDynamic<std::chrono::nanoseconds> socketQueueTimeout_{
       folly::observer::makeObserver(
           [timeoutMs =
                THRIFT_FLAG_OBSERVE(server_default_socket_queue_timeout_ms)]()
               -> std::chrono::nanoseconds {
-            // Disable timeout for debug builds and unit tests by default - this
-            // is a production overload protection feature.
+            // Disable timeout for debug builds and unit tests by default -
+            // this is a production overload protection feature.
             if (folly::kIsDebug) {
               return std::chrono::milliseconds::zero();
             }
@@ -641,10 +633,10 @@ class ThriftServerConfig {
           })};
 
   /**
-   * How long a socket with outbound data will tolerate read inactivity from a
-   * client. Clients must read data from their end of the connection before this
-   * period expires or the server will drop the connection. The amount of data
-   * read is irrelevant. Zero indicates no timeout.
+   * How long a socket with outbound data will tolerate read inactivity from
+   * a client. Clients must read data from their end of the connection
+   * before this period expires or the server will drop the connection. The
+   * amount of data read is irrelevant. Zero indicates no timeout.
    */
   ServerAttributeDynamic<std::chrono::milliseconds> socketWriteTimeout_{
       DEFAULT_SOCKET_WRITE_TIMEOUT};
@@ -663,7 +655,8 @@ class ThriftServerConfig {
   ServerAttributeStatic<int> listenBacklog_{DEFAULT_LISTEN_BACKLOG};
 
   /**
-   * The maximum number of pending connections each io worker thread can hold.
+   * The maximum number of pending connections each io worker thread can
+   * hold.
    */
   ServerAttributeStatic<uint32_t> maxNumPendingConnectionsPerWorker_{
       T_MAX_NUM_PENDING_CONNECTIONS_PER_WORKER};
@@ -687,22 +680,24 @@ class ThriftServerConfig {
 
   /**
    * The maximum memory usage (in bytes) by each request debug payload.
-   * Payloads larger than this value will be simply dropped by instrumentation.
+   * Payloads larger than this value will be simply dropped by
+   * instrumentation.
    */
   ServerAttributeStatic<uint64_t> maxDebugPayloadMemoryPerRequest_{
       0x1000000}; // 16MB
 
   /**
    * The maximum memory usage by each worker to keep track of debug payload.
-   * Each time a request payload is added for tracking, the tracker should check
-   * whether it's using memory beyond this value and evict payloads based on
-   * its policies.
+   * Each time a request payload is added for tracking, the tracker should
+   * check whether it's using memory beyond this value and evict payloads
+   * based on its policies.
    */
   ServerAttributeStatic<uint64_t> maxDebugPayloadMemoryPerWorker_{
       0x1000000}; // 16MB
 
   /**
-   * The maximum number of debug payloads to track after request has finished.
+   * The maximum number of debug payloads to track after request has
+   * finished.
    */
   ServerAttributeStatic<uint16_t> maxFinishedDebugPayloadsPerWorker_{10};
 
@@ -721,8 +716,9 @@ class ThriftServerConfig {
   ServerAttributeDynamic<size_t> writeBatchingSize_{0};
 
   /**
-   * Trigger early flush when the total number of bytes queued equals or exceeds
-   * this value. Ignored if write batching interval is not set. (0 == disabled)
+   * Trigger early flush when the total number of bytes queued equals or
+   * exceeds this value. Ignored if write batching interval is not set. (0
+   * == disabled)
    */
   ServerAttributeDynamic<size_t> writeBatchingByteSize_{0};
 
@@ -738,16 +734,16 @@ class ThriftServerConfig {
               -> size_t { return **o < 0 ? 0ul : static_cast<size_t>(**o); })};
 
   /**
-   * Per-connection threshold for number of allocated bytes allowed in egress
-   * buffer before applying backpressure by pausing streams.
-   * (0 == disabled)
+   * Per-connection threshold for number of allocated bytes allowed in
+   * egress buffer before applying backpressure by pausing streams. (0 ==
+   * disabled)
    */
   ServerAttributeDynamic<size_t> egressBufferBackpressureThreshold_{0};
 
   /**
-   * Factor of egress buffer backpressure threshold at which to resume streams.
-   * Should be set well below 1 to avoid rapidly turning backpressure on/off.
-   * Ignored if backpressure threshold is disabled.
+   * Factor of egress buffer backpressure threshold at which to resume
+   * streams. Should be set well below 1 to avoid rapidly turning
+   * backpressure on/off. Ignored if backpressure threshold is disabled.
    */
   ServerAttributeDynamic<double> egressBufferRecoveryFactor_{0.75};
 
@@ -773,14 +769,14 @@ class ThriftServerConfig {
 
   /**
    * Socket options that will be applied to every connection to clients.
-   * If the socket does not support the specific option, it is silently ignored.
-   * Refer to setsockopt() for more details.
+   * If the socket does not support the specific option, it is silently
+   * ignored. Refer to setsockopt() for more details.
    */
   ServerAttributeDynamic<folly::SocketOptionMap> perConnectionSocketOptions_{
       folly::emptySocketOptionMap};
 
-  // Flag indicating whether it is safe to mutate the server config through its
-  // setters.
+  // Flag indicating whether it is safe to mutate the server config through
+  // its setters.
   std::atomic<bool> frozen_{false};
 };
 

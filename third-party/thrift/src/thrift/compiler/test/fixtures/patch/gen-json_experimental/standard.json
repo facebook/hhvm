@@ -333,10 +333,20 @@
   "name" : "TypeUri"
 }
           },
+          "typedefType" : {
+            "name" : "typedefType",
+            "key" : 17,
+            "lineno" : 237,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "TypeUri"
+}
+          },
           "structType" : {
             "name" : "structType",
             "key" : 11,
-            "lineno" : 237,
+            "lineno" : 238,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -346,7 +356,7 @@
           "unionType" : {
             "name" : "unionType",
             "key" : 12,
-            "lineno" : 238,
+            "lineno" : 239,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -356,7 +366,7 @@
           "exceptionType" : {
             "name" : "exceptionType",
             "key" : 13,
-            "lineno" : 239,
+            "lineno" : 240,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -366,7 +376,7 @@
           "listType" : {
             "name" : "listType",
             "key" : 14,
-            "lineno" : 240,
+            "lineno" : 241,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -376,7 +386,7 @@
           "setType" : {
             "name" : "setType",
             "key" : 15,
-            "lineno" : 241,
+            "lineno" : 242,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -386,7 +396,7 @@
           "mapType" : {
             "name" : "mapType",
             "key" : 16,
-            "lineno" : 242,
+            "lineno" : 243,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",

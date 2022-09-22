@@ -36,13 +36,15 @@ File root|module_attr.php--here.php
   ("\\Talias",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([3:8-12], "here")); td_pos = [7:6-12];
-        td_vis = Transparent; td_tparams = []; td_constraint = None;
+        td_vis = Transparent; td_tparams = []; td_as_constraint = None;
+        td_super_constraint = None;
         td_type = (Rhint ([7:15-18]), (Tprim Tint)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }));
   ("\\Topaque",
    (Shallow_decl_defs.Typedef
       { Typing_defs.td_module = (Some ([3:8-12], "here")); td_pos = [9:9-16];
-        td_vis = Opaque; td_tparams = []; td_constraint = None;
+        td_vis = Opaque; td_tparams = []; td_as_constraint = None;
+        td_super_constraint = None;
         td_type = (Rhint ([9:19-25]), (Tprim Tstring)); td_is_ctx = false;
         td_attributes = []; td_internal = false; td_docs_url = None }))
   ]

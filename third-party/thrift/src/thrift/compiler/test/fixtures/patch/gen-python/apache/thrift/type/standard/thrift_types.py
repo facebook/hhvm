@@ -269,6 +269,14 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
             None,  # default value
             None,  # adapter info
         ),
+        (
+            17,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "typedefType",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(TypeUri),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
     )
 
     @staticmethod

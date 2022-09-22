@@ -18,15 +18,19 @@ byte-unit = "4.0.14"
 bytecode_printer = { path = "../../bytecode_printer" }
 clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
 compile = { path = "../../compile/cargo/compile" }
+decl_parser = { path = "../../../hackrs/decl_parser/cargo/decl_parser" }
 decl_provider = { path = "../../decl_provider" }
 direct_decl_parser = { path = "../../../parser/api/cargo/direct_decl_parser" }
 env_logger = "0.7"
 escaper = { path = "../../../utils/escaper" }
 facts_rust = { path = "../../../facts/cargo/facts_rust" }
 ffi = { path = "../../../utils/ffi" }
+file_provider = { path = "../../../hackrs/file_provider/cargo/file_provider" }
+hackrs_test_utils = { path = "../../../hackrs/hackrs_test_utils/cargo/hackrs_test_utils" }
 hash = { path = "../../../utils/hash" }
 hdrhistogram = "6.3"
 hhbc = { path = "../../hhbc/cargo/hhbc" }
+hhi = { path = "../../../hhi/rust" }
 hhvm_config = { path = "../../hhvm_config/cargo/options" }
 hhvm_options = { path = "../../../utils/hhvm_options" }
 hhvm_types_ffi = { path = "../../hhvm_cxx/hhvm_types" }
@@ -36,6 +40,7 @@ itertools = "0.10.3"
 jwalk = "0.6"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 multifile_rust = { path = "../../../utils/multifile" }
+naming_provider = { path = "../../../hackrs/naming_provider/cargo/naming_provider" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
 once_cell = "1.12"
@@ -43,6 +48,7 @@ options = { path = "../../compile/cargo/options" }
 oxidized = { path = "../../../oxidized" }
 panic-message = "0.3"
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+pos = { path = "../../../hackrs/pos/cargo/pos" }
 positioned_by_ref_parser = { path = "../../../parser/api/cargo/positioned_by_ref_parser" }
 positioned_full_trivia_parser = { path = "../../../parser/api/cargo/positioned_full_trivia_parser" }
 positioned_parser = { path = "../../../parser/api/cargo/positioned_parser" }
@@ -51,7 +57,10 @@ rayon = "1.2"
 regex = "1.5.4"
 sem_diff = { path = "../../sem_diff" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
+shallow_decl_provider = { path = "../../../hackrs/shallow_decl_provider/cargo/shallow_decl_provider" }
 strum = "0.21"
 strum_macros = "0.21"
+tempdir = "0.3"
 textual = { path = "../../ir/conversions/textual" }
 thiserror = "=1.0.30"
+ty = { path = "../../../hackrs/ty/cargo/ty" }

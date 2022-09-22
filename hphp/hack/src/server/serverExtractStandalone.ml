@@ -604,14 +604,15 @@ end = struct
       @@ Nast_helper.get_class ctx cls_name;
       (match Decl_provider.get_class ctx cls_name with
       | None ->
-        let Typing_defs.{ td_type; td_constraint; _ } =
+        let Typing_defs.{ td_type; td_as_constraint; td_super_constraint; _ } =
           value_or_not_found description
           @@ Decl_provider.get_typedef ctx cls_name
         in
         Option.iter ~f:(add_tydef_attr_deps ctx env)
         @@ Nast_helper.get_typedef ctx cls_name;
         add_dep ctx ~this:None env td_type;
-        Option.iter td_constraint ~f:(add_dep ctx ~this:None env)
+        Option.iter td_as_constraint ~f:(add_dep ctx ~this:None env);
+        Option.iter td_super_constraint ~f:(add_dep ctx ~this:None env)
       | Some cls ->
         let add_dep = add_dep ctx env ~this:(Some cls_name) in
         Typing_deps.Dep.(
@@ -1352,12 +1353,20 @@ end = struct
         ppf
         ( nm,
           fixmes,
-          Aast.{ t_tparams; t_constraint; t_vis; t_kind; t_user_attributes; _ }
-        ) =
+          Aast.
+            {
+              t_tparams;
+              t_as_constraint;
+              t_super_constraint;
+              t_vis;
+              t_kind;
+              t_user_attributes;
+              _;
+            } ) =
       Fmt.(
         pf
           ppf
-          {|%a%a%a %s%a%a = %a;|}
+          {|%a%a%a %s%a%a%a = %a;|}
           (list ~sep:cut pp_fixme)
           fixmes
           pp_user_attrs
@@ -1368,7 +1377,9 @@ end = struct
           pp_tparams
           t_tparams
           (option @@ prefix (const string " as ") @@ pp_hint ~is_ctx:false)
-          t_constraint
+          t_as_constraint
+          (option @@ prefix (const string " super ") @@ pp_hint ~is_ctx:false)
+          t_super_constraint
           (pp_hint ~is_ctx:false)
           t_kind)
 

@@ -14,6 +14,7 @@ use crate::ClassId;
 use crate::CtxConstant;
 use crate::HackConstant;
 use crate::Method;
+use crate::SrcLoc;
 use crate::TypeConstant;
 use crate::UserType;
 
@@ -54,7 +55,7 @@ pub struct Class<'a> {
     pub name: ClassId,
     pub properties: Vec<Property<'a>>,
     pub requirements: Vec<Requirement>,
-    pub span: Span,
+    pub span: SrcLoc,
     pub type_constants: Vec<TypeConstant<'a>>,
 
     /// For class generics the upper bounds of each generic.

@@ -38,7 +38,7 @@ namespace type {
 namespace detail {
 
 // All the NativeTypes for the given tag.
-template <typename Tag>
+template <typename Tag, typename = void>
 struct NativeTypes {
   // No types to declare for non concrete types.
   static_assert(is_abstract_v<Tag>, "");

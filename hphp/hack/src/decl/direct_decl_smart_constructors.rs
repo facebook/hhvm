@@ -3284,10 +3284,18 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(ty) => ty,
             None => return Node::Ignored(SK::AliasDeclaration),
         };
-        let constraint = match constraint {
-            Node::TypeConstraint(&(_kind, hint)) => self.node_to_ty(hint),
-            _ => None,
-        };
+        let mut as_constraint = None;
+        let mut super_constraint = None;
+        for c in constraint.iter() {
+            if let Node::TypeConstraint(&(kind, hint)) = c {
+                let ty = self.node_to_ty(hint);
+                match kind {
+                    ConstraintKind::ConstraintAs => as_constraint = ty,
+                    ConstraintKind::ConstraintSuper => super_constraint = ty,
+                    _ => {}
+                }
+            }
+        }
 
         // Pop the type params stack only after creating all inner types.
         let tparams = self.pop_type_params(generic_params);
@@ -3334,7 +3342,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 _ => aast::TypedefVisibility::Transparent,
             },
             tparams,
-            constraint,
+            as_constraint,
+            super_constraint,
             type_: ty,
             is_ctx: false,
             attributes: user_attributes,
@@ -3376,11 +3385,13 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
 
         // lowerer ensures there is only one as constraint
         let mut as_constraint = None;
+        let mut super_constraint = None;
         for c in constraint.iter() {
             if let Node::ContextConstraint(&(kind, hint)) = c {
                 let ty = self.node_to_ty(hint);
                 match kind {
                     ConstraintKind::ConstraintAs => as_constraint = ty,
+                    ConstraintKind::ConstraintSuper => super_constraint = ty,
                     _ => {}
                 }
             }
@@ -3403,7 +3414,8 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             pos,
             vis: aast::TypedefVisibility::Opaque,
             tparams,
-            constraint: as_constraint,
+            as_constraint,
+            super_constraint,
             type_: ty,
             is_ctx: true,
             attributes: user_attributes,

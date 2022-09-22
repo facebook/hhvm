@@ -11,25 +11,18 @@ use ir::instr::Hhbc;
 use ir::instr::IsTypeOp;
 use ir::Func;
 use ir::FuncBuilder;
-use ir::FuncBuilderEx;
+use ir::FuncBuilderEx as _;
 use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
-use ir::StringInterner;
 use ir::ValueId;
-use itertools::Itertools;
-use log::trace;
 
+use super::func_builder::FuncBuilderEx as _;
 use crate::hack;
 
-pub(crate) fn lower<'a>(func: Func<'a>, strings: &StringInterner) -> Func<'a> {
-    trace!(
-        "Before Lower: {}",
-        ir::print::DisplayFunc(&func, true, strings)
-    );
-    let mut builder = FuncBuilder::with_func(func);
-
-    let mut lowerer = Lowerer::default();
+/// Lower individual Instrs in the Func to simpler forms.
+pub(crate) fn lower_instrs<'a>(builder: &mut FuncBuilder<'a>) {
+    let mut lowerer = LowerInstrs { changed: false };
 
     let mut bid = Func::ENTRY_BID;
     while bid.0 < builder.func.blocks.len() as u32 {
@@ -43,73 +36,26 @@ pub(crate) fn lower<'a>(func: Func<'a>, strings: &StringInterner) -> Func<'a> {
         }
         bid.0 += 1;
     }
-
-    let mut func = builder.finish();
-    ir::passes::split_critical_edges(&mut func, true);
-    trace!(
-        "After Lower: {}",
-        ir::print::DisplayFunc(&func, true, strings)
-    );
-    func
-}
-
-trait FuncBuilderEx2 {
-    fn hack_builtin(&mut self, _builtin: hack::Builtin, _args: &[ValueId], _loc: LocId) -> Instr;
-    fn emit_hack_builtin(
-        &mut self,
-        builtin: hack::Builtin,
-        args: &[ValueId],
-        loc: LocId,
-    ) -> ValueId;
-}
-
-impl<'a> FuncBuilderEx2 for FuncBuilder<'a> {
-    fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr {
-        use ir::instr::TextualHackBuiltinParam;
-        let target = builtin.into_str();
-        let params = args
-            .iter()
-            .map(|_| TextualHackBuiltinParam::Value)
-            .collect_vec()
-            .into_boxed_slice();
-        let values = args.to_vec().into_boxed_slice();
-        Instr::Special(ir::instr::Special::Textual(
-            ir::instr::Textual::HackBuiltin {
-                target,
-                params,
-                values,
-                loc,
-            },
-        ))
-    }
-
-    fn emit_hack_builtin(
-        &mut self,
-        builtin: hack::Builtin,
-        args: &[ValueId],
-        loc: LocId,
-    ) -> ValueId {
-        let instr = self.hack_builtin(builtin, args, loc);
-        self.emit(instr)
-    }
 }
 
 #[derive(Default)]
-struct Lowerer {
+struct LowerInstrs {
     changed: bool,
 }
 
-impl Lowerer {
+impl LowerInstrs {
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Instr {
         let builtin = match instr {
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::CmpEq,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gt, _)) => hack::Builtin::CmpGt,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gte, _)) => hack::Builtin::CmpGte,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lt, _)) => hack::Builtin::CmpLt,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lte, _)) => hack::Builtin::CmpLte,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::NSame, _)) => hack::Builtin::CmpNSame,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Neq, _)) => hack::Builtin::CmpNeq,
-            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Same, _)) => hack::Builtin::CmpSame,
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGt),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Gte, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpGte),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lt, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpLt),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Lte, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpLte),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::NSame, _)) => {
+                hack::Builtin::Hhbc(hack::Hhbc::CmpNSame)
+            }
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Neq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpNeq),
+            Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Same, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpSame),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::ArrLike, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Bool, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Class, _)) => todo!(),
@@ -117,7 +63,9 @@ impl Lowerer {
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Dbl, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Dict, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Func, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Int, _)) => hack::Builtin::IsInt,
+            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Int, _)) => {
+                hack::Builtin::Hhbc(hack::Hhbc::IsTypeInt)
+            }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Keyset, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::LegacyArrLike, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Null, _)) => todo!(),
@@ -126,9 +74,9 @@ impl Lowerer {
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Scalar, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Str, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
-            Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Modulo,
-            Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Not,
-            Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Print,
+            Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
+            Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
+            Instr::Hhbc(Hhbc::Print(..)) => hack::Builtin::Hhbc(hack::Hhbc::Print),
             _ => unreachable!("Unhandled Instr: {instr:#?}"),
         };
         builder.hack_builtin(builtin, instr.operands(), instr.loc_id())
@@ -142,12 +90,12 @@ impl Lowerer {
         let pred = builder.emit_is(vid, &return_type, loc);
         let pred = builder.emit(Instr::Hhbc(Hhbc::Not(pred, loc)));
         builder.if_then(pred, loc, |builder| {
-            builder.hack_builtin(hack::Builtin::VerifyFailed, &[], loc)
+            builder.hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc)
         })
     }
 }
 
-impl TransformInstr for Lowerer {
+impl TransformInstr for LowerInstrs {
     fn apply<'a>(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'a>) -> Instr {
         let instr = match instr {
             Instr::Hhbc(

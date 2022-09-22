@@ -46,6 +46,7 @@ class TypeName_Builder(thrift.py3.builder.StructBuilder):
     stringType: _typing.Optional[_apache_thrift_type_standard_types.Void]
     binaryType: _typing.Optional[_apache_thrift_type_standard_types.Void]
     enumType: _typing.Any
+    typedefType: _typing.Any
     structType: _typing.Any
     unionType: _typing.Any
     exceptionType: _typing.Any

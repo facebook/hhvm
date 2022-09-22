@@ -72,7 +72,7 @@ impl HhServerProviderBackend {
         ))));
         let file_provider = Arc::new(FileProviderWithChanges {
             delta_and_changes: Arc::clone(&file_store),
-            disk: DiskProvider::new(Arc::clone(&path_ctx)),
+            disk: DiskProvider::new(Arc::clone(&path_ctx), None),
         });
         let decl_parser =
             DeclParser::with_options(Arc::clone(&file_provider) as _, parser_options.clone());

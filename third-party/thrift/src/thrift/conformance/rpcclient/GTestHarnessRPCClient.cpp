@@ -26,11 +26,13 @@
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Sleep.h>
 #include <folly/futures/Future.h>
+#include <thrift/conformance/PluggableFunctions.h>
 #include <thrift/conformance/RpcStructComparator.h>
 #include <thrift/conformance/Utils.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceService.h>
 #include <thrift/lib/cpp2/async/Sink.h>
 #include <thrift/lib/cpp2/server/BaseThriftServer.h>
+#include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/cpp2/util/ScopedServerInterfaceThread.h>
 
 namespace apache::thrift::conformance {
@@ -179,6 +181,14 @@ class ConformanceVerificationServer
   ServerTestResult serverResult_;
 };
 
+void createClient(
+    std::string_view service_name, std::string ipAddress, std::string port) {
+  auto client =
+      create_rpc_conformance_setup_service_client_(std::string(service_name));
+  // client->sync_createRPCConformanceServiceClient(ipAddress, port);
+  client->semifuture_createRPCConformanceServiceClient(ipAddress, port);
+}
+
 class RPCClientConformanceTest : public testing::Test {
  public:
   RPCClientConformanceTest(
@@ -186,24 +196,34 @@ class RPCClientConformanceTest : public testing::Test {
       const TestSuite& suite,
       const conformance::Test& test,
       const TestCase& testCase,
-      bool conforming)
+      bool conforming,
+      bool connectViaServer)
       : suite_(suite),
         test_(test),
         testCase_(testCase),
         conforming_(conforming),
         handler_(std::make_shared<ConformanceVerificationServer>(
             *testCase_.rpc_ref())),
-        server_(handler_) {
-    clientProcess_ = folly::Subprocess(std::vector<std::string>{
-        std::string(clientCmd),
-        "--port",
-        folly::to<std::string>(server_.getPort())});
+        server_(handler_),
+        connectViaServer_(connectViaServer) {
+    auto port = folly::to<std::string>(server_.getPort());
+    auto& server = server_.getThriftServer();
     if (testCase_.rpc_ref()->serverInstruction()->streamCreditTimeout_ref()) {
-      server_.getThriftServer().setStreamExpireTime(
+      server.setStreamExpireTime(
           std::chrono::milliseconds{*testCase_.rpc_ref()
                                          ->serverInstruction()
                                          ->streamCreditTimeout_ref()
                                          ->streamExpireTime()});
+    }
+    if (connectViaServer_) {
+      auto& thriftServer = dynamic_cast<apache::thrift::ThriftServer&>(server);
+      std::ignore = update_server_props_(thriftServer);
+      createClient(clientCmd, server_.getAddress().getAddressStr(), port);
+    } else {
+      clientProcess_ = folly::Subprocess(std::vector<std::string>{
+          std::string(clientCmd),
+          "--port",
+          folly::to<std::string>(server_.getPort())});
     }
   }
 
@@ -226,9 +246,11 @@ class RPCClientConformanceTest : public testing::Test {
   }
 
   void TearDown() override {
-    clientProcess_.sendSignal(SIGINT);
-    clientProcess_.waitOrTerminateOrKill(
-        std::chrono::seconds(10), std::chrono::seconds(10));
+    if (!connectViaServer_) {
+      clientProcess_.sendSignal(SIGINT);
+      clientProcess_.waitOrTerminateOrKill(
+          std::chrono::seconds(10), std::chrono::seconds(10));
+    }
   }
 
  private:
@@ -276,13 +298,14 @@ class RPCClientConformanceTest : public testing::Test {
   std::shared_ptr<ConformanceVerificationServer> handler_;
   apache::thrift::ScopedServerInterfaceThread server_;
   folly::Subprocess clientProcess_;
+  bool connectViaServer_ = false;
 };
 
 void registerTests(
     std::string_view category,
     const TestSuite& suite,
     const std::set<std::string>& nonconforming,
-    std::string_view clientCmd,
+    std::pair<std::string_view, bool> clientCmd,
     const char* file,
     int line) {
   for (const auto& test : *suite.tests()) {
@@ -300,7 +323,12 @@ void registerTests(
           line,
           [clientCmd, &suite, &test, &testCase, conforming]() {
             return new RPCClientConformanceTest(
-                clientCmd, suite, test, testCase, conforming);
+                clientCmd.first,
+                suite,
+                test,
+                testCase,
+                conforming,
+                clientCmd.second);
           });
     }
   }

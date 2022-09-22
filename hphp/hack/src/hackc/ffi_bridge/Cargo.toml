@@ -13,7 +13,7 @@ anyhow = "1.0.56"
 bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 compile = { path = "../compile/cargo/compile" }
-cxx = "1.0.64"
+cxx = "1.0.76"
 decl_provider = { path = "../decl_provider" }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 facts_rust = { path = "../../facts/cargo/facts_rust" }
@@ -29,4 +29,4 @@ parser_core_types = { path = "../../parser/cargo/core_types" }
 sha-1 = "0.10"
 
 [build-dependencies]
-cxx-build = "1.0.64"
+cxx-build = "1.0.76"

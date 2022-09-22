@@ -51,7 +51,8 @@
           {{#function:exceptions}}
           "{{field:name}}" : {
             "name": "{{field:name}}",
-            "type" : {{#field:type}}{{> Types}}{{/field:type}}
+            "type" : {{#field:type}}{{> Types}}{{/field:type}},
+            "id" : {{field:key}}
           }{{^last?}},{{/last?}}
           {{/function:exceptions}}
         },

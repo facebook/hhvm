@@ -456,27 +456,28 @@ TYPED_TEST_P(
   EXPECT_EQ(obj, objd);
 }
 
-TYPED_TEST_P(TerseWriteSerializerTests, TerseStructs) {
-  SCOPED_TRACE(folly::pretty_name<TypeParam>());
+template <typename Prot, typename T, typename T1, typename T2, typename T3>
+void terse_struct_optimization_test() {
+  SCOPED_TRACE(folly::pretty_name<T>());
   terse_write::EmptyStruct empty;
-  terse_write::TerseStructs obj;
-  // 'TerseStruct1' has 'field1'.
-  terse_write::TerseStructs1 obj1;
-  // 'TerseStruct2' has 'field2'.
-  terse_write::TerseStructs2 obj2;
-  // 'TerseStruct3' has 'field3'.
-  terse_write::TerseStructs3 obj3;
+  T obj;
+  // 'T1' has 'field1'.
+  T1 obj1;
+  // 'T2' has 'field2'.
+  T2 obj2;
+  // 'T3' has 'field3'.
+  T3 obj3;
 
   EXPECT_EQ(
-      TypeParam::template serialize<std::string>(obj),
-      TypeParam::template serialize<std::string>(empty));
+      Prot::template serialize<std::string>(obj),
+      Prot::template serialize<std::string>(empty));
 
   obj.field1()->field1() = 1;
   obj1.field1()->field1() = 1;
 
   EXPECT_EQ(
-      TypeParam::template serialize<std::string>(obj),
-      TypeParam::template serialize<std::string>(obj1));
+      Prot::template serialize<std::string>(obj),
+      Prot::template serialize<std::string>(obj1));
 
   apache::thrift::clear(obj);
 
@@ -484,8 +485,8 @@ TYPED_TEST_P(TerseWriteSerializerTests, TerseStructs) {
   obj2.field2()->field1() = 1;
 
   EXPECT_EQ(
-      TypeParam::template serialize<std::string>(obj),
-      TypeParam::template serialize<std::string>(obj2));
+      Prot::template serialize<std::string>(obj),
+      Prot::template serialize<std::string>(obj2));
 
   apache::thrift::clear(obj);
 
@@ -493,8 +494,23 @@ TYPED_TEST_P(TerseWriteSerializerTests, TerseStructs) {
   obj3.field3()->field1() = 1;
 
   EXPECT_EQ(
-      TypeParam::template serialize<std::string>(obj),
-      TypeParam::template serialize<std::string>(obj3));
+      Prot::template serialize<std::string>(obj),
+      Prot::template serialize<std::string>(obj3));
+}
+
+TYPED_TEST_P(TerseWriteSerializerTests, TerseStructs) {
+  terse_struct_optimization_test<
+      TypeParam,
+      terse_write::TerseStructs,
+      terse_write::TerseStructs1,
+      terse_write::TerseStructs2,
+      terse_write::TerseStructs3>();
+  terse_struct_optimization_test<
+      TypeParam,
+      tablebased_terse_write::TerseStructs,
+      tablebased_terse_write::TerseStructs1,
+      tablebased_terse_write::TerseStructs2,
+      tablebased_terse_write::TerseStructs3>();
 }
 
 TYPED_TEST_P(TerseWriteSerializerTests, AdaptedFields) {

@@ -27,6 +27,13 @@ struct SrcKey;
 namespace jit::svcreq {
 
 /*
+ * A helper that initializes unpassed default arguments to KindOfUninit.
+ * This is needed when coming to C++ from JIT, as the JIT may optimize away
+ * uninit writes for default arguments.
+ */
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+                       uint32_t numNonVariadicParams) noexcept;
+/*
  * Handle a request to initially translate the code at the given current
  * location. Reached from translations at other SrcKeys when these translations
  * are unable or unwilling to continue due to insufficient type information or

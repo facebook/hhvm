@@ -704,6 +704,7 @@ enum apache_thrift_type_standard_TypeNameEnum: int {
   stringType = 8;
   binaryType = 9;
   enumType = 10;
+  typedefType = 17;
   structType = 11;
   unionType = 12;
   exceptionType = 13;
@@ -781,6 +782,12 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       'type' => \TType::STRUCT,
       'class' => apache_thrift_type_standard_TypeUri::class,
     ),
+    17 => shape(
+      'var' => 'typedefType',
+      'union' => true,
+      'type' => \TType::STRUCT,
+      'class' => apache_thrift_type_standard_TypeUri::class,
+    ),
     11 => shape(
       'var' => 'structType',
       'union' => true,
@@ -829,6 +836,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     'stringType' => 8,
     'binaryType' => 9,
     'enumType' => 10,
+    'typedefType' => 17,
     'structType' => 11,
     'unionType' => 12,
     'exceptionType' => 13,
@@ -848,6 +856,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     ?'stringType' => ?apache_thrift_type_standard_Void,
     ?'binaryType' => ?apache_thrift_type_standard_Void,
     ?'enumType' => ?apache_thrift_type_standard_TypeUri,
+    ?'typedefType' => ?apache_thrift_type_standard_TypeUri,
     ?'structType' => ?apache_thrift_type_standard_TypeUri,
     ?'unionType' => ?apache_thrift_type_standard_TypeUri,
     ?'exceptionType' => ?apache_thrift_type_standard_TypeUri,
@@ -867,6 +876,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     ?'stringType' => ?apache_thrift_type_standard_Void,
     ?'binaryType' => ?apache_thrift_type_standard_Void,
     ?'enumType' => ?apache_thrift_type_standard_TypeUri::TShape,
+    ?'typedefType' => ?apache_thrift_type_standard_TypeUri::TShape,
     ?'structType' => ?apache_thrift_type_standard_TypeUri::TShape,
     ?'unionType' => ?apache_thrift_type_standard_TypeUri::TShape,
     ?'exceptionType' => ?apache_thrift_type_standard_TypeUri::TShape,
@@ -875,7 +885,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     ?'mapType' => ?apache_thrift_type_standard_Void,
     ...
   );
-  const int STRUCTURAL_ID = 7110509308610567869;
+  const int STRUCTURAL_ID = 2966511906547332991;
   /**
    * Original thrift field:-
    * 1: enum standard.Void boolType
@@ -928,6 +938,11 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
   public ?apache_thrift_type_standard_TypeUri $enumType;
   /**
    * Original thrift field:-
+   * 17: struct standard.TypeUri typedefType
+   */
+  public ?apache_thrift_type_standard_TypeUri $typedefType;
+  /**
+   * Original thrift field:-
    * 11: struct standard.TypeUri structType
    */
   public ?apache_thrift_type_standard_TypeUri $structType;
@@ -958,7 +973,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
   public ?apache_thrift_type_standard_Void $mapType;
   protected apache_thrift_type_standard_TypeNameEnum $_type = apache_thrift_type_standard_TypeNameEnum::_EMPTY_;
 
-  public function __construct(?apache_thrift_type_standard_Void $boolType = null, ?apache_thrift_type_standard_Void $byteType = null, ?apache_thrift_type_standard_Void $i16Type = null, ?apache_thrift_type_standard_Void $i32Type = null, ?apache_thrift_type_standard_Void $i64Type = null, ?apache_thrift_type_standard_Void $floatType = null, ?apache_thrift_type_standard_Void $doubleType = null, ?apache_thrift_type_standard_Void $stringType = null, ?apache_thrift_type_standard_Void $binaryType = null, ?apache_thrift_type_standard_TypeUri $enumType = null, ?apache_thrift_type_standard_TypeUri $structType = null, ?apache_thrift_type_standard_TypeUri $unionType = null, ?apache_thrift_type_standard_TypeUri $exceptionType = null, ?apache_thrift_type_standard_Void $listType = null, ?apache_thrift_type_standard_Void $setType = null, ?apache_thrift_type_standard_Void $mapType = null)[] {
+  public function __construct(?apache_thrift_type_standard_Void $boolType = null, ?apache_thrift_type_standard_Void $byteType = null, ?apache_thrift_type_standard_Void $i16Type = null, ?apache_thrift_type_standard_Void $i32Type = null, ?apache_thrift_type_standard_Void $i64Type = null, ?apache_thrift_type_standard_Void $floatType = null, ?apache_thrift_type_standard_Void $doubleType = null, ?apache_thrift_type_standard_Void $stringType = null, ?apache_thrift_type_standard_Void $binaryType = null, ?apache_thrift_type_standard_TypeUri $enumType = null, ?apache_thrift_type_standard_TypeUri $typedefType = null, ?apache_thrift_type_standard_TypeUri $structType = null, ?apache_thrift_type_standard_TypeUri $unionType = null, ?apache_thrift_type_standard_TypeUri $exceptionType = null, ?apache_thrift_type_standard_Void $listType = null, ?apache_thrift_type_standard_Void $setType = null, ?apache_thrift_type_standard_Void $mapType = null)[] {
     $this->_type = apache_thrift_type_standard_TypeNameEnum::_EMPTY_;
     if ($boolType !== null) {
       $this->boolType = $boolType;
@@ -999,6 +1014,10 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
     if ($enumType !== null) {
       $this->enumType = $enumType;
       $this->_type = apache_thrift_type_standard_TypeNameEnum::enumType;
+    }
+    if ($typedefType !== null) {
+      $this->typedefType = $typedefType;
+      $this->_type = apache_thrift_type_standard_TypeNameEnum::typedefType;
     }
     if ($structType !== null) {
       $this->structType = $structType;
@@ -1042,6 +1061,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       Shapes::idx($shape, 'stringType'),
       Shapes::idx($shape, 'binaryType'),
       Shapes::idx($shape, 'enumType'),
+      Shapes::idx($shape, 'typedefType'),
       Shapes::idx($shape, 'structType'),
       Shapes::idx($shape, 'unionType'),
       Shapes::idx($shape, 'exceptionType'),
@@ -1090,6 +1110,9 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
         break;
       case apache_thrift_type_standard_TypeNameEnum::enumType:
         $this->enumType = null;
+        break;
+      case apache_thrift_type_standard_TypeNameEnum::typedefType:
+        $this->typedefType = null;
         break;
       case apache_thrift_type_standard_TypeNameEnum::structType:
         $this->structType = null;
@@ -1313,6 +1336,26 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       (string)$this->_type,
     );
     return $this->enumType as nonnull;
+  }
+
+  public function set_typedefType(apache_thrift_type_standard_TypeUri $typedefType)[write_props]: this {
+    $this->reset();
+    $this->_type = apache_thrift_type_standard_TypeNameEnum::typedefType;
+    $this->typedefType = $typedefType;
+    return $this;
+  }
+
+  public function get_typedefType()[]: ?apache_thrift_type_standard_TypeUri {
+    return $this->typedefType;
+  }
+
+  public function getx_typedefType()[]: apache_thrift_type_standard_TypeUri {
+    invariant(
+      $this->_type === apache_thrift_type_standard_TypeNameEnum::typedefType,
+      'get_typedefType called on an instance of TypeName whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->typedefType as nonnull;
   }
 
   public function set_structType(apache_thrift_type_standard_TypeUri $structType)[write_props]: this {
@@ -1592,6 +1635,21 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
           ),
           tmeta_ThriftField::fromShape(
             shape(
+              "id" => 17,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "standard.TypeUri",
+                    )
+                  ),
+                )
+              ),
+              "name" => "typedefType",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
               "id" => 11,
               "type" => tmeta_ThriftType::fromShape(
                 shape(
@@ -1706,6 +1764,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       Shapes::idx($shape, 'stringType'),
       Shapes::idx($shape, 'binaryType'),
       Shapes::idx($shape, 'enumType') === null ? null : (apache_thrift_type_standard_TypeUri::__fromShape($shape['enumType'])),
+      Shapes::idx($shape, 'typedefType') === null ? null : (apache_thrift_type_standard_TypeUri::__fromShape($shape['typedefType'])),
       Shapes::idx($shape, 'structType') === null ? null : (apache_thrift_type_standard_TypeUri::__fromShape($shape['structType'])),
       Shapes::idx($shape, 'unionType') === null ? null : (apache_thrift_type_standard_TypeUri::__fromShape($shape['unionType'])),
       Shapes::idx($shape, 'exceptionType') === null ? null : (apache_thrift_type_standard_TypeUri::__fromShape($shape['exceptionType'])),
@@ -1727,6 +1786,7 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       'stringType' => $this->stringType,
       'binaryType' => $this->binaryType,
       'enumType' => $this->enumType?->__toShape(),
+      'typedefType' => $this->typedefType?->__toShape(),
       'structType' => $this->structType?->__toShape(),
       'unionType' => $this->unionType?->__toShape(),
       'exceptionType' => $this->exceptionType?->__toShape(),
@@ -1790,25 +1850,32 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       $this->enumType = $_tmp1;
       $this->_type = apache_thrift_type_standard_TypeNameEnum::enumType;
     }
-    if (idx($parsed, 'structType') !== null) {
-      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['structType']));
+    if (idx($parsed, 'typedefType') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['typedefType']));
       $_tmp3 = apache_thrift_type_standard_TypeUri::withDefaultValues();
       $_tmp3->readFromJson($_tmp2);
-      $this->structType = $_tmp3;
+      $this->typedefType = $_tmp3;
+      $this->_type = apache_thrift_type_standard_TypeNameEnum::typedefType;
+    }
+    if (idx($parsed, 'structType') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['structType']));
+      $_tmp5 = apache_thrift_type_standard_TypeUri::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->structType = $_tmp5;
       $this->_type = apache_thrift_type_standard_TypeNameEnum::structType;
     }
     if (idx($parsed, 'unionType') !== null) {
-      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['unionType']));
-      $_tmp5 = apache_thrift_type_standard_TypeUri::withDefaultValues();
-      $_tmp5->readFromJson($_tmp4);
-      $this->unionType = $_tmp5;
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['unionType']));
+      $_tmp7 = apache_thrift_type_standard_TypeUri::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->unionType = $_tmp7;
       $this->_type = apache_thrift_type_standard_TypeNameEnum::unionType;
     }
     if (idx($parsed, 'exceptionType') !== null) {
-      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['exceptionType']));
-      $_tmp7 = apache_thrift_type_standard_TypeUri::withDefaultValues();
-      $_tmp7->readFromJson($_tmp6);
-      $this->exceptionType = $_tmp7;
+      $_tmp8 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, apache_thrift_type_standard_TypeUri>($parsed['exceptionType']));
+      $_tmp9 = apache_thrift_type_standard_TypeUri::withDefaultValues();
+      $_tmp9->readFromJson($_tmp8);
+      $this->exceptionType = $_tmp9;
       $this->_type = apache_thrift_type_standard_TypeNameEnum::exceptionType;
     }
     if (idx($parsed, 'listType') !== null) {

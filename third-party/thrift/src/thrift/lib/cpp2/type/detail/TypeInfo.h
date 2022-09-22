@@ -37,6 +37,8 @@ using op::detail::partial_ordering;
 class Dyn;
 class Ptr;
 
+enum class IterType { Default = 0, Key, Value };
+
 // Runtime type information for a Thrift type.
 struct TypeInfo {
   const Type thriftType;
@@ -53,9 +55,11 @@ struct TypeInfo {
   void (*assign)(void*, const Dyn&);
   void (*append)(void*, const Dyn&);
   bool (*add)(void*, const Dyn&);
-  bool (*put_)(void*, FieldId, const Dyn&, const Dyn&);
+  void (*prepend)(void*, const Dyn&);
+  bool (*put_)(void*, FieldId, size_t, const Dyn&, const Dyn&);
   Ptr (*ensure_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
+  Ptr (*next)(void*, IterType, std::any&);
   size_t (*size)(const void*);
 
   bool equal(const void* lhs, const Dyn& rhs) const {
@@ -76,6 +80,11 @@ struct TypeInfo {
 
   bool put(void* ptr, FieldId id, const Dyn& val) const;
   bool put(void* ptr, const Dyn& key, const Dyn& val) const;
+  void insert(void* ptr, size_t pos, const Dyn& val) const;
+
+  bool remove(void* ptr, size_t pos) const;
+  bool remove(void* ptr, const Dyn& key) const;
+  bool remove(void* ptr, FieldId id) const;
 
   Ptr ensure(void* ptr, FieldId id) const;
   Ptr ensure(void* ptr, FieldId id, const Dyn& defVal) const;
@@ -115,9 +124,11 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::assign,
       &Op::append,
       &Op::add,
+      &Op::prepend,
       &Op::put,
       &Op::ensure,
       &Op::get,
+      &Op::next,
       &Op::size,
   };
   return kValue;

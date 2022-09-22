@@ -14,7 +14,7 @@ derive_more = "0.99.17"
 hh_hash = { path = "../hh_hash" }
 nohash-hasher = "0.2"
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
-rusqlite = { version = "0.27.0", features = ["backup", "blob", "column_decltype"] }
+rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 thiserror = "=1.0.30"

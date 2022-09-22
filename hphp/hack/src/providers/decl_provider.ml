@@ -256,14 +256,15 @@ let get_fun
 
 let maybe_pessimise_typedef_decl ctx typedef_decl =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    match typedef_decl.Typing_defs.td_constraint with
+    (* TODO: deal with super constraint *)
+    match typedef_decl.Typing_defs.td_as_constraint with
     | Some _ -> typedef_decl
     | None ->
       let open Typing_defs in
       let pos = typedef_decl.td_pos in
       {
         typedef_decl with
-        td_constraint =
+        td_as_constraint =
           Some
             (Decl_enforceability.supportdyn_mixed
                pos

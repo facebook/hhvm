@@ -136,21 +136,6 @@ struct apc_rfc1867_data {
 int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
                          unsigned int event, void *event_data, void **extra);
 
-void const_load_impl(struct cache_info *info,
-                     const char **int_keys, long long *int_values,
-                     const char **char_keys, char *char_values,
-                     const char **strings, const char **objects,
-                     const char **thrifts, const char **others);
-
-void const_load_impl_compressed(
-  struct cache_info *info,
-  int *int_lens, const char *int_keys, long long *int_values,
-  int *char_lens, const char *char_keys, char *char_values,
-  int *string_lens, const char *strings,
-  int *object_lens, const char *objects,
-  int *thrift_lens, const char *thrifts,
-  int *other_lens, const char *others);
-
 static_assert(sizeof(int64_t) == sizeof(long long),
               "Must be able to cast an int64* to a long long*");
 

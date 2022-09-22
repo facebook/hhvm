@@ -259,6 +259,18 @@ cdef __StructSpec get_reflection__TypeName():
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
+            id=17,
+            name="typedefType",
+            type=_apache_thrift_type_standard_types.TypeUri,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
             id=11,
             name="structType",
             type=_apache_thrift_type_standard_types.TypeUri,

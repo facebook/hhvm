@@ -82,7 +82,8 @@
                 "type" : {
   "type" : "struct",
   "name" : "FooEx"
-}
+},
+                "id" : 1
               }
             },
             "returnType" : {
@@ -108,7 +109,8 @@
                 "type" : {
   "type" : "struct",
   "name" : "FooEx"
-}
+},
+                "id" : 1
               }
             },
             "returnType" : {
@@ -152,7 +154,8 @@
                 "type" : {
   "type" : "struct",
   "name" : "FooEx"
-}
+},
+                "id" : 1
               }
             },
             "returnType" : {
@@ -179,7 +182,8 @@
                 "type" : {
   "type" : "struct",
   "name" : "FooEx"
-}
+},
+                "id" : 1
               }
             },
             "returnType" : {

@@ -1,6 +1,7 @@
 [(Typedef
     { t_annotation = (); t_name = ([4:6-9], "\\Foo"); t_tparams = []; 
-      t_constraint = None; t_kind = ([4:12-18], (Hprim Tstring)); t_user_attributes = [{ ua_name = ([3:3-9], "__Docs"); ua_params = [((), [3:10-42], (String "http://example.com/foo?bar#baz"))] }];
+      t_as_constraint = None; t_super_constraint = None; t_kind = ([4:12-18], (Hprim Tstring));
+      t_user_attributes = [{ ua_name = ([3:3-9], "__Docs"); ua_params = [((), [3:10-42], (String "http://example.com/foo?bar#baz"))] }]; 
       t_file_attributes = []; t_mode = Mstrict; t_vis = Transparent;
       t_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 

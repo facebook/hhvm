@@ -212,7 +212,8 @@ type typedef_type = {
   td_pos: Pos_or_decl.t;
   td_vis: Ast_defs.typedef_visibility;
   td_tparams: decl_tparam list;
-  td_constraint: decl_ty option;
+  td_as_constraint: decl_ty option;
+  td_super_constraint: decl_ty option;
   td_type: decl_ty;
   td_is_ctx: bool;
   td_attributes: user_attribute list;
@@ -1246,7 +1247,8 @@ let equal_typedef_type tt1 tt2 =
   Pos_or_decl.equal tt1.td_pos tt2.td_pos
   && Aast.equal_typedef_visibility tt1.td_vis tt2.td_vis
   && List.equal equal_decl_tparam tt1.td_tparams tt2.td_tparams
-  && Option.equal equal_decl_ty tt1.td_constraint tt2.td_constraint
+  && Option.equal equal_decl_ty tt1.td_as_constraint tt2.td_as_constraint
+  && Option.equal equal_decl_ty tt1.td_super_constraint tt2.td_super_constraint
   && equal_decl_ty tt1.td_type tt2.td_type
 
 let equal_fun_elt fe1 fe2 =

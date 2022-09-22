@@ -2421,14 +2421,18 @@ let typedef ctx tdef =
       (Naming_elaborate_namespaces_endo.make_env env.namespace)
       tdef
   in
-  let tconstraint = Option.map tdef.Aast.t_constraint ~f:(hint env) in
+  let t_as_constraint = Option.map tdef.Aast.t_as_constraint ~f:(hint env) in
+  let t_super_constraint =
+    Option.map tdef.Aast.t_super_constraint ~f:(hint env)
+  in
   let tparaml = type_paraml env tdef.Aast.t_tparams in
   let attrs = user_attributes env tdef.Aast.t_user_attributes in
   {
     N.t_annotation = ();
     t_name = tdef.Aast.t_name;
     t_tparams = tparaml;
-    t_constraint = tconstraint;
+    t_as_constraint;
+    t_super_constraint;
     t_kind = hint env tdef.Aast.t_kind;
     t_user_attributes = attrs;
     t_mode = tdef.Aast.t_mode;

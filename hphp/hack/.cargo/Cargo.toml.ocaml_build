@@ -126,6 +126,7 @@ members = [
     "src/utils/hh24_types",
     "src/utils/html_entities",
     "src/utils/html_entities/test",
+    "src/utils/intern",
     "src/utils/line_break_map",
     "src/utils/lint",
     "src/utils/multifile",

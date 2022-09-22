@@ -892,9 +892,22 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
           runtimeDisableResourcePoolsDeprecated();
         }
       }
-    } else {
-      if (!THRIFT_FLAG(allow_resource_pools_for_wildcards) &&
-          !FLAGS_thrift_allow_resource_pools_for_wildcards) {
+    } else { // we can only have WildcardMethodMetadataMap here
+      auto* wildcardMap =
+          std::get_if<AsyncProcessorFactory::WildcardMethodMetadataMap>(
+              &methodMetadata);
+
+      DCHECK(wildcardMap);
+
+      bool wildcardFlagEnabled =
+          THRIFT_FLAG(allow_resource_pools_for_wildcards) ||
+          FLAGS_thrift_allow_resource_pools_for_wildcards;
+      bool validExecutor = wildcardMap->wildcardMetadata->executorType !=
+          AsyncProcessorFactory::MethodMetadata::ExecutorType::UNKNOWN;
+
+      // if a wildcard is not providing valid executor type
+      // we should not turn on resource pool for it
+      if (!wildcardFlagEnabled || !validExecutor) {
         LOG(INFO) << "Resource pools disabled. Wildcard methods";
         runtimeServerActions_.wildcardMethods = true;
         runtimeDisableResourcePoolsDeprecated();

@@ -17,6 +17,7 @@
 #include <thrift/conformance/GTestHarness.h>
 
 #include <chrono>
+#include <exception>
 #include <stdexcept>
 
 #include <folly/experimental/coro/AsyncGenerator.h>
@@ -327,25 +328,40 @@ testing::AssertionResult runRpcTest(
     Client<RPCConformanceService>& client, const RpcTestCase& rpc) {
   try {
     client.sync_sendTestCase(rpc);
-    auto actualClientResult = runClientSteps(client, *rpc.clientInstruction());
-    if (!equal(actualClientResult, *rpc.clientTestResult())) {
-      return testing::AssertionFailure()
-          << "\nExpected client result: " << jsonify(*rpc.clientTestResult())
-          << "\nActual client result: " << jsonify(actualClientResult);
-    }
-
-    // Get result from server
-    ServerTestResult actualServerResult;
-    client.sync_getTestResult(actualServerResult);
-    if (actualServerResult != *rpc.serverTestResult()) {
-      return testing::AssertionFailure()
-          << "\nExpected server result: " << jsonify(*rpc.serverTestResult())
-          << "\nActual server result: " << jsonify(actualServerResult);
-    }
-    return testing::AssertionSuccess();
-  } catch (...) {
-    return testing::AssertionFailure();
+  } catch (const std::exception& e) {
+    return testing::AssertionFailure()
+        << "\nFailed to send RPC test case to server: " << e.what();
   }
+
+  ClientTestResult actualClientResult;
+  try {
+    actualClientResult = runClientSteps(client, *rpc.clientInstruction());
+  } catch (const std::exception& e) {
+    return testing::AssertionFailure()
+        << "\nFailed to receive RPC client result: " << e.what();
+  }
+
+  if (!equal(actualClientResult, *rpc.clientTestResult())) {
+    return testing::AssertionFailure()
+        << "\nExpected client result: " << jsonify(*rpc.clientTestResult())
+        << "\nActual client result: " << jsonify(actualClientResult);
+  }
+
+  // Get result from server
+  ServerTestResult actualServerResult;
+  try {
+    client.sync_getTestResult(actualServerResult);
+  } catch (const std::exception& e) {
+    return testing::AssertionFailure()
+        << "\nFailed to receive RPC server result: " << e.what();
+  }
+
+  if (actualServerResult != *rpc.serverTestResult()) {
+    return testing::AssertionFailure()
+        << "\nExpected server result: " << jsonify(*rpc.serverTestResult())
+        << "\nActual server result: " << jsonify(actualServerResult);
+  }
+  return testing::AssertionSuccess();
 }
 
 testing::AssertionResult runBasicRpcTest(

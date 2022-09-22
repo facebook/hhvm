@@ -1,6 +1,6 @@
 [(Typedef
-    { t_annotation = (); t_name = ([4:8-9], "\\X"); t_tparams = []; t_constraint = (Some ([4:13-26], (Hintersection [([4:14-25], (Happly (([4:14-25], "\\HH\\Contexts\\write_props"), [])))])));
-      t_kind = ([4:8-9], (Happly (([4:8-9], "\\HH\\Contexts\\defaults"), []))); 
+    { t_annotation = (); t_name = ([4:8-9], "\\X"); t_tparams = []; t_as_constraint = (Some ([4:13-26], (Hintersection [([4:14-25], (Happly (([4:14-25], "\\HH\\Contexts\\write_props"), [])))])));
+      t_super_constraint = None; t_kind = ([4:8-9], (Happly (([4:8-9], "\\HH\\Contexts\\defaults"), []))); 
       t_user_attributes = [];
       t_file_attributes =
       [{ fa_user_attributes = [{ ua_name = ([3:8-32], "__EnableUnstableFeatures"); ua_params = [((), [3:33-66], (String "context_alias_declaration_short"))] }];

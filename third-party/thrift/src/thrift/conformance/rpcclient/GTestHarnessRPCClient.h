@@ -36,7 +36,7 @@ void registerTests(
     std::string_view name,
     const TestSuite& suite,
     const std::set<std::string>& nonconforming,
-    std::string_view clientCmd,
+    std::pair<std::string_view, bool> clientCmd,
     const char* file = "",
     int line = 0);
 
@@ -46,7 +46,7 @@ class RPCClientConformanceTestRegistration {
  public:
   RPCClientConformanceTestRegistration(
       std::vector<TestSuite> suites,
-      std::map<std::string_view, std::string_view> clientCmds,
+      std::map<std::string_view, std::pair<std::string_view, bool>> clientCmds,
       const std::set<std::string>& nonconforming,
       const char* file = "",
       int line = 0)

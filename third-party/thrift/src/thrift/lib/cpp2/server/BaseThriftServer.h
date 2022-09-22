@@ -991,16 +991,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     return thriftConfig_.getNumCPUWorkerThreads();
   }
 
-  /**
-   * Codel queuing timeout - limit queueing time before overload
-   * http://en.wikipedia.org/wiki/CoDel
-   */
-  virtual void setEnableCodel(bool enableCodel) {
-    thriftConfig_.setEnableCodel(
-        folly::observer::makeStaticObserver(std::optional{enableCodel}),
-        AttributeSource::OVERRIDE);
-  }
-
   bool getEnableCodel() const { return thriftConfig_.getEnableCodel().get(); }
 
   /**
@@ -1182,9 +1172,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
-   * Gets an observer representing the socket queue timeout. If no value is
-   * set, this falls back to the thrift flag,
-   * server_default_socket_queue_timeout_ms.
+   * Gets an observer representing the socket queue timeout.
    */
   const folly::observer::Observer<std::chrono::nanoseconds>&
   getSocketQueueTimeout() const {

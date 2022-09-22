@@ -1011,6 +1011,9 @@ void pcre_handle_exec_error(int pcre_code) {
   case PCRE_ERROR_BADUTF8_OFFSET:
     preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
     break;
+  case PCRE_ERROR_JIT_STACKLIMIT:
+    preg_code = PHP_PCRE_JIT_STACKLIMIT_ERROR;
+    break;
   default:
     preg_code = PHP_PCRE_INTERNAL_ERROR;
     break;

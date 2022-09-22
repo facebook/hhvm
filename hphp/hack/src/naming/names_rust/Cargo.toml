@@ -13,5 +13,5 @@ hh24_types = { path = "../../utils/hh24_types" }
 nohash-hasher = "0.2"
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
-rusqlite = { version = "0.27.0", features = ["backup", "blob", "column_decltype"] }
+rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

@@ -10,7 +10,7 @@
 , editline
 , expat
 , flex
-, fmt
+, fmt_8
 , freetype
 , fribidi
 , gd
@@ -33,7 +33,6 @@
 , libedit
 , libelf
 , libevent
-, libgccjit
 , libkrb5
 , libmcrypt
 , libmemcached
@@ -134,7 +133,7 @@ stdenv.mkDerivation rec {
       )
       editline
       expat
-      (if nondefaultStdlib then fmt.override { inherit stdenv; } else fmt)
+      (if nondefaultStdlib then fmt_8.override { inherit stdenv; } else fmt_8)
       freetype
       fribidi
       gd
@@ -169,7 +168,6 @@ stdenv.mkDerivation rec {
       libedit
       libelf
       libevent
-      libgccjit
       libkrb5
       libmcrypt
       libmemcached

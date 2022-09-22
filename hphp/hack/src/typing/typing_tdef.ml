@@ -30,7 +30,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
     td_vis = _;
     td_tparams;
     td_type;
-    td_constraint;
+    td_as_constraint;
+    td_super_constraint = _;
     td_is_ctx = _;
     td_attributes = _;
     td_internal = _;
@@ -75,8 +76,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
       if should_expand then
         Phase.localize ~ety_env env td_type
       else
-        let (env, td_constraint) =
-          match td_constraint with
+        let (env, td_as_constraint) =
+          match td_as_constraint with
           | None ->
             let r_cstr =
               Reason.Rimplicit_upper_bound (Reason.to_pos r, "?nonnull")
@@ -85,7 +86,8 @@ let expand_typedef_ ?(force_expand = false) ety_env env r (x : string) argl =
             ((env, None), cstr)
           | Some cstr -> Phase.localize ~ety_env env cstr
         in
-        (env, mk (r, Tnewtype (x, argl, td_constraint)))
+        (* TODO: update Tnewtype and pass in super constraint as well *)
+        (env, mk (r, Tnewtype (x, argl, td_as_constraint)))
     in
     (env, (ety_env, with_reason expanded_ty r))
 

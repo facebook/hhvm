@@ -11,18 +11,25 @@ use anyhow::Result;
 use crate::state::UnitState;
 use crate::textual;
 
-pub fn textual_writer(w: &mut dyn std::io::Write, path: &Path, unit: &ir::Unit<'_>) -> Result<()> {
+pub fn textual_writer(
+    w: &mut dyn std::io::Write,
+    path: &Path,
+    mut unit: ir::Unit<'_>,
+) -> Result<()> {
+    // steal the StringInterner so we can mutate it while reading the Unit.
+    let strings = std::mem::take(&mut unit.strings);
+
     textual::write_attribute(w, textual::Attribute::SourceLanguage("hack".to_string()))?;
     writeln!(w)?;
 
-    let mut state = UnitState::new(unit);
+    let mut state = UnitState::new(strings);
     check_fatal(path, &unit.fatal)?;
 
     if !unit.classes.is_empty() {
         todo!();
     }
 
-    for func in &unit.functions {
+    for func in unit.functions {
         crate::func::write_function(w, &mut state, func)?;
     }
 

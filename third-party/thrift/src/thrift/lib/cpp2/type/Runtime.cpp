@@ -18,6 +18,14 @@
 
 namespace apache::thrift::type {
 namespace detail {
+namespace {
+Ptr checkFound(Ptr result) {
+  if (!result.has_value()) {
+    folly::throw_exception<std::out_of_range>("not found");
+  }
+  return result;
+}
+} // namespace
 
 Ptr TypeInfo::get(void* ptr, FieldId id) const {
   return get_(ptr, id, std::string::npos, nullPtr());
@@ -28,11 +36,24 @@ Ptr TypeInfo::get(void* ptr, size_t pos) const {
 Ptr TypeInfo::get(void* ptr, const Dyn& val) const {
   return get_(ptr, {}, std::string::npos, val);
 }
+
 bool TypeInfo::put(void* ptr, FieldId id, const Dyn& val) const {
-  return put_(ptr, id, nullPtr(), val);
+  return put_(ptr, id, std::string::npos, nullPtr(), val);
 }
 bool TypeInfo::put(void* ptr, const Dyn& key, const Dyn& val) const {
-  return put_(ptr, {}, key, val);
+  return put_(ptr, {}, std::string::npos, key, val);
+}
+void TypeInfo::insert(void* ptr, size_t pos, const Dyn& val) const {
+  put_(ptr, {}, pos, nullPtr(), val);
+}
+bool TypeInfo::remove(void* ptr, size_t pos) const {
+  return put_(ptr, {}, pos, nullPtr(), nullPtr());
+}
+bool TypeInfo::remove(void* ptr, const Dyn& key) const {
+  return put_(ptr, {}, std::string::npos, key, nullPtr());
+}
+bool TypeInfo::remove(void* ptr, FieldId id) const {
+  return put_(ptr, id, std::string::npos, nullPtr(), nullPtr());
 }
 
 Ptr TypeInfo::ensure(void* ptr, FieldId id) const {
@@ -46,6 +67,14 @@ Ptr TypeInfo::ensure(void* ptr, const Dyn& key) const {
 }
 Ptr TypeInfo::ensure(void* ptr, const Dyn& key, const Dyn& defVal) const {
   return ensure_(ptr, {}, key, defVal);
+}
+
+Ptr Cursor::next() {
+  return type_->next(ptr_, iterType_, itr_);
+}
+
+bool Dyn::contains(const Dyn& key) const {
+  return get(key).has_value();
 }
 
 Ptr Dyn::ensure(const Dyn& key) const {
@@ -78,6 +107,20 @@ Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
 }
 Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
+}
+
+Ptr Dyn::at(const Dyn& key) const {
+  return checkFound(get(key));
+}
+Ptr Dyn::at(size_t pos) const {
+  return checkFound(get(pos));
+}
+Ptr Dyn::at(const Dyn& key, bool ctxConst, bool ctxRvalue) const {
+  return checkFound(get(key, ctxConst, ctxRvalue));
+}
+
+Ptr Dyn::at(size_t pos, bool ctxConst, bool ctxRvalue) const {
+  return checkFound(get(pos, ctxConst, ctxRvalue));
 }
 
 } // namespace detail

@@ -41,8 +41,8 @@ enum class partial_ordering : std::underlying_type_t<folly::ordering> {
   lt = int(folly::ordering::lt), // i.e. std::partial_ordering::less
   eq = int(folly::ordering::eq), // i.e. std::partial_ordering::equivalent
   gt = int(folly::ordering::gt), // i.e. std::partial_ordering::greater
-  ne = -2, // i.e. std::partial_ordering::unordered
-           // Prefer compile-time error or exception, when possible.
+  ne = 2, // i.e. std::partial_ordering::unordered
+          // Prefer compile-time error or exception, when possible.
 };
 inline constexpr partial_ordering to_partial_ordering(folly::ordering cmp) {
   return static_cast<partial_ordering>(cmp);

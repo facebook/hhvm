@@ -32,8 +32,8 @@ let is_enum (ctx : Provider_context.t) (x : string) =
   | None -> false
   | Some sc -> Option.is_some sc.Shallow_decl_defs.sc_enum_type
 
-let get_enforcement (ctx : Provider_context.t) (ty : decl_ty) :
-    Typing_defs.enforcement =
+let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
+    : Typing_defs.enforcement =
   let tcopt = Provider_context.get_tcopt ctx in
   let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
   (* hack to avoid yet another flag, just for data gathering for pessimisation *)
@@ -160,14 +160,35 @@ let get_enforcement (ctx : Provider_context.t) (ty : decl_ty) :
         Unenforced
     | Toption ty -> enforcement ~is_dynamic_enforceable ctx visited ty
   in
-  enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+  if return_from_async then
+    match get_node ty with
+    | Tapply ((_, name), [ty])
+      when String.equal Naming_special_names.Classes.cAwaitable name ->
+      enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+    | _ -> enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
+  else
+    enforcement ~is_dynamic_enforceable:false ctx SSet.empty ty
 
-let is_enforceable (ctx : Provider_context.t) (ty : decl_ty) =
-  match get_enforcement ctx ty with
+let is_enforceable ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
+    =
+  match get_enforcement ~return_from_async ctx ty with
   | Enforced -> true
   | Unenforced -> false
 
-let make_like_type ty = Typing_make_type.like (get_reason ty) ty
+let make_like_type ~return_from_async ty =
+  let like_if_not_void ty =
+    match get_node ty with
+    | Tprim Aast.(Tvoid | Tnoreturn) -> ty
+    | _ -> Typing_make_type.like (get_reason ty) ty
+  in
+  if return_from_async then
+    match get_node ty with
+    | Tapply ((pos, name), [ty])
+      when String.equal Naming_special_names.Classes.cAwaitable name ->
+      mk (get_reason ty, Tapply ((pos, name), [like_if_not_void ty]))
+    | _ -> like_if_not_void ty
+  else
+    like_if_not_void ty
 
 let make_supportdyn_type p r ty =
   mk (r, Tapply ((p, Naming_special_names.Classes.cSupportDyn), [ty]))
@@ -191,10 +212,10 @@ let maybe_add_supportdyn_constraints ctx p tparams =
     tparams
 
 let pessimise_type ctx ty =
-  if is_enforceable ctx ty then
+  if is_enforceable ~return_from_async:false ctx ty then
     ty
   else
-    make_like_type ty
+    make_like_type ~return_from_async:false ty
 
 let maybe_pessimise_type ctx ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
@@ -230,6 +251,7 @@ let add_supportdyn_to_ret_ty ret_ty =
 let pessimise_fun_type ctx p ty =
   match get_node ty with
   | Tfun ft ->
+    let return_from_async = get_ft_async ft in
     let ret_ty = ft.ft_ret.et_type in
     let ft =
       {
@@ -239,10 +261,13 @@ let pessimise_fun_type ctx p ty =
         ft_ret = add_supportdyn_to_ret_ty ft.ft_ret;
       }
     in
-    if is_enforceable ctx ret_ty then
+    if is_enforceable ~return_from_async ctx ret_ty then
       mk (get_reason ty, Tfun ft)
     else
-      mk (get_reason ty, Tfun (update_return_ty ft (make_like_type ret_ty)))
+      mk
+        ( get_reason ty,
+          Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
+        )
   | _ -> ty
 
 let maybe_pessimise_fun_type ctx p ty =

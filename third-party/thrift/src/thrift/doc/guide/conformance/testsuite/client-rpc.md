@@ -11,24 +11,24 @@ The following diagram shows the client RPC conformance test framework.
 
 Client RPC test framework consist of a test runner and a C++ server. Test runner spawns a new test client for the target language and execute the tests. Each test runs in 3 steps.
 
-1. Client connects to the server and fetch the test case with `getTestCase` API. It returns a `ClientInstruction` union which contains a struct for each test case. Instruction struct contains input parameters for the next step.
-2. Client invokes the actual test API with the input parameters provided in step #1.
-3. Client invokes `sendTestResult` API with `ClientTestResult` parameter and sends the received response in step #2 back to the server.
+1. Client connects to the server and fetch the test case with `getTestCase` method. It returns a `RpcTestCase` which contains `ClientInstruction`, which stores input parameters for the next step.
+2. Client invokes the actual test method with the input parameters defined in `ClientInstruction`. Server performs instructions defined in `ServerInstruction`. Server stores the result in temporary `ServerTestResult`, and client stores response from test API in temporary `ClientTestResult`.
+3. Client sends the stored `ClientTestResult` to server with `sendTestResult` method. Server compares the received `ClientTestResult` from the expected client result in `RpcTestCase`. Server then compares the actual stored `ServerTestResult` from the test method with the expected server test result in `RpcTestCase`.
 
 ## Test cases
 
-Test cases below describes available tests, the behavior in step #2, test API invoked by the test client in step #2 and the expected result in `ClientTestResult`.
+Test cases below describes available tests, the behavior in step #2, test method invoked by the test client in step #2 and the expected result in `ClientTestResult`.
 
 ### Request response
 
 | Test | Description | Expected result in ClientTestResult |
 | :--- | :----------- | :---|
-| Basic | Client sends a regular request-response request and receives the expected result from the server.<br/><br/> `Response requestResponseBasic(1: Request req);` | The response struct |
-| Server throws user-declared exception | Client sends a regular request-response request and server decides to throw a user-declared exception. Client should surface this as the Thrift struct representing the user-declared exception.<br/><br/> `void requestResponseDeclaredException(1: Request req) throws (1: UserException e);` | The exception struct |
-| Server throws undeclared exception | Client sends a regular request-response request and server decides to throw an undeclared exception. Client should surface this as a TApplicationException containing the error message from the server.<br/><br/> `void requestResponseUndeclaredException(1: Request req);` | The exception message string |
+| Basic | Client sends a regular request-response request with `RequestResponseBasicClientInstruction.request` and receives the expected result from the server.<br/><br/> `Response requestResponseBasic(1: Request req);` | The response struct |
+| Server throws user-declared exception | Client sends a regular request-response request with `RequestResponseDeclaredExceptionClientInstruction.request`, and server decides to throw a user-declared exception. Client should surface this as the Thrift struct representing the user-declared exception.<br/><br/> `void requestResponseDeclaredException(1: Request req) throws (1: UserException e);` | The exception struct |
+| Server throws undeclared exception | Client sends a regular request-response request with `RequestResponseUndeclaredExceptionClientInstruction.request`, and server decides to throw an undeclared exception. Client should surface this as a `TApplicationException` containing the error message from the server.<br/><br/> `void requestResponseUndeclaredException(1: Request req);` | The exception message string |
 | No Argument and void response | Client sends a request-response request with no argument.<br/><br/> `void requestResponseNoArgVoidResponse();` | |
-| Fragmentation | Client sends a large request-response request (to force fragmentation) and server responds with a large response. Client should be able to successfully fragment the request and reassemble the fragmented response.<br/><br/> `Response requestResponseBasic(1: Request req);` | The response struct |
-| Timeout | Client sends a request and doesn't receive a response from server causing receive timeout to expire. Client should raise a TTransportException with type TIMEOUT.<br/><br/> `Response requestResponseTimeout(1: Request req);`| TTransportException raised |
+| Fragmentation | Client sends a large request-response request (to force fragmentation) with `RequestResponseBasicClientInstruction.request` and server responds with a large response. Client should be able to successfully fragment the request and reassemble the fragmented response. It reuses request-response basic testcase. | The response struct |
+| Timeout | Client sends a request with `RequestResponseTimeoutClientInstruction.request` and doesn't receive a response from server within `RequestResponseTimeoutClientInstruction.timeOutMs` causing receive timeout to expire. Client should raise a `TTransportException` with type `TIMEOUT`.<br/><br/> `Response requestResponseTimeout(1: Request req);`| `TTransportException` raised |
 
 ### Streaming
 

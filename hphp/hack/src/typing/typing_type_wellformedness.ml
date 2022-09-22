@@ -434,7 +434,8 @@ let typedef tenv t =
     t_tparams;
     t_annotation = _;
     t_name = _;
-    t_constraint;
+    t_as_constraint;
+    t_super_constraint;
     t_kind;
     t_mode = _;
     t_vis;
@@ -478,7 +479,11 @@ let typedef tenv t =
     (* We always check the constraints for internal types, so treat in_signature:true *)
     (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
     tenv_with_typedef_tparams
-    t_constraint;
+    t_as_constraint;
+  maybe
+    (Typing_kinding.Simple.check_well_kinded_hint ~in_signature:true)
+    tenv_with_typedef_tparams
+    t_super_constraint;
   Typing_kinding.Simple.check_well_kinded_hint
     ~in_signature:should_check_internal_signature
     tenv_with_typedef_tparams
@@ -500,7 +505,11 @@ let typedef tenv t =
     }
   in
   (* We checked the kinds already above.  *)
-  Option.value_map ~default:[] ~f:(hint_no_kind_check env) t.t_constraint
+  Option.value_map ~default:[] ~f:(hint_no_kind_check env) t.t_as_constraint
+  @ Option.value_map
+      ~default:[]
+      ~f:(hint_no_kind_check env)
+      t.t_super_constraint
   @ hint_no_kind_check env t_kind
 
 let global_constant tenv gconst =

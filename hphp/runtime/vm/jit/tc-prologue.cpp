@@ -29,6 +29,7 @@
 #include "hphp/runtime/vm/jit/irgen-func-prologue.h"
 #include "hphp/runtime/vm/jit/irlower.h"
 #include "hphp/runtime/vm/jit/mcgen.h"
+#include "hphp/runtime/vm/jit/opt.h"
 #include "hphp/runtime/vm/jit/print.h"
 #include "hphp/runtime/vm/jit/prof-data.h"
 #include "hphp/runtime/vm/jit/smashable-instr.h"
@@ -149,6 +150,7 @@ void PrologueTranslator::gen() {
 
   irgen::emitFuncPrologue(env, func, nPassed, transId);
   irgen::sealUnit(env);
+  optimize(*unit, kind);
 
   printUnit(2, *unit, "After initial prologue generation");
 

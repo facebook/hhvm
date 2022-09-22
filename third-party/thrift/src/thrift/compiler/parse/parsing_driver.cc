@@ -741,6 +741,13 @@ void parsing_driver::add_def(std::unique_ptr<t_named> node) {
       scope_cache->add_constant(program->scope_name(*node, value), &value);
     }
   } else if (auto* tnode = dynamic_cast<t_type*>(node.get())) {
+    auto* tnode_true_type = tnode->get_true_type();
+    if (tnode_true_type && tnode_true_type->is_enum()) {
+      for (const auto& value :
+           static_cast<const t_enum*>(tnode_true_type)->consts()) {
+        scope_cache->add_constant(program->scope_name(*node, value), &value);
+      }
+    }
     scope_cache->add_type(program->scope_name(*node), tnode);
   } else {
     throw std::logic_error("Unsupported declaration.");

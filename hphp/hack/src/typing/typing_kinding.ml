@@ -234,7 +234,8 @@ let check_typedef_usable_as_hk_type env use_pos typedef_name typedef_info =
     end
   in
   visitor#on_type () typedef_info.td_type;
-  maybe visitor#on_type () typedef_info.td_constraint
+  maybe visitor#on_type () typedef_info.td_as_constraint;
+  maybe visitor#on_type () typedef_info.td_super_constraint
 
 (* TODO(T70068435)
   This is a workaround until we support proper kind-checking of HK types that impose constraints

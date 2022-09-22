@@ -6,8 +6,11 @@
  *
  *)
 
-(** Checks if a type is one that HHVM will enforce as a parameter or return *)
-val is_enforceable : Provider_context.t -> Typing_defs.decl_ty -> bool
+(** Checks if a type is one that HHVM will enforce as a parameter or return.
+    If the function is async, then the contents of the Awaitable return are
+    enforced. Otherwise they aren't. *)
+val is_enforceable :
+  return_from_async:bool -> Provider_context.t -> Typing_defs.decl_ty -> bool
 
 (** If the type is not enforceable, turn it into a like type (~ty) otherwise
     return the type *)

@@ -1031,7 +1031,8 @@ let typedef : Typing_env_types.env -> Nast.typedef -> unit =
     t_kind;
     t_annotation = _;
     t_name = _;
-    t_constraint = _;
+    t_as_constraint = _;
+    t_super_constraint = _;
     t_user_attributes = _;
     t_mode = _;
     t_vis = _;

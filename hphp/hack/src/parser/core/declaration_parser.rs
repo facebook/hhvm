@@ -2373,7 +2373,7 @@ where
         let generic = self.with_type_parser(|p: &mut TypeParser<'a, S>| {
             p.parse_generic_type_parameter_list_opt()
         });
-        let constr = self.parse_type_constraint_opt(true);
+        let constraints = self.parse_type_constraints(true);
         let equal = self.require_equal();
         let ty = self.parse_type_specifier(false /* allow_var */, true /* allow_attr */);
         let semi = self.require_semicolon();
@@ -2384,7 +2384,7 @@ where
             token,
             name,
             generic,
-            constr,
+            constraints,
             equal,
             ty,
             semi,

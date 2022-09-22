@@ -198,6 +198,9 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
             [this](StreamId id)
                 -> folly::Expected<quic::QuicSocket::FlowControlState,
                                    quic::LocalErrorCode> {
+              if (isReceivingStream(id)) {
+                return folly::makeUnexpected(LocalErrorCode::INVALID_OPERATION);
+              }
               checkNotReadOnlyStream(id);
               auto& stream = streams_[id];
               if (stream.writeState == CLOSED) {

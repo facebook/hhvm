@@ -113,12 +113,12 @@ pub struct HphpOptions {
     pub file_cache: Option<PathBuf>,
 
     /// Directory containing input files.
-    #[clap(long("module"), action(ArgAction::Append), value_name("PATH"))]
-    pub modules: Vec<PathBuf>,
+    #[clap(long("dir"), action(ArgAction::Append), value_name("PATH"))]
+    pub dirs: Vec<PathBuf>,
 
     /// Extra directories for static files without exclusion checking
-    #[clap(long("cmodule"), action(ArgAction::Append), value_name("PATH"))]
-    pub cmodules: Vec<PathBuf>,
+    #[clap(long("cdir"), action(ArgAction::Append), value_name("PATH"))]
+    pub cdirs: Vec<PathBuf>,
 
     /// Extra static files force-included without exclusion checking (ignored)
     #[clap(long("cfile"), action(ArgAction::Append), value_name("PATH"))]

@@ -5654,11 +5654,26 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             );
             let docs_url = p_docs_url(&user_attributes, env);
 
+            let (super_constraints, as_constraints) =
+                p_tconstraints_into_lower_and_upper(&c.constraint, env);
+            let require_one = &mut |kind: &str, cs: Vec<_>| {
+                if cs.len() > 1 {
+                    let msg = format!(
+                        "Multiple `{}` constraints on an alias are not allowed",
+                        kind
+                    );
+                    raise_parsing_error(node, env, &msg);
+                }
+                cs.into_iter().next()
+            };
+            let as_constraint = require_one("as", as_constraints);
+            let super_constraint = require_one("super", super_constraints);
             Ok(vec![ast::Def::mk_typedef(ast::Typedef {
                 annotation: (),
                 name: pos_name(&c.name, env)?,
                 tparams,
-                constraint: map_optional(&c.constraint, env, p_tconstraint)?.map(|x| x.1),
+                as_constraint,
+                super_constraint,
                 user_attributes,
                 file_attributes: vec![],
                 namespace: mk_empty_ns_env(env),
@@ -5679,7 +5694,7 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
             })])
         }
         ContextAliasDeclaration(c) => {
-            let (_super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
+            let (super_constraint, as_constraint) = p_ctx_constraints(&c.as_constraint, env)?;
 
             let pos_name = pos_name(&c.name, env)?;
             if let Some(first_char) = pos_name.1.chars().next() {
@@ -5715,7 +5730,8 @@ fn p_def<'a>(node: S<'a>, env: &mut Env<'a>) -> Result<Vec<ast::Def>> {
                 annotation: (),
                 name: pos_name,
                 tparams: vec![],
-                constraint: as_constraint,
+                as_constraint,
+                super_constraint,
                 user_attributes: itertools::concat(
                     c.attribute_spec
                         .syntax_node_to_list_skip_separator()

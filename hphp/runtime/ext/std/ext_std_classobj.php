@@ -222,6 +222,17 @@ function trait_exists(string $traitname,
 function enum_exists(string $enumname,
                       bool $autoload = true)[]: bool;
 
+/**
+ * Checks if the module exists
+ *
+ * @param string $modulename -
+ * @param bool $autoload -
+ *
+ * @return bool - Returns TRUE if module exists, FALSE if not
+ */
+<<__Native>>
+function module_exists(string $modulename,
+                       bool $autoload = true)[]: bool;
 }
 
 namespace HH {

@@ -99,6 +99,12 @@ bool HHVM_FUNCTION(enum_exists, const String& enum_name,
   return cls && isAnyEnum(cls);
 }
 
+bool HHVM_FUNCTION(module_exists, const String& module_name,
+                   bool autoload /* = true */) {
+  if (autoload) return Module::load(module_name.get()) != nullptr;
+  return Module::lookup(module_name.get()) != nullptr;
+}
+
 Variant HHVM_FUNCTION(get_class_methods, const Variant& class_or_object) {
   auto const cls = get_cls(class_or_object);
   if (!cls) return init_null();
@@ -516,6 +522,7 @@ void StandardExtension::initClassobj() {
   HHVM_FE(interface_exists);
   HHVM_FE(trait_exists);
   HHVM_FE(enum_exists);
+  HHVM_FE(module_exists);
   HHVM_FE(get_class_methods);
   HHVM_FE(get_class_constants);
   HHVM_FE(get_class_vars);

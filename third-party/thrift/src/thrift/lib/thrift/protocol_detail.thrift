@@ -34,33 +34,23 @@ namespace py.asyncio apache_thrift_asyncio.protocol_detail
 namespace go thrift.lib.thrift.protocol_detail
 namespace py thrift.lib.thrift.protocol_detail
 
-typedef ObjectStruct (
-  cpp.type = "::apache::thrift::protocol::detail::ObjectWrapper<::apache::thrift::protocol::detail::ObjectStruct>",
-  cpp.indirection,
-) Object
-
-typedef ValueUnion (
-  cpp.type = "::apache::thrift::protocol::detail::ValueWrapper<::apache::thrift::protocol::detail::ValueUnion>",
-  cpp.indirection,
-) Value
-
 // A dynamic struct/union/exception
-struct ObjectStruct {
+@cpp.Adapter{name = "::apache::thrift::protocol::detail::ObjectAdapter"}
+@cpp.UseOpEncode
+struct Object {
   // The type of the object, if applicable.
   1: standard.Uri type;
 
   // The members of the object.
   // TODO(ytj): use schema.FieldId as key
   2: map<i16, Value> members;
-} (
-  cpp.virtual, // TODO(ytj): add protected dtor for base class
-  thrift.uri = "facebook.com/thrift/protocol/Object",
-  cpp.detail.no_any,
-)
+} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Object")
 
 // A dynamic value.
+@cpp.Adapter{name = "::apache::thrift::protocol::detail::ValueAdapter"}
 @cpp.ScopedEnumAsUnionType
-union ValueUnion {
+@cpp.UseOpEncode
+union Value {
   // Integers.
   1: bool boolValue;
   2: byte byteValue;
@@ -88,8 +78,4 @@ union ValueUnion {
   15: set<Value> setValue;
   @hack.SkipCodegen{reason = "Map keys can only be integer/string/binary/enum"}
   16: map<Value, Value> mapValue;
-} (
-  cpp.virtual, // TODO(ytj): add protected dtor for base class
-  thrift.uri = "facebook.com/thrift/protocol/Value",
-  cpp.detail.no_any,
-)
+} (cpp.virtual, thrift.uri = "facebook.com/thrift/protocol/Value")

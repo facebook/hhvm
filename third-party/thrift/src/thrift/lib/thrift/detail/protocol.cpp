@@ -33,32 +33,6 @@ const char* ValueWrapper<Base>::__fbthrift_thrift_uri() {
   return ret->c_str();
 }
 
-template const char* ObjectWrapper<ObjectStruct>::__fbthrift_thrift_uri();
-template const char* ValueWrapper<ValueUnion>::__fbthrift_thrift_uri();
+template const char* ObjectWrapper<detail::Object>::__fbthrift_thrift_uri();
+template const char* ValueWrapper<detail::Value>::__fbthrift_thrift_uri();
 } // namespace apache::thrift::protocol::detail
-
-namespace apache::thrift::conformance::register_protocol_object_and_value {
-namespace {
-template <typename T>
-void reg() {
-  const ThriftTypeInfo& type = getGeneratedThriftTypeInfo<T>();
-  AnyRegistry& generated = detail::getGeneratedAnyRegistry();
-  if (!generated.registerType<
-          T,
-          StandardProtocol::Compact,
-          StandardProtocol::Binary,
-          StandardProtocol::SimpleJson>(type)) {
-    folly::throw_exception<std::runtime_error>(
-        "Could not register: " + type.get_uri());
-  }
-  op::registerStdSerializers<
-      type::struct_t<T>,
-      type::StandardProtocol::Compact,
-      type::StandardProtocol::Binary,
-      type::StandardProtocol::SimpleJson>(
-      type::detail::getGeneratedTypeRegistry());
-}
-} // namespace
-FOLLY_EXPORT bool static_init_protocol_object_and_value =
-    (reg<protocol::detail::Object>(), reg<protocol::detail::Value>(), false);
-} // namespace apache::thrift::conformance::register_protocol_object_and_value

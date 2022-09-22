@@ -20,35 +20,32 @@
 #include <thrift/lib/cpp2/Thrift.h>
 
 namespace apache::thrift::protocol::detail {
-// Teach cpp.indirection how to convert custom struct to thrift struct
-template <class From, class To>
-struct converter {
-  To& operator()(From& v) const { return v; }
-  const To& operator()(const From& v) const { return v; }
-};
 
-class ObjectStruct;
-class ValueUnion;
+namespace detail {
+class Object;
+class Value;
+} // namespace detail
 
-template <class Base = ObjectStruct>
+template <class Base = detail::Object>
 class ObjectWrapper;
-template <class Base = ValueUnion>
+template <class Base = detail::Value>
 class ValueWrapper;
 
-using Object = ObjectWrapper<ObjectStruct>;
-using Value = ValueWrapper<ValueUnion>;
+using Object = ObjectWrapper<detail::Object>;
+using Value = ValueWrapper<detail::Value>;
 
 template <class Base>
 class ObjectWrapper : public Base {
  private:
-  static_assert(std::is_same_v<Base, ObjectStruct>);
+  static_assert(std::is_same_v<Base, detail::Object>);
   friend struct ::apache::thrift::detail::st::struct_private_access;
   static const char* __fbthrift_thrift_uri();
 
  public:
   using Base::Base;
   using Base::members;
-  using __fbthrift_cpp2_indirection_fn = detail::converter<ObjectWrapper, Base>;
+  explicit ObjectWrapper(const Base& base) : Base(base) {}
+  explicit ObjectWrapper(Base&& base) : Base(std::move(base)) {}
 
   // TODO(ytj): Provide boost.json.value like APIs
   // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__object.html
@@ -92,16 +89,33 @@ class ObjectWrapper : public Base {
   [[nodiscard]] bool empty() const { return members()->empty(); }
 };
 
+struct ObjectAdapter {
+  template <class Object>
+  static auto fromThrift(Object&& obj) {
+    return ObjectWrapper<Object>{std::forward<Object>(obj)};
+  }
+
+  template <class Object>
+  static Object& toThrift(ObjectWrapper<Object>& obj) {
+    return static_cast<Object&>(obj);
+  }
+  template <class Object>
+  static const Object& toThrift(const ObjectWrapper<Object>& obj) {
+    return static_cast<const Object&>(obj);
+  }
+};
+
 template <class Base>
 class ValueWrapper : public Base {
  private:
-  static_assert(std::is_same_v<Base, ValueUnion>);
+  static_assert(std::is_same_v<Base, detail::Value>);
   friend struct ::apache::thrift::detail::st::struct_private_access;
   static const char* __fbthrift_thrift_uri();
 
  public:
   using Base::Base;
-  using __fbthrift_cpp2_indirection_fn = detail::converter<ValueWrapper, Base>;
+  explicit ValueWrapper(const Base& base) : Base(base) {}
+  explicit ValueWrapper(Base&& base) : Base(std::move(base)) {}
 
   // TODO(ytj): Provide boost.json.value like APIs
   // www.boost.org/doc/libs/release/libs/json/doc/html/json/ref/boost__json__value.html
@@ -134,6 +148,22 @@ class ValueWrapper : public Base {
   FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE(map);
 
 #undef FBTHRIFT_THRIFT_VALUE_GEN_METHOD_FROM_TYPE
+};
+
+struct ValueAdapter {
+  template <class Value>
+  static auto fromThrift(Value&& obj) {
+    return ValueWrapper<Value>{std::forward<Value>(obj)};
+  }
+
+  template <class Value>
+  static Value& toThrift(ValueWrapper<Value>& obj) {
+    return static_cast<Value&>(obj);
+  }
+  template <class Value>
+  static const Value& toThrift(const ValueWrapper<Value>& obj) {
+    return static_cast<const Value&>(obj);
+  }
 };
 
 } // namespace apache::thrift::protocol::detail

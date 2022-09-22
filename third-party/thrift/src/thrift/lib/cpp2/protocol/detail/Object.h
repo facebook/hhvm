@@ -576,8 +576,8 @@ MaskedDecodeResult parseObject(
   prot.setInput(&buf);
   MaskedDecodeResult result;
   MaskedProtocolData& protocolData = result.excluded;
-  protocolData.protocol() = detail::get_standard_protocol<Protocol>;
-  MaskedDecodeResultValue parseValueResult = detail::parseValue(
+  protocolData.protocol() = get_standard_protocol<Protocol>;
+  MaskedDecodeResultValue parseValueResult = parseValue(
       prot,
       T_STRUCT,
       MaskRef{readMask, false},

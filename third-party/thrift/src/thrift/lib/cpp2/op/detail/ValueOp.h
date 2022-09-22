@@ -16,8 +16,10 @@
 
 #pragma once
 
+#include <cstdint>
 #include <iterator>
 #include <stdexcept>
+#include <type_traits>
 
 #include <thrift/lib/cpp2/op/detail/BaseOp.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -33,33 +35,68 @@ template <typename Tag>
 struct NumberOp : BaseOp<Tag> {
   using T = type::native_type<Tag>;
   using Base = BaseOp<Tag>;
-  using Base::ref;
-
-  static bool add(T& self, const T& val) { return (self += val, true); }
-  static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<Tag>()); }
-};
-
-template <typename Tag>
-struct FloatOp : NumberOp<Tag> {
-  using T = type::native_type<Tag>;
-  using Base = BaseOp<Tag>;
+  using Base::bad_op;
   using Base::ref;
   using Base::unimplemented;
 
+  // TODO(afuller): Make this implicit-conversion safe.
+  template <typename L, typename R>
+  static partial_ordering compare(const L& lhs, const R& rhs) {
+    return partial_ordering((lhs > rhs) - (rhs > lhs));
+  }
+
+  // TODO(afuller): Use saturating add.
+  static bool add(T& self, const T& val) { return (self += val, true); }
+  static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<Tag>()); }
+
   static partial_ordering compare(const void* lhs, const Dyn& rhs) {
-    if (const T* ptr = rhs.tryAs<Tag>()) {
-      return to_partial_ordering(op::compare<Tag>(ref(lhs), *ptr));
+    switch (rhs.type().baseType()) {
+      case type::BaseType::Bool:
+        return compare(ref(lhs), rhs.as<type::bool_t>());
+      case type::BaseType::Byte:
+        return compare(ref(lhs), rhs.as<type::byte_t>());
+      case type::BaseType::I16:
+        return compare(ref(lhs), rhs.as<type::i16_t>());
+      case type::BaseType::I32:
+        return compare(ref(lhs), rhs.as<type::i32_t>());
+      case type::BaseType::I64:
+        return compare(ref(lhs), rhs.as<type::i64_t>());
+      case type::BaseType::Float:
+        return compare(ref(lhs), rhs.as<type::float_t>());
+      case type::BaseType::Double:
+        return compare(ref(lhs), rhs.as<type::double_t>());
+      default:
+        bad_op();
     }
+  }
 
-    // Widen the type for inter op with other floats.
-    if (const auto* ptr = rhs.tryAs<type::float_t>()) {
-      return to_partial_ordering(op::compare<type::double_t>(ref(lhs), *ptr));
-    } else if (const auto* ptr = rhs.tryAs<type::double_t>()) {
-      return to_partial_ordering(op::compare<type::double_t>(ref(lhs), *ptr));
+  // TODO(afuller): Detect and 'handle' bad conversions.
+  static void assign(void* lhs, const Dyn& rhs) {
+    switch (rhs.type().baseType()) {
+      case type::BaseType::Bool:
+        ref(lhs) = static_cast<T>(rhs.as<type::bool_t>());
+        return;
+      case type::BaseType::Byte:
+        ref(lhs) = static_cast<T>(rhs.as<type::byte_t>());
+        return;
+      case type::BaseType::I16:
+        ref(lhs) = static_cast<T>(rhs.as<type::i16_t>());
+        return;
+      case type::BaseType::I32:
+        ref(lhs) = static_cast<T>(rhs.as<type::i32_t>());
+        return;
+      case type::BaseType::I64:
+        ref(lhs) = static_cast<T>(rhs.as<type::i64_t>());
+        return;
+      case type::BaseType::Float:
+        ref(lhs) = static_cast<T>(rhs.as<type::float_t>());
+        return;
+      case type::BaseType::Double:
+        ref(lhs) = static_cast<T>(rhs.as<type::double_t>());
+        return;
+      default:
+        bad_op();
     }
-
-    // TODO(afuller): Implement compatibility with integer types.
-    unimplemented();
   }
 };
 
@@ -74,9 +111,9 @@ struct AnyOp<type::i32_t> : NumberOp<type::i32_t> {};
 template <>
 struct AnyOp<type::i64_t> : NumberOp<type::i64_t> {};
 template <>
-struct AnyOp<type::float_t> : FloatOp<type::float_t> {};
+struct AnyOp<type::float_t> : NumberOp<type::float_t> {};
 template <>
-struct AnyOp<type::double_t> : FloatOp<type::double_t> {};
+struct AnyOp<type::double_t> : NumberOp<type::double_t> {};
 
 struct StringCompare : folly::IOBufCompare {
   using folly::IOBufCompare::operator();
@@ -124,6 +161,32 @@ struct StringOp : BaseOp<Tag> {
   using Base::ref;
   using Base::unimplemented;
 
+  static void assign(std::string& self, std::string val) {
+    self = std::move(val);
+  }
+  static void assign(folly::IOBuf& self, const folly::IOBuf& val) {
+    self = val;
+  }
+  static void assign(folly::IOBuf& self, const std::string& val) {
+    // TODO(afuller): Use the existing buffer instead of a new heap allocation.
+    self = *folly::IOBuf::copyBuffer(val.data(), val.length());
+  }
+  static void assign(std::string& self, const folly::IOBuf& val) {
+    assign(self, val.to<std::string>());
+  }
+  static void assign(
+      std::string& self, const std::unique_ptr<folly::IOBuf>& val) {
+    assign(self, *val);
+  }
+  static void assign(
+      folly::IOBuf& self, const std::unique_ptr<folly::IOBuf>& val) {
+    assign(self, *val);
+  }
+  template <typename T>
+  static void assign(const std::unique_ptr<folly::IOBuf>& self, T&& val) {
+    assign(*self, std::forward<T>(val));
+  }
+
   static partial_ordering compare(const void* lhs, const Dyn& rhs) {
     StringCompare cmp;
     // TODO(afuller): Consider using a ~map.
@@ -135,6 +198,21 @@ struct StringOp : BaseOp<Tag> {
       return to_partial_ordering(cmp(ref(lhs), *ptr));
     } else if (const auto* ptr = rhs.tryAs<IOBufPtrTag>()) {
       return to_partial_ordering(cmp(ref(lhs), **ptr));
+    }
+    // TODO(afuller): Implement compatibility with any type convertable to
+    // fmt::string_view.
+    unimplemented();
+  }
+
+  static void assign(void* s, const Dyn& val) {
+    if (const T* ptr = val.tryAs<Tag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<StdTag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufTag>()) {
+      return assign(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufPtrTag>()) {
+      return assign(ref(s), *ptr);
     }
     // TODO(afuller): Implement compatibility with any type convertable to
     // fmt::string_view.

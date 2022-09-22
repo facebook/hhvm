@@ -58,6 +58,20 @@ struct CliOptions {
 fn main() {
     let mut opts = CliOptions::from_args();
 
+    // If no modes were specified, print the shallow decls at least.
+    if !opts.shallow && !opts.folded && !opts.typing {
+        opts.shallow = true;
+    }
+
+    if opts.with_pos {
+        decl_files::<BReason>(&opts);
+    } else {
+        decl_files::<NReason>(&opts);
+    }
+}
+
+fn decl_files<R: Reason>(opts: &CliOptions) {
+    // Add hhi files to the given list of filenames
     let hhi_root = tempdir::TempDir::new("rupro_decl_file_hhi").unwrap();
     hhi::write_hhi_files(hhi_root.path()).unwrap();
 
@@ -81,30 +95,16 @@ fn main() {
         })
         .collect();
 
-    // If no modes were specified, print the shallow decls at least.
-    if !opts.shallow && !opts.folded && !opts.typing {
-        opts.shallow = true;
-    }
-
-    if opts.with_pos {
-        decl_files::<BReason>(&opts, path_ctx, &filenames);
-    } else {
-        decl_files::<NReason>(&opts, path_ctx, &filenames);
-    }
-}
-
-fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames: &[RelativePath]) {
-    // Add hhi files to the given list of filenames
-    let mut all_filenames = WalkDir::new(&ctx.hhi)
+    let mut all_filenames = WalkDir::new(&path_ctx.hhi)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| !e.file_type().is_dir())
-        .map(|e| RelativePath::new(Prefix::Hhi, e.path().strip_prefix(&ctx.hhi).unwrap()))
+        .map(|e| RelativePath::new(Prefix::Hhi, e.path().strip_prefix(&path_ctx.hhi).unwrap()))
         .collect::<Vec<_>>();
     let file_provider: Arc<dyn file_provider::FileProvider> =
-        Arc::new(file_provider::DiskProvider::new(ctx));
+        Arc::new(file_provider::DiskProvider::new(path_ctx, Some(hhi_root)));
     let decl_parser = DeclParser::new(Arc::clone(&file_provider));
-    all_filenames.extend(filenames);
+    all_filenames.extend(&filenames);
 
     let shallow_decl_store = make_shallow_decl_store(StoreOpts::Unserialized);
     populate_shallow_decl_store(&shallow_decl_store, decl_parser.clone(), &all_filenames);
@@ -123,7 +123,7 @@ fn decl_files<R: Reason>(opts: &CliOptions, ctx: Arc<RelativePathCtx>, filenames
 
     let mut saw_err = false;
 
-    for &path in filenames {
+    for path in filenames {
         for decl in decl_parser.parse(path).unwrap() {
             match decl {
                 shallow::Decl::Class(name, decl) => {

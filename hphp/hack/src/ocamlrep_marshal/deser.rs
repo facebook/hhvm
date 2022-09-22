@@ -8,9 +8,9 @@
 
 #![allow(non_camel_case_types, non_snake_case)]
 
-use crate::intext::*;
-
 use ocamlrep::Value;
+
+use crate::intext::*;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -30,12 +30,12 @@ struct intern_item<'a> {
 
 enum InternItemStackOp {
     ReadItems = 0,
-    Shift = 2,
+    //    Shift = 2,
 }
 
-struct State<'a, A> {
-    /// Reading pointer in block holding input data.
-    intern_src: *const u8,
+struct State<'s, 'a, A> {
+    /// Slice holding input data.
+    intern_src: &'s [u8],
 
     /// The allocator of OCaml objects, e.g. `ocamlrep::Arena` or
     /// `ocamlrep_ocamlpool::Pool`.
@@ -47,16 +47,16 @@ struct State<'a, A> {
     /// Objects already seen.
     intern_obj_table: Vec<Value<'a>>,
 
-    /// The recursion stack used in `intern_rec`.
+    /// The "recursion stack" used in `intern_rec`.
     stack: Vec<intern_item<'a>>,
 }
 
-impl<'a, A: ocamlrep::Allocator> State<'a, A> {
+impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
     const INTERN_STACK_INIT_SIZE: usize = 256;
 
-    unsafe fn new(alloc: &'a A, src: *const u8) -> Self {
+    fn new(alloc: &'a A, intern_src: &'s [u8]) -> Self {
         Self {
-            intern_src: src,
+            intern_src,
             alloc,
             obj_counter: 0,
             intern_obj_table: Vec::new(),
@@ -65,90 +65,88 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
     }
 
     #[inline]
-    unsafe fn read8u(&mut self) -> u8 {
-        let res = u8::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(1);
+    fn read8u(&mut self) -> u8 {
+        let size = std::mem::size_of::<u8>();
+        let res = u8::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read8s(&mut self) -> i8 {
-        let res = i8::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(1);
+    fn read8s(&mut self) -> i8 {
+        let size = std::mem::size_of::<i8>();
+        let res = i8::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read16u(&mut self) -> u16 {
-        let res = u16::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(2);
+    fn read16u(&mut self) -> u16 {
+        let size = std::mem::size_of::<u16>();
+        let res = u16::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read16s(&mut self) -> i16 {
-        let res = i16::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(2);
+    fn read16s(&mut self) -> i16 {
+        let size = std::mem::size_of::<i16>();
+        let res = i16::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read32u(&mut self) -> u32 {
-        let res = u32::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(4);
+    fn read32u(&mut self) -> u32 {
+        let size = std::mem::size_of::<u32>();
+        let res = u32::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read32s(&mut self) -> i32 {
-        let res = i32::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(4);
+    fn read32s(&mut self) -> i32 {
+        let size = std::mem::size_of::<i32>();
+        let res = i32::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[size..];
         res
     }
 
     #[inline]
-    unsafe fn read64u(&mut self) -> u64 {
-        let res = u64::from_be_bytes(*(self.intern_src as *const _));
-        self.intern_src = self.intern_src.offset(8);
+    fn read64u(&mut self) -> u64 {
+        let size = std::mem::size_of::<u64>();
+        let res = u64::from_be_bytes(self.intern_src[..size].try_into().unwrap());
+        self.intern_src = &self.intern_src[8..];
         res
     }
 
-    #[inline]
-    unsafe fn readblock(&mut self, dst: *mut u8, count: usize) {
-        let src = self.intern_src;
-        std::intrinsics::copy_nonoverlapping(src, dst, count);
-        self.intern_src = self.intern_src.add(count);
-    }
-
-    unsafe fn readfloat(&mut self, dest: *mut f64, code: u8) {
+    fn readfloat(&mut self, dst: &mut f64, code: u8) {
         if std::mem::size_of::<f64>() != 8 {
             panic!("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut u8, 8);
-        let bytes = *(dest as *const [u8; 8]);
-        *dest = match code {
-            CODE_DOUBLE_BIG => f64::from_be_bytes(bytes),
-            CODE_DOUBLE_LITTLE => f64::from_le_bytes(bytes),
+        let src: [u8; 8] = self.intern_src[..8].try_into().unwrap();
+        self.intern_src = &self.intern_src[8..];
+        *dst = match code {
+            CODE_DOUBLE_BIG => f64::from_be_bytes(src),
+            CODE_DOUBLE_LITTLE => f64::from_le_bytes(src),
             _ => unreachable!(),
         }
     }
 
-    // `len` is a number of floats
-    unsafe fn readfloats(&mut self, dest: *mut f64, len: usize, code: u8) {
+    fn readfloats(&mut self, dest: &mut [f64], code: u8) {
         if std::mem::size_of::<f64>() != 8 {
             panic!("input_value: non-standard floats");
         }
-        self.readblock(dest as *mut u8, len * 8);
-
-        let mut i = 0;
-        while i < len as usize {
-            let bytes = *(dest.add(i) as *const [u8; 8]);
-            *(dest.add(i)) = match code {
-                CODE_DOUBLE_ARRAY8_BIG | CODE_DOUBLE_ARRAY32_BIG => f64::from_be_bytes(bytes),
-                CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY32_LITTLE => f64::from_le_bytes(bytes),
+        let count = dest.len() * 8; // number of bytes
+        let bytes = &self.intern_src[..count];
+        self.intern_src = &self.intern_src[count..];
+        for (i, bytes) in bytes.chunks_exact(8).enumerate() {
+            let src: [u8; 8] = bytes.try_into().unwrap();
+            dest[i] = match code {
+                CODE_DOUBLE_ARRAY8_BIG | CODE_DOUBLE_ARRAY32_BIG => f64::from_be_bytes(src),
+                CODE_DOUBLE_ARRAY8_LITTLE | CODE_DOUBLE_ARRAY32_LITTLE => f64::from_le_bytes(src),
                 _ => unreachable!(),
             };
-            i += 1
         }
     }
 
@@ -184,12 +182,6 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
             dest = top.dest;
 
             match top.op {
-                Shift => {
-                    // Shift value by an offset
-                    *dest = Value::from_bits((*dest).to_bits() + top.arg as usize);
-                    // Pop item and iterate
-                    self.stack.pop();
-                }
                 ReadItems => {
                     // Pop item
                     top.dest = top.dest.offset(1);
@@ -287,7 +279,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                         ocamlrep::DOUBLE_TAG,
                                     );
                                     self.readfloat(
-                                        self.alloc.block_ptr_mut(&mut builder) as *mut f64,
+                                        &mut *(self.alloc.block_ptr_mut(&mut builder) as *mut f64),
                                         code,
                                     );
                                     v = Value::from_bits(builder.build().to_bits());
@@ -307,24 +299,8 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                     len = self.read64u() as usize;
                                     current_block = READ_DOUBLE_ARRAY_LABEL;
                                 }
-                                CODE_CODEPOINTER => {
-                                    unimplemented!()
-                                }
-                                CODE_INFIXPOINTER => {
-                                    ofs = self.read32u() as usize;
-                                    self.stack.push(intern_item {
-                                        op: Shift,
-                                        dest,
-                                        arg: ofs as usize,
-                                    });
-                                    self.stack.push(intern_item {
-                                        op: ReadItems,
-                                        dest,
-                                        arg: 1,
-                                    });
-                                    continue;
-                                }
-                                CODE_CUSTOM | CODE_CUSTOM_LEN | CODE_CUSTOM_FIXED => {
+                                CODE_CODEPOINTER | CODE_INFIXPOINTER | CODE_CUSTOM
+                                | CODE_CUSTOM_LEN | CODE_CUSTOM_FIXED => {
                                     unimplemented!()
                                 }
                                 _ => {
@@ -332,9 +308,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                 }
                             }
                             match current_block {
-                                NOTHING_TO_DO_LABEL => {}
-                                READ_BLOCK_LABEL => {}
-                                READ_STRING_LABEL => {}
+                                NOTHING_TO_DO_LABEL | READ_BLOCK_LABEL | READ_STRING_LABEL => {}
                                 _ => {
                                     match current_block {
                                         READ_SHARED_LABEL => {
@@ -347,8 +321,7 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                                                 ocamlrep::DOUBLE_ARRAY_TAG,
                                             );
                                             self.readfloats(
-                                                self.alloc.block_ptr_mut(&mut builder) as *mut f64,
-                                                len,
+                                                std::slice::from_raw_parts_mut(self.alloc.block_ptr_mut(&mut builder) as *mut f64, len),
                                                 code,
                                             );
                                             v = Value::from_bits(builder.build().to_bits());
@@ -361,12 +334,11 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
                             }
                         }
                         match current_block {
-                            NOTHING_TO_DO_LABEL => {}
-                            READ_BLOCK_LABEL => {}
+                            NOTHING_TO_DO_LABEL| READ_BLOCK_LABEL => {}
                             _ /* READ_STRING_LABEL */ => {
                                 size = (len + std::mem::size_of::<Value<'_>>()) / std::mem::size_of::<Value<'_>>();
-                                v = Value::from_bits(ocamlrep::bytes_to_ocamlrep(std::slice::from_raw_parts(self.intern_src as *const u8, len as usize), self.alloc).to_bits());
-                                self.intern_src = self.intern_src.offset(len as isize);
+                                v = Value::from_bits(ocamlrep::bytes_to_ocamlrep(&self.intern_src[..len], self.alloc).to_bits());
+                                self.intern_src = &self.intern_src[len..];
                                 self.obj_counter += 1;
                                 self.intern_obj_table.push(v);
                                 current_block = NOTHING_TO_DO_LABEL;
@@ -425,9 +397,8 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
         };
     }
 
-    unsafe fn input_val_from_string(&mut self, str: &[u8]) -> usize {
+    unsafe fn input_val_from_string(&mut self, str: &'s [u8]) -> usize {
         let mut obj: usize = (0_usize << 1) + 1;
-
         let mut h: marshal_header = marshal_header {
             magic: 0,
             header_len: 0,
@@ -435,24 +406,21 @@ impl<'a, A: ocamlrep::Allocator> State<'a, A> {
             num_objects: 0,
             whsize: 0,
         };
-
         self.parse_header(&mut h);
         if h.header_len as usize + h.data_len as usize > str.len() {
             panic!("input_val_from_string: bad length");
         }
-
-        self.intern_src = (&str[(h.header_len as usize)..]).as_ptr();
-        // Fill it in
+        self.intern_src = &str[(h.header_len as usize)..];
         self.intern_rec(&mut obj as *mut usize as *mut Value<'a>);
 
         obj
     }
 }
 
-pub unsafe fn input_value<'a, A: ocamlrep::Allocator>(
-    str: &[u8],
+pub unsafe fn input_value<'s, 'a, A: ocamlrep::Allocator>(
+    str: &'s [u8],
     alloc: &'a A,
 ) -> ocamlrep::OpaqueValue<'a> {
-    let mut state = State::new(alloc, str.as_ptr());
+    let mut state = State::new(alloc, str);
     ocamlrep::OpaqueValue::from_bits(state.input_val_from_string(str))
 }

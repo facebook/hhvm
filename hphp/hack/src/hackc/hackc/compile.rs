@@ -9,6 +9,7 @@ use std::io::stdout;
 use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
+use std::sync::Arc;
 use std::sync::Mutex;
 
 use anyhow::Context;
@@ -17,6 +18,7 @@ use clap::Parser;
 use compile::EnvFlags;
 use compile::NativeEnv;
 use compile::Profile;
+use decl_parser::DeclParser;
 use decl_provider::ConstDecl;
 use decl_provider::DeclProvider;
 use decl_provider::Error;
@@ -24,13 +26,26 @@ use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
 use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
+use hackrs_test_utils::serde_store::StoreOpts;
+use hackrs_test_utils::store::make_shallow_decl_store;
 use multifile_rust as multifile;
+use naming_provider::SqliteNamingTable;
 use ocamlrep::rc::RcOc;
 use options::HhbcFlags;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
+use pos::ConstName;
+use pos::FunName;
+use pos::RelativePathCtx;
+use pos::ToOxidized;
+use pos::TypeName;
 use rayon::prelude::*;
+use shallow_decl_provider::LazyShallowDeclProvider;
+use shallow_decl_provider::ShallowDeclProvider;
+use tempdir::TempDir;
+use ty::reason::NReason;
+use ty::reason::Reason;
 
 use crate::FileOpts;
 
@@ -203,17 +218,8 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
             &source_text,
             &arena,
         );
-        let provider = SingleDeclProvider {
-            arena: &arena,
-            decls: match hackc_opts.use_serialized_decls {
-                false => DeclsHolder::ByRef(parsed_file.decls),
-                true => DeclsHolder::Ser(decl_provider::serialize_decls(&parsed_file.decls)?),
-            },
-            type_requests: Default::default(),
-            func_requests: Default::default(),
-            const_requests: Default::default(),
-            module_requests: Default::default(),
-        };
+        let provider: SingleDeclProvider<'_, NReason> =
+            SingleDeclProvider::make(&arena, parsed_file.decls, hackc_opts)?;
         let env = hackc_opts.native_env(path)?;
         let hhas = compile_impl(env, source_text, Some(&provider))?;
         if hackc_opts.log_decls_requested {
@@ -249,42 +255,157 @@ struct Access {
 }
 
 #[derive(Debug)]
-struct SingleDeclProvider<'a> {
+struct SingleDeclProvider<'a, R: Reason> {
     arena: &'a bumpalo::Bump,
     decls: DeclsHolder<'a>,
+    shallow_decl_provider: Option<Arc<dyn ShallowDeclProvider<R>>>,
     type_requests: RefCell<Vec<Access>>,
     func_requests: RefCell<Vec<Access>>,
     const_requests: RefCell<Vec<Access>>,
     module_requests: RefCell<Vec<Access>>,
 }
 
-impl<'a> DeclProvider for SingleDeclProvider<'a> {
+impl<'a, R: Reason> DeclProvider for SingleDeclProvider<'a, R> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>, Error> {
-        let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
+        let decl = {
+            let decl = self.find_decl(|decls| decl_provider::find_type_decl(decls, symbol));
+            match (&decl, self.shallow_decl_provider.as_ref()) {
+                (Ok(_), _) => decl,
+                (Err(Error::NotFound), Some(shallow_decl_provider)) => {
+                    if let Ok(Some(type_decl)) =
+                        shallow_decl_provider.get_type(TypeName::new(symbol))
+                    {
+                        match type_decl {
+                            shallow_decl_provider::TypeDecl::Class(c) => {
+                                Ok(decl_provider::TypeDecl::Class(c.to_oxidized(self.arena)))
+                            }
+                            shallow_decl_provider::TypeDecl::Typedef(ty) => {
+                                Ok(decl_provider::TypeDecl::Typedef(ty.to_oxidized(self.arena)))
+                            }
+                        }
+                    } else {
+                        decl
+                    }
+                }
+                (_, _) => decl,
+            }
+        };
         Self::record_access(&self.type_requests, symbol, depth, decl.is_ok());
         decl
     }
 
     fn func_decl(&self, symbol: &str) -> Result<&'a FunDecl<'a>, Error> {
-        let decl = self.find_decl(|decls| decl_provider::find_func_decl(decls, symbol));
+        let decl = {
+            let decl = self.find_decl(|decls| decl_provider::find_func_decl(decls, symbol));
+            match (&decl, self.shallow_decl_provider.as_ref()) {
+                (Ok(_), _) => decl,
+                (Err(Error::NotFound), Some(shallow_decl_provider)) => {
+                    if let Ok(Some(fun_decl)) = shallow_decl_provider.get_fun(FunName::new(symbol))
+                    {
+                        Ok(fun_decl.to_oxidized(self.arena))
+                    } else {
+                        decl
+                    }
+                }
+                (_, _) => decl,
+            }
+        };
         Self::record_access(&self.func_requests, symbol, 0, decl.is_ok());
         decl
     }
 
     fn const_decl(&self, symbol: &str) -> Result<&'a ConstDecl<'a>, Error> {
-        let decl = self.find_decl(|decls| decl_provider::find_const_decl(decls, symbol));
+        let decl = {
+            let decl = self.find_decl(|decls| decl_provider::find_const_decl(decls, symbol));
+            match (&decl, self.shallow_decl_provider.as_ref()) {
+                (Ok(_), _) => decl,
+                (Err(Error::NotFound), Some(shallow_decl_provider)) => {
+                    if let Ok(Some(const_decl)) =
+                        shallow_decl_provider.get_const(ConstName::new(symbol))
+                    {
+                        Ok(const_decl.to_oxidized(self.arena))
+                    } else {
+                        decl
+                    }
+                }
+                (_, _) => decl,
+            }
+        };
         Self::record_access(&self.const_requests, symbol, 0, decl.is_ok());
         decl
     }
 
     fn module_decl(&self, symbol: &str) -> Result<&'a ModuleDecl<'a>, Error> {
         let decl = self.find_decl(|decls| decl_provider::find_module_decl(decls, symbol));
+        // TODO: ShallowDeclProvider doesn't have a get_module equivalent
         Self::record_access(&self.module_requests, symbol, 0, decl.is_ok());
         decl
     }
 }
 
-impl<'a> SingleDeclProvider<'a> {
+fn make_naming_table_powered_shallow_decl_provider<R: Reason>(
+    hackc_opts: &crate::Opts,
+) -> Result<impl ShallowDeclProvider<R>> {
+    let hhi_root = TempDir::new("rupro_decl_repo_hhi")?;
+    hhi::write_hhi_files(hhi_root.path()).unwrap();
+
+    let root = hackc_opts
+        .naming_table_root
+        .as_ref()
+        .ok_or_else(|| anyhow::Error::msg("Did not find naming table root path"))?
+        .clone();
+
+    let ctx = Arc::new(RelativePathCtx {
+        root,
+        hhi: hhi_root.path().into(),
+        dummy: PathBuf::new(),
+        tmp: PathBuf::new(),
+    });
+
+    let file_provider: Arc<dyn file_provider::FileProvider> = Arc::new(
+        file_provider::DiskProvider::new(Arc::clone(&ctx), Some(hhi_root)),
+    );
+    let parser = DeclParser::new(file_provider);
+
+    let shallow_decl_store = make_shallow_decl_store::<R>(StoreOpts::Unserialized);
+
+    let naming_table_path = hackc_opts
+        .naming_table
+        .as_ref()
+        .ok_or_else(|| anyhow::Error::msg("Did not find naming table"))?
+        .clone();
+
+    Ok(LazyShallowDeclProvider::new(
+        Arc::new(shallow_decl_store),
+        Arc::new(SqliteNamingTable::new(naming_table_path).unwrap()),
+        parser,
+    ))
+}
+
+impl<'a, R: Reason> SingleDeclProvider<'a, R> {
+    fn make(arena: &'a bumpalo::Bump, decls: Decls<'a>, hackc_opts: &crate::Opts) -> Result<Self> {
+        Ok(SingleDeclProvider {
+            arena,
+            decls: match hackc_opts.use_serialized_decls {
+                false => DeclsHolder::ByRef(decls),
+                true => DeclsHolder::Ser(decl_provider::serialize_decls(&decls)?),
+            },
+            shallow_decl_provider: if hackc_opts.naming_table.is_some()
+                && hackc_opts.naming_table_root.is_some()
+            {
+                Some(Arc::new(make_naming_table_powered_shallow_decl_provider(
+                    hackc_opts,
+                )?))
+            } else {
+                None
+            },
+            type_requests: Default::default(),
+            func_requests: Default::default(),
+            const_requests: Default::default(),
+            module_requests: Default::default(),
+        })
+    }
+
     fn find_decl<T>(
         &self,
         mut find: impl FnMut(&Decls<'a>) -> Result<T, Error>,

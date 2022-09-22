@@ -11,3 +11,4 @@ path = "../../file_provider.rs"
 anyhow = "1.0.56"
 bstr = { version = "0.2", features = ["serde1"] }
 pos = { path = "../../../pos/cargo/pos" }
+tempdir = "0.3"

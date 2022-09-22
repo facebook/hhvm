@@ -104,7 +104,7 @@ TEST(TypeTest, Equality) {
 TEST(TypeTest, BaseType) {
   auto unique = getUniqueTypes();
   for (const auto& test : unique) {
-    EXPECT_EQ(test.type.base_type(), test.expected_type);
+    EXPECT_EQ(test.type.baseType(), test.expected_type);
   }
 }
 

@@ -34,13 +34,14 @@ namespace detail {
 
 template <typename Tag>
 struct ContainerOp : BaseOp<Tag> {
+  using T = type::native_type<Tag>;
+  using I = typename T::iterator;
   using Base = BaseOp<Tag>;
   using Base::ref;
+  using Base::ret;
 
   static size_t size(const void* s) { return ref(s).size(); }
 
-  // TODO(afuller): This is O(n) for non-random access iterators, expose
-  // some form of type-erased iterators directly as well.
   static auto find(void* s, size_t pos) {
     if (pos >= ref(s).size()) {
       // TODO(afuller): Consider returning 'end' instead.
@@ -50,6 +51,23 @@ struct ContainerOp : BaseOp<Tag> {
     std::advance(itr, pos);
     return itr;
   }
+
+  // Get or begin iterator.
+  static I& iter(T& self, std::any& i) {
+    if (!i.has_value()) {
+      i = self.begin();
+    }
+    return std::any_cast<I&>(i);
+  }
+
+  template <typename ITag>
+  static Ptr next(ITag tag, T& self, std::any& i) {
+    auto& itr = iter(self, i);
+    if (itr != self.end()) {
+      return ret(tag, *itr++);
+    }
+    return {};
+  }
 };
 
 template <typename VTag, typename Tag = type::list<VTag>>
@@ -58,6 +76,7 @@ struct ListOp : ContainerOp<Tag> {
   using Base = ContainerOp<Tag>;
   using Base::check_op;
   using Base::find;
+  using Base::next;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -83,6 +102,11 @@ struct ListOp : ContainerOp<Tag> {
     check_op(pos != std::string::npos);
     return ret(VTag{}, *find(s, pos));
   }
+
+  static Ptr next(void* s, IterType t, std::any& i) {
+    check_op(t != IterType::Key);
+    return next(VTag{}, ref(s), i);
+  }
 };
 
 template <typename VTag>
@@ -95,7 +119,9 @@ template <typename KTag, typename Tag = type::set<KTag>>
 struct SetOp : ContainerOp<Tag> {
   using T = type::native_type<Tag>;
   using Base = ContainerOp<Tag>;
+  using Base::check_op;
   using Base::find;
+  using Base::next;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -110,11 +136,13 @@ struct SetOp : ContainerOp<Tag> {
   static bool contains(const T& self, K&& key) {
     return self.find(std::forward<K>(key)) != self.end();
   }
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
-    if (pos != std::string::npos) {
-      return ret(KTag{}, *find(s, pos));
-    }
-    unimplemented(); // TODO(afuller): Get by key (aka contains).
+  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) {
+    unimplemented(); // TODO(afuller): Get by key (aka contains/intern set).
+  }
+
+  static Ptr next(void* s, IterType t, std::any& i) {
+    check_op(t != IterType::Value);
+    return next(KTag{}, ref(s), i);
   }
 };
 
@@ -129,6 +157,7 @@ struct MapOp : ContainerOp<Tag> {
   using Base = ContainerOp<Tag>;
   using Base::bad_op;
   using Base::check_op;
+  using Base::iter;
   using Base::ref;
   using Base::ret;
   using Base::unimplemented;
@@ -167,15 +196,36 @@ struct MapOp : ContainerOp<Tag> {
     }
   }
 
-  static Ptr get(void* s, FieldId, size_t pos, const Dyn& k) {
+  static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
     if (k != nullptr) {
       return ret(VTag{}, ref(s).at(k.as<KTag>()));
-    } else if (pos != std::string::npos) {
-      return ret(KTag{}, Base::find(s, pos)->first);
     }
     bad_op();
   }
+
+  static Ptr next(T& self, IterType type, typename T::iterator& itr) {
+    if (itr == self.end()) {
+      return {};
+    }
+    auto& entry = *itr++;
+    switch (type) {
+      case IterType::Key:
+        return ret(KTag{}, entry.first);
+      case IterType::Value:
+        return ret(VTag{}, entry.second);
+      case IterType::Default:
+        unimplemented();
+    }
+  }
+
+  static Ptr next(void* s, IterType type, std::any& i) {
+    if (type == IterType::Default) {
+      unimplemented(); // TODO(afuller): Key-value pair?
+    }
+    return next(ref(s), type, iter(ref(s), i));
+  }
 };
+
 template <typename KTag, typename VTag>
 struct AnyOp<type::map<KTag, VTag>> : MapOp<KTag, VTag> {};
 template <typename T, typename KTag, typename VTag>

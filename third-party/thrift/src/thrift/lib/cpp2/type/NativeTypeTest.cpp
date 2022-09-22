@@ -27,6 +27,16 @@
 namespace apache::thrift::type {
 namespace {
 
+template <typename Tag>
+native_type<Tag> foo();
+template <typename T>
+if_not_thrift_type_tag<T, T> foo();
+
+TEST(NativeTypeTest, UndefinedOverloading) {
+  test::same_type<int, decltype(foo<int>())>;
+  test::same_type<int, decltype(foo<i32_t>())>;
+}
+
 TEST(NativeTypeTest, Void) {
   test::same_type<void, native_type<void_t>>;
   test::same_tag<void_t, infer_tag<void>>;

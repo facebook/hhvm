@@ -37,6 +37,8 @@ using op::detail::partial_ordering;
 class Dyn;
 class Ptr;
 
+enum class IterType { Default = 0, Key, Value };
+
 // Runtime type information for a Thrift type.
 struct TypeInfo {
   const Type thriftType;
@@ -56,6 +58,7 @@ struct TypeInfo {
   bool (*put_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*ensure_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
+  Ptr (*next)(void*, IterType, std::any&);
   size_t (*size)(const void*);
 
   bool equal(const void* lhs, const Dyn& rhs) const {
@@ -118,6 +121,7 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::put,
       &Op::ensure,
       &Op::get,
+      &Op::next,
       &Op::size,
   };
   return kValue;

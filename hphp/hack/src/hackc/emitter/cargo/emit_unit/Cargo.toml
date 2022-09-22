@@ -25,7 +25,7 @@ hash = { path = "../../../../utils/hash" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 hhbc_string_utils = { path = "../../../utils/cargo/hhbc_string_utils" }
 hhvm_types_ffi = { path = "../../../hhvm_cxx/hhvm_types" }
-indexmap = { version = "1.8.0", features = ["rayon", "serde-1"] }
+indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 instruction_sequence = { path = "../instruction_sequence" }
 itertools = "0.10.3"
 label_rewriter = { path = "../label_rewriter" }

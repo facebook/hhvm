@@ -47,7 +47,7 @@
             lastModifiedDate = self.lastModifiedDate;
           };
           packages.hhvm_clang = packages.hhvm.override {
-            stdenv = pkgs.llvmPackages_13.stdenv;
+            stdenv = pkgs.llvmPackages_14.stdenv;
           };
           packages.default = packages.hhvm;
 

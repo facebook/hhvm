@@ -82,6 +82,11 @@ struct ListOp : ContainerOp<Tag> {
   using Base::unimplemented;
 
   template <typename V = type::native_type<VTag>>
+  static void prepend(T& self, V&& val) {
+    self.insert(self.begin(), std::forward<V>(val));
+  }
+  static void prepend(void* s, const Dyn& v) { prepend(ref(s), v.as<VTag>()); }
+  template <typename V = type::native_type<VTag>>
   static void append(T& self, V&& val) {
     self.push_back(std::forward<V>(val));
   }

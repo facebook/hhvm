@@ -116,26 +116,26 @@ TEST(RuntimeTest, Int) {
 
 TEST(RuntimeTest, List) {
   std::vector<std::string> value;
-  std::string elem = "the";
+  std::string elem = "best";
   auto ref = Ref::to<list<string_t>>(value);
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
   ref.append(Ref::to<string_t>(elem));
-  EXPECT_THAT(value, ::testing::ElementsAre("the"));
-  EXPECT_THAT(ref, ::testing::ElementsAre("the"));
+  EXPECT_THAT(value, ::testing::ElementsAre("best"));
+  EXPECT_THAT(ref, ::testing::ElementsAre("best"));
   EXPECT_THAT(ref, ::testing::SizeIs(1));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
   EXPECT_THROW(ref["field1"], std::logic_error);
-  EXPECT_EQ(ref[0], "the");
-  EXPECT_EQ(ref[Ordinal{1}], "the");
+  EXPECT_EQ(ref[0], "best");
+  EXPECT_EQ(ref[Ordinal{1}], "best");
   EXPECT_THROW(ref[1], std::out_of_range);
   EXPECT_THROW(ref.add(Ref::to<string_t>(value[0])), std::runtime_error);
   EXPECT_THROW(ref[Ref::to(0)], std::logic_error);
 
-  ref.append("best");
+  ref.prepend("the");
   ref.append("test");
   EXPECT_THAT(ref, ::testing::ElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));

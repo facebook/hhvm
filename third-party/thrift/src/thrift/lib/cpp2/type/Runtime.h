@@ -92,9 +92,10 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   using Base::assign;
   using Base::operator=;
 
+  // Prepend to a list, string, etc.
+  using Base::prepend;
   // Append to a list, string, etc.
   using Base::append;
-  using Base::prepend;
 
   // Add to a set, number, etc.
   using Base::add;
@@ -229,9 +230,10 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   Value& operator=(const Value& other) noexcept;
   Value& operator=(Value&& other) noexcept;
 
+  // Prepend to a list, string, etc.
+  using Base::prepend;
   // Append to a list, string, etc.
   using Base::append;
-  using Base::prepend;
 
   // Add to a set, number, etc.
   using Base::add;

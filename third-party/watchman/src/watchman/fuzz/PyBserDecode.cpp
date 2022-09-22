@@ -8,6 +8,7 @@
 #include "watchman/python/pywatchman/bser.h"
 
 extern "C" int LLVMFuzzerTestOneInput(void const* data, size_t size) {
+  // libfuzzer is not happy if Py_Initialize initializes signal handlers.
   Py_InitializeEx(0);
 
   auto* d = reinterpret_cast<const char*>(data);
@@ -15,7 +16,7 @@ extern "C" int LLVMFuzzerTestOneInput(void const* data, size_t size) {
   ctx.is_mutable = false;
   ctx.value_encoding = nullptr;
   ctx.value_errors = nullptr;
-  ctx.bser_version = 2;
+  ctx.bser_version = 1;
   ctx.bser_capabilities = 0;
 
   PyObject* parsed = bser_loads_recursive(&d, d + size, &ctx);

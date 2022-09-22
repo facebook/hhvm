@@ -169,6 +169,11 @@ int bunser_int(const char** ptr, const char* end, int64_t* val) {
   int32_t i32;
   int64_t i64;
 
+  if (buf >= end) {
+    PyErr_SetString(PyExc_ValueError, "input buffer to small for int encoding");
+    return 0;
+  }
+
   switch (buf[0]) {
     case BSER_INT8:
       needed = 2;
@@ -244,6 +249,8 @@ bunser_array(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   int mutable = ctx->is_mutable;
   PyObject* res;
 
+  assert(buf < end);
+
   // skip array header
   buf++;
   if (!bunser_int(&buf, end, &nitems)) {
@@ -251,7 +258,7 @@ bunser_array(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   }
   *ptr = buf;
 
-  if (nitems > LONG_MAX) {
+  if (nitems > UINT32_MAX) {
     PyErr_Format(PyExc_ValueError, "too many items for python array");
     return NULL;
   }
@@ -260,6 +267,10 @@ bunser_array(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     res = PyList_New((Py_ssize_t)nitems);
   } else {
     res = PyTuple_New((Py_ssize_t)nitems);
+  }
+
+  if (!res) {
+    return NULL;
   }
 
   for (i = 0; i < nitems; i++) {
@@ -295,6 +306,11 @@ bunser_object(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     return 0;
   }
   *ptr = buf;
+
+  if (nitems > UINT32_MAX) {
+    PyErr_Format(PyExc_ValueError, "object too big");
+    return NULL;
+  }
 
   if (mutable) {
     res = PyDict_New();
@@ -380,6 +396,12 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     // lookup time.
   }
 
+  if (buf + 1 >= end) {
+    PyErr_SetString(
+        PyExc_ValueError, "input buffer to small for template encoding");
+    return 0;
+  }
+
   if (buf[1] != BSER_ARRAY) {
     PyErr_Format(PyExc_ValueError, "Expect ARRAY to follow TEMPLATE");
     return NULL;
@@ -404,7 +426,7 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     return 0;
   }
 
-  if (nitems > LONG_MAX) {
+  if (nitems > UINT32_MAX) {
     PyErr_Format(PyExc_ValueError, "Too many items for python");
     Py_DECREF(keys);
     return NULL;
@@ -441,6 +463,11 @@ bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     for (keyidx = 0; keyidx < numkeys; keyidx++) {
       PyObject* key;
       PyObject* ele;
+
+      if (*ptr >= end) {
+        PyErr_SetString(PyExc_ValueError, "input buffer too small");
+        return 0;
+      }
 
       if (**ptr == BSER_SKIP) {
         *ptr = *ptr + 1;
@@ -479,6 +506,11 @@ PyObject* bser_loads_recursive(
     const unser_ctx_t* ctx) {
   const char* buf = *ptr;
 
+  if (buf >= end) {
+    PyErr_SetString(PyExc_ValueError, "input buffer too small");
+    return 0;
+  }
+
   switch (buf[0]) {
     case BSER_INT8:
     case BSER_INT16:
@@ -500,6 +532,11 @@ PyObject* bser_loads_recursive(
     }
 
     case BSER_REAL: {
+      if (buf + 1 + sizeof(double) > end) {
+        PyErr_SetString(
+            PyExc_ValueError, "input buffer too small for real encoding");
+        return 0;
+      }
       double dval;
       memcpy(&dval, buf + 1, sizeof(dval));
       *ptr = buf + 1 + sizeof(double);

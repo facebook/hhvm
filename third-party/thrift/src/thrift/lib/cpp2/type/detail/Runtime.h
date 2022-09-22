@@ -184,6 +184,7 @@ class Dyn {
 
   void clear() const { type_.mut().clear(ptr_); }
   void assign(const Dyn& val) const { type_.mut().assign(ptr_, val); }
+  void prepend(const Dyn& val) const { type_.mut().prepend(ptr_, val); }
   void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
   bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
   bool put(const Dyn& key, const Dyn& val) const {
@@ -267,6 +268,7 @@ class Ptr final : public Dyn {
   using Dyn::get;
   using Dyn::keys;
   using Dyn::mut;
+  using Dyn::prepend;
   using Dyn::put;
   using Dyn::tryMut;
   using Dyn::values;
@@ -305,6 +307,7 @@ struct BaseErasedOp {
     folly::throw_exception<std::runtime_error>(msg);
   }
 
+  [[noreturn]] static void prepend(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static void append(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static bool add(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static bool put(void*, FieldId, const Dyn&, const Dyn&) {
@@ -559,6 +562,8 @@ class BaseDyn : public Dyn,
     return (assign(val), std::move(derived()));
   }
 
+  void prepend(ConstT val) { Base::prepend(val); }
+  void prepend(const std::string& val) { prepend(asRef(val)); }
   void append(ConstT val) { Base::append(val); }
   void append(const std::string& val) { append(asRef(val)); }
 

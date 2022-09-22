@@ -55,6 +55,7 @@ struct TypeInfo {
   void (*assign)(void*, const Dyn&);
   void (*append)(void*, const Dyn&);
   bool (*add)(void*, const Dyn&);
+  void (*prepend)(void*, const Dyn&);
   bool (*put_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*ensure_)(void*, FieldId, const Dyn&, const Dyn&);
   Ptr (*get_)(void*, FieldId, size_t, const Dyn&);
@@ -118,6 +119,7 @@ FOLLY_EXPORT const TypeInfo& getTypeInfo() {
       &Op::assign,
       &Op::append,
       &Op::add,
+      &Op::prepend,
       &Op::put,
       &Op::ensure,
       &Op::get,

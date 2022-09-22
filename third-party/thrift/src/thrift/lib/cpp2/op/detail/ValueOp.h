@@ -169,7 +169,7 @@ struct StringOp : BaseOp<Tag> {
   }
   static void assign(folly::IOBuf& self, const std::string& val) {
     // TODO(afuller): Use the existing buffer instead of a new heap allocation.
-    self = *folly::IOBuf::copyBuffer(val.data(), val.length());
+    self = std::move(*folly::IOBuf::copyBuffer(val.data(), val.length()));
   }
   static void assign(std::string& self, const folly::IOBuf& val) {
     assign(self, val.to<std::string>());
@@ -185,6 +185,14 @@ struct StringOp : BaseOp<Tag> {
     assign(*self, std::forward<T>(val));
   }
 
+  template <typename T1, typename T2>
+  static std::unique_ptr<folly::IOBuf> concat(T1&& first, T2&& second) {
+    folly::IOBufQueue builder;
+    builder.append(std::forward<T1>(first));
+    builder.append(std::forward<T2>(second));
+    return builder.move();
+  }
+
   static void append(std::string& self, const std::string& val) { self += val; }
   static void append(std::string& self, const folly::IOBuf& val) {
     val.appendTo(self);
@@ -194,23 +202,41 @@ struct StringOp : BaseOp<Tag> {
   }
   template <typename T>
   static void append(folly::IOBuf& self, T&& val) {
-    folly::IOBufQueue builder;
-    builder.append(self);
-    builder.append(std::forward<T>(val));
-    self = *builder.move();
+    self = std::move(*concat(std::move(self), std::forward<T>(val)));
   }
   static void append(folly::IOBuf& self, const IOBufPtr& val) {
     append(self, *val);
   }
   template <typename T>
   static void append(IOBufPtr& self, T&& val) {
-    folly::IOBufQueue builder;
-    builder.append(std::move(self));
-    builder.append(std::forward<T>(val));
-    self = builder.move();
+    self = concat(std::move(self), std::forward<T>(val));
   }
   static void append(IOBufPtr& self, const IOBufPtr& val) {
     append(self, *val);
+  }
+
+  static void prepend(std::string& self, std::string val) {
+    self = std::move(val) + std::move(self);
+  }
+  static void prepend(std::string& self, const folly::IOBuf& val) {
+    prepend(self, val.to<std::string>());
+  }
+  static void prepend(std::string& self, const IOBufPtr& val) {
+    prepend(self, *val);
+  }
+  template <typename T>
+  static void prepend(folly::IOBuf& self, T&& val) {
+    self = std::move(*concat(std::forward<T>(val), std::move(self)));
+  }
+  static void prepend(folly::IOBuf& self, const IOBufPtr& val) {
+    prepend(self, *val);
+  }
+  template <typename T>
+  static void prepend(IOBufPtr& self, T&& val) {
+    self = concat(std::forward<T>(val), std::move(self));
+  }
+  static void prepend(IOBufPtr& self, const IOBufPtr& val) {
+    prepend(self, *val);
   }
 
   static partial_ordering compare(const void* lhs, const Dyn& rhs) {
@@ -239,6 +265,21 @@ struct StringOp : BaseOp<Tag> {
       return assign(ref(s), *ptr);
     } else if (const auto* ptr = val.tryAs<IOBufPtrTag>()) {
       return assign(ref(s), *ptr);
+    }
+    // TODO(afuller): Implement compatibility with any type convertable to
+    // fmt::string_view.
+    unimplemented();
+  }
+
+  static void prepend(void* s, const Dyn& val) {
+    if (const T* ptr = val.tryAs<Tag>()) {
+      return prepend(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<StdTag>()) {
+      return prepend(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufTag>()) {
+      return prepend(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufPtrTag>()) {
+      return prepend(ref(s), *ptr);
     }
     // TODO(afuller): Implement compatibility with any type convertable to
     // fmt::string_view.

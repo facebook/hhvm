@@ -94,6 +94,7 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
 
   // Append to a list, string, etc.
   using Base::append;
+  using Base::prepend;
 
   // Add to a set, number, etc.
   using Base::add;
@@ -230,6 +231,7 @@ class Value : private detail::DynCmp<Value, ConstRef>,
 
   // Append to a list, string, etc.
   using Base::append;
+  using Base::prepend;
 
   // Add to a set, number, etc.
   using Base::add;

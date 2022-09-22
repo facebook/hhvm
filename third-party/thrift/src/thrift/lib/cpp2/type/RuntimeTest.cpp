@@ -314,6 +314,8 @@ TEST(RuntimeTest, BinaryRef) {
   EXPECT_EQ(data, "the best");
   ref += " test";
   EXPECT_EQ(data, "the best test");
+  ref.prepend("BinaryRef ");
+  EXPECT_EQ(data, "BinaryRef the best test");
   EXPECT_THROW(++ref, std::runtime_error);
 }
 
@@ -467,6 +469,12 @@ TEST(RuntimeTest, StringBinaryInterOp) {
   EXPECT_EQ(binaryHi, "hibye");
   stringHi += binaryBye;
   EXPECT_EQ(stringHi, "hibye");
+
+  // Prepend
+  binaryHi.prepend(stringBye);
+  EXPECT_EQ(binaryHi, "byehibye");
+  stringHi.prepend(binaryBye);
+  EXPECT_EQ(stringHi, "byehibye");
 }
 
 } // namespace

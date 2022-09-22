@@ -55,6 +55,8 @@ import weakref as __weakref
 import builtins as _builtins
 cimport b.types as _b_types
 import b.types as _b_types
+cimport c.types as _c_types
+import c.types as _c_types
 
 cimport s.types_reflection as _types_reflection
 

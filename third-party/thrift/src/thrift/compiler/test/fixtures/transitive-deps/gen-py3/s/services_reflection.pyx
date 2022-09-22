@@ -14,6 +14,7 @@ from thrift.py3.reflection cimport (
 import folly.iobuf as _fbthrift_iobuf
 
 cimport b.types as _b_types
+cimport c.types as _c_types
 
 cimport s.types as _s_types
 

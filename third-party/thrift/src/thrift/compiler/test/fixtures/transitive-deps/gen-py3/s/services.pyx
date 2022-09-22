@@ -55,6 +55,8 @@ cimport s.types as _s_types
 import s.types as _s_types
 import b.types as _b_types
 cimport b.types as _b_types
+import c.types as _c_types
+cimport c.types as _c_types
 
 cimport s.services_reflection as _services_reflection
 

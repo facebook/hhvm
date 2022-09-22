@@ -19,6 +19,7 @@ from thrift.python.server import ServiceInterface, oneway, PythonUserException
 import s.thrift_types
 import s.thrift_metadata
 import b.thrift_types
+import c.thrift_types
 
 class TestServiceInterface(
     ServiceInterface,

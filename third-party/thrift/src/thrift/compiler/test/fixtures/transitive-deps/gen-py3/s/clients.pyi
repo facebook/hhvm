@@ -14,6 +14,7 @@ from types import TracebackType
 
 import s.types as _s_types
 import b.types as _b_types
+import c.types as _c_types
 
 
 _TestServiceT = _typing.TypeVar('_TestServiceT', bound='TestService')

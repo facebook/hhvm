@@ -14,6 +14,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import b.thrift_types
 
+import c.thrift_types
+
 # This unfortunately has to be down here to prevent circular imports
 import s.thrift_metadata
 

@@ -23,6 +23,7 @@ import thrift.python.types as _fbthrift_python_types
 import s.thrift_types
 import s.thrift_metadata
 import b.thrift_types
+import c.thrift_types
 
 class TestService(_fbthrift_python_Client["TestService.Async", "TestService.Sync"]):
     @staticmethod

@@ -42,6 +42,7 @@ from thrift.py3.common cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 cimport b.types as _b_types
+cimport c.types as _c_types
 
 cimport s.types_fields as _fbthrift_types_fields
 

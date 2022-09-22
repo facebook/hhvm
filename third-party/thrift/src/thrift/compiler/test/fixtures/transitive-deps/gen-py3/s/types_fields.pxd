@@ -40,6 +40,7 @@ from thrift.py3.types cimport (
 from folly.optional cimport cOptional as __cOptional
 
 cimport b.types as _b_types
+cimport c.types as _c_types
 
 cimport s.types as _s_types
 

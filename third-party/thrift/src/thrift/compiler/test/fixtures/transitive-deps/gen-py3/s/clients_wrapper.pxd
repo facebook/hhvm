@@ -27,6 +27,7 @@ from thrift.py3.client cimport cClientWrapper
 cimport s.types as _s_types
 
 cimport b.types as _b_types
+cimport c.types as _c_types
 
 cdef extern from "src/gen-cpp2/s_clients.h" namespace "::cpp2":
   cdef cppclass cTestServiceAsyncClient "::cpp2::TestServiceAsyncClient":

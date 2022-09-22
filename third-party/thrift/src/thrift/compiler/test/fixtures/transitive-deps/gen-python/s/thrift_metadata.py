@@ -12,6 +12,8 @@ import apache.thrift.metadata.thrift_types as _fbthrift_metadata
 
 import b.thrift_metadata
 
+import c.thrift_metadata
+
 
 def gen_metadata_service_TestService() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_service_TestService(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))

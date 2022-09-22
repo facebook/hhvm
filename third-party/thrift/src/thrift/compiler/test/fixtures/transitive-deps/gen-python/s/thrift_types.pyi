@@ -16,6 +16,8 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 
 import b.thrift_types
 
+import c.thrift_types
+
 
 class _fbthrift_TestService_test_args(_fbthrift_python_types.Struct):
 

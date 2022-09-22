@@ -12,6 +12,7 @@ from abc import abstractmethod, ABCMeta
 
 import s.types as _s_types
 import b.types as _b_types
+import c.types as _c_types
 
 _TestServiceInterfaceT = _typing.TypeVar('_TestServiceInterfaceT', bound='TestServiceInterface')
 

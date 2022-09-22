@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::facebook::thrift::test::ServiceServiceInfoHolder apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::__fbthrift_serviceInfoHolder;
 
 
-::facebook::thrift::test::MyI32 apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::sync_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) {
+::facebook::thrift::test::MyI32 apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> /*arg1*/, std::unique_ptr<::std::string> /*arg2*/, std::unique_ptr<::facebook::thrift::test::Foo> /*arg3*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("func");
 }
 
-::facebook::thrift::test::MyI32 apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
-  return sync_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+::facebook::thrift::test::MyI32 apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::sync_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
+  return func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
 }
 
 folly::SemiFuture<::facebook::thrift::test::MyI32> apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::semifuture_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_func.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
+  return sync_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3));
 }
 
 folly::Future<::facebook::thrift::test::MyI32> apache::thrift::ServiceHandler<::facebook::thrift::test::Service>::future_func(std::unique_ptr<::facebook::thrift::test::StringWithAdapter> p_arg1, std::unique_ptr<::std::string> p_arg2, std::unique_ptr<::facebook::thrift::test::Foo> p_arg3) {
@@ -115,7 +115,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3)));
+        callback->result(sync_func(std::move(p_arg1), std::move(p_arg2), std::move(p_arg3)));
         return;
       }
       default:

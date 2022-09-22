@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyService>::__fbthrift_serviceInfoHolder;
 
 
-bool apache::thrift::ServiceHandler<::cpp2::MyService>::sync_hasDataById(::std::int64_t /*id*/) {
+bool apache::thrift::ServiceHandler<::cpp2::MyService>::hasDataById(::std::int64_t /*id*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("hasDataById");
 }
 
-bool apache::thrift::ServiceHandler<::cpp2::MyService>::hasDataById(::std::int64_t p_id) {
-  return sync_hasDataById(p_id);
+bool apache::thrift::ServiceHandler<::cpp2::MyService>::sync_hasDataById(::std::int64_t p_id) {
+  return hasDataById(p_id);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_hasDataById(::std::int64_t p_id) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_hasDataById.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return hasDataById(p_id);
+  return sync_hasDataById(p_id);
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::cpp2::MyService>::future_hasDataById(::std::int64_t p_id) {
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(hasDataById(p_id));
+        callback->result(sync_hasDataById(p_id));
         return;
       }
       default:
@@ -133,19 +133,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::getDataById(::std::string& /*_return*/, ::std::int64_t /*id*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getDataById");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::getDataById(::std::string& _return, ::std::int64_t p_id) {
-  return sync_getDataById(_return, p_id);
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_getDataById(::std::string& _return, ::std::int64_t p_id) {
+  return getDataById(_return, p_id);
 }
 
 folly::SemiFuture<::std::string> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_getDataById(::std::int64_t p_id) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_getDataById.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   ::std::string ret;
-  getDataById(ret, p_id);
+  sync_getDataById(ret, p_id);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -227,7 +227,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        getDataById(_return, p_id);
+        sync_getDataById(_return, p_id);
         callback->result(_return);
         return;
       }
@@ -245,18 +245,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::putDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("putDataById");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::putDataById(::std::int64_t p_id, const ::std::string& p_data) {
-  return sync_putDataById(p_id, p_data);
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_putDataById(::std::int64_t p_id, const ::std::string& p_data) {
+  return putDataById(p_id, p_data);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_putDataById(::std::int64_t p_id, const ::std::string& p_data) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_putDataById.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  putDataById(p_id, p_data);
+  sync_putDataById(p_id, p_data);
   return folly::makeSemiFuture();
 }
 
@@ -337,7 +337,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        putDataById(p_id, p_data);
+        sync_putDataById(p_id, p_data);
         callback->done();
         return;
       }
@@ -355,18 +355,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::lobDataById(::std::int64_t /*id*/, const ::std::string& /*data*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("lobDataById");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::lobDataById(::std::int64_t p_id, const ::std::string& p_data) {
-  return sync_lobDataById(p_id, p_data);
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_lobDataById(::std::int64_t p_id, const ::std::string& p_data) {
+  return lobDataById(p_id, p_data);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_lobDataById(::std::int64_t p_id, const ::std::string& p_data) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_lobDataById.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  lobDataById(p_id, p_data);
+  sync_lobDataById(p_id, p_data);
   return folly::makeSemiFuture();
 }
 
@@ -447,7 +447,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        lobDataById(p_id, p_data);
+        sync_lobDataById(p_id, p_data);
         return;
       }
       default:

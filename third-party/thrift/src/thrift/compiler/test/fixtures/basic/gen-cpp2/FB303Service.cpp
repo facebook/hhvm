@@ -25,19 +25,19 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic::FB303ServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::sync_simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::simple_rpc(::test::fixtures::basic::ReservedKeyword& /*_return*/, ::std::int32_t /*int_parameter*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simple_rpc");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::std::int32_t p_int_parameter) {
-  return sync_simple_rpc(_return, p_int_parameter);
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::sync_simple_rpc(::test::fixtures::basic::ReservedKeyword& _return, ::std::int32_t p_int_parameter) {
+  return simple_rpc(_return, p_int_parameter);
 }
 
 folly::SemiFuture<std::unique_ptr<::test::fixtures::basic::ReservedKeyword>> apache::thrift::ServiceHandler<::test::fixtures::basic::FB303Service>::semifuture_simple_rpc(::std::int32_t p_int_parameter) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_simple_rpc.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::test::fixtures::basic::ReservedKeyword>();
-  simple_rpc(*ret, p_int_parameter);
+  sync_simple_rpc(*ret, p_int_parameter);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -118,7 +118,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::test::fixtures::basic::ReservedKeyword _return;
-        simple_rpc(_return, p_int_parameter);
+        sync_simple_rpc(_return, p_int_parameter);
         callback->result(_return);
         return;
       }

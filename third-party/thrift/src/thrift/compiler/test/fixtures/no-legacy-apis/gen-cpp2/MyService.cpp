@@ -25,19 +25,19 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::sync_query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::query(::test::fixtures::basic::MyStruct& /*_return*/, std::unique_ptr<::test::fixtures::basic::MyUnion> /*u*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("query");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::query(::test::fixtures::basic::MyStruct& _return, std::unique_ptr<::test::fixtures::basic::MyUnion> p_u) {
-  return sync_query(_return, std::move(p_u));
+void apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::sync_query(::test::fixtures::basic::MyStruct& _return, std::unique_ptr<::test::fixtures::basic::MyUnion> p_u) {
+  return query(_return, std::move(p_u));
 }
 
 folly::SemiFuture<std::unique_ptr<::test::fixtures::basic::MyStruct>> apache::thrift::ServiceHandler<::test::fixtures::basic::MyService>::semifuture_query(std::unique_ptr<::test::fixtures::basic::MyUnion> p_u) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_query.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::test::fixtures::basic::MyStruct>();
-  query(*ret, std::move(p_u));
+  sync_query(*ret, std::move(p_u));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -118,7 +118,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::test::fixtures::basic::MyStruct _return;
-        query(_return, std::move(p_u));
+        sync_query(_return, std::move(p_u));
         callback->result(_return);
         return;
       }

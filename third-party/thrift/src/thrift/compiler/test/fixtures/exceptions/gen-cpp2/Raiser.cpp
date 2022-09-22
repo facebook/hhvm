@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::RaiserServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::Raiser>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doBland() {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::doBland() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("doBland");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::doBland() {
-  return sync_doBland();
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doBland() {
+  return doBland();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_doBland() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_doBland.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  doBland();
+  sync_doBland();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        doBland();
+        sync_doBland();
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doRaise() {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::doRaise() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("doRaise");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::doRaise() {
-  return sync_doRaise();
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_doRaise() {
+  return doRaise();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_doRaise() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_doRaise.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  doRaise();
+  sync_doRaise();
   return folly::makeSemiFuture();
 }
 
@@ -226,7 +226,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        doRaise();
+        sync_doRaise();
         callback->done();
         return;
       }
@@ -245,19 +245,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get200(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::get200(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get200");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::get200(::std::string& _return) {
-  return sync_get200(_return);
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get200(::std::string& _return) {
+  return get200(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_get200() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_get200.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  get200(*ret);
+  sync_get200(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -338,7 +338,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        get200(_return);
+        sync_get200(_return);
         callback->result(_return);
         return;
       }
@@ -357,19 +357,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get500(::std::string& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::get500(::std::string& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get500");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::Raiser>::get500(::std::string& _return) {
-  return sync_get500(_return);
+void apache::thrift::ServiceHandler<::cpp2::Raiser>::sync_get500(::std::string& _return) {
+  return get500(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::Raiser>::semifuture_get500() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_get500.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  get500(*ret);
+  sync_get500(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -450,7 +450,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        get500(_return);
+        sync_get500(_return);
         callback->result(_return);
         return;
       }

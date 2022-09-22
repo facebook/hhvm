@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServicePrioParentServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_ping() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::ping() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ping");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::ping() {
-  return sync_ping();
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_ping() {
+  return ping();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::semifuture_ping() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_ping.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  ping();
+  sync_ping();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        ping();
+        sync_ping();
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_pong() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::pong() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("pong");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::pong() {
-  return sync_pong();
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::sync_pong() {
+  return pong();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioParent>::semifuture_pong() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_pong.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  pong();
+  sync_pong();
   return folly::makeSemiFuture();
 }
 
@@ -226,7 +226,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        pong();
+        sync_pong();
         callback->done();
         return;
       }

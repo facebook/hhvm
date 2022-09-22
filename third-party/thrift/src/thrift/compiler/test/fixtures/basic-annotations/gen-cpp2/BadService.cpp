@@ -29,18 +29,18 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteract
   apache::thrift::detail::si::throw_app_exn_unimplemented("createBadInteraction");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::sync_bar() {
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::bar() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::bar() {
-  return sync_bar();
+::std::int32_t apache::thrift::ServiceHandler<::cpp2::GoodService>::sync_bar() {
+  return bar();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService>::semifuture_bar() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bar.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return bar();
+  return sync_bar();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::GoodService>::future_bar() {
@@ -119,7 +119,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(bar());
+        callback->result(sync_bar());
         return;
       }
       default:
@@ -138,18 +138,18 @@ determineInvocationType:
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::sync_foo() {
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::foo() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::foo() {
-  return sync_foo();
+void apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::sync_foo() {
+  return foo();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::GoodService>::BadInteractionIf::semifuture_foo() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_foo.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  foo();
+  sync_foo();
   return folly::makeSemiFuture();
 }
 
@@ -217,7 +217,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        foo();
+        sync_foo();
         callback->done();
         return;
       }

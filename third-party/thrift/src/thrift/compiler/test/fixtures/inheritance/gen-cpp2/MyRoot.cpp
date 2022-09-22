@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyRootServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyRoot>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyRoot>::sync_do_root() {
+void apache::thrift::ServiceHandler<::cpp2::MyRoot>::do_root() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_root");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyRoot>::do_root() {
-  return sync_do_root();
+void apache::thrift::ServiceHandler<::cpp2::MyRoot>::sync_do_root() {
+  return do_root();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyRoot>::semifuture_do_root() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_do_root.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  do_root();
+  sync_do_root();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        do_root();
+        sync_do_root();
         callback->done();
         return;
       }

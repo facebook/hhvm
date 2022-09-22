@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyLeafServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyLeaf>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::sync_do_leaf() {
+void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::do_leaf() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_leaf");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::do_leaf() {
-  return sync_do_leaf();
+void apache::thrift::ServiceHandler<::cpp2::MyLeaf>::sync_do_leaf() {
+  return do_leaf();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyLeaf>::semifuture_do_leaf() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_do_leaf.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  do_leaf();
+  sync_do_leaf();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        do_leaf();
+        sync_do_leaf();
         callback->done();
         return;
       }

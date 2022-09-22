@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::py3::simple::RederivedServiceServiceInfoHolder apache::thrift::ServiceHandler<::py3::simple::RederivedService>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::sync_get_seven() {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::get_seven() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_seven");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::get_seven() {
-  return sync_get_seven();
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::RederivedService>::sync_get_seven() {
+  return get_seven();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::RederivedService>::semifuture_get_seven() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_get_seven.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return get_seven();
+  return sync_get_seven();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::RederivedService>::future_get_seven() {
@@ -115,7 +115,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(get_seven());
+        callback->result(sync_get_seven());
         return;
       }
       default:

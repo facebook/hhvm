@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic::FooServiceServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::sync_simple_rpc() {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::simple_rpc() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simple_rpc");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::simple_rpc() {
-  return sync_simple_rpc();
+void apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::sync_simple_rpc() {
+  return simple_rpc();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test::fixtures::basic::FooService>::semifuture_simple_rpc() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_simple_rpc.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  simple_rpc();
+  sync_simple_rpc();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        simple_rpc();
+        sync_simple_rpc();
         callback->done();
         return;
       }

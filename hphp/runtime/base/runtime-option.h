@@ -1258,6 +1258,9 @@ struct RuntimeOption {
   F(bool, ClassAsStringVarExport, false)                                \
   /* When this flag is on, gettype for
    * classes and lazy classes outputs string. */                        \
+  F(bool, ClassAsStringPrintR, false)                                   \
+  /* When this flag is on, print_r for
+   * classes and lazy classes outputs a string. */                      \
   F(bool, ClassAsStringGetType, true)                                   \
   /* Raise warning when strings are used as classes. */                 \
   F(bool, RaiseStrToClsConversionWarning, false)                        \

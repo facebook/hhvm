@@ -20,6 +20,7 @@
 #include <iterator>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 #include <thrift/lib/cpp2/op/detail/BaseOp.h>
 #include <thrift/lib/cpp2/type/NativeType.h>
@@ -115,6 +116,11 @@ struct AnyOp<type::float_t> : NumberOp<type::float_t> {};
 template <>
 struct AnyOp<type::double_t> : NumberOp<type::double_t> {};
 
+using StdTag = type::cpp_type<std::string, type::string_c>;
+using IOBufTag = type::cpp_type<folly::IOBuf, type::string_c>;
+using IOBufPtr = std::unique_ptr<folly::IOBuf>;
+using IOBufPtrTag = type::cpp_type<IOBufPtr, type::string_c>;
+
 struct StringCompare : folly::IOBufCompare {
   using folly::IOBufCompare::operator();
   folly::ordering operator()(fmt::string_view lhs, fmt::string_view rhs) const {
@@ -125,8 +131,7 @@ struct StringCompare : folly::IOBufCompare {
     return operator()(
         folly::IOBuf::wrapBufferAsValue(lhs.data(), lhs.size()), rhs);
   }
-  folly::ordering operator()(
-      fmt::string_view lhs, const std::unique_ptr<IOBuf>& rhs) const {
+  folly::ordering operator()(fmt::string_view lhs, const IOBufPtr& rhs) const {
     return operator()(
         folly::IOBuf::wrapBufferAsValue(lhs.data(), lhs.size()), *rhs);
   }
@@ -136,23 +141,18 @@ struct StringCompare : folly::IOBufCompare {
         lhs, folly::IOBuf::wrapBufferAsValue(rhs.data(), rhs.size()));
   }
   folly::ordering operator()(
-      const folly::IOBuf& lhs, const std::unique_ptr<IOBuf>& rhs) const {
+      const folly::IOBuf& lhs, const IOBufPtr& rhs) const {
     return operator()(lhs, *rhs);
   }
-  folly::ordering operator()(
-      const std::unique_ptr<IOBuf>& lhs, fmt::string_view rhs) const {
+  folly::ordering operator()(const IOBufPtr& lhs, fmt::string_view rhs) const {
     return operator()(
         *lhs, folly::IOBuf::wrapBufferAsValue(rhs.data(), rhs.size()));
   }
   folly::ordering operator()(
-      const std::unique_ptr<IOBuf>& lhs, const folly::IOBuf& rhs) const {
+      const IOBufPtr& lhs, const folly::IOBuf& rhs) const {
     return operator()(*lhs, rhs);
   }
 };
-
-using StdTag = type::cpp_type<std::string, type::string_c>;
-using IOBufTag = type::cpp_type<folly::IOBuf, type::string_c>;
-using IOBufPtrTag = type::cpp_type<std::unique_ptr<IOBuf>, type::string_c>;
 
 template <typename Tag>
 struct StringOp : BaseOp<Tag> {
@@ -174,17 +174,43 @@ struct StringOp : BaseOp<Tag> {
   static void assign(std::string& self, const folly::IOBuf& val) {
     assign(self, val.to<std::string>());
   }
-  static void assign(
-      std::string& self, const std::unique_ptr<folly::IOBuf>& val) {
+  static void assign(std::string& self, const IOBufPtr& val) {
     assign(self, *val);
   }
-  static void assign(
-      folly::IOBuf& self, const std::unique_ptr<folly::IOBuf>& val) {
+  static void assign(folly::IOBuf& self, const IOBufPtr& val) {
     assign(self, *val);
   }
   template <typename T>
-  static void assign(const std::unique_ptr<folly::IOBuf>& self, T&& val) {
+  static void assign(const IOBufPtr& self, T&& val) {
     assign(*self, std::forward<T>(val));
+  }
+
+  static void append(std::string& self, const std::string& val) { self += val; }
+  static void append(std::string& self, const folly::IOBuf& val) {
+    val.appendTo(self);
+  }
+  static void append(std::string& self, const IOBufPtr& val) {
+    append(self, *val);
+  }
+  template <typename T>
+  static void append(folly::IOBuf& self, T&& val) {
+    folly::IOBufQueue builder;
+    builder.append(self);
+    builder.append(std::forward<T>(val));
+    self = *builder.move();
+  }
+  static void append(folly::IOBuf& self, const IOBufPtr& val) {
+    append(self, *val);
+  }
+  template <typename T>
+  static void append(IOBufPtr& self, T&& val) {
+    folly::IOBufQueue builder;
+    builder.append(std::move(self));
+    builder.append(std::forward<T>(val));
+    self = builder.move();
+  }
+  static void append(IOBufPtr& self, const IOBufPtr& val) {
+    append(self, *val);
   }
 
   static partial_ordering compare(const void* lhs, const Dyn& rhs) {
@@ -218,6 +244,22 @@ struct StringOp : BaseOp<Tag> {
     // fmt::string_view.
     unimplemented();
   }
+
+  static void append(void* s, const Dyn& val) {
+    if (const T* ptr = val.tryAs<Tag>()) {
+      return append(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<StdTag>()) {
+      return append(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufTag>()) {
+      return append(ref(s), *ptr);
+    } else if (const auto* ptr = val.tryAs<IOBufPtrTag>()) {
+      return append(ref(s), *ptr);
+    }
+    // TODO(afuller): Implement compatibility with any type convertable to
+    // fmt::string_view.
+    unimplemented();
+  }
+  static bool add(void* s, const Dyn& val) { return (append(s, val), true); }
 };
 
 template <>

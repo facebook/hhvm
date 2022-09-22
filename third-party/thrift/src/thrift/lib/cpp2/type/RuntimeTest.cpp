@@ -308,10 +308,13 @@ TEST(RuntimeTest, ConstRef) {
 TEST(RuntimeTest, BinaryRef) {
   std::string data;
   auto ref = Ref::to<binary_t>(data);
-  ref.assign("hi");
-  EXPECT_EQ(data, "hi");
-  ref = "bye";
-  EXPECT_EQ(data, "bye");
+  ref.assign("the");
+  EXPECT_EQ(data, "the");
+  ref.append(" best");
+  EXPECT_EQ(data, "the best");
+  ref += " test";
+  EXPECT_EQ(data, "the best test");
+  EXPECT_THROW(++ref, std::runtime_error);
 }
 
 TEST(RuntimeTest, IdenticalValue) {
@@ -458,6 +461,12 @@ TEST(RuntimeTest, StringBinaryInterOp) {
   EXPECT_EQ(stringHi, binaryBye);
   stringHi = "hi";
   EXPECT_EQ(stringHi, binaryHi);
+
+  // Append
+  binaryHi += stringBye;
+  EXPECT_EQ(binaryHi, "hibye");
+  stringHi += binaryBye;
+  EXPECT_EQ(stringHi, "hibye");
 }
 
 } // namespace

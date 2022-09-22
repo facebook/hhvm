@@ -153,12 +153,14 @@ class AsyncProcessorFactory {
           rpcKind(kind),
           priority(prio) {}
 
+   protected:
     MethodMetadata(const MethodMetadata& other)
         : executorType(other.executorType),
           interactionType(other.interactionType),
           rpcKind(other.rpcKind),
           priority(other.priority) {}
 
+   public:
     virtual ~MethodMetadata() = default;
 
     bool isWildcard() const {

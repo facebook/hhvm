@@ -185,11 +185,9 @@ void emitEntryAssertions(irgen::IRGS& irgs, const Func* func, SrcKey sk) {
     irgen::assertTypeLocation(irgs, Location::Local { loc }, t);
   }
 
-  // Set types of non-passed parameters (not yet initialized to default value).
+  // Non-passed parameters contain uninitialized garbage.
   auto const numNonVariadicParams = func->numNonVariadicParams();
-  for (; loc < numNonVariadicParams; ++loc) {
-    irgen::assertTypeLocation(irgs, Location::Local { loc }, TUninit);
-  }
+  loc = numNonVariadicParams;
 
   // Set the type of ...$args parameter.
   if (func->hasVariadicCaptureParam()) {

@@ -543,6 +543,47 @@ void emitFuncPrologue(IRGS& env, const Func* callee, uint32_t argc,
 
 namespace {
 
+void emitInitLocalRange(IRGS& env, const Func* callee,
+                        uint32_t from, uint32_t to) {
+  assertx(from <= to);
+  /*
+   * Maximum number of local initializations to unroll.
+   *
+   * The actual crossover point in terms of code size is 6 (just like for the
+   * params init unroll limit); 9 was determined by experiment to be the
+   * optimal point in certain benchmarks.
+   *
+   * We don't limit the count in optimized translations, as we expect these
+   * stores to be elided.
+   */
+  auto constexpr kMaxLocalsInitUnroll = 9;
+
+  assertx(from <= to);
+
+  // Set all remaining uninitialized locals to Uninit.
+  if (env.context.kind == TransKind::Optimize ||
+      to - from <= kMaxLocalsInitUnroll) {
+    for (auto i = from; i < to; ++i) {
+      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
+    }
+  } else {
+    auto const range = LocalIdRange{from, to};
+    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
+  }
+}
+
+void emitInitDefaultParamLocals(IRGS& env, const Func* callee, uint32_t argc) {
+  assertx(argc <= callee->numNonVariadicParams());
+
+  // We are done. If there were variadics, they were already initialized.
+  if (argc == callee->numNonVariadicParams()) return;
+
+  // Set locals of parameters with default values to Uninit. In optimized
+  // translations, these locals will be overwritten later, so these stores
+  // will be optimized away.
+  emitInitLocalRange(env, callee, argc, callee->numNonVariadicParams());
+}
+
 /*
  * Unpack closure use variables into locals.
  */
@@ -606,32 +647,8 @@ void emitInitClosureLocals(IRGS& env, const Func* callee) {
  * Set non-input locals to Uninit.
  */
 void emitInitRegularLocals(IRGS& env, const Func* callee) {
-  /*
-   * Maximum number of local initializations to unroll.
-   *
-   * The actual crossover point in terms of code size is 6 (just like for the
-   * params init unroll limit); 9 was determined by experiment to be the
-   * optimal point in certain benchmarks.
-   *
-   * We don't limit the count in optimized translations, as we expect these
-   * stores to be elided.
-   */
-  auto constexpr kMaxLocalsInitUnroll = 9;
-
-  auto const firstRegularLocal = callee->firstRegularLocalId();
-  auto const numLocals = callee->numLocals();
-  assertx(firstRegularLocal <= numLocals);
-
-  // Set all remaining uninitialized locals to Uninit.
-  if (env.context.kind == TransKind::Optimize ||
-      numLocals - firstRegularLocal <= kMaxLocalsInitUnroll) {
-    for (auto i = firstRegularLocal; i < numLocals; ++i) {
-      gen(env, StLoc, LocalId{i}, fp(env), cns(env, TUninit));
-    }
-  } else {
-    auto const range = LocalIdRange{firstRegularLocal, (uint32_t)numLocals};
-    gen(env, StLocRange, range, fp(env), cns(env, TUninit));
-  }
+  emitInitLocalRange(
+    env, callee, callee->firstRegularLocalId(), callee->numLocals());
 }
 
 void emitSurpriseCheck(IRGS& env, const Func* callee) {
@@ -658,6 +675,7 @@ void emitFuncEntry(IRGS& env) {
   assertx(curSrcKey(env).funcEntry());
   auto const callee = curFunc(env);
 
+  emitInitDefaultParamLocals(env, callee, curSrcKey(env).numEntryArgs());
   emitInitClosureLocals(env, callee);
   emitInitRegularLocals(env, callee);
 

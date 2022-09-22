@@ -51,6 +51,7 @@ void visit_locations(const BlockList& blocks, Visit visit) {
         [&] (UnknownEffects)      {},
         [&] (ReturnEffects x)     { visit(x.kills); },
         [&] (CallEffects x)       { visit(x.kills);
+                                    visit(x.uninits);
                                     visit(x.inputs);
                                     visit(x.actrec);
                                     visit(x.outputs);
@@ -63,7 +64,9 @@ void visit_locations(const BlockList& blocks, Visit visit) {
                                     visit(x.backtrace); },
         [&] (PureLoad x)          { visit(x.src); },
         [&] (PureStore x)         { visit(x.dst); },
-        [&] (ExitEffects x)       { visit(x.live); visit(x.kills); },
+        [&] (ExitEffects x)       { visit(x.live);
+                                    visit(x.kills);
+                                    visit(x.uninits); },
         [&] (PureInlineCall x)    { visit(x.base);
                                     visit(x.actrec); }
       );

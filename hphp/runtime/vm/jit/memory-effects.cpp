@@ -316,37 +316,59 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   // These exits don't leave the current php function, and could head to code
   // that could read or write anything as far as we know (including frame
   // locals).
-  case ReqBindJmp:
+  case ReqBindJmp: {
+    auto const uninitArgs = [&]{
+      auto const extra = inst.extra<ReqBindJmp>();
+      if (!extra->target.funcEntry()) return AEmpty;
+
+      // Kill TUninit arguments passed by prologue.
+      auto const func = extra->target.func();
+      auto const numParams = func->numNonVariadicParams();
+      auto const numEntryArgs = extra->target.numEntryArgs();
+      assertx(numEntryArgs <= numParams);
+      return numEntryArgs == numParams ? AEmpty : AStack::range(
+        extra->irSPOff + func->numFuncEntryInputs() - numParams,
+        extra->irSPOff + func->numFuncEntryInputs() - numEntryArgs
+      );
+    }();
+
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      stack_below(inst.extra<ReqBindJmp>()->irSPOff)
+      stack_below(inst.extra<ReqBindJmp>()->irSPOff),
+      uninitArgs
     };
+  }
   case ReqInterpBBNoTranslate:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      stack_below(inst.extra<ReqInterpBBNoTranslate>()->irSPOff)
+      stack_below(inst.extra<ReqInterpBBNoTranslate>()->irSPOff),
+      AEmpty
     };
   case ReqRetranslate:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      stack_below(inst.extra<ReqRetranslate>()->offset)
+      stack_below(inst.extra<ReqRetranslate>()->offset),
+      AEmpty
     };
   case ReqRetranslateOpt:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      stack_below(inst.extra<ReqRetranslateOpt>()->offset)
+      stack_below(inst.extra<ReqRetranslateOpt>()->offset),
+      AEmpty
     };
   case JmpSwitchDest:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
       *stack_below(inst.extra<JmpSwitchDest>()->spOffBCFromIRSP).
-        precise_union(AMIStateAny)
+        precise_union(AMIStateAny),
+      AEmpty
     };
   case JmpSSwitchDest:
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
       *stack_below(inst.extra<JmpSSwitchDest>()->offset).
-        precise_union(AMIStateAny)
+        precise_union(AMIStateAny),
+      AEmpty
     };
 
   //////////////////////////////////////////////////////////////////////
@@ -430,7 +452,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EndCatch>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateAny
+      stack_kills | AMIStateAny,
+      AEmpty
     };
   }
 
@@ -438,7 +461,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const stack_kills = stack_below(inst.extra<EnterTCUnwind>()->offset);
     return ExitEffects {
       AUnknown,
-      stack_kills | AMIStateAny
+      stack_kills | AMIStateAny,
+      AEmpty
     };
   }
 
@@ -507,7 +531,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     auto const extra = inst.extra<InterpOneData>();
     return ExitEffects {
       *AUnknown.exclude_vm_reg(),
-      stack_below(extra->spOffset) | AMIStateAny
+      stack_below(extra->spOffset) | AMIStateAny,
+      AEmpty
     };
   }
 
@@ -546,6 +571,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         // Kills. Everything on the stack.
         stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
+        // No input uninits.
+        AEmpty,
         // No inputs. The value being sent is passed explicitly.
         AEmpty,
         // ActRec. It is on the heap and we already implicitly assume that
@@ -564,6 +591,8 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
+        // No input uninits when calling a prologue.
+        AEmpty,
         // Input arguments.
         extra->numInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
@@ -586,9 +615,15 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
     {
       auto const extra = inst.extra<CallFuncEntry>();
       auto const callee = extra->target.func();
+      auto const numParams = callee->numNonVariadicParams();
       return CallEffects {
         // Kills. Everything on the stack below the incoming parameters.
         stack_below(extra->spOffset) | AMIStateAny | AVMRegAny,
+        // Kill TUninit arguments.
+        extra->numInitArgs >= numParams ? AEmpty : AStack::range(
+          extra->spOffset + callee->numFuncEntryInputs() - numParams,
+          extra->spOffset + callee->numFuncEntryInputs() - extra->numInitArgs
+        ),
         // Input arguments.
         callee->numFuncEntryInputs() == 0 ? AEmpty : AStack::range(
           extra->spOffset,
@@ -1992,10 +2027,13 @@ DEBUG_ONLY bool check_effects(const IRInstruction& inst, MemEffects me) {
     },
     [&] (PureLoad x)         { check(x.src); },
     [&] (PureStore x)        { check(x.dst); },
-    [&] (ExitEffects x)      { check(x.live); check(x.kills); },
+    [&] (ExitEffects x)      { check(x.live);
+                               check(x.kills);
+                               check(x.uninits); },
     [&] (IrrelevantEffects)  {},
     [&] (UnknownEffects)     {},
     [&] (CallEffects x)      { check(x.kills);
+                               check(x.uninits);
                                check(x.inputs);
                                check(x.actrec);
                                check(x.outputs);
@@ -2224,7 +2262,11 @@ MemEffects canonicalize(MemEffects me) {
       return PureStore { canonicalize(x.dst), x.value, x.dep };
     },
     [&] (ExitEffects x) -> R {
-      return ExitEffects { canonicalize(x.live), canonicalize(x.kills) };
+      return ExitEffects {
+        canonicalize(x.live),
+        canonicalize(x.kills),
+        canonicalize(x.uninits)
+      };
     },
     [&] (PureInlineCall x) -> R {
       return PureInlineCall {
@@ -2236,6 +2278,7 @@ MemEffects canonicalize(MemEffects me) {
     [&] (CallEffects x) -> R {
       return CallEffects {
         canonicalize(x.kills),
+        canonicalize(x.uninits),
         canonicalize(x.inputs),
         canonicalize(x.actrec),
         canonicalize(x.outputs),
@@ -2267,7 +2310,11 @@ std::string show(MemEffects effects) {
       );
     },
     [&] (ExitEffects x) {
-      return sformat("exit({} ; {})", show(x.live), show(x.kills));
+      return sformat("exit({} ; {}; {})",
+        show(x.live),
+        show(x.kills),
+        show(x.uninits)
+      );
     },
     [&] (PureInlineCall x) {
       return sformat("inline_call({} ; {})",
@@ -2276,8 +2323,9 @@ std::string show(MemEffects effects) {
       );
     },
     [&] (CallEffects x) {
-      return sformat("call({} ; {} ; {} ; {} ; {})",
+      return sformat("call({} ; {} ; {} ; {} ; {} ; {})",
         show(x.kills),
+        show(x.uninits),
         show(x.inputs),
         show(x.actrec),
         show(x.outputs),

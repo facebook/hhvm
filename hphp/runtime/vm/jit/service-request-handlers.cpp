@@ -258,6 +258,15 @@ void syncRegs(SBInvOffset spOff) noexcept {
 
 }
 
+void uninitDefaultArgs(ActRec* fp, uint32_t numEntryArgs,
+                       uint32_t numNonVariadicParams) noexcept {
+  // JIT may optimize away uninit writes for default arguments. Write them, as
+  // we may inspect them or continue execution in the interpreter.
+  for (auto param = numEntryArgs; param < numNonVariadicParams; ++param) {
+    tvWriteUninit(frame_local(fp, param));
+  }
+}
+
 TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
   syncRegs(spOff);
   FTRACE(1, "handleTranslate {}\n", vmfp()->func()->fullName()->data());
@@ -268,6 +277,7 @@ TCA handleTranslate(Offset bcOff, SBInvOffset spOff) noexcept {
 
 TCA handleTranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleTranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
@@ -289,6 +299,7 @@ TCA handleRetranslate(Offset bcOff, SBInvOffset spOff) noexcept {
 
 TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateFuncEntry {}\n",
          vmfp()->func()->fullName()->data());
 
@@ -302,6 +313,7 @@ TCA handleRetranslateFuncEntry(uint32_t numArgs) noexcept {
 
 TCA handleRetranslateOpt(uint32_t numArgs) noexcept {
   syncRegs(SBInvOffset{0});
+  uninitDefaultArgs(vmfp(), numArgs, liveFunc()->numNonVariadicParams());
   FTRACE(1, "handleRetranslateOpt {}\n", vmfp()->func()->fullName()->data());
 
   auto const sk = SrcKey { liveFunc(), numArgs, SrcKey::FuncEntryTag {} };

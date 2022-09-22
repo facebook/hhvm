@@ -16,6 +16,13 @@
 
 #include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
+THRIFT_FLAG_DEFINE_int64(server_default_socket_queue_timeout_ms, 100);
+THRIFT_FLAG_DEFINE_int64(server_default_queue_timeout_ms, 100);
+THRIFT_FLAG_DEFINE_int64(server_polled_service_health_liveness_ms, 100);
+THRIFT_FLAG_DEFINE_int64(
+    server_ingress_memory_limit_enforcement_payload_size_min_bytes, 1024);
+THRIFT_FLAG_DEFINE_bool(server_reject_header_connections, false);
+
 namespace apache {
 namespace thrift {
 

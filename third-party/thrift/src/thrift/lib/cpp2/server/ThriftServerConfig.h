@@ -21,16 +21,14 @@
 #include <folly/io/SocketOptionMap.h>
 #include <folly/sorted_vector_types.h>
 #include <thrift/lib/cpp/concurrency/ThreadManager.h>
+#include <thrift/lib/cpp2/Flags.h>
 #include <thrift/lib/cpp2/server/ServerAttribute.h>
-#include <thrift/lib/cpp2/server/ServerFlags.h>
 
 THRIFT_FLAG_DECLARE_int64(server_default_socket_queue_timeout_ms);
 THRIFT_FLAG_DECLARE_int64(server_default_queue_timeout_ms);
-
 THRIFT_FLAG_DECLARE_int64(server_polled_service_health_liveness_ms);
 THRIFT_FLAG_DECLARE_int64(
     server_ingress_memory_limit_enforcement_payload_size_min_bytes);
-
 THRIFT_FLAG_DECLARE_bool(server_reject_header_connections);
 
 namespace apache::thrift {

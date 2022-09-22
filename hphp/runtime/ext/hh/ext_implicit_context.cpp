@@ -125,7 +125,7 @@ TypedValue HHVM_FUNCTION(get_implicit_context, StringArg key) {
 
 Object HHVM_FUNCTION(get_whole_implicit_context) {
   auto const obj = *ImplicitContext::activeCtx;
-  return Object::attach(obj);
+  return Object{obj};
 }
 
 String HHVM_FUNCTION(get_implicit_context_memo_key) {

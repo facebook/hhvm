@@ -1,4 +1,3 @@
-#![allow(unused)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -23,7 +22,6 @@ use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
-use ir::SrcLoc;
 use ir::StringInterner;
 use ir::TryCatchId;
 use ir::ValueId;
@@ -319,14 +317,14 @@ fn write_inc_dec_l<'a>(
     op: IncDecOp,
 ) -> Result {
     let builtin = match op {
-        IncDecOp::PreInc => hack::Builtin::Add,
-        IncDecOp::PostInc => hack::Builtin::Add,
-        IncDecOp::PreDec => hack::Builtin::Sub,
-        IncDecOp::PostDec => hack::Builtin::Sub,
-        IncDecOp::PreIncO => hack::Builtin::AddO,
-        IncDecOp::PostIncO => hack::Builtin::AddO,
-        IncDecOp::PreDecO => hack::Builtin::SubO,
-        IncDecOp::PostDecO => hack::Builtin::SubO,
+        IncDecOp::PreInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
+        IncDecOp::PostInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
+        IncDecOp::PreDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+        IncDecOp::PostDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+        IncDecOp::PreIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
+        IncDecOp::PostIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
+        IncDecOp::PreDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
+        IncDecOp::PostDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
         _ => unreachable!(),
     };
 

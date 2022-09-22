@@ -18,11 +18,13 @@ use crate::textual::Sid;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
-pub(crate) enum Builtin {
+/// These represent builtins for handling HHVM bytecode instructions. In general
+/// the names should match the HHBC name except when they are compound bytecodes
+/// (like Cmp with a parameter of Eq becoming CmpEq). Documentation can be found
+/// in hphp/doc/bytecode.specification.
+pub(crate) enum Hhbc {
     Add,
     AddO,
-    ArgPack(usize),
-    Bool,
     CmpEq,
     CmpGt,
     CmpGte,
@@ -31,43 +33,62 @@ pub(crate) enum Builtin {
     CmpNSame,
     CmpNeq,
     CmpSame,
-    Copy,
-    Int,
-    IsInt,
+    IsTypeInt,
     Modulo,
     Not,
-    Null,
     Print,
     Sub,
     SubO,
     VerifyFailed,
 }
 
+pub(crate) enum Builtin {
+    /// Build a *HackParams for the given number of parameters. Takes a "this"
+    /// value and the number of parameters as the value (so one more total than
+    /// the arg).
+    ///   ArgPack<0>(*Mixed) -> *HackParams
+    ///   ArgPack<1>(*Mixed, *Mixed) -> *HackParams
+    ///   ArgPack<2>(*Mixed, *Mixed, *Mixed) -> *HackParams
+    ArgPack(usize),
+    /// Turns a raw boolean into a Mixed.
+    ///   Bool(n: bool) -> *Mixed
+    Bool,
+    Copy,
+    /// Hhbc handlers.  See hphp/doc/bytecode.specification for docs.
+    Hhbc(Hhbc),
+    /// Turns a raw int into a Mixed.
+    ///   Int(n: int) -> *Mixed
+    Int,
+    /// Returns a Mixed containing a `null`.
+    ///   Null() -> *Mixed
+    Null,
+}
+
 impl Builtin {
     pub(crate) fn into_str(&self) -> Cow<'static, str> {
         match self {
-            Builtin::Add => Cow::Borrowed("hack_add"),
-            Builtin::AddO => Cow::Borrowed("hack_add_o"),
+            Builtin::Hhbc(Hhbc::Add) => Cow::Borrowed("hack_add"),
+            Builtin::Hhbc(Hhbc::AddO) => Cow::Borrowed("hack_add_o"),
             Builtin::ArgPack(n) => Cow::Owned(format!("arg_pack_{}", n)),
             Builtin::Bool => Cow::Borrowed("hack_bool"),
-            Builtin::CmpEq => Cow::Borrowed("hack_cmp_eq"),
-            Builtin::CmpGt => Cow::Borrowed("hack_cmp_gt"),
-            Builtin::CmpGte => Cow::Borrowed("hack_cmp_gte"),
-            Builtin::CmpLt => Cow::Borrowed("hack_cmp_lt"),
-            Builtin::CmpLte => Cow::Borrowed("hack_cmp_lte"),
-            Builtin::CmpNSame => Cow::Borrowed("hack_cmp_nsame"),
-            Builtin::CmpNeq => Cow::Borrowed("hack_cmp_neq"),
-            Builtin::CmpSame => Cow::Borrowed("hack_cmp_same"),
+            Builtin::Hhbc(Hhbc::CmpEq) => Cow::Borrowed("hack_cmp_eq"),
+            Builtin::Hhbc(Hhbc::CmpGt) => Cow::Borrowed("hack_cmp_gt"),
+            Builtin::Hhbc(Hhbc::CmpGte) => Cow::Borrowed("hack_cmp_gte"),
+            Builtin::Hhbc(Hhbc::CmpLt) => Cow::Borrowed("hack_cmp_lt"),
+            Builtin::Hhbc(Hhbc::CmpLte) => Cow::Borrowed("hack_cmp_lte"),
+            Builtin::Hhbc(Hhbc::CmpNSame) => Cow::Borrowed("hack_cmp_nsame"),
+            Builtin::Hhbc(Hhbc::CmpNeq) => Cow::Borrowed("hack_cmp_neq"),
+            Builtin::Hhbc(Hhbc::CmpSame) => Cow::Borrowed("hack_cmp_same"),
             Builtin::Copy => Cow::Borrowed("copy"),
             Builtin::Int => Cow::Borrowed("hack_int"),
-            Builtin::IsInt => Cow::Borrowed("hack_is_int"),
-            Builtin::Modulo => Cow::Borrowed("hack_modulo"),
-            Builtin::Not => Cow::Borrowed("hack_not"),
+            Builtin::Hhbc(Hhbc::IsTypeInt) => Cow::Borrowed("hack_is_int"),
+            Builtin::Hhbc(Hhbc::Modulo) => Cow::Borrowed("hack_modulo"),
+            Builtin::Hhbc(Hhbc::Not) => Cow::Borrowed("hack_not"),
             Builtin::Null => Cow::Borrowed("hack_null"),
-            Builtin::Print => Cow::Borrowed("hack_print"),
-            Builtin::Sub => Cow::Borrowed("hack_sub"),
-            Builtin::SubO => Cow::Borrowed("hack_sub_o"),
-            Builtin::VerifyFailed => Cow::Borrowed("hack_verify_failed"),
+            Builtin::Hhbc(Hhbc::Print) => Cow::Borrowed("hack_print"),
+            Builtin::Hhbc(Hhbc::Sub) => Cow::Borrowed("hack_sub"),
+            Builtin::Hhbc(Hhbc::SubO) => Cow::Borrowed("hack_sub_o"),
+            Builtin::Hhbc(Hhbc::VerifyFailed) => Cow::Borrowed("hack_verify_failed"),
         }
     }
 }

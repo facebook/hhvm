@@ -366,11 +366,11 @@ testing::AssertionResult runRpcTest(
 
 testing::AssertionResult runBasicRpcTest(
     Client<BasicRPCConformanceService>& client, const RpcTestCase& rpc) {
+  ClientTestResult result;
+  ServerTestResult actualServerTestResult;
+  const auto& clientInstruction = *rpc.clientInstruction();
+  const auto& serverInstruction = *rpc.serverInstruction();
   try {
-    ClientTestResult result;
-    auto clientInstruction = *rpc.clientInstruction();
-    auto serverInstruction = *rpc.serverInstruction();
-    ServerTestResult actualServerTestResult;
     switch (clientInstruction.getType()) {
       case ClientInstruction::Type::requestResponseBasic:
         actualServerTestResult = runRequestResponseBasic(

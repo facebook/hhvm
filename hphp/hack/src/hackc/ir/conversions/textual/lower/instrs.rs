@@ -11,25 +11,18 @@ use ir::instr::Hhbc;
 use ir::instr::IsTypeOp;
 use ir::Func;
 use ir::FuncBuilder;
-use ir::FuncBuilderEx;
+use ir::FuncBuilderEx as _;
 use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
-use ir::StringInterner;
 use ir::ValueId;
-use itertools::Itertools;
-use log::trace;
 
+use super::func_builder::FuncBuilderEx as _;
 use crate::hack;
 
-pub(crate) fn lower<'a>(func: Func<'a>, strings: &StringInterner) -> Func<'a> {
-    trace!(
-        "Before Lower: {}",
-        ir::print::DisplayFunc(&func, true, strings)
-    );
-    let mut builder = FuncBuilder::with_func(func);
-
-    let mut lowerer = Lowerer::default();
+/// Lower individual Instrs in the Func to simpler forms.
+pub(crate) fn lower_instrs<'a>(builder: &mut FuncBuilder<'a>) {
+    let mut lowerer = LowerInstrs { changed: false };
 
     let mut bid = Func::ENTRY_BID;
     while bid.0 < builder.func.blocks.len() as u32 {
@@ -43,63 +36,14 @@ pub(crate) fn lower<'a>(func: Func<'a>, strings: &StringInterner) -> Func<'a> {
         }
         bid.0 += 1;
     }
-
-    let mut func = builder.finish();
-    ir::passes::split_critical_edges(&mut func, true);
-    trace!(
-        "After Lower: {}",
-        ir::print::DisplayFunc(&func, true, strings)
-    );
-    func
-}
-
-trait FuncBuilderEx2 {
-    fn hack_builtin(&mut self, _builtin: hack::Builtin, _args: &[ValueId], _loc: LocId) -> Instr;
-    fn emit_hack_builtin(
-        &mut self,
-        builtin: hack::Builtin,
-        args: &[ValueId],
-        loc: LocId,
-    ) -> ValueId;
-}
-
-impl<'a> FuncBuilderEx2 for FuncBuilder<'a> {
-    fn hack_builtin(&mut self, builtin: hack::Builtin, args: &[ValueId], loc: LocId) -> Instr {
-        use ir::instr::TextualHackBuiltinParam;
-        let target = builtin.into_str();
-        let params = args
-            .iter()
-            .map(|_| TextualHackBuiltinParam::Value)
-            .collect_vec()
-            .into_boxed_slice();
-        let values = args.to_vec().into_boxed_slice();
-        Instr::Special(ir::instr::Special::Textual(
-            ir::instr::Textual::HackBuiltin {
-                target,
-                params,
-                values,
-                loc,
-            },
-        ))
-    }
-
-    fn emit_hack_builtin(
-        &mut self,
-        builtin: hack::Builtin,
-        args: &[ValueId],
-        loc: LocId,
-    ) -> ValueId {
-        let instr = self.hack_builtin(builtin, args, loc);
-        self.emit(instr)
-    }
 }
 
 #[derive(Default)]
-struct Lowerer {
+struct LowerInstrs {
     changed: bool,
 }
 
-impl Lowerer {
+impl LowerInstrs {
     fn handle_with_builtin(&self, builder: &mut FuncBuilder<'_>, instr: &Instr) -> Instr {
         let builtin = match instr {
             Instr::Hhbc(Hhbc::CmpOp(_, CmpOp::Eq, _)) => hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
@@ -151,7 +95,7 @@ impl Lowerer {
     }
 }
 
-impl TransformInstr for Lowerer {
+impl TransformInstr for LowerInstrs {
     fn apply<'a>(&mut self, _iid: InstrId, instr: Instr, builder: &mut FuncBuilder<'a>) -> Instr {
         let instr = match instr {
             Instr::Hhbc(

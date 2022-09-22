@@ -53,7 +53,8 @@ ExternalProject_Add(
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
     "-Dwangle_DIR=${WANGLE_INSTALL_DIR}/lib/cmake/wangle"
 
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+    "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
 )
 ExternalProject_Get_property(bundled_thrift INSTALL_DIR)
 

@@ -97,6 +97,8 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
 
   // Add to a set, number, etc.
   using Base::add;
+  using Base::operator+=;
+  using Base::operator++;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //
@@ -231,6 +233,8 @@ class Value : private detail::DynCmp<Value, ConstRef>,
 
   // Add to a set, number, etc.
   using Base::add;
+  using Base::operator+=;
+  using Base::operator++;
 
   // Put a key-value pair, overwriting any existing entry in a map, struct, etc.
   //

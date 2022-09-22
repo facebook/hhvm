@@ -498,10 +498,14 @@ class BaseDyn : public Dyn,
   ConstT get(FieldId id) const&& { return ConstT{Base::get(id, true, true)}; }
 
   // Get by name.
-  MutT get(const std::string& name) & { return get(asRef(name)); }
-  MutT get(const std::string& name) && { return get(asRef(name)); }
-  ConstT get(const std::string& name) const& { return get(asRef(name)); }
-  ConstT get(const std::string& name) const&& { return get(asRef(name)); }
+  MutT get(const std::string& name) & { return get(asRef<string_t>(name)); }
+  MutT get(const std::string& name) && { return get(asRef<string_t>(name)); }
+  ConstT get(const std::string& name) const& {
+    return get(asRef<string_t>(name));
+  }
+  ConstT get(const std::string& name) const&& {
+    return get(asRef<string_t>(name));
+  }
 
   // Get by position.
   MutT get(size_t pos) & { return MutT{Base::get(pos)}; }
@@ -535,15 +539,15 @@ class BaseDyn : public Dyn,
   template <typename IdT, typename R = ConstT>
   using if_not_index = std::enable_if_t<!is_index_type_v<IdT>, R>;
 
-  template <typename Tag = type::string_t>
-  static ConstT asRef(const std::string& name) {
-    return ConstT::template to<Tag>(name);
+  template <typename Tag = binary_t>
+  static ConstT asRef(const native_type<Tag>& val) {
+    return ConstT::template to<Tag>(val);
   }
 
   // Re-map mut calls from base, without 'const' qualifier.
 
   void assign(ConstT val) { Base::assign(val); }
-  void assign(const std::string& val) { assign(asRef<binary_t>(val)); }
+  void assign(const std::string& val) { assign(asRef(val)); }
   Derived& operator=(ConstT val) & { return (assign(val), derived()); }
   Derived&& operator=(ConstT val) && {
     return (assign(val), std::move(derived()));
@@ -556,10 +560,20 @@ class BaseDyn : public Dyn,
   }
 
   void append(ConstT val) { Base::append(val); }
-  void append(const std::string& val) { append(asRef<binary_t>(val)); }
+  void append(const std::string& val) { append(asRef(val)); }
 
   bool add(ConstT val) { return Base::add(val); }
-  bool add(const std::string& val) { return add(asRef<binary_t>(val)); }
+  bool add(const std::string& val) { return add(asRef(val)); }
+  Derived& operator+=(ConstT val) & { return (add(val), derived()); }
+  Derived&& operator+=(ConstT val) && { return (add(val), derived()); }
+  Derived& operator+=(const std::string& val) & {
+    return (add(asRef(val)), derived());
+  }
+  Derived&& operator+=(const std::string& val) && {
+    return (add(asRef(val)), derived());
+  }
+  Derived& operator++() & { return (add(asRef<i32_t>(1)), derived()); }
+  Derived&& operator++() && { return (add(asRef<i32_t>(1)), derived()); }
 
   bool put(FieldId id, ConstT val) { return Base::put(id, val); }
   bool put(ConstT key, ConstT val) { return Base::put(key, val); }
@@ -567,10 +581,10 @@ class BaseDyn : public Dyn,
     return Base::put(id, asRef(val));
   }
   bool put(const std::string& name, ConstT val) {
-    return put(asRef(name), val);
+    return put(asRef<string_t>(name), val);
   }
   bool put(const std::string& name, const std::string& val) {
-    return put(asRef(name), asRef(val));
+    return put(asRef<string_t>(name), asRef(val));
   }
 
   MutT ensure(FieldId id) { return MutT{Base::ensure(id)}; }
@@ -584,56 +598,56 @@ class BaseDyn : public Dyn,
   MutT ensure(ConstT key, ConstT defVal) {
     return MutT{Base::ensure(key, defVal)};
   }
-  MutT ensure(const std::string& name) { return ensure(asRef(name)); }
+  MutT ensure(const std::string& name) { return ensure(asRef<string_t>(name)); }
   MutT ensure(const std::string& name, ConstT defVal) {
-    return ensure(asRef(name), defVal);
+    return ensure(asRef<string_t>(name), defVal);
   }
   MutT ensure(const std::string& name, const std::string& defVal) {
-    return ensure(asRef(name), asRef(defVal));
+    return ensure(asRef<string_t>(name), asRef(defVal));
   }
 
   void clear() { Base::clear(); }
   void clear(FieldId id) { Base::put(id, ConstT{}); }
   void clear(ConstT key) { Base::put(key, ConstT{}); }
-  void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
+  void clear(std::string name) { Base::put(asRef<string_t>(name), ConstT{}); }
 
  private:
   // TODO(afuller): Support capturing string literals directly and remove these.
   friend bool operator==(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) == rhs;
+    return asRef(lhs) == rhs;
   }
   friend bool operator!=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) != rhs;
+    return asRef(lhs) != rhs;
   }
   friend bool operator<(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) < rhs;
+    return asRef(lhs) < rhs;
   }
   friend bool operator<=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) <= rhs;
+    return asRef(lhs) <= rhs;
   }
   friend bool operator>(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) > rhs;
+    return asRef(lhs) > rhs;
   }
   friend bool operator>=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) >= rhs;
+    return asRef(lhs) >= rhs;
   }
   friend bool operator==(const Derived& lhs, const std::string& rhs) {
-    return lhs == asRef<binary_t>(rhs);
+    return lhs == asRef(rhs);
   }
   friend bool operator!=(const Derived& lhs, const std::string& rhs) {
-    return lhs != asRef<binary_t>(rhs);
+    return lhs != asRef(rhs);
   }
   friend bool operator<(const Derived& lhs, const std::string& rhs) {
-    return lhs < asRef<binary_t>(rhs);
+    return lhs < asRef(rhs);
   }
   friend bool operator<=(const Derived& lhs, const std::string& rhs) {
-    return lhs <= asRef<binary_t>(rhs);
+    return lhs <= asRef(rhs);
   }
   friend bool operator>(const Derived& lhs, const std::string& rhs) {
-    return lhs > asRef<binary_t>(rhs);
+    return lhs > asRef(rhs);
   }
   friend bool operator>=(const Derived& lhs, const std::string& rhs) {
-    return lhs >= asRef<binary_t>(rhs);
+    return lhs >= asRef(rhs);
   }
 };
 
@@ -667,6 +681,8 @@ class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
 
  protected:
   using Base::operator=;
+  using Base::operator+=;
+  using Base::operator++;
 };
 
 // The ops for the empty type 'void'.

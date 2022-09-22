@@ -101,6 +101,11 @@ TEST(RuntimeTest, Int) {
   EXPECT_EQ(ref, Ref::to(2));
   EXPECT_EQ(ref, Value::of(2));
 
+  EXPECT_EQ(++ref, 3);
+  EXPECT_EQ(value, 3);
+  EXPECT_EQ(ref += -5, -2);
+  EXPECT_EQ(value, -2);
+
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(value, 0);
@@ -141,6 +146,9 @@ TEST(RuntimeTest, List) {
   EXPECT_THAT(ref, ::testing::ElementsAre());
   EXPECT_THAT(ref, ::testing::IsEmpty());
   EXPECT_THAT(ref, ::testing::SizeIs(0));
+
+  EXPECT_THROW(ref += "bad", std::runtime_error);
+  EXPECT_THROW(++ref, std::bad_any_cast);
 }
 
 TEST(RuntimeTest, Set) {
@@ -161,7 +169,7 @@ TEST(RuntimeTest, Set) {
   EXPECT_THROW(ref.get(Ref::to<string_t>("best")), std::runtime_error);
 
   ref.add("the");
-  ref.add("test");
+  ref += ("test");
   EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
 
@@ -173,6 +181,7 @@ TEST(RuntimeTest, Set) {
   EXPECT_THAT(ref, ::testing::SizeIs(0));
 
   EXPECT_THROW(ref.values().begin(), std::logic_error);
+  EXPECT_THROW(++ref, std::bad_any_cast);
 }
 
 TEST(RuntimeTest, Map) {
@@ -201,6 +210,8 @@ TEST(RuntimeTest, Map) {
   EXPECT_TRUE(value.empty());
 
   EXPECT_THROW(ref.begin(), std::runtime_error);
+  EXPECT_THROW(ref += "three", std::logic_error);
+  EXPECT_THROW(++ref, std::logic_error);
 }
 
 TEST(RuntimeTest, DynMap) {

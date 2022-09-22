@@ -439,7 +439,6 @@ final class Options {
     public ?string $hh_single_type_check;
     public bool $write_to_checkout = false;
     public bool $bespoke = false;
-    public bool $lazyclass = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -2522,12 +2521,6 @@ function should_skip_test_simple(
       file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
-  }
-
-  $no_lazyclass_tag = "nolazyclass";
-  if ($options->lazyclass &&
-      file_exists("$test.$no_lazyclass_tag")) {
-    return 'skip-lazyclass';
   }
 
   $no_jitserialize_tag = "nojitserialize";

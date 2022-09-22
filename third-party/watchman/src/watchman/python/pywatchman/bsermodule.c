@@ -508,7 +508,7 @@ static PyObject* bser_loads(PyObject* self, PyObject* args, PyObject* kw) {
   }
 
   if (mutable_obj) {
-    ctx.mutable = PyObject_IsTrue(mutable_obj) > 0 ? 1 : 0;
+    ctx.is_mutable = PyObject_IsTrue(mutable_obj) > 0 ? 1 : 0;
   }
   ctx.value_encoding = value_encoding;
   if (value_encoding == NULL) {

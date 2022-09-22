@@ -50,7 +50,7 @@ typedef struct {
 extern PyTypeObject bserObjectType;
 
 typedef struct loads_ctx {
-  int mutable;
+  int is_mutable;
   const char* value_encoding;
   const char* value_errors;
   uint32_t bser_version;

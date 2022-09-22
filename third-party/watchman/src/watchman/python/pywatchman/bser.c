@@ -241,7 +241,7 @@ static PyObject*
 bunser_array(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   const char* buf = *ptr;
   int64_t nitems, i;
-  int mutable = ctx->mutable;
+  int mutable = ctx->is_mutable;
   PyObject* res;
 
   // skip array header
@@ -285,7 +285,7 @@ static PyObject*
 bunser_object(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   const char* buf = *ptr;
   int64_t nitems, i;
-  int mutable = ctx->mutable;
+  int mutable = ctx->is_mutable;
   PyObject* res;
   bserObject* obj;
 
@@ -365,13 +365,13 @@ static PyObject*
 bunser_template(const char** ptr, const char* end, const unser_ctx_t* ctx) {
   const char* buf = *ptr;
   int64_t nitems, i;
-  int mutable = ctx->mutable;
+  int mutable = ctx->is_mutable;
   PyObject* arrval;
   PyObject* keys;
   Py_ssize_t numkeys, keyidx;
   unser_ctx_t keys_ctx = {0};
   if (mutable) {
-    keys_ctx.mutable = 1;
+    keys_ctx.is_mutable = 1;
     // Decode keys as UTF-8 in this case.
     keys_ctx.value_encoding = "utf-8";
     keys_ctx.value_errors = "strict";

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-struct C {
-  1: i64 i;
-}
+include "b.thrift"
 
-exception E {}
+service TestService {
+  void test() throws (1: b.E ex);
+}

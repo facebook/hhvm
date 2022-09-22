@@ -39,28 +39,8 @@ from thrift.py3.types cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport b.types as _b_types
 
-cimport c.types as _c_types
+cimport s.types as _s_types
 
-
-
-ctypedef void (*__C_FieldsSetterFunc)(__C_FieldsSetter, object) except *
-
-cdef class __C_FieldsSetter(__StructFieldsSetter):
-    cdef _c_types.cC* _struct_cpp_obj
-    cdef cumap[__cstring_view, __C_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __C_FieldsSetter _fbthrift_create(_c_types.cC* struct_cpp_obj)
-    cdef void _set_field_0(self, _fbthrift_value) except *
-
-
-ctypedef void (*__E_FieldsSetterFunc)(__E_FieldsSetter, object) except *
-
-cdef class __E_FieldsSetter(__StructFieldsSetter):
-    cdef _c_types.cE* _struct_cpp_obj
-    cdef cumap[__cstring_view, __E_FieldsSetterFunc] _setters
-
-    @staticmethod
-    cdef __E_FieldsSetter _fbthrift_create(_c_types.cE* struct_cpp_obj)
 

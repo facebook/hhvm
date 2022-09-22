@@ -39,3 +39,4 @@ class List__c_C(_typing.Sequence[_c_types.C], _typing.Hashable):
 
 
 B = List__c_C
+E = _c_types.E

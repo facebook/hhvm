@@ -10,14 +10,8 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
+cimport b.types as _b_types
+cimport b.builders as _b_builders
 
-cimport c.types as _c_types
-
-cdef class C_Builder(thrift.py3.builder.StructBuilder):
-    cdef public pint i
-
-
-cdef class E_Builder(thrift.py3.builder.StructBuilder):
-    pass
-
+cimport s.types as _s_types
 

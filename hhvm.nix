@@ -10,7 +10,7 @@
 , editline
 , expat
 , flex
-, fmt
+, fmt_8
 , freetype
 , fribidi
 , gd
@@ -127,7 +127,7 @@ stdenv.mkDerivation rec {
       (double-conversion.override { inherit stdenv; })
       editline
       expat
-      (fmt.override { inherit stdenv; })
+      (fmt_8.override { inherit stdenv; })
       freetype
       fribidi
       gd

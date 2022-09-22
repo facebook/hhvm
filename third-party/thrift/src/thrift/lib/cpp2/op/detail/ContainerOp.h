@@ -152,10 +152,10 @@ struct SetOp : ContainerOp<Tag> {
     return {};
   }
 
-  static bool put(void*, FieldId, size_t, const Dyn& k, const Dyn& v) {
+  static bool put(void* s, FieldId, size_t, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
     check_op(v == nullptr);
-    unimplemented(); // TODO(afuller): Remove by key.
+    return ref(s).erase(k.as<KTag>());
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
@@ -202,6 +202,9 @@ struct MapOp : ContainerOp<Tag> {
 
   static bool put(void* s, FieldId, size_t, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
+    if (v == nullptr) { // Remove
+      return ref(s).erase(k.as<KTag>());
+    }
     return put(ref(s), k.as<KTag>(), v.as<VTag>());
   }
 

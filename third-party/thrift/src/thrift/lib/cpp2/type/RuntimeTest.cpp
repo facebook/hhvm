@@ -177,7 +177,10 @@ TEST(RuntimeTest, Set) {
   EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
 
-  EXPECT_THROW(ref.remove("the"), std::runtime_error);
+  EXPECT_TRUE(ref.remove("best"));
+  EXPECT_FALSE(ref.remove("best"));
+  EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(2));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
@@ -215,6 +218,11 @@ TEST(RuntimeTest, Map) {
 
   EXPECT_THAT(ref.keys(), ::testing::UnorderedElementsAre("one", "two"));
   EXPECT_THAT(ref.values(), ::testing::UnorderedElementsAre(2, 0));
+
+  ref.clear("two");
+  EXPECT_FALSE(ref.remove("two"));
+  EXPECT_THAT(ref.keys(), ::testing::UnorderedElementsAre("one"));
+  EXPECT_THAT(ref.values(), ::testing::UnorderedElementsAre(2));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());

@@ -6,12 +6,6 @@
 use std::borrow::Cow;
 
 use anyhow::Error;
-use ir::instr::Special;
-use ir::instr::Textual;
-use ir::instr::TextualHackBuiltinParam;
-use ir::Instr;
-use ir::LocId;
-use ir::ValueId;
 use strum::EnumProperty as _;
 use strum_macros::EnumIter;
 use strum_macros::EnumProperty;
@@ -109,25 +103,14 @@ impl Builtin {
     }
 }
 
-pub(crate) fn builtin_instr(
-    target: Builtin,
-    params: Vec<TextualHackBuiltinParam>,
-    values: Vec<ValueId>,
-    loc: LocId,
-) -> Instr {
-    let target = target.into_str();
-    Instr::Special(Special::Textual(Textual::HackBuiltin {
-        target,
-        params: params.into_boxed_slice(),
-        values: values.into_boxed_slice(),
-        loc,
-    }))
-}
-
 pub(crate) fn call_builtin(
     w: &mut textual::FuncWriter<'_>,
     target: Builtin,
     params: impl textual::VarArgs,
 ) -> Result<Sid> {
     w.call(&target.into_str(), params)
+}
+
+pub(crate) fn expr_builtin(target: Builtin, params: impl textual::VarArgs) -> textual::Expr {
+    textual::Expr::call(target.into_str(), params)
 }

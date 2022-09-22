@@ -120,6 +120,7 @@ fn write_final(
                 operands,
             )?;
             let src = state.lookup_vid(operands.next().unwrap());
+            let src = w.write_expr(src)?;
             w.store(base, src, &textual::Ty::Mixed)?;
             Ok(src)
         }

@@ -98,7 +98,7 @@ impl fmt::Display for FmtTy<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Var {
     // Named(String),
     Hack(LocalId),
@@ -122,7 +122,7 @@ impl fmt::Display for FmtVar<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Const {
     False,
     // Float(f64),
@@ -157,7 +157,7 @@ impl fmt::Display for FmtConst<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Expr {
     Sid(Sid),
     Deref(Var),
@@ -410,6 +410,16 @@ impl<'a> FuncWriter<'a> {
         writeln!(self.w)?;
 
         Ok(())
+    }
+
+    pub(crate) fn write_expr(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
+        let expr = expr.into();
+        match expr {
+            Expr::Sid(sid) => Ok(sid),
+            Expr::Deref(_) | Expr::Const(_) | Expr::Call(_, _) => {
+                todo!("EXPR: {expr:?}")
+            }
+        }
     }
 
     pub(crate) fn write_label(&mut self, bid: BlockId, params: &[Sid]) -> Result {

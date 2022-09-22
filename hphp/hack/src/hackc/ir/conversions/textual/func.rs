@@ -185,8 +185,7 @@ fn write_builtin(
             TextualHackBuiltinParam::True => textual::Expr::true_(),
             TextualHackBuiltinParam::Value => {
                 let vid = *values.next().unwrap();
-                let sid = state.lookup_vid(vid);
-                textual::Expr::Sid(sid)
+                state.lookup_vid(vid)
             }
         })
         .collect_vec();
@@ -367,8 +366,43 @@ impl<'a> FuncState<'a> {
         sid
     }
 
-    pub fn lookup_vid(&self, vid: ValueId) -> Sid {
-        let iid = vid.expect_instr("instr expected");
+    /// Look up a ValueId in the FuncState and return an Expr representing
+    /// it. For InstrIds and complex ConstIds return an Expr containing the
+    /// (already emitted) Sid. For simple ConstIds use an Expr representing the
+    /// value directly.
+    pub fn lookup_vid(&self, vid: ValueId) -> textual::Expr {
+        use textual::Expr;
+        match vid.full() {
+            ir::FullInstrId::Instr(iid) => Expr::Sid(self.lookup_iid(iid)),
+            ir::FullInstrId::Constant(c) => {
+                use hack::Builtin;
+                let c = self.func.constant(c);
+                match c {
+                    Constant::Bool(_) => todo!(),
+                    Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::int(*i)]),
+                    Constant::Null => hack::expr_builtin(Builtin::Null, ()),
+                    Constant::String(s) => {
+                        let s = util::escaped_string(s);
+                        hack::expr_builtin(Builtin::String, [Expr::string(s)])
+                    }
+                    Constant::Dict(..) => todo!(),
+                    Constant::Dir => todo!(),
+                    Constant::Double(..) => todo!(),
+                    Constant::File => todo!(),
+                    Constant::FuncCred => todo!(),
+                    Constant::Keyset(..) => todo!(),
+                    Constant::Method => todo!(),
+                    Constant::Named(..) => todo!(),
+                    Constant::NewCol(..) => todo!(),
+                    Constant::Uninit => todo!(),
+                    Constant::Vec(..) => todo!(),
+                }
+            }
+            ir::FullInstrId::None => unreachable!(),
+        }
+    }
+
+    pub fn lookup_iid(&self, iid: InstrId) -> Sid {
         *self.iid_mapping.get(&iid).unwrap()
     }
 
@@ -387,7 +421,7 @@ impl<'a> FuncState<'a> {
 }
 
 /// Rewrite the function prelude:
-/// - Convert constants into builtins.
+/// - Convert complex constants into builtins.
 fn rewrite_prelude<'a>(func: ir::Func<'a>) -> ir::Func<'a> {
     let mut builder = ir::FuncBuilder::with_func(func);
 
@@ -410,58 +444,31 @@ fn rewrite_prelude<'a>(func: ir::Func<'a>) -> ir::Func<'a> {
 }
 
 fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBuilder<'_>) {
-    let constants = std::mem::take(&mut builder.func.constants);
-
-    for (lid, constant) in constants.into_iter().enumerate() {
+    for (lid, constant) in builder.func.constants.iter().enumerate() {
         let lid = ConstantId::from_usize(lid);
         trace!("    Const {lid}: {constant:?}");
         let src = ValueId::from_constant(lid);
-        let loc = LocId::NONE;
         let vid = match constant {
-            Constant::Bool(value) => {
-                let params = vec![if value {
-                    TextualHackBuiltinParam::True
-                } else {
-                    TextualHackBuiltinParam::False
-                }];
-                builder.emit(hack::builtin_instr(
-                    hack::Builtin::Bool,
-                    params,
-                    vec![],
-                    loc,
-                ))
-            }
+            Constant::Bool(..)
+            | Constant::Double(..)
+            | Constant::Int(..)
+            | Constant::Null
+            | Constant::String(..)
+            | Constant::Uninit => None,
+
             Constant::Dict(..) => todo!(),
             Constant::Dir => todo!(),
-            Constant::Double(..) => todo!(),
             Constant::File => todo!(),
             Constant::FuncCred => todo!(),
-            Constant::Int(i) => {
-                let params = vec![TextualHackBuiltinParam::Int(i)];
-                builder.emit(hack::builtin_instr(hack::Builtin::Int, params, vec![], loc))
-            }
             Constant::Keyset(..) => todo!(),
             Constant::Method => todo!(),
             Constant::Named(..) => todo!(),
             Constant::NewCol(..) => todo!(),
-            Constant::Null | Constant::Uninit => builder.emit(hack::builtin_instr(
-                hack::Builtin::Null,
-                vec![],
-                vec![],
-                loc,
-            )),
-            Constant::String(s) => {
-                let params = vec![TextualHackBuiltinParam::String(util::escaped_string(&s))];
-                builder.emit(hack::builtin_instr(
-                    hack::Builtin::String,
-                    params,
-                    vec![],
-                    loc,
-                ))
-            }
             Constant::Vec(..) => todo!(),
         };
-        remap.insert(src, vid);
+        if let Some(vid) = vid {
+            remap.insert(src, vid);
+        }
     }
 }
 

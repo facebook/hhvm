@@ -78,6 +78,10 @@ pub enum BaseType {
     Nothing,
     Null,
     Num,
+    /// Used to represent a raw pointer in the type system.  Not used by HHVM.
+    RawPtr(Box<BaseType>),
+    /// Used to represent a raw named type.  Not used by HHVM.
+    RawType(String),
     Resource,
     String,
     This,
@@ -111,6 +115,12 @@ impl BaseType {
             BaseType::Nothing => f.write_str("Nothing"),
             BaseType::Null => f.write_str("Null"),
             BaseType::Num => f.write_str("Num"),
+            BaseType::RawPtr(s) => {
+                f.write_str("RawPtr(")?;
+                s.write(f, strings)?;
+                f.write_str(")")
+            }
+            BaseType::RawType(s) => write!(f, "RawType({s})"),
             BaseType::Resource => f.write_str("Resource"),
             BaseType::String => f.write_str("String"),
             BaseType::This => f.write_str("This"),

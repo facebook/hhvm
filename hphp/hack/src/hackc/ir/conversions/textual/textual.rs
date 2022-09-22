@@ -3,6 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+//! This is a structural version of the Textual language - it should have
+//! basically no business logic and just provides a type-safe way to write
+//! Textual.
+
 use std::borrow::Cow;
 use std::fmt;
 
@@ -54,19 +58,42 @@ impl fmt::Display for FmtSid {
     }
 }
 
-#[derive(Clone)]
-pub(crate) enum Ty {
-    Mixed,
-    Type(String),
-}
+pub(crate) type Ty = ir::BaseType;
 
 struct FmtTy<'a>(&'a Ty);
 
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            Ty::Mixed => write!(f, "HackMixed"),
-            Ty::Type(s) => write!(f, "{s}"),
+            Ty::Bool => write!(f, "bool"),
+            Ty::Int => write!(f, "int"),
+            Ty::String => write!(f, "string"),
+            Ty::RawType(s) => write!(f, "{s}"),
+            Ty::RawPtr(sub) => write!(f, "*{}", FmtTy(sub)),
+            Ty::Mixed => f.write_str("*Mixed"),
+            Ty::Void => f.write_str("void"),
+
+            Ty::AnyArray
+            | Ty::Arraykey
+            | Ty::Class(_)
+            | Ty::Classname
+            | Ty::Darray
+            | Ty::Dict
+            | Ty::Float
+            | Ty::Keyset
+            | Ty::None
+            | Ty::Nonnull
+            | Ty::Noreturn
+            | Ty::Nothing
+            | Ty::Null
+            | Ty::Num
+            | Ty::Resource
+            | Ty::This
+            | Ty::Typename
+            | Ty::Varray
+            | Ty::VarrayOrDarray
+            | Ty::Vec
+            | Ty::VecOrDict => todo!("unhandled type: {:?}", self.0),
         }
     }
 }

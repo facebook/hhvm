@@ -101,6 +101,8 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::Nothing => todo!(),
                 BaseType::Null => todo!(),
                 BaseType::Num => todo!(),
+                BaseType::RawPtr(_) => todo!(),
+                BaseType::RawType(_) => todo!(),
                 BaseType::Resource => todo!(),
                 BaseType::String => todo!(),
                 BaseType::This => todo!(),

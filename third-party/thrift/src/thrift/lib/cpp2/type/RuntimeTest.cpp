@@ -150,6 +150,7 @@ TEST(RuntimeTest, List) {
   EXPECT_THAT(ref, ::testing::IsEmpty());
   EXPECT_THAT(ref, ::testing::SizeIs(0));
 
+  EXPECT_THROW(ref[1], std::out_of_range);
   EXPECT_THROW(ref += "bad", std::runtime_error);
   EXPECT_THROW(++ref, std::bad_any_cast);
 }
@@ -167,9 +168,9 @@ TEST(RuntimeTest, Set) {
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
-  EXPECT_THROW(ref.get(FieldId{1}), std::runtime_error);
-  EXPECT_THROW(ref.get("best"), std::runtime_error);
-  EXPECT_THROW(ref.get(Ref::to<string_t>("best")), std::runtime_error);
+  EXPECT_THROW(ref.get(FieldId{1}), std::logic_error);
+  EXPECT_FALSE(ref.contains("the"));
+  EXPECT_TRUE(ref.contains("best"));
 
   ref.add("the");
   ref += ("test");
@@ -196,6 +197,11 @@ TEST(RuntimeTest, Map) {
   EXPECT_EQ(ref.size(), 0);
   EXPECT_FALSE(ref.put("one", 1));
   EXPECT_EQ(value["one"], 1);
+  EXPECT_TRUE(ref.contains("one"));
+  EXPECT_EQ(ref.at("one"), 1);
+  EXPECT_EQ(ref["one"], 1);
+  EXPECT_FALSE(ref.contains("two"));
+  EXPECT_THROW(ref.at("two"), std::out_of_range);
 
   ref["one"] = 2;
   EXPECT_EQ(value["one"], 2);
@@ -227,7 +233,8 @@ TEST(RuntimeTest, DynMap) {
   EXPECT_TRUE(map["empty"].empty());
   EXPECT_EQ(map.size(), 2);
   EXPECT_EQ(map["hi"], "bye");
-  EXPECT_THROW(map.get("bye"), std::out_of_range);
+  EXPECT_EQ(map.get("bye"), detail::nullPtr());
+  EXPECT_THROW(map.at("bye"), std::out_of_range);
 }
 
 TEST(RuntimeTest, DynStruct) {

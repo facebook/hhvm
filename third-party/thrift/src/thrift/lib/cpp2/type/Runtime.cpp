@@ -18,6 +18,14 @@
 
 namespace apache::thrift::type {
 namespace detail {
+namespace {
+Ptr checkFound(Ptr result) {
+  if (!result.has_value()) {
+    folly::throw_exception<std::out_of_range>("not found");
+  }
+  return result;
+}
+} // namespace
 
 Ptr TypeInfo::get(void* ptr, FieldId id) const {
   return get_(ptr, id, std::string::npos, nullPtr());
@@ -65,6 +73,10 @@ Ptr Cursor::next() {
   return type_->next(ptr_, iterType_, itr_);
 }
 
+bool Dyn::contains(const Dyn& key) const {
+  return get(key).has_value();
+}
+
 Ptr Dyn::ensure(const Dyn& key) const {
   return type_.mut().ensure(ptr_, key);
 }
@@ -95,6 +107,20 @@ Ptr Dyn::get(FieldId id, bool ctxConst, bool ctxRvalue) const {
 }
 Ptr Dyn::get(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return type_.withContext(ctxConst, ctxRvalue)->get(ptr_, pos);
+}
+
+Ptr Dyn::at(const Dyn& key) const {
+  return checkFound(get(key));
+}
+Ptr Dyn::at(size_t pos) const {
+  return checkFound(get(pos));
+}
+Ptr Dyn::at(const Dyn& key, bool ctxConst, bool ctxRvalue) const {
+  return checkFound(get(key, ctxConst, ctxRvalue));
+}
+
+Ptr Dyn::at(size_t pos, bool ctxConst, bool ctxRvalue) const {
+  return checkFound(get(pos, ctxConst, ctxRvalue));
 }
 
 } // namespace detail

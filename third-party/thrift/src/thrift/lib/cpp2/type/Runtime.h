@@ -58,7 +58,7 @@ class ConstRef final : public detail::BaseRef<ConstRef> {
 
   template <typename IdT>
   ConstRef operator[](IdT&& id) const {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
 
  private:
@@ -133,15 +133,16 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
     return Base::tryMut<Tag>();
   }
 
+  using Base::at;
   using Base::get;
-  Ref operator[](Ordinal ord) & { return get(ord); }
-  Ref operator[](Ordinal ord) && { return get(ord); }
-  Ref operator[](size_t pos) & { return get(pos); }
-  Ref operator[](size_t pos) && { return get(pos); }
-  ConstRef operator[](Ordinal ord) const& { return get(ord); }
-  ConstRef operator[](Ordinal ord) const&& { return get(ord); }
-  ConstRef operator[](size_t pos) const& { return get(pos); }
-  ConstRef operator[](size_t pos) const&& { return get(pos); }
+  Ref operator[](Ordinal ord) & { return at(ord); }
+  Ref operator[](Ordinal ord) && { return at(ord); }
+  Ref operator[](size_t pos) & { return at(pos); }
+  Ref operator[](size_t pos) && { return at(pos); }
+  ConstRef operator[](Ordinal ord) const& { return at(ord); }
+  ConstRef operator[](Ordinal ord) const&& { return at(ord); }
+  ConstRef operator[](size_t pos) const& { return at(pos); }
+  ConstRef operator[](size_t pos) const&& { return at(pos); }
   template <typename IdT>
   if_not_index<IdT, Ref> operator[](IdT&& id) & {
     return ensure(std::forward<IdT>(id));
@@ -152,11 +153,11 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   }
   template <typename IdT>
   if_not_index<IdT> operator[](IdT&& id) const& {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
   template <typename IdT>
   if_not_index<IdT> operator[](IdT&& id) const&& {
-    return get(std::forward<IdT>(id));
+    return at(std::forward<IdT>(id));
   }
 
   explicit Ref(detail::Ptr data) noexcept : Base(data) {}

@@ -147,6 +147,7 @@ class Dyn {
   FOLLY_NODISCARD bool identical(const Dyn& rhs) const {
     return type() == rhs.type() && type_->identical(ptr_, rhs);
   }
+  FOLLY_NODISCARD bool contains(const Dyn& key) const;
 
   FOLLY_NODISCARD bool equal(const Dyn& rhs) const {
     return type_->equal(ptr_, rhs);
@@ -214,6 +215,12 @@ class Dyn {
   Ptr get(FieldId id, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
 
+  // Like get, but throws when not found.
+  Ptr at(const Dyn& key) const;
+  Ptr at(size_t pos) const;
+  Ptr at(const Dyn& key, bool ctxConst, bool ctxRvalue = false) const;
+  Ptr at(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
+
   Cursor items() const { return {type_, ptr_}; }
   Cursor items(bool ctxConst, bool ctxRvalue = false) const {
     return {type_.withContext(ctxConst, ctxRvalue), ptr_};
@@ -270,6 +277,7 @@ class Ptr final : public Dyn {
   using Dyn::add;
   using Dyn::append;
   using Dyn::assign;
+  using Dyn::at;
   using Dyn::clear;
   using Dyn::ensure;
   using Dyn::get;
@@ -495,7 +503,11 @@ class BaseDyn : public Dyn,
   iterator end() const { return {}; }
   const_iterator cend() const { return {}; }
 
+  using Base::contains;
+  bool contains(const std::string& key) const { return contains(asRef(key)); }
+
   // Get by value.
+  // TODO(afuller): These should be accepting ConstT.
   MutT get(const Base& key) & { return MutT{Base::get(key)}; }
   MutT get(const Base& key) && { return MutT{Base::get(key, false, true)}; }
   ConstT get(const Base& key) const& { return ConstT{Base::get(key, true)}; }
@@ -518,18 +530,41 @@ class BaseDyn : public Dyn,
   ConstT get(const std::string& name) const&& {
     return get(asRef<string_t>(name));
   }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(const std::string& key) & { return at(asRef(key)); }
+  MutT at(const std::string& key) && { return at(asRef(key)); }
+  ConstT at(const std::string& key) const& { return at(asRef(key)); }
+  ConstT at(const std::string& key) const&& { return at(asRef(key)); }
+
+  // TODO(afuller): These should be accepting ConstT.
+  MutT at(const Base& key) & { return MutT{Base::at(key)}; }
+  MutT at(const Base& key) && { return MutT{Base::at(key, false, true)}; }
+  ConstT at(const Base& key) const& { return ConstT{Base::at(key, true)}; }
+  ConstT at(const Base& key) const&& {
+    return ConstT{Base::at(key, true, true)};
+  }
 
   // Get by position.
   MutT get(size_t pos) & { return MutT{Base::get(pos)}; }
   MutT get(size_t pos) && { return MutT{Base::get(pos, false, true)}; }
   ConstT get(size_t pos) const& { return ConstT{Base::get(pos, true)}; }
   ConstT get(size_t pos) const&& { return ConstT{Base::get(pos, true, true)}; }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(size_t pos) & { return MutT{Base::at(pos)}; }
+  MutT at(size_t pos) && { return MutT{Base::at(pos, false, true)}; }
+  ConstT at(size_t pos) const& { return ConstT{Base::at(pos, true)}; }
+  ConstT at(size_t pos) const&& { return ConstT{Base::at(pos, true, true)}; }
 
   // Get by ordinal.
   MutT get(Ordinal ord) & { return get(type::toPosition(ord)); }
   MutT get(Ordinal ord) && { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const& { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const&& { return get(type::toPosition(ord)); }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(Ordinal ord) & { return at(type::toPosition(ord)); }
+  MutT at(Ordinal ord) && { return at(type::toPosition(ord)); }
+  ConstT at(Ordinal ord) const& { return at(type::toPosition(ord)); }
+  ConstT at(Ordinal ord) const&& { return at(type::toPosition(ord)); }
 
   // Iterate over keys.
   iterable keys() & { return Base::keys(); }

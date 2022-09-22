@@ -143,11 +143,16 @@ struct SetOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& k) { return add(ref(s), k.as<KTag>()); }
 
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) {
-    unimplemented(); // TODO(afuller): Get by key (aka contains/intern set).
+  static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
+    check_op(k != nullptr);
+    auto itr = ref(s).find(k.as<KTag>());
+    if (itr != ref(s).end()) {
+      return ret(KTag{}, *itr);
+    }
+    return {};
   }
-  [[noreturn]] static bool put(
-      void*, FieldId, size_t, const Dyn& k, const Dyn& v) {
+
+  static bool put(void*, FieldId, size_t, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
     check_op(v == nullptr);
     unimplemented(); // TODO(afuller): Remove by key.
@@ -210,10 +215,12 @@ struct MapOp : ContainerOp<Tag> {
   }
 
   static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
-    if (k != nullptr) {
-      return ret(VTag{}, ref(s).at(k.as<KTag>()));
+    check_op(k != nullptr);
+    auto itr = ref(s).find(k.as<KTag>());
+    if (itr != ref(s).end()) {
+      return ret(VTag{}, itr->second);
     }
-    bad_op();
+    return {};
   }
 
   static Ptr next(T& self, IterType type, typename T::iterator& itr) {

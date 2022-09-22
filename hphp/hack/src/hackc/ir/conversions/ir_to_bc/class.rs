@@ -118,7 +118,7 @@ pub(crate) fn convert_class<'a>(
         name,
         properties: Slice::fill_iter(alloc, properties.iter().cloned()),
         requirements,
-        span,
+        span: span.to_span(),
         type_constants,
         upper_bounds,
         uses,

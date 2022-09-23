@@ -54,6 +54,17 @@ const char bser_utf8string_hdr = BSER_UTF8STRING;
 const char bser_skip = BSER_SKIP;
 
 constexpr size_t kMaximumContainerSize = std::numeric_limits<uint32_t>::max();
+constexpr size_t kMaximumReservation = 10000;
+
+template <typename T>
+void limitedReservation(T& container, size_t size) {
+  // When parsing BSER, we want to avoid reallocations when
+  // possible. However, hostile inputs can ask for extremely large
+  // arrays and maps. In those cases, simply cap the reservation
+  // request to a reasonable amount before attempting to parse. If
+  // reallocation is necessary, so be it.
+  container.reserve(std::min(size, kMaximumReservation));
+}
 
 bool is_bser_version_supported(const bser_ctx_t* ctx) {
   return ctx->bser_version == 1 || ctx->bser_version == 2;
@@ -556,7 +567,7 @@ class BserParser {
     size_t count = expectSize("array");
 
     std::vector<json_ref> rv;
-    rv.reserve(count);
+    limitedReservation(rv, count);
     for (size_t i = 0; i < count; i++) {
       rv.push_back(expectValue());
     }
@@ -586,10 +597,10 @@ class BserParser {
 
     // Now load up the array with object values
     std::vector<json_ref> rv;
-    rv.reserve(element_count);
+    limitedReservation(rv, element_count);
     for (size_t i = 0; i < element_count; i++) {
       std::unordered_map<w_string, json_ref> item;
-      item.reserve(templ.size());
+      limitedReservation(item, templ.size());
       for (const auto& template_key : templ) {
         char type = *ensure(1);
         if (type == BSER_SKIP) {
@@ -611,7 +622,7 @@ class BserParser {
     size_t element_count = expectSize("object");
 
     std::unordered_map<w_string, json_ref> rv;
-    rv.reserve(element_count);
+    limitedReservation(rv, element_count);
 
     for (size_t i = 0; i < element_count; i++) {
       auto key = expectString();

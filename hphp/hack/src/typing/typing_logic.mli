@@ -24,7 +24,8 @@ type subtype_prop =
   | Conj of subtype_prop list  (** Conjunction. Conj [] means "true" *)
   | Disj of Typing_error.t option * subtype_prop list
       (** Disjunction. Disj f [] means "false".  The error message function f
-   * wraps the error that should be produced in this case. *)
+        wraps the error that should be produced in this case. *)
+[@@deriving show]
 
 val equal_subtype_prop : subtype_prop -> subtype_prop -> bool
 

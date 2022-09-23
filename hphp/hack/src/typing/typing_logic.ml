@@ -20,6 +20,7 @@ type subtype_prop =
   | IsSubtype of coercion_direction option * internal_type * internal_type
   | Conj of subtype_prop list
   | Disj of Typing_error.t option * subtype_prop list
+[@@deriving show]
 
 let rec equal_subtype_prop p1 p2 =
   match (p1, p2) with

@@ -452,7 +452,7 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
       let (lazy child_pos) = class_elt.ce_pos in
       let lateinit = Markdown_lite.md_codify "@lateinit" in
       let required = Markdown_lite.md_codify "@required" in
-      let show = function
+      let show_tag_opt = function
         | None -> Printf.sprintf "not %s or %s" required lateinit
         | Some Xhp_attribute.Required -> required
         | Some Xhp_attribute.LateInit -> lateinit
@@ -463,9 +463,9 @@ let check_xhp_attr_required env parent_class_elt class_elt on_error =
            @@ Secondary.Bad_xhp_attr_required_override
                 {
                   pos = child_pos;
-                  tag = show tag;
+                  tag = show_tag_opt tag;
                   parent_pos;
-                  parent_tag = show parent_tag;
+                  parent_tag = show_tag_opt parent_tag;
                 })
     | (_, _) -> ()
 

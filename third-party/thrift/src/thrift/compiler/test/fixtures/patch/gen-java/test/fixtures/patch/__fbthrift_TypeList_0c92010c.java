@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_01d73de2 implements TypeList {
+public class __fbthrift_TypeList_0c92010c implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -27,9 +27,9 @@ public class __fbthrift_TypeList_01d73de2 implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField21Patch", "test.fixtures.patch.MyStructField21Patch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField22Patch", "test.fixtures.patch.MyStructField22Patch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructField23Patch", "test.fixtures.patch.MyStructField23Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN21Patch", "test.fixtures.patch.MyStructFieldN21Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN22Patch", "test.fixtures.patch.MyStructFieldN22Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN23Patch", "test.fixtures.patch.MyStructFieldN23Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
   }
 

@@ -176,7 +176,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyUnionPatchStruc
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField21PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldN21PatchStruct> {
   static constexpr const std::size_t fields_size = 5;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -191,7 +191,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField21Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField22PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldN22PatchStruct> {
   static constexpr const std::size_t fields_size = 4;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
@@ -206,7 +206,7 @@ template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField22Pa
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::patch::MyStructField23PatchStruct> {
+template <> struct TStructDataStorage<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
   static constexpr const std::size_t fields_size = 5;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;

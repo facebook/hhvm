@@ -135,7 +135,7 @@ struct ForEachField<::test::fixtures::patch::MyUnionPatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField21PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN21PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -147,7 +147,7 @@ struct ForEachField<::test::fixtures::patch::MyStructField21PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField22PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN22PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -158,7 +158,7 @@ struct ForEachField<::test::fixtures::patch::MyStructField22PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructField23PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);

@@ -506,9 +506,9 @@ class InnerUnionFieldPatchStruct;
 class InnerUnionPatchStruct;
 class MyUnionFieldPatchStruct;
 class MyUnionPatchStruct;
-class MyStructField21PatchStruct;
-class MyStructField22PatchStruct;
-class MyStructField23PatchStruct;
+class MyStructFieldN21PatchStruct;
+class MyStructFieldN22PatchStruct;
+class MyStructFieldN23PatchStruct;
 class MyStructFieldPatchStruct;
 class MyStructPatchStruct;
 }}} // test::fixtures::patch
@@ -1431,30 +1431,30 @@ class MyStruct final  {
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                    void,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>,
-                                                   ::apache::thrift::field_id<6>,
-                                                   ::apache::thrift::field_id<7>,
-                                                   ::apache::thrift::field_id<8>,
-                                                   ::apache::thrift::field_id<9>,
-                                                   ::apache::thrift::field_id<10>,
-                                                   ::apache::thrift::field_id<11>,
-                                                   ::apache::thrift::field_id<12>,
-                                                   ::apache::thrift::field_id<13>,
-                                                   ::apache::thrift::field_id<14>,
-                                                   ::apache::thrift::field_id<15>,
-                                                   ::apache::thrift::field_id<16>,
-                                                   ::apache::thrift::field_id<17>,
-                                                   ::apache::thrift::field_id<18>,
-                                                   ::apache::thrift::field_id<19>,
-                                                   ::apache::thrift::field_id<20>,
-                                                   ::apache::thrift::field_id<21>,
-                                                   ::apache::thrift::field_id<22>,
-                                                   ::apache::thrift::field_id<23>,
-                                                   ::apache::thrift::field_id<30>>;
+                                                   ::apache::thrift::field_id<-1>,
+                                                   ::apache::thrift::field_id<-2>,
+                                                   ::apache::thrift::field_id<-3>,
+                                                   ::apache::thrift::field_id<-4>,
+                                                   ::apache::thrift::field_id<-5>,
+                                                   ::apache::thrift::field_id<-6>,
+                                                   ::apache::thrift::field_id<-7>,
+                                                   ::apache::thrift::field_id<-8>,
+                                                   ::apache::thrift::field_id<-9>,
+                                                   ::apache::thrift::field_id<-10>,
+                                                   ::apache::thrift::field_id<-11>,
+                                                   ::apache::thrift::field_id<-12>,
+                                                   ::apache::thrift::field_id<-13>,
+                                                   ::apache::thrift::field_id<-14>,
+                                                   ::apache::thrift::field_id<-15>,
+                                                   ::apache::thrift::field_id<-16>,
+                                                   ::apache::thrift::field_id<-17>,
+                                                   ::apache::thrift::field_id<-18>,
+                                                   ::apache::thrift::field_id<-19>,
+                                                   ::apache::thrift::field_id<-20>,
+                                                   ::apache::thrift::field_id<-21>,
+                                                   ::apache::thrift::field_id<-22>,
+                                                   ::apache::thrift::field_id<-23>,
+                                                   ::apache::thrift::field_id<-24>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -1515,103 +1515,103 @@ class MyStruct final  {
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
-    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::boolVal> = 1;
-    template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
+    template<> static constexpr int value<::apache::thrift::field_id<-2>> = 2;
     template<> static constexpr int value<::apache::thrift::ident::byteVal> = 2;
-    template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
+    template<> static constexpr int value<::apache::thrift::field_id<-3>> = 3;
     template<> static constexpr int value<::apache::thrift::ident::i16Val> = 3;
-    template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
+    template<> static constexpr int value<::apache::thrift::field_id<-4>> = 4;
     template<> static constexpr int value<::apache::thrift::ident::i32Val> = 4;
-    template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
+    template<> static constexpr int value<::apache::thrift::field_id<-5>> = 5;
     template<> static constexpr int value<::apache::thrift::ident::i64Val> = 5;
-    template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
+    template<> static constexpr int value<::apache::thrift::field_id<-6>> = 6;
     template<> static constexpr int value<::apache::thrift::ident::floatVal> = 6;
-    template<> static constexpr int value<::apache::thrift::field_id<7>> = 7;
+    template<> static constexpr int value<::apache::thrift::field_id<-7>> = 7;
     template<> static constexpr int value<::apache::thrift::ident::doubleVal> = 7;
-    template<> static constexpr int value<::apache::thrift::field_id<8>> = 8;
+    template<> static constexpr int value<::apache::thrift::field_id<-8>> = 8;
     template<> static constexpr int value<::apache::thrift::ident::stringVal> = 8;
-    template<> static constexpr int value<::apache::thrift::field_id<9>> = 9;
+    template<> static constexpr int value<::apache::thrift::field_id<-9>> = 9;
     template<> static constexpr int value<::apache::thrift::ident::binaryVal> = 9;
-    template<> static constexpr int value<::apache::thrift::field_id<10>> = 10;
+    template<> static constexpr int value<::apache::thrift::field_id<-10>> = 10;
     template<> static constexpr int value<::apache::thrift::ident::structVal> = 10;
-    template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
+    template<> static constexpr int value<::apache::thrift::field_id<-11>> = 11;
     template<> static constexpr int value<::apache::thrift::ident::optBoolVal> = 11;
-    template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
+    template<> static constexpr int value<::apache::thrift::field_id<-12>> = 12;
     template<> static constexpr int value<::apache::thrift::ident::optByteVal> = 12;
-    template<> static constexpr int value<::apache::thrift::field_id<13>> = 13;
+    template<> static constexpr int value<::apache::thrift::field_id<-13>> = 13;
     template<> static constexpr int value<::apache::thrift::ident::optI16Val> = 13;
-    template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
+    template<> static constexpr int value<::apache::thrift::field_id<-14>> = 14;
     template<> static constexpr int value<::apache::thrift::ident::optI32Val> = 14;
-    template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
+    template<> static constexpr int value<::apache::thrift::field_id<-15>> = 15;
     template<> static constexpr int value<::apache::thrift::ident::optI64Val> = 15;
-    template<> static constexpr int value<::apache::thrift::field_id<16>> = 16;
+    template<> static constexpr int value<::apache::thrift::field_id<-16>> = 16;
     template<> static constexpr int value<::apache::thrift::ident::optFloatVal> = 16;
-    template<> static constexpr int value<::apache::thrift::field_id<17>> = 17;
+    template<> static constexpr int value<::apache::thrift::field_id<-17>> = 17;
     template<> static constexpr int value<::apache::thrift::ident::optDoubleVal> = 17;
-    template<> static constexpr int value<::apache::thrift::field_id<18>> = 18;
+    template<> static constexpr int value<::apache::thrift::field_id<-18>> = 18;
     template<> static constexpr int value<::apache::thrift::ident::optStringVal> = 18;
-    template<> static constexpr int value<::apache::thrift::field_id<19>> = 19;
+    template<> static constexpr int value<::apache::thrift::field_id<-19>> = 19;
     template<> static constexpr int value<::apache::thrift::ident::optBinaryVal> = 19;
-    template<> static constexpr int value<::apache::thrift::field_id<20>> = 20;
+    template<> static constexpr int value<::apache::thrift::field_id<-20>> = 20;
     template<> static constexpr int value<::apache::thrift::ident::optStructVal> = 20;
-    template<> static constexpr int value<::apache::thrift::field_id<21>> = 21;
+    template<> static constexpr int value<::apache::thrift::field_id<-21>> = 21;
     template<> static constexpr int value<::apache::thrift::ident::optListVal> = 21;
-    template<> static constexpr int value<::apache::thrift::field_id<22>> = 22;
+    template<> static constexpr int value<::apache::thrift::field_id<-22>> = 22;
     template<> static constexpr int value<::apache::thrift::ident::optSetVal> = 22;
-    template<> static constexpr int value<::apache::thrift::field_id<23>> = 23;
+    template<> static constexpr int value<::apache::thrift::field_id<-23>> = 23;
     template<> static constexpr int value<::apache::thrift::ident::optMapVal> = 23;
-    template<> static constexpr int value<::apache::thrift::field_id<30>> = 24;
+    template<> static constexpr int value<::apache::thrift::field_id<-24>> = 24;
     template<> static constexpr int value<::apache::thrift::ident::unionVal> = 24;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-1>>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::boolVal>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-2>>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byteVal>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-3>>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i16Val>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-4>>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i32Val>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-5>>) { return 5; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i64Val>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-6>>) { return 6; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::floatVal>) { return 6; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-7>>) { return 7; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::doubleVal>) { return 7; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-8>>) { return 8; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::stringVal>) { return 8; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-9>>) { return 9; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binaryVal>) { return 9; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<10>>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-10>>) { return 10; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::structVal>) { return 10; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-11>>) { return 11; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBoolVal>) { return 11; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-12>>) { return 12; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optByteVal>) { return 12; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<13>>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-13>>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI16Val>) { return 13; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-14>>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI32Val>) { return 14; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-15>>) { return 15; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI64Val>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-16>>) { return 16; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optFloatVal>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-17>>) { return 17; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optDoubleVal>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-18>>) { return 18; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStringVal>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-19>>) { return 19; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBinaryVal>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-20>>) { return 20; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStructVal>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-21>>) { return 21; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optListVal>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-22>>) { return 22; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optSetVal>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-23>>) { return 23; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optMapVal>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<30>>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-24>>) { return 24; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::unionVal>) { return 24; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
@@ -4764,7 +4764,7 @@ unsigned long MyUnionPatchStruct::read(Protocol_* iprot) {
 using MyUnionPatch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::UnionPatchAdapter, ::test::fixtures::patch::MyUnionPatchStruct>;
 
 
-class MyStructField21PatchStruct final  {
+class MyStructFieldN21PatchStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
   template<class> friend struct ::apache::thrift::detail::invoke_reffer;
@@ -4854,28 +4854,28 @@ class MyStructField21PatchStruct final  {
   bool __fbthrift_is_empty() const;
 
  public:
-  using __fbthrift_cpp2_type = MyStructField21PatchStruct;
+  using __fbthrift_cpp2_type = MyStructFieldN21PatchStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
 
 
  public:
 
-  MyStructField21PatchStruct();
+  MyStructFieldN21PatchStruct();
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructField21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg);
+  MyStructFieldN21PatchStruct(apache::thrift::FragileConstructor, ::std::vector<::std::int16_t> assign__arg, bool clear__arg, ::std::vector<::std::int16_t> remove__arg, ::std::vector<::std::int16_t> prepend__arg, ::std::vector<::std::int16_t> append__arg);
 
-  MyStructField21PatchStruct(MyStructField21PatchStruct&&) noexcept;
+  MyStructFieldN21PatchStruct(MyStructFieldN21PatchStruct&&) noexcept;
 
-  MyStructField21PatchStruct(const MyStructField21PatchStruct& src);
+  MyStructFieldN21PatchStruct(const MyStructFieldN21PatchStruct& src);
 
 
-  MyStructField21PatchStruct& operator=(MyStructField21PatchStruct&&) noexcept;
-  MyStructField21PatchStruct& operator=(const MyStructField21PatchStruct& src);
+  MyStructFieldN21PatchStruct& operator=(MyStructFieldN21PatchStruct&&) noexcept;
+  MyStructFieldN21PatchStruct& operator=(const MyStructFieldN21PatchStruct& src);
 
-  ~MyStructField21PatchStruct();
+  ~MyStructFieldN21PatchStruct();
 
  private:
   ::std::vector<::std::int16_t> __fbthrift_field_assign;
@@ -4892,8 +4892,8 @@ class MyStructField21PatchStruct final  {
 
  public:
 
-  bool operator==(const MyStructField21PatchStruct&) const;
-  bool operator<(const MyStructField21PatchStruct&) const;
+  bool operator==(const MyStructFieldN21PatchStruct&) const;
+  bool operator<(const MyStructFieldN21PatchStruct&) const;
 
   template <typename..., typename T = ::std::vector<::std::int16_t>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign_ref() const& {
@@ -5098,10 +5098,10 @@ class MyStructField21PatchStruct final  {
   ::std::vector<::std::int16_t>* get_assign() &;
   ::std::vector<::std::int16_t>* get_assign() && = delete;
 
-  template <typename T_MyStructField21PatchStruct_assign_struct_setter = ::std::vector<::std::int16_t>>
+  template <typename T_MyStructFieldN21PatchStruct_assign_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::std::vector<::std::int16_t>& set_assign(T_MyStructField21PatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_MyStructField21PatchStruct_assign_struct_setter>(assign_);
+  ::std::vector<::std::int16_t>& set_assign(T_MyStructFieldN21PatchStruct_assign_struct_setter&& assign_) {
+    assign_ref() = std::forward<T_MyStructFieldN21PatchStruct_assign_struct_setter>(assign_);
     return __fbthrift_field_assign;
   }
 
@@ -5117,28 +5117,28 @@ class MyStructField21PatchStruct final  {
   const ::std::vector<::std::int16_t>& get_remove() const&;
   ::std::vector<::std::int16_t> get_remove() &&;
 
-  template <typename T_MyStructField21PatchStruct_remove_struct_setter = ::std::vector<::std::int16_t>>
+  template <typename T_MyStructFieldN21PatchStruct_remove_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::vector<::std::int16_t>& set_remove(T_MyStructField21PatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyStructField21PatchStruct_remove_struct_setter>(remove_);
+  ::std::vector<::std::int16_t>& set_remove(T_MyStructFieldN21PatchStruct_remove_struct_setter&& remove_) {
+    remove_ref() = std::forward<T_MyStructFieldN21PatchStruct_remove_struct_setter>(remove_);
     return __fbthrift_field_remove;
   }
   const ::std::vector<::std::int16_t>& get_prepend() const&;
   ::std::vector<::std::int16_t> get_prepend() &&;
 
-  template <typename T_MyStructField21PatchStruct_prepend_struct_setter = ::std::vector<::std::int16_t>>
+  template <typename T_MyStructFieldN21PatchStruct_prepend_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.prepend_ref() = BAR;` instead of `FOO.set_prepend(BAR);`")]]
-  ::std::vector<::std::int16_t>& set_prepend(T_MyStructField21PatchStruct_prepend_struct_setter&& prepend_) {
-    prepend_ref() = std::forward<T_MyStructField21PatchStruct_prepend_struct_setter>(prepend_);
+  ::std::vector<::std::int16_t>& set_prepend(T_MyStructFieldN21PatchStruct_prepend_struct_setter&& prepend_) {
+    prepend_ref() = std::forward<T_MyStructFieldN21PatchStruct_prepend_struct_setter>(prepend_);
     return __fbthrift_field_prepend;
   }
   const ::std::vector<::std::int16_t>& get_append() const&;
   ::std::vector<::std::int16_t> get_append() &&;
 
-  template <typename T_MyStructField21PatchStruct_append_struct_setter = ::std::vector<::std::int16_t>>
+  template <typename T_MyStructFieldN21PatchStruct_append_struct_setter = ::std::vector<::std::int16_t>>
   [[deprecated("Use `FOO.append_ref() = BAR;` instead of `FOO.set_append(BAR);`")]]
-  ::std::vector<::std::int16_t>& set_append(T_MyStructField21PatchStruct_append_struct_setter&& append_) {
-    append_ref() = std::forward<T_MyStructField21PatchStruct_append_struct_setter>(append_);
+  ::std::vector<::std::int16_t>& set_append(T_MyStructFieldN21PatchStruct_append_struct_setter&& append_) {
+    append_ref() = std::forward<T_MyStructFieldN21PatchStruct_append_struct_setter>(append_);
     return __fbthrift_field_append;
   }
 
@@ -5155,21 +5155,21 @@ class MyStructField21PatchStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops<MyStructField21PatchStruct>;
-  friend void swap(MyStructField21PatchStruct& a, MyStructField21PatchStruct& b);
+  friend class ::apache::thrift::Cpp2Ops<MyStructFieldN21PatchStruct>;
+  friend void swap(MyStructFieldN21PatchStruct& a, MyStructFieldN21PatchStruct& b);
 };
 
 template <class Protocol_>
-unsigned long MyStructField21PatchStruct::read(Protocol_* iprot) {
+unsigned long MyStructFieldN21PatchStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
 }
 
-using MyStructField21Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter, ::test::fixtures::patch::MyStructField21PatchStruct>;
+using MyStructFieldN21Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::ListPatchAdapter, ::test::fixtures::patch::MyStructFieldN21PatchStruct>;
 
 
-class MyStructField22PatchStruct final  {
+class MyStructFieldN22PatchStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
   template<class> friend struct ::apache::thrift::detail::invoke_reffer;
@@ -5251,27 +5251,27 @@ class MyStructField22PatchStruct final  {
   bool __fbthrift_is_empty() const;
 
  public:
-  using __fbthrift_cpp2_type = MyStructField22PatchStruct;
+  using __fbthrift_cpp2_type = MyStructFieldN22PatchStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
 
 
  public:
 
-  MyStructField22PatchStruct() :
+  MyStructFieldN22PatchStruct() :
       __fbthrift_field_clear() {
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructField22PatchStruct(apache::thrift::FragileConstructor, ::std::set<::std::string> assign__arg, bool clear__arg, ::std::set<::std::string> remove__arg, ::std::set<::std::string> add__arg);
+  MyStructFieldN22PatchStruct(apache::thrift::FragileConstructor, ::std::set<::std::string> assign__arg, bool clear__arg, ::std::set<::std::string> remove__arg, ::std::set<::std::string> add__arg);
 
-  MyStructField22PatchStruct(MyStructField22PatchStruct&&) noexcept;
+  MyStructFieldN22PatchStruct(MyStructFieldN22PatchStruct&&) noexcept;
 
-  MyStructField22PatchStruct(const MyStructField22PatchStruct& src);
+  MyStructFieldN22PatchStruct(const MyStructFieldN22PatchStruct& src);
 
 
-  MyStructField22PatchStruct& operator=(MyStructField22PatchStruct&&) noexcept;
-  MyStructField22PatchStruct& operator=(const MyStructField22PatchStruct& src);
+  MyStructFieldN22PatchStruct& operator=(MyStructFieldN22PatchStruct&&) noexcept;
+  MyStructFieldN22PatchStruct& operator=(const MyStructFieldN22PatchStruct& src);
  private:
   ::std::set<::std::string> __fbthrift_field_assign;
  private:
@@ -5285,8 +5285,8 @@ class MyStructField22PatchStruct final  {
 
  public:
 
-  bool operator==(const MyStructField22PatchStruct&) const;
-  bool operator<(const MyStructField22PatchStruct&) const;
+  bool operator==(const MyStructFieldN22PatchStruct&) const;
+  bool operator<(const MyStructFieldN22PatchStruct&) const;
 
   template <typename..., typename T = ::std::set<::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign_ref() const& {
@@ -5451,10 +5451,10 @@ class MyStructField22PatchStruct final  {
   ::std::set<::std::string>* get_assign() &;
   ::std::set<::std::string>* get_assign() && = delete;
 
-  template <typename T_MyStructField22PatchStruct_assign_struct_setter = ::std::set<::std::string>>
+  template <typename T_MyStructFieldN22PatchStruct_assign_struct_setter = ::std::set<::std::string>>
   [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::std::set<::std::string>& set_assign(T_MyStructField22PatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_MyStructField22PatchStruct_assign_struct_setter>(assign_);
+  ::std::set<::std::string>& set_assign(T_MyStructFieldN22PatchStruct_assign_struct_setter&& assign_) {
+    assign_ref() = std::forward<T_MyStructFieldN22PatchStruct_assign_struct_setter>(assign_);
     return __fbthrift_field_assign;
   }
 
@@ -5470,19 +5470,19 @@ class MyStructField22PatchStruct final  {
   const ::std::set<::std::string>& get_remove() const&;
   ::std::set<::std::string> get_remove() &&;
 
-  template <typename T_MyStructField22PatchStruct_remove_struct_setter = ::std::set<::std::string>>
+  template <typename T_MyStructFieldN22PatchStruct_remove_struct_setter = ::std::set<::std::string>>
   [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::set<::std::string>& set_remove(T_MyStructField22PatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyStructField22PatchStruct_remove_struct_setter>(remove_);
+  ::std::set<::std::string>& set_remove(T_MyStructFieldN22PatchStruct_remove_struct_setter&& remove_) {
+    remove_ref() = std::forward<T_MyStructFieldN22PatchStruct_remove_struct_setter>(remove_);
     return __fbthrift_field_remove;
   }
   const ::std::set<::std::string>& get_add() const&;
   ::std::set<::std::string> get_add() &&;
 
-  template <typename T_MyStructField22PatchStruct_add_struct_setter = ::std::set<::std::string>>
+  template <typename T_MyStructFieldN22PatchStruct_add_struct_setter = ::std::set<::std::string>>
   [[deprecated("Use `FOO.add_ref() = BAR;` instead of `FOO.set_add(BAR);`")]]
-  ::std::set<::std::string>& set_add(T_MyStructField22PatchStruct_add_struct_setter&& add_) {
-    add_ref() = std::forward<T_MyStructField22PatchStruct_add_struct_setter>(add_);
+  ::std::set<::std::string>& set_add(T_MyStructFieldN22PatchStruct_add_struct_setter&& add_) {
+    add_ref() = std::forward<T_MyStructFieldN22PatchStruct_add_struct_setter>(add_);
     return __fbthrift_field_add;
   }
 
@@ -5499,21 +5499,21 @@ class MyStructField22PatchStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops<MyStructField22PatchStruct>;
-  friend void swap(MyStructField22PatchStruct& a, MyStructField22PatchStruct& b);
+  friend class ::apache::thrift::Cpp2Ops<MyStructFieldN22PatchStruct>;
+  friend void swap(MyStructFieldN22PatchStruct& a, MyStructFieldN22PatchStruct& b);
 };
 
 template <class Protocol_>
-unsigned long MyStructField22PatchStruct::read(Protocol_* iprot) {
+unsigned long MyStructFieldN22PatchStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
 }
 
-using MyStructField22Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::SetPatchAdapter, ::test::fixtures::patch::MyStructField22PatchStruct>;
+using MyStructFieldN22Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::SetPatchAdapter, ::test::fixtures::patch::MyStructFieldN22PatchStruct>;
 
 
-class MyStructField23PatchStruct final  {
+class MyStructFieldN23PatchStruct final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
   template<class> friend struct ::apache::thrift::detail::invoke_reffer;
@@ -5603,28 +5603,28 @@ class MyStructField23PatchStruct final  {
   bool __fbthrift_is_empty() const;
 
  public:
-  using __fbthrift_cpp2_type = MyStructField23PatchStruct;
+  using __fbthrift_cpp2_type = MyStructFieldN23PatchStruct;
   static constexpr bool __fbthrift_cpp2_is_union =
     false;
 
 
  public:
 
-  MyStructField23PatchStruct();
+  MyStructFieldN23PatchStruct();
 
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructField23PatchStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> assign__arg, bool clear__arg, ::std::map<::std::string, ::std::string> add__arg, ::std::unordered_set<::std::string> remove__arg, ::std::map<::std::string, ::std::string> put__arg);
+  MyStructFieldN23PatchStruct(apache::thrift::FragileConstructor, ::std::map<::std::string, ::std::string> assign__arg, bool clear__arg, ::std::map<::std::string, ::std::string> add__arg, ::std::unordered_set<::std::string> remove__arg, ::std::map<::std::string, ::std::string> put__arg);
 
-  MyStructField23PatchStruct(MyStructField23PatchStruct&&) noexcept;
+  MyStructFieldN23PatchStruct(MyStructFieldN23PatchStruct&&) noexcept;
 
-  MyStructField23PatchStruct(const MyStructField23PatchStruct& src);
+  MyStructFieldN23PatchStruct(const MyStructFieldN23PatchStruct& src);
 
 
-  MyStructField23PatchStruct& operator=(MyStructField23PatchStruct&&) noexcept;
-  MyStructField23PatchStruct& operator=(const MyStructField23PatchStruct& src);
+  MyStructFieldN23PatchStruct& operator=(MyStructFieldN23PatchStruct&&) noexcept;
+  MyStructFieldN23PatchStruct& operator=(const MyStructFieldN23PatchStruct& src);
 
-  ~MyStructField23PatchStruct();
+  ~MyStructFieldN23PatchStruct();
 
  private:
   ::std::map<::std::string, ::std::string> __fbthrift_field_assign;
@@ -5641,8 +5641,8 @@ class MyStructField23PatchStruct final  {
 
  public:
 
-  bool operator==(const MyStructField23PatchStruct&) const;
-  bool operator<(const MyStructField23PatchStruct&) const;
+  bool operator==(const MyStructFieldN23PatchStruct&) const;
+  bool operator<(const MyStructFieldN23PatchStruct&) const;
 
   template <typename..., typename T = ::std::map<::std::string, ::std::string>>
   FOLLY_ERASE ::apache::thrift::optional_field_ref<const T&> assign_ref() const& {
@@ -5847,10 +5847,10 @@ class MyStructField23PatchStruct final  {
   ::std::map<::std::string, ::std::string>* get_assign() &;
   ::std::map<::std::string, ::std::string>* get_assign() && = delete;
 
-  template <typename T_MyStructField23PatchStruct_assign_struct_setter = ::std::map<::std::string, ::std::string>>
+  template <typename T_MyStructFieldN23PatchStruct_assign_struct_setter = ::std::map<::std::string, ::std::string>>
   [[deprecated("Use `FOO.assign_ref() = BAR;` instead of `FOO.set_assign(BAR);`")]]
-  ::std::map<::std::string, ::std::string>& set_assign(T_MyStructField23PatchStruct_assign_struct_setter&& assign_) {
-    assign_ref() = std::forward<T_MyStructField23PatchStruct_assign_struct_setter>(assign_);
+  ::std::map<::std::string, ::std::string>& set_assign(T_MyStructFieldN23PatchStruct_assign_struct_setter&& assign_) {
+    assign_ref() = std::forward<T_MyStructFieldN23PatchStruct_assign_struct_setter>(assign_);
     return __fbthrift_field_assign;
   }
 
@@ -5866,28 +5866,28 @@ class MyStructField23PatchStruct final  {
   const ::std::map<::std::string, ::std::string>& get_add() const&;
   ::std::map<::std::string, ::std::string> get_add() &&;
 
-  template <typename T_MyStructField23PatchStruct_add_struct_setter = ::std::map<::std::string, ::std::string>>
+  template <typename T_MyStructFieldN23PatchStruct_add_struct_setter = ::std::map<::std::string, ::std::string>>
   [[deprecated("Use `FOO.add_ref() = BAR;` instead of `FOO.set_add(BAR);`")]]
-  ::std::map<::std::string, ::std::string>& set_add(T_MyStructField23PatchStruct_add_struct_setter&& add_) {
-    add_ref() = std::forward<T_MyStructField23PatchStruct_add_struct_setter>(add_);
+  ::std::map<::std::string, ::std::string>& set_add(T_MyStructFieldN23PatchStruct_add_struct_setter&& add_) {
+    add_ref() = std::forward<T_MyStructFieldN23PatchStruct_add_struct_setter>(add_);
     return __fbthrift_field_add;
   }
   const ::std::unordered_set<::std::string>& get_remove() const&;
   ::std::unordered_set<::std::string> get_remove() &&;
 
-  template <typename T_MyStructField23PatchStruct_remove_struct_setter = ::std::unordered_set<::std::string>>
+  template <typename T_MyStructFieldN23PatchStruct_remove_struct_setter = ::std::unordered_set<::std::string>>
   [[deprecated("Use `FOO.remove_ref() = BAR;` instead of `FOO.set_remove(BAR);`")]]
-  ::std::unordered_set<::std::string>& set_remove(T_MyStructField23PatchStruct_remove_struct_setter&& remove_) {
-    remove_ref() = std::forward<T_MyStructField23PatchStruct_remove_struct_setter>(remove_);
+  ::std::unordered_set<::std::string>& set_remove(T_MyStructFieldN23PatchStruct_remove_struct_setter&& remove_) {
+    remove_ref() = std::forward<T_MyStructFieldN23PatchStruct_remove_struct_setter>(remove_);
     return __fbthrift_field_remove;
   }
   const ::std::map<::std::string, ::std::string>& get_put() const&;
   ::std::map<::std::string, ::std::string> get_put() &&;
 
-  template <typename T_MyStructField23PatchStruct_put_struct_setter = ::std::map<::std::string, ::std::string>>
+  template <typename T_MyStructFieldN23PatchStruct_put_struct_setter = ::std::map<::std::string, ::std::string>>
   [[deprecated("Use `FOO.put_ref() = BAR;` instead of `FOO.set_put(BAR);`")]]
-  ::std::map<::std::string, ::std::string>& set_put(T_MyStructField23PatchStruct_put_struct_setter&& put_) {
-    put_ref() = std::forward<T_MyStructField23PatchStruct_put_struct_setter>(put_);
+  ::std::map<::std::string, ::std::string>& set_put(T_MyStructFieldN23PatchStruct_put_struct_setter&& put_) {
+    put_ref() = std::forward<T_MyStructFieldN23PatchStruct_put_struct_setter>(put_);
     return __fbthrift_field_put;
   }
 
@@ -5904,18 +5904,18 @@ class MyStructField23PatchStruct final  {
   template <class Protocol_>
   void readNoXfer(Protocol_* iprot);
 
-  friend class ::apache::thrift::Cpp2Ops<MyStructField23PatchStruct>;
-  friend void swap(MyStructField23PatchStruct& a, MyStructField23PatchStruct& b);
+  friend class ::apache::thrift::Cpp2Ops<MyStructFieldN23PatchStruct>;
+  friend void swap(MyStructFieldN23PatchStruct& a, MyStructFieldN23PatchStruct& b);
 };
 
 template <class Protocol_>
-unsigned long MyStructField23PatchStruct::read(Protocol_* iprot) {
+unsigned long MyStructFieldN23PatchStruct::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;
 }
 
-using MyStructField23Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::MapPatchAdapter, ::test::fixtures::patch::MyStructField23PatchStruct>;
+using MyStructFieldN23Patch = ::apache::thrift::adapt_detail::adapted_t<::apache::thrift::op::detail::MapPatchAdapter, ::test::fixtures::patch::MyStructFieldN23PatchStruct>;
 
 
 class MyStructFieldPatchStruct final  {
@@ -5932,30 +5932,30 @@ class MyStructFieldPatchStruct final  {
   template<class T>
   using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
                                                    void,
-                                                   ::apache::thrift::field_id<1>,
-                                                   ::apache::thrift::field_id<2>,
-                                                   ::apache::thrift::field_id<3>,
-                                                   ::apache::thrift::field_id<4>,
-                                                   ::apache::thrift::field_id<5>,
-                                                   ::apache::thrift::field_id<6>,
-                                                   ::apache::thrift::field_id<7>,
-                                                   ::apache::thrift::field_id<8>,
-                                                   ::apache::thrift::field_id<9>,
-                                                   ::apache::thrift::field_id<10>,
-                                                   ::apache::thrift::field_id<11>,
-                                                   ::apache::thrift::field_id<12>,
-                                                   ::apache::thrift::field_id<13>,
-                                                   ::apache::thrift::field_id<14>,
-                                                   ::apache::thrift::field_id<15>,
-                                                   ::apache::thrift::field_id<16>,
-                                                   ::apache::thrift::field_id<17>,
-                                                   ::apache::thrift::field_id<18>,
-                                                   ::apache::thrift::field_id<19>,
-                                                   ::apache::thrift::field_id<20>,
-                                                   ::apache::thrift::field_id<21>,
-                                                   ::apache::thrift::field_id<22>,
-                                                   ::apache::thrift::field_id<23>,
-                                                   ::apache::thrift::field_id<30>>;
+                                                   ::apache::thrift::field_id<-1>,
+                                                   ::apache::thrift::field_id<-2>,
+                                                   ::apache::thrift::field_id<-3>,
+                                                   ::apache::thrift::field_id<-4>,
+                                                   ::apache::thrift::field_id<-5>,
+                                                   ::apache::thrift::field_id<-6>,
+                                                   ::apache::thrift::field_id<-7>,
+                                                   ::apache::thrift::field_id<-8>,
+                                                   ::apache::thrift::field_id<-9>,
+                                                   ::apache::thrift::field_id<-10>,
+                                                   ::apache::thrift::field_id<-11>,
+                                                   ::apache::thrift::field_id<-12>,
+                                                   ::apache::thrift::field_id<-13>,
+                                                   ::apache::thrift::field_id<-14>,
+                                                   ::apache::thrift::field_id<-15>,
+                                                   ::apache::thrift::field_id<-16>,
+                                                   ::apache::thrift::field_id<-17>,
+                                                   ::apache::thrift::field_id<-18>,
+                                                   ::apache::thrift::field_id<-19>,
+                                                   ::apache::thrift::field_id<-20>,
+                                                   ::apache::thrift::field_id<-21>,
+                                                   ::apache::thrift::field_id<-22>,
+                                                   ::apache::thrift::field_id<-23>,
+                                                   ::apache::thrift::field_id<-24>>;
 
   template<class T>
   using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
@@ -5980,9 +5980,9 @@ class MyStructFieldPatchStruct final  {
                                                          ::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>,
                                                          ::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>,
                                                          ::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField21PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField22PatchStruct>>,
-                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField23PatchStruct>>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN21PatchStruct>>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN22PatchStruct>>,
+                                                         ::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN23PatchStruct>>,
                                                          ::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionPatchStruct>>>;
 
   template<class T>
@@ -6016,103 +6016,103 @@ class MyStructFieldPatchStruct final  {
   struct __fbthrift_ordinal_impl {
 #if defined(_MSC_VER) || defined(__clang__)
     template<class> static constexpr int value = 0;
-    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::field_id<-1>> = 1;
     template<> static constexpr int value<::apache::thrift::ident::boolVal> = 1;
-    template<> static constexpr int value<::apache::thrift::field_id<2>> = 2;
+    template<> static constexpr int value<::apache::thrift::field_id<-2>> = 2;
     template<> static constexpr int value<::apache::thrift::ident::byteVal> = 2;
-    template<> static constexpr int value<::apache::thrift::field_id<3>> = 3;
+    template<> static constexpr int value<::apache::thrift::field_id<-3>> = 3;
     template<> static constexpr int value<::apache::thrift::ident::i16Val> = 3;
-    template<> static constexpr int value<::apache::thrift::field_id<4>> = 4;
+    template<> static constexpr int value<::apache::thrift::field_id<-4>> = 4;
     template<> static constexpr int value<::apache::thrift::ident::i32Val> = 4;
-    template<> static constexpr int value<::apache::thrift::field_id<5>> = 5;
+    template<> static constexpr int value<::apache::thrift::field_id<-5>> = 5;
     template<> static constexpr int value<::apache::thrift::ident::i64Val> = 5;
-    template<> static constexpr int value<::apache::thrift::field_id<6>> = 6;
+    template<> static constexpr int value<::apache::thrift::field_id<-6>> = 6;
     template<> static constexpr int value<::apache::thrift::ident::floatVal> = 6;
-    template<> static constexpr int value<::apache::thrift::field_id<7>> = 7;
+    template<> static constexpr int value<::apache::thrift::field_id<-7>> = 7;
     template<> static constexpr int value<::apache::thrift::ident::doubleVal> = 7;
-    template<> static constexpr int value<::apache::thrift::field_id<8>> = 8;
+    template<> static constexpr int value<::apache::thrift::field_id<-8>> = 8;
     template<> static constexpr int value<::apache::thrift::ident::stringVal> = 8;
-    template<> static constexpr int value<::apache::thrift::field_id<9>> = 9;
+    template<> static constexpr int value<::apache::thrift::field_id<-9>> = 9;
     template<> static constexpr int value<::apache::thrift::ident::binaryVal> = 9;
-    template<> static constexpr int value<::apache::thrift::field_id<10>> = 10;
+    template<> static constexpr int value<::apache::thrift::field_id<-10>> = 10;
     template<> static constexpr int value<::apache::thrift::ident::structVal> = 10;
-    template<> static constexpr int value<::apache::thrift::field_id<11>> = 11;
+    template<> static constexpr int value<::apache::thrift::field_id<-11>> = 11;
     template<> static constexpr int value<::apache::thrift::ident::optBoolVal> = 11;
-    template<> static constexpr int value<::apache::thrift::field_id<12>> = 12;
+    template<> static constexpr int value<::apache::thrift::field_id<-12>> = 12;
     template<> static constexpr int value<::apache::thrift::ident::optByteVal> = 12;
-    template<> static constexpr int value<::apache::thrift::field_id<13>> = 13;
+    template<> static constexpr int value<::apache::thrift::field_id<-13>> = 13;
     template<> static constexpr int value<::apache::thrift::ident::optI16Val> = 13;
-    template<> static constexpr int value<::apache::thrift::field_id<14>> = 14;
+    template<> static constexpr int value<::apache::thrift::field_id<-14>> = 14;
     template<> static constexpr int value<::apache::thrift::ident::optI32Val> = 14;
-    template<> static constexpr int value<::apache::thrift::field_id<15>> = 15;
+    template<> static constexpr int value<::apache::thrift::field_id<-15>> = 15;
     template<> static constexpr int value<::apache::thrift::ident::optI64Val> = 15;
-    template<> static constexpr int value<::apache::thrift::field_id<16>> = 16;
+    template<> static constexpr int value<::apache::thrift::field_id<-16>> = 16;
     template<> static constexpr int value<::apache::thrift::ident::optFloatVal> = 16;
-    template<> static constexpr int value<::apache::thrift::field_id<17>> = 17;
+    template<> static constexpr int value<::apache::thrift::field_id<-17>> = 17;
     template<> static constexpr int value<::apache::thrift::ident::optDoubleVal> = 17;
-    template<> static constexpr int value<::apache::thrift::field_id<18>> = 18;
+    template<> static constexpr int value<::apache::thrift::field_id<-18>> = 18;
     template<> static constexpr int value<::apache::thrift::ident::optStringVal> = 18;
-    template<> static constexpr int value<::apache::thrift::field_id<19>> = 19;
+    template<> static constexpr int value<::apache::thrift::field_id<-19>> = 19;
     template<> static constexpr int value<::apache::thrift::ident::optBinaryVal> = 19;
-    template<> static constexpr int value<::apache::thrift::field_id<20>> = 20;
+    template<> static constexpr int value<::apache::thrift::field_id<-20>> = 20;
     template<> static constexpr int value<::apache::thrift::ident::optStructVal> = 20;
-    template<> static constexpr int value<::apache::thrift::field_id<21>> = 21;
+    template<> static constexpr int value<::apache::thrift::field_id<-21>> = 21;
     template<> static constexpr int value<::apache::thrift::ident::optListVal> = 21;
-    template<> static constexpr int value<::apache::thrift::field_id<22>> = 22;
+    template<> static constexpr int value<::apache::thrift::field_id<-22>> = 22;
     template<> static constexpr int value<::apache::thrift::ident::optSetVal> = 22;
-    template<> static constexpr int value<::apache::thrift::field_id<23>> = 23;
+    template<> static constexpr int value<::apache::thrift::field_id<-23>> = 23;
     template<> static constexpr int value<::apache::thrift::ident::optMapVal> = 23;
-    template<> static constexpr int value<::apache::thrift::field_id<30>> = 24;
+    template<> static constexpr int value<::apache::thrift::field_id<-24>> = 24;
     template<> static constexpr int value<::apache::thrift::ident::unionVal> = 24;
 #else
     template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-1>>) { return 1; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::boolVal>) { return 1; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<2>>) { return 2; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-2>>) { return 2; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::byteVal>) { return 2; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<3>>) { return 3; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-3>>) { return 3; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i16Val>) { return 3; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<4>>) { return 4; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-4>>) { return 4; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i32Val>) { return 4; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<5>>) { return 5; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-5>>) { return 5; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::i64Val>) { return 5; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<6>>) { return 6; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-6>>) { return 6; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::floatVal>) { return 6; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<7>>) { return 7; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-7>>) { return 7; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::doubleVal>) { return 7; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<8>>) { return 8; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-8>>) { return 8; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::stringVal>) { return 8; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<9>>) { return 9; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-9>>) { return 9; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::binaryVal>) { return 9; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<10>>) { return 10; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-10>>) { return 10; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::structVal>) { return 10; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<11>>) { return 11; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-11>>) { return 11; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBoolVal>) { return 11; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<12>>) { return 12; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-12>>) { return 12; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optByteVal>) { return 12; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<13>>) { return 13; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-13>>) { return 13; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI16Val>) { return 13; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<14>>) { return 14; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-14>>) { return 14; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI32Val>) { return 14; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<15>>) { return 15; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-15>>) { return 15; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optI64Val>) { return 15; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<16>>) { return 16; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-16>>) { return 16; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optFloatVal>) { return 16; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<17>>) { return 17; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-17>>) { return 17; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optDoubleVal>) { return 17; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<18>>) { return 18; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-18>>) { return 18; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStringVal>) { return 18; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<19>>) { return 19; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-19>>) { return 19; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optBinaryVal>) { return 19; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<20>>) { return 20; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-20>>) { return 20; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optStructVal>) { return 20; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<21>>) { return 21; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-21>>) { return 21; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optListVal>) { return 21; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<22>>) { return 22; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-22>>) { return 22; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optSetVal>) { return 22; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<23>>) { return 23; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-23>>) { return 23; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::optMapVal>) { return 23; }
-    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<30>>) { return 24; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<-24>>) { return 24; }
     static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::unionVal>) { return 24; }
     template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
 #endif
@@ -6140,9 +6140,9 @@ class MyStructFieldPatchStruct final  {
     template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::StringPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::StringPatchStruct>>, T, std::enable_if_t<sizeof(T) != -18>> { static constexpr int value = 18; };
     template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::BinaryPatchAdapter, ::apache::thrift::type::struct_t<::apache::thrift::op::BinaryPatchStruct>>, T, std::enable_if_t<sizeof(T) != -19>> { static constexpr int value = 19; };
     template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::StructPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyDataPatchStruct>>, T, std::enable_if_t<sizeof(T) != -20>> { static constexpr int value = 20; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField21PatchStruct>>, T, std::enable_if_t<sizeof(T) != -21>> { static constexpr int value = 21; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField22PatchStruct>>, T, std::enable_if_t<sizeof(T) != -22>> { static constexpr int value = 22; };
-    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructField23PatchStruct>>, T, std::enable_if_t<sizeof(T) != -23>> { static constexpr int value = 23; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::ListPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN21PatchStruct>>, T, std::enable_if_t<sizeof(T) != -21>> { static constexpr int value = 21; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::SetPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN22PatchStruct>>, T, std::enable_if_t<sizeof(T) != -22>> { static constexpr int value = 22; };
+    template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::MapPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyStructFieldN23PatchStruct>>, T, std::enable_if_t<sizeof(T) != -23>> { static constexpr int value = 23; };
     template<class T> struct Impl<::apache::thrift::type::adapted<::apache::thrift::op::detail::UnionPatchAdapter, ::apache::thrift::type::struct_t<::test::fixtures::patch::MyUnionPatchStruct>>, T, std::enable_if_t<sizeof(T) != -24>> { static constexpr int value = 24; };
 
     template<class T> static constexpr int value = Impl<T, T, void>::value;
@@ -6168,34 +6168,34 @@ class MyStructFieldPatchStruct final  {
  public:
 
   MyStructFieldPatchStruct() {
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter, 1>(__fbthrift_field_boolVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 2>(__fbthrift_field_byteVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 3>(__fbthrift_field_i16Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 4>(__fbthrift_field_i32Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 5>(__fbthrift_field_i64Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 6>(__fbthrift_field_floatVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 7>(__fbthrift_field_doubleVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 8>(__fbthrift_field_stringVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, 9>(__fbthrift_field_binaryVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, 10>(__fbthrift_field_structVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter, 11>(__fbthrift_field_optBoolVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 12>(__fbthrift_field_optByteVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 13>(__fbthrift_field_optI16Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 14>(__fbthrift_field_optI32Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 15>(__fbthrift_field_optI64Val, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 16>(__fbthrift_field_optFloatVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, 17>(__fbthrift_field_optDoubleVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, 18>(__fbthrift_field_optStringVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, 19>(__fbthrift_field_optBinaryVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, 20>(__fbthrift_field_optStructVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter, 21>(__fbthrift_field_optListVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter, 22>(__fbthrift_field_optSetVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, 23>(__fbthrift_field_optMapVal, *this);
-    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter, 30>(__fbthrift_field_unionVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter, -1>(__fbthrift_field_boolVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -2>(__fbthrift_field_byteVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -3>(__fbthrift_field_i16Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -4>(__fbthrift_field_i32Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -5>(__fbthrift_field_i64Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -6>(__fbthrift_field_floatVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -7>(__fbthrift_field_doubleVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, -8>(__fbthrift_field_stringVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, -9>(__fbthrift_field_binaryVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, -10>(__fbthrift_field_structVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BoolPatchAdapter, -11>(__fbthrift_field_optBoolVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -12>(__fbthrift_field_optByteVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -13>(__fbthrift_field_optI16Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -14>(__fbthrift_field_optI32Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -15>(__fbthrift_field_optI64Val, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -16>(__fbthrift_field_optFloatVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::NumberPatchAdapter, -17>(__fbthrift_field_optDoubleVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StringPatchAdapter, -18>(__fbthrift_field_optStringVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::BinaryPatchAdapter, -19>(__fbthrift_field_optBinaryVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::StructPatchAdapter, -20>(__fbthrift_field_optStructVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::ListPatchAdapter, -21>(__fbthrift_field_optListVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::SetPatchAdapter, -22>(__fbthrift_field_optSetVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::MapPatchAdapter, -23>(__fbthrift_field_optMapVal, *this);
+    ::apache::thrift::adapt_detail::construct<::apache::thrift::op::detail::UnionPatchAdapter, -24>(__fbthrift_field_unionVal, *this);
   }
   // FragileConstructor for use in initialization lists only.
   [[deprecated("This constructor is deprecated")]]
-  MyStructFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::op::BoolPatch boolVal__arg, ::apache::thrift::op::BytePatch byteVal__arg, ::apache::thrift::op::I16Patch i16Val__arg, ::apache::thrift::op::I32Patch i32Val__arg, ::apache::thrift::op::I64Patch i64Val__arg, ::apache::thrift::op::FloatPatch floatVal__arg, ::apache::thrift::op::DoublePatch doubleVal__arg, ::apache::thrift::op::StringPatch stringVal__arg, ::apache::thrift::op::BinaryPatch binaryVal__arg, ::test::fixtures::patch::MyDataPatch structVal__arg, ::apache::thrift::op::BoolPatch optBoolVal__arg, ::apache::thrift::op::BytePatch optByteVal__arg, ::apache::thrift::op::I16Patch optI16Val__arg, ::apache::thrift::op::I32Patch optI32Val__arg, ::apache::thrift::op::I64Patch optI64Val__arg, ::apache::thrift::op::FloatPatch optFloatVal__arg, ::apache::thrift::op::DoublePatch optDoubleVal__arg, ::apache::thrift::op::StringPatch optStringVal__arg, ::apache::thrift::op::BinaryPatch optBinaryVal__arg, ::test::fixtures::patch::MyDataPatch optStructVal__arg, ::test::fixtures::patch::MyStructField21Patch optListVal__arg, ::test::fixtures::patch::MyStructField22Patch optSetVal__arg, ::test::fixtures::patch::MyStructField23Patch optMapVal__arg, ::test::fixtures::patch::MyUnionPatch unionVal__arg);
+  MyStructFieldPatchStruct(apache::thrift::FragileConstructor, ::apache::thrift::op::BoolPatch boolVal__arg, ::apache::thrift::op::BytePatch byteVal__arg, ::apache::thrift::op::I16Patch i16Val__arg, ::apache::thrift::op::I32Patch i32Val__arg, ::apache::thrift::op::I64Patch i64Val__arg, ::apache::thrift::op::FloatPatch floatVal__arg, ::apache::thrift::op::DoublePatch doubleVal__arg, ::apache::thrift::op::StringPatch stringVal__arg, ::apache::thrift::op::BinaryPatch binaryVal__arg, ::test::fixtures::patch::MyDataPatch structVal__arg, ::apache::thrift::op::BoolPatch optBoolVal__arg, ::apache::thrift::op::BytePatch optByteVal__arg, ::apache::thrift::op::I16Patch optI16Val__arg, ::apache::thrift::op::I32Patch optI32Val__arg, ::apache::thrift::op::I64Patch optI64Val__arg, ::apache::thrift::op::FloatPatch optFloatVal__arg, ::apache::thrift::op::DoublePatch optDoubleVal__arg, ::apache::thrift::op::StringPatch optStringVal__arg, ::apache::thrift::op::BinaryPatch optBinaryVal__arg, ::test::fixtures::patch::MyDataPatch optStructVal__arg, ::test::fixtures::patch::MyStructFieldN21Patch optListVal__arg, ::test::fixtures::patch::MyStructFieldN22Patch optSetVal__arg, ::test::fixtures::patch::MyStructFieldN23Patch optMapVal__arg, ::test::fixtures::patch::MyUnionPatch unionVal__arg);
 
   MyStructFieldPatchStruct(MyStructFieldPatchStruct&&) noexcept;
   MyStructFieldPatchStruct(const MyStructFieldPatchStruct& src);
@@ -6244,11 +6244,11 @@ class MyStructFieldPatchStruct final  {
  private:
   ::test::fixtures::patch::MyDataPatch __fbthrift_field_optStructVal;
  private:
-  ::test::fixtures::patch::MyStructField21Patch __fbthrift_field_optListVal;
+  ::test::fixtures::patch::MyStructFieldN21Patch __fbthrift_field_optListVal;
  private:
-  ::test::fixtures::patch::MyStructField22Patch __fbthrift_field_optSetVal;
+  ::test::fixtures::patch::MyStructFieldN22Patch __fbthrift_field_optSetVal;
  private:
-  ::test::fixtures::patch::MyStructField23Patch __fbthrift_field_optMapVal;
+  ::test::fixtures::patch::MyStructFieldN23Patch __fbthrift_field_optMapVal;
  private:
   ::test::fixtures::patch::MyUnionPatch __fbthrift_field_unionVal;
  private:
@@ -7059,122 +7059,122 @@ class MyStructFieldPatchStruct final  {
     return {static_cast<T&&>(this->__fbthrift_field_optStructVal), __isset.at(19), __isset.bit(19)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optListVal_ref() const& {
     return {this->__fbthrift_field_optListVal, __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optListVal_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optListVal), __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optListVal_ref() & {
     return {this->__fbthrift_field_optListVal, __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optListVal_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optListVal), __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optListVal() const& {
     return {this->__fbthrift_field_optListVal, __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optListVal() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optListVal), __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optListVal() & {
     return {this->__fbthrift_field_optListVal, __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField21Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN21Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optListVal() && {
     return {static_cast<T&&>(this->__fbthrift_field_optListVal), __isset.at(20), __isset.bit(20)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optSetVal_ref() const& {
     return {this->__fbthrift_field_optSetVal, __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optSetVal_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optSetVal), __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optSetVal_ref() & {
     return {this->__fbthrift_field_optSetVal, __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optSetVal_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optSetVal), __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optSetVal() const& {
     return {this->__fbthrift_field_optSetVal, __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optSetVal() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optSetVal), __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optSetVal() & {
     return {this->__fbthrift_field_optSetVal, __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField22Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN22Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optSetVal() && {
     return {static_cast<T&&>(this->__fbthrift_field_optSetVal), __isset.at(21), __isset.bit(21)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optMapVal_ref() const& {
     return {this->__fbthrift_field_optMapVal, __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optMapVal_ref() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optMapVal), __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optMapVal_ref() & {
     return {this->__fbthrift_field_optMapVal, __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optMapVal_ref() && {
     return {static_cast<T&&>(this->__fbthrift_field_optMapVal), __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&> optMapVal() const& {
     return {this->__fbthrift_field_optMapVal, __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<const T&&> optMapVal() const&& {
     return {static_cast<const T&&>(this->__fbthrift_field_optMapVal), __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&> optMapVal() & {
     return {this->__fbthrift_field_optMapVal, __isset.at(22), __isset.bit(22)};
   }
 
-  template <typename..., typename T = ::test::fixtures::patch::MyStructField23Patch>
+  template <typename..., typename T = ::test::fixtures::patch::MyStructFieldN23Patch>
   FOLLY_ERASE ::apache::thrift::field_ref<T&&> optMapVal() && {
     return {static_cast<T&&>(this->__fbthrift_field_optMapVal), __isset.at(22), __isset.bit(22)};
   }

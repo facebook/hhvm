@@ -83,62 +83,62 @@
         "fields" : {
           "boolVal" : {
             "name" : "boolVal",
-            "key" : 1,
-            "lineno" : 44,
+            "key" : -1,
+            "lineno" : 45,
             "type" : "bool"
           },
           "byteVal" : {
             "name" : "byteVal",
-            "key" : 2,
-            "lineno" : 45,
+            "key" : -2,
+            "lineno" : 46,
             "type" : "byte"
           },
           "i16Val" : {
             "name" : "i16Val",
-            "key" : 3,
-            "lineno" : 46,
+            "key" : -3,
+            "lineno" : 47,
             "type" : "i16"
           },
           "i32Val" : {
             "name" : "i32Val",
-            "key" : 4,
-            "lineno" : 47,
+            "key" : -4,
+            "lineno" : 48,
             "type" : "i32"
           },
           "i64Val" : {
             "name" : "i64Val",
-            "key" : 5,
-            "lineno" : 48,
+            "key" : -5,
+            "lineno" : 49,
             "type" : "i64"
           },
           "floatVal" : {
             "name" : "floatVal",
-            "key" : 6,
-            "lineno" : 49,
+            "key" : -6,
+            "lineno" : 50,
             "type" : "float"
           },
           "doubleVal" : {
             "name" : "doubleVal",
-            "key" : 7,
-            "lineno" : 50,
+            "key" : -7,
+            "lineno" : 51,
             "type" : "double"
           },
           "stringVal" : {
             "name" : "stringVal",
-            "key" : 8,
-            "lineno" : 51,
+            "key" : -8,
+            "lineno" : 52,
             "type" : "string"
           },
           "binaryVal" : {
             "name" : "binaryVal",
-            "key" : 9,
-            "lineno" : 52,
+            "key" : -9,
+            "lineno" : 53,
             "type" : "binary"
           },
           "structVal" : {
             "name" : "structVal",
-            "key" : 10,
-            "lineno" : 53,
+            "key" : -10,
+            "lineno" : 54,
             "type" : {
   "type" : "struct",
   "name" : "MyData"
@@ -146,71 +146,71 @@
           },
           "optBoolVal" : {
             "name" : "optBoolVal",
-            "key" : 11,
-            "lineno" : 55,
+            "key" : -11,
+            "lineno" : 56,
             "required" : "optional",
             "type" : "bool"
           },
           "optByteVal" : {
             "name" : "optByteVal",
-            "key" : 12,
-            "lineno" : 56,
+            "key" : -12,
+            "lineno" : 57,
             "required" : "optional",
             "type" : "byte"
           },
           "optI16Val" : {
             "name" : "optI16Val",
-            "key" : 13,
-            "lineno" : 57,
+            "key" : -13,
+            "lineno" : 58,
             "required" : "optional",
             "type" : "i16"
           },
           "optI32Val" : {
             "name" : "optI32Val",
-            "key" : 14,
-            "lineno" : 58,
+            "key" : -14,
+            "lineno" : 59,
             "required" : "optional",
             "type" : "i32"
           },
           "optI64Val" : {
             "name" : "optI64Val",
-            "key" : 15,
-            "lineno" : 59,
+            "key" : -15,
+            "lineno" : 60,
             "required" : "optional",
             "type" : "i64"
           },
           "optFloatVal" : {
             "name" : "optFloatVal",
-            "key" : 16,
-            "lineno" : 60,
+            "key" : -16,
+            "lineno" : 61,
             "required" : "optional",
             "type" : "float"
           },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
-            "key" : 17,
-            "lineno" : 61,
+            "key" : -17,
+            "lineno" : 62,
             "required" : "optional",
             "type" : "double"
           },
           "optStringVal" : {
             "name" : "optStringVal",
-            "key" : 18,
-            "lineno" : 62,
+            "key" : -18,
+            "lineno" : 63,
             "required" : "optional",
             "type" : "string"
           },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
-            "key" : 19,
-            "lineno" : 63,
+            "key" : -19,
+            "lineno" : 64,
             "required" : "optional",
             "type" : "binary"
           },
           "optStructVal" : {
             "name" : "optStructVal",
-            "key" : 20,
-            "lineno" : 64,
+            "key" : -20,
+            "lineno" : 65,
             "required" : "optional",
             "type" : {
   "type" : "struct",
@@ -219,8 +219,8 @@
           },
           "optListVal" : {
             "name" : "optListVal",
-            "key" : 21,
-            "lineno" : 66,
+            "key" : -21,
+            "lineno" : 67,
             "required" : "optional",
             "type" : {
   "type" : "list",
@@ -229,8 +229,8 @@
           },
           "optSetVal" : {
             "name" : "optSetVal",
-            "key" : 22,
-            "lineno" : 67,
+            "key" : -22,
+            "lineno" : 68,
             "required" : "optional",
             "type" : {
   "type" : "set",
@@ -239,8 +239,8 @@
           },
           "optMapVal" : {
             "name" : "optMapVal",
-            "key" : 23,
-            "lineno" : 68,
+            "key" : -23,
+            "lineno" : 69,
             "required" : "optional",
             "type" : {
   "type" : "map",
@@ -250,8 +250,8 @@
           },
           "unionVal" : {
             "name" : "unionVal",
-            "key" : 30,
-            "lineno" : 70,
+            "key" : -24,
+            "lineno" : 71,
             "type" : {
   "type" : "struct",
   "name" : "MyUnion"
@@ -531,7 +531,7 @@
         "fields" : {
           "boolVal" : {
             "name" : "boolVal",
-            "key" : 1,
+            "key" : -1,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -541,7 +541,7 @@
           },
           "byteVal" : {
             "name" : "byteVal",
-            "key" : 2,
+            "key" : -2,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -551,7 +551,7 @@
           },
           "i16Val" : {
             "name" : "i16Val",
-            "key" : 3,
+            "key" : -3,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -561,7 +561,7 @@
           },
           "i32Val" : {
             "name" : "i32Val",
-            "key" : 4,
+            "key" : -4,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -571,7 +571,7 @@
           },
           "i64Val" : {
             "name" : "i64Val",
-            "key" : 5,
+            "key" : -5,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -581,7 +581,7 @@
           },
           "floatVal" : {
             "name" : "floatVal",
-            "key" : 6,
+            "key" : -6,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -591,7 +591,7 @@
           },
           "doubleVal" : {
             "name" : "doubleVal",
-            "key" : 7,
+            "key" : -7,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -601,7 +601,7 @@
           },
           "stringVal" : {
             "name" : "stringVal",
-            "key" : 8,
+            "key" : -8,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -611,7 +611,7 @@
           },
           "binaryVal" : {
             "name" : "binaryVal",
-            "key" : 9,
+            "key" : -9,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -621,7 +621,7 @@
           },
           "structVal" : {
             "name" : "structVal",
-            "key" : 10,
+            "key" : -10,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -631,7 +631,7 @@
           },
           "optBoolVal" : {
             "name" : "optBoolVal",
-            "key" : 11,
+            "key" : -11,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -641,7 +641,7 @@
           },
           "optByteVal" : {
             "name" : "optByteVal",
-            "key" : 12,
+            "key" : -12,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -651,7 +651,7 @@
           },
           "optI16Val" : {
             "name" : "optI16Val",
-            "key" : 13,
+            "key" : -13,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -661,7 +661,7 @@
           },
           "optI32Val" : {
             "name" : "optI32Val",
-            "key" : 14,
+            "key" : -14,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -671,7 +671,7 @@
           },
           "optI64Val" : {
             "name" : "optI64Val",
-            "key" : 15,
+            "key" : -15,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -681,7 +681,7 @@
           },
           "optFloatVal" : {
             "name" : "optFloatVal",
-            "key" : 16,
+            "key" : -16,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -691,7 +691,7 @@
           },
           "optDoubleVal" : {
             "name" : "optDoubleVal",
-            "key" : 17,
+            "key" : -17,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -701,7 +701,7 @@
           },
           "optStringVal" : {
             "name" : "optStringVal",
-            "key" : 18,
+            "key" : -18,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -711,7 +711,7 @@
           },
           "optBinaryVal" : {
             "name" : "optBinaryVal",
-            "key" : 19,
+            "key" : -19,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -721,7 +721,7 @@
           },
           "optStructVal" : {
             "name" : "optStructVal",
-            "key" : 20,
+            "key" : -20,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -731,37 +731,37 @@
           },
           "optListVal" : {
             "name" : "optListVal",
-            "key" : 21,
+            "key" : -21,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "MyStructField21Patch"
+  "name" : "MyStructFieldN21Patch"
 }
           },
           "optSetVal" : {
             "name" : "optSetVal",
-            "key" : 22,
+            "key" : -22,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "MyStructField22Patch"
+  "name" : "MyStructFieldN22Patch"
 }
           },
           "optMapVal" : {
             "name" : "optMapVal",
-            "key" : 23,
+            "key" : -23,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "MyStructField23Patch"
+  "name" : "MyStructFieldN23Patch"
 }
           },
           "unionVal" : {
             "name" : "unionVal",
-            "key" : 30,
+            "key" : -24,
             "lineno" : 21,
             "required" : "opt-in-req-out",
             "type" : {
@@ -774,8 +774,8 @@
         "is_union" : false,
         "lineno" : 21
       },
-      "MyStructField21Patch" : {
-        "name" : "MyStructField21Patch",
+      "MyStructFieldN21Patch" : {
+        "name" : "MyStructFieldN21Patch",
         "fields" : {
           "assign" : {
             "name" : "assign",
@@ -834,8 +834,8 @@
         "is_union" : false,
         "lineno" : 21
       },
-      "MyStructField22Patch" : {
-        "name" : "MyStructField22Patch",
+      "MyStructFieldN22Patch" : {
+        "name" : "MyStructFieldN22Patch",
         "fields" : {
           "assign" : {
             "name" : "assign",
@@ -883,8 +883,8 @@
         "is_union" : false,
         "lineno" : 21
       },
-      "MyStructField23Patch" : {
-        "name" : "MyStructField23Patch",
+      "MyStructFieldN23Patch" : {
+        "name" : "MyStructFieldN23Patch",
         "fields" : {
           "assign" : {
             "name" : "assign",

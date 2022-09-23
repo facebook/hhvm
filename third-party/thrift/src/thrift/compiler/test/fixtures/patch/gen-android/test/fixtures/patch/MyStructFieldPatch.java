@@ -26,30 +26,30 @@ import com.facebook.thrift.protocol.*;
 @SuppressWarnings({ "unused", "serial" })
 public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldPatch");
-  private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)1);
-  private static final TField BYTE_VAL_FIELD_DESC = new TField("byteVal", TType.STRUCT, (short)2);
-  private static final TField I16_VAL_FIELD_DESC = new TField("i16Val", TType.STRUCT, (short)3);
-  private static final TField I32_VAL_FIELD_DESC = new TField("i32Val", TType.STRUCT, (short)4);
-  private static final TField I64_VAL_FIELD_DESC = new TField("i64Val", TType.STRUCT, (short)5);
-  private static final TField FLOAT_VAL_FIELD_DESC = new TField("floatVal", TType.STRUCT, (short)6);
-  private static final TField DOUBLE_VAL_FIELD_DESC = new TField("doubleVal", TType.STRUCT, (short)7);
-  private static final TField STRING_VAL_FIELD_DESC = new TField("stringVal", TType.STRUCT, (short)8);
-  private static final TField BINARY_VAL_FIELD_DESC = new TField("binaryVal", TType.STRUCT, (short)9);
-  private static final TField STRUCT_VAL_FIELD_DESC = new TField("structVal", TType.STRUCT, (short)10);
-  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.STRUCT, (short)11);
-  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.STRUCT, (short)12);
-  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.STRUCT, (short)13);
-  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.STRUCT, (short)14);
-  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.STRUCT, (short)15);
-  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.STRUCT, (short)16);
-  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.STRUCT, (short)17);
-  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRUCT, (short)18);
-  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRUCT, (short)19);
-  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)20);
-  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.STRUCT, (short)21);
-  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.STRUCT, (short)22);
-  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.STRUCT, (short)23);
-  private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)30);
+  private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)-1);
+  private static final TField BYTE_VAL_FIELD_DESC = new TField("byteVal", TType.STRUCT, (short)-2);
+  private static final TField I16_VAL_FIELD_DESC = new TField("i16Val", TType.STRUCT, (short)-3);
+  private static final TField I32_VAL_FIELD_DESC = new TField("i32Val", TType.STRUCT, (short)-4);
+  private static final TField I64_VAL_FIELD_DESC = new TField("i64Val", TType.STRUCT, (short)-5);
+  private static final TField FLOAT_VAL_FIELD_DESC = new TField("floatVal", TType.STRUCT, (short)-6);
+  private static final TField DOUBLE_VAL_FIELD_DESC = new TField("doubleVal", TType.STRUCT, (short)-7);
+  private static final TField STRING_VAL_FIELD_DESC = new TField("stringVal", TType.STRUCT, (short)-8);
+  private static final TField BINARY_VAL_FIELD_DESC = new TField("binaryVal", TType.STRUCT, (short)-9);
+  private static final TField STRUCT_VAL_FIELD_DESC = new TField("structVal", TType.STRUCT, (short)-10);
+  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.STRUCT, (short)-11);
+  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.STRUCT, (short)-12);
+  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.STRUCT, (short)-13);
+  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.STRUCT, (short)-14);
+  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.STRUCT, (short)-15);
+  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.STRUCT, (short)-16);
+  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.STRUCT, (short)-17);
+  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRUCT, (short)-18);
+  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRUCT, (short)-19);
+  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-20);
+  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.STRUCT, (short)-21);
+  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.STRUCT, (short)-22);
+  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.STRUCT, (short)-23);
+  private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)-24);
 
   public final BoolPatch boolVal;
   public final BytePatch byteVal;
@@ -71,34 +71,34 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   public final StringPatch optStringVal;
   public final BinaryPatch optBinaryVal;
   public final MyDataPatch optStructVal;
-  public final MyStructField21Patch optListVal;
-  public final MyStructField22Patch optSetVal;
-  public final MyStructField23Patch optMapVal;
+  public final MyStructFieldN21Patch optListVal;
+  public final MyStructFieldN22Patch optSetVal;
+  public final MyStructFieldN23Patch optMapVal;
   public final MyUnionPatch unionVal;
-  public static final int BOOLVAL = 1;
-  public static final int BYTEVAL = 2;
-  public static final int I16VAL = 3;
-  public static final int I32VAL = 4;
-  public static final int I64VAL = 5;
-  public static final int FLOATVAL = 6;
-  public static final int DOUBLEVAL = 7;
-  public static final int STRINGVAL = 8;
-  public static final int BINARYVAL = 9;
-  public static final int STRUCTVAL = 10;
-  public static final int OPTBOOLVAL = 11;
-  public static final int OPTBYTEVAL = 12;
-  public static final int OPTI16VAL = 13;
-  public static final int OPTI32VAL = 14;
-  public static final int OPTI64VAL = 15;
-  public static final int OPTFLOATVAL = 16;
-  public static final int OPTDOUBLEVAL = 17;
-  public static final int OPTSTRINGVAL = 18;
-  public static final int OPTBINARYVAL = 19;
-  public static final int OPTSTRUCTVAL = 20;
-  public static final int OPTLISTVAL = 21;
-  public static final int OPTSETVAL = 22;
-  public static final int OPTMAPVAL = 23;
-  public static final int UNIONVAL = 30;
+  public static final int BOOLVAL = -1;
+  public static final int BYTEVAL = -2;
+  public static final int I16VAL = -3;
+  public static final int I32VAL = -4;
+  public static final int I64VAL = -5;
+  public static final int FLOATVAL = -6;
+  public static final int DOUBLEVAL = -7;
+  public static final int STRINGVAL = -8;
+  public static final int BINARYVAL = -9;
+  public static final int STRUCTVAL = -10;
+  public static final int OPTBOOLVAL = -11;
+  public static final int OPTBYTEVAL = -12;
+  public static final int OPTI16VAL = -13;
+  public static final int OPTI32VAL = -14;
+  public static final int OPTI64VAL = -15;
+  public static final int OPTFLOATVAL = -16;
+  public static final int OPTDOUBLEVAL = -17;
+  public static final int OPTSTRINGVAL = -18;
+  public static final int OPTBINARYVAL = -19;
+  public static final int OPTSTRUCTVAL = -20;
+  public static final int OPTLISTVAL = -21;
+  public static final int OPTSETVAL = -22;
+  public static final int OPTMAPVAL = -23;
+  public static final int UNIONVAL = -24;
 
   public MyStructFieldPatch(
       BoolPatch boolVal,
@@ -121,9 +121,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       StringPatch optStringVal,
       BinaryPatch optBinaryVal,
       MyDataPatch optStructVal,
-      MyStructField21Patch optListVal,
-      MyStructField22Patch optSetVal,
-      MyStructField23Patch optMapVal,
+      MyStructFieldN21Patch optListVal,
+      MyStructFieldN22Patch optSetVal,
+      MyStructFieldN23Patch optMapVal,
       MyUnionPatch unionVal) {
     this.boolVal = boolVal;
     this.byteVal = byteVal;
@@ -461,7 +461,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optStructVal != null;
   }
 
-  public MyStructField21Patch getOptListVal() {
+  public MyStructFieldN21Patch getOptListVal() {
     return this.optListVal;
   }
 
@@ -470,7 +470,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optListVal != null;
   }
 
-  public MyStructField22Patch getOptSetVal() {
+  public MyStructFieldN22Patch getOptSetVal() {
     return this.optSetVal;
   }
 
@@ -479,7 +479,7 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optSetVal != null;
   }
 
-  public MyStructField23Patch getOptMapVal() {
+  public MyStructFieldN23Patch getOptMapVal() {
     return this.optMapVal;
   }
 
@@ -589,9 +589,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     StringPatch tmp_optStringVal = null;
     BinaryPatch tmp_optBinaryVal = null;
     MyDataPatch tmp_optStructVal = null;
-    MyStructField21Patch tmp_optListVal = null;
-    MyStructField22Patch tmp_optSetVal = null;
-    MyStructField23Patch tmp_optMapVal = null;
+    MyStructFieldN21Patch tmp_optListVal = null;
+    MyStructFieldN22Patch tmp_optSetVal = null;
+    MyStructFieldN23Patch tmp_optMapVal = null;
     MyUnionPatch tmp_unionVal = null;
     TField __field;
     iprot.readStructBegin();
@@ -745,21 +745,21 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
           break;
         case OPTLISTVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optListVal = MyStructField21Patch.deserialize(iprot);
+            tmp_optListVal = MyStructFieldN21Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTSETVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optSetVal = MyStructField22Patch.deserialize(iprot);
+            tmp_optSetVal = MyStructFieldN22Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
         case OPTMAPVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optMapVal = MyStructField23Patch.deserialize(iprot);
+            tmp_optMapVal = MyStructFieldN23Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -814,114 +814,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     validate();
 
     oprot.writeStructBegin(STRUCT_DESC);
-    if (this.boolVal != null) {
-      oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
-      this.boolVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.byteVal != null) {
-      oprot.writeFieldBegin(BYTE_VAL_FIELD_DESC);
-      this.byteVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.i16Val != null) {
-      oprot.writeFieldBegin(I16_VAL_FIELD_DESC);
-      this.i16Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.i32Val != null) {
-      oprot.writeFieldBegin(I32_VAL_FIELD_DESC);
-      this.i32Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.i64Val != null) {
-      oprot.writeFieldBegin(I64_VAL_FIELD_DESC);
-      this.i64Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.floatVal != null) {
-      oprot.writeFieldBegin(FLOAT_VAL_FIELD_DESC);
-      this.floatVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.doubleVal != null) {
-      oprot.writeFieldBegin(DOUBLE_VAL_FIELD_DESC);
-      this.doubleVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.stringVal != null) {
-      oprot.writeFieldBegin(STRING_VAL_FIELD_DESC);
-      this.stringVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.binaryVal != null) {
-      oprot.writeFieldBegin(BINARY_VAL_FIELD_DESC);
-      this.binaryVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.structVal != null) {
-      oprot.writeFieldBegin(STRUCT_VAL_FIELD_DESC);
-      this.structVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optBoolVal != null) {
-      oprot.writeFieldBegin(OPT_BOOL_VAL_FIELD_DESC);
-      this.optBoolVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optByteVal != null) {
-      oprot.writeFieldBegin(OPT_BYTE_VAL_FIELD_DESC);
-      this.optByteVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optI16Val != null) {
-      oprot.writeFieldBegin(OPT_I16_VAL_FIELD_DESC);
-      this.optI16Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optI32Val != null) {
-      oprot.writeFieldBegin(OPT_I32_VAL_FIELD_DESC);
-      this.optI32Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optI64Val != null) {
-      oprot.writeFieldBegin(OPT_I64_VAL_FIELD_DESC);
-      this.optI64Val.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optFloatVal != null) {
-      oprot.writeFieldBegin(OPT_FLOAT_VAL_FIELD_DESC);
-      this.optFloatVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optDoubleVal != null) {
-      oprot.writeFieldBegin(OPT_DOUBLE_VAL_FIELD_DESC);
-      this.optDoubleVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optStringVal != null) {
-      oprot.writeFieldBegin(OPT_STRING_VAL_FIELD_DESC);
-      this.optStringVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optBinaryVal != null) {
-      oprot.writeFieldBegin(OPT_BINARY_VAL_FIELD_DESC);
-      this.optBinaryVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optStructVal != null) {
-      oprot.writeFieldBegin(OPT_STRUCT_VAL_FIELD_DESC);
-      this.optStructVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optListVal != null) {
-      oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
-      this.optListVal.write(oprot);
-      oprot.writeFieldEnd();
-    }
-    if (this.optSetVal != null) {
-      oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
-      this.optSetVal.write(oprot);
+    if (this.unionVal != null) {
+      oprot.writeFieldBegin(UNION_VAL_FIELD_DESC);
+      this.unionVal.write(oprot);
       oprot.writeFieldEnd();
     }
     if (this.optMapVal != null) {
@@ -929,9 +824,114 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       this.optMapVal.write(oprot);
       oprot.writeFieldEnd();
     }
-    if (this.unionVal != null) {
-      oprot.writeFieldBegin(UNION_VAL_FIELD_DESC);
-      this.unionVal.write(oprot);
+    if (this.optSetVal != null) {
+      oprot.writeFieldBegin(OPT_SET_VAL_FIELD_DESC);
+      this.optSetVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optListVal != null) {
+      oprot.writeFieldBegin(OPT_LIST_VAL_FIELD_DESC);
+      this.optListVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optStructVal != null) {
+      oprot.writeFieldBegin(OPT_STRUCT_VAL_FIELD_DESC);
+      this.optStructVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optBinaryVal != null) {
+      oprot.writeFieldBegin(OPT_BINARY_VAL_FIELD_DESC);
+      this.optBinaryVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optStringVal != null) {
+      oprot.writeFieldBegin(OPT_STRING_VAL_FIELD_DESC);
+      this.optStringVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optDoubleVal != null) {
+      oprot.writeFieldBegin(OPT_DOUBLE_VAL_FIELD_DESC);
+      this.optDoubleVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optFloatVal != null) {
+      oprot.writeFieldBegin(OPT_FLOAT_VAL_FIELD_DESC);
+      this.optFloatVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optI64Val != null) {
+      oprot.writeFieldBegin(OPT_I64_VAL_FIELD_DESC);
+      this.optI64Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optI32Val != null) {
+      oprot.writeFieldBegin(OPT_I32_VAL_FIELD_DESC);
+      this.optI32Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optI16Val != null) {
+      oprot.writeFieldBegin(OPT_I16_VAL_FIELD_DESC);
+      this.optI16Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optByteVal != null) {
+      oprot.writeFieldBegin(OPT_BYTE_VAL_FIELD_DESC);
+      this.optByteVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.optBoolVal != null) {
+      oprot.writeFieldBegin(OPT_BOOL_VAL_FIELD_DESC);
+      this.optBoolVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.structVal != null) {
+      oprot.writeFieldBegin(STRUCT_VAL_FIELD_DESC);
+      this.structVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.binaryVal != null) {
+      oprot.writeFieldBegin(BINARY_VAL_FIELD_DESC);
+      this.binaryVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.stringVal != null) {
+      oprot.writeFieldBegin(STRING_VAL_FIELD_DESC);
+      this.stringVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.doubleVal != null) {
+      oprot.writeFieldBegin(DOUBLE_VAL_FIELD_DESC);
+      this.doubleVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.floatVal != null) {
+      oprot.writeFieldBegin(FLOAT_VAL_FIELD_DESC);
+      this.floatVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.i64Val != null) {
+      oprot.writeFieldBegin(I64_VAL_FIELD_DESC);
+      this.i64Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.i32Val != null) {
+      oprot.writeFieldBegin(I32_VAL_FIELD_DESC);
+      this.i32Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.i16Val != null) {
+      oprot.writeFieldBegin(I16_VAL_FIELD_DESC);
+      this.i16Val.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.byteVal != null) {
+      oprot.writeFieldBegin(BYTE_VAL_FIELD_DESC);
+      this.byteVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.boolVal != null) {
+      oprot.writeFieldBegin(BOOL_VAL_FIELD_DESC);
+      this.boolVal.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();

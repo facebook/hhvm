@@ -184,9 +184,9 @@ pub struct MyStructFieldPatch {
     pub optStringVal: patch::types::StringPatch,
     pub optBinaryVal: patch::types::BinaryPatch,
     pub optStructVal: crate::types::MyDataPatch,
-    pub optListVal: crate::types::MyStructField21Patch,
-    pub optSetVal: crate::types::MyStructField22Patch,
-    pub optMapVal: crate::types::MyStructField23Patch,
+    pub optListVal: crate::types::MyStructFieldN21Patch,
+    pub optSetVal: crate::types::MyStructFieldN22Patch,
+    pub optMapVal: crate::types::MyStructFieldN23Patch,
     pub unionVal: crate::types::MyUnionPatch,
     // This field forces `..Default::default()` when instantiating this
     // struct, to make code future-proof against new fields added later to
@@ -197,7 +197,7 @@ pub struct MyStructFieldPatch {
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct MyStructField21Patch {
+pub struct MyStructFieldN21Patch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
     pub assign: ::std::option::Option<::std::vec::Vec<::std::primitive::i16>>,
     #[doc = "Clears a value. Applies first."]
@@ -217,7 +217,7 @@ pub struct MyStructField21Patch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct MyStructField22Patch {
+pub struct MyStructFieldN22Patch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
     pub assign: ::std::option::Option<::std::collections::BTreeSet<::std::string::String>>,
     #[doc = "Clears a value. Applies first."]
@@ -235,7 +235,7 @@ pub struct MyStructField22Patch {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct MyStructField23Patch {
+pub struct MyStructFieldN23Patch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
     pub assign: ::std::option::Option<::std::collections::BTreeMap<::std::string::String, ::std::string::String>>,
     #[doc = "Clears a value. Applies first."]
@@ -607,102 +607,102 @@ where
 {
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStruct");
-        p.write_field_begin("boolVal", ::fbthrift::TType::Bool, 1);
+        p.write_field_begin("boolVal", ::fbthrift::TType::Bool, -1);
         ::fbthrift::Serialize::write(&self.boolVal, p);
         p.write_field_end();
-        p.write_field_begin("byteVal", ::fbthrift::TType::Byte, 2);
+        p.write_field_begin("byteVal", ::fbthrift::TType::Byte, -2);
         ::fbthrift::Serialize::write(&self.byteVal, p);
         p.write_field_end();
-        p.write_field_begin("i16Val", ::fbthrift::TType::I16, 3);
+        p.write_field_begin("i16Val", ::fbthrift::TType::I16, -3);
         ::fbthrift::Serialize::write(&self.i16Val, p);
         p.write_field_end();
-        p.write_field_begin("i32Val", ::fbthrift::TType::I32, 4);
+        p.write_field_begin("i32Val", ::fbthrift::TType::I32, -4);
         ::fbthrift::Serialize::write(&self.i32Val, p);
         p.write_field_end();
-        p.write_field_begin("i64Val", ::fbthrift::TType::I64, 5);
+        p.write_field_begin("i64Val", ::fbthrift::TType::I64, -5);
         ::fbthrift::Serialize::write(&self.i64Val, p);
         p.write_field_end();
-        p.write_field_begin("floatVal", ::fbthrift::TType::Float, 6);
+        p.write_field_begin("floatVal", ::fbthrift::TType::Float, -6);
         ::fbthrift::Serialize::write(&self.floatVal, p);
         p.write_field_end();
-        p.write_field_begin("doubleVal", ::fbthrift::TType::Double, 7);
+        p.write_field_begin("doubleVal", ::fbthrift::TType::Double, -7);
         ::fbthrift::Serialize::write(&self.doubleVal, p);
         p.write_field_end();
-        p.write_field_begin("stringVal", ::fbthrift::TType::String, 8);
+        p.write_field_begin("stringVal", ::fbthrift::TType::String, -8);
         ::fbthrift::Serialize::write(&self.stringVal, p);
         p.write_field_end();
-        p.write_field_begin("binaryVal", ::fbthrift::TType::String, 9);
+        p.write_field_begin("binaryVal", ::fbthrift::TType::String, -9);
         ::fbthrift::Serialize::write(&self.binaryVal, p);
         p.write_field_end();
-        p.write_field_begin("structVal", ::fbthrift::TType::Struct, 10);
+        p.write_field_begin("structVal", ::fbthrift::TType::Struct, -10);
         ::fbthrift::Serialize::write(&self.structVal, p);
         p.write_field_end();
         if let ::std::option::Option::Some(some) = &self.optBoolVal {
-            p.write_field_begin("optBoolVal", ::fbthrift::TType::Bool, 11);
+            p.write_field_begin("optBoolVal", ::fbthrift::TType::Bool, -11);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optByteVal {
-            p.write_field_begin("optByteVal", ::fbthrift::TType::Byte, 12);
+            p.write_field_begin("optByteVal", ::fbthrift::TType::Byte, -12);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optI16Val {
-            p.write_field_begin("optI16Val", ::fbthrift::TType::I16, 13);
+            p.write_field_begin("optI16Val", ::fbthrift::TType::I16, -13);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optI32Val {
-            p.write_field_begin("optI32Val", ::fbthrift::TType::I32, 14);
+            p.write_field_begin("optI32Val", ::fbthrift::TType::I32, -14);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optI64Val {
-            p.write_field_begin("optI64Val", ::fbthrift::TType::I64, 15);
+            p.write_field_begin("optI64Val", ::fbthrift::TType::I64, -15);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optFloatVal {
-            p.write_field_begin("optFloatVal", ::fbthrift::TType::Float, 16);
+            p.write_field_begin("optFloatVal", ::fbthrift::TType::Float, -16);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optDoubleVal {
-            p.write_field_begin("optDoubleVal", ::fbthrift::TType::Double, 17);
+            p.write_field_begin("optDoubleVal", ::fbthrift::TType::Double, -17);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optStringVal {
-            p.write_field_begin("optStringVal", ::fbthrift::TType::String, 18);
+            p.write_field_begin("optStringVal", ::fbthrift::TType::String, -18);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optBinaryVal {
-            p.write_field_begin("optBinaryVal", ::fbthrift::TType::String, 19);
+            p.write_field_begin("optBinaryVal", ::fbthrift::TType::String, -19);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optStructVal {
-            p.write_field_begin("optStructVal", ::fbthrift::TType::Struct, 20);
+            p.write_field_begin("optStructVal", ::fbthrift::TType::Struct, -20);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optListVal {
-            p.write_field_begin("optListVal", ::fbthrift::TType::List, 21);
+            p.write_field_begin("optListVal", ::fbthrift::TType::List, -21);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optSetVal {
-            p.write_field_begin("optSetVal", ::fbthrift::TType::Set, 22);
+            p.write_field_begin("optSetVal", ::fbthrift::TType::Set, -22);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
         if let ::std::option::Option::Some(some) = &self.optMapVal {
-            p.write_field_begin("optMapVal", ::fbthrift::TType::Map, 23);
+            p.write_field_begin("optMapVal", ::fbthrift::TType::Map, -23);
             ::fbthrift::Serialize::write(some, p);
             p.write_field_end();
         }
-        p.write_field_begin("unionVal", ::fbthrift::TType::Struct, 30);
+        p.write_field_begin("unionVal", ::fbthrift::TType::Struct, -24);
         ::fbthrift::Serialize::write(&self.unionVal, p);
         p.write_field_end();
         p.write_field_stop();
@@ -716,30 +716,30 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("binaryVal", ::fbthrift::TType::String, 9),
-            ::fbthrift::Field::new("boolVal", ::fbthrift::TType::Bool, 1),
-            ::fbthrift::Field::new("byteVal", ::fbthrift::TType::Byte, 2),
-            ::fbthrift::Field::new("doubleVal", ::fbthrift::TType::Double, 7),
-            ::fbthrift::Field::new("floatVal", ::fbthrift::TType::Float, 6),
-            ::fbthrift::Field::new("i16Val", ::fbthrift::TType::I16, 3),
-            ::fbthrift::Field::new("i32Val", ::fbthrift::TType::I32, 4),
-            ::fbthrift::Field::new("i64Val", ::fbthrift::TType::I64, 5),
-            ::fbthrift::Field::new("optBinaryVal", ::fbthrift::TType::String, 19),
-            ::fbthrift::Field::new("optBoolVal", ::fbthrift::TType::Bool, 11),
-            ::fbthrift::Field::new("optByteVal", ::fbthrift::TType::Byte, 12),
-            ::fbthrift::Field::new("optDoubleVal", ::fbthrift::TType::Double, 17),
-            ::fbthrift::Field::new("optFloatVal", ::fbthrift::TType::Float, 16),
-            ::fbthrift::Field::new("optI16Val", ::fbthrift::TType::I16, 13),
-            ::fbthrift::Field::new("optI32Val", ::fbthrift::TType::I32, 14),
-            ::fbthrift::Field::new("optI64Val", ::fbthrift::TType::I64, 15),
-            ::fbthrift::Field::new("optListVal", ::fbthrift::TType::List, 21),
-            ::fbthrift::Field::new("optMapVal", ::fbthrift::TType::Map, 23),
-            ::fbthrift::Field::new("optSetVal", ::fbthrift::TType::Set, 22),
-            ::fbthrift::Field::new("optStringVal", ::fbthrift::TType::String, 18),
-            ::fbthrift::Field::new("optStructVal", ::fbthrift::TType::Struct, 20),
-            ::fbthrift::Field::new("stringVal", ::fbthrift::TType::String, 8),
-            ::fbthrift::Field::new("structVal", ::fbthrift::TType::Struct, 10),
-            ::fbthrift::Field::new("unionVal", ::fbthrift::TType::Struct, 30),
+            ::fbthrift::Field::new("binaryVal", ::fbthrift::TType::String, -9),
+            ::fbthrift::Field::new("boolVal", ::fbthrift::TType::Bool, -1),
+            ::fbthrift::Field::new("byteVal", ::fbthrift::TType::Byte, -2),
+            ::fbthrift::Field::new("doubleVal", ::fbthrift::TType::Double, -7),
+            ::fbthrift::Field::new("floatVal", ::fbthrift::TType::Float, -6),
+            ::fbthrift::Field::new("i16Val", ::fbthrift::TType::I16, -3),
+            ::fbthrift::Field::new("i32Val", ::fbthrift::TType::I32, -4),
+            ::fbthrift::Field::new("i64Val", ::fbthrift::TType::I64, -5),
+            ::fbthrift::Field::new("optBinaryVal", ::fbthrift::TType::String, -19),
+            ::fbthrift::Field::new("optBoolVal", ::fbthrift::TType::Bool, -11),
+            ::fbthrift::Field::new("optByteVal", ::fbthrift::TType::Byte, -12),
+            ::fbthrift::Field::new("optDoubleVal", ::fbthrift::TType::Double, -17),
+            ::fbthrift::Field::new("optFloatVal", ::fbthrift::TType::Float, -16),
+            ::fbthrift::Field::new("optI16Val", ::fbthrift::TType::I16, -13),
+            ::fbthrift::Field::new("optI32Val", ::fbthrift::TType::I32, -14),
+            ::fbthrift::Field::new("optI64Val", ::fbthrift::TType::I64, -15),
+            ::fbthrift::Field::new("optListVal", ::fbthrift::TType::List, -21),
+            ::fbthrift::Field::new("optMapVal", ::fbthrift::TType::Map, -23),
+            ::fbthrift::Field::new("optSetVal", ::fbthrift::TType::Set, -22),
+            ::fbthrift::Field::new("optStringVal", ::fbthrift::TType::String, -18),
+            ::fbthrift::Field::new("optStructVal", ::fbthrift::TType::Struct, -20),
+            ::fbthrift::Field::new("stringVal", ::fbthrift::TType::String, -8),
+            ::fbthrift::Field::new("structVal", ::fbthrift::TType::Struct, -10),
+            ::fbthrift::Field::new("unionVal", ::fbthrift::TType::Struct, -24),
         ];
         let mut field_boolVal = ::std::option::Option::None;
         let mut field_byteVal = ::std::option::Option::None;
@@ -770,30 +770,30 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Bool, 1) => field_boolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Byte, 2) => field_byteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I16, 3) => field_i16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 4) => field_i32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 5) => field_i64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Float, 6) => field_floatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Double, 7) => field_doubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 8) => field_stringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 9) => field_binaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 10) => field_structVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Bool, 11) => field_optBoolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Byte, 12) => field_optByteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I16, 13) => field_optI16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I32, 14) => field_optI32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::I64, 15) => field_optI64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Float, 16) => field_optFloatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Double, 17) => field_optDoubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 18) => field_optStringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::String, 19) => field_optBinaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 20) => field_optStructVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::List, 21) => field_optListVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Set, 22) => field_optSetVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Map, 23) => field_optMapVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 30) => field_unionVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, -1) => field_boolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, -2) => field_byteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, -3) => field_i16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, -4) => field_i32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, -5) => field_i64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Float, -6) => field_floatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, -7) => field_doubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, -8) => field_stringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, -9) => field_binaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -10) => field_structVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, -11) => field_optBoolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, -12) => field_optByteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, -13) => field_optI16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, -14) => field_optI32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, -15) => field_optI64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Float, -16) => field_optFloatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, -17) => field_optDoubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, -18) => field_optStringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, -19) => field_optBinaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -20) => field_optStructVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, -21) => field_optListVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, -22) => field_optSetVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, -23) => field_optMapVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -24) => field_unionVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1499,76 +1499,76 @@ where
 {
     fn write(&self, p: &mut P) {
         p.write_struct_begin("MyStructFieldPatch");
-        p.write_field_begin("boolVal", ::fbthrift::TType::Struct, 1);
+        p.write_field_begin("boolVal", ::fbthrift::TType::Struct, -1);
         ::fbthrift::Serialize::write(&self.boolVal, p);
         p.write_field_end();
-        p.write_field_begin("byteVal", ::fbthrift::TType::Struct, 2);
+        p.write_field_begin("byteVal", ::fbthrift::TType::Struct, -2);
         ::fbthrift::Serialize::write(&self.byteVal, p);
         p.write_field_end();
-        p.write_field_begin("i16Val", ::fbthrift::TType::Struct, 3);
+        p.write_field_begin("i16Val", ::fbthrift::TType::Struct, -3);
         ::fbthrift::Serialize::write(&self.i16Val, p);
         p.write_field_end();
-        p.write_field_begin("i32Val", ::fbthrift::TType::Struct, 4);
+        p.write_field_begin("i32Val", ::fbthrift::TType::Struct, -4);
         ::fbthrift::Serialize::write(&self.i32Val, p);
         p.write_field_end();
-        p.write_field_begin("i64Val", ::fbthrift::TType::Struct, 5);
+        p.write_field_begin("i64Val", ::fbthrift::TType::Struct, -5);
         ::fbthrift::Serialize::write(&self.i64Val, p);
         p.write_field_end();
-        p.write_field_begin("floatVal", ::fbthrift::TType::Struct, 6);
+        p.write_field_begin("floatVal", ::fbthrift::TType::Struct, -6);
         ::fbthrift::Serialize::write(&self.floatVal, p);
         p.write_field_end();
-        p.write_field_begin("doubleVal", ::fbthrift::TType::Struct, 7);
+        p.write_field_begin("doubleVal", ::fbthrift::TType::Struct, -7);
         ::fbthrift::Serialize::write(&self.doubleVal, p);
         p.write_field_end();
-        p.write_field_begin("stringVal", ::fbthrift::TType::Struct, 8);
+        p.write_field_begin("stringVal", ::fbthrift::TType::Struct, -8);
         ::fbthrift::Serialize::write(&self.stringVal, p);
         p.write_field_end();
-        p.write_field_begin("binaryVal", ::fbthrift::TType::Struct, 9);
+        p.write_field_begin("binaryVal", ::fbthrift::TType::Struct, -9);
         ::fbthrift::Serialize::write(&self.binaryVal, p);
         p.write_field_end();
-        p.write_field_begin("structVal", ::fbthrift::TType::Struct, 10);
+        p.write_field_begin("structVal", ::fbthrift::TType::Struct, -10);
         ::fbthrift::Serialize::write(&self.structVal, p);
         p.write_field_end();
-        p.write_field_begin("optBoolVal", ::fbthrift::TType::Struct, 11);
+        p.write_field_begin("optBoolVal", ::fbthrift::TType::Struct, -11);
         ::fbthrift::Serialize::write(&self.optBoolVal, p);
         p.write_field_end();
-        p.write_field_begin("optByteVal", ::fbthrift::TType::Struct, 12);
+        p.write_field_begin("optByteVal", ::fbthrift::TType::Struct, -12);
         ::fbthrift::Serialize::write(&self.optByteVal, p);
         p.write_field_end();
-        p.write_field_begin("optI16Val", ::fbthrift::TType::Struct, 13);
+        p.write_field_begin("optI16Val", ::fbthrift::TType::Struct, -13);
         ::fbthrift::Serialize::write(&self.optI16Val, p);
         p.write_field_end();
-        p.write_field_begin("optI32Val", ::fbthrift::TType::Struct, 14);
+        p.write_field_begin("optI32Val", ::fbthrift::TType::Struct, -14);
         ::fbthrift::Serialize::write(&self.optI32Val, p);
         p.write_field_end();
-        p.write_field_begin("optI64Val", ::fbthrift::TType::Struct, 15);
+        p.write_field_begin("optI64Val", ::fbthrift::TType::Struct, -15);
         ::fbthrift::Serialize::write(&self.optI64Val, p);
         p.write_field_end();
-        p.write_field_begin("optFloatVal", ::fbthrift::TType::Struct, 16);
+        p.write_field_begin("optFloatVal", ::fbthrift::TType::Struct, -16);
         ::fbthrift::Serialize::write(&self.optFloatVal, p);
         p.write_field_end();
-        p.write_field_begin("optDoubleVal", ::fbthrift::TType::Struct, 17);
+        p.write_field_begin("optDoubleVal", ::fbthrift::TType::Struct, -17);
         ::fbthrift::Serialize::write(&self.optDoubleVal, p);
         p.write_field_end();
-        p.write_field_begin("optStringVal", ::fbthrift::TType::Struct, 18);
+        p.write_field_begin("optStringVal", ::fbthrift::TType::Struct, -18);
         ::fbthrift::Serialize::write(&self.optStringVal, p);
         p.write_field_end();
-        p.write_field_begin("optBinaryVal", ::fbthrift::TType::Struct, 19);
+        p.write_field_begin("optBinaryVal", ::fbthrift::TType::Struct, -19);
         ::fbthrift::Serialize::write(&self.optBinaryVal, p);
         p.write_field_end();
-        p.write_field_begin("optStructVal", ::fbthrift::TType::Struct, 20);
+        p.write_field_begin("optStructVal", ::fbthrift::TType::Struct, -20);
         ::fbthrift::Serialize::write(&self.optStructVal, p);
         p.write_field_end();
-        p.write_field_begin("optListVal", ::fbthrift::TType::Struct, 21);
+        p.write_field_begin("optListVal", ::fbthrift::TType::Struct, -21);
         ::fbthrift::Serialize::write(&self.optListVal, p);
         p.write_field_end();
-        p.write_field_begin("optSetVal", ::fbthrift::TType::Struct, 22);
+        p.write_field_begin("optSetVal", ::fbthrift::TType::Struct, -22);
         ::fbthrift::Serialize::write(&self.optSetVal, p);
         p.write_field_end();
-        p.write_field_begin("optMapVal", ::fbthrift::TType::Struct, 23);
+        p.write_field_begin("optMapVal", ::fbthrift::TType::Struct, -23);
         ::fbthrift::Serialize::write(&self.optMapVal, p);
         p.write_field_end();
-        p.write_field_begin("unionVal", ::fbthrift::TType::Struct, 30);
+        p.write_field_begin("unionVal", ::fbthrift::TType::Struct, -24);
         ::fbthrift::Serialize::write(&self.unionVal, p);
         p.write_field_end();
         p.write_field_stop();
@@ -1582,30 +1582,30 @@ where
 {
     fn read(p: &mut P) -> ::anyhow::Result<Self> {
         static FIELDS: &[::fbthrift::Field] = &[
-            ::fbthrift::Field::new("binaryVal", ::fbthrift::TType::Struct, 9),
-            ::fbthrift::Field::new("boolVal", ::fbthrift::TType::Struct, 1),
-            ::fbthrift::Field::new("byteVal", ::fbthrift::TType::Struct, 2),
-            ::fbthrift::Field::new("doubleVal", ::fbthrift::TType::Struct, 7),
-            ::fbthrift::Field::new("floatVal", ::fbthrift::TType::Struct, 6),
-            ::fbthrift::Field::new("i16Val", ::fbthrift::TType::Struct, 3),
-            ::fbthrift::Field::new("i32Val", ::fbthrift::TType::Struct, 4),
-            ::fbthrift::Field::new("i64Val", ::fbthrift::TType::Struct, 5),
-            ::fbthrift::Field::new("optBinaryVal", ::fbthrift::TType::Struct, 19),
-            ::fbthrift::Field::new("optBoolVal", ::fbthrift::TType::Struct, 11),
-            ::fbthrift::Field::new("optByteVal", ::fbthrift::TType::Struct, 12),
-            ::fbthrift::Field::new("optDoubleVal", ::fbthrift::TType::Struct, 17),
-            ::fbthrift::Field::new("optFloatVal", ::fbthrift::TType::Struct, 16),
-            ::fbthrift::Field::new("optI16Val", ::fbthrift::TType::Struct, 13),
-            ::fbthrift::Field::new("optI32Val", ::fbthrift::TType::Struct, 14),
-            ::fbthrift::Field::new("optI64Val", ::fbthrift::TType::Struct, 15),
-            ::fbthrift::Field::new("optListVal", ::fbthrift::TType::Struct, 21),
-            ::fbthrift::Field::new("optMapVal", ::fbthrift::TType::Struct, 23),
-            ::fbthrift::Field::new("optSetVal", ::fbthrift::TType::Struct, 22),
-            ::fbthrift::Field::new("optStringVal", ::fbthrift::TType::Struct, 18),
-            ::fbthrift::Field::new("optStructVal", ::fbthrift::TType::Struct, 20),
-            ::fbthrift::Field::new("stringVal", ::fbthrift::TType::Struct, 8),
-            ::fbthrift::Field::new("structVal", ::fbthrift::TType::Struct, 10),
-            ::fbthrift::Field::new("unionVal", ::fbthrift::TType::Struct, 30),
+            ::fbthrift::Field::new("binaryVal", ::fbthrift::TType::Struct, -9),
+            ::fbthrift::Field::new("boolVal", ::fbthrift::TType::Struct, -1),
+            ::fbthrift::Field::new("byteVal", ::fbthrift::TType::Struct, -2),
+            ::fbthrift::Field::new("doubleVal", ::fbthrift::TType::Struct, -7),
+            ::fbthrift::Field::new("floatVal", ::fbthrift::TType::Struct, -6),
+            ::fbthrift::Field::new("i16Val", ::fbthrift::TType::Struct, -3),
+            ::fbthrift::Field::new("i32Val", ::fbthrift::TType::Struct, -4),
+            ::fbthrift::Field::new("i64Val", ::fbthrift::TType::Struct, -5),
+            ::fbthrift::Field::new("optBinaryVal", ::fbthrift::TType::Struct, -19),
+            ::fbthrift::Field::new("optBoolVal", ::fbthrift::TType::Struct, -11),
+            ::fbthrift::Field::new("optByteVal", ::fbthrift::TType::Struct, -12),
+            ::fbthrift::Field::new("optDoubleVal", ::fbthrift::TType::Struct, -17),
+            ::fbthrift::Field::new("optFloatVal", ::fbthrift::TType::Struct, -16),
+            ::fbthrift::Field::new("optI16Val", ::fbthrift::TType::Struct, -13),
+            ::fbthrift::Field::new("optI32Val", ::fbthrift::TType::Struct, -14),
+            ::fbthrift::Field::new("optI64Val", ::fbthrift::TType::Struct, -15),
+            ::fbthrift::Field::new("optListVal", ::fbthrift::TType::Struct, -21),
+            ::fbthrift::Field::new("optMapVal", ::fbthrift::TType::Struct, -23),
+            ::fbthrift::Field::new("optSetVal", ::fbthrift::TType::Struct, -22),
+            ::fbthrift::Field::new("optStringVal", ::fbthrift::TType::Struct, -18),
+            ::fbthrift::Field::new("optStructVal", ::fbthrift::TType::Struct, -20),
+            ::fbthrift::Field::new("stringVal", ::fbthrift::TType::Struct, -8),
+            ::fbthrift::Field::new("structVal", ::fbthrift::TType::Struct, -10),
+            ::fbthrift::Field::new("unionVal", ::fbthrift::TType::Struct, -24),
         ];
         let mut field_boolVal = ::std::option::Option::None;
         let mut field_byteVal = ::std::option::Option::None;
@@ -1636,30 +1636,30 @@ where
             let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
             match (fty, fid as ::std::primitive::i32) {
                 (::fbthrift::TType::Stop, _) => break,
-                (::fbthrift::TType::Struct, 1) => field_boolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 2) => field_byteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 3) => field_i16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 4) => field_i32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 5) => field_i64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 6) => field_floatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 7) => field_doubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 8) => field_stringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 9) => field_binaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 10) => field_structVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 11) => field_optBoolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 12) => field_optByteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 13) => field_optI16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 14) => field_optI32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 15) => field_optI64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 16) => field_optFloatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 17) => field_optDoubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 18) => field_optStringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 19) => field_optBinaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 20) => field_optStructVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 21) => field_optListVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 22) => field_optSetVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 23) => field_optMapVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
-                (::fbthrift::TType::Struct, 30) => field_unionVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -1) => field_boolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -2) => field_byteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -3) => field_i16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -4) => field_i32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -5) => field_i64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -6) => field_floatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -7) => field_doubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -8) => field_stringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -9) => field_binaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -10) => field_structVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -11) => field_optBoolVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -12) => field_optByteVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -13) => field_optI16Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -14) => field_optI32Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -15) => field_optI64Val = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -16) => field_optFloatVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -17) => field_optDoubleVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -18) => field_optStringVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -19) => field_optBinaryVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -20) => field_optStructVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -21) => field_optListVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -22) => field_optSetVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -23) => field_optMapVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, -24) => field_unionVal = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (fty, _) => p.skip(fty)?,
             }
             p.read_field_end()?;
@@ -1697,7 +1697,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyStructField21Patch {
+impl ::std::default::Default for self::MyStructFieldN21Patch {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -1710,10 +1710,10 @@ impl ::std::default::Default for self::MyStructField21Patch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyStructField21Patch {
+impl ::std::fmt::Debug for self::MyStructFieldN21Patch {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyStructField21Patch")
+            .debug_struct("MyStructFieldN21Patch")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("remove", &self.remove)
@@ -1723,25 +1723,25 @@ impl ::std::fmt::Debug for self::MyStructField21Patch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyStructField21Patch {}
-unsafe impl ::std::marker::Sync for self::MyStructField21Patch {}
+unsafe impl ::std::marker::Send for self::MyStructFieldN21Patch {}
+unsafe impl ::std::marker::Sync for self::MyStructFieldN21Patch {}
 
-impl ::fbthrift::GetTType for self::MyStructField21Patch {
+impl ::fbthrift::GetTType for self::MyStructFieldN21Patch {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyStructField21Patch {
+impl ::fbthrift::GetUri for self::MyStructFieldN21Patch {
     fn uri() -> &'static str {
-        "test.dev/fixtures/patch/MyStructField21Patch"
+        "test.dev/fixtures/patch/MyStructFieldN21Patch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyStructField21Patch
+impl<P> ::fbthrift::Serialize<P> for self::MyStructFieldN21Patch
 where
     P: ::fbthrift::ProtocolWriter,
 {
     fn write(&self, p: &mut P) {
-        p.write_struct_begin("MyStructField21Patch");
+        p.write_struct_begin("MyStructFieldN21Patch");
         if let ::std::option::Option::Some(some) = &self.assign {
             p.write_field_begin("assign", ::fbthrift::TType::List, 1);
             ::fbthrift::Serialize::write(some, p);
@@ -1764,7 +1764,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyStructField21Patch
+impl<P> ::fbthrift::Deserialize<P> for self::MyStructFieldN21Patch
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -1809,7 +1809,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyStructField22Patch {
+impl ::std::default::Default for self::MyStructFieldN22Patch {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -1821,10 +1821,10 @@ impl ::std::default::Default for self::MyStructField22Patch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyStructField22Patch {
+impl ::std::fmt::Debug for self::MyStructFieldN22Patch {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyStructField22Patch")
+            .debug_struct("MyStructFieldN22Patch")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("remove", &self.remove)
@@ -1833,25 +1833,25 @@ impl ::std::fmt::Debug for self::MyStructField22Patch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyStructField22Patch {}
-unsafe impl ::std::marker::Sync for self::MyStructField22Patch {}
+unsafe impl ::std::marker::Send for self::MyStructFieldN22Patch {}
+unsafe impl ::std::marker::Sync for self::MyStructFieldN22Patch {}
 
-impl ::fbthrift::GetTType for self::MyStructField22Patch {
+impl ::fbthrift::GetTType for self::MyStructFieldN22Patch {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyStructField22Patch {
+impl ::fbthrift::GetUri for self::MyStructFieldN22Patch {
     fn uri() -> &'static str {
-        "test.dev/fixtures/patch/MyStructField22Patch"
+        "test.dev/fixtures/patch/MyStructFieldN22Patch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyStructField22Patch
+impl<P> ::fbthrift::Serialize<P> for self::MyStructFieldN22Patch
 where
     P: ::fbthrift::ProtocolWriter,
 {
     fn write(&self, p: &mut P) {
-        p.write_struct_begin("MyStructField22Patch");
+        p.write_struct_begin("MyStructFieldN22Patch");
         if let ::std::option::Option::Some(some) = &self.assign {
             p.write_field_begin("assign", ::fbthrift::TType::Set, 1);
             ::fbthrift::Serialize::write(some, p);
@@ -1871,7 +1871,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyStructField22Patch
+impl<P> ::fbthrift::Deserialize<P> for self::MyStructFieldN22Patch
 where
     P: ::fbthrift::ProtocolReader,
 {
@@ -1912,7 +1912,7 @@ where
 
 
 #[allow(clippy::derivable_impls)]
-impl ::std::default::Default for self::MyStructField23Patch {
+impl ::std::default::Default for self::MyStructFieldN23Patch {
     fn default() -> Self {
         Self {
             assign: ::std::option::Option::None,
@@ -1925,10 +1925,10 @@ impl ::std::default::Default for self::MyStructField23Patch {
     }
 }
 
-impl ::std::fmt::Debug for self::MyStructField23Patch {
+impl ::std::fmt::Debug for self::MyStructFieldN23Patch {
     fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
         formatter
-            .debug_struct("MyStructField23Patch")
+            .debug_struct("MyStructFieldN23Patch")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
             .field("add", &self.add)
@@ -1938,25 +1938,25 @@ impl ::std::fmt::Debug for self::MyStructField23Patch {
     }
 }
 
-unsafe impl ::std::marker::Send for self::MyStructField23Patch {}
-unsafe impl ::std::marker::Sync for self::MyStructField23Patch {}
+unsafe impl ::std::marker::Send for self::MyStructFieldN23Patch {}
+unsafe impl ::std::marker::Sync for self::MyStructFieldN23Patch {}
 
-impl ::fbthrift::GetTType for self::MyStructField23Patch {
+impl ::fbthrift::GetTType for self::MyStructFieldN23Patch {
     const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
 }
 
-impl ::fbthrift::GetUri for self::MyStructField23Patch {
+impl ::fbthrift::GetUri for self::MyStructFieldN23Patch {
     fn uri() -> &'static str {
-        "test.dev/fixtures/patch/MyStructField23Patch"
+        "test.dev/fixtures/patch/MyStructFieldN23Patch"
     }
 }
 
-impl<P> ::fbthrift::Serialize<P> for self::MyStructField23Patch
+impl<P> ::fbthrift::Serialize<P> for self::MyStructFieldN23Patch
 where
     P: ::fbthrift::ProtocolWriter,
 {
     fn write(&self, p: &mut P) {
-        p.write_struct_begin("MyStructField23Patch");
+        p.write_struct_begin("MyStructFieldN23Patch");
         if let ::std::option::Option::Some(some) = &self.assign {
             p.write_field_begin("assign", ::fbthrift::TType::Map, 1);
             ::fbthrift::Serialize::write(some, p);
@@ -1979,7 +1979,7 @@ where
     }
 }
 
-impl<P> ::fbthrift::Deserialize<P> for self::MyStructField23Patch
+impl<P> ::fbthrift::Deserialize<P> for self::MyStructFieldN23Patch
 where
     P: ::fbthrift::ProtocolReader,
 {

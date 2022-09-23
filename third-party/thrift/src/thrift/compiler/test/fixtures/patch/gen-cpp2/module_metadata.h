@@ -70,17 +70,17 @@ class StructMetadata<::test::fixtures::patch::MyUnionPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructField21PatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyStructFieldN21PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructField22PatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyStructFieldN22PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructField23PatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

@@ -38,7 +38,10 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "doubleVal", self.doubleVal
         yield "stringVal", self.stringVal
         yield "binaryVal", self.binaryVal
+        yield "enumVal", self.enumVal
         yield "structVal", self.structVal
+        yield "unionVal", self.unionVal
+        yield "lateStructVal", self.lateStructVal
         yield "optBoolVal", self.optBoolVal
         yield "optByteVal", self.optByteVal
         yield "optI16Val", self.optI16Val
@@ -48,9 +51,16 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
         yield "optDoubleVal", self.optDoubleVal
         yield "optStringVal", self.optStringVal
         yield "optBinaryVal", self.optBinaryVal
+        yield "optEnumVal", self.optEnumVal
         yield "optStructVal", self.optStructVal
+        yield "optLateStructVal", self.optLateStructVal
         yield "optListVal", self.optListVal
         yield "optSetVal", self.optSetVal
         yield "optMapVal", self.optMapVal
-        yield "unionVal", self.unionVal
+
+cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _test_fixtures_patch_module_types.LateDefStruct
+
+    def __iter__(self):
+        pass
 

@@ -24,6 +24,10 @@ package "facebook.com/thrift/test/patch"
 
 namespace cpp2 apache.thrift.test.patch
 
+enum MyEnum {
+  MyValue0 = 0,
+}
+
 struct MyStruct {
   bool boolVal;
   byte byteVal;
@@ -34,7 +38,10 @@ struct MyStruct {
   double doubleVal;
   string stringVal;
   binary (cpp.type = "::folly::IOBuf") binaryVal;
+  MyEnum enumVal;
   StructPatchTestInclude.MyData structVal;
+  StructPatchTestInclude.MyUnion unionVal;
+  LateDefStruct lateStructVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;
@@ -45,14 +52,13 @@ struct MyStruct {
   optional double optDoubleVal;
   optional string optStringVal;
   optional binary (cpp.type = "::folly::IOBuf") optBinaryVal;
+  optional MyEnum optEnumVal;
   optional StructPatchTestInclude.MyData optStructVal;
+  optional LateDefStruct optLateStructVal;
 
   optional list<i16> optListVal;
   optional set<string> optSetVal;
   optional map<string, string> optMapVal;
-
-  StructPatchTestInclude.MyUnion unionVal;
-  LateDefStruct lateStructVal;
 }
 
 // Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.

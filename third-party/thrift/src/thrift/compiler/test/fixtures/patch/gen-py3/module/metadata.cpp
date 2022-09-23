@@ -13,10 +13,12 @@ namespace patch {
 ::apache::thrift::metadata::ThriftMetadata module_getThriftModuleMetadata() {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
+  ::apache::thrift::detail::md::EnumMetadata<MyEnum>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyData>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<InnerUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyUnion>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<LateDefStruct>::gen(metadata);
   return metadata;
 }
 } // namespace test

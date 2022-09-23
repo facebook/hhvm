@@ -40,6 +40,10 @@ union MyUnion {
   3: InnerUnion option3;
 }
 
+enum MyEnum {
+  MyValue0 = 0,
+}
+
 @thrift.Testing
 struct MyStruct {
   bool boolVal;
@@ -51,7 +55,10 @@ struct MyStruct {
   double doubleVal;
   string stringVal;
   binary (cpp.type = "::folly::IOBuf") binaryVal;
+  MyEnum enumVal;
   MyData structVal;
+  MyUnion unionVal;
+  LateDefStruct lateStructVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;
@@ -62,11 +69,14 @@ struct MyStruct {
   optional double optDoubleVal;
   optional string optStringVal;
   optional binary (cpp.type = "::folly::IOBuf") optBinaryVal;
+  optional MyEnum optEnumVal;
   optional MyData optStructVal;
+  optional LateDefStruct optLateStructVal;
 
   optional list<i16> optListVal;
   optional set<string> optSetVal;
   optional map<string, string> optMapVal;
-
-  MyUnion unionVal;
 }
+
+// Intentionally defined after MyStruct, so it's patch types are generated after MyStruct's.
+struct LateDefStruct {}

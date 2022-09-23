@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructFieldN22Patch> {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN22Patch");
+public class MyStructFieldN27Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructFieldN27Patch> {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN27Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.SET, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.SET, (short)7);
@@ -75,13 +75,13 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(MyStructFieldN22Patch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(MyStructFieldN27Patch.class, metaDataMap);
   }
 
-  public MyStructFieldN22Patch() {
+  public MyStructFieldN27Patch() {
   }
 
-  public MyStructFieldN22Patch(
+  public MyStructFieldN27Patch(
       boolean clear,
       Set<String> remove,
       Set<String> add) {
@@ -92,7 +92,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
     this.add = add;
   }
 
-  public MyStructFieldN22Patch(
+  public MyStructFieldN27Patch(
       Set<String> assign,
       boolean clear,
       Set<String> remove,
@@ -137,8 +137,8 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
       return this;
     }
 
-    public MyStructFieldN22Patch build() {
-      MyStructFieldN22Patch result = new MyStructFieldN22Patch();
+    public MyStructFieldN27Patch build() {
+      MyStructFieldN27Patch result = new MyStructFieldN27Patch();
       result.setAssign(this.assign);
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
@@ -156,7 +156,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN22Patch(MyStructFieldN22Patch other) {
+  public MyStructFieldN27Patch(MyStructFieldN27Patch other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetAssign()) {
@@ -171,8 +171,8 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
     }
   }
 
-  public MyStructFieldN22Patch deepCopy() {
-    return new MyStructFieldN22Patch(this);
+  public MyStructFieldN27Patch deepCopy() {
+    return new MyStructFieldN27Patch(this);
   }
 
   /**
@@ -185,7 +185,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   /**
    * Assigns a value. If set, all other operations are ignored.
    */
-  public MyStructFieldN22Patch setAssign(Set<String> assign) {
+  public MyStructFieldN27Patch setAssign(Set<String> assign) {
     this.assign = assign;
     return this;
   }
@@ -215,7 +215,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   /**
    * Clears a value. Applies first.
    */
-  public MyStructFieldN22Patch setClear(boolean clear) {
+  public MyStructFieldN27Patch setClear(boolean clear) {
     this.clear = clear;
     setClearIsSet(true);
     return this;
@@ -244,7 +244,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   /**
    * Removes entries, if present. Applies third.
    */
-  public MyStructFieldN22Patch setRemove(Set<String> remove) {
+  public MyStructFieldN27Patch setRemove(Set<String> remove) {
     this.remove = remove;
     return this;
   }
@@ -274,7 +274,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   /**
    * Adds entries, if not already present. Applies fourth.
    */
-  public MyStructFieldN22Patch setAdd(Set<String> add) {
+  public MyStructFieldN27Patch setAdd(Set<String> add) {
     this.add = add;
     return this;
   }
@@ -359,9 +359,9 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN22Patch))
+    if (!(_that instanceof MyStructFieldN27Patch))
       return false;
-    MyStructFieldN22Patch that = (MyStructFieldN22Patch)_that;
+    MyStructFieldN27Patch that = (MyStructFieldN27Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
@@ -380,7 +380,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
   }
 
   @Override
-  public int compareTo(MyStructFieldN22Patch other) {
+  public int compareTo(MyStructFieldN27Patch other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -571,7 +571,7 @@ public class MyStructFieldN22Patch implements TBase, java.io.Serializable, Clone
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("MyStructFieldN22Patch");
+    StringBuilder sb = new StringBuilder("MyStructFieldN27Patch");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

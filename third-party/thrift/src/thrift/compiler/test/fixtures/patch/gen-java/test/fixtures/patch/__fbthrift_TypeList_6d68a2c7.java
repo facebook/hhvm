@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_0c92010c implements TypeList {
+public class __fbthrift_TypeList_6d68a2c7 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -20,6 +20,7 @@ public class __fbthrift_TypeList_0c92010c implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnion", "test.fixtures.patch.InnerUnion"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnion", "test.fixtures.patch.MyUnion"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStruct", "test.fixtures.patch.MyStruct"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStruct", "test.fixtures.patch.LateDefStruct"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataFieldPatch", "test.fixtures.patch.MyDataFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyDataPatch", "test.fixtures.patch.MyDataPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionFieldPatch", "test.fixtures.patch.InnerUnionFieldPatch"));
@@ -27,10 +28,15 @@ public class __fbthrift_TypeList_0c92010c implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN21Patch", "test.fixtures.patch.MyStructFieldN21Patch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN22Patch", "test.fixtures.patch.MyStructFieldN22Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN10Patch", "test.fixtures.patch.MyStructFieldN10Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN23Patch", "test.fixtures.patch.MyStructFieldN23Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN26Patch", "test.fixtures.patch.MyStructFieldN26Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN27Patch", "test.fixtures.patch.MyStructFieldN27Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN28Patch", "test.fixtures.patch.MyStructFieldN28Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructPatch", "test.fixtures.patch.LateDefStructPatch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyEnum", "test.fixtures.patch.MyEnum"));
   }
 
   @java.lang.Override

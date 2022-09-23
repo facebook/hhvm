@@ -42,7 +42,10 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pfloat doubleVal
     cdef public str stringVal
     cdef public bytes binaryVal
+    cdef public _test_fixtures_patch_module_types.MyEnum enumVal
     cdef public object structVal
+    cdef public object unionVal
+    cdef public object lateStructVal
     cdef public pbool optBoolVal
     cdef public pint optByteVal
     cdef public pint optI16Val
@@ -52,10 +55,15 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pfloat optDoubleVal
     cdef public str optStringVal
     cdef public bytes optBinaryVal
+    cdef public _test_fixtures_patch_module_types.MyEnum optEnumVal
     cdef public object optStructVal
+    cdef public object optLateStructVal
     cdef public list optListVal
     cdef public set optSetVal
     cdef public dict optMapVal
-    cdef public object unionVal
+
+
+cdef class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
+    pass
 
 

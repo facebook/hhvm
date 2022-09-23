@@ -24,39 +24,39 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Cloneable, Comparable<MyStructFieldN21Patch> {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN21Patch");
-  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.LIST, (short)1);
+public class LateDefStructPatch implements TBase, java.io.Serializable, Cloneable, Comparable<LateDefStructPatch> {
+  private static final TStruct STRUCT_DESC = new TStruct("LateDefStructPatch");
+  private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.STRUCT, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
-  private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
-  private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
-  private static final TField APPEND_FIELD_DESC = new TField("append", TType.LIST, (short)9);
+  private static final TField PATCH_PRIOR_FIELD_DESC = new TField("patchPrior", TType.STRUCT, (short)3);
+  private static final TField ENSURE_FIELD_DESC = new TField("ensure", TType.STRUCT, (short)5);
+  private static final TField PATCH_FIELD_DESC = new TField("patch", TType.STRUCT, (short)6);
 
   /**
    * Assigns a value. If set, all other operations are ignored.
    */
-  public List<Short> assign;
+  public LateDefStruct assign;
   /**
    * Clears a value. Applies first.
    */
   public boolean clear;
   /**
-   * Removes entries, if present. Applies third.
+   * Patches any previously set values. Applies second.
    */
-  public List<Short> remove;
+  public LateDefStructFieldPatch patchPrior;
   /**
-   * Prepends to the front of a given list.
+   * Initialize fields, using the given defaults. Applies third.
    */
-  public List<Short> prepend;
+  public LateDefStruct ensure;
   /**
-   * Appends to the back of a given list.
+   * Patches any set value, including newly set values. Applies last.
    */
-  public List<Short> append;
+  public LateDefStructFieldPatch patch;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
-  public static final int REMOVE = 7;
-  public static final int PREPEND = 8;
-  public static final int APPEND = 9;
+  public static final int PATCHPRIOR = 3;
+  public static final int ENSURE = 5;
+  public static final int PATCH = 6;
 
   // isset id assignments
   private static final int __CLEAR_ISSET_ID = 0;
@@ -67,70 +67,66 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(ASSIGN, new FieldMetaData("assign", TFieldRequirementType.OPTIONAL, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
+        new StructMetaData(TType.STRUCT, LateDefStruct.class)));
     tmpMetaDataMap.put(CLEAR, new FieldMetaData("clear", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.BOOL)));
-    tmpMetaDataMap.put(REMOVE, new FieldMetaData("remove", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
-    tmpMetaDataMap.put(PREPEND, new FieldMetaData("prepend", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
-    tmpMetaDataMap.put(APPEND, new FieldMetaData("append", TFieldRequirementType.DEFAULT, 
-        new ListMetaData(TType.LIST, 
-            new FieldValueMetaData(TType.I16))));
+    tmpMetaDataMap.put(PATCHPRIOR, new FieldMetaData("patchPrior", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, LateDefStructFieldPatch.class)));
+    tmpMetaDataMap.put(ENSURE, new FieldMetaData("ensure", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, LateDefStruct.class)));
+    tmpMetaDataMap.put(PATCH, new FieldMetaData("patch", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, LateDefStructFieldPatch.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(MyStructFieldN21Patch.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(LateDefStructPatch.class, metaDataMap);
   }
 
-  public MyStructFieldN21Patch() {
+  public LateDefStructPatch() {
   }
 
-  public MyStructFieldN21Patch(
+  public LateDefStructPatch(
       boolean clear,
-      List<Short> remove,
-      List<Short> prepend,
-      List<Short> append) {
+      LateDefStructFieldPatch patchPrior,
+      LateDefStruct ensure,
+      LateDefStructFieldPatch patch) {
     this();
     this.clear = clear;
     setClearIsSet(true);
-    this.remove = remove;
-    this.prepend = prepend;
-    this.append = append;
+    this.patchPrior = patchPrior;
+    this.ensure = ensure;
+    this.patch = patch;
   }
 
-  public MyStructFieldN21Patch(
-      List<Short> assign,
+  public LateDefStructPatch(
+      LateDefStruct assign,
       boolean clear,
-      List<Short> remove,
-      List<Short> prepend,
-      List<Short> append) {
+      LateDefStructFieldPatch patchPrior,
+      LateDefStruct ensure,
+      LateDefStructFieldPatch patch) {
     this();
     this.assign = assign;
     this.clear = clear;
     setClearIsSet(true);
-    this.remove = remove;
-    this.prepend = prepend;
-    this.append = append;
+    this.patchPrior = patchPrior;
+    this.ensure = ensure;
+    this.patch = patch;
   }
 
   public static class Builder {
-    private List<Short> assign;
+    private LateDefStruct assign;
     private boolean clear;
-    private List<Short> remove;
-    private List<Short> prepend;
-    private List<Short> append;
+    private LateDefStructFieldPatch patchPrior;
+    private LateDefStruct ensure;
+    private LateDefStructFieldPatch patch;
 
     BitSet __optional_isset = new BitSet(1);
 
     public Builder() {
     }
 
-    public Builder setAssign(final List<Short> assign) {
+    public Builder setAssign(final LateDefStruct assign) {
       this.assign = assign;
       return this;
     }
@@ -141,30 +137,30 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
       return this;
     }
 
-    public Builder setRemove(final List<Short> remove) {
-      this.remove = remove;
+    public Builder setPatchPrior(final LateDefStructFieldPatch patchPrior) {
+      this.patchPrior = patchPrior;
       return this;
     }
 
-    public Builder setPrepend(final List<Short> prepend) {
-      this.prepend = prepend;
+    public Builder setEnsure(final LateDefStruct ensure) {
+      this.ensure = ensure;
       return this;
     }
 
-    public Builder setAppend(final List<Short> append) {
-      this.append = append;
+    public Builder setPatch(final LateDefStructFieldPatch patch) {
+      this.patch = patch;
       return this;
     }
 
-    public MyStructFieldN21Patch build() {
-      MyStructFieldN21Patch result = new MyStructFieldN21Patch();
+    public LateDefStructPatch build() {
+      LateDefStructPatch result = new LateDefStructPatch();
       result.setAssign(this.assign);
       if (__optional_isset.get(__CLEAR_ISSET_ID)) {
         result.setClear(this.clear);
       }
-      result.setRemove(this.remove);
-      result.setPrepend(this.prepend);
-      result.setAppend(this.append);
+      result.setPatchPrior(this.patchPrior);
+      result.setEnsure(this.ensure);
+      result.setPatch(this.patch);
       return result;
     }
   }
@@ -176,39 +172,39 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN21Patch(MyStructFieldN21Patch other) {
+  public LateDefStructPatch(LateDefStructPatch other) {
     __isset_bit_vector.clear();
     __isset_bit_vector.or(other.__isset_bit_vector);
     if (other.isSetAssign()) {
       this.assign = TBaseHelper.deepCopy(other.assign);
     }
     this.clear = TBaseHelper.deepCopy(other.clear);
-    if (other.isSetRemove()) {
-      this.remove = TBaseHelper.deepCopy(other.remove);
+    if (other.isSetPatchPrior()) {
+      this.patchPrior = TBaseHelper.deepCopy(other.patchPrior);
     }
-    if (other.isSetPrepend()) {
-      this.prepend = TBaseHelper.deepCopy(other.prepend);
+    if (other.isSetEnsure()) {
+      this.ensure = TBaseHelper.deepCopy(other.ensure);
     }
-    if (other.isSetAppend()) {
-      this.append = TBaseHelper.deepCopy(other.append);
+    if (other.isSetPatch()) {
+      this.patch = TBaseHelper.deepCopy(other.patch);
     }
   }
 
-  public MyStructFieldN21Patch deepCopy() {
-    return new MyStructFieldN21Patch(this);
+  public LateDefStructPatch deepCopy() {
+    return new LateDefStructPatch(this);
   }
 
   /**
    * Assigns a value. If set, all other operations are ignored.
    */
-  public List<Short> getAssign() {
+  public LateDefStruct getAssign() {
     return this.assign;
   }
 
   /**
    * Assigns a value. If set, all other operations are ignored.
    */
-  public MyStructFieldN21Patch setAssign(List<Short> assign) {
+  public LateDefStructPatch setAssign(LateDefStruct assign) {
     this.assign = assign;
     return this;
   }
@@ -238,7 +234,7 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   /**
    * Clears a value. Applies first.
    */
-  public MyStructFieldN21Patch setClear(boolean clear) {
+  public LateDefStructPatch setClear(boolean clear) {
     this.clear = clear;
     setClearIsSet(true);
     return this;
@@ -258,103 +254,102 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   }
 
   /**
-   * Removes entries, if present. Applies third.
+   * Patches any previously set values. Applies second.
    */
-  public List<Short> getRemove() {
-    return this.remove;
+  public LateDefStructFieldPatch getPatchPrior() {
+    return this.patchPrior;
   }
 
   /**
-   * Removes entries, if present. Applies third.
+   * Patches any previously set values. Applies second.
    */
-  public MyStructFieldN21Patch setRemove(List<Short> remove) {
-    this.remove = remove;
+  public LateDefStructPatch setPatchPrior(LateDefStructFieldPatch patchPrior) {
+    this.patchPrior = patchPrior;
     return this;
   }
 
-  public void unsetRemove() {
-    this.remove = null;
+  public void unsetPatchPrior() {
+    this.patchPrior = null;
   }
 
-  // Returns true if field remove is set (has been assigned a value) and false otherwise
-  public boolean isSetRemove() {
-    return this.remove != null;
+  // Returns true if field patchPrior is set (has been assigned a value) and false otherwise
+  public boolean isSetPatchPrior() {
+    return this.patchPrior != null;
   }
 
-  public void setRemoveIsSet(boolean __value) {
+  public void setPatchPriorIsSet(boolean __value) {
     if (!__value) {
-      this.remove = null;
+      this.patchPrior = null;
     }
   }
 
   /**
-   * Prepends to the front of a given list.
+   * Initialize fields, using the given defaults. Applies third.
    */
-  public List<Short> getPrepend() {
-    return this.prepend;
+  public LateDefStruct getEnsure() {
+    return this.ensure;
   }
 
   /**
-   * Prepends to the front of a given list.
+   * Initialize fields, using the given defaults. Applies third.
    */
-  public MyStructFieldN21Patch setPrepend(List<Short> prepend) {
-    this.prepend = prepend;
+  public LateDefStructPatch setEnsure(LateDefStruct ensure) {
+    this.ensure = ensure;
     return this;
   }
 
-  public void unsetPrepend() {
-    this.prepend = null;
+  public void unsetEnsure() {
+    this.ensure = null;
   }
 
-  // Returns true if field prepend is set (has been assigned a value) and false otherwise
-  public boolean isSetPrepend() {
-    return this.prepend != null;
+  // Returns true if field ensure is set (has been assigned a value) and false otherwise
+  public boolean isSetEnsure() {
+    return this.ensure != null;
   }
 
-  public void setPrependIsSet(boolean __value) {
+  public void setEnsureIsSet(boolean __value) {
     if (!__value) {
-      this.prepend = null;
+      this.ensure = null;
     }
   }
 
   /**
-   * Appends to the back of a given list.
+   * Patches any set value, including newly set values. Applies last.
    */
-  public List<Short> getAppend() {
-    return this.append;
+  public LateDefStructFieldPatch getPatch() {
+    return this.patch;
   }
 
   /**
-   * Appends to the back of a given list.
+   * Patches any set value, including newly set values. Applies last.
    */
-  public MyStructFieldN21Patch setAppend(List<Short> append) {
-    this.append = append;
+  public LateDefStructPatch setPatch(LateDefStructFieldPatch patch) {
+    this.patch = patch;
     return this;
   }
 
-  public void unsetAppend() {
-    this.append = null;
+  public void unsetPatch() {
+    this.patch = null;
   }
 
-  // Returns true if field append is set (has been assigned a value) and false otherwise
-  public boolean isSetAppend() {
-    return this.append != null;
+  // Returns true if field patch is set (has been assigned a value) and false otherwise
+  public boolean isSetPatch() {
+    return this.patch != null;
   }
 
-  public void setAppendIsSet(boolean __value) {
+  public void setPatchIsSet(boolean __value) {
     if (!__value) {
-      this.append = null;
+      this.patch = null;
     }
   }
 
-  @SuppressWarnings("unchecked")
   public void setFieldValue(int fieldID, Object __value) {
     switch (fieldID) {
     case ASSIGN:
       if (__value == null) {
         unsetAssign();
       } else {
-        setAssign((List<Short>)__value);
+        setAssign((LateDefStruct)__value);
       }
       break;
 
@@ -366,27 +361,27 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
       }
       break;
 
-    case REMOVE:
+    case PATCHPRIOR:
       if (__value == null) {
-        unsetRemove();
+        unsetPatchPrior();
       } else {
-        setRemove((List<Short>)__value);
+        setPatchPrior((LateDefStructFieldPatch)__value);
       }
       break;
 
-    case PREPEND:
+    case ENSURE:
       if (__value == null) {
-        unsetPrepend();
+        unsetEnsure();
       } else {
-        setPrepend((List<Short>)__value);
+        setEnsure((LateDefStruct)__value);
       }
       break;
 
-    case APPEND:
+    case PATCH:
       if (__value == null) {
-        unsetAppend();
+        unsetPatch();
       } else {
-        setAppend((List<Short>)__value);
+        setPatch((LateDefStructFieldPatch)__value);
       }
       break;
 
@@ -403,14 +398,14 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     case CLEAR:
       return new Boolean(isClear());
 
-    case REMOVE:
-      return getRemove();
+    case PATCHPRIOR:
+      return getPatchPrior();
 
-    case PREPEND:
-      return getPrepend();
+    case ENSURE:
+      return getEnsure();
 
-    case APPEND:
-      return getAppend();
+    case PATCH:
+      return getPatch();
 
     default:
       throw new IllegalArgumentException("Field " + fieldID + " doesn't exist!");
@@ -423,30 +418,30 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN21Patch))
+    if (!(_that instanceof LateDefStructPatch))
       return false;
-    MyStructFieldN21Patch that = (MyStructFieldN21Patch)_that;
+    LateDefStructPatch that = (LateDefStructPatch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.clear, that.clear)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetPatchPrior(), that.isSetPatchPrior(), this.patchPrior, that.patchPrior)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetPrepend(), that.isSetPrepend(), this.prepend, that.prepend)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetEnsure(), that.isSetEnsure(), this.ensure, that.ensure)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetAppend(), that.isSetAppend(), this.append, that.append)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, remove, prepend, append});
+    return Arrays.deepHashCode(new Object[] {assign, clear, patchPrior, ensure, patch});
   }
 
   @Override
-  public int compareTo(MyStructFieldN21Patch other) {
+  public int compareTo(LateDefStructPatch other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -473,27 +468,27 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetRemove()).compareTo(other.isSetRemove());
+    lastComparison = Boolean.valueOf(isSetPatchPrior()).compareTo(other.isSetPatchPrior());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(remove, other.remove);
+    lastComparison = TBaseHelper.compareTo(patchPrior, other.patchPrior);
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetPrepend()).compareTo(other.isSetPrepend());
+    lastComparison = Boolean.valueOf(isSetEnsure()).compareTo(other.isSetEnsure());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(prepend, other.prepend);
+    lastComparison = TBaseHelper.compareTo(ensure, other.ensure);
     if (lastComparison != 0) { 
       return lastComparison;
     }
-    lastComparison = Boolean.valueOf(isSetAppend()).compareTo(other.isSetAppend());
+    lastComparison = Boolean.valueOf(isSetPatch()).compareTo(other.isSetPatch());
     if (lastComparison != 0) {
       return lastComparison;
     }
-    lastComparison = TBaseHelper.compareTo(append, other.append);
+    lastComparison = TBaseHelper.compareTo(patch, other.patch);
     if (lastComparison != 0) { 
       return lastComparison;
     }
@@ -512,20 +507,9 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
       switch (__field.id)
       {
         case ASSIGN:
-          if (__field.type == TType.LIST) {
-            {
-              TList _list13 = iprot.readListBegin();
-              this.assign = new ArrayList<Short>(Math.max(0, _list13.size));
-              for (int _i14 = 0; 
-                   (_list13.size < 0) ? iprot.peekList() : (_i14 < _list13.size); 
-                   ++_i14)
-              {
-                short _elem15;
-                _elem15 = iprot.readI16();
-                this.assign.add(_elem15);
-              }
-              iprot.readListEnd();
-            }
+          if (__field.type == TType.STRUCT) {
+            this.assign = new LateDefStruct();
+            this.assign.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -538,59 +522,26 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case REMOVE:
-          if (__field.type == TType.LIST) {
-            {
-              TList _list16 = iprot.readListBegin();
-              this.remove = new ArrayList<Short>(Math.max(0, _list16.size));
-              for (int _i17 = 0; 
-                   (_list16.size < 0) ? iprot.peekList() : (_i17 < _list16.size); 
-                   ++_i17)
-              {
-                short _elem18;
-                _elem18 = iprot.readI16();
-                this.remove.add(_elem18);
-              }
-              iprot.readListEnd();
-            }
+        case PATCHPRIOR:
+          if (__field.type == TType.STRUCT) {
+            this.patchPrior = new LateDefStructFieldPatch();
+            this.patchPrior.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case PREPEND:
-          if (__field.type == TType.LIST) {
-            {
-              TList _list19 = iprot.readListBegin();
-              this.prepend = new ArrayList<Short>(Math.max(0, _list19.size));
-              for (int _i20 = 0; 
-                   (_list19.size < 0) ? iprot.peekList() : (_i20 < _list19.size); 
-                   ++_i20)
-              {
-                short _elem21;
-                _elem21 = iprot.readI16();
-                this.prepend.add(_elem21);
-              }
-              iprot.readListEnd();
-            }
+        case ENSURE:
+          if (__field.type == TType.STRUCT) {
+            this.ensure = new LateDefStruct();
+            this.ensure.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case APPEND:
-          if (__field.type == TType.LIST) {
-            {
-              TList _list22 = iprot.readListBegin();
-              this.append = new ArrayList<Short>(Math.max(0, _list22.size));
-              for (int _i23 = 0; 
-                   (_list22.size < 0) ? iprot.peekList() : (_i23 < _list22.size); 
-                   ++_i23)
-              {
-                short _elem24;
-                _elem24 = iprot.readI16();
-                this.append.add(_elem24);
-              }
-              iprot.readListEnd();
-            }
+        case PATCH:
+          if (__field.type == TType.STRUCT) {
+            this.patch = new LateDefStructFieldPatch();
+            this.patch.read(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -615,50 +566,26 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     if (this.assign != null) {
       if (isSetAssign()) {
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
-        {
-          oprot.writeListBegin(new TList(TType.I16, this.assign.size()));
-          for (short _iter25 : this.assign)          {
-            oprot.writeI16(_iter25);
-          }
-          oprot.writeListEnd();
-        }
+        this.assign.write(oprot);
         oprot.writeFieldEnd();
       }
     }
     oprot.writeFieldBegin(CLEAR_FIELD_DESC);
     oprot.writeBool(this.clear);
     oprot.writeFieldEnd();
-    if (this.remove != null) {
-      oprot.writeFieldBegin(REMOVE_FIELD_DESC);
-      {
-        oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (short _iter26 : this.remove)        {
-          oprot.writeI16(_iter26);
-        }
-        oprot.writeListEnd();
-      }
+    if (this.patchPrior != null) {
+      oprot.writeFieldBegin(PATCH_PRIOR_FIELD_DESC);
+      this.patchPrior.write(oprot);
       oprot.writeFieldEnd();
     }
-    if (this.prepend != null) {
-      oprot.writeFieldBegin(PREPEND_FIELD_DESC);
-      {
-        oprot.writeListBegin(new TList(TType.I16, this.prepend.size()));
-        for (short _iter27 : this.prepend)        {
-          oprot.writeI16(_iter27);
-        }
-        oprot.writeListEnd();
-      }
+    if (this.ensure != null) {
+      oprot.writeFieldBegin(ENSURE_FIELD_DESC);
+      this.ensure.write(oprot);
       oprot.writeFieldEnd();
     }
-    if (this.append != null) {
-      oprot.writeFieldBegin(APPEND_FIELD_DESC);
-      {
-        oprot.writeListBegin(new TList(TType.I16, this.append.size()));
-        for (short _iter28 : this.append)        {
-          oprot.writeI16(_iter28);
-        }
-        oprot.writeListEnd();
-      }
+    if (this.patch != null) {
+      oprot.writeFieldBegin(PATCH_FIELD_DESC);
+      this.patch.write(oprot);
       oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
@@ -675,7 +602,7 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("MyStructFieldN21Patch");
+    StringBuilder sb = new StringBuilder("LateDefStructPatch");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -703,35 +630,35 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("remove");
+    sb.append("patchPrior");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getRemove() == null) {
+    if (this.getPatchPrior() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getRemove(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getPatchPrior(), indent + 1, prettyPrint));
     }
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("prepend");
+    sb.append("ensure");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getPrepend() == null) {
+    if (this.getEnsure() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getPrepend(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getEnsure(), indent + 1, prettyPrint));
     }
     first = false;
     if (!first) sb.append("," + newLine);
     sb.append(indentStr);
-    sb.append("append");
+    sb.append("patch");
     sb.append(space);
     sb.append(":").append(space);
-    if (this.getAppend() == null) {
+    if (this.getPatch() == null) {
       sb.append("null");
     } else {
-      sb.append(TBaseHelper.toString(this.getAppend(), indent + 1, prettyPrint));
+      sb.append(TBaseHelper.toString(this.getPatch(), indent + 1, prettyPrint));
     }
     first = false;
     sb.append(newLine + TBaseHelper.reduceIndent(indentStr));

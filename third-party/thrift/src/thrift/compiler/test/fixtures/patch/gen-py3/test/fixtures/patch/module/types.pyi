@@ -21,6 +21,13 @@ import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 __property__ = property
 
 
+class MyEnum(thrift.py3.types.Enum):
+    MyValue0: MyEnum = ...
+    def _to_python(self) -> "test.fixtures.patch.module.thrift_types.MyEnum": ...   # type: ignore
+    def _to_py3(self) -> MyEnum: ...
+    def _to_py_deprecated(self) -> int: ...
+
+
 class MyData(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         pass
@@ -149,7 +156,9 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optDoubleVal: bool
         optStringVal: bool
         optBinaryVal: bool
+        optEnumVal: bool
         optStructVal: bool
+        optLateStructVal: bool
         optListVal: bool
         optSetVal: bool
         optMapVal: bool
@@ -173,7 +182,13 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     binaryVal: Final[bytes] = ...
 
+    enumVal: Final[MyEnum] = ...
+
     structVal: Final[MyData] = ...
+
+    unionVal: Final[MyUnion] = ...
+
+    lateStructVal: Final[LateDefStruct] = ...
 
     optBoolVal: Final[_typing.Optional[bool]] = ...
 
@@ -193,15 +208,17 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     optBinaryVal: Final[_typing.Optional[bytes]] = ...
 
+    optEnumVal: Final[_typing.Optional[MyEnum]] = ...
+
     optStructVal: Final[_typing.Optional[MyData]] = ...
+
+    optLateStructVal: Final[_typing.Optional[LateDefStruct]] = ...
 
     optListVal: Final[_typing.Optional[_typing.Sequence[int]]] = ...
 
     optSetVal: Final[_typing.Optional[_typing.AbstractSet[str]]] = ...
 
     optMapVal: Final[_typing.Optional[_typing.Mapping[str, str]]] = ...
-
-    unionVal: Final[MyUnion] = ...
 
     def __init__(
         self, *,
@@ -214,7 +231,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         doubleVal: _typing.Optional[float]=None,
         stringVal: _typing.Optional[str]=None,
         binaryVal: _typing.Optional[bytes]=None,
+        enumVal: _typing.Optional[MyEnum]=None,
         structVal: _typing.Optional[MyData]=None,
+        unionVal: _typing.Optional[MyUnion]=None,
+        lateStructVal: _typing.Optional[LateDefStruct]=None,
         optBoolVal: _typing.Optional[bool]=None,
         optByteVal: _typing.Optional[int]=None,
         optI16Val: _typing.Optional[int]=None,
@@ -224,11 +244,12 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optDoubleVal: _typing.Optional[float]=None,
         optStringVal: _typing.Optional[str]=None,
         optBinaryVal: _typing.Optional[bytes]=None,
+        optEnumVal: _typing.Optional[MyEnum]=None,
         optStructVal: _typing.Optional[MyData]=None,
+        optLateStructVal: _typing.Optional[LateDefStruct]=None,
         optListVal: _typing.Optional[_typing.Sequence[int]]=None,
         optSetVal: _typing.Optional[_typing.AbstractSet[str]]=None,
-        optMapVal: _typing.Optional[_typing.Mapping[str, str]]=None,
-        unionVal: _typing.Optional[MyUnion]=None
+        optMapVal: _typing.Optional[_typing.Mapping[str, str]]=None
     ) -> None: ...
 
     def __call__(
@@ -242,7 +263,10 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         doubleVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         stringVal: _typing.Union[str, '__NotSet', None]=NOTSET,
         binaryVal: _typing.Union[bytes, '__NotSet', None]=NOTSET,
+        enumVal: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
         structVal: _typing.Union[MyData, '__NotSet', None]=NOTSET,
+        unionVal: _typing.Union[MyUnion, '__NotSet', None]=NOTSET,
+        lateStructVal: _typing.Union[LateDefStruct, '__NotSet', None]=NOTSET,
         optBoolVal: _typing.Union[bool, '__NotSet', None]=NOTSET,
         optByteVal: _typing.Union[int, '__NotSet', None]=NOTSET,
         optI16Val: _typing.Union[int, '__NotSet', None]=NOTSET,
@@ -252,11 +276,12 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optDoubleVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         optStringVal: _typing.Union[str, '__NotSet', None]=NOTSET,
         optBinaryVal: _typing.Union[bytes, '__NotSet', None]=NOTSET,
+        optEnumVal: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
         optStructVal: _typing.Union[MyData, '__NotSet', None]=NOTSET,
+        optLateStructVal: _typing.Union[LateDefStruct, '__NotSet', None]=NOTSET,
         optListVal: _typing.Union[_typing.Sequence[int], '__NotSet', None]=NOTSET,
         optSetVal: _typing.Union[_typing.AbstractSet[str], '__NotSet', None]=NOTSET,
-        optMapVal: _typing.Union[_typing.Mapping[str, str], '__NotSet', None]=NOTSET,
-        unionVal: _typing.Union[MyUnion, '__NotSet', None]=NOTSET
+        optMapVal: _typing.Union[_typing.Mapping[str, str], '__NotSet', None]=NOTSET
     ) -> MyStruct: ...
 
     def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MyStruct'], bytes]]: ...
@@ -271,6 +296,31 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     def _to_python(self) -> "test.fixtures.patch.module.thrift_types.MyStruct": ...   # type: ignore
     def _to_py3(self) -> MyStruct: ...
     def _to_py_deprecated(self) -> "module.ttypes.MyStruct": ...   # type: ignore
+
+class LateDefStruct(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        pass
+
+    def __init__(
+        self, 
+    ) -> None: ...
+
+    def __call__(
+        self, 
+    ) -> LateDefStruct: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['LateDefStruct'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'LateDefStruct') -> bool: ...
+    def __gt__(self, other: 'LateDefStruct') -> bool: ...
+    def __le__(self, other: 'LateDefStruct') -> bool: ...
+    def __ge__(self, other: 'LateDefStruct') -> bool: ...
+
+    def _to_python(self) -> "test.fixtures.patch.module.thrift_types.LateDefStruct": ...   # type: ignore
+    def _to_py3(self) -> LateDefStruct: ...
+    def _to_py_deprecated(self) -> "module.ttypes.LateDefStruct": ...   # type: ignore
 
 _List__i16T = _typing.TypeVar('_List__i16T', bound=_typing.Sequence[int])
 

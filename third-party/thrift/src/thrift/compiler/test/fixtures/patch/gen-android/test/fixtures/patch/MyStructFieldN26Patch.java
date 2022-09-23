@@ -24,8 +24,8 @@ import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN21Patch");
+public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN26Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.LIST, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
   private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
@@ -58,7 +58,7 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   public static final int PREPEND = 8;
   public static final int APPEND = 9;
 
-  public MyStructFieldN21Patch(
+  public MyStructFieldN26Patch(
       List<Short> assign,
       Boolean clear,
       List<Short> remove,
@@ -74,7 +74,7 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public MyStructFieldN21Patch(MyStructFieldN21Patch other) {
+  public MyStructFieldN26Patch(MyStructFieldN26Patch other) {
     if (other.isSetAssign()) {
       this.assign = TBaseHelper.deepCopy(other.assign);
     } else {
@@ -102,8 +102,8 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     }
   }
 
-  public MyStructFieldN21Patch deepCopy() {
-    return new MyStructFieldN21Patch(this);
+  public MyStructFieldN26Patch deepCopy() {
+    return new MyStructFieldN26Patch(this);
   }
 
   /**
@@ -172,9 +172,9 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof MyStructFieldN21Patch))
+    if (!(_that instanceof MyStructFieldN26Patch))
       return false;
-    MyStructFieldN21Patch that = (MyStructFieldN21Patch)_that;
+    MyStructFieldN26Patch that = (MyStructFieldN26Patch)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetAssign(), that.isSetAssign(), this.assign, that.assign)) { return false; }
 
@@ -199,7 +199,7 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     throw new TException("unimplemented in android immutable structure");
   }
 
-  public static MyStructFieldN21Patch deserialize(TProtocol iprot) throws TException {
+  public static MyStructFieldN26Patch deserialize(TProtocol iprot) throws TException {
     List<Short> tmp_assign = null;
     Boolean tmp_clear = null;
     List<Short> tmp_remove = null;
@@ -306,8 +306,8 @@ public class MyStructFieldN21Patch implements TBase, java.io.Serializable, Clone
     }
     iprot.readStructEnd();
 
-    MyStructFieldN21Patch _that;
-    _that = new MyStructFieldN21Patch(
+    MyStructFieldN26Patch _that;
+    _that = new MyStructFieldN26Patch(
       tmp_assign
       ,tmp_clear
       ,tmp_remove

@@ -89,8 +89,20 @@ cdef extern from * nogil:
 cdef extern from *:
     ctypedef bstring _folly_IOBuf "::folly::IOBuf"
 
+cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+    cdef cppclass EnumMetadata[T]:
+        @staticmethod
+        void gen(__fbthrift_cThriftMetadata &metadata)
+cdef extern from "src/gen-cpp2/module_types.h" namespace "::test::fixtures::patch":
+    cdef cppclass cMyEnum "::test::fixtures::patch::MyEnum":
+        pass
 
 
+
+
+
+cdef class MyEnum(thrift.py3.types.CompiledEnum):
+    pass
 
 cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
@@ -173,7 +185,10 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test
         __terse_field_ref[double] doubleVal_ref "doubleVal_ref" ()
         __terse_field_ref[string] stringVal_ref "stringVal_ref" ()
         __terse_field_ref[_folly_IOBuf] binaryVal_ref "binaryVal_ref" ()
+        __terse_field_ref[cMyEnum] enumVal_ref "enumVal_ref" ()
         __terse_field_ref[cMyData] structVal_ref "structVal_ref" ()
+        __terse_field_ref[cMyUnion] unionVal_ref "unionVal_ref" ()
+        __terse_field_ref[cLateDefStruct] lateStructVal_ref "lateStructVal_ref" ()
         __optional_field_ref[cbool] optBoolVal_ref "optBoolVal_ref" ()
         __optional_field_ref[cint8_t] optByteVal_ref "optByteVal_ref" ()
         __optional_field_ref[cint16_t] optI16Val_ref "optI16Val_ref" ()
@@ -183,11 +198,23 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test
         __optional_field_ref[double] optDoubleVal_ref "optDoubleVal_ref" ()
         __optional_field_ref[string] optStringVal_ref "optStringVal_ref" ()
         __optional_field_ref[_folly_IOBuf] optBinaryVal_ref "optBinaryVal_ref" ()
+        __optional_field_ref[cMyEnum] optEnumVal_ref "optEnumVal_ref" ()
         __optional_field_ref[cMyData] optStructVal_ref "optStructVal_ref" ()
+        __optional_field_ref[cLateDefStruct] optLateStructVal_ref "optLateStructVal_ref" ()
         __optional_field_ref[vector[cint16_t]] optListVal_ref "optListVal_ref" ()
         __optional_field_ref[cset[string]] optSetVal_ref "optSetVal_ref" ()
         __optional_field_ref[cmap[string,string]] optMapVal_ref "optMapVal_ref" ()
-        __terse_field_ref[cMyUnion] unionVal_ref "unionVal_ref" ()
+
+
+    cdef cppclass cLateDefStruct "::test::fixtures::patch::LateDefStruct":
+        cLateDefStruct() except +
+        cLateDefStruct(const cLateDefStruct&) except +
+        bint operator==(cLateDefStruct&)
+        bint operator!=(cLateDefStruct&)
+        bint operator<(cLateDefStruct&)
+        bint operator>(cLateDefStruct&)
+        bint operator<=(cLateDefStruct&)
+        bint operator>=(cLateDefStruct&)
 
 
 
@@ -259,7 +286,10 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object doubleVal_impl(self)
     cdef inline object stringVal_impl(self)
     cdef inline object binaryVal_impl(self)
+    cdef inline object enumVal_impl(self)
     cdef inline object structVal_impl(self)
+    cdef inline object unionVal_impl(self)
+    cdef inline object lateStructVal_impl(self)
     cdef inline object optBoolVal_impl(self)
     cdef inline object optByteVal_impl(self)
     cdef inline object optI16Val_impl(self)
@@ -269,20 +299,34 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object optDoubleVal_impl(self)
     cdef inline object optStringVal_impl(self)
     cdef inline object optBinaryVal_impl(self)
+    cdef inline object optEnumVal_impl(self)
     cdef inline object optStructVal_impl(self)
+    cdef inline object optLateStructVal_impl(self)
     cdef inline object optListVal_impl(self)
     cdef inline object optSetVal_impl(self)
     cdef inline object optMapVal_impl(self)
-    cdef inline object unionVal_impl(self)
+    cdef object __fbthrift_cached_enumVal
     cdef MyData __fbthrift_cached_structVal
+    cdef MyUnion __fbthrift_cached_unionVal
+    cdef LateDefStruct __fbthrift_cached_lateStructVal
+    cdef object __fbthrift_cached_optEnumVal
     cdef MyData __fbthrift_cached_optStructVal
+    cdef LateDefStruct __fbthrift_cached_optLateStructVal
     cdef List__i16 __fbthrift_cached_optListVal
     cdef Set__string __fbthrift_cached_optSetVal
     cdef Map__string_string __fbthrift_cached_optMapVal
-    cdef MyUnion __fbthrift_cached_unionVal
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMyStruct])
+
+
+
+cdef class LateDefStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[cLateDefStruct] _cpp_obj
+    cdef _fbthrift_types_fields.__LateDefStruct_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cLateDefStruct])
 
 
 cdef class List__i16(thrift.py3.types.List):

@@ -9,6 +9,36 @@
 namespace fixtures\patch;
 
 /**
+ * Original thrift enum:-
+ * MyEnum
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyEnum'))>>
+enum MyEnum: int {
+  MyValue0 = 0;
+}
+
+class MyEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return \tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "module.MyEnum",
+        "elements" => dict[
+          0 => "MyValue0",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
  * Original thrift struct:-
  * MyData
  */
@@ -659,54 +689,82 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'is_binary' => true,
     ),
     -10 => shape(
+      'var' => 'enumVal',
+      'is_terse' => true,
+      'type' => \TType::I32,
+      'enum' => \fixtures\patch\MyEnum::class,
+    ),
+    -11 => shape(
       'var' => 'structVal',
       'is_terse' => true,
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyData::class,
     ),
-    -11 => shape(
+    -12 => shape(
+      'var' => 'unionVal',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyUnion::class,
+    ),
+    -13 => shape(
+      'var' => 'lateStructVal',
+      'is_terse' => true,
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStruct::class,
+    ),
+    -14 => shape(
       'var' => 'optBoolVal',
       'type' => \TType::BOOL,
     ),
-    -12 => shape(
+    -15 => shape(
       'var' => 'optByteVal',
       'type' => \TType::BYTE,
     ),
-    -13 => shape(
+    -16 => shape(
       'var' => 'optI16Val',
       'type' => \TType::I16,
     ),
-    -14 => shape(
+    -17 => shape(
       'var' => 'optI32Val',
       'type' => \TType::I32,
     ),
-    -15 => shape(
+    -18 => shape(
       'var' => 'optI64Val',
       'type' => \TType::I64,
     ),
-    -16 => shape(
+    -19 => shape(
       'var' => 'optFloatVal',
       'type' => \TType::FLOAT,
     ),
-    -17 => shape(
+    -20 => shape(
       'var' => 'optDoubleVal',
       'type' => \TType::DOUBLE,
     ),
-    -18 => shape(
+    -21 => shape(
       'var' => 'optStringVal',
       'type' => \TType::STRING,
     ),
-    -19 => shape(
+    -22 => shape(
       'var' => 'optBinaryVal',
       'type' => \TType::STRING,
       'is_binary' => true,
     ),
-    -20 => shape(
+    -23 => shape(
+      'var' => 'optEnumVal',
+      'type' => \TType::I32,
+      'enum' => \fixtures\patch\MyEnum::class,
+    ),
+    -24 => shape(
       'var' => 'optStructVal',
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyData::class,
     ),
-    -21 => shape(
+    -25 => shape(
+      'var' => 'optLateStructVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStruct::class,
+    ),
+    -26 => shape(
       'var' => 'optListVal',
       'type' => \TType::LST,
       'etype' => \TType::I16,
@@ -715,7 +773,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       ),
       'format' => 'collection',
     ),
-    -22 => shape(
+    -27 => shape(
       'var' => 'optSetVal',
       'type' => \TType::SET,
       'etype' => \TType::STRING,
@@ -724,7 +782,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       ),
       'format' => 'collection',
     ),
-    -23 => shape(
+    -28 => shape(
       'var' => 'optMapVal',
       'type' => \TType::MAP,
       'ktype' => \TType::STRING,
@@ -737,12 +795,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       ),
       'format' => 'collection',
     ),
-    -24 => shape(
-      'var' => 'unionVal',
-      'is_terse' => true,
-      'type' => \TType::STRUCT,
-      'class' => \fixtures\patch\MyUnion::class,
-    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'boolVal' => -1,
@@ -754,21 +806,25 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     'doubleVal' => -7,
     'stringVal' => -8,
     'binaryVal' => -9,
-    'structVal' => -10,
-    'optBoolVal' => -11,
-    'optByteVal' => -12,
-    'optI16Val' => -13,
-    'optI32Val' => -14,
-    'optI64Val' => -15,
-    'optFloatVal' => -16,
-    'optDoubleVal' => -17,
-    'optStringVal' => -18,
-    'optBinaryVal' => -19,
-    'optStructVal' => -20,
-    'optListVal' => -21,
-    'optSetVal' => -22,
-    'optMapVal' => -23,
-    'unionVal' => -24,
+    'enumVal' => -10,
+    'structVal' => -11,
+    'unionVal' => -12,
+    'lateStructVal' => -13,
+    'optBoolVal' => -14,
+    'optByteVal' => -15,
+    'optI16Val' => -16,
+    'optI32Val' => -17,
+    'optI64Val' => -18,
+    'optFloatVal' => -19,
+    'optDoubleVal' => -20,
+    'optStringVal' => -21,
+    'optBinaryVal' => -22,
+    'optEnumVal' => -23,
+    'optStructVal' => -24,
+    'optLateStructVal' => -25,
+    'optListVal' => -26,
+    'optSetVal' => -27,
+    'optMapVal' => -28,
   ];
 
   const type TConstructorShape = shape(
@@ -781,7 +837,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ?'doubleVal' => ?float,
     ?'stringVal' => ?string,
     ?'binaryVal' => ?string,
+    ?'enumVal' => ?\fixtures\patch\MyEnum,
     ?'structVal' => ?\fixtures\patch\MyData,
+    ?'unionVal' => ?\fixtures\patch\MyUnion,
+    ?'lateStructVal' => ?\fixtures\patch\LateDefStruct,
     ?'optBoolVal' => ?bool,
     ?'optByteVal' => ?int,
     ?'optI16Val' => ?int,
@@ -791,11 +850,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ?'optDoubleVal' => ?float,
     ?'optStringVal' => ?string,
     ?'optBinaryVal' => ?string,
+    ?'optEnumVal' => ?\fixtures\patch\MyEnum,
     ?'optStructVal' => ?\fixtures\patch\MyData,
+    ?'optLateStructVal' => ?\fixtures\patch\LateDefStruct,
     ?'optListVal' => ?Vector<int>,
     ?'optSetVal' => ?Set<string>,
     ?'optMapVal' => ?Map<string, string>,
-    ?'unionVal' => ?\fixtures\patch\MyUnion,
   );
 
   const type TShape = shape(
@@ -808,7 +868,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     'doubleVal' => float,
     'stringVal' => string,
     'binaryVal' => string,
+    ?'enumVal' => ?\fixtures\patch\MyEnum,
     ?'structVal' => ?\fixtures\patch\MyData::TShape,
+    ?'unionVal' => ?\fixtures\patch\MyUnion::TShape,
+    ?'lateStructVal' => ?\fixtures\patch\LateDefStruct::TShape,
     ?'optBoolVal' => ?bool,
     ?'optByteVal' => ?int,
     ?'optI16Val' => ?int,
@@ -818,14 +881,15 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     ?'optDoubleVal' => ?float,
     ?'optStringVal' => ?string,
     ?'optBinaryVal' => ?string,
+    ?'optEnumVal' => ?\fixtures\patch\MyEnum,
     ?'optStructVal' => ?\fixtures\patch\MyData::TShape,
+    ?'optLateStructVal' => ?\fixtures\patch\LateDefStruct::TShape,
     ?'optListVal' => ?vec<int>,
     ?'optSetVal' => ?dict<string, bool>,
     ?'optMapVal' => ?dict<string, string>,
-    ?'unionVal' => ?\fixtures\patch\MyUnion::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 6259378322162674958;
+  const int STRUCTURAL_ID = 1570331448749914702;
   /**
    * Original thrift field:-
    * -1: bool boolVal
@@ -873,81 +937,101 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   public string $binaryVal;
   /**
    * Original thrift field:-
-   * -10: struct module.MyData structVal
+   * -10: enum module.MyEnum enumVal
+   */
+  public ?\fixtures\patch\MyEnum $enumVal;
+  /**
+   * Original thrift field:-
+   * -11: struct module.MyData structVal
    */
   public ?\fixtures\patch\MyData $structVal;
   /**
    * Original thrift field:-
-   * -11: bool optBoolVal
+   * -12: struct module.MyUnion unionVal
+   */
+  public ?\fixtures\patch\MyUnion $unionVal;
+  /**
+   * Original thrift field:-
+   * -13: struct module.LateDefStruct lateStructVal
+   */
+  public ?\fixtures\patch\LateDefStruct $lateStructVal;
+  /**
+   * Original thrift field:-
+   * -14: bool optBoolVal
    */
   public ?bool $optBoolVal;
   /**
    * Original thrift field:-
-   * -12: byte optByteVal
+   * -15: byte optByteVal
    */
   public ?int $optByteVal;
   /**
    * Original thrift field:-
-   * -13: i16 optI16Val
+   * -16: i16 optI16Val
    */
   public ?int $optI16Val;
   /**
    * Original thrift field:-
-   * -14: i32 optI32Val
+   * -17: i32 optI32Val
    */
   public ?int $optI32Val;
   /**
    * Original thrift field:-
-   * -15: i64 optI64Val
+   * -18: i64 optI64Val
    */
   public ?int $optI64Val;
   /**
    * Original thrift field:-
-   * -16: float optFloatVal
+   * -19: float optFloatVal
    */
   public ?float $optFloatVal;
   /**
    * Original thrift field:-
-   * -17: double optDoubleVal
+   * -20: double optDoubleVal
    */
   public ?float $optDoubleVal;
   /**
    * Original thrift field:-
-   * -18: string optStringVal
+   * -21: string optStringVal
    */
   public ?string $optStringVal;
   /**
    * Original thrift field:-
-   * -19: binary optBinaryVal
+   * -22: binary optBinaryVal
    */
   public ?string $optBinaryVal;
   /**
    * Original thrift field:-
-   * -20: struct module.MyData optStructVal
+   * -23: enum module.MyEnum optEnumVal
+   */
+  public ?\fixtures\patch\MyEnum $optEnumVal;
+  /**
+   * Original thrift field:-
+   * -24: struct module.MyData optStructVal
    */
   public ?\fixtures\patch\MyData $optStructVal;
   /**
    * Original thrift field:-
-   * -21: list<i16> optListVal
+   * -25: struct module.LateDefStruct optLateStructVal
+   */
+  public ?\fixtures\patch\LateDefStruct $optLateStructVal;
+  /**
+   * Original thrift field:-
+   * -26: list<i16> optListVal
    */
   public ?Vector<int> $optListVal;
   /**
    * Original thrift field:-
-   * -22: set<string> optSetVal
+   * -27: set<string> optSetVal
    */
   public ?Set<string> $optSetVal;
   /**
    * Original thrift field:-
-   * -23: map<string, string> optMapVal
+   * -28: map<string, string> optMapVal
    */
   public ?Map<string, string> $optMapVal;
-  /**
-   * Original thrift field:-
-   * -24: struct module.MyUnion unionVal
-   */
-  public ?\fixtures\patch\MyUnion $unionVal;
 
-  public function __construct(?bool $boolVal = null, ?int $byteVal = null, ?int $i16Val = null, ?int $i32Val = null, ?int $i64Val = null, ?float $floatVal = null, ?float $doubleVal = null, ?string $stringVal = null, ?string $binaryVal = null, ?\fixtures\patch\MyData $structVal = null, ?bool $optBoolVal = null, ?int $optByteVal = null, ?int $optI16Val = null, ?int $optI32Val = null, ?int $optI64Val = null, ?float $optFloatVal = null, ?float $optDoubleVal = null, ?string $optStringVal = null, ?string $optBinaryVal = null, ?\fixtures\patch\MyData $optStructVal = null, ?Vector<int> $optListVal = null, ?Set<string> $optSetVal = null, ?Map<string, string> $optMapVal = null, ?\fixtures\patch\MyUnion $unionVal = null)[] {
+  public function __construct(?bool $boolVal = null, ?int $byteVal = null, ?int $i16Val = null, ?int $i32Val = null, ?int $i64Val = null, ?float $floatVal = null, ?float $doubleVal = null, ?string $stringVal = null, ?string $binaryVal = null, ?\fixtures\patch\MyEnum $enumVal = null, ?\fixtures\patch\MyData $structVal = null, ?\fixtures\patch\MyUnion $unionVal = null, ?\fixtures\patch\LateDefStruct $lateStructVal = null, ?bool $optBoolVal = null, ?int $optByteVal = null, ?int $optI16Val = null, ?int $optI32Val = null, ?int $optI64Val = null, ?float $optFloatVal = null, ?float $optDoubleVal = null, ?string $optStringVal = null, ?string $optBinaryVal = null, ?\fixtures\patch\MyEnum $optEnumVal = null, ?\fixtures\patch\MyData $optStructVal = null, ?\fixtures\patch\LateDefStruct $optLateStructVal = null, ?Vector<int> $optListVal = null, ?Set<string> $optSetVal = null, ?Map<string, string> $optMapVal = null)[] {
     $this->boolVal = $boolVal ?? false;
     $this->byteVal = $byteVal ?? 0;
     $this->i16Val = $i16Val ?? 0;
@@ -957,7 +1041,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     $this->doubleVal = $doubleVal ?? 0.0;
     $this->stringVal = $stringVal ?? '';
     $this->binaryVal = $binaryVal ?? '';
+    $this->enumVal = $enumVal;
     $this->structVal = $structVal;
+    $this->unionVal = $unionVal;
+    $this->lateStructVal = $lateStructVal;
     $this->optBoolVal = $optBoolVal;
     $this->optByteVal = $optByteVal;
     $this->optI16Val = $optI16Val;
@@ -967,11 +1054,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     $this->optDoubleVal = $optDoubleVal;
     $this->optStringVal = $optStringVal;
     $this->optBinaryVal = $optBinaryVal;
+    $this->optEnumVal = $optEnumVal;
     $this->optStructVal = $optStructVal;
+    $this->optLateStructVal = $optLateStructVal;
     $this->optListVal = $optListVal;
     $this->optSetVal = $optSetVal;
     $this->optMapVal = $optMapVal;
-    $this->unionVal = $unionVal;
   }
 
   public static function withDefaultValues()[]: this {
@@ -989,7 +1077,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       Shapes::idx($shape, 'doubleVal'),
       Shapes::idx($shape, 'stringVal'),
       Shapes::idx($shape, 'binaryVal'),
+      Shapes::idx($shape, 'enumVal'),
       Shapes::idx($shape, 'structVal'),
+      Shapes::idx($shape, 'unionVal'),
+      Shapes::idx($shape, 'lateStructVal'),
       Shapes::idx($shape, 'optBoolVal'),
       Shapes::idx($shape, 'optByteVal'),
       Shapes::idx($shape, 'optI16Val'),
@@ -999,11 +1090,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       Shapes::idx($shape, 'optDoubleVal'),
       Shapes::idx($shape, 'optStringVal'),
       Shapes::idx($shape, 'optBinaryVal'),
+      Shapes::idx($shape, 'optEnumVal'),
       Shapes::idx($shape, 'optStructVal'),
+      Shapes::idx($shape, 'optLateStructVal'),
       Shapes::idx($shape, 'optListVal'),
       Shapes::idx($shape, 'optSetVal'),
       Shapes::idx($shape, 'optMapVal'),
-      Shapes::idx($shape, 'unionVal'),
     );
   }
 
@@ -1120,6 +1212,21 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               "id" => -10,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.MyEnum",
+                    )
+                  ),
+                )
+              ),
+              "name" => "enumVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -11,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
                       "name" => "module.MyData",
@@ -1132,7 +1239,46 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -11,
+              "id" => -12,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.MyUnion",
+                    )
+                  ),
+                )
+              ),
+              "name" => "unionVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -13,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStruct",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.LateDefStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "lateStructVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -14,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
@@ -1144,7 +1290,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -12,
+              "id" => -15,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
@@ -1156,7 +1302,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -13,
+              "id" => -16,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
@@ -1168,7 +1314,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -14,
+              "id" => -17,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
@@ -1180,7 +1326,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -15,
+              "id" => -18,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
@@ -1192,7 +1338,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -16,
+              "id" => -19,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_FLOAT_TYPE,
@@ -1204,7 +1350,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -17,
+              "id" => -20,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
@@ -1216,7 +1362,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -18,
+              "id" => -21,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
@@ -1228,7 +1374,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -19,
+              "id" => -22,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
@@ -1240,7 +1386,23 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -20,
+              "id" => -23,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.MyEnum",
+                    )
+                  ),
+                )
+              ),
+              "name" => "optEnumVal",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -24,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -1256,7 +1418,32 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -21,
+              "id" => -25,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStruct",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.LateDefStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "optLateStructVal",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -26,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_list" => \tmeta_ThriftListType::fromShape(
@@ -1276,7 +1463,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -22,
+              "id" => -27,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_set" => \tmeta_ThriftSetType::fromShape(
@@ -1296,7 +1483,7 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -23,
+              "id" => -28,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_map" => \tmeta_ThriftMapType::fromShape(
@@ -1317,21 +1504,6 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
               ),
               "name" => "optMapVal",
               "is_optional" => true,
-            )
-          ),
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => -24,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.MyUnion",
-                    )
-                  ),
-                )
-              ),
-              "name" => "unionVal",
             )
           ),
         ],
@@ -1364,7 +1536,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       $shape['doubleVal'],
       $shape['stringVal'],
       $shape['binaryVal'],
+      Shapes::idx($shape, 'enumVal'),
       Shapes::idx($shape, 'structVal') === null ? null : (\fixtures\patch\MyData::__fromShape($shape['structVal'])),
+      Shapes::idx($shape, 'unionVal') === null ? null : (\fixtures\patch\MyUnion::__fromShape($shape['unionVal'])),
+      Shapes::idx($shape, 'lateStructVal') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['lateStructVal'])),
       Shapes::idx($shape, 'optBoolVal'),
       Shapes::idx($shape, 'optByteVal'),
       Shapes::idx($shape, 'optI16Val'),
@@ -1374,11 +1549,12 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       Shapes::idx($shape, 'optDoubleVal'),
       Shapes::idx($shape, 'optStringVal'),
       Shapes::idx($shape, 'optBinaryVal'),
+      Shapes::idx($shape, 'optEnumVal'),
       Shapes::idx($shape, 'optStructVal') === null ? null : (\fixtures\patch\MyData::__fromShape($shape['optStructVal'])),
+      Shapes::idx($shape, 'optLateStructVal') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['optLateStructVal'])),
       Shapes::idx($shape, 'optListVal') === null ? null : ((new Vector($shape['optListVal']))),
       Shapes::idx($shape, 'optSetVal') === null ? null : (new Set(Keyset\keys($shape['optSetVal']))),
       Shapes::idx($shape, 'optMapVal') === null ? null : ((new Map($shape['optMapVal']))),
-      Shapes::idx($shape, 'unionVal') === null ? null : (\fixtures\patch\MyUnion::__fromShape($shape['unionVal'])),
     );
   }
 
@@ -1393,7 +1569,10 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'doubleVal' => $this->doubleVal,
       'stringVal' => $this->stringVal,
       'binaryVal' => $this->binaryVal,
+      'enumVal' => $this->enumVal,
       'structVal' => $this->structVal?->__toShape(),
+      'unionVal' => $this->unionVal?->__toShape(),
+      'lateStructVal' => $this->lateStructVal?->__toShape(),
       'optBoolVal' => $this->optBoolVal,
       'optByteVal' => $this->optByteVal,
       'optI16Val' => $this->optI16Val,
@@ -1403,14 +1582,15 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       'optDoubleVal' => $this->optDoubleVal,
       'optStringVal' => $this->optStringVal,
       'optBinaryVal' => $this->optBinaryVal,
+      'optEnumVal' => $this->optEnumVal,
       'optStructVal' => $this->optStructVal?->__toShape(),
+      'optLateStructVal' => $this->optLateStructVal?->__toShape(),
       'optListVal' => $this->optListVal
         |> $$ === null ? null : vec($$),
       'optSetVal' => $this->optSetVal
         |> $$ === null ? null : ThriftUtil::toDArray(Dict\fill_keys($$->toValuesArray(), true), static::class),
       'optMapVal' => $this->optMapVal
         |> $$ === null ? null : dict($$),
-      'unionVal' => $this->unionVal?->__toShape(),
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -1466,37 +1646,52 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     if (idx($parsed, 'binaryVal') !== null) {
       $this->binaryVal = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binaryVal']);
     }
+    if (idx($parsed, 'enumVal') !== null) {
+      $this->enumVal = \fixtures\patch\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyEnum>($parsed['enumVal']));
+    }
     if (idx($parsed, 'structVal') !== null) {
       $_tmp3 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyData>($parsed['structVal']));
       $_tmp4 = \fixtures\patch\MyData::withDefaultValues();
       $_tmp4->readFromJson($_tmp3);
       $this->structVal = $_tmp4;
     }
+    if (idx($parsed, 'unionVal') !== null) {
+      $_tmp5 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyUnion>($parsed['unionVal']));
+      $_tmp6 = \fixtures\patch\MyUnion::withDefaultValues();
+      $_tmp6->readFromJson($_tmp5);
+      $this->unionVal = $_tmp6;
+    }
+    if (idx($parsed, 'lateStructVal') !== null) {
+      $_tmp7 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStruct>($parsed['lateStructVal']));
+      $_tmp8 = \fixtures\patch\LateDefStruct::withDefaultValues();
+      $_tmp8->readFromJson($_tmp7);
+      $this->lateStructVal = $_tmp8;
+    }
     if (idx($parsed, 'optBoolVal') !== null) {
       $this->optBoolVal = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['optBoolVal']);
     }
     if (idx($parsed, 'optByteVal') !== null) {
-      $_tmp5 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optByteVal']);
-      if ($_tmp5 > 0x7f) {
+      $_tmp9 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optByteVal']);
+      if ($_tmp9 > 0x7f) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
-        $this->optByteVal = (int)$_tmp5;
+        $this->optByteVal = (int)$_tmp9;
       }
     }
     if (idx($parsed, 'optI16Val') !== null) {
-      $_tmp6 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optI16Val']);
-      if ($_tmp6 > 0x7fff) {
+      $_tmp10 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optI16Val']);
+      if ($_tmp10 > 0x7fff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
-        $this->optI16Val = (int)$_tmp6;
+        $this->optI16Val = (int)$_tmp10;
       }
     }
     if (idx($parsed, 'optI32Val') !== null) {
-      $_tmp7 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optI32Val']);
-      if ($_tmp7 > 0x7fffffff) {
+      $_tmp11 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['optI32Val']);
+      if ($_tmp11 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
-        $this->optI32Val = (int)$_tmp7;
+        $this->optI32Val = (int)$_tmp11;
       }
     }
     if (idx($parsed, 'optI64Val') !== null) {
@@ -1514,53 +1709,134 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     if (idx($parsed, 'optBinaryVal') !== null) {
       $this->optBinaryVal = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['optBinaryVal']);
     }
+    if (idx($parsed, 'optEnumVal') !== null) {
+      $this->optEnumVal = \fixtures\patch\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyEnum>($parsed['optEnumVal']));
+    }
     if (idx($parsed, 'optStructVal') !== null) {
-      $_tmp8 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyData>($parsed['optStructVal']));
-      $_tmp9 = \fixtures\patch\MyData::withDefaultValues();
-      $_tmp9->readFromJson($_tmp8);
-      $this->optStructVal = $_tmp9;
+      $_tmp12 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyData>($parsed['optStructVal']));
+      $_tmp13 = \fixtures\patch\MyData::withDefaultValues();
+      $_tmp13->readFromJson($_tmp12);
+      $this->optStructVal = $_tmp13;
+    }
+    if (idx($parsed, 'optLateStructVal') !== null) {
+      $_tmp14 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStruct>($parsed['optLateStructVal']));
+      $_tmp15 = \fixtures\patch\LateDefStruct::withDefaultValues();
+      $_tmp15->readFromJson($_tmp14);
+      $this->optLateStructVal = $_tmp15;
     }
     if (idx($parsed, 'optListVal') !== null) {
-      $_json13 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['optListVal']);
-      $_container14 = Vector {};
-      foreach($_json13 as $_key11 => $_value12) {
-        $_elem15 = 0;
-        $_tmp16 = (int)$_value12;
-        if ($_tmp16 > 0x7fff) {
+      $_json19 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['optListVal']);
+      $_container20 = Vector {};
+      foreach($_json19 as $_key17 => $_value18) {
+        $_elem21 = 0;
+        $_tmp22 = (int)$_value18;
+        if ($_tmp22 > 0x7fff) {
           throw new \TProtocolException("number exceeds limit in field");
         } else {
-          $_elem15 = (int)$_tmp16;
+          $_elem21 = (int)$_tmp22;
         }
-        $_container14 []= $_elem15;
+        $_container20 []= $_elem21;
       }
-      $this->optListVal = $_container14;
+      $this->optListVal = $_container20;
     }
     if (idx($parsed, 'optSetVal') !== null) {
-      $_json20 = HH\FIXME\UNSAFE_CAST<mixed, Set<string>>($parsed['optSetVal']);
-      $_container21 = Set {};
-      foreach($_json20 as $_key18 => $_value19) {
-        $_elem22 = '';
-        $_elem22 = $_value19;
-        $_container21->add($_elem22);
+      $_json26 = HH\FIXME\UNSAFE_CAST<mixed, Set<string>>($parsed['optSetVal']);
+      $_container27 = Set {};
+      foreach($_json26 as $_key24 => $_value25) {
+        $_elem28 = '';
+        $_elem28 = $_value25;
+        $_container27->add($_elem28);
       }
-      $this->optSetVal = $_container21;
+      $this->optSetVal = $_container27;
     }
     if (idx($parsed, 'optMapVal') !== null) {
-      $_json26 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, string>>($parsed['optMapVal']);
-      $_container27 = Map {};
-      foreach($_json26 as $_key24 => $_value25) {
-        $_value28 = '';
-        $_value28 = $_value25;
-        $_container27[$_key24] = $_value28;
+      $_json32 = HH\FIXME\UNSAFE_CAST<mixed, Map<string, string>>($parsed['optMapVal']);
+      $_container33 = Map {};
+      foreach($_json32 as $_key30 => $_value31) {
+        $_value34 = '';
+        $_value34 = $_value31;
+        $_container33[$_key30] = $_value34;
       }
-      $this->optMapVal = $_container27;
+      $this->optMapVal = $_container33;
     }
-    if (idx($parsed, 'unionVal') !== null) {
-      $_tmp29 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyUnion>($parsed['unionVal']));
-      $_tmp30 = \fixtures\patch\MyUnion::withDefaultValues();
-      $_tmp30->readFromJson($_tmp29);
-      $this->unionVal = $_tmp30;
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * LateDefStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStruct'))>>
+class LateDefStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LateDefStruct';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.LateDefStruct",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
     }
+
   }
 
 }
@@ -3099,79 +3375,99 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       'class' => \thrift\op\BinaryPatch::class,
     ),
     -10 => shape(
+      'var' => 'enumVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyStructFieldN10Patch::class,
+    ),
+    -11 => shape(
       'var' => 'structVal',
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyDataPatch::class,
     ),
-    -11 => shape(
+    -12 => shape(
+      'var' => 'unionVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyUnionPatch::class,
+    ),
+    -13 => shape(
+      'var' => 'lateStructVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStructPatch::class,
+    ),
+    -14 => shape(
       'var' => 'optBoolVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BoolPatch::class,
     ),
-    -12 => shape(
+    -15 => shape(
       'var' => 'optByteVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BytePatch::class,
     ),
-    -13 => shape(
+    -16 => shape(
       'var' => 'optI16Val',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I16Patch::class,
     ),
-    -14 => shape(
+    -17 => shape(
       'var' => 'optI32Val',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I32Patch::class,
     ),
-    -15 => shape(
+    -18 => shape(
       'var' => 'optI64Val',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\I64Patch::class,
     ),
-    -16 => shape(
+    -19 => shape(
       'var' => 'optFloatVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\FloatPatch::class,
     ),
-    -17 => shape(
+    -20 => shape(
       'var' => 'optDoubleVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\DoublePatch::class,
     ),
-    -18 => shape(
+    -21 => shape(
       'var' => 'optStringVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\StringPatch::class,
     ),
-    -19 => shape(
+    -22 => shape(
       'var' => 'optBinaryVal',
       'type' => \TType::STRUCT,
       'class' => \thrift\op\BinaryPatch::class,
     ),
-    -20 => shape(
-      'var' => 'optStructVal',
-      'type' => \TType::STRUCT,
-      'class' => \fixtures\patch\MyDataPatch::class,
-    ),
-    -21 => shape(
-      'var' => 'optListVal',
-      'type' => \TType::STRUCT,
-      'class' => \fixtures\patch\MyStructFieldN21Patch::class,
-    ),
-    -22 => shape(
-      'var' => 'optSetVal',
-      'type' => \TType::STRUCT,
-      'class' => \fixtures\patch\MyStructFieldN22Patch::class,
-    ),
     -23 => shape(
-      'var' => 'optMapVal',
+      'var' => 'optEnumVal',
       'type' => \TType::STRUCT,
       'class' => \fixtures\patch\MyStructFieldN23Patch::class,
     ),
     -24 => shape(
-      'var' => 'unionVal',
+      'var' => 'optStructVal',
       'type' => \TType::STRUCT,
-      'class' => \fixtures\patch\MyUnionPatch::class,
+      'class' => \fixtures\patch\MyDataPatch::class,
+    ),
+    -25 => shape(
+      'var' => 'optLateStructVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStructPatch::class,
+    ),
+    -26 => shape(
+      'var' => 'optListVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyStructFieldN26Patch::class,
+    ),
+    -27 => shape(
+      'var' => 'optSetVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyStructFieldN27Patch::class,
+    ),
+    -28 => shape(
+      'var' => 'optMapVal',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\MyStructFieldN28Patch::class,
     ),
   ];
   const dict<string, int> FIELDMAP = dict[
@@ -3184,21 +3480,25 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     'doubleVal' => -7,
     'stringVal' => -8,
     'binaryVal' => -9,
-    'structVal' => -10,
-    'optBoolVal' => -11,
-    'optByteVal' => -12,
-    'optI16Val' => -13,
-    'optI32Val' => -14,
-    'optI64Val' => -15,
-    'optFloatVal' => -16,
-    'optDoubleVal' => -17,
-    'optStringVal' => -18,
-    'optBinaryVal' => -19,
-    'optStructVal' => -20,
-    'optListVal' => -21,
-    'optSetVal' => -22,
-    'optMapVal' => -23,
-    'unionVal' => -24,
+    'enumVal' => -10,
+    'structVal' => -11,
+    'unionVal' => -12,
+    'lateStructVal' => -13,
+    'optBoolVal' => -14,
+    'optByteVal' => -15,
+    'optI16Val' => -16,
+    'optI32Val' => -17,
+    'optI64Val' => -18,
+    'optFloatVal' => -19,
+    'optDoubleVal' => -20,
+    'optStringVal' => -21,
+    'optBinaryVal' => -22,
+    'optEnumVal' => -23,
+    'optStructVal' => -24,
+    'optLateStructVal' => -25,
+    'optListVal' => -26,
+    'optSetVal' => -27,
+    'optMapVal' => -28,
   ];
 
   const type TConstructorShape = shape(
@@ -3211,7 +3511,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     ?'doubleVal' => ?\thrift\op\DoublePatch,
     ?'stringVal' => ?\thrift\op\StringPatch,
     ?'binaryVal' => ?\thrift\op\BinaryPatch,
+    ?'enumVal' => ?\fixtures\patch\MyStructFieldN10Patch,
     ?'structVal' => ?\fixtures\patch\MyDataPatch,
+    ?'unionVal' => ?\fixtures\patch\MyUnionPatch,
+    ?'lateStructVal' => ?\fixtures\patch\LateDefStructPatch,
     ?'optBoolVal' => ?\thrift\op\BoolPatch,
     ?'optByteVal' => ?\thrift\op\BytePatch,
     ?'optI16Val' => ?\thrift\op\I16Patch,
@@ -3221,11 +3524,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     ?'optDoubleVal' => ?\thrift\op\DoublePatch,
     ?'optStringVal' => ?\thrift\op\StringPatch,
     ?'optBinaryVal' => ?\thrift\op\BinaryPatch,
+    ?'optEnumVal' => ?\fixtures\patch\MyStructFieldN23Patch,
     ?'optStructVal' => ?\fixtures\patch\MyDataPatch,
-    ?'optListVal' => ?\fixtures\patch\MyStructFieldN21Patch,
-    ?'optSetVal' => ?\fixtures\patch\MyStructFieldN22Patch,
-    ?'optMapVal' => ?\fixtures\patch\MyStructFieldN23Patch,
-    ?'unionVal' => ?\fixtures\patch\MyUnionPatch,
+    ?'optLateStructVal' => ?\fixtures\patch\LateDefStructPatch,
+    ?'optListVal' => ?\fixtures\patch\MyStructFieldN26Patch,
+    ?'optSetVal' => ?\fixtures\patch\MyStructFieldN27Patch,
+    ?'optMapVal' => ?\fixtures\patch\MyStructFieldN28Patch,
   );
 
   const type TShape = shape(
@@ -3238,7 +3542,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     ?'doubleVal' => ?\thrift\op\DoublePatch::TShape,
     ?'stringVal' => ?\thrift\op\StringPatch::TShape,
     ?'binaryVal' => ?\thrift\op\BinaryPatch::TShape,
+    ?'enumVal' => ?\fixtures\patch\MyStructFieldN10Patch::TShape,
     ?'structVal' => ?\fixtures\patch\MyDataPatch::TShape,
+    ?'unionVal' => ?\fixtures\patch\MyUnionPatch::TShape,
+    ?'lateStructVal' => ?\fixtures\patch\LateDefStructPatch::TShape,
     ?'optBoolVal' => ?\thrift\op\BoolPatch::TShape,
     ?'optByteVal' => ?\thrift\op\BytePatch::TShape,
     ?'optI16Val' => ?\thrift\op\I16Patch::TShape,
@@ -3248,14 +3555,15 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     ?'optDoubleVal' => ?\thrift\op\DoublePatch::TShape,
     ?'optStringVal' => ?\thrift\op\StringPatch::TShape,
     ?'optBinaryVal' => ?\thrift\op\BinaryPatch::TShape,
+    ?'optEnumVal' => ?\fixtures\patch\MyStructFieldN23Patch::TShape,
     ?'optStructVal' => ?\fixtures\patch\MyDataPatch::TShape,
-    ?'optListVal' => ?\fixtures\patch\MyStructFieldN21Patch::TShape,
-    ?'optSetVal' => ?\fixtures\patch\MyStructFieldN22Patch::TShape,
-    ?'optMapVal' => ?\fixtures\patch\MyStructFieldN23Patch::TShape,
-    ?'unionVal' => ?\fixtures\patch\MyUnionPatch::TShape,
+    ?'optLateStructVal' => ?\fixtures\patch\LateDefStructPatch::TShape,
+    ?'optListVal' => ?\fixtures\patch\MyStructFieldN26Patch::TShape,
+    ?'optSetVal' => ?\fixtures\patch\MyStructFieldN27Patch::TShape,
+    ?'optMapVal' => ?\fixtures\patch\MyStructFieldN28Patch::TShape,
     ...
   );
-  const int STRUCTURAL_ID = 1184269259104737577;
+  const int STRUCTURAL_ID = 5178145407888136906;
   /**
    * Original thrift field:-
    * -1: struct patch.BoolPatch boolVal
@@ -3303,81 +3611,101 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
   public ?\thrift\op\BinaryPatch $binaryVal;
   /**
    * Original thrift field:-
-   * -10: struct module.MyDataPatch structVal
+   * -10: struct module.MyStructFieldN10Patch enumVal
+   */
+  public ?\fixtures\patch\MyStructFieldN10Patch $enumVal;
+  /**
+   * Original thrift field:-
+   * -11: struct module.MyDataPatch structVal
    */
   public ?\fixtures\patch\MyDataPatch $structVal;
   /**
    * Original thrift field:-
-   * -11: struct patch.BoolPatch optBoolVal
+   * -12: struct module.MyUnionPatch unionVal
+   */
+  public ?\fixtures\patch\MyUnionPatch $unionVal;
+  /**
+   * Original thrift field:-
+   * -13: struct module.LateDefStructPatch lateStructVal
+   */
+  public ?\fixtures\patch\LateDefStructPatch $lateStructVal;
+  /**
+   * Original thrift field:-
+   * -14: struct patch.BoolPatch optBoolVal
    */
   public ?\thrift\op\BoolPatch $optBoolVal;
   /**
    * Original thrift field:-
-   * -12: struct patch.BytePatch optByteVal
+   * -15: struct patch.BytePatch optByteVal
    */
   public ?\thrift\op\BytePatch $optByteVal;
   /**
    * Original thrift field:-
-   * -13: struct patch.I16Patch optI16Val
+   * -16: struct patch.I16Patch optI16Val
    */
   public ?\thrift\op\I16Patch $optI16Val;
   /**
    * Original thrift field:-
-   * -14: struct patch.I32Patch optI32Val
+   * -17: struct patch.I32Patch optI32Val
    */
   public ?\thrift\op\I32Patch $optI32Val;
   /**
    * Original thrift field:-
-   * -15: struct patch.I64Patch optI64Val
+   * -18: struct patch.I64Patch optI64Val
    */
   public ?\thrift\op\I64Patch $optI64Val;
   /**
    * Original thrift field:-
-   * -16: struct patch.FloatPatch optFloatVal
+   * -19: struct patch.FloatPatch optFloatVal
    */
   public ?\thrift\op\FloatPatch $optFloatVal;
   /**
    * Original thrift field:-
-   * -17: struct patch.DoublePatch optDoubleVal
+   * -20: struct patch.DoublePatch optDoubleVal
    */
   public ?\thrift\op\DoublePatch $optDoubleVal;
   /**
    * Original thrift field:-
-   * -18: struct patch.StringPatch optStringVal
+   * -21: struct patch.StringPatch optStringVal
    */
   public ?\thrift\op\StringPatch $optStringVal;
   /**
    * Original thrift field:-
-   * -19: struct patch.BinaryPatch optBinaryVal
+   * -22: struct patch.BinaryPatch optBinaryVal
    */
   public ?\thrift\op\BinaryPatch $optBinaryVal;
   /**
    * Original thrift field:-
-   * -20: struct module.MyDataPatch optStructVal
+   * -23: struct module.MyStructFieldN23Patch optEnumVal
+   */
+  public ?\fixtures\patch\MyStructFieldN23Patch $optEnumVal;
+  /**
+   * Original thrift field:-
+   * -24: struct module.MyDataPatch optStructVal
    */
   public ?\fixtures\patch\MyDataPatch $optStructVal;
   /**
    * Original thrift field:-
-   * -21: struct module.MyStructFieldN21Patch optListVal
+   * -25: struct module.LateDefStructPatch optLateStructVal
    */
-  public ?\fixtures\patch\MyStructFieldN21Patch $optListVal;
+  public ?\fixtures\patch\LateDefStructPatch $optLateStructVal;
   /**
    * Original thrift field:-
-   * -22: struct module.MyStructFieldN22Patch optSetVal
+   * -26: struct module.MyStructFieldN26Patch optListVal
    */
-  public ?\fixtures\patch\MyStructFieldN22Patch $optSetVal;
+  public ?\fixtures\patch\MyStructFieldN26Patch $optListVal;
   /**
    * Original thrift field:-
-   * -23: struct module.MyStructFieldN23Patch optMapVal
+   * -27: struct module.MyStructFieldN27Patch optSetVal
    */
-  public ?\fixtures\patch\MyStructFieldN23Patch $optMapVal;
+  public ?\fixtures\patch\MyStructFieldN27Patch $optSetVal;
   /**
    * Original thrift field:-
-   * -24: struct module.MyUnionPatch unionVal
+   * -28: struct module.MyStructFieldN28Patch optMapVal
    */
-  public ?\fixtures\patch\MyUnionPatch $unionVal;
+  public ?\fixtures\patch\MyStructFieldN28Patch $optMapVal;
 
-  public function __construct(?\thrift\op\BoolPatch $boolVal = null, ?\thrift\op\BytePatch $byteVal = null, ?\thrift\op\I16Patch $i16Val = null, ?\thrift\op\I32Patch $i32Val = null, ?\thrift\op\I64Patch $i64Val = null, ?\thrift\op\FloatPatch $floatVal = null, ?\thrift\op\DoublePatch $doubleVal = null, ?\thrift\op\StringPatch $stringVal = null, ?\thrift\op\BinaryPatch $binaryVal = null, ?\fixtures\patch\MyDataPatch $structVal = null, ?\thrift\op\BoolPatch $optBoolVal = null, ?\thrift\op\BytePatch $optByteVal = null, ?\thrift\op\I16Patch $optI16Val = null, ?\thrift\op\I32Patch $optI32Val = null, ?\thrift\op\I64Patch $optI64Val = null, ?\thrift\op\FloatPatch $optFloatVal = null, ?\thrift\op\DoublePatch $optDoubleVal = null, ?\thrift\op\StringPatch $optStringVal = null, ?\thrift\op\BinaryPatch $optBinaryVal = null, ?\fixtures\patch\MyDataPatch $optStructVal = null, ?\fixtures\patch\MyStructFieldN21Patch $optListVal = null, ?\fixtures\patch\MyStructFieldN22Patch $optSetVal = null, ?\fixtures\patch\MyStructFieldN23Patch $optMapVal = null, ?\fixtures\patch\MyUnionPatch $unionVal = null)[] {
+  public function __construct(?\thrift\op\BoolPatch $boolVal = null, ?\thrift\op\BytePatch $byteVal = null, ?\thrift\op\I16Patch $i16Val = null, ?\thrift\op\I32Patch $i32Val = null, ?\thrift\op\I64Patch $i64Val = null, ?\thrift\op\FloatPatch $floatVal = null, ?\thrift\op\DoublePatch $doubleVal = null, ?\thrift\op\StringPatch $stringVal = null, ?\thrift\op\BinaryPatch $binaryVal = null, ?\fixtures\patch\MyStructFieldN10Patch $enumVal = null, ?\fixtures\patch\MyDataPatch $structVal = null, ?\fixtures\patch\MyUnionPatch $unionVal = null, ?\fixtures\patch\LateDefStructPatch $lateStructVal = null, ?\thrift\op\BoolPatch $optBoolVal = null, ?\thrift\op\BytePatch $optByteVal = null, ?\thrift\op\I16Patch $optI16Val = null, ?\thrift\op\I32Patch $optI32Val = null, ?\thrift\op\I64Patch $optI64Val = null, ?\thrift\op\FloatPatch $optFloatVal = null, ?\thrift\op\DoublePatch $optDoubleVal = null, ?\thrift\op\StringPatch $optStringVal = null, ?\thrift\op\BinaryPatch $optBinaryVal = null, ?\fixtures\patch\MyStructFieldN23Patch $optEnumVal = null, ?\fixtures\patch\MyDataPatch $optStructVal = null, ?\fixtures\patch\LateDefStructPatch $optLateStructVal = null, ?\fixtures\patch\MyStructFieldN26Patch $optListVal = null, ?\fixtures\patch\MyStructFieldN27Patch $optSetVal = null, ?\fixtures\patch\MyStructFieldN28Patch $optMapVal = null)[] {
     $this->boolVal = $boolVal;
     $this->byteVal = $byteVal;
     $this->i16Val = $i16Val;
@@ -3387,7 +3715,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     $this->doubleVal = $doubleVal;
     $this->stringVal = $stringVal;
     $this->binaryVal = $binaryVal;
+    $this->enumVal = $enumVal;
     $this->structVal = $structVal;
+    $this->unionVal = $unionVal;
+    $this->lateStructVal = $lateStructVal;
     $this->optBoolVal = $optBoolVal;
     $this->optByteVal = $optByteVal;
     $this->optI16Val = $optI16Val;
@@ -3397,11 +3728,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
     $this->optDoubleVal = $optDoubleVal;
     $this->optStringVal = $optStringVal;
     $this->optBinaryVal = $optBinaryVal;
+    $this->optEnumVal = $optEnumVal;
     $this->optStructVal = $optStructVal;
+    $this->optLateStructVal = $optLateStructVal;
     $this->optListVal = $optListVal;
     $this->optSetVal = $optSetVal;
     $this->optMapVal = $optMapVal;
-    $this->unionVal = $unionVal;
   }
 
   public static function withDefaultValues()[]: this {
@@ -3419,7 +3751,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       Shapes::idx($shape, 'doubleVal'),
       Shapes::idx($shape, 'stringVal'),
       Shapes::idx($shape, 'binaryVal'),
+      Shapes::idx($shape, 'enumVal'),
       Shapes::idx($shape, 'structVal'),
+      Shapes::idx($shape, 'unionVal'),
+      Shapes::idx($shape, 'lateStructVal'),
       Shapes::idx($shape, 'optBoolVal'),
       Shapes::idx($shape, 'optByteVal'),
       Shapes::idx($shape, 'optI16Val'),
@@ -3429,11 +3764,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       Shapes::idx($shape, 'optDoubleVal'),
       Shapes::idx($shape, 'optStringVal'),
       Shapes::idx($shape, 'optBinaryVal'),
+      Shapes::idx($shape, 'optEnumVal'),
       Shapes::idx($shape, 'optStructVal'),
+      Shapes::idx($shape, 'optLateStructVal'),
       Shapes::idx($shape, 'optListVal'),
       Shapes::idx($shape, 'optSetVal'),
       Shapes::idx($shape, 'optMapVal'),
-      Shapes::idx($shape, 'unionVal'),
     );
   }
 
@@ -3588,6 +3924,21 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
+                      "name" => "module.MyStructFieldN10Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "enumVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -11,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
                       "name" => "module.MyDataPatch",
                     )
                   ),
@@ -3598,7 +3949,46 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -11,
+              "id" => -12,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.MyUnionPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "unionVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -13,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStructPatch",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.LateDefStructPatch",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "lateStructVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -14,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3613,7 +4003,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -12,
+              "id" => -15,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3628,7 +4018,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -13,
+              "id" => -16,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3643,7 +4033,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -14,
+              "id" => -17,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3658,7 +4048,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -15,
+              "id" => -18,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3673,7 +4063,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -16,
+              "id" => -19,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3688,7 +4078,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -17,
+              "id" => -20,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3703,7 +4093,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -18,
+              "id" => -21,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3718,7 +4108,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -19,
+              "id" => -22,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3733,7 +4123,22 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -20,
+              "id" => -23,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.MyStructFieldN23Patch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "optEnumVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -24,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
@@ -3748,12 +4153,36 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -21,
+              "id" => -25,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStructPatch",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.LateDefStructPatch",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "optLateStructVal",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => -26,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "module.MyStructFieldN21Patch",
+                      "name" => "module.MyStructFieldN26Patch",
                     )
                   ),
                 )
@@ -3763,12 +4192,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -22,
+              "id" => -27,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "module.MyStructFieldN22Patch",
+                      "name" => "module.MyStructFieldN27Patch",
                     )
                   ),
                 )
@@ -3778,32 +4207,17 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
           ),
           \tmeta_ThriftField::fromShape(
             shape(
-              "id" => -23,
+              "id" => -28,
               "type" => \tmeta_ThriftType::fromShape(
                 shape(
                   "t_struct" => \tmeta_ThriftStructType::fromShape(
                     shape(
-                      "name" => "module.MyStructFieldN23Patch",
+                      "name" => "module.MyStructFieldN28Patch",
                     )
                   ),
                 )
               ),
               "name" => "optMapVal",
-            )
-          ),
-          \tmeta_ThriftField::fromShape(
-            shape(
-              "id" => -24,
-              "type" => \tmeta_ThriftType::fromShape(
-                shape(
-                  "t_struct" => \tmeta_ThriftStructType::fromShape(
-                    shape(
-                      "name" => "module.MyUnionPatch",
-                    )
-                  ),
-                )
-              ),
-              "name" => "unionVal",
             )
           ),
         ],
@@ -3932,6 +4346,18 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             ),
           ],
         ),
+        'enumVal' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "underlyingName" => "MyStructFieldN10PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
         'structVal' => shape(
           'field' => dict[],
           'type' => dict[
@@ -3939,6 +4365,30 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
               shape(
                 "name" => "::apache::thrift::op::detail::StructPatchAdapter",
                 "underlyingName" => "MyDataPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'unionVal' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
+                "underlyingName" => "MyUnionPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'lateStructVal' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "underlyingName" => "LateDefStructPatchStruct",
                 "extraNamespace" => "",
               )
             ),
@@ -4052,6 +4502,18 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             ),
           ],
         ),
+        'optEnumVal' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+                "underlyingName" => "MyStructFieldN23PatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
         'optStructVal' => shape(
           'field' => dict[],
           'type' => dict[
@@ -4064,13 +4526,25 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             ),
           ],
         ),
+        'optLateStructVal' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+                "underlyingName" => "LateDefStructPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
         'optListVal' => shape(
           'field' => dict[],
           'type' => dict[
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::ListPatchAdapter",
-                "underlyingName" => "MyStructFieldN21PatchStruct",
+                "underlyingName" => "MyStructFieldN26PatchStruct",
                 "extraNamespace" => "",
               )
             ),
@@ -4082,7 +4556,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::SetPatchAdapter",
-                "underlyingName" => "MyStructFieldN22PatchStruct",
+                "underlyingName" => "MyStructFieldN27PatchStruct",
                 "extraNamespace" => "",
               )
             ),
@@ -4094,19 +4568,7 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::apache::thrift::op::detail::MapPatchAdapter",
-                "underlyingName" => "MyStructFieldN23PatchStruct",
-                "extraNamespace" => "",
-              )
-            ),
-          ],
-        ),
-        'unionVal' => shape(
-          'field' => dict[],
-          'type' => dict[
-            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
-              shape(
-                "name" => "::apache::thrift::op::detail::UnionPatchAdapter",
-                "underlyingName" => "MyUnionPatchStruct",
+                "underlyingName" => "MyStructFieldN28PatchStruct",
                 "extraNamespace" => "",
               )
             ),
@@ -4127,7 +4589,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       Shapes::idx($shape, 'doubleVal') === null ? null : (\thrift\op\DoublePatch::__fromShape($shape['doubleVal'])),
       Shapes::idx($shape, 'stringVal') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['stringVal'])),
       Shapes::idx($shape, 'binaryVal') === null ? null : (\thrift\op\BinaryPatch::__fromShape($shape['binaryVal'])),
+      Shapes::idx($shape, 'enumVal') === null ? null : (\fixtures\patch\MyStructFieldN10Patch::__fromShape($shape['enumVal'])),
       Shapes::idx($shape, 'structVal') === null ? null : (\fixtures\patch\MyDataPatch::__fromShape($shape['structVal'])),
+      Shapes::idx($shape, 'unionVal') === null ? null : (\fixtures\patch\MyUnionPatch::__fromShape($shape['unionVal'])),
+      Shapes::idx($shape, 'lateStructVal') === null ? null : (\fixtures\patch\LateDefStructPatch::__fromShape($shape['lateStructVal'])),
       Shapes::idx($shape, 'optBoolVal') === null ? null : (\thrift\op\BoolPatch::__fromShape($shape['optBoolVal'])),
       Shapes::idx($shape, 'optByteVal') === null ? null : (\thrift\op\BytePatch::__fromShape($shape['optByteVal'])),
       Shapes::idx($shape, 'optI16Val') === null ? null : (\thrift\op\I16Patch::__fromShape($shape['optI16Val'])),
@@ -4137,11 +4602,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       Shapes::idx($shape, 'optDoubleVal') === null ? null : (\thrift\op\DoublePatch::__fromShape($shape['optDoubleVal'])),
       Shapes::idx($shape, 'optStringVal') === null ? null : (\thrift\op\StringPatch::__fromShape($shape['optStringVal'])),
       Shapes::idx($shape, 'optBinaryVal') === null ? null : (\thrift\op\BinaryPatch::__fromShape($shape['optBinaryVal'])),
+      Shapes::idx($shape, 'optEnumVal') === null ? null : (\fixtures\patch\MyStructFieldN23Patch::__fromShape($shape['optEnumVal'])),
       Shapes::idx($shape, 'optStructVal') === null ? null : (\fixtures\patch\MyDataPatch::__fromShape($shape['optStructVal'])),
-      Shapes::idx($shape, 'optListVal') === null ? null : (\fixtures\patch\MyStructFieldN21Patch::__fromShape($shape['optListVal'])),
-      Shapes::idx($shape, 'optSetVal') === null ? null : (\fixtures\patch\MyStructFieldN22Patch::__fromShape($shape['optSetVal'])),
-      Shapes::idx($shape, 'optMapVal') === null ? null : (\fixtures\patch\MyStructFieldN23Patch::__fromShape($shape['optMapVal'])),
-      Shapes::idx($shape, 'unionVal') === null ? null : (\fixtures\patch\MyUnionPatch::__fromShape($shape['unionVal'])),
+      Shapes::idx($shape, 'optLateStructVal') === null ? null : (\fixtures\patch\LateDefStructPatch::__fromShape($shape['optLateStructVal'])),
+      Shapes::idx($shape, 'optListVal') === null ? null : (\fixtures\patch\MyStructFieldN26Patch::__fromShape($shape['optListVal'])),
+      Shapes::idx($shape, 'optSetVal') === null ? null : (\fixtures\patch\MyStructFieldN27Patch::__fromShape($shape['optSetVal'])),
+      Shapes::idx($shape, 'optMapVal') === null ? null : (\fixtures\patch\MyStructFieldN28Patch::__fromShape($shape['optMapVal'])),
     );
   }
 
@@ -4156,7 +4622,10 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       'doubleVal' => $this->doubleVal?->__toShape(),
       'stringVal' => $this->stringVal?->__toShape(),
       'binaryVal' => $this->binaryVal?->__toShape(),
+      'enumVal' => $this->enumVal?->__toShape(),
       'structVal' => $this->structVal?->__toShape(),
+      'unionVal' => $this->unionVal?->__toShape(),
+      'lateStructVal' => $this->lateStructVal?->__toShape(),
       'optBoolVal' => $this->optBoolVal?->__toShape(),
       'optByteVal' => $this->optByteVal?->__toShape(),
       'optI16Val' => $this->optI16Val?->__toShape(),
@@ -4166,11 +4635,12 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       'optDoubleVal' => $this->optDoubleVal?->__toShape(),
       'optStringVal' => $this->optStringVal?->__toShape(),
       'optBinaryVal' => $this->optBinaryVal?->__toShape(),
+      'optEnumVal' => $this->optEnumVal?->__toShape(),
       'optStructVal' => $this->optStructVal?->__toShape(),
+      'optLateStructVal' => $this->optLateStructVal?->__toShape(),
       'optListVal' => $this->optListVal?->__toShape(),
       'optSetVal' => $this->optSetVal?->__toShape(),
       'optMapVal' => $this->optMapVal?->__toShape(),
-      'unionVal' => $this->unionVal?->__toShape(),
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -4238,95 +4708,119 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
       $_tmp17->readFromJson($_tmp16);
       $this->binaryVal = $_tmp17;
     }
-    if (idx($parsed, 'structVal') !== null) {
-      $_tmp18 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyDataPatch>($parsed['structVal']));
-      $_tmp19 = \fixtures\patch\MyDataPatch::withDefaultValues();
+    if (idx($parsed, 'enumVal') !== null) {
+      $_tmp18 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN10Patch>($parsed['enumVal']));
+      $_tmp19 = \fixtures\patch\MyStructFieldN10Patch::withDefaultValues();
       $_tmp19->readFromJson($_tmp18);
-      $this->structVal = $_tmp19;
+      $this->enumVal = $_tmp19;
     }
-    if (idx($parsed, 'optBoolVal') !== null) {
-      $_tmp20 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BoolPatch>($parsed['optBoolVal']));
-      $_tmp21 = \thrift\op\BoolPatch::withDefaultValues();
+    if (idx($parsed, 'structVal') !== null) {
+      $_tmp20 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyDataPatch>($parsed['structVal']));
+      $_tmp21 = \fixtures\patch\MyDataPatch::withDefaultValues();
       $_tmp21->readFromJson($_tmp20);
-      $this->optBoolVal = $_tmp21;
-    }
-    if (idx($parsed, 'optByteVal') !== null) {
-      $_tmp22 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BytePatch>($parsed['optByteVal']));
-      $_tmp23 = \thrift\op\BytePatch::withDefaultValues();
-      $_tmp23->readFromJson($_tmp22);
-      $this->optByteVal = $_tmp23;
-    }
-    if (idx($parsed, 'optI16Val') !== null) {
-      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I16Patch>($parsed['optI16Val']));
-      $_tmp25 = \thrift\op\I16Patch::withDefaultValues();
-      $_tmp25->readFromJson($_tmp24);
-      $this->optI16Val = $_tmp25;
-    }
-    if (idx($parsed, 'optI32Val') !== null) {
-      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I32Patch>($parsed['optI32Val']));
-      $_tmp27 = \thrift\op\I32Patch::withDefaultValues();
-      $_tmp27->readFromJson($_tmp26);
-      $this->optI32Val = $_tmp27;
-    }
-    if (idx($parsed, 'optI64Val') !== null) {
-      $_tmp28 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I64Patch>($parsed['optI64Val']));
-      $_tmp29 = \thrift\op\I64Patch::withDefaultValues();
-      $_tmp29->readFromJson($_tmp28);
-      $this->optI64Val = $_tmp29;
-    }
-    if (idx($parsed, 'optFloatVal') !== null) {
-      $_tmp30 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\FloatPatch>($parsed['optFloatVal']));
-      $_tmp31 = \thrift\op\FloatPatch::withDefaultValues();
-      $_tmp31->readFromJson($_tmp30);
-      $this->optFloatVal = $_tmp31;
-    }
-    if (idx($parsed, 'optDoubleVal') !== null) {
-      $_tmp32 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\DoublePatch>($parsed['optDoubleVal']));
-      $_tmp33 = \thrift\op\DoublePatch::withDefaultValues();
-      $_tmp33->readFromJson($_tmp32);
-      $this->optDoubleVal = $_tmp33;
-    }
-    if (idx($parsed, 'optStringVal') !== null) {
-      $_tmp34 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\StringPatch>($parsed['optStringVal']));
-      $_tmp35 = \thrift\op\StringPatch::withDefaultValues();
-      $_tmp35->readFromJson($_tmp34);
-      $this->optStringVal = $_tmp35;
-    }
-    if (idx($parsed, 'optBinaryVal') !== null) {
-      $_tmp36 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BinaryPatch>($parsed['optBinaryVal']));
-      $_tmp37 = \thrift\op\BinaryPatch::withDefaultValues();
-      $_tmp37->readFromJson($_tmp36);
-      $this->optBinaryVal = $_tmp37;
-    }
-    if (idx($parsed, 'optStructVal') !== null) {
-      $_tmp38 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyDataPatch>($parsed['optStructVal']));
-      $_tmp39 = \fixtures\patch\MyDataPatch::withDefaultValues();
-      $_tmp39->readFromJson($_tmp38);
-      $this->optStructVal = $_tmp39;
-    }
-    if (idx($parsed, 'optListVal') !== null) {
-      $_tmp40 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN21Patch>($parsed['optListVal']));
-      $_tmp41 = \fixtures\patch\MyStructFieldN21Patch::withDefaultValues();
-      $_tmp41->readFromJson($_tmp40);
-      $this->optListVal = $_tmp41;
-    }
-    if (idx($parsed, 'optSetVal') !== null) {
-      $_tmp42 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN22Patch>($parsed['optSetVal']));
-      $_tmp43 = \fixtures\patch\MyStructFieldN22Patch::withDefaultValues();
-      $_tmp43->readFromJson($_tmp42);
-      $this->optSetVal = $_tmp43;
-    }
-    if (idx($parsed, 'optMapVal') !== null) {
-      $_tmp44 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN23Patch>($parsed['optMapVal']));
-      $_tmp45 = \fixtures\patch\MyStructFieldN23Patch::withDefaultValues();
-      $_tmp45->readFromJson($_tmp44);
-      $this->optMapVal = $_tmp45;
+      $this->structVal = $_tmp21;
     }
     if (idx($parsed, 'unionVal') !== null) {
-      $_tmp46 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyUnionPatch>($parsed['unionVal']));
-      $_tmp47 = \fixtures\patch\MyUnionPatch::withDefaultValues();
+      $_tmp22 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyUnionPatch>($parsed['unionVal']));
+      $_tmp23 = \fixtures\patch\MyUnionPatch::withDefaultValues();
+      $_tmp23->readFromJson($_tmp22);
+      $this->unionVal = $_tmp23;
+    }
+    if (idx($parsed, 'lateStructVal') !== null) {
+      $_tmp24 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStructPatch>($parsed['lateStructVal']));
+      $_tmp25 = \fixtures\patch\LateDefStructPatch::withDefaultValues();
+      $_tmp25->readFromJson($_tmp24);
+      $this->lateStructVal = $_tmp25;
+    }
+    if (idx($parsed, 'optBoolVal') !== null) {
+      $_tmp26 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BoolPatch>($parsed['optBoolVal']));
+      $_tmp27 = \thrift\op\BoolPatch::withDefaultValues();
+      $_tmp27->readFromJson($_tmp26);
+      $this->optBoolVal = $_tmp27;
+    }
+    if (idx($parsed, 'optByteVal') !== null) {
+      $_tmp28 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BytePatch>($parsed['optByteVal']));
+      $_tmp29 = \thrift\op\BytePatch::withDefaultValues();
+      $_tmp29->readFromJson($_tmp28);
+      $this->optByteVal = $_tmp29;
+    }
+    if (idx($parsed, 'optI16Val') !== null) {
+      $_tmp30 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I16Patch>($parsed['optI16Val']));
+      $_tmp31 = \thrift\op\I16Patch::withDefaultValues();
+      $_tmp31->readFromJson($_tmp30);
+      $this->optI16Val = $_tmp31;
+    }
+    if (idx($parsed, 'optI32Val') !== null) {
+      $_tmp32 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I32Patch>($parsed['optI32Val']));
+      $_tmp33 = \thrift\op\I32Patch::withDefaultValues();
+      $_tmp33->readFromJson($_tmp32);
+      $this->optI32Val = $_tmp33;
+    }
+    if (idx($parsed, 'optI64Val') !== null) {
+      $_tmp34 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\I64Patch>($parsed['optI64Val']));
+      $_tmp35 = \thrift\op\I64Patch::withDefaultValues();
+      $_tmp35->readFromJson($_tmp34);
+      $this->optI64Val = $_tmp35;
+    }
+    if (idx($parsed, 'optFloatVal') !== null) {
+      $_tmp36 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\FloatPatch>($parsed['optFloatVal']));
+      $_tmp37 = \thrift\op\FloatPatch::withDefaultValues();
+      $_tmp37->readFromJson($_tmp36);
+      $this->optFloatVal = $_tmp37;
+    }
+    if (idx($parsed, 'optDoubleVal') !== null) {
+      $_tmp38 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\DoublePatch>($parsed['optDoubleVal']));
+      $_tmp39 = \thrift\op\DoublePatch::withDefaultValues();
+      $_tmp39->readFromJson($_tmp38);
+      $this->optDoubleVal = $_tmp39;
+    }
+    if (idx($parsed, 'optStringVal') !== null) {
+      $_tmp40 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\StringPatch>($parsed['optStringVal']));
+      $_tmp41 = \thrift\op\StringPatch::withDefaultValues();
+      $_tmp41->readFromJson($_tmp40);
+      $this->optStringVal = $_tmp41;
+    }
+    if (idx($parsed, 'optBinaryVal') !== null) {
+      $_tmp42 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\op\BinaryPatch>($parsed['optBinaryVal']));
+      $_tmp43 = \thrift\op\BinaryPatch::withDefaultValues();
+      $_tmp43->readFromJson($_tmp42);
+      $this->optBinaryVal = $_tmp43;
+    }
+    if (idx($parsed, 'optEnumVal') !== null) {
+      $_tmp44 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN23Patch>($parsed['optEnumVal']));
+      $_tmp45 = \fixtures\patch\MyStructFieldN23Patch::withDefaultValues();
+      $_tmp45->readFromJson($_tmp44);
+      $this->optEnumVal = $_tmp45;
+    }
+    if (idx($parsed, 'optStructVal') !== null) {
+      $_tmp46 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyDataPatch>($parsed['optStructVal']));
+      $_tmp47 = \fixtures\patch\MyDataPatch::withDefaultValues();
       $_tmp47->readFromJson($_tmp46);
-      $this->unionVal = $_tmp47;
+      $this->optStructVal = $_tmp47;
+    }
+    if (idx($parsed, 'optLateStructVal') !== null) {
+      $_tmp48 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStructPatch>($parsed['optLateStructVal']));
+      $_tmp49 = \fixtures\patch\LateDefStructPatch::withDefaultValues();
+      $_tmp49->readFromJson($_tmp48);
+      $this->optLateStructVal = $_tmp49;
+    }
+    if (idx($parsed, 'optListVal') !== null) {
+      $_tmp50 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN26Patch>($parsed['optListVal']));
+      $_tmp51 = \fixtures\patch\MyStructFieldN26Patch::withDefaultValues();
+      $_tmp51->readFromJson($_tmp50);
+      $this->optListVal = $_tmp51;
+    }
+    if (idx($parsed, 'optSetVal') !== null) {
+      $_tmp52 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN27Patch>($parsed['optSetVal']));
+      $_tmp53 = \fixtures\patch\MyStructFieldN27Patch::withDefaultValues();
+      $_tmp53->readFromJson($_tmp52);
+      $this->optSetVal = $_tmp53;
+    }
+    if (idx($parsed, 'optMapVal') !== null) {
+      $_tmp54 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldN28Patch>($parsed['optMapVal']));
+      $_tmp55 = \fixtures\patch\MyStructFieldN28Patch::withDefaultValues();
+      $_tmp55->readFromJson($_tmp54);
+      $this->optMapVal = $_tmp55;
     }
   }
 
@@ -4334,10 +4828,326 @@ class MyStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruc
 
 /**
  * Original thrift struct:-
- * MyStructFieldN21Patch
+ * MyStructFieldN10Patch
  */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN21Patch'))>>
-class MyStructFieldN21Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN10Patch'))>>
+class MyStructFieldN10Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::I32,
+      'enum' => \fixtures\patch\MyEnum::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\MyEnum,
+    ?'clear' => ?bool,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\MyEnum,
+    'clear' => bool,
+    ...
+  );
+  const int STRUCTURAL_ID = 1042349483945124076;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: enum module.MyEnum assign
+   */
+  public ?\fixtures\patch\MyEnum $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+
+  public function __construct(?\fixtures\patch\MyEnum $assign = null, ?bool $clear = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyStructFieldN10Patch';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MyStructFieldN10Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.MyEnum",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "MyStructFieldN10PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      $shape['clear'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign,
+      'clear' => $this->clear,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $this->assign = \fixtures\patch\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyEnum>($parsed['assign']));
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * MyStructFieldN23Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN23Patch'))>>
+class MyStructFieldN23Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::I32,
+      'enum' => \fixtures\patch\MyEnum::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\MyEnum,
+    ?'clear' => ?bool,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\MyEnum,
+    'clear' => bool,
+    ...
+  );
+  const int STRUCTURAL_ID = 1042349483945124076;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: enum module.MyEnum assign
+   */
+  public ?\fixtures\patch\MyEnum $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+
+  public function __construct(?\fixtures\patch\MyEnum $assign = null, ?bool $clear = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MyStructFieldN23Patch';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MyStructFieldN23Patch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "module.MyEnum",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "MyStructFieldN23PatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      $shape['clear'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign,
+      'clear' => $this->clear,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $this->assign = \fixtures\patch\MyEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyEnum>($parsed['assign']));
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * MyStructFieldN26Patch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN26Patch'))>>
+class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4466,13 +5276,13 @@ class MyStructFieldN21Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   }
 
   public function getName()[]: string {
-    return 'MyStructFieldN21Patch';
+    return 'MyStructFieldN26Patch';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.MyStructFieldN21Patch",
+        "name" => "module.MyStructFieldN26Patch",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -4574,7 +5384,7 @@ class MyStructFieldN21Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::ListPatchAdapter",
-            "underlyingName" => "MyStructFieldN21PatchStruct",
+            "underlyingName" => "MyStructFieldN26PatchStruct",
             "extraNamespace" => "",
           )
         ),
@@ -4684,10 +5494,10 @@ class MyStructFieldN21Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
 
 /**
  * Original thrift struct:-
- * MyStructFieldN22Patch
+ * MyStructFieldN27Patch
  */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN22Patch'))>>
-class MyStructFieldN22Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN27Patch'))>>
+class MyStructFieldN27Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -4795,13 +5605,13 @@ class MyStructFieldN22Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   }
 
   public function getName()[]: string {
-    return 'MyStructFieldN22Patch';
+    return 'MyStructFieldN27Patch';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.MyStructFieldN22Patch",
+        "name" => "module.MyStructFieldN27Patch",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -4884,7 +5694,7 @@ class MyStructFieldN22Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::SetPatchAdapter",
-            "underlyingName" => "MyStructFieldN22PatchStruct",
+            "underlyingName" => "MyStructFieldN27PatchStruct",
             "extraNamespace" => "",
           )
         ),
@@ -4962,10 +5772,10 @@ class MyStructFieldN22Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
 
 /**
  * Original thrift struct:-
- * MyStructFieldN23Patch
+ * MyStructFieldN28Patch
  */
-<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN23Patch'))>>
-class MyStructFieldN23Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/MyStructFieldN28Patch'))>>
+class MyStructFieldN28Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   use \ThriftSerializationTrait;
 
   const dict<int, this::TFieldSpec> SPEC = dict[
@@ -5106,13 +5916,13 @@ class MyStructFieldN23Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   }
 
   public function getName()[]: string {
-    return 'MyStructFieldN23Patch';
+    return 'MyStructFieldN28Patch';
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
-        "name" => "module.MyStructFieldN23Patch",
+        "name" => "module.MyStructFieldN28Patch",
         "fields" => vec[
           \tmeta_ThriftField::fromShape(
             shape(
@@ -5229,7 +6039,7 @@ class MyStructFieldN23Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
         '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
           shape(
             "name" => "::apache::thrift::op::detail::MapPatchAdapter",
-            "underlyingName" => "MyStructFieldN23PatchStruct",
+            "underlyingName" => "MyStructFieldN28PatchStruct",
             "extraNamespace" => "",
           )
         ),
@@ -5633,6 +6443,397 @@ class MyStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     if (idx($parsed, 'patch') !== null) {
       $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\MyStructFieldPatch>($parsed['patch']));
       $_tmp7 = \fixtures\patch\MyStructFieldPatch::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->patch = $_tmp7;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * LateDefStructFieldPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructFieldPatch'))>>
+class LateDefStructFieldPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+    ...
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LateDefStructFieldPatch';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.LateDefStructFieldPatch",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+            "underlyingName" => "LateDefStructFieldPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * LateDefStructPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'test.dev/fixtures/patch/LateDefStructPatch'))>>
+class LateDefStructPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStruct::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    3 => shape(
+      'var' => 'patchPrior',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStructFieldPatch::class,
+    ),
+    5 => shape(
+      'var' => 'ensure',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStruct::class,
+    ),
+    6 => shape(
+      'var' => 'patch',
+      'type' => \TType::STRUCT,
+      'class' => \fixtures\patch\LateDefStructFieldPatch::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'patchPrior' => 3,
+    'ensure' => 5,
+    'patch' => 6,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\fixtures\patch\LateDefStruct,
+    ?'clear' => ?bool,
+    ?'patchPrior' => ?\fixtures\patch\LateDefStructFieldPatch,
+    ?'ensure' => ?\fixtures\patch\LateDefStruct,
+    ?'patch' => ?\fixtures\patch\LateDefStructFieldPatch,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\fixtures\patch\LateDefStruct::TShape,
+    'clear' => bool,
+    ?'patchPrior' => ?\fixtures\patch\LateDefStructFieldPatch::TShape,
+    ?'ensure' => ?\fixtures\patch\LateDefStruct::TShape,
+    ?'patch' => ?\fixtures\patch\LateDefStructFieldPatch::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 6907948067616855680;
+  /**
+   * Assigns a value. If set, all other operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct module.LateDefStruct assign
+   */
+  public ?\fixtures\patch\LateDefStruct $assign;
+  /**
+   * Clears a value. Applies first.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Patches any previously set values. Applies second.
+   * 
+   * Original thrift field:-
+   * 3: struct module.LateDefStructFieldPatch patchPrior
+   */
+  public ?\fixtures\patch\LateDefStructFieldPatch $patchPrior;
+  /**
+   * Initialize fields, using the given defaults. Applies third.
+   * 
+   * Original thrift field:-
+   * 5: struct module.LateDefStruct ensure
+   */
+  public ?\fixtures\patch\LateDefStruct $ensure;
+  /**
+   * Patches any set value, including newly set values. Applies last.
+   * 
+   * Original thrift field:-
+   * 6: struct module.LateDefStructFieldPatch patch
+   */
+  public ?\fixtures\patch\LateDefStructFieldPatch $patch;
+
+  public function __construct(?\fixtures\patch\LateDefStruct $assign = null, ?bool $clear = null, ?\fixtures\patch\LateDefStructFieldPatch $patchPrior = null, ?\fixtures\patch\LateDefStruct $ensure = null, ?\fixtures\patch\LateDefStructFieldPatch $patch = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->patchPrior = $patchPrior;
+    $this->ensure = $ensure;
+    $this->patch = $patch;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'patchPrior'),
+      Shapes::idx($shape, 'ensure'),
+      Shapes::idx($shape, 'patch'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'LateDefStructPatch';
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.LateDefStructPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStructFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patchPrior",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ensure",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.LateDefStructFieldPatch",
+                    )
+                  ),
+                )
+              ),
+              "name" => "patch",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::StructPatchAdapter",
+            "underlyingName" => "LateDefStructPatchStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'patchPrior' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "LateDefStructFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+        'patch' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::op::detail::FieldPatchAdapter",
+                "underlyingName" => "LateDefStructFieldPatchStruct",
+                "extraNamespace" => "",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['assign'])),
+      $shape['clear'],
+      Shapes::idx($shape, 'patchPrior') === null ? null : (\fixtures\patch\LateDefStructFieldPatch::__fromShape($shape['patchPrior'])),
+      Shapes::idx($shape, 'ensure') === null ? null : (\fixtures\patch\LateDefStruct::__fromShape($shape['ensure'])),
+      Shapes::idx($shape, 'patch') === null ? null : (\fixtures\patch\LateDefStructFieldPatch::__fromShape($shape['patch'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+      'patchPrior' => $this->patchPrior?->__toShape(),
+      'ensure' => $this->ensure?->__toShape(),
+      'patch' => $this->patch?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStruct>($parsed['assign']));
+      $_tmp1 = \fixtures\patch\LateDefStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'patchPrior') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStructFieldPatch>($parsed['patchPrior']));
+      $_tmp3 = \fixtures\patch\LateDefStructFieldPatch::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->patchPrior = $_tmp3;
+    }
+    if (idx($parsed, 'ensure') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStruct>($parsed['ensure']));
+      $_tmp5 = \fixtures\patch\LateDefStruct::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->ensure = $_tmp5;
+    }
+    if (idx($parsed, 'patch') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \fixtures\patch\LateDefStructFieldPatch>($parsed['patch']));
+      $_tmp7 = \fixtures\patch\LateDefStructFieldPatch::withDefaultValues();
       $_tmp7->readFromJson($_tmp6);
       $this->patch = $_tmp7;
     }

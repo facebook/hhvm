@@ -189,6 +189,23 @@ class PreReceivedDataAsyncTransportWrapper
     }
   }
 
+  std::unique_ptr<IOBuf> takePreReceivedData() override {
+    if (!preReceivedData_ || preReceivedData_->empty()) {
+      return {};
+    }
+    auto freeVec = [](void*, void* userData) {
+      delete reinterpret_cast<std::vector<uint8_t>*>(userData);
+    };
+    std::vector<uint8_t>* ptr = preReceivedData_.release();
+    return IOBuf::takeOwnership(
+        static_cast<void*>(ptr->data()),
+        ptr->size(),
+        0,
+        ptr->size(),
+        freeVec,
+        ptr);
+  }
+
  private:
   PreReceivedDataAsyncTransportWrapper(
       folly::AsyncTransport::UniquePtr socket,

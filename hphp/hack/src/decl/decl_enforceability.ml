@@ -223,16 +223,6 @@ let maybe_pessimise_type ctx ty =
   else
     ty
 
-let update_param_ty param ty =
-  { param with fp_type = { param.fp_type with et_type = ty } }
-
-let add_supportdyn_to_params param =
-  let ty = param.fp_type.et_type in
-  match get_node ty with
-  | Tdynamic ->
-    update_param_ty param (supportdyn_mixed (get_pos ty) (get_reason ty))
-  | _ -> param
-
 let update_return_ty ft ty =
   { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
 
@@ -242,11 +232,7 @@ let pessimise_fun_type ctx p ty =
     let return_from_async = get_ft_async ft in
     let ret_ty = ft.ft_ret.et_type in
     let ft =
-      {
-        ft with
-        ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
-        ft_params = List.map ~f:add_supportdyn_to_params ft.ft_params;
-      }
+      { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
     in
     if is_enforceable ~return_from_async ctx ret_ty then
       mk (get_reason ty, Tfun ft)

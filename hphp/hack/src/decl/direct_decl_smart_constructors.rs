@@ -5495,6 +5495,11 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             flags |= FunTypeFlags::VARIADIC
         }
 
+        let pess_return_type = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
+        } else {
+            ret
+        };
         let fty = Ty_::Tfun(self.alloc(FunType {
             tparams: &[],
             where_constraints: &[],
@@ -5502,7 +5507,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             implicit_params,
             ret: self.alloc(PossiblyEnforcedTy {
                 enforced: Enforcement::Unenforced,
-                type_: ret,
+                type_: pess_return_type,
             }),
             flags,
             ifc_decl: default_ifc_fun_decl(),

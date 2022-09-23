@@ -282,6 +282,16 @@ and hfun p env ro hl il variadic_hint ctxs h readonly_ret =
   let variadic_hint = Option.map variadic_hint ~f:(hint env) in
   let hl = List.map ~f:(hint env) hl in
   let ctxs = Option.map ~f:(contexts env) ctxs in
+  let everything_sdt =
+    TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+  in
+  let h_ret = hint ~allow_retonly:true env h in
+  let pess_ret =
+    if everything_sdt then
+      (p, Aast.Hlike h_ret)
+    else
+      h_ret
+  in
   let hint =
     N.Hfun
       N.
@@ -291,11 +301,11 @@ and hfun p env ro hl il variadic_hint ctxs h readonly_ret =
           hf_param_info = il;
           hf_variadic_ty = variadic_hint;
           hf_ctxs = ctxs;
-          hf_return_ty = hint ~allow_retonly:true env h;
+          hf_return_ty = pess_ret;
           hf_is_readonly_return = readonly_ret;
         }
   in
-  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx) then
+  if everything_sdt then
     wrap_supportdyn p hint
   else
     hint

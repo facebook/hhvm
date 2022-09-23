@@ -42,6 +42,7 @@ type hack =
   | ModuleDeclaration
   | ModuleDefinition
   | FileCall
+  | GlobalNamespaceAlias
 
 type src = FileLines
 

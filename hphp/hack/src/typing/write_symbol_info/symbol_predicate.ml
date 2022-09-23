@@ -46,6 +46,7 @@ type hack =
   | ModuleDeclaration
   | ModuleDefinition
   | FileCall
+  | GlobalNamespaceAlias
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
@@ -100,6 +101,7 @@ let hack_to_string = function
   | ModuleDeclaration -> "ModuleDeclaration"
   | ModuleDefinition -> "ModuleDefinition"
   | FileCall -> "FileCall"
+  | GlobalNamespaceAlias -> "GlobalNamespaceAlias"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
@@ -140,6 +142,7 @@ let ordered_all =
     Hack FileXRefs;
     Hack FileDeclarations;
     Hack FileCall;
+    Hack GlobalNamespaceAlias;
     Src FileLines;
   ]
 

@@ -495,6 +495,19 @@ public final class TerseStructWithCustomDefault implements com.facebook.thrift.p
       TField __field;
       oprot.readStructBegin(TerseStructWithCustomDefault.NAMES_TO_IDS, TerseStructWithCustomDefault.THRIFT_NAMES_TO_IDS, TerseStructWithCustomDefault.FIELD_METADATA);
       TerseStructWithCustomDefault.Builder builder = new TerseStructWithCustomDefault.Builder();
+      builder.setBoolField(false);
+      builder.setByteField((byte)0);
+      builder.setShortField((short)0);
+      builder.setIntField(0);
+      builder.setLongField(0L);
+      builder.setFloatField(0.f);
+      builder.setDoubleField(0.);
+      builder.setStringField(com.facebook.thrift.util.IntrinsicDefaults.defaultString());
+      builder.setBinaryField(com.facebook.thrift.util.IntrinsicDefaults.defaultByteArray());
+      builder.setEnumField(com.facebook.thrift.test.terse_write.MyEnum.fromInteger(0));
+      builder.setListField(com.facebook.thrift.util.IntrinsicDefaults.defaultList());
+      builder.setSetField(com.facebook.thrift.util.IntrinsicDefaults.defaultSet());
+      builder.setMapField(com.facebook.thrift.util.IntrinsicDefaults.defaultMap());
       while (true) {
         __field = oprot.readFieldBegin();
         if (__field.type == TType.STOP) { break; }

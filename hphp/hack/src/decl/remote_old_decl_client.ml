@@ -102,56 +102,59 @@ let fetch_old_decls
         ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
         names
     in
-    let hh_config_version = Utils.get_hh_version () in
-    let start_t = Unix.gettimeofday () in
-    let no_limit =
-      TypecheckerOptions.remote_old_decls_no_limit
-        (Provider_context.get_tcopt ctx)
-    in
-    let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
-    let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
-    let decl_fetch_future =
-      fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
-    in
-    (match Future.get ~timeout:120 decl_fetch_future with
-    | Error e ->
-      Hh_logger.log
-        "Failed to fetch decls from remote decl store: %s"
-        (Future.error_to_string e);
-      SMap.empty
-    | Ok () ->
-      let chan = Stdlib.open_in_bin destination_path in
-      let decl_blobs : string list = Marshal.from_channel chan in
-      Stdlib.close_in chan;
-      let decls =
-        List.fold
-          ~init:SMap.empty
-          ~f:(fun acc blob ->
-            let contents : Shallow_decl_defs.decl SMap.t =
-              Marshal.from_string blob 0
-            in
-            SMap.fold
-              (fun name decl acc ->
-                match decl with
-                | Shallow_decl_defs.Class cls -> SMap.add name (Some cls) acc
-                | _ -> acc)
-              contents
-              acc)
-          decl_blobs
+    (match List.length decl_hashes with
+    | 0 -> SMap.empty
+    | _ ->
+      let hh_config_version = Utils.get_hh_version () in
+      let start_t = Unix.gettimeofday () in
+      let no_limit =
+        TypecheckerOptions.remote_old_decls_no_limit
+          (Provider_context.get_tcopt ctx)
       in
-      let telemetry = Telemetry.create () in
-      let fetch_results =
-        Telemetry.create ()
-        |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
-        |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
+      let tmp_dir = Tempfile.mkdtemp ~skip_mocking:false in
+      let destination_path = Path.(to_string @@ concat tmp_dir "decl_blobs") in
+      let decl_fetch_future =
+        fetch_async ~hh_config_version ~destination_path ~no_limit decl_hashes
       in
-      Hh_logger.log
-        "Fetched %d/%d decls remotely"
-        (SMap.cardinal decls)
-        (List.length names);
+      (match Future.get ~timeout:120 decl_fetch_future with
+      | Error e ->
+        Hh_logger.log
+          "Failed to fetch decls from remote decl store: %s"
+          (Future.error_to_string e);
+        SMap.empty
+      | Ok () ->
+        let chan = Stdlib.open_in_bin destination_path in
+        let decl_blobs : string list = Marshal.from_channel chan in
+        Stdlib.close_in chan;
+        let decls =
+          List.fold
+            ~init:SMap.empty
+            ~f:(fun acc blob ->
+              let contents : Shallow_decl_defs.decl SMap.t =
+                Marshal.from_string blob 0
+              in
+              SMap.fold
+                (fun name decl acc ->
+                  match decl with
+                  | Shallow_decl_defs.Class cls -> SMap.add name (Some cls) acc
+                  | _ -> acc)
+                contents
+                acc)
+            decl_blobs
+        in
+        let telemetry = Telemetry.create () in
+        let fetch_results =
+          Telemetry.create ()
+          |> Telemetry.int_ ~key:"to_fetch" ~value:(List.length names)
+          |> Telemetry.int_ ~key:"fetched" ~value:(SMap.cardinal decls)
+        in
+        Hh_logger.log
+          "Fetched %d/%d decls remotely"
+          (SMap.cardinal decls)
+          (List.length names);
 
-      let telemetry =
-        Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
-      in
-      HackEventLogger.remote_old_decl_end telemetry start_t;
-      decls)
+        let telemetry =
+          Telemetry.object_ telemetry ~key:telemetry_label ~value:fetch_results
+        in
+        HackEventLogger.remote_old_decl_end telemetry start_t;
+        decls))

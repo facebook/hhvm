@@ -278,21 +278,27 @@ and contexts env ctxs =
   in
   (pos, hl)
 
-and hfun env ro hl il variadic_hint ctxs h readonly_ret =
+and hfun p env ro hl il variadic_hint ctxs h readonly_ret =
   let variadic_hint = Option.map variadic_hint ~f:(hint env) in
   let hl = List.map ~f:(hint env) hl in
   let ctxs = Option.map ~f:(contexts env) ctxs in
-  N.Hfun
-    N.
-      {
-        hf_is_readonly = ro;
-        hf_param_tys = hl;
-        hf_param_info = il;
-        hf_variadic_ty = variadic_hint;
-        hf_ctxs = ctxs;
-        hf_return_ty = hint ~allow_retonly:true env h;
-        hf_is_readonly_return = readonly_ret;
-      }
+  let hint =
+    N.Hfun
+      N.
+        {
+          hf_is_readonly = ro;
+          hf_param_tys = hl;
+          hf_param_info = il;
+          hf_variadic_ty = variadic_hint;
+          hf_ctxs = ctxs;
+          hf_return_ty = hint ~allow_retonly:true env h;
+          hf_is_readonly_return = readonly_ret;
+        }
+  in
+  if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx) then
+    wrap_supportdyn p hint
+  else
+    hint
 
 and hint_
     ~forbid_this
@@ -337,7 +343,7 @@ and hint_
           hf_return_ty = h;
           hf_is_readonly_return = readonly_ret;
         } ->
-    hfun env ro hl il variadic_hint ctxs h readonly_ret
+    hfun p env ro hl il variadic_hint ctxs h readonly_ret
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
@@ -452,7 +458,14 @@ and hint_
           new_field)
         nsi_field_map
     in
-    N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
+    let hint = N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map } in
+    if
+      TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+      && nsi_allows_unknown_fields
+    then
+      wrap_supportdyn p hint
+    else
+      hint
   | Aast.Hmixed -> N.Hmixed
   | Aast.Hfun_context n -> N.Hfun_context n
   | Aast.Hvar n -> N.Hvar n

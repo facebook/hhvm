@@ -231,22 +231,10 @@ let add_supportdyn_to_params param =
   match get_node ty with
   | Tdynamic ->
     update_param_ty param (supportdyn_mixed (get_pos ty) (get_reason ty))
-  | Tfun _ ->
-    update_param_ty param (make_supportdyn_type (get_pos ty) (get_reason ty) ty)
   | _ -> param
 
 let update_return_ty ft ty =
   { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
-
-let add_supportdyn_to_ret_ty ret_ty =
-  let ty = ret_ty.et_type in
-  match get_node ty with
-  | Tfun _ ->
-    {
-      ret_ty with
-      et_type = make_supportdyn_type (get_pos ty) (get_reason ty) ty;
-    }
-  | _ -> ret_ty
 
 let pessimise_fun_type ctx p ty =
   match get_node ty with
@@ -258,7 +246,6 @@ let pessimise_fun_type ctx p ty =
         ft with
         ft_tparams = add_supportdyn_constraints p ft.ft_tparams;
         ft_params = List.map ~f:add_supportdyn_to_params ft.ft_params;
-        ft_ret = add_supportdyn_to_ret_ty ft.ft_ret;
       }
     in
     if is_enforceable ~return_from_async ctx ret_ty then

@@ -102,8 +102,8 @@ let fetch_old_decls
         ~f:(fun name -> Utils.name_to_decl_hash_opt ~name ~db_path)
         names
     in
-    (match List.length decl_hashes with
-    | 0 -> SMap.empty
+    (match decl_hashes with
+    | [] -> SMap.empty
     | _ ->
       let hh_config_version = Utils.get_hh_version () in
       let start_t = Unix.gettimeofday () in

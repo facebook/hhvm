@@ -443,6 +443,7 @@ void Parser<T>::readDataAvailableHybrid(size_t nbytes) {
 
 template <class T>
 void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
+  blockResize_ = true;
   if (newBufferLogicEnabled_) {
     getReadBufferNew(bufout, lenout);
   } else if (hybridBufferLogicEnabled_) {
@@ -455,6 +456,7 @@ void Parser<T>::getReadBuffer(void** bufout, size_t* lenout) {
 template <class T>
 void Parser<T>::readDataAvailable(size_t nbytes) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
+  blockResize_ = false;
   try {
     if (newBufferLogicEnabled_) {
       readDataAvailableNew(nbytes);
@@ -475,6 +477,7 @@ template <class T>
 void Parser<T>::readEOF() noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
 
+  blockResize_ = false;
   owner_.close(transport::TTransportException(
       transport::TTransportException::TTransportExceptionType::END_OF_FILE,
       "Channel got EOF. Check for server hitting connection limit, "
@@ -484,7 +487,7 @@ void Parser<T>::readEOF() noexcept {
 template <class T>
 void Parser<T>::readErr(const folly::AsyncSocketException& ex) noexcept {
   folly::DelayedDestruction::DestructorGuard dg(&this->owner_);
-
+  blockResize_ = false;
   owner_.close(transport::TTransportException(ex));
 }
 
@@ -494,7 +497,8 @@ template <class T>
 void Parser<T>::timeoutExpired() noexcept {
   if (LIKELY(
           allocType_ ==
-          apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT)) {
+              apache::thrift::RpcOptions::MemAllocType::ALLOC_DEFAULT &&
+          !blockResize_)) {
     resizeBuffer();
   }
 }

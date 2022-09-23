@@ -165,6 +165,7 @@ class Parser final : public folly::AsyncTransport::ReadCallback,
   static constexpr size_t kReallocateThreshold = 64;
   std::unique_ptr<folly::IOBuf> dynamicBuffer_{nullptr};
   bool reallocateIfShared_{false};
+  bool blockResize_{false};
 };
 
 } // namespace rocket

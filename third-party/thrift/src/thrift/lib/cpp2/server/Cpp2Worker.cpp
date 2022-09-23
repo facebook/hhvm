@@ -22,6 +22,7 @@
 
 #include <folly/Overload.h>
 #include <folly/String.h>
+#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <folly/io/async/AsyncSSLSocket.h>
 #include <folly/io/async/AsyncSocket.h>
 #include <folly/io/async/EventBaseLocal.h>
@@ -84,6 +85,16 @@ void Cpp2Worker::onNewConnection(
     return;
   }
 
+  PeekingManagerOptions const peekingManagerOptions =
+      PeekingManagerOptions().withPreferBufferMovable(
+          secureTransportType == wangle::SecureTransportType::NONE &&
+          server_->preferIoUring() &&
+          folly::AsyncIoUringSocketFactory::supports(sock->getEventBase()));
+  if (peekingManagerOptions.preferBufferMovable()) {
+    sock = folly::AsyncIoUringSocketFactory::create<
+        folly::AsyncTransport::UniquePtr>(std::move(sock));
+  }
+
   const auto& func = server_->getZeroCopyEnableFunc();
   if (func && sock) {
     sock->setZeroCopy(true);
@@ -95,7 +106,12 @@ void Cpp2Worker::onNewConnection(
     // If no security, peek into the socket to determine type
     case wangle::SecureTransportType::NONE: {
       new TransportPeekingManager(
-          shared_from_this(), *addr, tinfo, server_, std::move(sock));
+          shared_from_this(),
+          *addr,
+          tinfo,
+          server_,
+          std::move(sock),
+          peekingManagerOptions);
       break;
     }
     case wangle::SecureTransportType::TLS:
@@ -132,9 +148,9 @@ void Cpp2Worker::handleHeader(
     folly::AsyncTransport::UniquePtr sock,
     const folly::SocketAddress* addr,
     const wangle::TransportInfo& tinfo) {
-  auto fd = sock->getUnderlyingTransport<folly::AsyncSocket>()
-                ->getNetworkSocket()
-                .toFd();
+  folly::AsyncSocket* underlying =
+      sock->getUnderlyingTransport<folly::AsyncSocket>();
+  auto fd = underlying ? underlying->getNetworkSocket().toFd() : -1;
   VLOG(4) << "Cpp2Worker: Creating connection for socket " << fd;
 
   auto thriftTransport = createThriftTransport(std::move(sock));
@@ -170,8 +186,9 @@ std::shared_ptr<folly::AsyncTransport> Cpp2Worker::createThriftTransport(
 
   folly::AsyncSocket* tsock =
       sock->getUnderlyingTransport<folly::AsyncSocket>();
-  CHECK(tsock);
-  markSocketAccepted(tsock);
+  if (tsock) {
+    markSocketAccepted(tsock);
+  }
   // use custom deleter for std::shared_ptr<folly::AsyncTransport> to allow
   // socket transfer from header to rocket (if enabled by ThriftFlags)
   return apache::thrift::transport::detail::convertToShared(std::move(sock));

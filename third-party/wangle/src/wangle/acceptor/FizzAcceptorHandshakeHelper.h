@@ -184,12 +184,17 @@ class FizzHandshakeOptions {
     return *this;
   }
 
+  FizzHandshakeOptions& setPreferIoUringSocket(bool flag) {
+    preferIoUringSocket_ = flag;
+    return *this;
+  }
+
  private:
   std::shared_ptr<fizz::extensions::TokenBindingContext> tokenBindingCtx_{
       nullptr};
   FizzLoggingCallback* loggingCallback_{nullptr};
   bool handshakeRecordAlignedReads_{false};
-
+  bool preferIoUringSocket_{false};
   friend class FizzAcceptorHandshakeHelper;
 };
 
@@ -210,7 +215,8 @@ class FizzAcceptorHandshakeHelper
         acceptTime_(acceptTime),
         tinfo_(tinfo),
         loggingCallback_(options.loggingCallback_),
-        handshakeRecordAlignedReads_(options.handshakeRecordAlignedReads_) {}
+        handshakeRecordAlignedReads_(options.handshakeRecordAlignedReads_),
+        preferIoUringSocket_(options.preferIoUringSocket_) {}
 
   void start(
       folly::AsyncSSLSocket::UniquePtr sock,
@@ -240,7 +246,6 @@ class FizzAcceptorHandshakeHelper
       folly::AsyncSSLSocket::UniquePtr sslSock,
       const std::shared_ptr<const fizz::server::FizzServerContext>& fizzContext,
       const std::shared_ptr<fizz::ServerExtensions>& extensions);
-
   folly::AsyncSSLSocket::UniquePtr createSSLSocket(
       const std::shared_ptr<folly::SSLContext>& sslContext,
       folly::AsyncTransport::UniquePtr transport);
@@ -274,6 +279,7 @@ class FizzAcceptorHandshakeHelper
   wangle::SSLErrorEnum sslError_{wangle::SSLErrorEnum::NO_ERROR};
   FizzLoggingCallback* loggingCallback_;
   bool handshakeRecordAlignedReads_{false};
+  bool preferIoUringSocket_{false};
 };
 
 class DefaultToFizzPeekingCallback

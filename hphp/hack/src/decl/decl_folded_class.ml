@@ -423,10 +423,11 @@ let build_prop_sprop_ty
     ~(elt_origin : string)
     (sp : Shallow_decl_defs.shallow_prop) : Typing_defs.decl_ty =
   let (sp_pos, sp_name) = sp.sp_name in
+  let is_xhp_attr = is_some sp.sp_xhp_attr in
   let ty =
     match sp.sp_type with
     | None -> mk (Reason.Rwitness_from_decl sp_pos, Typing_defs.make_tany ())
-    | Some ty' -> Decl_enforceability.maybe_pessimise_type ctx ty'
+    | Some ty' -> Decl_enforceability.maybe_pessimise_type ~is_xhp_attr ctx ty'
   in
   (if member_heaps_enabled ctx then
     if is_static then

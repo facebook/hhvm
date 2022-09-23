@@ -351,7 +351,11 @@ let maybe_pessimise_gconst_decl ctx gconst_decl =
     Typing_defs.
       {
         gconst_decl with
-        cd_type = Decl_enforceability.pessimise_type ctx gconst_decl.cd_type;
+        cd_type =
+          Decl_enforceability.pessimise_type
+            ~is_xhp_attr:false
+            ctx
+            gconst_decl.cd_type;
       }
   else
     gconst_decl

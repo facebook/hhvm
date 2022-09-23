@@ -211,15 +211,15 @@ let maybe_add_supportdyn_constraints ctx p tparams =
   else
     tparams
 
-let pessimise_type ctx ty =
-  if is_enforceable ~return_from_async:false ctx ty then
+let pessimise_type ~is_xhp_attr ctx ty =
+  if (not is_xhp_attr) && is_enforceable ~return_from_async:false ctx ty then
     ty
   else
     make_like_type ~return_from_async:false ty
 
-let maybe_pessimise_type ctx ty =
+let maybe_pessimise_type ~is_xhp_attr ctx ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_type ctx ty
+    pessimise_type ~is_xhp_attr ctx ty
   else
     ty
 

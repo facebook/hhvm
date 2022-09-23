@@ -343,15 +343,21 @@ and hint_
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
     in
     (match hint_id with
-    | N.Hprim _
     | N.Hmixed
-    | N.Hnonnull
+    | N.Hnonnull ->
+      if not (List.is_empty hl) then
+        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p;
+      if TypecheckerOptions.everything_sdt tcopt then
+        wrap_supportdyn p hint_id
+      else
+        hint_id
+    | N.Hprim _
     | N.Hdynamic
     | N.Hnothing ->
       if not (List.is_empty hl) then
-        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p
-    | _ -> ());
-    hint_id
+        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p;
+      hint_id
+    | _ -> hint_id)
   | Aast.Haccess ((pos, root_id), ids) ->
     let root_ty =
       match root_id with
@@ -523,22 +529,8 @@ and hint_id
       | x when String.equal x SN.Typehints.num -> N.Hprim N.Tnum
       | x when String.equal x SN.Typehints.resource -> N.Hprim N.Tresource
       | x when String.equal x SN.Typehints.arraykey -> N.Hprim N.Tarraykey
-      | x when String.equal x SN.Typehints.mixed ->
-        let mixed = N.Hmixed in
-        if
-          TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
-        then
-          wrap_supportdyn p mixed
-        else
-          mixed
-      | x when String.equal x SN.Typehints.nonnull ->
-        let nonnull = N.Hnonnull in
-        if
-          TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
-        then
-          wrap_supportdyn p nonnull
-        else
-          nonnull
+      | x when String.equal x SN.Typehints.mixed -> N.Hmixed
+      | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
       | x when String.equal x SN.Classes.cSupportDyn && not (Pos.is_hhi p) ->
         if

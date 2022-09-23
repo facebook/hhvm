@@ -13,6 +13,7 @@
 , fmt_8
 , freetype
 , fribidi
+, gcc-unwrapped
 , gd
 , gdb
 , gettext
@@ -136,6 +137,8 @@ stdenv.mkDerivation rec {
       (if nondefaultStdlib then fmt_8.override { inherit stdenv; } else fmt_8)
       freetype
       fribidi
+      # Workaround for https://github.com/NixOS/nixpkgs/issues/192665
+      gcc-unwrapped.lib
       gd
       gdb
       gettext

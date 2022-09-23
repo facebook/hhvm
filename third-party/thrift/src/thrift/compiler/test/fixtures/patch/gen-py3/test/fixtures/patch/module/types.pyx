@@ -61,6 +61,61 @@ import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 cimport test.fixtures.patch.module.types_reflection as _types_reflection
 
 
+cdef __EnumData __MyEnum_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cMyEnum](), MyEnum)
+
+
+@__cython.internal
+@__cython.auto_pickle(False)
+cdef class __MyEnumMeta(thrift.py3.types.EnumMeta):
+    def _fbthrift_get_by_value(cls, int value):
+        return __MyEnum_enum_data.get_by_value(value)
+
+    def _fbthrift_get_all_names(cls):
+        return __MyEnum_enum_data.get_all_names()
+
+    def __len__(cls):
+        return __MyEnum_enum_data.size()
+
+    def __getattribute__(cls, str name not None):
+        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
+            return super().__getattribute__(name)
+        return __MyEnum_enum_data.get_by_name(name)
+
+
+@__cython.final
+@__cython.auto_pickle(False)
+cdef class MyEnum(thrift.py3.types.CompiledEnum):
+    cdef get_by_name(self, str name):
+        return __MyEnum_enum_data.get_by_name(name)
+
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        EnumMetadata[cMyEnum].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MyEnum"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return python_types.MyEnum(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+__SetMetaClass(<PyTypeObject*> MyEnum, <PyTypeObject*> __MyEnumMeta)
+
+
 
 cdef __UnionTypeEnumData __InnerUnion_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
     __createEnumDataForUnionType[cInnerUnion](),
@@ -593,7 +648,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
           "optDoubleVal": deref(self._cpp_obj).optDoubleVal_ref().has_value(),
           "optStringVal": deref(self._cpp_obj).optStringVal_ref().has_value(),
           "optBinaryVal": deref(self._cpp_obj).optBinaryVal_ref().has_value(),
+          "optEnumVal": deref(self._cpp_obj).optEnumVal_ref().has_value(),
           "optStructVal": deref(self._cpp_obj).optStructVal_ref().has_value(),
+          "optLateStructVal": deref(self._cpp_obj).optLateStructVal_ref().has_value(),
           "optListVal": deref(self._cpp_obj).optListVal_ref().has_value(),
           "optSetVal": deref(self._cpp_obj).optSetVal_ref().has_value(),
           "optMapVal": deref(self._cpp_obj).optMapVal_ref().has_value(),
@@ -677,6 +734,16 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def binaryVal(self):
         return self.binaryVal_impl()
 
+    cdef inline enumVal_impl(self):
+
+        if self.__fbthrift_cached_enumVal is None:
+            self.__fbthrift_cached_enumVal = translate_cpp_enum_to_python(MyEnum, <int>(deref(self._cpp_obj).enumVal_ref().value()))
+        return self.__fbthrift_cached_enumVal
+
+    @property
+    def enumVal(self):
+        return self.enumVal_impl()
+
     cdef inline structVal_impl(self):
 
         if self.__fbthrift_cached_structVal is None:
@@ -686,6 +753,26 @@ cdef class MyStruct(thrift.py3.types.Struct):
     @property
     def structVal(self):
         return self.structVal_impl()
+
+    cdef inline unionVal_impl(self):
+
+        if self.__fbthrift_cached_unionVal is None:
+            self.__fbthrift_cached_unionVal = MyUnion._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).unionVal_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_unionVal
+
+    @property
+    def unionVal(self):
+        return self.unionVal_impl()
+
+    cdef inline lateStructVal_impl(self):
+
+        if self.__fbthrift_cached_lateStructVal is None:
+            self.__fbthrift_cached_lateStructVal = LateDefStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).lateStructVal_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_lateStructVal
+
+    @property
+    def lateStructVal(self):
+        return self.lateStructVal_impl()
 
     cdef inline optBoolVal_impl(self):
         if not deref(self._cpp_obj).optBoolVal_ref().has_value():
@@ -777,6 +864,18 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def optBinaryVal(self):
         return self.optBinaryVal_impl()
 
+    cdef inline optEnumVal_impl(self):
+        if not deref(self._cpp_obj).optEnumVal_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_optEnumVal is None:
+            self.__fbthrift_cached_optEnumVal = translate_cpp_enum_to_python(MyEnum, <int>(deref(self._cpp_obj).optEnumVal_ref().value_unchecked()))
+        return self.__fbthrift_cached_optEnumVal
+
+    @property
+    def optEnumVal(self):
+        return self.optEnumVal_impl()
+
     cdef inline optStructVal_impl(self):
         if not deref(self._cpp_obj).optStructVal_ref().has_value():
             return None
@@ -788,6 +887,18 @@ cdef class MyStruct(thrift.py3.types.Struct):
     @property
     def optStructVal(self):
         return self.optStructVal_impl()
+
+    cdef inline optLateStructVal_impl(self):
+        if not deref(self._cpp_obj).optLateStructVal_ref().has_value():
+            return None
+
+        if self.__fbthrift_cached_optLateStructVal is None:
+            self.__fbthrift_cached_optLateStructVal = LateDefStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).optLateStructVal_ref().ref_unchecked(), self._cpp_obj))
+        return self.__fbthrift_cached_optLateStructVal
+
+    @property
+    def optLateStructVal(self):
+        return self.optLateStructVal_impl()
 
     cdef inline optListVal_impl(self):
         if not deref(self._cpp_obj).optListVal_ref().has_value():
@@ -824,16 +935,6 @@ cdef class MyStruct(thrift.py3.types.Struct):
     @property
     def optMapVal(self):
         return self.optMapVal_impl()
-
-    cdef inline unionVal_impl(self):
-
-        if self.__fbthrift_cached_unionVal is None:
-            self.__fbthrift_cached_unionVal = MyUnion._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).unionVal_ref().ref(), self._cpp_obj))
-        return self.__fbthrift_cached_unionVal
-
-    @property
-    def unionVal(self):
-        return self.unionVal_impl()
 
 
     def __hash__(MyStruct self):
@@ -880,7 +981,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 24
+        return 28
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
@@ -911,6 +1012,105 @@ cdef class MyStruct(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MyStruct, self)
+@__cython.auto_pickle(False)
+cdef class LateDefStruct(thrift.py3.types.Struct):
+    def __init__(LateDefStruct self, **kwargs):
+        self._cpp_obj = make_shared[cLateDefStruct]()
+        self._fields_setter = _fbthrift_types_fields.__LateDefStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(LateDefStruct self, **kwargs):
+        return self
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("LateDefStruct", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cLateDefStruct] cpp_obj):
+        __fbthrift_inst = <LateDefStruct>LateDefStruct.__new__(LateDefStruct)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+
+    def __hash__(LateDefStruct self):
+        return super().__hash__()
+
+    def __repr__(LateDefStruct self):
+        return super().__repr__()
+
+    def __str__(LateDefStruct self):
+        return super().__str__()
+
+
+    def __copy__(LateDefStruct self):
+        cdef shared_ptr[cLateDefStruct] cpp_obj = make_shared[cLateDefStruct](
+            deref(self._cpp_obj)
+        )
+        return LateDefStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cLateDefStruct](
+            self._cpp_obj,
+            (<LateDefStruct>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__LateDefStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cLateDefStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.LateDefStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cLateDefStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 0
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(LateDefStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cLateDefStruct](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(LateDefStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cLateDefStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[cLateDefStruct](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "test.fixtures.patch.module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.LateDefStruct, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.LateDefStruct, self)
 @__cython.auto_pickle(False)
 cdef class List__i16(thrift.py3.types.List):
     def __init__(self, items=None):

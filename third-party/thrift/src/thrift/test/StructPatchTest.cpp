@@ -383,6 +383,18 @@ TEST(StructPatchTest, ListPatch) {
       actual,
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
       {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
+
+  ListPatch erasePatch;
+  erasePatch.erase(1);
+  test::expectPatch(
+      erasePatch,
+      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+      {2, 3, 4, 5, 6, 7, 8, 9, 10});
+
+  ListPatch removePatch;
+  removePatch.remove({1, 2, 3, 4});
+  test::expectPatch(
+      removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
 }
 
 TEST(StructPatchTest, SetPatch) {
@@ -424,6 +436,28 @@ TEST(StructPatchTest, MapPatch) {
       *assignPatch.toThrift().assign(),
       (std::map<std::string, std::string>(
           {{"a", "1"}, {"b", "3"}, {"c", "4"}})));
+
+  MapPatch addPatch;
+  addPatch.add({{"a", "1"}, {"b", "2"}});
+  test::expectPatch(addPatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      addPatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}, {"c", "3"}});
+
+  MapPatch erasePatch;
+  erasePatch.add({{"a", "1"}, {"b", "2"}});
+  erasePatch.erase("c");
+  test::expectPatch(erasePatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      erasePatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}});
+
+  MapPatch removePatch;
+  removePatch.add({{"a", "1"}, {"b", "2"}});
+  removePatch.remove({"c", "d"});
+  test::expectPatch(removePatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      removePatch,
+      {{"a", "0"}, {"c", "3"}, {"d", "4"}},
+      {{"a", "0"}, {"b", "2"}});
 }
 
 TEST(UnionPatchTest, ClearAndAssign) {

@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::NestedContainersServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::NestedContainers>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapList");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo) {
-  return sync_mapList(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo) {
+  return mapList(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_mapList(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::int32_t>>> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_mapList.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  mapList(std::move(p_foo));
+  sync_mapList(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        mapList(std::move(p_foo));
+        sync_mapList(std::move(p_foo));
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapSet");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo) {
-  return sync_mapSet(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo) {
+  return mapSet(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_mapSet(std::unique_ptr<::std::map<::std::int32_t, ::std::set<::std::int32_t>>> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_mapSet.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  mapSet(std::move(p_foo));
+  sync_mapSet(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -226,7 +226,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        mapSet(std::move(p_foo));
+        sync_mapSet(std::move(p_foo));
         callback->done();
         return;
       }
@@ -245,18 +245,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listMap");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo) {
-  return sync_listMap(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo) {
+  return listMap(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_listMap(std::unique_ptr<::std::vector<::std::map<::std::int32_t, ::std::int32_t>>> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_listMap.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  listMap(std::move(p_foo));
+  sync_listMap(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -336,7 +336,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        listMap(std::move(p_foo));
+        sync_listMap(std::move(p_foo));
         callback->done();
         return;
       }
@@ -355,18 +355,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listSet");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo) {
-  return sync_listSet(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo) {
+  return listSet(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_listSet(std::unique_ptr<::std::vector<::std::set<::std::int32_t>>> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_listSet.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  listSet(std::move(p_foo));
+  sync_listSet(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -446,7 +446,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        listSet(std::move(p_foo));
+        sync_listSet(std::move(p_foo));
         callback->done();
         return;
       }
@@ -465,18 +465,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("turtles");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo) {
-  return sync_turtles(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::NestedContainers>::sync_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo) {
+  return turtles(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::NestedContainers>::semifuture_turtles(std::unique_ptr<::std::vector<::std::vector<::std::map<::std::int32_t, ::std::map<::std::int32_t, ::std::set<::std::int32_t>>>>>> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_turtles.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  turtles(std::move(p_foo));
+  sync_turtles(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -556,7 +556,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        turtles(std::move(p_foo));
+        sync_turtles(std::move(p_foo));
         callback->done();
         return;
       }

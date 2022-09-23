@@ -26,4 +26,10 @@ let include_hhi t = t.GlobalOptions.symbol_write_include_hhi
 
 let ownership t = t.GlobalOptions.symbol_write_ownership
 
+let sym_hash_in t = t.GlobalOptions.symbol_write_sym_hash_in
+
+let sym_exclude_out t = t.GlobalOptions.symbol_write_exclude_out
+
+let sym_hash_out t = t.GlobalOptions.symbol_write_sym_hash_out
+
 let default = GlobalOptions.default

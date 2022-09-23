@@ -49,7 +49,10 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     doubleVal: _typing.Optional[float]
     stringVal: _typing.Optional[str]
     binaryVal: _typing.Optional[bytes]
+    enumVal: _typing.Optional[_test_fixtures_patch_module_types.MyEnum]
     structVal: _typing.Any
+    unionVal: _typing.Any
+    lateStructVal: _typing.Any
     optBoolVal: _typing.Optional[bool]
     optByteVal: _typing.Optional[int]
     optI16Val: _typing.Optional[int]
@@ -59,11 +62,17 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     optDoubleVal: _typing.Optional[float]
     optStringVal: _typing.Optional[str]
     optBinaryVal: _typing.Optional[bytes]
+    optEnumVal: _typing.Optional[_test_fixtures_patch_module_types.MyEnum]
     optStructVal: _typing.Any
+    optLateStructVal: _typing.Any
     optListVal: _typing.Optional[list]
     optSetVal: _typing.Optional[set]
     optMapVal: _typing.Optional[dict]
-    unionVal: _typing.Any
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class LateDefStruct_Builder(thrift.py3.builder.StructBuilder):
 
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 

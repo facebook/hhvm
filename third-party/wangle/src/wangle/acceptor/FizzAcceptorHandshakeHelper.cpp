@@ -15,6 +15,7 @@
  */
 
 #include <fizz/record/Types.h>
+#include <folly/experimental/io/AsyncIoUringSocketFactory.h>
 #include <wangle/acceptor/FizzAcceptorHandshakeHelper.h>
 #include <wangle/acceptor/SSLAcceptorHandshakeHelper.h>
 #include <wangle/ssl/SSLContextManager.h>
@@ -61,11 +62,19 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
     folly::AsyncSSLSocket::UniquePtr sslSock,
     const std::shared_ptr<const FizzServerContext>& fizzContext,
     const std::shared_ptr<fizz::ServerExtensions>& extensions) {
-  folly::AsyncSocket::UniquePtr asyncSock(
-      new folly::AsyncSocket(std::move(sslSock)));
-  asyncSock->cacheAddresses();
+  folly::AsyncTransport::UniquePtr asyncTransport;
+  if (preferIoUringSocket_ &&
+      folly::AsyncIoUringSocketFactory::supports(sslSock->getEventBase())) {
+    asyncTransport = folly::AsyncIoUringSocketFactory::create<
+        folly::AsyncTransport::UniquePtr>(std::move(sslSock));
+  } else {
+    folly::AsyncSocket::UniquePtr asyncSock(
+        new folly::AsyncSocket(std::move(sslSock)));
+    asyncSock->cacheAddresses();
+    asyncTransport = folly::AsyncTransport::UniquePtr(std::move(asyncSock));
+  }
   AsyncFizzServer::UniquePtr fizzServer(
-      new AsyncFizzServer(std::move(asyncSock), fizzContext, extensions));
+      new AsyncFizzServer(std::move(asyncTransport), fizzContext, extensions));
   fizzServer->setHandshakeRecordAlignedReads(handshakeRecordAlignedReads_);
 
   return fizzServer;

@@ -457,13 +457,13 @@ std::string type_resolver::gen_type_tag(const t_type& type) {
     } else if (cpp_type->find_annotation_or_null("cpp.indirection")) {
       tag = fmt::format(
           "::apache::thrift::type::adapted<::apache::thrift::IndirectionAdapter<{}>, {}>",
-          *find_type(*cpp_type),
+          get_native_type(type),
           tag);
       return tag;
     } else {
       tag = fmt::format(
           "::apache::thrift::type::cpp_type<{}, {}>",
-          *find_type(*cpp_type),
+          get_native_type(type),
           tag);
     }
   }

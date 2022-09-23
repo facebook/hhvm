@@ -22,6 +22,7 @@
 #include <thrift/lib/cpp2/reflection/internal/test_helpers.h>
 #include <thrift/lib/cpp2/type/Testing.h>
 #include <thrift/test/reflection/gen-cpp2/fatal_reflection_indirection_fatal_types.h>
+#include <thrift/test/reflection/gen-cpp2/include_indirection_type_fatal_types.h>
 
 namespace {
 
@@ -171,32 +172,41 @@ TEST_F(FatalReflectionIndirectionTest, indirection_string_field) {
   EXPECT_TRUE(member::is_set(obj));
 }
 
-TEST_F(FatalReflectionIndirectionTest, type_tag) {
+template <typename T>
+class IndirectionTypeTagTest : public ::testing::Test {};
+
+using Types = ::testing::Types<
+    reflection_indirection::struct_with_indirections,
+    apache::thrift::reflection::struct_with_included_indirections>;
+
+TYPED_TEST_SUITE(IndirectionTypeTagTest, Types);
+
+TYPED_TEST(IndirectionTypeTagTest, type_tag) {
   using apache::thrift::field_ordinal;
   using apache::thrift::op::get_type_tag;
   using apache::thrift::test::same_type;
   using namespace apache::thrift::type;
   using namespace reflection_indirection;
 
-  same_type<get_type_tag<field_ordinal<0>, type>, void>;
-  same_type<get_type_tag<field_ordinal<1>, type>, i32_t>;
+  same_type<get_type_tag<field_ordinal<0>, TypeParam>, void>;
+  same_type<get_type_tag<field_ordinal<1>, TypeParam>, i32_t>;
   same_type<
-      get_type_tag<field_ordinal<2>, type>,
+      get_type_tag<field_ordinal<2>, TypeParam>,
       apache::thrift::type::cpp_type<CppFakeI32, apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<field_ordinal<3>, type>,
+      get_type_tag<field_ordinal<3>, TypeParam>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasANumber>,
           apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<field_ordinal<4>, type>,
+      get_type_tag<field_ordinal<4>, TypeParam>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAResult>,
           apache::thrift::type::i32_t>>;
   same_type<
-      get_type_tag<field_ordinal<5>, type>,
+      get_type_tag<field_ordinal<5>, TypeParam>,
       apache::thrift::type::adapted<
           apache::thrift::IndirectionAdapter<
               reflection_indirection::CppHasAPhrase>,

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include <thrift/conformance/GTestHarness.h>
 #include <thrift/conformance/PluggableFunctions.h>
 #include <thrift/conformance/Utils.h>
@@ -24,8 +26,8 @@ namespace apache::thrift::conformance {
 // Specialization for consuming pluggable function.
 template <>
 std::unique_ptr<Client<RPCConformanceService>>
-createClient<Client<RPCConformanceService>>(std::string service_name) {
-  return create_rpc_conformance_service_client_(service_name);
+createClient<Client<RPCConformanceService>>(std::string_view serviceName) {
+  return create_rpc_conformance_service_client_(serviceName);
 }
 
 // Register the tests with gtest.

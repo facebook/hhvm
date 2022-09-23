@@ -809,7 +809,9 @@ bool TypeConstraint::checkStringCompatible() const {
   if (auto ptd = boost::get<const TypeAlias*>(&p)) {
     auto td = *ptd;
     return td->type == AnnotType::String ||
-           td->type == AnnotType::ArrayKey;
+           td->type == AnnotType::ArrayKey ||
+           (td->type == AnnotType::Object &&
+            interface_supports_string(td->klass->name()));
   }
   if (auto pc = boost::get<Class*>(&p)) {
     auto c = *pc;

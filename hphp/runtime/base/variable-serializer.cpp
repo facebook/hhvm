@@ -1605,6 +1605,11 @@ void VariableSerializer::serializeClass(const Class* cls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (RuntimeOption::EvalClassAsStringPrintR) {
+        write(StrNR(cls->name()));
+        break;
+      }
+      // fall-through
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(cls->name());
@@ -1646,6 +1651,11 @@ void VariableSerializer::serializeLazyClass(LazyClassData lcls) {
       m_buf->append(")\n");
       break;
     case Type::PrintR:
+      if (RuntimeOption::EvalClassAsStringPrintR) {
+        write(StrNR(lcls.name()));
+        break;
+      }
+      // fall-through
     case Type::DebuggerDump:
       m_buf->append("class(");
       m_buf->append(lcls.name());

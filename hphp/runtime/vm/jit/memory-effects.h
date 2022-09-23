@@ -124,6 +124,10 @@ struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
  * it writes to them first, and which it generally may write to.  (This is used
  * for killing stack slots below the call depth and MInstrState locations)
  *
+ * The `uninits' set contains stack locations of inputs semantically containing
+ * TUninit, but with the responsibility of the callee to store that TUninit.
+ * Caller can treat these locations as killed.
+ *
  * The `inputs' set contains stack locations the call will read as arguments.
  *
  * The `actrec' set contains stack locations the call will write ActRec to.
@@ -137,6 +141,7 @@ struct PureInlineCall { AliasClass base; SSATmp* fp; AliasClass actrec; };
  * not CallEffects.
  */
 struct CallEffects    { AliasClass kills;
+                        AliasClass uninits;
                         AliasClass inputs;
                         AliasClass actrec;
                         AliasClass outputs;
@@ -160,13 +165,15 @@ struct ReturnEffects  { AliasClass kills; };
 /*
  * ExitEffects contains two sets of alias classes, representing locations that
  * are considered live exiting the region, and locations that will never be
- * read (unless written again) after exiting the region (`kills').  Various
- * instructions that exit regions populate these in different ways.
+ * read (unless written again) after exiting the region (`kills' and 'uninits').
+ * Various instructions that exit regions populate these in different ways.
  *
  * ExitEffects instructions require inlined frames to be spilled immediatelly
  * prior to the instruction, see spillInlinedFrames() for more details.
  */
-struct ExitEffects    { AliasClass live; AliasClass kills; };
+struct ExitEffects    { AliasClass live;
+                        AliasClass kills;
+                        AliasClass uninits; };
 
 /*
  * "Irrelevant" effects means it doesn't do anything we currently care about

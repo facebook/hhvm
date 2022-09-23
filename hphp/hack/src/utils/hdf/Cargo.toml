@@ -9,8 +9,8 @@ path = "lib.rs"
 crate-type = ["lib", "staticlib"]
 
 [dependencies]
-cxx = "1.0.64"
+cxx = "1.0.76"
 thiserror = "=1.0.30"
 
 [build-dependencies]
-cxx-build = "1.0.64"
+cxx-build = "1.0.76"

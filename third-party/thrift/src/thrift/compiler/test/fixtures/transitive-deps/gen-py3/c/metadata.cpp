@@ -12,6 +12,7 @@ namespace cpp2 {
   ::apache::thrift::metadata::ThriftServiceMetadataResponse response;
   ::apache::thrift::metadata::ThriftMetadata& metadata = *response.metadata_ref();
   ::apache::thrift::detail::md::StructMetadata<C>::gen(metadata);
+  ::apache::thrift::detail::md::ExceptionMetadata<E>::gen(metadata);
   return metadata;
 }
 } // namespace cpp2

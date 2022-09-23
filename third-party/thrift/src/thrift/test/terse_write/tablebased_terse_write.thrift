@@ -142,3 +142,25 @@ struct TerseStructWithCustomDefault {
   13: map<i32, i32> map_field = {1: 1};
   14: MyStructWithCustomDefault struct_field;
 }
+
+@thrift.TerseWrite
+struct TerseStructs {
+  1: MyStruct field1;
+  2: MyStruct field2;
+  3: MyStruct field3;
+}
+
+@thrift.TerseWrite
+struct TerseStructs1 {
+  1: MyStruct field1;
+}
+
+@thrift.TerseWrite
+struct TerseStructs2 {
+  2: MyStruct field2;
+}
+
+@thrift.TerseWrite
+struct TerseStructs3 {
+  3: MyStruct field3;
+}

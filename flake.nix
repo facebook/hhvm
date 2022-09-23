@@ -68,9 +68,6 @@
                     FPM_INPUTS+=("./$LINE")
                   done < ${pkgs.lib.strings.escapeShellArg (pkgs.referencesByPopularity pkg)}
 
-                  # Dangling symlink
-                  rm ./nix/store/*-libgccjit-*/lib/lib
-
                   ${pkgs.lib.strings.escapeShellArg pkgs.fpm}/bin/fpm \
                     --verbose \
                     --package "$out" \

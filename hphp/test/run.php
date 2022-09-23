@@ -439,7 +439,6 @@ final class Options {
     public ?string $hh_single_type_check;
     public bool $write_to_checkout = false;
     public bool $bespoke = false;
-    public bool $lazyclass = false;
 
     // Additional state added for convenience since Options is plumbed
     // around almost everywhere.
@@ -1177,6 +1176,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
+    '-vRuntime.Eval.EnableLogBridge=false',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '-l1',
     '-o "' . test_repo($options, $test) . '"',
@@ -2522,12 +2522,6 @@ function should_skip_test_simple(
       file_exists("$test.$no_bespoke_tag")) {
       // Skip due to changes in array identity
       return 'skip-bespoke';
-  }
-
-  $no_lazyclass_tag = "nolazyclass";
-  if ($options->lazyclass &&
-      file_exists("$test.$no_lazyclass_tag")) {
-    return 'skip-lazyclass';
   }
 
   $no_jitserialize_tag = "nojitserialize";

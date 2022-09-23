@@ -1455,11 +1455,30 @@ RegSet interp_one_cf_regs() {
   return vm_regs_with_sp() | rarg(2);
 }
 
+namespace {
+
+void emitUninitDefaultArgs(Vout& v, SrcKey sk) {
+  auto const numEntryArgs = sk.numEntryArgs();
+  auto const numParams = sk.func()->numNonVariadicParams();
+  assertx(numEntryArgs <= numParams);
+  if (numEntryArgs == numParams) return;
+
+  v << vcall{
+    CallSpec::direct(svcreq::uninitDefaultArgs),
+    v.makeVcallArgs({{rvmfp(), v.cns(numEntryArgs), v.cns(numParams)}}),
+    v.makeTuple({}),
+    Fixup::none()
+  };
+}
+
+} // namespace
+
 void emitInterpReq(Vout& v, SrcKey sk, SBInvOffset spOff) {
   auto const helper = sk.funcEntry()
     ? tc::ustubs().interpHelperFuncEntryFromTC
     : tc::ustubs().interpHelperFromTC;
   if (sk.funcEntry()) {
+    emitUninitDefaultArgs(v, sk);
     sk.advance();
   } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();
@@ -1474,6 +1493,7 @@ void emitInterpReqNoTranslate(Vout& v, SrcKey sk, SBInvOffset spOff) {
     ? tc::ustubs().interpHelperNoTranslateFuncEntryFromTC
     : tc::ustubs().interpHelperNoTranslateFromTC;
   if (sk.funcEntry()) {
+    emitUninitDefaultArgs(v, sk);
     sk.advance();
   } else if (sk.resumeMode() == ResumeMode::None) {
     auto const frameRelOff = spOff.offset + sk.func()->numSlotsInFrame();

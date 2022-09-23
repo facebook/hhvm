@@ -104,7 +104,7 @@ std::unique_ptr<HTTP2RoutingHandler> createHTTP2RoutingHandler(
 TEST(ThriftServer, H2ClientAddressTest) {
   class EchoClientAddrTestInterface
       : public apache::thrift::ServiceHandler<TestService> {
-    void sendResponse(std::string& _return, int64_t /* size */) override {
+    void sync_sendResponse(std::string& _return, int64_t /* size */) override {
       _return = getConnectionContext()->getPeerAddress()->describe();
     }
   };
@@ -2851,7 +2851,8 @@ TEST(ThriftServer, SSLPermittedAcceptsPlaintextAndSSL) {
 TEST(ThriftServer, ClientOnlyTimeouts) {
   class SendResponseInterface
       : public apache::thrift::ServiceHandler<TestService> {
-    void sendResponse(std::string& _return, int64_t shouldSleepMs) override {
+    void sync_sendResponse(
+        std::string& _return, int64_t shouldSleepMs) override {
       auto header = getConnectionContext()->getHeader();
       if (shouldSleepMs) {
         usleep(shouldSleepMs * 1000);
@@ -2902,7 +2903,7 @@ TEST(ThriftServerTest, QueueTimeHeaderTest) {
   class QueueTimeTestHandler
       : public apache::thrift::ServiceHandler<TestService> {
    public:
-    void sendResponse(std::string& _return, int64_t size) override {
+    void sync_sendResponse(std::string& _return, int64_t size) override {
       _return = folly::to<std::string>(size);
     }
   };
@@ -2949,7 +2950,7 @@ TEST(ThriftServer, QueueTimeoutStressTest) {
 
   class SendResponseInterface
       : public apache::thrift::ServiceHandler<TestService> {
-    void sendResponse(std::string& _return, int64_t id) override {
+    void sync_sendResponse(std::string& _return, int64_t id) override {
       DCHECK(lastSeenId_ < id);
 
       if (lastSeenId_ + 1 == id) {

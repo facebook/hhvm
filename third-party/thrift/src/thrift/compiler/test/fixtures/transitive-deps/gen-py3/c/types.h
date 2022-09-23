@@ -30,8 +30,25 @@ void reset_field<::cpp2::C>(
 }
 
 template<>
+void reset_field<::cpp2::E>(
+    ::cpp2::E& obj, uint16_t index) {
+  switch (index) {
+  }
+}
+
+template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::C>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::E>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

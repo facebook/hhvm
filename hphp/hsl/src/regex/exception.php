@@ -13,20 +13,23 @@ namespace HH\Lib\Regex;
 use namespace HH\Lib\Str;
 
 final class Exception extends \Exception {
-  public function __construct(Pattern<Match> $pattern, int $code)[]: void {
+  public function __construct(Pattern<Match> $pattern, int $code)[] {
     $errors = dict[
       \PREG_INTERNAL_ERROR => 'Internal error',
       \PREG_BACKTRACK_LIMIT_ERROR => 'Backtrack limit error',
       \PREG_RECURSION_LIMIT_ERROR => 'Recursion limit error',
       \PREG_BAD_UTF8_ERROR => 'Bad UTF8 error',
       \PREG_BAD_UTF8_OFFSET_ERROR => 'Bad UTF8 offset error',
+      \PREG_BAD_REGEX_ERROR => 'Regex failed to compile',
     ];
     parent::__construct(
       Str\format(
         "%s: %s",
-        idx($errors, $code, 'Invalid pattern'),
-        /* HH_FIXME[4110] Until we have a to_string() function */
-        $pattern,
+        idx($errors, $code, 'Unknown regex error'),
+        \HH\FIXME\UNSAFE_CAST<\HH\Lib\Regex\Pattern<shape(...)>, string>(
+          $pattern,
+          'Until we have a to_string() function',
+        ),
       ),
     );
   }

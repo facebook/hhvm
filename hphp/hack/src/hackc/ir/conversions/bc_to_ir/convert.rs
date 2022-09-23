@@ -67,7 +67,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     // Convert the class containers - but not the methods which are converted
     // below.  This has to be done before the functions.
     for c in unit.classes.as_ref() {
-        crate::class::convert_class(&mut ir_unit, c);
+        crate::class::convert_class(&mut ir_unit, filename, c);
     }
 
     for f in unit.functions.as_ref() {

@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test_cpp2::cpp_reflection::service_with_special_namesServiceInfoHolder apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_get() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::get() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::get() {
-  return sync_get();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_get() {
+  return get();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_get() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_get.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return get();
+  return sync_get();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_get() {
@@ -115,7 +115,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(get());
+        callback->result(sync_get());
         return;
       }
       default:
@@ -133,18 +133,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_getter() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getter() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getter");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::getter() {
-  return sync_getter();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_getter() {
+  return getter();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_getter() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_getter.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return getter();
+  return sync_getter();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_getter() {
@@ -223,7 +223,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(getter());
+        callback->result(sync_getter());
         return;
       }
       default:
@@ -241,18 +241,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_lists() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::lists() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("lists");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::lists() {
-  return sync_lists();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_lists() {
+  return lists();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_lists() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_lists.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return lists();
+  return sync_lists();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_lists() {
@@ -331,7 +331,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(lists());
+        callback->result(sync_lists());
         return;
       }
       default:
@@ -349,18 +349,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_maps() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::maps() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("maps");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::maps() {
-  return sync_maps();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_maps() {
+  return maps();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_maps() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_maps.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return maps();
+  return sync_maps();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_maps() {
@@ -439,7 +439,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(maps());
+        callback->result(sync_maps());
         return;
       }
       default:
@@ -457,18 +457,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("name");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name() {
-  return sync_name();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name() {
+  return name();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_name() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_name.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return name();
+  return sync_name();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_name() {
@@ -547,7 +547,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(name());
+        callback->result(sync_name());
         return;
       }
       default:
@@ -565,18 +565,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name_to_value() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name_to_value() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("name_to_value");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::name_to_value() {
-  return sync_name_to_value();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_name_to_value() {
+  return name_to_value();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_name_to_value() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_name_to_value.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return name_to_value();
+  return sync_name_to_value();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_name_to_value() {
@@ -655,7 +655,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(name_to_value());
+        callback->result(sync_name_to_value());
         return;
       }
       default:
@@ -673,18 +673,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_names() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::names() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("names");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::names() {
-  return sync_names();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_names() {
+  return names();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_names() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_names.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return names();
+  return sync_names();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_names() {
@@ -763,7 +763,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(names());
+        callback->result(sync_names());
         return;
       }
       default:
@@ -781,18 +781,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_prefix_tree() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::prefix_tree() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("prefix_tree");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::prefix_tree() {
-  return sync_prefix_tree();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_prefix_tree() {
+  return prefix_tree();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_prefix_tree() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_prefix_tree.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return prefix_tree();
+  return sync_prefix_tree();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_prefix_tree() {
@@ -871,7 +871,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(prefix_tree());
+        callback->result(sync_prefix_tree());
         return;
       }
       default:
@@ -889,18 +889,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_sets() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sets() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sets");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sets() {
-  return sync_sets();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_sets() {
+  return sets();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_sets() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_sets.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return sets();
+  return sync_sets();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_sets() {
@@ -979,7 +979,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(sets());
+        callback->result(sync_sets());
         return;
       }
       default:
@@ -997,18 +997,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_setter() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::setter() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("setter");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::setter() {
-  return sync_setter();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_setter() {
+  return setter();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_setter() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_setter.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return setter();
+  return sync_setter();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_setter() {
@@ -1087,7 +1087,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(setter());
+        callback->result(sync_setter());
         return;
       }
       default:
@@ -1105,18 +1105,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_str() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::str() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("str");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::str() {
-  return sync_str();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_str() {
+  return str();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_str() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_str.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return str();
+  return sync_str();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_str() {
@@ -1195,7 +1195,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(str());
+        callback->result(sync_str());
         return;
       }
       default:
@@ -1213,18 +1213,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_strings() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::strings() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("strings");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::strings() {
-  return sync_strings();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_strings() {
+  return strings();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_strings() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_strings.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return strings();
+  return sync_strings();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_strings() {
@@ -1303,7 +1303,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(strings());
+        callback->result(sync_strings());
         return;
       }
       default:
@@ -1321,18 +1321,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_type() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::type() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("type");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::type() {
-  return sync_type();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_type() {
+  return type();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_type() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_type.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return type();
+  return sync_type();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_type() {
@@ -1411,7 +1411,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(type());
+        callback->result(sync_type());
         return;
       }
       default:
@@ -1429,18 +1429,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("value");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value() {
-  return sync_value();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value() {
+  return value();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_value() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_value.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return value();
+  return sync_value();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_value() {
@@ -1519,7 +1519,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(value());
+        callback->result(sync_value());
         return;
       }
       default:
@@ -1537,18 +1537,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value_to_name() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value_to_name() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("value_to_name");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::value_to_name() {
-  return sync_value_to_name();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_value_to_name() {
+  return value_to_name();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_value_to_name() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_value_to_name.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return value_to_name();
+  return sync_value_to_name();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_value_to_name() {
@@ -1627,7 +1627,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(value_to_name());
+        callback->result(sync_value_to_name());
         return;
       }
       default:
@@ -1645,18 +1645,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_values() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::values() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("values");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::values() {
-  return sync_values();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_values() {
+  return values();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_values() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_values.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return values();
+  return sync_values();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_values() {
@@ -1735,7 +1735,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(values());
+        callback->result(sync_values());
         return;
       }
       default:
@@ -1753,18 +1753,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_id() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::id() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("id");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::id() {
-  return sync_id();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_id() {
+  return id();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_id() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_id.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return id();
+  return sync_id();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_id() {
@@ -1843,7 +1843,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(id());
+        callback->result(sync_id());
         return;
       }
       default:
@@ -1861,18 +1861,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_ids() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::ids() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("ids");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::ids() {
-  return sync_ids();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_ids() {
+  return ids();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_ids() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_ids.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return ids();
+  return sync_ids();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_ids() {
@@ -1951,7 +1951,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(ids());
+        callback->result(sync_ids());
         return;
       }
       default:
@@ -1969,18 +1969,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptor() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptor() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("descriptor");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptor() {
-  return sync_descriptor();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptor() {
+  return descriptor();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_descriptor() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_descriptor.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return descriptor();
+  return sync_descriptor();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_descriptor() {
@@ -2059,7 +2059,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(descriptor());
+        callback->result(sync_descriptor());
         return;
       }
       default:
@@ -2077,18 +2077,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptors() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptors() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("descriptors");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::descriptors() {
-  return sync_descriptors();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_descriptors() {
+  return descriptors();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_descriptors() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_descriptors.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return descriptors();
+  return sync_descriptors();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_descriptors() {
@@ -2167,7 +2167,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(descriptors());
+        callback->result(sync_descriptors());
         return;
       }
       default:
@@ -2185,18 +2185,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_key() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::key() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("key");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::key() {
-  return sync_key();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_key() {
+  return key();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_key() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_key.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return key();
+  return sync_key();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_key() {
@@ -2275,7 +2275,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(key());
+        callback->result(sync_key());
         return;
       }
       default:
@@ -2293,18 +2293,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_keys() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::keys() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("keys");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::keys() {
-  return sync_keys();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_keys() {
+  return keys();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_keys() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_keys.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return keys();
+  return sync_keys();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_keys() {
@@ -2383,7 +2383,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(keys());
+        callback->result(sync_keys());
         return;
       }
       default:
@@ -2401,18 +2401,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotation() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotation() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("annotation");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotation() {
-  return sync_annotation();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotation() {
+  return annotation();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_annotation() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_annotation.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return annotation();
+  return sync_annotation();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_annotation() {
@@ -2491,7 +2491,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(annotation());
+        callback->result(sync_annotation());
         return;
       }
       default:
@@ -2509,18 +2509,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotations() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotations() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("annotations");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::annotations() {
-  return sync_annotations();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_annotations() {
+  return annotations();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_annotations() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_annotations.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return annotations();
+  return sync_annotations();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_annotations() {
@@ -2599,7 +2599,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(annotations());
+        callback->result(sync_annotations());
         return;
       }
       default:
@@ -2617,18 +2617,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_member() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::member() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("member");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::member() {
-  return sync_member();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_member() {
+  return member();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_member() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_member.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return member();
+  return sync_member();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_member() {
@@ -2707,7 +2707,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(member());
+        callback->result(sync_member());
         return;
       }
       default:
@@ -2725,18 +2725,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_members() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::members() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("members");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::members() {
-  return sync_members();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_members() {
+  return members();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_members() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_members.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return members();
+  return sync_members();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_members() {
@@ -2815,7 +2815,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(members());
+        callback->result(sync_members());
         return;
       }
       default:
@@ -2833,18 +2833,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_field() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::field() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("field");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::field() {
-  return sync_field();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_field() {
+  return field();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_field() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_field.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return field();
+  return sync_field();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_field() {
@@ -2923,7 +2923,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(field());
+        callback->result(sync_field());
         return;
       }
       default:
@@ -2941,18 +2941,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_fields() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fields() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("fields");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::fields() {
-  return sync_fields();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::sync_fields() {
+  return fields();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::semifuture_fields() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_fields.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return fields();
+  return sync_fields();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service_with_special_names>::future_fields() {
@@ -3031,7 +3031,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(fields());
+        callback->result(sync_fields());
         return;
       }
       default:

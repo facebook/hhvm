@@ -4,17 +4,18 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use hash::HashSet;
+use ir::StringInterner;
 
-pub(crate) struct UnitState<'a> {
+pub(crate) struct UnitState {
     pub(crate) external_funcs: HashSet<String>,
-    pub(crate) unit: &'a ir::Unit<'a>,
+    pub(crate) strings: StringInterner,
 }
 
-impl<'a> UnitState<'a> {
-    pub(crate) fn new(unit: &'a ir::Unit<'a>) -> Self {
+impl UnitState {
+    pub(crate) fn new(strings: StringInterner) -> Self {
         Self {
             external_funcs: Default::default(),
-            unit,
+            strings,
         }
     }
 }

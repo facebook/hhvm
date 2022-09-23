@@ -1312,13 +1312,10 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
         self.node_to_ty_(node, true)
     }
 
-    fn make_supportdyn(&self, pos: &'a Pos<'a>) -> Ty_<'a> {
+    fn make_supportdyn(&self, pos: &'a Pos<'a>, ty: Ty_<'a>) -> Ty_<'a> {
         Ty_::Tapply(self.alloc((
             (pos, naming_special_names::typehints::HH_SUPPORTDYN),
-            self.alloc([self.alloc(Ty(
-                self.alloc(Reason::witness_from_decl(pos)),
-                Ty_::Tnonnull,
-            ))]),
+            self.alloc([self.alloc(Ty(self.alloc(Reason::witness_from_decl(pos)), ty))]),
         )))
     }
     fn node_to_ty_(&self, node: Node<'a>, allow_non_ret_ty: bool) -> Option<&'a Ty<'a>> {
@@ -1423,7 +1420,7 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> DirectDeclSmartConstructors<'a,
                         "nothing" => Ty_::Tunion(&[]),
                         "nonnull" => {
                             if self.opts.everything_sdt {
-                                self.make_supportdyn(pos)
+                                self.make_supportdyn(pos, Ty_::Tnonnull)
                             } else {
                                 Ty_::Tnonnull
                             }
@@ -2841,16 +2838,12 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             TokenKind::Num => self.prim_ty(aast::Tprim::Tnum, token_pos(self)),
             TokenKind::Bool => self.prim_ty(aast::Tprim::Tbool, token_pos(self)),
             TokenKind::Mixed => {
+                let reason = self.alloc(Reason::hint(token_pos(self)));
                 if self.opts.everything_sdt {
-                    Node::Ty(self.alloc(Ty(
-                        self.alloc(Reason::hint(token_pos(self))),
-                        Ty_::Toption(self.alloc(Ty(
-                            self.alloc(Reason::hint(token_pos(self))),
-                            self.make_supportdyn(token_pos(self)),
-                        ))),
-                    )))
+                    let ty_ = self.make_supportdyn(token_pos(self), Ty_::Tmixed);
+                    Node::Ty(self.alloc(Ty(reason, ty_)))
                 } else {
-                    Node::Ty(self.alloc(Ty(self.alloc(Reason::hint(token_pos(self))), Ty_::Tmixed)))
+                    Node::Ty(self.alloc(Ty(reason, Ty_::Tmixed)))
                 }
             }
             TokenKind::Void => self.prim_ty(aast::Tprim::Tvoid, token_pos(self)),
@@ -4871,9 +4864,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
         };
+
+        let base_pos = self.get_pos(base);
         let base = self
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+
+        let base = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(base_pos)), Ty_::Tlike(base)))
+        } else {
+            base
+        };
 
         let mut is_abstract = false;
         let mut is_final = false;
@@ -5028,9 +5029,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         } else {
             ClassConstKind::CCConcrete
         };
+        let type_pos = self.get_pos(type_);
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+        let type_ = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(type_pos)), Ty_::Tlike(type_)))
+        } else {
+            type_
+        };
         let class_name = match self.classish_name_builder.get_current_classish_name() {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),
@@ -5120,12 +5127,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
                 fields.insert(self.make_t_shape_field_name(name), type_)
             }
         }
-        let kind = match open.token_kind() {
-            Some(TokenKind::DotDotDot) => ShapeKind::OpenShape,
-            _ => ShapeKind::ClosedShape,
+        let (kind, is_open) = match open.token_kind() {
+            Some(TokenKind::DotDotDot) => (ShapeKind::OpenShape, true),
+            _ => (ShapeKind::ClosedShape, false),
         };
         let pos = self.merge_positions(shape, rparen);
-        self.hint_ty(pos, Ty_::Tshape(self.alloc((kind, fields.into()))))
+        let ty_ = Ty_::Tshape(self.alloc((kind, fields.into())));
+        if is_open && self.opts.everything_sdt {
+            self.hint_ty(pos, self.make_supportdyn(pos, ty_))
+        } else {
+            self.hint_ty(pos, ty_)
+        }
     }
 
     fn make_classname_type_specifier(
@@ -5497,21 +5509,29 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             flags |= FunTypeFlags::VARIADIC
         }
 
-        self.hint_ty(
-            pos,
-            Ty_::Tfun(self.alloc(FunType {
-                tparams: &[],
-                where_constraints: &[],
-                params,
-                implicit_params,
-                ret: self.alloc(PossiblyEnforcedTy {
-                    enforced: Enforcement::Unenforced,
-                    type_: ret,
-                }),
-                flags,
-                ifc_decl: default_ifc_fun_decl(),
-            })),
-        )
+        let pess_return_type = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(pos)), Ty_::Tlike(ret)))
+        } else {
+            ret
+        };
+        let fty = Ty_::Tfun(self.alloc(FunType {
+            tparams: &[],
+            where_constraints: &[],
+            params,
+            implicit_params,
+            ret: self.alloc(PossiblyEnforcedTy {
+                enforced: Enforcement::Unenforced,
+                type_: pess_return_type,
+            }),
+            flags,
+            ifc_decl: default_ifc_fun_decl(),
+        }));
+
+        if self.opts.everything_sdt {
+            self.hint_ty(pos, self.make_supportdyn(pos, fty))
+        } else {
+            self.hint_ty(pos, fty)
+        }
     }
 
     fn make_closure_parameter_type_specifier(

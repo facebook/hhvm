@@ -30,19 +30,19 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::A>::IIf> apache::thrift::
   apache::thrift::detail::si::throw_app_exn_unimplemented("createI");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::A>::sync_foo(::cpp2::Foo& /*_return*/) {
+void apache::thrift::ServiceHandler<::cpp2::A>::foo(::cpp2::Foo& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::A>::foo(::cpp2::Foo& _return) {
-  return sync_foo(_return);
+void apache::thrift::ServiceHandler<::cpp2::A>::sync_foo(::cpp2::Foo& _return) {
+  return foo(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::cpp2::Foo>> apache::thrift::ServiceHandler<::cpp2::A>::semifuture_foo() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_foo.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::cpp2::Foo>();
-  foo(*ret);
+  sync_foo(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -123,7 +123,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::cpp2::Foo _return;
-        foo(_return);
+        sync_foo(_return);
         callback->result(_return);
         return;
       }
@@ -143,18 +143,18 @@ determineInvocationType:
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::A>::IIf::sync_interact() {
+void apache::thrift::ServiceHandler<::cpp2::A>::IIf::interact() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interact");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::A>::IIf::interact() {
-  return sync_interact();
+void apache::thrift::ServiceHandler<::cpp2::A>::IIf::sync_interact() {
+  return interact();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::A>::IIf::semifuture_interact() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_interact.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  interact();
+  sync_interact();
   return folly::makeSemiFuture();
 }
 
@@ -222,7 +222,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        interact();
+        sync_interact();
         callback->done();
         return;
       }
@@ -334,18 +334,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::BServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::B>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::B>::sync_bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
+void apache::thrift::ServiceHandler<::cpp2::B>::bar(std::unique_ptr<::cpp2::Foo> /*foo*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::B>::bar(std::unique_ptr<::cpp2::Foo> p_foo) {
-  return sync_bar(std::move(p_foo));
+void apache::thrift::ServiceHandler<::cpp2::B>::sync_bar(std::unique_ptr<::cpp2::Foo> p_foo) {
+  return bar(std::move(p_foo));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_bar(std::unique_ptr<::cpp2::Foo> p_foo) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bar.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  bar(std::move(p_foo));
+  sync_bar(std::move(p_foo));
   return folly::makeSemiFuture();
 }
 
@@ -425,7 +425,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        bar(std::move(p_foo));
+        sync_bar(std::move(p_foo));
         callback->done();
         return;
       }
@@ -444,18 +444,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_stream_stuff() {
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::stream_stuff() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("stream_stuff");
 }
 
-::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::stream_stuff() {
-  return sync_stream_stuff();
+::apache::thrift::ServerStream<::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_stream_stuff() {
+  return stream_stuff();
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_stream_stuff() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_stream_stuff.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return stream_stuff();
+  return sync_stream_stuff();
 }
 
 folly::Future<::apache::thrift::ServerStream<::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::future_stream_stuff() {
@@ -534,7 +534,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(stream_stuff());
+        callback->result(sync_stream_stuff());
         return;
       }
       default:
@@ -552,18 +552,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_sink_stuff() {
+::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sink_stuff() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("sink_stuff");
 }
 
-::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sink_stuff() {
-  return sync_sink_stuff();
+::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t> apache::thrift::ServiceHandler<::cpp2::B>::sync_sink_stuff() {
+  return sink_stuff();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::semifuture_sink_stuff() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_sink_stuff.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return sink_stuff();
+  return sync_sink_stuff();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::std::int32_t, ::std::int32_t>> apache::thrift::ServiceHandler<::cpp2::B>::future_sink_stuff() {
@@ -642,7 +642,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(sink_stuff());
+        callback->result(sync_sink_stuff());
         return;
       }
       default:
@@ -767,18 +767,18 @@ std::unique_ptr<apache::thrift::ServiceHandler<::cpp2::C>::IIf> apache::thrift::
 }
 
 
-void apache::thrift::ServiceHandler<::cpp2::C>::IIf::sync_interact() {
+void apache::thrift::ServiceHandler<::cpp2::C>::IIf::interact() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("interact");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::C>::IIf::interact() {
-  return sync_interact();
+void apache::thrift::ServiceHandler<::cpp2::C>::IIf::sync_interact() {
+  return interact();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::C>::IIf::semifuture_interact() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_interact.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  interact();
+  sync_interact();
   return folly::makeSemiFuture();
 }
 
@@ -846,7 +846,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        interact();
+        sync_interact();
         callback->done();
         return;
       }

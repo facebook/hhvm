@@ -177,6 +177,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   // not be useful, e.g. non-C++ languages.
   bool allowCheckUnimplementedExtraInterfaces_ = true;
 
+  bool preferIoUring_ = false;
+
   std::weak_ptr<folly::ShutdownSocketSet> wShutdownSocketSet_;
 
   //! Listen socket
@@ -632,6 +634,10 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   void updateTLSCert();
 
+  void setPreferIoUring(bool b) { preferIoUring_ = b; }
+
+  bool preferIoUring() const { return preferIoUring_; }
+
   /**
    * Tells the thrift server to update ticket seeds with the contents of the
    * file ticketPath when modified and initialized the seeds with the contents
@@ -697,6 +703,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
     config.socketMaxReadsPerEvent = socketMaxReadsPerEvent_;
 
     config.useZeroCopy = !!zeroCopyEnableFunc_;
+    config.preferIoUring = preferIoUring_;
     return config;
   }
 

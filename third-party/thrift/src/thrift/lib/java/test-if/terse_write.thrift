@@ -199,6 +199,12 @@ struct TerseStructWithCustomDefault {
   12: set<i16> set_field = [1];
   13: map<i16, i16> map_field = {1: 1};
   14: MyStructWithCustomDefault struct_field;
+  15: adaptedInt adaptedInt_field = 5000;
+  @java.Adapter{
+    adapterClassName = "com.facebook.thrift.adapter.test.StringToLongTypeAdapter",
+    typeClassName = "java.lang.Long",
+  }
+  16: adaptedInt doubleAdaptedInt_field = 6000;
 }
 
 @thrift.TerseWrite

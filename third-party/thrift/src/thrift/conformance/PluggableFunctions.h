@@ -15,6 +15,9 @@
  */
 
 #pragma once
+
+#include <string_view>
+
 #include <thrift/conformance/if/gen-cpp2/ConformanceServiceAsyncClient.h>
 #include <thrift/conformance/if/gen-cpp2/RPCConformanceSetupServiceAsyncClient.h>
 #include <thrift/conformance/if/gen-cpp2/rpc_clients.h>
@@ -26,22 +29,22 @@ namespace apache::thrift::conformance {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<Client<ConformanceService>>,
     create_conformance_service_client_,
-    std::string /*service_name or smc tier*/);
+    std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<Client<RPCConformanceService>>,
     create_rpc_conformance_service_client_,
-    std::string /*service_name or smc tier*/);
+    std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<Client<BasicRPCConformanceService>>,
     create_basic_rpc_conformance_service_client_,
-    std::string /*service_name or smc tier*/);
+    std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     std::unique_ptr<Client<RPCConformanceSetupService>>,
     create_rpc_conformance_setup_service_client_,
-    std::string /*service_name or smc tier*/);
+    std::string_view /*serviceName or smc tier*/);
 
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     int, update_server_props_, apache::thrift::ThriftServer&);

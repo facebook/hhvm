@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test_cpp2::cpp_reflection::service2ServiceInfoHolder apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodA() {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodA() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodA");
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodA() {
-  return sync_methodA();
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodA() {
+  return methodA();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodA() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodA.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  methodA();
+  sync_methodA();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        methodA();
+        sync_methodA();
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodB(::std::int32_t /*x*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*y*/, double /*z*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodB");
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z) {
-  return sync_methodB(p_x, std::move(p_y), p_z);
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z) {
+  return methodB(p_x, std::move(p_y), p_z);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodB(::std::int32_t p_x, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_y, double p_z) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodB.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  methodB(p_x, std::move(p_y), p_z);
+  sync_methodB(p_x, std::move(p_y), p_z);
   return folly::makeSemiFuture();
 }
 
@@ -226,7 +226,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        methodB(p_x, std::move(p_y), p_z);
+        sync_methodB(p_x, std::move(p_y), p_z);
         callback->done();
         return;
       }
@@ -245,18 +245,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodC() {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodC() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodC");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodC() {
-  return sync_methodC();
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodC() {
+  return methodC();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodC() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodC.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodC();
+  return sync_methodC();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::future_methodC() {
@@ -335,7 +335,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodC());
+        callback->result(sync_methodC());
         return;
       }
       default:
@@ -353,18 +353,18 @@ determineInvocationType:
   }
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) {
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodD(::std::int32_t /*i*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*j*/, double /*k*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodD");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
-  return sync_methodD(p_i, std::move(p_j), p_k);
+::std::int32_t apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
+  return methodD(p_i, std::move(p_j), p_k);
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodD.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodD(p_i, std::move(p_j), p_k);
+  return sync_methodD(p_i, std::move(p_j), p_k);
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::future_methodD(::std::int32_t p_i, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_j, double p_k) {
@@ -443,7 +443,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodD(p_i, std::move(p_j), p_k));
+        callback->result(sync_methodD(p_i, std::move(p_j), p_k));
         return;
       }
       default:
@@ -461,19 +461,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodE(::test_cpp2::cpp_reflection::struct2& /*_return*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodE");
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodE(::test_cpp2::cpp_reflection::struct2& _return) {
-  return sync_methodE(_return);
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodE(::test_cpp2::cpp_reflection::struct2& _return) {
+  return methodE(_return);
 }
 
 folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodE() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodE.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::test_cpp2::cpp_reflection::struct2>();
-  methodE(*ret);
+  sync_methodE(*ret);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -554,7 +554,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::test_cpp2::cpp_reflection::struct2 _return;
-        methodE(_return);
+        sync_methodE(_return);
         callback->result(_return);
         return;
       }
@@ -573,19 +573,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodF(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodF(::test_cpp2::cpp_reflection::struct2& /*_return*/, ::std::int32_t /*l*/, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> /*m*/, double /*n*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodF");
 }
 
-void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::methodF(::test_cpp2::cpp_reflection::struct2& _return, ::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n) {
-  return sync_methodF(_return, p_l, std::move(p_m), p_n);
+void apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::sync_methodF(::test_cpp2::cpp_reflection::struct2& _return, ::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n) {
+  return methodF(_return, p_l, std::move(p_m), p_n);
 }
 
 folly::SemiFuture<std::unique_ptr<::test_cpp2::cpp_reflection::struct2>> apache::thrift::ServiceHandler<::test_cpp2::cpp_reflection::service2>::semifuture_methodF(::std::int32_t p_l, std::unique_ptr<::test_cpp2::cpp_reflection::struct1> p_m, double p_n) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodF.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::test_cpp2::cpp_reflection::struct2>();
-  methodF(*ret, p_l, std::move(p_m), p_n);
+  sync_methodF(*ret, p_l, std::move(p_m), p_n);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -666,7 +666,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::test_cpp2::cpp_reflection::struct2 _return;
-        methodF(_return, p_l, std::move(p_m), p_n);
+        sync_methodF(_return, p_l, std::move(p_m), p_n);
         callback->result(_return);
         return;
       }

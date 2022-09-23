@@ -16,6 +16,7 @@
 
 #include <signal.h>
 
+#include <folly/Demangle.h>
 #include <folly/FileUtil.h>
 #include <folly/Likely.h>
 #include <folly/SpinLock.h>
@@ -374,15 +375,15 @@ class ProvidedBuffersBuffer {
     }
   }
 
-  struct io_uring_buf_ring* ring() const {
+  struct io_uring_buf_ring* ring() const noexcept {
     return ringPtr_;
   }
 
-  struct io_uring_buf* ringBuf(int idx) const {
+  struct io_uring_buf* ringBuf(int idx) const noexcept {
     return &ringPtr_->bufs[idx & ringMask_];
   }
 
-  uint32_t ringCount() const { return 1 + ringMask_; }
+  uint32_t ringCount() const noexcept { return 1 + ringMask_; }
 
   char* buffer(uint16_t idx) {
     size_t offset = idx << bufferShift_;
@@ -435,7 +436,7 @@ class ProvidedBufferRing : public IoUringBackend::ProvidedBufferProviderBase {
     }
   }
 
-  void enobuf() override {
+  void enobuf() noexcept override {
     {
       // what we want to do is something like
       // if (cachedHead_ != localHead_) {
@@ -449,11 +450,13 @@ class ProvidedBufferRing : public IoUringBackend::ProvidedBufferProviderBase {
     VLOG_EVERY_N(1, 500) << "enobuf";
   }
 
-  void unusedBuf(uint16_t i, size_t /* length */) override { returnBuffer(i); }
+  void unusedBuf(uint16_t i, size_t /* length */) noexcept override {
+    returnBuffer(i);
+  }
 
-  uint32_t count() const override { return buffer_.ringCount(); }
+  uint32_t count() const noexcept override { return buffer_.ringCount(); }
 
-  std::unique_ptr<IOBuf> getIoBuf(uint16_t i, size_t length) override {
+  std::unique_ptr<IOBuf> getIoBuf(uint16_t i, size_t length) noexcept override {
     static constexpr bool kDoMalloc = false;
 
     std::unique_ptr<IOBuf> ret;
@@ -493,7 +496,7 @@ class ProvidedBufferRing : public IoUringBackend::ProvidedBufferProviderBase {
     return ret;
   }
 
-  bool available() const override { return !enobuf_; }
+  bool available() const noexcept override { return !enobuf_; }
 
  private:
   void initialRegister() {
@@ -514,12 +517,12 @@ class ProvidedBufferRing : public IoUringBackend::ProvidedBufferProviderBase {
     }
   }
 
-  bool tryPublish(uint16_t expected, uint16_t value) {
+  bool tryPublish(uint16_t expected, uint16_t value) noexcept {
     return reinterpret_cast<std::atomic<uint16_t>*>(&buffer_.ring()->tail)
         ->compare_exchange_strong(expected, value, std::memory_order_release);
   }
 
-  void returnBuffer(uint16_t i) {
+  void returnBuffer(uint16_t i) noexcept {
     __u64 addr = (__u64)buffer_.buffer(i);
     uint16_t this_idx = localHead_++;
     uint16_t next_head = this_idx + 1;
@@ -531,7 +534,7 @@ class ProvidedBufferRing : public IoUringBackend::ProvidedBufferProviderBase {
     if (tryPublish(this_idx, next_head)) {
       enobuf_ = false;
     }
-    DVLOG(1) << "returnBuffer(" << i << ")@" << this_idx;
+    DVLOG(9) << "returnBuffer(" << i << ")@" << this_idx;
   }
 
   char const* getData(uint16_t i) { return buffer_.buffer(i); }
@@ -608,7 +611,7 @@ int IoUringBackend::FdRegistry::init() {
 }
 
 IoUringBackend::FdRegistrationRecord* IoUringBackend::FdRegistry::alloc(
-    int fd) {
+    int fd) noexcept {
   if (FOLLY_UNLIKELY(err_ || free_.empty())) {
     return nullptr;
   }
@@ -672,17 +675,20 @@ FOLLY_ALWAYS_INLINE struct io_uring_sqe* IoUringBackend::get_sqe() {
   return ret;
 }
 
-void IoUringBackend::IoSqeBase::internalSubmit(struct io_uring_sqe* sqe) {
+void IoUringBackend::IoSqeBase::internalSubmit(
+    struct io_uring_sqe* sqe) noexcept {
   if (inFlight_) {
-    throw std::runtime_error(to<std::string>(
-        "cannot resubmit an IoSqe. type=", typeid(*this).name()));
+    LOG(ERROR) << "cannot resubmit an IoSqe. type="
+               << folly::demangle(typeid(*this));
+    return;
   }
   inFlight_ = true;
   processSubmit(sqe);
   ::io_uring_sqe_set_data(sqe, this);
 }
 
-void IoUringBackend::IoSqeBase::internalCallback(int res, uint32_t flags) {
+void IoUringBackend::IoSqeBase::internalCallback(
+    int res, uint32_t flags) noexcept {
   if (!(flags & IORING_CQE_F_MORE)) {
     inFlight_ = false;
   }
@@ -1128,7 +1134,7 @@ IoUringBackend::IoSqe* IoUringBackend::allocIoSqe(const EventCallback& cb) {
   return ret;
 }
 
-void IoUringBackend::releaseIoSqe(IoUringBackend::IoSqe* aioIoSqe) {
+void IoUringBackend::releaseIoSqe(IoUringBackend::IoSqe* aioIoSqe) noexcept {
   CHECK_GT(numIoSqeInUse_, 0);
   aioIoSqe->cbData_.releaseData();
   // unregister the file descriptor record
@@ -1149,7 +1155,7 @@ void IoUringBackend::releaseIoSqe(IoUringBackend::IoSqe* aioIoSqe) {
   }
 }
 
-void IoUringBackend::IoSqe::release() {
+void IoUringBackend::IoSqe::release() noexcept {
   backend_->releaseIoSqe(this);
 }
 
@@ -1236,6 +1242,20 @@ size_t IoUringBackend::processActiveEvents() {
   }
 
   return ret;
+}
+
+void IoUringBackend::submitOutstanding() {
+  prepList(submitList_);
+  submitEager();
+}
+
+unsigned int IoUringBackend::processCompleted() {
+  return internalProcessCqe(options_.maxGet, false);
+}
+
+size_t IoUringBackend::loopPoll() {
+  prepList(submitList_);
+  return getActiveEvents(WaitForEventsMode::DONT_WAIT);
 }
 
 int IoUringBackend::eb_event_base_loop(int flags) {
@@ -1477,14 +1497,14 @@ void IoUringBackend::submitNow(IoSqeBase& ioSqe) {
   submitBusyCheck(waitingToSubmit_, WaitForEventsMode::DONT_WAIT);
 }
 
-void IoUringBackend::internalSubmit(IoSqeBase& ioSqe) {
+void IoUringBackend::internalSubmit(IoSqeBase& ioSqe) noexcept {
   auto* sqe = get_sqe();
   setSubmitting();
   ioSqe.internalSubmit(sqe);
   doneSubmitting();
 }
 
-void IoUringBackend::submitSoon(IoSqeBase& ioSqe) {
+void IoUringBackend::submitSoon(IoSqeBase& ioSqe) noexcept {
   internalSubmit(ioSqe);
   if (waitingToSubmit_ >= options_.maxSubmit) {
     submitBusyCheck(waitingToSubmit_, WaitForEventsMode::DONT_WAIT);
@@ -1494,26 +1514,30 @@ void IoUringBackend::submitSoon(IoSqeBase& ioSqe) {
 namespace {
 
 struct IoSqeNop final : IoUringBackend::IoSqeBase {
-  void processSubmit(struct io_uring_sqe*) override {
+  void processSubmit(struct io_uring_sqe*) noexcept override {
     LOG(FATAL) << "IoSqeNop: cannot submit this!";
   }
-  void callback(int, uint32_t) override {}
-  void callbackCancelled() override {}
+  void callback(int, uint32_t) noexcept override {}
+  void callbackCancelled() noexcept override {}
 };
 IoSqeNop const ioSqeNop;
 
 } // namespace
 
 void IoUringBackend::cancel(IoSqeBase* ioSqe) {
+  bool skip = false;
   ioSqe->markCancelled();
   auto* sqe = get_sqe();
   io_uring_prep_cancel64(sqe, (uint64_t)ioSqe, 0);
   io_uring_sqe_set_data(sqe, (void*)&ioSqeNop); // just need something unique
 #if FOLLY_IO_URING_UP_TO_DATE
   if (params_.features & IORING_FEAT_CQE_SKIP) {
-    sqe->flags |= IOSQE_CQE_SKIP_SUCCESS;
+    // sqe->flags |= IOSQE_CQE_SKIP_SUCCESS;
+    // skip = true;
   }
 #endif
+  DVLOG(4) << "Cancel " << ioSqe << " with ud= " << &ioSqeNop
+           << " skip=" << skip;
 }
 
 int IoUringBackend::cancelOne(IoSqe* ioSqe) {
@@ -1577,7 +1601,7 @@ size_t IoUringBackend::getActiveEvents(WaitForEventsMode waitForEvents) {
   int ret;
   // we can be called from the submitList() method
   // or with non blocking flags
-  if (FOLLY_LIKELY(waitForEvents == WaitForEventsMode::WAIT)) {
+  if (waitForEvents == WaitForEventsMode::WAIT) {
     // if polling the CQ, busy wait for one entry
     if (options_.flags & Options::Flags::POLL_CQ) {
       if (waitingToSubmit_) {
@@ -1598,9 +1622,10 @@ size_t IoUringBackend::getActiveEvents(WaitForEventsMode waitForEvents) {
     }
   } else {
     if (waitingToSubmit_) {
-      submitBusyCheck(waitingToSubmit_, WaitForEventsMode::DONT_WAIT);
+      ret = submitBusyCheck(waitingToSubmit_, WaitForEventsMode::DONT_WAIT);
+    } else {
+      ret = ::io_uring_peek_cqe(&ioRing_, &cqe);
     }
-    ret = ::io_uring_peek_cqe(&ioRing_, &cqe);
   }
   if (ret == -EBADR) {
     // cannot recover from droped CQE
@@ -1611,6 +1636,13 @@ size_t IoUringBackend::getActiveEvents(WaitForEventsMode waitForEvents) {
     LOG(ERROR) << "wait_cqe error: " << ret;
     return 0;
   }
+
+  return internalProcessCqe(options_.maxGet, true);
+}
+
+unsigned int IoUringBackend::internalProcessCqe(
+    unsigned int maxGet, bool allowMore) noexcept {
+  struct io_uring_cqe* cqe;
 
   unsigned int count_more = 0;
   unsigned int count = 0;
@@ -1632,15 +1664,17 @@ size_t IoUringBackend::getActiveEvents(WaitForEventsMode waitForEvents) {
       break;
     }
     io_uring_cq_advance(&ioRing_, loop_count);
-    if (count >= options_.maxGet) {
+    if (count >= maxGet) {
       break;
     }
-    ret = ::io_uring_peek_cqe(&ioRing_, &cqe);
-    if (ret == -EBADR) {
-      // cannot recover from droped CQE
-      folly::terminate_with<std::runtime_error>("BADR");
-    } else if (ret) {
-      break;
+    if (allowMore) {
+      int ret = ::io_uring_peek_cqe(&ioRing_, &cqe);
+      if (ret == -EBADR) {
+        // cannot recover from droped CQE
+        folly::terminate_with<std::runtime_error>("BADR");
+      } else if (ret) {
+        break;
+      }
     }
   } while (true);
   numInsertedEvents_ -= (count - count_more);
@@ -1661,7 +1695,8 @@ int IoUringBackend::submitEager() {
   return res;
 }
 
-int IoUringBackend::submitBusyCheck(int num, WaitForEventsMode waitForEvents) {
+int IoUringBackend::submitBusyCheck(
+    int num, WaitForEventsMode waitForEvents) noexcept {
   int i = 0;
   int res;
   DCHECK(!isSubmitting()) << "mid processing a submit, cannot submit";
@@ -1888,7 +1923,7 @@ static bool doKernelSupportsRecvmsgMultishot() {
           close(fd);
         }
       }
-      void processSubmit(struct io_uring_sqe* sqe) override {
+      void processSubmit(struct io_uring_sqe* sqe) noexcept override {
         io_uring_prep_recvmsg(sqe, fd, &msg, 0);
 
         sqe->buf_group = bp_->gid();
@@ -1899,9 +1934,12 @@ static bool doKernelSupportsRecvmsgMultishot() {
         sqe->ioprio |= kMultishotFlag;
       }
 
-      void callback(int res, uint32_t) override { supported = res != -EINVAL; }
+      void callback(int res, uint32_t) noexcept override {
+        supported = res != -EINVAL;
+      }
 
-      void callbackCancelled() override { delete this; }
+      void callbackCancelled() noexcept override { delete this; }
+
       IoUringBackend::ProvidedBufferProviderBase* bp_;
       bool supported = false;
       struct msghdr msg;

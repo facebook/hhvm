@@ -448,7 +448,7 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
   /**
    * EventRecvmsgCallback implementation
    */
-  folly::EventRecvmsgCallback::MsgHdr* allocateData() override;
+  folly::EventRecvmsgCallback::MsgHdr* allocateData() noexcept override;
   void eventRecvmsgCallback(FizzMsgHdr* msgHdr, int res);
 
   /**

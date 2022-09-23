@@ -29,18 +29,18 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_v
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("void_ret_i16_param"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_byte_i16_param(::std::int8_t /*param1*/, ::std::int16_t /*param2*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_byte_i16_param(::std::int8_t /*param1*/, ::std::int16_t /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_byte_i16_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
-  return sync_void_ret_byte_i16_param(p_param1, p_param2);
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
+  return void_ret_byte_i16_param(p_param1, p_param2);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_byte_i16_param(::std::int8_t p_param1, ::std::int16_t p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_byte_i16_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_byte_i16_param(p_param1, p_param2);
+  sync_void_ret_byte_i16_param(p_param1, p_param2);
   return folly::makeSemiFuture();
 }
 
@@ -120,7 +120,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_byte_i16_param(p_param1, p_param2);
+        sync_void_ret_byte_i16_param(p_param1, p_param2);
         callback->done();
         return;
       }
@@ -139,18 +139,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_map_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
-  return sync_void_ret_map_param(std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  return void_ret_map_param(std::move(p_param1));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_map_param(std::move(p_param1));
+  sync_void_ret_map_param(std::move(p_param1));
   return folly::makeSemiFuture();
 }
 
@@ -230,7 +230,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_map_param(std::move(p_param1));
+        sync_void_ret_map_param(std::move(p_param1));
         callback->done();
         return;
       }
@@ -249,18 +249,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/, std::unique_ptr<::std::set<::std::vector<::std::string>>> /*param2*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/, std::unique_ptr<::std::set<::std::vector<::std::string>>> /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_map_setlist_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
-  return sync_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
+  return void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_map_setlist_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1, std::unique_ptr<::std::set<::std::vector<::std::string>>> p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+  sync_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
   return folly::makeSemiFuture();
 }
 
@@ -340,7 +340,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
+        sync_void_ret_map_setlist_param(std::move(p_param1), std::move(p_param2));
         callback->done();
         return;
       }
@@ -359,18 +359,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_map_typedef_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
-  return sync_void_ret_map_typedef_param(p_param1);
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
+  return void_ret_map_typedef_param(p_param1);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_map_typedef_param(::some::valid::ns::simpleTypeDef p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_map_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_map_typedef_param(p_param1);
+  sync_void_ret_map_typedef_param(p_param1);
   return folly::makeSemiFuture();
 }
 
@@ -450,7 +450,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_map_typedef_param(p_param1);
+        sync_void_ret_map_typedef_param(p_param1);
         callback->done();
         return;
       }
@@ -469,18 +469,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_enum_param(::some::valid::ns::MyEnumA /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_enum_param(::some::valid::ns::MyEnumA /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_enum_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
-  return sync_void_ret_enum_param(p_param1);
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
+  return void_ret_enum_param(p_param1);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_enum_param(::some::valid::ns::MyEnumA p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_enum_param(p_param1);
+  sync_void_ret_enum_param(p_param1);
   return folly::makeSemiFuture();
 }
 
@@ -560,7 +560,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_enum_param(p_param1);
+        sync_void_ret_enum_param(p_param1);
         callback->done();
         return;
       }
@@ -579,18 +579,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_struct_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
-  return sync_void_ret_struct_param(std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
+  return void_ret_struct_param(std::move(p_param1));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_struct_param(std::unique_ptr<::some::valid::ns::MyStruct> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_struct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_struct_param(std::move(p_param1));
+  sync_void_ret_struct_param(std::move(p_param1));
   return folly::makeSemiFuture();
 }
 
@@ -670,7 +670,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_struct_param(std::move(p_param1));
+        sync_void_ret_struct_param(std::move(p_param1));
         callback->done();
         return;
       }
@@ -689,18 +689,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("void_ret_listunion_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
-  return sync_void_ret_listunion_param(std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
+  return void_ret_listunion_param(std::move(p_param1));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_void_ret_listunion_param(std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_void_ret_listunion_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  void_ret_listunion_param(std::move(p_param1));
+  sync_void_ret_listunion_param(std::move(p_param1));
   return folly::makeSemiFuture();
 }
 
@@ -780,7 +780,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        void_ret_listunion_param(std::move(p_param1));
+        sync_void_ret_listunion_param(std::move(p_param1));
         callback->done();
         return;
       }
@@ -799,18 +799,18 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_i32_i64_param(::std::int32_t /*param1*/, ::std::int64_t /*param2*/) {
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_i32_i64_param(::std::int32_t /*param1*/, ::std::int64_t /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bool_ret_i32_i64_param");
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
-  return sync_bool_ret_i32_i64_param(p_param1, p_param2);
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
+  return bool_ret_i32_i64_param(p_param1, p_param2);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bool_ret_i32_i64_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return bool_ret_i32_i64_param(p_param1, p_param2);
+  return sync_bool_ret_i32_i64_param(p_param1, p_param2);
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_bool_ret_i32_i64_param(::std::int32_t p_param1, ::std::int64_t p_param2) {
@@ -889,7 +889,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(bool_ret_i32_i64_param(p_param1, p_param2));
+        callback->result(sync_bool_ret_i32_i64_param(p_param1, p_param2));
         return;
       }
       default:
@@ -907,18 +907,18 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bool_ret_map_param");
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
-  return sync_bool_ret_map_param(std::move(p_param1));
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  return bool_ret_map_param(std::move(p_param1));
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bool_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return bool_ret_map_param(std::move(p_param1));
+  return sync_bool_ret_map_param(std::move(p_param1));
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_bool_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
@@ -997,7 +997,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(bool_ret_map_param(std::move(p_param1)));
+        callback->result(sync_bool_ret_map_param(std::move(p_param1)));
         return;
       }
       default:
@@ -1015,18 +1015,18 @@ determineInvocationType:
   }
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> /*param1*/) {
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bool_ret_union_param");
 }
 
-bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
-  return sync_bool_ret_union_param(std::move(p_param1));
+bool apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
+  return bool_ret_union_param(std::move(p_param1));
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bool_ret_union_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return bool_ret_union_param(std::move(p_param1));
+  return sync_bool_ret_union_param(std::move(p_param1));
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_bool_ret_union_param(std::unique_ptr<::some::valid::ns::ComplexUnion> p_param1) {
@@ -1105,7 +1105,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(bool_ret_union_param(std::move(p_param1)));
+        callback->result(sync_bool_ret_union_param(std::move(p_param1)));
         return;
       }
       default:
@@ -1123,18 +1123,18 @@ determineInvocationType:
   }
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_i64_ret_float_double_param(float /*param1*/, double /*param2*/) {
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::i64_ret_float_double_param(float /*param1*/, double /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("i64_ret_float_double_param");
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::i64_ret_float_double_param(float p_param1, double p_param2) {
-  return sync_i64_ret_float_double_param(p_param1, p_param2);
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_i64_ret_float_double_param(float p_param1, double p_param2) {
+  return i64_ret_float_double_param(p_param1, p_param2);
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_i64_ret_float_double_param(float p_param1, double p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_i64_ret_float_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return i64_ret_float_double_param(p_param1, p_param2);
+  return sync_i64_ret_float_double_param(p_param1, p_param2);
 }
 
 folly::Future<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_i64_ret_float_double_param(float p_param1, double p_param2) {
@@ -1213,7 +1213,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(i64_ret_float_double_param(p_param1, p_param2));
+        callback->result(sync_i64_ret_float_double_param(p_param1, p_param2));
         return;
       }
       default:
@@ -1231,18 +1231,18 @@ determineInvocationType:
   }
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_i64_ret_string_typedef_param(std::unique_ptr<::std::string> /*param1*/, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> /*param2*/) {
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::i64_ret_string_typedef_param(std::unique_ptr<::std::string> /*param1*/, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("i64_ret_string_typedef_param");
 }
 
-::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::i64_ret_string_typedef_param(std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
-  return sync_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
+::std::int64_t apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_i64_ret_string_typedef_param(std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
+  return i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
 }
 
 folly::SemiFuture<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_i64_ret_string_typedef_param(std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_i64_ret_string_typedef_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
+  return sync_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2));
 }
 
 folly::Future<::std::int64_t> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_i64_ret_string_typedef_param(std::unique_ptr<::std::string> p_param1, std::unique_ptr<::std::set<::some::valid::ns::mostComplexTypeDef>> p_param2) {
@@ -1321,7 +1321,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2)));
+        callback->result(sync_i64_ret_string_typedef_param(std::move(p_param1), std::move(p_param2)));
         return;
       }
       default:
@@ -1343,18 +1343,18 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_i
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("i64_ret_i32_i32_i32_i32_i32_param"));
 }
 
-double apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> /*param1*/) {
+double apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("double_ret_setstruct_param");
 }
 
-double apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
-  return sync_double_ret_setstruct_param(std::move(p_param1));
+double apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
+  return double_ret_setstruct_param(std::move(p_param1));
 }
 
 folly::SemiFuture<double> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_double_ret_setstruct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return double_ret_setstruct_param(std::move(p_param1));
+  return sync_double_ret_setstruct_param(std::move(p_param1));
 }
 
 folly::Future<double> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_double_ret_setstruct_param(std::unique_ptr<::std::set<::some::valid::ns::MyStruct>> p_param1) {
@@ -1433,7 +1433,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(double_ret_setstruct_param(std::move(p_param1)));
+        callback->result(sync_double_ret_setstruct_param(std::move(p_param1)));
         return;
       }
       default:
@@ -1451,19 +1451,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_string_ret_string_param(::std::string& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::string_ret_string_param(::std::string& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("string_ret_string_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::string_ret_string_param(::std::string& _return, std::unique_ptr<::std::string> p_param1) {
-  return sync_string_ret_string_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_string_ret_string_param(::std::string& _return, std::unique_ptr<::std::string> p_param1) {
+  return string_ret_string_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_string_ret_string_param(std::unique_ptr<::std::string> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_string_ret_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  string_ret_string_param(*ret, std::move(p_param1));
+  sync_string_ret_string_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -1544,7 +1544,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        string_ret_string_param(_return, std::move(p_param1));
+        sync_string_ret_string_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }
@@ -1563,19 +1563,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_binary_ret_binary_param(::std::string& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::binary_ret_binary_param(::std::string& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("binary_ret_binary_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::binary_ret_binary_param(::std::string& _return, std::unique_ptr<::std::string> p_param1) {
-  return sync_binary_ret_binary_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_binary_ret_binary_param(::std::string& _return, std::unique_ptr<::std::string> p_param1) {
+  return binary_ret_binary_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_binary_ret_binary_param(std::unique_ptr<::std::string> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_binary_ret_binary_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  binary_ret_binary_param(*ret, std::move(p_param1));
+  sync_binary_ret_binary_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -1656,7 +1656,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        binary_ret_binary_param(_return, std::move(p_param1));
+        sync_binary_ret_binary_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }
@@ -1675,19 +1675,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& /*_return*/, bool /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& /*_return*/, bool /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("map_ret_bool_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, bool p_param1) {
-  return sync_map_ret_bool_param(_return, p_param1);
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_map_ret_bool_param(::std::map<::std::string, ::std::int64_t>& _return, bool p_param1) {
+  return map_ret_bool_param(_return, p_param1);
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::std::string, ::std::int64_t>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_map_ret_bool_param(bool p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_map_ret_bool_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::map<::std::string, ::std::int64_t>>();
-  map_ret_bool_param(*ret, p_param1);
+  sync_map_ret_bool_param(*ret, p_param1);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -1768,7 +1768,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::std::string, ::std::int64_t> _return;
-        map_ret_bool_param(_return, p_param1);
+        sync_map_ret_bool_param(_return, p_param1);
         callback->result(_return);
         return;
       }
@@ -1787,19 +1787,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_list_ret_map_setlist_param(::std::vector<bool>& /*_return*/, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> /*param1*/, std::unique_ptr<::std::vector<::std::string>> /*param2*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::list_ret_map_setlist_param(::std::vector<bool>& /*_return*/, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> /*param1*/, std::unique_ptr<::std::vector<::std::string>> /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("list_ret_map_setlist_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::list_ret_map_setlist_param(::std::vector<bool>& _return, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
-  return sync_list_ret_map_setlist_param(_return, std::move(p_param1), std::move(p_param2));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_list_ret_map_setlist_param(::std::vector<bool>& _return, std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
+  return list_ret_map_setlist_param(_return, std::move(p_param1), std::move(p_param2));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<bool>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_list_ret_map_setlist_param(std::unique_ptr<::std::map<::std::int32_t, ::std::vector<::std::string>>> p_param1, std::unique_ptr<::std::vector<::std::string>> p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_list_ret_map_setlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::vector<bool>>();
-  list_ret_map_setlist_param(*ret, std::move(p_param1), std::move(p_param2));
+  sync_list_ret_map_setlist_param(*ret, std::move(p_param1), std::move(p_param2));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -1880,7 +1880,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<bool> _return;
-        list_ret_map_setlist_param(_return, std::move(p_param1), std::move(p_param2));
+        sync_list_ret_map_setlist_param(_return, std::move(p_param1), std::move(p_param2));
         callback->result(_return);
         return;
       }
@@ -1899,19 +1899,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& /*_return*/, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("mapsetlistmapliststring_ret_listlistlist_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
-  return sync_mapsetlistmapliststring_ret_listlistlist_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_mapsetlistmapliststring_ret_listlistlist_param(::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& _return, std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
+  return mapsetlistmapliststring_ret_listlistlist_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_mapsetlistmapliststring_ret_listlistlist_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>>();
-  mapsetlistmapliststring_ret_listlistlist_param(*ret, std::move(p_param1));
+  sync_mapsetlistmapliststring_ret_listlistlist_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -1992,7 +1992,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> _return;
-        mapsetlistmapliststring_ret_listlistlist_param(_return, std::move(p_param1));
+        sync_mapsetlistmapliststring_ret_listlistlist_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }
@@ -2011,18 +2011,18 @@ determineInvocationType:
   }
 }
 
-::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_typedef_ret_i32_param(::std::int32_t /*param1*/) {
+::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::typedef_ret_i32_param(::std::int32_t /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("typedef_ret_i32_param");
 }
 
-::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::typedef_ret_i32_param(::std::int32_t p_param1) {
-  return sync_typedef_ret_i32_param(p_param1);
+::some::valid::ns::simpleTypeDef apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_typedef_ret_i32_param(::std::int32_t p_param1) {
+  return typedef_ret_i32_param(p_param1);
 }
 
 folly::SemiFuture<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_typedef_ret_i32_param(::std::int32_t p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_typedef_ret_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return typedef_ret_i32_param(p_param1);
+  return sync_typedef_ret_i32_param(p_param1);
 }
 
 folly::Future<::some::valid::ns::simpleTypeDef> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_typedef_ret_i32_param(::std::int32_t p_param1) {
@@ -2101,7 +2101,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(typedef_ret_i32_param(p_param1));
+        callback->result(sync_typedef_ret_i32_param(p_param1));
         return;
       }
       default:
@@ -2123,18 +2123,18 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_l
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("listtypedef_ret_typedef_param"));
 }
 
-::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_enum_ret_double_param(double /*param1*/) {
+::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::enum_ret_double_param(double /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("enum_ret_double_param");
 }
 
-::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::enum_ret_double_param(double p_param1) {
-  return sync_enum_ret_double_param(p_param1);
+::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_enum_ret_double_param(double p_param1) {
+  return enum_ret_double_param(p_param1);
 }
 
 folly::SemiFuture<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_enum_ret_double_param(double p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_enum_ret_double_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return enum_ret_double_param(p_param1);
+  return sync_enum_ret_double_param(p_param1);
 }
 
 folly::Future<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_enum_ret_double_param(double p_param1) {
@@ -2213,7 +2213,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(enum_ret_double_param(p_param1));
+        callback->result(sync_enum_ret_double_param(p_param1));
         return;
       }
       default:
@@ -2231,18 +2231,18 @@ determineInvocationType:
   }
 }
 
-::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_enum_ret_double_enum_param(double /*param1*/, ::some::valid::ns::MyEnumA /*param2*/) {
+::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::enum_ret_double_enum_param(double /*param1*/, ::some::valid::ns::MyEnumA /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("enum_ret_double_enum_param");
 }
 
-::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
-  return sync_enum_ret_double_enum_param(p_param1, p_param2);
+::some::valid::ns::MyEnumA apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
+  return enum_ret_double_enum_param(p_param1, p_param2);
 }
 
 folly::SemiFuture<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_enum_ret_double_enum_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return enum_ret_double_enum_param(p_param1, p_param2);
+  return sync_enum_ret_double_enum_param(p_param1, p_param2);
 }
 
 folly::Future<::some::valid::ns::MyEnumA> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::future_enum_ret_double_enum_param(double p_param1, ::some::valid::ns::MyEnumA p_param2) {
@@ -2321,7 +2321,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(enum_ret_double_enum_param(p_param1, p_param2));
+        callback->result(sync_enum_ret_double_enum_param(p_param1, p_param2));
         return;
       }
       default:
@@ -2339,19 +2339,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& /*_return*/, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listenum_ret_map_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
-  return sync_listenum_ret_map_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_listenum_ret_map_param(::std::vector<::some::valid::ns::MyEnumA>& _return, std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
+  return listenum_ret_map_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::MyEnumA>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_listenum_ret_map_param(std::unique_ptr<::std::map<::std::string, ::std::int64_t>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_listenum_ret_map_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::vector<::some::valid::ns::MyEnumA>>();
-  listenum_ret_map_param(*ret, std::move(p_param1));
+  sync_listenum_ret_map_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -2432,7 +2432,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<::some::valid::ns::MyEnumA> _return;
-        listenum_ret_map_param(_return, std::move(p_param1));
+        sync_listenum_ret_map_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }
@@ -2455,19 +2455,19 @@ void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::async_eb_s
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("struct_ret_i16_param"));
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& /*_return*/, std::unique_ptr<::std::set<::std::string>> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& /*_return*/, std::unique_ptr<::std::set<::std::string>> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("setstruct_ret_set_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, std::unique_ptr<::std::set<::std::string>> p_param1) {
-  return sync_setstruct_ret_set_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_setstruct_ret_set_param(::std::set<::some::valid::ns::MyStruct>& _return, std::unique_ptr<::std::set<::std::string>> p_param1) {
+  return setstruct_ret_set_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::set<::some::valid::ns::MyStruct>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_setstruct_ret_set_param(std::unique_ptr<::std::set<::std::string>> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_setstruct_ret_set_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::set<::some::valid::ns::MyStruct>>();
-  setstruct_ret_set_param(*ret, std::move(p_param1));
+  sync_setstruct_ret_set_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -2548,7 +2548,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::set<::some::valid::ns::MyStruct> _return;
-        setstruct_ret_set_param(_return, std::move(p_param1));
+        sync_setstruct_ret_set_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }
@@ -2567,19 +2567,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& /*_return*/, ::std::int32_t /*param1*/, ::std::int32_t /*param2*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& /*_return*/, ::std::int32_t /*param1*/, ::std::int32_t /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("union_ret_i32_i32_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::std::int32_t p_param1, ::std::int32_t p_param2) {
-  return sync_union_ret_i32_i32_param(_return, p_param1, p_param2);
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_union_ret_i32_i32_param(::some::valid::ns::ComplexUnion& _return, ::std::int32_t p_param1, ::std::int32_t p_param2) {
+  return union_ret_i32_i32_param(_return, p_param1, p_param2);
 }
 
 folly::SemiFuture<std::unique_ptr<::some::valid::ns::ComplexUnion>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_union_ret_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_union_ret_i32_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::some::valid::ns::ComplexUnion>();
-  union_ret_i32_i32_param(*ret, p_param1, p_param2);
+  sync_union_ret_i32_i32_param(*ret, p_param1, p_param2);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -2660,7 +2660,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::some::valid::ns::ComplexUnion _return;
-        union_ret_i32_i32_param(_return, p_param1, p_param2);
+        sync_union_ret_i32_i32_param(_return, p_param1, p_param2);
         callback->result(_return);
         return;
       }
@@ -2679,19 +2679,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& /*_return*/, std::unique_ptr<::std::string> /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("listunion_string_param");
 }
 
-void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, std::unique_ptr<::std::string> p_param1) {
-  return sync_listunion_string_param(_return, std::move(p_param1));
+void apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::sync_listunion_string_param(::std::vector<::some::valid::ns::ComplexUnion>& _return, std::unique_ptr<::std::string> p_param1) {
+  return listunion_string_param(_return, std::move(p_param1));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::vector<::some::valid::ns::ComplexUnion>>> apache::thrift::ServiceHandler<::some::valid::ns::ParamService>::semifuture_listunion_string_param(std::unique_ptr<::std::string> p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_listunion_string_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::vector<::some::valid::ns::ComplexUnion>>();
-  listunion_string_param(*ret, std::move(p_param1));
+  sync_listunion_string_param(*ret, std::move(p_param1));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -2772,7 +2772,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::vector<::some::valid::ns::ComplexUnion> _return;
-        listunion_string_param(_return, std::move(p_param1));
+        sync_listunion_string_param(_return, std::move(p_param1));
         callback->result(_return);
         return;
       }

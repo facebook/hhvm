@@ -13,7 +13,7 @@ macro_rules! tx_ty {
         textual::Ty::Mixed
     };
     ($name:ident) => {
-        textual::Ty::Type(stringify!($name).to_string())
+        textual::Ty::RawType(stringify!($name).to_string())
     };
     (* $rest:tt) => {
         textual::Ty::RawPtr(Box::new(tx_ty!($rest)))
@@ -31,5 +31,5 @@ mod textual;
 mod util;
 mod writer;
 
-pub use decls::BUILTIN_DECLS;
+pub use decls::write_decls;
 pub use writer::textual_writer;

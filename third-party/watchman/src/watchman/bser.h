@@ -68,4 +68,9 @@ constexpr size_t kDecodeIntFailed = ~size_t{};
 std::optional<json_int_t>
 bunser_int(const char* buf, size_t avail, size_t* needed);
 
-json_ref bunser(const char* buf, const char* end, json_int_t* needed);
+/**
+ * Parses a value from a BSER document.
+ *
+ * Ignores any unused data at the end of the buffer.
+ */
+json_ref bunser(const char* buf, const char* end);

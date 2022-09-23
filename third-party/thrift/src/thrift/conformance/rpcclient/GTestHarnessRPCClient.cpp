@@ -19,6 +19,7 @@
 #include <chrono>
 #include <memory>
 #include <stdexcept>
+#include <string_view>
 
 #include <fmt/core.h>
 #include <folly/Subprocess.h>
@@ -182,10 +183,8 @@ class ConformanceVerificationServer
 };
 
 void createClient(
-    std::string_view service_name, std::string ipAddress, std::string port) {
-  auto client =
-      create_rpc_conformance_setup_service_client_(std::string(service_name));
-  // client->sync_createRPCConformanceServiceClient(ipAddress, port);
+    std::string_view serviceName, std::string ipAddress, std::string port) {
+  auto client = create_rpc_conformance_setup_service_client_(serviceName);
   client->semifuture_createRPCConformanceServiceClient(ipAddress, port);
 }
 

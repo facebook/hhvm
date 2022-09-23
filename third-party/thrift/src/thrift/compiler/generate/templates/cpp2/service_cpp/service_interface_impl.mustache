@@ -18,12 +18,12 @@
 <%^function:starts_interaction?%>
 <%^function:eb%>
 
-<% > service_common/sync_function_return_type_server%> <% > service_common/service_class_name%>::sync_<%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>) {
+<% > service_common/sync_function_return_type_server%> <% > service_common/service_class_name%>::<%function:cpp_name%>(<% > service_common/sync_function_return_param_server%><% > service_common/function_param_list_server_commented_out%>) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("<%function:name%>");
 }
 
-<% > service_common/sync_function_return_type_server%> <% > service_common/service_class_name%>::<%function:cpp_name%>(<%#function:sync_returns_by_outparam?%><%!%><%type:cpp_type%>& _return<%function:comma%><%!%><%/function:sync_returns_by_outparam?%><% > service_common/function_param_list_server%>) {
-  return sync_<%function:cpp_name%>(<%#function:sync_returns_by_outparam?%>_return<%function:comma%><%!%><%/function:sync_returns_by_outparam?%><% > service_common/param_list_move%>);
+<% > service_common/sync_function_return_type_server%> <% > service_common/service_class_name%>::sync_<%function:cpp_name%>(<%#function:sync_returns_by_outparam?%><%!%><%type:cpp_type%>& _return<%function:comma%><%!%><%/function:sync_returns_by_outparam?%><% > service_common/function_param_list_server%>) {
+  return <%function:cpp_name%>(<%#function:sync_returns_by_outparam?%>_return<%function:comma%><%!%><%/function:sync_returns_by_outparam?%><% > service_common/param_list_move%>);
 }
 
 folly::SemiFuture<<% > types/return_type_server_lift_unit%>> <% > service_common/service_class_name%>::semifuture_<%function:cpp_name%>(<% > service_common/function_param_list_server%>) {
@@ -31,21 +31,21 @@ folly::SemiFuture<<% > types/return_type_server_lift_unit%>> <% > service_common
   __fbthrift_invocation_<%function:cpp_name%>.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
 <%^function:sync_returns_by_outparam?%>
 <%^function:void?%>
-  return <%function:cpp_name%>(<% > service_common/param_list_move%>);
+  return sync_<%function:cpp_name%>(<% > service_common/param_list_move%>);
 <%/function:void?%>
 <%#function:void?%>
-  <%function:cpp_name%>(<% > service_common/param_list_move%>);
+  sync_<%function:cpp_name%>(<% > service_common/param_list_move%>);
   return folly::makeSemiFuture();
 <%/function:void?%>
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
 <%#function:stack_arguments?%>
   <%type:cpp_type%> ret;
-  <%function:cpp_name%>(ret<%function:comma%><% > service_common/param_list_move%>);
+  sync_<%function:cpp_name%>(ret<%function:comma%><% > service_common/param_list_move%>);
 <%/function:stack_arguments?%>
 <%^function:stack_arguments?%>
   auto ret = std::make_unique<<%type:cpp_type%>>();
-  <%function:cpp_name%>(*ret<%function:comma%><% > service_common/param_list_move%>);
+  sync_<%function:cpp_name%>(*ret<%function:comma%><% > service_common/param_list_move%>);
 <%/function:stack_arguments?%>
   return folly::makeSemiFuture(std::move(ret));
 <%/function:sync_returns_by_outparam?%>
@@ -160,10 +160,10 @@ determineInvocationType:
       {
 <%^function:sync_returns_by_outparam?%>
 <%^function:void?%>
-        callback->result(<%function:cpp_name%>(<% > service_common/param_list_move%>));
+        callback->result(sync_<%function:cpp_name%>(<% > service_common/param_list_move%>));
 <%/function:void?%>
 <%#function:void?%>
-        <%function:cpp_name%>(<% > service_common/param_list_move%>);
+        sync_<%function:cpp_name%>(<% > service_common/param_list_move%>);
 <%^function:oneway?%>
         callback->done();
 <%/function:oneway?%>
@@ -171,7 +171,7 @@ determineInvocationType:
 <%/function:sync_returns_by_outparam?%>
 <%#function:sync_returns_by_outparam?%>
         <%type:cpp_type%> _return;
-        <%function:cpp_name%>(_return<%function:comma%><% > service_common/param_list_move%>);
+        sync_<%function:cpp_name%>(_return<%function:comma%><% > service_common/param_list_move%>);
         callback->result(_return);
 <%/function:sync_returns_by_outparam?%>
         return;

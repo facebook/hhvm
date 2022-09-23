@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include <thrift/compiler/sema/patch_mutator.h>
+
+#include <memory>
+
+#include <fmt/core.h>
 
 #include <thrift/compiler/ast/diagnostic_context.h>
 #include <thrift/compiler/ast/t_field.h>
@@ -57,6 +60,13 @@ const char* getPatchTypeName(t_base_type::type base_type) {
 
 std::string getSibName(const std::string& sibling, const std::string& name) {
   return sibling.substr(0, sibling.find_last_of("/")) + name;
+}
+
+std::string getFieldPatchSuffix(const t_field& field) {
+  if (field.id() < 0) {
+    return fmt::format("FieldN{}Patch", -field.id());
+  }
+  return fmt::format("Field{}Patch", field.id());
 }
 
 // A fluent function to set the doc string on a given node.
@@ -406,7 +416,7 @@ t_type_ref patch_generator::find_patch_type(
   }
 
   // Could not resolve a shared patch type, so generate a field specific one.
-  std::string suffix = "Field" + std::to_string(field.id()) + "Patch";
+  std::string suffix = getFieldPatchSuffix(field);
   return gen_patch(annot, parent, suffix, field.type());
 }
 

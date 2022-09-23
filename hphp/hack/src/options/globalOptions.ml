@@ -107,6 +107,9 @@ type t = {
   symbol_write_index_paths_file: string option;
   symbol_write_index_paths_file_output: string option;
   symbol_write_include_hhi: bool;
+  symbol_write_sym_hash_in: string option;
+  symbol_write_exclude_out: string option;
+  symbol_write_sym_hash_out: bool;
   po_disallow_func_ptrs_in_constants: bool;
   tco_error_php_lambdas: bool;
   tco_disallow_discarded_nullable_awaitables: bool;
@@ -244,6 +247,9 @@ let default =
     symbol_write_index_paths_file = None;
     symbol_write_index_paths_file_output = None;
     symbol_write_include_hhi = true;
+    symbol_write_sym_hash_in = None;
+    symbol_write_exclude_out = None;
+    symbol_write_sym_hash_out = false;
     po_disallow_func_ptrs_in_constants = false;
     tco_error_php_lambdas = false;
     tco_disallow_discarded_nullable_awaitables = false;
@@ -387,6 +393,9 @@ let make
     ?symbol_write_index_paths_file
     ?symbol_write_index_paths_file_output
     ?(symbol_write_include_hhi = default.symbol_write_include_hhi)
+    ?symbol_write_sym_hash_in
+    ?symbol_write_exclude_out
+    ?(symbol_write_sym_hash_out = default.symbol_write_sym_hash_out)
     ?(po_disallow_func_ptrs_in_constants =
       default.po_disallow_func_ptrs_in_constants)
     ?(tco_error_php_lambdas = default.tco_error_php_lambdas)
@@ -542,6 +551,9 @@ let make
     symbol_write_index_paths_file;
     symbol_write_index_paths_file_output;
     symbol_write_include_hhi;
+    symbol_write_sym_hash_in;
+    symbol_write_exclude_out;
+    symbol_write_sym_hash_out;
     po_disallow_func_ptrs_in_constants;
     tco_error_php_lambdas;
     tco_disallow_discarded_nullable_awaitables;

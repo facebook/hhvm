@@ -101,6 +101,11 @@ TEST(RuntimeTest, Int) {
   EXPECT_EQ(ref, Ref::to(2));
   EXPECT_EQ(ref, Value::of(2));
 
+  EXPECT_EQ(++ref, 3);
+  EXPECT_EQ(value, 3);
+  EXPECT_EQ(ref += -5, -2);
+  EXPECT_EQ(value, -2);
+
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(value, 0);
@@ -111,29 +116,43 @@ TEST(RuntimeTest, Int) {
 
 TEST(RuntimeTest, List) {
   std::vector<std::string> value;
-  std::string elem = "the";
+  std::string elem = "best";
   auto ref = Ref::to<list<string_t>>(value);
   EXPECT_TRUE(ref.empty());
   EXPECT_EQ(ref.size(), 0);
   ref.append(Ref::to<string_t>(elem));
-  EXPECT_THAT(value, ::testing::ElementsAre("the"));
-  EXPECT_THAT(ref, ::testing::ElementsAre("the"));
+  EXPECT_THAT(value, ::testing::ElementsAre("best"));
+  EXPECT_THAT(ref, ::testing::ElementsAre("best"));
   EXPECT_THAT(ref, ::testing::SizeIs(1));
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
   EXPECT_THROW(ref[FieldId{1}], std::logic_error);
   EXPECT_THROW(ref["field1"], std::logic_error);
-  EXPECT_EQ(ref[0], "the");
-  EXPECT_EQ(ref[Ordinal{1}], "the");
+  EXPECT_EQ(ref[0], "best");
+  EXPECT_EQ(ref[Ordinal{1}], "best");
   EXPECT_THROW(ref[1], std::out_of_range);
   EXPECT_THROW(ref.add(Ref::to<string_t>(value[0])), std::runtime_error);
   EXPECT_THROW(ref[Ref::to(0)], std::logic_error);
 
-  ref.append("best");
+  ref.prepend("the");
   ref.append("test");
   EXPECT_THAT(ref, ::testing::ElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
+
+  ref.remove(1);
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(2));
+  EXPECT_THROW(ref.remove(20), std::out_of_range);
+  EXPECT_THROW(ref.insert(20, "hi"), std::out_of_range);
+
+  ref.insert(1, "greatest");
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "greatest", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(3));
+  EXPECT_THROW(ref.insert(4, "never"), std::out_of_range);
+  ref.insert(3, "ever");
+  EXPECT_THAT(ref, ::testing::ElementsAre("the", "greatest", "test", "ever"));
+  EXPECT_THAT(ref, ::testing::SizeIs(4));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
@@ -141,6 +160,10 @@ TEST(RuntimeTest, List) {
   EXPECT_THAT(ref, ::testing::ElementsAre());
   EXPECT_THAT(ref, ::testing::IsEmpty());
   EXPECT_THAT(ref, ::testing::SizeIs(0));
+
+  EXPECT_THROW(ref[1], std::out_of_range);
+  EXPECT_THROW(ref += "bad", std::runtime_error);
+  EXPECT_THROW(++ref, std::bad_any_cast);
 }
 
 TEST(RuntimeTest, Set) {
@@ -156,14 +179,19 @@ TEST(RuntimeTest, Set) {
 
   EXPECT_FALSE(ref.empty());
   EXPECT_EQ(ref.size(), 1);
-  EXPECT_THROW(ref.get(FieldId{1}), std::runtime_error);
-  EXPECT_THROW(ref.get("best"), std::runtime_error);
-  EXPECT_THROW(ref.get(Ref::to<string_t>("best")), std::runtime_error);
+  EXPECT_THROW(ref.get(FieldId{1}), std::logic_error);
+  EXPECT_FALSE(ref.contains("the"));
+  EXPECT_TRUE(ref.contains("best"));
 
   ref.add("the");
-  ref.add("test");
+  ref += ("test");
   EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "best", "test"));
   EXPECT_THAT(ref, ::testing::SizeIs(3));
+
+  EXPECT_TRUE(ref.remove("best"));
+  EXPECT_FALSE(ref.remove("best"));
+  EXPECT_THAT(ref, ::testing::UnorderedElementsAre("the", "test"));
+  EXPECT_THAT(ref, ::testing::SizeIs(2));
 
   ref.clear();
   EXPECT_TRUE(ref.empty());
@@ -173,6 +201,7 @@ TEST(RuntimeTest, Set) {
   EXPECT_THAT(ref, ::testing::SizeIs(0));
 
   EXPECT_THROW(ref.values().begin(), std::logic_error);
+  EXPECT_THROW(++ref, std::bad_any_cast);
 }
 
 TEST(RuntimeTest, Map) {
@@ -182,6 +211,11 @@ TEST(RuntimeTest, Map) {
   EXPECT_EQ(ref.size(), 0);
   EXPECT_FALSE(ref.put("one", 1));
   EXPECT_EQ(value["one"], 1);
+  EXPECT_TRUE(ref.contains("one"));
+  EXPECT_EQ(ref.at("one"), 1);
+  EXPECT_EQ(ref["one"], 1);
+  EXPECT_FALSE(ref.contains("two"));
+  EXPECT_THROW(ref.at("two"), std::out_of_range);
 
   ref["one"] = 2;
   EXPECT_EQ(value["one"], 2);
@@ -196,11 +230,18 @@ TEST(RuntimeTest, Map) {
   EXPECT_THAT(ref.keys(), ::testing::UnorderedElementsAre("one", "two"));
   EXPECT_THAT(ref.values(), ::testing::UnorderedElementsAre(2, 0));
 
+  ref.clear("two");
+  EXPECT_FALSE(ref.remove("two"));
+  EXPECT_THAT(ref.keys(), ::testing::UnorderedElementsAre("one"));
+  EXPECT_THAT(ref.values(), ::testing::UnorderedElementsAre(2));
+
   ref.clear();
   EXPECT_TRUE(ref.empty());
   EXPECT_TRUE(value.empty());
 
   EXPECT_THROW(ref.begin(), std::runtime_error);
+  EXPECT_THROW(ref += "three", std::logic_error);
+  EXPECT_THROW(++ref, std::logic_error);
 }
 
 TEST(RuntimeTest, DynMap) {
@@ -211,7 +252,8 @@ TEST(RuntimeTest, DynMap) {
   EXPECT_TRUE(map["empty"].empty());
   EXPECT_EQ(map.size(), 2);
   EXPECT_EQ(map["hi"], "bye");
-  EXPECT_THROW(map.get("bye"), std::out_of_range);
+  EXPECT_EQ(map.get("bye"), detail::nullPtr());
+  EXPECT_THROW(map.at("bye"), std::out_of_range);
 }
 
 TEST(RuntimeTest, DynStruct) {
@@ -297,10 +339,15 @@ TEST(RuntimeTest, ConstRef) {
 TEST(RuntimeTest, BinaryRef) {
   std::string data;
   auto ref = Ref::to<binary_t>(data);
-  ref.assign("hi");
-  EXPECT_EQ(data, "hi");
-  ref = "bye";
-  EXPECT_EQ(data, "bye");
+  ref.assign("the");
+  EXPECT_EQ(data, "the");
+  ref.append(" best");
+  EXPECT_EQ(data, "the best");
+  ref += " test";
+  EXPECT_EQ(data, "the best test");
+  ref.prepend("BinaryRef ");
+  EXPECT_EQ(data, "BinaryRef the best test");
+  EXPECT_THROW(++ref, std::runtime_error);
 }
 
 TEST(RuntimeTest, IdenticalValue) {
@@ -447,6 +494,18 @@ TEST(RuntimeTest, StringBinaryInterOp) {
   EXPECT_EQ(stringHi, binaryBye);
   stringHi = "hi";
   EXPECT_EQ(stringHi, binaryHi);
+
+  // Append
+  binaryHi += stringBye;
+  EXPECT_EQ(binaryHi, "hibye");
+  stringHi += binaryBye;
+  EXPECT_EQ(stringHi, "hibye");
+
+  // Prepend
+  binaryHi.prepend(stringBye);
+  EXPECT_EQ(binaryHi, "byehibye");
+  stringHi.prepend(binaryBye);
+  EXPECT_EQ(stringHi, "byehibye");
 }
 
 } // namespace

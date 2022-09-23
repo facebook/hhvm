@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::query(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("query");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
-  return sync_query(std::move(p_s), std::move(p_i));
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
+  return query(std::move(p_s), std::move(p_i));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_query(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_query.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  query(std::move(p_s), std::move(p_i));
+  sync_query(std::move(p_s), std::move(p_i));
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        query(std::move(p_s), std::move(p_i));
+        sync_query(std::move(p_s), std::move(p_i));
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::has_arg_docs(std::unique_ptr<::cpp2::MyStruct> /*s*/, std::unique_ptr<::cpp2::Included> /*i*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("has_arg_docs");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
-  return sync_has_arg_docs(std::move(p_s), std::move(p_i));
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
+  return has_arg_docs(std::move(p_s), std::move(p_i));
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_has_arg_docs(std::unique_ptr<::cpp2::MyStruct> p_s, std::unique_ptr<::cpp2::Included> p_i) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_has_arg_docs.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  has_arg_docs(std::move(p_s), std::move(p_i));
+  sync_has_arg_docs(std::move(p_s), std::move(p_i));
   return folly::makeSemiFuture();
 }
 
@@ -226,7 +226,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        has_arg_docs(std::move(p_s), std::move(p_i));
+        sync_has_arg_docs(std::move(p_s), std::move(p_i));
         callback->done();
         return;
       }

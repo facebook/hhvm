@@ -1,6 +1,5 @@
 #ifndef ART_H
 #define ART_H
-#include "watchman/config.h"
 #include <array>
 #include <cstdint>
 #include <functional>

@@ -16,7 +16,7 @@ function get_declared_interfaces();
 <<__PHPStdLib>>
 function get_declared_traits();
 <<__PHPStdLib>>
-function enum_exists(string $class_name, bool $autoload = true)[]: bool;
+function enum_exists(string $enum_name, bool $autoload = true)[]: bool;
 <<__PHPStdLib>>
 function class_exists(string $class_name, bool $autoload = true)[]: bool;
 <<__PHPStdLib>>

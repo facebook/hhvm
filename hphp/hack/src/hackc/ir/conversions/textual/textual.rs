@@ -3,6 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+//! This is a structural version of the Textual language - it should have
+//! basically no business logic and just provides a type-safe way to write
+//! Textual.
+
 use std::borrow::Cow;
 use std::fmt;
 
@@ -54,24 +58,47 @@ impl fmt::Display for FmtSid {
     }
 }
 
-#[derive(Clone)]
-pub(crate) enum Ty {
-    Mixed,
-    Type(String),
-}
+pub(crate) type Ty = ir::BaseType;
 
 struct FmtTy<'a>(&'a Ty);
 
 impl fmt::Display for FmtTy<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            Ty::Mixed => write!(f, "HackMixed"),
-            Ty::Type(s) => write!(f, "{s}"),
+            Ty::Bool => write!(f, "bool"),
+            Ty::Int => write!(f, "int"),
+            Ty::String => write!(f, "string"),
+            Ty::RawType(s) => write!(f, "{s}"),
+            Ty::RawPtr(sub) => write!(f, "*{}", FmtTy(sub)),
+            Ty::Mixed => f.write_str("*Mixed"),
+            Ty::Void => f.write_str("void"),
+
+            Ty::AnyArray
+            | Ty::Arraykey
+            | Ty::Class(_)
+            | Ty::Classname
+            | Ty::Darray
+            | Ty::Dict
+            | Ty::Float
+            | Ty::Keyset
+            | Ty::None
+            | Ty::Nonnull
+            | Ty::Noreturn
+            | Ty::Nothing
+            | Ty::Null
+            | Ty::Num
+            | Ty::Resource
+            | Ty::This
+            | Ty::Typename
+            | Ty::Varray
+            | Ty::VarrayOrDarray
+            | Ty::Vec
+            | Ty::VecOrDict => todo!("unhandled type: {:?}", self.0),
         }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Var {
     // Named(String),
     Hack(LocalId),
@@ -95,7 +122,7 @@ impl fmt::Display for FmtVar<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Const {
     False,
     // Float(f64),
@@ -130,7 +157,7 @@ impl fmt::Display for FmtConst<'_> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) enum Expr {
     Sid(Sid),
     Deref(Var),
@@ -385,6 +412,16 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 
+    pub(crate) fn write_expr(&mut self, expr: impl Into<Expr>) -> Result<Sid> {
+        let expr = expr.into();
+        match expr {
+            Expr::Sid(sid) => Ok(sid),
+            Expr::Deref(_) | Expr::Const(_) | Expr::Call(_, _) => {
+                todo!("EXPR: {expr:?}")
+            }
+        }
+    }
+
     pub(crate) fn write_label(&mut self, bid: BlockId, params: &[Sid]) -> Result {
         if params.is_empty() {
             writeln!(self.w, "#{}:", FmtBid(bid))?;
@@ -476,4 +513,22 @@ impl<'a> FuncWriter<'a> {
         }
         Ok(())
     }
+}
+
+pub(crate) fn declare_function(
+    w: &mut dyn std::io::Write,
+    name: &str,
+    tys: &[Ty],
+    ret_ty: Ty,
+) -> Result {
+    write!(w, "declare {name}(")?;
+
+    let mut sep = "";
+    for ty in tys {
+        write!(w, "{sep}{}", FmtTy(ty))?;
+        sep = ", ";
+    }
+
+    writeln!(w, "): {}", FmtTy(&ret_ty))?;
+    Ok(())
 }

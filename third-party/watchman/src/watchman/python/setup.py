@@ -47,7 +47,12 @@ setup(
     keywords=("watchman inotify fsevents kevent kqueue portfs filesystem watcher"),
     license="BSD",
     packages=["pywatchman"],
-    ext_modules=[Extension("pywatchman.bser", sources=srcs(["pywatchman/bser.c"]))],
+    ext_modules=[
+        Extension(
+            "pywatchman.bser",
+            sources=srcs(["pywatchman/bsermodule.c", "pywatchman/bser.c"]),
+        )
+    ],
     platforms="Platform Independent",
     classifiers=[
         "Development Status :: 5 - Production/Stable",

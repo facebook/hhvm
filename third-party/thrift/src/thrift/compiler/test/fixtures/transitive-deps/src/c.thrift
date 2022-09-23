@@ -17,3 +17,5 @@
 struct C {
   1: i64 i;
 }
+
+exception E {}

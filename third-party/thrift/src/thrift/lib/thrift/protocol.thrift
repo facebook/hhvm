@@ -56,6 +56,7 @@ struct EncodedValue {
 }
 
 // MaskedData uses ValueId to get encodedValues and map keys from the lists.
+@cpp.UseOpEncode
 struct MaskedProtocolData {
   1: type.Protocol protocol;
   2: MaskedData data;

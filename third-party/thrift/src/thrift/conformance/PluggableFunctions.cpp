@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <string_view>
+
 #include <thrift/conformance/PluggableFunctions.h>
 
 namespace apache::thrift::conformance {
@@ -21,7 +23,7 @@ namespace apache::thrift::conformance {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<Client<ConformanceService>>,
     create_conformance_service_client_,
-    std::string /*service_name or smc tier*/) {
+    std::string_view /*serviceName or smc tier*/) {
   throw std::invalid_argument(
       "Unimplemented Method create_conformance_service_client_");
 }
@@ -29,7 +31,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<Client<RPCConformanceService>>,
     create_rpc_conformance_service_client_,
-    std::string /*service_name or smc tier*/) {
+    std::string_view /*serviceName or smc tier*/) {
   throw std::invalid_argument(
       "Unimplemented Method create_rpc_conformance_service_client_");
 }
@@ -37,7 +39,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<Client<BasicRPCConformanceService>>,
     create_basic_rpc_conformance_service_client_,
-    std::string /*service_name or smc tier*/) {
+    std::string_view /*serviceName or smc tier*/) {
   throw std::invalid_argument(
       "Unimplemented Method create_basic_rpc_conformance_service_client_");
 }
@@ -45,7 +47,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     std::unique_ptr<Client<RPCConformanceSetupService>>,
     create_rpc_conformance_setup_service_client_,
-    std::string /*service_name or smc tier*/) {
+    std::string_view /*serviceName or smc tier*/) {
   throw std::invalid_argument(
       "Unimplemented Method create_rpc_conformance_setup_service_client_");
 }

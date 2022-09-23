@@ -718,7 +718,7 @@ cdef class Union(StructOrUnion):
         return hash((self.type, self.value))
 
     def __repr__(self):
-        return f"{type(self).__name__}(type={self.type.name}, value={self.value!r})"
+        return f"{type(self).__name__}({self.type.name}={self.value!r})"
 
     def __bool__(self):
         return self.type.value != 0

@@ -220,7 +220,7 @@ class StructTests(unittest.TestCase):
 
     def test_repr(self) -> None:
         self.assertEqual(
-            "easy(val=42, val_list=i[], name=None, an_int=Integers(type=EMPTY, value=None))",
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None))",
             repr(easy(val=42)),
         )
 

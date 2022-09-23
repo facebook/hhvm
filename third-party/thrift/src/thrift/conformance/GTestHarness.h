@@ -89,7 +89,7 @@ std::unique_ptr<Client> createClient(
 
 // Creates a client for the localhost.
 template <typename Client>
-std::unique_ptr<Client> createClient(std::string) {
+std::unique_ptr<Client> createClient(std::string_view) {
   throw std::invalid_argument("Unimplemented Method createClient");
 }
 

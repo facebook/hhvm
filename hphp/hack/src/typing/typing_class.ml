@@ -1080,14 +1080,14 @@ let class_var_def ~is_static cls env cv =
       in
       let cty =
         match cty.et_enforced with
-        | Unenforced ->
+        | Enforced when is_none cv.cv_xhp_attr -> cty
+        | _ ->
           if TypecheckerOptions.everything_sdt env.genv.tcopt then
             { cty with et_type = Typing_utils.make_like env cty.et_type }
           else (
             Typing_log.log_pessimise_prop env (fst cv.cv_id) (snd cv.cv_id);
             cty
           )
-        | Enforced -> cty
       in
       Option.iter ty_err_opt ~f:Errors.add_typing_error;
       let expected =

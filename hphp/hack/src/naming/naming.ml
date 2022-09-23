@@ -1138,7 +1138,15 @@ and enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
   let open Aast in
   let pos = fst enum_name in
   let enum_hint = (pos, Happly (enum_name, [])) in
-  let old_base = e.e_base in
+  let old_base =
+    if
+      in_enum_class
+      && TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+    then
+      (pos, Hlike e.e_base)
+    else
+      e.e_base
+  in
   let new_base = hint env old_base in
   let bound =
     if in_enum_class then

@@ -4864,9 +4864,17 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassDeclaration),
         };
+
+        let base_pos = self.get_pos(base);
         let base = self
             .node_to_ty(base)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+
+        let base = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(base_pos)), Ty_::Tlike(base)))
+        } else {
+            base
+        };
 
         let mut is_abstract = false;
         let mut is_final = false;
@@ -5021,9 +5029,15 @@ impl<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>> FlattenSmartConstructors
         } else {
             ClassConstKind::CCConcrete
         };
+        let type_pos = self.get_pos(type_);
         let type_ = self
             .node_to_ty(type_)
             .unwrap_or_else(|| self.tany_with_pos(name.0));
+        let type_ = if self.opts.everything_sdt {
+            self.alloc(Ty(self.alloc(Reason::hint(type_pos)), Ty_::Tlike(type_)))
+        } else {
+            type_
+        };
         let class_name = match self.classish_name_builder.get_current_classish_name() {
             Some(name) => name,
             None => return Node::Ignored(SyntaxKind::EnumClassEnumerator),

@@ -84,6 +84,21 @@ class PeekingManagerBase : public wangle::ManagedConnection {
   ThriftServer* const server_;
 };
 
+class PeekingManagerOptions {
+ public:
+  explicit PeekingManagerOptions(bool preferBufferMovable = false)
+      : preferBufferMovable_(preferBufferMovable) {}
+
+  PeekingManagerOptions& withPreferBufferMovable(bool b) {
+    preferBufferMovable_ = b;
+    return *this;
+  }
+  bool preferBufferMovable() const { return preferBufferMovable_; }
+
+ private:
+  bool preferBufferMovable_;
+};
+
 class CheckTLSPeekingManager : public PeekingManagerBase,
                                public wangle::SocketPeeker::Callback {
  public:
@@ -160,10 +175,11 @@ class PreReceivedDataAsyncTransportWrapper
 
   static UniquePtr create(
       folly::AsyncTransport::UniquePtr socket,
-      std::vector<uint8_t> preReceivedData) {
+      std::vector<uint8_t> preReceivedData,
+      PeekingManagerOptions options) {
     DCHECK(!socket->getReadCallback());
     return UniquePtr(new PreReceivedDataAsyncTransportWrapper(
-        std::move(socket), std::move(preReceivedData)));
+        std::move(socket), std::move(preReceivedData), options));
   }
 
   ReadCallback* getReadCallback() const override { return readCallback_; }
@@ -176,31 +192,56 @@ class PreReceivedDataAsyncTransportWrapper
         return;
       }
       const auto preReceivedData = std::exchange(preReceivedData_, {});
-      void* buf;
-      size_t bufSize;
-      callback->getReadBuffer(&buf, &bufSize);
-      CHECK(callback == readCallback_);
-      CHECK(bufSize >= preReceivedData->size());
-      std::memcpy(buf, preReceivedData->data(), preReceivedData->size());
-      callback->readDataAvailable(preReceivedData->size());
+      if (options_.preferBufferMovable() && readCallback_->isBufferMovable()) {
+        callback->readBufferAvailable(IOBuf::copyBuffer(
+            preReceivedData->data(), preReceivedData->size()));
+      } else {
+        void* buf;
+        size_t bufSize;
+        callback->getReadBuffer(&buf, &bufSize);
+        CHECK(callback == readCallback_);
+        CHECK(bufSize >= preReceivedData->size());
+        std::memcpy(buf, preReceivedData->data(), preReceivedData->size());
+        callback->readDataAvailable(preReceivedData->size());
+      }
     }
     if (readCallback_ == callback) {
       Base::setReadCB(callback);
     }
   }
 
+  std::unique_ptr<IOBuf> takePreReceivedData() override {
+    if (!preReceivedData_ || preReceivedData_->empty()) {
+      return {};
+    }
+    auto freeVec = [](void*, void* userData) {
+      delete reinterpret_cast<std::vector<uint8_t>*>(userData);
+    };
+    std::vector<uint8_t>* ptr = preReceivedData_.release();
+    return IOBuf::takeOwnership(
+        static_cast<void*>(ptr->data()),
+        ptr->size(),
+        0,
+        ptr->size(),
+        freeVec,
+        ptr);
+  }
+
  private:
   PreReceivedDataAsyncTransportWrapper(
       folly::AsyncTransport::UniquePtr socket,
-      std::vector<uint8_t> preReceivedData)
+      std::vector<uint8_t> preReceivedData,
+      PeekingManagerOptions options)
       : Base(std::move(socket)),
         preReceivedData_(
             preReceivedData.size() ? std::make_unique<std::vector<uint8_t>>(
                                          std::move(preReceivedData))
-                                   : std::unique_ptr<std::vector<uint8_t>>()) {}
+                                   : std::unique_ptr<std::vector<uint8_t>>()),
+        options_(options) {}
 
   std::unique_ptr<std::vector<uint8_t>> preReceivedData_;
   folly::AsyncTransport::ReadCallback* readCallback_{};
+  PeekingManagerOptions const options_;
 };
 
 class TransportPeekingManager : public PeekingManagerBase,
@@ -211,11 +252,13 @@ class TransportPeekingManager : public PeekingManagerBase,
       const folly::SocketAddress& clientAddr,
       wangle::TransportInfo tinfo,
       apache::thrift::ThriftServer* server,
-      folly::AsyncTransport::UniquePtr socket)
+      folly::AsyncTransport::UniquePtr socket,
+      PeekingManagerOptions options = PeekingManagerOptions())
       : PeekingManagerBase(
             std::move(acceptor), clientAddr, std::move(tinfo), server),
         socket_(std::move(socket)),
-        peeker_(new wangle::TransportPeeker(*socket_, this, kPeekBytes)) {
+        peeker_(new wangle::TransportPeeker(*socket_, this, kPeekBytes)),
+        options_(options) {
     peeker_->start();
   }
 
@@ -236,7 +279,7 @@ class TransportPeekingManager : public PeekingManagerBase,
     }
 
     auto transport = PreReceivedDataAsyncTransportWrapper::create(
-        std::move(socket_), peekBytes);
+        std::move(socket_), peekBytes, options_);
 
     try {
       // Check for new transports
@@ -277,6 +320,7 @@ class TransportPeekingManager : public PeekingManagerBase,
  private:
   folly::AsyncTransport::UniquePtr socket_;
   typename wangle::TransportPeeker::UniquePtr peeker_;
+  PeekingManagerOptions const options_;
 };
 
 } // namespace thrift

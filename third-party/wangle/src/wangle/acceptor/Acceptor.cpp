@@ -80,6 +80,7 @@ void Acceptor::init(
       peeker->setContext(std::move(context));
       peeker->options().setHandshakeRecordAlignedReads(
           accConfig_.fizzConfig.preferKTLS);
+      peeker->options().setPreferIoUringSocket(accConfig_.preferIoUring);
       securityProtocolCtxManager_.addPeeker(peeker);
     } else {
       securityProtocolCtxManager_.addPeeker(&defaultPeekingCallback_);
@@ -418,9 +419,10 @@ void Acceptor::connectionReady(
   // Limit the number of reads from the socket per poll loop iteration,
   // both to keep memory usage under control and to prevent one fast-
   // writing client from starving other connections.
-  auto asyncSocket = sock->getUnderlyingTransport<AsyncSocket>();
-  asyncSocket->setMaxReadsPerEvent(accConfig_.socketMaxReadsPerEvent);
-  tinfo.initWithSocket(asyncSocket);
+  if (auto asyncSocket = sock->getUnderlyingTransport<AsyncSocket>()) {
+    asyncSocket->setMaxReadsPerEvent(accConfig_.socketMaxReadsPerEvent);
+    tinfo.initWithSocket(asyncSocket);
+  }
   tinfo.appProtocol = std::make_shared<std::string>(nextProtocolName);
 
   for (const auto& cb : observerList_.getAll()) {

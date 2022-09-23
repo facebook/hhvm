@@ -278,21 +278,37 @@ and contexts env ctxs =
   in
   (pos, hl)
 
-and hfun env ro hl il variadic_hint ctxs h readonly_ret =
+and hfun p env ro hl il variadic_hint ctxs h readonly_ret =
   let variadic_hint = Option.map variadic_hint ~f:(hint env) in
   let hl = List.map ~f:(hint env) hl in
   let ctxs = Option.map ~f:(contexts env) ctxs in
-  N.Hfun
-    N.
-      {
-        hf_is_readonly = ro;
-        hf_param_tys = hl;
-        hf_param_info = il;
-        hf_variadic_ty = variadic_hint;
-        hf_ctxs = ctxs;
-        hf_return_ty = hint ~allow_retonly:true env h;
-        hf_is_readonly_return = readonly_ret;
-      }
+  let everything_sdt =
+    TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+  in
+  let h_ret = hint ~allow_retonly:true env h in
+  let pess_ret =
+    if everything_sdt then
+      (p, Aast.Hlike h_ret)
+    else
+      h_ret
+  in
+  let hint =
+    N.Hfun
+      N.
+        {
+          hf_is_readonly = ro;
+          hf_param_tys = hl;
+          hf_param_info = il;
+          hf_variadic_ty = variadic_hint;
+          hf_ctxs = ctxs;
+          hf_return_ty = pess_ret;
+          hf_is_readonly_return = readonly_ret;
+        }
+  in
+  if everything_sdt then
+    wrap_supportdyn p hint
+  else
+    hint
 
 and hint_
     ~forbid_this
@@ -337,21 +353,27 @@ and hint_
           hf_return_ty = h;
           hf_is_readonly_return = readonly_ret;
         } ->
-    hfun env ro hl il variadic_hint ctxs h readonly_ret
+    hfun p env ro hl il variadic_hint ctxs h readonly_ret
   | Aast.Happly (((p, _x) as id), hl) ->
     let hint_id =
       hint_id ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env id hl
     in
     (match hint_id with
-    | N.Hprim _
     | N.Hmixed
-    | N.Hnonnull
+    | N.Hnonnull ->
+      if not (List.is_empty hl) then
+        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p;
+      if TypecheckerOptions.everything_sdt tcopt then
+        wrap_supportdyn p hint_id
+      else
+        hint_id
+    | N.Hprim _
     | N.Hdynamic
     | N.Hnothing ->
       if not (List.is_empty hl) then
-        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p
-    | _ -> ());
-    hint_id
+        Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p;
+      hint_id
+    | _ -> hint_id)
   | Aast.Haccess ((pos, root_id), ids) ->
     let root_ty =
       match root_id with
@@ -446,7 +468,14 @@ and hint_
           new_field)
         nsi_field_map
     in
-    N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map }
+    let hint = N.Hshape { N.nsi_allows_unknown_fields; nsi_field_map } in
+    if
+      TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+      && nsi_allows_unknown_fields
+    then
+      wrap_supportdyn p hint
+    else
+      hint
   | Aast.Hmixed -> N.Hmixed
   | Aast.Hfun_context n -> N.Hfun_context n
   | Aast.Hvar n -> N.Hvar n
@@ -523,22 +552,8 @@ and hint_id
       | x when String.equal x SN.Typehints.num -> N.Hprim N.Tnum
       | x when String.equal x SN.Typehints.resource -> N.Hprim N.Tresource
       | x when String.equal x SN.Typehints.arraykey -> N.Hprim N.Tarraykey
-      | x when String.equal x SN.Typehints.mixed ->
-        let mixed = N.Hmixed in
-        if
-          TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
-        then
-          wrap_supportdyn p mixed
-        else
-          mixed
-      | x when String.equal x SN.Typehints.nonnull ->
-        let nonnull = N.Hnonnull in
-        if
-          TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
-        then
-          wrap_supportdyn p nonnull
-        else
-          nonnull
+      | x when String.equal x SN.Typehints.mixed -> N.Hmixed
+      | x when String.equal x SN.Typehints.nonnull -> N.Hnonnull
       | x when String.equal x SN.Typehints.dynamic -> N.Hdynamic
       | x when String.equal x SN.Classes.cSupportDyn && not (Pos.is_hhi p) ->
         if
@@ -1123,7 +1138,15 @@ and enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
   let open Aast in
   let pos = fst enum_name in
   let enum_hint = (pos, Happly (enum_name, [])) in
-  let old_base = e.e_base in
+  let old_base =
+    if
+      in_enum_class
+      && TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+    then
+      (pos, Hlike e.e_base)
+    else
+      e.e_base
+  in
   let new_base = hint env old_base in
   let bound =
     if in_enum_class then

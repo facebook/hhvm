@@ -17,3 +17,5 @@
 include "c.thrift"
 
 typedef list<c.C> B
+
+typedef c.E E

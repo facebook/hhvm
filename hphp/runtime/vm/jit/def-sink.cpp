@@ -483,6 +483,7 @@ bool conflicts(const IRInstruction& instr,
       }
       return
         load.src.maybe(call.kills) ||
+        load.src.maybe(call.uninits) ||
         load.src.maybe(call.actrec) ||
         load.src.maybe(call.outputs) ||
         load.src.maybe(AHeapAny) ||
@@ -525,6 +526,7 @@ bool conflicts(const IRInstruction& instr,
       }
       return
         test_reads(call.kills) ||
+        test_reads(call.uninits) ||
         test_reads(call.actrec) ||
         test_reads(call.outputs) ||
         test_reads(AHeapAny) ||

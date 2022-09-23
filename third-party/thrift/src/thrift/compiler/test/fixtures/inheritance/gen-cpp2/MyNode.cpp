@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyNodeServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyNode>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyNode>::sync_do_mid() {
+void apache::thrift::ServiceHandler<::cpp2::MyNode>::do_mid() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("do_mid");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyNode>::do_mid() {
-  return sync_do_mid();
+void apache::thrift::ServiceHandler<::cpp2::MyNode>::sync_do_mid() {
+  return do_mid();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyNode>::semifuture_do_mid() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_do_mid.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  do_mid();
+  sync_do_mid();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        do_mid();
+        sync_do_mid();
         callback->done();
         return;
       }

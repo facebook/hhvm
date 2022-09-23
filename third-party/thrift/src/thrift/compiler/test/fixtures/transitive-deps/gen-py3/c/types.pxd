@@ -73,6 +73,17 @@ cdef extern from "gen-cpp2/c_types_custom_protocol.h" namespace "::cpp2":
         __field_ref[cint64_t] i_ref "i_ref" ()
 
 
+    cdef cppclass cE "::cpp2::E"(cTException):
+        cE() except +
+        cE(const cE&) except +
+        bint operator==(cE&)
+        bint operator!=(cE&)
+        bint operator<(cE&)
+        bint operator>(cE&)
+        bint operator<=(cE&)
+        bint operator>=(cE&)
+
+
 
 
 cdef class C(thrift.py3.types.Struct):
@@ -82,6 +93,15 @@ cdef class C(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cC])
+
+
+
+cdef class E(thrift.py3.exceptions.GeneratedError):
+    cdef shared_ptr[cE] _cpp_obj
+    cdef _fbthrift_types_fields.__E_FieldsSetter _fields_setter
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cE])
 
 
 

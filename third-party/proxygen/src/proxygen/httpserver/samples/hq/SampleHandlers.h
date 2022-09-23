@@ -191,9 +191,12 @@ class ChunkedHandler
     resp.setIsChunked(true);
     maybeAddAltSvcHeader(resp);
     txn_->sendHeaders(resp);
-    firstFrameSize_ = getQueryParamAsNumber(msg, "keyFrame", 5000);
-    otherFrameSize_ = getQueryParamAsNumber(msg, "frame", 500);
-    auto segment = getQueryParamAsNumber(msg, "segment", 2000);
+    firstFrameSize_ =
+        std::min(getQueryParamAsNumber(msg, "keyFrame", 5000), kMaxFrameSize);
+    otherFrameSize_ =
+        std::min(getQueryParamAsNumber(msg, "frame", 500), kMaxFrameSize);
+    auto segment = std::min(getQueryParamAsNumber(msg, "segment", 2000),
+                            kMaxSegmentLength);
     totalChunkCount_ = segment / frameDelay_.count();
   }
   void onBody(std::unique_ptr<folly::IOBuf> chain) noexcept override {
@@ -250,6 +253,8 @@ class ChunkedHandler
         });
   }
 
+  const uint32_t kMaxFrameSize{1000000};
+  const uint32_t kMaxSegmentLength{60000};
   uint32_t firstFrameSize_{5000};
   uint32_t otherFrameSize_{500};
   std::chrono::milliseconds frameDelay_{33};

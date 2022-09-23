@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_foo() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("foo");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::foo() {
-  return sync_foo();
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_foo() {
+  return foo();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_foo() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_foo.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  foo();
+  sync_foo();
   return folly::makeSemiFuture();
 }
 
@@ -74,7 +74,7 @@ void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_foo(std::unique
       }
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        foo();
+        sync_foo();
         callback->done();
         return;
       }
@@ -88,18 +88,18 @@ void apache::thrift::ServiceHandler<::cpp2::MyService>::async_tm_foo(std::unique
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_bar() {
+void apache::thrift::ServiceHandler<::cpp2::MyService>::bar() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bar");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyService>::bar() {
-  return sync_bar();
+void apache::thrift::ServiceHandler<::cpp2::MyService>::sync_bar() {
+  return bar();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyService>::semifuture_bar() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bar.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  bar();
+  sync_bar();
   return folly::makeSemiFuture();
 }
 
@@ -179,7 +179,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        bar();
+        sync_bar();
         callback->done();
         return;
       }

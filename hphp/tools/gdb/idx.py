@@ -146,7 +146,7 @@ def atomic_low_ptr_vector_at(av, idx, hasher=None):
 
 
 def fixed_vector_at(fv, idx, hasher=None):
-    return rawptr(fv['m_sp'])[idx]
+    return rawptr(fv['m_impl']['m_sp'])[idx]
 
 
 def fixed_string_map_at(fsm, sd, hasher=None):

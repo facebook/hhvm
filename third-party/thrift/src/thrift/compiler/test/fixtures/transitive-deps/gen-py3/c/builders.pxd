@@ -17,3 +17,7 @@ cdef class C_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint i
 
 
+cdef class E_Builder(thrift.py3.builder.StructBuilder):
+    pass
+
+

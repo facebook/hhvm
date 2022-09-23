@@ -90,4 +90,18 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
     cdef void _set_field_21(self, _fbthrift_value) except *
     cdef void _set_field_22(self, _fbthrift_value) except *
     cdef void _set_field_23(self, _fbthrift_value) except *
+    cdef void _set_field_24(self, _fbthrift_value) except *
+    cdef void _set_field_25(self, _fbthrift_value) except *
+    cdef void _set_field_26(self, _fbthrift_value) except *
+    cdef void _set_field_27(self, _fbthrift_value) except *
+
+
+ctypedef void (*__LateDefStruct_FieldsSetterFunc)(__LateDefStruct_FieldsSetter, object) except *
+
+cdef class __LateDefStruct_FieldsSetter(__StructFieldsSetter):
+    cdef _test_fixtures_patch_module_types.cLateDefStruct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __LateDefStruct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __LateDefStruct_FieldsSetter _fbthrift_create(_test_fixtures_patch_module_types.cLateDefStruct* struct_cpp_obj)
 

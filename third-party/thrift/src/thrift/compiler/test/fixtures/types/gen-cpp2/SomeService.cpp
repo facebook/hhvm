@@ -25,19 +25,19 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::apache::thrift::fixtures::types::SomeServiceServiceInfoHolder apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::sync_bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) {
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::bounce_map(::apache::thrift::fixtures::types::SomeMap& /*_return*/, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> /*m*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("bounce_map");
 }
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::bounce_map(::apache::thrift::fixtures::types::SomeMap& _return, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m) {
-  return sync_bounce_map(_return, std::move(p_m));
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::sync_bounce_map(::apache::thrift::fixtures::types::SomeMap& _return, std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m) {
+  return bounce_map(_return, std::move(p_m));
 }
 
 folly::SemiFuture<std::unique_ptr<::apache::thrift::fixtures::types::SomeMap>> apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::semifuture_bounce_map(std::unique_ptr<::apache::thrift::fixtures::types::SomeMap> p_m) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_bounce_map.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::apache::thrift::fixtures::types::SomeMap>();
-  bounce_map(*ret, std::move(p_m));
+  sync_bounce_map(*ret, std::move(p_m));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -118,7 +118,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::apache::thrift::fixtures::types::SomeMap _return;
-        bounce_map(_return, std::move(p_m));
+        sync_bounce_map(_return, std::move(p_m));
         callback->result(_return);
         return;
       }
@@ -137,19 +137,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::sync_binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/) {
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& /*_return*/, std::unique_ptr<::std::vector<::std::int64_t>> /*r*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("binary_keyed_map");
 }
 
-void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& _return, std::unique_ptr<::std::vector<::std::int64_t>> p_r) {
-  return sync_binary_keyed_map(_return, std::move(p_r));
+void apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::sync_binary_keyed_map(::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>& _return, std::unique_ptr<::std::vector<::std::int64_t>> p_r) {
+  return binary_keyed_map(_return, std::move(p_r));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>> apache::thrift::ServiceHandler<::apache::thrift::fixtures::types::SomeService>::semifuture_binary_keyed_map(std::unique_ptr<::std::vector<::std::int64_t>> p_r) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_binary_keyed_map.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t>>();
-  binary_keyed_map(*ret, std::move(p_r));
+  sync_binary_keyed_map(*ret, std::move(p_r));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -230,7 +230,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::apache::thrift::fixtures::types::TBinary, ::std::int64_t> _return;
-        binary_keyed_map(_return, std::move(p_r));
+        sync_binary_keyed_map(_return, std::move(p_r));
         callback->result(_return);
         return;
       }

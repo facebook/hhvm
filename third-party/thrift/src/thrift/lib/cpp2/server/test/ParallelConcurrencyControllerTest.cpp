@@ -478,6 +478,14 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
       return std::make_unique<BadAsyncProcessor>(baton_);
     }
 
+    CreateMethodMetadataResult createMethodMetadata() override {
+      WildcardMethodMetadataMap wildcardMap;
+      wildcardMap.wildcardMetadata = std::make_shared<WildcardMethodMetadata>(
+          MethodMetadata::ExecutorType::ANY);
+
+      return wildcardMap;
+    }
+
     std::vector<apache::thrift::ServiceHandlerBase*> getServiceHandlers()
         override {
       return {};

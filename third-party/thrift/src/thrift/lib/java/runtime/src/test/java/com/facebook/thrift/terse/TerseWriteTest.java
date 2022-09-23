@@ -24,6 +24,7 @@ import static org.junit.Assert.assertNull;
 import com.facebook.thrift.payload.ThriftSerializable;
 import com.facebook.thrift.protocol.ByteBufTProtocol;
 import com.facebook.thrift.test.terse.AdaptedTerseStruct;
+import com.facebook.thrift.test.terse.EmptyStruct;
 import com.facebook.thrift.test.terse.FieldLevelTerseStruct;
 import com.facebook.thrift.test.terse.InnerTerseStruct;
 import com.facebook.thrift.test.terse.MyEnum;
@@ -95,31 +96,34 @@ public class TerseWriteTest {
     assertEquals(1, st.getSetField().iterator().next().intValue());
     assertEquals(1, st.getMapField().size());
     assertEquals(1, (short) st.getMapField().get((short) 1));
+    assertEquals("5000", st.getAdaptedIntField());
+    assertEquals((Long) 6000L, (Long) st.getDoubleAdaptedIntField());
     assertNotNull(st.getStructField());
   }
 
-  // @todo(Bahadir) Fix this test when we clarify the terse + default.
-  //  @Test
-  //  public void testTerseStructWithCustomDefaultDeserialized() {
-  //    ByteBufTProtocol protocol = serialize(new EmptyStruct.Builder().build());
-  //    // create from an empty struct
-  //    TerseStructWithCustomDefault st = TerseStructWithCustomDefault.read0(protocol);
-  //
-  //    assertEquals(IntrinsicDefaults.defaultBoolean(), st.isBoolField());
-  //    assertEquals(IntrinsicDefaults.defaultByte(), st.getByteField());
-  //    assertEquals(IntrinsicDefaults.defaultShort(), st.getShortField());
-  //    assertEquals(IntrinsicDefaults.defaultInt(), st.getIntField());
-  //    assertEquals(IntrinsicDefaults.defaultLong(), st.getLongField());
-  //    assertEquals(IntrinsicDefaults.defaultFloat(), st.getFloatField(), 0);
-  //    assertEquals(IntrinsicDefaults.defaultDouble(), st.getDoubleField(), 0);
-  //    assertEquals(IntrinsicDefaults.defaultString(), st.getStringField());
-  //    assertArrayEquals(IntrinsicDefaults.defaultByteArray(), st.getBinaryField());
-  //    assertEquals(MyEnum.ME0, st.getEnumField());
-  //    assertEquals(IntrinsicDefaults.defaultList(), st.getListField());
-  //    assertEquals(IntrinsicDefaults.defaultSet(), st.getSetField());
-  //    assertEquals(IntrinsicDefaults.defaultMap(), st.getMapField());
-  //    assertNotNull(st.getStructField());
-  //  }
+  @Test
+  public void testTerseStructWithCustomDefaultDeserialized() {
+    ByteBufTProtocol protocol = serialize(new EmptyStruct.Builder().build());
+    // create from an empty struct
+    TerseStructWithCustomDefault st = TerseStructWithCustomDefault.read0(protocol);
+
+    assertEquals(IntrinsicDefaults.defaultBoolean(), st.isBoolField());
+    assertEquals(IntrinsicDefaults.defaultByte(), st.getByteField());
+    assertEquals(IntrinsicDefaults.defaultShort(), st.getShortField());
+    assertEquals(IntrinsicDefaults.defaultInt(), st.getIntField());
+    assertEquals(IntrinsicDefaults.defaultLong(), st.getLongField());
+    assertEquals(IntrinsicDefaults.defaultFloat(), st.getFloatField(), 0);
+    assertEquals(IntrinsicDefaults.defaultDouble(), st.getDoubleField(), 0);
+    assertEquals(IntrinsicDefaults.defaultString(), st.getStringField());
+    assertArrayEquals(IntrinsicDefaults.defaultByteArray(), st.getBinaryField());
+    assertEquals(MyEnum.ME0, st.getEnumField());
+    assertEquals(IntrinsicDefaults.defaultList(), st.getListField());
+    assertEquals(IntrinsicDefaults.defaultSet(), st.getSetField());
+    assertEquals(IntrinsicDefaults.defaultMap(), st.getMapField());
+    assertEquals("0", st.getAdaptedIntField());
+    assertEquals((Long) IntrinsicDefaults.defaultLong(), (Long) st.getDoubleAdaptedIntField());
+    assertNotNull(st.getStructField());
+  }
 
   @Test
   public void testFieldLevelTerseStruct() {

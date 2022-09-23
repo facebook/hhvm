@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::extra::svc::ExtraServiceServiceInfoHolder apache::thrift::ServiceHandler<::extra::svc::ExtraService>::__fbthrift_serviceInfoHolder;
 
 
-bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_simple_function() {
+bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::simple_function() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("simple_function");
 }
 
-bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::simple_function() {
-  return sync_simple_function();
+bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_simple_function() {
+  return simple_function();
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_simple_function() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_simple_function.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return simple_function();
+  return sync_simple_function();
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::future_simple_function() {
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(simple_function());
+        callback->result(sync_simple_function());
         return;
       }
       default:
@@ -137,18 +137,18 @@ void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::async_eb_throws
   callback->exception(apache::thrift::detail::si::create_app_exn_unimplemented("throws_function"));
 }
 
-bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_throws_function2(bool /*param1*/) {
+bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::throws_function2(bool /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("throws_function2");
 }
 
-bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::throws_function2(bool p_param1) {
-  return sync_throws_function2(p_param1);
+bool apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_throws_function2(bool p_param1) {
+  return throws_function2(p_param1);
 }
 
 folly::SemiFuture<bool> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_throws_function2(bool p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_throws_function2.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return throws_function2(p_param1);
+  return sync_throws_function2(p_param1);
 }
 
 folly::Future<bool> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::future_throws_function2(bool p_param1) {
@@ -228,7 +228,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(throws_function2(p_param1));
+        callback->result(sync_throws_function2(p_param1));
         return;
       }
       default:
@@ -245,19 +245,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/) {
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::throws_function3(::std::map<::std::int32_t, ::std::string>& /*_return*/, bool /*param1*/, const ::std::string& /*param2*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("throws_function3");
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::throws_function3(::std::map<::std::int32_t, ::std::string>& _return, bool p_param1, const ::std::string& p_param2) {
-  return sync_throws_function3(_return, p_param1, p_param2);
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_throws_function3(::std::map<::std::int32_t, ::std::string>& _return, bool p_param1, const ::std::string& p_param2) {
+  return throws_function3(_return, p_param1, p_param2);
 }
 
 folly::SemiFuture<::std::map<::std::int32_t, ::std::string>> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_throws_function3(bool p_param1, const ::std::string& p_param2) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_throws_function3.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   ::std::map<::std::int32_t, ::std::string> ret;
-  throws_function3(ret, p_param1, p_param2);
+  sync_throws_function3(ret, p_param1, p_param2);
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -339,7 +339,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::map<::std::int32_t, ::std::string> _return;
-        throws_function3(_return, p_param1, p_param2);
+        sync_throws_function3(_return, p_param1, p_param2);
         callback->result(_return);
         return;
       }
@@ -357,18 +357,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret() {
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("oneway_void_ret");
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret() {
-  return sync_oneway_void_ret();
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret() {
+  return oneway_void_ret();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_oneway_void_ret() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_oneway_void_ret.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  oneway_void_ret();
+  sync_oneway_void_ret();
   return folly::makeSemiFuture();
 }
 
@@ -449,7 +449,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        oneway_void_ret();
+        sync_oneway_void_ret();
         return;
       }
       default:
@@ -466,18 +466,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) {
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t /*param1*/, ::std::int32_t /*param2*/, ::std::int32_t /*param3*/, ::std::int32_t /*param4*/, ::std::int32_t /*param5*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("oneway_void_ret_i32_i32_i32_i32_i32_param");
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
-  return sync_oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
+  return oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_oneway_void_ret_i32_i32_i32_i32_i32_param(::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_oneway_void_ret_i32_i32_i32_i32_i32_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
+  sync_oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
   return folly::makeSemiFuture();
 }
 
@@ -558,7 +558,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
+        sync_oneway_void_ret_i32_i32_i32_i32_i32_param(p_param1, p_param2, p_param3, p_param4, p_param5);
         return;
       }
       default:
@@ -579,18 +579,18 @@ void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::async_eb_oneway
   LOG(DFATAL) << "Function oneway_void_ret_map_setlist_param is unimplemented";
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/) {
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("oneway_void_ret_struct_param");
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
-  return sync_oneway_void_ret_struct_param(p_param1);
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
+  return oneway_void_ret_struct_param(p_param1);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_oneway_void_ret_struct_param(const ::some::valid::ns::MyStruct& p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_oneway_void_ret_struct_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  oneway_void_ret_struct_param(p_param1);
+  sync_oneway_void_ret_struct_param(p_param1);
   return folly::makeSemiFuture();
 }
 
@@ -671,7 +671,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        oneway_void_ret_struct_param(p_param1);
+        sync_oneway_void_ret_struct_param(p_param1);
         return;
       }
       default:
@@ -688,18 +688,18 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/) {
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& /*param1*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("oneway_void_ret_listunion_param");
 }
 
-void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
-  return sync_oneway_void_ret_listunion_param(p_param1);
+void apache::thrift::ServiceHandler<::extra::svc::ExtraService>::sync_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
+  return oneway_void_ret_listunion_param(p_param1);
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::extra::svc::ExtraService>::semifuture_oneway_void_ret_listunion_param(const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_oneway_void_ret_listunion_param.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  oneway_void_ret_listunion_param(p_param1);
+  sync_oneway_void_ret_listunion_param(p_param1);
   return folly::makeSemiFuture();
 }
 
@@ -780,7 +780,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        oneway_void_ret_listunion_param(p_param1);
+        sync_oneway_void_ret_listunion_param(p_param1);
         return;
       }
       default:

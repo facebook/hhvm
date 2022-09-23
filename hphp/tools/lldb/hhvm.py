@@ -1,21 +1,25 @@
-#!/usr/bin/env python3
+# Copyright 2022-present Facebook. All Rights Reserved.
+
+""" The main module you load in your .lldbinit. """
+
 
 import lldb
+import sys
 
-class WalkstkCommand:
-    def __init__(self, debugger, internal_dict):
-        pass
-    def __call__(self, debugger, command, exe_ctx, result):
-        pass
-    def get_short_help(self):
-        return "Traverse the interleaved VM and native stacks"
-    def get_long_help(self):
-        return """\
-The output backtrace has the following format:
+import pretty
+import stack
 
-    #<bt frame> <fp> @ <rip>: <function> [at <filename>:<line>]
 
-`walkstk' depends on the custom HHVM unwinder defined in unwind.py."""
+def __lldb_init_module(debugger, internal_dict):
+    """ Load up the commands and pretty printers of each module.
+    
+    Arguments:
+        debugger: Current debugger object
+        internal_dict: Dict for current script session. For internal use by LLDB only.
 
-def __lldb_init_module(debugger, dict):
-    debugger.HandleCommand('command script add -c hhvm.WalkstkCommand "walkstk"')
+    Returns:
+        None
+    """
+    top = sys.modules[__name__].__name__
+    pretty.__lldb_init_module(debugger, internal_dict, top)
+    stack.__lldb_init_module(debugger, internal_dict, top)

@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <unordered_set>
 #include <utility>
 
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
@@ -31,6 +32,19 @@ void erase_all(C1& container, const C2& values) {
        ++itr) {
     container.erase(*itr);
   }
+}
+
+template <typename C1, typename C2>
+void remove_all_values(C1& container, const C2& values) {
+  container.erase(
+      std::remove_if(
+          container.begin(),
+          container.end(),
+          [&](const auto& element) {
+            return std::find(values.begin(), values.end(), element) !=
+                values.end();
+          }),
+      container.end());
 }
 
 // Patch must have the following fields:
@@ -94,8 +108,31 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     prepend.insert(prepend.begin(), std::forward<U>(val));
   }
 
+  template <typename U = typename T::value_type>
+  void erase(U&& val) {
+    if (hasAssign()) {
+      auto& assign = *data_.assign();
+      auto it = std::find(assign.begin(), assign.end(), val);
+      if (it != assign.end()) {
+        assign.erase(it);
+      }
+    }
+    data_.remove()->push_back(std::forward<U>(val));
+  }
+
+  template <typename C = std::unordered_set<typename T::value_type>>
+  void remove(C&& entries) {
+    if (hasAssign()) {
+      auto& assign = *data_.assign();
+      remove_all_values(assign, entries);
+    }
+    data_.remove()->insert(
+        data_.remove()->end(), entries.begin(), entries.end());
+  }
+
   void apply(T& val) const {
     if (!applyAssignOrClear(val)) {
+      remove_all_values(val, *data_.remove());
       val.insert(val.begin(), data_.prepend()->begin(), data_.prepend()->end());
       val.insert(val.end(), data_.append()->begin(), data_.append()->end());
     }
@@ -103,19 +140,24 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
 
   template <typename U>
   void merge(U&& next) {
-    if (!mergeAssignAndClear(std::forward<U>(next))) {
-      // TODO(afuller): Optimize the r-value reference case.
-      if (!next.toThrift().prepend()->empty()) {
-        decltype(auto) rhs = *std::forward<U>(next).toThrift().prepend();
-        data_.prepend()->insert(
-            data_.prepend()->begin(), rhs.begin(), rhs.end());
-      }
-      if (!next.toThrift().append()->empty()) {
-        decltype(auto) rhs = *std::forward<U>(next).toThrift().append();
-        data_.append()->reserve(data_.append()->size() + rhs.size());
-        auto inserter = std::back_inserter(*data_.append());
-        std::copy_n(rhs.begin(), rhs.size(), inserter);
-      }
+    if (mergeAssignAndClear(std::forward<U>(next))) {
+      return;
+    }
+    {
+      decltype(auto) rhs = *std::forward<U>(next).toThrift().remove();
+      data_.remove()->reserve(data_.remove()->size() + rhs.size());
+      data_.remove()->insert(data_.remove()->end(), rhs.begin(), rhs.end());
+    }
+    // TODO(afuller): Optimize the r-value reference case.
+    if (!next.toThrift().prepend()->empty()) {
+      decltype(auto) rhs = *std::forward<U>(next).toThrift().prepend();
+      data_.prepend()->insert(data_.prepend()->begin(), rhs.begin(), rhs.end());
+    }
+    if (!next.toThrift().append()->empty()) {
+      decltype(auto) rhs = *std::forward<U>(next).toThrift().append();
+      data_.append()->reserve(data_.append()->size() + rhs.size());
+      auto inserter = std::back_inserter(*data_.append());
+      std::copy_n(rhs.begin(), rhs.size(), inserter);
     }
   }
 
@@ -123,6 +165,7 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base::applyAssignOrClear;
   using Base::assignOr;
   using Base::data_;
+  using Base::hasAssign;
   using Base::mergeAssignAndClear;
 };
 
@@ -245,21 +288,50 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   void put(C&& entries) {
     auto& field = assignOr(*data_.put());
     for (auto&& entry : entries) {
+      auto key = std::forward<decltype(entry)>(entry).first;
+      field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
+      data_.add()->erase(key);
+      data_.remove()->erase(key);
+    }
+  }
+  template <typename K, typename V>
+  void insert_or_assign(K&& key, V&& value) {
+    assignOr(*data_.put()).insert_or_assign(key, std::forward<V>(value));
+    data_.add()->erase(key);
+    data_.remove()->erase(key);
+  }
+
+  template <typename C = T>
+  void add(C&& entries) {
+    auto& field = assignOr(*data_.add());
+    for (auto&& entry : entries) {
       field.insert_or_assign(
           std::forward<decltype(entry)>(entry).first,
           std::forward<decltype(entry)>(entry).second);
     }
   }
-  template <typename K, typename V>
-  void insert_or_assign(K&& key, V&& value) {
-    assignOr(*data_.put())
-        .insert_or_assign(std::forward<K>(key), std::forward<V>(value));
+
+  template <typename C = std::unordered_set<typename T::key_type>>
+  void remove(C&& keys) {
+    auto& field = assignOr(*data_.add());
+    for (auto&& key : keys) {
+      field.erase(key);
+      data_.remove()->insert(key);
+    }
+  }
+
+  template <typename K = typename T::key_type>
+  void erase(K&& key) {
+    assignOr(*data_.add()).erase(key);
+    data_.remove()->insert(key);
   }
 
   void apply(T& val) const {
     if (applyAssignOrClear(val)) {
       return;
     }
+    val.insert(data_.add()->begin(), data_.add()->end());
+    erase_all(val, *data_.remove());
     for (const auto& entry : *data_.put()) {
       val.insert_or_assign(entry.first, entry.second);
     }
@@ -268,6 +340,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   template <typename U>
   void merge(U&& next) {
     if (!mergeAssignAndClear(std::forward<U>(next))) {
+      add(*std::forward<U>(next).toThrift().add());
+      remove(*std::forward<U>(next).toThrift().remove());
       put(*std::forward<U>(next).toThrift().put());
     }
   }

@@ -3789,10 +3789,10 @@ AliasClass mem_writes_for_inst(const Vinstr& inst) {
     [] (const PureStore& a)       { return a.dst; },
     [] (const PureInlineCall& a)  { return a.base; },
     [] (const CallEffects& e)     {
-      return e.kills | e.actrec | e.outputs | AHeapAny | ARdsAny;
+      return e.kills | e.uninits | e.actrec | e.outputs | AHeapAny | ARdsAny;
     },
     [] (const ReturnEffects& e)   { return e.kills; },
-    [] (const ExitEffects& e)     { return e.kills; },
+    [] (const ExitEffects& e)     { return e.kills | e.uninits; },
     [] (const IrrelevantEffects&) { return AEmpty; },
     [] (const UnknownEffects&)    { return AUnknown; }
   );

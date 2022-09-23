@@ -25,19 +25,19 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::test::fixtures::basic::DbMixedStackArgumentsServiceInfoHolder apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::sync_getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey0(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getDataByKey0");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey0(::std::string& _return, std::unique_ptr<::std::string> p_key) {
-  return sync_getDataByKey0(_return, std::move(p_key));
+void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::sync_getDataByKey0(::std::string& _return, std::unique_ptr<::std::string> p_key) {
+  return getDataByKey0(_return, std::move(p_key));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::semifuture_getDataByKey0(std::unique_ptr<::std::string> p_key) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_getDataByKey0.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  getDataByKey0(*ret, std::move(p_key));
+  sync_getDataByKey0(*ret, std::move(p_key));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -118,7 +118,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        getDataByKey0(_return, std::move(p_key));
+        sync_getDataByKey0(_return, std::move(p_key));
         callback->result(_return);
         return;
       }
@@ -137,19 +137,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::sync_getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
+void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey1(::std::string& /*_return*/, std::unique_ptr<::std::string> /*key*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("getDataByKey1");
 }
 
-void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::getDataByKey1(::std::string& _return, std::unique_ptr<::std::string> p_key) {
-  return sync_getDataByKey1(_return, std::move(p_key));
+void apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::sync_getDataByKey1(::std::string& _return, std::unique_ptr<::std::string> p_key) {
+  return getDataByKey1(_return, std::move(p_key));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::test::fixtures::basic::DbMixedStackArguments>::semifuture_getDataByKey1(std::unique_ptr<::std::string> p_key) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_getDataByKey1.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  getDataByKey1(*ret, std::move(p_key));
+  sync_getDataByKey1(*ret, std::move(p_key));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -230,7 +230,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        getDataByKey1(_return, std::move(p_key));
+        sync_getDataByKey1(_return, std::move(p_key));
         callback->result(_return);
         return;
       }

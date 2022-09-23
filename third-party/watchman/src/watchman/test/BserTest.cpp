@@ -88,6 +88,12 @@ bdumps_pdu(uint32_t version, uint32_t capabilities, const json_ref& json) {
 }
 
 const char* json_inputs[] = {
+    "null",
+    "true",
+    "false",
+    "0",
+    "-100",
+    "\"hello\"",
     "{\"bar\": true, \"foo\": 42}",
     "[1, 2, 3]",
     "[null, true, false, 65536]",
@@ -136,9 +142,8 @@ void check_roundtrip(
             << bser_capabilities;
   std::optional<json_ref> templ;
   json_error_t jerr;
-  json_int_t needed;
 
-  auto expected = json_loads(input, 0, &jerr);
+  auto expected = json_loads(input, JSON_DECODE_ANY, &jerr);
   ASSERT_TRUE(expected) << "loaded " << input << " " << jerr.text;
   if (template_text) {
     templ = json_loads(template_text, 0, &jerr);
@@ -150,11 +155,11 @@ void check_roundtrip(
   const char* end = dump_buf->data() + dump_buf->size();
   hexdump(dump_buf->data(), end);
 
-  auto decoded = bunser(dump_buf->data(), end, &needed);
+  auto decoded = bunser(dump_buf->data(), end);
 
-  auto jdump = json_dumps(decoded, JSON_SORT_KEYS);
+  auto jdump = json_dumps(decoded, JSON_ENCODE_ANY | JSON_SORT_KEYS);
   EXPECT_TRUE(json_equal(expected.value(), decoded))
-      << "round-tripped json_equal";
+      << "round-tripped json_equal: " << jdump;
   EXPECT_EQ(jdump, input) << "round-tripped";
 }
 
@@ -255,27 +260,24 @@ void check_bser_typed_strings() {
 }
 
 TEST(Bser, bser_tests) {
-  int i, num_json_inputs, num_templ;
-
-  num_json_inputs = sizeof(json_inputs) / sizeof(json_inputs[0]);
-  num_templ = sizeof(template_tests) / sizeof(template_tests[0]);
+  int num_templ = sizeof(template_tests) / sizeof(template_tests[0]);
   int num_serial = sizeof(serialization_tests) / sizeof(serialization_tests[0]);
 
-  for (i = 0; i < num_json_inputs; i++) {
-    fmt::print("json_input = {}\n", json_inputs[i]);
-    check_roundtrip(1, 0, json_inputs[i], nullptr);
-    check_roundtrip(2, 0, json_inputs[i], nullptr);
-    check_roundtrip(2, BSER_CAP_DISABLE_UNICODE, json_inputs[i], nullptr);
+  for (auto& json_input : json_inputs) {
+    fmt::print("json_input = {}\n", json_input);
+    check_roundtrip(1, 0, json_input, nullptr);
+    check_roundtrip(2, 0, json_input, nullptr);
+    check_roundtrip(2, BSER_CAP_DISABLE_UNICODE, json_input, nullptr);
     check_roundtrip(
-        2, BSER_CAP_DISABLE_UNICODE_FOR_ERRORS, json_inputs[i], nullptr);
+        2, BSER_CAP_DISABLE_UNICODE_FOR_ERRORS, json_input, nullptr);
     check_roundtrip(
         2,
         BSER_CAP_DISABLE_UNICODE | BSER_CAP_DISABLE_UNICODE_FOR_ERRORS,
-        json_inputs[i],
+        json_input,
         nullptr);
   }
 
-  for (i = 0; i < num_templ; i++) {
+  for (int i = 0; i < num_templ; i++) {
     check_roundtrip(
         1, 0, template_tests[i].json_text, template_tests[i].template_text);
     check_roundtrip(
@@ -297,7 +299,7 @@ TEST(Bser, bser_tests) {
         template_tests[i].template_text);
   }
 
-  for (i = 0; i < num_serial; i++) {
+  for (int i = 0; i < num_serial; i++) {
     check_serialization(
         1, 0, serialization_tests[i].json_text, serialization_tests[i].bserv1);
     check_serialization(
@@ -446,6 +448,19 @@ TEST(Bser, fuzz_examples) {
       literal("\x00\x06\x7f\xff\xff\xff\xff\xff\xff\xff"),
       literal("\x00\x06\xff\xff\xff\xff\xff\xff\xff\xff"),
       literal("\x02\x03\xf4"),
+      literal("\x07\x00\xff\xff\x0a\x00\xff\xff\xff"),
+      literal("\x02\x06\xff\xff\xff\xff\xff\xff\xff\xff"),
+      literal("\x00\x05\xc6\x05\x05\x05\x05\x05\x05\x05\x05\x05\xee\x04\x05\x05"
+              "\x05\x05\x05\x01\x05\x04\xf6\x05\x05\x05\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x05\x05\x05\x0b\x00\x03\x00\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x19\x05\x05\x05\x05\x01\x05\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe6\x05\x05\x05"
+              "\x05\x05\x05\x01\x05\x04\xf6\x05\x05\x05\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x05\x05\x05\x0b\x00\x03\x00\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x19\x05\x05\x05\x05\x01\x05\x05\x05\x05\x05\x05\x05"
+              "\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\x05\xe6\x05\x05\x05"
+              "\x05\x05\x05\x05\x05\x05\x21\x05\x05\x05\x05\x05\x05\x05\x21\x05"
+              "\x05\x05\x05\x05"),
   };
   for (std::string_view input : corpus) {
     for (auto allocator : allAllocators) {
@@ -456,9 +471,8 @@ TEST(Bser, fuzz_examples) {
       auto data = allocator(input.size());
       memcpy(data.get(), input.data(), input.size());
 
-      json_int_t needed;
       try {
-        bunser(data.get(), data.get() + input.size(), &needed);
+        bunser(data.get(), data.get() + input.size());
       } catch (const BserParseError&) {
       }
     }

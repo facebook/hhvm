@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::CServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::C>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::C>::sync_f() {
+void apache::thrift::ServiceHandler<::cpp2::C>::f() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("f");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::C>::f() {
-  return sync_f();
+void apache::thrift::ServiceHandler<::cpp2::C>::sync_f() {
+  return f();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_f() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_f.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  f();
+  sync_f();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        f();
+        sync_f();
         callback->done();
         return;
       }
@@ -135,18 +135,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::sync_numbers() {
+::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::numbers() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("numbers");
 }
 
-::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::numbers() {
-  return sync_numbers();
+::apache::thrift::ServerStream<::cpp2::number> apache::thrift::ServiceHandler<::cpp2::C>::sync_numbers() {
+  return numbers();
 }
 
 folly::SemiFuture<::apache::thrift::ServerStream<::cpp2::number>> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_numbers() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_numbers.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return numbers();
+  return sync_numbers();
 }
 
 folly::Future<::apache::thrift::ServerStream<::cpp2::number>> apache::thrift::ServiceHandler<::cpp2::C>::future_numbers() {
@@ -225,7 +225,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(numbers());
+        callback->result(sync_numbers());
         return;
       }
       default:
@@ -243,19 +243,19 @@ determineInvocationType:
   }
 }
 
-void apache::thrift::ServiceHandler<::cpp2::C>::sync_thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {
+void apache::thrift::ServiceHandler<::cpp2::C>::thing(::std::string& /*_return*/, ::std::int32_t /*a*/, std::unique_ptr<::std::string> /*b*/, std::unique_ptr<::std::set<::std::int32_t>> /*c*/) {
   apache::thrift::detail::si::throw_app_exn_unimplemented("thing");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::C>::thing(::std::string& _return, ::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c) {
-  return sync_thing(_return, p_a, std::move(p_b), std::move(p_c));
+void apache::thrift::ServiceHandler<::cpp2::C>::sync_thing(::std::string& _return, ::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c) {
+  return thing(_return, p_a, std::move(p_b), std::move(p_c));
 }
 
 folly::SemiFuture<std::unique_ptr<::std::string>> apache::thrift::ServiceHandler<::cpp2::C>::semifuture_thing(::std::int32_t p_a, std::unique_ptr<::std::string> p_b, std::unique_ptr<::std::set<::std::int32_t>> p_c) {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_thing.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
   auto ret = std::make_unique<::std::string>();
-  thing(*ret, p_a, std::move(p_b), std::move(p_c));
+  sync_thing(*ret, p_a, std::move(p_b), std::move(p_c));
   return folly::makeSemiFuture(std::move(ret));
 }
 
@@ -336,7 +336,7 @@ determineInvocationType:
       case apache::thrift::detail::si::InvocationType::Sync:
       {
         ::std::string _return;
-        thing(_return, p_a, std::move(p_b), std::move(p_c));
+        sync_thing(_return, p_a, std::move(p_b), std::move(p_c));
         callback->result(_return);
         return;
       }

@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::py3::simple::DerivedServiceServiceInfoHolder apache::thrift::ServiceHandler<::py3::simple::DerivedService>::__fbthrift_serviceInfoHolder;
 
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::DerivedService>::sync_get_six() {
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::DerivedService>::get_six() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("get_six");
 }
 
-::std::int32_t apache::thrift::ServiceHandler<::py3::simple::DerivedService>::get_six() {
-  return sync_get_six();
+::std::int32_t apache::thrift::ServiceHandler<::py3::simple::DerivedService>::sync_get_six() {
+  return get_six();
 }
 
 folly::SemiFuture<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::DerivedService>::semifuture_get_six() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_get_six.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return get_six();
+  return sync_get_six();
 }
 
 folly::Future<::std::int32_t> apache::thrift::ServiceHandler<::py3::simple::DerivedService>::future_get_six() {
@@ -115,7 +115,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(get_six());
+        callback->result(sync_get_six());
         return;
       }
       default:

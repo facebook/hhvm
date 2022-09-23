@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::MyServicePrioChildServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::__fbthrift_serviceInfoHolder;
 
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::sync_pang() {
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::pang() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("pang");
 }
 
-void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::pang() {
-  return sync_pang();
+void apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::sync_pang() {
+  return pang();
 }
 
 folly::SemiFuture<folly::Unit> apache::thrift::ServiceHandler<::cpp2::MyServicePrioChild>::semifuture_pang() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_pang.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  pang();
+  sync_pang();
   return folly::makeSemiFuture();
 }
 
@@ -116,7 +116,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        pang();
+        sync_pang();
         callback->done();
         return;
       }

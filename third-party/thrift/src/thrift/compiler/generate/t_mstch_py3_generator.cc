@@ -305,6 +305,9 @@ class py3_mstch_program : public mstch_program {
         const t_type* exType = field.get_type();
         streamExceptions_.emplace(visit_type(field.get_type()), exType);
       }
+      for (const auto& field : function.get_xceptions()->fields()) {
+        visit_type(field.get_type());
+      }
       addFunctionByUniqueReturnType(&function);
     }
   }

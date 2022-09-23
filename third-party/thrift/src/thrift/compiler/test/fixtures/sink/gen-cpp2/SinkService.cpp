@@ -25,18 +25,18 @@ std::optional<std::reference_wrapper<apache::thrift::ServiceRequestInfoMap const
 ::cpp2::SinkServiceServiceInfoHolder apache::thrift::ServiceHandler<::cpp2::SinkService>::__fbthrift_serviceInfoHolder;
 
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_method() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::method() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("method");
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::method() {
-  return sync_method();
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_method() {
+  return method();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_method() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_method.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return method();
+  return sync_method();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_method() {
@@ -115,7 +115,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(method());
+        callback->result(sync_method());
         return;
       }
       default:
@@ -133,18 +133,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodAndReponse() {
+::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodAndReponse() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodAndReponse");
 }
 
-::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodAndReponse() {
-  return sync_methodAndReponse();
+::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodAndReponse() {
+  return methodAndReponse();
 }
 
 folly::SemiFuture<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_methodAndReponse() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodAndReponse.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodAndReponse();
+  return sync_methodAndReponse();
 }
 
 folly::Future<::apache::thrift::ResponseAndSinkConsumer<::cpp2::InitialResponse, ::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_methodAndReponse() {
@@ -223,7 +223,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodAndReponse());
+        callback->result(sync_methodAndReponse());
         return;
       }
       default:
@@ -241,18 +241,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodThrow() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodThrow");
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodThrow() {
-  return sync_methodThrow();
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodThrow() {
+  return methodThrow();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_methodThrow() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodThrow.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodThrow();
+  return sync_methodThrow();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_methodThrow() {
@@ -331,7 +331,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodThrow());
+        callback->result(sync_methodThrow());
         return;
       }
       default:
@@ -349,18 +349,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodSinkThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodSinkThrow() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodSinkThrow");
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodSinkThrow() {
-  return sync_methodSinkThrow();
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodSinkThrow() {
+  return methodSinkThrow();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_methodSinkThrow() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodSinkThrow.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodSinkThrow();
+  return sync_methodSinkThrow();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_methodSinkThrow() {
@@ -439,7 +439,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodSinkThrow());
+        callback->result(sync_methodSinkThrow());
         return;
       }
       default:
@@ -457,18 +457,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodFinalThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodFinalThrow() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodFinalThrow");
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodFinalThrow() {
-  return sync_methodFinalThrow();
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodFinalThrow() {
+  return methodFinalThrow();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_methodFinalThrow() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodFinalThrow.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodFinalThrow();
+  return sync_methodFinalThrow();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_methodFinalThrow() {
@@ -547,7 +547,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodFinalThrow());
+        callback->result(sync_methodFinalThrow());
         return;
       }
       default:
@@ -565,18 +565,18 @@ determineInvocationType:
   }
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodBothThrow() {
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodBothThrow() {
   apache::thrift::detail::si::throw_app_exn_unimplemented("methodBothThrow");
 }
 
-::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::methodBothThrow() {
-  return sync_methodBothThrow();
+::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse> apache::thrift::ServiceHandler<::cpp2::SinkService>::sync_methodBothThrow() {
+  return methodBothThrow();
 }
 
 folly::SemiFuture<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::semifuture_methodBothThrow() {
   auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
   __fbthrift_invocation_methodBothThrow.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
-  return methodBothThrow();
+  return sync_methodBothThrow();
 }
 
 folly::Future<::apache::thrift::SinkConsumer<::cpp2::SinkPayload, ::cpp2::FinalResponse>> apache::thrift::ServiceHandler<::cpp2::SinkService>::future_methodBothThrow() {
@@ -655,7 +655,7 @@ determineInvocationType:
 #endif // FOLLY_HAS_COROUTINES
       case apache::thrift::detail::si::InvocationType::Sync:
       {
-        callback->result(methodBothThrow());
+        callback->result(sync_methodBothThrow());
         return;
       }
       default:

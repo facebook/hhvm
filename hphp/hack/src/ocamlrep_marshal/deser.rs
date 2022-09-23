@@ -6,15 +6,13 @@
 // This file ('deser.rs') was based off c2rust generated code of 'intern.c' at
 // revision `15553b77175270d987058b386d737ccb939e8d5a` (i.e. the 4.14.0 tag).
 
-#![allow(non_camel_case_types, non_snake_case)]
-
 use ocamlrep::Value;
 
 use crate::intext::*;
 
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct marshal_header {
+pub struct MarshalHeader {
     pub magic: u32,
     pub header_len: i32,
     pub data_len: usize,
@@ -22,7 +20,7 @@ pub struct marshal_header {
     pub whsize: usize,
 }
 
-struct intern_item<'a> {
+struct InternItem<'a> {
     pub dest: *mut Value<'a>,
     pub arg: usize,
     pub op: InternItemStackOp,
@@ -30,7 +28,6 @@ struct intern_item<'a> {
 
 enum InternItemStackOp {
     ReadItems = 0,
-    //    Shift = 2,
 }
 
 struct State<'s, 'a, A> {
@@ -48,7 +45,7 @@ struct State<'s, 'a, A> {
     intern_obj_table: Vec<Value<'a>>,
 
     /// The "recursion stack" used in `intern_rec`.
-    stack: Vec<intern_item<'a>>,
+    stack: Vec<InternItem<'a>>,
 }
 
 impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
@@ -167,11 +164,9 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
         let mut v: Value<'a> = Value::from_bits(0);
         let mut ofs: usize = 0;
 
-        use InternItemStackOp::*;
-
         // Initially let's try to read the first object from the stream
-        self.stack.push(intern_item {
-            op: ReadItems,
+        self.stack.push(InternItem {
+            op: InternItemStackOp::ReadItems,
             dest,
             arg: 1,
         });
@@ -182,7 +177,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
             dest = top.dest;
 
             match top.op {
-                ReadItems => {
+                InternItemStackOp::ReadItems => {
                     // Pop item
                     top.dest = top.dest.offset(1);
                     top.arg -= 1;
@@ -304,7 +299,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                                     unimplemented!()
                                 }
                                 _ => {
-                                    panic!("input_value_from_string: ill-formed message");
+                                    panic!("input_value: ill-formed message");
                                 }
                             }
                             match current_block {
@@ -348,16 +343,17 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                     match current_block {
                         READ_BLOCK_LABEL => {
                             if size == 0 {
-                                panic!("atoms are not supported");
+                                panic!("input_value: atoms are not supported");
                             } else {
                                 let mut builder =
                                     self.alloc.block_with_size_and_tag(size as usize, tag);
                                 if tag == ocamlrep::OBJECT_TAG {
-                                    panic!("objects not supported");
+                                    panic!("input_value: objects not supported");
                                 } else {
-                                    // If it's not an object then read the conents of the block
-                                    self.stack.push(intern_item {
-                                        op: ReadItems,
+                                    // If it's not an object then read the
+                                    // contents of the block
+                                    self.stack.push(InternItem {
+                                        op: InternItemStackOp::ReadItems,
                                         dest: self.alloc.block_ptr_mut(&mut builder)
                                             as *mut Value<'a>,
                                         arg: size,
@@ -376,7 +372,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
         }
     }
 
-    unsafe fn parse_header(&mut self, mut h: *mut marshal_header) {
+    unsafe fn parse_header(&mut self, mut h: *mut MarshalHeader) {
         (*h).magic = self.read32u();
         match (*h).magic {
             MAGIC_NUMBER_SMALL => {
@@ -393,13 +389,13 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
                 (*h).num_objects = self.read64u() as usize;
                 (*h).whsize = self.read64u() as usize;
             }
-            _ => panic!("input_value_from_string: bad object"),
+            _ => panic!("input_value: bad object"),
         };
     }
 
     unsafe fn input_val_from_string(&mut self, str: &'s [u8]) -> usize {
-        let mut obj: usize = (0_usize << 1) + 1;
-        let mut h: marshal_header = marshal_header {
+        let mut obj = Value::int(0).to_bits();
+        let mut h = MarshalHeader {
             magic: 0,
             header_len: 0,
             data_len: 0,
@@ -408,7 +404,7 @@ impl<'s, 'a, A: ocamlrep::Allocator> State<'s, 'a, A> {
         };
         self.parse_header(&mut h);
         if h.header_len as usize + h.data_len as usize > str.len() {
-            panic!("input_val_from_string: bad length");
+            panic!("input_value: bad length");
         }
         self.intern_src = &str[(h.header_len as usize)..];
         self.intern_rec(&mut obj as *mut usize as *mut Value<'a>);

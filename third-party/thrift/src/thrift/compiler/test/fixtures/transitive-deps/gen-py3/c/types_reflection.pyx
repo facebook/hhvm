@@ -48,3 +48,16 @@ cdef __StructSpec get_reflection__C():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__E():
+    cdef _c_types.E defaults = _c_types.E._fbthrift_create(
+        constant_shared_ptr[_c_types.cE](
+            default_inst[_c_types.cE]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="E",
+        kind=__StructType.EXCEPTION,
+        annotations={
+        },
+    )
+    return spec

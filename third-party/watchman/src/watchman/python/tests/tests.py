@@ -10,6 +10,7 @@ import binascii
 import collections
 import inspect
 import os
+import struct
 import sys
 import tempfile
 import unittest
@@ -426,6 +427,20 @@ class TestBSERDump(unittest.TestCase):
         self.assertRaises(MemoryError, self.bser_mod.dumps, b"a" * ((1 << 32) - 1))
         self.assertRaises(MemoryError, self.bser_mod.dumps, b"a" * ((1 << 32) + 0))
         self.assertRaises(MemoryError, self.bser_mod.dumps, b"a" * ((1 << 32) + 1))
+
+    def test_fuzz_examples(self):
+        def t(ex: bytes):
+            try:
+                document = b"\x00\x01\x05" + struct.pack("@i", len(ex)) + ex
+                print("encoded", document)
+                self.bser_mod.loads(document)
+            except Exception:
+                # Exceptions are okay - abort is not.
+                pass
+
+        t(b"\x03\x00")
+        t(b"\x02")
+        t(b"\x07")
 
 
 if __name__ == "__main__":

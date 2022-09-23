@@ -610,3 +610,13 @@ let file_call ~path pos ~call_args progress =
       ]
   in
   Fact_acc.add_fact Predicate.(Hack FileCall) json progress
+
+let global_namespace_alias ~from ~to_ progress =
+  let json =
+    JSON_Object
+      [
+        ("from", Build_json.build_name_json_nested from);
+        ("to", Build_json.build_namespaceqname_json_nested to_);
+      ]
+  in
+  Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json progress

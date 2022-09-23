@@ -25,6 +25,10 @@ from apache.thrift.test.terse_write.terse_write.thrift_types import (
     MyEnum,
     MyStruct,
     MyStructWithCustomDefault,
+    TerseStructs,
+    TerseStructs1,
+    TerseStructs2,
+    TerseStructs3,
     TerseStructWithCustomDefault,
 )
 from folly.iobuf import IOBuf
@@ -281,3 +285,52 @@ class SerializerTests(unittest.TestCase):
             self.assertEqual(decoded.set_field, set())
             self.assertEqual(decoded.map_field, {})
             self.assertEqual(decoded.struct_field, MyStructWithCustomDefault(field1=0))
+
+    def test_terse_structs_optimization(self) -> None:
+        # empty
+        empty = EmptyStruct()
+        obj = TerseStructs(
+            field1=MyStruct(field1=0),
+            field2=MyStruct(field1=0),
+            field3=MyStruct(field1=0),
+        )
+        for proto in Protocol:
+            encoded_empty = serialize(empty, protocol=proto)
+            encoded_obj = serialize(obj, protocol=proto)
+            self.assertEqual(encoded_empty, encoded_obj)
+
+        # field1 set
+        obj = TerseStructs(
+            field1=MyStruct(field1=1),
+            field2=MyStruct(field1=0),
+            field3=MyStruct(field1=0),
+        )
+        obj1 = TerseStructs1(field1=MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj1 = serialize(obj1, protocol=proto)
+            encoded_obj = serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj1, encoded_obj)
+
+        # field2 set
+        obj = TerseStructs(
+            field1=MyStruct(field1=0),
+            field2=MyStruct(field1=1),
+            field3=MyStruct(field1=0),
+        )
+        obj2 = TerseStructs2(field2=MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj2 = serialize(obj2, protocol=proto)
+            encoded_obj = serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj2, encoded_obj)
+
+        # field3 set
+        obj = TerseStructs(
+            field1=MyStruct(field1=0),
+            field2=MyStruct(field1=0),
+            field3=MyStruct(field1=1),
+        )
+        obj3 = TerseStructs3(field3=MyStruct(field1=1))
+        for proto in Protocol:
+            encoded_obj3 = serialize(obj3, protocol=proto)
+            encoded_obj = serialize(obj, protocol=proto)
+            self.assertEqual(encoded_obj3, encoded_obj)

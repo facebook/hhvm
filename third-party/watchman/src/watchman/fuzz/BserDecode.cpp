@@ -8,10 +8,9 @@
 #include "watchman/bser.h"
 
 extern "C" int LLVMFuzzerTestOneInput(void const* data, size_t size) {
-  json_int_t needed;
   auto* d = reinterpret_cast<const char*>(data);
   try {
-    bunser(d, d + size, &needed);
+    bunser(d, d + size);
   } catch (const BserParseError&) {
     // Caught parse errors are okay.
   }

@@ -1172,9 +1172,7 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
   }
 
   /**
-   * Gets an observer representing the socket queue timeout. If no value is
-   * set, this falls back to the thrift flag,
-   * server_default_socket_queue_timeout_ms.
+   * Gets an observer representing the socket queue timeout.
    */
   const folly::observer::Observer<std::chrono::nanoseconds>&
   getSocketQueueTimeout() const {

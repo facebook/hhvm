@@ -147,6 +147,7 @@ class Dyn {
   FOLLY_NODISCARD bool identical(const Dyn& rhs) const {
     return type() == rhs.type() && type_->identical(ptr_, rhs);
   }
+  FOLLY_NODISCARD bool contains(const Dyn& key) const;
 
   FOLLY_NODISCARD bool equal(const Dyn& rhs) const {
     return type_->equal(ptr_, rhs);
@@ -184,6 +185,7 @@ class Dyn {
 
   void clear() const { type_.mut().clear(ptr_); }
   void assign(const Dyn& val) const { type_.mut().assign(ptr_, val); }
+  void prepend(const Dyn& val) const { type_.mut().prepend(ptr_, val); }
   void append(const Dyn& val) const { type_.mut().append(ptr_, val); }
   bool add(const Dyn& val) const { return type_.mut().add(ptr_, val); }
   bool put(const Dyn& key, const Dyn& val) const {
@@ -192,6 +194,13 @@ class Dyn {
   bool put(FieldId id, const Dyn& val) const {
     return type_.mut().put(ptr_, id, val);
   }
+  void insert(size_t pos, const Dyn& val) const {
+    type_.mut().insert(ptr_, pos, val);
+  }
+
+  bool remove(const Dyn& val) const { return type_.mut().remove(ptr_, val); }
+  bool remove(FieldId id) const { return type_.mut().remove(ptr_, id); }
+  void remove(size_t pos) const { type_.mut().remove(ptr_, pos); }
 
   Ptr ensure(const Dyn& key) const;
   Ptr ensure(const Dyn& key, const Dyn& val) const;
@@ -205,6 +214,12 @@ class Dyn {
   Ptr get(const Dyn& key, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(FieldId id, bool ctxConst, bool ctxRvalue = false) const;
   Ptr get(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
+
+  // Like get, but throws when not found.
+  Ptr at(const Dyn& key) const;
+  Ptr at(size_t pos) const;
+  Ptr at(const Dyn& key, bool ctxConst, bool ctxRvalue = false) const;
+  Ptr at(size_t pos, bool ctxConst, bool ctxRvalue = false) const;
 
   Cursor items() const { return {type_, ptr_}; }
   Cursor items(bool ctxConst, bool ctxRvalue = false) const {
@@ -262,12 +277,16 @@ class Ptr final : public Dyn {
   using Dyn::add;
   using Dyn::append;
   using Dyn::assign;
+  using Dyn::at;
   using Dyn::clear;
   using Dyn::ensure;
   using Dyn::get;
+  using Dyn::insert;
   using Dyn::keys;
   using Dyn::mut;
+  using Dyn::prepend;
   using Dyn::put;
+  using Dyn::remove;
   using Dyn::tryMut;
   using Dyn::values;
 
@@ -305,9 +324,10 @@ struct BaseErasedOp {
     folly::throw_exception<std::runtime_error>(msg);
   }
 
+  [[noreturn]] static void prepend(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static void append(void*, const Dyn&) { bad_op(); }
   [[noreturn]] static bool add(void*, const Dyn&) { bad_op(); }
-  [[noreturn]] static bool put(void*, FieldId, const Dyn&, const Dyn&) {
+  [[noreturn]] static bool put(void*, FieldId, size_t, const Dyn&, const Dyn&) {
     bad_op();
   }
   [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn&, const Dyn&) {
@@ -483,7 +503,11 @@ class BaseDyn : public Dyn,
   iterator end() const { return {}; }
   const_iterator cend() const { return {}; }
 
+  using Base::contains;
+  bool contains(const std::string& key) const { return contains(asRef(key)); }
+
   // Get by value.
+  // TODO(afuller): These should be accepting ConstT.
   MutT get(const Base& key) & { return MutT{Base::get(key)}; }
   MutT get(const Base& key) && { return MutT{Base::get(key, false, true)}; }
   ConstT get(const Base& key) const& { return ConstT{Base::get(key, true)}; }
@@ -498,22 +522,49 @@ class BaseDyn : public Dyn,
   ConstT get(FieldId id) const&& { return ConstT{Base::get(id, true, true)}; }
 
   // Get by name.
-  MutT get(const std::string& name) & { return get(asRef(name)); }
-  MutT get(const std::string& name) && { return get(asRef(name)); }
-  ConstT get(const std::string& name) const& { return get(asRef(name)); }
-  ConstT get(const std::string& name) const&& { return get(asRef(name)); }
+  MutT get(const std::string& name) & { return get(asRef<string_t>(name)); }
+  MutT get(const std::string& name) && { return get(asRef<string_t>(name)); }
+  ConstT get(const std::string& name) const& {
+    return get(asRef<string_t>(name));
+  }
+  ConstT get(const std::string& name) const&& {
+    return get(asRef<string_t>(name));
+  }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(const std::string& key) & { return at(asRef(key)); }
+  MutT at(const std::string& key) && { return at(asRef(key)); }
+  ConstT at(const std::string& key) const& { return at(asRef(key)); }
+  ConstT at(const std::string& key) const&& { return at(asRef(key)); }
+
+  // TODO(afuller): These should be accepting ConstT.
+  MutT at(const Base& key) & { return MutT{Base::at(key)}; }
+  MutT at(const Base& key) && { return MutT{Base::at(key, false, true)}; }
+  ConstT at(const Base& key) const& { return ConstT{Base::at(key, true)}; }
+  ConstT at(const Base& key) const&& {
+    return ConstT{Base::at(key, true, true)};
+  }
 
   // Get by position.
   MutT get(size_t pos) & { return MutT{Base::get(pos)}; }
   MutT get(size_t pos) && { return MutT{Base::get(pos, false, true)}; }
   ConstT get(size_t pos) const& { return ConstT{Base::get(pos, true)}; }
   ConstT get(size_t pos) const&& { return ConstT{Base::get(pos, true, true)}; }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(size_t pos) & { return MutT{Base::at(pos)}; }
+  MutT at(size_t pos) && { return MutT{Base::at(pos, false, true)}; }
+  ConstT at(size_t pos) const& { return ConstT{Base::at(pos, true)}; }
+  ConstT at(size_t pos) const&& { return ConstT{Base::at(pos, true, true)}; }
 
   // Get by ordinal.
   MutT get(Ordinal ord) & { return get(type::toPosition(ord)); }
   MutT get(Ordinal ord) && { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const& { return get(type::toPosition(ord)); }
   ConstT get(Ordinal ord) const&& { return get(type::toPosition(ord)); }
+  // Like `get`, but throws std::out_of_range when a value is not found.
+  MutT at(Ordinal ord) & { return at(type::toPosition(ord)); }
+  MutT at(Ordinal ord) && { return at(type::toPosition(ord)); }
+  ConstT at(Ordinal ord) const& { return at(type::toPosition(ord)); }
+  ConstT at(Ordinal ord) const&& { return at(type::toPosition(ord)); }
 
   // Iterate over keys.
   iterable keys() & { return Base::keys(); }
@@ -535,15 +586,15 @@ class BaseDyn : public Dyn,
   template <typename IdT, typename R = ConstT>
   using if_not_index = std::enable_if_t<!is_index_type_v<IdT>, R>;
 
-  template <typename Tag = type::string_t>
-  static ConstT asRef(const std::string& name) {
-    return ConstT::template to<Tag>(name);
+  template <typename Tag = binary_t>
+  static ConstT asRef(const native_type<Tag>& val) {
+    return ConstT::template to<Tag>(val);
   }
 
   // Re-map mut calls from base, without 'const' qualifier.
 
   void assign(ConstT val) { Base::assign(val); }
-  void assign(const std::string& val) { assign(asRef<binary_t>(val)); }
+  void assign(const std::string& val) { assign(asRef(val)); }
   Derived& operator=(ConstT val) & { return (assign(val), derived()); }
   Derived&& operator=(ConstT val) && {
     return (assign(val), std::move(derived()));
@@ -555,23 +606,43 @@ class BaseDyn : public Dyn,
     return (assign(val), std::move(derived()));
   }
 
+  void prepend(ConstT val) { Base::prepend(val); }
+  void prepend(const std::string& val) { prepend(asRef(val)); }
   void append(ConstT val) { Base::append(val); }
-  void append(const std::string& val) { append(asRef<binary_t>(val)); }
+  void append(const std::string& val) { append(asRef(val)); }
 
   bool add(ConstT val) { return Base::add(val); }
-  bool add(const std::string& val) { return add(asRef<binary_t>(val)); }
+  bool add(const std::string& val) { return add(asRef(val)); }
+  Derived& operator+=(ConstT val) & { return (add(val), derived()); }
+  Derived&& operator+=(ConstT val) && { return (add(val), derived()); }
+  Derived& operator+=(const std::string& val) & {
+    return (add(asRef(val)), derived());
+  }
+  Derived&& operator+=(const std::string& val) && {
+    return (add(asRef(val)), derived());
+  }
+  Derived& operator++() & { return (add(asRef<i32_t>(1)), derived()); }
+  Derived&& operator++() && { return (add(asRef<i32_t>(1)), derived()); }
 
   bool put(FieldId id, ConstT val) { return Base::put(id, val); }
   bool put(ConstT key, ConstT val) { return Base::put(key, val); }
-  bool put(FieldId id, const std::string& val) {
-    return Base::put(id, asRef(val));
-  }
+  bool put(FieldId id, const std::string& val) { return put(id, asRef(val)); }
+  bool put(ConstT key, const std::string& val) { return put(key, asRef(val)); }
   bool put(const std::string& name, ConstT val) {
-    return put(asRef(name), val);
+    return put(asRef<string_t>(name), val);
   }
   bool put(const std::string& name, const std::string& val) {
-    return put(asRef(name), asRef(val));
+    return put(asRef<string_t>(name), asRef(val));
   }
+
+  bool insert(size_t pos, ConstT val) { return Base::insert(pos, val); }
+  void insert(size_t pos, const std::string& val) {
+    Base::insert(pos, asRef(val));
+  }
+
+  bool remove(ConstT key) { return Base::remove(key); }
+  void remove(size_t pos) { Base::remove(pos); }
+  bool remove(const std::string& key) { return Base::remove(asRef(key)); }
 
   MutT ensure(FieldId id) { return MutT{Base::ensure(id)}; }
   MutT ensure(FieldId id, ConstT defVal) {
@@ -584,56 +655,56 @@ class BaseDyn : public Dyn,
   MutT ensure(ConstT key, ConstT defVal) {
     return MutT{Base::ensure(key, defVal)};
   }
-  MutT ensure(const std::string& name) { return ensure(asRef(name)); }
+  MutT ensure(const std::string& name) { return ensure(asRef<string_t>(name)); }
   MutT ensure(const std::string& name, ConstT defVal) {
-    return ensure(asRef(name), defVal);
+    return ensure(asRef<string_t>(name), defVal);
   }
   MutT ensure(const std::string& name, const std::string& defVal) {
-    return ensure(asRef(name), asRef(defVal));
+    return ensure(asRef<string_t>(name), asRef(defVal));
   }
 
   void clear() { Base::clear(); }
-  void clear(FieldId id) { Base::put(id, ConstT{}); }
-  void clear(ConstT key) { Base::put(key, ConstT{}); }
-  void clear(std::string name) { Base::put(asRef(name), ConstT{}); }
+  void clear(FieldId id) { Base::remove(id); }
+  void clear(ConstT key) { Base::remove(key); }
+  void clear(std::string name) { Base::remove(asRef<string_t>(name)); }
 
  private:
   // TODO(afuller): Support capturing string literals directly and remove these.
   friend bool operator==(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) == rhs;
+    return asRef(lhs) == rhs;
   }
   friend bool operator!=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) != rhs;
+    return asRef(lhs) != rhs;
   }
   friend bool operator<(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) < rhs;
+    return asRef(lhs) < rhs;
   }
   friend bool operator<=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) <= rhs;
+    return asRef(lhs) <= rhs;
   }
   friend bool operator>(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) > rhs;
+    return asRef(lhs) > rhs;
   }
   friend bool operator>=(const std::string& lhs, const Derived& rhs) {
-    return asRef<binary_t>(lhs) >= rhs;
+    return asRef(lhs) >= rhs;
   }
   friend bool operator==(const Derived& lhs, const std::string& rhs) {
-    return lhs == asRef<binary_t>(rhs);
+    return lhs == asRef(rhs);
   }
   friend bool operator!=(const Derived& lhs, const std::string& rhs) {
-    return lhs != asRef<binary_t>(rhs);
+    return lhs != asRef(rhs);
   }
   friend bool operator<(const Derived& lhs, const std::string& rhs) {
-    return lhs < asRef<binary_t>(rhs);
+    return lhs < asRef(rhs);
   }
   friend bool operator<=(const Derived& lhs, const std::string& rhs) {
-    return lhs <= asRef<binary_t>(rhs);
+    return lhs <= asRef(rhs);
   }
   friend bool operator>(const Derived& lhs, const std::string& rhs) {
-    return lhs > asRef<binary_t>(rhs);
+    return lhs > asRef(rhs);
   }
   friend bool operator>=(const Derived& lhs, const std::string& rhs) {
-    return lhs >= asRef<binary_t>(rhs);
+    return lhs >= asRef(rhs);
   }
 };
 
@@ -667,6 +738,8 @@ class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
 
  protected:
   using Base::operator=;
+  using Base::operator+=;
+  using Base::operator++;
 };
 
 // The ops for the empty type 'void'.

@@ -364,7 +364,7 @@ class AsyncFizzBase::FizzMsgHdr : public folly::EventRecvmsgCallback::MsgHdr {
   iovec iov_;
 };
 
-folly::EventRecvmsgCallback::MsgHdr* AsyncFizzBase::allocateData() {
+folly::EventRecvmsgCallback::MsgHdr* AsyncFizzBase::allocateData() noexcept {
   auto* ret = msgHdr_.release();
   if (!ret) {
     ret = new FizzMsgHdr(this);

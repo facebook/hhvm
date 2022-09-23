@@ -136,7 +136,7 @@ bool validate_fields(MaskRef ref) {
     using FieldType = op::get_native_type<Ord, Struct>;
     if constexpr (is_thrift_struct_v<FieldType>) {
       // Need to validate the struct type.
-      isValid &= detail::validate_fields<FieldType>(next);
+      isValid &= validate_fields<FieldType>(next);
       return;
     }
     isValid = false;
@@ -151,7 +151,7 @@ bool is_compatible_with(const Mask& mask) {
     return true;
   }
   if constexpr (is_thrift_struct_v<T>) {
-    return detail::validate_fields<T>(ref);
+    return validate_fields<T>(ref);
   }
   return false;
 }
@@ -159,7 +159,7 @@ bool is_compatible_with(const Mask& mask) {
 // Throws an error if a thrift struct type is not compatible with the mask.
 template <typename T>
 void errorIfNotCompatible(const Mask& mask) {
-  if (!detail::is_compatible_with<T>(mask)) {
+  if (!::apache::thrift::protocol::detail::is_compatible_with<T>(mask)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
@@ -326,7 +326,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
 template <typename T>
 Mask path(const Mask& other) {
   // This is the base case as there is no more id.
-  detail::errorIfNotCompatible<T>(other);
+  errorIfNotCompatible<T>(other);
   return other;
 }
 
@@ -350,7 +350,7 @@ Mask path(
     size_t index,
     const Mask& other) {
   if (index == fieldNames.size()) {
-    detail::errorIfNotCompatible<Struct>(other);
+    errorIfNotCompatible<Struct>(other);
     return other;
   }
   // static_assert doesn't work as it compiles this code for every field.

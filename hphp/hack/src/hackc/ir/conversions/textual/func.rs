@@ -1,4 +1,3 @@
-#![allow(unused)]
 // Copyright (c) Facebook, Inc. and its affiliates.
 //
 // This source code is licensed under the MIT license found in the
@@ -23,7 +22,6 @@ use ir::Instr;
 use ir::InstrId;
 use ir::LocId;
 use ir::LocalId;
-use ir::SrcLoc;
 use ir::StringInterner;
 use ir::TryCatchId;
 use ir::ValueId;
@@ -36,6 +34,7 @@ use crate::mangle::MangleId;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
+use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
 
@@ -44,44 +43,45 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 /// f(params: HackParams): mixed;
 pub(crate) fn write_function(
     w: &mut dyn std::io::Write,
-    unit_state: &mut UnitState<'_>,
-    function: &ir::Function<'_>,
+    state: &mut UnitState,
+    function: ir::Function<'_>,
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr());
 
-    textual::write_function(
-        w,
-        &unit_state.unit.strings,
-        &function.name.mangle(),
-        function.func.loc(function.func.span),
-        &[("params", tx_ty!(HackParams))],
-        tx_ty!(mixed),
-        |w| write_func(w, unit_state, &function.func),
-    )?;
-
-    Ok(())
+    write_func(w, state, &function.name.mangle(), &function.func)
 }
 
 fn write_func(
-    w: &mut textual::FuncWriter<'_>,
-    unit_state: &mut UnitState<'_>,
+    w: &mut dyn std::io::Write,
+    unit_state: &mut UnitState,
+    name: &str,
     func: &ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let func = crate::lower::lower(func, &unit_state.unit.strings);
+    let func = crate::lower::lower(func, &unit_state.strings);
     let func = rewrite_prelude(func);
     let mut func = rewrite_jmp_ops(func);
     ir::passes::clean::run(&mut func);
 
-    let mut state = FuncState::new(unit_state.unit, &func);
+    textual::write_function(
+        w,
+        &unit_state.strings,
+        name,
+        func.loc(func.span),
+        &[("params", tx_ty!(HackParams))],
+        tx_ty!(mixed),
+        |w| {
+            let mut state = FuncState::new(&unit_state.strings, &func);
 
-    for bid in func.block_ids() {
-        write_block(w, &mut state, bid)?;
-    }
+            for bid in func.block_ids() {
+                write_block(w, &mut state, bid)?;
+            }
 
-    unit_state.external_funcs.extend(state.external_funcs);
+            unit_state.external_funcs.extend(state.external_funcs);
 
-    Ok(())
+            Ok(())
+        },
+    )
 }
 
 fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
@@ -185,8 +185,7 @@ fn write_builtin(
             TextualHackBuiltinParam::True => textual::Expr::true_(),
             TextualHackBuiltinParam::Value => {
                 let vid = *values.next().unwrap();
-                let sid = state.lookup_vid(vid);
-                textual::Expr::Sid(sid)
+                state.lookup_vid(vid)
             }
         })
         .collect_vec();
@@ -240,7 +239,7 @@ fn write_call(
         loc: _,
     } = *call;
 
-    assert!(state.strings().lookup_bytes(context).is_empty());
+    assert!(state.strings.lookup_bytes(context).is_empty());
     assert!(inouts.as_ref().map_or(true, |inouts| inouts.is_empty()));
     assert!(readonly.as_ref().map_or(true, |ro| ro.is_empty()));
     assert!(num_rets < 2);
@@ -294,7 +293,7 @@ fn write_call(
         CallDetail::FCallCtor => todo!(),
         CallDetail::FCallFunc => todo!(),
         CallDetail::FCallFuncD { func } => {
-            let target = func.mangle(state.strings());
+            let target = func.mangle(state.strings);
             state.external_funcs.insert(target.to_string());
             let args = detail
                 .args(operands)
@@ -319,14 +318,14 @@ fn write_inc_dec_l<'a>(
     op: IncDecOp,
 ) -> Result {
     let builtin = match op {
-        IncDecOp::PreInc => hack::Builtin::Add,
-        IncDecOp::PostInc => hack::Builtin::Add,
-        IncDecOp::PreDec => hack::Builtin::Sub,
-        IncDecOp::PostDec => hack::Builtin::Sub,
-        IncDecOp::PreIncO => hack::Builtin::AddO,
-        IncDecOp::PostIncO => hack::Builtin::AddO,
-        IncDecOp::PreDecO => hack::Builtin::SubO,
-        IncDecOp::PostDecO => hack::Builtin::SubO,
+        IncDecOp::PreInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
+        IncDecOp::PostInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
+        IncDecOp::PreDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+        IncDecOp::PostDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
+        IncDecOp::PreIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
+        IncDecOp::PostIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
+        IncDecOp::PreDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
+        IncDecOp::PostDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
         _ => unreachable!(),
     };
 
@@ -348,16 +347,16 @@ pub(crate) struct FuncState<'a> {
     external_funcs: HashSet<String>,
     func: &'a ir::Func<'a>,
     iid_mapping: ir::InstrIdMap<Sid>,
-    unit: &'a ir::Unit<'a>,
+    pub(crate) strings: &'a StringInterner,
 }
 
 impl<'a> FuncState<'a> {
-    fn new(unit: &'a ir::Unit<'a>, func: &'a ir::Func<'a>) -> Self {
+    fn new(strings: &'a StringInterner, func: &'a ir::Func<'a>) -> Self {
         Self {
             external_funcs: Default::default(),
             func,
             iid_mapping: Default::default(),
-            unit,
+            strings,
         }
     }
 
@@ -367,18 +366,49 @@ impl<'a> FuncState<'a> {
         sid
     }
 
-    pub fn lookup_vid(&self, vid: ValueId) -> Sid {
-        let iid = vid.expect_instr("instr expected");
+    /// Look up a ValueId in the FuncState and return an Expr representing
+    /// it. For InstrIds and complex ConstIds return an Expr containing the
+    /// (already emitted) Sid. For simple ConstIds use an Expr representing the
+    /// value directly.
+    pub fn lookup_vid(&self, vid: ValueId) -> textual::Expr {
+        use textual::Expr;
+        match vid.full() {
+            ir::FullInstrId::Instr(iid) => Expr::Sid(self.lookup_iid(iid)),
+            ir::FullInstrId::Constant(c) => {
+                use hack::Builtin;
+                let c = self.func.constant(c);
+                match c {
+                    Constant::Bool(_) => todo!(),
+                    Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::int(*i)]),
+                    Constant::Null => hack::expr_builtin(Builtin::Null, ()),
+                    Constant::String(s) => {
+                        let s = util::escaped_string(s);
+                        hack::expr_builtin(Builtin::String, [Expr::string(s)])
+                    }
+                    Constant::Dict(..) => todo!(),
+                    Constant::Dir => todo!(),
+                    Constant::Double(..) => todo!(),
+                    Constant::File => todo!(),
+                    Constant::FuncCred => todo!(),
+                    Constant::Keyset(..) => todo!(),
+                    Constant::Method => todo!(),
+                    Constant::Named(..) => todo!(),
+                    Constant::NewCol(..) => todo!(),
+                    Constant::Uninit => todo!(),
+                    Constant::Vec(..) => todo!(),
+                }
+            }
+            ir::FullInstrId::None => unreachable!(),
+        }
+    }
+
+    pub fn lookup_iid(&self, iid: InstrId) -> Sid {
         *self.iid_mapping.get(&iid).unwrap()
     }
 
     pub(crate) fn set_iid(&mut self, iid: InstrId, sid: Sid) {
         let old = self.iid_mapping.insert(iid, sid);
         assert!(old.is_none());
-    }
-
-    pub(crate) fn strings(&self) -> &StringInterner {
-        &self.unit.strings
     }
 
     pub(crate) fn update_loc(&mut self, w: &mut textual::FuncWriter<'_>, loc: LocId) -> Result {
@@ -391,7 +421,7 @@ impl<'a> FuncState<'a> {
 }
 
 /// Rewrite the function prelude:
-/// - Convert constants into builtins.
+/// - Convert complex constants into builtins.
 fn rewrite_prelude<'a>(func: ir::Func<'a>) -> ir::Func<'a> {
     let mut builder = ir::FuncBuilder::with_func(func);
 
@@ -414,58 +444,31 @@ fn rewrite_prelude<'a>(func: ir::Func<'a>) -> ir::Func<'a> {
 }
 
 fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBuilder<'_>) {
-    let constants = std::mem::take(&mut builder.func.constants);
-
-    for (lid, constant) in constants.into_iter().enumerate() {
+    for (lid, constant) in builder.func.constants.iter().enumerate() {
         let lid = ConstantId::from_usize(lid);
         trace!("    Const {lid}: {constant:?}");
         let src = ValueId::from_constant(lid);
-        let loc = LocId::NONE;
         let vid = match constant {
-            Constant::Bool(value) => {
-                let params = vec![if value {
-                    TextualHackBuiltinParam::True
-                } else {
-                    TextualHackBuiltinParam::False
-                }];
-                builder.emit(hack::builtin_instr(
-                    hack::Builtin::Bool,
-                    params,
-                    vec![],
-                    loc,
-                ))
-            }
+            Constant::Bool(..)
+            | Constant::Double(..)
+            | Constant::Int(..)
+            | Constant::Null
+            | Constant::String(..)
+            | Constant::Uninit => None,
+
             Constant::Dict(..) => todo!(),
             Constant::Dir => todo!(),
-            Constant::Double(..) => todo!(),
             Constant::File => todo!(),
             Constant::FuncCred => todo!(),
-            Constant::Int(i) => {
-                let params = vec![TextualHackBuiltinParam::Int(i)];
-                builder.emit(hack::builtin_instr(hack::Builtin::Int, params, vec![], loc))
-            }
             Constant::Keyset(..) => todo!(),
             Constant::Method => todo!(),
             Constant::Named(..) => todo!(),
             Constant::NewCol(..) => todo!(),
-            Constant::Null | Constant::Uninit => builder.emit(hack::builtin_instr(
-                hack::Builtin::Null,
-                vec![],
-                vec![],
-                loc,
-            )),
-            Constant::String(s) => {
-                let params = vec![TextualHackBuiltinParam::HackString(s.to_vec())];
-                builder.emit(hack::builtin_instr(
-                    hack::Builtin::Copy,
-                    params,
-                    vec![],
-                    loc,
-                ))
-            }
             Constant::Vec(..) => todo!(),
         };
-        remap.insert(src, vid);
+        if let Some(vid) = vid {
+            remap.insert(src, vid);
+        }
     }
 }
 

@@ -22,6 +22,8 @@ cdef __StructSpec get_reflection__MyUnion()
 
 cdef __StructSpec get_reflection__MyStruct()
 
+cdef __StructSpec get_reflection__LateDefStruct()
+
 cdef __ListSpec get_reflection__List__i16()
 
 cdef __SetSpec get_reflection__Set__string()

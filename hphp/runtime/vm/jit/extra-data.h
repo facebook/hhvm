@@ -1235,18 +1235,20 @@ struct CallData : IRExtraData {
 struct CallFuncEntryData : IRExtraData {
   explicit CallFuncEntryData(const SrcKey& target,
                              IRSPRelOffset spOffset,
+                             uint32_t numInitArgs,
                              uint32_t arFlags,
                              bool formingRegion)
     : target(target)
     , spOffset(spOffset)
+    , numInitArgs(numInitArgs)
     , arFlags(arFlags)
     , formingRegion(formingRegion)
   {}
 
   std::string show() const {
     return folly::sformat(
-      "{}, IRSP {}, arFlags {}{}",
-      showShort(target), spOffset.offset, arFlags,
+      "{}, IRSP {}, numInitArgs {}, arFlags {}{}",
+      showShort(target), spOffset.offset, numInitArgs, arFlags,
       formingRegion ? ",formingRegion" :""
     );
   }
@@ -1255,6 +1257,7 @@ struct CallFuncEntryData : IRExtraData {
     return folly::hash::hash_combine(
       SrcKey::StableHasher()(target),
       std::hash<int32_t>()(spOffset.offset),
+      std::hash<uint32_t>()(numInitArgs),
       std::hash<uint32_t>()(arFlags),
       std::hash<bool>()(formingRegion)
     );
@@ -1263,6 +1266,7 @@ struct CallFuncEntryData : IRExtraData {
   bool equals(const CallFuncEntryData& o) const {
     return target == o.target &&
            spOffset == o.spOffset &&
+           numInitArgs == o.numInitArgs &&
            arFlags == o.arFlags &&
            formingRegion == o.formingRegion;
   }
@@ -1273,6 +1277,7 @@ struct CallFuncEntryData : IRExtraData {
 
   SrcKey target;
   IRSPRelOffset spOffset;
+  uint32_t numInitArgs;
   uint32_t arFlags;
   bool formingRegion;
 };

@@ -199,6 +199,11 @@ struct ServerSocketConfig {
   FizzConfig fizzConfig;
 
   /**
+   * If supported prefer using IoUring sockets
+   */
+  bool preferIoUring{false};
+
+  /**
    * A map containing custom configs.
    */
   std::unordered_map<std::string, std::shared_ptr<CustomConfig>>

@@ -33,7 +33,6 @@
 , libedit
 , libelf
 , libevent
-, libgccjit
 , libkrb5
 , libmcrypt
 , libmemcached
@@ -169,7 +168,6 @@ stdenv.mkDerivation rec {
       libedit
       libelf
       libevent
-      libgccjit
       libkrb5
       libmcrypt
       libmemcached

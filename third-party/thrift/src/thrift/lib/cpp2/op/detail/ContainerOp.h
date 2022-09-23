@@ -37,17 +37,15 @@ struct ContainerOp : BaseOp<Tag> {
   using T = type::native_type<Tag>;
   using I = typename T::iterator;
   using Base = BaseOp<Tag>;
+  using Base::check_found;
   using Base::ref;
   using Base::ret;
 
   static size_t size(const void* s) { return ref(s).size(); }
 
-  static auto find(void* s, size_t pos) {
-    if (pos >= ref(s).size()) {
-      // TODO(afuller): Consider returning 'end' instead.
-      folly::throw_exception<std::out_of_range>("out of range");
-    }
-    auto itr = ref(s).begin();
+  static auto find(T& self, size_t pos) {
+    check_found(pos < self.size());
+    auto itr = self.begin();
     std::advance(itr, pos);
     return itr;
   }
@@ -74,6 +72,7 @@ template <typename VTag, typename Tag = type::list<VTag>>
 struct ListOp : ContainerOp<Tag> {
   using T = type::native_type<Tag>;
   using Base = ContainerOp<Tag>;
+  using Base::check_found;
   using Base::check_op;
   using Base::find;
   using Base::next;
@@ -81,6 +80,11 @@ struct ListOp : ContainerOp<Tag> {
   using Base::ret;
   using Base::unimplemented;
 
+  template <typename V = type::native_type<VTag>>
+  static void prepend(T& self, V&& val) {
+    self.insert(self.begin(), std::forward<V>(val));
+  }
+  static void prepend(void* s, const Dyn& v) { prepend(ref(s), v.as<VTag>()); }
   template <typename V = type::native_type<VTag>>
   static void append(T& self, V&& val) {
     self.push_back(std::forward<V>(val));
@@ -93,6 +97,19 @@ struct ListOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& v) { return add(ref(s), v.as<VTag>()); }
 
+  static bool put(void* s, FieldId, size_t pos, const Dyn&, const Dyn& v) {
+    check_op(pos != std::string::npos);
+    if (v == nullptr) { // Remove.
+      ref(s).erase(find(ref(s), pos));
+    } else { // Insert.
+      check_found(pos <= ref(s).size()); // Allow end().
+      auto itr = ref(s).begin();
+      std::advance(itr, pos);
+      ref(s).insert(itr, v.as<VTag>());
+    }
+    return true;
+  }
+
   template <typename U>
   static decltype(auto) get(U&& self, size_t pos) {
     return folly::forward_like<U>(self.at(pos));
@@ -100,7 +117,7 @@ struct ListOp : ContainerOp<Tag> {
 
   static Ptr get(void* s, FieldId, size_t pos, const Dyn&) {
     check_op(pos != std::string::npos);
-    return ret(VTag{}, *find(s, pos));
+    return ret(VTag{}, *find(ref(s), pos));
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
@@ -132,12 +149,19 @@ struct SetOp : ContainerOp<Tag> {
   }
   static bool add(void* s, const Dyn& k) { return add(ref(s), k.as<KTag>()); }
 
-  template <typename K = type::native_type<KTag>>
-  static bool contains(const T& self, K&& key) {
-    return self.find(std::forward<K>(key)) != self.end();
+  static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
+    check_op(k != nullptr);
+    auto itr = ref(s).find(k.as<KTag>());
+    if (itr != ref(s).end()) {
+      return ret(KTag{}, *itr);
+    }
+    return {};
   }
-  [[noreturn]] static Ptr get(void*, FieldId, size_t, const Dyn&) {
-    unimplemented(); // TODO(afuller): Get by key (aka contains/intern set).
+
+  static bool put(void* s, FieldId, size_t, const Dyn& k, const Dyn& v) {
+    check_op(k != nullptr);
+    check_op(v == nullptr);
+    return ref(s).erase(k.as<KTag>());
   }
 
   static Ptr next(void* s, IterType t, std::any& i) {
@@ -182,8 +206,11 @@ struct MapOp : ContainerOp<Tag> {
     return itr->second;
   }
 
-  static bool put(void* s, FieldId, const Dyn& k, const Dyn& v) {
+  static bool put(void* s, FieldId, size_t, const Dyn& k, const Dyn& v) {
     check_op(k != nullptr);
+    if (v == nullptr) { // Remove
+      return ref(s).erase(k.as<KTag>());
+    }
     return put(ref(s), k.as<KTag>(), v.as<VTag>());
   }
 
@@ -197,10 +224,12 @@ struct MapOp : ContainerOp<Tag> {
   }
 
   static Ptr get(void* s, FieldId, size_t, const Dyn& k) {
-    if (k != nullptr) {
-      return ret(VTag{}, ref(s).at(k.as<KTag>()));
+    check_op(k != nullptr);
+    auto itr = ref(s).find(k.as<KTag>());
+    if (itr != ref(s).end()) {
+      return ret(VTag{}, itr->second);
     }
-    bad_op();
+    return {};
   }
 
   static Ptr next(T& self, IterType type, typename T::iterator& itr) {

@@ -42,7 +42,7 @@ struct AnyOp : BaseOp<Tag> {
   using Base::unimplemented;
   [[noreturn]] static void append(void*, const Dyn&) { unimplemented(); }
   [[noreturn]] static bool add(void*, const Dyn&) { unimplemented(); }
-  [[noreturn]] static bool put(void*, FieldId, const Dyn&, const Dyn&) {
+  [[noreturn]] static bool put(void*, FieldId, size_t, const Dyn&, const Dyn&) {
     unimplemented();
   }
   [[noreturn]] static Ptr ensure(void*, FieldId, const Dyn&, const Dyn&) {

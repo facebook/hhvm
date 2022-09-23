@@ -138,3 +138,4 @@ cdef class List__c_C(thrift.py3.types.List):
 Sequence.register(List__c_C)
 
 B = List__c_C
+E = _c_types.E

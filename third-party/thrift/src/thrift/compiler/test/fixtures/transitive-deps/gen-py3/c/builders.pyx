@@ -10,3 +10,9 @@ cdef class C_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self):
         yield "i", self.i
 
+cdef class E_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _c_types.E
+
+    def __iter__(self):
+        pass
+

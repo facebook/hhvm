@@ -383,6 +383,18 @@ TEST(StructPatchTest, ListPatch) {
       actual,
       {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
       {1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10});
+
+  ListPatch erasePatch;
+  erasePatch.erase(1);
+  test::expectPatch(
+      erasePatch,
+      {1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+      {2, 3, 4, 5, 6, 7, 8, 9, 10});
+
+  ListPatch removePatch;
+  removePatch.remove({1, 2, 3, 4});
+  test::expectPatch(
+      removePatch, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {5, 6, 7, 8, 9, 10});
 }
 
 TEST(StructPatchTest, SetPatch) {

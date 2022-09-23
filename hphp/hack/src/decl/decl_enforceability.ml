@@ -198,12 +198,17 @@ let supportdyn_mixed p r = make_supportdyn_type p r (mk (r, Tmixed))
 let add_supportdyn_constraints p tparams =
   let r = Reason.Rwitness_from_decl p in
   List.map tparams ~f:(fun tparam ->
-      {
-        tparam with
-        tp_constraints =
-          (Ast_defs.Constraint_as, supportdyn_mixed p r)
-          :: tparam.tp_constraints;
-      })
+      if
+        Naming_special_names.Coeffects.is_generated_generic (snd tparam.tp_name)
+      then
+        tparam
+      else
+        {
+          tparam with
+          tp_constraints =
+            (Ast_defs.Constraint_as, supportdyn_mixed p r)
+            :: tparam.tp_constraints;
+        })
 
 let maybe_add_supportdyn_constraints ctx p tparams =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then

@@ -1176,6 +1176,7 @@ function hphp_cmd(
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
     '-vRuntime.Eval.EnableArgsInBacktraces=true',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
+    '-vRuntime.Eval.EnableLogBridge=false',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
     '-l1',
     '-o "' . test_repo($options, $test) . '"',

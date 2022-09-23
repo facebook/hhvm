@@ -202,6 +202,12 @@ type t = {
   symbol_write_index_paths_file_output: string option;
   (* Write symbol indexing data for hhi files *)
   symbol_write_include_hhi: bool;
+  (* Use symbols hash table for incremental indexing *)
+  symbol_write_sym_hash_in: string option;
+  (* Path to file containing units to exclude *)
+  symbol_write_exclude_out: string option;
+  (* Generate symbols hash table *)
+  symbol_write_sym_hash_out: bool;
   (* Flag to disallow HH\fun and HH\class_meth in constants and constant initializers *)
   po_disallow_func_ptrs_in_constants: bool;
   (* Flag to report an error on php style anonymous functions *)
@@ -411,6 +417,9 @@ val make :
   ?symbol_write_index_paths_file:string ->
   ?symbol_write_index_paths_file_output:string ->
   ?symbol_write_include_hhi:bool ->
+  ?symbol_write_sym_hash_in:string ->
+  ?symbol_write_exclude_out:string ->
+  ?symbol_write_sym_hash_out:bool ->
   ?po_disallow_func_ptrs_in_constants:bool ->
   ?tco_error_php_lambdas:bool ->
   ?tco_disallow_discarded_nullable_awaitables:bool ->

@@ -9,7 +9,7 @@ import typing
 Formatters = []
 
 
-def format(datatype: str, regex: bool = True):
+def format(datatype: str, regex: bool = False):
     """ Wrapper for pretty printer functions.
 
     Add the command needed to register the pretty printer with the LLDB debugger
@@ -31,7 +31,7 @@ def format(datatype: str, regex: bool = True):
     return inner
 
 
-@format("HPHP::StringData", regex = False)
+@format("HPHP::StringData")
 def pp_StringData(val_obj: lldb.SBValue, _internal_dict) -> typing.Optional[str]:
     """ Pretty print HPHP::StringData
 

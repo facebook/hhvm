@@ -245,21 +245,50 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   void put(C&& entries) {
     auto& field = assignOr(*data_.put());
     for (auto&& entry : entries) {
+      auto key = std::forward<decltype(entry)>(entry).first;
+      field.insert_or_assign(key, std::forward<decltype(entry)>(entry).second);
+      data_.add()->erase(key);
+      data_.remove()->erase(key);
+    }
+  }
+  template <typename K, typename V>
+  void insert_or_assign(K&& key, V&& value) {
+    assignOr(*data_.put()).insert_or_assign(key, std::forward<V>(value));
+    data_.add()->erase(key);
+    data_.remove()->erase(key);
+  }
+
+  template <typename C = T>
+  void add(C&& entries) {
+    auto& field = assignOr(*data_.add());
+    for (auto&& entry : entries) {
       field.insert_or_assign(
           std::forward<decltype(entry)>(entry).first,
           std::forward<decltype(entry)>(entry).second);
     }
   }
-  template <typename K, typename V>
-  void insert_or_assign(K&& key, V&& value) {
-    assignOr(*data_.put())
-        .insert_or_assign(std::forward<K>(key), std::forward<V>(value));
+
+  template <typename C = std::unordered_set<typename T::key_type>>
+  void remove(C&& keys) {
+    auto& field = assignOr(*data_.add());
+    for (auto&& key : keys) {
+      field.erase(key);
+      data_.remove()->insert(key);
+    }
+  }
+
+  template <typename K = typename T::key_type>
+  void erase(K&& key) {
+    assignOr(*data_.add()).erase(key);
+    data_.remove()->insert(key);
   }
 
   void apply(T& val) const {
     if (applyAssignOrClear(val)) {
       return;
     }
+    val.insert(data_.add()->begin(), data_.add()->end());
+    erase_all(val, *data_.remove());
     for (const auto& entry : *data_.put()) {
       val.insert_or_assign(entry.first, entry.second);
     }
@@ -268,6 +297,8 @@ class MapPatch : public BaseContainerPatch<Patch, MapPatch<Patch>> {
   template <typename U>
   void merge(U&& next) {
     if (!mergeAssignAndClear(std::forward<U>(next))) {
+      add(*std::forward<U>(next).toThrift().add());
+      remove(*std::forward<U>(next).toThrift().remove());
       put(*std::forward<U>(next).toThrift().put());
     }
   }

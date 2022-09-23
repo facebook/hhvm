@@ -424,6 +424,28 @@ TEST(StructPatchTest, MapPatch) {
       *assignPatch.toThrift().assign(),
       (std::map<std::string, std::string>(
           {{"a", "1"}, {"b", "3"}, {"c", "4"}})));
+
+  MapPatch addPatch;
+  addPatch.add({{"a", "1"}, {"b", "2"}});
+  test::expectPatch(addPatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      addPatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}, {"c", "3"}});
+
+  MapPatch erasePatch;
+  erasePatch.add({{"a", "1"}, {"b", "2"}});
+  erasePatch.erase("c");
+  test::expectPatch(erasePatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      erasePatch, {{"a", "0"}, {"c", "3"}}, {{"a", "0"}, {"b", "2"}});
+
+  MapPatch removePatch;
+  removePatch.add({{"a", "1"}, {"b", "2"}});
+  removePatch.remove({"c", "d"});
+  test::expectPatch(removePatch, {}, {{"a", "1"}, {"b", "2"}});
+  test::expectPatch(
+      removePatch,
+      {{"a", "0"}, {"c", "3"}, {"d", "4"}},
+      {{"a", "0"}, {"b", "2"}});
 }
 
 TEST(UnionPatchTest, ClearAndAssign) {

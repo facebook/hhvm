@@ -10,6 +10,7 @@
 
 
 #include "thrift/annotation/gen-cpp2/cpp_types.h"
+#include "thrift/annotation/gen-cpp2/hack_types.h"
 #include "thrift/annotation/gen-cpp2/thrift_types.h"
 
 namespace apache {
@@ -75,6 +76,7 @@ struct struct_field;
 struct field1;
 struct field2;
 struct field3;
+struct field1;
 struct msg;
 } // namespace ident
 namespace detail {
@@ -318,6 +320,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(field2);
 #define APACHE_THRIFT_ACCESSOR_field3
 APACHE_THRIFT_DEFINE_ACCESSOR(field3);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_field1
+#define APACHE_THRIFT_ACCESSOR_field1
+APACHE_THRIFT_DEFINE_ACCESSOR(field1);
+#endif
 #ifndef APACHE_THRIFT_ACCESSOR_msg
 #define APACHE_THRIFT_ACCESSOR_msg
 APACHE_THRIFT_DEFINE_ACCESSOR(msg);
@@ -396,6 +402,7 @@ class StructLevelTerseStruct;
 class FieldLevelTerseStruct;
 class TerseStructWithCustomDefault;
 class AdaptedFields;
+class WrappedFields;
 class TerseException;
 }}}} // facebook::thrift::test::terse_write
 // END forward_declare
@@ -4624,6 +4631,169 @@ class AdaptedFields final  {
 
 template <class Protocol_>
 unsigned long AdaptedFields::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class WrappedFields final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const char* __fbthrift_thrift_uri();
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+  static constexpr std::size_t __fbthrift_field_size_v = 1;
+
+  template<class T>
+  using __fbthrift_id = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                   void,
+                                                   ::apache::thrift::field_id<1>>;
+
+  template<class T>
+  using __fbthrift_type_tag = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                         void,
+                                                         ::apache::thrift::type::i32_t>;
+
+  template<class T>
+  using __fbthrift_ident = folly::type_pack_element_t<folly::to_underlying(T::value),
+                                                      void,
+                                                      ::apache::thrift::ident::field1>;
+
+  struct __fbthrift_ordinal_impl {
+#if defined(_MSC_VER) || defined(__clang__)
+    template<class> static constexpr int value = 0;
+    template<> static constexpr int value<::apache::thrift::field_id<1>> = 1;
+    template<> static constexpr int value<::apache::thrift::ident::field1> = 1;
+#else
+    template<class T> static constexpr int value_impl(folly::tag_t<T>) { return 0; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::field_id<1>>) { return 1; }
+    static constexpr int value_impl(folly::tag_t<::apache::thrift::ident::field1>) { return 1; }
+    template<class T> static constexpr int value = value_impl(folly::tag_t<T>{});
+#endif
+  };
+
+  struct __fbthrift_ordinal_impl_for_non_unique_type {
+    template<class, class, class> struct Impl { static constexpr int value = 0; };
+    template<class T> struct Impl<::apache::thrift::type::i32_t, T, std::enable_if_t<sizeof(T) != -1>> { static constexpr int value = 1; };
+
+    template<class T> static constexpr int value = Impl<T, T, void>::value;
+  };
+
+  template<class T> using __fbthrift_ordinal = ::apache::thrift::field_ordinal<
+    std::conditional_t<
+        __fbthrift_ordinal_impl::value<T> != 0,
+        __fbthrift_ordinal_impl,
+        __fbthrift_ordinal_impl_for_non_unique_type>::template value<T>
+  >;
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = WrappedFields;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  WrappedFields() :
+      __fbthrift_field_field1(static_cast<::std::int32_t>(7)) {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  WrappedFields(apache::thrift::FragileConstructor, ::std::int32_t field1__arg);
+
+  WrappedFields(WrappedFields&&) = default;
+
+  WrappedFields(const WrappedFields&) = default;
+
+
+  WrappedFields& operator=(WrappedFields&&) = default;
+
+  WrappedFields& operator=(const WrappedFields&) = default;
+ private:
+  ::std::int32_t __fbthrift_field_field1;
+
+ public:
+
+  bool operator==(const WrappedFields&) const;
+  bool operator<(const WrappedFields&) const;
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1_ref() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1_ref() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1_ref() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1_ref() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&> field1() const& {
+    return ::apache::thrift::terse_field_ref<const T&>{this->__fbthrift_field_field1};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<const T&&> field1() const&& {
+    return ::apache::thrift::terse_field_ref<const T&&>{static_cast<const T&&>(this->__fbthrift_field_field1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&> field1() & {
+    return ::apache::thrift::terse_field_ref<T&>{this->__fbthrift_field_field1};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::terse_field_ref<T&&> field1() && {
+    return ::apache::thrift::terse_field_ref<T&&>{static_cast<T&&>(this->__fbthrift_field_field1)};
+  }
+
+  ::std::int32_t get_field1() const {
+    return __fbthrift_field_field1;
+  }
+
+  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  ::std::int32_t& set_field1(::std::int32_t field1_) {
+    field1_ref() = field1_;
+    return __fbthrift_field_field1;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<WrappedFields>;
+  friend void swap(WrappedFields& a, WrappedFields& b);
+};
+
+template <class Protocol_>
+unsigned long WrappedFields::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

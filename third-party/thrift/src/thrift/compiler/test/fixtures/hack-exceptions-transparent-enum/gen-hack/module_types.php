@@ -106,6 +106,9 @@ class MyException extends \TException implements \IThriftSyncStruct {
     return 'MyException';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(

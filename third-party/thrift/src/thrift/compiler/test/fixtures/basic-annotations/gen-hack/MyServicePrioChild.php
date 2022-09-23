@@ -325,6 +325,9 @@ class MyServicePrioChild_pang_args implements \IThriftSyncStruct, \IThriftShapis
     return 'MyServicePrioChild_pang_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -393,6 +396,9 @@ class MyServicePrioChild_pang_result extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'MyServicePrioChild_pang_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

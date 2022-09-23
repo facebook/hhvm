@@ -52,6 +52,9 @@ class Fields implements \IThriftSyncStruct {
     return 'Fields';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -132,6 +135,9 @@ class FieldsInjectedToEmptyStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'FieldsInjectedToEmptyStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -233,6 +239,9 @@ class FieldsInjectedToStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'FieldsInjectedToStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -371,6 +380,9 @@ class FieldsInjectedWithIncludedStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'FieldsInjectedWithIncludedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

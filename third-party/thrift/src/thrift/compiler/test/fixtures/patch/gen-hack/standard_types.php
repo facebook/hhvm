@@ -204,6 +204,9 @@ class apache_thrift_type_standard_UriStruct implements \IThriftSyncStruct, \IThr
     return 'UriStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -574,6 +577,9 @@ class apache_thrift_type_standard_TypeUri implements \IThriftSyncStruct, \IThrif
       (string)$this->_type,
     );
     return $this->typeHashPrefixSha2_256 as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1476,6 +1482,9 @@ class apache_thrift_type_standard_TypeName implements \IThriftSyncStruct, \IThri
       (string)$this->_type,
     );
     return $this->mapType as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

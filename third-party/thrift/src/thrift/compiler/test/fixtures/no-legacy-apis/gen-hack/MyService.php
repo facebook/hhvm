@@ -348,6 +348,9 @@ class MyService_query_args implements \IThriftSyncStruct, \IThriftShapishSyncStr
     return 'MyService_query_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -453,6 +456,9 @@ class MyService_query_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'MyService_query_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

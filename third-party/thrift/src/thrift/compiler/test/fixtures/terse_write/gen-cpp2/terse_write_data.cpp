@@ -387,6 +387,22 @@ const std::array<int, 3> TStructDataStorage<::facebook::thrift::test::terse_writ
   -1,
 }};
 
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::fields_names = {{
+  "field1",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::fields_types = {{
+  TType::T_I32,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::storage_names = {{
+  "__fbthrift_field_field1",
+}};
+const std::array<int, 1> TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>::isset_indexes = {{
+  -1,
+}};
+
 const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::thrift::test::terse_write::TerseException>::fields_names = {{
   "msg",
 }};

@@ -118,6 +118,9 @@ class BarStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return 'BarStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(

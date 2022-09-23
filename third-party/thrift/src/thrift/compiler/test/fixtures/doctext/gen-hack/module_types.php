@@ -90,6 +90,9 @@ class A implements \IThriftSyncStruct {
     return 'A';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -265,6 +268,9 @@ class U implements \IThriftSyncStruct, \IThriftUnion<UEnum> {
     return $this->s as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -361,6 +367,9 @@ class Bang extends \TException implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Bang';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

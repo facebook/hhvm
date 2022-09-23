@@ -26,7 +26,6 @@ from glean.schema.hack.types import (
     FunctionDefinition,
     GlobalConstDeclaration,
     GlobalConstDefinition,
-    GlobalNamespaceAlias,
     InterfaceDeclaration,
     InterfaceDefinition,
     MethodDeclaration,
@@ -168,7 +167,6 @@ max_workers = 2
             "hack.TypeConstDefinition": TypeConstDefinition,
             "hack.TypedefDeclaration": TypedefDeclaration,
             "hack.TypedefDefinition": TypedefDefinition,
-            "hack.GlobalNamespaceAlias": GlobalNamespaceAlias,
             "src.FileLines": FileLines,
             "gencode.GenCode": GenCode,
         }

@@ -182,9 +182,6 @@ val file_call :
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
 
-val global_namespace_alias :
-  from:string -> to_:string -> Fact_acc.t -> Fact_id.t * Fact_acc.t
-
 val method_occ :
   SymbolOccurrence.receiver_class ->
   string ->

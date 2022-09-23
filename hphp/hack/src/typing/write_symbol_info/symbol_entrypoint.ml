@@ -9,8 +9,6 @@
 open Hh_prelude
 open Hh_json
 module File_info = Symbol_file_info
-module Add_fact = Symbol_add_fact
-module Fact_acc = Symbol_predicate.Fact_acc
 
 let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
@@ -32,23 +30,12 @@ let write_file file_dir num_tasts json_chunks =
     (Byte_units.to_string_hum (Byte_units.of_bytes_int json_length))
     num_tasts
 
-let index_namespace_map ns ~ownership =
-  let progress = Fact_acc.init ~ownership in
-  if ownership then Fact_acc.set_ownership_unit progress (Some ".hhconfig");
-  List.fold ns ~init:progress ~f:(fun progress (from, to_) ->
-      Add_fact.global_namespace_alias progress ~from ~to_ |> snd)
-  |> Fact_acc.to_json
-
 let write_json
     (ctx : Provider_context.t)
-    (namespace_map : (string * string) list)
     (ownership : bool)
     (file_dir : string)
     (files_info : File_info.t list)
     (start_time : float) : float =
-  let json_namespace_map = index_namespace_map namespace_map ~ownership in
-  write_file file_dir 1 json_namespace_map;
-
   (* Large file may lead to large json files which timeout when sent
      to the server. Not an issue currently, but if it is, we can index
      xrefs/decls separately, or split in batches according to files size *)
@@ -72,7 +59,6 @@ let write_json
 
 let recheck_job
     (ctx : Provider_context.t)
-    (namespace_map : (string * string) list)
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
@@ -83,15 +69,14 @@ let recheck_job
   let files_info =
     List.map progress ~f:(File_info.create ctx ~root_path ~hhi_path)
   in
-  write_json ctx namespace_map ownership out_dir files_info start_time
+  write_json ctx ownership out_dir files_info start_time
 
 let index_files ctx ~out_dir ~files =
-  recheck_job ctx [] out_dir "www" "hhi" false 0.0 files |> ignore
+  recheck_job ctx out_dir "www" "hhi" false 0.0 files |> ignore
 
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
-    ~(namespace_map : (string * string) list)
     ~(ownership : bool)
     ~(out_dir : string)
     ~(root_path : string)
@@ -106,7 +91,7 @@ let go
   let cumulated_elapsed =
     MultiWorker.call
       workers
-      ~job:(recheck_job ctx namespace_map out_dir root_path hhi_path ownership)
+      ~job:(recheck_job ctx out_dir root_path hhi_path ownership)
       ~merge:(fun f1 f2 -> f1 +. f2)
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
       ~neutral:0.

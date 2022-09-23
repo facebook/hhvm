@@ -14,7 +14,6 @@ val index_files :
 val go :
   MultiWorker.worker list option ->
   Provider_context.t ->
-  namespace_map:(string * string) list ->
   ownership:bool ->
   out_dir:string ->
   root_path:string ->

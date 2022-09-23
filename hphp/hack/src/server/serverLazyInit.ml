@@ -1072,6 +1072,7 @@ let write_symbol_info
       ~telemetry_label:"write_symbol_info.naming"
       ~cgroup_steps
   in
+  let namespace_map = ParserOptions.auto_namespace_map env.tcopt in
   let paths = env.swriteopt.symbol_write_index_paths in
   let paths_file = env.swriteopt.symbol_write_index_paths_file in
   let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
@@ -1124,6 +1125,7 @@ let write_symbol_info
     Symbol_entrypoint.go
       genv.workers
       ctx
+      ~namespace_map
       ~ownership
       ~out_dir
       ~root_path

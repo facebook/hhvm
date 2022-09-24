@@ -508,10 +508,6 @@ def gen_thrift(path: str) -> None:
             print_thrift_defs(UNION_TRANSFORM, union_fields, count=2, file=file)
         )
 
-        # Generate a struct of all defined structs and unions.
-        all_struct_name = STRUCT_TRANSFORM[Target.NAME].format("all")
-        print(gen_thrift_def(STRUCT_TRANSFORM, all_struct_name, classes), file=file)
-
 
 CPP2_SPECIALIZE_TEMPLATE = """template <>
 struct {}<{}, mod_set<{}>> {{

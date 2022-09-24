@@ -203,13 +203,13 @@ struct TClientStreamError {
           DCHECK(payload.metadata.payloadMetadata().has_value());
           DCHECK_EQ(
               payload.metadata.payloadMetadata()->getType(),
-              apache::thrift::PayloadMetadata::exceptionMetadata);
+              apache::thrift::PayloadMetadata::Type::exceptionMetadata);
           auto& exceptionMetadataBase =
               payload.metadata.payloadMetadata()->get_exceptionMetadata();
           if (auto exceptionMetadataRef =
                   exceptionMetadataBase.metadata()) {
             if (exceptionMetadataRef->getType() ==
-                apache::thrift::PayloadExceptionMetadata::declaredException) {
+                apache::thrift::PayloadExceptionMetadata::Type::declaredException) {
               msgBuffer = std::move(payload.payload);
               if (!msgBuffer) {
                 msgStr = "Failed to parse declared exception";

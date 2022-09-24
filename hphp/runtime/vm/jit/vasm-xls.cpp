@@ -2830,14 +2830,14 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
 
     if (isPrologue(unit.context->kind)) {
       if (state.hasIndirectFixup) {
-        auto blockState = state.in;
+        auto curState = state.in;
         for (auto it = block.code.begin(); it != block.code.end(); ++it) {
           // Note that if the instruction at the start or end of the spill
           // regions has fixup, this loop does not account for it.
           // This is not ideal but currently there are no instructions that
           // have fixups that can start/end spill regions, so it is fine.
-          if (instrInState(unit, *it, blockState, ctx.sp) == NeedSpill &&
-              instrHasIndirectFixup(*it)) {
+          curState = instrInState(unit, *it, curState, ctx.sp);
+          if (curState == NeedSpill && instrHasIndirectFixup(*it)) {
             updateIndirectFixupBySpill(*it, spillSize);
           }
         }

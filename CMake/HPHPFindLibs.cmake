@@ -272,7 +272,6 @@ if (NOT WINDOWS)
   endif()
 endif()
 
-FIND_LIBRARY(PAM_LIB pam)
 FIND_LIBRARY(CRYPT_LIB NAMES xcrypt crypt crypto)
 if (LINUX OR FREEBSD)
   FIND_LIBRARY (RT_LIB rt)
@@ -300,14 +299,14 @@ endif()
 
 if (APPLE)
   find_library(KERBEROS_LIB NAMES gssapi_krb5)
+endif()
 
-  # This is required by Homebrew's libc. See
-  # https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
-  # for more info.
-  find_package(Libpam)
-  if (PAM_INCLUDE_PATH)
-    include_directories(${PAM_INCLUDE_PATH})
-  endif()
+# This is required by Homebrew's libc. See
+# https://github.com/facebook/hhvm/pull/5728#issuecomment-124290712
+# for more info.
+find_package(Libpam)
+if (PAM_INCLUDE_PATH)
+  include_directories(${PAM_INCLUDE_PATH})
 endif()
 
 include_directories(${HPHP_HOME}/hphp)
@@ -386,10 +385,10 @@ macro(hphp_link target)
   if (APPLE)
     target_link_libraries(${target} ${VISIBILITY} ${LIBINTL_LIBRARIES})
     target_link_libraries(${target} ${VISIBILITY} ${KERBEROS_LIB})
+  endif()
 
-    if (PAM_LIBRARY)
-      target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
-    endif()
+  if (PAM_LIBRARY)
+    target_link_libraries(${target} ${VISIBILITY} ${PAM_LIBRARY})
   endif()
 
   if (LIBPTHREAD_LIBRARIES)
@@ -403,10 +402,6 @@ macro(hphp_link target)
   target_link_libraries(${target} ${VISIBILITY} ${LIBXML2_LIBRARIES})
 
   target_link_libraries(${target} ${VISIBILITY} ${LBER_LIBRARIES})
-
-  if (PAM_LIB)
-    target_link_libraries(${target} ${VISIBILITY} ${PAM_LIB})
-  endif()
 
   if (CRYPT_LIB)
     target_link_libraries(${target} ${VISIBILITY} ${CRYPT_LIB})

@@ -75,7 +75,8 @@ ExternalProject_Add(
     "-Dfmt_DIR=${fmt_DIR}"
     "-Dfolly_DIR=${FOLLY_INSTALL_DIR}/lib/cmake/folly"
 
-    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR}"
+    "-DCMAKE_CXX_FLAGS=-I${JEMALLOC_INCLUDE_DIR} ${CMAKE_CXX_FLAGS}"
+    "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
   DEPENDS ${FIZZ_DEPS}
 )
 ExternalProject_Get_property(bundled_fizz INSTALL_DIR)

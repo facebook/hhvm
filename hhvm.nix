@@ -13,6 +13,7 @@
 , fmt_8
 , freetype
 , fribidi
+, gcc-unwrapped
 , gd
 , gdb
 , gettext
@@ -69,6 +70,8 @@
 , zstd
 }:
 let
+  nondefaultStdlib =
+    builtins.match ".*-stdlib=\+\+.*" (builtins.readFile "${stdenv.cc}/nix-support/libcxx-ldflags") != null;
   versionParts =
     builtins.match
       ''
@@ -119,33 +122,49 @@ stdenv.mkDerivation rec {
     ];
   buildInputs =
     [
-      (boost.override { inherit stdenv; })
+      (if nondefaultStdlib then boost.override { inherit stdenv; } else boost)
       brotli
       bzip2
       (curl.override { openssl = openssl_1_1; })
-      (double-conversion.override { inherit stdenv; })
+      (
+        if nondefaultStdlib then
+          double-conversion.override { inherit stdenv; }
+        else
+          double-conversion
+      )
       editline
       expat
-      (fmt_8.override { inherit stdenv; })
+      (if nondefaultStdlib then fmt_8.override { inherit stdenv; } else fmt_8)
       freetype
       fribidi
+      # Workaround for https://github.com/NixOS/nixpkgs/issues/192665
+      gcc-unwrapped.lib
       gd
       gdb
       gettext
       git
       (
-        (glog.override {
-          inherit stdenv;
-          gflags = gflags.override { inherit stdenv; };
-        }).overrideAttrs (finalAttrs: previousAttrs: {
-          # Workaround for https://github.com/google/glog/issues/709
-          doCheck = !stdenv.cc.isClang;
-        })
+        if nondefaultStdlib then
+          (glog.override {
+            inherit stdenv;
+            gflags = gflags.override { inherit stdenv; };
+          }).overrideAttrs
+            (finalAttrs: previousAttrs: {
+              # Workaround for https://github.com/google/glog/issues/709
+              doCheck = !stdenv.cc.isClang;
+            })
+        else
+          glog
       )
       gmp
-      (gperf.override { inherit stdenv; })
-      (gperftools.override { inherit stdenv; })
-      (icu.override { inherit stdenv; })
+      (if nondefaultStdlib then gperf.override { inherit stdenv; } else gperf)
+      (
+        if nondefaultStdlib then
+          gperftools.override { inherit stdenv; }
+        else
+          gperftools
+      )
+      (if nondefaultStdlib then icu.override { inherit stdenv; } else icu)
       imagemagick6
       jemalloc
       libdwarf
@@ -171,7 +190,7 @@ stdenv.mkDerivation rec {
       re2
       re2c
       sqlite
-      (tbb.override { inherit stdenv; })
+      (if nondefaultStdlib then tbb.override { inherit stdenv; } else tbb)
       tzdata
       unzip
       zlib

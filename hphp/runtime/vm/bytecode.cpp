@@ -89,9 +89,7 @@
 #include "hphp/runtime/ext/reflection/ext_reflection.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
 #include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/json/JSON_parser.h"
 
-#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
 
 #include "hphp/runtime/vm/act-rec-defs.h"
@@ -374,6 +372,12 @@ private:
 };
 THREAD_LOCAL_FLAT(StackElms, t_se);
 
+void flush_evaluation_stack() {
+  if (!t_se.isNull()) {
+    t_se->flush();
+  }
+}
+
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise
 // page, so the minimum useful stack size is the next power of two.
@@ -431,25 +435,6 @@ void Stack::requestInit() {
 
 void Stack::requestExit() {
   m_elms = nullptr;
-}
-
-void flush_evaluation_stack() {
-  if (vmStack().isAllocated()) {
-    // For RPCRequestHandler threads, the ExecutionContext can stay
-    // alive across requests, but its always ok to kill it between
-    // requests, so do so now
-    RPCRequestHandler::cleanupState();
-  }
-
-  tl_heap->flush();
-
-  if (!t_se.isNull()) {
-    t_se->flush();
-  }
-  rds::flush();
-  json_parser_flush_caches();
-
-  always_assert(tl_heap->empty());
 }
 
 static std::string toStringElm(TypedValue tv) {

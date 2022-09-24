@@ -13,15 +13,35 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#pragma once
+
+#include "hphp/runtime/server/job-queue-vm-stack.h"
+
+#include "hphp/runtime/base/memory-manager.h"
+#include "hphp/runtime/base/rds.h"
+#include "hphp/runtime/server/rpc-request-handler.h"
+#include "hphp/runtime/vm/bytecode.h"
+#include "hphp/runtime/vm/vm-regs.h"
+
+#include "hphp/runtime/ext/json/JSON_parser.h"
 
 namespace HPHP {
-//////////////////////////////////////////////////////////////////////
 
-struct JobQueueDropVMStack {
-  static void dropCache();
-};
+void JobQueueDropVMStack::dropCache() {
+  if (vmStack().isAllocated()) {
+    // For RPCRequestHandler threads, the ExecutionContext can stay
+    // alive across requests, but its always ok to kill it between
+    // requests, so do so now
+    RPCRequestHandler::cleanupState();
+  }
 
-//////////////////////////////////////////////////////////////////////
+  tl_heap->flush();
+
+  flush_evaluation_stack();
+
+  rds::flush();
+  json_parser_flush_caches();
+
+  always_assert(tl_heap->empty());
 }
 
+}

@@ -19,6 +19,7 @@ use file_provider::DiskProvider;
 use file_provider::FileProvider;
 use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
+use naming_provider::NamingProvider;
 use naming_table::NamingTable;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
@@ -132,16 +133,8 @@ impl HhServerProviderBackend {
         &*self.file_store
     }
 
-    pub fn file_provider(&self) -> &dyn FileProvider {
-        &*self.file_provider
-    }
-
     pub fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BReason> {
         &*self.lazy_shallow_decl_provider
-    }
-
-    pub fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
-        &*self.folded_decl_provider
     }
 
     /// Decl-parse the given file, dedup duplicate definitions of the same
@@ -182,6 +175,24 @@ impl HhServerProviderBackend {
         self.naming_table.pop_local_changes();
         self.shallow_decl_changes_store.pop_local_changes();
         self.folded_classes_store.pop_local_changes();
+    }
+}
+
+impl rust_provider_backend_api::RustProviderBackend<BReason> for HhServerProviderBackend {
+    fn file_provider(&self) -> &dyn FileProvider {
+        &*self.file_provider
+    }
+
+    fn naming_provider(&self) -> &dyn NamingProvider {
+        &*self.naming_table
+    }
+
+    fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
+        &*self.folded_decl_provider
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
     }
 }
 

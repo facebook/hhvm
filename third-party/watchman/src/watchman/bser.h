@@ -40,6 +40,12 @@ class BserParseError : public std::exception {
   mutable std::string what_;
 };
 
+class BserParseTooDeep : public BserParseError {
+ public:
+  BserParseTooDeep()
+      : BserParseError{"bser document exceeds recursion limit"} {}
+};
+
 #define BSER_MAGIC "\x00\x01"
 #define BSER_V2_MAGIC "\x00\x02"
 

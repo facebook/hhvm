@@ -211,9 +211,9 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
   terse_write_AdaptedFields.is_union() = false;
   static const auto* const
   terse_write_AdaptedFields_fields = new std::array<EncodedThriftField, 3>{{
-    {1, "field1", false, std::make_unique<Typedef>("terse_write.MyInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
-    {2, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
-    {3, "field3", false, std::make_unique<Typedef>("terse_write.MyInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
+    {1, "field1", false, std::make_unique<Typedef>("terse_write.MyInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString(R"(\Adapter1)")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{}},
+    {2, "field2", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString(R"(\Adapter1)")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
+    {3, "field3", false, std::make_unique<Typedef>("terse_write.MyInteger", std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.Adapter", {{"name", cvString(R"(\Adapter1)")}}).cv_struct_ref(), *cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
   }};
   for (const auto& f : *terse_write_AdaptedFields_fields) {
     ::apache::thrift::metadata::ThriftField field;
@@ -225,6 +225,31 @@ StructMetadata<::facebook::thrift::test::terse_write::AdaptedFields>::gen(Thrift
     terse_write_AdaptedFields.fields()->push_back(std::move(field));
   }
   terse_write_AdaptedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::terse_write::WrappedFields>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("terse_write.WrappedFields", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& terse_write_WrappedFields = res.first->second;
+  terse_write_WrappedFields.name() = "terse_write.WrappedFields";
+  terse_write_WrappedFields.is_union() = false;
+  static const auto* const
+  terse_write_WrappedFields_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field1", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{*cvStruct("hack.FieldWrapper", {{"name", cvString(R"(\MyFieldWrapper)")}}).cv_struct_ref(), }},
+  }};
+  for (const auto& f : *terse_write_WrappedFields_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    terse_write_WrappedFields.fields()->push_back(std::move(field));
+  }
+  terse_write_WrappedFields.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

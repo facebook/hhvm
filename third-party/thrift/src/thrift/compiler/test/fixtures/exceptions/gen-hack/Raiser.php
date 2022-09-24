@@ -360,6 +360,9 @@ class Raiser_doBland_args implements \IThriftSyncStruct {
     return 'Raiser_doBland_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -412,6 +415,9 @@ class Raiser_doBland_result extends \ThriftSyncStructWithoutResult {
     return 'Raiser_doBland_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -462,6 +468,9 @@ class Raiser_doRaise_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Raiser_doRaise_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -544,6 +553,9 @@ class Raiser_doRaise_result extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'Raiser_doRaise_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -666,6 +678,9 @@ class Raiser_get200_args implements \IThriftSyncStruct {
     return 'Raiser_get200_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -727,6 +742,9 @@ class Raiser_get200_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'Raiser_get200_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -792,6 +810,9 @@ class Raiser_get500_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Raiser_get500_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -885,6 +906,9 @@ class Raiser_get500_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'Raiser_get500_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

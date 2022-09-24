@@ -323,6 +323,9 @@ class Bar_baz_args implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return 'Bar_baz_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -501,6 +504,9 @@ class Bar_baz_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'Bar_baz_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

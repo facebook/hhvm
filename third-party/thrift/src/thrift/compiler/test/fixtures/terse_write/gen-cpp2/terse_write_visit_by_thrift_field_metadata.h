@@ -200,6 +200,19 @@ struct VisitByFieldId<::facebook::thrift::test::terse_write::AdaptedFields> {
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::test::terse_write::WrappedFields> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field1_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::terse_write::WrappedFields");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::test::terse_write::TerseException> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

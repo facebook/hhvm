@@ -423,6 +423,9 @@ class SinkService_method_args implements \IThriftSyncStruct {
     return 'SinkService_method_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -473,6 +476,9 @@ class SinkService_method_FirstResponse extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'SinkService_method_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -537,6 +543,9 @@ class SinkService_method_SinkPayload extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'SinkService_method_SinkPayload';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -620,6 +629,9 @@ class SinkService_method_FinalResponse extends \ThriftSyncStructWithResult {
     return 'SinkService_method_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -689,6 +701,9 @@ class SinkService_methodAndReponse_args implements \IThriftSyncStruct {
     return 'SinkService_methodAndReponse_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -751,6 +766,9 @@ class SinkService_methodAndReponse_FirstResponse extends \ThriftSyncStructWithRe
 
   public function getName()[]: string {
     return 'SinkService_methodAndReponse_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -834,6 +852,9 @@ class SinkService_methodAndReponse_SinkPayload extends \ThriftSyncStructWithResu
     return 'SinkService_methodAndReponse_SinkPayload';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -915,6 +936,9 @@ class SinkService_methodAndReponse_FinalResponse extends \ThriftSyncStructWithRe
     return 'SinkService_methodAndReponse_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -984,6 +1008,9 @@ class SinkService_methodThrow_args implements \IThriftSyncStruct {
     return 'SinkService_methodThrow_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1044,6 +1071,9 @@ class SinkService_methodThrow_FirstResponse extends \ThriftSyncStructWithoutResu
 
   public function getName()[]: string {
     return 'SinkService_methodThrow_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1133,6 +1163,9 @@ class SinkService_methodThrow_SinkPayload extends \ThriftSyncStructWithResult {
     return 'SinkService_methodThrow_SinkPayload';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1214,6 +1247,9 @@ class SinkService_methodThrow_FinalResponse extends \ThriftSyncStructWithResult 
     return 'SinkService_methodThrow_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1283,6 +1319,9 @@ class SinkService_methodSinkThrow_args implements \IThriftSyncStruct {
     return 'SinkService_methodSinkThrow_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1333,6 +1372,9 @@ class SinkService_methodSinkThrow_FirstResponse extends \ThriftSyncStructWithout
 
   public function getName()[]: string {
     return 'SinkService_methodSinkThrow_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1407,6 +1449,9 @@ class SinkService_methodSinkThrow_SinkPayload extends \ThriftSyncStructWithResul
 
   public function getName()[]: string {
     return 'SinkService_methodSinkThrow_SinkPayload';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1511,6 +1556,9 @@ class SinkService_methodSinkThrow_FinalResponse extends \ThriftSyncStructWithRes
     return 'SinkService_methodSinkThrow_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1580,6 +1628,9 @@ class SinkService_methodFinalThrow_args implements \IThriftSyncStruct {
     return 'SinkService_methodFinalThrow_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1630,6 +1681,9 @@ class SinkService_methodFinalThrow_FirstResponse extends \ThriftSyncStructWithou
 
   public function getName()[]: string {
     return 'SinkService_methodFinalThrow_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1694,6 +1748,9 @@ class SinkService_methodFinalThrow_SinkPayload extends \ThriftSyncStructWithResu
 
   public function getName()[]: string {
     return 'SinkService_methodFinalThrow_SinkPayload';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1787,6 +1844,9 @@ class SinkService_methodFinalThrow_FinalResponse extends \ThriftSyncStructWithRe
     return 'SinkService_methodFinalThrow_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1877,6 +1937,9 @@ class SinkService_methodBothThrow_args implements \IThriftSyncStruct {
     return 'SinkService_methodBothThrow_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1927,6 +1990,9 @@ class SinkService_methodBothThrow_FirstResponse extends \ThriftSyncStructWithout
 
   public function getName()[]: string {
     return 'SinkService_methodBothThrow_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2001,6 +2067,9 @@ class SinkService_methodBothThrow_SinkPayload extends \ThriftSyncStructWithResul
 
   public function getName()[]: string {
     return 'SinkService_methodBothThrow_SinkPayload';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2115,6 +2184,9 @@ class SinkService_methodBothThrow_FinalResponse extends \ThriftSyncStructWithRes
     return 'SinkService_methodBothThrow_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2205,6 +2277,9 @@ class SinkService_methodFast_args implements \IThriftSyncStruct {
     return 'SinkService_methodFast_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2255,6 +2330,9 @@ class SinkService_methodFast_FirstResponse extends \ThriftSyncStructWithoutResul
 
   public function getName()[]: string {
     return 'SinkService_methodFast_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2319,6 +2397,9 @@ class SinkService_methodFast_SinkPayload extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'SinkService_methodFast_SinkPayload';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2400,6 +2481,9 @@ class SinkService_methodFast_FinalResponse extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'SinkService_methodFast_FinalResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

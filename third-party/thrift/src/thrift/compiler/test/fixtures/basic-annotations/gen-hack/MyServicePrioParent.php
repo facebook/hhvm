@@ -475,6 +475,9 @@ class MyServicePrioParent_ping_args implements \IThriftSyncStruct, \IThriftShapi
     return 'MyServicePrioParent_ping_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -545,6 +548,9 @@ class MyServicePrioParent_ping_result extends \ThriftSyncStructWithoutResult {
     return 'MyServicePrioParent_ping_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -607,6 +613,9 @@ class MyServicePrioParent_pong_args implements \IThriftSyncStruct, \IThriftShapi
 
   public function getName()[]: string {
     return 'MyServicePrioParent_pong_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -677,6 +686,9 @@ class MyServicePrioParent_pong_result extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'MyServicePrioParent_pong_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

@@ -308,13 +308,19 @@ class t_hack_generator : public t_concat_generator {
       const std::string& struct_hack_name_with_ns);
   void generate_php_struct_withDefaultValues_method(std::ofstream& out);
 
+  void generate_php_struct_clear_terse_fields(
+      std::ofstream& out,
+      const t_struct* tstruct,
+      ThriftStructType type,
+      const std::string& struct_hack_name_with_ns);
   void generate_php_struct_constructor_field_assignment(
       std::ofstream& out,
       const t_field& field,
       const t_struct* tstruct,
       ThriftStructType type,
       const std::string& name = "",
-      bool is_default_assignment = false);
+      bool is_default_assignment = false,
+      bool skip_custom_default = false);
   void generate_php_struct_metadata_method(
       std::ofstream& out, const t_struct* tstruct);
   void generate_php_struct_structured_annotations_method(
@@ -4412,6 +4418,8 @@ void t_hack_generator::generate_php_struct_methods(
       out << ";\n" << indent() << "}\n\n";
     }
   }
+  generate_php_struct_clear_terse_fields(
+      out, tstruct, type, struct_hack_name_with_ns);
   generate_php_struct_metadata_method(out, tstruct);
   generate_php_struct_structured_annotations_method(out, tstruct);
 
@@ -4462,7 +4470,8 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
     const t_struct* tstruct,
     ThriftStructType type,
     const std::string& struct_hack_name_with_ns,
-    bool is_default_assignment) {
+    bool is_default_assignment,
+    bool skip_custom_default) {
   if (skip_codegen(&field)) {
     return;
   }
@@ -4484,7 +4493,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
   std::string dval = "";
   bool is_exception = tstruct->is_exception();
   if (field.default_value() != nullptr &&
-      !(t->is_struct() || t->is_xception())) {
+      !(t->is_struct() || t->is_xception() || skip_custom_default)) {
     dval = render_const_value(t, field.default_value());
   } else if (
       tstruct->is_exception() &&
@@ -4537,7 +4546,7 @@ void t_hack_generator::generate_php_struct_constructor_field_assignment(
           << hack_typehint << ", " << struct_hack_name_with_ns << ">("
           << (nullable ? "null" : dval) << ", " << field.get_key()
           << ", $this);\n";
-    } else if (!nullable) {
+    } else if (!nullable || skip_custom_default) {
       out << indent() << "$this->" << field_name << " = " << dval << ";\n";
     }
   } else {
@@ -4656,6 +4665,25 @@ void t_hack_generator::generate_php_struct_default_constructor(
         generate_php_struct_constructor_field_assignment(
             out, *field, tstruct, type, struct_hack_name_with_ns, true);
       }
+    }
+  }
+  scope_down(out);
+  out << "\n";
+}
+
+void t_hack_generator::generate_php_struct_clear_terse_fields(
+    std::ofstream& out,
+    const t_struct* tstruct,
+    ThriftStructType type,
+    const std::string& struct_hack_name_with_ns) {
+  out << indent()
+      << "public function clearTerseFields()[write_props]: void {\n";
+  indent_up();
+  for (const auto& field : tstruct->fields()) {
+    if (!skip_codegen(&field) &&
+        field.qualifier() == t_field_qualifier::terse) {
+      generate_php_struct_constructor_field_assignment(
+          out, field, tstruct, type, struct_hack_name_with_ns, true, true);
     }
   }
   scope_down(out);

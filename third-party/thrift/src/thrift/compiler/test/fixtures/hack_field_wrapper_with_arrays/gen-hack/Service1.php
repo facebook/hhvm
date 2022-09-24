@@ -691,6 +691,9 @@ class Service1_func_args implements \IThriftSyncStruct, \IThriftShapishAsyncStru
     return 'Service1_func_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -832,6 +835,9 @@ class Service1_func_result extends \ThriftSyncStructWithResult {
     return 'Service1_func_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -944,6 +950,9 @@ class Service1_func1_args implements \IThriftSyncStruct, \IThriftShapishAsyncStr
 
   public function getName()[]: string {
     return 'Service1_func1_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1087,6 +1096,9 @@ class Service1_func1_result extends \ThriftSyncStructWithResult {
     return 'Service1_func1_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1217,6 +1229,9 @@ class Service1_func2_args implements \IThriftAsyncStruct, \IThriftShapishAsyncSt
 
   public function getName()[]: string {
     return 'Service1_func2_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1404,6 +1419,9 @@ class Service1_func2_result extends \ThriftAsyncStructWithResult {
 
   public function getName()[]: string {
     return 'Service1_func2_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

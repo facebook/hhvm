@@ -83,8 +83,16 @@ struct Block {
 
   unsigned    id() const           { return m_id; }
   Hint        hint() const         { return m_hint; }
-  void        setHint(Hint hint)   { m_hint = hint; }
   uint64_t    profCount() const    { return m_profCount; }
+
+  void setHint(Hint hint) {
+    // Do not downgrade likeliness of the entry block. Translations are entered
+    // at their first code emitted to the 'a' section, so downgrading the
+    // likeliness of the entry block may cause the translation to be entered
+    // at an incorrect block.
+    if (isEntry() && hint < m_hint) return;
+    m_hint = hint;
+  }
 
   void setProfCount(uint64_t count) { m_profCount = checkedProfCount(count); }
 

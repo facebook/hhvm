@@ -479,4 +479,15 @@ TEST(Bser, fuzz_examples) {
   }
 }
 
+TEST(Bser, detect_array_stack_overflow) {
+  const std::string_view rec{"\x00\x03\x01", 3};
+  const size_t N = 1000;
+  std::string str;
+  str.reserve(N * rec.size());
+  for (size_t i = 0; i < N; ++i) {
+    str += rec;
+  }
+  EXPECT_THROW((bunser(str.data(), str.data() + str.size())), BserParseTooDeep);
+}
+
 } // namespace

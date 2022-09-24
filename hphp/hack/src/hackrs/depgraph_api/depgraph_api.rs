@@ -95,8 +95,33 @@ pub enum DependencyName {
     Fun(FunName),
     /// Represents something depending on a class/typedef/trait/interface
     Type(TypeName),
+    /// Represents something depending on a module.
+    Module(ModuleName),
 }
 
+impl From<FunName> for DependencyName {
+    fn from(name: FunName) -> Self {
+        Self::Fun(name)
+    }
+}
+
+impl From<ConstName> for DependencyName {
+    fn from(name: ConstName) -> Self {
+        Self::Const(name)
+    }
+}
+
+impl From<ModuleName> for DependencyName {
+    fn from(name: ModuleName) -> Self {
+        Self::Module(name)
+    }
+}
+
+impl From<TypeName> for DependencyName {
+    fn from(name: TypeName) -> Self {
+        Self::Type(name)
+    }
+}
 /// Organize and administer dependency records.
 pub trait DepGraphWriter: Debug + Send + Sync {
     /// Record a dependency.

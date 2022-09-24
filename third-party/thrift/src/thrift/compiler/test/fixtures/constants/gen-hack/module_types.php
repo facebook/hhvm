@@ -204,6 +204,9 @@ class Internship implements \IThriftSyncStruct {
     return 'Internship';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -350,6 +353,9 @@ class Range implements \IThriftSyncStruct {
     return 'Range';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -454,6 +460,9 @@ class struct1 implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'struct1';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -592,6 +601,9 @@ class struct2 implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'struct2';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -748,6 +760,9 @@ class struct3 implements \IThriftSyncStruct {
     return 'struct3';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -880,6 +895,9 @@ class struct4 implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'struct4';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1073,6 +1091,9 @@ class union1 implements \IThriftSyncStruct, \IThriftUnion<union1Enum> {
       (string)$this->_type,
     );
     return $this->d as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1337,6 +1358,9 @@ class union2 implements \IThriftSyncStruct, \IThriftUnion<union2Enum> {
       (string)$this->_type,
     );
     return $this->u as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

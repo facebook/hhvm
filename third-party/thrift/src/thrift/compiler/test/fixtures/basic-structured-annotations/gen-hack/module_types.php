@@ -120,6 +120,9 @@ class structured_annotation_inline implements \IThriftSyncStruct {
     return 'structured_annotation_inline';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -212,6 +215,9 @@ class structured_annotation_with_default implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'structured_annotation_with_default';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -323,6 +329,9 @@ class structured_annotation_recursive implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'structured_annotation_recursive';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -456,6 +465,9 @@ class structured_annotation_forward implements \IThriftSyncStruct {
     return 'structured_annotation_forward';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -551,6 +563,9 @@ class structured_annotation_nested implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'structured_annotation_nested';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -688,6 +703,9 @@ class MyStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -902,6 +920,9 @@ class MyException extends \TException implements \IThriftSyncStruct {
     return 'MyException';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return \tmeta_ThriftException::fromShape(
       shape(
@@ -1084,6 +1105,9 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<\fixtures\basic-struc
       (string)$this->_type,
     );
     return $this->second as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

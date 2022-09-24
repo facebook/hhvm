@@ -889,6 +889,9 @@ class MyService_foo_args implements \IThriftSyncStruct {
     return 'MyService_foo_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -939,6 +942,9 @@ class MyService_foo_result extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'MyService_foo_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1000,6 +1006,9 @@ class MyService_interact_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_interact_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1067,6 +1076,9 @@ class MyService_interact_result extends \ThriftSyncStructWithoutResult {
     return 'MyService_interact_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1117,6 +1129,9 @@ class MyService_interactFast_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_interactFast_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1180,6 +1195,9 @@ class MyService_interactFast_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'MyService_interactFast_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1247,6 +1265,9 @@ class MyService_serialize_args implements \IThriftSyncStruct {
     return 'MyService_serialize_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1308,6 +1329,9 @@ class MyService_serialize_StreamResponse extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'MyService_serialize_StreamResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1386,6 +1410,9 @@ class MyService_serialize_FirstResponse extends \ThriftSyncStructWithResult {
     return 'MyService_serialize_FirstResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1449,6 +1476,9 @@ class MyService_MyInteraction_frobnicate_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_frobnicate_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1522,6 +1552,9 @@ class MyService_MyInteraction_frobnicate_result extends \ThriftSyncStructWithRes
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_frobnicate_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1610,6 +1643,9 @@ class MyService_MyInteraction_ping_args implements \IThriftSyncStruct {
     return 'MyService_MyInteraction_ping_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1660,6 +1696,9 @@ class MyService_MyInteraction_truthify_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_truthify_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1723,6 +1762,9 @@ class MyService_MyInteraction_truthify_StreamResponse extends \ThriftSyncStructW
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_truthify_StreamResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1790,6 +1832,9 @@ class MyService_MyInteraction_truthify_FirstResponse extends \ThriftSyncStructWi
     return 'MyService_MyInteraction_truthify_FirstResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1840,6 +1885,9 @@ class MyService_MyInteraction_encode_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_encode_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1908,6 +1956,9 @@ class MyService_MyInteraction_encode_FirstResponse extends \ThriftSyncStructWith
 
   public function getName()[]: string {
     return 'MyService_MyInteraction_encode_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1994,6 +2045,9 @@ class MyService_MyInteraction_encode_SinkPayload extends \ThriftSyncStructWithRe
     return 'MyService_MyInteraction_encode_SinkPayload';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2071,6 +2125,9 @@ class MyService_MyInteraction_encode_FinalResponse extends \ThriftSyncStructWith
     return 'MyService_MyInteraction_encode_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2136,6 +2193,9 @@ class MyService_MyInteractionFast_frobnicate_args implements \IThriftSyncStruct 
     return 'MyService_MyInteractionFast_frobnicate_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2197,6 +2257,9 @@ class MyService_MyInteractionFast_frobnicate_result extends \ThriftSyncStructWit
 
   public function getName()[]: string {
     return 'MyService_MyInteractionFast_frobnicate_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2264,6 +2327,9 @@ class MyService_MyInteractionFast_ping_args implements \IThriftSyncStruct {
     return 'MyService_MyInteractionFast_ping_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2314,6 +2380,9 @@ class MyService_MyInteractionFast_truthify_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_MyInteractionFast_truthify_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2377,6 +2446,9 @@ class MyService_MyInteractionFast_truthify_StreamResponse extends \ThriftSyncStr
 
   public function getName()[]: string {
     return 'MyService_MyInteractionFast_truthify_StreamResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2444,6 +2516,9 @@ class MyService_MyInteractionFast_truthify_FirstResponse extends \ThriftSyncStru
     return 'MyService_MyInteractionFast_truthify_FirstResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2494,6 +2569,9 @@ class MyService_MyInteractionFast_encode_args implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyService_MyInteractionFast_encode_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2562,6 +2640,9 @@ class MyService_MyInteractionFast_encode_FirstResponse extends \ThriftSyncStruct
 
   public function getName()[]: string {
     return 'MyService_MyInteractionFast_encode_FirstResponse';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2648,6 +2729,9 @@ class MyService_MyInteractionFast_encode_SinkPayload extends \ThriftSyncStructWi
     return 'MyService_MyInteractionFast_encode_SinkPayload';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2725,6 +2809,9 @@ class MyService_MyInteractionFast_encode_FinalResponse extends \ThriftSyncStruct
     return 'MyService_MyInteractionFast_encode_FinalResponse';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2790,6 +2877,9 @@ class MyService_SerialInteraction_frobnicate_args implements \IThriftSyncStruct 
     return 'MyService_SerialInteraction_frobnicate_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -2840,6 +2930,9 @@ class MyService_SerialInteraction_frobnicate_result extends \ThriftSyncStructWit
 
   public function getName()[]: string {
     return 'MyService_SerialInteraction_frobnicate_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

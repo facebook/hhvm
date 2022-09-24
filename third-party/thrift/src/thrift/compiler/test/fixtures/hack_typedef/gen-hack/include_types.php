@@ -68,6 +68,9 @@ class Foo implements \IThriftSyncStruct {
     return 'Foo';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(

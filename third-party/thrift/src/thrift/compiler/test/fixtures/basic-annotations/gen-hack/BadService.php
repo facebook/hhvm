@@ -404,6 +404,9 @@ class BadService_bar_args implements \IThriftSyncStruct, \IThriftShapishSyncStru
     return 'BadService_bar_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -483,6 +486,9 @@ class BadService_bar_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'BadService_bar_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -570,6 +576,9 @@ class BadService_BadInteraction_foo_args implements \IThriftSyncStruct, \IThrift
     return 'BadService_BadInteraction_foo_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -638,6 +647,9 @@ class BadService_BadInteraction_foo_result extends \ThriftSyncStructWithoutResul
 
   public function getName()[]: string {
     return 'BadService_BadInteraction_foo_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

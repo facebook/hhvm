@@ -54,6 +54,9 @@ class MyStruct implements \IThriftSyncStruct {
     return 'MyStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -136,6 +139,9 @@ class MySecondStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MySecondStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -222,6 +228,9 @@ class MyThirdStruct implements \IThriftSyncStruct {
     return 'MyThirdStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -304,6 +313,9 @@ class MyFourthStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyFourthStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -395,6 +407,9 @@ class MyFifthStruct implements \IThriftSyncStruct {
     return 'MyFifthStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -481,6 +496,9 @@ trait MySixthStructTrait implements \IThriftSyncStruct {
     return 'MySixthStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -559,6 +577,9 @@ trait MySeventhStructTrait implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MySeventhStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

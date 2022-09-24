@@ -6215,6 +6215,10 @@ module rec Error : sig
   val both : t -> t -> t
 
   val with_code : t -> code:Error_code.t -> t
+
+  val show : t -> string
+
+  val pp : Format.formatter -> t -> unit
 end = struct
   type t =
     | Primary of Primary.t
@@ -6225,6 +6229,10 @@ end = struct
     | Union of t list
     | Intersection of t list
     | With_code of t * Error_code.t
+
+  let show _ = "<implement error>"
+
+  let pp _ _ = ()
 
   let iter t ~on_prim ~on_snd =
     let rec aux = function

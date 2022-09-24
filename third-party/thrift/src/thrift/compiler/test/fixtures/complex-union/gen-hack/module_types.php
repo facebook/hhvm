@@ -322,6 +322,9 @@ class ComplexUnion implements \IThriftSyncStruct, \IThriftUnion<ComplexUnionEnum
     return $this->stringRef as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -649,6 +652,9 @@ class ListUnion implements \IThriftSyncStruct, \IThriftUnion<ListUnionEnum> {
     return $this->stringListValue as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -878,6 +884,9 @@ class DataUnion implements \IThriftSyncStruct, \IThriftUnion<DataUnionEnum> {
     return $this->stringData as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1022,6 +1031,9 @@ class Val implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Val';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1269,6 +1281,9 @@ class ValUnion implements \IThriftSyncStruct, \IThriftUnion<ValUnionEnum> {
     return $this->v2 as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1481,6 +1496,9 @@ class VirtualComplexUnion implements \IThriftSyncStruct, \IThriftUnion<VirtualCo
     return $this->thingTwo as nonnull;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1590,6 +1608,9 @@ class NonCopyableStruct implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'NonCopyableStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1731,6 +1752,9 @@ class NonCopyableUnion implements \IThriftSyncStruct, \IThriftUnion<NonCopyableU
       (string)$this->_type,
     );
     return $this->s as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

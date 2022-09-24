@@ -1500,6 +1500,91 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::test::terse_write::WrappedFields>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::terse_write::WrappedFields>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test { namespace terse_write {
+
+const char* WrappedFields::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/terse_write/WrappedFields";
+}
+
+const folly::StringPiece WrappedFields::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<WrappedFields>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+WrappedFields::WrappedFields(apache::thrift::FragileConstructor, ::std::int32_t field1__arg) :
+    __fbthrift_field_field1(std::move(field1__arg)) {
+}
+
+
+void WrappedFields::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field1 = ::std::int32_t();
+}
+
+void WrappedFields::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_field1 = ::std::int32_t();
+}
+
+bool WrappedFields::__fbthrift_is_empty() const {
+  return ::apache::thrift::op::isEmpty<::apache::thrift::type::i32_t>(this->__fbthrift_field_field1);
+}
+
+bool WrappedFields::operator==(FOLLY_MAYBE_UNUSED const WrappedFields& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool WrappedFields::operator<(FOLLY_MAYBE_UNUSED const WrappedFields& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return lhs.field1_ref() < rhs.field1_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED WrappedFields& a, FOLLY_MAYBE_UNUSED WrappedFields& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
+}
+
+template void WrappedFields::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t WrappedFields::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t WrappedFields::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t WrappedFields::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void WrappedFields::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t WrappedFields::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t WrappedFields::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t WrappedFields::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // facebook::thrift::test::terse_write
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::test::terse_write::TerseException>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

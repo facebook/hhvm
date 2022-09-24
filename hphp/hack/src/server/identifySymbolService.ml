@@ -341,10 +341,23 @@ let visitor =
               ~is_method:true
               ~is_const:false
         | Aast.ValCollection (kind, _, _) ->
-          let type_name = Aast.show_vc_kind kind in
+          let type_name =
+            match kind with
+            | Aast_defs.Vector -> "Vector"
+            | Aast_defs.ImmVector -> "ImmVector"
+            | Aast_defs.Set -> "Set"
+            | Aast_defs.ImmSet -> "ImmSet"
+            | Aast_defs.Keyset -> "keyset"
+            | Aast_defs.Vec -> "vec"
+          in
           process_class_id (pos, "\\HH\\" ^ type_name)
         | Aast.KeyValCollection (kind, _, _) ->
-          let type_name = Aast.show_kvc_kind kind in
+          let type_name =
+            match kind with
+            | Aast_defs.Map -> "Map"
+            | Aast_defs.ImmMap -> "ImmMap"
+            | Aast_defs.Dict -> "dict"
+          in
           process_class_id (pos, "\\HH\\" ^ type_name)
         | Aast.EnumClassLabel (enum_name, label_name) ->
           begin

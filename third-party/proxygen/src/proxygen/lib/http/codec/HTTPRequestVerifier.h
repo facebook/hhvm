@@ -99,9 +99,6 @@ class HTTPRequestVerifier {
       error = "Duplicate authority";
       return false;
     }
-    if (authority.empty()) {
-      LOG(ERROR) << "Empty :authority is not allowed";
-    }
     if (validate &&
         !CodecUtil::validateHeaderValue(
             authority,

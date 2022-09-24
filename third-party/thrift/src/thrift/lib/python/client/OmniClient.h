@@ -134,13 +134,14 @@ class OmniClient : public apache::thrift::TClientBase {
  protected:
   // RpcOptions unused in base OmniClient since no interaction support
   virtual void setInteraction(apache::thrift::RpcOptions& rpcOptions) {
-    if (factoryClient_) {
-      factoryClient_->setInteraction(rpcOptions);
+    auto client = factoryClient_.load();
+    if (client) {
+      client->setInteraction(rpcOptions);
     }
   }
 
   std::shared_ptr<apache::thrift::RequestChannel> channel_;
-  OmniClient* factoryClient_ = nullptr;
+  std::atomic<OmniClient*> factoryClient_ = nullptr;
 };
 
 class OmniInteractionClient : public OmniClient {

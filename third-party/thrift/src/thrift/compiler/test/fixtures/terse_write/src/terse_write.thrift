@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/hack.thrift"
 include "thrift/annotation/thrift.thrift"
 
 package "facebook.com/thrift/test/terse_write"
@@ -114,16 +115,24 @@ struct TerseStructWithCustomDefault {
   14: MyStructWithCustomDefault struct_field;
 }
 
+@hack.Adapter{name = '\Adapter1'}
 @cpp.Adapter{name = "::my::Adapter"}
 typedef i32 MyInteger
 
 @thrift.TerseWrite
 struct AdaptedFields {
   1: MyInteger field1;
+  @hack.Adapter{name = '\Adapter1'}
   @cpp.Adapter{name = "::my::Adapter"}
   2: i32 field2;
   @cpp.Adapter{name = "::my::Adapter"}
   3: MyInteger field3;
+}
+
+@thrift.TerseWrite
+struct WrappedFields {
+  @hack.FieldWrapper{name = "\MyFieldWrapper"}
+  1: i32 field1 = 7;
 }
 
 @thrift.TerseWrite

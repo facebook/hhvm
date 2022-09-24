@@ -79,6 +79,9 @@ class A implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return 'A';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -432,6 +435,9 @@ class B implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'B';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1140,6 +1146,9 @@ class C implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'C';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

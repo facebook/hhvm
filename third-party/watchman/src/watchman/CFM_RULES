@@ -40,7 +40,8 @@ def create_rule(src):
 
     publish(
         wiki_root_path = root,
-        srcs = [src]
+        srcs = [src],
+        oncall = "codehub_markdown",
     )
 
 [create_rule(src) for src in ALL_SRCS]

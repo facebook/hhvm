@@ -54,6 +54,11 @@ const char bser_utf8string_hdr = BSER_UTF8STRING;
 const char bser_skip = BSER_SKIP;
 
 constexpr size_t kMaximumContainerSize = std::numeric_limits<uint32_t>::max();
+
+// We could write the BSER parser to use O(1) stack depth, but in the short term
+// let's limit container depth.
+constexpr size_t kMaximumDepth = 1000;
+
 constexpr size_t kMaximumReservation = 10000;
 
 template <typename T>
@@ -564,6 +569,8 @@ class BserParser {
   }
 
   std::vector<json_ref> parseArray() {
+    BumpDepth scope{depth};
+
     size_t count = expectSize("array");
 
     std::vector<json_ref> rv;
@@ -580,6 +587,8 @@ class BserParser {
   }
 
   json_ref parseTemplate() {
+    BumpDepth scope{depth};
+
     // Load in the property names template
     auto templ = expectArray();
 
@@ -630,6 +639,8 @@ class BserParser {
   }
 
   json_ref parseObject() {
+    BumpDepth scope{depth};
+
     size_t element_count = expectSize("object");
 
     std::unordered_map<w_string, json_ref> rv;
@@ -652,9 +663,23 @@ class BserParser {
     return json_object(std::move(rv));
   }
 
+  struct BumpDepth {
+    explicit BumpDepth(size_t& depth) : depth{depth} {
+      if (++depth == kMaximumDepth) {
+        throw BserParseTooDeep{};
+      }
+    }
+    ~BumpDepth() {
+      --depth;
+    }
+
+    size_t& depth;
+  };
+
   const char* buf;
   const char* const start;
   const char* const end;
+  size_t depth = 0;
 };
 
 } // namespace

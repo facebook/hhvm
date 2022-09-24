@@ -66,27 +66,31 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 }
 
 impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
-    fn get_fun(&self, _dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+    fn get_fun(&self, dependent: DeclName, name: FunName) -> Result<Option<Arc<FunDecl<R>>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, name.into())?;
         Ok(self.shallow_decl_provider.get_fun(name)?)
     }
 
-    fn get_const(
-        &self,
-        _dependent: DeclName,
-        name: ConstName,
-    ) -> Result<Option<Arc<ConstDecl<R>>>> {
+    fn get_const(&self, dependent: DeclName, name: ConstName) -> Result<Option<Arc<ConstDecl<R>>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, name.into())?;
         Ok(self.shallow_decl_provider.get_const(name)?)
     }
 
     fn get_module(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         name: ModuleName,
     ) -> Result<Option<Arc<ModuleDecl<R>>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, name.into())?;
         Ok(self.shallow_decl_provider.get_module(name)?)
     }
 
-    fn get_type(&self, _dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+    fn get_type(&self, dependent: DeclName, name: TypeName) -> Result<Option<TypeDecl<R>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, name.into())?;
         match self.shallow_decl_provider.get_type_kind(name)? {
             None => Ok(None),
             Some(KindOfType::TTypedef) => Ok(Some(TypeDecl::Typedef(
@@ -105,10 +109,12 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_property_type(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, DependencyName::Prop(class_name, property_name))?;
         Ok(self
             .shallow_decl_provider
             .get_property_type(class_name, property_name)?)
@@ -116,10 +122,14 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_property_type(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         class_name: TypeName,
         property_name: PropName,
     ) -> Result<Option<Ty<R>>> {
+        self.dependency_registrar.add_dependency(
+            dependent,
+            DependencyName::StaticProp(class_name, property_name),
+        )?;
         Ok(self
             .shallow_decl_provider
             .get_static_property_type(class_name, property_name)?)
@@ -127,10 +137,12 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_method_type(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, DependencyName::Method(class_name, method_name))?;
         Ok(self
             .shallow_decl_provider
             .get_method_type(class_name, method_name)?)
@@ -138,10 +150,14 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_static_method_type(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         class_name: TypeName,
         method_name: MethodName,
     ) -> Result<Option<Ty<R>>> {
+        self.dependency_registrar.add_dependency(
+            dependent,
+            DependencyName::StaticMethod(class_name, method_name),
+        )?;
         Ok(self
             .shallow_decl_provider
             .get_static_method_type(class_name, method_name)?)
@@ -149,9 +165,11 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 
     fn get_shallow_constructor_type(
         &self,
-        _dependent: DeclName,
+        dependent: DeclName,
         class_name: TypeName,
     ) -> Result<Option<Ty<R>>> {
+        self.dependency_registrar
+            .add_dependency(dependent, DependencyName::Constructor(class_name))?;
         Ok(self
             .shallow_decl_provider
             .get_constructor_type(class_name)?)

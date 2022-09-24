@@ -346,6 +346,9 @@ class TestService_init_args implements \IThriftSyncStruct, \IThriftShapishSyncSt
     return 'TestService_init_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -443,6 +446,9 @@ class TestService_init_result extends \ThriftSyncStructWithResult {
 
   public function getName()[]: string {
     return 'TestService_init_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

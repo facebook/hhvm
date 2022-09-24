@@ -253,6 +253,16 @@ void reset_field<::facebook::thrift::test::terse_write::AdaptedFields>(
 }
 
 template<>
+void reset_field<::facebook::thrift::test::terse_write::WrappedFields>(
+    ::facebook::thrift::test::terse_write::WrappedFields& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.field1_ref().copy_from(default_inst<::facebook::thrift::test::terse_write::WrappedFields>().field1_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::facebook::thrift::test::terse_write::TerseException>(
     ::facebook::thrift::test::terse_write::TerseException& obj, uint16_t index) {
   switch (index) {
@@ -315,6 +325,16 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::test::terse_write::AdaptedFields>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::test::terse_write::WrappedFields>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

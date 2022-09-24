@@ -124,6 +124,9 @@ class Color implements \IThriftSyncStruct {
     return 'Color';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -290,6 +293,9 @@ class Vehicle implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Vehicle';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -564,6 +570,9 @@ class Person implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Person';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

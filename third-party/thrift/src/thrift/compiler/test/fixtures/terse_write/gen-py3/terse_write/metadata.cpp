@@ -21,6 +21,7 @@ namespace terse_write {
   ::apache::thrift::detail::md::StructMetadata<FieldLevelTerseStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<TerseStructWithCustomDefault>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<AdaptedFields>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<WrappedFields>::gen(metadata);
   ::apache::thrift::detail::md::ExceptionMetadata<TerseException>::gen(metadata);
   return metadata;
 }

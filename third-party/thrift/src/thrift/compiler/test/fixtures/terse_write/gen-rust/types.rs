@@ -129,6 +129,17 @@ pub struct AdaptedFields {
 }
 
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct WrappedFields {
+    pub field1: ::std::primitive::i32,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct TerseException {
     pub msg: ::std::string::String,
     // This field forces `..Default::default()` when instantiating this
@@ -1211,6 +1222,80 @@ where
             field1: field_field1.unwrap_or_default(),
             field2: field_field2.unwrap_or_default(),
             field3: field_field3.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::WrappedFields {
+    fn default() -> Self {
+        Self {
+            field1: 7,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::WrappedFields {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("WrappedFields")
+            .field("field1", &self.field1)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::WrappedFields {}
+unsafe impl ::std::marker::Sync for self::WrappedFields {}
+
+impl ::fbthrift::GetTType for self::WrappedFields {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::WrappedFields {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/terse_write/WrappedFields"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::WrappedFields
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("WrappedFields");
+        p.write_field_begin("field1", ::fbthrift::TType::I32, 1);
+        ::fbthrift::Serialize::write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::WrappedFields
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::I32, 1),
+        ];
+        let mut field_field1 = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I32, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field1: field_field1.unwrap_or(7),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

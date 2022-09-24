@@ -77,6 +77,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return 'MyStruct';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -167,6 +170,9 @@ class MyStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapishSy
 
   public function getName()[]: string {
     return 'MyStructWithCustomDefault';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -495,6 +501,23 @@ class StructLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncS
 
   public function getName()[]: string {
     return 'StructLevelTerseStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->bool_field = false;
+    $this->byte_field = 0;
+    $this->short_field = 0;
+    $this->int_field = 0;
+    $this->long_field = 0;
+    $this->float_field = 0.0;
+    $this->double_field = 0.0;
+    $this->string_field = '';
+    $this->binary_field = '';
+    $this->enum_field = null;
+    $this->list_field = Vector {};
+    $this->set_field = Set {};
+    $this->map_field = Map {};
+    $this->struct_field = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1345,6 +1368,23 @@ class FieldLevelTerseStruct implements \IThriftSyncStruct, \IThriftShapishSyncSt
 
   public function getName()[]: string {
     return 'FieldLevelTerseStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->terse_bool_field = false;
+    $this->terse_byte_field = 0;
+    $this->terse_short_field = 0;
+    $this->terse_int_field = 0;
+    $this->terse_long_field = 0;
+    $this->terse_float_field = 0.0;
+    $this->terse_double_field = 0.0;
+    $this->terse_string_field = '';
+    $this->terse_binary_field = '';
+    $this->terse_enum_field = null;
+    $this->terse_list_field = Vector {};
+    $this->terse_set_field = Set {};
+    $this->terse_map_field = Map {};
+    $this->terse_struct_field = null;
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2421,6 +2461,23 @@ class TerseStructWithCustomDefault implements \IThriftSyncStruct, \IThriftShapis
     return 'TerseStructWithCustomDefault';
   }
 
+  public function clearTerseFields()[write_props]: void {
+    $this->bool_field = false;
+    $this->byte_field = 0;
+    $this->short_field = 0;
+    $this->int_field = 0;
+    $this->long_field = 0;
+    $this->float_field = 0.0;
+    $this->double_field = 0.0;
+    $this->string_field = '';
+    $this->binary_field = '';
+    $this->enum_field = null;
+    $this->list_field = Vector {};
+    $this->set_field = Set {};
+    $this->map_field = Map {};
+    $this->struct_field = null;
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -2796,16 +2853,19 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     1 => shape(
       'var' => 'field1',
       'is_terse' => true,
+      'adapter' => \Adapter1::class,
       'type' => \TType::I32,
     ),
     2 => shape(
       'var' => 'field2',
+      'adapter' => \Adapter1::class,
       'is_terse' => true,
       'type' => \TType::I32,
     ),
     3 => shape(
       'var' => 'field3',
       'is_terse' => true,
+      'adapter' => \Adapter1::class,
       'type' => \TType::I32,
     ),
   ];
@@ -2816,15 +2876,15 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
   ];
 
   const type TConstructorShape = shape(
-    ?'field1' => ?int,
-    ?'field2' => ?int,
-    ?'field3' => ?int,
+    ?'field1' => ?\Adapter1::THackType,
+    ?'field2' => ?\Adapter1::THackType,
+    ?'field3' => ?\Adapter1::THackType,
   );
 
   const type TShape = shape(
-    'field1' => int,
-    'field2' => int,
-    'field3' => int,
+    'field1' => \Adapter1::THackType,
+    'field2' => \Adapter1::THackType,
+    'field3' => \Adapter1::THackType,
     ...
   );
   const int STRUCTURAL_ID = 8495441692096133093;
@@ -2832,22 +2892,22 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
    * Original thrift field:-
    * 1: i32 field1
    */
-  public int $field1;
+  public \Adapter1::THackType $field1;
   /**
    * Original thrift field:-
    * 2: i32 field2
    */
-  public int $field2;
+  public \Adapter1::THackType $field2;
   /**
    * Original thrift field:-
    * 3: i32 field3
    */
-  public int $field3;
+  public \Adapter1::THackType $field3;
 
-  public function __construct(?int $field1 = null, ?int $field2 = null, ?int $field3 = null)[] {
-    $this->field1 = $field1 ?? 0;
-    $this->field2 = $field2 ?? 0;
-    $this->field3 = $field3 ?? 0;
+  public function __construct(?\Adapter1::THackType $field1 = null, ?\Adapter1::THackType $field2 = null, ?\Adapter1::THackType $field3 = null)[] {
+    $this->field1 = $field1 ?? \Adapter1::fromThrift(0);
+    $this->field2 = $field2 ?? \Adapter1::fromThrift(0);
+    $this->field3 = $field3 ?? \Adapter1::fromThrift(0);
   }
 
   public static function withDefaultValues()[]: this {
@@ -2864,6 +2924,12 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'AdaptedFields';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->field1 = \Adapter1::fromThrift(0);
+    $this->field2 = \Adapter1::fromThrift(0);
+    $this->field3 = \Adapter1::fromThrift(0);
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -2940,6 +3006,11 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         'field1' => shape(
           'field' => dict[],
           'type' => dict[
+            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\Adapter1",
+              )
+            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
@@ -2949,6 +3020,11 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
         ),
         'field2' => shape(
           'field' => dict[
+            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\Adapter1",
+              )
+            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
@@ -2966,6 +3042,11 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
             ),
           ],
           'type' => dict[
+            '\thrift\annotation\hack\Adapter' => \thrift\annotation\hack\Adapter::fromShape(
+              shape(
+                "name" => "\Adapter1",
+              )
+            ),
             '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
               shape(
                 "name" => "::my::Adapter",
@@ -3004,7 +3085,7 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     }
 
     if (idx($parsed, 'field1') !== null) {
-      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['field1']);
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \Adapter1::THackType>($parsed['field1']);
       if ($_tmp0 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
@@ -3020,11 +3101,160 @@ class AdaptedFields implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       }
     }
     if (idx($parsed, 'field3') !== null) {
-      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['field3']);
+      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, \Adapter1::THackType>($parsed['field3']);
       if ($_tmp2 > 0x7fffffff) {
         throw new \TProtocolException("number exceeds limit in field");
       } else {
         $this->field3 = (int)$_tmp2;
+      }
+    }
+  }
+
+  private static function __hackAdapterTypeChecks()[]: void {
+    \ThriftUtil::requireSameType<\Adapter1::TThriftType, int>();
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * WrappedFields
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/terse_write/WrappedFields'))>>
+class WrappedFields implements \IThriftAsyncStruct, \IThriftShapishAsyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field1',
+      'is_wrapped' => true,
+      'is_terse' => true,
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field1' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field1' => ?int,
+  );
+
+  const type TShape = shape(
+    'field1' => int,
+    ...
+  );
+  const int STRUCTURAL_ID = 3788696854924653147;
+  /**
+   * Original thrift field:-
+   * 1: i32 field1
+   */
+  private ?\MyFieldWrapper<int, \thrift\test\terse_write\WrappedFields> $field1;
+
+  public function get_field1()[]: \MyFieldWrapper<int, \thrift\test\terse_write\WrappedFields> {
+    return $this->field1 as nonnull;
+  }
+
+
+  public function __construct()[] {
+    $this->field1 = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<int, \thrift\test\terse_write\WrappedFields>(7, 1, $this);
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static async function genFromShape(self::TConstructorShape $shape)[zoned_local]: Awaitable<this> {
+    $obj = new static();
+    $field1 = Shapes::idx($shape, 'field1');
+    if ($field1 !== null) {
+      await $obj->get_field1()->genWrap($field1);
+    }
+    return $obj;
+  }
+
+  public function getName()[]: string {
+    return 'WrappedFields';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->field1 = \MyFieldWrapper::fromThrift_DO_NOT_USE_THRIFT_INTERNAL<int, \thrift\test\terse_write\WrappedFields>(0, 1, $this);
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "terse_write.WrappedFields",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "field1",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+        'field1' => shape(
+          'field' => dict[
+            '\thrift\annotation\hack\FieldWrapper' => \thrift\annotation\hack\FieldWrapper::fromShape(
+              shape(
+                "name" => "\MyFieldWrapper",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static async function __genFromShape(self::TShape $shape): Awaitable<this> {
+    $obj = new static();
+    await $obj->get_field1()->genWrap($shape['field1']);
+    return $obj;
+  }
+
+  public async function __genToShape(): Awaitable<self::TShape> {
+    $field1 = await ($this->field1 as nonnull)->genUnwrap();
+    return shape(
+      'field1' => $field1,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field1') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['field1']);
+      if ($_tmp0 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->field1 = (int)$_tmp0;
       }
     }
   }
@@ -3083,6 +3313,10 @@ class TerseException extends \TException implements \IThriftSyncStruct {
   <<__Override>>
   public function getMessage()[]: string {
     return $this->msg ?? '';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->msg = '';
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

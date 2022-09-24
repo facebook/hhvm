@@ -44,6 +44,9 @@ class SetGenerated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
     return 'SetGenerated';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return \tmeta_ThriftStruct::fromShape(
       shape(
@@ -136,6 +139,9 @@ class Transitive implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'Transitive';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

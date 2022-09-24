@@ -14,11 +14,14 @@ crate-type = ["lib", "staticlib"]
 bincode = "1.3.3"
 bstr = { version = "0.2", features = ["serde1"] }
 deps_rust = { path = "../../../deps/cargo/deps_rust" }
+file_provider = { path = "../../../hackrs/file_provider/cargo/file_provider" }
 hackrs_provider_backend = { path = "../../hackrs_provider_backend" }
+naming_provider = { path = "../../../hackrs/naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
 ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../../hackrs/pos/cargo/pos" }
+rust_provider_backend_api = { path = "../.." }
 ty = { path = "../../../hackrs/ty/cargo/ty" }

@@ -75,6 +75,10 @@ end
 
 module Error : sig
   type t
+
+  val show : t -> string
+
+  val pp : Format.formatter -> t -> unit
 end
 
 module Primary : sig
@@ -1898,6 +1902,10 @@ module Reasons_callback : sig
 end
 
 type t = Error.t
+
+val show : t -> string
+
+val pp : Format.formatter -> t -> unit
 
 (** Iterate over an error calling `on_prim` and `on_snd` when each `Primary.t`
      and `Secondary.t` error is encountered, respectively. *)

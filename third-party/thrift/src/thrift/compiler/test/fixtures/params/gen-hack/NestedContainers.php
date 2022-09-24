@@ -1009,6 +1009,9 @@ class NestedContainers_mapList_args implements \IThriftSyncStruct, \IThriftShapi
     return 'NestedContainers_mapList_args';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1111,6 +1114,9 @@ class NestedContainers_mapList_result extends \ThriftSyncStructWithoutResult {
     return 'NestedContainers_mapList_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1188,6 +1194,9 @@ class NestedContainers_mapSet_args implements \IThriftSyncStruct, \IThriftShapis
 
   public function getName()[]: string {
     return 'NestedContainers_mapSet_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1292,6 +1301,9 @@ class NestedContainers_mapSet_result extends \ThriftSyncStructWithoutResult {
     return 'NestedContainers_mapSet_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1369,6 +1381,9 @@ class NestedContainers_listMap_args implements \IThriftSyncStruct, \IThriftShapi
 
   public function getName()[]: string {
     return 'NestedContainers_listMap_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1473,6 +1488,9 @@ class NestedContainers_listMap_result extends \ThriftSyncStructWithoutResult {
     return 'NestedContainers_listMap_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1546,6 +1564,9 @@ class NestedContainers_listSet_args implements \IThriftSyncStruct, \IThriftShapi
 
   public function getName()[]: string {
     return 'NestedContainers_listSet_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1645,6 +1666,9 @@ class NestedContainers_listSet_result extends \ThriftSyncStructWithoutResult {
     return 'NestedContainers_listSet_result';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -1741,6 +1765,9 @@ class NestedContainers_turtles_args implements \IThriftSyncStruct, \IThriftShapi
 
   public function getName()[]: string {
     return 'NestedContainers_turtles_args';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -1887,6 +1914,9 @@ class NestedContainers_turtles_result extends \ThriftSyncStructWithoutResult {
 
   public function getName()[]: string {
     return 'NestedContainers_turtles_result';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

@@ -89,6 +89,9 @@ class MyStructNestedAnnotation implements \IThriftSyncStruct, \IThriftShapishSyn
     return 'MyStructNestedAnnotation';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -202,6 +205,9 @@ class MyUnion implements \IThriftSyncStruct, \IThriftUnion<MyUnionEnum>, \IThrif
     $this->_type = MyUnionEnum::_EMPTY_;
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
     return tmeta_ThriftStruct::fromShape(
       shape(
@@ -282,6 +288,9 @@ class MyException extends \TException implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'MyException';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
@@ -503,6 +512,9 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'MyStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {
@@ -835,6 +847,9 @@ class SecretStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   public function getName()[]: string {
     return 'SecretStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getStructMetadata()[]: \tmeta_ThriftStruct {

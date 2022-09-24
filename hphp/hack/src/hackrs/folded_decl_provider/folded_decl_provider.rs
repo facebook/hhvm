@@ -22,11 +22,13 @@ use ty::decl::Ty;
 use ty::decl::TypedefDecl;
 use ty::reason::Reason;
 
+mod eager;
 mod fold;
 mod inherit;
 mod provider;
 mod subst;
 
+pub use eager::EagerFoldedDeclProvider;
 pub use fold::DeclFolder;
 pub use provider::LazyFoldedDeclProvider;
 pub use subst::Substitution;

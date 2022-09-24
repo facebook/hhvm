@@ -53,6 +53,9 @@ class Fiery extends \TException implements \IThriftSyncStruct {
     return 'Fiery';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -138,6 +141,9 @@ class Serious extends \TException implements \IThriftSyncStruct {
   <<__Override>>
   public function getMessage()[]: string {
     return $this->sonnet ?? '';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
@@ -239,6 +245,9 @@ class ComplexFieldNames extends \TException implements \IThriftSyncStruct {
   <<__Override>>
   public function getMessage()[]: string {
     return $this->internal_error_message ?? '';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
@@ -352,6 +361,9 @@ class CustomFieldNames extends \TException implements \IThriftSyncStruct {
     return $this->internal_error_message ?? '';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -456,6 +468,9 @@ class ExceptionWithPrimitiveField extends \TException implements \IThriftSyncStr
 
   public function getName()[]: string {
     return 'ExceptionWithPrimitiveField';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
@@ -569,6 +584,9 @@ class ExceptionWithStructuredAnnotation extends \TException implements \IThriftS
     return $this->message_field ?? '';
   }
 
+  public function clearTerseFields()[write_props]: void {
+  }
+
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {
     return tmeta_ThriftException::fromShape(
       shape(
@@ -653,6 +671,9 @@ class Banal extends \TException implements \IThriftSyncStruct {
 
   public function getName()[]: string {
     return 'Banal';
+  }
+
+  public function clearTerseFields()[write_props]: void {
   }
 
   public static function getExceptionMetadata()[]: \tmeta_ThriftException {

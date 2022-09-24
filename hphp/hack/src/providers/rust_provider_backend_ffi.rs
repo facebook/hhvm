@@ -11,7 +11,9 @@ use hackrs_provider_backend::Config;
 use hackrs_provider_backend::FileType;
 use hackrs_provider_backend::HhServerProviderBackend;
 use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use ocamlrep_custom::Custom;
 use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
@@ -23,15 +25,44 @@ use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::shallow_decl_defs;
 use pos::RelativePath;
 use pos::RelativePathCtx;
+use rust_provider_backend_api::RustProviderBackend;
 use ty::decl;
 use ty::reason::BReason;
+use ty::reason::NReason;
 
-struct BackendWrapper(HhServerProviderBackend);
+pub enum BackendWrapper {
+    Positioned(Arc<dyn RustProviderBackend<BReason>>),
+    PositionFree(Arc<dyn RustProviderBackend<NReason>>),
+}
 
-impl std::ops::Deref for BackendWrapper {
-    type Target = HhServerProviderBackend;
-    fn deref(&self) -> &HhServerProviderBackend {
-        &self.0
+impl BackendWrapper {
+    pub fn positioned(backend: Arc<dyn RustProviderBackend<BReason>>) -> Custom<Self> {
+        Custom::from(Self::Positioned(backend))
+    }
+
+    pub fn position_free(backend: Arc<dyn RustProviderBackend<NReason>>) -> Custom<Self> {
+        Custom::from(Self::PositionFree(backend))
+    }
+
+    fn as_hh_server_backend(&self) -> Option<&HhServerProviderBackend> {
+        match self {
+            Self::Positioned(backend) => backend.as_any().downcast_ref(),
+            Self::PositionFree(..) => None,
+        }
+    }
+
+    pub fn file_provider(&self) -> &dyn file_provider::FileProvider {
+        match self {
+            Self::Positioned(backend) => backend.file_provider(),
+            Self::PositionFree(backend) => backend.file_provider(),
+        }
+    }
+
+    pub fn naming_provider(&self) -> &dyn naming_provider::NamingProvider {
+        match self {
+            Self::Positioned(backend) => backend.naming_provider(),
+            Self::PositionFree(backend) => backend.naming_provider(),
+        }
     }
 }
 
@@ -39,13 +70,16 @@ impl ocamlrep_custom::CamlSerialize for BackendWrapper {
     ocamlrep_custom::caml_serialize_default_impls!();
 
     fn serialize(&self) -> Vec<u8> {
-        let config: Config = self.0.config();
+        let backend = self
+            .as_hh_server_backend()
+            .expect("only HhServerProviderBackend can be serialized");
+        let config: Config = backend.config();
         bincode::serialize(&config).unwrap()
     }
 
     fn deserialize(data: &[u8]) -> Self {
         let config: Config = bincode::deserialize(data).unwrap();
-        Self(HhServerProviderBackend::new(config).unwrap())
+        BackendWrapper::Positioned(Arc::new(HhServerProviderBackend::new(config).unwrap()))
     }
 }
 
@@ -73,22 +107,34 @@ ocaml_ffi! {
             tmp,
             ..Default::default()
         };
-        let backend = HhServerProviderBackend::new(Config {
+        let backend = Arc::new(HhServerProviderBackend::new(Config {
             path_ctx,
             parser_options: opts,
             db_path: None,
-        }).unwrap();
-        Custom::from(BackendWrapper(backend))
+        }).unwrap());
+        BackendWrapper::positioned(backend)
     }
 }
 
+const UNIMPLEMENTED_MESSAGE: &str = "RustProviderBackend impls other than HhServerProviderBackend \
+    only support the minimum functionality necessary for typechecking a file. \
+    This API is not supported.";
+
 ocaml_ffi! {
     fn hh_rust_provider_backend_push_local_changes(backend: Backend) {
-        backend.push_local_changes();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.push_local_changes();
+        } else {
+            unimplemented!("push_local_changes: {UNIMPLEMENTED_MESSAGE}");
+        }
     }
 
     fn hh_rust_provider_backend_pop_local_changes(backend: Backend) {
-        backend.pop_local_changes();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.pop_local_changes();
+        } else {
+            unimplemented!("pop_local_changes: {UNIMPLEMENTED_MESSAGE}");
+        }
     }
 }
 
@@ -102,6 +148,10 @@ ocaml_ffi_with_arena! {
         text: UnsafeOcamlPtr,
     ) -> direct_decl_parser::ParsedFileWithHashes<'a> {
         let backend = unsafe { get_backend(backend) };
+        let backend = match backend.as_hh_server_backend() {
+            Some(backend) => backend,
+            None => unimplemented!("direct_decl_parse_and_cache: {UNIMPLEMENTED_MESSAGE}"),
+        };
         // SAFETY: Borrow the contents of the source file from the value on the
         // OCaml heap rather than copying it over. This is safe as long as we
         // don't call into OCaml within this function scope.
@@ -116,115 +166,11 @@ ocaml_ffi_with_arena! {
         decls: &[(&'a str, shallow_decl_defs::Decl<'a>)],
     ) {
         let backend = unsafe { get_backend(backend) };
+        let backend = match backend.as_hh_server_backend() {
+            Some(backend) => backend,
+            None => unimplemented!("add_shallow_decls: {UNIMPLEMENTED_MESSAGE}"),
+        };
         backend.add_decls(decls).unwrap();
-    }
-
-    fn hh_rust_provider_backend_get_fun<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::FunName,
-    ) -> Option<Arc<decl::FunDecl<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_fun(name.into(), name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_shallow_class<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::TypeName,
-    ) -> Option<Arc<decl::ShallowClass<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_class(name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_typedef<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::TypeName,
-    ) -> Option<Arc<decl::TypedefDecl<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_typedef(name.into(), name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_gconst<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::ConstName,
-    ) -> Option<Arc<decl::ConstDecl<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_const(name.into(), name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_module<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::ModuleName,
-    ) -> Option<Arc<decl::ModuleDecl<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_module(name.into(), name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_prop<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: (pos::TypeName, pos::PropName),
-    ) -> Option<decl::Ty<BReason>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_property_type(name.0, name.1).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_static_prop<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: (pos::TypeName, pos::PropName),
-    ) -> Option<decl::Ty<BReason>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_static_property_type(name.0, name.1).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_method<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: (pos::TypeName, pos::MethodName),
-    ) -> Option<decl::Ty<BReason>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_method_type(name.0, name.1).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_static_method<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: (pos::TypeName, pos::MethodName),
-    ) -> Option<decl::Ty<BReason>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_static_method_type(name.0, name.1).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_constructor<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::TypeName,
-    ) -> Option<decl::Ty<BReason>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.shallow_decl_provider().get_constructor_type(name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_get_folded_class<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::TypeName,
-    ) -> Option<Arc<decl::FoldedClass<BReason>>> {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_class(name.into(), name).unwrap()
-    }
-
-    fn hh_rust_provider_backend_declare_folded_class<'a>(
-        arena: &'a Bump,
-        backend: UnsafeOcamlPtr,
-        name: pos::TypeName,
-    ) {
-        let backend = unsafe { get_backend(backend) };
-        backend.folded_decl_provider().get_class(name.into(), name).unwrap();
     }
 }
 
@@ -236,6 +182,236 @@ unsafe fn get_backend(ptr: UnsafeOcamlPtr) -> Backend {
     Backend::from_ocamlrep(ptr.as_value()).unwrap()
 }
 
+// NB: this function interacts with the OCaml runtime (but won't trigger a GC).
+fn to_ocaml<T: ToOcamlRep + ?Sized>(value: &T) -> UnsafeOcamlPtr {
+    // SAFETY: this module doesn't do any concurrent interaction with the OCaml
+    // runtime while invoking this function
+    unsafe { UnsafeOcamlPtr::new(ocamlrep_ocamlpool::to_ocaml(value)) }
+}
+
+ocaml_ffi! {
+    fn hh_rust_provider_backend_get_fun(
+        backend: Backend,
+        name: pos::FunName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::FunDecl<BReason>>> = backend.folded_decl_provider()
+                    .get_fun(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::FunDecl<NReason>>> = backend.folded_decl_provider()
+                    .get_fun(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_shallow_class(
+        backend: Backend,
+        name: pos::TypeName,
+    ) -> Option<Arc<decl::ShallowClass<BReason>>> {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.shallow_decl_provider().get_class(name).unwrap()
+        } else {
+            unimplemented!("get_shallow_class: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_get_typedef(
+        backend: Backend,
+        name: pos::TypeName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::TypedefDecl<BReason>>> = backend.folded_decl_provider()
+                    .get_typedef(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::TypedefDecl<NReason>>> = backend.folded_decl_provider()
+                    .get_typedef(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_gconst(
+        backend: Backend,
+        name: pos::ConstName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::ConstDecl<BReason>>> = backend.folded_decl_provider()
+                    .get_const(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::ConstDecl<NReason>>> = backend.folded_decl_provider()
+                    .get_const(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_module(
+        backend: Backend,
+        name: pos::ModuleName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::ModuleDecl<BReason>>> = backend.folded_decl_provider()
+                    .get_module(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::ModuleDecl<NReason>>> = backend.folded_decl_provider()
+                    .get_module(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_prop(
+        backend: Backend,
+        name: (pos::TypeName, pos::PropName),
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
+                    .get_shallow_property_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
+                    .get_shallow_property_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_static_prop(
+        backend: Backend,
+        name: (pos::TypeName, pos::PropName),
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
+                    .get_shallow_static_property_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
+                    .get_shallow_static_property_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_method(
+        backend: Backend,
+        name: (pos::TypeName, pos::MethodName),
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
+                    .get_shallow_method_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
+                    .get_shallow_method_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_static_method(
+        backend: Backend,
+        name: (pos::TypeName, pos::MethodName),
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
+                    .get_shallow_static_method_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
+                    .get_shallow_static_method_type(name.0.into(), name.0, name.1)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_constructor(
+        backend: Backend,
+        name: pos::TypeName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
+                    .get_shallow_constructor_type(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<decl::Ty<NReason>> = backend.folded_decl_provider()
+                    .get_shallow_constructor_type(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_get_folded_class(
+        backend: Backend,
+        name: pos::TypeName,
+    ) -> UnsafeOcamlPtr {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => {
+                let res: Option<Arc<decl::FoldedClass<BReason>>> = backend.folded_decl_provider()
+                    .get_class(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+            BackendWrapper::PositionFree(backend) => {
+                let res: Option<Arc<decl::FoldedClass<NReason>>> = backend.folded_decl_provider()
+                    .get_class(name.into(), name)
+                    .unwrap();
+                to_ocaml(&res)
+            }
+        }
+    }
+
+    fn hh_rust_provider_backend_declare_folded_class(
+        backend: Backend,
+        name: pos::TypeName,
+    ) {
+        match &*backend {
+            BackendWrapper::Positioned(backend) => { backend.folded_decl_provider().get_class(name.into(), name).unwrap(); }
+            BackendWrapper::PositionFree(backend) => { backend.folded_decl_provider().get_class(name.into(), name).unwrap(); }
+        }
+    }
+}
+
 // File_provider ////////////////////////////////////////////////////////////
 
 ocaml_ffi! {
@@ -243,7 +419,16 @@ ocaml_ffi! {
         backend: Backend,
         path: RelativePath,
     ) -> Option<FileType> {
-        backend.file_store().get(path).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.file_store().get(path).unwrap()
+        } else {
+            // NB: This is semantically different than the above. We'll read
+            // from disk instead of returning None for files that aren't already
+            // present in our file store (i.e., the in-memory cache). We'll
+            // return Some("") instead of None for files that aren't present on
+            // disk.
+            Some(FileType::Disk(backend.file_provider().get(path).unwrap()))
+        }
     }
 
     fn hh_rust_provider_backend_file_provider_get_contents(
@@ -258,7 +443,11 @@ ocaml_ffi! {
         path: RelativePath,
         contents: bstr::BString,
     ) {
-        backend.file_store().insert(path, FileType::Disk(contents)).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.file_store().insert(path, FileType::Disk(contents)).unwrap();
+        } else {
+            unimplemented!("provide_file_for_tests: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_for_ide(
@@ -266,7 +455,11 @@ ocaml_ffi! {
         path: RelativePath,
         contents: bstr::BString,
     ) {
-        backend.file_store().insert(path, FileType::Ide(contents)).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.file_store().insert(path, FileType::Ide(contents)).unwrap();
+        } else {
+            unimplemented!("provide_file_for_ide: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_file_provider_provide_file_hint(
@@ -274,8 +467,12 @@ ocaml_ffi! {
         path: RelativePath,
         file: FileType,
     ) {
-        if let FileType::Ide(_) = file {
-            backend.file_store().insert(path, file).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let FileType::Ide(_) = file {
+                backend.file_store().insert(path, file).unwrap();
+            }
+        } else {
+            unimplemented!("provide_file_hint: {UNIMPLEMENTED_MESSAGE}")
         }
     }
 
@@ -283,7 +480,11 @@ ocaml_ffi! {
         backend: Backend,
         paths: BTreeSet<RelativePath>,
     ) {
-        backend.file_store().remove_batch(&mut paths.into_iter()).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.file_store().remove_batch(&mut paths.into_iter()).unwrap();
+        } else {
+            unimplemented!("file_provider_remove_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 }
 
@@ -295,28 +496,53 @@ ocaml_ffi! {
         name: pos::TypeName,
         pos: (file_info::Pos, naming_types::KindOfType),
     ) {
-        backend.naming_table().add_type(name, &pos).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().add_type(name, &pos).unwrap();
+        } else {
+            unimplemented!("naming_types_add: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_types_get_pos(
         backend: Backend,
         name: pos::TypeName,
     ) -> Option<(file_info::Pos, naming_types::KindOfType)> {
-        backend.naming_table().get_type_pos(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_type_pos(name).unwrap()
+        } else {
+            backend.naming_provider()
+                .get_type_path_and_kind(name).unwrap()
+                .map(|(path, kind)| {
+                    (
+                        file_info::Pos::File(kind.into(), RcOc::new(path.into())),
+                        kind,
+                    )
+                })
+        }
     }
 
     fn hh_rust_provider_backend_naming_types_remove_batch(
         backend: Backend,
         names: Vec<pos::TypeName>,
     ) {
-        backend.naming_table().remove_type_batch(&names).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().remove_type_batch(&names).unwrap();
+        } else {
+            unimplemented!("naming_types_remove_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_types_get_canon_name(
         backend: Backend,
         name: pos::TypeName,
     ) -> Option<pos::TypeName> {
-        backend.naming_table().get_canon_type_name(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_canon_type_name(name).unwrap()
+        } else {
+            // TODO: raise an exception or change NamingProvider to include
+            // canon methods; this implementation is incorrect
+            Some(name)
+        }
     }
 
     fn hh_rust_provider_backend_naming_funs_add(
@@ -324,28 +550,48 @@ ocaml_ffi! {
         name: pos::FunName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table().add_fun(name, &pos).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().add_fun(name, &pos).unwrap();
+        } else {
+            unimplemented!("naming_funs_add: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_funs_get_pos(
         backend: Backend,
         name: pos::FunName,
     ) -> Option<file_info::Pos> {
-        backend.naming_table().get_fun_pos(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_fun_pos(name).unwrap()
+        } else {
+            backend.naming_provider()
+                .get_fun_path(name).unwrap()
+                .map(|path| file_info::Pos::File(file_info::NameType::Fun, RcOc::new(path.into())))
+        }
     }
 
     fn hh_rust_provider_backend_naming_funs_remove_batch(
         backend: Backend,
         names: Vec<pos::FunName>,
     ) {
-        backend.naming_table().remove_fun_batch(&names).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().remove_fun_batch(&names).unwrap();
+        } else {
+            unimplemented!("naming_funs_remove_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_funs_get_canon_name(
         backend: Backend,
         name: pos::FunName,
     ) -> Option<pos::FunName> {
-        backend.naming_table().get_canon_fun_name(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_canon_fun_name(name).unwrap()
+        } else {
+            // TODO: raise an exception or change NamingProvider to include
+            // canon methods; this implementation is incorrect
+            Some(name)
+        }
     }
 
     fn hh_rust_provider_backend_naming_consts_add(
@@ -353,21 +599,35 @@ ocaml_ffi! {
         name: pos::ConstName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table().add_const(name, &pos).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().add_const(name, &pos).unwrap();
+        } else {
+            unimplemented!("naming_consts_add: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_consts_get_pos(
         backend: Backend,
         name: pos::ConstName,
     ) -> Option<file_info::Pos> {
-        backend.naming_table().get_const_pos(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_const_pos(name).unwrap()
+        } else {
+            backend.naming_provider()
+                .get_const_path(name).unwrap()
+                .map(|path| file_info::Pos::File(file_info::NameType::Const, RcOc::new(path.into())))
+        }
     }
 
     fn hh_rust_provider_backend_naming_consts_remove_batch(
         backend: Backend,
         names: Vec<pos::ConstName>,
     ) {
-        backend.naming_table().remove_const_batch(&names).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().remove_const_batch(&names).unwrap();
+        } else {
+            unimplemented!("naming_consts_remove_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_modules_add(
@@ -375,40 +635,66 @@ ocaml_ffi! {
         name: pos::ModuleName,
         pos: file_info::Pos,
     ) {
-        backend.naming_table().add_module(name, &pos).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().add_module(name, &pos).unwrap();
+        } else {
+            unimplemented!("naming_modules_add: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_modules_get_pos(
         backend: Backend,
         name: pos::ModuleName,
     ) -> Option<file_info::Pos> {
-        backend.naming_table().get_module_pos(name).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_module_pos(name).unwrap()
+        } else {
+            backend.naming_provider()
+                .get_module_path(name).unwrap()
+                .map(|path| file_info::Pos::File(file_info::NameType::Module, RcOc::new(path.into())))
+        }
     }
 
     fn hh_rust_provider_backend_naming_modules_remove_batch(
         backend: Backend,
         names: Vec<pos::ModuleName>,
     ) {
-        backend.naming_table().remove_module_batch(&names).unwrap();
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().remove_module_batch(&names).unwrap();
+        } else {
+            unimplemented!("naming_modules_remove_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_get_db_path(
         backend: Backend,
     ) -> Option<PathBuf> {
-        backend.naming_table().db_path()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().db_path()
+        } else {
+            unimplemented!("naming_get_db_path: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_set_db_path(
         backend: Backend,
         db_path: PathBuf,
     ) {
-        backend.naming_table().set_db_path(db_path).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().set_db_path(db_path).unwrap()
+        } else {
+            unimplemented!("naming_set_db_path: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 
     fn hh_rust_provider_backend_naming_get_filenames_by_hash(
         backend: Backend,
         deps: Custom<deps_rust::DepSet>,
     ) -> std::collections::BTreeSet<RelativePath> {
-        backend.naming_table().get_filenames_by_hash(&deps).unwrap()
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.naming_table().get_filenames_by_hash(&deps).unwrap()
+        } else {
+            unimplemented!("naming_get_filenames_by_hash: {UNIMPLEMENTED_MESSAGE}")
+        }
     }
 }

@@ -299,8 +299,6 @@ Class* get_cls(const Variant& class_or_object);
 const Func* get_method_func(const Class* cls, const String& meth_name);
 Variant default_arg_from_php_code(const Func::ParamInfo& fpi, const Func* func,
                                   unsigned argIdx);
-bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
-                                     Variant &cns);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

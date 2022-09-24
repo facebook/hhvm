@@ -357,31 +357,6 @@ static bool resolveConstant(const char *p, int64_t len, Variant &cns) {
   return true;
 }
 
-bool resolveDefaultParameterConstant(const char *value, int64_t valueLen,
-                                     Variant &cns) {
-  const char *p = value;
-  const char *e = value + valueLen;
-  const char *s;
-  bool isLval = false;
-  int64_t lval = 0;
-
-  while ((s = strchr(p, '|'))) {
-    isLval = true;
-    if (!resolveConstant(p, s - p, cns)) {
-      return false;
-    }
-    lval |= cns.toInt64();
-    p = s + 1;
-  }
-  if (!resolveConstant(p, e - p, cns)) {
-    return false;
-  }
-  if (isLval) {
-    cns = cns.toInt64() | lval;
-  }
-  return true;
-}
-
 static bool isConstructor(const Func* func) {
   PreClass* pcls = func->preClass();
   if (!pcls || (pcls->attrs() & AttrInterface)) { return false; }

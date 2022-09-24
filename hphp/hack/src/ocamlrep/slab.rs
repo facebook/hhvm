@@ -660,6 +660,12 @@ fn deserialize_slab<'de, D: serde::Deserializer<'de>>(
     Ok(slab)
 }
 
+pub unsafe fn buf_into_value<'a>(buf: &'a mut [u8]) -> Option<Value<'a>> {
+    let slab = Slab::from_bytes_mut(buf);
+    slab.rebase_to(slab.current_address());
+    slab.value()
+}
+
 fn slab_from_words(words: Box<[usize]>) -> Result<Box<Slab<'static>>, SlabIntegrityError> {
     let mut slab = unsafe { std::mem::transmute::<Box<[usize]>, Box<Slab<'static>>>(words) };
     // Do a (relatively expensive) integrity check, since we have no

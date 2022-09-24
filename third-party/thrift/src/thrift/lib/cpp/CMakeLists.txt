@@ -92,6 +92,16 @@ add_library(
   async/TUnframedAsyncChannel.cpp
   server/TServerObserver.cpp
 )
+if (
+  CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR
+  CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+)
+  target_compile_options(
+    async
+    PUBLIC
+      $<$<COMPILE_LANGUAGE:CXX>:-fsized-deallocation>
+  )
+endif()
 target_link_libraries(
   async
   PUBLIC

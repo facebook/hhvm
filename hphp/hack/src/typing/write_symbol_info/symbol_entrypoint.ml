@@ -16,10 +16,10 @@ let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
   Hh_logger.log "%s %dm%ds" s tm_min tm_sec
 
-let write_file file_dir num_tasts json_chunks =
+let write_file out_dir num_tasts json_chunks =
   let (_out_file, channel) =
     Caml.Filename.open_temp_file
-      ~temp_dir:file_dir
+      ~temp_dir:out_dir
       "glean_symbol_info_chunk_"
       ".json"
   in
@@ -41,14 +41,10 @@ let index_namespace_map ns ~ownership =
 
 let write_json
     (ctx : Provider_context.t)
-    (namespace_map : (string * string) list)
     (ownership : bool)
-    (file_dir : string)
+    (out_dir : string)
     (files_info : File_info.t list)
     (start_time : float) : float =
-  let json_namespace_map = index_namespace_map namespace_map ~ownership in
-  write_file file_dir 1 json_namespace_map;
-
   (* Large file may lead to large json files which timeout when sent
      to the server. Not an issue currently, but if it is, we can index
      xrefs/decls separately, or split in batches according to files size *)
@@ -58,7 +54,7 @@ let write_json
      let json_chunks =
        Symbol_index_batch.build_json ctx files_info ~ownership
      in
-     write_file file_dir (List.length files_info) json_chunks
+     write_file out_dir (List.length files_info) json_chunks
    with
    | WorkerCancel.Worker_should_exit as exn ->
      (* Cancellation requests must be re-raised *)
@@ -72,7 +68,6 @@ let write_json
 
 let recheck_job
     (ctx : Provider_context.t)
-    (namespace_map : (string * string) list)
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
@@ -83,10 +78,10 @@ let recheck_job
   let files_info =
     List.map progress ~f:(File_info.create ctx ~root_path ~hhi_path)
   in
-  write_json ctx namespace_map ownership out_dir files_info start_time
+  write_json ctx ownership out_dir files_info start_time
 
 let index_files ctx ~out_dir ~files =
-  recheck_job ctx [] out_dir "www" "hhi" false 0.0 files |> ignore
+  recheck_job ctx out_dir "www" "hhi" false 0.0 files |> ignore
 
 let go
     (workers : MultiWorker.worker list option)
@@ -106,11 +101,13 @@ let go
   let cumulated_elapsed =
     MultiWorker.call
       workers
-      ~job:(recheck_job ctx namespace_map out_dir root_path hhi_path ownership)
+      ~job:(recheck_job ctx out_dir root_path hhi_path ownership)
       ~merge:(fun f1 f2 -> f1 +. f2)
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
       ~neutral:0.
   in
+  let json_namespace_map = index_namespace_map namespace_map ~ownership in
+  write_file out_dir 1 json_namespace_map;
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in
   log_elapsed "Processed all batches in " elapsed

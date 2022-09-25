@@ -1681,7 +1681,7 @@ void skipTrivialCast(IRGS& env, Op op) {
 
   auto const next = getBlock(env, nextSrcKey(env));
   if (input->isA(type)) gen(env, Jmp, next);
-  ifThen(env,
+  ifElse(env,
     [&](Block* taken) { gen(env, CheckType, type, taken, input); },
     [&]{ gen(env, Jmp, next); }
   );

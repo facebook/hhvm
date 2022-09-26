@@ -17,23 +17,9 @@ use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Deserialize,
-    Eq,
-    EqModuloPos,
-    Hash,
-    FromOcamlRep,
-    FromOcamlRepIn,
-    ToOcamlRep,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    Serialize
-)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Deserialize, Serialize)]
+#[derive(EqModuloPos, FromOcamlRep, FromOcamlRepIn, ToOcamlRep, NoPosHash)]
 #[repr(u8)]
 pub enum Prefix {
     Root,
@@ -59,34 +45,23 @@ impl TryFrom<usize> for Prefix {
 
 impl Display for Prefix {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        use Prefix::*;
         // NB: This encoding is used in the impl of Serialize and Deserialize
         // for RelativePath below.
         match self {
-            Root => write!(f, "root"),
-            Hhi => write!(f, "hhi"),
-            Tmp => write!(f, "tmp"),
-            Dummy => write!(f, ""),
+            Self::Root => write!(f, "root"),
+            Self::Hhi => write!(f, "hhi"),
+            Self::Tmp => write!(f, "tmp"),
+            Self::Dummy => write!(f, ""),
         }
     }
 }
 
+#[derive(Default)]
 pub struct PrefixPathMap {
     root: PathBuf,
     hhi: PathBuf,
     tmp: PathBuf,
     dummy: PathBuf,
-}
-
-impl Default for PrefixPathMap {
-    fn default() -> Self {
-        Self {
-            root: PathBuf::new(),
-            hhi: PathBuf::new(),
-            tmp: PathBuf::new(),
-            dummy: PathBuf::new(),
-        }
-    }
 }
 
 impl Prefix {
@@ -100,19 +75,8 @@ impl Prefix {
     }
 }
 
-#[derive(
-    Clone,
-    Debug,
-    Eq,
-    EqModuloPos,
-    Hash,
-    FromOcamlRep,
-    ToOcamlRep,
-    NoPosHash,
-    Ord,
-    PartialEq,
-    PartialOrd
-)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(EqModuloPos, FromOcamlRep, ToOcamlRep, NoPosHash)]
 pub struct RelativePath {
     prefix: Prefix,
     path: PathBuf,
@@ -146,9 +110,7 @@ impl RelativePath {
     pub fn to_absolute(&self) -> PathBuf {
         let prefix_map = PrefixPathMap::default();
         let prefix = self.prefix.to_path(&prefix_map);
-        let mut r = PathBuf::from(prefix);
-        r.push(self.path.as_path());
-        r
+        prefix.join(&self.path)
     }
 
     pub fn utf8_path(&self) -> &Utf8Path {
@@ -166,9 +128,7 @@ impl Display for RelativePath {
 // as a string. This allows using it as a map key in serde_json.
 impl Serialize for RelativePath {
     fn serialize<S: serde::Serializer>(&self, serializer: S) -> Result<S::Ok, S::Error> {
-        let path_str = self
-            .path
-            .to_str()
+        let path_str = (self.path.to_str())
             .ok_or_else(|| serde::ser::Error::custom("path contains invalid UTF-8 characters"))?;
         serializer.serialize_str(&format!("{}|{}", self.prefix, path_str))
     }

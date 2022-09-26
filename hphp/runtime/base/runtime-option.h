@@ -1443,6 +1443,7 @@ struct RuntimeOption {
   F(bool, TaintLogRequestURLs, false)                                   \
   F(bool, DiamondTraitMethods, false)                                   \
   F(uint32_t, HHIRSpecializedDestructorThreshold, 80)                   \
+  F(bool, FastRepoOptionCache, true)                                    \
   /* */
 
 private:

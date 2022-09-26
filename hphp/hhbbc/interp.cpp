@@ -2674,12 +2674,6 @@ void in(ISS& env, const bc::IssetS& op) {
 
 void in(ISS& env, const bc::IssetG&) { popC(env); push(env, TBool); }
 
-void isTypeImpl(ISS& env, const Type& locOrCell, const Type& test) {
-  if (locOrCell.subtypeOf(test))  return push(env, TTrue);
-  if (!locOrCell.couldBe(test))   return push(env, TFalse);
-  push(env, TBool);
-}
-
 void isTypeObj(ISS& env, const Type& ty) {
   if (!ty.couldBe(BObj)) return push(env, TFalse);
   if (ty.subtypeOf(BObj)) {
@@ -2696,6 +2690,24 @@ void isTypeObj(ISS& env, const Type& ty) {
   push(env, TBool);
 }
 
+void isTypeImpl(ISS& env, const Type& locOrCell, IsTypeOp subop) {
+  switch (subop) {
+    case IsTypeOp::Scalar: return push(env, TBool);
+    case IsTypeOp::LegacyArrLike: return push(env, TBool);
+    case IsTypeOp::Obj: return isTypeObj(env, locOrCell);
+    case IsTypeOp::Func:
+      // If it is TFunc, it may still be meth_caller.
+      if (locOrCell.couldBe(TFunc)) return push(env, TBool);
+      break;
+    default: break;
+  }
+
+  auto const test = type_of_istype(subop);
+  if (locOrCell.subtypeOf(test))  return push(env, TTrue);
+  if (!locOrCell.couldBe(test))   return push(env, TFalse);
+  push(env, TBool);
+}
+
 template<class Op>
 void isTypeLImpl(ISS& env, const Op& op) {
   auto const loc = locAsCell(env, op.nloc1.id);
@@ -2705,14 +2717,7 @@ void isTypeLImpl(ISS& env, const Op& op) {
     effect_free(env);
   }
 
-  switch (op.subop2) {
-  case IsTypeOp::Scalar: return push(env, TBool);
-  case IsTypeOp::LegacyArrLike: return push(env, TBool);
-  case IsTypeOp::Obj: return isTypeObj(env, loc);
-  case IsTypeOp::Func:
-    return loc.couldBe(TFunc) ? push(env, TBool) : push(env, TFalse);
-  default: return isTypeImpl(env, loc, type_of_istype(op.subop2));
-  }
+  isTypeImpl(env, loc, op.subop2);
 }
 
 template<class Op>
@@ -2723,14 +2728,7 @@ void isTypeCImpl(ISS& env, const Op& op) {
     effect_free(env);
   }
 
-  switch (op.subop1) {
-  case IsTypeOp::Scalar: return push(env, TBool);
-  case IsTypeOp::LegacyArrLike: return push(env, TBool);
-  case IsTypeOp::Obj: return isTypeObj(env, t1);
-  case IsTypeOp::Func:
-    return t1.couldBe(TFunc) ? push(env, TBool) : push(env, TFalse);
-  default: return isTypeImpl(env, t1, type_of_istype(op.subop1));
-  }
+  isTypeImpl(env, t1, op.subop1);
 }
 
 void in(ISS& env, const bc::IsTypeC& op) { isTypeCImpl(env, op); }

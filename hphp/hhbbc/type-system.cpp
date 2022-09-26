@@ -3860,9 +3860,9 @@ Type type_of_istype(IsTypeOp op) {
   case IsTypeOp::Dict:    return TDict;
   case IsTypeOp::Keyset:  return TKeyset;
   case IsTypeOp::Obj:     return TObj;
-  case IsTypeOp::ClsMeth: return TClsMeth;
+  case IsTypeOp::ClsMeth: return union_of(TClsMeth, TRClsMeth);
   case IsTypeOp::Class:   return union_of(TCls, TLazyCls);
-  case IsTypeOp::Func:    return TFunc;
+  case IsTypeOp::Func:    return union_of(TFunc, TRFunc);
   case IsTypeOp::ArrLike: return TArrLike;
   case IsTypeOp::Scalar: always_assert(false);
   case IsTypeOp::LegacyArrLike: always_assert(false);

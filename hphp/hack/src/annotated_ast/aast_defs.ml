@@ -11,10 +11,6 @@
  * requiring a lot of padding for inline doc comments. *)
 [@@@ocamlformat "doc-comments-padding=80"]
 
-module ShapeMap = Ast_defs.ShapeMap
-
-type 'a shape_map = 'a ShapeMap.t [@@deriving eq, ord, show]
-
 type 'a local_id_map = 'a Local_id.Map.t [@@deriving eq, ord, show]
 
 let pp_local_id_map _ fmt map =
@@ -728,6 +724,7 @@ and ('ex, 'en) expr_ =
 and hole_source =
   | Typing
   | UnsafeCast of hint list
+  | UnsafeNonnullCast
   | EnforcedCast of hint list
 
 and ('ex, 'en) class_get_expr =

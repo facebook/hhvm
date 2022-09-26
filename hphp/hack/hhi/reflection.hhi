@@ -352,5 +352,5 @@ class ReflectionModule implements Reflector {
   final public function getAttributes()[]: darray<string, varray<mixed>>;
   final public function hasAttribute(string $name)[]: bool;
   final public function getAttribute(string $name)[]: ?varray<mixed>;
-  final public function getAttributeClass<T as HH\FileAttribute>(classname<T> $c)[]: ?T;
+  final public function getAttributeClass<T as HH\ModuleAttribute>(classname<T> $c)[]: ?T;
 }

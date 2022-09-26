@@ -1597,13 +1597,16 @@ impl<'a: 'b, 'b, 'arena: 'a + 'b> ClosureVisitor<'a, 'b, 'arena> {
     }
 }
 
-/// Swap *e with Expr_::Null, then return it with UNSAFE_CAST stripped off.
+/// Swap *e with Expr_::Null, then return it with UNSAFE_CAST
+/// and UNSAFE_NONNULL_CAST stripped off.
 fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
     let null = Expr_::mk_null();
     let mut e_owned = std::mem::replace(e, null);
     /*
         If this is a call of the form
           HH\FIXME\UNSAFE_CAST(e, ...)
+        or
+          HH\FIXME\UNSAFE_NONNULL_CAST(e, ...)
         then treat as a no-op by transforming it to
           e
         Repeat in case there are nested occurrences
@@ -1614,8 +1617,10 @@ fn strip_unsafe_casts(e: &mut Expr_) -> Expr_ {
             Expr_::Call(mut x)
                 if !x.2.is_empty() && {
                     // Function name should be HH\FIXME\UNSAFE_CAST
+                    // or HH\FIXME\UNSAFE_NONNULL_CAST
                     if let Expr_::Id(ref id) = (x.0).2 {
                         id.1 == pseudo_functions::UNSAFE_CAST
+                            || id.1 == pseudo_functions::UNSAFE_NONNULL_CAST
                     } else {
                         false
                     }

@@ -338,7 +338,7 @@ fn type_exists(result: &compile_ffi::DeclResult, symbol: &str) -> bool {
         .parsed_file
         .decls
         .types()
-        .any(|(sym, _)| sym == symbol)
+        .any(|(sym, _)| *sym == symbol)
 }
 
 pub fn direct_decl_parse(

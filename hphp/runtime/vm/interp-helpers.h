@@ -319,17 +319,6 @@ inline void initFuncInputs(const Func* callee, uint32_t numArgsInclUnpack) {
 }
 
 /*
- * This helper only does a stack overflow check for the native stack.
- * Both native and VM stack overflows are independently possible.
- */
-inline void checkNativeStack() {
-  // Check whether we're going out of bounds of our native stack.
-  if (LIKELY(stack_in_bounds())) return;
-  TRACE_MOD(Trace::gc, 1, "Maximum stack depth exceeded.\n");
-  throw_stack_overflow();
-}
-
-/*
  * This helper does a stack overflow check on *both* the native stack
  * and the VM stack.
  *

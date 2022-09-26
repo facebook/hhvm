@@ -74,7 +74,7 @@ pub struct DeclSummary {
 }
 
 impl DeclSummary {
-    pub fn new(symbol: &str, decl: Decl<'_>) -> Self {
+    pub fn new(symbol: &str, decl: &Decl<'_>) -> Self {
         Self {
             name_type: decl.kind(),
             symbol: symbol.to_owned(),
@@ -87,9 +87,9 @@ impl DeclSummary {
     }
 }
 
-impl From<(&str, Decl<'_>)> for DeclSummary {
-    fn from((symbol, decl): (&str, Decl<'_>)) -> Self {
-        Self::new(symbol, decl)
+impl From<&(&str, Decl<'_>)> for DeclSummary {
+    fn from((symbol, decl): &(&str, Decl<'_>)) -> Self {
+        Self::new(*symbol, decl)
     }
 }
 
@@ -118,7 +118,7 @@ impl SymbolRow {
         path: RelativePath,
         file_info_id: crate::FileInfoId,
         name: &str,
-        decl: Decl<'_>,
+        decl: &Decl<'_>,
     ) -> Self {
         let kind = decl.kind();
         Self {

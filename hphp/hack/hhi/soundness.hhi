@@ -29,3 +29,20 @@ namespace HH\FIXME;
  * expression.
  */
 function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\FormatString<nothing> $msg = null)[]: Tout;
+
+/**
+ * `UNSAFE_NONNULL_CAST` allows you to lie to the type checker and
+ * pretend that a value is never `null`. **This is almost always a bad
+ * idea**. It can lead to exceptions that the type checker would have
+ * prevented.
+ *
+ * If you're sure a value is never null, use `$my_value as nonnull`. The
+ * type checker understands this, and the runtime checks the value.
+ *
+ * If you're not sure whether a value is null, check for null first.
+ *
+ * ```
+ * if ($my_value is null) { ... } else { ... }
+ * ```
+ */
+function UNSAFE_NONNULL_CAST<T as nonnull>(?T $t, ?\HH\FormatString<nothing> $msg = null)[]: T;

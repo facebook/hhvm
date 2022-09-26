@@ -15,6 +15,7 @@
  */
 
 #include <utility>
+#include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_exception.h>
 #include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_service.h>
@@ -202,6 +203,22 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   auto schema = val();
   schema->set_map();
   add_definition(*schema, node);
+  return schema;
+}
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
+
+  schema->add_map(val("type"), gen_type(*node.type()->get_true_type()));
+
+  const auto* program = node.program();
+  assert(program);
+  auto id = const_cast<t_program*>(program)->intern_value(
+      node.value()->clone(), node.type());
+  schema->add_map(val("value"), val(id));
+
   return schema;
 }
 } // namespace compiler

@@ -496,9 +496,9 @@ u64_hash_wrapper_impls! { DeclHash }
 use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::shallow_decl_defs;
 
-impl From<Decl<'_>> for DeclHash {
-    fn from(decl: Decl<'_>) -> Self {
-        match decl {
+impl From<&Decl<'_>> for DeclHash {
+    fn from(decl: &Decl<'_>) -> Self {
+        match *decl {
             Decl::Class(decl) => decl.into(),
             Decl::Fun(decl) => decl.into(),
             Decl::Typedef(decl) => decl.into(),

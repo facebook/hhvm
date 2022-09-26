@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d38688ae2d756bafdee5e048d605b419>>
+// @generated SignedSource<<b5f455e08988ea4bffb10850342981e7>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -2381,6 +2381,9 @@ impl HoleSource {
     pub fn mk_unsafe_cast(p0: Vec<Hint>) -> Self {
         HoleSource::UnsafeCast(p0)
     }
+    pub fn mk_unsafe_nonnull_cast() -> Self {
+        HoleSource::UnsafeNonnullCast
+    }
     pub fn mk_enforced_cast(p0: Vec<Hint>) -> Self {
         HoleSource::EnforcedCast(p0)
     }
@@ -2393,6 +2396,12 @@ impl HoleSource {
     pub fn is_unsafe_cast(&self) -> bool {
         match self {
             HoleSource::UnsafeCast(..) => true,
+            _ => false,
+        }
+    }
+    pub fn is_unsafe_nonnull_cast(&self) -> bool {
+        match self {
+            HoleSource::UnsafeNonnullCast => true,
             _ => false,
         }
     }

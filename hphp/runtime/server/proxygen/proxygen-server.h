@@ -18,7 +18,6 @@
 
 #include "hphp/runtime/server/cert-reloader.h"
 #include "hphp/runtime/server/proxygen/proxygen-transport.h"
-#include "hphp/runtime/server/job-queue-vm-stack.h"
 #include "hphp/runtime/server/server-worker.h"
 #include "hphp/runtime/server/server.h"
 #include <proxygen/lib/http/session/HTTPSessionAcceptor.h>

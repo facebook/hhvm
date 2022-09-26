@@ -20,9 +20,11 @@
 #include <unordered_map>
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_base_type.h>
+#include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_function.h>
 #include <thrift/compiler/ast/t_map.h>
 #include <thrift/compiler/ast/t_paramlist.h>
+#include <thrift/compiler/ast/t_program.h>
 #include <thrift/compiler/ast/t_struct.h>
 
 namespace apache::thrift::compiler {
@@ -141,6 +143,34 @@ TEST(SchematizerTest, Structured) {
           .at(0)
           .first->get_string(),
       "doubleType");
+}
+
+TEST(SchematizerTest, Const) {
+  std::string program_path("path/to/Program.thrift");
+  t_program program(program_path);
+
+  std::string const_name("Const");
+  std::string const_uri("path/to/Const");
+  t_type_ref const_type(t_base_type::t_string());
+
+  t_const c(
+      &program,
+      const_type,
+      const_name,
+      std::make_unique<t_const_value>("Hello"));
+  c.set_uri(const_uri);
+
+  auto schema = schematizer::gen_schema(c);
+  auto map = flatten_map(*schema);
+
+  validateDefinition(map, const_name, const_uri);
+
+  auto type = flatten_map(*map.at("type"));
+  EXPECT_EQ(type.at("name")->get_map().at(0).first->get_string(), "stringType");
+
+  auto& container = program.intern_list();
+  EXPECT_EQ(container.size(), 1);
+  EXPECT_EQ(container[0]->get_value()->get_string(), "Hello");
 }
 
 } // namespace apache::thrift::compiler

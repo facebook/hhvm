@@ -535,6 +535,8 @@ pub mod pseudo_functions {
 
     pub const UNSAFE_CAST: &str = "\\HH\\FIXME\\UNSAFE_CAST";
 
+    pub const UNSAFE_NONNULL_CAST: &str = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST";
+
     pub const ENFORCED_CAST: &str = "\\HH\\FIXME\\ENFORCED_CAST";
 
     pub static ALL_PSEUDO_FUNCTIONS: &[&str] = &[
@@ -552,6 +554,7 @@ pub mod pseudo_functions {
         EXIT,
         DIE,
         UNSAFE_CAST,
+        UNSAFE_NONNULL_CAST,
     ];
 
     lazy_static! {

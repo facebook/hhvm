@@ -90,8 +90,8 @@ module TShapeField : sig
   val of_ast : (Pos.t -> Pos_or_decl.t) -> Ast_defs.shape_field_name -> t
 end
 
-(** This is similar to Aast.ShapeMap, but contains Pos_or_decl.t
-    instead of Pos.t. Aast.ShapeMap is used in shape expressions,
+(** This is similar to Ast_defs.ShapeMap, but contains Pos_or_decl.t
+    instead of Pos.t. Ast_defs.ShapeMap is used in shape expressions,
     while this is used in shape types. *)
 module TShapeMap : sig
   include WrappedMap.S with type key = TShapeField.t

@@ -180,8 +180,6 @@ module PositionedValueBuilder = struct
 end
 
 include PositionedWithValue.WithValueBuilder (PositionedValueBuilder)
-module Validated =
-  Full_fidelity_validated_syntax.Make (Token) (PositionedSyntaxValue)
 
 let source_text node = PositionedSyntaxValue.source_text (value node)
 

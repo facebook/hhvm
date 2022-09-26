@@ -629,6 +629,8 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
+void flush_evaluation_stack();
+
 /*
  * Visit all the slots on a live eval stack, stopping when we reach
  * the supplied activation record.

@@ -163,7 +163,7 @@ ocaml_ffi_with_arena! {
     fn hh_rust_provider_backend_add_shallow_decls<'a>(
         arena: &'a Bump,
         backend: UnsafeOcamlPtr,
-        decls: &[(&'a str, shallow_decl_defs::Decl<'a>)],
+        decls: &[&(&'a str, shallow_decl_defs::Decl<'a>)],
     ) {
         let backend = unsafe { get_backend(backend) };
         let backend = match backend.as_hh_server_backend() {

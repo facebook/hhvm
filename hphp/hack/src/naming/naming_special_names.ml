@@ -835,6 +835,8 @@ module PseudoFunctions = struct
 
   let unsafe_cast = "\\HH\\FIXME\\UNSAFE_CAST"
 
+  let unsafe_nonnull_cast = "\\HH\\FIXME\\UNSAFE_NONNULL_CAST"
+
   let enforced_cast = "\\HH\\FIXME\\ENFORCED_CAST"
 
   let all_pseudo_functions =
@@ -854,6 +856,7 @@ module PseudoFunctions = struct
         exit;
         die;
         unsafe_cast;
+        unsafe_nonnull_cast;
       ]
 
   let is_pseudo_function x = HashSet.mem all_pseudo_functions x
@@ -894,6 +897,7 @@ module StdlibFunctions = struct
         PseudoFunctions.unset;
         type_structure;
         PseudoFunctions.unsafe_cast;
+        PseudoFunctions.unsafe_nonnull_cast;
       ]
 
   let needs_special_dispatch x = Hash_set.mem special_dispatch x

@@ -27,6 +27,13 @@ There are three different categories of conformance tests:
 - **[Server](testsuite/server-rpc.md)** - This category of conformance describes the server behavior when making a RPC call.
 Client/Server test focus on invoking remote procedure calls (RPCs) with request-response, streaming, sink and interactions, while data tests cover the (de)serialization of Thrift values in any context (RPC, disk, db, etc).
 
+### Test Groups
+
+Tests in thrift conformance are grouped. There are smoke test and regression test groups. Tests are assigned to the groups by setting a tag.
+
+- **test/regression** - Tests tagged with "test/regression" are excluded from CI (Continuous Integration) builds, runs daily on stable builds.
+- **test/smoke** - Tests tagged with "test/smoke" are executed on each CI build. Failure of these tests will cause a build break. The goal is to test the core functionalities quickly. Only a subset of the conformance tests are tagged with "test/smoke" as too many tests in this bucket will increase build time and eventually timeout. These tests are also executed as part of the regression tests.
+
 ### Conformance tests
 
 - [Conformance Quickstart Guide](fb/quickstart.md)

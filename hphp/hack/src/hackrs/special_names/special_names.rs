@@ -245,6 +245,8 @@ pub mod pseudo_functions {
     pub static exit: Lazy<FunName> = lazy!(sn::pseudo_functions::EXIT);
     pub static die: Lazy<FunName> = lazy!(sn::pseudo_functions::DIE);
     pub static unsafe_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::UNSAFE_CAST);
+    pub static unsafe_nonnull_cast: Lazy<FunName> =
+        lazy!(sn::pseudo_functions::UNSAFE_NONNULL_CAST);
     pub static enforced_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::ENFORCED_CAST);
 }
 

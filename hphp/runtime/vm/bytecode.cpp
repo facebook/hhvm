@@ -29,16 +29,14 @@
 #include <folly/String.h>
 #include <folly/portability/SysMman.h>
 
-#include "hphp/util/numa.h"
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
+#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
 #include "hphp/system/systemlib.h"
 
-#include "hphp/runtime/base/apc-stats.h"
-#include "hphp/runtime/base/apc-typed-value.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/array-iterator.h"
 #include "hphp/runtime/base/array-provenance.h"
@@ -46,19 +44,14 @@
 #include "hphp/runtime/base/code-coverage.h"
 #include "hphp/runtime/base/collections.h"
 #include "hphp/runtime/base/container-functions.h"
-#include "hphp/runtime/base/enum-util.h"
 #include "hphp/runtime/base/execution-context.h"
 #include "hphp/runtime/base/file-util.h"
-#include "hphp/runtime/base/hhprof.h"
 #include "hphp/runtime/base/implicit-context.h"
-#include "hphp/runtime/base/memory-manager.h"
 #include "hphp/runtime/base/object-data.h"
-#include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/rds.h"
 #include "hphp/runtime/base/repo-auth-type.h"
 #include "hphp/runtime/base/runtime-error.h"
 #include "hphp/runtime/base/runtime-option.h"
-#include "hphp/runtime/base/stat-cache.h"
 #include "hphp/runtime/base/stats.h"
 #include "hphp/runtime/base/strings.h"
 #include "hphp/runtime/base/tv-arith.h"
@@ -83,27 +76,20 @@
 #include "hphp/runtime/ext/asio/ext_wait-handle.h"
 #include "hphp/runtime/ext/asio/ext_waitable-wait-handle.h"
 #include "hphp/runtime/ext/std/ext_std_closure.h"
-#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/reflection/ext_reflection.h"
+#include "hphp/runtime/ext/std/ext_std_misc.h"
 #include "hphp/runtime/ext/std/ext_std_variable.h"
-#include "hphp/runtime/ext/string/ext_string.h"
-#include "hphp/runtime/ext/json/JSON_parser.h"
 
-#include "hphp/runtime/server/rpc-request-handler.h"
 #include "hphp/runtime/server/source-root-info.h"
 
-#include "hphp/runtime/vm/act-rec-defs.h"
 #include "hphp/runtime/vm/act-rec.h"
 #include "hphp/runtime/vm/class.h"
 #include "hphp/runtime/vm/class-meth-data-ref.h"
 #include "hphp/runtime/vm/cti.h"
-#include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/debugger-hook.h"
 #include "hphp/runtime/vm/event-hook.h"
 #include "hphp/runtime/ext/functioncredential/ext_functioncredential.h"
-#include "hphp/runtime/vm/hh-utils.h"
 #include "hphp/runtime/vm/hhbc-codec.h"
 #include "hphp/runtime/vm/hhbc.h"
 #include "hphp/runtime/vm/interp-helpers.h"
@@ -114,18 +100,15 @@
 #include "hphp/runtime/vm/module.h"
 #include "hphp/runtime/vm/native.h"
 #include "hphp/runtime/vm/reified-generics.h"
-#include "hphp/runtime/vm/repo-global-data.h"
 #include "hphp/runtime/vm/resumable.h"
 #include "hphp/runtime/vm/runtime.h"
 #include "hphp/runtime/vm/srckey.h"
 #include "hphp/runtime/vm/super-inlining-bros.h"
 #include "hphp/runtime/vm/taint/interpreter.h"
 #include "hphp/runtime/vm/type-constraint.h"
-#include "hphp/runtime/vm/type-profile.h"
 #include "hphp/runtime/vm/unwind.h"
 #include "hphp/runtime/vm/workload-stats.h"
 
-#include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/enter-tc.h"
 #include "hphp/runtime/vm/jit/jit-resume-addr-defs.h"
 #include "hphp/runtime/vm/jit/perf-counters.h"
@@ -134,9 +117,8 @@
 #include "hphp/runtime/vm/jit/translator-inline.h"
 #include "hphp/runtime/vm/jit/translator-runtime.h"
 #include "hphp/runtime/vm/jit/translator.h"
-#include "hphp/runtime/vm/jit/unwind-itanium.h"
 
-#include "hphp/util/stacktrace-profiler.h"
+#include "hphp/zend/zend-string.h"
 
 
 namespace HPHP {
@@ -374,6 +356,12 @@ private:
 };
 THREAD_LOCAL_FLAT(StackElms, t_se);
 
+void flush_evaluation_stack() {
+  if (!t_se.isNull()) {
+    t_se->flush();
+  }
+}
+
 const int Stack::sSurprisePageSize = sysconf(_SC_PAGESIZE);
 // We reserve the bottom page of each stack for use as the surprise
 // page, so the minimum useful stack size is the next power of two.
@@ -431,25 +419,6 @@ void Stack::requestInit() {
 
 void Stack::requestExit() {
   m_elms = nullptr;
-}
-
-void flush_evaluation_stack() {
-  if (vmStack().isAllocated()) {
-    // For RPCRequestHandler threads, the ExecutionContext can stay
-    // alive across requests, but its always ok to kill it between
-    // requests, so do so now
-    RPCRequestHandler::cleanupState();
-  }
-
-  tl_heap->flush();
-
-  if (!t_se.isNull()) {
-    t_se->flush();
-  }
-  rds::flush();
-  json_parser_flush_caches();
-
-  always_assert(tl_heap->empty());
 }
 
 static std::string toStringElm(TypedValue tv) {

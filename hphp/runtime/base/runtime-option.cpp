@@ -350,6 +350,31 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
   std::string fpath{path};
   if (boost::starts_with(fpath, "/:")) return defaults();
 
+  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
+    return boost::starts_with(
+      std::filesystem::path{p2},
+      std::filesystem::path{p1}.parent_path()
+    );
+  };
+
+  // Fast path: we have an active request and it has cached a RepoOptions
+  // which has not been modified. This only works when the runtime option
+  // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
+  // configs that were added between the current directory and the source file.
+  // (Loading these configs would result in a fatal anyway with this option)
+  if (RO::EvalFastRepoOptionCache && !g_context.isNull()) {
+    if (auto const opts = g_context->getRepoOptionsForRequest()) {
+      // If path() is empty we have the default() options, which means we have
+      // negatively cached the existence of a .hhvmconfig.hdf for this request.
+      if (opts->path().empty()) return *opts;
+
+      // Don't bother checking if the file is changed. This cache is request
+      // local and within any given request we want to use a consistent version
+      // of the RepoOptions anyway.
+      if (isParentOf(opts->path(), fpath)) return *opts;
+    }
+  }
+
   // Wrap filesystem accesses if needed to proxy info from cli server client.
   Stream::Wrapper* wrapper = nullptr;
   if (get_cli_ucred()) {
@@ -376,19 +401,12 @@ const RepoOptions& RepoOptions::forFile(const char* path) {
 
   };
 
-  auto const isParentOf = [] (const std::string& p1, const std::string& p2) {
-    return boost::starts_with(
-      std::filesystem::path{p2},
-      std::filesystem::path{p1}.parent_path()
-    );
-  };
-
   // Fast path: we have an active request and it has cached a RepoOptions
   // which has not been modified. This only works when the runtime option
   // Eval.FatalOnParserOptionMismatch is set. It can cause us to miss out on
   // configs that were added between the current directory and the source file.
   // (Loading these configs would result in a fatal anyway with this option)
-  if (!g_context.isNull()) {
+  if (!RO::EvalFastRepoOptionCache && !g_context.isNull()) {
     if (auto const opts = g_context->getRepoOptionsForRequest()) {
       // If path() is empty we have the default() options, which means we have
       // negatively cached the existence of a .hhvmconfig.hdf for this request.

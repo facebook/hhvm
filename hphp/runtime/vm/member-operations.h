@@ -101,14 +101,6 @@ inline TypedValue initScratchKey(StringData* key) {
   return make_tv<KindOfString>(key);
 }
 
-/* keyAsValue transforms a key into a value suitable for indexing into an
- * Array. */
-inline const Variant& keyAsValue(TypedValue& key) {
-  return tvAsCVarRef(&key);
-}
-inline int64_t keyAsValue(int64_t key)           { return key; }
-inline StrNR keyAsValue(StringData* key)         { return StrNR(key); }
-
 /* prepareKey is used by operations that need to cast their key to a
  * string. For generic keys, the returned value must be decreffed after use. */
 StringData* prepareAnyKey(TypedValue* tv);

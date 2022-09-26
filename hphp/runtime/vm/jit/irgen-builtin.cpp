@@ -1813,11 +1813,12 @@ Type builtinReturnType(const Func* builtin) {
 namespace {
 
 void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
-  auto const def = popC(env);
-  auto const key = popC(env);
-  auto const stack_base = popC(env);
+  auto const def = topC(env, BCSPRelOffset{0});
+  auto const key = topC(env, BCSPRelOffset{1});
+  auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
+    discard(env, 3);
     pushIncRef(env, elem);
     decRef(env, def, DecRefProfileId::IdxDef);
     decRef(env, key, DecRefProfileId::IdxKey);
@@ -1827,11 +1828,6 @@ void implVecIdx(IRGS& env, SSATmp* loaded_collection_vec) {
   if (key->isA(TNull | TStr)) return finish(def);
 
   if (!key->isA(TInt)) {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -1864,7 +1860,7 @@ void implDictKeysetIdx(IRGS& env,
   auto const stack_base = topC(env, BCSPRelOffset{2});
 
   auto const finish = [&](SSATmp* elem) {
-    popC(env); popC(env); popC(env);
+    discard(env, 3);
     pushIncRef(env, elem);
     decRef(env, def, DecRefProfileId::IdxDef);
     decRef(env, key, DecRefProfileId::IdxKey);
@@ -1874,11 +1870,6 @@ void implDictKeysetIdx(IRGS& env,
   if (key->isA(TNull)) return finish(def);
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, stack_base, key);
     return;
   }
@@ -2048,14 +2039,6 @@ void emitAKExists(IRGS& env) {
   }
 
   auto const throwBadKey = [&] {
-    // TODO(T11019533): Fix the underlying issue with unreachable code rather
-    // than papering over it by pushing an unused value here.
-    discard(env, 2);
-    push(env, cns(env, false));
-    decRef(env, arr, DecRefProfileId::AKExistsArr);
-    decRef(env, key, DecRefProfileId::AKExistsKey);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, arr, key);
   };
 

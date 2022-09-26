@@ -289,6 +289,7 @@ struct BitmaskEnum {}
  */
 @scope.Structured
 @scope.Service
+@scope.Const
 @Experimental
 struct GenerateRuntimeSchema {
   1: string name;

@@ -128,3 +128,39 @@ TEST(SchemaTest, EmptyService) {
   EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/EmptyService");
   EXPECT_TRUE(schema.functions()->empty());
 }
+
+TEST(SchemaTest, IntConst) {
+  facebook::thrift::type::Const schema = schema_constants::schemaIntConst();
+  EXPECT_EQ(*schema.name(), "IntConst");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/IntConst");
+  EXPECT_EQ(
+      schema.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::i32Type);
+  EXPECT_EQ(
+      schema_constants::getValue(*schema.value())
+          .as<apache::thrift::type::i32_t>(),
+      11);
+}
+
+TEST(SchemaTest, ListConst) {
+  facebook::thrift::type::Const schema = schema_constants::schemaListConst();
+  EXPECT_EQ(*schema.name(), "ListConst");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/ListConst");
+  EXPECT_EQ(
+      schema.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::listType);
+  EXPECT_EQ(schema.type()->toThrift().params()->size(), 1);
+  EXPECT_EQ(
+      schema.type()->toThrift().params()->at(0).name()->getType(),
+      apache::thrift::type::TypeName::Type::i32Type);
+
+  auto list_values =
+      schema_constants::getValue(*schema.value())
+          .as<apache::thrift::type::list<apache::thrift::type::i32_t>>();
+  EXPECT_EQ(list_values.size(), 5);
+  EXPECT_EQ(list_values[0], 2);
+  EXPECT_EQ(list_values[1], 3);
+  EXPECT_EQ(list_values[2], 5);
+  EXPECT_EQ(list_values[3], 7);
+  EXPECT_EQ(list_values[4], 11);
+}

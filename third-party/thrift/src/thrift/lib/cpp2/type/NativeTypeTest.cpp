@@ -48,6 +48,10 @@ TEST(NativeTypeTest, Bool) {
   test::same_tag<bool_t, infer_tag<bool>>;
 }
 
+TEST(InferTagTest, Tag) {
+  test::same_tag<byte_t, infer_tag<byte_t>>;
+}
+
 TEST(InferTagTest, Integer) {
   test::same_type<int8_t, native_type<byte_t>>;
   test::same_type<int16_t, native_type<i16_t>>;

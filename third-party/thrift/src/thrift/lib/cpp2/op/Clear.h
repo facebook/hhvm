@@ -46,11 +46,12 @@ FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
 // Ignores all 'custom' defaults set on fields within structured types.
 //
 // For example:
-//   getDefault<type::i32_t>() -> 0
 //   getDefault<type::set<type::i32_t>>() -> {}
 //   getDefault<type::string_t>() -> ""
-template <typename Tag>
-FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<Tag>
+//   getDefault<int32_t>() -> 0
+template <typename TagOrT>
+FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<
+    type::infer_tag<TagOrT>>
     getIntrinsicDefault{};
 
 // Clears the given value, leaving it equal to its intrinsic default.

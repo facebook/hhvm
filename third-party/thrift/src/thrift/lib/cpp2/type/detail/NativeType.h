@@ -225,6 +225,12 @@ struct InferTag<T, std::enable_if_t<is_thrift_struct_v<T>>> {
   using type = type::struct_t<T>;
 };
 
+// Pass through type tags.
+template <typename Tag>
+struct InferTag<Tag, if_thrift_type_tag<Tag>> {
+  using type = Tag;
+};
+
 } // namespace detail
 } // namespace type
 } // namespace thrift

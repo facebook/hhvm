@@ -75,6 +75,7 @@ TEST(ClearTest, InferTag) {
   EXPECT_FALSE(op::isEmpty<>(val));
   op::clear<>(val);
   EXPECT_TRUE(op::isEmpty<>(val));
+  EXPECT_EQ(op::getIntrinsicDefault<int64_t>(), 0);
 }
 
 TEST(ClearTest, Integral) {

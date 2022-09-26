@@ -103,10 +103,21 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   using Base::assign;
   using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
 
-  // Returns if the given field is ensured (explicitly or implicitly).
+  // Returns if the patch ensures the given field is set (explicitly or
+  // implicitly).
   template <typename Id>
-  constexpr bool ensured() const {
+  constexpr bool ensures() const {
     return !isAbsent(getEnsure<Id>(data_));
+  }
+
+  // Returns if the patch modifies the given field
+  template <typename Id>
+  bool modifies() const {
+    return hasAssign() || data_.clear() == true ||
+        // TODO(afuller): Consider adding op::getDefault to use instead.
+        getEnsure<Id>(data_) != op::get<Id>(op::getIntrinsicDefault<T>()) ||
+        !getRawPatch<Id>(data_.patchPrior()).empty() ||
+        !getRawPatch<Id>(data_.patch()).empty();
   }
 
   // Ensures the given field is set, and return the associated patch object.
@@ -132,8 +143,6 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
  protected:
   using Base::data_;
   using Base::hasAssign;
-  template <typename Id>
-  using as_id = get_field_id<Id, T>;
 
   // Clears the field with the given id.
   template <typename Id>
@@ -148,23 +157,19 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
   }
   using Base::clear;
 
-  template <typename Id>
-  decltype(auto) patchPrior() {
-    ensurePatchable();
-    // Field Ids must always be used to access patchPrior.
-    return *data_.patchPrior()->get(as_id<Id>{});
-  }
-
   template <typename Id, typename U>
   static decltype(auto) getEnsure(U&& data) {
-    return op::get<Id>(*data.ensure());
+    return op::get<Id>(*std::forward<U>(data).ensure());
+  }
+
+  template <typename Id>
+  decltype(auto) patchPrior() {
+    return (ensurePatchable(), getRawPatch<Id>(data_.patchPrior()));
   }
 
   template <typename Id>
   decltype(auto) patchAfter() {
-    ensurePatchable();
-    // Field Ids must always be used to access patch(After).
-    return *data_.patch()->get(as_id<Id>{});
+    return (ensurePatchable(), getRawPatch<Id>(data_.patch()));
   }
 
   void ensurePatchable() {
@@ -180,7 +185,7 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
 
   template <typename Id>
   bool maybeEnsure() {
-    if (ensured<Id>()) {
+    if (ensures<Id>()) {
       return false;
     }
     // Merge anything (oddly) in patchAfter into patchPrior.
@@ -190,6 +195,13 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
     getEnsure<Id>(data_).ensure();
     return true;
+  }
+
+ private:
+  template <typename Id, typename U>
+  decltype(auto) getRawPatch(U&& patch) const {
+    // Field Ids must always be used to access patch(Prior).
+    return *patch->get(get_field_id<Id, T>{});
   }
 };
 
@@ -237,7 +249,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   // Returns the proper patch object for the given field.
   template <typename Id>
   decltype(auto) patchIfSet() {
-    return Base::template ensured<Id>() ? patchAfter<Id>() : patchPrior<Id>();
+    return Base::template ensures<Id>() ? patchAfter<Id>() : patchPrior<Id>();
   }
 
   void apply(T& val) const {
@@ -278,7 +290,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
         patchPrior<Id>() =
             *std::forward<U>(next).toThrift().patchPrior()->get(id);
         resetValue(getEnsure<Id>(data_));
-      } else if (ensured<Id>()) {
+      } else if (ensures<Id>()) {
         // All values will be set before next, so ignore next.ensure and
         // merge next.patchPrior and next.patch into this.patch.
         auto temp = *std::forward<U>(next).toThrift().patch()->get(id);
@@ -295,7 +307,7 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
       }
 
       // Consume next.ensure, if any.
-      if (next.template ensured<decltype(id)>()) {
+      if (next.template ensures<decltype(id)>()) {
         getEnsure<Id>(data_) =
             *op::get<Id>(*std::forward<U>(next).toThrift().ensure());
       }
@@ -317,8 +329,8 @@ class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
   }
 
   template <typename Id>
-  decltype(auto) ensured() {
-    return Base::template ensured<Id>();
+  decltype(auto) ensures() {
+    return Base::template ensures<Id>();
   }
 
   template <typename Id, typename U>

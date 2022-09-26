@@ -59,6 +59,7 @@ MyStruct testValue() {
 MyStructPatch testPatch() {
   auto val = testValue();
   MyStructPatch result;
+  EXPECT_FALSE(result.modifies<ident::boolVal>());
   result.patchIfSet<ident::boolVal>() = !op::BoolPatch{};
   result.patchIfSet<ident::byteVal>() = val.byteVal();
   result.patchIfSet<ident::i16Val>() += 2;
@@ -68,12 +69,14 @@ MyStructPatch testPatch() {
   result.patchIfSet<ident::doubleVal>() += 6;
   result.patchIfSet<ident::stringVal>() = "_" + op::StringPatch{} + "_";
   result.patchIfSet<ident::structVal>().patchIfSet<ident::data1>().append("Na");
+  EXPECT_TRUE(result.modifies<ident::boolVal>());
   return result;
 }
 
 MyStructPatch testOptPatch() {
   auto val = testValue();
   MyStructPatch result;
+  EXPECT_FALSE(result.modifies<ident::optBoolVal>());
   result.patchIfSet<ident::optBoolVal>() = !op::BoolPatch{};
   result.patchIfSet<ident::optByteVal>() = val.byteVal();
   result.patchIfSet<ident::optI16Val>() += 2;
@@ -82,6 +85,7 @@ MyStructPatch testOptPatch() {
   result.patchIfSet<ident::optFloatVal>() += 5;
   result.patchIfSet<ident::optDoubleVal>() += 6;
   result.patchIfSet<ident::optStringVal>() = "_" + op::StringPatch{} + "_";
+  EXPECT_TRUE(result.modifies<ident::optBoolVal>());
   MyData data;
   data.data2() = 5;
   result.patchIfSet<ident::optStructVal>() = std::move(data);
@@ -199,6 +203,7 @@ TEST(StructPatchTest, Patch) {
 
 TEST(StructPatchTest, ClearAssign) {
   auto patch = MyStructPatch::createClear();
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
   patch.merge(MyStructPatch::createAssign(testValue()));
   // Assign takes precedence, like usual.
   test::expectPatch(patch, {}, testValue());
@@ -206,6 +211,7 @@ TEST(StructPatchTest, ClearAssign) {
 
 TEST(StructPatchTest, AssignClear) {
   auto patch = MyStructPatch::createAssign(testValue());
+  EXPECT_TRUE(patch.modifies<ident::structVal>());
   patch.merge(MyStructPatch::createClear());
   test::expectPatch(patch, testValue(), {});
 
@@ -463,6 +469,8 @@ TEST(StructPatchTest, MapPatch) {
 TEST(UnionPatchTest, Assign) {
   MyUnionPatch noop;
   MyUnionPatch assignEmpty = MyUnionPatch::createAssign({});
+  EXPECT_FALSE(noop.modifies<ident::option1>());
+  EXPECT_TRUE(assignEmpty.modifies<ident::option1>());
 
   MyUnion actual;
   test::expectPatch(noop, actual, {});
@@ -485,9 +493,11 @@ TEST(UnionPatchTest, Assign) {
 
 TEST(UnionPatchTest, Ensure) {
   MyUnionPatch patch;
-  EXPECT_FALSE(patch.ensured<ident::option1>());
+  EXPECT_FALSE(patch.ensures<ident::option1>());
+  EXPECT_FALSE(patch.modifies<ident::option1>());
   patch.ensure<ident::option1>("hi");
-  EXPECT_TRUE(patch.ensured<ident::option1>());
+  EXPECT_TRUE(patch.ensures<ident::option1>());
+  EXPECT_TRUE(patch.modifies<ident::option1>());
 
   MyUnion expected;
   expected.option1_ref() = "hi";

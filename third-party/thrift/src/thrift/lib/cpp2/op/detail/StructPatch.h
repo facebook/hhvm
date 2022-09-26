@@ -90,52 +90,23 @@ class FieldPatch : public BasePatch<Patch, FieldPatch<Patch>> {
 //   P patchPrior;
 //   T ensure;
 //   P patch;
-template <typename Patch>
-class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
-  using Base = BaseClearPatch<Patch, StructPatch>;
+template <typename Patch, typename Derived>
+class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
+  using Base = BaseClearPatch<Patch, Derived>;
   using T = typename Base::value_type;
   template <typename Id>
   using F = type::native_type<get_field_tag<Id, T>>;
 
  public:
-  using Base::apply;
-  using Base::assign;
   using Base::Base;
-  using Base::hasAssign;
   using Base::operator=;
+  using Base::assign;
   using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
 
-  void clear() {
-    Base::clear();
-    // Custom defaults must also be cleared.
-    op::clear<type::infer_tag<T>>(*data_.ensure());
-  }
-
+  // Returns if the given field is ensured (explicitly or implicitly).
   template <typename Id>
-  void clear() {
-    if (hasAssign()) {
-      clearValue(op::get<Id>(*data_.assign()));
-      return;
-    }
-    patchPrior<Id>().clear();
-    clearValue(getEnsure<Id>(data_));
-    patchAfter<Id>().reset();
-  }
-
-  // Assigns to the given field, ensuring first if needed.
-  template <typename Id, typename U = F<Id>>
-  void assign(U&& val) {
-    if (hasValue(data_.assign())) {
-      op::get<Id>(*data_.assign()) = std::forward<U>(val);
-    } else {
-      ensure<Id>().assign(std::forward<U>(val));
-    }
-  }
-
-  // Returns the proper patch object for the given field.
-  template <typename Id>
-  decltype(auto) patchIfSet() {
-    return ensured<Id>() ? patchAfter<Id>() : patchPrior<Id>();
+  constexpr bool ensured() const {
+    return !isAbsent(getEnsure<Id>(data_));
   }
 
   // Ensures the given field is set, and return the associated patch object.
@@ -152,10 +123,115 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
     return patchAfter<Id>();
   }
 
-  // Returns if the given field is ensured (explicitly or implicitly).
+ protected:
+  using Base::data_;
+  using Base::hasAssign;
   template <typename Id>
-  constexpr decltype(auto) ensured() const {
-    return !isAbsent(getEnsure<Id>(data_));
+  using as_id = get_field_id<Id, T>;
+
+  // Clears the field with the given id.
+  template <typename Id>
+  void clear() {
+    if (hasAssign()) {
+      op::clear<Id>(*data_.assign());
+      return;
+    }
+    patchPrior<Id>().clear();
+    op::clear<Id>(*data_.ensure());
+    patchAfter<Id>().reset();
+  }
+  using Base::clear;
+
+  template <typename Id>
+  decltype(auto) patchPrior() {
+    ensurePatchable();
+    // Field Ids must always be used to access patchPrior.
+    return *data_.patchPrior()->get(as_id<Id>{});
+  }
+
+  template <typename Id, typename U>
+  static decltype(auto) getEnsure(U&& data) {
+    return op::get<Id>(*data.ensure());
+  }
+
+  template <typename Id>
+  decltype(auto) patchAfter() {
+    ensurePatchable();
+    // Field Ids must always be used to access patch(After).
+    return *data_.patch()->get(as_id<Id>{});
+  }
+
+  void ensurePatchable() {
+    if (data_.assign().has_value()) {
+      // Ensure even unknown fields are cleared, and ensure is used as a
+      // complete replancement.
+      *data_.clear() = true;
+      data_.ensure() = std::move(*data_.assign());
+      // Unset assign.
+      data_.assign().reset();
+    }
+  }
+
+  template <typename Id>
+  bool maybeEnsure() {
+    if (ensured<Id>()) {
+      return false;
+    }
+    // Merge anything (oddly) in patchAfter into patchPrior.
+    if (!patchAfter<Id>().empty()) {
+      patchPrior<Id>().merge(std::move(patchAfter<Id>()));
+      patchAfter<Id>().reset();
+    }
+    getEnsure<Id>(data_).ensure();
+    return true;
+  }
+};
+
+// Patch must have the following fields:
+//   optional T assign;
+//   bool clear;
+//   P patchPrior;
+//   T ensure;
+//   P patch;
+// Where P is the field patch type for the struct type T.
+template <typename Patch>
+class StructPatch : public BaseEnsurePatch<Patch, StructPatch<Patch>> {
+  using Base = BaseEnsurePatch<Patch, StructPatch>;
+  using T = typename Base::value_type;
+  template <typename Id>
+  using F = type::native_type<get_field_tag<Id, T>>;
+
+ public:
+  using Base::apply;
+  using Base::assign;
+  using Base::Base;
+  using Base::operator=;
+  using patch_type = std::decay_t<decltype(*std::declval<Patch>().patch())>;
+
+  void clear() {
+    Base::clear();
+    // Custom defaults must also be cleared.
+    op::clear<type::infer_tag<T>>(*data_.ensure());
+  }
+  template <typename Id>
+  void clear() {
+    Base::template clear<Id>();
+  }
+
+  // Assigns to the given field, ensuring first if needed.
+  template <typename Id, typename U = F<Id>>
+  void assign(U&& val) {
+    if (hasValue(data_.assign())) {
+      op::get<Id>(*data_.assign()) = std::forward<U>(val);
+    } else {
+      Base::template ensure<Id>().assign(std::forward<U>(val));
+    }
+  }
+
+  // Returns the proper patch object for the given field.
+  template <typename Id>
+  decltype(auto) patchIfSet() {
+    return Base::template ensured<Id>() ? patchAfter<Id>() : patchPrior<Id>();
   }
 
   void apply(T& val) const {
@@ -228,75 +304,52 @@ class StructPatch : public BaseClearPatch<Patch, StructPatch<Patch>> {
   using Base::data_;
   using Base::get;
   using Base::mergeAssignAndClear;
-  template <typename Id>
-  using as_id = get_field_id<Id, T>;
 
   template <typename Id>
   decltype(auto) patchPrior() {
-    ensurePatchable();
-    // Field Ids must always be used to access patchPrior.
-    return *data_.patchPrior()->get(as_id<Id>{});
+    return Base::template patchPrior<Id>();
+  }
+
+  template <typename Id>
+  decltype(auto) ensured() {
+    return Base::template ensured<Id>();
   }
 
   template <typename Id, typename U>
   static decltype(auto) getEnsure(U&& data) {
-    return op::get<Id>(*data.ensure());
-  }
-
-  template <typename Id>
-  bool maybeEnsure() {
-    if (ensured<Id>()) {
-      return false;
-    }
-    // Merge anything (oddly) in patchAfter into patchPrior.
-    if (!patchAfter<Id>().empty()) {
-      patchPrior<Id>().merge(std::move(patchAfter<Id>()));
-      patchAfter<Id>().reset();
-    }
-    getEnsure<Id>(data_).ensure();
-    return true;
+    return Base::template getEnsure<Id, U>(std::forward<U>(data));
   }
 
   template <typename Id>
   decltype(auto) patchAfter() {
-    ensurePatchable();
-    // Field Ids must always be used to access patch(After).
-    return *data_.patch()->get(as_id<Id>{});
-  }
-
-  void ensurePatchable() {
-    if (data_.assign().has_value()) {
-      // Ensure even unknown fields are cleared, and ensure is used as a
-      // complete replancement.
-      *data_.clear() = true;
-      data_.ensure() = std::move(*data_.assign());
-      // Unset assign.
-      data_.assign().reset();
-    }
+    return Base::template patchAfter<Id>();
   }
 };
 
 // A patch for an union value.
 //
 // Patch must have the following fields:
+//   optional T assign;
 //   bool clear;
 //   P patchPrior;
 //   T ensure;
 //   P patch;
-// Where P is the patch type for the union type T.
-// TODO(afuller): Add 'assign' support and inherit from BaseClearPatch
+// Where P is the field patch type for the union type T.
 template <typename Patch>
-class UnionPatch : public BasePatch<Patch, UnionPatch<Patch>> {
-  using Base = BasePatch<Patch, UnionPatch<Patch>>;
-  using T = folly::remove_cvref_t<decltype(*std::declval<Patch>().ensure())>;
-  using P = folly::remove_cvref_t<decltype(*std::declval<Patch>().patch())>;
+class UnionPatch : public BaseEnsurePatch<Patch, UnionPatch<Patch>> {
+  using Base = BaseEnsurePatch<Patch, UnionPatch>;
+  using T = typename Base::value_type;
+  using P = typename Base::patch_type;
+  template <typename Id>
+  using F = type::native_type<get_field_tag<Id, T>>;
 
  public:
   using Base::Base;
   using Base::operator=;
   using Base::apply;
-  using value_type = T;
-  using patch_type = P;
+  using Base::assign;
+  using Base::clear;
+  using Base::ensure;
 
   template <typename U = T>
   FOLLY_NODISCARD static UnionPatch createEnsure(U&& _default) {
@@ -308,30 +361,11 @@ class UnionPatch : public BasePatch<Patch, UnionPatch<Patch>> {
   P& ensure(const T& val) { return *ensureAnd(val).patch(); }
   P& ensure(T&& val) { return *ensureAnd(std::move(val)).patch(); }
 
-  // Ensure the value is set to the given value.
-  template <typename U = value_type>
-  FOLLY_NODISCARD static UnionPatch createAssign(U&& val) {
-    UnionPatch patch;
-    patch.assign(std::forward<U>(val));
-    return patch;
+  // Assigns to the given field, ensuring first if needed.
+  template <typename Id, typename U = F<Id>>
+  void assign(U&& val) {
+    op::get<Id>(Base::resetAnd().assign().ensure()) = std::forward<U>(val);
   }
-  void assign(const value_type& val) { clearAnd().ensure().emplace(val); }
-  void assign(value_type&& val) { clearAnd().ensure().emplace(std::move(val)); }
-  UnionPatch& operator=(const value_type& val) {
-    return (assign(val), derived());
-  }
-  UnionPatch& operator=(value_type&& val) {
-    assign(std::move(val));
-    return derived();
-  }
-
-  // Unset any value.
-  FOLLY_NODISCARD static UnionPatch createClear() {
-    UnionPatch patch;
-    patch.clear();
-    return patch;
-  }
-  void clear() { resetAnd().clear() = true; }
 
   // Patch any set value.
   FOLLY_NODISCARD P& patchIfSet() {
@@ -343,62 +377,30 @@ class UnionPatch : public BasePatch<Patch, UnionPatch<Patch>> {
     return *data_.patchPrior();
   }
 
-  void apply(T& val) const { applyEnsure(val); }
-
-  // A 'union' patch only applies to set optional-union fields.
-  template <typename U>
-  if_opt_type<folly::remove_cvref_t<U>> apply(U&& field) const {
-    if (field.has_value()) {
-      apply(*std::forward<U>(field));
+  void apply(T& val) const {
+    if (applyAssign(val)) {
+      return;
     }
-  }
-
-  // A 'union' patch only applies to set union-union fields.
-  template <typename U>
-  void apply(union_field_ref<U> field) const {
-    if (field.has_value()) {
-      apply(*field);
+    // Clear, ensure or patchPrior.
+    if (*data_.clear()) {
+      clearValue(val);
+    } else if (hasValue(data_.ensure()) && !sameType(data_.ensure(), val)) {
+      val = *data_.ensure();
+    } else {
+      data_.patchPrior()->apply(val);
     }
+    // Apply the patch after ensure.
+    data_.patch()->apply(val);
   }
 
   template <typename U>
   void merge(U&& next) {
-    mergeEnsure(std::forward<U>(next));
-  }
-
- private:
-  using Base::data_;
-  using Base::derived;
-  using Base::resetAnd;
-
-  Patch& clearAnd() { return (clear(), data_); }
-  template <typename U = value_type>
-  Patch& ensureAnd(U&& _default) {
-    if (!hasValue(data_.ensure())) {
-      data_.ensure().emplace(std::forward<U>(_default));
-    }
-    return data_;
-  }
-
-  bool emptyEnsure() const {
-    return !*data_.clear() && data_.patchPrior()->empty() &&
-        !hasValue(data_.ensure()) && data_.patch()->empty();
-  }
-
-  template <typename U>
-  bool mergeEnsure(U&& next) {
-    if (*next.toThrift().clear()) {
-      if (hasValue(next.toThrift().ensure())) {
-        data_.clear() = true;
-        data_.patchPrior()->reset(); // We can ignore next.patchPrior.
-        data_.ensure() = *std::forward<U>(next).toThrift().ensure();
-        data_.patch() = *std::forward<U>(next).toThrift().patch();
-      } else {
-        clear(); // We can ignore everything else.
-      }
-      return true; // It's a complete replacement.
+    if (mergeAssignAndClear(std::forward<U>(next))) {
+      return; // Complete replacement.
     }
 
+    // Merge patchPrior, ensure, and patchAfter.
+    // next.assign and next.clear known to be empty.
     if (hasValue(data_.ensure())) {
       // All values will be set before next, so ignore next.ensure and
       // merge next.patchPrior and next.patch into this.patch.
@@ -406,7 +408,7 @@ class UnionPatch : public BasePatch<Patch, UnionPatch<Patch>> {
       data_.patch()->merge(*std::forward<U>(next).toThrift().patchPrior());
       data_.patch()->merge(std::move(temp));
     } else { // Both this.ensure and next.clear are known to be empty.
-      // Merge anything (oddly) in patch into patchPrior.
+      // Merge anything in patch into patchPrior.
       data_.patchPrior()->merge(std::move(*data_.patch()));
       // Merge in next.patchPrior into patchPrior.
       data_.patchPrior()->merge(*std::forward<U>(next).toThrift().patchPrior());
@@ -417,23 +419,23 @@ class UnionPatch : public BasePatch<Patch, UnionPatch<Patch>> {
       // Consume next.patch.
       data_.patch() = *std::forward<U>(next).toThrift().patch();
     }
-    return false;
   }
 
-  template <typename U>
-  void applyEnsure(U& val) const {
-    // Clear or patch.
-    if (*data_.clear()) {
-      clearValue(val);
-    } else {
-      data_.patchPrior()->apply(val);
+ private:
+  using Base::applyAssign;
+  using Base::data_;
+  using Base::ensurePatchable;
+  using Base::mergeAssignAndClear;
+  using Base::resetAnd;
+
+  template <typename U = T>
+  Patch& ensureAnd(U&& _default) {
+    ensurePatchable();
+    assert(!op::isEmpty<>(_default));
+    if (!hasValue(data_.ensure())) {
+      data_.ensure().emplace(std::forward<U>(_default));
     }
-    // Ensure if needed.
-    if (hasValue(data_.ensure()) && !sameType(data_.ensure(), val)) {
-      val = *data_.ensure();
-    }
-    // Apply the patch after ensure.
-    data_.patch()->apply(val);
+    return data_;
   }
 };
 

@@ -240,7 +240,7 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 294,
+            "lineno" : 295,
             "required" : "opt-in-req-out",
             "type" : "string"
           }

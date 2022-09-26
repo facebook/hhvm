@@ -208,8 +208,8 @@ class BaseClearPatch : public BaseAssignPatch<Patch, Derived> {
   }
 
  protected:
-  template <typename>
-  friend class StructPatch;
+  template <typename, typename>
+  friend class BaseEnsurePatch;
   using Base::applyAssign;
   using Base::data_;
   using Base::derived;

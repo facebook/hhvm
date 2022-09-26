@@ -71,7 +71,7 @@ if_opt_type<T, bool> isAbsent(const T& opt) {
 }
 template <typename T>
 constexpr bool isAbsent(union_field_ref<T> opt) {
-  return opt.has_value();
+  return !opt.has_value();
 }
 template <typename T>
 constexpr bool isAbsent(field_ref<T>) {

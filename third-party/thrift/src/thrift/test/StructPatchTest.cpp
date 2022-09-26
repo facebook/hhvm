@@ -460,23 +460,18 @@ TEST(StructPatchTest, MapPatch) {
       {{"a", "0"}, {"b", "2"}});
 }
 
-TEST(UnionPatchTest, ClearAndAssign) {
+TEST(UnionPatchTest, Assign) {
   MyUnionPatch noop;
-  MyUnion actual;
-  MyUnionPatch assignEmpty = MyUnionPatch::createAssign(actual);
-  EXPECT_EQ(assignEmpty.toThrift(), MyUnionPatch::createClear().toThrift());
-  EXPECT_EQ(actual.getType(), MyUnion::Type::__EMPTY__);
-  EXPECT_EQ(*assignEmpty.toThrift().clear(), true);
-  EXPECT_EQ(
-      assignEmpty.toThrift().ensure()->getType(), MyUnion::Type::__EMPTY__);
+  MyUnionPatch assignEmpty = MyUnionPatch::createAssign({});
 
-  EXPECT_EQ(actual, MyUnion{});
+  MyUnion actual;
   test::expectPatch(noop, actual, {});
   test::expectPatch(assignEmpty, actual, {});
 
   actual.option1_ref() = "hi";
-  MyUnionPatch assign = MyUnionPatch::createAssign(actual);
-  EXPECT_EQ(actual.getType(), MyUnion::Type::option1);
+  MyUnionPatch assign;
+  assign.assign<ident::option1>("hi");
+  EXPECT_EQ(assign.toThrift(), MyUnionPatch::createAssign(actual).toThrift());
   test::expectPatch(noop, actual, actual);
   test::expectPatch(assignEmpty, actual, {});
   test::expectPatch(assign, actual, actual);
@@ -490,14 +485,18 @@ TEST(UnionPatchTest, ClearAndAssign) {
 
 TEST(UnionPatchTest, Ensure) {
   MyUnionPatch patch;
-  MyUnion expected, actual;
-  patch.ensure().option1_ref() = "hi";
+  EXPECT_FALSE(patch.ensured<ident::option1>());
+  patch.ensure<ident::option1>("hi");
+  EXPECT_TRUE(patch.ensured<ident::option1>());
+
+  MyUnion expected;
   expected.option1_ref() = "hi";
   EXPECT_EQ(
       patch.toThrift(), decltype(patch)::createEnsure(expected).toThrift());
 
   // Empty -> expected
-  test::expectPatch(patch, {}, expected);
+  MyUnion actual;
+  test::expectPatch(patch, actual, expected);
   patch.apply(actual);
   EXPECT_EQ(actual.getType(), MyUnion::Type::option1);
 

@@ -2475,6 +2475,10 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct, \IThriftShapishSyncSt
           shape(
           )
         ),
+        '\thrift\annotation\TConst' => \thrift\annotation\TConst::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )

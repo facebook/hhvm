@@ -93,9 +93,9 @@ impl<R: Reason> DeclParser<R> {
 // `hphp/hack/src/providers/direct_decl_utils.ml`)
 fn remove_php_stdlib_decls<'a>(
     arena: &'a bumpalo::Bump,
-    (name, decl): (&'a str, Decl<'a>),
+    (name, decl): &(&'a str, Decl<'a>),
 ) -> Option<(&'a str, Decl<'a>)> {
-    match decl {
+    match *decl {
         Decl::Fun(fun) if fun.php_std_lib => None,
         Decl::Class(class)
             if (class.user_attributes.iter()).any(|ua| {
@@ -146,8 +146,8 @@ fn remove_php_stdlib_decls<'a>(
                 static_methods,
                 ..*class
             });
-            Some((name, Decl::Class(masked)))
+            Some((*name, Decl::Class(masked)))
         }
-        _ => Some((name, decl)),
+        _ => Some((*name, *decl)),
     }
 }

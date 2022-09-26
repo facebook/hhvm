@@ -84,9 +84,9 @@ impl<'a> Decls<'a> {
         Self(List::empty())
     }
 
-    pub fn get(&self, kind: NameType, symbol: &str) -> Option<Decl<'a>> {
+    pub fn get(&self, kind: NameType, symbol: &str) -> Option<&'a Decl<'a>> {
         self.iter().find_map(|(name, decl)| {
-            if decl.kind() == kind && name == symbol {
+            if decl.kind() == kind && *name == symbol {
                 Some(decl)
             } else {
                 None
@@ -102,46 +102,45 @@ impl<'a> Decls<'a> {
         self.0 = self.0.rev(arena)
     }
 
-    pub fn iter(&self) -> impl Iterator<Item = (&'a str, Decl<'a>)> {
-        self.0.iter().copied()
+    pub fn iter(&self) -> impl Iterator<Item = &'a (&'a str, Decl<'a>)> {
+        self.0.iter()
     }
 
     pub fn classes(
         &self,
     ) -> impl Iterator<Item = (&'a str, &'a shallow_decl_defs::ShallowClass<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Class(decl) => Some((name, decl)),
+        self.iter().filter_map(|(name, decl)| match *decl {
+            Decl::Class(decl) => Some((*name, decl)),
             _ => None,
         })
     }
     pub fn funs(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::FunElt<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Fun(decl) => Some((name, decl)),
+        self.iter().filter_map(|(name, decl)| match *decl {
+            Decl::Fun(decl) => Some((*name, decl)),
             _ => None,
         })
     }
     pub fn typedefs(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::TypedefType<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Typedef(decl) => Some((name, decl)),
+        self.iter().filter_map(|(name, decl)| match *decl {
+            Decl::Typedef(decl) => Some((*name, decl)),
             _ => None,
         })
     }
     pub fn consts(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::ConstDecl<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Const(decl) => Some((name, decl)),
+        self.iter().filter_map(|(name, decl)| match *decl {
+            Decl::Const(decl) => Some((*name, decl)),
             _ => None,
         })
     }
-    pub fn types(&self) -> impl Iterator<Item = (&'a str, Decl<'a>)> {
+    pub fn types(&self) -> impl Iterator<Item = &'a (&'a str, Decl<'a>)> {
         self.iter().filter(|(_, decl)| match decl {
             Decl::Class(_) | Decl::Typedef(_) => true,
             Decl::Fun(_) | Decl::Const(_) | Decl::Module(_) => false,
         })
     }
-
     pub fn modules(&self) -> impl Iterator<Item = (&'a str, &'a typing_defs::ModuleDefType<'a>)> {
-        self.iter().filter_map(|(name, decl)| match decl {
-            Decl::Module(decl) => Some((name, decl)),
+        self.iter().filter_map(|(name, decl)| match *decl {
+            Decl::Module(decl) => Some((*name, decl)),
             _ => None,
         })
     }
@@ -158,6 +157,6 @@ impl<'a> IntoIterator for Decls<'a> {
 
 impl std::fmt::Debug for Decls<'_> {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        fmt.debug_map().entries(self.iter()).finish()
+        fmt.debug_map().entries(self.iter().map(|a| *a)).finish()
     }
 }

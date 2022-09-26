@@ -157,7 +157,7 @@ impl HhServerProviderBackend {
     /// php_stdlib decls, deduping, or removing naming conflict losers).
     pub fn add_decls(
         &self,
-        decls: &[(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)],
+        decls: &[&(&str, oxidized_by_ref::shallow_decl_defs::Decl<'_>)],
     ) -> Result<()> {
         self.shallow_decl_store
             .add_decls(decls.iter().copied().map(Into::into))

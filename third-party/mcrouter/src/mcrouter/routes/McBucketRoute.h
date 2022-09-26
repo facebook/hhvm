@@ -69,7 +69,9 @@ class McBucketRoute {
   bool traverse(
       const Request& req,
       const RouteHandleTraverser<MemcacheRouteHandleIf>& t) const {
-    auto bucketId = ch3_(getRoutingKey<Request>(req, salt_));
+    auto bucketId = folly::fibers::runInMainContext([this, &req]() {
+      return ch3_(getRoutingKey<Request>(req, this->salt_));
+    });
     if (bucketId < bucketizeUntil_) {
       if (auto* ctx = fiber_local<MemcacheRouterInfo>::getTraverseCtx()) {
         ctx->recordBucketIdAndKeyspace(bucketId, bucketizationKeyspace_);
@@ -85,7 +87,9 @@ class McBucketRoute {
 
   template <class Request>
   ReplyT<Request> route(const Request& req) const {
-    auto bucketId = ch3_(getRoutingKey<Request>(req, salt_));
+    auto bucketId = folly::fibers::runInMainContext([this, &req]() {
+      return ch3_(getRoutingKey<Request>(req, this->salt_));
+    });
     if (bucketId < bucketizeUntil_) {
       auto proxy = &fiber_local<MemcacheRouterInfo>::getSharedCtx()->proxy();
       proxy->stats().increment(bucketized_routing_stat);

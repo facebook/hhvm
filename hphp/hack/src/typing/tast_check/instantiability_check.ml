@@ -9,7 +9,7 @@
 
 open Hh_prelude
 open Aast
-module ShapeMap = Aast.ShapeMap
+module ShapeMap = Ast_defs.ShapeMap
 module SN = Naming_special_names
 module Cls = Decl_provider.Class
 

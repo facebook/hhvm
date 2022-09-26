@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<be3115a52be960051b5fee8badb449a9>>
+// @generated SignedSource<<f7f05c31751930de5bd131ee46167432>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -25,9 +25,7 @@ pub use oxidized::aast_defs::TypedefVisibility;
 pub use oxidized::aast_defs::Visibility;
 use serde::Deserialize;
 use serde::Serialize;
-pub use shape_map::ShapeMap;
 
-pub use crate::ast_defs::shape_map;
 #[allow(unused_imports)]
 use crate::*;
 

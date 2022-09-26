@@ -24,6 +24,9 @@ struct EncodingDetector : IntlError {
     return GetData<EncodingDetector>(obj, s_EncodingDetector);
   }
 
+  const String& text() const { return m_text; }
+  const String& declaredEncoding() const { return m_declaredEncoding; }
+
   std::shared_ptr<UCharsetDetector> detector();
 
   void setText(const String& text) {
@@ -54,7 +57,9 @@ struct EncodingMatch : IntlError {
   ~EncodingMatch() = default;
 
   static Object newInstance(const UCharsetMatch* match,
-                            const std::shared_ptr<UCharsetDetector>& det) {
+                            const std::shared_ptr<UCharsetDetector>& det,
+                            const String& text,
+                            const String& declaredEncoding) {
     if (UNLIKELY(!c_EncodingMatch)) {
       c_EncodingMatch = Class::lookup(s_EncodingMatch.get());
       assertx(c_EncodingMatch);
@@ -63,6 +68,8 @@ struct EncodingMatch : IntlError {
     auto const data = Native::data<EncodingMatch>(ret);
     data->m_match = const_cast<UCharsetMatch*>(match);
     data->m_encodingDetector = det;
+    data->m_text = text;
+    data->m_declaredEncoding = declaredEncoding;
     return ret;
   }
 
@@ -77,8 +84,12 @@ struct EncodingMatch : IntlError {
   UCharsetMatch* match() const { return m_match; }
 
  private:
+  // m_match is owned by m_encodingDetector
   std::shared_ptr<UCharsetDetector> m_encodingDetector;
   UCharsetMatch* m_match{nullptr};
+  // m_text and m_declaredEncoding are used by m_encodingDetector
+  String m_text;
+  String m_declaredEncoding;
   static Class* c_EncodingMatch;
 };
 

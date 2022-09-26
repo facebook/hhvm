@@ -790,9 +790,6 @@ void emitBespokeIdx(IRGS& env) {
   }
 
   if (!key->isA(TInt) && !key->isA(TStr)) {
-    finish(def);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
     gen(env, ThrowInvalidArrayKey, base, key);
     return;
   }
@@ -810,22 +807,16 @@ void emitBespokeIdx(IRGS& env) {
 }
 
 void emitBespokeAKExists(IRGS& env) {
-  auto const base = popC(env);
-  auto const origKey = popC(env);
+  auto const base = topC(env, BCSPRelOffset{0});
+  auto const origKey = topC(env, BCSPRelOffset{1});
   if (!origKey->type().isKnownDataType()) PUNT(Bespoke-AKExists-KeyNotKnown);
   auto const key = classConvertPuntOnRaise(env, origKey);
 
   auto const finish = [&](bool res) {
+    discard(env, 2);
     push(env, cns(env, res));
     decRef(env, base, DecRefProfileId::AKExistsArr);
     decRef(env, key, DecRefProfileId::AKExistsKey);
-  };
-
-  auto const throwBadKey = [&] {
-    finish(false);
-    updateMarker(env);
-    env.irb->exceptionStackBoundary();
-    gen(env, ThrowInvalidArrayKey, base, key);
   };
 
   auto const baseType = base->type();
@@ -833,7 +824,7 @@ void emitBespokeAKExists(IRGS& env) {
     finish(false);
     return;
   } else if (!key->type().subtypeOfAny(TInt, TStr)) {
-    throwBadKey();
+    gen(env, ThrowInvalidArrayKey, base, key);
     return;
   }
 

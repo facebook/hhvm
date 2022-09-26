@@ -47,6 +47,10 @@ function main() {
   var_dump(idx(null, 'not_reached', 'wtf'));
   echo "\n";
 
+  // invalid array key
+  try { var_dump(idx(dict[2 => $o], $o)); } catch (Exception $e) { var_dump($e->getMessage()); }
+  try { var_dump(idx(vec[$o], $o)); } catch (Exception $e) { var_dump($e->getMessage()); }
+
   // too few arguments
   try { var_dump(idx($s)); } catch (Exception $e) { var_dump($e->getMessage()); }
   try { var_dump(idx()); } catch (Exception $e) { var_dump($e->getMessage()); }

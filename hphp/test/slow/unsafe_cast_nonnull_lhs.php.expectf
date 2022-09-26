@@ -1,0 +1,5 @@
+Fatal error: Uncaught exception 'InvalidArgumentException' with message 'Invalid dict key: expected a key of type int or string, null given' in %s/hphp/test/slow/unsafe_cast_nonnull_lhs.php:4
+Stack trace:
+#0 %s/hphp/test/slow/unsafe_cast_nonnull_lhs.php(10): f()
+#1 (): main()
+#2 {main}

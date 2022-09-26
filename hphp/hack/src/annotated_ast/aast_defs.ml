@@ -728,6 +728,7 @@ and ('ex, 'en) expr_ =
 and hole_source =
   | Typing
   | UnsafeCast of hint list
+  | UnsafeNonnullCast
   | EnforcedCast of hint list
 
 and ('ex, 'en) class_get_expr =

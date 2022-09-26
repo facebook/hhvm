@@ -168,6 +168,8 @@ let nast_converter =
       match src with
       | Aast.UnsafeCast hints ->
         mk_call hints Naming_special_names.PseudoFunctions.unsafe_cast
+      | Aast.UnsafeNonnullCast ->
+        mk_call [] Naming_special_names.PseudoFunctions.unsafe_nonnull_cast
       | Aast.EnforcedCast hints ->
         mk_call hints Naming_special_names.PseudoFunctions.enforced_cast
       | _ -> ex_

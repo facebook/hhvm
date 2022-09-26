@@ -346,6 +346,7 @@ fn is_special_builtin(f_name: &str) -> bool {
         | "HH\\darray"
         | "HH\\vec"
         | "hphp_array_idx"
+        | "HH\\FIXME\\UNSAFE_NONNULL_CAST"
         | "HH\\FIXME\\UNSAFE_CAST" => true,
         /* all other special builtins listed in emit_expresion.rs return mutable:
         specifically, these:

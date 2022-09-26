@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<0a14fefd8c020ff2433984c0845a33e4>>
+// @generated SignedSource<<be3115a52be960051b5fee8badb449a9>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1205,6 +1205,7 @@ pub enum HoleSource<'a> {
     Typing,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     UnsafeCast(&'a [&'a Hint<'a>]),
+    UnsafeNonnullCast,
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     EnforcedCast(&'a [&'a Hint<'a>]),
 }

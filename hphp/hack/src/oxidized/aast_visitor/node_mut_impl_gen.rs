@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<45678c4ad0c009579fb65d5ad2ab5c53>>
+// @generated SignedSource<<f99ac62a744cb782821af87e4add1dfb>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -1401,6 +1401,7 @@ impl<P: Params> NodeMut<P> for HoleSource {
         match self {
             HoleSource::Typing => Ok(()),
             HoleSource::UnsafeCast(a0) => a0.accept(c, v),
+            HoleSource::UnsafeNonnullCast => Ok(()),
             HoleSource::EnforcedCast(a0) => a0.accept(c, v),
         }
     }

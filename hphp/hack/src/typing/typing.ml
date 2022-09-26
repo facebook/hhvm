@@ -114,6 +114,7 @@ let mk_hole ?(source = Aast.Typing) ((_, pos, _) as expr) ~ty_have ~ty_expect =
       match source with
       | Aast.Typing -> ty_have
       | UnsafeCast _
+      | UnsafeNonnullCast
       | EnforcedCast _ ->
         ty_expect
     in
@@ -4611,7 +4612,8 @@ and expr_
     begin
       match e with
       | (_, p, Aast.Call ((_, _, Aast.Id (_, func)), _, _, _))
-        when String.equal func SN.PseudoFunctions.unsafe_cast ->
+        when String.equal func SN.PseudoFunctions.unsafe_cast
+             || String.equal func SN.PseudoFunctions.unsafe_nonnull_cast ->
         Errors.add_typing_error
           Typing_error.(primary @@ Primary.Unsafe_cast_await p)
       | _ -> ()
@@ -6819,7 +6821,9 @@ and dispatch_call
         ( make_call_special env id tel (MakeType.void (Reason.Rwitness pos)),
           should_forget_fakes )
       (* `unsafe_cast` *)
-      | unsafe_cast when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
+      | unsafe_cast
+        when String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast
+             || String.equal unsafe_cast SN.PseudoFunctions.unsafe_nonnull_cast
         ->
         let result =
           match el with
@@ -6853,10 +6857,13 @@ and dispatch_call
               | (ty, _) :: _ -> (ty, ty)
               | _ -> (dflt_ty, dflt_ty)
             in
-            let te =
-              Aast.Hole
-                (el, ty_from, ty_to, UnsafeCast (List.map ~f:snd explicit_targs))
+            let hole_source =
+              if String.equal unsafe_cast SN.PseudoFunctions.unsafe_cast then
+                UnsafeCast (List.map ~f:snd explicit_targs)
+              else
+                UnsafeNonnullCast
             in
+            let te = Aast.Hole (el, ty_from, ty_to, hole_source) in
             make_result env p te ty
         in
         let should_forget_fakes = false in

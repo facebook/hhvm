@@ -1,0 +1,1 @@
+Catchable fatal error: Value returned from function f() must be of type int, null given in %s/hphp/test/slow/unsafe_cast_nonnull_erased.php on line 5

@@ -328,6 +328,7 @@ class AsyncProcessor : public TProcessorBase {
   virtual const char* getServiceName();
 
   using MethodMetadata = AsyncProcessorFactory::MethodMetadata;
+  using WildcardMethodMetadata = AsyncProcessorFactory::WildcardMethodMetadata;
 
   /**
    * DEPRECATED! This will be removed.

@@ -100,237 +100,6 @@ let omit_syntax_record =
   in
   (fun x -> not (SSet.mem x.type_name names))
 
-module GenerateFFValidatedSyntax = struct
-  let to_validate_functions x =
-    if
-      String.equal x.kind_name "ErrorSyntax"
-      || String.equal x.kind_name "ListItem"
-    then
-      ""
-    else
-      let get_type_string t =
-        match SMap.find_opt t schema_map with
-        | None -> failwith @@ sprintf "Unknown type: %s" t
-        | Some t -> t.type_name
-      in
-      let rec validator_of ?(n = "validate") = function
-        | Token -> sprintf "%s_token" n
-        | Just t -> sprintf "%s_%s" n (get_type_string t)
-        | Aggregate a -> sprintf "%s_%s" n (aggregate_type_name a)
-        | ZeroOrMore s -> sprintf "%s_list_with (%s)" n (validator_of ~n s)
-        | ZeroOrOne s -> sprintf "%s_option_with (%s)" n (validator_of ~n s)
-      in
-      let mapper (f, t) =
-        sprintf "%s_%s = %s x.%s_%s" x.prefix f (validator_of t) x.prefix f
-      in
-      let fields = List.rev_map ~f:mapper x.fields in
-      let mapper (f, t) =
-        sprintf
-          "%s_%s = %s x.%s_%s"
-          x.prefix
-          f
-          (validator_of ~n:"invalidate" t)
-          x.prefix
-          f
-      in
-      let invalidations = List.map ~f:mapper x.fields in
-      sprintf
-        "  and validate_%s : %s validator = function
-  | { Syntax.syntax = Syntax.%s x; value = v } -> v,
-    { %s
-    }
-  | s -> validation_fail (Some SyntaxKind.%s) s
-  and invalidate_%s : %s invalidator = fun (v, x) ->
-    { Syntax.syntax =
-      Syntax.%s
-      { %s
-      }
-    ; Syntax.value = v
-    }
-"
-        (* validator *)
-        x.type_name
-        x.type_name
-        x.kind_name
-        (String.concat ~sep:"\n    ; " fields)
-        x.kind_name
-        (* invalidator *)
-        x.type_name
-        x.type_name
-        x.kind_name
-        (String.concat ~sep:"\n      ; " invalidations)
-
-  let to_aggregate_validation x =
-    let aggregated_types = aggregation_of x in
-    let (prefix, trim) = aggregate_type_pfx_trim x in
-    let compact = Str.global_replace (Str.regexp trim) "" in
-    let valign = align_fmt (fun x -> compact x.kind_name) aggregated_types in
-    let type_name = aggregate_type_name x in
-    let make_validation_clause ty =
-      (* TODO: clean up *)
-      sprintf
-        "
-    | Syntax.%s _ -> tag validate_%s (fun x -> %s%s x) x"
-        ty.kind_name
-        ty.func_name
-        prefix
-        (compact ty.kind_name)
-    in
-    let make_invalidation_clause ty =
-      (* TODO: cleanup *)
-      sprintf
-        ("
-    | %s" ^^ valign ^^ " thing -> invalidate_%-30s (value, thing)")
-        prefix
-        (compact ty.kind_name)
-        ty.type_name
-    in
-    let invalidation_body =
-      map_and_concat make_invalidation_clause aggregated_types
-    in
-    let validation_body =
-      map_and_concat make_validation_clause aggregated_types
-    in
-    let invalidation =
-      sprintf
-        "  and invalidate_%s : %s invalidator = fun (value, thing) ->
-    match thing with%s
-"
-        type_name
-        type_name
-        invalidation_body
-    in
-    let validation =
-      sprintf
-        "  and validate_%s : %s validator = fun x ->
-    match Syntax.syntax x with%s
-    | s -> aggregation_fail Def.%s s
-"
-        type_name
-        type_name
-        validation_body
-        (string_of_aggregate_type x)
-    in
-    validation ^ invalidation
-
-  let full_fidelity_validated_syntax_template =
-    make_header
-      MLStyle
-      "
- * This module contains the functions to (in)validate syntax trees."
-    ^ "
-
-open Full_fidelity_syntax_type (* module signatures of the functor *)
-module SyntaxKind = Full_fidelity_syntax_kind
-module Def = Schema_definition
-
-module Make(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  module SyntaxBase = Full_fidelity_syntax.WithToken(Token)
-  module Syntax = SyntaxBase.WithSyntaxValue(SyntaxValue)
-  module Validated = MakeValidated(Token)(SyntaxValue)
-  open Validated
-
-  type 'a validator = Syntax.t -> 'a value
-  type 'a invalidator = 'a value -> Syntax.t
-
-  exception Validation_failure of SyntaxKind.t option * Syntax.t
-  let validation_fail k t = raise (Validation_failure (k, t))
-
-  exception Aggregation_failure of Def.aggregate_type * Syntax.syntax
-  let aggregation_fail a s =
-    Printf.eprintf \"Aggregation failure: For %s not expecting %s\\n\"
-      (Schema_definition.string_of_aggregate_type a)
-      (SyntaxKind.to_string @@ Syntax.to_kind s);
-    raise (Aggregation_failure (a, s))
-
-  let validate_option_with : 'a . 'a validator -> 'a option validator =
-    fun validate node ->
-      match Syntax.syntax node with
-      | Syntax.Missing -> Syntax.value node, None
-      | _ -> let value, result = validate node in value, Some result
-  let invalidate_option_with : 'a . 'a invalidator -> 'a option invalidator =
-    fun invalidate (value, thing) -> match thing with
-    | Some real_thing -> invalidate (value, real_thing)
-    | None -> { Syntax.syntax = Syntax.Missing; value }
-
-  let validate_token : Token.t validator = fun node ->
-    match Syntax.syntax node with
-    | Syntax.Token t -> Syntax.value node, t
-    | _ -> validation_fail None node
-  let invalidate_token : Token.t invalidator = fun (value, token) ->
-    { Syntax.syntax = Syntax.Token token; value }
-
-  let validate_list_with : 'a . 'a validator -> 'a listesque validator =
-    fun validate node ->
-      let validate_item i =
-        match Syntax.syntax i with
-        | Syntax.ListItem { list_item ; list_separator } ->
-          let item = validate list_item in
-          let separator = validate_option_with validate_token list_separator in
-          i.Syntax.value, (item, separator)
-        | _ -> validation_fail (Some SyntaxKind.ListItem) i
-      in
-      let validate_list l =
-        try Syntactic (List.map validate_item l) with
-        | Validation_failure (Some SyntaxKind.ListItem, _) ->
-          NonSyntactic (List.map validate l)
-      in
-      let result =
-        match Syntax.syntax node with
-        | Syntax.SyntaxList l -> validate_list l
-        | Syntax.Missing -> MissingList
-        | _ -> SingletonList (validate node)
-      in
-      node.Syntax.value, result
-
-  let invalidate_list_with : 'a . 'a invalidator -> 'a listesque invalidator =
-    fun invalidate (value, listesque) ->
-      match listesque with
-      | SingletonList node -> invalidate node
-      | MissingList -> { Syntax.syntax = Syntax.Missing; value }
-      | NonSyntactic nodes ->
-        { Syntax.syntax = Syntax.SyntaxList (List.map invalidate nodes); value }
-      | Syntactic nodes ->
-        let mapper (value, (node, separator)) =
-          let inode = invalidate node in
-          let iseparator = invalidate_option_with invalidate_token separator in
-          { Syntax.syntax = Syntax.ListItem
-            { list_item = inode; list_separator = iseparator }
-          ; value
-          }
-        in
-        { Syntax.syntax = Syntax.SyntaxList (List.map mapper nodes); value }
-
-  let rec tag : 'a 'b . 'a validator -> ('a -> 'b) -> 'b validator =
-    (* Validating aggregate types means picking the right validator for the
-     * expected/valid variants and then tagging the result with the constructor
-     * corresponding to the variant. This is a repetative pattern. Explicit
-     * polymorphism saves us this trouble.
-     *)
-    fun validator projection node ->
-      let value, node = validator node in
-      value, projection node
-AGGREGATE_VALIDATORS
-VALIDATE_FUNCTIONS
-end
-"
-
-  let full_fidelity_validated_syntax =
-    Full_fidelity_schema.make_template_file
-      ~transformations:
-        [{ pattern = "VALIDATE_FUNCTIONS"; func = to_validate_functions }]
-      ~aggregate_transformations:
-        [
-          {
-            aggregate_pattern = "AGGREGATE_VALIDATORS";
-            aggregate_func = to_aggregate_validation;
-          };
-        ]
-      ~filename:(full_fidelity_path_prefix ^ "full_fidelity_validated_syntax.ml")
-      ~template:full_fidelity_validated_syntax_template
-      ()
-end
-
 module GenerateFFSyntaxType = struct
   let to_parse_tree x =
     if omit_syntax_record x then
@@ -370,38 +139,6 @@ module GenerateFFSyntaxType = struct
       "  and %s =\n  | %s\n"
       type_name
       (String.concat ~sep:"\n  | " type_body)
-
-  let to_validated_syntax x =
-    (* Not proud of this, but we have to exclude these things that don't occur
-     * in validated syntax. Their absence being the point of the validated
-     * syntax
-     *)
-    if
-      String.equal x.kind_name "ErrorSyntax"
-      || String.equal x.kind_name "ListItem"
-    then
-      ""
-    else
-      Printf.(
-        let mapper (f, c) =
-          let rec make_type_string : child_spec -> string = function
-            | Aggregate t -> aggregate_type_name t
-            | Token -> "Token.t"
-            | Just t ->
-              (match SMap.find_opt t schema_map with
-              | None -> failwith @@ sprintf "Unknown type: %s" t
-              | Some t -> t.type_name)
-            | ZeroOrMore ((Just _ | Aggregate _ | Token) as c) ->
-              sprintf "%s listesque" (make_type_string c)
-            | ZeroOrOne ((Just _ | Aggregate _ | Token) as c) ->
-              sprintf "%s option" (make_type_string c)
-            | ZeroOrMore c -> sprintf "(%s) listesque" (make_type_string c)
-            | ZeroOrOne c -> sprintf "(%s) option" (make_type_string c)
-          in
-          sprintf "%s_%s: %s value" x.prefix f (make_type_string c)
-        in
-        let fields = map_and_concat_separated "\n    ; " mapper x.fields in
-        sprintf "  and %s =\n    { %s\n    }\n" x.type_name fields)
 
   let full_fidelity_syntax_template : string =
     make_header
@@ -476,19 +213,6 @@ PARSE_TREE   and syntax =
 SYNTAX
 end
 
-module MakeValidated(Token : TokenType)(SyntaxValue : SyntaxValueType) = struct
-  type 'a value = SyntaxValue.t * 'a [@@deriving show]
-  (* TODO: Different styles of list seem to only happen in predetermined places,
-   * so split this out again into specific variants
-   *)
-  type 'a listesque =
-  | Syntactic of ('a value * Token.t option value) value list
-  | NonSyntactic of 'a value list
-  | MissingList
-  | SingletonList of 'a value
-AGGREGATE_TYPESVALIDATED_SYNTAX
-[@@deriving show]
-end
 "
 
   let full_fidelity_syntax_type =
@@ -497,7 +221,6 @@ end
         [
           { pattern = "PARSE_TREE"; func = to_parse_tree };
           { pattern = "SYNTAX"; func = to_syntax };
-          { pattern = "VALIDATED_SYNTAX"; func = to_validated_syntax };
         ]
       ~aggregate_transformations:
         [
@@ -3144,7 +2867,6 @@ let templates =
     GenerateFFOperator.full_fidelity_operator;
     GenerateFFSyntaxType.full_fidelity_syntax_type;
     GenerateFFSyntaxSig.full_fidelity_syntax_sig;
-    GenerateFFValidatedSyntax.full_fidelity_validated_syntax;
     GenerateFFTriviaKind.full_fidelity_trivia_kind;
     GenerateFFRustTriviaKind.full_fidelity_trivia_kind;
     GenerateFFSyntax.full_fidelity_syntax;

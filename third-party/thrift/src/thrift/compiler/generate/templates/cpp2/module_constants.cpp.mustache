@@ -61,15 +61,15 @@ const ::apache::thrift::type::AnyValue& <%program:name%>_constants::getValue(::a
   auto pos = ::apache::thrift::type::toPosition(static_cast<::apache::thrift::type::Ordinal>(vid), <%program:num_interned_values%>);
   <%#program:interned_values?%>
 
-  static const folly::Indestructible<::std::array<::apache::thrift::type::AnyValue, <%program:num_interned_values%>>> values {
+  static const folly::Indestructible<::std::array<::apache::thrift::type::AnyValue, <%program:num_interned_values%>>> values {{{
   <%#program:interned_values%>
     <%#constant:type%>
     <%#constant:value%>
-    {::apache::thrift::type::AnyValue::create<<%type:type_tag%>>(<% > common/iterate_const_values%>)},
+    ::apache::thrift::type::AnyValue::create<<%type:type_tag%>>(<% > common/iterate_const_values%>),
     <%/constant:value%>
     <%/constant:type%>
   <%/program:interned_values%>
-  };
+  }}};
 
   return (*values)[pos];
   <%/program:interned_values?%>

@@ -52,3 +52,9 @@ exception SimpleException {}
 
 @thrift.GenerateRuntimeSchema
 safe transient server exception FancyException {}
+
+@thrift.GenerateRuntimeSchema
+const i32 IntConst = 11;
+
+@thrift.GenerateRuntimeSchema
+const list<i32> ListConst = [2, 3, 5, 7, IntConst];

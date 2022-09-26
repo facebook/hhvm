@@ -255,12 +255,13 @@ void gen_default_enum_values(
   node.append_value(std::move(defaultValue));
 }
 
+template <typename Nde>
 void generate_runtime_schema(
     diagnostic_context& ctx,
     mutator_context&,
     bool annotation_required,
     std::string schemaTypeUri,
-    t_type& node,
+    Nde node,
     std::function<std::unique_ptr<apache::thrift::compiler::t_const_value>()>
         generator) {
   const t_const* annotation =
@@ -296,7 +297,7 @@ void generate_runtime_schema(
 
 void generate_struct_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_struct& node) {
-  generate_runtime_schema(
+  generate_runtime_schema<t_struct&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Struct", node, [&node]() {
         return schematizer::gen_schema(node);
       });
@@ -304,7 +305,7 @@ void generate_struct_schema(
 
 void generate_union_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_union& node) {
-  generate_runtime_schema(
+  generate_runtime_schema<t_union&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Union", node, [&node]() {
         return schematizer::gen_schema(node);
       });
@@ -312,7 +313,7 @@ void generate_union_schema(
 
 void generate_exception_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_exception& node) {
-  generate_runtime_schema(
+  generate_runtime_schema<t_exception&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Exception", node, [&node]() {
         return schematizer::gen_schema(node);
       });
@@ -320,8 +321,16 @@ void generate_exception_schema(
 
 void generate_service_schema(
     diagnostic_context& ctx, mutator_context& mCtx, t_service& node) {
-  generate_runtime_schema(
+  generate_runtime_schema<t_service&>(
       ctx, mCtx, true, "facebook.com/thrift/type/Service", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
+void generate_const_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_const& node) {
+  generate_runtime_schema<t_const&>(
+      ctx, mCtx, true, "facebook.com/thrift/type/Const", node, [&node]() {
         return schematizer::gen_schema(node);
       });
 }
@@ -348,6 +357,7 @@ ast_mutators standard_mutators() {
     main.add_union_visitor(&generate_union_schema);
     main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);
+    main.add_const_visitor(&generate_const_schema);
   }
   add_patch_mutators(mutators);
   return mutators;

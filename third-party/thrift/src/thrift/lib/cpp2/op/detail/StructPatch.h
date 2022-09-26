@@ -122,6 +122,12 @@ class BaseEnsurePatch : public BaseClearPatch<Patch, Derived> {
     }
     return patchAfter<Id>();
   }
+  // Ensures the given field is initalized, and return the associated patch
+  // object.
+  template <typename Id>
+  decltype(auto) patch() {
+    return ensure<Id>();
+  }
 
  protected:
   using Base::data_;

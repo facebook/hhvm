@@ -248,7 +248,7 @@ TEST(StructPatchTest, OptionalField_Assign) {
 
 TEST(StructPatchTest, AssignClearEnsure) {
   MyStructPatch assign;
-  assign.assign<ident::optI32Val>(1);
+  assign.patch<ident::optI32Val>() = 1;
 
   MyStructPatch clearEnsure;
   clearEnsure.clear<ident::optI32Val>();
@@ -514,6 +514,26 @@ TEST(UnionPatchTest, Ensure) {
 }
 
 TEST(UnionPatchTest, Patch) {
+  MyUnionPatch patch;
+  patch.patch<ident::option1>() += "Na";
+
+  MyUnion actual;
+  MyUnion expected1;
+  expected1.option1_ref() = "Na";
+  MyUnion expected2;
+  expected2.option1_ref() = "NaNa";
+  test::expectPatch(patch, actual, expected1, expected2);
+
+  actual.option2_ref() = 1;
+  test::expectPatch(patch, actual, expected1, expected2);
+
+  actual.option1_ref() = "Ba";
+  expected1.option1_ref() = "BaNa";
+  expected2.option1_ref() = "BaNaNa";
+  test::expectPatch(patch, actual, expected1, expected2);
+}
+
+TEST(UnionPatchTest, PatchIfSet) {
   MyUnionPatch patch;
   *patch.patchIfSet()->option1() = "Hi";
   patch.ensure().option1_ref() = "Bye";

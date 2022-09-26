@@ -57,8 +57,7 @@ BUILD_PARAMS+=("$profile_flags")
 ( # add CARGO_BIN to PATH so that rustc and other tools can be invoked
   [[ -n "$CARGO_BIN" ]] && PATH="$CARGO_BIN:$PATH";
   # note: --manifest-path doesn't work with custom toolchain, so do cd
-  cd "$HACK_SOURCE_ROOT" && \
-  sed '/\/facebook\//d' ./.cargo/Cargo.toml.ocaml_build > ./Cargo.toml;
+  cd "$HACK_SOURCE_ROOT/src";
   if [ -z "$bin" ]; then
     cargo build "${BUILD_PARAMS[@]}"
   else

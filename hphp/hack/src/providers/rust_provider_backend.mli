@@ -10,6 +10,10 @@ type t
 
 val make : ParserOptions.t -> t
 
+(** Initialize with a given [Rust_provider_backend.t] value (constructed on the
+    Rust side) instead of the default backend constructed by [make]. *)
+val set : t -> unit
+
 val push_local_changes : t -> unit
 
 val pop_local_changes : t -> unit

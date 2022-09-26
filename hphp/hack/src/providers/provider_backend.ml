@@ -257,6 +257,10 @@ let set_pessimised_shared_memory_backend info : unit =
 let set_rust_backend popt : unit =
   backend_ref := Rust_provider_backend (Rust_provider_backend.make popt)
 
+let set_custom_rust_backend backend : unit =
+  Rust_provider_backend.set backend;
+  backend_ref := Rust_provider_backend backend
+
 let make_decl_store_from_local_memory
     ({ decl_cache; folded_class_cache; _ } : local_memory) :
     Decl_store.decl_store =

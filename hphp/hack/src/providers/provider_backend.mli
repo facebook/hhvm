@@ -228,6 +228,8 @@ val set_pessimised_shared_memory_backend : pessimisation_info -> unit
 
 val set_rust_backend : ParserOptions.t -> unit
 
+val set_custom_rust_backend : Rust_provider_backend.t -> unit
+
 val set_local_memory_backend_with_defaults_for_test : unit -> unit
 
 (** TODO(ljw): for now, max_num_shallow_decls accepts a special value "-1"

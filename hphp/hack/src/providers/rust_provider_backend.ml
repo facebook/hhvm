@@ -340,6 +340,8 @@ let make popt =
   Decl.set_decl_store backend;
   backend
 
+let set backend = Decl.set_decl_store backend
+
 let push_local_changes t =
   Decl.Funs.clear_cache ();
   Decl.ShallowClasses.clear_cache ();

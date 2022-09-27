@@ -63,6 +63,7 @@ constexpr auto kScopeConstUri = "facebook.com/thrift/annotation/Const";
 constexpr auto kCppAdapterUri = "facebook.com/thrift/annotation/cpp/Adapter";
 constexpr auto kCppDisableLazyChecksumUri =
     "facebook.com/thrift/annotation/cpp/DisableLazyChecksum";
+constexpr auto kCppEnumTypeUri = "facebook.com/thrift/annotation/cpp/EnumType";
 constexpr auto kCppFieldInterceptorUri =
     "facebook.com/thrift/annotation/cpp/FieldInterceptor";
 constexpr auto kCppLazyUri = "facebook.com/thrift/annotation/cpp/Lazy";

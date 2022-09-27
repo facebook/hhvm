@@ -33,6 +33,43 @@
           }
         },
         "lineno" : 27
+      },
+      "EnumUnderlyingType" : {
+        "name" : "EnumUnderlyingType",
+        "constants" : {
+          "I8" : {
+            "name" : "I8",
+            "docstring" : "::std::int8_t\n",
+            "lineno" : 196,
+            "value" : 0
+          },
+          "U8" : {
+            "name" : "U8",
+            "docstring" : "::std::uint8_t\n",
+            "lineno" : 198,
+            "value" : 1
+          },
+          "I16" : {
+            "name" : "I16",
+            "docstring" : "::std::int16_t\n",
+            "lineno" : 200,
+            "value" : 2
+          },
+          "U16" : {
+            "name" : "U16",
+            "docstring" : "::std::uint16_t\n",
+            "lineno" : 202,
+            "value" : 3
+          },
+          "U32" : {
+            "name" : "U32",
+            "docstring" : "::std::uint32_t\n",
+            "lineno" : 204,
+            "value" : 4
+          }
+        },
+        "docstring" : "Enum in C++ by default uses signed 32 bit integer. There is no need to specify\nunderlying type for signed 32 bit integer.\n",
+        "lineno" : 194
       }
       },
   "structs" :
@@ -197,6 +234,25 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 187
+      },
+      "EnumType" : {
+        "name" : "EnumType",
+        "docstring" : "Indicates an integer type for C++ to use as the underlying type of enum, for example:\n\n    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}\n    enum Fruit {\n      Apple = 0,\n      Banana = 1,\n    }\n\nwill be generated into the following:\n\n    enum class Fruit : ::std::int8_t {\n      Apple = 0,\n      Banana = 1,\n    };\n\n",
+        "fields" : {
+          "type" : {
+            "name" : "type",
+            "key" : 1,
+            "lineno" : 226,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "enum",
+  "name" : "EnumUnderlyingType"
+}
+          }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 224
       }
       },
   "source_path" : "thrift/annotation/cpp",

@@ -56,17 +56,19 @@ const i32 AnIntegerEnum2 = MyEnumA.fieldB;
 
 const list<i32> AnIntegerEnum2 = [MyEnumA.fieldB, MyEnumA.fieldA];
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
 enum AnnotatedEnum {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
-} (cpp2.declare_bitwise_ops, cpp.enum_type = "std::uint32_t")
+} (cpp2.declare_bitwise_ops)
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
 enum AnnotatedEnum2 {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
-} (cpp2.enum_type = "short", cpp.declare_bitwise_ops)
+} (cpp.declare_bitwise_ops)
 
 const MyEnumA constEnumA = MyEnumA.fieldB;
 

@@ -833,7 +833,7 @@ enum class MyEnumA {
 
 
 
-enum class AnnotatedEnum : std::uint32_t {
+enum class AnnotatedEnum : ::std::uint32_t {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,
@@ -872,7 +872,7 @@ inline constexpr AnnotatedEnum operator~(AnnotatedEnum a) {
   return static_cast<E>(~static_cast<U>(a));
 }
 
-enum class AnnotatedEnum2 : short {
+enum class AnnotatedEnum2 : ::std::int16_t {
   FIELDA = 2,
   FIELDB = 4,
   FIELDC = 9,

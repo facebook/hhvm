@@ -27,6 +27,26 @@
           "column" : 2
         }
       }
+    },
+    "EnumUnderlyingType" : {
+      "lineno" : 194,
+      "constants" : {
+        "I8" : 0,
+        "U8" : 1,
+        "I16" : 2,
+        "U16" : 3,
+        "U32" : 4
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 194,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 205,
+          "column" : 2
+        }
+      }
     }
   },
   "structs" : {
@@ -373,6 +393,38 @@
         "end" : {
           "line" : 188,
           "column" : 22
+        }
+      }
+    },
+    "EnumType" : {
+      "lineno" : 224,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "type" : {
+          "type_enum" : "ENUM",
+          "spec_args" : "EnumUnderlyingType",
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 226,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 226,
+              "column" : 30
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 224,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 227,
+          "column" : 2
         }
       }
     }

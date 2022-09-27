@@ -22,28 +22,17 @@
 <%/type:sink?%><%!
 
 %><%#type:sink?%>
-  <%#type:sink_has_first_response?%>
 typedef apache::thrift::ThriftPResultSink<
     apache::thrift::ThriftPresult<true<%#type:sink_first_response_type%><% > service_tcc/field_data_return%><%/type:sink_first_response_type%><% > service_tcc/field_data_throws%>>,
     apache::thrift::ThriftPresult<true<%#type:sink_elem_type%><% > service_tcc/field_data_return%><%/type:sink_elem_type%><% > service_tcc/field_data_sink_throws%>>,
     apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><% > service_tcc/field_data_sink_final_throws%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
-  <%/type:sink_has_first_response?%><%!
-
-  %><%^type:sink_has_first_response?%>
-typedef apache::thrift::ThriftPResultSink<
-    apache::thrift::ThriftPresult<true<% > service_tcc/field_data_throws%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_elem_type%><% > service_tcc/field_data_return%><%/type:sink_elem_type%><% > service_tcc/field_data_sink_throws%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><% > service_tcc/field_data_sink_final_throws%>>
-    > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
-  <%/type:sink_has_first_response?%>
 <%/type:sink?%>
 <%/type:streamresponse?%><%!
 
 %><%#type:streamresponse?%>
 typedef apache::thrift::ThriftPResultStream<
-    <%#type:stream_has_first_response?%>apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><% > service_tcc/field_data_throws%>>, <%/type:stream_has_first_response?%><%!
-    %><%^type:stream_has_first_response?%>apache::thrift::ThriftPresult<true<% > service_tcc/field_data_throws%>>, <%/type:stream_has_first_response?%>
+    apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><% > service_tcc/field_data_throws%>>,
     apache::thrift::ThriftPresult<true<%#type:stream_elem_type%><% > service_tcc/field_data_return%><%/type:stream_elem_type%><% > service_tcc/field_data_stream_throws%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/type:streamresponse?%>

@@ -19,7 +19,7 @@ typedef apache::thrift::ThriftPresult<false> MyService_interactFast_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>> MyService_interactFast_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_serialize_pargs;
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>, 
+    apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>
     > MyService_serialize_presult;
 template <typename ProtocolIn_, typename ProtocolOut_>
@@ -306,7 +306,7 @@ typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apach
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteraction_ping_pargs;
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteraction_truthify_pargs;
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true>, 
+    apache::thrift::ThriftPresult<true>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>>
     > MyService_MyInteraction_truthify_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteraction_encode_pargs;
@@ -606,7 +606,7 @@ typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apach
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteractionFast_ping_pargs;
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteractionFast_truthify_pargs;
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true>, 
+    apache::thrift::ThriftPresult<true>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, bool*>>
     > MyService_MyInteractionFast_truthify_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_MyInteractionFast_encode_pargs;

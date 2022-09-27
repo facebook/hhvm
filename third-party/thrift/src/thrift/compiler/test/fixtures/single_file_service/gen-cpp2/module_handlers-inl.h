@@ -159,7 +159,7 @@ typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apac
 typedef apache::thrift::ThriftPresult<true> B_bar_presult;
 typedef apache::thrift::ThriftPresult<false> B_stream_stuff_pargs;
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true>, 
+    apache::thrift::ThriftPresult<true>,
     apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::integral, ::std::int32_t*>>
     > B_stream_stuff_presult;
 typedef apache::thrift::ThriftPresult<false> B_sink_stuff_pargs;

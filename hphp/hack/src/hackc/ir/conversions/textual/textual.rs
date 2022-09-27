@@ -7,7 +7,6 @@
 //! basically no business logic and just provides a type-safe way to write
 //! Textual.
 
-use std::borrow::Cow;
 use std::fmt;
 
 use anyhow::Error;
@@ -195,8 +194,8 @@ impl Expr {
         Expr::Const(Const::HackInt(i))
     }
 
-    pub(crate) fn hack_string<'a>(s: impl Into<Cow<'a, [u8]>>) -> Expr {
-        Expr::Const(Const::HackString(s.into().into_owned()))
+    pub(crate) fn hack_string<'a>(s: impl Into<Vec<u8>>) -> Expr {
+        Expr::Const(Const::HackString(s.into()))
     }
 
     pub(crate) fn index(base: impl Into<Expr>, offset: impl Into<Expr>) -> Expr {

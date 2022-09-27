@@ -61,6 +61,7 @@ pub(crate) fn write_func(
 ) -> Result {
     let func = func.clone();
     let func = crate::lower::lower(func, &mut unit_state.strings);
+    ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = func
         .params
@@ -175,6 +176,9 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         }
         Instr::Terminator(Terminator::Ret(vid, _)) => {
             w.ret(state.lookup_vid(vid))?;
+        }
+        Instr::Terminator(Terminator::Unreachable) => {
+            w.unreachable()?;
         }
         _ => {
             // This should only handle instructions that can't be rewritten into

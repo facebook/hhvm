@@ -80,7 +80,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::Sub
             | Hhbc::SubO => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
 
-            Hhbc::Print | Hhbc::IsTypeInt | Hhbc::Not => {
+            Hhbc::Print | Hhbc::IsTypeInt | Hhbc::IsTypeStr | Hhbc::Not => {
                 declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?
             }
             Hhbc::VerifyFailed => declare_function(w, &name, &[], ty!(noreturn))?,

@@ -43,6 +43,8 @@ pub(crate) enum Hhbc {
     CmpSame,
     #[strum(props(Function = "hhbc_is_type_int"))]
     IsTypeInt,
+    #[strum(props(Function = "hhbc_is_type_str"))]
+    IsTypeStr,
     #[strum(props(Function = "hhbc_modulo"))]
     Modulo,
     #[strum(props(Function = "hhbc_not"))]
@@ -112,7 +114,7 @@ pub(crate) enum Builtin {
     ///   RawPtrIsNull(*void) -> bool
     #[strum(props(Function = "raw_ptr_is_null"))]
     RawPtrIsNull,
-    /// Turns a string into a Mixed.
+    /// Turns a raw string into a Mixed.
     ///   String(s: *string) -> *Mixed
     #[strum(props(Function = "hack_string"))]
     String,

@@ -52,41 +52,36 @@ jobs:
     - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version
-    - run: |
-        set -ex
-        export HHVM_BIN="$(command -v hhvm)"
-        "$HHVM_BIN" hphp/test/run.php all
-      continue-on-error: true
     - name: Build the deb package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the deb package's information
       if: runner.os == 'Linux'
-      run: dpkg-deb --info bundle.deb
+      run: dpkg-deb --info ${{matrix.package}}.deb
     - name: Show the deb package's content
       if: runner.os == 'Linux'
-      run: dpkg-deb --contents bundle.deb
+      run: dpkg-deb --contents ${{matrix.package}}.deb
     - name: Save the deb package as build artifact
       if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
-        name: bundle.deb
-        path: bundle.deb
+        name: ${{matrix.package}}.deb
+        path: ${{matrix.package}}.deb
     - name: Build the rpm package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the rpm package's information
       if: runner.os == 'Linux'
-      run: rpm --query --info --package bundle.rpm
+      run: rpm --query --info --package ${{matrix.package}}.rpm
     - name: Show the rpm package's content
       if: runner.os == 'Linux'
-      run: rpm --query --list --package bundle.rpm
+      run: rpm --query --list --package ${{matrix.package}}.rpm
     - name: Save the rpm package as build artifact
       if: runner.os == 'Linux' && matrix.package == 'hhvm'
       uses: actions/upload-artifact@v2
       with:
-        name: bundle.rpm
-        path: bundle.rpm
+        name: ${{matrix.package}}.rpm
+        path: ${{matrix.package}}.rpm
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials
@@ -101,6 +96,29 @@ jobs:
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+  install-deb-and-run-all-tests:
+    strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
+      matrix:
+        package:
+        - hhvm
+        - hhvm_clang
+        os:
+        - ubuntu-latest
+    runs-on: ${{matrix.os}}
+    steps:
+    - name: Download the ${{matrix.package}}.deb from build-and-test job
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{matrix.package}}.deb
+    - run: sudo apt-get install ${{matrix.package}}.deb
+    - run: |
+        set -ex
+        export HHVM_BIN="$(command -v hhvm)"
+        "$HHVM_BIN" hphp/test/run.php all
+      # Suppress errors for now because we have not port all tests to HHVM OSS
+      continue-on-error: true
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
@@ -112,10 +130,10 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
-    - name: Download the bundle.deb from build-and-test job
+    - name: Download the hhvm.deb from build-and-test job
       uses: actions/download-artifact@v2
       with:
-        name: bundle.deb
+        name: hhvm.deb
     - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |
@@ -171,7 +189,7 @@ jobs:
           reprepro export nightly
         fi
     - if: startsWith(github.ref_name, 'nightly-')
-      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb nightly bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb nightly hhvm.deb
     - name: Create release suite
       if: startsWith(github.ref_name, 'HHVM-')
       run: |
@@ -191,7 +209,7 @@ jobs:
           reprepro export release
         fi
     - if: startsWith(github.ref_name, 'HHVM-')
-      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb release bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb release hhvm.deb
     - name: Determine HHVM version
       if: startsWith(github.ref_name, 'HHVM-')
       run: |
@@ -216,4 +234,4 @@ jobs:
           reprepro export "release-$HHVM_VERSION_MAJAR_MINOR"
         fi
     - if: startsWith(github.ref_name, 'HHVM-')
-      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb "release-$HHVM_VERSION_MAJAR_MINOR" bundle.deb
+      run: reprepro --keepunreferencedfiles --keepunusednewfiles includedeb "release-$HHVM_VERSION_MAJAR_MINOR" hhvm.deb

@@ -62,7 +62,7 @@ jobs:
       if: runner.os == 'Linux'
       run: dpkg-deb --contents ${{matrix.package}}.deb
     - name: Save the deb package as build artifact
-      if: runner.os == 'Linux' && matrix.package == 'hhvm'
+      if: runner.os == 'Linux'
       uses: actions/upload-artifact@v2
       with:
         name: ${{matrix.package}}.deb
@@ -77,7 +77,7 @@ jobs:
       if: runner.os == 'Linux'
       run: rpm --query --list --package ${{matrix.package}}.rpm
     - name: Save the rpm package as build artifact
-      if: runner.os == 'Linux' && matrix.package == 'hhvm'
+      if: runner.os == 'Linux'
       uses: actions/upload-artifact@v2
       with:
         name: ${{matrix.package}}.rpm
@@ -97,6 +97,7 @@ jobs:
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
   install-deb-and-run-all-tests:
+    needs: build-and-test
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false

@@ -394,6 +394,7 @@ pub(crate) fn write_function(
         w,
     };
 
+    writer.write_label(BlockId::from_usize(0), &[])?;
     body(&mut writer)?;
 
     writeln!(w, "}}")?;

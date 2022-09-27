@@ -100,6 +100,10 @@ pub(crate) enum Builtin {
     ///   Int(n: int) -> *Mixed
     #[strum(props(Function = "hack_int"))]
     Int,
+    /// Returns true if the given Mixed is truthy.
+    ///   IsTrue(p: *Mixed) -> bool
+    #[strum(props(Function = "hack_is_true"))]
+    IsTrue,
     /// Returns a Mixed containing a `null`.
     ///   Null() -> *Mixed
     #[strum(props(Function = "hack_null"))]

@@ -49,6 +49,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             Builtin::GetParam => {
                 declare_function(w, &name, &[ty!(*HackParam), ty!(int)], ty!(mixed))?
             }
+            Builtin::IsTrue => declare_function(w, &name, &[ty!(mixed)], ty!(bool))?,
             Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
             Builtin::VerifyParamCount => declare_function(
                 w,

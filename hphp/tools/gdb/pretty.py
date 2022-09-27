@@ -528,21 +528,23 @@ class SrcKeyPrinter(object):
             return '<invalid SrcKey>'
 
         func = nameof(lookup_func(func_id))
-        offset = self.val['m_s']['m_offset']
+        offset = self.val['m_s']['m_offsetOrNumArgs']
 
         rmp = self.val['m_s']['m_resumeModeAndTags']
-        resume = prologue = ''
+        mode = ''
         if rmp == 0:
             # ResumeMode::None
             pass
         elif rmp == 1:
-            resume = 'ra'
+            mode = 'ra'
         elif rmp == 2:
-            resume = 'rg'
+            mode = 'rg'
         elif rmp == 3:
-            prologue = 'p'
+            mode = 'p'
+        elif rmp == 4:
+            mode = 'fe'
 
-        return '%s@%d%s%s' % (func, offset, resume, prologue)
+        return '%s@%d%s' % (func, offset, mode)
 
 #------------------------------------------------------------------------------
 # Lookup function.

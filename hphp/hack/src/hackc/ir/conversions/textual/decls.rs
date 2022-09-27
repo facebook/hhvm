@@ -42,9 +42,14 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             Builtin::Null => declare_function(w, &name, &[], ty!(mixed))?,
             Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(mixed))?,
 
+            Builtin::AllocWords => declare_function(w, &name, &[ty!(int)], ty!(*void))?,
+            Builtin::BadMethodCall | Builtin::BadProperty => {
+                declare_function(w, &name, &[], ty!(noreturn))?
+            }
             Builtin::GetParam => {
                 declare_function(w, &name, &[ty!(*HackParam), ty!(int)], ty!(mixed))?
             }
+            Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
             Builtin::VerifyParamCount => declare_function(
                 w,
                 &name,

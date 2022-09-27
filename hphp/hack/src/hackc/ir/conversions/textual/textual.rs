@@ -166,10 +166,14 @@ impl fmt::Display for FmtConst<'_> {
 #[derive(Clone, Debug)]
 pub(crate) enum Expr {
     Sid(Sid),
+    /// *Variable
     Deref(Var),
     // Field(String),
-    // Index(Box<Expr>),
+    /// a[b]
+    Index(Box<Expr>, Box<Expr>),
+    /// 0, null, etc
     Const(Const),
+    /// foo(1, 2, 3)
     Call(String, Box<[Expr]>),
     // TyAscription(Box<Expr>, Ty),
 }
@@ -195,6 +199,12 @@ impl Expr {
         Expr::Const(Const::HackString(s.into().into_owned()))
     }
 
+    pub(crate) fn index(base: impl Into<Expr>, offset: impl Into<Expr>) -> Expr {
+        let base = base.into();
+        let offset = offset.into();
+        Expr::Index(Box::new(base), Box::new(offset))
+    }
+
     pub(crate) fn int(i: i64) -> Expr {
         Expr::Const(Const::Int(i))
     }
@@ -215,6 +225,12 @@ impl Expr {
 impl From<&'static str> for Expr {
     fn from(s: &'static str) -> Self {
         Expr::Const(Const::String(AsciiString::from_ascii(s).unwrap()))
+    }
+}
+
+impl From<i64> for Expr {
+    fn from(i: i64) -> Self {
+        Expr::Const(Const::Int(i))
     }
 }
 
@@ -239,9 +255,17 @@ impl fmt::Display for FmtExpr<'_> {
                 }
                 write!(f, ")")
             }
-            Expr::Sid(sid) => FmtSid(sid).fmt(f),
-            Expr::Deref(ref var) => write!(f, "&{}", FmtVar(strings, var)),
             Expr::Const(ref c) => FmtConst(c).fmt(f),
+            Expr::Deref(ref var) => write!(f, "&{}", FmtVar(strings, var)),
+            Expr::Index(ref base, ref offset) => {
+                write!(
+                    f,
+                    "{}[{}]",
+                    FmtExpr(strings, base),
+                    FmtExpr(strings, offset)
+                )
+            }
+            Expr::Sid(sid) => FmtSid(sid).fmt(f),
         }
     }
 }
@@ -422,7 +446,7 @@ impl<'a> FuncWriter<'a> {
         let expr = expr.into();
         match expr {
             Expr::Sid(sid) => Ok(sid),
-            Expr::Deref(_) | Expr::Const(_) | Expr::Call(_, _) => {
+            Expr::Call(_, _) | Expr::Const(_) | Expr::Deref(_) | Expr::Index(_, _) => {
                 todo!("EXPR: {expr:?}")
             }
         }
@@ -509,6 +533,11 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 
+    pub(crate) fn unreachable(&mut self) -> Result {
+        writeln!(self.w, "{INDENT}ret 0 // unreachable")?;
+        Ok(())
+    }
+
     pub(crate) fn write_loc(&mut self, src_loc: &SrcLoc) -> Result {
         if src_loc.filename != self.cur_loc.filename {
             write_full_loc(self.w, src_loc, self.strings)?;
@@ -519,6 +548,35 @@ impl<'a> FuncWriter<'a> {
         }
         Ok(())
     }
+}
+
+pub(crate) fn write_type(
+    w: &mut dyn std::io::Write,
+    name: &str,
+    src_loc: &SrcLoc,
+    fields: &[(&str, Ty)],
+    strings: &StringInterner,
+) -> Result {
+    write_full_loc(w, src_loc, strings)?;
+
+    write!(w, "type {name} = {{")?;
+
+    let mut sep = "\n";
+    for (name, ty) in fields {
+        write!(w, "{sep}{INDENT}{name}: {ty}", ty = FmtTy(ty))?;
+        sep = ";\n";
+    }
+
+    writeln!(w, "\n}}")?;
+    writeln!(w)?;
+
+    Ok(())
+}
+
+pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: Ty) -> Result {
+    writeln!(w, "global {name} // {}", FmtTy(&ty))?;
+    writeln!(w)?;
+    Ok(())
 }
 
 pub(crate) fn declare_function(

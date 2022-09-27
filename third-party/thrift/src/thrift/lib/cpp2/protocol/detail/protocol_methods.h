@@ -113,14 +113,40 @@ template <typename Container>
 auto emplace_back_default(Container& c) -> typename std::enable_if<
     !std::is_same<decltype(c.emplace_back()), void>::value,
     typename Container::reference>::type {
-  return c.emplace_back();
+  return c.emplace_back(detail::default_set_element(c));
 }
 template <typename Container>
 auto emplace_back_default(Container& c) -> typename std::enable_if<
     std::is_same<decltype(c.emplace_back()), void>::value,
     typename Container::reference>::type {
-  c.emplace_back();
+  c.emplace_back(detail::default_set_element(c));
   return c.back();
+}
+
+template <typename Container, typename Map>
+typename Container::reference emplace_back_default_map(Container& c, Map& m) {
+  return c.emplace_back(
+      detail::default_map_key(m), detail::default_map_value(m));
+}
+
+template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
+std::enable_if_t<detail::alloc_should_propagate_map<Map>>
+deserialize_key_val_into_map(
+    Map& m, const KeyDeserializer& kr, const MappedDeserializer& mr) {
+  typename Map::key_type key = detail::default_map_key(m);
+  typename Map::mapped_type value = detail::default_map_value(m);
+  kr(key);
+  mr(value);
+  m.emplace(std::move(key), std::move(value));
+}
+
+template <typename Map, typename KeyDeserializer, typename MappedDeserializer>
+std::enable_if_t<!detail::alloc_should_propagate_map<Map>>
+deserialize_key_val_into_map(
+    Map& m, const KeyDeserializer& kr, const MappedDeserializer& mr) {
+  typename Map::key_type key; // Create key/val without allocator awareness.
+  kr(key);
+  mr(m[std::move(key)]);
 }
 
 template <typename Void, typename T>
@@ -170,12 +196,12 @@ deserialize_known_length_map(
   typename Map::container_type tmp(map.get_allocator());
   reserve_if_possible(&tmp, map_size);
   {
-    auto& elem0 = emplace_back_default(tmp);
+    auto& elem0 = emplace_back_default_map(tmp, map);
     kr(elem0.first);
     mr(elem0.second);
   }
   for (size_t i = 1; i < map_size; ++i) {
-    auto& elem = emplace_back_default(tmp);
+    auto& elem = emplace_back_default_map(tmp, map);
     kr(elem.first);
     mr(elem.second);
     sorted = sorted && map.key_comp()(tmp[i - 1].first, elem.first);
@@ -197,11 +223,11 @@ deserialize_known_length_map(
   reserve_if_possible(&map, map_size);
 
   for (auto i = map_size; i--;) {
-    typename Map::key_type key;
+    typename Map::key_type key = detail::default_map_key(map);
+    typename Map::mapped_type value = detail::default_map_value(map);
     kr(key);
-    auto iter = map.emplace_hint(
-        map.end(), std::move(key), typename Map::mapped_type{});
-    mr(iter->second);
+    mr(value);
+    map.emplace_hint(map.end(), std::move(key), std::move(value));
   }
 }
 
@@ -217,9 +243,7 @@ deserialize_known_length_map(
   reserve_if_possible(&map, map_size);
 
   for (auto i = map_size; i--;) {
-    typename Map::key_type key;
-    kr(key);
-    mr(map[std::move(key)]);
+    deserialize_key_val_into_map(map, kr, mr);
   }
 }
 
@@ -257,7 +281,7 @@ deserialize_known_length_set(
   reserve_if_possible(&set, set_size);
 
   for (auto i = set_size; i--;) {
-    typename Set::value_type value;
+    typename Set::value_type value = detail::default_set_element(set);
     vr(value);
     set.emplace_hint(set.end(), std::move(value));
   }
@@ -272,7 +296,7 @@ deserialize_known_length_set(
   reserve_if_possible(&set, set_size);
 
   for (auto i = set_size; i--;) {
-    typename Set::value_type value;
+    typename Set::value_type value = detail::default_set_element(set);
     vr(value);
     set.insert(std::move(value));
   }

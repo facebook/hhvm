@@ -4989,12 +4989,18 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
       Typing_make_type.dynamic (Reason.Rsupport_dynamic_type pos)
     in
     let dynamic_return_ty = make_dynamic (get_pos ret_locl_ty) in
+    let hint_pos =
+      match f.f_ret with
+      | (_, None) -> fst f.f_name
+      | (_, Some (pos, _)) -> pos
+    in
     let dynamic_return_info =
-      Typing_env_return_info.
-        {
-          return_type = MakeType.unenforced dynamic_return_ty;
-          return_disposable = false;
-        }
+      Typing_return.make_info
+        hint_pos
+        f.f_fun_kind
+        f.f_user_attributes
+        env
+        (MakeType.unenforced dynamic_return_ty)
     in
     let (env, param_tys) =
       Typing_param.make_param_local_tys

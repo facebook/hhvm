@@ -175,6 +175,17 @@ struct recurse_helper {
     // explicit overload exists for IOBuf -> binary so we add here too
     dynamic_converter_impl<TC>::from(out, input, format, adherence);
   }
+
+  template <typename TC>
+  static void from(
+      typename std::vector<bool>::reference out,
+      const folly::dynamic& input,
+      dynamic_format format,
+      format_adherence adherence) {
+    bool tmp;
+    dynamic_converter_impl<TC>::from(tmp, input, format, adherence);
+    out = tmp;
+  }
 };
 
 template <>

@@ -7,7 +7,6 @@
 //! basically no business logic and just provides a type-safe way to write
 //! Textual.
 
-use std::borrow::Cow;
 use std::fmt;
 
 use anyhow::Error;
@@ -100,8 +99,14 @@ impl fmt::Display for FmtTy<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Var {
-    // Named(String),
+    Named(String),
     Hack(LocalId),
+}
+
+impl Var {
+    pub(crate) fn named(s: impl Into<String>) -> Self {
+        Var::Named(s.into())
+    }
 }
 
 impl From<LocalId> for Var {
@@ -116,7 +121,7 @@ impl fmt::Display for FmtVar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtVar(strings, var) = *self;
         match *var {
-            // Var::Named(ref s) => s.fmt(f),
+            Var::Named(ref s) => s.fmt(f),
             Var::Hack(lid) => FmtLid(strings, lid).fmt(f),
         }
     }
@@ -129,7 +134,7 @@ pub(crate) enum Const {
     HackInt(i64),
     HackString(Vec<u8>),
     Int(i64),
-    // Null,
+    Null,
     String(AsciiString),
     True,
 }
@@ -147,7 +152,7 @@ impl fmt::Display for FmtConst<'_> {
                 write!(f, "hack_string(\"{}\")", crate::util::escaped_string(s))
             }
             Const::Int(i) => i.fmt(f),
-            // Const::Null => f.write_str("null"),
+            Const::Null => f.write_str("null"),
             Const::String(ref s) => {
                 // String should already be escaped...
                 write!(f, "\"{}\"", s)
@@ -160,10 +165,14 @@ impl fmt::Display for FmtConst<'_> {
 #[derive(Clone, Debug)]
 pub(crate) enum Expr {
     Sid(Sid),
+    /// *Variable
     Deref(Var),
     // Field(String),
-    // Index(Box<Expr>),
+    /// a[b]
+    Index(Box<Expr>, Box<Expr>),
+    /// 0, null, etc
     Const(Const),
+    /// foo(1, 2, 3)
     Call(String, Box<[Expr]>),
     // TyAscription(Box<Expr>, Ty),
 }
@@ -185,8 +194,14 @@ impl Expr {
         Expr::Const(Const::HackInt(i))
     }
 
-    pub(crate) fn hack_string<'a>(s: impl Into<Cow<'a, [u8]>>) -> Expr {
-        Expr::Const(Const::HackString(s.into().into_owned()))
+    pub(crate) fn hack_string<'a>(s: impl Into<Vec<u8>>) -> Expr {
+        Expr::Const(Const::HackString(s.into()))
+    }
+
+    pub(crate) fn index(base: impl Into<Expr>, offset: impl Into<Expr>) -> Expr {
+        let base = base.into();
+        let offset = offset.into();
+        Expr::Index(Box::new(base), Box::new(offset))
     }
 
     pub(crate) fn int(i: i64) -> Expr {
@@ -194,7 +209,7 @@ impl Expr {
     }
 
     pub(crate) fn null() -> Expr {
-        Expr::Const(Const::True)
+        Expr::Const(Const::Null)
     }
 
     pub(crate) fn string(s: AsciiString) -> Expr {
@@ -209,6 +224,12 @@ impl Expr {
 impl From<&'static str> for Expr {
     fn from(s: &'static str) -> Self {
         Expr::Const(Const::String(AsciiString::from_ascii(s).unwrap()))
+    }
+}
+
+impl From<i64> for Expr {
+    fn from(i: i64) -> Self {
+        Expr::Const(Const::Int(i))
     }
 }
 
@@ -233,9 +254,17 @@ impl fmt::Display for FmtExpr<'_> {
                 }
                 write!(f, ")")
             }
-            Expr::Sid(sid) => FmtSid(sid).fmt(f),
-            Expr::Deref(ref var) => write!(f, "&{}", FmtVar(strings, var)),
             Expr::Const(ref c) => FmtConst(c).fmt(f),
+            Expr::Deref(ref var) => write!(f, "&{}", FmtVar(strings, var)),
+            Expr::Index(ref base, ref offset) => {
+                write!(
+                    f,
+                    "{}[{}]",
+                    FmtExpr(strings, base),
+                    FmtExpr(strings, offset)
+                )
+            }
+            Expr::Sid(sid) => FmtSid(sid).fmt(f),
         }
     }
 }
@@ -364,6 +393,7 @@ pub(crate) fn write_function(
         w,
     };
 
+    writer.write_label(BlockId::from_usize(0), &[])?;
     body(&mut writer)?;
 
     writeln!(w, "}}")?;
@@ -416,7 +446,7 @@ impl<'a> FuncWriter<'a> {
         let expr = expr.into();
         match expr {
             Expr::Sid(sid) => Ok(sid),
-            Expr::Deref(_) | Expr::Const(_) | Expr::Call(_, _) => {
+            Expr::Call(_, _) | Expr::Const(_) | Expr::Deref(_) | Expr::Index(_, _) => {
                 todo!("EXPR: {expr:?}")
             }
         }
@@ -454,14 +484,14 @@ impl<'a> FuncWriter<'a> {
         self.call("copy", vec![src])
     }
 
-    pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
+    pub(crate) fn load(&mut self, ty: Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();
         writeln!(
             self.w,
             "{INDENT}{dst}: {ty} = load {src}",
             dst = FmtSid(dst),
-            ty = FmtTy(ty),
+            ty = FmtTy(&ty),
             src = FmtExpr(self.strings, &src)
         )?;
         Ok(dst)
@@ -489,7 +519,7 @@ impl<'a> FuncWriter<'a> {
         &mut self,
         dst: impl Into<Expr>,
         src: impl Into<Expr>,
-        src_ty: &Ty,
+        src_ty: Ty,
     ) -> Result {
         let dst = dst.into();
         let src = src.into();
@@ -498,8 +528,13 @@ impl<'a> FuncWriter<'a> {
             "{INDENT}store {dst} <- {src}: {ty}",
             dst = FmtExpr(self.strings, &dst),
             src = FmtExpr(self.strings, &src),
-            ty = FmtTy(src_ty),
+            ty = FmtTy(&src_ty),
         )?;
+        Ok(())
+    }
+
+    pub(crate) fn unreachable(&mut self) -> Result {
+        writeln!(self.w, "{INDENT}ret 0 // unreachable")?;
         Ok(())
     }
 
@@ -513,6 +548,35 @@ impl<'a> FuncWriter<'a> {
         }
         Ok(())
     }
+}
+
+pub(crate) fn write_type(
+    w: &mut dyn std::io::Write,
+    name: &str,
+    src_loc: &SrcLoc,
+    fields: &[(&str, Ty)],
+    strings: &StringInterner,
+) -> Result {
+    write_full_loc(w, src_loc, strings)?;
+
+    write!(w, "type {name} = {{")?;
+
+    let mut sep = "\n";
+    for (name, ty) in fields {
+        write!(w, "{sep}{INDENT}{name}: {ty}", ty = FmtTy(ty))?;
+        sep = ";\n";
+    }
+
+    writeln!(w, "\n}}")?;
+    writeln!(w)?;
+
+    Ok(())
+}
+
+pub(crate) fn declare_global(w: &mut dyn std::io::Write, name: &str, ty: Ty) -> Result {
+    writeln!(w, "global {name} // {}", FmtTy(&ty))?;
+    writeln!(w)?;
+    Ok(())
 }
 
 pub(crate) fn declare_function(

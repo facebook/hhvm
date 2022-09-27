@@ -25,8 +25,8 @@ pub fn textual_writer(
     let mut state = UnitState::new(strings);
     check_fatal(path, &unit.fatal)?;
 
-    if !unit.classes.is_empty() {
-        todo!();
+    for cls in unit.classes {
+        crate::class::write_class(w, &mut state, cls)?;
     }
 
     for func in unit.functions {

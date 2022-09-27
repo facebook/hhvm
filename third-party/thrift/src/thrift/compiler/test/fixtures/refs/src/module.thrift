@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
+
 namespace java.swift test.fixtures.refs
 
 enum MyEnum {
@@ -89,10 +91,11 @@ struct StructWithSharedConst {
   );
 }
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
 enum TypedEnum {
   VAL1 = 0,
   VAL2 = 1,
-} (cpp.enum_type = "short")
+}
 
 struct Empty {}
 

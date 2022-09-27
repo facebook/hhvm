@@ -248,6 +248,12 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 290
+      },
+      "InternBox" : {
+        "name" : "InternBox",
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 302
       }
       },
   "source_path" : "thrift/annotation/thrift",

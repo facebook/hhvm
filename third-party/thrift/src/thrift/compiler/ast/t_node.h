@@ -75,6 +75,7 @@ class t_node {
   // Returns the value of an annotation with the given name.
   //
   // If not found returns the provided default or "".
+  // TODO(dokwon): Refactor get_annotation to use string_view.
   template <
       typename T = std::vector<std::string>,
       typename D = const std::string*>

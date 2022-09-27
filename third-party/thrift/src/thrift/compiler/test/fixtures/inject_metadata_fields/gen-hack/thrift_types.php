@@ -1986,3 +1986,72 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct {
 
 }
 
+/**
+ * Original thrift struct:-
+ * InternBox
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/InternBox'))>>
+class InternBox implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'InternBox';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "thrift.InternBox",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\Testing' => \thrift\annotation\Testing::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+}
+

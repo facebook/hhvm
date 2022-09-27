@@ -547,7 +547,7 @@ class ThriftServerConfig {
   static constexpr uint32_t T_MAX_NUM_PENDING_CONNECTIONS_PER_WORKER = 4096;
 
   static constexpr std::chrono::milliseconds DEFAULT_TIMEOUT =
-      std::chrono::milliseconds(60000);
+      std::chrono::milliseconds(0);
 
   static constexpr std::chrono::milliseconds DEFAULT_TASK_EXPIRE_TIME =
       std::chrono::milliseconds(5000);
@@ -584,7 +584,7 @@ class ThriftServerConfig {
 
   //! Milliseconds we'll keep the connection alive for (0 = infinity)
   ServerAttributeStatic<std::chrono::milliseconds> connectionAgeTimeout_{
-      std::chrono::milliseconds(0)};
+      DEFAULT_TIMEOUT};
 
   /**
    * The time in milliseconds before an unperformed task expires

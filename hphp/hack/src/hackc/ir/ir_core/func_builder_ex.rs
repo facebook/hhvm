@@ -104,7 +104,7 @@ impl<'a> FuncBuilderEx for FuncBuilder<'a> {
                 BaseType::RawPtr(_) => todo!(),
                 BaseType::RawType(_) => todo!(),
                 BaseType::Resource => todo!(),
-                BaseType::String => todo!(),
+                BaseType::String => Instr::Hhbc(Hhbc::IsTypeC(vid, IsTypeOp::Str, loc)),
                 BaseType::This => todo!(),
                 BaseType::Typename => todo!(),
                 BaseType::Varray => todo!(),

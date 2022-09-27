@@ -245,6 +245,7 @@ let rec hint
     ?(allow_like = false)
     ?(in_where_clause = false)
     ?(in_context = false)
+    ?(in_is_as = false)
     ?(tp_depth = 0)
     env
     (hh : Aast.hint) =
@@ -257,6 +258,7 @@ let rec hint
       ~allow_like
       ~in_where_clause
       ~in_context
+      ~in_is_as
       ~tp_depth
       env
       (p, h) )
@@ -317,6 +319,7 @@ and hint_
     ~allow_like
     ~in_where_clause
     ~in_context
+    ~in_is_as
     ?(tp_depth = 0)
     env
     (p, x) =
@@ -363,7 +366,7 @@ and hint_
     | N.Hnonnull ->
       if not (List.is_empty hl) then
         Errors.add_naming_error @@ Naming_error.Unexpected_type_arguments p;
-      if TypecheckerOptions.everything_sdt tcopt then
+      if TypecheckerOptions.everything_sdt tcopt && not in_is_as then
         wrap_supportdyn p hint_id
       else
         hint_id
@@ -2235,9 +2238,14 @@ and expr_ env p (e : Nast.expr_) =
     in
     N.Eif (e1, e2opt, e3)
   | Aast.Is (e, h) ->
-    N.Is (expr env e, hint ~allow_wildcard:true ~allow_like:true env h)
+    N.Is
+      ( expr env e,
+        hint ~allow_wildcard:true ~allow_like:true ~in_is_as:true env h )
   | Aast.As (e, h, b) ->
-    N.As (expr env e, hint ~allow_wildcard:true ~allow_like:true env h, b)
+    N.As
+      ( expr env e,
+        hint ~allow_wildcard:true ~allow_like:true ~in_is_as:true env h,
+        b )
   | Aast.Upcast (e, h) ->
     N.Upcast (expr env e, hint ~allow_wildcard:false ~allow_like:true env h)
   | Aast.New

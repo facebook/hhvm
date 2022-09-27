@@ -72,7 +72,9 @@ impl LowerInstrs {
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Obj, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Res, _)) => todo!(),
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Scalar, _)) => todo!(),
-            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Str, _)) => todo!(),
+            Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Str, _)) => {
+                hack::Builtin::Hhbc(hack::Hhbc::IsTypeStr)
+            }
             Instr::Hhbc(Hhbc::IsTypeC(_, IsTypeOp::Vec, _)) => todo!(),
             Instr::Hhbc(Hhbc::Modulo(..)) => hack::Builtin::Hhbc(hack::Hhbc::Modulo),
             Instr::Hhbc(Hhbc::Not(..)) => hack::Builtin::Hhbc(hack::Hhbc::Not),
@@ -89,9 +91,11 @@ impl LowerInstrs {
         let return_type = builder.func.return_type.enforced.clone();
         let pred = builder.emit_is(vid, &return_type, loc);
         let pred = builder.emit(Instr::Hhbc(Hhbc::Not(pred, loc)));
-        builder.if_then(pred, loc, |builder| {
-            builder.hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc)
-        })
+        builder.emit_if_then(pred, loc, |builder| {
+            builder.emit_hack_builtin(hack::Builtin::Hhbc(hack::Hhbc::VerifyFailed), &[], loc);
+            Instr::unreachable()
+        });
+        Instr::copy(vid)
     }
 }
 

@@ -1417,7 +1417,29 @@ let obj_get_with_mismatches
     }
   in
   let (env, e2, ty, lval_err, rval_err_opt) =
-    obj_get_inner args env receiver_or_parent_ty member_id on_error
+    let (env, e2, ty, lvarl_err, rval_err_opt) =
+      obj_get_inner args env receiver_or_parent_ty member_id on_error
+    in
+    (* If we failed on a static receiver type in SDT dynamic method check, try again
+     * on dynamic, if the receiver type supports dynamic.
+     *)
+    if
+      Option.is_some e2
+      && env.Typing_env_types.in_support_dynamic_type_method_check
+      && (not (is_dynamic receiver_or_parent_ty))
+      && Typing_utils.is_sub_type
+           env
+           receiver_or_parent_ty
+           (Typing_make_type.dynamic Reason.none)
+    then
+      obj_get_inner
+        args
+        env
+        (MakeType.dynamic (Reason.Rwitness obj_pos))
+        member_id
+        on_error
+    else
+      (env, e2, ty, lvarl_err, rval_err_opt)
   in
   let from_res = Result.fold ~ok:(fun _ -> None) ~error:(fun tys -> Some tys) in
   let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both

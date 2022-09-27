@@ -28,8 +28,10 @@ use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
 
+use crate::class;
 use crate::hack;
 use crate::mangle::Mangle;
+use crate::mangle::MangleClassId;
 use crate::mangle::MangleId;
 use crate::state::UnitState;
 use crate::textual;
@@ -51,26 +53,43 @@ pub(crate) fn write_function(
     write_func(w, state, &function.name.mangle(), &function.func)
 }
 
-fn write_func(
+pub(crate) fn write_func(
     w: &mut dyn std::io::Write,
     unit_state: &mut UnitState,
     name: &str,
     func: &ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let func = crate::lower::lower(func, &unit_state.strings);
-    let func = rewrite_prelude(func);
-    let mut func = rewrite_jmp_ops(func);
-    ir::passes::clean::run(&mut func);
+    let func = crate::lower::lower(func, &mut unit_state.strings);
+    ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
+    let params = func
+        .params
+        .iter()
+        .map(|p| {
+            let name_bytes = unit_state.strings.lookup_bytes(p.name);
+            let name_string = util::escaped_string(name_bytes);
+            (name_string, p.ty.enforced.ty.clone())
+        })
+        .collect_vec();
+    let params = params
+        .iter()
+        .map(|(name, ty)| (name.as_str(), ty.clone()))
+        .collect_vec();
+
+    let span = func.loc(func.span).clone();
     textual::write_function(
         w,
         &unit_state.strings,
         name,
-        func.loc(func.span),
-        &[("params", tx_ty!(HackParams))],
+        &span,
+        &params,
         tx_ty!(mixed),
         |w| {
+            let func = rewrite_prelude(func);
+            let mut func = rewrite_jmp_ops(func);
+            ir::passes::clean::run(&mut func);
+
             let mut state = FuncState::new(&unit_state.strings, &func);
 
             for bid in func.block_ids() {
@@ -94,7 +113,10 @@ fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: 
         .iter()
         .map(|iid| state.alloc_sid_for_iid(w, *iid))
         .collect_vec();
-    w.write_label(bid, &params)?;
+    // The entry BID is always included for us.
+    if bid != Func::ENTRY_BID {
+        w.write_label(bid, &params)?;
+    }
 
     for iid in block.iids() {
         write_instr(w, state, iid)?;
@@ -119,11 +141,13 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::MemberOp(ref mop) => crate::member_op::write(w, state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
-            w.prune_not(textual::Expr::call("hack_is_true", [state.lookup_vid(vid)]))?;
+            let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
+            w.prune_not(pred)?;
         }
         Instr::Special(Special::Textual(Textual::AssertTrue(vid, _))) => {
             // I think "prune" means "stop if this expression IS NOT true"...
-            w.prune(textual::Expr::call("hack_is_true", [state.lookup_vid(vid)]))?;
+            let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
+            w.prune(pred)?;
         }
         Instr::Special(Special::Textual(Textual::HackBuiltin {
             ref target,
@@ -152,6 +176,9 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         }
         Instr::Terminator(Terminator::Ret(vid, _)) => {
             w.ret(state.lookup_vid(vid))?;
+        }
+        Instr::Terminator(Terminator::Unreachable) => {
+            w.unreachable()?;
         }
         _ => {
             // This should only handle instructions that can't be rewritten into
@@ -201,7 +228,7 @@ fn write_load_var(
     iid: InstrId,
     lid: LocalId,
 ) -> Result {
-    let sid = w.load(&textual::Ty::Mixed, textual::Expr::deref(lid))?;
+    let sid = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
     state.set_iid(iid, sid);
     Ok(())
 }
@@ -215,7 +242,7 @@ fn write_set_var(
     w.store(
         textual::Expr::deref(lid),
         state.lookup_vid(vid),
-        &textual::Ty::Mixed,
+        tx_ty!(mixed),
     )
 }
 
@@ -284,9 +311,21 @@ fn write_call(
         todo!();
     }
 
+    let args = detail.args(operands);
+
     let output = match *detail {
         CallDetail::FCallClsMethod { .. } => todo!(),
-        CallDetail::FCallClsMethodD { .. } => todo!(),
+        CallDetail::FCallClsMethodD { clsid, method } => {
+            // C::foo()
+            let target = method.mangle(clsid, state.strings);
+            state.external_funcs.insert(target.to_string());
+            let this = class::load_static_class(w, clsid, state.strings)?;
+            let pack_args = std::iter::once(this.into())
+                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
+                .collect_vec();
+            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
+            w.call(&target, [arg_pack])?
+        }
         CallDetail::FCallClsMethodM { .. } => todo!(),
         CallDetail::FCallClsMethodS { .. } => todo!(),
         CallDetail::FCallClsMethodSD { .. } => todo!(),
@@ -295,12 +334,10 @@ fn write_call(
         CallDetail::FCallFuncD { func } => {
             let target = func.mangle(state.strings);
             state.external_funcs.insert(target.to_string());
-            let args = detail
-                .args(operands)
-                .iter()
-                .map(|vid| state.lookup_vid(*vid))
+            let pack_args = std::iter::once(textual::Expr::null())
+                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
                 .collect_vec();
-            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), args)?;
+            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
             w.call(&target, [arg_pack])?
         }
         CallDetail::FCallObjMethod { .. } => todo!(),
@@ -329,9 +366,9 @@ fn write_inc_dec_l<'a>(
         _ => unreachable!(),
     };
 
-    let pre = w.load(&textual::Ty::Mixed, textual::Expr::deref(lid))?;
+    let pre = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
     let post = hack::call_builtin(w, builtin, (pre, textual::Expr::hack_int(1)))?;
-    w.store(textual::Expr::deref(lid), post, &textual::Ty::Mixed)?;
+    w.store(textual::Expr::deref(lid), post, tx_ty!(mixed))?;
 
     let sid = match op {
         IncDecOp::PreInc | IncDecOp::PreDec | IncDecOp::PreIncO | IncDecOp::PreDecO => pre,

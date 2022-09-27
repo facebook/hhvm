@@ -2422,7 +2422,7 @@ TEST(ThriftServer, ServerConfigTest) {
   // If nothing is set, expect defaults
   auto serverConfig = server.getServerSocketConfig();
   EXPECT_EQ(
-      serverConfig.sslHandshakeTimeout, defaultConfig.sslHandshakeTimeout);
+      serverConfig.sslHandshakeTimeout, std::chrono::milliseconds::zero());
 
   // Idle timeout of 0 with no SSL handshake set, expect it to be 0.
   server.setIdleTimeout(std::chrono::milliseconds::zero());

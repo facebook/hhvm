@@ -1174,7 +1174,10 @@ function hphp_cmd(
     $hdf,
     '-vRuntime.ResourceLimit.CoreFileSize=0',
     '-vRuntime.Eval.EnableIntrinsicsExtension=true',
-    '-vRuntime.Eval.EnableArgsInBacktraces=true',
+    // EnableArgsInBacktraces disables most of HHBBC's DCE optimizations.
+    // In order to test those optimizations (which are part of a normal prod
+    // configuration) we turn this flag off by default.
+    '-vRuntime.Eval.EnableArgsInBacktraces=false',
     '-vRuntime.Eval.FoldLazyClassKeys=false',
     '-vRuntime.Eval.EnableLogBridge=false',
     '-vParserThreadCount=' . ($options->repo_threads ?? 1),
@@ -1184,7 +1187,7 @@ function hphp_cmd(
     "-vExternWorker.WorkingDir=".Status::getTestTmpPath($test, 'work'),
     $extra_args,
     $compiler_args,
-    read_opts_file("$test.hphp_opts"),
+    read_opts_file(find_test_ext($test, 'hphp_opts')),
   ]);
 }
 

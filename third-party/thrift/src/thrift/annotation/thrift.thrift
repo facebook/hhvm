@@ -168,7 +168,7 @@ struct NoDeprecated {}
 @Experimental
 struct TerseWrite {}
 
-// TODO(dokwon): Document.
+// Indicates that a field's value should never be stored on the 'stack'.
 @scope.Field
 @Beta
 struct Box {}
@@ -294,3 +294,11 @@ struct BitmaskEnum {}
 struct GenerateRuntimeSchema {
   1: string name;
 }
+
+// Indicates that a field's value should never be stored on the 'stack', and that
+// identical values can be shared in immutable contexts.
+//
+// Unlike `@thrift.Box` above, this annotation does not work yet :-).
+@scope.Field
+@Testing // TODO: Implement.
+struct InternBox {}

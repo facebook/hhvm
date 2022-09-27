@@ -19,5 +19,5 @@ if sys.version_info[0] >= 3:
 import thrift.annotation.scope.ttypes
 
 
-from .ttypes import UTF8STRINGS, Beta, Experimental, Testing, Deprecated, ReserveIds, Legacy, RequiresBackwardCompatibility, NoExperimental, NoBeta, NoLegacy, NoDeprecated, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, GenDefaultEnumValue, v1, v1beta, v1alpha, v1test, ExceptionMessage, BitmaskEnum, GenerateRuntimeSchema
+from .ttypes import UTF8STRINGS, Beta, Experimental, Testing, Deprecated, ReserveIds, Legacy, RequiresBackwardCompatibility, NoExperimental, NoBeta, NoLegacy, NoDeprecated, TerseWrite, Box, Mixin, SerializeInFieldIdOrder, GenDefaultEnumValue, v1, v1beta, v1alpha, v1test, ExceptionMessage, BitmaskEnum, GenerateRuntimeSchema, InternBox
 

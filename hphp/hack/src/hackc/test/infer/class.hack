@@ -39,9 +39,14 @@
 // CHECK: define invoke::static::_CC(name: *Mixed, params: *HackParams) : *Mixed
 // CHECK:   n0: *Mixed = load &name
 // CHECK:   n1: *HackParams = load &params
-// CHECK:   jmp b1
+// CHECK:   jmp b1, b2
 // CHECK: #b1:
-// CHECK:   n2 = hack_bad_method_call()
+// CHECK:   prune hhbc_cmp_eq(n0, hack_string("cmp"))
+// CHECK:   n2 = _MC::cmp(n1)
+// CHECK:   ret n2
+// CHECK: #b2:
+// CHECK:   prune ! hhbc_cmp_eq(n0, hack_string("cmp"))
+// CHECK:   n3 = hack_bad_method_call()
 
 // CHECK: define invoke::_CC(name: *Mixed, params: *HackParams) : *Mixed
 // CHECK:   n0: *Mixed = load &name
@@ -69,4 +74,11 @@
 // CHECK:   n2 = hack_bad_property()
 
 class C {
+  public static function cmp(mixed $a, mixed $b): void {
+    if ($a == $b) {
+      echo "equal";
+    } else {
+      echo "unequal";
+    }
+  }
 }

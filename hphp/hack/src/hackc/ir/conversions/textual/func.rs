@@ -53,7 +53,7 @@ pub(crate) fn write_function(
     write_func(w, state, &function.name.mangle(), &function.func)
 }
 
-fn write_func(
+pub(crate) fn write_func(
     w: &mut dyn std::io::Write,
     unit_state: &mut UnitState,
     name: &str,

@@ -26,6 +26,7 @@ use strum::IntoEnumIterator as _;
 use strum_macros::EnumCount;
 use strum_macros::EnumIter;
 
+use super::func;
 use super::hack;
 use super::textual;
 use super::textual::Sid;
@@ -48,6 +49,15 @@ enum VTableIndex {
 pub(crate) enum IsStatic {
     Static,
     NonStatic,
+}
+
+impl IsStatic {
+    fn matches_method(&self, method: &ir::Method<'_>) -> bool {
+        match self {
+            IsStatic::Static => method.attrs.is_static(),
+            IsStatic::NonStatic => !method.attrs.is_static(),
+        }
+    }
 }
 
 pub(crate) struct StaticClassId(pub(crate) ir::ClassId);
@@ -90,8 +100,8 @@ pub(crate) fn write_class(
     }
 
     let methods = std::mem::take(&mut class.methods);
-    for _method in methods {
-        todo!();
+    for method in methods {
+        write_method(w, state, &class, method)?;
     }
 
     Ok(())
@@ -339,7 +349,19 @@ fn write_invoke(
 
             let mut bid_allocator = bid_allocator();
 
-            let targets: Vec<(BlockId, &ir::Method<'_>)> = Vec::new();
+            let targets = class
+                .methods
+                .iter()
+                .filter_map(|method| {
+                    if is_static.matches_method(method) {
+                        let bid = bid_allocator.next().unwrap();
+                        Some((bid, method))
+                    } else {
+                        None
+                    }
+                })
+                .collect_vec();
+
             let default = bid_allocator.next().unwrap();
 
             w.jmp(
@@ -356,13 +378,12 @@ fn write_invoke(
             for (bid, method) in targets {
                 w.write_label(bid, &[])?;
                 let mname = method.name.as_bytes();
-                let pred = hack::call_builtin(
-                    w,
+                let pred = hack::expr_builtin(
                     hack::Builtin::Hhbc(hack::Hhbc::CmpEq),
                     (name, textual::Expr::hack_string(mname)),
-                )?;
+                );
+                w.prune(pred.clone())?;
                 cmps.push(pred);
-                w.prune(pred)?;
                 let target = method.name.mangle(class.name, &state.strings);
                 let res = w.call(&target, [params])?;
                 w.ret(res)?;
@@ -470,6 +491,26 @@ fn write_set_prop(
             w.unreachable()?;
             Ok(())
         },
+    )
+}
+
+fn write_method(
+    w: &mut dyn std::io::Write,
+    state: &mut UnitState,
+    class: &ir::Class<'_>,
+    method: ir::Method<'_>,
+) -> Result {
+    trace!(
+        "Convert Method {}::{}",
+        class.name.as_bstr(&state.strings),
+        method.name.as_bstr()
+    );
+
+    func::write_func(
+        w,
+        state,
+        &method.name.mangle(class.name, &state.strings),
+        &method.func,
     )
 }
 

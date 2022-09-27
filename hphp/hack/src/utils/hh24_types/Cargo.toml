@@ -8,7 +8,7 @@ edition = "2021"
 path = "hh24_types.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 depgraph = { path = "../../depgraph/cargo/depgraph" }
 derive_more = "0.99.17"
 hh_hash = { path = "../hh_hash" }
@@ -17,5 +17,5 @@ oxidized_by_ref = { path = "../../oxidized_by_ref" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

@@ -8,7 +8,7 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 core_utils_rust = { path = "../../utils/core" }
@@ -21,5 +21,5 @@ lazy_static = "1.4"
 naming_special_names_rust = { path = "../../naming" }
 oxidized = { path = "../../oxidized" }
 regex = "1.5.4"
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 write_bytes = { path = "../../utils/write_bytes/write_bytes" }

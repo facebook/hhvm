@@ -11,7 +11,7 @@ name = "fbthrift_test"
 path = "lib.rs"
 
 [dev-dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 fbthrift = { path = "../.." }
 fbthrift_test_if = { path = "cargo_thrift" }
 proptest = "1.0"

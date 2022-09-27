@@ -8,7 +8,7 @@ edition = "2021"
 path = "hackrs_provider_backend.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 datastore = { path = "../../hackrs/datastore" }

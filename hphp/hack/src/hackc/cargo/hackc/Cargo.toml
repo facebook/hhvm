@@ -10,7 +10,7 @@ path = "../../hackc/hackc.rs"
 
 [dependencies]
 aast_parser = { path = "../../../parser/cargo/aast_parser" }
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 bc_to_ir = { path = "../../ir/conversions/bc_to_ir" }
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
@@ -62,5 +62,5 @@ strum = "0.21"
 strum_macros = "0.21"
 tempdir = "0.3"
 textual = { path = "../../ir/conversions/textual" }
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 ty = { path = "../../../hackrs/ty/cargo/ty" }

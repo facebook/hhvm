@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../shallow_decl_provider.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 datastore = { path = "../../../datastore" }
 decl_parser = { path = "../../../decl_parser/cargo/decl_parser" }
 itertools = "0.10.3"
@@ -16,5 +16,5 @@ naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 ty = { path = "../../../ty/cargo/ty" }

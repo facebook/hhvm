@@ -8,7 +8,7 @@ edition = "2021"
 path = "../../folded_decl_provider.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 datastore = { path = "../../../datastore" }
 depgraph_api = { path = "../../../depgraph_api/cargo/depgraph_api" }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
@@ -18,5 +18,5 @@ oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 special_names = { path = "../../../special_names/cargo/special_names" }
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 ty = { path = "../../../ty/cargo/ty" }

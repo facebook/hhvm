@@ -54,7 +54,7 @@ jobs:
     - run: hhvm --version
     - name: Build the deb package
       if: runner.os == 'Linux'
-      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+      run: nix bundle --out-link ${{matrix.package}}.deb --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the deb package's information
       if: runner.os == 'Linux'
       run: dpkg-deb --info ${{matrix.package}}.deb
@@ -69,7 +69,7 @@ jobs:
         path: ${{matrix.package}}.deb
     - name: Build the rpm package
       if: runner.os == 'Linux'
-      run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+      run: nix bundle --out-link ${{matrix.package}}.rpm --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#rpm" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - name: Show the rpm package's information
       if: runner.os == 'Linux'
       run: rpm --query --info --package ${{matrix.package}}.rpm

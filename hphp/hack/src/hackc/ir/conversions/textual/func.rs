@@ -28,8 +28,10 @@ use ir::ValueId;
 use itertools::Itertools;
 use log::trace;
 
+use crate::class;
 use crate::hack;
 use crate::mangle::Mangle;
+use crate::mangle::MangleClassId;
 use crate::mangle::MangleId;
 use crate::state::UnitState;
 use crate::textual;
@@ -217,7 +219,7 @@ fn write_load_var(
     iid: InstrId,
     lid: LocalId,
 ) -> Result {
-    let sid = w.load(&textual::Ty::Mixed, textual::Expr::deref(lid))?;
+    let sid = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
     state.set_iid(iid, sid);
     Ok(())
 }
@@ -231,7 +233,7 @@ fn write_set_var(
     w.store(
         textual::Expr::deref(lid),
         state.lookup_vid(vid),
-        &textual::Ty::Mixed,
+        tx_ty!(mixed),
     )
 }
 
@@ -300,9 +302,21 @@ fn write_call(
         todo!();
     }
 
+    let args = detail.args(operands);
+
     let output = match *detail {
         CallDetail::FCallClsMethod { .. } => todo!(),
-        CallDetail::FCallClsMethodD { .. } => todo!(),
+        CallDetail::FCallClsMethodD { clsid, method } => {
+            // C::foo()
+            let target = method.mangle(clsid, state.strings);
+            state.external_funcs.insert(target.to_string());
+            let this = class::load_static_class(w, clsid, state.strings)?;
+            let pack_args = std::iter::once(this.into())
+                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
+                .collect_vec();
+            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
+            w.call(&target, [arg_pack])?
+        }
         CallDetail::FCallClsMethodM { .. } => todo!(),
         CallDetail::FCallClsMethodS { .. } => todo!(),
         CallDetail::FCallClsMethodSD { .. } => todo!(),
@@ -311,12 +325,10 @@ fn write_call(
         CallDetail::FCallFuncD { func } => {
             let target = func.mangle(state.strings);
             state.external_funcs.insert(target.to_string());
-            let args = detail
-                .args(operands)
-                .iter()
-                .map(|vid| state.lookup_vid(*vid))
+            let pack_args = std::iter::once(textual::Expr::null())
+                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
                 .collect_vec();
-            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), args)?;
+            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
             w.call(&target, [arg_pack])?
         }
         CallDetail::FCallObjMethod { .. } => todo!(),
@@ -345,9 +357,9 @@ fn write_inc_dec_l<'a>(
         _ => unreachable!(),
     };
 
-    let pre = w.load(&textual::Ty::Mixed, textual::Expr::deref(lid))?;
+    let pre = w.load(tx_ty!(mixed), textual::Expr::deref(lid))?;
     let post = hack::call_builtin(w, builtin, (pre, textual::Expr::hack_int(1)))?;
-    w.store(textual::Expr::deref(lid), post, &textual::Ty::Mixed)?;
+    w.store(textual::Expr::deref(lid), post, tx_ty!(mixed))?;
 
     let sid = match op {
         IncDecOp::PreInc | IncDecOp::PreDec | IncDecOp::PreIncO | IncDecOp::PreDecO => pre,

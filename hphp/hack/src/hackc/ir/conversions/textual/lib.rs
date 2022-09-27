@@ -15,11 +15,12 @@ macro_rules! tx_ty {
     ($name:ident) => {
         crate::textual::Ty::RawType(stringify!($name).to_string())
     };
-    (* $rest:tt) => {
-        crate::textual::Ty::RawPtr(Box::new(tx_ty!($rest)))
+    (* $($rest:tt)+) => {
+        crate::textual::Ty::RawPtr(Box::new(tx_ty!($($rest)+)))
     };
 }
 
+mod class;
 mod decls;
 mod func;
 mod hack;

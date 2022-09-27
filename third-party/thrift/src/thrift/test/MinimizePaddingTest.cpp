@@ -82,3 +82,11 @@ struct reordered_ref_type {
 TEST(minimize_padding_test, reorder_ref_type) {
   EXPECT_EQ(sizeof(reordered_ref_type), sizeof(ref_type));
 }
+
+TEST(minimize_padding_test, enums) {
+  EXPECT_EQ(sizeof(byte_enum), 1);
+  EXPECT_EQ(sizeof(short_enum), 2);
+  EXPECT_EQ(sizeof(unsigned_int_enum), 4);
+  EXPECT_EQ(sizeof(minimized_enums), 8);
+  EXPECT_EQ(sizeof(enums), 12);
+}

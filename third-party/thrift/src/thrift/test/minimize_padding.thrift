@@ -15,6 +15,7 @@
  */
 
 include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp2 apache.thrift.test
 
@@ -26,6 +27,18 @@ struct empty {} (cpp.minimize_padding)
 
 enum test_enum {
   foo = 0,
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+enum byte_enum {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+enum short_enum {
+}
+
+@cpp.EnumType{type = cpp.EnumUnderlyingType.U32}
+enum unsigned_int_enum {
 }
 
 struct nonoptimal {
@@ -101,3 +114,18 @@ struct nonoptimal_large_struct_noexcept_move {
   4: required string mystring;
   5: required i32 a;
 } (cpp.minimize_padding)
+
+@thrift.TerseWrite
+struct enums {
+  1: byte_enum byte_enum_field;
+  2: unsigned_int_enum unsigned_int_enum_field;
+  3: short_enum short_enum_field;
+}
+
+@cpp.MinimizePadding
+@thrift.TerseWrite
+struct minimized_enums {
+  1: byte_enum byte_enum_field;
+  2: unsigned_int_enum unsigned_int_enum_field;
+  3: short_enum short_enum_field;
+}

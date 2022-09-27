@@ -76,21 +76,28 @@ MaskedDecodeResult parseObject(
       buf, readMask, writeMask, string_to_binary);
 }
 
-// Schemaless serialization of protocol::Object
-// into thrift serialization protocol
-// Protocol: protocol to use eg. apache::thrift::BinaryProtocolWriter
-// obj: object to be serialized
-// Serialized output is same as schema based serialization except when struct
-// contains an empty list, set or map
+// Schemaless serialization of protocol::Value into thrift serialization
+// protocol Protocol: protocol to use eg. apache::thrift::BinaryProtocolWriter
+// val: Value to be serialized Serialized output is same as schema based
+// serialization except when struct contains an empty list, set or map
 template <class Protocol>
-std::unique_ptr<folly::IOBuf> serializeObject(const Object& obj) {
+std::unique_ptr<folly::IOBuf> serializeValue(const Value& val) {
   Protocol prot;
   folly::IOBufQueue queue(folly::IOBufQueue::cacheChainLength());
   prot.setOutput(&queue);
-  Value val;
-  val.objectValue_ref() = obj;
   detail::serializeValue(prot, val);
   return queue.move();
+}
+
+// Schemaless serialization of protocol::Object into thrift serialization
+// protocol Protocol: protocol to use eg. apache::thrift::BinaryProtocolWriter
+// obj: object to be serialized Serialized output is same as schema based
+// serialization except when struct contains an empty list, set or map
+template <class Protocol>
+std::unique_ptr<folly::IOBuf> serializeObject(const Object& obj) {
+  Value val;
+  val.objectValue_ref() = obj;
+  return serializeValue<Protocol>(val);
 }
 
 // Serialization of protocol::Object with MaskedProtocolData.

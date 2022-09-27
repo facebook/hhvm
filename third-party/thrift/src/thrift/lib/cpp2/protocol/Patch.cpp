@@ -158,7 +158,8 @@ void ApplyPatch::operator()(const Object& patch, protocol::Value& value) const {
     case Value::Type::objectValue:
       return operator()(patch, *value.objectValue_ref());
     default:
-      folly::throw_exception<std::runtime_error>("Not Implemented.");
+      folly::throw_exception<std::runtime_error>(
+          "Not Implemented type support.");
   }
 }
 

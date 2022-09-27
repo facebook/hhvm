@@ -31,7 +31,6 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -5815,10 +5814,6 @@ JitResumeAddr dispatchBB() {
 #ifdef CTI_SUPPORTED
 namespace {
 
-constexpr auto do_prof = false;
-
-static BoolProfiler PredictProf("predict"), LookupProf("lookup");
-
 constexpr unsigned NumPredictors = 16; // real cpus have 8-24
 static __thread unsigned s_predict{0};
 static __thread PcPair s_predictors[NumPredictors];
@@ -5910,7 +5905,6 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   }
   if (isReturnish(opcode)) {
     auto target = popPrediction();
-    if (do_prof) PredictProf(pc == target.pc);
     if (pc == target.pc) return target;
   }
   if (isFCall(opcode)) {
@@ -5918,7 +5912,6 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     assert(nextpc == origPc + instrLen(origPc));
     pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
   }
-  if (do_prof) LookupProf(pc == vmfp()->func()->entry());
   // return ip to jump to, caller will do jmp(rax)
   return lookup_cti(vmfp()->func(), pc);
 }

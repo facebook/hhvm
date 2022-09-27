@@ -52,6 +52,11 @@ jobs:
     - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version
+    - run: |
+        set -ex
+        export HHVM_BIN="$(command -v hhvm)"
+        "$HHVM_BIN" hphp/test/run.php all
+      continue-on-error: true
     - name: Build the deb package
       if: runner.os == 'Linux'
       run: nix bundle --print-build-logs --bundler "git+file://$(pwd)?submodules=1&shallow=1#deb" "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"

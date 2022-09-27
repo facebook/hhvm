@@ -116,7 +116,7 @@ jobs:
         set -ex
         export HHVM_BIN="$(command -v hhvm)"
         "$HHVM_BIN" hphp/test/run.php all
-      # Suppress errors for now because we have not port all tests to HHVM OSS
+      # Suppress errors for now because we have not ported all tests to HHVM OSS
       continue-on-error: true
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'

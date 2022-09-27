@@ -77,8 +77,6 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 #include "hphp/runtime/server/source-root-info.h"
 
@@ -3027,10 +3025,11 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Obj:    return is_object(&val);
   case IsTypeOp::Str:    return is_string(&val);
   case IsTypeOp::Res:    return tvIsResource(val);
-  case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
+  case IsTypeOp::Scalar: return tvAsCVarRef(val).isScalar();
   case IsTypeOp::ArrLike: return is_any_array(&val);
   case IsTypeOp::LegacyArrLike: {
-    return HHVM_FN(is_array_marked_legacy)(tvAsCVarRef(val));
+    auto const& v = tvAsCVarRef(val);
+    return v.isArray() && v.asCArrRef()->isLegacyArray();
   }
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
   case IsTypeOp::Func: return is_fun(&val);

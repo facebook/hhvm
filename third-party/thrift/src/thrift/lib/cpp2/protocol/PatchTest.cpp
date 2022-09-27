@@ -690,6 +690,23 @@ TEST_F(PatchTest, Set) {
   }
 }
 
+TEST_F(PatchTest, GeneratedSetPatch) {
+  SetPatch patch;
+  patch.erase("a");
+  patch.emplace("a");
+  patch.insert("b");
+  patch.add({"c"});
+  patch.remove({"c", "d"});
+
+  auto patched = applyGeneratedPatch<type::set<type::binary_t>>(
+      std::set<std::string>{}, patch);
+  EXPECT_EQ(patched, (std::set<std::string>{"a", "b"}));
+
+  patched = applyGeneratedPatch<type::set<type::binary_t>>(
+      std::set<std::string>{"a", "d", "e"}, patch);
+  EXPECT_EQ(patched, (std::set<std::string>{"a", "b", "e"}));
+}
+
 TEST_F(PatchTest, Map) {
   std::map<std::string, std::string> data = {{"key", "test"}},
                                      patch = {{"new key", "new value"}};

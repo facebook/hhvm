@@ -10,13 +10,13 @@
 
 macro_rules! tx_ty {
     (mixed) => {
-        textual::Ty::Mixed
+        crate::textual::Ty::Mixed
     };
     ($name:ident) => {
-        textual::Ty::RawType(stringify!($name).to_string())
+        crate::textual::Ty::RawType(stringify!($name).to_string())
     };
     (* $rest:tt) => {
-        textual::Ty::RawPtr(Box::new(tx_ty!($rest)))
+        crate::textual::Ty::RawPtr(Box::new(tx_ty!($rest)))
     };
 }
 

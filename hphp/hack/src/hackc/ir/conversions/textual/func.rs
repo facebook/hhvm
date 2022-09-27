@@ -58,19 +58,35 @@ fn write_func(
     func: &ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let func = crate::lower::lower(func, &unit_state.strings);
-    let func = rewrite_prelude(func);
-    let mut func = rewrite_jmp_ops(func);
-    ir::passes::clean::run(&mut func);
+    let func = crate::lower::lower(func, &mut unit_state.strings);
 
+    let params = func
+        .params
+        .iter()
+        .map(|p| {
+            let name_bytes = unit_state.strings.lookup_bytes(p.name);
+            let name_string = util::escaped_string(name_bytes);
+            (name_string, p.ty.enforced.ty.clone())
+        })
+        .collect_vec();
+    let params = params
+        .iter()
+        .map(|(name, ty)| (name.as_str(), ty.clone()))
+        .collect_vec();
+
+    let span = func.loc(func.span).clone();
     textual::write_function(
         w,
         &unit_state.strings,
         name,
-        func.loc(func.span),
-        &[("params", tx_ty!(HackParams))],
+        &span,
+        &params,
         tx_ty!(mixed),
         |w| {
+            let func = rewrite_prelude(func);
+            let mut func = rewrite_jmp_ops(func);
+            ir::passes::clean::run(&mut func);
+
             let mut state = FuncState::new(&unit_state.strings, &func);
 
             for bid in func.block_ids() {

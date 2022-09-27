@@ -577,3 +577,7 @@ struct StructWithAdaptedField {
 } (
   thrift.uri = "facebook.com/thrift/test/reflection/reflection/StructWithAdaptedField",
 )
+
+struct StructWithVectorBool {
+  1: list<bool> values;
+}

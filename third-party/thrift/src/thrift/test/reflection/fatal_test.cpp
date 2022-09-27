@@ -73,6 +73,7 @@ FATAL_S(StructWithIOBufs, "StructWithIOBuf");
 FATAL_S(struct_with_renamed_fields, "struct_with_renamed_field");
 FATAL_S(IntStructs, "IntStruct");
 FATAL_S(StructWithAdaptedFields, "StructWithAdaptedField");
+FATAL_S(StructWithVectorBools, "StructWithVectorBool");
 
 FATAL_S(constant1s, "constant1");
 FATAL_S(constant2s, "constant2");
@@ -205,7 +206,9 @@ TEST(fatal, metadata) {
           fatal::pair<struct_with_renamed_field, struct_with_renamed_fields>,
           fatal::pair<IntStruct, IntStructs>,
           fatal::pair<StructWithAdaptedField, StructWithAdaptedFields>,
+          fatal::pair<StructWithVectorBool, StructWithVectorBools>,
           fatal::pair<my_structA, my_structAs>>,
+
       info::structs>();
 
   EXPECT_SAME<

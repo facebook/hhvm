@@ -165,6 +165,16 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(e.enum, cls)
         self.assertEqual(int(e), val)
 
+    def test_repr(self) -> None:
+        # Assert we generate valid python syntax here (like repr should ...)
+        self.assertEqual(repr(Color.green), "Color.green")
+        self.assertEqual(repr(BadEnum(Color, 69)), "Color.#INVALID#")
+
+    def test_str(self) -> None:
+        # Assert we show the more verbose representation of the enum
+        self.assertEqual(str(Color.green), "<Color.green: 2>")
+        self.assertEqual(str(BadEnum(Color, 69)), "<Color.#INVALID#: 69>")
+
 
 class FlagTests(unittest.TestCase):
     def test_flag_enum(self) -> None:

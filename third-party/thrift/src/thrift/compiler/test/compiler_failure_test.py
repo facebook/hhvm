@@ -2330,7 +2330,7 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:15] Enum values in EnumWithBadId cannot use reserved ids: 3\n",
         )
 
-    def test_cpp_field_interceptor(self):
+    def test_required_key_specified_in_structured_annotation(self):
         write_file(
             "foo.thrift",
             textwrap.dedent(
@@ -2343,6 +2343,16 @@ class CompilerFailureTest(unittest.TestCase):
                     @cpp.FieldInterceptor
                     2: i32 field2;
                 }
+
+                @cpp.EnumType
+                enum MyEnum1 {
+                    ZERO = 0,
+                }
+
+                @cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
+                enum MyEnum2 {
+                    ZERO = 0,
+                }
                 """
             ),
         )
@@ -2350,7 +2360,8 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(ret, 1)
         self.assertEqual(
             err,
-            "[ERROR:foo.thrift:6] `@cpp.FieldInterceptor` cannot be used without `name` specified in `field2`.\n",
+            "[ERROR:foo.thrift:6] `@cpp.FieldInterceptor` cannot be used without `name` specified in `field2`.\n"
+            "[ERROR:foo.thrift:10] `@cpp.EnumType` cannot be used without `type` specified in `MyEnum1`.\n",
         )
 
     def test_no_required_field(self):

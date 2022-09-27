@@ -831,6 +831,20 @@ void validate_cpp_field_interceptor_annotation(
   }
 }
 
+void validate_cpp_enum_type(diagnostic_context& ctx, const t_enum& e) {
+  if (const t_const* annot =
+          e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+    try {
+      annot->get_value_from_structured_annotation("type");
+    } catch (const std::exception&) {
+      ctx.error(
+          "`@cpp.EnumType` cannot be used without `type` specified in `{}`.",
+          e.name());
+      return;
+    }
+  }
+}
+
 void validate_cpp_field_adapter_annotation(
     diagnostic_context& ctx, const t_field& field) {
   adapter_or_wrapper_checker(ctx).check(
@@ -1015,6 +1029,7 @@ ast_validator standard_validator() {
   validator.add_definition_visitor(&validate_hack_wrapper_annotation);
   validator.add_definition_visitor(
       &validate_hack_wrapper_and_adapter_annotation);
+  validator.add_enum_visitor(&validate_cpp_enum_type);
 
   validator.add_const_visitor(&validate_const_type_and_value);
   validator.add_program_visitor(&validate_uri_uniqueness);

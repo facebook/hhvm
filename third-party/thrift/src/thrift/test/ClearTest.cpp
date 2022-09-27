@@ -23,7 +23,7 @@ namespace apache::thrift::test {
 namespace {
 
 template <typename T>
-void checkIsDefault(T& obj) {
+void checkIsDefault(const T& obj) {
   EXPECT_EQ(*obj.bool_field(), false);
   EXPECT_EQ(*obj.byte_field(), 0);
   EXPECT_EQ(*obj.short_field(), 0);
@@ -40,15 +40,27 @@ void checkIsDefault(T& obj) {
   EXPECT_EQ(*obj.struct_field()->int_field(), 0);
 }
 
-TEST(ClearTest, StructWithNoDefaultStruct) {
+TEST(ClearTest, Struct_NoDefaults) {
   StructWithNoDefaultStruct obj;
   checkIsDefault(obj);
+  const auto& def = op::getDefault<StructWithNoDefaultStruct>();
+  checkIsDefault(def);
+  const auto& idef = op::getIntrinsicDefault<StructWithNoDefaultStruct>();
+  checkIsDefault(idef);
 }
 
-TEST(ClearTest, StructWithDefaultStruct) {
+TEST(ClearTest, Struct_Defaults) {
   StructWithDefaultStruct obj;
+  const auto& def = op::getDefault<StructWithDefaultStruct>();
+  EXPECT_EQ(obj, def);
+
   apache::thrift::clear(obj);
+  EXPECT_NE(obj, def);
   checkIsDefault(obj);
+
+  const auto& idef = op::getIntrinsicDefault<StructWithDefaultStruct>();
+  EXPECT_EQ(obj, idef);
+  checkIsDefault(idef);
 }
 
 TEST(ClearTest, RefFields) {

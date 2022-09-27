@@ -31,7 +31,6 @@
 
 #include "hphp/util/portability.h"
 #include "hphp/util/ringbuffer.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/text-util.h"
 #include "hphp/util/trace.h"
 
@@ -78,8 +77,6 @@
 #include "hphp/runtime/ext/std/ext_std_closure.h"
 #include "hphp/runtime/ext/generator/ext_generator.h"
 #include "hphp/runtime/ext/hh/ext_hh.h"
-#include "hphp/runtime/ext/std/ext_std_misc.h"
-#include "hphp/runtime/ext/std/ext_std_variable.h"
 
 #include "hphp/runtime/server/source-root-info.h"
 
@@ -3028,10 +3025,11 @@ OPTBLD_INLINE static bool isTypeHelper(TypedValue val, IsTypeOp op) {
   case IsTypeOp::Obj:    return is_object(&val);
   case IsTypeOp::Str:    return is_string(&val);
   case IsTypeOp::Res:    return tvIsResource(val);
-  case IsTypeOp::Scalar: return HHVM_FN(is_scalar)(tvAsCVarRef(val));
+  case IsTypeOp::Scalar: return tvAsCVarRef(val).isScalar();
   case IsTypeOp::ArrLike: return is_any_array(&val);
   case IsTypeOp::LegacyArrLike: {
-    return HHVM_FN(is_array_marked_legacy)(tvAsCVarRef(val));
+    auto const& v = tvAsCVarRef(val);
+    return v.isArray() && v.asCArrRef()->isLegacyArray();
   }
   case IsTypeOp::ClsMeth: return is_clsmeth(&val);
   case IsTypeOp::Func: return is_fun(&val);
@@ -5815,10 +5813,6 @@ JitResumeAddr dispatchBB() {
 #ifdef CTI_SUPPORTED
 namespace {
 
-constexpr auto do_prof = false;
-
-static BoolProfiler PredictProf("predict"), LookupProf("lookup");
-
 constexpr unsigned NumPredictors = 16; // real cpus have 8-24
 static __thread unsigned s_predict{0};
 static __thread PcPair s_predictors[NumPredictors];
@@ -5910,7 +5904,6 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
   }
   if (isReturnish(opcode)) {
     auto target = popPrediction();
-    if (do_prof) PredictProf(pc == target.pc);
     if (pc == target.pc) return target;
   }
   if (isFCall(opcode)) {
@@ -5918,7 +5911,6 @@ PcPair run(TCA* returnaddr, ExecMode modes, rds::Header* tl, PC nextpc, PC pc,
     assert(nextpc == origPc + instrLen(origPc));
     pushPrediction({*returnaddr + kCtiIndirectJmpSize, nextpc});
   }
-  if (do_prof) LookupProf(pc == vmfp()->func()->entry());
   // return ip to jump to, caller will do jmp(rax)
   return lookup_cti(vmfp()->func(), pc);
 }

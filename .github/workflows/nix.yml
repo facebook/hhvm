@@ -31,8 +31,6 @@ jobs:
         - hhvm_clang
         os:
         - ubuntu-latest
-    # Building hhvm_clang is expected to fail because we have not fully ported HHVM OSS to Clang yet
-    continue-on-error: ${{ matrix.package == 'hhvm_clang' }}
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0

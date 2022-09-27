@@ -25,7 +25,7 @@ namespace HH\FIXME;
  * help you, and future changes will be less scary.
  *
  * `UNSAFE_CAST` is still better than `HH_FIXME`, because `HH_FIXME`
- * applies the entire next line, and `UNSAFE_CAST` applies to a single
+ * applies to the entire next line, and `UNSAFE_CAST` applies to a single
  * expression.
  */
 function UNSAFE_CAST<<<__Explicit>> Tin, <<__Explicit>> Tout>(Tin $t, ?\HH\FormatString<nothing> $msg = null)[]: Tout;

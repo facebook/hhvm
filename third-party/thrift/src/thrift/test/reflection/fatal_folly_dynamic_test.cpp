@@ -745,3 +745,14 @@ TEST_F(fatal_folly_dynamic_enum, from_integer_lenient) {
   EXPECT_TRUE(member_meta::is_set(obj2));
   EXPECT_EQ(global_enum1::field0, member_meta::getter{}(obj2));
 }
+
+TEST(fatal_from_dynamic, struct_with_vector_bool) {
+  folly::dynamic v = folly::dynamic::object();
+  v["values"] = folly::dynamic::array(true, false, true, false);
+  auto res = apache::thrift::from_dynamic<
+      test_cpp2::cpp_reflection::StructWithVectorBool>(
+      v,
+      apache::thrift::dynamic_format::PORTABLE,
+      apache::thrift::format_adherence::LENIENT);
+  EXPECT_EQ(res.values(), std::vector<bool>({true, false, true, false}));
+}

@@ -23,7 +23,6 @@
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/tv-val.h"
 
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/word-mem.h"
 
 namespace HPHP {

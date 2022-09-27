@@ -224,6 +224,12 @@ class StructTests(unittest.TestCase):
             repr(easy(val=42)),
         )
 
+    def test_str(self) -> None:
+        self.assertEqual(
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None))",
+            str(easy(val=42)),
+        )
+
     def test_update_nested_fields(self) -> None:
         n = Nested1(a=Nested2(b=Nested3(c=easy(val=42, name="foo"))))
         n = update_nested_field(n, {"a.b.c": easy(val=128)})

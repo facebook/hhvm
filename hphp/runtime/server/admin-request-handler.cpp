@@ -67,7 +67,6 @@
 #include "hphp/util/numa.h"
 #include "hphp/util/process.h"
 #include "hphp/util/service-data.h"
-#include "hphp/util/stacktrace-profiler.h"
 #include "hphp/util/timer.h"
 
 #ifdef ENABLE_EXTENSION_MYSQL
@@ -382,7 +381,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "/invalidate-units: remove specified files from the unit cache\n"
         "    path           absolute path of files to invalidate\n"
 
-        "/start-stacktrace-profiler: set enable_stacktrace_profiler to true\n"
         "/relocate:        relocate translations\n"
         "    random        optional, default false, relocate random subset\n"
         "       all        optional, default false, relocate all translations\n"
@@ -769,12 +767,6 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       } else {
         transport->sendString("Unable to mkdir or file already exists.\n");
       }
-      break;
-    }
-
-    if (cmd == "start-stacktrace-profiler") {
-      enable_stacktrace_profiler = true;
-      transport->sendString("OK\n");
       break;
     }
 

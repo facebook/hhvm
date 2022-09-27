@@ -43,6 +43,62 @@ class RefType_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
 }
 
 /**
+ * Enum in C++ by default uses signed 32 bit integer. There is no need to specify
+ * underlying type for signed 32 bit integer.
+ * 
+ * Original thrift enum:-
+ * EnumUnderlyingType
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/EnumUnderlyingType'))>>
+enum EnumUnderlyingType: int {
+  /**
+   * ::std::int8_t
+   */
+  I8 = 0;
+  /**
+   * ::std::uint8_t
+   */
+  U8 = 1;
+  /**
+   * ::std::int16_t
+   */
+  I16 = 2;
+  /**
+   * ::std::uint16_t
+   */
+  U16 = 3;
+  /**
+   * ::std::uint32_t
+   */
+  U32 = 4;
+}
+
+class EnumUnderlyingType_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return \tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "cpp.EnumUnderlyingType",
+        "elements" => dict[
+          0 => "I8",
+          1 => "U8",
+          2 => "I16",
+          3 => "U16",
+          4 => "U32",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
  * Original thrift struct:-
  * Ref
  */
@@ -1400,6 +1456,144 @@ class UseOpEncode implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
       throw new \TProtocolException("Cannot parse the given json string.");
     }
 
+  }
+
+}
+
+/**
+ * Indicates an integer type for C++ to use as the underlying type of enum, for example:
+ * 
+ *     @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+ *     enum Fruit {
+ *       Apple = 0,
+ *       Banana = 1,
+ *     }
+ * 
+ * will be generated into the following:
+ * 
+ *     enum class Fruit : ::std::int8_t {
+ *       Apple = 0,
+ *       Banana = 1,
+ *     };
+ * 
+ *
+ * Original thrift struct:-
+ * EnumType
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/cpp/EnumType'))>>
+class EnumType implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'type',
+      'type' => \TType::I32,
+      'enum' => \thrift\annotation\cpp\EnumUnderlyingType::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'type' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'type' => ?\thrift\annotation\cpp\EnumUnderlyingType,
+  );
+
+  const type TShape = shape(
+    ?'type' => ?\thrift\annotation\cpp\EnumUnderlyingType,
+  );
+  const int STRUCTURAL_ID = 1724537317047809370;
+  /**
+   * Original thrift field:-
+   * 1: enum cpp.EnumUnderlyingType type
+   */
+  public ?\thrift\annotation\cpp\EnumUnderlyingType $type;
+
+  public function __construct(?\thrift\annotation\cpp\EnumUnderlyingType $type = null)[] {
+    $this->type = $type;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'type'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'EnumType';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "cpp.EnumType",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                    shape(
+                      "name" => "cpp.EnumUnderlyingType",
+                    )
+                  ),
+                )
+              ),
+              "name" => "type",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'type'),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'type' => $this->type,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'type') !== null) {
+      $this->type = \thrift\annotation\cpp\EnumUnderlyingType::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\annotation\cpp\EnumUnderlyingType>($parsed['type']));
+    }
   }
 
 }

@@ -23,7 +23,6 @@
 #include "hphp/util/alloc.h"
 #include "hphp/util/safe-cast.h"
 #include "hphp/util/stack-trace.h"
-#include "hphp/util/stacktrace-profiler.h"
 
 #include "hphp/runtime/base/apc-handle-defs.h"
 #include "hphp/runtime/base/apc-string.h"

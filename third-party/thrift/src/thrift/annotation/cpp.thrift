@@ -186,3 +186,42 @@ struct FieldInterceptor {
 
 @scope.Structured
 struct UseOpEncode {}
+
+/**
+ * Enum in C++ by default uses signed 32 bit integer. There is no need to specify
+ * underlying type for signed 32 bit integer.
+ */
+enum EnumUnderlyingType {
+  /** ::std::int8_t */
+  I8 = 0,
+  /** ::std::uint8_t */
+  U8 = 1,
+  /** ::std::int16_t */
+  I16 = 2,
+  /** ::std::uint16_t */
+  U16 = 3,
+  /** ::std::uint32_t */
+  U32 = 4,
+}
+
+/**
+ * Indicates an integer type for C++ to use as the underlying type of enum, for example:
+ *
+ *     @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+ *     enum Fruit {
+ *       Apple = 0,
+ *       Banana = 1,
+ *     }
+ *
+ * will be generated into the following:
+ *
+ *     enum class Fruit : ::std::int8_t {
+ *       Apple = 0,
+ *       Banana = 1,
+ *     };
+ *
+ */
+@scope.Enum
+struct EnumType {
+  1: EnumUnderlyingType type;
+}

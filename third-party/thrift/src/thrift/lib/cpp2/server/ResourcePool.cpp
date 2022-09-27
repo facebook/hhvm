@@ -303,12 +303,6 @@ std::size_t ResourcePoolSet::idleWorkerCount() const {
 }
 
 void ResourcePoolSet::stopAndJoin() {
-  {
-    // This is called during shutdown - the ResourcePoolSet should have been
-    // locked by this point.
-    std::lock_guard<std::mutex> lock(mutex_);
-    CHECK(locked_);
-  }
   for (auto& resourcePool : resourcePools_) {
     if (resourcePool) {
       resourcePool->stop();

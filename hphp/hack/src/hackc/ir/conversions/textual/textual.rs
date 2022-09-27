@@ -100,8 +100,14 @@ impl fmt::Display for FmtTy<'_> {
 
 #[derive(Clone, Debug)]
 pub(crate) enum Var {
-    // Named(String),
+    Named(String),
     Hack(LocalId),
+}
+
+impl Var {
+    pub(crate) fn named(s: impl Into<String>) -> Self {
+        Var::Named(s.into())
+    }
 }
 
 impl From<LocalId> for Var {
@@ -116,7 +122,7 @@ impl fmt::Display for FmtVar<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let FmtVar(strings, var) = *self;
         match *var {
-            // Var::Named(ref s) => s.fmt(f),
+            Var::Named(ref s) => s.fmt(f),
             Var::Hack(lid) => FmtLid(strings, lid).fmt(f),
         }
     }
@@ -129,7 +135,7 @@ pub(crate) enum Const {
     HackInt(i64),
     HackString(Vec<u8>),
     Int(i64),
-    // Null,
+    Null,
     String(AsciiString),
     True,
 }
@@ -147,7 +153,7 @@ impl fmt::Display for FmtConst<'_> {
                 write!(f, "hack_string(\"{}\")", crate::util::escaped_string(s))
             }
             Const::Int(i) => i.fmt(f),
-            // Const::Null => f.write_str("null"),
+            Const::Null => f.write_str("null"),
             Const::String(ref s) => {
                 // String should already be escaped...
                 write!(f, "\"{}\"", s)
@@ -194,7 +200,7 @@ impl Expr {
     }
 
     pub(crate) fn null() -> Expr {
-        Expr::Const(Const::True)
+        Expr::Const(Const::Null)
     }
 
     pub(crate) fn string(s: AsciiString) -> Expr {
@@ -454,14 +460,14 @@ impl<'a> FuncWriter<'a> {
         self.call("copy", vec![src])
     }
 
-    pub(crate) fn load(&mut self, ty: &Ty, src: impl Into<Expr>) -> Result<Sid> {
+    pub(crate) fn load(&mut self, ty: Ty, src: impl Into<Expr>) -> Result<Sid> {
         let src = src.into();
         let dst = self.alloc_sid();
         writeln!(
             self.w,
             "{INDENT}{dst}: {ty} = load {src}",
             dst = FmtSid(dst),
-            ty = FmtTy(ty),
+            ty = FmtTy(&ty),
             src = FmtExpr(self.strings, &src)
         )?;
         Ok(dst)
@@ -489,7 +495,7 @@ impl<'a> FuncWriter<'a> {
         &mut self,
         dst: impl Into<Expr>,
         src: impl Into<Expr>,
-        src_ty: &Ty,
+        src_ty: Ty,
     ) -> Result {
         let dst = dst.into();
         let src = src.into();
@@ -498,7 +504,7 @@ impl<'a> FuncWriter<'a> {
             "{INDENT}store {dst} <- {src}: {ty}",
             dst = FmtExpr(self.strings, &dst),
             src = FmtExpr(self.strings, &src),
-            ty = FmtTy(src_ty),
+            ty = FmtTy(&src_ty),
         )?;
         Ok(())
     }

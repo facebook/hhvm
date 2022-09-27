@@ -24,6 +24,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <fmt/core.h>
 
 #include <thrift/compiler/ast/t_field.h>
 #include <thrift/compiler/gen/cpp/type_resolver.h>
@@ -38,6 +39,16 @@ namespace apache {
 namespace thrift {
 namespace compiler {
 namespace {
+
+// Since we can not include `thrift/annotation/cpp.thrift`,
+// this is a copy of cpp.EnumUnderlyingType.
+enum class EnumUnderlyingType {
+  I8 = 0,
+  U8 = 1,
+  I16 = 2,
+  U16 = 3,
+  U32 = 4,
+};
 
 const std::string& get_cpp_template(const t_type* type) {
   return type->get_annotation({"cpp.template", "cpp2.template"});
@@ -1973,18 +1984,9 @@ class cpp_mstch_enum : public mstch_enum {
     }
     return mstch::node();
   }
-  const std::string& cpp_is_unscoped_() {
-    return enum_->get_annotation(
-        {"cpp2.deprecated_enum_unscoped", "cpp.deprecated_enum_unscoped"});
-  }
   mstch::node cpp_is_unscoped() { return cpp_is_unscoped_(); }
   mstch::node cpp_name() { return cpp2::get_name(enum_); }
-  mstch::node cpp_enum_type() {
-    static std::string kInt = "int";
-    return enum_->get_annotation(
-        {"cpp.enum_type", "cpp2.enum_type"},
-        cpp_is_unscoped_().empty() ? nullptr : &kInt);
-  }
+  mstch::node cpp_enum_type() { return fmt::to_string(cpp_enum_type(*enum_)); }
   mstch::node cpp_declare_bitwise_ops() {
     return enum_->get_annotation(
         {"cpp.declare_bitwise_ops", "cpp2.declare_bitwise_ops"});
@@ -2008,6 +2010,42 @@ class cpp_mstch_enum : public mstch_enum {
   }
   mstch::node legacy_api() {
     return ::apache::thrift::compiler::generate_legacy_api(*enum_);
+  }
+
+ private:
+  const std::string& cpp_is_unscoped_() {
+    return enum_->get_annotation(
+        {"cpp2.deprecated_enum_unscoped", "cpp.deprecated_enum_unscoped"});
+  }
+
+  fmt::string_view cpp_enum_type(const t_enum& e) {
+    if (const auto* annot =
+            e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+      const auto& type = annot->get_value_from_structured_annotation("type");
+      switch (static_cast<EnumUnderlyingType>(type.get_integer())) {
+        case EnumUnderlyingType::I8:
+          return "::std::int8_t";
+        case EnumUnderlyingType::U8:
+          return "::std::uint8_t";
+        case EnumUnderlyingType::I16:
+          return "::std::int16_t";
+        case EnumUnderlyingType::U16:
+          return "::std::uint16_t";
+        case EnumUnderlyingType::U32:
+          return "::std::uint32_t";
+        default:
+          throw std::runtime_error("unknown enum underlying type");
+      }
+    }
+    // TODO(dokwon): Deprecate unstructured 'cpp.enum_type' annotation.
+    static std::string kInt = "int";
+    if (const std::string& type = e.get_annotation(
+            {"cpp.enum_type", "cpp2.enum_type"},
+            cpp_is_unscoped_().empty() ? nullptr : &kInt);
+        !type.empty()) {
+      return type;
+    }
+    return fmt::string_view("");
   }
 };
 

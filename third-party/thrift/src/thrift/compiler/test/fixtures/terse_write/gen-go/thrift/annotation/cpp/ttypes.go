@@ -73,6 +73,65 @@ func RefTypeFromString(s string) (RefType, error) {
 
 func RefTypePtr(v RefType) *RefType { return &v }
 
+//Enum in C++ by default uses signed 32 bit integer. There is no need to specify
+//underlying type for signed 32 bit integer.
+type EnumUnderlyingType int64
+const (
+  EnumUnderlyingType_I8 EnumUnderlyingType = 0
+  EnumUnderlyingType_U8 EnumUnderlyingType = 1
+  EnumUnderlyingType_I16 EnumUnderlyingType = 2
+  EnumUnderlyingType_U16 EnumUnderlyingType = 3
+  EnumUnderlyingType_U32 EnumUnderlyingType = 4
+)
+
+var EnumUnderlyingTypeToName = map[EnumUnderlyingType]string {
+  EnumUnderlyingType_I8: "I8",
+  EnumUnderlyingType_U8: "U8",
+  EnumUnderlyingType_I16: "I16",
+  EnumUnderlyingType_U16: "U16",
+  EnumUnderlyingType_U32: "U32",
+}
+
+var EnumUnderlyingTypeToValue = map[string]EnumUnderlyingType {
+  "I8": EnumUnderlyingType_I8,
+  "U8": EnumUnderlyingType_U8,
+  "I16": EnumUnderlyingType_I16,
+  "U16": EnumUnderlyingType_U16,
+  "U32": EnumUnderlyingType_U32,
+}
+
+var EnumUnderlyingTypeNames = []string {
+  "I8",
+  "U8",
+  "I16",
+  "U16",
+  "U32",
+}
+
+var EnumUnderlyingTypeValues = []EnumUnderlyingType {
+  EnumUnderlyingType_I8,
+  EnumUnderlyingType_U8,
+  EnumUnderlyingType_I16,
+  EnumUnderlyingType_U16,
+  EnumUnderlyingType_U32,
+}
+
+func (p EnumUnderlyingType) String() string {
+  if v, ok := EnumUnderlyingTypeToName[p]; ok {
+    return v
+  }
+  return "<UNSET>"
+}
+
+func EnumUnderlyingTypeFromString(s string) (EnumUnderlyingType, error) {
+  if v, ok := EnumUnderlyingTypeToValue[s]; ok {
+    return v, nil
+  }
+  return EnumUnderlyingType(0), fmt.Errorf("not a valid EnumUnderlyingType string")
+}
+
+func EnumUnderlyingTypePtr(v EnumUnderlyingType) *EnumUnderlyingType { return &v }
+
 // Attributes:
 //  - Type
 type Ref struct {
@@ -1310,5 +1369,133 @@ func (p *UseOpEncode) String() string {
   }
 
   return fmt.Sprintf("UseOpEncode({})")
+}
+
+// Indicates an integer type for C++ to use as the underlying type of enum, for example:
+// 
+//     @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
+//     enum Fruit {
+//       Apple = 0,
+//       Banana = 1,
+//     }
+// 
+// will be generated into the following:
+// 
+//     enum class Fruit : ::std::int8_t {
+//       Apple = 0,
+//       Banana = 1,
+//     };
+// 
+// 
+// Attributes:
+//  - Type
+type EnumType struct {
+  Type EnumUnderlyingType `thrift:"type,1" db:"type" json:"type"`
+}
+
+func NewEnumType() *EnumType {
+  return &EnumType{}
+}
+
+
+func (p *EnumType) GetType() EnumUnderlyingType {
+  return p.Type
+}
+type EnumTypeBuilder struct {
+  obj *EnumType
+}
+
+func NewEnumTypeBuilder() *EnumTypeBuilder{
+  return &EnumTypeBuilder{
+    obj: NewEnumType(),
+  }
+}
+
+func (p EnumTypeBuilder) Emit() *EnumType{
+  return &EnumType{
+    Type: p.obj.Type,
+  }
+}
+
+func (e *EnumTypeBuilder) Type(type_a1 EnumUnderlyingType) *EnumTypeBuilder {
+  e.obj.Type = type_a1
+  return e
+}
+
+func (e *EnumType) SetType(type_a1 EnumUnderlyingType) *EnumType {
+  e.Type = type_a1
+  return e
+}
+
+func (p *EnumType) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *EnumType)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    temp := EnumUnderlyingType(v)
+    p.Type = temp
+  }
+  return nil
+}
+
+func (p *EnumType) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("EnumType"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *EnumType) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("type", thrift.I32, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:type: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Type)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.type (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:type: ", p), err) }
+  return err
+}
+
+func (p *EnumType) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  typeVal := fmt.Sprintf("%v", p.Type)
+  return fmt.Sprintf("EnumType({Type:%s})", typeVal)
 }
 

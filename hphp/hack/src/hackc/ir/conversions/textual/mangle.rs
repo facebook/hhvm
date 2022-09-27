@@ -3,14 +3,22 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use ir::ClassId;
 use ir::StringInterner;
 
+/// Used for things that can mangle themselves directly.
 pub(crate) trait Mangle {
     fn mangle(&self) -> String;
 }
 
+/// Used for things that need a StringInterner to mangle themselves.
 pub(crate) trait MangleId {
     fn mangle(&self, strings: &StringInterner) -> String;
+}
+
+/// Used for things that need to be mangled relative to a ClassId.
+pub(crate) trait MangleClassId {
+    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String;
 }
 
 impl Mangle for [u8] {
@@ -38,14 +46,46 @@ impl Mangle for [u8] {
     }
 }
 
+// Classes and functions live in different namespaces.
+
+fn mangle_func_name(func: &[u8]) -> String {
+    format!("_H{}", func.mangle())
+}
+
+fn mangle_class_name(class: &[u8]) -> String {
+    format!("_C{}", class.mangle())
+}
+
+fn mangle_method_name(class: &[u8], method: &[u8]) -> String {
+    format!("_M{}::{}", class.mangle(), method.mangle())
+}
+
 impl Mangle for ir::FunctionName<'_> {
     fn mangle(&self) -> String {
-        format!("_H{}", self.as_bytes().mangle())
+        mangle_func_name(self.as_bytes())
+    }
+}
+
+impl MangleId for ir::ClassId {
+    fn mangle(&self, strings: &StringInterner) -> String {
+        mangle_class_name(self.as_bytes(strings))
     }
 }
 
 impl MangleId for ir::FunctionId {
     fn mangle(&self, strings: &StringInterner) -> String {
-        format!("_H{}", self.as_bytes(strings).mangle())
+        mangle_func_name(self.as_bytes(strings))
+    }
+}
+
+impl MangleClassId for ir::MethodName<'_> {
+    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String {
+        mangle_method_name(class.as_bytes(strings), self.as_bytes())
+    }
+}
+
+impl MangleClassId for ir::MethodId {
+    fn mangle(&self, class: ClassId, strings: &StringInterner) -> String {
+        mangle_method_name(class.as_bytes(strings), self.as_bytes(strings))
     }
 }

@@ -9,6 +9,7 @@
 #include <thrift/lib/cpp2/gen/module_types_h.h>
 
 
+#include "thrift/annotation/gen-cpp2/cpp_types.h"
 
 namespace apache {
 namespace thrift {
@@ -269,7 +270,7 @@ enum class MyEnum {
 
 
 
-enum class TypedEnum : short {
+enum class TypedEnum : ::std::int16_t {
   VAL1 = 0,
   VAL2 = 1,
 };

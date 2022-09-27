@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+include "thrift/annotation/cpp.thrift"
 include "thrift/test/EnumTest.thrift"
 
 enum MyQualifiedEnum {
@@ -37,9 +38,10 @@ enum MyBitMaskEnum {
   kBaz = 4,
 } (cpp.declare_bitwise_ops)
 
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I16}
 enum MyBitMaskEnumShort {
   kNil = 0,
   kFoo = 1,
   kBar = 2,
   kBaz = 4,
-} (cpp.enum_type = 'int16_t', cpp.declare_bitwise_ops)
+} (cpp.declare_bitwise_ops)

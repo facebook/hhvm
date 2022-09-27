@@ -532,6 +532,38 @@ TEST_F(PatchTest, List) {
   }
 }
 
+TEST_F(PatchTest, GeneratedListPatch) {
+  ListPatch patch;
+  patch.prepend({3, 4});
+  patch.emplace_front(2);
+  patch.push_front(1);
+  using Vec = ListPatch::value_type;
+  Vec actual{5, 6};
+  patch.append({7, 8});
+  patch.emplace_back(9);
+  patch.push_back(10);
+
+  auto patched = applyGeneratedPatch<type::list<type::i16_t>>(actual, patch);
+  EXPECT_EQ(patched, (Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}));
+
+  patched = applyGeneratedPatch<type::list<type::i16_t>>(patched, patch);
+  EXPECT_EQ(
+      patched, (Vec{1, 2, 3, 4, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 7, 8, 9, 10}));
+
+  ListPatch erasePatch;
+  erasePatch.erase(1);
+  patched = applyGeneratedPatch<type::list<type::i16_t>>(
+      Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, erasePatch);
+  EXPECT_EQ(patched, (Vec{2, 3, 4, 5, 6, 7, 8, 9, 10}));
+
+  ListPatch removePatch;
+  removePatch.remove({1, 2, 3, 4});
+
+  patched = applyGeneratedPatch<type::list<type::i16_t>>(
+      Vec{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, removePatch);
+  EXPECT_EQ(patched, (Vec{5, 6, 7, 8, 9, 10}));
+}
+
 TEST_F(PatchTest, Set) {
   std::set<std::string> data = {"test"}, patch = {"new value"};
   auto value = asValueStruct<type::set<type::binary_t>>(data);
@@ -1480,5 +1512,39 @@ TEST_F(PatchTest, ApplyPatchToSerializedData) {
   applyPatch(patchObj, value);
   EXPECT_EQ(modifiedObj, *value.objectValue_ref());
 }
+
+TEST_F(PatchTest, ApplyGeneratedPatchToSerializedData) {
+  test::patch::MyStruct original;
+  original.boolVal() = true;
+  original.byteVal() = 42;
+  original.stringVal() = "test";
+
+  test::patch::MyStructPatch patch;
+  patch.patchIfSet<ident::boolVal>() = !op::BoolPatch{};
+  patch.patchIfSet<ident::byteVal>() = original.byteVal();
+  patch.patchIfSet<ident::i16Val>() += 2;
+  patch.patchIfSet<ident::i32Val>() += 3;
+  patch.patchIfSet<ident::i64Val>() += 4;
+  patch.patchIfSet<ident::floatVal>() += 5;
+  patch.patchIfSet<ident::doubleVal>() += 6;
+  patch.patchIfSet<ident::stringVal>() = "_" + op::StringPatch{} + "_";
+  patch.patchIfSet<ident::structVal>().patchIfSet<ident::data1>().append("Na");
+
+  folly::IOBufQueue buffer;
+  CompactSerializer::serialize(original, &buffer);
+  auto binaryObj = buffer.moveAsValue();
+  CompactProtocolReader prot;
+  prot.setInput(&binaryObj);
+  auto valueObject = detail::parseValue(prot, protocol::T_STRUCT);
+
+  auto patchObject = convertToObject(patch.toThrift());
+  auto serialized = applyPatchToSerializedData<type::StandardProtocol::Compact>(
+      patchObject, binaryObj);
+  Object modifiedObj = parseObject<CompactProtocolReader>(*serialized);
+  // Compare with directly applying the patch to entire object.
+  applyPatch(patchObject, valueObject);
+  EXPECT_EQ(modifiedObj, *valueObject.objectValue_ref());
+}
+
 } // namespace
 } // namespace apache::thrift::protocol

@@ -275,18 +275,25 @@ void ApplyPatch::operator()(
   }
 
   if (auto* remove = findOp(patch, PatchOp::Remove)) {
-    const auto* to_remove = remove->if_set();
-    if (!to_remove) {
-      throw std::runtime_error("list remove patch should contain a set");
+    if (!remove->is_set() && !remove->is_list()) {
+      throw std::runtime_error(
+          "list remove patch should contain a set or a list");
     }
 
+    auto make_element_filter = [&]() -> std::function<bool(const Value&)> {
+      if (const auto* to_remove = remove->if_set()) {
+        return [to_remove](const auto& element) {
+          return to_remove->find(element) != to_remove->end();
+        };
+      }
+      const auto* to_remove = remove->if_list();
+      return [to_remove](const auto& element) {
+        return std::find(to_remove->begin(), to_remove->end(), element) !=
+            to_remove->end();
+      };
+    };
     value.erase(
-        std::remove_if(
-            value.begin(),
-            value.end(),
-            [&](const auto& element) {
-              return to_remove->find(element) != to_remove->end();
-            }),
+        std::remove_if(value.begin(), value.end(), make_element_filter()),
         value.end());
   }
 
@@ -542,26 +549,34 @@ void insertNextMask(
 void insertFieldsToMask(
     ExtractedMasks& masks, const Value& patchFields, bool recursive) {
   auto getIncludesMapRef = [&](Mask& mask) { return mask.includes_map_ref(); };
-  if (auto* obj = patchFields.if_object()) {
+  auto removeHandler = [&](const auto* container) {
+    for (const auto& key : *container) {
+      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
+      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
+      insertMask(masks.read, readId, allMask(), getIncludesMapRef);
+      insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
+    }
+  };
+
+  if (const auto* obj = patchFields.if_object()) {
     for (const auto& [id, value] : *obj) {
       insertNextMask(masks, value, id, id, recursive, [&](Mask& mask) {
         return mask.includes_ref();
       });
     }
-  } else if (auto* map = patchFields.if_map()) {
+  } else if (const auto* map = patchFields.if_map()) {
     for (const auto& [key, value] : *map) {
       auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
       auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
       insertNextMask(
           masks, value, readId, writeId, recursive, getIncludesMapRef);
     }
-  } else { // set of map keys (Remove)
-    for (const auto& key : patchFields.as_set()) {
-      auto readId = static_cast<int64_t>(findMapIdByValue(masks.read, key));
-      auto writeId = static_cast<int64_t>(findMapIdByValue(masks.write, key));
-      insertMask(masks.read, readId, allMask(), getIncludesMapRef);
-      insertMask(masks.write, writeId, allMask(), getIncludesMapRef);
-    }
+  } else if (const auto* set = patchFields.if_set()) {
+    // set of map keys (Remove)
+    removeHandler(set);
+  } else if (const auto* list = patchFields.if_list()) {
+    // list of map keys (Remove)
+    removeHandler(list);
   }
 }
 

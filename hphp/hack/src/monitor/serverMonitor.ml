@@ -123,6 +123,8 @@ module Make_monitor
     (SC : ServerMonitorUtils.Server_config)
     (Informant : Informant_sig.S) =
 struct
+  open Hh_prelude.Result.Monad_infix
+
   type env = {
     informant: Informant.t;
     server: ServerProcess.server_process;
@@ -149,11 +151,14 @@ struct
 
   type t = env * ServerMonitorUtils.monitor_config * Unix.file_descr
 
+  type 'a msg_update = ('a, 'a * string) result
+
   (** Use this as the only way to change server.
   It closes all outstanding FDs. That's needed so clients know that they can give up. *)
-  let set_server env new_server =
+  let set_server (env : env msg_update) new_server : env msg_update =
+    env >>= fun env ->
     Sent_fds_collector.collect_all_fds ();
-    { env with server = new_server }
+    Ok { env with server = new_server }
 
   let msg_to_channel fd msg =
     (* This FD will be passed to a server process, so avoid using Ocaml's
@@ -252,18 +257,21 @@ struct
     0 = Config_file.compare_versions env.current_version new_version
 
   (* Actually starts a new server. *)
-  let start_new_server env exit_status =
+  let start_new_server (env : env msg_update) exit_status : env msg_update =
+    env >>= fun env ->
     let informant_managed = Informant.is_managing env.informant in
     let new_server =
       start_server ~informant_managed env.server_start_options exit_status
     in
-    let env = set_server env new_server in
-    { env with retries = env.retries + 1 }
+    let env = set_server (Ok env) new_server in
+    env >>= fun new_env -> Ok { new_env with retries = new_env.retries + 1 }
 
   (* Kill the server (if it's running) and restart it - maybe. Obeying the rules
    * of state transitions. See docs on the ServerProcess.server_process ADT for
    * state transitions. *)
-  let kill_and_maybe_restart_server env exit_status =
+  let kill_and_maybe_restart_server (env : env msg_update) exit_status :
+      env msg_update =
+    env >>= fun env ->
     Hh_logger.log
       "kill_and_maybe_restart_server (env.server=%s)"
       (show_server_process env.server);
@@ -293,7 +301,7 @@ struct
     | (Died_config_changed, _) ->
       (* Now we can start a new instance safely.
        * See diagram on ServerProcess.server_process docs. *)
-      start_new_server env exit_status
+      start_new_server (Ok env) exit_status
     | (Not_yet_started, false)
     | (Alive _, false)
     | (Died_unexpectedly _, false) ->
@@ -301,13 +309,13 @@ struct
        * See diagram on ServerProcess.server_process docs. *)
       Hh_logger.log
         "Avoiding starting a new server because version in config no longer matches.";
-      set_server env Died_config_changed
+      set_server (Ok env) Died_config_changed
     | (Not_yet_started, true)
     | (Alive _, true)
     | (Died_unexpectedly _, true) ->
       (* Start new server instance because config matches.
        * See diagram on ServerProcess.server_process docs. *)
-      start_new_server env exit_status
+      start_new_server (Ok env) exit_status
 
   let read_version fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
@@ -416,7 +424,7 @@ struct
    * the client can wait for socket closure as indication that both the monitor
    * and server have exited.
    *)
-  let client_out_of_date env client_fd mismatch_info =
+  let client_out_of_date (env : env) client_fd mismatch_info =
     Hh_logger.log "Client out of date. Killing server.";
     (* If we detect out of date client, should always kill server and exit
      * monitor, even if messaging to channel or event logger fails. *)
@@ -431,9 +439,14 @@ struct
   (** Send (possibly empty) sequences of messages before handing off to
       server. *)
   let rec client_prehandoff
-      ~tracker ~is_purgatory_client env handoff_options client_fd =
+      ~tracker
+      ~is_purgatory_client
+      (env : env msg_update)
+      handoff_options
+      client_fd : env msg_update =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     let module PH = Prehandoff in
+    env >>= fun env ->
     match env.server with
     | Alive server ->
       let server_fd =
@@ -457,7 +470,7 @@ struct
       in
       hand_off_client_connection_wrapper ~tracker server_fd client_fd;
       server.last_request_handoff := Unix.time ();
-      env
+      Ok env
     | Died_unexpectedly (status, was_oom) ->
       (* Server has died; notify the client *)
       msg_to_channel client_fd (PH.Server_died { PH.status; PH.was_oom });
@@ -466,7 +479,8 @@ struct
       Exit.exit Exit_status.No_error
     | Died_config_changed ->
       if not is_purgatory_client then (
-        let env = kill_and_maybe_restart_server env None in
+        let env = kill_and_maybe_restart_server (Ok env) None in
+        env >>= fun env ->
         (* Assert that the restart succeeded, and then push prehandoff through again. *)
         match env.server with
         | Alive _ ->
@@ -475,7 +489,7 @@ struct
           client_prehandoff
             ~tracker
             ~is_purgatory_client
-            env
+            (Ok env)
             handoff_options
             client_fd
         | Died_unexpectedly _
@@ -488,39 +502,41 @@ struct
             "Failed starting server transitioning off Died_config_changed state"
       ) else (
         msg_to_channel client_fd PH.Server_died_config_change;
-        env
+        Ok env
       )
     | Not_yet_started ->
-      let env =
+      let env : env msg_update =
         if handoff_options.MonitorRpc.force_dormant_start then (
           msg_to_channel
             client_fd
             (PH.Server_not_alive_dormant
                "Warning - starting a server by force-dormant-start option...");
-          kill_and_maybe_restart_server env None
+          kill_and_maybe_restart_server (Ok env) None
         ) else (
           msg_to_channel
             client_fd
             (PH.Server_not_alive_dormant
                "Server killed by informant. Waiting for next server...");
-          env
+          Ok env
         )
       in
+      env >>= fun env ->
       if Queue.length env.purgatory_clients >= env.max_purgatory_clients then
         let () =
           msg_to_channel client_fd PH.Server_dormant_connections_limit_reached
         in
-        env
+        Ok env
       else
         let () =
           Queue.enqueue
             env.purgatory_clients
             (tracker, handoff_options, client_fd)
         in
-        env
+        Ok env
 
-  let handle_monitor_rpc env client_fd =
+  let handle_monitor_rpc (env : env msg_update) client_fd =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
+    env >>= fun env ->
     let cmd : MonitorRpc.command =
       Marshal_tools.from_fd_with_preamble client_fd
     in
@@ -532,7 +548,7 @@ struct
       client_prehandoff
         ~tracker
         ~is_purgatory_client:false
-        env
+        (Ok env)
         handoff_options
         client_fd
     | MonitorRpc.SHUT_DOWN tracker ->
@@ -540,7 +556,8 @@ struct
       kill_server_with_check_and_wait env.server;
       Exit.exit Exit_status.No_error
 
-  let ack_and_handoff_client env client_fd =
+  let ack_and_handoff_client (env : env msg_update) client_fd : env msg_update =
+    env >>= fun env ->
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     try
       let start_time = Unix.gettimeofday () in
@@ -571,75 +588,80 @@ struct
       ) else (
         Hh_logger.log "[%s] sending Connection_ok..." tracker_id;
         msg_to_channel client_fd Connection_ok;
-        handle_monitor_rpc env client_fd
+        handle_monitor_rpc (Ok env) client_fd
       )
     with
     | Malformed_build_id _ as exn ->
       let e = Exception.wrap exn in
       HackEventLogger.malformed_build_id e;
       Hh_logger.log "Malformed Build ID - %s" (Exception.to_string e);
-      Exception.reraise e
+      Error (env, "Malformed Build ID")
 
-  let push_purgatory_clients env =
+  let push_purgatory_clients (env : env msg_update) : env msg_update =
     (* We create a queue and transfer all the purgatory clients to it before
      * processing to avoid repeatedly retrying the same client even after
      * an EBADF. Control flow is easier this way than trying to manage an
      * immutable env in the face of exceptions. *)
+    env >>= fun env ->
     let clients = Queue.create () in
     Queue.blit_transfer ~src:env.purgatory_clients ~dst:clients ();
     let env =
       Queue.fold
         ~f:
           begin
-            fun env (tracker, handoff_options, client_fd) ->
+            fun env_accumulator (tracker, handoff_options, client_fd) ->
             try
               client_prehandoff
                 ~tracker
                 ~is_purgatory_client:true
-                env
+                env_accumulator
                 handoff_options
                 client_fd
             with
             | Unix.Unix_error (Unix.EPIPE, _, _)
             | Unix.Unix_error (Unix.EBADF, _, _) ->
               log "Purgatory client disconnected. Dropping." ~tracker;
-              env
+              env_accumulator
+            (* @nzthomas TODO, is this an error? *)
           end
-        ~init:env
+        ~init:(Ok env)
         clients
     in
     env
 
-  let maybe_push_purgatory_clients env =
+  let maybe_push_purgatory_clients (env : env msg_update) : env msg_update =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
+    env >>= fun env ->
     match (env.server, Queue.length env.purgatory_clients) with
-    | (Alive _, 0) -> env
+    | (Alive _, 0) -> Ok env
     | (Died_config_changed, _) ->
       (* These clients are waiting for a server to be started. But this Monitor
        * is waiting for a new client to connect (which confirms to us that we
        * are running the correct version of the Monitor). So let them know
        * that they might want to do something. *)
-      push_purgatory_clients env
-    | (Alive _, _) -> push_purgatory_clients env
+      push_purgatory_clients (Ok env)
+    | (Alive _, _) -> push_purgatory_clients (Ok env)
     | (Not_yet_started, _)
     | (Died_unexpectedly _, _) ->
-      env
+      Ok env
 
   (* Kill command from client is handled by server server, so the monitor
    * needs to check liveness of the server process to know whether
    * to stop itself. *)
-  let update_status_ (env : env) monitor_config =
+  let update_status_ (env : env msg_update) monitor_config :
+      (env * int option * Informant_sig.server_state, env * string) result =
     let env =
+      env >>= fun env ->
       match env.server with
       | Alive process ->
         let (pid, proc_stat) = SC.wait_pid process in
         (match (pid, proc_stat) with
         | (0, _) ->
           (* "pid=0" means the pid we waited for (i.e. process) hasn't yet died/stopped *)
-          env
+          Ok env
         | (_, Unix.WEXITED 0) ->
           (* "pid<>0, WEXITED 0" means the process had a clean exit *)
-          set_server env (Died_unexpectedly (proc_stat, false))
+          set_server (Ok env) (Died_unexpectedly (proc_stat, false))
         | (_, _) ->
           (* this case is any kind of unexpected exit *)
           let is_oom =
@@ -704,13 +726,14 @@ struct
             ~exit_code
             ~exit_status
             ~is_oom;
-          set_server env (Died_unexpectedly (proc_stat, is_oom)))
+          set_server (Ok env) (Died_unexpectedly (proc_stat, is_oom)))
       | Not_yet_started
       | Died_config_changed
       | Died_unexpectedly _ ->
-        env
+        Ok env
     in
 
+    env >>= fun env ->
     let (exit_status, server_state) =
       match env.server with
       | Alive _ -> (None, Informant_sig.Server_alive)
@@ -721,11 +744,12 @@ struct
       | Died_config_changed ->
         (None, Informant_sig.Server_dead)
     in
-    (env, exit_status, server_state)
+    Ok (env, exit_status, server_state)
 
-  let update_status env monitor_config =
+  let update_status (env : env msg_update) monitor_config : env msg_update =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
-    let (env, exit_status, server_state) = update_status_ env monitor_config in
+    update_status_ env monitor_config
+    >>= fun (env, exit_status, server_state) ->
     let informant_report = Informant.report env.informant server_state in
     let is_watchman_fresh_instance =
       match exit_status with
@@ -782,16 +806,16 @@ struct
     let max_watchman_retries = 3 in
     let max_sql_retries = 3 in
     match (informant_report, env.server) with
-    | (Informant_sig.Move_along, Died_config_changed) -> env
+    | (Informant_sig.Move_along, Died_config_changed) -> Ok env
     | (Informant_sig.Restart_server, Died_config_changed) ->
       Hh_logger.log "%s"
       @@ "Ignoring Informant directed restart - waiting for next client "
       ^ "connection to verify server version first";
-      env
+      Ok env
     | (Informant_sig.Restart_server, _) ->
       Hh_logger.log "Informant directed server restart. Restarting server.";
       HackEventLogger.informant_induced_restart ();
-      kill_and_maybe_restart_server env exit_status
+      kill_and_maybe_restart_server (Ok env) exit_status
     | (Informant_sig.Move_along, _) ->
       if
         (is_watchman_failed || is_watchman_fresh_instance)
@@ -801,35 +825,38 @@ struct
           "Watchman died. Restarting hh_server (attempt: %d)"
           (env.watchman_retries + 1);
         let env = { env with watchman_retries = env.watchman_retries + 1 } in
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_decl_heap_elems_bug then (
         Hh_logger.log "hh_server died due to Decl_heap_elems_bug. Restarting";
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_worker_error then (
         Hh_logger.log "hh_server died due to worker error. Restarting";
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_config_changed then (
         Hh_logger.log "hh_server died from hh config change. Restarting";
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_heap_stale then (
         Hh_logger.log
           "Several large rebases caused shared heap to be stale. Restarting";
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_big_rebase then (
         Hh_logger.log "Server exited because of big rebase. Restarting";
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else if is_sql_assertion_failure && env.sql_retries < max_sql_retries
         then (
         Hh_logger.log
           "Sql failed. Restarting hh_server in fresh mode (attempt: %d)"
           (env.sql_retries + 1);
         let env = { env with sql_retries = env.sql_retries + 1 } in
-        set_server env Not_yet_started
+        set_server (Ok env) Not_yet_started
       ) else
-        env
+        Ok env
 
   let rec check_and_run_loop
-      ?(consecutive_throws = 0) env monitor_config (socket : Unix.file_descr) =
+      ?(consecutive_throws = 0)
+      (env : env msg_update)
+      monitor_config
+      (socket : Unix.file_descr) =
     let (env, consecutive_throws) =
       try (check_and_run_loop_ env monitor_config socket, 0) with
       | Unix.Unix_error (Unix.ECHILD, _, _) as exn ->
@@ -859,12 +886,24 @@ struct
           (Exception.to_string e);
         (env, consecutive_throws + 1)
     in
+    let env =
+      match env with
+      | Error (e, msg) ->
+        Hh_logger.log
+          "Encountered error in check_and_run_loop: %s, starting new loop"
+          msg;
+        Ok e
+      | Ok e -> Ok e
+    in
     check_and_run_loop ~consecutive_throws env monitor_config socket
 
-  and check_and_run_loop_ env monitor_config (socket : Unix.file_descr) =
+  and check_and_run_loop_
+      (env : env msg_update) monitor_config (socket : Unix.file_descr) :
+      env msg_update =
     (* WARNING! Don't use the (slow) HackEventLogger here, in the inner loop non-failure path. *)
     (* That's because HackEventLogger for the monitor is synchronous and takes 50ms/call. *)
     (* But the monitor's non-failure inner loop must handle hundres of clients per second *)
+    env >>= fun env ->
     let lock_file = monitor_config.lock_file in
     if not (Lock.grab lock_file) then (
       Hh_logger.log "Lost lock; terminating.\n%!";
@@ -881,7 +920,7 @@ struct
         |> Option.value ~default:0
       | _ -> 0
     in
-    let env = maybe_push_purgatory_clients env in
+    let env = maybe_push_purgatory_clients (Ok env) in
     (* The first sequence number we send is 1; hence, the default "0" will be a no-op *)
     let () = Sent_fds_collector.collect_fds ~sequence_receipt_high_water_mark in
     let has_client = sleep_and_check socket in
@@ -914,15 +953,22 @@ struct
         raise Exit_status.(Exit_with Socket_error)
       | exn ->
         let e = Exception.wrap exn in
-        Hh_logger.log
-          "Ack_and_handoff failure; closing client FD: %s"
-          (Exception.get_ctor_string e);
+        let msg =
+          Printf.sprintf
+            "Ack_and_handoff failure; closing client FD: %s"
+            (Exception.get_ctor_string e)
+        in
+        Hh_logger.log "%s" msg;
         ensure_fd_closed fd;
-        Exception.reraise e
+        env >>= fun env -> Error (env, msg)
 
   let check_and_run_loop_once (env, monitor_config, socket) =
-    let env = check_and_run_loop_ env monitor_config socket in
-    (env, monitor_config, socket)
+    let env = check_and_run_loop_ (Ok env) monitor_config socket in
+    match env with
+    | Ok env -> (env, monitor_config, socket)
+    | Error (env, msg) ->
+      Hh_logger.log "%s" msg;
+      (env, monitor_config, socket)
 
   let start_monitor
       ~current_version
@@ -993,5 +1039,5 @@ struct
         informant_init_env
         monitor_config
     in
-    check_and_run_loop env monitor_config socket
+    check_and_run_loop (Ok env) monitor_config socket
 end

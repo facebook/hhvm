@@ -662,6 +662,8 @@ let report informant server_state =
   | (Resigned, Informant_sig.Server_not_yet_started) ->
     (* Actually, this case should never happen. But we force a restart
      * to avoid accidental wedged states anyway. *)
+    Hh_logger.log
+      "Unexpected Resigned informant without a server started, restarting server";
     Informant_sig.Restart_server
   | (Resigned, _) -> Informant_sig.Move_along
   | (Active env, Informant_sig.Server_not_yet_started) ->
@@ -676,6 +678,7 @@ let report informant server_state =
       in
       (match report with
       | Informant_sig.Restart_server ->
+        Hh_logger.log "Informant watcher starting server from settling";
         HackEventLogger.informant_watcher_starting_server_from_settling ()
       | Informant_sig.Move_along -> ());
       report

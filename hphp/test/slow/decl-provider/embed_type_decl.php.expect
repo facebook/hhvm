@@ -13,3 +13,33 @@ object(stdClass) (1) {
   string(4) "type"
 }
 string(21) "Error: Decl not found"
+object(stdClass) (4) {
+  ["abstract"]=>
+  bool(false)
+  ["final"]=>
+  bool(true)
+  ["kind"]=>
+  string(5) "class"
+  ["name"]=>
+  string(9) "\stdClass"
+}
+object(stdClass) (4) {
+  ["abstract"]=>
+  bool(false)
+  ["final"]=>
+  bool(false)
+  ["kind"]=>
+  string(5) "class"
+  ["name"]=>
+  string(11) "\SoapHeader"
+}
+object(stdClass) (4) {
+  ["abstract"]=>
+  bool(false)
+  ["final"]=>
+  bool(true)
+  ["kind"]=>
+  string(5) "class"
+  ["name"]=>
+  string(11) "\HH\Lib\Ref"
+}

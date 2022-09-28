@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/bytecode.h"
 #include "hphp/runtime/vm/repo-file.h"
 #include "hphp/runtime/vm/repo-global-data.h"
@@ -116,6 +117,10 @@ void ProcessInit() {
   SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
                                                "/:systemlib.php",
                                                Native::s_systemNativeFuncs);
+
+  // If `EnableDecl` is on, this registers the decls of the builtin symbols
+  // of systemlib
+  Native::registerBuiltinSymbols("/:systemlib.php", slib);
 
   if (auto const info = SystemLib::s_unit->getFatalInfo()) {
     Logger::Error("An error has been introduced into the systemlib, "

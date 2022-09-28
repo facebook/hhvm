@@ -26,6 +26,7 @@
 #include "hphp/runtime/ext/string/ext_string.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/runtime/base/config.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/native-func-table.h"
 #include "hphp/runtime/vm/runtime-compiler.h"
 #include "hphp/runtime/vm/unit.h"
@@ -73,6 +74,8 @@ void Extension::CompileSystemlib(const std::string &slib,
 
   unit->merge();
   SystemLib::addPersistentUnit(unit);
+  // Also register facts for systemlib extensions
+  Native::registerBuiltinSymbols(name, slib);
 }
 
 /**

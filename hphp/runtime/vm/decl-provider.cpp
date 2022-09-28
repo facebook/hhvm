@@ -17,6 +17,7 @@
 #include "hphp/runtime/base/autoload-handler.h"
 #include "hphp/runtime/base/runtime-option.h"
 #include "hphp/runtime/base/zend-string.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/decl-provider.h"
 #include "hphp/util/sha1.h"
 
@@ -124,7 +125,15 @@ hackc::ExternalDeclProviderResult HhvmDeclProvider::getDecls(
     auto [it, _] = m_cache.insert({filename, std::move(decl_result)});
     return hackc::ExternalDeclProviderResult::from_decls(it->second);
   }
+
   ITRACE(4, "DP {}: getFile() returned None\n", sym);
+
+  auto const res = Native::getBuiltinDecls(makeStaticString(sym), kind);
+  if (res) {
+    ITRACE(4, "DP {}: found in extensions or systemlib \n", sym);
+    return *res;
+  }
+  ITRACE(4, "DP {}: symbol not found in native decl registry", sym);
   m_sawMissing = true;
   return hackc::ExternalDeclProviderResult::missing();
 }

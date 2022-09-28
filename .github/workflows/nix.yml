@@ -111,7 +111,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: ${{matrix.package}}.deb
-    - run: sudo apt-get install ${{matrix.package}}.deb
+    - run: sudo apt-get install ./${{matrix.package}}.deb
     - run: |
         set -ex
         export HHVM_BIN="$(command -v hhvm)"

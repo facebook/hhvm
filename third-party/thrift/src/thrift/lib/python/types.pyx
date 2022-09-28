@@ -817,9 +817,6 @@ cdef class BadEnum:
         self.name = '#INVALID#'
 
     def __repr__(self):
-        return f'{self.enum.__name__}.{self.name}'
-
-    def __str__(self):
         return f'<{self.enum.__name__}.{self.name}: {self.value}>'
 
     def __int__(self):
@@ -1250,14 +1247,6 @@ cdef Struct _fbthrift_struct_update_nested_field(Struct obj, list path_and_vals)
     return obj(**updatedict)
 
 class Enum:
-    def __repr__(self):
-        """We are on purpose making repr return valid python syntax
-        unlike python Enums themselves"""
-        return f'{self.__class__.__name__}.{self.name}'
-
-    def __str__(self):
-        return f'<{self.__class__.__name__}.{self.name}: {self.value}>'
-
     @staticmethod
     def __get_metadata__():
         raise NotImplementedError()

@@ -113,6 +113,7 @@ jobs:
       with:
         name: ${{matrix.package}}.deb
     - run: sudo apt-get install ./${{matrix.package}}.deb
+    - run: sudo apt-get install locales-all
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
         "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all

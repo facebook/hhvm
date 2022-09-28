@@ -21,7 +21,7 @@ cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
 
 // The **standard** types all Thrift implementations support.
-@thrift.v1 // TODO(afuller): Remove dep on 'reflection' and switch to v1alpha.
+@thrift.v1alpha
 package "facebook.com/thrift/type"
 
 namespace cpp2 apache.thrift.type

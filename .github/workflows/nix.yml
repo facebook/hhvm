@@ -107,17 +107,15 @@ jobs:
         - ubuntu-latest
     runs-on: ${{matrix.os}}
     steps:
+    - uses: actions/checkout@v3
     - name: Download the ${{matrix.package}}.deb from build-and-test job
       uses: actions/download-artifact@v2
       with:
         name: ${{matrix.package}}.deb
     - run: sudo apt-get install ./${{matrix.package}}.deb
+    - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
-        set -ex
-        export HHVM_BIN="$(command -v hhvm)"
-        "$HHVM_BIN" hphp/test/run.php all
-      # Suppress errors for now because we have not ported all tests to HHVM OSS
-      continue-on-error: true
+        "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

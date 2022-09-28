@@ -167,7 +167,7 @@ pub fn from_text<'decl>(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     profile: &mut Profile,
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
@@ -221,7 +221,7 @@ pub fn unit_from_text<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
     let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, alloc);
@@ -355,7 +355,7 @@ fn emit_fatal<'arena>(
 fn create_emitter<'arena, 'decl>(
     flags: &EnvFlags,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {
     Emitter::new(

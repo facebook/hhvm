@@ -71,7 +71,7 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         systemlib: bool,
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: Option<&'decl dyn DeclProvider>,
+        decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,

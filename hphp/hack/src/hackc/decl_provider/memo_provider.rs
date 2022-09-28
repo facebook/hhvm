@@ -17,7 +17,7 @@ use crate::TypeDecl;
 
 /// A DeclProvider that memoizes results of previous queries.
 pub struct MemoProvider<'d> {
-    next: &'d dyn DeclProvider,
+    next: &'d dyn DeclProvider<'d>,
     types: RefCell<HashMap<String, TypeDecl<'d>>>,
     funcs: RefCell<HashMap<String, &'d FunDecl<'d>>>,
     consts: RefCell<HashMap<String, &'d ConstDecl<'d>>>,
@@ -25,7 +25,7 @@ pub struct MemoProvider<'d> {
 }
 
 impl<'d> MemoProvider<'d> {
-    pub fn new(next: &'d dyn DeclProvider) -> Self {
+    pub fn new(next: &'d dyn DeclProvider<'d>) -> Self {
         Self {
             next,
             types: Default::default(),
@@ -48,7 +48,7 @@ impl<'d> MemoProvider<'d> {
     }
 }
 
-impl<'d> DeclProvider for MemoProvider<'d> {
+impl<'d> DeclProvider<'d> for MemoProvider<'d> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>> {
         Self::fetch_or_insert(&self.types, symbol, || self.next.type_decl(symbol, depth))
     }

@@ -324,7 +324,7 @@ fn compile_from_text_cpp_ffi(
         &native_env,
         decl_provider
             .as_ref()
-            .map(|provider| provider as &dyn DeclProvider),
+            .map(|provider| provider as &dyn DeclProvider<'_>),
         &mut Default::default(),
     )
     .map_err(|e| e.to_string())?;
@@ -413,7 +413,7 @@ fn compile_unit_from_text_cpp_ffi(
         &native_env,
         decl_provider
             .as_ref()
-            .map(|provider| provider as &dyn DeclProvider),
+            .map(|provider| provider as &dyn DeclProvider<'_>),
         &mut Default::default(),
     )
     .map(|unit| Box::new(UnitWrapper(unit, bump)))

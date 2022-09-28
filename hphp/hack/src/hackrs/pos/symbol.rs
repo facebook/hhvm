@@ -105,7 +105,7 @@ impl ToOcamlRep for Symbol {
         &'a self,
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
-        self.as_str().to_ocamlrep(alloc)
+        alloc.add_copy(self.as_str())
     }
 }
 
@@ -216,7 +216,7 @@ impl ToOcamlRep for Bytes {
         &'a self,
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
-        self.as_bytes().to_ocamlrep(alloc)
+        alloc.add_copy(self.as_bytes())
     }
 }
 
@@ -298,7 +298,7 @@ macro_rules! common_impls {
                 &'a self,
                 alloc: &'a A,
             ) -> ocamlrep::OpaqueValue<'a> {
-                self.as_str().to_ocamlrep(alloc)
+                alloc.add_copy(self.as_str())
             }
         }
 

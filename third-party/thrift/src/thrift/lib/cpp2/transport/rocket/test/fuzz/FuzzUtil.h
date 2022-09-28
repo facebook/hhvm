@@ -98,24 +98,6 @@ class FakeProcessor final : public apache::thrift::AsyncProcessor {
             "place holder"),
         "1" /* doesnt matter */);
   }
-
-  void processSerializedRequest(
-      apache::thrift::ResponseChannelRequest::UniquePtr req,
-      apache::thrift::SerializedRequest&& serializedRequest,
-      apache::thrift::protocol::PROTOCOL_TYPES protType,
-      apache::thrift::Cpp2RequestContext* context,
-      folly::EventBase* eb,
-      apache::thrift::concurrency::ThreadManager* tm) {
-    processSerializedCompressedRequestWithMetadata(
-        std::move(req),
-        apache::thrift::SerializedCompressedRequest(
-            std::move(serializedRequest)),
-        apache::thrift::AsyncProcessorFactory::MethodMetadata(),
-        protType,
-        context,
-        eb,
-        tm);
-  }
 };
 
 class FakeProcessorFactory final

@@ -37,14 +37,6 @@ using Func = std::function<void(
 
 class MockAsyncProcessor : public AsyncProcessor {
  public:
-  void processSerializedRequest(
-      ResponseChannelRequest::UniquePtr,
-      SerializedRequest&&,
-      protocol::PROTOCOL_TYPES,
-      Cpp2RequestContext*,
-      folly::EventBase*,
-      concurrency::ThreadManager*) override {}
-
   void processSerializedCompressedRequestWithMetadata(
       apache::thrift::ResponseChannelRequest::UniquePtr,
       apache::thrift::SerializedCompressedRequest&&,
@@ -431,14 +423,6 @@ TEST(ParallelConcurrencyControllerTest, FinishCallbackExecptionSafe) {
   class BadAsyncProcessor : public AsyncProcessor {
    public:
     BadAsyncProcessor(folly::Baton<>& baton) : baton_(baton) {}
-
-    void processSerializedRequest(
-        ResponseChannelRequest::UniquePtr,
-        SerializedRequest&&,
-        protocol::PROTOCOL_TYPES,
-        Cpp2RequestContext*,
-        folly::EventBase*,
-        concurrency::ThreadManager*) override {}
 
     void processSerializedCompressedRequestWithMetadata(
         apache::thrift::ResponseChannelRequest::UniquePtr,

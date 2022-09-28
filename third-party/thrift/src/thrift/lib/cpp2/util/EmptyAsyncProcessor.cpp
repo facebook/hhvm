@@ -20,26 +20,6 @@ namespace apache::thrift {
 
 std::unique_ptr<AsyncProcessor> EmptyAsyncProcessorFactory::getProcessor() {
   class EmptyAsyncProcessor : public AsyncProcessor {
-    void processSerializedRequest(
-        ResponseChannelRequest::UniquePtr,
-        SerializedRequest&&,
-        protocol::PROTOCOL_TYPES,
-        Cpp2RequestContext*,
-        folly::EventBase*,
-        concurrency::ThreadManager*) override {
-      LOG(FATAL) << "This method should never be called on EmptyAsyncProcessor";
-    }
-
-    void processSerializedCompressedRequest(
-        ResponseChannelRequest::UniquePtr,
-        SerializedCompressedRequest&&,
-        protocol::PROTOCOL_TYPES,
-        Cpp2RequestContext*,
-        folly::EventBase*,
-        concurrency::ThreadManager*) override {
-      LOG(FATAL) << "This method should never be called on EmptyAsyncProcessor";
-    }
-
     void processSerializedCompressedRequestWithMetadata(
         ResponseChannelRequest::UniquePtr,
         SerializedCompressedRequest&&,

@@ -17,6 +17,7 @@
 #include "hphp/runtime/vm/runtime-compiler.h"
 
 #include "hphp/runtime/base/autoload-handler.h"
+#include "hphp/runtime/base/repo-autoload-map.h"
 #include "hphp/runtime/base/request-info.h"
 #include "hphp/runtime/base/static-string-table.h"
 #include "hphp/runtime/base/unit-cache.h"
@@ -194,11 +195,15 @@ Unit* compile_systemlib_string(const char* s, size_t sz, const char* fname,
     defaults.flags(),
     defaults.dir()
   };
+  // We provide the empty autoload map here: there are no symbols that are going
+  // to be provided outside of systemlib itself. The created decl provider will
+  // hook into `s_builtin_symbols` to provide the relevant decls.
+  RepoAutoloadMap empty_map({}, {}, {}, {}, {});
   auto ue = parse(
     loader,
     fname,
     nativeFuncs,
-    nullptr, // TODO: decl provider for systemlib
+    RuntimeOption::EvalEnableDecl ? &empty_map : nullptr,
     nullptr,
     true,
     false

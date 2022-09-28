@@ -28,6 +28,8 @@ extern void (*g_vmProcessInit)();
 void ProcessInit();
 void ProcessInitNoSystemLib();
 
+extern std::string get_and_check_systemlib(std::string* hhas);
+
 /*
  * This must be called before execute_program_impl in an hhvm build.
  */

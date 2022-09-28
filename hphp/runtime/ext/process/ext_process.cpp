@@ -84,6 +84,9 @@ static char** build_envp(const Array& envs, req::vector<String> &senvs) {
 
 static struct ProcessExtension final : Extension {
   ProcessExtension() : Extension("pcntl", NO_EXTENSION_VERSION_YET) {}
+  void loadDecls() override {
+    loadDeclsFrom("process");
+  }
   void moduleInit() override {
     HHVM_FE(pcntl_alarm);
     HHVM_FE(pcntl_exec);

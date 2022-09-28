@@ -26,6 +26,7 @@
 
 #include <set>
 #include <string>
+#include <string_view>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,6 +83,24 @@ public:
   virtual void threadShutdown();
   virtual void requestInit();
   virtual void requestShutdown();
+
+  // Override this function when your extension calls anything other than:
+  //
+  //  loadSystemlib();
+  //
+  // ... in `moduleInit`. This will load the decls for any symbols declared in
+  // the PHP file for this module. Examples of when overriding this function is
+  // required:
+  // - ext_asio, which calls `loadSystemlib` twice with different arguments
+  // - ext_collections*, which calls `loadSystemlib` for each collection kind
+  // - ext_datetime, which happens to use a different name for the extension
+  //   versus the binary section
+  virtual void loadDecls();
+  // Load the source contained in the binary section corresponding to [name],
+  // parse it's decls, then store them in `s_builtin_symbols`. This is generally
+  // going to be given the same string as whatever `loadSystemlib` takes, and
+  // by default will be passed *just* the extension name.
+  void loadDeclsFrom(std::string_view name);
 
   // override this to control extension_loaded() return value
   virtual bool moduleEnabled() const;

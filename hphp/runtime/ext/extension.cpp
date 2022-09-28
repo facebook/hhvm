@@ -74,8 +74,23 @@ void Extension::CompileSystemlib(const std::string &slib,
 
   unit->merge();
   SystemLib::addPersistentUnit(unit);
-  // Also register facts for systemlib extensions
-  Native::registerBuiltinSymbols(name, slib);
+}
+
+namespace {
+  std::string get_section(
+    std::string_view name,
+    std::string* hhas_out,
+    const std::string& dsoName
+  ) {
+    assertx(!name.empty());
+#ifdef _MSC_VER
+    std::string section("ext_");
+#else
+    std::string section("ext.");
+#endif
+    section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
+    return get_systemlib(hhas_out, section, dsoName);
+  }
 }
 
 /**
@@ -85,15 +100,8 @@ void Extension::CompileSystemlib(const std::string &slib,
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  assertx(!name.empty());
-#ifdef _MSC_VER
-  std::string section("ext_");
-#else
-  std::string section("ext.");
-#endif
-  section += HHVM_FN(md5)(name, false).substr(0, 12).data();
   std::string hhas;
-  std::string slib = get_systemlib(&hhas, section, m_dsoName);
+  auto const slib = get_section(name, &hhas, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
     CompileSystemlib(slib, phpname, m_nativeFuncs);
@@ -149,6 +157,20 @@ void Extension::registerExtensionFunction(const String& name) {
 
 const std::vector<StringData*>& Extension::getExtensionFunctions() const {
   return m_functions;
+}
+
+void Extension::loadDecls() {
+  // Look for "ext.{namehash}" in the binary and grab its decls
+  loadDeclsFrom(m_name);
+}
+
+void Extension::loadDeclsFrom(std::string_view name) {
+  std::string hhas;
+  auto const slib = get_section(name, &hhas, m_dsoName);
+  // We *really* ought to assert that `slib` is non-empty here, but there are
+  // some extensions that don't have any source code, such as the ones created by
+  // `IMPLEMENT_DEFAULT_EXTENSION_VERSION`
+  Native::registerBuiltinSymbols(std::string(name), slib);
 }
 
 /////////////////////////////////////////////////////////////////////////////

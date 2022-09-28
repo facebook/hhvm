@@ -52,10 +52,8 @@ void registerBuiltinSymbols(
   const std::string& name,
   const std::string& contents
 ) {
-  // Just guard on decls being available here, versus guarding at the callsites
-  if (!RuntimeOption::EvalEnableDecl) {
-    return;
-  }
+  // We should *never* call this function unless decl driven bytecode is enabled
+  assertx(RuntimeOption::EvalEnableDecl);
 
   // Systemlib and extensions are compiled before we've even loaded HHVM
   // options, so our recourse here is to use the defaults.
@@ -103,9 +101,9 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
 
   auto const maybeGetDecls = [symbol](auto const& map) {
     auto const res = map.find(symbol);
-    return res != map.end() ? HPHP::make_optional(
-      hackc::ExternalDeclProviderResult::from_decls(*res->second)
-    ) : std::nullopt;
+    return res != map.end() ?
+      HPHP::make_optional(hackc::ExternalDeclProviderResult::from_decls(*res->second))
+    : std::nullopt;
   };
   // We should only ever call this if `EnableDecl` is set, and asserting on
   // `symbol` here is a smoke check

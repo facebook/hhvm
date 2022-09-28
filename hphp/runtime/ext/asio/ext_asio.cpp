@@ -183,6 +183,11 @@ void AsioExtension::moduleInit() {
 
 void AsioExtension::requestInit() { requestInitSingletons(); }
 
+void AsioExtension::loadDecls() {
+  loadDeclsFrom("asio");
+  loadDeclsFrom("async-generator");
+}
+
 void AsioExtension::initFunctions() {
   HHVM_FALIAS(
     HH\\asio_get_current_context_idx,

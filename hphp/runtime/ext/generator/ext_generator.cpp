@@ -185,7 +185,7 @@ struct GeneratorExtension final : Extension {
     Native::registerNativeDataInfo<Generator>(
       Generator::s_className.get(),
       Native::NDIFlags::NO_SWEEP | Native::NDIFlags::CTOR_THROWS);
-    loadSystemlib("generator");
+    loadSystemlib();
     Generator::s_class = Class::lookup(Generator::s_className.get());
     assertx(Generator::s_class);
   }

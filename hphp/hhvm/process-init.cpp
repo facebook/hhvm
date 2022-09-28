@@ -80,6 +80,18 @@ void ProcessInitNoSystemLib() {
   Stack::ValidateStackSize();
 }
 
+std::string get_and_check_systemlib(std::string* hhas) {
+  auto const slib = get_systemlib(hhas);
+
+  if (slib.empty()) {
+    // Die a horrible death.
+    Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
+                  " or export HHVM_SYSTEMLIB to your ENV");
+    _exit(1);
+  }
+  return slib;
+}
+
 void ProcessInit() {
   // Save the current options, and set things up so that
   // systemlib.php can be read from and stored in the
@@ -101,26 +113,13 @@ void ProcessInit() {
 
   rds::requestInit();
   std::string hhas;
-  auto const slib = get_systemlib(&hhas);
-
-  if (slib.empty()) {
-    // Die a horrible death.
-    Logger::Error("Unable to find/load systemlib.php, check /proc is mounted"
-                  " or export HHVM_SYSTEMLIB to your ENV");
-    _exit(1);
-  }
-
-  // Save this in case the debugger needs it. Once we know if this
+  auto const slib = get_and_check_systemlib(&hhas);
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
   SystemLib::s_unit = compile_systemlib_string(slib.c_str(), slib.size(),
                                                "/:systemlib.php",
                                                Native::s_systemNativeFuncs);
-
-  // If `EnableDecl` is on, this registers the decls of the builtin symbols
-  // of systemlib
-  Native::registerBuiltinSymbols("/:systemlib.php", slib);
 
   if (auto const info = SystemLib::s_unit->getFatalInfo()) {
     Logger::Error("An error has been introduced into the systemlib, "

@@ -26,6 +26,7 @@ struct AsioExtension final : Extension {
   AsioExtension() : Extension("asio", "0.1") {}
   void moduleInit() override;
   void requestInit() override;
+  void loadDecls() override;
 
 private:
   void initFunctions();

@@ -937,6 +937,10 @@ TypedValue date_sunrise_sunset(int64_t timestamp, int64_t format,
 static struct DateTimeExtension final : Extension {
   DateTimeExtension() : Extension("date") { }
 
+  void loadDecls() override {
+    loadDeclsFrom("datetime");
+  }
+
   void moduleInit() override {
     HHVM_ME(DateTime, __construct);
     HHVM_ME(DateTime, add);

@@ -71,6 +71,7 @@
 #include "hphp/runtime/server/server-stats.h"
 #include "hphp/runtime/server/warmup-request-handler.h"
 #include "hphp/runtime/server/xbox-server.h"
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/debug/debug.h"
 #include "hphp/runtime/vm/jit/code-cache.h"
 #include "hphp/runtime/vm/jit/mcgen-translate.h"
@@ -178,6 +179,8 @@ namespace HPHP {
  * actually initialize the VM.
  */
 void (*g_vmProcessInit)();
+
+std::string get_and_check_systemlib(std::string *hhas);
 
 void timezone_init();
 
@@ -2472,6 +2475,18 @@ void hphp_process_init(bool skipModules) {
 
   jit::mcgen::processInit();
   jit::processInitProfData();
+  if (RuntimeOption::EvalEnableDecl) {
+    // There are no `.hhas` files left in `hphp/system/` or `hphp/runtime/ext/`
+    // so I suspect that `hhas` will always be empty. However the API requires
+    // we pass something in to receive the `.hhas` code.
+    std::string hhas;
+    auto const slib = get_and_check_systemlib(&hhas);
+    Native::registerBuiltinSymbols("/:systemlib.php", slib);
+    if (!skipModules) {
+      ExtensionRegistry::moduleDeclInit();
+    }
+    BootStats::mark("s_builtin_symbols_populated");
+  }
   g_vmProcessInit();
   BootStats::mark("g_vmProcessInit");
 

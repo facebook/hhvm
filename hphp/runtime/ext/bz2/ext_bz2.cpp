@@ -386,7 +386,7 @@ struct bz2Extension final : Extension {
     Native::registerNativeDataInfo<ChunkedBunzipper>(
       s_SystemLib_ChunkedBunzipper.get());
 
-    loadSystemlib("bz2");
+    loadSystemlib();
   }
 } s_bz2_extension;
 

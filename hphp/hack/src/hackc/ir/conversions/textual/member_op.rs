@@ -186,7 +186,7 @@ fn write_final_query_m(
             // $a->hello
 
             // Since we don't know the actual type (right now everything is
-            // HackMixed) then we need to use dynamic access.  In the future if
+            // Mixed) then we need to use dynamic access.  In the future if
             // we know the actual type we may be able to use direct field
             // access.
 

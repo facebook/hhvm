@@ -5,8 +5,10 @@
 
 //! Textual is the name of the text format for Infer's IR.  This crate converts
 //! from HackC's IR to Textual for ingestion by Infer.
-
-// ./infer/bin/infer compile --capture-textual-sil infer/tests/codetoanalyze/sil/parsing/basic.sil --help
+//!
+//! End-to-end usage example:
+//!   hackc compile-infer test/infer/basic.hack > basic.sil
+//!   ./infer/bin/infer compile --capture-textual basic.sil
 
 macro_rules! tx_ty {
     (mixed) => {

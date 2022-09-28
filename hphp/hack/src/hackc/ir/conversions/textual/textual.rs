@@ -497,12 +497,14 @@ impl<'a> FuncWriter<'a> {
         Ok(dst)
     }
 
+    // Terminate this branch if `expr` is false.
     pub(crate) fn prune(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
         writeln!(self.w, "{INDENT}prune {}", FmtExpr(self.strings, &expr))?;
         Ok(())
     }
 
+    // Terminate this branch if `expr` is true.
     pub(crate) fn prune_not(&mut self, expr: impl Into<Expr>) -> Result {
         let expr = expr.into();
         writeln!(self.w, "{INDENT}prune ! {}", FmtExpr(self.strings, &expr))?;

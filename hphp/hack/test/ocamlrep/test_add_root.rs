@@ -156,3 +156,41 @@ fn differently_typed_views_of_same_data() {
         Ok((1 << 32 | 2, U32Pair::new(1, 2)))
     );
 }
+
+#[test]
+fn shared_rcs() {
+    use std::rc::Rc;
+
+    let arena = Arena::new();
+    let inner_tuple = Rc::new((1, 2));
+    let outer_tuple = Rc::new((Rc::clone(&inner_tuple), inner_tuple));
+    let ocaml_tuple = arena.add_root(&outer_tuple);
+    let outer_tuple = ocaml_tuple.as_block().unwrap();
+
+    // The tuple pointer in the first field is physically equal to the tuple
+    // pointer in the second field.
+    assert_eq!(outer_tuple[0].to_bits(), outer_tuple[1].to_bits());
+
+    let inner_tuple = outer_tuple[0].as_block().unwrap();
+    assert_eq!(inner_tuple[0].as_int(), Some(1));
+    assert_eq!(inner_tuple[1].as_int(), Some(2));
+}
+
+#[test]
+fn shared_arcs() {
+    use std::sync::Arc;
+
+    let arena = Arena::new();
+    let inner_tuple = Arc::new((1, 2));
+    let outer_tuple = Arc::new((Arc::clone(&inner_tuple), inner_tuple));
+    let ocaml_tuple = arena.add_root(&outer_tuple);
+    let outer_tuple = ocaml_tuple.as_block().unwrap();
+
+    // The tuple pointer in the first field is physically equal to the tuple
+    // pointer in the second field.
+    assert_eq!(outer_tuple[0].to_bits(), outer_tuple[1].to_bits());
+
+    let inner_tuple = outer_tuple[0].as_block().unwrap();
+    assert_eq!(inner_tuple[0].as_int(), Some(1));
+    assert_eq!(inner_tuple[1].as_int(), Some(2));
+}

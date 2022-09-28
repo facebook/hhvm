@@ -123,6 +123,29 @@ python/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Binary
 python/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
 #
 #
+# Python RPC conformance client tests
+python/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
+python/ThriftRPCClientTest/SinkBasic/Success.SinkBasicTest
+python/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
+python/ThriftRPCClientTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
+python/ThriftRPCClientTest/StreamBasic/Success.StreamBasicTest
+python/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
+python/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
+python/ThriftRPCClientTest/StreamFragmentation/Success.StreamFragmentationTest
+python/ThriftRPCClientTest/StreamInitialResponse/Success.StreamInitialResponseTest
+python/ThriftRPCClientTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
+# Python RPC conformance server tests
+python/ThriftRPCServerTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
+python/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest
+python/ThriftRPCServerTest/SinkChunkTimeout/Success.SinkChunkTimeoutTest
+python/ThriftRPCServerTest/StreamFragmentation/Success.StreamFragmentationTest
+python/ThriftRPCServerTest/StreamInitialResponse/Success.StreamInitialResponseTest
+python/ThriftRPCServerTest/StreamBasic/Success.StreamBasicTest
+python/ThriftRPCServerTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
+python/ThriftRPCServerTest/SinkFragmentation/Success.SinkFragmentationTest
+#
+#
+#
 # Java: NaN
 #
 java2/RoundTripTest/double/NaN.Binary

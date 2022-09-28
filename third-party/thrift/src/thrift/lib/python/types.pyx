@@ -539,17 +539,6 @@ cdef class Struct(StructOrUnion):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
 
-    def __str__(self):
-        field_list = []
-        for name, value in self:
-            if isinstance(value, (str, bytes)):
-                field_list.append(f"{name}={repr(value)}")
-            else:
-                field_list.append(f"{name}={value}")
-
-        fields = ", ".join(field_list)
-        return f"{type(self).__name__}({fields})"
-
     cdef folly.iobuf.IOBuf _serialize(self, Protocol proto):
         cdef StructInfo info = self._fbthrift_struct_info
         return folly.iobuf.from_unique_ptr(

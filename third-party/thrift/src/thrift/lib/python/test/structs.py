@@ -220,14 +220,14 @@ class StructTests(unittest.TestCase):
 
     def test_repr(self) -> None:
         self.assertEqual(
-            "easy(val=42, val_list=i[], name='Test str', an_int=Integers(EMPTY=None))",
-            repr(easy(val=42, name="Test str")),
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None))",
+            repr(easy(val=42)),
         )
 
     def test_str(self) -> None:
         self.assertEqual(
-            "easy(val=42, val_list=i[], name='Test str', an_int=Integers(EMPTY=None))",
-            str(easy(val=42, name="Test str")),
+            "easy(val=42, val_list=i[], name=None, an_int=Integers(EMPTY=None))",
+            str(easy(val=42)),
         )
 
     def test_update_nested_fields(self) -> None:

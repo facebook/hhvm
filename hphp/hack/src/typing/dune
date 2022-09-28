@@ -241,6 +241,7 @@
   trait_reuse_check
   typing_extends
   typing_inheritance
+  typing_partial_enforcement
   typing_requirements
   typing_subtype_method
   typing_type_wellformedness)

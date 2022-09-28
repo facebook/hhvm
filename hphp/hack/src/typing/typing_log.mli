@@ -109,7 +109,11 @@ val increment_feature_count : Typing_env_types.env -> string -> unit
 
 val log_pessimise_prop : Typing_env_types.env -> Pos.t -> string -> unit
 
-val log_pessimise_return : ?level:int -> Typing_env_types.env -> Pos.t -> unit
+val log_pessimise_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string option -> unit
+
+val log_pessimise_poisoned_return :
+  ?level:int -> Typing_env_types.env -> Pos.t -> string -> unit
 
 val log_pessimise_param :
   Typing_env_types.env ->

@@ -13,6 +13,8 @@ bincode = "1.3.3"
 bumpalo = { version = "3.8", features = ["collections"] }
 direct_decl_parser = { path = "../../parser/api/cargo/direct_decl_parser" }
 hash = { path = "../../utils/hash" }
+oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
+parser_core_types = { path = "../../parser/cargo/core_types" }
 sha-1 = "0.10"
-thiserror = "=1.0.30"
+thiserror = "1.0.36"

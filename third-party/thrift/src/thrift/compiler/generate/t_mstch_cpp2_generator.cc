@@ -1461,8 +1461,10 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = 2;
       case t_type::type::t_i32:
       case t_type::type::t_float:
-      case t_type::type::t_enum:
         return ret = 4;
+      case t_type::type::t_enum:
+        return ret = compute_alignment(
+                   *dynamic_cast<const t_enum*>(type->get_true_type()));
       case t_type::type::t_i64:
       case t_type::type::t_double:
       case t_type::type::t_string:
@@ -1498,6 +1500,26 @@ class cpp_mstch_struct : public mstch_struct {
       default:
         return ret = 0;
     }
+  }
+
+  static size_t compute_alignment(const t_enum& e) {
+    if (const auto* annot =
+            e.find_structured_annotation_or_null(kCppEnumTypeUri)) {
+      const auto& type = annot->get_value_from_structured_annotation("type");
+      switch (static_cast<EnumUnderlyingType>(type.get_integer())) {
+        case EnumUnderlyingType::I8:
+        case EnumUnderlyingType::U8:
+          return 1;
+        case EnumUnderlyingType::I16:
+        case EnumUnderlyingType::U16:
+          return 2;
+        case EnumUnderlyingType::U32:
+          return 4;
+        default:
+          throw std::runtime_error("unknown enum underlying type");
+      }
+    }
+    return 4;
   }
 
   // Returns the struct members reordered to minimize padding if the

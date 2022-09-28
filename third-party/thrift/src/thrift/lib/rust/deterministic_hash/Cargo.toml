@@ -8,7 +8,7 @@ license = "Apache-2.0"
 publish = false
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 fbthrift = { path = ".." }
 ring = "0.16.20"
-thiserror = "=1.0.30"
+thiserror = "1.0.36"

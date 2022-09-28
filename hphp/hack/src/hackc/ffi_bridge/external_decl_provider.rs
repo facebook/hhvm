@@ -92,7 +92,7 @@ impl<'a> std::fmt::Debug for ExternalDeclProvider<'a> {
     }
 }
 
-impl<'a> DeclProvider for ExternalDeclProvider<'a> {
+impl<'a> DeclProvider<'a> for ExternalDeclProvider<'a> {
     fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'a>> {
         let result = unsafe {
             // Invoke extern C/C++ provider implementation.

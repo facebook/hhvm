@@ -6,6 +6,7 @@
 pub mod dump_expr_tree;
 
 use std::fmt;
+use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -30,6 +31,7 @@ use options::Hhvm;
 use options::Options;
 use options::ParserOptions;
 use oxidized::ast;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
 use oxidized::relative_path::Prefix;
@@ -100,6 +102,22 @@ impl NativeEnv {
             ..Default::default()
         }
     }
+
+    pub fn to_decl_parser_options(&self) -> DeclParserOptions {
+        let auto_namespace_map = self.hhvm.aliased_namespaces_cloned().collect();
+        // Keep in sync with getDeclFlags in runtime-option.cpp
+        let lang_flags = &self.hhvm.parser_options;
+        DeclParserOptions {
+            auto_namespace_map,
+            disable_xhp_element_mangling: lang_flags.po_disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: true,
+            allow_new_attribute_syntax: lang_flags.po_allow_new_attribute_syntax,
+            enable_xhp_class_modifier: lang_flags.po_enable_xhp_class_modifier,
+            php5_compat_mode: true,
+            hhvm_compat_mode: true,
+            ..Default::default()
+        }
+    }
 }
 
 /// Compilation profile. All times are in seconds,
@@ -167,7 +185,7 @@ pub fn from_text<'decl>(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
@@ -221,7 +239,7 @@ pub fn unit_from_text<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
     let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, alloc);
@@ -281,7 +299,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
     match &emitter.decl_provider {
         None => (),
         Some(decl_provider) => {
-            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);
+            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider.clone());
             let res = readonly_check::check_program(&mut new_ast, false);
             // Ignores all errors after the first...
             if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
@@ -355,7 +373,7 @@ fn emit_fatal<'arena>(
 fn create_emitter<'arena, 'decl>(
     flags: &EnvFlags,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {
     Emitter::new(

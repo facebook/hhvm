@@ -43,13 +43,22 @@ FOLLY_EXPORT const auto& staticDefault(F&& make) {
   return kVal;
 }
 
-// Gets a (potentally const&) value representing the intrinsic default.
+// Gets a (potentally const&) value representing the default.
 //
-// C++'s intrinsic default for the underlying native type, is the intrisitic
-// default for for all unstructured types.
+// C++'s default for the underlying native type, is the default for all
+// unstructured types.
 template <typename Tag, typename = void>
-struct GetIntrinsicDefault {
+struct GetDefault {
+  static_assert(!type::is_a_v<Tag, type::structured_c>, "");
   constexpr auto operator()() const { return type::native_type<Tag>{}; }
+};
+
+// Gets a (potentally const&) value representing the **intrinsic** default.
+//
+// This is the same as the default for all non-structured types.
+template <typename Tag, typename = void>
+struct GetIntrinsicDefault : GetDefault<Tag> {
+  static_assert(!type::is_a_v<Tag, type::structured_c>, "");
 };
 
 // Clear the given value, setting it to it's intrinsic default.
@@ -154,7 +163,15 @@ struct CreateDefault {
   }
 };
 
-// Cache the cleared defaults for structured types.
+// Structured types have statically addressable defaults ...
+template <typename T>
+struct GetDefault<type::struct_t<T>> : CreateDefault<type::struct_t<T>> {};
+template <typename T>
+struct GetDefault<type::exception_t<T>> : CreateDefault<type::exception_t<T>> {
+};
+template <typename T>
+struct GetDefault<type::union_t<T>> : CreateDefault<type::union_t<T>> {};
+// ... and need to be cleared to get the intrinsic default.
 template <typename T>
 struct GetIntrinsicDefault<type::struct_t<T>>
     : ThriftClearDefault<type::struct_t<T>> {};

@@ -9,7 +9,7 @@ name = "rust_to_ocaml"
 path = "../src/rust_to_ocaml.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 attr_parser = { path = "../attr_parser" }
 clap = { version = "3.2.17", features = ["derive", "regex", "unicode", "wrap_help"] }
 convert_case = "0.4.0"

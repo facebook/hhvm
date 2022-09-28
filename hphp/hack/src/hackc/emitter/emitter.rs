@@ -5,6 +5,7 @@
 
 use std::borrow::Cow;
 use std::collections::BTreeSet;
+use std::sync::Arc;
 
 use decl_provider::DeclProvider;
 use decl_provider::MemoProvider;
@@ -62,7 +63,7 @@ pub struct Emitter<'arena, 'decl> {
     /// None => do not look up any decls. For now this is the same as as a
     /// DeclProvider that always returns NotFound, but this behavior may later
     /// diverge from None provider behavior.
-    pub decl_provider: Option<MemoProvider<'decl>>,
+    pub decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
 }
 
 impl<'arena, 'decl> Emitter<'arena, 'decl> {
@@ -71,13 +72,14 @@ impl<'arena, 'decl> Emitter<'arena, 'decl> {
         systemlib: bool,
         for_debugger_eval: bool,
         alloc: &'arena bumpalo::Bump,
-        decl_provider: Option<&'decl dyn DeclProvider>,
+        decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     ) -> Emitter<'arena, 'decl> {
         Emitter {
             opts,
             systemlib,
             for_debugger_eval,
-            decl_provider: decl_provider.map(MemoProvider::new),
+            decl_provider: decl_provider
+                .map(|p| Arc::new(MemoProvider::new(p)) as Arc<dyn DeclProvider<'decl> + 'decl>),
             alloc,
 
             label_gen: LabelGen::new(),

@@ -161,6 +161,10 @@ std::unique_ptr<IOBufClientBufferedStream> extractClientStream(
 OmniClient::OmniClient(RequestChannel_ptr channel)
     : channel_(std::move(channel)) {}
 
+OmniClient::OmniClient(OmniClient&& other) noexcept
+    : channel_(std::move(other.channel_)),
+      factoryClient_(other.factoryClient_.load()) {}
+
 OmniClient::~OmniClient() {
   if (channel_) {
     auto eb = channel_->getEventBase();

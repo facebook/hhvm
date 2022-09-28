@@ -127,7 +127,7 @@ impl<T: ToOcamlRep + Consable> ToOcamlRep for Hc<T> {
         &'a self,
         alloc: &'a A,
     ) -> ocamlrep::OpaqueValue<'a> {
-        (**self).to_ocamlrep(alloc)
+        self.0.to_ocamlrep(alloc)
     }
 }
 
@@ -187,5 +187,40 @@ impl<T: Consable> Conser<T> {
             }
         };
         Hc(rc)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn shared_hcs() {
+        use ocamlrep::Arena;
+
+        use super::*;
+
+        impl Consable for (i32, i32) {
+            fn conser() -> &'static Conser<Self> {
+                static CONSER: Lazy<Conser<(i32, i32)>> = Lazy::new(Conser::new);
+                &CONSER
+            }
+        }
+        impl Consable for (Hc<(i32, i32)>, Hc<(i32, i32)>) {
+            fn conser() -> &'static Conser<Self> {
+                static CONSER: Lazy<Conser<(Hc<(i32, i32)>, Hc<(i32, i32)>)>> =
+                    Lazy::new(Conser::new);
+                &CONSER
+            }
+        }
+
+        let inner_tuple = Hc::new((1, 2));
+        let outer_tuple = Hc::new((Hc::clone(&inner_tuple), inner_tuple));
+
+        let arena = Arena::new();
+        let ocaml_tuple = arena.add_root(&outer_tuple);
+        let outer_tuple = ocaml_tuple.as_block().unwrap();
+
+        // The tuple pointer in the first field is physically equal to the tuple
+        // pointer in the second field.
+        assert_eq!(outer_tuple[0].to_bits(), outer_tuple[1].to_bits());
     }
 }

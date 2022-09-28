@@ -59,6 +59,10 @@ class CPUConcurrencyController {
     // If we are within X% of our concurrency limit, then we will
     // adjust it by `additiveMultiplier`.
     double increaseDistanceRatio = 0.20;
+    // Use instead of `increaseDistanceRatio`. If bumpOnError = true,
+    // then we will bump our concurrency limit only when we are
+    // under CPU target AND seen a load shedding event in last interval.
+    bool bumpOnError = false;
 
     // How long to wait after an overload event to ensure we aren't
     // estimating concurrency improperly.
@@ -81,8 +85,8 @@ class CPUConcurrencyController {
       : config_(std::move(config)), serverConfigs_(serverConfigs) {
     scheduler_.setThreadName("CPUConcurrencyController-loop");
     scheduler_.start();
-    configSchedulerCallback_ =
-        config_.addCallback([this](folly::observer::Snapshot<Config>) {
+    configSchedulerCallback_ = config_.getUnderlyingObserver().addCallback(
+        [this](folly::observer::Snapshot<Config>) {
           this->cancel();
           this->schedule();
         });
@@ -96,6 +100,7 @@ class CPUConcurrencyController {
   }
 
   void requestStarted();
+  void requestShed();
 
   int64_t getStableEstimate() const {
     return stableEstimate_.load(std::memory_order_relaxed);
@@ -128,7 +133,7 @@ class CPUConcurrencyController {
 
   const Config& config() const { return **config_; }
 
-  folly::observer::Observer<Config> config_;
+  folly::observer::TLObserver<Config> config_;
   folly::observer::CallbackHandle configSchedulerCallback_;
   apache::thrift::server::ServerConfigs& serverConfigs_;
 
@@ -145,6 +150,7 @@ class CPUConcurrencyController {
   // estimate RPS at target load, as well as whether we should increase
   // while underloaded.
   folly::relaxed_atomic<int32_t> totalRequestCount_{0};
+  folly::relaxed_atomic<bool> recentShedRequest_{false};
   std::chrono::steady_clock::time_point lastTotalRequestReset_{
       std::chrono::steady_clock::now()};
 };

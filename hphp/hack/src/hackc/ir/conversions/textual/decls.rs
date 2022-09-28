@@ -42,9 +42,15 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             Builtin::Null => declare_function(w, &name, &[], ty!(mixed))?,
             Builtin::String => declare_function(w, &name, &[ty!(string)], ty!(mixed))?,
 
+            Builtin::AllocWords => declare_function(w, &name, &[ty!(int)], ty!(*void))?,
+            Builtin::BadMethodCall | Builtin::BadProperty => {
+                declare_function(w, &name, &[], ty!(noreturn))?
+            }
             Builtin::GetParam => {
                 declare_function(w, &name, &[ty!(*HackParam), ty!(int)], ty!(mixed))?
             }
+            Builtin::IsTrue => declare_function(w, &name, &[ty!(mixed)], ty!(bool))?,
+            Builtin::RawPtrIsNull => declare_function(w, &name, &[ty!(*void)], ty!(bool))?,
             Builtin::VerifyParamCount => declare_function(
                 w,
                 &name,
@@ -74,7 +80,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::Sub
             | Hhbc::SubO => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
 
-            Hhbc::Print | Hhbc::IsTypeInt | Hhbc::Not => {
+            Hhbc::Print | Hhbc::IsTypeInt | Hhbc::IsTypeStr | Hhbc::Not => {
                 declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?
             }
             Hhbc::VerifyFailed => declare_function(w, &name, &[], ty!(noreturn))?,

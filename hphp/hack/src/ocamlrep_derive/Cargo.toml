@@ -17,5 +17,5 @@ syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit",
 synstructure = "0.12"
 
 [dev-dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 macro_test_util = { path = "../utils/test/macro_test_util" }

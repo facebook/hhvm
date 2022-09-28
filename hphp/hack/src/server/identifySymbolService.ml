@@ -468,21 +468,34 @@ let visitor =
        * So instead of invoking super#on_Call, we reimplement it here, omitting
        * `self#on_expr env e` when necessary. *)
       let ( + ) = self#plus in
+
       let ea =
-        match expr_ with
-        | Aast.Call
-            ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
-          when Tast_env.is_in_expr_tree env
-               && String.equal methName SN.ExpressionTrees.symbolType ->
-          (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
-          self#on_expr env arg
-        | Aast.Id id -> process_fun_id id
-        | Aast.Obj_get (((ty, _, _) as obj), (_, _, Aast.Id mid), _, _) ->
-          self#on_expr env obj + typed_method env ty mid
-        | Aast.Class_const (((ty, _, _) as cid), mid) ->
-          self#on_class_id env cid + typed_method env ty mid
-        | _ -> self#on_expr env e
+        if Tast_env.is_in_expr_tree env then
+          (* In an expression tree, we desugar function calls and
+             method calls to calls to ::symbolType(). Any other
+             function call is just calling typing helpers, and isn't
+             useful in hover or go-to-definition.
+
+             This ensures that when a user hovers over a literal "abc" we only
+             show the inferred type, and don't show
+             MyVisitor::stringType() information. *)
+          match expr_ with
+          | Aast.Call
+              ((_, _, Aast.Class_const (_, (_, methName))), _, [(_, arg)], _)
+            when String.equal methName SN.ExpressionTrees.symbolType ->
+            (* Treat MyVisitor::symbolType(foo<>) as just foo(). *)
+            self#on_expr env arg
+          | _ -> self#zero
+        else
+          match expr_ with
+          | Aast.Id id -> process_fun_id id
+          | Aast.Obj_get (((ty, _, _) as obj), (_, _, Aast.Id mid), _, _) ->
+            self#on_expr env obj + typed_method env ty mid
+          | Aast.Class_const (((ty, _, _) as cid), mid) ->
+            self#on_class_id env cid + typed_method env ty mid
+          | _ -> self#on_expr env e
       in
+
       let tala = self#on_list self#on_targ env tal in
       let ela = self#on_list self#on_expr env (List.map ~f:snd el) in
       let arg_names = process_callee_arg_names !class_name e el in

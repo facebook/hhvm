@@ -1585,6 +1585,7 @@ ThriftServer::checkOverload(
         (method == nullptr ||
          !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
         static_cast<uint32_t>(getActiveRequests()) >= maxRequests) {
+      getCPUConcurrencyController().requestShed();
       return {std::make_pair(
           kOverloadedErrorCode, "load shedding due to max request limit")};
     }
@@ -1594,6 +1595,7 @@ ThriftServer::checkOverload(
       (method == nullptr ||
        !getMethodsBypassMaxRequestsLimit().contains(*method)) &&
       !qpsTokenBucket_.consume(1.0, maxQps, maxQps)) {
+    getCPUConcurrencyController().requestShed();
     return {
         std::make_pair(kOverloadedErrorCode, "load shedding due to qps limit")};
   }

@@ -8,7 +8,7 @@ edition = "2021"
 path = "datastore.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 dashmap = { version = "4.0.2", features = ["rayon", "serde"] }
 hash = { path = "../../utils/hash" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

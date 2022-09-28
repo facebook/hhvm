@@ -8,12 +8,14 @@ edition = "2021"
 path = "lib.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 ascii = "1.0"
 hash = { path = "../../../../utils/hash" }
 ir = { path = "../.." }
 itertools = "0.10.3"
 log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { path = "../../../../utils/newtype" }
+num-derive = "0.3.3"
+num-traits = "0.2"
 strum = "0.21"
 strum_macros = "0.21"

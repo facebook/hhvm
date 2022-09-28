@@ -55,6 +55,7 @@ class OmniClient : public apache::thrift::TClientBase {
   explicit OmniClient(RequestChannel_ptr channel);
   explicit OmniClient(std::shared_ptr<apache::thrift::RequestChannel> channel)
       : channel_(std::move(channel)) {}
+  explicit OmniClient(OmniClient&&) noexcept;
   ~OmniClient();
 
   OmniClientResponseWithHeaders sync_send(

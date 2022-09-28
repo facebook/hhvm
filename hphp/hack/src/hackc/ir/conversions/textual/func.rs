@@ -53,7 +53,7 @@ pub(crate) fn write_function(
     write_func(w, state, &function.name.mangle(), &function.func)
 }
 
-fn write_func(
+pub(crate) fn write_func(
     w: &mut dyn std::io::Write,
     unit_state: &mut UnitState,
     name: &str,
@@ -61,6 +61,7 @@ fn write_func(
 ) -> Result {
     let func = func.clone();
     let func = crate::lower::lower(func, &mut unit_state.strings);
+    ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = func
         .params
@@ -112,7 +113,10 @@ fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: 
         .iter()
         .map(|iid| state.alloc_sid_for_iid(w, *iid))
         .collect_vec();
-    w.write_label(bid, &params)?;
+    // The entry BID is always included for us.
+    if bid != Func::ENTRY_BID {
+        w.write_label(bid, &params)?;
+    }
 
     for iid in block.iids() {
         write_instr(w, state, iid)?;
@@ -137,11 +141,13 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         Instr::MemberOp(ref mop) => crate::member_op::write(w, state, iid, mop)?,
         Instr::Special(Special::Textual(Textual::AssertFalse(vid, _))) => {
             // I think "prune_not" means "stop if this expression IS true"...
-            w.prune_not(textual::Expr::call("hack_is_true", [state.lookup_vid(vid)]))?;
+            let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
+            w.prune_not(pred)?;
         }
         Instr::Special(Special::Textual(Textual::AssertTrue(vid, _))) => {
             // I think "prune" means "stop if this expression IS NOT true"...
-            w.prune(textual::Expr::call("hack_is_true", [state.lookup_vid(vid)]))?;
+            let pred = hack::expr_builtin(hack::Builtin::IsTrue, [state.lookup_vid(vid)]);
+            w.prune(pred)?;
         }
         Instr::Special(Special::Textual(Textual::HackBuiltin {
             ref target,
@@ -170,6 +176,9 @@ fn write_instr(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, iid: 
         }
         Instr::Terminator(Terminator::Ret(vid, _)) => {
             w.ret(state.lookup_vid(vid))?;
+        }
+        Instr::Terminator(Terminator::Unreachable) => {
+            w.unreachable()?;
         }
         _ => {
             // This should only handle instructions that can't be rewritten into

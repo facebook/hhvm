@@ -10,7 +10,7 @@ test = false
 doctest = false
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 ffi = { path = "../../utils/ffi" }
 hash = { path = "../../utils/hash" }
 hhbc = { path = "../hhbc/cargo/hhbc" }

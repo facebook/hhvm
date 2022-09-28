@@ -191,7 +191,14 @@ let tfun_to_func_details (env : Tast_env.t) (ft : Typing_defs.locl_fun_type) :
   {
     return_ty = Tast_env.print_ty env ft.ft_ret.et_type;
     min_arity;
-    params = List.mapi (List.take ft.ft_params min_arity) ~f:param_to_record;
+    params =
+      (if Tast_env.is_in_expr_tree env then
+        (* Helper functions in expression trees don't have relevant
+           parameter names on their decl, so don't autofill
+           parameters.*)
+        []
+      else
+        List.mapi (List.take ft.ft_params min_arity) ~f:param_to_record);
   }
 
 (* Convert a `ty` into a func details structure *)

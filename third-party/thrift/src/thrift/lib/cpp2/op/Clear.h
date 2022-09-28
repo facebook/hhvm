@@ -41,14 +41,26 @@ namespace op {
 template <typename Tag = void>
 FOLLY_INLINE_VARIABLE constexpr detail::IsEmpty<Tag> isEmpty{};
 
-// Returns the 'intrinsic' default for the given type.
+// Returns the default for the given type.
 //
-// Ignores all 'custom' defaults set on fields within structured types.
+// Includes all 'custom' defaults set on fields within structured types.
 //
 // For example:
 //   getDefault<type::set<type::i32_t>>() -> {}
 //   getDefault<type::string_t>() -> ""
 //   getDefault<int32_t>() -> 0
+template <typename TagOrT>
+FOLLY_INLINE_VARIABLE constexpr detail::GetDefault<type::infer_tag<TagOrT>>
+    getDefault{};
+
+// Returns the 'intrinsic' default for the given type.
+//
+// Ignores all 'custom' defaults set on fields within structured types.
+//
+// For example:
+//   getIntrinsicDefault<type::set<type::i32_t>>() -> {}
+//   getIntrinsicDefault<type::string_t>() -> ""
+//   getIntrinsicDefault<int32_t>() -> 0
 template <typename TagOrT>
 FOLLY_INLINE_VARIABLE constexpr detail::GetIntrinsicDefault<
     type::infer_tag<TagOrT>>

@@ -71,6 +71,67 @@ struct Reserver<C, folly::void_t<typename reserve_result<C>::type>> {
   }
 };
 
+template <typename Cont, typename Elem, typename Enable = void>
+constexpr bool alloc_is_recursive = false;
+template <typename Cont, typename Elem>
+constexpr bool alloc_is_recursive<
+    Cont,
+    Elem,
+    folly::
+        void_t<typename Cont::allocator_type, typename Elem::allocator_type>> =
+    std::uses_allocator<Elem, typename Cont::allocator_type>::value;
+template <typename Cont, typename Elem>
+constexpr bool alloc_should_propagate = alloc_is_recursive<Cont, Elem> &&
+    !std::uses_allocator<Cont, std::allocator<char>>::value;
+
+template <typename Map>
+constexpr bool alloc_should_propagate_map =
+    alloc_should_propagate<Map, typename Map::key_type> ||
+    alloc_should_propagate<Map, typename Map::mapped_type>;
+
+template <typename C>
+std::enable_if_t<
+    alloc_should_propagate<C, typename C::value_type>,
+    typename C::value_type>
+default_set_element(C& c) {
+  return typename C::value_type(c.get_allocator());
+}
+template <typename C>
+std::enable_if_t<
+    !alloc_should_propagate<C, typename C::value_type>,
+    typename C::value_type>
+default_set_element(C&) {
+  return typename C::value_type{};
+}
+template <typename Map>
+std::enable_if_t<
+    alloc_should_propagate<Map, typename Map::key_type>,
+    typename Map::key_type>
+default_map_key(Map& m) {
+  return typename Map::key_type(m.get_allocator());
+}
+template <typename Map>
+std::enable_if_t<
+    !alloc_should_propagate<Map, typename Map::key_type>,
+    typename Map::key_type>
+default_map_key(Map&) {
+  return typename Map::key_type{};
+}
+template <typename C>
+std::enable_if_t<
+    alloc_should_propagate<C, typename C::mapped_type>,
+    typename C::mapped_type>
+default_map_value(C& map) {
+  return typename C::mapped_type(map.get_allocator());
+}
+template <typename C>
+std::enable_if_t<
+    !alloc_should_propagate<C, typename C::mapped_type>,
+    typename C::mapped_type>
+default_map_value(C&) {
+  return typename C::mapped_type{};
+}
+
 } // namespace detail
 
 template <>
@@ -439,6 +500,22 @@ template <class L>
 class Cpp2Ops<
     L,
     folly::void_t<typename apache::thrift::detail::push_back_result<L>::type>> {
+ private:
+  // Need a resize func instead of c.resize(size, defaultElement(C)), because
+  // some non-standard vectors do not support resize(size_type, T value = T()).
+  template <typename C = L>
+  std::enable_if_t<
+      detail::alloc_should_propagate<C, typename C::value_type>,
+      void> static resize(C& c, uint32_t size) {
+    c.resize(size, typename C::value_type(c.get_allocator()));
+  }
+  template <typename C = L>
+  std::enable_if_t<
+      !detail::alloc_should_propagate<C, typename C::value_type>,
+      void> static resize(C& c, uint32_t size) {
+    c.resize(size);
+  }
+
  public:
   typedef L Type;
   static constexpr protocol::TType thriftType() { return protocol::T_LIST; }
@@ -460,7 +537,7 @@ class Cpp2Ops<
     uint32_t size;
     protocol::TType etype;
     prot->readListBegin(etype, size);
-    value->resize(size);
+    resize(*value, size);
     apache::thrift::detail::readIntoVector(prot, *value);
     prot->readListEnd();
   }
@@ -495,6 +572,20 @@ class Cpp2Ops<
     S,
     folly::void_t<
         typename apache::thrift::detail::insert_key_result<S>::type>> {
+ private:
+  template <typename C = S>
+  std::enable_if_t<
+      detail::alloc_should_propagate<C, typename C::key_type>,
+      typename C::key_type> static defaultElement(C& c) {
+    return typename C::key_type(c.get_allocator());
+  }
+  template <typename C = S>
+  std::enable_if_t<
+      !detail::alloc_should_propagate<C, typename C::key_type>,
+      typename C::key_type> static defaultElement(C&) {
+    return typename C::key_type{};
+  }
+
  public:
   typedef S Type;
   static constexpr protocol::TType thriftType() { return protocol::T_SET; }
@@ -518,7 +609,7 @@ class Cpp2Ops<
     prot->readSetBegin(etype, size);
     apache::thrift::detail::Reserver<Type>::reserve(*value, size);
     for (uint32_t i = 0; i < size; i++) {
-      ElemType elem;
+      ElemType elem = defaultElement(*value);
       Cpp2Ops<ElemType>::read(prot, &elem);
       value->insert(std::move(elem));
     }
@@ -555,6 +646,21 @@ class Cpp2Ops<
     M,
     folly::void_t<
         typename apache::thrift::detail::subscript_key_result<M>::type>> {
+ private:
+  template <typename Map, typename ValueType>
+  std::enable_if_t<
+      detail::alloc_should_propagate_map<Map>,
+      ValueType&> static emplaceKey(Map& m, typename Map::key_type&& key) {
+    return m.emplace(std::move(key), detail::default_map_value(m))
+        .first->second;
+  }
+  template <typename Map, typename ValueType>
+  std::enable_if_t<
+      !detail::alloc_should_propagate_map<Map>,
+      ValueType&> static emplaceKey(Map& m, typename Map::key_type&& key) {
+    return m[std::move(key)];
+  }
+
  public:
   typedef M Type;
   static constexpr protocol::TType thriftType() { return protocol::T_MAP; }
@@ -593,9 +699,9 @@ class Cpp2Ops<
     prot->readMapBegin(keytype, valuetype, size);
     apache::thrift::detail::Reserver<Type>::reserve(*value, size);
     for (uint32_t i = 0; i < size; i++) {
-      KeyType key;
+      KeyType key = detail::default_map_key(*value);
       Cpp2Ops<KeyType>::read(prot, &key);
-      auto& val = (*value)[std::move(key)];
+      ValueType& val = emplaceKey<Type, ValueType>(*value, std::move(key));
       Cpp2Ops<ValueType>::read(prot, &val);
     }
     prot->readMapEnd();

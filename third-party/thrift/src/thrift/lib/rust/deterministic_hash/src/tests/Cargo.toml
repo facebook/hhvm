@@ -21,7 +21,7 @@ name = "deterministic_hash_test"
 path = "deterministic_hash_test.rs"
 
 [dependencies]
-anyhow = "1.0.56"
+anyhow = "1.0.65"
 async-trait = "0.1.56"
 codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"
@@ -33,7 +33,7 @@ ref-cast = "1.0.2"
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_derive = "1.0"
 smallvec = { version = "1.6.1", features = ["serde", "specialization", "union"] }
-thiserror = "=1.0.30"
+thiserror = "1.0.36"
 tracing = "0.1.35"
 tracing-futures = "0.2.5"
 

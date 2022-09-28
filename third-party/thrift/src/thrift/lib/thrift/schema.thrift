@@ -121,7 +121,7 @@ struct DefinitionAttrs {
  * A Thrift enum value.
  *
  *     enum ... {
- *       {definition.name} = {value}
+ *       {attrs.name} = {value}
  *     }
  */
 struct EnumValue {
@@ -143,7 +143,7 @@ struct EnumValue {
 /**
  * A Thrift enum.
  *
- *     enum {definition.name} { ... values ... }
+ *     enum {attrs.name} { ... values ... }
  */
 struct Enum {
   /** The definition attributes. */
@@ -173,7 +173,7 @@ enum FieldQualifier {
 /**
  * A Thrift field.
  *
- *     {id}: {qualifier} {type} {definition.name} = {customDefault}
+ *     {id}: {qualifier} {type} {attrs.name} = {customDefault}
  */
 struct Field {
   /**
@@ -219,7 +219,7 @@ typedef list<Field> Fields
 /**
  * A Thrift struct.
  *
- *     struct {definition.name} { ... fields ... }
+ *     struct {attrs.name} { ... fields ... }
  */
 struct Struct {
   /** The definition attributes. */
@@ -237,7 +237,7 @@ struct Struct {
 /**
  * A Thrift union.
  *
- *   union {definition.name} { ... fields ... }
+ *   union {attrs.name} { ... fields ... }
  */
 struct Union {
   /** The definition attributes. */
@@ -285,7 +285,7 @@ enum ErrorSafety {
 /**
  * A Thrift exception.
  *
- *  {safety} {kind} {blame} exception {definition.name} { ... fields ... }
+ *  {safety} {kind} {blame} exception {attrs.name} { ... fields ... }
  */
 struct Exception {
   /** The definition attributes. */
@@ -374,7 +374,7 @@ struct Sink {
 /**
  * A Thrift interaction.
  *
- *     interaction {definition.name} { ... functions ... }
+ *     interaction {attrs.name} { ... functions ... }
  */
 struct Interaction {
   /** The definition attributes. */
@@ -406,7 +406,7 @@ typedef list<ReturnType> ReturnTypes
 /**
  * A Thrift function.
  *
- *     {qualifier} { ... returnTypes ... } {definition.name}({paramlist}) throws ( ... exceptions ... )
+ *     {qualifier} { ... returnTypes ... } {attrs.name}({paramlist}) throws ( ... exceptions ... )
  */
 @hack.Name{name = "TFunction"}
 struct Function {
@@ -440,7 +440,7 @@ typedef list<Function> Functions
 /**
  * A Thrift service.
  *
- *     service {definition.name} [extends {inheritedService}] { ... functions ... }
+ *     service {attrs.name} [extends {inheritedService}] { ... functions ... }
  */
 struct Service {
   /** The definition attributes. */
@@ -463,7 +463,7 @@ struct Service {
 /**
  * A Thrift constant.
  *
- *     const {type} {definition.name} = {value}
+ *     const {type} {attrs.name} = {value}
  */
 struct Const {
   /** The definition attributes. */
@@ -480,7 +480,7 @@ struct Const {
 /**
  * A Thrift typedef.
  *
- *     typedef {type} {definition.name}
+ *     typedef {type} {attrs.name}
  */
 struct Typedef {
   /** The definition attributes. */
@@ -513,8 +513,8 @@ typedef list<Definition> DefinitionList
 /**
  * A Thrift program.
  *
- *     {definition.name}.thrift:
- *       ... {definition.annotations} ...
+ *     {attrs.name}.thrift:
+ *       ... {attrs.annotations} ...
  *       package {package/definition.uri}
  *
  *       ... {includes} ...
@@ -529,7 +529,7 @@ struct Program {
   /**
    * The parsed package for the program, if available.
    *
-   * The unparsed package is available as {definition.uri}.
+   * The unparsed package is available as {attrs.uri}.
    */
   // TODO(afuller): Allow 'package' as an ident in Thrift and remove trailing
   // '_' (or change the name slightly in some other way).

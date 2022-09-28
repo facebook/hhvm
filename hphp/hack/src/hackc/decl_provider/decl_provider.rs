@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 mod memo_provider;
+mod self_provider;
 
 use std::io::BufReader;
 use std::io::BufWriter;
@@ -24,6 +25,7 @@ use oxidized_by_ref::shallow_decl_defs::Decl;
 pub use oxidized_by_ref::shallow_decl_defs::FunDecl;
 pub use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 pub use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+pub use self_provider::SelfProvider;
 use sha1::Digest;
 use sha1::Sha1;
 use thiserror::Error;
@@ -86,16 +88,16 @@ pub enum TypeDecl<'a> {
 /// Further traversal into the type of Bar should it too be a type alias
 /// would be at a depth of two.
 ///
-pub trait DeclProvider: std::fmt::Debug {
+pub trait DeclProvider<'d>: std::fmt::Debug {
     /// Get a decl for the given type name and depth.
     /// * `symbol` - the name of the symbol being requested
     /// * `depth` - a hint to the provider about the number of layers of decl
     ///             request traversed to arrive at this request
-    fn type_decl(&self, symbol: &str, depth: u64) -> Result<TypeDecl<'_>>;
+    fn type_decl<'s>(&'s self, symbol: &str, depth: u64) -> Result<TypeDecl<'d>>;
 
-    fn func_decl(&self, symbol: &str) -> Result<&'_ FunDecl<'_>>;
-    fn const_decl(&self, symbol: &str) -> Result<&'_ ConstDecl<'_>>;
-    fn module_decl(&self, symbol: &str) -> Result<&'_ ModuleDecl<'_>>;
+    fn func_decl<'s>(&'s self, symbol: &str) -> Result<&'d FunDecl<'d>>;
+    fn const_decl<'s>(&'s self, symbol: &str) -> Result<&'d ConstDecl<'d>>;
+    fn module_decl<'s>(&'s self, symbol: &str) -> Result<&'d ModuleDecl<'d>>;
 }
 
 /// Serialize decls into an opaque blob suffixed with a Sha1 content hash.

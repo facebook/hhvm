@@ -23,6 +23,9 @@ pub(crate) fn lower<'a>(func: Func<'a>, strings: &mut StringInterner) -> Func<'a
 
     let mut func = builder.finish();
     ir::passes::split_critical_edges(&mut func, true);
+
+    ir::passes::clean::run(&mut func);
+
     trace!(
         "After Lower: {}",
         ir::print::DisplayFunc(&func, true, strings)

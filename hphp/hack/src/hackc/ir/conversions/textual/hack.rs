@@ -43,6 +43,8 @@ pub(crate) enum Hhbc {
     CmpSame,
     #[strum(props(Function = "hhbc_is_type_int"))]
     IsTypeInt,
+    #[strum(props(Function = "hhbc_is_type_str"))]
+    IsTypeStr,
     #[strum(props(Function = "hhbc_modulo"))]
     Modulo,
     #[strum(props(Function = "hhbc_not"))]
@@ -66,6 +68,11 @@ impl std::default::Default for Hhbc {
 
 #[derive(EnumIter, EnumProperty)]
 pub(crate) enum Builtin {
+    /// Allocate an array with the given number of words (a word is a
+    /// pointer-sized value).
+    ///   AllocWords(int) -> *void
+    #[strum(props(Function = "alloc_words"))]
+    AllocWords,
     /// Build a *HackParams for the given number of parameters. Takes a "this"
     /// value and the number of parameters as the value (so one more total than
     /// the arg).
@@ -73,6 +80,14 @@ pub(crate) enum Builtin {
     ///   ArgPack<1>(*Mixed, *Mixed) -> *HackParams
     ///   ArgPack<2>(*Mixed, *Mixed, *Mixed) -> *HackParams
     ArgPack(usize),
+    /// Throws a BadMethodCall exception.
+    ///   BadMethodCall() -> noreturn
+    #[strum(props(Function = "hack_bad_method_call"))]
+    BadMethodCall,
+    /// Throws a BadProperty exception.
+    ///   BadProperty() -> noreturn
+    #[strum(props(Function = "hack_bad_property"))]
+    BadProperty,
     /// Turns a raw boolean into a Mixed.
     ///   Bool(n: bool) -> *Mixed
     #[strum(props(Function = "hack_bool"))]
@@ -87,11 +102,19 @@ pub(crate) enum Builtin {
     ///   Int(n: int) -> *Mixed
     #[strum(props(Function = "hack_int"))]
     Int,
+    /// Returns true if the given Mixed is truthy.
+    ///   IsTrue(p: *Mixed) -> bool
+    #[strum(props(Function = "hack_is_true"))]
+    IsTrue,
     /// Returns a Mixed containing a `null`.
     ///   Null() -> *Mixed
     #[strum(props(Function = "hack_null"))]
     Null,
-    /// Turns a string into a Mixed.
+    /// Returns true if the given raw pointer is null.
+    ///   RawPtrIsNull(*void) -> bool
+    #[strum(props(Function = "raw_ptr_is_null"))]
+    RawPtrIsNull,
+    /// Turns a raw string into a Mixed.
     ///   String(s: *string) -> *Mixed
     #[strum(props(Function = "hack_string"))]
     String,

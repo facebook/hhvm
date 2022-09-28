@@ -2655,6 +2655,10 @@ class GenerateRuntimeSchema implements \IThriftSyncStruct, \IThriftShapishSyncSt
           shape(
           )
         ),
+        '\thrift\annotation\Enum' => \thrift\annotation\FbthriftInternalEnum::fromShape(
+          shape(
+          )
+        ),
         '\thrift\annotation\Experimental' => \thrift\annotation\Experimental::fromShape(
           shape(
           )

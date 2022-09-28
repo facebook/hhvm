@@ -19,6 +19,7 @@
 #include <memory>
 
 #include <thrift/compiler/ast/t_const_value.h>
+#include <thrift/compiler/ast/t_enum.h>
 #include <thrift/compiler/ast/t_service.h>
 #include <thrift/compiler/ast/t_structured.h>
 
@@ -32,6 +33,7 @@ class schematizer {
   static std::unique_ptr<t_const_value> gen_schema(const t_structured& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_service& node);
   static std::unique_ptr<t_const_value> gen_schema(const t_const& node);
+  static std::unique_ptr<t_const_value> gen_schema(const t_enum& node);
 };
 } // namespace compiler
 } // namespace thrift

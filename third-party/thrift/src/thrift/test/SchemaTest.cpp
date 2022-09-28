@@ -164,3 +164,21 @@ TEST(SchemaTest, ListConst) {
   EXPECT_EQ(list_values[3], 7);
   EXPECT_EQ(list_values[4], 11);
 }
+
+TEST(SchemaTest, Enum) {
+  facebook::thrift::type::Enum schema = schema_constants::schemaEnum();
+  EXPECT_EQ(*schema.name(), "Enum");
+  EXPECT_EQ(*schema.uri(), "facebook.com/thrift/test/schema/Enum");
+  auto values = schema.values().value();
+
+  EXPECT_EQ(values.size(), 2);
+
+  auto value0 = values.at(0);
+  auto value1 = values.at(1);
+
+  EXPECT_EQ(value0.name(), "unspecified");
+  EXPECT_EQ(value0.get_value(), 0);
+
+  EXPECT_EQ(value1.name(), "test");
+  EXPECT_EQ(value1.get_value(), 22);
+}

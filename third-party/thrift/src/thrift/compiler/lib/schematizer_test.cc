@@ -54,6 +54,41 @@ std::unordered_map<std::string, t_const_value*> flatten_map(
 }
 } // namespace
 
+TEST(SchematizerTest, Enum) {
+  std::string enum_name("Enum");
+  std::string enum_uri("path/to/Enum");
+
+  t_enum e(nullptr, enum_name);
+  e.set_uri(enum_uri);
+
+  std::string ev_0_name("EnumValue0");
+  int32_t ev_0_value(0);
+  t_enum_value enum_value_0(ev_0_name, ev_0_value);
+
+  std::string ev_1_name("EnumValue1");
+  int32_t ev_1_value(1);
+  t_enum_value enum_value_1(ev_1_name, ev_1_value);
+
+  e.append_value(std::make_unique<t_enum_value>(enum_value_0));
+  e.append_value(std::make_unique<t_enum_value>(enum_value_1));
+
+  auto schema = schematizer::gen_schema(e);
+  auto map = flatten_map(*schema);
+  const auto& values = map.at("values")->get_list();
+
+  validateDefinition(map, enum_name, enum_uri);
+
+  EXPECT_EQ(values.size(), 2);
+
+  auto value0 = flatten_map(*values.at(0));
+  EXPECT_EQ(value0.at("name")->get_string(), ev_0_name);
+  EXPECT_EQ(value0.at("value")->get_integer(), ev_0_value);
+
+  auto value1 = flatten_map(*values.at(1));
+  EXPECT_EQ(value1.at("name")->get_string(), ev_1_name);
+  EXPECT_EQ(value1.at("value")->get_integer(), ev_1_value);
+}
+
 TEST(SchematizerTest, Service) {
   std::string service_name("Service");
   std::string service_uri("path/to/Service");

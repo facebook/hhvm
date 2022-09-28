@@ -240,7 +240,7 @@
           "name" : {
             "name" : "name",
             "key" : 1,
-            "lineno" : 295,
+            "lineno" : 296,
             "required" : "opt-in-req-out",
             "type" : "string"
           }
@@ -253,7 +253,7 @@
         "name" : "InternBox",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 302
+        "lineno" : 303
       }
       },
   "source_path" : "thrift/annotation/thrift",

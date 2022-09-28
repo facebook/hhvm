@@ -335,6 +335,14 @@ void generate_const_schema(
       });
 }
 
+void generate_enum_schema(
+    diagnostic_context& ctx, mutator_context& mCtx, t_enum& node) {
+  generate_runtime_schema<t_enum&>(
+      ctx, mCtx, true, "facebook.com/thrift/type/Enum", node, [&node]() {
+        return schematizer::gen_schema(node);
+      });
+}
+
 ast_mutators standard_mutators() {
   ast_mutators mutators;
   {
@@ -358,6 +366,7 @@ ast_mutators standard_mutators() {
     main.add_exception_visitor(&generate_exception_schema);
     main.add_service_visitor(&generate_service_schema);
     main.add_const_visitor(&generate_const_schema);
+    main.add_enum_visitor(&generate_enum_schema);
   }
   add_patch_mutators(mutators);
   return mutators;

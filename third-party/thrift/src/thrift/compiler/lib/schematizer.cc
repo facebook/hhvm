@@ -221,6 +221,27 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
 
   return schema;
 }
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(const t_enum& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
+
+  auto values = val();
+  values->set_list();
+
+  for (const auto& value : node.values()) {
+    auto value_schema = val();
+    value_schema->set_map();
+    add_definition(*value_schema, value);
+    value_schema->add_map(val("value"), val(value.get_value()));
+    values->add_list(std::move(value_schema));
+  }
+
+  schema->add_map(val("values"), std::move(values));
+
+  return schema;
+}
 } // namespace compiler
 } // namespace thrift
 } // namespace apache

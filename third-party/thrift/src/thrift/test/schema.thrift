@@ -46,6 +46,12 @@ service EmptyService {
 @thrift.GenerateRuntimeSchema
 union Union {}
 
+@thrift.GenerateRuntimeSchema
+enum Enum {
+  unspecified = 0,
+  test = 22,
+}
+
 // @lint-ignore THRIFTCHECKS
 @thrift.GenerateRuntimeSchema
 exception SimpleException {}

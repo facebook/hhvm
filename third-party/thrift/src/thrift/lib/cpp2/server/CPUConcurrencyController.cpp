@@ -89,17 +89,24 @@ void CPUConcurrencyController::cycleOnce() {
       }
     }
 
-    // We prevent unbounded increase of limits by only changing when
-    // necessary (i.e., we are getting near breaching existing limit). We try
-    // and push the limit back to stable estimate if we are not overloaded as
-    // after an overload event the limit will be set aggressively and may cause
-    // steady-state load shedding due to bursty traffic.
     auto lim = this->getLimit();
-    bool nearExistingLimit =
-        currentLimitUsage >= (1.0 - config().increaseDistanceRatio) * lim;
+
+    // We prevent unbounded increase of limits by only changing when
+    // necessary (i.e., we are getting near breaching existing limit).
+    bool nearExistingLimit = !config().bumpOnError &&
+        (currentLimitUsage >= (1.0 - config().increaseDistanceRatio) * lim);
+
+    // Bump concurrency limit if we saw some load shedding errors recently.
+    bool recentLoadShed =
+        config().bumpOnError && recentShedRequest_.exchange(false);
+
+    // We try and push the limit back to stable estimate if we are not
+    // overloaded as after an overload event the limit will be set aggressively
+    // and may cause steady-state load shedding due to bursty traffic.
     bool shouldConvergeStable =
         !isRefractoryPeriod() && lim < getStableEstimate();
-    if (nearExistingLimit || shouldConvergeStable) {
+
+    if (nearExistingLimit || recentLoadShed || shouldConvergeStable) {
       auto newLim =
           lim +
           std::max<uint32_t>(
@@ -141,6 +148,14 @@ void CPUConcurrencyController::requestStarted() {
   }
 
   totalRequestCount_ += 1;
+}
+
+void CPUConcurrencyController::requestShed() {
+  if (!enabled()) {
+    return;
+  }
+
+  recentShedRequest_.store(true);
 }
 
 uint32_t CPUConcurrencyController::getLimit() const {

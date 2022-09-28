@@ -34,10 +34,11 @@ class RequestStateMachine {
       AdaptiveConcurrencyController& controller,
       CPUConcurrencyController& cpuController)
       : includeInRecentRequests_(includeInRecentRequests),
-        adaptiveConcurrencyController_(controller) {
+        adaptiveConcurrencyController_(controller),
+        cpuController_(cpuController) {
     if (includeInRecentRequests_) {
       adaptiveConcurrencyController_.requestStarted(started());
-      cpuController.requestStarted();
+      cpuController_.requestStarted();
     }
   }
 
@@ -96,6 +97,7 @@ class RequestStateMachine {
   [[nodiscard]] bool tryStopProcessing() {
     if (!startProcessingOrQueueTimeout_.exchange(
             true, std::memory_order_relaxed)) {
+      cpuController_.requestShed();
       dequeued_.store(
           std::chrono::steady_clock::now(), std::memory_order_relaxed);
       return true;
@@ -137,6 +139,7 @@ class RequestStateMachine {
   std::atomic<std::chrono::steady_clock::time_point> dequeued_{
       std::chrono::steady_clock::time_point::min()};
   AdaptiveConcurrencyController& adaptiveConcurrencyController_;
+  CPUConcurrencyController& cpuController_;
 };
 
 } // namespace thrift

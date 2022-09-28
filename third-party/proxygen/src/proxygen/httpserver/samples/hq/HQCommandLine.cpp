@@ -314,6 +314,7 @@ void initializeTransportSettings(HQToolParams& hqUberParams) {
       std::chrono::seconds(FLAGS_d6d_raise_timeout_secs);
   hqParams.transportSettings.d6dConfig.advertisedProbeTimeout =
       std::chrono::seconds(FLAGS_d6d_probe_timeout_secs);
+  hqParams.transportSettings.shouldRecvBatch = true;
   hqParams.transportSettings.maxRecvBatchSize = 32;
   hqParams.transportSettings.shouldUseRecvmmsgForBatchRecv = true;
   hqParams.transportSettings.advertisedInitialMaxStreamsBidi = 100;

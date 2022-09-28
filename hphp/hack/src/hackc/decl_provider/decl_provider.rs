@@ -4,6 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 mod memo_provider;
+mod self_provider;
 
 use std::io::BufReader;
 use std::io::BufWriter;
@@ -24,6 +25,7 @@ use oxidized_by_ref::shallow_decl_defs::Decl;
 pub use oxidized_by_ref::shallow_decl_defs::FunDecl;
 pub use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
 pub use oxidized_by_ref::shallow_decl_defs::TypedefDecl;
+pub use self_provider::SelfProvider;
 use sha1::Digest;
 use sha1::Sha1;
 use thiserror::Error;

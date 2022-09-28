@@ -1036,6 +1036,7 @@ dependencies = [
  "direct_decl_parser",
  "hash",
  "oxidized_by_ref",
+ "parser_core_types",
  "sha-1",
  "thiserror",
 ]

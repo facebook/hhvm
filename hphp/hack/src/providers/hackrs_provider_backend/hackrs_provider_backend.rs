@@ -21,6 +21,7 @@ use folded_decl_provider::FoldedDeclProvider;
 use folded_decl_provider::LazyFoldedDeclProvider;
 use naming_provider::NamingProvider;
 use naming_table::NamingTable;
+use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::parser_options::ParserOptions;
@@ -30,25 +31,27 @@ use pos::TypeName;
 use shallow_decl_provider::LazyShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclProvider;
 use shallow_decl_provider::ShallowDeclStore;
+use shm_store::OcamlShmStore;
 use shm_store::ShmStore;
 use ty::decl;
 use ty::decl::folded::FoldedClass;
-use ty::reason::BReason;
+use ty::reason::BReason as BR;
 
 pub struct HhServerProviderBackend {
     path_ctx: Arc<RelativePathCtx>,
     parser_options: ParserOptions,
-    decl_parser: DeclParser<BReason>,
+    decl_parser: DeclParser<BR>,
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
     file_provider: Arc<FileProviderWithChanges>,
     naming_table: Arc<NamingTable>,
     /// Collection of Arcs pointing to the backing stores for the
     /// ShallowDeclStore below, allowing us to invoke push/pop_local_changes.
     shallow_decl_changes_store: Arc<ShallowStoreWithChanges>,
-    shallow_decl_store: Arc<ShallowDeclStore<BReason>>,
-    lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BReason>>,
-    folded_classes_store: Arc<ChangesStore<TypeName, Arc<FoldedClass<BReason>>>>,
-    folded_decl_provider: Arc<LazyFoldedDeclProvider<BReason>>,
+    shallow_decl_store: Arc<ShallowDeclStore<BR>>,
+    lazy_shallow_decl_provider: Arc<LazyShallowDeclProvider<BR>>,
+    folded_classes_shm: Arc<OcamlShmStore<TypeName, Arc<FoldedClass<BR>>>>,
+    folded_classes_store: Arc<ChangesStore<TypeName, Arc<FoldedClass<BR>>>>,
+    folded_decl_provider: Arc<LazyFoldedDeclProvider<BR>>,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -89,11 +92,13 @@ impl HhServerProviderBackend {
             decl_parser.clone(),
         ));
 
-        let folded_classes_store = Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
+        let folded_classes_shm = Arc::new(OcamlShmStore::new(
             "FoldedClasses",
             shm_store::Evictability::Evictable,
             shm_store::Compression::default(),
-        ))));
+        ));
+        let folded_classes_store =
+            Arc::new(ChangesStore::new(Arc::clone(&folded_classes_shm) as _));
 
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
             Arc::new(parser_options.clone()),
@@ -113,6 +118,7 @@ impl HhServerProviderBackend {
             shallow_decl_changes_store,
             shallow_decl_store,
             lazy_shallow_decl_provider,
+            folded_classes_shm,
             folded_classes_store,
         })
     }
@@ -133,7 +139,7 @@ impl HhServerProviderBackend {
         &*self.file_store
     }
 
-    pub fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BReason> {
+    pub fn shallow_decl_provider(&self) -> &dyn ShallowDeclProvider<BR> {
         &*self.lazy_shallow_decl_provider
     }
 
@@ -178,7 +184,7 @@ impl HhServerProviderBackend {
     }
 }
 
-impl rust_provider_backend_api::RustProviderBackend<BReason> for HhServerProviderBackend {
+impl rust_provider_backend_api::RustProviderBackend<BR> for HhServerProviderBackend {
     fn file_provider(&self) -> &dyn FileProvider {
         &*self.file_provider
     }
@@ -187,7 +193,7 @@ impl rust_provider_backend_api::RustProviderBackend<BReason> for HhServerProvide
         &*self.naming_table
     }
 
-    fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BReason> {
+    fn folded_decl_provider(&self) -> &dyn FoldedDeclProvider<BR> {
         &*self.folded_decl_provider
     }
 
@@ -196,72 +202,119 @@ impl rust_provider_backend_api::RustProviderBackend<BReason> for HhServerProvide
     }
 }
 
-pub struct ShallowStoreWithChanges {
-    classes: Arc<ChangesStore<TypeName, Arc<decl::ShallowClass<BReason>>>>,
-    typedefs: Arc<ChangesStore<TypeName, Arc<decl::TypedefDecl<BReason>>>>,
-    funs: Arc<ChangesStore<pos::FunName, Arc<decl::FunDecl<BReason>>>>,
-    consts: Arc<ChangesStore<pos::ConstName, Arc<decl::ConstDecl<BReason>>>>,
-    modules: Arc<ChangesStore<pos::ModuleName, Arc<decl::ModuleDecl<BReason>>>>,
-    properties: Arc<ChangesStore<(TypeName, pos::PropName), decl::Ty<BReason>>>,
-    static_properties: Arc<ChangesStore<(TypeName, pos::PropName), decl::Ty<BReason>>>,
-    methods: Arc<ChangesStore<(TypeName, pos::MethodName), decl::Ty<BReason>>>,
-    static_methods: Arc<ChangesStore<(TypeName, pos::MethodName), decl::Ty<BReason>>>,
-    constructors: Arc<ChangesStore<TypeName, decl::Ty<BReason>>>,
+#[rustfmt::skip]
+impl HhServerProviderBackend {
+    /// SAFETY: This method (and all other `get_ocaml_` methods) call into the
+    /// OCaml runtime and may trigger a GC. Must be invoked from the main thread
+    /// with no concurrent interaction with the OCaml runtime. The returned
+    /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
+    /// triggered after this method returns.
+    pub unsafe fn get_ocaml_shallow_class(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.classes.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.classes_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_typedef(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.typedefs.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.typedefs_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_fun(&self, name: pos::FunName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.funs.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.funs_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_const(&self, name: pos::ConstName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.consts.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.consts_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_module(&self, name: pos::ModuleName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.modules.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.modules_shm.get_ocaml_value(name) }
+    }
+
+    pub unsafe fn get_ocaml_folded_class(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
+        if self.folded_classes_store.has_local_change(name) { None }
+        else { self.folded_classes_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_property(&self, name: (TypeName, pos::PropName)) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.props.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.props_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_static_property(&self, name: (TypeName, pos::PropName)) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.static_props.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.static_props_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_method(&self, name: (TypeName, pos::MethodName)) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.methods.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.methods_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_static_method(&self, name: (TypeName, pos::MethodName)) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.static_methods.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.static_methods_shm.get_ocaml_value(name) }
+    }
+    pub unsafe fn get_ocaml_constructor(&self, name: TypeName) -> Option<UnsafeOcamlPtr> {
+        if self.shallow_decl_changes_store.constructors.has_local_change(name) { None }
+        else { self.shallow_decl_changes_store.constructors_shm.get_ocaml_value(name) }
+    }
+}
+
+#[rustfmt::skip]
+struct ShallowStoreWithChanges {
+    classes:            Arc<ChangesStore <TypeName, Arc<decl::ShallowClass<BR>>>>,
+    classes_shm:        Arc<OcamlShmStore<TypeName, Arc<decl::ShallowClass<BR>>>>,
+    typedefs:           Arc<ChangesStore <TypeName, Arc<decl::TypedefDecl<BR>>>>,
+    typedefs_shm:       Arc<OcamlShmStore<TypeName, Arc<decl::TypedefDecl<BR>>>>,
+    funs:               Arc<ChangesStore <pos::FunName, Arc<decl::FunDecl<BR>>>>,
+    funs_shm:           Arc<OcamlShmStore<pos::FunName, Arc<decl::FunDecl<BR>>>>,
+    consts:             Arc<ChangesStore <pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
+    consts_shm:         Arc<OcamlShmStore<pos::ConstName, Arc<decl::ConstDecl<BR>>>>,
+    modules:            Arc<ChangesStore <pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
+    modules_shm:        Arc<OcamlShmStore<pos::ModuleName, Arc<decl::ModuleDecl<BR>>>>,
+    props:              Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
+    props_shm:          Arc<OcamlShmStore<(TypeName, pos::PropName), decl::Ty<BR>>>,
+    static_props:       Arc<ChangesStore <(TypeName, pos::PropName), decl::Ty<BR>>>,
+    static_props_shm:   Arc<OcamlShmStore<(TypeName, pos::PropName), decl::Ty<BR>>>,
+    methods:            Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
+    methods_shm:        Arc<OcamlShmStore<(TypeName, pos::MethodName), decl::Ty<BR>>>,
+    static_methods:     Arc<ChangesStore <(TypeName, pos::MethodName), decl::Ty<BR>>>,
+    static_methods_shm: Arc<OcamlShmStore<(TypeName, pos::MethodName), decl::Ty<BR>>>,
+    constructors:       Arc<ChangesStore <TypeName, decl::Ty<BR>>>,
+    constructors_shm:   Arc<OcamlShmStore<TypeName, decl::Ty<BR>>>,
 }
 
 impl ShallowStoreWithChanges {
+    #[rustfmt::skip]
     pub fn new() -> Self {
+        use shm_store::{Compression, Evictability::Evictable};
+        let classes_shm =        Arc::new(OcamlShmStore::new("Classes", Evictable, Compression::default()));
+        let typedefs_shm =       Arc::new(OcamlShmStore::new("Typedefs", Evictable, Compression::default()));
+        let funs_shm =           Arc::new(OcamlShmStore::new("Funs", Evictable, Compression::default()));
+        let consts_shm =         Arc::new(OcamlShmStore::new("Consts", Evictable, Compression::default()));
+        let modules_shm =        Arc::new(OcamlShmStore::new("Modules", Evictable, Compression::default()));
+        let props_shm =          Arc::new(OcamlShmStore::new("Props", Evictable, Compression::default()));
+        let static_props_shm =   Arc::new(OcamlShmStore::new("StaticProps", Evictable, Compression::default()));
+        let methods_shm =        Arc::new(OcamlShmStore::new("Methods", Evictable, Compression::default()));
+        let static_methods_shm = Arc::new(OcamlShmStore::new("StaticMethods", Evictable, Compression::default()));
+        let constructors_shm =   Arc::new(OcamlShmStore::new("Constructors", Evictable, Compression::default()));
         Self {
-            classes: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Classes",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            typedefs: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Typedefs",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            funs: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Funs",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            consts: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Consts",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            modules: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Modules",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            properties: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Properties",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            static_properties: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "StaticProperties",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            methods: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Methods",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            static_methods: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "StaticMethods",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
-            constructors: Arc::new(ChangesStore::new(Arc::new(ShmStore::new(
-                "Constructors",
-                shm_store::Evictability::Evictable,
-                shm_store::Compression::default(),
-            )))),
+            classes:        Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _)),
+            typedefs:       Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _)),
+            funs:           Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _)),
+            consts:         Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _)),
+            modules:        Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _)),
+            props:          Arc::new(ChangesStore::new(Arc::clone(&props_shm) as _)),
+            static_props:   Arc::new(ChangesStore::new(Arc::clone(&static_props_shm) as _)),
+            methods:        Arc::new(ChangesStore::new(Arc::clone(&methods_shm) as _)),
+            static_methods: Arc::new(ChangesStore::new(Arc::clone(&static_methods_shm) as _)),
+            constructors:   Arc::new(ChangesStore::new(Arc::clone(&constructors_shm) as _)),
+            classes_shm,
+            typedefs_shm,
+            funs_shm,
+            consts_shm,
+            modules_shm,
+            props_shm,
+            static_props_shm,
+            methods_shm,
+            static_methods_shm,
+            constructors_shm,
         }
     }
 
@@ -271,8 +324,8 @@ impl ShallowStoreWithChanges {
         self.funs.push_local_changes();
         self.consts.push_local_changes();
         self.modules.push_local_changes();
-        self.properties.push_local_changes();
-        self.static_properties.push_local_changes();
+        self.props.push_local_changes();
+        self.static_props.push_local_changes();
         self.methods.push_local_changes();
         self.static_methods.push_local_changes();
         self.constructors.push_local_changes();
@@ -284,22 +337,22 @@ impl ShallowStoreWithChanges {
         self.funs.pop_local_changes();
         self.consts.pop_local_changes();
         self.modules.pop_local_changes();
-        self.properties.pop_local_changes();
-        self.static_properties.pop_local_changes();
+        self.props.pop_local_changes();
+        self.static_props.pop_local_changes();
         self.methods.pop_local_changes();
         self.static_methods.pop_local_changes();
         self.constructors.pop_local_changes();
     }
 
-    pub fn as_shallow_decl_store(&self) -> ShallowDeclStore<BReason> {
+    pub fn as_shallow_decl_store(&self) -> ShallowDeclStore<BR> {
         ShallowDeclStore::new(
             Arc::clone(&self.classes) as _,
             Arc::clone(&self.typedefs) as _,
             Arc::clone(&self.funs) as _,
             Arc::clone(&self.consts) as _,
             Arc::clone(&self.modules) as _,
-            Arc::clone(&self.properties) as _,
-            Arc::clone(&self.static_properties) as _,
+            Arc::clone(&self.props) as _,
+            Arc::clone(&self.static_props) as _,
             Arc::clone(&self.methods) as _,
             Arc::clone(&self.static_methods) as _,
             Arc::clone(&self.constructors) as _,

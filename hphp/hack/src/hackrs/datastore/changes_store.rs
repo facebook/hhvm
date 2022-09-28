@@ -35,6 +35,15 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
         self.fallback.get(key)
     }
 
+    pub fn has_local_change(&self, key: K) -> bool {
+        for store in self.stack.read().iter() {
+            if store.contains_key(&key) {
+                return true;
+            }
+        }
+        false
+    }
+
     pub fn insert(&self, key: K, val: V) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             store.insert(key, Some(val));

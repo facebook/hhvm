@@ -20,6 +20,8 @@ intern = { path = "../../../utils/intern" }
 lru = "0.7.0"
 lz4 = "1.23.1"
 ocaml_blob = { path = "../ocaml_blob" }
+ocamlrep = { path = "../../../ocamlrep" }
+ocamlrep_marshal = { path = "../../../ocamlrep_marshal/cargo/ocamlrep_marshal" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }
 pos = { path = "../../../hackrs/pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

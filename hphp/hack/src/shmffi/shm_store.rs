@@ -6,16 +6,23 @@
 #![feature(allocator_api)]
 
 use std::alloc::Layout;
+use std::borrow::Cow;
 use std::hash::Hash;
 use std::hash::Hasher;
 use std::io::Read;
 use std::io::Write;
 
 use anyhow::Result;
+use ocamlrep::ptr::UnsafeOcamlPtr;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use parking_lot::Mutex;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 
+/// A `datastore::Store` which writes its values to sharedmem (via the `shmffi`
+/// crate) as bincode-serialized values. Can be configured to compress the
+/// bincode blobs using `Compression`.
 pub struct ShmStore<K, V> {
     /// An LRU cache of hashconsed values in front of the serialized shm heap.
     cache: Mutex<lru::LruCache<K, V>>,
@@ -244,5 +251,170 @@ impl Key for hh24_types::ToplevelSymbolHash {
 impl Key for hh24_types::ToplevelCanonSymbolHash {
     fn hash_key<H: Hasher>(&self, state: &mut H) {
         self.hash(state);
+    }
+}
+
+/// A `datastore::Store` which writes its values to sharedmem (via the `shmffi`
+/// crate) as OCaml-marshaled values. Can be configured to compress the
+/// marshaled blobs using `Compression`.
+pub struct OcamlShmStore<K, V> {
+    /// An LRU cache of hashconsed values in front of the serialized shm heap.
+    cache: Mutex<lru::LruCache<K, V>>,
+    evictable: bool,
+    compression: Compression,
+    prefix: &'static str,
+}
+
+impl<K, V> OcamlShmStore<K, V>
+where
+    K: Key + Copy + Hash + Eq + Send + Sync + 'static,
+    V: Clone + Send + Sync + 'static,
+{
+    pub fn new(prefix: &'static str, evictability: Evictability, compression: Compression) -> Self {
+        Self {
+            cache: Mutex::new(lru::LruCache::new(1000)),
+            evictable: matches!(evictability, Evictability::Evictable),
+            compression,
+            prefix,
+        }
+    }
+
+    /// # Safety
+    ///
+    /// Must be invoked on the main thread. Calls into the OCaml runtime and may
+    /// trigger a GC, so no unrooted OCaml values may exist. The returned
+    /// `UnsafeOcamlPtr` is unrooted and could be invalidated if the GC is
+    /// triggered after this method returns.
+    pub unsafe fn get_ocaml_value(&self, key: K) -> Option<UnsafeOcamlPtr> {
+        shmffi::with(|segment| {
+            segment.table.get(&self.hash_key(key)).map(|heap_value| {
+                extern "C" {
+                    fn caml_input_value_from_block(data: *const u8, size: usize) -> UnsafeOcamlPtr;
+                }
+                let bytes = self.decompress(heap_value.as_slice()).unwrap();
+                caml_input_value_from_block(bytes.as_ptr(), bytes.len())
+            })
+        })
+    }
+
+    fn decompress<'a>(&self, bytes: &'a [u8]) -> Result<Cow<'a, [u8]>> {
+        Ok(match self.compression {
+            Compression::None => Cow::Borrowed(bytes),
+            Compression::Lz4 { .. } => Cow::Owned(lz4_decompress(bytes)?),
+            Compression::Zstd { .. } => Cow::Owned(zstd_decompress(bytes)?),
+        })
+    }
+
+    fn hash_key(&self, key: K) -> u64 {
+        let mut hasher = hash::Hasher::default();
+        self.prefix.hash(&mut hasher);
+        key.hash_key(&mut hasher);
+        hasher.finish()
+    }
+}
+
+impl<K, V> datastore::Store<K, V> for OcamlShmStore<K, V>
+where
+    K: Key + Copy + Hash + Eq + Send + Sync + 'static,
+    V: ToOcamlRep + FromOcamlRep + Clone + Send + Sync + 'static,
+{
+    fn get(&self, key: K) -> Result<Option<V>> {
+        if let Some(val) = self.cache.lock().get(&key) {
+            return Ok(Some(val.clone()));
+        }
+        let hash = self.hash_key(key);
+        let val_opt: Option<V> = shmffi::with(|segment| {
+            segment
+                .table
+                .get(&hash)
+                .map(|heap_value| -> Result<_> {
+                    let bytes = self.decompress(heap_value.as_slice()).unwrap();
+                    let arena = ocamlrep::Arena::new();
+                    let value = unsafe { ocamlrep_marshal::input_value(&bytes, &arena) };
+                    // SAFETY: we just allocated this value with an ocamlrep::Arena
+                    let value = unsafe { ocamlrep::Arena::make_transparent(value) };
+                    Ok(V::from_ocamlrep(value)?)
+                })
+                .transpose()
+        })?;
+        if let Some(val) = &val_opt {
+            self.cache.lock().put(key, val.clone());
+        }
+        Ok(val_opt)
+    }
+
+    fn insert(&self, key: K, val: V) -> Result<()> {
+        let arena = ocamlrep::Arena::new();
+        let ocaml_val = arena.add_root(&val);
+        let mut bytes = std::io::Cursor::new(Vec::with_capacity(4096));
+        ocamlrep_marshal::output_value(
+            &mut bytes,
+            ocaml_val,
+            ocamlrep_marshal::ExternFlags::empty(),
+        )?;
+        let bytes = bytes.into_inner();
+        let bytes = match self.compression {
+            Compression::None => bytes,
+            Compression::Lz4 { compression_level } => lz4_compress(&bytes, compression_level)?,
+            Compression::Zstd { compression_level } => zstd_compress(&bytes, compression_level)?,
+        };
+        self.cache.lock().put(key, val);
+        let blob = ocaml_blob::SerializedValue::BStr(&bytes);
+        let _did_insert = shmffi::with(|segment| {
+            segment.table.insert(
+                self.hash_key(key),
+                Some(Layout::from_size_align(blob.as_slice().len(), 1).unwrap()),
+                self.evictable,
+                |buffer| blob.to_heap_value_in(self.evictable, buffer),
+            )
+        });
+        Ok(())
+    }
+
+    fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
+        let mut cache = self.cache.lock();
+        for key in keys {
+            let hash = self.hash_key(key);
+            let _size = shmffi::with(|segment| {
+                segment
+                    .table
+                    .inspect_and_remove(&hash, |value| value.unwrap().as_slice().len())
+            });
+            cache.pop(&key);
+        }
+        Ok(())
+    }
+}
+
+fn lz4_compress(mut bytes: &[u8], level: u32) -> Result<Vec<u8>> {
+    let mut encoder = lz4::EncoderBuilder::new().level(level).build(vec![])?;
+    std::io::copy(&mut bytes, &mut encoder)?;
+    let (compressed, result) = encoder.finish();
+    result?;
+    Ok(compressed)
+}
+
+fn lz4_decompress(compressed: &[u8]) -> Result<Vec<u8>> {
+    let mut decompressed = vec![];
+    let mut decoder = lz4::Decoder::new(compressed)?;
+    std::io::copy(&mut decoder, &mut decompressed)?;
+    Ok(decompressed)
+}
+
+fn zstd_compress(mut bytes: &[u8], level: i32) -> Result<Vec<u8>> {
+    let mut compressed = vec![];
+    zstd::stream::copy_encode(&mut bytes, &mut compressed, level)?;
+    Ok(compressed)
+}
+
+fn zstd_decompress(mut compressed: &[u8]) -> Result<Vec<u8>> {
+    let mut decompressed = vec![];
+    zstd::stream::copy_decode(&mut compressed, &mut decompressed)?;
+    Ok(decompressed)
+}
+
+impl<K, V> std::fmt::Debug for OcamlShmStore<K, V> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("OcamlShmStore").finish()
     }
 }

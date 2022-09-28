@@ -194,6 +194,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::FunName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_fun(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::FunDecl<BReason>>> = backend.folded_decl_provider()
@@ -213,9 +218,14 @@ ocaml_ffi! {
     fn hh_rust_provider_backend_get_shallow_class(
         backend: Backend,
         name: pos::TypeName,
-    ) -> Option<Arc<decl::ShallowClass<BReason>>> {
+    ) -> Option<UnsafeOcamlPtr> {
         if let Some(backend) = backend.as_hh_server_backend() {
-            backend.shallow_decl_provider().get_class(name).unwrap()
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_shallow_class(name) } {
+                return opt;
+            }
+            let c: Option<Arc<decl::ShallowClass<BReason>>> =
+                backend.shallow_decl_provider().get_class(name).unwrap();
+            c.as_ref().map(to_ocaml)
         } else {
             unimplemented!("get_shallow_class: {UNIMPLEMENTED_MESSAGE}")
         }
@@ -225,6 +235,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::TypeName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_typedef(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::TypedefDecl<BReason>>> = backend.folded_decl_provider()
@@ -245,6 +260,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::ConstName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_const(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::ConstDecl<BReason>>> = backend.folded_decl_provider()
@@ -265,6 +285,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::ModuleName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_module(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::ModuleDecl<BReason>>> = backend.folded_decl_provider()
@@ -285,6 +310,11 @@ ocaml_ffi! {
         backend: Backend,
         name: (pos::TypeName, pos::PropName),
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_property(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -305,6 +335,11 @@ ocaml_ffi! {
         backend: Backend,
         name: (pos::TypeName, pos::PropName),
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_static_property(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -325,6 +360,11 @@ ocaml_ffi! {
         backend: Backend,
         name: (pos::TypeName, pos::MethodName),
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_method(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -345,6 +385,11 @@ ocaml_ffi! {
         backend: Backend,
         name: (pos::TypeName, pos::MethodName),
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_static_method(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -365,6 +410,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::TypeName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_constructor(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<decl::Ty<BReason>> = backend.folded_decl_provider()
@@ -385,6 +435,11 @@ ocaml_ffi! {
         backend: Backend,
         name: pos::TypeName,
     ) -> UnsafeOcamlPtr {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            if let opt @ Some(_) = unsafe { backend.get_ocaml_folded_class(name) } {
+                return to_ocaml(&opt);
+            }
+        }
         match &*backend {
             BackendWrapper::Positioned(backend) => {
                 let res: Option<Arc<decl::FoldedClass<BReason>>> = backend.folded_decl_provider()

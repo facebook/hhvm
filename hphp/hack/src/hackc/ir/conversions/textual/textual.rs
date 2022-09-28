@@ -70,6 +70,7 @@ impl fmt::Display for FmtTy<'_> {
             Ty::RawType(s) => write!(f, "{s}"),
             Ty::RawPtr(sub) => write!(f, "*{}", FmtTy(sub)),
             Ty::Mixed => f.write_str("*Mixed"),
+            Ty::Noreturn => f.write_str("noreturn"),
             Ty::Void => f.write_str("void"),
 
             Ty::AnyArray
@@ -82,7 +83,6 @@ impl fmt::Display for FmtTy<'_> {
             | Ty::Keyset
             | Ty::None
             | Ty::Nonnull
-            | Ty::Noreturn
             | Ty::Nothing
             | Ty::Null
             | Ty::Num

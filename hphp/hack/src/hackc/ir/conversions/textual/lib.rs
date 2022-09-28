@@ -10,15 +10,42 @@
 //!   hackc compile-infer test/infer/basic.hack > basic.sil
 //!   ./infer/bin/infer compile --capture-textual basic.sil
 
-macro_rules! tx_ty {
-    (mixed) => {
+/// Helper for tx_ty! Called like `tx_ty_sub!(AllowNaked Pat)` where
+/// AllowNaked=0 means naked raw-types not allowed and AllowNaked=1 means naked
+/// raw-types are allowed.
+macro_rules! tx_ty_sub {
+    ($_:tt bool) => {
+        textual::Ty::Bool
+    };
+    ($_:tt int) => {
+        textual::Ty::Int
+    };
+    ($_:tt mixed) => {
         crate::textual::Ty::Mixed
     };
-    ($name:ident) => {
-        crate::textual::Ty::RawType(stringify!($name).to_string())
+    ($_:tt noreturn) => {
+        crate::textual::Ty::Noreturn
     };
-    (* $($rest:tt)+) => {
-        crate::textual::Ty::RawPtr(Box::new(tx_ty!($($rest)+)))
+    ($_:tt string) => {
+        textual::Ty::String
+    };
+    ($_:tt void) => {
+        textual::Ty::Void
+    };
+    (1 $name:ident) => {
+        crate::textual::Ty::RawType(stringify!($name).to_owned())
+    };
+    ($_:tt * $($rest:tt)+) => {
+        crate::textual::Ty::RawPtr(Box::new(tx_ty_sub!(1 $($rest)+)))
+    };
+}
+
+/// Build a textual::Ty for a well-defined type.  Handles primitives like `int`
+/// or `string` as well as pointer types like `*int` or `*Foo`.  Doesn't allow
+/// naked raw-types like `Foo`.
+macro_rules! tx_ty {
+    ( $($rest:tt)+ ) => {
+        tx_ty_sub!(0 $($rest)+)
     };
 }
 

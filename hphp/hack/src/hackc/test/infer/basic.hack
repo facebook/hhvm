@@ -57,3 +57,14 @@ function cmp(mixed $a, mixed $b): void {
 function ret_str(): string {
   return "hello, world\n";
 }
+
+// CHECK: define _Hbool_call(params: *HackParams) : *Mixed {
+// CHECK: #b0:
+// CHECK:   n2 = arg_pack_1(null, hack_bool(false))
+// CHECK:   n3 = _Hf_bool(n2)
+// CHECK:   n4 = arg_pack_1(null, hack_bool(true))
+// CHECK:   n5 = _Hf_bool(n4)
+function bool_call(): void {
+  f_bool(false);
+  f_bool(true);
+}

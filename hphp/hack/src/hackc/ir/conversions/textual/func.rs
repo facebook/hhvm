@@ -415,7 +415,7 @@ impl<'a> FuncState<'a> {
                 use hack::Builtin;
                 let c = self.func.constant(c);
                 match c {
-                    Constant::Bool(_) => todo!(),
+                    Constant::Bool(v) => hack::expr_builtin(Builtin::Bool, [Expr::bool_(*v)]),
                     Constant::Int(i) => hack::expr_builtin(Builtin::Int, [Expr::int(*i)]),
                     Constant::Null => hack::expr_builtin(Builtin::Null, ()),
                     Constant::String(s) => {

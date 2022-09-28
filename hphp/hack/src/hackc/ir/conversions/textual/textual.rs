@@ -178,6 +178,10 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
+    pub(crate) fn bool_(v: bool) -> Expr {
+        Expr::Const(if v { Const::True } else { Const::False })
+    }
+
     pub(crate) fn call(target: impl ToString, params: impl VarArgs) -> Expr {
         Expr::Call(target.to_string(), params.into_exprs().into_boxed_slice())
     }
@@ -418,6 +422,8 @@ impl<'a> FuncWriter<'a> {
 
 impl<'a> FuncWriter<'a> {
     pub(crate) fn jmp(&mut self, targets: &[BlockId], params: impl VarArgs) -> Result {
+        assert!(!targets.is_empty());
+
         let params = params.into_exprs();
         write!(self.w, "{INDENT}jmp ")?;
 

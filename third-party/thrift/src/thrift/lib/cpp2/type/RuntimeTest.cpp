@@ -394,6 +394,9 @@ TEST(RuntimeTest, ListValue) {
   Value value;
   value = Value::create<list<string_t>>();
   EXPECT_TRUE(value.empty());
+  EXPECT_THROW(value.at(0), std::out_of_range);
+  EXPECT_THROW(value[Ordinal{1}], std::out_of_range);
+
   value.as<list<string_t>>().emplace_back("hi");
   EXPECT_FALSE(value.empty());
   Value other(value);

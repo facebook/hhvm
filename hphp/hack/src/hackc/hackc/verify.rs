@@ -242,8 +242,12 @@ fn compile_php_file<'a, 'arena>(
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = crate::compile::native_env(filepath, single_file_opts);
     let decl_arena = bumpalo::Bump::new();
-    let decl_provider =
-        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        None,
+        env.to_decl_parser_options(),
+        source_text.clone(),
+        &decl_arena,
+    );
     let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, profile)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     Ok((env, unit))

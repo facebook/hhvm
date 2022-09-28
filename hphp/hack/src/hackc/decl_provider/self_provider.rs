@@ -7,6 +7,7 @@ use std::sync::Arc;
 
 use direct_decl_parser::parse_decls_without_reference_text;
 use direct_decl_parser::Decls;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized_by_ref::shallow_decl_defs::ConstDecl;
 use oxidized_by_ref::shallow_decl_defs::FunDecl;
 use oxidized_by_ref::shallow_decl_defs::ModuleDecl;
@@ -31,11 +32,12 @@ pub struct SelfProvider<'d> {
 impl<'d> SelfProvider<'d> {
     pub fn new(
         fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+        decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
         arena: &'d bumpalo::Bump,
     ) -> Self {
         let parsed_file = parse_decls_without_reference_text(
-            &Default::default(),
+            &decl_opts,
             source_text.file_path().clone(),
             source_text.text(),
             arena,
@@ -53,6 +55,7 @@ impl<'d> SelfProvider<'d> {
     /// this can simply return a nonoption decl provider
     pub fn wrap_existing_provider(
         fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
+        decl_opts: DeclParserOptions,
         source_text: SourceText<'_>,
         arena: &'d bumpalo::Bump,
     ) -> Option<Arc<dyn DeclProvider<'d> + 'd>> {
@@ -61,6 +64,7 @@ impl<'d> SelfProvider<'d> {
         } else {
             Some(Arc::new(SelfProvider::new(
                 fallback_decl_provider,
+                decl_opts,
                 source_text,
                 arena,
             )) as Arc<dyn DeclProvider<'d> + 'd>)

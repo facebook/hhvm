@@ -162,8 +162,12 @@ pub(crate) fn process_single_file(
     let env = native_env(filepath, opts);
     let mut output = Vec::new();
     let decl_arena = bumpalo::Bump::new();
-    let decl_provider =
-        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        None,
+        env.to_decl_parser_options(),
+        source_text.clone(),
+        &decl_arena,
+    );
     compile::from_text(&mut output, source_text, &env, decl_provider, profile)?;
     if opts.verbosity >= 1 {
         eprintln!("{}: {:#?}", env.filepath.path().display(), profile);
@@ -179,7 +183,12 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
         let env = hackc_opts.native_env(path)?;
         let decl_arena = bumpalo::Bump::new();
         let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
-        let decl_provider = SelfProvider::wrap_existing_provider(None, text, &decl_arena);
+        let decl_provider = SelfProvider::wrap_existing_provider(
+            None,
+            env.to_decl_parser_options(),
+            text,
+            &decl_arena,
+        );
         let hhas = compile_impl(env, source_text, decl_provider)?;
         w.write_all(&hhas)?;
     }

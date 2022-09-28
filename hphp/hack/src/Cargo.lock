@@ -1035,6 +1035,7 @@ dependencies = [
  "bumpalo",
  "direct_decl_parser",
  "hash",
+ "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
  "sha-1",

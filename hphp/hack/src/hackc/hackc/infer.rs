@@ -71,10 +71,13 @@ fn compile_php_file<'a, 'arena>(
     let env = crate::compile::native_env(filepath, single_file_opts);
     let mut profile = Profile::default();
     let decl_arena = bumpalo::Bump::new();
-    let decl_provider =
-        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        None,
+        env.to_decl_parser_options(),
+        source_text.clone(),
+        &decl_arena,
+    );
     let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, &mut profile)?;
-
     let ir = bc_to_ir::bc_to_ir(&unit, path);
 
     Ok(ir)

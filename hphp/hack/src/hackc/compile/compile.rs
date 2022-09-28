@@ -31,6 +31,7 @@ use options::Hhvm;
 use options::Options;
 use options::ParserOptions;
 use oxidized::ast;
+use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
 use oxidized::relative_path::Prefix;
@@ -98,6 +99,22 @@ impl NativeEnv {
                 ..self.hhvm.clone()
             },
             hhbc: self.hhbc_flags.clone(),
+            ..Default::default()
+        }
+    }
+
+    pub fn to_decl_parser_options(&self) -> DeclParserOptions {
+        let auto_namespace_map = self.hhvm.aliased_namespaces_cloned().collect();
+        // Keep in sync with getDeclFlags in runtime-option.cpp
+        let lang_flags = &self.hhvm.parser_options;
+        DeclParserOptions {
+            auto_namespace_map,
+            disable_xhp_element_mangling: lang_flags.po_disable_xhp_element_mangling,
+            interpret_soft_types_as_like_types: true,
+            allow_new_attribute_syntax: lang_flags.po_allow_new_attribute_syntax,
+            enable_xhp_class_modifier: lang_flags.po_enable_xhp_class_modifier,
+            php5_compat_mode: true,
+            hhvm_compat_mode: true,
             ..Default::default()
         }
     }

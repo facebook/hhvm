@@ -319,8 +319,12 @@ fn compile_from_text_cpp_ffi(
         None
     };
 
-    let decl_provider =
-        SelfProvider::wrap_existing_provider(external_decl_provider, text.clone(), &decl_allocator);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        external_decl_provider,
+        native_env.to_decl_parser_options(),
+        text.clone(),
+        &decl_allocator,
+    );
 
     let mut output = Vec::new();
     compile::from_text(
@@ -410,8 +414,12 @@ fn compile_unit_from_text_cpp_ffi(
         None
     };
 
-    let decl_provider =
-        SelfProvider::wrap_existing_provider(external_decl_provider, text.clone(), &decl_allocator);
+    let decl_provider = SelfProvider::wrap_existing_provider(
+        external_decl_provider,
+        native_env.to_decl_parser_options(),
+        text.clone(),
+        &decl_allocator,
+    );
 
     compile::unit_from_text(
         alloc,

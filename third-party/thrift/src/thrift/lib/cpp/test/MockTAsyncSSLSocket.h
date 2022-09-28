@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
+ * Copyright (c) Facebook, Inc. and its affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,23 +33,9 @@ class MockTAsyncSSLSocket : public apache::thrift::async::TAsyncSSLSocket {
       const std::shared_ptr<folly::SSLContext> ctx, folly::EventBase* base)
       : TAsyncSSLSocket(ctx, base) {}
 
-  MockTAsyncSSLSocket(
-      const std::shared_ptr<folly::SSLContext> ctx,
-      folly::EventBase* base,
-      folly::AsyncSSLSocket::Options&& options)
-      : TAsyncSSLSocket(ctx, base, std::move(options)) {}
-
   static MockTAsyncSSLSocket::UniquePtr newSocket(
       const std::shared_ptr<folly::SSLContext> ctx, folly::EventBase* base) {
     return MockTAsyncSSLSocket::UniquePtr(new MockTAsyncSSLSocket(ctx, base));
-  }
-
-  static MockTAsyncSSLSocket::UniquePtr newSocket(
-      const std::shared_ptr<folly::SSLContext> ctx,
-      folly::EventBase* base,
-      folly::AsyncSSLSocket::Options&& options) {
-    return MockTAsyncSSLSocket::UniquePtr(
-        new MockTAsyncSSLSocket(ctx, base, std::move(options)));
   }
 
   MOCK_METHOD(

@@ -93,7 +93,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         name,
         properties: cls.properties.as_ref().to_vec(),
         requirements,
-        span: ir::SrcLoc::from_span(filename, &cls.span),
+        src_loc: ir::SrcLoc::from_span(filename, &cls.span),
         type_constants,
         upper_bounds,
         uses: cls

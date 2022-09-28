@@ -10,5 +10,5 @@ use crate::SrcLoc;
 pub struct Module<'a> {
     pub attributes: Vec<Attribute<'a>>,
     pub name: ClassId,
-    pub span: SrcLoc,
+    pub src_loc: SrcLoc,
 }

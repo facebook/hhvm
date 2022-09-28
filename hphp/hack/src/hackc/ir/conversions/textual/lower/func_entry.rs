@@ -60,7 +60,7 @@ pub(crate) fn rewrite_entry<'a, 'b>(
             .contains(&Func::ENTRY_BID)
     );
 
-    let loc = builder.func.span;
+    let loc = builder.func.loc_id;
 
     let old_entry = builder.alloc_bid();
     builder.func.blocks.swap(Func::ENTRY_BID, old_entry);
@@ -84,5 +84,5 @@ pub(crate) fn rewrite_entry<'a, 'b>(
         builder.emit(Instr::Hhbc(Hhbc::SetL(vid, lid, loc)));
     }
 
-    builder.emit(Instr::jmp(old_entry, builder.func.span));
+    builder.emit(Instr::jmp(old_entry, builder.func.loc_id));
 }

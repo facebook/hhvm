@@ -194,7 +194,7 @@ fn write_type(
     }
 
     let cname = mangled_class_name(class.name, is_static, &state.strings);
-    textual::write_type(w, &cname, &class.span, &fields, &state.strings)?;
+    textual::write_type(w, &cname, &class.src_loc, &fields, &state.strings)?;
     Ok(())
 }
 
@@ -231,7 +231,7 @@ fn write_get_static(
         w,
         &state.strings,
         &get_static_name(class.name, &state.strings),
-        &class.span,
+        &class.src_loc,
         &[],
         static_ty(class.name, &state.strings),
         |w| {
@@ -333,7 +333,7 @@ fn write_invoke(
         w,
         &state.strings,
         &invoke_name(state, class, is_static),
-        &class.span,
+        &class.src_loc,
         &[("name", tx_ty!(mixed)), ("params", tx_ty!(*HackParams))],
         tx_ty!(mixed),
         |w| {
@@ -427,7 +427,7 @@ fn write_get_prop(
         w,
         &state.strings,
         &get_prop_name(state, class, is_static),
-        &class.span,
+        &class.src_loc,
         &[("name", tx_ty!(mixed))],
         tx_ty!(mixed),
         |w| {
@@ -468,7 +468,7 @@ fn write_set_prop(
         w,
         &state.strings,
         &set_prop_name(state, class, is_static),
-        &class.span,
+        &class.src_loc,
         &[("name", tx_ty!(mixed)), ("value", tx_ty!(mixed))],
         tx_ty!(void),
         |w| {

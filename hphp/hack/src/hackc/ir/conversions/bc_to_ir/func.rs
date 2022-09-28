@@ -94,7 +94,7 @@ fn convert_body<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     body: &Body<'a>,
-    span: ir::SrcLoc,
+    src_loc: ir::SrcLoc,
 ) -> ir::Func<'a> {
     let Body {
         ref body_instrs,
@@ -131,7 +131,7 @@ fn convert_body<'a>(
         .collect();
 
     let mut locs: IdVec<ir::LocId, ir::SrcLoc> = Default::default();
-    locs.push(span);
+    locs.push(src_loc);
 
     let func = ir::Func {
         blocks: Default::default(),
@@ -146,7 +146,7 @@ fn convert_body<'a>(
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),
         shadowed_tparams,
-        span: ir::LocId::from_usize(0),
+        loc_id: ir::LocId::from_usize(0),
         tparams,
     };
 

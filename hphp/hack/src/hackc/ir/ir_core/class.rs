@@ -55,7 +55,7 @@ pub struct Class<'a> {
     pub name: ClassId,
     pub properties: Vec<Property<'a>>,
     pub requirements: Vec<Requirement>,
-    pub span: SrcLoc,
+    pub src_loc: SrcLoc,
     pub type_constants: Vec<TypeConstant<'a>>,
 
     /// For class generics the upper bounds of each generic.

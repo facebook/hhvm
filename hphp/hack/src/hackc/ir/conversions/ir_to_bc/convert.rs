@@ -53,7 +53,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
         ir_unit.modules.into_iter().map(|module| hhbc::Module {
             attributes: convert_attributes(alloc, module.attributes),
             name: strings.lookup_class_name(module.name),
-            span: module.span.to_span(),
+            span: module.src_loc.to_span(),
         }),
     );
     unit.module_use = ir_unit.module_use.into();

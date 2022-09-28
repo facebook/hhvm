@@ -219,7 +219,7 @@ pub struct Func<'a> {
     /// shadowed_tparams are the set of tparams on a method which shadow a
     /// tparam on the containing class.
     pub shadowed_tparams: Vec<ClassId>,
-    pub span: LocId,
+    pub loc_id: LocId,
     pub tparams: ClassIdMap<TParamBounds>,
 }
 

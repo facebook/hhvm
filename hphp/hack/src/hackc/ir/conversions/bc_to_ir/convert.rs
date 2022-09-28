@@ -42,7 +42,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
         .map(|module| ir::Module {
             attributes: module.attributes.iter().map(convert_attribute).collect(),
             name: ir::ClassId::from_hhbc(module.name, &mut strings),
-            span: ir::SrcLoc::from_span(filename, &module.span),
+            src_loc: ir::SrcLoc::from_span(filename, &module.span),
         })
         .collect();
 

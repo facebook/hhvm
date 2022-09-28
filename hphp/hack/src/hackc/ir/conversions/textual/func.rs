@@ -77,7 +77,7 @@ pub(crate) fn write_func(
         .map(|(name, ty)| (name.as_str(), ty.clone()))
         .collect_vec();
 
-    let span = func.loc(func.span).clone();
+    let span = func.loc(func.loc_id).clone();
     textual::write_function(
         w,
         &unit_state.strings,

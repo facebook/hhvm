@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use decl_provider::DeclProvider;
 use decl_provider::TypeDecl;
 use env::emitter::Emitter;
 use env::Env;

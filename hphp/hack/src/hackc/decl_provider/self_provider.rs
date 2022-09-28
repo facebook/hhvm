@@ -24,13 +24,13 @@ use crate::TypeDecl;
 /// Useful when the file under compilation is not indexed by the HHVM autoloader
 /// or similar circumstances.
 pub struct SelfProvider<'d> {
-    fallback_decl_provider: Option<&'d dyn DeclProvider<'d>>,
+    fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
     decls: Decls<'d>,
 }
 
 impl<'d> SelfProvider<'d> {
     pub fn new(
-        fallback_decl_provider: Option<&'d dyn DeclProvider<'d>>,
+        fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
         source_text: SourceText<'_>,
         arena: &'d bumpalo::Bump,
     ) -> Self {
@@ -52,7 +52,7 @@ impl<'d> SelfProvider<'d> {
     /// When decls are turned on everywhere by default and it is no longer optional
     /// this can simply return a nonoption decl provider
     pub fn wrap_existing_provider(
-        fallback_decl_provider: Option<&'d dyn DeclProvider<'d>>,
+        fallback_decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
         source_text: SourceText<'_>,
         arena: &'d bumpalo::Bump,
     ) -> Option<Arc<dyn DeclProvider<'d> + 'd>> {
@@ -70,10 +70,11 @@ impl<'d> SelfProvider<'d> {
     fn result_or_else<T>(
         &self,
         decl: Result<T>,
-        get_fallback_decl: impl Fn(&'d dyn DeclProvider<'d>) -> Result<T>,
+        get_fallback_decl: impl Fn(&Arc<dyn DeclProvider<'d> + 'd>) -> Result<T>,
     ) -> Result<T> {
         decl.or_else(|_| {
             self.fallback_decl_provider
+                .as_ref()
                 .map_or(Err(crate::Error::NotFound), get_fallback_decl)
         })
     }
@@ -107,7 +108,7 @@ impl<'d> DeclProvider<'d> for SelfProvider<'d> {
 
 impl<'d> std::fmt::Debug for SelfProvider<'d> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if let Some(p) = self.fallback_decl_provider {
+        if let Some(p) = &self.fallback_decl_provider {
             write!(f, "SelfProvider({:?})", p)
         } else {
             write!(f, "SelfProvider")

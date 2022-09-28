@@ -13,11 +13,13 @@ use std::ffi::c_void;
 use std::ffi::OsStr;
 use std::os::unix::ffi::OsStrExt;
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use anyhow::Result;
 use compile::EnvFlags;
 use cxx::CxxString;
 use decl_provider::DeclProvider;
+use decl_provider::SelfProvider;
 use direct_decl_parser::DeclParserOptions;
 use direct_decl_parser::ParsedFile;
 use external_decl_provider::ExternalDeclProvider;
@@ -308,23 +310,24 @@ fn compile_from_text_cpp_ffi(
     );
     let decl_allocator = bumpalo::Bump::new();
 
-    let decl_provider = if env.decl_provider != 0 {
-        Some(ExternalDeclProvider::new(
+    let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+        Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
             &decl_allocator,
-        ))
+        )))
     } else {
         None
     };
+
+    let decl_provider =
+        SelfProvider::wrap_existing_provider(external_decl_provider, text.clone(), &decl_allocator);
 
     let mut output = Vec::new();
     compile::from_text(
         &mut output,
         text,
         &native_env,
-        decl_provider
-            .as_ref()
-            .map(|provider| provider as &dyn DeclProvider<'_>),
+        decl_provider,
         &mut Default::default(),
     )
     .map_err(|e| e.to_string())?;
@@ -398,22 +401,23 @@ fn compile_unit_from_text_cpp_ffi(
     );
 
     let decl_allocator = bumpalo::Bump::new();
-    let decl_provider = if env.decl_provider != 0 {
-        Some(ExternalDeclProvider::new(
+    let external_decl_provider: Option<Arc<dyn DeclProvider<'_> + '_>> = if env.decl_provider != 0 {
+        Some(Arc::new(ExternalDeclProvider::new(
             env.decl_provider as *const c_void,
             &decl_allocator,
-        ))
+        )))
     } else {
         None
     };
+
+    let decl_provider =
+        SelfProvider::wrap_existing_provider(external_decl_provider, text.clone(), &decl_allocator);
 
     compile::unit_from_text(
         alloc,
         text,
         &native_env,
-        decl_provider
-            .as_ref()
-            .map(|provider| provider as &dyn DeclProvider<'_>),
+        decl_provider,
         &mut Default::default(),
     )
     .map(|unit| Box::new(UnitWrapper(unit, bump)))

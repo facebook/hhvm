@@ -7,7 +7,6 @@ use std::collections::BTreeMap;
 use std::iter;
 use std::str::FromStr;
 
-use decl_provider::DeclProvider;
 use emit_pos::emit_pos;
 use emit_pos::emit_pos_then;
 use env::emitter::Emitter;

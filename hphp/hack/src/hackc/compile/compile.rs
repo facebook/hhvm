@@ -6,6 +6,7 @@
 pub mod dump_expr_tree;
 
 use std::fmt;
+use std::sync::Arc;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -167,7 +168,7 @@ pub fn from_text<'decl>(
     writer: &mut dyn std::io::Write,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<()> {
     let alloc = bumpalo::Bump::new();
@@ -221,7 +222,7 @@ pub fn unit_from_text<'arena, 'decl>(
     alloc: &'arena bumpalo::Bump,
     source_text: SourceText<'_>,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     profile: &mut Profile,
 ) -> Result<Unit<'arena>> {
     let mut emitter = create_emitter(&native_env.flags, native_env, decl_provider, alloc);
@@ -281,7 +282,7 @@ fn check_readonly_and_emit<'arena, 'decl>(
     match &emitter.decl_provider {
         None => (),
         Some(decl_provider) => {
-            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider);
+            let mut new_ast = readonly_nonlocal_infer::infer(ast, decl_provider.clone());
             let res = readonly_check::check_program(&mut new_ast, false);
             // Ignores all errors after the first...
             if let Some(readonly_check::ReadOnlyError(pos, msg)) = res.into_iter().next() {
@@ -355,7 +356,7 @@ fn emit_fatal<'arena>(
 fn create_emitter<'arena, 'decl>(
     flags: &EnvFlags,
     native_env: &NativeEnv,
-    decl_provider: Option<&'decl dyn DeclProvider<'decl>>,
+    decl_provider: Option<Arc<dyn DeclProvider<'decl> + 'decl>>,
     alloc: &'arena bumpalo::Bump,
 ) -> Emitter<'arena, 'decl> {
     Emitter::new(

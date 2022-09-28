@@ -11,10 +11,10 @@ use std::borrow::Cow;
 use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::env;
+use std::sync::Arc;
 
 use decl_provider::DeclProvider;
 use decl_provider::Error;
-use decl_provider::MemoProvider;
 use itertools::Itertools;
 use naming_special_names_rust;
 use oxidized::aast;
@@ -29,8 +29,8 @@ use crate::subtype;
 use crate::tyx;
 use crate::tyx::Tyx;
 
-struct Infer<'arena, 'decl> {
-    decl_provider: &'arena MemoProvider<'decl>,
+struct Infer<'decl> {
+    decl_provider: Arc<dyn DeclProvider<'decl> + 'decl>,
     stats: Stats,
 }
 
@@ -62,7 +62,7 @@ macro_rules! box_tup {
     }
 }
 
-impl<'arena, 'decl> Infer<'arena, 'decl> {
+impl<'decl> Infer<'decl> {
     fn infer_expr(
         &mut self,
         expr: &ast::Expr,
@@ -981,8 +981,11 @@ fn class_id_to_name<'c>(class_id: &'c aast::ClassId<(), ()>, where_: Where<'c>) 
 
 /// # Panics
 /// Panics if a decl provider returns any error other than [`decl_provider::Error::NotFound`];
-pub fn infer(prog: &ast::Program, decl_provider: &'_ MemoProvider<'_>) -> ast::Program {
-    let mut infer = Infer {
+pub fn infer<'d>(
+    prog: &ast::Program,
+    decl_provider: Arc<dyn DeclProvider<'d> + 'd>,
+) -> ast::Program {
+    let mut infer: Infer<'d> = Infer {
         decl_provider,
         stats: Default::default(),
     };

@@ -12,6 +12,7 @@ use std::path::PathBuf;
 use anyhow::Result;
 use clap::Parser;
 use compile::Profile;
+use decl_provider::SelfProvider;
 use ocamlrep::rc::RcOc;
 use oxidized::relative_path::Prefix;
 use oxidized::relative_path::RelativePath;
@@ -69,7 +70,10 @@ fn compile_php_file<'a, 'arena>(
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = crate::compile::native_env(filepath, single_file_opts);
     let mut profile = Profile::default();
-    let unit = compile::unit_from_text(alloc, source_text, &env, None, &mut profile)?;
+    let decl_arena = bumpalo::Bump::new();
+    let decl_provider =
+        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, &mut profile)?;
 
     let ir = bc_to_ir::bc_to_ir(&unit, path);
 

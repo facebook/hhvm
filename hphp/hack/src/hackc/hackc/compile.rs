@@ -24,6 +24,7 @@ use decl_provider::DeclProvider;
 use decl_provider::Error;
 use decl_provider::FunDecl;
 use decl_provider::ModuleDecl;
+use decl_provider::SelfProvider;
 use decl_provider::TypeDecl;
 use direct_decl_parser::Decls;
 use hackrs_test_utils::serde_store::StoreOpts;
@@ -160,7 +161,10 @@ pub(crate) fn process_single_file(
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = native_env(filepath, opts);
     let mut output = Vec::new();
-    compile::from_text(&mut output, source_text, &env, None, profile)?;
+    let decl_arena = bumpalo::Bump::new();
+    let decl_provider =
+        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    compile::from_text(&mut output, source_text, &env, decl_provider, profile)?;
     if opts.verbosity >= 1 {
         eprintln!("{}: {:#?}", env.filepath.path().display(), profile);
     }
@@ -173,7 +177,10 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
         let source_text = std::fs::read(&path)
             .with_context(|| format!("Unable to read file '{}'", path.display()))?;
         let env = hackc_opts.native_env(path)?;
-        let hhas = compile_impl(env, source_text, None)?;
+        let decl_arena = bumpalo::Bump::new();
+        let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
+        let decl_provider = SelfProvider::wrap_existing_provider(None, text, &decl_arena);
+        let hhas = compile_impl(env, source_text, decl_provider)?;
         w.write_all(&hhas)?;
     }
     Ok(())
@@ -182,7 +189,7 @@ pub(crate) fn compile_from_text(hackc_opts: &mut crate::Opts, w: &mut impl Write
 fn compile_impl<'d>(
     env: NativeEnv,
     source_text: Vec<u8>,
-    decl_provider: Option<&'d dyn DeclProvider<'d>>,
+    decl_provider: Option<Arc<dyn DeclProvider<'d> + 'd>>,
 ) -> Result<Vec<u8>> {
     let text = SourceText::make(RcOc::new(env.filepath.clone()), &source_text);
     let mut hhas = Vec::new();
@@ -218,10 +225,13 @@ pub(crate) fn test_decl_compile(hackc_opts: &mut crate::Opts, w: &mut impl Write
             &source_text,
             &arena,
         );
-        let provider: SingleDeclProvider<'_, NReason> =
-            SingleDeclProvider::make(&arena, parsed_file.decls, hackc_opts)?;
+        let provider: Arc<SingleDeclProvider<'_, NReason>> = Arc::new(SingleDeclProvider::make(
+            &arena,
+            parsed_file.decls,
+            hackc_opts,
+        )?);
         let env = hackc_opts.native_env(path)?;
-        let hhas = compile_impl(env, source_text, Some(&provider))?;
+        let hhas = compile_impl(env, source_text, Some(provider.clone()))?;
         if hackc_opts.log_decls_requested {
             for a in provider.type_requests.borrow().iter() {
                 println!("type/{}: {}, {}", a.depth, a.symbol, a.found);

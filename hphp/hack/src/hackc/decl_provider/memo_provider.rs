@@ -5,6 +5,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::cell::RefCell;
+use std::sync::Arc;
 
 use hash::HashMap;
 
@@ -17,7 +18,7 @@ use crate::TypeDecl;
 
 /// A DeclProvider that memoizes results of previous queries.
 pub struct MemoProvider<'d> {
-    next: &'d dyn DeclProvider<'d>,
+    next: Arc<dyn DeclProvider<'d> + 'd>,
     types: RefCell<HashMap<String, TypeDecl<'d>>>,
     funcs: RefCell<HashMap<String, &'d FunDecl<'d>>>,
     consts: RefCell<HashMap<String, &'d ConstDecl<'d>>>,
@@ -25,7 +26,7 @@ pub struct MemoProvider<'d> {
 }
 
 impl<'d> MemoProvider<'d> {
-    pub fn new(next: &'d dyn DeclProvider<'d>) -> Self {
+    pub fn new(next: Arc<dyn DeclProvider<'d> + 'd>) -> Self {
         Self {
             next,
             types: Default::default(),

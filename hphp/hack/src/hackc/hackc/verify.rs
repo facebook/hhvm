@@ -12,6 +12,7 @@ use std::time::Duration;
 
 use anyhow::ensure;
 use clap::Parser;
+use decl_provider::SelfProvider;
 use itertools::Itertools;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
@@ -240,7 +241,10 @@ fn compile_php_file<'a, 'arena>(
     let filepath = RelativePath::make(Prefix::Dummy, path.to_path_buf());
     let source_text = SourceText::make(RcOc::new(filepath.clone()), &content);
     let env = crate::compile::native_env(filepath, single_file_opts);
-    let unit = compile::unit_from_text(alloc, source_text, &env, None, profile)
+    let decl_arena = bumpalo::Bump::new();
+    let decl_provider =
+        SelfProvider::wrap_existing_provider(None, source_text.clone(), &decl_arena);
+    let unit = compile::unit_from_text(alloc, source_text, &env, decl_provider, profile)
         .map_err(|err| VerifyError::CompileError(err.to_string()))?;
     Ok((env, unit))
 }

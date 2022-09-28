@@ -30,7 +30,7 @@ jobs:
         - hhvm
         - hhvm_clang
         os:
-        - ubuntu-latest
+        - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0

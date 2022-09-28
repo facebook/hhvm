@@ -21,7 +21,7 @@ $header = fread($fp, 14);
 $header = unpack("A4fourcc/L1length/A4chunkheader", $header);
 
 if ($header["fourcc"] != "RIFF") echo "Invalid FourCC in created image file\n";
-if ($header["length"] != $size) echo "The length specified in the image header is different from the actual size: (${header['length']} != ${size})\n";
+if ($header["length"] != $size) echo "The length specified in the image header is different from the actual size: ({$header['length']} != {$size})\n";
 
 fclose($fp);
 unlink($filename);

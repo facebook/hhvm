@@ -81,8 +81,8 @@ class CPUConcurrencyController {
       : config_(std::move(config)), serverConfigs_(serverConfigs) {
     scheduler_.setThreadName("CPUConcurrencyController-loop");
     scheduler_.start();
-    configSchedulerCallback_ =
-        config_.addCallback([this](folly::observer::Snapshot<Config>) {
+    configSchedulerCallback_ = config_.getUnderlyingObserver().addCallback(
+        [this](folly::observer::Snapshot<Config>) {
           this->cancel();
           this->schedule();
         });
@@ -128,7 +128,7 @@ class CPUConcurrencyController {
 
   const Config& config() const { return **config_; }
 
-  folly::observer::Observer<Config> config_;
+  folly::observer::TLObserver<Config> config_;
   folly::observer::CallbackHandle configSchedulerCallback_;
   apache::thrift::server::ServerConfigs& serverConfigs_;
 

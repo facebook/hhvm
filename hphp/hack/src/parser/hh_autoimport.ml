@@ -105,6 +105,7 @@ let funcs =
     "thread_mark_stack";
     "thread_memory_stats";
     "type_structure";
+    "type_structure_for_alias";
     "varray";
     "vec";
     "xenon_get_data";

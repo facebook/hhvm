@@ -11,4 +11,5 @@ class C {
 
 function test(): void {
   HH\type_structure_for_alias(MyAlias1::class);
+  type_structure_for_alias(MyAlias1::class);
 }

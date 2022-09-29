@@ -219,3 +219,36 @@ impl<R: Reason> NamedDecl<R> {
         }
     }
 }
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub enum Decl<R: Reason> {
+    Class(ClassDecl<R>),
+    Fun(FunDecl<R>),
+    Typedef(TypedefDecl<R>),
+    Const(ConstDecl<R>),
+    Module(ModuleDecl<R>),
+}
+
+walkable!(Decl<R> => {
+    Self::Class(x) => [x],
+    Self::Fun(x) => [x],
+    Self::Typedef(x) => [x],
+    Self::Const(x) => [x],
+    Self::Module(x) => [x],
+});
+
+impl<R: Reason> Decl<R> {
+    pub fn name_kind(&self) -> oxidized::naming_types::NameKind {
+        use oxidized::naming_types::KindOfType;
+        use oxidized::naming_types::NameKind;
+        match self {
+            Self::Class(..) => NameKind::TypeKind(KindOfType::TClass),
+            Self::Typedef(..) => NameKind::TypeKind(KindOfType::TTypedef),
+            Self::Fun(..) => NameKind::FunKind,
+            Self::Const(..) => NameKind::ConstKind,
+            Self::Module(..) => NameKind::ModuleKind,
+        }
+    }
+}

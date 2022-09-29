@@ -1867,11 +1867,9 @@ name = "hh24_types"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "depgraph",
  "derive_more",
  "hh_hash",
  "nohash-hasher",
- "oxidized_by_ref",
  "rusqlite",
  "serde",
  "serde_json",
@@ -2532,6 +2530,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "hh24_types",
+ "hh_hash",
  "nohash-hasher",
  "oxidized",
  "oxidized_by_ref",

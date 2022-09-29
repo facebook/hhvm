@@ -7,7 +7,6 @@ use std::path::Path;
 
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
-use hh24_types::FileDeclsHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntSet;
@@ -816,7 +815,7 @@ impl Names {
             )?
             .execute(params![
                 crate::datatypes::convert::mode_to_i64(parsed_file.and_then(|pf| pf.mode)),
-                FileDeclsHash::from(decls_or_empty),
+                crate::hash_decls(&decls_or_empty),
                 join(decls_or_empty.classes(), "|"),
                 join(decls_or_empty.consts(), "|"),
                 join(decls_or_empty.funs(), "|"),

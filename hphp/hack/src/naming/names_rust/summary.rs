@@ -27,7 +27,7 @@ impl FileSummary {
     pub fn from_decls(file: ParsedFile<'_>) -> Self {
         Self {
             mode: file.mode,
-            hash: FileDeclsHash::from(file.decls),
+            hash: crate::hash_decls(&file.decls),
             decls: file.decls.iter().map(DeclSummary::from).collect(),
         }
     }
@@ -78,7 +78,7 @@ impl DeclSummary {
         Self {
             name_type: decl.kind(),
             symbol: symbol.to_owned(),
-            hash: DeclHash::from(decl),
+            hash: crate::hash_decl(decl),
         }
     }
 
@@ -125,7 +125,7 @@ impl SymbolRow {
             hash: ToplevelSymbolHash::from(kind.into(), name),
             canon_hash: ToplevelCanonSymbolHash::from(kind.into(), name.to_owned()),
             kind,
-            decl_hash: DeclHash::from(decl),
+            decl_hash: crate::hash_decl(decl),
             file_info_id,
             path,
         }

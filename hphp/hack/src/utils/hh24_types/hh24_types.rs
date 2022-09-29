@@ -325,12 +325,6 @@ impl ToplevelSymbolHash {
     }
 }
 
-impl From<ToplevelSymbolHash> for depgraph::dep::Dep {
-    fn from(symbol_hash: ToplevelSymbolHash) -> depgraph::dep::Dep {
-        depgraph::dep::Dep::new(symbol_hash.0)
-    }
-}
-
 /// The "canon hash" of a toplevel symbol name (i.e., the hash of the symbol
 /// name after ASCII characters in the name have been converted to lowercase),
 /// as it appears in the naming table.
@@ -478,12 +472,6 @@ pub enum ParseDepgraphEdgeError {
 pub struct FileDeclsHash(u64);
 u64_hash_wrapper_impls! { FileDeclsHash }
 
-impl From<oxidized_by_ref::direct_decl_parser::Decls<'_>> for FileDeclsHash {
-    fn from(decls: oxidized_by_ref::direct_decl_parser::Decls<'_>) -> Self {
-        Self(hash(&decls))
-    }
-}
-
 /// The position-insensitive hash of a decl (the type signature of a toplevel
 /// declaration), as it appears in the naming table. Used in the NAMING_FUNS,
 /// NAMING_CONSTS, and NAMING_TYPES tables (in the near future).
@@ -492,51 +480,6 @@ impl From<oxidized_by_ref::direct_decl_parser::Decls<'_>> for FileDeclsHash {
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct DeclHash(u64);
 u64_hash_wrapper_impls! { DeclHash }
-
-use oxidized_by_ref::direct_decl_parser::Decl;
-use oxidized_by_ref::shallow_decl_defs;
-
-impl From<&Decl<'_>> for DeclHash {
-    fn from(decl: &Decl<'_>) -> Self {
-        match *decl {
-            Decl::Class(decl) => decl.into(),
-            Decl::Fun(decl) => decl.into(),
-            Decl::Typedef(decl) => decl.into(),
-            Decl::Const(decl) => decl.into(),
-            Decl::Module(decl) => decl.into(),
-        }
-    }
-}
-
-impl From<&shallow_decl_defs::ClassDecl<'_>> for DeclHash {
-    fn from(decl: &shallow_decl_defs::ClassDecl<'_>) -> Self {
-        Self(hash(decl))
-    }
-}
-
-impl From<&shallow_decl_defs::FunDecl<'_>> for DeclHash {
-    fn from(decl: &shallow_decl_defs::FunDecl<'_>) -> Self {
-        Self(hash(decl))
-    }
-}
-
-impl From<&shallow_decl_defs::TypedefDecl<'_>> for DeclHash {
-    fn from(decl: &shallow_decl_defs::TypedefDecl<'_>) -> Self {
-        Self(hash(decl))
-    }
-}
-
-impl From<&shallow_decl_defs::ConstDecl<'_>> for DeclHash {
-    fn from(decl: &shallow_decl_defs::ConstDecl<'_>) -> Self {
-        Self(hash(decl))
-    }
-}
-
-impl From<&shallow_decl_defs::ModuleDecl<'_>> for DeclHash {
-    fn from(decl: &shallow_decl_defs::ModuleDecl<'_>) -> Self {
-        Self(hash(decl))
-    }
-}
 
 /// This type is for serializing an anyhow error. What you get out will print with
 /// the same information as the original anyhow, but won't look quite as pretty

@@ -10,6 +10,7 @@ path = "names.rs"
 [dependencies]
 anyhow = "1.0.65"
 hh24_types = { path = "../../utils/hh24_types" }
+hh_hash = { path = "../../utils/hh_hash" }
 nohash-hasher = "0.2"
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }

@@ -247,13 +247,13 @@ let maybe_pessimise_type ~is_xhp_attr ctx ty =
 let update_return_ty ft ty =
   { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
 
-let intersect_enforceable ret_ty ty_to_wrap =
+let intersect_enforceable ~is_method ret_ty ty_to_wrap =
   match ret_ty with
-  | None -> ty_to_wrap
-  | Some enf_ty ->
+  | Some enf_ty when is_method ->
     Typing_make_type.intersection (get_reason ty_to_wrap) [enf_ty; ty_to_wrap]
+  | _ -> ty_to_wrap
 
-let pessimise_fun_type ctx p ty =
+let pessimise_fun_type ~is_method ctx p ty =
   match get_node ty with
   | Tfun ft ->
     let return_from_async = get_ft_async ft in
@@ -261,21 +261,35 @@ let pessimise_fun_type ctx p ty =
     let ft =
       { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
     in
-    (match get_enforcement ~return_from_async ctx ret_ty with
-    | Enforced _ -> mk (get_reason ty, Tfun ft)
-    | Unenforced enf_ty_opt ->
+    if
+      is_method
+      && TypecheckerOptions.(
+           experimental_feature_enabled
+             (Provider_context.get_tcopt ctx)
+             experimental_always_pessimise_return)
+    then
       mk
         ( get_reason ty,
-          Tfun
-            (update_return_ty
-               ft
-               (intersect_enforceable
-                  enf_ty_opt
-                  (make_like_type ~return_from_async ret_ty))) ))
+          Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
+        )
+    else (
+      match get_enforcement ~return_from_async ctx ret_ty with
+      | Enforced _ -> mk (get_reason ty, Tfun ft)
+      | Unenforced enf_ty_opt ->
+        mk
+          ( get_reason ty,
+            Tfun
+              (update_return_ty
+                 ft
+                 (intersect_enforceable
+                    ~is_method
+                    enf_ty_opt
+                    (make_like_type ~return_from_async ret_ty))) )
+    )
   | _ -> ty
 
-let maybe_pessimise_fun_type ctx p ty =
+let maybe_pessimise_fun_type ~is_method ctx p ty =
   if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt ctx) then
-    pessimise_fun_type ctx p ty
+    pessimise_fun_type ~is_method ctx p ty
   else
     ty

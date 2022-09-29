@@ -31,6 +31,7 @@ val maybe_pessimise_type :
 (** If the return type is not enforceable, turn it into a like type (~ty) otherwise
     return the original function type. Also add supportdyn<mixed> to the type parameters. *)
 val pessimise_fun_type :
+  is_method:bool ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty ->
@@ -39,6 +40,7 @@ val pessimise_fun_type :
 (** Pessimise the type if in implicit pessimisation mode, otherwise
     return the type *)
 val maybe_pessimise_fun_type :
+  is_method:bool ->
   Provider_context.t ->
   Pos_or_decl.t ->
   Typing_defs.decl_ty ->

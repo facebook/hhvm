@@ -648,7 +648,12 @@ let build_method_fun_elt
       fe_pos = pos;
       fe_internal = false;
       fe_deprecated = None;
-      fe_type = Decl_enforceability.maybe_pessimise_fun_type ctx pos m.sm_type;
+      fe_type =
+        Decl_enforceability.maybe_pessimise_fun_type
+          ~is_method:true
+          ctx
+          pos
+          m.sm_type;
       fe_php_std_lib = false;
       fe_support_dynamic_type = support_dynamic_type;
     }

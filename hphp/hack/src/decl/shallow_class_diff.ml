@@ -98,6 +98,8 @@ module type Member_S = sig
 
   val is_private : t -> bool
 
+  val is_internal : t -> bool
+
   (** Whether adding this member implies that the constructor and the
     constructor of all descendants should be considered modified.
     This is the case for example for required XHP attributes. *)
@@ -115,8 +117,18 @@ let diff_members
     (type member)
     (members_left_right : (member option * member option) SMap.t)
     (module Member : Member_S with type t = member)
-    (classish_kind : Ast_defs.classish_kind) :
-    member_change SMap.t * constructor_change =
+    (classish_kind : Ast_defs.classish_kind)
+    (module_changed : bool) : member_change SMap.t * constructor_change =
+  (* If both members are internal and the module changed, we have to treat it as a Modified change*)
+  let check_module_change_internal m1 m2 diff =
+    match diff with
+    | None when module_changed && Member.is_internal m1 && Member.is_internal m2
+      ->
+      Some Modified
+    | None
+    | Some _ ->
+      diff
+  in
   SMap.fold
     members_left_right
     ~init:(SMap.empty, None)
@@ -143,6 +155,7 @@ let diff_members
       | (Some old_member, Some new_member) ->
         let member_changes =
           Member.diff old_member new_member
+          |> check_module_change_internal old_member new_member
           |> Option.value_map ~default:diff ~f:(fun ch ->
                  SMap.add diff ~key:name ~data:ch)
         in
@@ -177,6 +190,8 @@ module ClassConst : Member_S with type t = shallow_class_const = struct
 
   let is_private _ = false
 
+  let is_internal _ = false
+
   let constructor_is_changed_inheritance_when_added _ = false
 
   let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
@@ -199,6 +214,8 @@ module TypeConst : Member_S with type t = shallow_typeconst = struct
       | (_, (TCAbstract _ | TCConcrete _)) -> Some Changed_inheritance
 
   let is_private _ = false
+
+  let is_internal _ = false
 
   let constructor_is_changed_inheritance_when_added _ = false
 
@@ -223,6 +240,9 @@ module Prop : Member_S with type t = shallow_prop = struct
 
   let is_private p : bool =
     Aast_defs.equal_visibility p.sp_visibility Aast_defs.Private
+
+  let is_internal p : bool =
+    Aast_defs.equal_visibility p.sp_visibility Aast_defs.Internal
 
   let constructor_is_changed_inheritance_when_added p =
     Xhp_attribute.opt_is_required p.sp_xhp_attr
@@ -251,6 +271,9 @@ module Method : Member_S with type t = shallow_method = struct
   let is_private m : bool =
     Aast_defs.equal_visibility m.sm_visibility Aast_defs.Private
 
+  let is_internal m : bool =
+    Aast_defs.equal_visibility m.sm_visibility Aast_defs.Internal
+
   let constructor_is_changed_inheritance_when_added _ = false
 
   let constructor_is_changed_inheritance_when_modified ~old:_ ~new_:_ = false
@@ -272,6 +295,12 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
     ClassDiff.member_diff =
   let diff = ClassDiff.empty_member_diff in
   let kind = c2.sc_kind in
+  let module_changed =
+    match (c1.sc_module, c2.sc_module) with
+    | (Some (_, m1), Some (_, m2)) when String.equal m1 m2 -> false
+    | (None, None) -> false
+    | _ -> true
+  in
   let diff =
     let get_name x = snd x.scc_name in
     let consts = merge_member_lists get_name c1.sc_consts c2.sc_consts in
@@ -280,6 +309,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         consts
         (module ClassConst : Member_S with type t = shallow_class_const)
         kind
+        module_changed
     in
     {
       diff with
@@ -297,6 +327,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         typeconsts
         (module TypeConst : Member_S with type t = shallow_typeconst)
         kind
+        module_changed
     in
     {
       diff with
@@ -312,6 +343,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         props
         (module Prop : Member_S with type t = shallow_prop)
         kind
+        module_changed
     in
     {
       diff with
@@ -327,6 +359,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         sprops
         (module Prop : Member_S with type t = shallow_prop)
         kind
+        module_changed
     in
     {
       diff with
@@ -342,6 +375,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         methods
         (module Method : Member_S with type t = shallow_method)
         kind
+        module_changed
     in
     {
       diff with
@@ -359,6 +393,7 @@ let diff_class_members (c1 : shallow_class) (c2 : shallow_class) :
         smethods
         (module Method : Member_S with type t = shallow_method)
         kind
+        module_changed
     in
     {
       diff with
@@ -413,6 +448,13 @@ let remove_consistent_construct_attribute sc =
                SN.UserAttributes.uaConsistentConstruct));
   }
 
+(* Normalize module if the class is public *)
+let remove_modules_if_public sc =
+  if sc.sc_internal then
+    sc
+  else
+    { sc with sc_module = None }
+
 let remove_members_except_to_string sc =
   {
     sc with
@@ -430,6 +472,7 @@ let remove_members_except_to_string sc =
 (* To normalize classes for comparison, we:
 
    - Remove the ConsistentConstruct attribute
+   - Remove module if class itself is public
    - Remove all members (except for the toString method, which results in the
      implicit inclusion of the Stringish interface),
    - Replace all positions with Pos.none
@@ -447,6 +490,7 @@ let remove_members_except_to_string sc =
 let normalize sc =
   sc
   |> remove_consistent_construct_attribute
+  |> remove_modules_if_public
   |> remove_members_except_to_string
   |> Decl_pos_utils.NormalizeSig.shallow_class
 

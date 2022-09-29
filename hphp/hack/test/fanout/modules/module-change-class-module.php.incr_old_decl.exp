@@ -1,0 +1,8 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+bing.php:6:7,9: You cannot access internal members from module `B` in module `A` (Typing[4112])
+  foobar.php:6:21,23: This member is internal
+=== fanout ===
+Fun test
+Type Foobar

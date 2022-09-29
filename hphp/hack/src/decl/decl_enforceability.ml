@@ -13,6 +13,12 @@ let is_typedef ctx x =
   | Some Naming_types.TTypedef -> true
   | _ -> false
 
+type enf =
+  (* The type is fully enforced *)
+  | Enforced of decl_ty
+  (* The type is not fully enforced, but is enforced at the given ty, if present *)
+  | Unenforced of decl_ty option
+
 type class_or_typedef_result =
   | ClassResult of Shallow_decl_defs.shallow_class
   | TypedefResult of Typing_defs.typedef_type
@@ -27,13 +33,13 @@ let get_class_or_typedef ctx x =
     | None -> None
     | Some cd -> Some (ClassResult cd)
 
-let is_enum (ctx : Provider_context.t) (x : string) =
-  match Shallow_classes_provider.get ctx x with
-  | None -> false
-  | Some sc -> Option.is_some sc.Shallow_decl_defs.sc_enum_type
+let make_unenforced ty =
+  match ty with
+  | Enforced ty -> Unenforced (Some ty)
+  | Unenforced _ -> ty
 
 let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
-    : Typing_defs.enforcement =
+    : enf =
   let tcopt = Provider_context.get_tcopt ctx in
   let enable_sound_dynamic = TypecheckerOptions.enable_sound_dynamic tcopt in
   (* hack to avoid yet another flag, just for data gathering for pessimisation *)
@@ -42,14 +48,11 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
      It isn't at the top-level of a type, but is as an argument to a reified generic. *)
   let rec enforcement ~is_dynamic_enforceable ctx visited ty =
     match get_node ty with
-    | Tthis -> Unenforced
-    (* Enums are only enforced at their underlying type, in contrast to as and is
-     * tests which check for validity of values *)
-    | Tapply ((_, name), _) when is_enum ctx name -> Unenforced
+    | Tthis -> Unenforced None
     | Tapply ((_, name), tyl) ->
       (* Cyclic type definition error will be produced elsewhere *)
       if SSet.mem name visited then
-        Enforced
+        Unenforced None
       else begin
         (* The pessimised definition depends on the class or typedef being referenced,
            but we aren't adding any dependency edges here. It is therefore critical that
@@ -57,15 +60,27 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
            in Typing_enforceability when we are typechecking the function/property definition
            it is part of. *)
         match get_class_or_typedef ctx name with
-        | Some
-            (TypedefResult
-              { td_vis = Aast.Transparent; td_tparams = _; td_type; _ }) ->
+        | Some (TypedefResult { td_vis; td_type; _ }) ->
           (* Expand type definition one step and compute its enforcement. *)
-          enforcement
-            ~is_dynamic_enforceable
-            ctx
-            (SSet.add name visited)
-            td_type
+          let exp_ty =
+            enforcement
+              ~is_dynamic_enforceable
+              ctx
+              (SSet.add name visited)
+              td_type
+          in
+          Aast.(
+            (match td_vis with
+            | Transparent -> exp_ty
+            | Opaque -> make_unenforced exp_ty
+            | OpaqueModule -> Unenforced None))
+        | Some (ClassResult { Shallow_decl_defs.sc_enum_type = Some et; _ }) ->
+          make_unenforced
+            (enforcement
+               ~is_dynamic_enforceable
+               ctx
+               (SSet.add name visited)
+               et.te_base)
         | Some (ClassResult sc) ->
           List.Or_unequal_lengths.(
             (match
@@ -91,16 +106,14 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
                             visited
                             targ
                         with
-                       | Unenforced -> false
-                       | Enforced -> true)))
+                       | Unenforced _ -> false
+                       | Enforced _ -> true)))
              with
-            | Ok false -> Unenforced
-            | Ok true
+            | Ok false
             | Unequal_lengths ->
-              Enforced))
-        | Some (TypedefResult { td_vis = Aast.Opaque | Aast.OpaqueModule; _ })
-        | None ->
-          Unenforced
+              Unenforced None
+            | Ok true -> Enforced ty))
+        | None -> Unenforced None
       end
     | Tgeneric _ ->
       (* Previously we allowed dynamic ~> T when T is an __Enforceable generic,
@@ -114,51 +127,54 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
        * Additionally, higher kinded generics (i.e., with type arguments) cannot
        * be enforced at the moment; they are disallowed to have upper bounds.
        *)
-      Unenforced
-    | Trefinement _ -> Unenforced
-    | Taccess _ -> Unenforced
+      Unenforced None
+    | Trefinement _ -> Unenforced None
+    | Taccess _ -> Unenforced None
     | Tlike ty when enable_sound_dynamic ->
       enforcement ~is_dynamic_enforceable ctx visited ty
-    | Tlike _ -> Unenforced
+    | Tlike _ -> Unenforced None
     | Tprim prim ->
       begin
         match prim with
-        | Aast.Tvoid
-        | Aast.Tnoreturn ->
-          Unenforced
-        | _ -> Enforced
+        | Aast.Tvoid -> Unenforced None
+        | _ -> Enforced ty
       end
-    | Tany _ -> Enforced
-    | Terr -> Enforced
+    | Tany _ -> Enforced ty
+    | Terr -> Enforced ty
     | Tnonnull ->
       if mixed_nonnull_unenforced then
-        Unenforced
+        Unenforced None
       else
-        Enforced
+        Enforced ty
     | Tdynamic ->
       if (not enable_sound_dynamic) || is_dynamic_enforceable then
-        Enforced
+        Enforced ty
       else
-        Unenforced
-    | Tfun _ -> Unenforced
-    | Ttuple _ -> Unenforced
-    | Tunion [] -> Enforced
-    | Tunion _ -> Unenforced
-    | Tintersection _ -> Unenforced
-    | Tshape _ -> Unenforced
+        Unenforced None
+    | Tfun _ -> Unenforced None
+    | Ttuple _ -> Unenforced None
+    | Tunion [] -> Enforced ty
+    | Tunion _ -> Unenforced None
+    | Tintersection _ -> Unenforced None
+    | Tshape _ -> Unenforced None
     | Tmixed ->
       if mixed_nonnull_unenforced then
-        Unenforced
+        Unenforced None
       else
-        Enforced
-    | Tvar _ -> Unenforced
+        Enforced ty
+    | Tvar _ -> Unenforced None
     (* With no parameters, we enforce varray_or_darray just like array *)
-    | Tvec_or_dict (_, ty) ->
-      if is_any ty then
-        Enforced
+    | Tvec_or_dict (_, el_ty) ->
+      if is_any el_ty then
+        Enforced ty
       else
-        Unenforced
-    | Toption ty -> enforcement ~is_dynamic_enforceable ctx visited ty
+        Unenforced None
+    | Toption ty ->
+      (match enforcement ~is_dynamic_enforceable ctx visited ty with
+      | Enforced _ -> Enforced ty
+      | Unenforced (Some ety) ->
+        Unenforced (Some (mk (get_reason ty, Toption ety)))
+      | Unenforced None -> Unenforced None)
   in
   if return_from_async then
     match get_node ty with
@@ -172,8 +188,8 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
 let is_enforceable ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
     =
   match get_enforcement ~return_from_async ctx ty with
-  | Enforced -> true
-  | Unenforced -> false
+  | Enforced _ -> true
+  | Unenforced _ -> false
 
 let make_like_type ~return_from_async ty =
   let like_if_not_void ty =
@@ -231,6 +247,12 @@ let maybe_pessimise_type ~is_xhp_attr ctx ty =
 let update_return_ty ft ty =
   { ft with ft_ret = { et_type = ty; et_enforced = Unenforced } }
 
+let intersect_enforceable ret_ty ty_to_wrap =
+  match ret_ty with
+  | None -> ty_to_wrap
+  | Some enf_ty ->
+    Typing_make_type.intersection (get_reason ty_to_wrap) [enf_ty; ty_to_wrap]
+
 let pessimise_fun_type ctx p ty =
   match get_node ty with
   | Tfun ft ->
@@ -239,13 +261,17 @@ let pessimise_fun_type ctx p ty =
     let ft =
       { ft with ft_tparams = add_supportdyn_constraints p ft.ft_tparams }
     in
-    if is_enforceable ~return_from_async ctx ret_ty then
-      mk (get_reason ty, Tfun ft)
-    else
+    (match get_enforcement ~return_from_async ctx ret_ty with
+    | Enforced _ -> mk (get_reason ty, Tfun ft)
+    | Unenforced enf_ty_opt ->
       mk
         ( get_reason ty,
-          Tfun (update_return_ty ft (make_like_type ~return_from_async ret_ty))
-        )
+          Tfun
+            (update_return_ty
+               ft
+               (intersect_enforceable
+                  enf_ty_opt
+                  (make_like_type ~return_from_async ret_ty))) ))
   | _ -> ty
 
 let maybe_pessimise_fun_type ctx p ty =

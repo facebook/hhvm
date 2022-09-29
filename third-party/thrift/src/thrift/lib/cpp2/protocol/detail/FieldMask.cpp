@@ -16,7 +16,7 @@
 
 #include <type_traits>
 #include <folly/Utility.h>
-#include <thrift/lib/cpp2/detail/FieldMask.h>
+#include <thrift/lib/cpp2/protocol/detail/FieldMask.h>
 
 using apache::thrift::protocol::field_mask_constants;
 

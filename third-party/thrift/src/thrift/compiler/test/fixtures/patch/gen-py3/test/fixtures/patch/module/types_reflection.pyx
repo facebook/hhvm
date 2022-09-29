@@ -238,7 +238,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=-9,
             name="binaryVal",
-            type=bytes,
+            type=_fbthrift_iobuf.IOBuf,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.UNQUALIFIED,
             default=None,
@@ -394,7 +394,7 @@ cdef __StructSpec get_reflection__MyStruct():
         __FieldSpec._fbthrift_create(
             id=-22,
             name="optBinaryVal",
-            type=bytes,
+            type=_fbthrift_iobuf.IOBuf,
             kind=__NumberType.NOT_A_NUMBER,
             qualifier=__Qualifier.OPTIONAL,
             default=None,

@@ -21,6 +21,7 @@ include "thrift/lib/thrift/patch.thrift"
 package "facebook.com/thrift/test/patch"
 
 namespace cpp2 apache.thrift.test.patch
+namespace py3 thrift.test
 
 struct MyData {
   string data1;

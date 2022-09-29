@@ -180,7 +180,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     stringVal: Final[str] = ...
 
-    binaryVal: Final[bytes] = ...
+    binaryVal: Final[_fbthrift_iobuf.IOBuf] = ...
 
     enumVal: Final[MyEnum] = ...
 
@@ -206,7 +206,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
 
     optStringVal: Final[_typing.Optional[str]] = ...
 
-    optBinaryVal: Final[_typing.Optional[bytes]] = ...
+    optBinaryVal: Final[_typing.Optional[_fbthrift_iobuf.IOBuf]] = ...
 
     optEnumVal: Final[_typing.Optional[MyEnum]] = ...
 
@@ -230,7 +230,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         floatVal: _typing.Optional[float]=None,
         doubleVal: _typing.Optional[float]=None,
         stringVal: _typing.Optional[str]=None,
-        binaryVal: _typing.Optional[bytes]=None,
+        binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=None,
         enumVal: _typing.Optional[MyEnum]=None,
         structVal: _typing.Optional[MyData]=None,
         unionVal: _typing.Optional[MyUnion]=None,
@@ -243,7 +243,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optFloatVal: _typing.Optional[float]=None,
         optDoubleVal: _typing.Optional[float]=None,
         optStringVal: _typing.Optional[str]=None,
-        optBinaryVal: _typing.Optional[bytes]=None,
+        optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]=None,
         optEnumVal: _typing.Optional[MyEnum]=None,
         optStructVal: _typing.Optional[MyData]=None,
         optLateStructVal: _typing.Optional[LateDefStruct]=None,
@@ -262,7 +262,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         floatVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         doubleVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         stringVal: _typing.Union[str, '__NotSet', None]=NOTSET,
-        binaryVal: _typing.Union[bytes, '__NotSet', None]=NOTSET,
+        binaryVal: _typing.Union[_fbthrift_iobuf.IOBuf, '__NotSet', None]=NOTSET,
         enumVal: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
         structVal: _typing.Union[MyData, '__NotSet', None]=NOTSET,
         unionVal: _typing.Union[MyUnion, '__NotSet', None]=NOTSET,
@@ -275,7 +275,7 @@ class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
         optFloatVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         optDoubleVal: _typing.Union[float, '__NotSet', None]=NOTSET,
         optStringVal: _typing.Union[str, '__NotSet', None]=NOTSET,
-        optBinaryVal: _typing.Union[bytes, '__NotSet', None]=NOTSET,
+        optBinaryVal: _typing.Union[_fbthrift_iobuf.IOBuf, '__NotSet', None]=NOTSET,
         optEnumVal: _typing.Union[MyEnum, '__NotSet', None]=NOTSET,
         optStructVal: _typing.Union[MyData, '__NotSet', None]=NOTSET,
         optLateStructVal: _typing.Union[LateDefStruct, '__NotSet', None]=NOTSET,

@@ -576,7 +576,7 @@ MyStruct& MyStruct::operator=(FOLLY_MAYBE_UNUSED MyStruct&& other) noexcept {
 }
 
 
-MyStruct::MyStruct(apache::thrift::FragileConstructor, bool boolVal__arg, ::std::int8_t byteVal__arg, ::std::int16_t i16Val__arg, ::std::int32_t i32Val__arg, ::std::int64_t i64Val__arg, float floatVal__arg, double doubleVal__arg, ::std::string stringVal__arg, ::folly::IOBuf binaryVal__arg, ::test::fixtures::patch::MyEnum enumVal__arg, ::test::fixtures::patch::MyData structVal__arg, ::test::fixtures::patch::MyUnion unionVal__arg, ::test::fixtures::patch::LateDefStruct lateStructVal__arg, bool optBoolVal__arg, ::std::int8_t optByteVal__arg, ::std::int16_t optI16Val__arg, ::std::int32_t optI32Val__arg, ::std::int64_t optI64Val__arg, float optFloatVal__arg, double optDoubleVal__arg, ::std::string optStringVal__arg, ::folly::IOBuf optBinaryVal__arg, ::test::fixtures::patch::MyEnum optEnumVal__arg, ::test::fixtures::patch::MyData optStructVal__arg, ::test::fixtures::patch::LateDefStruct optLateStructVal__arg, ::std::vector<::std::int16_t> optListVal__arg, ::std::set<::std::string> optSetVal__arg, ::std::map<::std::string, ::std::string> optMapVal__arg) :
+MyStruct::MyStruct(apache::thrift::FragileConstructor, bool boolVal__arg, ::std::int8_t byteVal__arg, ::std::int16_t i16Val__arg, ::std::int32_t i32Val__arg, ::std::int64_t i64Val__arg, float floatVal__arg, double doubleVal__arg, ::std::string stringVal__arg, folly::IOBuf binaryVal__arg, ::test::fixtures::patch::MyEnum enumVal__arg, ::test::fixtures::patch::MyData structVal__arg, ::test::fixtures::patch::MyUnion unionVal__arg, ::test::fixtures::patch::LateDefStruct lateStructVal__arg, bool optBoolVal__arg, ::std::int8_t optByteVal__arg, ::std::int16_t optI16Val__arg, ::std::int32_t optI32Val__arg, ::std::int64_t optI64Val__arg, float optFloatVal__arg, double optDoubleVal__arg, ::std::string optStringVal__arg, folly::IOBuf optBinaryVal__arg, ::test::fixtures::patch::MyEnum optEnumVal__arg, ::test::fixtures::patch::MyData optStructVal__arg, ::test::fixtures::patch::LateDefStruct optLateStructVal__arg, ::std::vector<::std::int16_t> optListVal__arg, ::std::set<::std::string> optSetVal__arg, ::std::map<::std::string, ::std::string> optMapVal__arg) :
     __fbthrift_field_boolVal(std::move(boolVal__arg)),
     __fbthrift_field_byteVal(std::move(byteVal__arg)),
     __fbthrift_field_i16Val(std::move(i16Val__arg)),
@@ -633,7 +633,7 @@ void MyStruct::__fbthrift_clear() {
   this->__fbthrift_field_floatVal = float();
   this->__fbthrift_field_doubleVal = double();
   this->__fbthrift_field_stringVal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binaryVal = apache::thrift::StringTraits<::folly::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_binaryVal = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_enumVal = ::test::fixtures::patch::MyEnum();
   ::apache::thrift::clear(this->__fbthrift_field_structVal);
   ::apache::thrift::clear(this->__fbthrift_field_unionVal);
@@ -645,7 +645,7 @@ void MyStruct::__fbthrift_clear() {
   this->__fbthrift_field_optFloatVal = float();
   this->__fbthrift_field_optDoubleVal = double();
   this->__fbthrift_field_optStringVal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_optBinaryVal = apache::thrift::StringTraits<::folly::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_optBinaryVal = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_optEnumVal = ::test::fixtures::patch::MyEnum();
   ::apache::thrift::clear(this->__fbthrift_field_optStructVal);
   this->__fbthrift_field_optListVal.clear();
@@ -663,7 +663,7 @@ void MyStruct::__fbthrift_clear_terse_fields() {
   this->__fbthrift_field_floatVal = float();
   this->__fbthrift_field_doubleVal = double();
   this->__fbthrift_field_stringVal = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-  this->__fbthrift_field_binaryVal = apache::thrift::StringTraits<::folly::IOBuf>::fromStringLiteral("");
+  this->__fbthrift_field_binaryVal = apache::thrift::StringTraits<folly::IOBuf>::fromStringLiteral("");
   this->__fbthrift_field_enumVal = ::test::fixtures::patch::MyEnum();
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_structVal);
   ::apache::thrift::detail::st::clear_terse_fields(this->__fbthrift_field_unionVal);
@@ -678,7 +678,7 @@ bool MyStruct::__fbthrift_is_empty() const {
  ::apache::thrift::op::isEmpty<::apache::thrift::type::float_t>(this->__fbthrift_field_floatVal) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::double_t>(this->__fbthrift_field_doubleVal) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::string_t>(this->__fbthrift_field_stringVal) &&
- ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal) &&
+ ::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>>(this->__fbthrift_field_enumVal) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::struct_t<::test::fixtures::patch::MyData>>(this->__fbthrift_field_structVal) &&
  ::apache::thrift::op::isEmpty<::apache::thrift::type::union_t<::test::fixtures::patch::MyUnion>>(this->__fbthrift_field_unionVal) &&
@@ -726,7 +726,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.stringVal_ref() == rhs.stringVal_ref())) {
     return false;
   }
-  if (!apache::thrift::StringTraits<::folly::IOBuf>::isEqual(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal)) {
+  if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal)) {
     return false;
   }
   if (!(lhs.enumVal_ref() == rhs.enumVal_ref())) {
@@ -765,7 +765,7 @@ bool MyStruct::operator==(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.optStringVal_ref() == rhs.optStringVal_ref())) {
     return false;
   }
-  if (lhs.optBinaryVal_ref().has_value() != rhs.optBinaryVal_ref().has_value() || (lhs.optBinaryVal_ref().has_value() && !apache::thrift::StringTraits<::folly::IOBuf>::isEqual(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal))) {
+  if (lhs.optBinaryVal_ref().has_value() != rhs.optBinaryVal_ref().has_value() || (lhs.optBinaryVal_ref().has_value() && !apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal))) {
     return false;
   }
   if (!(lhs.optEnumVal_ref() == rhs.optEnumVal_ref())) {
@@ -815,8 +815,8 @@ bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.stringVal_ref() == rhs.stringVal_ref())) {
     return lhs.stringVal_ref() < rhs.stringVal_ref();
   }
-  if (!apache::thrift::StringTraits<::folly::IOBuf>::isEqual(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal)) {
-    return apache::thrift::StringTraits<::folly::IOBuf>::isLess(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal);
+  if (!apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal)) {
+    return apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.__fbthrift_field_binaryVal, rhs.__fbthrift_field_binaryVal);
   }
   if (!(lhs.enumVal_ref() == rhs.enumVal_ref())) {
     return lhs.enumVal_ref() < rhs.enumVal_ref();
@@ -854,8 +854,8 @@ bool MyStruct::operator<(FOLLY_MAYBE_UNUSED const MyStruct& rhs) const {
   if (!(lhs.optStringVal_ref() == rhs.optStringVal_ref())) {
     return lhs.optStringVal_ref() < rhs.optStringVal_ref();
   }
-  if (lhs.optBinaryVal_ref().has_value() != rhs.optBinaryVal_ref().has_value() || (lhs.optBinaryVal_ref().has_value() && !apache::thrift::StringTraits<::folly::IOBuf>::isEqual(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal))) {
-    return !lhs.optBinaryVal_ref().has_value() || (rhs.optBinaryVal_ref().has_value() && apache::thrift::StringTraits<::folly::IOBuf>::isLess(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal));
+  if (lhs.optBinaryVal_ref().has_value() != rhs.optBinaryVal_ref().has_value() || (lhs.optBinaryVal_ref().has_value() && !apache::thrift::StringTraits<folly::IOBuf>::isEqual(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal))) {
+    return !lhs.optBinaryVal_ref().has_value() || (rhs.optBinaryVal_ref().has_value() && apache::thrift::StringTraits<folly::IOBuf>::isLess(lhs.__fbthrift_field_optBinaryVal, rhs.__fbthrift_field_optBinaryVal));
   }
   if (!(lhs.optEnumVal_ref() == rhs.optEnumVal_ref())) {
     return lhs.optEnumVal_ref() < rhs.optEnumVal_ref();

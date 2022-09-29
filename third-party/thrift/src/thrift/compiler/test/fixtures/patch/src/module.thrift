@@ -54,7 +54,7 @@ struct MyStruct {
   float floatVal;
   double doubleVal;
   string stringVal;
-  binary (cpp.type = "::folly::IOBuf") binaryVal;
+  binary (cpp.type = "folly::IOBuf") binaryVal;
   MyEnum enumVal;
   MyData structVal;
   MyUnion unionVal;
@@ -68,7 +68,7 @@ struct MyStruct {
   optional float optFloatVal;
   optional double optDoubleVal;
   optional string optStringVal;
-  optional binary (cpp.type = "::folly::IOBuf") optBinaryVal;
+  optional binary (cpp.type = "folly::IOBuf") optBinaryVal;
   optional MyEnum optEnumVal;
   optional MyData optStructVal;
   optional LateDefStruct optLateStructVal;

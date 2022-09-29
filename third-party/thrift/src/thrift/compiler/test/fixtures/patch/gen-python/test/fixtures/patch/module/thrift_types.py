@@ -217,7 +217,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             -22,  # id
             _fbthrift_python_types.FieldQualifier.Optional, # qualifier
             "optBinaryVal",  # name
-            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),
@@ -321,7 +321,7 @@ class MyStruct(metaclass=_fbthrift_python_types.StructMeta):
             -9,  # id
             _fbthrift_python_types.FieldQualifier.Terse, # qualifier
             "binaryVal",  # name
-            _fbthrift_python_types.typeinfo_binary,  # typeinfo
+            _fbthrift_python_types.typeinfo_iobuf,  # typeinfo
             None,  # default value
             None,  # adapter info
         ),

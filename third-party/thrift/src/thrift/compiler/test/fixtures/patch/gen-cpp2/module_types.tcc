@@ -796,7 +796,7 @@ _readField_stringVal:
   }
 _readField_binaryVal:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, this->__fbthrift_field_binaryVal, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::readWithContext(*iprot, this->__fbthrift_field_binaryVal, _readState);
     
   }
 
@@ -979,7 +979,7 @@ _readField_optStringVal:
   }
 _readField_optBinaryVal:
   {
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::readWithContext(*iprot, this->__fbthrift_field_optBinaryVal, _readState);
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::readWithContext(*iprot, this->__fbthrift_field_optBinaryVal, _readState);
     
   }
  this->__isset.set(8, true);
@@ -1375,9 +1375,9 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("stringVal", apache::thrift::protocol::T_STRING, -8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_stringVal);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
     xfer += prot_->serializedFieldSize("binaryVal", apache::thrift::protocol::T_STRING, -9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, this->__fbthrift_field_binaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->__fbthrift_field_binaryVal);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>>(this->__fbthrift_field_enumVal))) {
     xfer += prot_->serializedFieldSize("enumVal", apache::thrift::protocol::T_I32, -10);
@@ -1429,7 +1429,7 @@ uint32_t MyStruct::serializedSize(Protocol_ const* prot_) const {
   }
   if (this->__isset.get(8)) {
     xfer += prot_->serializedFieldSize("optBinaryVal", apache::thrift::protocol::T_STRING, -22);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<false>(*prot_, this->__fbthrift_field_optBinaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<false>(*prot_, this->__fbthrift_field_optBinaryVal);
   }
   if (this->__isset.get(9)) {
     xfer += prot_->serializedFieldSize("optEnumVal", apache::thrift::protocol::T_I32, -23);
@@ -1495,9 +1495,9 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
     xfer += prot_->serializedFieldSize("stringVal", apache::thrift::protocol::T_STRING, -8);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::string, ::std::string>::serializedSize<false>(*prot_, this->__fbthrift_field_stringVal);
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
     xfer += prot_->serializedFieldSize("binaryVal", apache::thrift::protocol::T_STRING, -9);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, this->__fbthrift_field_binaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->__fbthrift_field_binaryVal);
   }
   if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::enum_t<::test::fixtures::patch::MyEnum>>(this->__fbthrift_field_enumVal))) {
     xfer += prot_->serializedFieldSize("enumVal", apache::thrift::protocol::T_I32, -10);
@@ -1549,7 +1549,7 @@ uint32_t MyStruct::serializedSizeZC(Protocol_ const* prot_) const {
   }
   if (this->__isset.get(8)) {
     xfer += prot_->serializedFieldSize("optBinaryVal", apache::thrift::protocol::T_STRING, -22);
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::serializedSize<true>(*prot_, this->__fbthrift_field_optBinaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::serializedSize<true>(*prot_, this->__fbthrift_field_optBinaryVal);
   }
   if (this->__isset.get(9)) {
     xfer += prot_->serializedFieldSize("optEnumVal", apache::thrift::protocol::T_I32, -23);
@@ -1656,11 +1656,11 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
   } else {
     previousFieldHasValue = false;
   }
-  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<::folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
+  if (!(::apache::thrift::op::isEmpty<::apache::thrift::type::cpp_type<folly::IOBuf, ::apache::thrift::type::binary_t>>(this->__fbthrift_field_binaryVal))) {
     constexpr int16_t kPrevFieldId = -8;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, -9, kPrevFieldId>(*prot_, "binaryVal", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, this->__fbthrift_field_binaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->__fbthrift_field_binaryVal);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;
@@ -1774,7 +1774,7 @@ uint32_t MyStruct::write(Protocol_* prot_) const {
     constexpr int16_t kPrevFieldId = -21;
     xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_STRING, -22, kPrevFieldId>(*prot_, "optBinaryVal", previousFieldHasValue);
     previousFieldHasValue = true;
-    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, ::folly::IOBuf>::write(*prot_, this->__fbthrift_field_optBinaryVal);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::binary, folly::IOBuf>::write(*prot_, this->__fbthrift_field_optBinaryVal);
     xfer += prot_->writeFieldEnd();
   } else {
     previousFieldHasValue = false;

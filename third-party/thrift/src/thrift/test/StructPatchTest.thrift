@@ -23,6 +23,7 @@ include "thrift/test/StructPatchTestInclude.thrift"
 package "facebook.com/thrift/test/patch"
 
 namespace cpp2 apache.thrift.test.patch
+namespace py3 thrift.test
 
 enum MyEnum {
   MyValue0 = 0,
@@ -37,7 +38,7 @@ struct MyStruct {
   float floatVal;
   double doubleVal;
   string stringVal;
-  binary (cpp.type = "::folly::IOBuf") binaryVal;
+  binary (cpp.type = "folly::IOBuf") binaryVal;
   MyEnum enumVal;
   StructPatchTestInclude.MyData structVal;
   StructPatchTestInclude.MyUnion unionVal;
@@ -51,7 +52,7 @@ struct MyStruct {
   optional float optFloatVal;
   optional double optDoubleVal;
   optional string optStringVal;
-  optional binary (cpp.type = "::folly::IOBuf") optBinaryVal;
+  optional binary (cpp.type = "folly::IOBuf") optBinaryVal;
   optional MyEnum optEnumVal;
   optional StructPatchTestInclude.MyData optStructVal;
   optional LateDefStruct optLateStructVal;

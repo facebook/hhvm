@@ -728,7 +728,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     cdef inline binaryVal_impl(self):
 
-        return (<const char*>deref(self._cpp_obj).binaryVal_ref().value().data())[:deref(self._cpp_obj).binaryVal_ref().value().size()]
+        if self.__fbthrift_cached_binaryVal is None:
+            self.__fbthrift_cached_binaryVal = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).binaryVal_ref().ref()), self)
+        return self.__fbthrift_cached_binaryVal
 
     @property
     def binaryVal(self):
@@ -858,7 +860,9 @@ cdef class MyStruct(thrift.py3.types.Struct):
         if not deref(self._cpp_obj).optBinaryVal_ref().has_value():
             return None
 
-        return (<const char*>deref(self._cpp_obj).optBinaryVal_ref().value_unchecked().data())[:deref(self._cpp_obj).optBinaryVal_ref().value_unchecked().size()]
+        if self.__fbthrift_cached_optBinaryVal is None:
+            self.__fbthrift_cached_optBinaryVal = _fbthrift_iobuf.IOBuf.create(ptr_address(deref(self._cpp_obj).optBinaryVal_ref().ref_unchecked()), self)
+        return self.__fbthrift_cached_optBinaryVal
 
     @property
     def optBinaryVal(self):

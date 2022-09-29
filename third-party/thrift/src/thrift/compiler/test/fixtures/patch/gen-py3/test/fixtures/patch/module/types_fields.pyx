@@ -181,9 +181,9 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 8)
             return
-        if not isinstance(_fbthrift_value, bytes):
-            raise TypeError(f'binaryVal is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).binaryVal_ref().assign(_test_fixtures_patch_module_types._folly_IOBuf(cmove(<string>_fbthrift_value)))
+        if not isinstance(_fbthrift_value, _fbthrift_iobuf.IOBuf):
+            raise TypeError(f'binaryVal is not a { _fbthrift_iobuf.IOBuf !r}.')
+        deref(self._struct_cpp_obj).binaryVal_ref().assign(deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()))
 
     cdef void _set_field_9(self, _fbthrift_value) except *:
         # for field enumVal
@@ -302,9 +302,9 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 21)
             return
-        if not isinstance(_fbthrift_value, bytes):
-            raise TypeError(f'optBinaryVal is not a { bytes !r}.')
-        deref(self._struct_cpp_obj).optBinaryVal_ref().assign(_test_fixtures_patch_module_types._folly_IOBuf(cmove(<string>_fbthrift_value)))
+        if not isinstance(_fbthrift_value, _fbthrift_iobuf.IOBuf):
+            raise TypeError(f'optBinaryVal is not a { _fbthrift_iobuf.IOBuf !r}.')
+        deref(self._struct_cpp_obj).optBinaryVal_ref().assign(deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()))
 
     cdef void _set_field_22(self, _fbthrift_value) except *:
         # for field optEnumVal

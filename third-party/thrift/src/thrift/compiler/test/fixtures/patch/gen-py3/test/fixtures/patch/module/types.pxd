@@ -86,8 +86,6 @@ cdef extern from * nogil:
         void clear()
         bint empty()
 
-cdef extern from *:
-    ctypedef bstring _folly_IOBuf "::folly::IOBuf"
 
 cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -184,7 +182,7 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test
         __terse_field_ref[float] floatVal_ref "floatVal_ref" ()
         __terse_field_ref[double] doubleVal_ref "doubleVal_ref" ()
         __terse_field_ref[string] stringVal_ref "stringVal_ref" ()
-        __terse_field_ref[_folly_IOBuf] binaryVal_ref "binaryVal_ref" ()
+        __terse_field_ref[_fbthrift_iobuf.cIOBuf] binaryVal_ref "binaryVal_ref" ()
         __terse_field_ref[cMyEnum] enumVal_ref "enumVal_ref" ()
         __terse_field_ref[cMyData] structVal_ref "structVal_ref" ()
         __terse_field_ref[cMyUnion] unionVal_ref "unionVal_ref" ()
@@ -197,7 +195,7 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test
         __optional_field_ref[float] optFloatVal_ref "optFloatVal_ref" ()
         __optional_field_ref[double] optDoubleVal_ref "optDoubleVal_ref" ()
         __optional_field_ref[string] optStringVal_ref "optStringVal_ref" ()
-        __optional_field_ref[_folly_IOBuf] optBinaryVal_ref "optBinaryVal_ref" ()
+        __optional_field_ref[_fbthrift_iobuf.cIOBuf] optBinaryVal_ref "optBinaryVal_ref" ()
         __optional_field_ref[cMyEnum] optEnumVal_ref "optEnumVal_ref" ()
         __optional_field_ref[cMyData] optStructVal_ref "optStructVal_ref" ()
         __optional_field_ref[cLateDefStruct] optLateStructVal_ref "optLateStructVal_ref" ()
@@ -305,10 +303,12 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object optListVal_impl(self)
     cdef inline object optSetVal_impl(self)
     cdef inline object optMapVal_impl(self)
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_binaryVal
     cdef object __fbthrift_cached_enumVal
     cdef MyData __fbthrift_cached_structVal
     cdef MyUnion __fbthrift_cached_unionVal
     cdef LateDefStruct __fbthrift_cached_lateStructVal
+    cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_optBinaryVal
     cdef object __fbthrift_cached_optEnumVal
     cdef MyData __fbthrift_cached_optStructVal
     cdef LateDefStruct __fbthrift_cached_optLateStructVal

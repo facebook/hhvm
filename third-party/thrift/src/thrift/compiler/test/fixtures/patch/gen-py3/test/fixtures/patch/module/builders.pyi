@@ -48,7 +48,7 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     floatVal: _typing.Optional[float]
     doubleVal: _typing.Optional[float]
     stringVal: _typing.Optional[str]
-    binaryVal: _typing.Optional[bytes]
+    binaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]
     enumVal: _typing.Optional[_test_fixtures_patch_module_types.MyEnum]
     structVal: _typing.Any
     unionVal: _typing.Any
@@ -61,7 +61,7 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     optFloatVal: _typing.Optional[float]
     optDoubleVal: _typing.Optional[float]
     optStringVal: _typing.Optional[str]
-    optBinaryVal: _typing.Optional[bytes]
+    optBinaryVal: _typing.Optional[_fbthrift_iobuf.IOBuf]
     optEnumVal: _typing.Optional[_test_fixtures_patch_module_types.MyEnum]
     optStructVal: _typing.Any
     optLateStructVal: _typing.Any

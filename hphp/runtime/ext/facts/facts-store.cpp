@@ -872,6 +872,12 @@ struct FactsStoreImpl final
     });
   }
 
+  Array getAllModules() override {
+    return logPerformance(__func__, [&]() {
+      return makeDictOfStringToString(m_map.getAllModules());
+    });
+  }
+
   Array getAllTypeAliases() override {
     return logPerformance(__func__, [&]() {
       return makeDictOfStringToString(m_map.getAllTypeAliases());

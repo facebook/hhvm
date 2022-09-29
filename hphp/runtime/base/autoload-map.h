@@ -329,6 +329,7 @@ struct FactsStore : public AutoloadMap {
   virtual Array getAllFunctions() = 0;
   virtual Array getAllConstants() = 0;
   virtual Array getAllTypeAliases() = 0;
+  virtual Array getAllModules() = 0;
 };
 
 } // namespace HPHP

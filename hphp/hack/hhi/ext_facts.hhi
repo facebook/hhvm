@@ -87,6 +87,7 @@ function type_alias_to_path(string $type_alias_name)[]: ?string;
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
+function path_to_modules(string $path)[]: vec<string>;
 function path_to_types(string $path)[]: vec<classname<nonnull>>;
 function path_to_functions(string $path)[]: vec<string>;
 function path_to_constants(string $path)[]: vec<string>;
@@ -301,6 +302,7 @@ function file_attribute_parameters(
  * If a symbol is defined in more than one path, one of the paths defining the
  * symbol will be chosen in an unspecified manner.
  */
+function all_modules()[]: dict<string, string>;
 function all_types()[]: dict<classname<mixed>, string>;
 function all_functions()[]: dict<string, string>;
 function all_constants()[]: dict<string, string>;
@@ -327,7 +329,12 @@ type TypeData = shape(
   'methods' => vec<MethodData>,
 );
 
+type ModuleData = shape(
+  'name' => string,
+);
+
 type FileData = shape(
+  'modules' => vec<string>,
   'types' => vec<TypeData>,
   'functions' => vec<string>,
   'constants' => vec<string>,

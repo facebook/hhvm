@@ -124,6 +124,7 @@ struct SymbolMap {
   std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypes();
   std::vector<std::pair<Symbol<SymKind::Function>, Path>> getAllFunctions();
   std::vector<std::pair<Symbol<SymKind::Constant>, Path>> getAllConstants();
+  std::vector<std::pair<Symbol<SymKind::Module>, Path>> getAllModules();
   std::vector<std::pair<Symbol<SymKind::Type>, Path>> getAllTypeAliases();
 
   /**

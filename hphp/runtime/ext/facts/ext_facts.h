@@ -9,10 +9,12 @@ Variant HHVM_FUNCTION(facts_db_path, const String& root);
 Variant HHVM_FUNCTION(facts_type_to_path, const String& type_name);
 Variant HHVM_FUNCTION(facts_function_to_path, const String& function_name);
 Variant HHVM_FUNCTION(facts_constant_to_path, const String& constant_name);
+Variant HHVM_FUNCTION(facts_module_to_path, const String& module_name);
 Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& type_alias_name);
 Array HHVM_FUNCTION(facts_path_to_types, const String& path);
 Array HHVM_FUNCTION(facts_path_to_functions, const String& path);
 Array HHVM_FUNCTION(facts_path_to_constants, const String& path);
+Array HHVM_FUNCTION(facts_path_to_modules, const String& path);
 Array HHVM_FUNCTION(facts_path_to_type_aliases, const String& path);
 Variant HHVM_FUNCTION(facts_type_name, const String& type);
 Variant HHVM_FUNCTION(facts_kind, const String& type);
@@ -50,6 +52,7 @@ Array HHVM_FUNCTION(
 Array HHVM_FUNCTION(facts_all_types);
 Array HHVM_FUNCTION(facts_all_functions);
 Array HHVM_FUNCTION(facts_all_constants);
+Array HHVM_FUNCTION(facts_all_modules);
 Array HHVM_FUNCTION(facts_all_type_aliases);
 
 Array HHVM_FUNCTION(

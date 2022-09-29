@@ -471,6 +471,7 @@ struct MockAutoloadDB : public AutoloadDB {
   MOCK_METHOD(MultiResult<SymbolPath>, getAllTypePaths, (), (override));
   MOCK_METHOD(MultiResult<SymbolPath>, getAllFunctionPaths, (), (override));
   MOCK_METHOD(MultiResult<SymbolPath>, getAllConstantPaths, (), (override));
+  MOCK_METHOD(MultiResult<SymbolPath>, getAllModulePaths, (), (override));
 
   MOCK_METHOD(void, insertClock, (const Clock& clock), (override));
   MOCK_METHOD(Clock, getClock, (), (override));

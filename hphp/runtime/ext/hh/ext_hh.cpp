@@ -140,6 +140,10 @@ Variant HHVM_FUNCTION(autoload_constant_to_path, const String& constant) {
   return autoload_symbol_to_path(constant, AutoloadMap::KindOf::Constant);
 }
 
+Variant HHVM_FUNCTION(autoload_module_to_path, const String& module) {
+  return autoload_symbol_to_path(module, AutoloadMap::KindOf::Module);
+}
+
 Variant HHVM_FUNCTION(autoload_type_alias_to_path, const String& typeAlias) {
   return autoload_symbol_to_path(typeAlias, AutoloadMap::KindOf::TypeAlias);
 }
@@ -165,6 +169,10 @@ Array HHVM_FUNCTION(autoload_path_to_functions, const String& path) {
 
 Array HHVM_FUNCTION(autoload_path_to_constants, const String& path) {
   return autoload_path_to_symbols(path, AutoloadMap::KindOf::Constant);
+}
+
+Array HHVM_FUNCTION(autoload_path_to_modules, const String& path) {
+  return autoload_path_to_symbols(path, AutoloadMap::KindOf::Module);
 }
 
 Array HHVM_FUNCTION(autoload_path_to_type_aliases, const String& path) {
@@ -1451,10 +1459,12 @@ static struct HHExtension final : Extension {
     X(autoload_type_to_path);
     X(autoload_function_to_path);
     X(autoload_constant_to_path);
+    X(autoload_module_to_path);
     X(autoload_type_alias_to_path);
     X(autoload_path_to_types);
     X(autoload_path_to_functions);
     X(autoload_path_to_constants);
+    X(autoload_path_to_modules);
     X(autoload_path_to_type_aliases);
     X(could_include);
     X(serialize_memoize_param);

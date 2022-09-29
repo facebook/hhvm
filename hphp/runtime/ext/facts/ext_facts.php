@@ -84,6 +84,8 @@ function db_path(string $root)[]: ?string;
  * Throw InvalidOperationException if Facts is not enabled.
  */
 <<__Native>>
+function module_to_path(string $module_name)[]: ?string;
+<<__Native>>
 function type_to_path(string $type_name)[]: ?string;
 <<__Native>>
 function function_to_path(string $function_name)[]: ?string;
@@ -97,6 +99,8 @@ function type_alias_to_path(string $type_alias_name)[]: ?string;
  *
  * Throw InvalidOperationException if Facts is not enabled.
  */
+<<__Native>>
+function path_to_modules(string $path)[]: vec<string>;
 <<__Native>>
 function path_to_types(string $path)[]: vec<string>;
 <<__Native>>
@@ -338,6 +342,8 @@ function file_attribute_parameters(
  * symbol will be chosen in an unspecified manner.
  */
 <<__Native>>
+function all_modules()[]: dict<string, string>;
+<<__Native>>
 function all_types()[]: dict<classname<nonnull>, string>;
 <<__Native>>
 function all_functions()[]: dict<string, string>;
@@ -367,7 +373,12 @@ type TypeData = shape(
   'methods' => vec<MethodData>,
 );
 
+type ModuleData = shape(
+  'name' => string,
+);
+
 type FileData = shape(
+  'modules' => vec<ModuleData>,
   'types' => vec<TypeData>,
   'functions' => vec<string>,
   'constants' => vec<string>,

@@ -6,9 +6,8 @@
 use std::hash::Hasher;
 
 use fnv::FnvHasher;
-use oxidized::file_info::NameType;
 
-/// Variant types used in the naming table.
+/// Variant types used in the depgraph table.
 ///
 /// NOTE: Keep in sync with the order of the fields in `Typing_deps.ml`.
 #[derive(Copy, Clone, Debug)]
@@ -50,25 +49,6 @@ impl DepType {
             12 => Some(DepType::GConstName),
             13 => Some(DepType::Module),
             _ => None,
-        }
-    }
-
-    #[inline]
-    pub fn is_toplevel_symbol(self) -> bool {
-        match self {
-            DepType::GConst | DepType::Fun | DepType::Type | DepType::Module => true,
-            _ => false,
-        }
-    }
-}
-
-impl From<NameType> for DepType {
-    fn from(name_type: NameType) -> Self {
-        match name_type {
-            NameType::Fun => DepType::Fun,
-            NameType::Const => DepType::GConst,
-            NameType::Class | NameType::Typedef => DepType::Type,
-            NameType::Module => DepType::Module,
         }
     }
 }

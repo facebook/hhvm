@@ -4270,7 +4270,6 @@ name = "typing_deps_hash"
 version = "0.0.0"
 dependencies = [
  "fnv",
- "oxidized",
 ]
 
 [[package]]

@@ -5,9 +5,6 @@
 
 //! Common types used in the HH24 Hack typechecker rearchitecture.
 
-use hh_hash::hash;
-use typing_deps_hash::DepType;
-
 /// TODO(ljw): add backtraces to the three expected cases.
 /// But let's hold off until we've adopted thiserror 1.0.34 and rustc post backtrace stabilization
 #[derive(thiserror::Error, Debug)]
@@ -78,7 +75,7 @@ pub struct Checksum(pub u64);
 
 impl Checksum {
     fn xor(&mut self, combined_hash: (ToplevelSymbolHash, DeclHash)) {
-        self.0 ^= hash(&combined_hash);
+        self.0 ^= hh_hash::hash(&combined_hash);
     }
 
     pub fn addremove(&mut self, symbol_hash: ToplevelSymbolHash, decl_hash: DeclHash) {
@@ -287,26 +284,24 @@ pub struct ToplevelSymbolHash(u64);
 u64_hash_wrapper_impls! { ToplevelSymbolHash }
 
 impl ToplevelSymbolHash {
-    // TODO: Should be called `new`.
-    pub fn from(dep_type: typing_deps_hash::DepType, symbol: &str) -> Self {
-        assert!(dep_type.is_toplevel_symbol());
-        Self(typing_deps_hash::hash1(dep_type, symbol.as_bytes()))
+    fn new(deptype: typing_deps_hash::DepType, symbol: &str) -> Self {
+        Self(typing_deps_hash::hash1(deptype, symbol.as_bytes()))
     }
 
     pub fn from_type(symbol: &str) -> Self {
-        Self::from(typing_deps_hash::DepType::Type, symbol)
+        Self::new(typing_deps_hash::DepType::Type, symbol)
     }
 
     pub fn from_fun(symbol: &str) -> Self {
-        Self::from(typing_deps_hash::DepType::Fun, symbol)
+        Self::new(typing_deps_hash::DepType::Fun, symbol)
     }
 
     pub fn from_const(symbol: &str) -> Self {
-        Self::from(typing_deps_hash::DepType::GConst, symbol)
+        Self::new(typing_deps_hash::DepType::GConst, symbol)
     }
 
     pub fn from_module(symbol: &str) -> Self {
-        Self::from(typing_deps_hash::DepType::Module, symbol)
+        Self::new(typing_deps_hash::DepType::Module, symbol)
     }
 
     #[inline(always)]
@@ -335,18 +330,25 @@ pub struct ToplevelCanonSymbolHash(u64);
 u64_hash_wrapper_impls! { ToplevelCanonSymbolHash }
 
 impl ToplevelCanonSymbolHash {
-    // TODO: Should be called `new`.
-    pub fn from(dep_type: typing_deps_hash::DepType, mut symbol: String) -> Self {
+    fn new(dep_type: typing_deps_hash::DepType, mut symbol: String) -> Self {
         symbol.make_ascii_lowercase();
         Self(typing_deps_hash::hash1(dep_type, symbol.as_bytes()))
     }
 
     pub fn from_type(symbol: String) -> Self {
-        Self::from(typing_deps_hash::DepType::Type, symbol)
+        Self::new(typing_deps_hash::DepType::Type, symbol)
     }
 
     pub fn from_fun(symbol: String) -> Self {
-        Self::from(typing_deps_hash::DepType::Fun, symbol)
+        Self::new(typing_deps_hash::DepType::Fun, symbol)
+    }
+
+    pub fn from_const(symbol: String) -> Self {
+        Self::new(typing_deps_hash::DepType::GConst, symbol)
+    }
+
+    pub fn from_module(symbol: String) -> Self {
+        Self::new(typing_deps_hash::DepType::Module, symbol)
     }
 }
 
@@ -369,11 +371,12 @@ pub struct DependencyHash(pub u64);
 
 impl DependencyHash {
     pub fn of_member(
-        dep_type: DepType,
+        dep_type: typing_deps_hash::DepType,
         class_symbol: ToplevelSymbolHash,
         member_name: &str,
     ) -> DependencyHash {
-        let type_hash = typing_deps_hash::hash1(DepType::Type, &class_symbol.to_bytes());
+        let type_hash =
+            typing_deps_hash::hash1(typing_deps_hash::DepType::Type, &class_symbol.to_bytes());
         Self(typing_deps_hash::hash2(
             dep_type,
             type_hash,
@@ -381,7 +384,10 @@ impl DependencyHash {
         ))
     }
 
-    pub fn of_class(dep_type: DepType, class_symbol: ToplevelSymbolHash) -> DependencyHash {
+    pub fn of_class(
+        dep_type: typing_deps_hash::DepType,
+        class_symbol: ToplevelSymbolHash,
+    ) -> DependencyHash {
         Self(typing_deps_hash::hash1(dep_type, &class_symbol.to_bytes()))
     }
 }

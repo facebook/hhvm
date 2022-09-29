@@ -9,4 +9,3 @@ path = "../../typing_deps_hash.rs"
 
 [dependencies]
 fnv = "1.0"
-oxidized = { path = "../../../oxidized" }

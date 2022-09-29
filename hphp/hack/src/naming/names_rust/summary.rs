@@ -83,7 +83,7 @@ impl DeclSummary {
     }
 
     pub fn symbol_hash(&self) -> ToplevelSymbolHash {
-        ToplevelSymbolHash::from(self.name_type.into(), &self.symbol)
+        crate::hash_name(&self.symbol, self.name_type)
     }
 }
 
@@ -122,8 +122,8 @@ impl SymbolRow {
     ) -> Self {
         let kind = decl.kind();
         Self {
-            hash: ToplevelSymbolHash::from(kind.into(), name),
-            canon_hash: ToplevelCanonSymbolHash::from(kind.into(), name.to_owned()),
+            hash: crate::hash_name(name, kind),
+            canon_hash: crate::hash_canon_name(name.to_owned(), kind),
             kind,
             decl_hash: crate::hash_decl(decl),
             file_info_id,

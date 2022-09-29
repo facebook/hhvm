@@ -643,23 +643,23 @@ void ExtFrame::serialize(Serializer& writer) && {
 
 FOLLY_NOINLINE void RequestResponseFrame::serializeInFragmentsSlow(
     Serializer& writer) && {
-  serializeInFragmentsSlowCommon(std::move(*this), Flags(), writer);
+  serializeInFragmentsSlowCommon(std::move(*this), Flags().next(true), writer);
 }
 
 FOLLY_NOINLINE void RequestFnfFrame::serializeInFragmentsSlow(
     Serializer& writer) && {
-  serializeInFragmentsSlowCommon(std::move(*this), Flags(), writer);
+  serializeInFragmentsSlowCommon(std::move(*this), Flags().next(true), writer);
 }
 
 FOLLY_NOINLINE void RequestStreamFrame::serializeInFragmentsSlow(
     Serializer& writer) && {
-  serializeInFragmentsSlowCommon(std::move(*this), Flags(), writer);
+  serializeInFragmentsSlowCommon(std::move(*this), Flags().next(true), writer);
 }
 
 FOLLY_NOINLINE void RequestChannelFrame::serializeInFragmentsSlow(
     Serializer& writer) && {
   serializeInFragmentsSlowCommon(
-      std::move(*this), Flags().complete(hasComplete()), writer);
+      std::move(*this), Flags().next(true).complete(hasComplete()), writer);
 }
 
 FOLLY_NOINLINE void PayloadFrame::serializeInFragmentsSlow(

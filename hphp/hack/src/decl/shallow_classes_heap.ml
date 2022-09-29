@@ -21,7 +21,7 @@ end
 
 module Classes =
   SharedMem.HeapWithLocalCache
-    (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+    (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
     (Class)
     (Capacity)
 

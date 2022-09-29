@@ -20,7 +20,7 @@ module Class : SharedMem.Value with type t = shallow_class
 module Classes :
     module type of
       SharedMem.HeapWithLocalCache
-        (SharedMem.ImmediateBackend (SharedMem.Evictable)) (StringKey)
+        (SharedMem.ImmediateBackend (SharedMem.NonEvictable)) (StringKey)
         (Class)
         (Capacity)
 

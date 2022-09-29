@@ -93,7 +93,11 @@ zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
 zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 
 # TODO(alexeyt) failures not yet categorized
+server/debugger/tests/runTest1.php
 server/fastcgi/tests/invalid.php
+server/http/tests/client_blocking_read_test.php
+server/http/tests/runTest1.php
+server/http/tests/staticContentHeaderTest.php
 slow/coeffects/apc_pure.php
 slow/dom_document/clone.php
 slow/ext_hsl/execve_execvpe.php

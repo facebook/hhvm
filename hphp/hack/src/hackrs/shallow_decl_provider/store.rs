@@ -13,8 +13,8 @@ use pos::MethodName;
 use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
-use ty::decl::shallow::Decl;
 use ty::decl::shallow::ModuleDecl;
+use ty::decl::shallow::NamedDecl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ShallowClass;
@@ -115,14 +115,14 @@ impl<R: Reason> ShallowDeclStore<R> {
         }
     }
 
-    pub fn add_decls(&self, decls: impl IntoIterator<Item = Decl<R>>) -> Result<()> {
+    pub fn add_decls(&self, decls: impl IntoIterator<Item = NamedDecl<R>>) -> Result<()> {
         for decl in decls.into_iter() {
             match decl {
-                Decl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
-                Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
-                Decl::Typedef(name, decl) => self.typedefs.insert(name, Arc::new(decl))?,
-                Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
-                Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
+                NamedDecl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
+                NamedDecl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
+                NamedDecl::Typedef(name, decl) => self.typedefs.insert(name, Arc::new(decl))?,
+                NamedDecl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
+                NamedDecl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
             }
         }
         Ok(())

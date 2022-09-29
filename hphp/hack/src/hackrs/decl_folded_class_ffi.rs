@@ -111,17 +111,17 @@ ocaml_ffi! {
                 .map_err(|e| format!("Failed to parse {:?}: {:?}", filename, e))?;
             for decl in decls.iter() {
                 match decl {
-                    shallow::Decl::Class(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::Decl::Fun(_, decl)     => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::Decl::Typedef(_, decl) => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::Decl::Const(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
-                    shallow::Decl::Module(_, decl)  => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Class(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Fun(_, decl)     => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Typedef(_, decl) => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Const(_, decl)   => verify_to_ocamlrep(&Bump::new(), decl),
+                    shallow::NamedDecl::Module(_, decl)  => verify_to_ocamlrep(&Bump::new(), decl),
                 }
             }
             let classes: Vec<TypeName> = decls
                 .into_iter()
-                .filter_map(|decl: ty::decl::shallow::Decl<BReason>| match decl {
-                    shallow::Decl::Class(name, _) => Some(name),
+                .filter_map(|decl: ty::decl::shallow::NamedDecl<BReason>| match decl {
+                    shallow::NamedDecl::Class(name, _) => Some(name),
                     _ => None,
                 })
                 .collect();

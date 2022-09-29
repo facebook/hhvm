@@ -16,7 +16,7 @@ use pos::ModuleName;
 use pos::PropName;
 use pos::RelativePath;
 use pos::TypeName;
-use ty::decl::shallow::Decl;
+use ty::decl::shallow::NamedDecl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ModuleDecl;
@@ -67,7 +67,7 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
     pub fn dedup_and_add_decls(
         &self,
         path: RelativePath,
-        decls: impl IntoIterator<Item = Decl<R>>,
+        decls: impl IntoIterator<Item = NamedDecl<R>>,
     ) -> Result<()> {
         // dedup, taking the decl which was declared first syntactically
         let decls = decls
@@ -85,17 +85,17 @@ impl<R: Reason> LazyShallowDeclProvider<R> {
     fn remove_naming_conflict_losers(
         &self,
         path: RelativePath,
-        decls: impl Iterator<Item = Decl<R>>,
-    ) -> Result<Vec<Decl<R>>> {
+        decls: impl Iterator<Item = NamedDecl<R>>,
+    ) -> Result<Vec<NamedDecl<R>>> {
         let mut winners = vec![];
         for decl in decls {
             let path_opt = match decl {
-                Decl::Class(name, _) | Decl::Typedef(name, _) => {
+                NamedDecl::Class(name, _) | NamedDecl::Typedef(name, _) => {
                     self.naming_provider.get_type_path(name)?
                 }
-                Decl::Fun(name, _) => self.naming_provider.get_fun_path(name)?,
-                Decl::Const(name, _) => self.naming_provider.get_const_path(name)?,
-                Decl::Module(..) => Some(path), // TODO: look this up from naming provider
+                NamedDecl::Fun(name, _) => self.naming_provider.get_fun_path(name)?,
+                NamedDecl::Const(name, _) => self.naming_provider.get_const_path(name)?,
+                NamedDecl::Module(..) => Some(path), // TODO: look this up from naming provider
             };
             if path_opt.map_or(true, |p| p == path) {
                 winners.push(decl)

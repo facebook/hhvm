@@ -3252,6 +3252,9 @@ size_t HQSession::HQStreamTransportBase::sendBody(
   auto g = folly::makeGuard(setActiveCodec(__func__));
   CHECK(codecStreamId_);
 
+  codecFilterChain->generateBodyDSR(
+      *codecStreamId_, body.length, HTTPCodec::NoPadding, eom);
+
   uint64_t offset = streamWriteByteOffset();
   bufMeta_.length += body.length;
   bodyBytesEgressed_ += body.length;

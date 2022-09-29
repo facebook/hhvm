@@ -275,6 +275,14 @@ size_t PassThroughHTTPCodecFilter::generateBody(
   return call_->generateBody(writeBuf, stream, std::move(chain), padding, eom);
 }
 
+size_t PassThroughHTTPCodecFilter::generateBodyDSR(
+    StreamID stream,
+    size_t length,
+    folly::Optional<uint8_t> padding,
+    bool eom) {
+  return call_->generateBodyDSR(stream, length, padding, eom);
+}
+
 size_t PassThroughHTTPCodecFilter::generateChunkHeader(
     folly::IOBufQueue& writeBuf, StreamID stream, size_t length) {
   return call_->generateChunkHeader(writeBuf, stream, length);

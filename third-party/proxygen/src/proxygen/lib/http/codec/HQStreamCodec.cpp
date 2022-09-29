@@ -386,6 +386,16 @@ size_t HQStreamCodec::generateBody(folly::IOBufQueue& writeBuf,
   return bytesWritten;
 }
 
+size_t HQStreamCodec::generateBodyDSR(StreamID stream,
+                                      size_t length,
+                                      folly::Optional<uint8_t> /*padding*/,
+                                      bool /*eom*/) {
+  DCHECK_EQ(stream, streamId_);
+
+  // Assuming we have generated a single DATA frame.
+  return length;
+}
+
 size_t HQStreamCodec::generateTrailers(folly::IOBufQueue& writeBuf,
                                        StreamID stream,
                                        const HTTPHeaders& trailers) {

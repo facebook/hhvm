@@ -10,6 +10,7 @@
 
 #include <folly/Portability.h>
 #include <folly/io/IOBufQueue.h>
+#include <folly/lang/Assume.h>
 #include <proxygen/lib/http/HTTPException.h>
 #include <proxygen/lib/http/HTTPHeaderSize.h>
 #include <proxygen/lib/http/codec/CodecProtocol.h>
@@ -593,6 +594,23 @@ class HTTPCodec {
                               std::unique_ptr<folly::IOBuf> chain,
                               folly::Optional<uint8_t> padding,
                               bool eom) = 0;
+
+  /**
+   * Write egress message body with fixed length. This is used in DSR where the
+   * actual body bytes are held elsewhere and take an express path.
+   *
+   * @param padding Optionally add padding bytes to the body if possible
+   * @param eom implicitly generate the EOM marker with this body frame
+   *
+   * @return number of bytes written
+   */
+  virtual size_t generateBodyDSR(StreamID,
+                                 size_t,
+                                 folly::Optional<uint8_t>,
+                                 bool) {
+    LOG(FATAL) << __func__ << " not supported on this codec";
+    folly::assume_unreachable();
+  }
 
   /**
    * Write a body chunk header, if relevant.

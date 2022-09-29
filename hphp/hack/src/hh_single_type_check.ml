@@ -294,6 +294,7 @@ let parse_options () =
   let method_call_inference = ref false in
   let report_pos_from_reason = ref false in
   let enable_sound_dynamic = ref false in
+  let always_pessimise_return = ref false in
   let disallow_fun_and_cls_meth_pseudo_funcs = ref false in
   let disallow_inst_meth = ref false in
   let use_direct_decl_parser = ref true in
@@ -708,6 +709,9 @@ let parse_options () =
       ( "--enable-sound-dynamic-type",
         Arg.Set enable_sound_dynamic,
         " Enforce sound dynamic types.  Experimental." );
+      ( "--always-pessimise-return",
+        Arg.Set always_pessimise_return,
+        " Consider all return types unenforceable." );
       ( "--disallow-fun-and-cls-meth-pseudo-funcs",
         Arg.Set disallow_fun_and_cls_meth_pseudo_funcs,
         " Disable parsing of fun() and class_meth()." );
@@ -1030,6 +1034,14 @@ let parse_options () =
     if !enable_supportdyn_hint then
       SSet.add
         TypecheckerOptions.experimental_supportdynamic_type_hint
+        tco_experimental_features
+    else
+      tco_experimental_features
+  in
+  let tco_experimental_features =
+    if !always_pessimise_return then
+      SSet.add
+        TypecheckerOptions.experimental_always_pessimise_return
         tco_experimental_features
     else
       tco_experimental_features

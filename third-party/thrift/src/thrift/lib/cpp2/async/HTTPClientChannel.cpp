@@ -37,6 +37,11 @@ using std::unique_ptr;
 namespace apache {
 namespace thrift {
 
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void, setHTTPFrameworkMetadata, THeader*, const RpcOptions&) {}
+} // namespace detail
+
 const std::chrono::milliseconds HTTPClientChannel::kDefaultTransactionTimeout =
     std::chrono::milliseconds(500);
 
@@ -218,6 +223,7 @@ void HTTPClientChannel::sendRequest_(
 
   setRequestHeaderOptions(header.get());
   addRpcOptionHeaders(header.get(), rpcOptions);
+  detail::setHTTPFrameworkMetadata(header.get(), rpcOptions);
 
   auto msg = buildHTTPMessage(header.get());
 

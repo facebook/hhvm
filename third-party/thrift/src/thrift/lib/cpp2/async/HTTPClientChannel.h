@@ -28,7 +28,9 @@
 #include <proxygen/lib/http/session/HTTPTransaction.h>
 #include <proxygen/lib/http/session/HTTPUpstreamSession.h>
 #include <thrift/lib/cpp/transport/THeader.h>
+#include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/async/ClientChannel.h>
+#include <thrift/lib/cpp2/async/RpcOptions.h>
 
 namespace apache {
 namespace thrift {
@@ -296,6 +298,11 @@ class HTTPClientChannel : public ClientChannel,
   uint16_t protocolId_{apache::thrift::protocol::T_BINARY_PROTOCOL};
   CloseCallback* closeCallback_{nullptr};
 };
+
+namespace detail {
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void, setHTTPFrameworkMetadata, transport::THeader*, const RpcOptions&);
+} // namespace detail
 
 } // namespace thrift
 } // namespace apache

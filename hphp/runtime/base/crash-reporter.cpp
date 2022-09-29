@@ -319,13 +319,12 @@ static void bt_handler(int sigin, siginfo_t* info, void* args) {
 
       if (!RuntimeOption::CoreDumpEmail.empty()) {
         char format [] = "cat %s | mail -s \"Stack Trace from %s\" '%s'";
-        char* cmdline = (char*)alloca(
-            sizeof(char) *
-            (strlen(format)
+        size_t cmdline_size = sizeof(char) *(strlen(format)
              +RuntimeOption::StackTraceFilename.length()
              +strlen(Process::GetAppName().c_str())
-             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1));
-        sprintf(cmdline, format, RuntimeOption::StackTraceFilename.c_str(),
+             +strlen(RuntimeOption::CoreDumpEmail.c_str())+1);
+        char* cmdline = (char*)alloca(cmdline_size);
+        snprintf(cmdline, cmdline_size, format, RuntimeOption::StackTraceFilename.c_str(),
                 Process::GetAppName().c_str(),
                 RuntimeOption::CoreDumpEmail.c_str());
         FileUtil::ssystem(cmdline);

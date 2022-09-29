@@ -184,3 +184,7 @@ if (THIRD_PARTY_INCLUDE_PATHS)
   include_directories(${HPHP_HOME}/hphp)
   include_directories(${HPHP_HOME})
 endif()
+
+if (ENABLE_SYSTEM_LOCALE_ARCHIVE)
+  add_definitions(-DENABLE_SYSTEM_LOCALE_ARCHIVE)
+endif()

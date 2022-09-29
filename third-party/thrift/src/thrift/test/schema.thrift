@@ -64,3 +64,10 @@ const i32 IntConst = 11;
 
 @thrift.GenerateRuntimeSchema
 const list<i32> ListConst = [2, 3, 5, 7, IntConst];
+
+@thrift.GenerateRuntimeSchema
+service TestService {
+  void noParamsNoReturnNoEx();
+  i32 noParamsPrimitiveReturnNoEx();
+  void primitiveParamsNoReturnNoEx(1: i32 param0);
+}

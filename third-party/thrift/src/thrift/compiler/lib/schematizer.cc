@@ -54,6 +54,8 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
   type_name->set_map();
   std::unique_ptr<t_const_value> params;
   switch (type.get_type_value()) {
+    case t_type::type::t_void:
+      break;
     case t_type::type::t_bool:
       type_name->add_map(val("boolType"), val(0));
       break;
@@ -134,29 +136,41 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
   }
   return schema;
 }
-} // namespace
 
-std::unique_ptr<t_const_value> schematizer::gen_schema(
-    const t_structured& node) {
-  auto schema = val();
-  schema->set_map();
-  add_definition(*schema, node);
-
-  auto fields = val();
-  fields->set_list();
+const t_enum* find_enum(const t_program* program, std::string enum_uri) {
   // May be null in unit tests.
-  const auto* program = node.program();
-  const auto* field_qualifier_enum = program
-      ? dynamic_cast<const t_enum*>(program->scope()->find_def(
-            "facebook.com/thrift/type/FieldQualifier"))
+  return program
+      ? dynamic_cast<const t_enum*>(program->scope()->find_def(enum_uri))
       : nullptr;
+}
 
-  for (const auto& field : node.fields()) {
+void add_qualifier(const t_enum* t_enum, t_const_value& schema, int enum_val) {
+  auto qualifier_schema = val(enum_val);
+  if (t_enum) {
+    qualifier_schema->set_is_enum();
+    qualifier_schema->set_enum(t_enum);
+    qualifier_schema->set_enum_value(t_enum->find_value(enum_val));
+  }
+  schema.add_map(val("qualifier"), std::move(qualifier_schema));
+}
+
+void add_fields(
+    const t_program* program,
+    t_const_value& schema,
+    node_list_view<const t_field> fields) {
+  auto fields_schema = val();
+  fields_schema->set_list();
+
+  const auto* field_qualifier_enum =
+      find_enum(program, "facebook.com/thrift/type/FieldQualifier");
+
+  for (const auto& field : fields) {
     auto field_schema = val();
     field_schema->set_map();
     add_definition(*field_schema, field);
     field_schema->add_map(val("id"), val(field.id()));
-    auto qualifierVal = [&] {
+
+    add_qualifier(field_qualifier_enum, *field_schema, [&] {
       switch (field.qualifier()) {
         case t_field_qualifier::none:
         case t_field_qualifier::required:
@@ -168,14 +182,8 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
       }
       assert(false);
       return 0; // Default
-    }();
-    auto qualifier = val(qualifierVal);
-    if (field_qualifier_enum) {
-      qualifier->set_is_enum();
-      qualifier->set_enum(field_qualifier_enum);
-      qualifier->set_enum_value(field_qualifier_enum->find_value(qualifierVal));
-    }
-    field_schema->add_map(val("qualifier"), std::move(qualifier));
+    }());
+
     field_schema->add_map(
         val("type"), gen_type(*field.type()->get_true_type()));
     if (auto deflt = field.default_value()) {
@@ -184,10 +192,19 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
           deflt->clone(), field.type());
       field_schema->add_map(val("customDefault"), val(id));
     }
-    fields->add_list(std::move(field_schema));
+    fields_schema->add_list(std::move(field_schema));
   }
 
-  schema->add_map(val("fields"), std::move(fields));
+  schema.add_map(val("fields"), std::move(fields_schema));
+}
+} // namespace
+
+std::unique_ptr<t_const_value> schematizer::gen_schema(
+    const t_structured& node) {
+  auto schema = val();
+  schema->set_map();
+  add_definition(*schema, node);
+  add_fields(node.program(), *schema, node.fields());
 
   if (node.is_exception()) {
     const auto& ex = static_cast<const t_exception&>(node);
@@ -203,6 +220,60 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
   auto schema = val();
   schema->set_map();
   add_definition(*schema, node);
+
+  auto functions_schema = val();
+  functions_schema->set_list();
+
+  const auto* func_qualifier_enum =
+      find_enum(node.program(), "facebook.com/thrift/type/FunctionQualifier");
+
+  for (const auto& func : node.functions()) {
+    auto func_schema = val();
+    func_schema->set_map();
+    add_definition(*func_schema, func);
+
+    add_qualifier(func_qualifier_enum, *func_schema, [&] {
+      switch (func.qualifier()) {
+        case t_function_qualifier::unspecified:
+          return 0;
+        case t_function_qualifier::one_way:
+          return 1;
+        case t_function_qualifier::idempotent:
+          return 2;
+        case t_function_qualifier::read_only:
+          return 3;
+      }
+      assert(false);
+      return 0; // Default
+    }());
+
+    auto return_types_schema = val();
+    return_types_schema->set_list();
+    for (const auto& ret : func.return_types()) {
+      // TODO: Handle sink, stream, interactions
+      if (!ret->is_sink() && !ret->is_streamresponse()) {
+        auto return_type_schema = val();
+        return_type_schema->set_map();
+        return_type_schema->add_map(
+            val("thriftType"), gen_type(*ret->get_true_type()));
+        return_types_schema->add_list(std::move(return_type_schema));
+      }
+    }
+    func_schema->add_map(val("returnTypes"), std::move(return_types_schema));
+
+    auto param_list_schema = val();
+    param_list_schema->set_map();
+    add_fields(node.program(), *param_list_schema, func.params().fields());
+    func_schema->add_map(val("paramlist"), std::move(param_list_schema));
+
+    // TODO: add exceptions
+
+    functions_schema->add_list(std::move(func_schema));
+  }
+  schema->add_map(val("functions"), std::move(functions_schema));
+
+  // TODO: add inheritedService
+
   return schema;
 }
 

@@ -26,6 +26,10 @@ namespace thrift {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_REGISTER(
     void, handleFrameworkMetadata, std::unique_ptr<folly::IOBuf>&&) {}
+THRIFT_PLUGGABLE_FUNC_REGISTER(
+    void,
+    handleFrameworkMetadataHeader,
+    folly::F14NodeMap<std::string, std::string>&) {}
 } // namespace detail
 
 ThriftRequestCore::ThriftRequestCore(
@@ -67,6 +71,12 @@ ThriftRequestCore::ThriftRequestCore(
   if (auto priority = metadata.priority_ref()) {
     header_.setCallPriority(static_cast<concurrency::PRIORITY>(*priority));
   }
+  if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
+    DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
+    detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
+  } else if (auto otherMetadata = metadata.otherMetadata_ref()) {
+    detail::handleFrameworkMetadataHeader(*otherMetadata);
+  }
   if (auto otherMetadata = metadata.otherMetadata_ref()) {
     header_.setReadHeaders(std::move(*otherMetadata));
   }
@@ -89,11 +99,6 @@ ThriftRequestCore::ThriftRequestCore(
 
   if (auto* observer = serverConfigs_.getObserver()) {
     observer->receivedRequest(&reqContext_.getMethodName());
-  }
-
-  if (auto frameworkMetadata = metadata.frameworkMetadata_ref()) {
-    DCHECK(*frameworkMetadata && !(**frameworkMetadata).empty());
-    detail::handleFrameworkMetadata(std::move(*frameworkMetadata));
   }
 }
 

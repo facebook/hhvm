@@ -51,6 +51,10 @@ namespace thrift {
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     void, handleFrameworkMetadata, std::unique_ptr<folly::IOBuf>&&);
+THRIFT_PLUGGABLE_FUNC_DECLARE(
+    void,
+    handleFrameworkMetadataHeader,
+    folly::F14NodeMap<std::string, std::string>&);
 } // namespace detail
 
 /**

@@ -916,9 +916,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   }
 
   if (isActiveRequestsTrackingDisabled()) {
-    LOG(INFO) << "Resource pools disabled. Active request tracking disabled";
+    // Record this but don't disable. Managed in configuration instead.
     runtimeServerActions_.activeRequestTrackingDisabled = true;
-    runtimeDisableResourcePoolsDeprecated();
   }
 
   return !runtimeDisableResourcePoolsSet();

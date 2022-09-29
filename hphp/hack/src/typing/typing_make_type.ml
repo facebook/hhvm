@@ -104,7 +104,10 @@ let dynamic r = mk (r, Tdynamic)
 
 let like r ty = mk (r, Tlike ty)
 
-let locl_like r ty = mk (r, Tunion [dynamic r; ty])
+let locl_like r ty =
+  match get_node ty with
+  | Tprim Aast.Tnoreturn -> ty
+  | _ -> mk (r, Tunion [dynamic r; ty])
 
 let supportdyn r ty =
   match get_node ty with

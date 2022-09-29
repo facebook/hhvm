@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  build-and-run-quick-tests:
     if: |
       github.event_name == 'push' ||
       github.event_name == 'pull_request' ||
@@ -94,10 +94,32 @@ jobs:
     - name: Upload Nix binaries to the binary cache server on S3
       if: steps.configure-aws-credentials.outcome == 'success'
       run: nix copy --to 's3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com' --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+  install-deb-and-run-all-tests:
+    needs: build-and-run-quick-tests
+    strategy:
+      # Run tests on all OS's and HHVM versions, even if one fails
+      fail-fast: false
+      matrix:
+        package:
+        - hhvm
+        - hhvm_clang
+        os:
+        - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
+    runs-on: ${{matrix.os}}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Download the ${{matrix.package}}.deb from build-and-run-quick-tests job
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{matrix.package}}.deb
+    - run: sudo apt-get install ./${{matrix.package}}.deb
+    - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
+    - run: |
+        "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest
-    needs: build-and-test
+    needs: build-and-run-quick-tests
     steps:
     - uses: actions/checkout@v3
     - name: Assume the AWS role
@@ -105,7 +127,7 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
-    - name: Download the hhvm.deb from build-and-test job
+    - name: Download the hhvm.deb from build-and-run-quick-tests job
       uses: actions/download-artifact@v2
       with:
         name: hhvm.deb

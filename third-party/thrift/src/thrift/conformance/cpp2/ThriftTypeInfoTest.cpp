@@ -24,9 +24,9 @@ namespace apache::thrift::conformance {
 namespace {
 
 TEST(ThriftTypeInfoTest, Constants) {
-  EXPECT_EQ(kMinTypeHashBytes, type::standard_constants::minTypeHashBytes());
+  EXPECT_EQ(kMinTypeHashBytes, type::type_constants::minTypeHashBytes());
   EXPECT_EQ(
-      kDefaultTypeHashBytes, type::standard_constants::defaultTypeHashBytes());
+      kDefaultTypeHashBytes, type::type_constants::defaultTypeHashBytes());
 }
 
 TEST(ThriftTypeInfoTest, ValidateThriftTypeInfo) {

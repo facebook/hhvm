@@ -26,6 +26,44 @@ var _ = thrift0.GoUnusedProtection__
 var _ = java1.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
+type Void int64
+const (
+  Void_NoValue Void = 0
+)
+
+var VoidToName = map[Void]string {
+  Void_NoValue: "NoValue",
+}
+
+var VoidToValue = map[string]Void {
+  "NoValue": Void_NoValue,
+}
+
+var VoidNames = []string {
+  "NoValue",
+}
+
+var VoidValues = []Void {
+  Void_NoValue,
+}
+
+func (p Void) String() string {
+  if v, ok := VoidToName[p]; ok {
+    return v
+  }
+  return "<UNSET>"
+}
+
+func VoidFromString(s string) (Void, error) {
+  if v, ok := VoidToValue[s]; ok {
+    return v, nil
+  }
+  return Void(0), fmt.Errorf("not a valid Void string")
+}
+
+func VoidPtr(v Void) *Void { return &v }
+
+//The standard Thrift protocols.
 type StandardProtocol int64
 const (
   StandardProtocol_Custom StandardProtocol = 0
@@ -83,47 +121,17 @@ func StandardProtocolFromString(s string) (StandardProtocol, error) {
 
 func StandardProtocolPtr(v StandardProtocol) *StandardProtocol { return &v }
 
-type Void int64
-const (
-  Void_NoValue Void = 0
-)
-
-var VoidToName = map[Void]string {
-  Void_NoValue: "NoValue",
-}
-
-var VoidToValue = map[string]Void {
-  "NoValue": Void_NoValue,
-}
-
-var VoidNames = []string {
-  "NoValue",
-}
-
-var VoidValues = []Void {
-  Void_NoValue,
-}
-
-func (p Void) String() string {
-  if v, ok := VoidToName[p]; ok {
-    return v
-  }
-  return "<UNSET>"
-}
-
-func VoidFromString(s string) (Void, error) {
-  if v, ok := VoidToValue[s]; ok {
-    return v, nil
-  }
-  return Void(0), fmt.Errorf("not a valid Void string")
-}
-
-func VoidPtr(v Void) *Void { return &v }
-
+//Typedef for binary data which can be represented as a string of 8-bit bytes
+//
+//Each language can map this type into a customized memory efficient object
 type ByteString = []byte
 
 func ByteStringPtr(v ByteString) *ByteString { return &v }
 
+//Typedef for binary data
+//
+//Each language can map this type into a customized memory efficient object
+//May be used for zero-copy slice of data
 type ByteBuffer = []byte
 
 func ByteBufferPtr(v ByteBuffer) *ByteBuffer { return &v }

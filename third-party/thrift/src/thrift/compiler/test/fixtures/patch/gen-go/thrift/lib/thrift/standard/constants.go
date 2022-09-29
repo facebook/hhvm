@@ -24,8 +24,6 @@ var _ = context.Background
 
 var _ = thrift0.GoUnusedProtection__
 var _ = java1.GoUnusedProtection__
-const MinTypeHashBytes = 8
-const DefaultTypeHashBytes = 16
 
 func init() {
 }

@@ -35,9 +35,23 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'StandardProtocol', 'Void', 'UriStruct', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer', 'Uuid', 'UuidString', 'Path', 'PathSegments', 'Domain', 'DomainLabels', 'QueryString', 'QueryArgs', 'Uri']
+__all__ = ['UTF8STRINGS', 'Void', 'StandardProtocol', 'UriStruct', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer', 'Uuid', 'UuidString', 'Path', 'PathSegments', 'Domain', 'DomainLabels', 'QueryString', 'QueryArgs', 'Uri']
+
+class Void:
+  NoValue = 0
+
+  _VALUES_TO_NAMES = {
+    0: "NoValue",
+  }
+
+  _NAMES_TO_VALUES = {
+    "NoValue": 0,
+  }
 
 class StandardProtocol:
+  """
+  The standard Thrift protocols.
+  """
   Custom = 0
   Binary = 1
   Compact = 2
@@ -58,17 +72,6 @@ class StandardProtocol:
     "Compact": 2,
     "Json": 3,
     "SimpleJson": 4,
-  }
-
-class Void:
-  NoValue = 0
-
-  _VALUES_TO_NAMES = {
-    0: "NoValue",
-  }
-
-  _NAMES_TO_VALUES = {
-    "NoValue": 0,
   }
 
 class UriStruct:

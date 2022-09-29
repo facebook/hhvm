@@ -309,6 +309,26 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.type.standard.thrift_metadata
 
+class Void(_fbthrift_python_types.Enum, enum.Enum):
+    NoValue = 0
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "standard.Void"
+
+    @staticmethod
+    def __get_metadata__():
+        return apache.thrift.type.standard.thrift_metadata.gen_metadata_enum_Void()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("apache.thrift.type.standard.types")
+        return py3_types.Void(self.value)
+
+    def _to_py_deprecated(self):
+        return self.value
 class StandardProtocol(_fbthrift_python_types.Enum, enum.Enum):
     Custom = 0
     Binary = 1
@@ -333,26 +353,6 @@ class StandardProtocol(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class Void(_fbthrift_python_types.Enum, enum.Enum):
-    NoValue = 0
-    @staticmethod
-    def __get_thrift_name__() -> str:
-        return "standard.Void"
-
-    @staticmethod
-    def __get_metadata__():
-        return apache.thrift.type.standard.thrift_metadata.gen_metadata_enum_Void()
-
-    def _to_python(self):
-        return self
-
-    def _to_py3(self):
-        import importlib
-        py3_types = importlib.import_module("apache.thrift.type.standard.types")
-        return py3_types.Void(self.value)
-
-    def _to_py_deprecated(self):
-        return self.value
 
 def _fbthrift_metadata__struct_UriStruct():
     return apache.thrift.type.standard.thrift_metadata.gen_metadata_struct_UriStruct()
@@ -367,11 +367,6 @@ _fbthrift_all_structs = [
     TypeName,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
-
-
-minTypeHashBytes = 8
-
-defaultTypeHashBytes = 16
 
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf

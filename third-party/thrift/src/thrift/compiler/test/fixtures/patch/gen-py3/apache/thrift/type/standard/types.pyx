@@ -61,61 +61,6 @@ import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_th
 cimport apache.thrift.type.standard.types_reflection as _types_reflection
 
 
-cdef __EnumData __StandardProtocol_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cStandardProtocol](), StandardProtocol)
-
-
-@__cython.internal
-@__cython.auto_pickle(False)
-cdef class __StandardProtocolMeta(thrift.py3.types.EnumMeta):
-    def _fbthrift_get_by_value(cls, int value):
-        return __StandardProtocol_enum_data.get_by_value(value)
-
-    def _fbthrift_get_all_names(cls):
-        return __StandardProtocol_enum_data.get_all_names()
-
-    def __len__(cls):
-        return __StandardProtocol_enum_data.size()
-
-    def __getattribute__(cls, str name not None):
-        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
-            return super().__getattribute__(name)
-        return __StandardProtocol_enum_data.get_by_name(name)
-
-
-@__cython.final
-@__cython.auto_pickle(False)
-cdef class StandardProtocol(thrift.py3.types.CompiledEnum):
-    cdef get_by_name(self, str name):
-        return __StandardProtocol_enum_data.get_by_name(name)
-
-
-    @staticmethod
-    def __get_metadata__():
-        cdef __fbthrift_cThriftMetadata meta
-        EnumMetadata[cStandardProtocol].gen(meta)
-        return __MetadataBox.box(cmove(meta))
-
-    @staticmethod
-    def __get_thrift_name__():
-        return "standard.StandardProtocol"
-
-    def _to_python(self):
-        import importlib
-        python_types = importlib.import_module(
-            "apache.thrift.type.standard.thrift_types"
-        )
-        return python_types.StandardProtocol(self.value)
-
-    def _to_py3(self):
-        return self
-
-    def _to_py_deprecated(self):
-        return self.value
-
-
-__SetMetaClass(<PyTypeObject*> StandardProtocol, <PyTypeObject*> __StandardProtocolMeta)
-
-
 cdef __EnumData __Void_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cVoid](), Void)
 
 
@@ -169,6 +114,61 @@ cdef class Void(thrift.py3.types.CompiledEnum):
 
 
 __SetMetaClass(<PyTypeObject*> Void, <PyTypeObject*> __VoidMeta)
+
+
+cdef __EnumData __StandardProtocol_enum_data  = __EnumData._fbthrift_create(thrift.py3.types.createEnumData[cStandardProtocol](), StandardProtocol)
+
+
+@__cython.internal
+@__cython.auto_pickle(False)
+cdef class __StandardProtocolMeta(thrift.py3.types.EnumMeta):
+    def _fbthrift_get_by_value(cls, int value):
+        return __StandardProtocol_enum_data.get_by_value(value)
+
+    def _fbthrift_get_all_names(cls):
+        return __StandardProtocol_enum_data.get_all_names()
+
+    def __len__(cls):
+        return __StandardProtocol_enum_data.size()
+
+    def __getattribute__(cls, str name not None):
+        if name.startswith("__") or name.startswith("_fbthrift_") or name == "mro":
+            return super().__getattribute__(name)
+        return __StandardProtocol_enum_data.get_by_name(name)
+
+
+@__cython.final
+@__cython.auto_pickle(False)
+cdef class StandardProtocol(thrift.py3.types.CompiledEnum):
+    cdef get_by_name(self, str name):
+        return __StandardProtocol_enum_data.get_by_name(name)
+
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        EnumMetadata[cStandardProtocol].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "standard.StandardProtocol"
+
+    def _to_python(self):
+        import importlib
+        python_types = importlib.import_module(
+            "apache.thrift.type.standard.thrift_types"
+        )
+        return python_types.StandardProtocol(self.value)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        return self.value
+
+
+__SetMetaClass(<PyTypeObject*> StandardProtocol, <PyTypeObject*> __StandardProtocolMeta)
 
 
 
@@ -1141,8 +1141,6 @@ cdef class Map__string_string(thrift.py3.types.Map):
 
 Mapping.register(Map__string_string)
 
-minTypeHashBytes = 8
-defaultTypeHashBytes = 16
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
 Uuid = bytes

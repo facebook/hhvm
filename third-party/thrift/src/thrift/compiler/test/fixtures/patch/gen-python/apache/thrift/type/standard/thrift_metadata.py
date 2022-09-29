@@ -153,6 +153,22 @@ def gen_metadata_struct_TypeName() -> _fbthrift_metadata.ThriftMetadata:
 
 
 
+def _fbthrift_gen_metadata_enum_Void(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "standard.Void"
+
+    if qualified_name in metadata_struct.enums:
+        return metadata_struct
+    elements = {
+        0: "NoValue",
+    }
+    enum_dict = dict(metadata_struct.enums)
+    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
+    new_struct = metadata_struct(enums=enum_dict)
+
+    return new_struct
+
+def gen_metadata_enum_Void() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_enum_Void(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 def _fbthrift_gen_metadata_enum_StandardProtocol(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
     qualified_name = "standard.StandardProtocol"
 
@@ -173,27 +189,11 @@ def _fbthrift_gen_metadata_enum_StandardProtocol(metadata_struct: _fbthrift_meta
 
 def gen_metadata_enum_StandardProtocol() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_enum_StandardProtocol(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
-def _fbthrift_gen_metadata_enum_Void(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
-    qualified_name = "standard.Void"
-
-    if qualified_name in metadata_struct.enums:
-        return metadata_struct
-    elements = {
-        0: "NoValue",
-    }
-    enum_dict = dict(metadata_struct.enums)
-    enum_dict[qualified_name] = _fbthrift_metadata.ThriftEnum(name=qualified_name, elements=elements, structured_annotations=[])
-    new_struct = metadata_struct(enums=enum_dict)
-
-    return new_struct
-
-def gen_metadata_enum_Void() -> _fbthrift_metadata.ThriftMetadata:
-    return _fbthrift_gen_metadata_enum_Void(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
 def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={})
-    meta = _fbthrift_gen_metadata_enum_StandardProtocol(meta)
     meta = _fbthrift_gen_metadata_enum_Void(meta)
+    meta = _fbthrift_gen_metadata_enum_StandardProtocol(meta)
     meta = _fbthrift_gen_metadata_struct_UriStruct(meta)
     meta = _fbthrift_gen_metadata_struct_TypeUri(meta)
     meta = _fbthrift_gen_metadata_struct_TypeName(meta)

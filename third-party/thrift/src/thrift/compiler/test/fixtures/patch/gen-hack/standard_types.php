@@ -8,6 +8,38 @@
 
 /**
  * Original thrift enum:-
+ * Void
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Void'))>>
+enum apache_thrift_type_standard_Void: int {
+  NoValue = 0;
+}
+
+class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "standard.Void",
+        "elements" => dict[
+          0 => "NoValue",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
+/**
+ * The standard Thrift protocols.
+ * 
+ * Original thrift enum:-
  * StandardProtocol
  */
 <<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/StandardProtocol'))>>
@@ -30,36 +62,6 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
           2 => "Compact",
           3 => "Json",
           4 => "SimpleJson",
-        ],
-      )
-    );
-  }
-
-  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
-    return shape(
-      'enum' => dict[],
-      'constants' => dict[
-      ],
-    );
-  }
-}
-
-/**
- * Original thrift enum:-
- * Void
- */
-<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Void'))>>
-enum apache_thrift_type_standard_Void: int {
-  NoValue = 0;
-}
-
-class apache_thrift_type_standard_Void_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
-  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
-    return tmeta_ThriftEnum::fromShape(
-      shape(
-        "name" => "standard.Void",
-        "elements" => dict[
-          0 => "NoValue",
         ],
       )
     );

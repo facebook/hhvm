@@ -92,6 +92,18 @@ enum UniversalHashAlgorithmEnum {
 }
 
 /**
+ * The minimum and default number of bytes that can be used to identify
+ * a type.
+ *
+ * The expected number of types that can be hashed before a
+ * collision is 2^(8*{numBytes}/2).
+ * Which is ~4.3 billion types for the min, and ~18.45 quintillion
+ * types for the default.
+ */
+const byte minTypeHashBytes = 8;
+const byte defaultTypeHashBytes = 16;
+
+/**
  * A 'normal' Duration.
  *
  * This representation is always safe to 'normalize' or 'saturate' at

@@ -20,9 +20,5 @@ import thrift.annotation.thrift.ttypes
 import thrift.annotation.java.ttypes
 
 
-from .ttypes import UTF8STRINGS, StandardProtocol, Void, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri
-
-minTypeHashBytes = 8
-
-defaultTypeHashBytes = 16
+from .ttypes import UTF8STRINGS, Void, StandardProtocol, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri
 

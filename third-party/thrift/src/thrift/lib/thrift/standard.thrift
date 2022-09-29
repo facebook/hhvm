@@ -20,7 +20,7 @@ include "thrift/annotation/java.thrift"
 cpp_include "<folly/io/IOBuf.h>"
 cpp_include "<folly/FBString.h>"
 
-// The **standard** types all Thrift implementations support.
+/** The **standard** types all Thrift implementations support. */
 @thrift.v1alpha
 package "facebook.com/thrift/type"
 
@@ -33,30 +33,28 @@ namespace py.asyncio apache_thrift_asyncio.standard
 namespace go thrift.lib.thrift.standard
 namespace py thrift.lib.thrift.standard
 
-// The minimum and default number of bytes that can be used to identify
-// a type.
-//
-// The expected number of types that can be hashed before a
-// collision is 2^(8*{numBytes}/2).
-// Which is ~4.3 billion types for the min, and ~18.45 quintillion
-// types for the default.
-const byte minTypeHashBytes = 8;
-const byte defaultTypeHashBytes = 16;
+// TODO(afuller): Allow 'void' type for union fields.
+enum Void {
+  NoValue = 0 (cpp.name = "NoValueVoid"),
+}
 
-// Typedef for binary data which can be represented as a string of 8-bit bytes
-//
-// Each language can map this type into a customized memory efficient object
+/**
+ * Typedef for binary data which can be represented as a string of 8-bit bytes
+ *
+ * Each language can map this type into a customized memory efficient object
+ */
 @java.Adapter{
   adapterClassName = "com.facebook.thrift.adapter.common.UnpooledByteBufTypeAdapter",
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary (cpp2.type = "folly::fbstring") ByteString
 
-// Typedef for binary data
-//
-// Each language can map this type into a customized memory efficient object
-// May be used for zero-copy slice of data
-//
+/**
+ * Typedef for binary data
+ *
+ * Each language can map this type into a customized memory efficient object
+ * May be used for zero-copy slice of data
+ */
 // TODO(afuller): Consider switching to std::unique_ptr<folly::IOBuf> for c++,
 // to make moves cheaper (benchmark to see if this is better).
 @java.Adapter{
@@ -64,24 +62,6 @@ typedef binary (cpp2.type = "folly::fbstring") ByteString
   typeClassName = "io.netty.buffer.ByteBuf",
 }
 typedef binary (cpp2.type = "folly::IOBuf") ByteBuffer
-
-// The standard Thrift protocols.
-enum StandardProtocol {
-  Custom = 0,
-
-  // Standard protocols.
-  Binary = 1,
-  Compact = 2,
-
-  // Deprecated protocols.
-  Json = 3,
-  SimpleJson = 4,
-}
-
-// TODO(afuller): Allow 'void' type for union fields.
-enum Void {
-  NoValue = 0 (cpp.name = "NoValueVoid"),
-}
 
 /**
  * The binary form of a universally unique identifier (UUID).
@@ -241,4 +221,17 @@ union TypeName {
   14: Void listType;
   15: Void setType;
   16: Void mapType;
+}
+
+/** The standard Thrift protocols. */
+enum StandardProtocol {
+  Custom = 0,
+
+  // Standard protocols.
+  Binary = 1,
+  Compact = 2,
+
+  // Deprecated protocols.
+  Json = 3,
+  SimpleJson = 4,
 }

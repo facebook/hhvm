@@ -61,21 +61,21 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apa
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types.h" namespace "::apache::thrift::type":
-    cdef cppclass cStandardProtocol "::apache::thrift::type::StandardProtocol":
-        pass
-
     cdef cppclass cVoid "::apache::thrift::type::Void":
         pass
 
+    cdef cppclass cStandardProtocol "::apache::thrift::type::StandardProtocol":
+        pass
 
 
 
-
-cdef class StandardProtocol(thrift.py3.types.CompiledEnum):
-    pass
 
 
 cdef class Void(thrift.py3.types.CompiledEnum):
+    pass
+
+
+cdef class StandardProtocol(thrift.py3.types.CompiledEnum):
     pass
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apache::thrift::detail::md":
@@ -281,6 +281,3 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
 
 
-cdef extern from "thrift/lib/thrift/gen-cpp2/standard_constants.h" namespace "::apache::thrift::type":
-    cdef cint8_t cminTypeHashBytes "::apache::thrift::type::standard_constants::minTypeHashBytes"
-    cdef cint8_t cdefaultTypeHashBytes "::apache::thrift::type::standard_constants::defaultTypeHashBytes"

@@ -2270,7 +2270,7 @@ class CompilerFailureTest(unittest.TestCase):
                 @thrift.ReserveIds{ids = [2], id_ranges = {5: 10, 15: 20}}
                 struct IdRanges {
                   1: i64 a;
-                  10: string bad_field;
+                  9: string bad_field;
                 }
 
                 @thrift.ReserveIds{ids = [3, 8]}
@@ -2294,13 +2294,13 @@ class CompilerFailureTest(unittest.TestCase):
                 @thrift.ReserveIds{id_ranges = {5: 3}}
                 struct InvalidIdRange {
                   1: i64 a;
-                  3: string bad_field;
+                  2: string bad_field;
                 }
 
                 @thrift.ReserveIds{id_ranges = {5: 10}}
                 struct OkStruct {
                   1: i64 a;
-                  12: string b;
+                  10: string b;
                 }
 
                 @thrift.ReserveIds{ids = [-40000, 40000], id_ranges = {-50001: -50000, 50000: 50001}}
@@ -2317,15 +2317,13 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             "[ERROR:foo.thrift:3] Fields in IdList cannot use reserved ids: 3\n"
-            "[ERROR:foo.thrift:9] Fields in IdRanges cannot use reserved ids: 10\n"
+            "[ERROR:foo.thrift:9] Fields in IdRanges cannot use reserved ids: 9\n"
             "[ERROR:foo.thrift:21] Fields in UnionWithBadId cannot use reserved ids: 3\n"
             "[ERROR:foo.thrift:33] For each (start: end) in id_ranges, we must have start < end. Got (5: 3), annotated on InvalidIdRange\n"
             "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: -50001\n"
-            "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: -50000\n"
             "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: -40000\n"
             "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: 40000\n"
             "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: 50000\n"
-            "[ERROR:foo.thrift:45] Struct `Message` cannot have reserved id that is out of range: 50001\n"
             "[ERROR:foo.thrift:27] Fields in ExceptionWithBadId cannot use reserved ids: 3\n"
             "[ERROR:foo.thrift:15] Enum values in EnumWithBadId cannot use reserved ids: 3\n",
         )

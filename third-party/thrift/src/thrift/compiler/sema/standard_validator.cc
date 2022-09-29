@@ -945,7 +945,7 @@ class reserved_ids_checker {
             id_range_end->get_integer(),
             node.name());
         for (int i = id_range_begin->get_integer();
-             i <= id_range_end->get_integer();
+             i < id_range_end->get_integer();
              ++i) {
           reserved_ids.insert(i);
         }

@@ -508,9 +508,3 @@ cdef __MapSpec get_reflection__Map__string_string():
         value_kind=__NumberType.NOT_A_NUMBER,
     )
 
-cdef __SetSpec get_reflection___std_unordered_set__Set__string():
-    return __SetSpec._fbthrift_create(
-        value=str,
-        kind=__NumberType.NOT_A_NUMBER,
-     )
-

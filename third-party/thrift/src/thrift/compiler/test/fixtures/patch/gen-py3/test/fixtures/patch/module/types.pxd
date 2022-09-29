@@ -49,43 +49,6 @@ cimport test.fixtures.patch.module.types_fields as _fbthrift_types_fields
 cdef extern from "src/gen-py3/module/types.h":
   pass
 
-cdef extern from * nogil:
-    cdef cppclass _std_unordered_set "::std::unordered_set"[T]:
-        ctypedef T value_type
-        ctypedef size_t size_type
-
-        cppclass iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(iterator)
-            bint operator!=(iterator)
-        cppclass reverse_iterator:
-            T& operator*()
-            iterator operator++()
-            bint operator==(reverse_iterator)
-            bint operator!=(reverse_iterator)
-        cppclass const_iterator(iterator):
-            pass
-        cppclass const_reverse_iterator(reverse_iterator):
-            pass
-
-        _std_unordered_set() except +
-        _std_unordered_set(_std_unordered_set&) except +
-
-        cpair[iterator, bint] insert(const T&) except +
-        size_type size()
-        size_type count(const T&)
-        iterator begin()
-        const_iterator const_begin "begin"()
-        iterator end()
-        const_iterator const_end "end"()
-        reverse_iterator rbegin()
-        const_reverse_iterator const_rbegin "rbegin"()
-        reverse_iterator rend()
-        const_reverse_iterator const_rend "rend"()
-        void clear()
-        bint empty()
-
 
 cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
@@ -349,12 +312,5 @@ cdef class Map__string_string(thrift.py3.types.Map):
     cdef _fbthrift_create(shared_ptr[cmap[string,string]])
     @staticmethod
     cdef shared_ptr[cmap[string,string]] _make_instance(object items) except *
-
-cdef class _std_unordered_set__Set__string(thrift.py3.types.Set):
-    cdef shared_ptr[_std_unordered_set[string]] _cpp_obj
-    @staticmethod
-    cdef _fbthrift_create(shared_ptr[_std_unordered_set[string]])
-    @staticmethod
-    cdef shared_ptr[_std_unordered_set[string]] _make_instance(object items) except *
 
 

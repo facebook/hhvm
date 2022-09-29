@@ -29,5 +29,3 @@ cdef __ListSpec get_reflection__List__i16()
 cdef __SetSpec get_reflection__Set__string()
 
 cdef __MapSpec get_reflection__Map__string_string()
-
-cdef __SetSpec get_reflection___std_unordered_set__Set__string()

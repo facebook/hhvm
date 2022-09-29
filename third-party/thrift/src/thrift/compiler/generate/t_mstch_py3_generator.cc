@@ -323,12 +323,14 @@ class py3_mstch_program : public mstch_program {
 
   void visit_types_for_objects() {
     for (auto* object : program_->objects()) {
+      if (object->generated() ||
+          gen::cpp::type_resolver::is_directly_adapted(*object)) {
+        continue;
+      }
       for (const auto& field : object->fields()) {
         visit_type(field.get_type());
       }
-      if (!gen::cpp::type_resolver::is_directly_adapted(*object)) {
-        objects_.push_back(object);
-      }
+      objects_.push_back(object);
     }
   }
 

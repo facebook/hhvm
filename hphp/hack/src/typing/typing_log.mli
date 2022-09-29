@@ -123,6 +123,8 @@ val log_pessimise_param :
   string ->
   unit
 
+val log_sd_pass : ?level:int -> Typing_env_types.env -> Pos.t -> unit
+
 module GlobalInference : sig
   val log_merging_subgraph : Typing_env_types.env -> Pos.t -> unit
 

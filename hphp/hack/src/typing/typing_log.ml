@@ -805,6 +805,16 @@ let log_pessimise_return ?level env pos opt_bound =
 let log_pessimise_poisoned_return ?level env pos member =
   log_pessimise_ ?level env "ret" (Pos_or_decl.of_raw_pos pos) ("^" ^ member)
 
+let log_sd_pass ?(level = 1) env pos =
+  log_with_level env "sd_pass" ~level @@ fun () ->
+  let (file, line) =
+    let p = Pos.to_absolute pos in
+    (Pos.filename p, Pos.line p)
+  in
+  lnewline ();
+  lprintf (Normal Yellow) "sound dynamic pass:\t%s,%d" file line;
+  lnewline ()
+
 let increment_feature_count env s =
   if TypecheckerOptions.language_feature_logging env.genv.tcopt then
     Measure.sample s 1.0

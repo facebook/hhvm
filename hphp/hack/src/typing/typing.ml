@@ -4981,6 +4981,7 @@ and function_dynamically_callable env f params_decl_ty ret_locl_ty =
          ret_locl_ty
   in
   let function_body_check () =
+    Typing_log.log_sd_pass env (fst f.f_name);
     (* Here the body of the function is typechecked again to ensure it is safe
      * to call it from a dynamic context (eg. under dyn..dyn->dyn assumptions).
      * The code below must be kept in sync with with the fun_def checks.

@@ -92,27 +92,6 @@ zend/good/ext/intl/tests/locale_lookup_variant2.php
 zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
 zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 
-# TODO(alexeyt) failures due to pgrep missing from system
-server/debugger/tests/runTest1.php
-server/fastcgi/tests/authDigestTest.php
-server/fastcgi/tests/disable_ini_zend_compat.php
-server/fastcgi/tests/global_variables_server.php
-server/fastcgi/tests/headerTest.php
-server/fastcgi/tests/httpsTest.php
-server/fastcgi/tests/runTest1.php
-server/http/tests/apache_proxygen_headers.php
-server/http/tests/client_blocking_read_test.php
-server/http/tests/codeCoverageTest.php
-server/http/tests/get_headers_secure_dv_array.php
-server/http/tests/globalDocumentTest.php
-server/http/tests/method.php
-server/http/tests/requesIdTest.php
-server/http/tests/rqtrace.php
-server/http/tests/runTest1.php
-server/http/tests/staticContentHeaderTest.php
-server/http/tests/staticContentTest.php
-server/http/tests/takeoverTest.php
-
 # TODO(alexeyt) failures not yet categorized
 server/fastcgi/tests/invalid.php
 slow/coeffects/apc_pure.php

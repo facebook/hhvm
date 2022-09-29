@@ -405,6 +405,13 @@ void TransportCompatibilityTest::TestRequestResponse_Simple() {
     EXPECT_EQ(3, client->future_sumTwoNumbers(1, 2).get());
     EXPECT_EQ(8, client->future_add(5).get());
     if (FLAGS_transport != "http2") {
+      // Poll callCompleted_ to make the test more robust.
+      auto start = std::chrono::steady_clock::now();
+      while (server_->observer_->callCompleted_ != 5 &&
+             (std::chrono::steady_clock::now() - start) <
+                 std::chrono::seconds(5)) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // NOLINT
+      }
       EXPECT_EQ(5, server_->observer_->callCompleted_);
     }
   });

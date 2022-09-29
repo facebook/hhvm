@@ -392,18 +392,22 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
 
 let loose_unsafe_cast_lower_bound p ty_str_opt =
   let msg =
-    "HH\\FIXME\\UNSAFE_CAST input type annotation is too loose, please use a more specific type."
+    "The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible."
   in
-  let msg =
+  let (msg, autofix) =
     match ty_str_opt with
     | Some ty_str ->
-      msg
-      ^ " The typechecker infers "
-      ^ Markdown_lite.md_codify ty_str
-      ^ " as the most specific type."
-    | None -> msg
+      let path = Pos.filename (Pos.to_absolute p) in
+      let lines = Errors.read_lines path in
+      let src = String.concat ~sep:"\n" lines in
+      let original = Pos.get_text_from_pos ~content:src p in
+      let (start_offset, end_offset) = Pos.info_raw p in
+      let width = end_offset - start_offset in
+      ( msg ^ " Consider using " ^ Markdown_lite.md_codify ty_str ^ " instead.",
+        Some (original, ty_str, start_offset, width) )
+    | None -> (msg, None)
   in
-  Lints.add Codes.loose_unsafe_cast_lower_bound Lint_error p msg
+  Lints.add ~autofix Codes.loose_unsafe_cast_lower_bound Lint_error p msg
 
 let loose_unsafe_cast_upper_bound p =
   Lints.add

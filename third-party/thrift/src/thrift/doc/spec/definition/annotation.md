@@ -180,7 +180,7 @@ struct BinaryTree {
 
 Makes a field a reference, not a value and Thrift generates a `std::unique_ptr/std::shared_ptr` for the annotated field, not a value. This annotation is added to support recursive types. However, you can also use it to turn a field from a value to a pointer. `@cpp.Ref` is equivalent having type`@cpp.RefType.Unique`. All `@cpp.Ref` fields **should be** optional.
 
-NOTE: A struct may transitively contain itself as a field only if at least one of the fields in the inclusion chain is either an optional Ref field or a container. Otherwise the struct would have infinite size. See [`thrift/test/Recursive.thrift`](https://github.com/facebook/fbthrift/blob/main/thrift/test/Recursive.thrift) for examples. 
+NOTE: A struct may transitively contain itself as a field only if at least one of the fields in the inclusion chain is either an optional Ref field or a container. Otherwise the struct would have infinite size. See [`thrift/test/Recursive.thrift`](https://github.com/facebook/fbthrift/blob/main/thrift/test/Recursive.thrift) for examples.
 
 #### cpp.noncopyable and cpp.noncomparable
 
@@ -327,18 +327,26 @@ struct MyStruct {
 
 Insert some code into the Thrift generated header file.
 
-#### cpp.enum_type
+#### cpp.EnumType
 
 * Where to use: enum
-* Value: an integer type for c++ to use as the underlying type of enum
+* Type: an integer type for c++ to use as the underlying type of enum
+  * `cpp.EnumUnderlyingType.I8` : `std::int8_t`
+  * `cpp.EnumUnderlyingType.U8` : `std::uint8_t`
+  * `cpp.EnumUnderlyingType.I16` : `std::int16_t`
+  * `cpp.EnumUnderlyingType.U16` : `std::uint16_t`
+  * `cpp.EnumUnderlyingType.U32` : `std::uint32_t`:
 * Example:
 
+
 ```
+@cpp.EnumType{type = cpp.EnumUnderlyingType.I8}
 enum TermIdType {
  GENERIC_FP96 = 0,
  PREFIX_USERID = 1,
-} (cpp.enum_type = "int")
+}
 ```
+NOTE: Signed 32 bit integer and 64 bit integer are not valid options. Enum in C++ by default uses signed 32 bit integer, and Thrift serializer treats all enums as signed 32 bit integer which will lead into truncation.
 
 #### deprecated
 

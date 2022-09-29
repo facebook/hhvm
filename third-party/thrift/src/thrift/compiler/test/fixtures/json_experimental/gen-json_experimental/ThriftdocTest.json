@@ -260,7 +260,7 @@
   "inner_type" : "i32"
 }
 }
-          },
+                  },
           "map_three" : {
             "name" : "map_three",
             "default_value" : {"1" : {"\"a\"" : "one"}},
@@ -276,7 +276,7 @@
   "value_type" : "string"
 }
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -294,7 +294,7 @@
             "lineno" : 71,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "byte_thing" : {
             "name" : "byte_thing",
             "docstring" : "doct text goes before a comma\n",
@@ -302,21 +302,21 @@
             "lineno" : 74,
             "required" : "opt-in-req-out",
             "type" : "byte"
-          },
+                  },
           "i32_thing" : {
             "name" : "i32_thing",
             "key" : 9,
             "lineno" : 76,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "i64_thing" : {
             "name" : "i64_thing",
             "key" : 11,
             "lineno" : 77,
             "required" : "opt-in-req-out",
             "type" : "i64"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -331,7 +331,7 @@
             "lineno" : 89,
             "required" : "opt-in-req-out",
             "type" : "byte"
-          },
+                  },
           "struct_thing" : {
             "name" : "struct_thing",
             "key" : 2,
@@ -341,14 +341,14 @@
   "type" : "struct",
   "name" : "Xtruct"
 }
-          },
+                  },
           "i32_thing" : {
             "name" : "i32_thing",
             "key" : 3,
             "lineno" : 91,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -372,7 +372,7 @@
 },
   "value_type" : "i64"
 }
-          },
+                  },
           "xtructs" : {
             "name" : "xtructs",
             "docstring" : "And this is doc for field 2\n",
@@ -386,7 +386,7 @@
   "name" : "Xtruct"
 }
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -401,14 +401,14 @@
             "lineno" : 104,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "message" : {
             "name" : "message",
             "key" : 2,
             "lineno" : 105,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : true,
         "is_union" : false,
@@ -423,7 +423,7 @@
             "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "struct_thing" : {
             "name" : "struct_thing",
             "key" : 2,
@@ -433,7 +433,7 @@
   "type" : "struct",
   "name" : "Xtruct"
 }
-          }
+                  }
         },
         "is_exception" : true,
         "is_union" : false,
@@ -458,7 +458,7 @@
   "type" : "struct",
   "name" : "EmptyStruct"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -487,7 +487,7 @@
                 "key" : 1,
                 "lineno" : 127,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "string",
             "lineno" : 127
@@ -501,7 +501,7 @@
                 "key" : 1,
                 "lineno" : 128,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "byte",
             "lineno" : 128
@@ -515,7 +515,7 @@
                 "key" : 1,
                 "lineno" : 129,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "i32",
             "lineno" : 129
@@ -530,7 +530,7 @@
                 "key" : 1,
                 "lineno" : 132,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "i64",
             "lineno" : 132
@@ -544,7 +544,7 @@
                 "key" : 1,
                 "lineno" : 133,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "double",
             "lineno" : 133
@@ -561,7 +561,7 @@
                 "key" : 1,
                 "lineno" : 134,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "struct",
@@ -581,7 +581,7 @@
                 "key" : 1,
                 "lineno" : 135,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "struct",
@@ -602,7 +602,7 @@
                 "key" : 1,
                 "lineno" : 136,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "map",
@@ -623,7 +623,7 @@
                 "key" : 1,
                 "lineno" : 137,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "set",
@@ -643,7 +643,7 @@
                 "key" : 1,
                 "lineno" : 138,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "list",
@@ -665,7 +665,7 @@
                 "key" : 1,
                 "lineno" : 143,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "enum",
@@ -682,7 +682,7 @@
                 "key" : 1,
                 "lineno" : 146,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "i64",
             "lineno" : 146
@@ -696,7 +696,7 @@
                 "key" : 1,
                 "lineno" : 148,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "map",
@@ -721,7 +721,7 @@
                 "key" : 1,
                 "lineno" : 151,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "map",
@@ -741,7 +741,7 @@
             "lineno" : 151
           }
         }
-      }
+          }
       },
   "source_path" : "src/ThriftdocTest",
   "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.ThriftdocTest"

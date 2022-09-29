@@ -497,6 +497,8 @@ class mstch_service : public mstch_base {
             {"service:interaction?", &mstch_service::is_interaction},
             {"service:interactions", &mstch_service::interactions},
             {"service:interactions?", &mstch_service::has_interactions},
+            {"service:structured_annotations?",
+             &mstch_service::has_structured_annotations},
             {"service:structured_annotations",
              &mstch_service::structured_annotations},
             {"interaction:serial?", &mstch_service::is_serial_interaction},
@@ -550,6 +552,9 @@ class mstch_service : public mstch_base {
       context_.options["parent_service_cpp_name"] = cpp2::get_name(service_);
     }
     return make_mstch_interactions(interactions_, service_);
+  }
+  mstch::node has_structured_annotations() {
+    return !service_->structured_annotations().empty();
   }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(service_);
@@ -609,6 +614,8 @@ class mstch_function : public mstch_base {
             {"function:annotations", &mstch_function::annotations},
             {"function:starts_interaction?",
              &mstch_function::starts_interaction},
+            {"function:structured_annotations?",
+             &mstch_function::has_structured_annotations},
             {"function:structured_annotations",
              &mstch_function::structured_annotations},
             {"function:qualifier", &mstch_function::qualifier},
@@ -663,7 +670,9 @@ class mstch_function : public mstch_base {
   mstch::node starts_interaction() {
     return function_->get_returntype()->is_service();
   }
-
+  mstch::node has_structured_annotations() {
+    return !function_->structured_annotations().empty();
+  }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(function_);
   }
@@ -833,6 +842,8 @@ class mstch_typedef : public mstch_base {
             {"typedef:type", &mstch_typedef::type},
             {"typedef:is_same_type", &mstch_typedef::is_same_type},
             {"typedef:name", &mstch_typedef::name},
+            {"typedef:structured_annotations?",
+             &mstch_typedef::has_structured_annotations},
             {"typedef:structured_annotations",
              &mstch_typedef::structured_annotations},
         });
@@ -841,6 +852,9 @@ class mstch_typedef : public mstch_base {
   mstch::node name() { return typedef_->name(); }
   mstch::node is_same_type() {
     return typedef_->get_name() == typedef_->get_type()->get_name();
+  }
+  mstch::node has_structured_annotations() {
+    return !typedef_->structured_annotations().empty();
   }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(typedef_);
@@ -870,6 +884,8 @@ class mstch_struct : public mstch_base {
             {"struct:plain?", &mstch_struct::is_plain},
             {"struct:annotations", &mstch_struct::annotations},
             {"struct:thrift_uri", &mstch_struct::thrift_uri},
+            {"struct:structured_annotations?",
+             &mstch_struct::has_structured_annotations},
             {"struct:structured_annotations",
              &mstch_struct::structured_annotations},
             {"struct:exception_kind", &mstch_struct::exception_kind},
@@ -903,6 +919,9 @@ class mstch_struct : public mstch_base {
   mstch::node is_union() { return struct_->is_union(); }
   mstch::node is_plain() {
     return !struct_->is_xception() && !struct_->is_union();
+  }
+  mstch::node has_structured_annotations() {
+    return !struct_->structured_annotations().empty();
   }
   mstch::node annotations() { return mstch_base::annotations(struct_); }
   mstch::node structured_annotations() {
@@ -979,6 +998,8 @@ class mstch_field : public mstch_base {
             {"field:optional?", &mstch_field::is_optional},
             {"field:opt_in_req_out?", &mstch_field::is_optInReqOut},
             {"field:annotations", &mstch_field::annotations},
+            {"field:structured_annotations?",
+             &mstch_field::has_structured_annotations},
             {"field:structured_annotations",
              &mstch_field::structured_annotations},
         });
@@ -1001,6 +1022,9 @@ class mstch_field : public mstch_base {
     return field_->get_req() == t_field::e_req::opt_in_req_out;
   }
   mstch::node annotations() { return mstch_base::annotations(field_); }
+  mstch::node has_structured_annotations() {
+    return !field_->structured_annotations().empty();
+  }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(field_);
   }
@@ -1021,6 +1045,8 @@ class mstch_enum : public mstch_base {
         {
             {"enum:name", &mstch_enum::name},
             {"enum:values", &mstch_enum::values},
+            {"enum:structured_annotations?",
+             &mstch_enum::has_structured_annotations},
             {"enum:structured_annotations",
              &mstch_enum::structured_annotations},
         });
@@ -1028,6 +1054,9 @@ class mstch_enum : public mstch_base {
 
   mstch::node name() { return enum_->get_name(); }
   mstch::node values();
+  mstch::node has_structured_annotations() {
+    return !enum_->structured_annotations().empty();
+  }
   mstch::node structured_annotations() {
     return mstch_base::structured_annotations(enum_);
   }

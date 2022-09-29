@@ -234,7 +234,7 @@
   "type" : "enum",
   "name" : "Metasyntactic"
 }
-          },
+                  },
           "fine" : {
             "name" : "fine",
             "default_value" : 2,
@@ -245,7 +245,7 @@
   "type" : "enum",
   "name" : "Metasyntactic"
 }
-          },
+                  },
           "questionable" : {
             "name" : "questionable",
             "default_value" : -1,
@@ -256,7 +256,7 @@
   "type" : "enum",
   "name" : "Metasyntactic"
 }
-          },
+                  },
           "tags" : {
             "name" : "tags",
             "default_value" : [],
@@ -267,7 +267,7 @@
   "type" : "set",
   "inner_type" : "i32"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -286,7 +286,7 @@
   "type" : "enum",
   "name" : "MyEnum2"
 }
-          },
+                  },
           "me3_n3" : {
             "name" : "me3_n3",
             "default_value" : -3,
@@ -297,7 +297,7 @@
   "type" : "enum",
   "name" : "MyEnum3"
 }
-          },
+                  },
           "me1_t1" : {
             "name" : "me1_t1",
             "default_value" : 1,
@@ -308,7 +308,7 @@
   "type" : "enum",
   "name" : "MyEnum1"
 }
-          },
+                  },
           "me1_t2" : {
             "name" : "me1_t2",
             "default_value" : 1,
@@ -319,7 +319,7 @@
   "type" : "enum",
   "name" : "MyEnum1"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

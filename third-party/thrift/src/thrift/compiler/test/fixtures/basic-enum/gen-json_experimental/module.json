@@ -164,7 +164,7 @@
   "type" : "enum",
   "name" : "MyEnum"
 }
-          },
+                  },
           "myBigEnum" : {
             "name" : "myBigEnum",
             "default_value" : 1,
@@ -175,7 +175,7 @@
   "type" : "enum",
   "name" : "MyBigEnum"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

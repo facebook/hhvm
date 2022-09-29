@@ -19,7 +19,7 @@
             "lineno" : 32,
             "required" : "opt-in-req-out",
             "type" : "i64"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -41,13 +41,13 @@
                 "key" : 1,
                 "lineno" : 36,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "i64",
             "lineno" : 36
           }
         }
-      }
+          }
       },
   "source_path" : "src/module",
   "py_namespace" : "namespace_from_package.module"

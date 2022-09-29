@@ -13,6 +13,29 @@
   {
       "Adapter" : {
         "name" : "Adapter",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      },
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "adapterClassName" : {
             "name" : "adapterClassName",
@@ -20,14 +43,14 @@
             "lineno" : 36,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "typeClassName" : {
             "name" : "typeClassName",
             "key" : 2,
             "lineno" : 39,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

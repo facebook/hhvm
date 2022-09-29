@@ -33,14 +33,14 @@
                 "key" : 1,
                 "lineno" : 23,
                 "required" : "opt-in-req-out"
-              },
+                          },
               "i32_to": {
                 "name" : "i32_to",
                 "type" : "i32",
                 "key" : 2,
                 "lineno" : 23,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "streamresponse",
@@ -57,7 +57,7 @@
                 "key" : 1,
                 "lineno" : 24,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "streamresponse",
@@ -74,7 +74,7 @@
                 "key" : 1,
                 "lineno" : 25,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "exceptions" : {
               "e" : {
@@ -101,7 +101,7 @@
                 "key" : 1,
                 "lineno" : 26,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "exceptions" : {
               "e" : {
@@ -128,7 +128,7 @@
                 "key" : 1,
                 "lineno" : 30,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "streamresponse",
@@ -146,7 +146,7 @@
                 "key" : 1,
                 "lineno" : 32,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "exceptions" : {
               "e" : {
@@ -174,7 +174,7 @@
                 "key" : 1,
                 "lineno" : 36,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "exceptions" : {
               "e" : {
@@ -202,14 +202,14 @@
                 "key" : 1,
                 "lineno" : 38,
                 "required" : "opt-in-req-out"
-              },
+                          },
               "i32_to": {
                 "name" : "i32_to",
                 "type" : "i32",
                 "key" : 2,
                 "lineno" : 38,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "streamresponse",
@@ -218,7 +218,7 @@
             "lineno" : 38
           }
         }
-      }
+          }
       },
   "source_path" : "src/module",
   "py_namespace" : ""

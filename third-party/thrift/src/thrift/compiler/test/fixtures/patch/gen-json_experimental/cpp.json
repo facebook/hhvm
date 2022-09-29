@@ -76,6 +76,15 @@
   {
       "Ref" : {
         "name" : "Ref",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "type" : {
             "name" : "type",
@@ -86,7 +95,7 @@
   "type" : "enum",
   "name" : "RefType"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -94,6 +103,15 @@
       },
       "Lazy" : {
         "name" : "Lazy",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "ref" : {
             "name" : "ref",
@@ -102,7 +120,7 @@
             "lineno" : 41,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -110,12 +128,51 @@
       },
       "DisableLazyChecksum" : {
         "name" : "DisableLazyChecksum",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 44
       },
       "Adapter" : {
         "name" : "Adapter",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      },
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured"
+},
+        "value" : {}
+      },
+          "scope.Const" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Const"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "An annotation that applies a C++ adapter to typedef, field, or struct.\n\nFor example:\n\n  @cpp.Adapter{name = \"::ns::IdAdapter\"}\n  typedef i64 MyI64;\n\nHere the type `MyI64` has the C++ adapter `IdAdapter`.\n\n  struct User {\n    @cpp.Adapter{name = \"::ns::IdAdapter\"}\n    1: i64 id;\n  }\n\nHere the field `id` has the C++ adapter `IdAdapter`.\n",
         "fields" : {
           "name" : {
@@ -125,7 +182,7 @@
             "lineno" : 92,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "adaptedType" : {
             "name" : "adaptedType",
             "docstring" : "It is sometimes necessary to specify AdaptedType here (in case the codegen would\nhave a circular depdenceny, which will cause the C++ build to fail).\n",
@@ -133,7 +190,7 @@
             "lineno" : 98,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "underlyingName" : {
             "name" : "underlyingName",
             "docstring" : "When applied directly to a type (as opposed to on a typedef) the IDL name of the\ntype will refer to the adapted type in C++ and the underlying thrift struct will be\ngenerated in a nested namespace and/or with a different name. By default the struct\nwill be generated in a nested 'detail' namespace with the same name,\nbut both of these can be changed by setting these fields.\nEmpty string disables the nested namespace and uses the IDL name for the struct.\n",
@@ -141,7 +198,7 @@
             "lineno" : 108,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "extraNamespace" : {
             "name" : "extraNamespace",
             "default_value" : "detail",
@@ -149,7 +206,7 @@
             "lineno" : 109,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "moveOnly" : {
             "name" : "moveOnly",
             "docstring" : "Must set to true when adapted type is not copyable.\n",
@@ -157,7 +214,7 @@
             "lineno" : 112,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -165,6 +222,15 @@
       },
       "PackIsset" : {
         "name" : "PackIsset",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "atomic" : {
             "name" : "atomic",
@@ -173,7 +239,7 @@
             "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -181,24 +247,67 @@
       },
       "MinimizePadding" : {
         "name" : "MinimizePadding",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 120
       },
       "TriviallyRelocatable" : {
         "name" : "TriviallyRelocatable",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 123
       },
       "ScopedEnumAsUnionType" : {
         "name" : "ScopedEnumAsUnionType",
+        "structured_annotations": {
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 126
       },
       "StrongType" : {
         "name" : "StrongType",
+        "structured_annotations": {
+          "thrift.Experimental" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Experimental"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "Indicates a typedef should be 'strong', and require an explicit cast to\nthe underlying type.\n\nCurrently only works for integer typedefs, for example:\n\n    @cpp.StrongType\n    typedef i32 MyId;\n\nWill cause an enum class to be used instead of a typedef in the genearte code, for example:\n\n    enum class MyId : ::std::int32_t {};\n\n",
         "is_exception" : false,
         "is_union" : false,
@@ -206,6 +315,22 @@
       },
       "FieldInterceptor" : {
         "name" : "FieldInterceptor",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      },
+          "thrift.Experimental" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Experimental"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "An annotation that intercepts field access with C++ field interceptor.\nUse with *caution* since this may introduce substantial performance overhead on each field access.\n\nFor example:\n\n    struct Foo {\n      @cpp.FieldInterceptor{name = \"MyFieldInterceptor\"}\n      1: i64 id;\n    }\n\nThe field interceptor `MyFieldInterceptor` will intercept with `interceptThriftFieldAccess`\nwhen the field `id` is accessed.\n",
         "fields" : {
           "name" : {
@@ -215,7 +340,7 @@
             "lineno" : 178,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "noinline" : {
             "name" : "noinline",
             "docstring" : "Setting to true makes compiler not inline and erase function signature for\nthe intercepting field accessor.\n",
@@ -223,7 +348,7 @@
             "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -231,12 +356,30 @@
       },
       "UseOpEncode" : {
         "name" : "UseOpEncode",
+        "structured_annotations": {
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 187
       },
       "EnumType" : {
         "name" : "EnumType",
+        "structured_annotations": {
+          "scope.FbthriftInternalEnum" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Enum"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "Indicates an integer type for C++ to use as the underlying type of enum, for example:\n\n    @cpp.EnumType{type = cpp.EnumUnderlyingType.I8}\n    enum Fruit {\n      Apple = 0,\n      Banana = 1,\n    }\n\nwill be generated into the following:\n\n    enum class Fruit : ::std::int8_t {\n      Apple = 0,\n      Banana = 1,\n    };\n\n",
         "fields" : {
           "type" : {
@@ -248,7 +391,7 @@
   "type" : "enum",
   "name" : "EnumUnderlyingType"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

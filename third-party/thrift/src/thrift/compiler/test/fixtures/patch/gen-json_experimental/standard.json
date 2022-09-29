@@ -144,6 +144,15 @@
   {
       "UriStruct" : {
         "name" : "UriStruct",
+        "structured_annotations": {
+          "thrift.Experimental" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Experimental"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "The 'parsed' form of a `Uri`.\n\n  {scheme}://{domain}/{path}?{query}#{fragment}\n",
         "fields" : {
           "scheme" : {
@@ -152,7 +161,7 @@
             "lineno" : 162,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "domain" : {
             "name" : "domain",
             "key" : 2,
@@ -162,7 +171,7 @@
   "type" : "list",
   "inner_type" : "string"
 }
-          },
+                  },
           "path" : {
             "name" : "path",
             "key" : 4,
@@ -172,7 +181,7 @@
   "type" : "list",
   "inner_type" : "string"
 }
-          },
+                  },
           "query" : {
             "name" : "query",
             "key" : 5,
@@ -183,14 +192,14 @@
   "key_type" : "string",
   "value_type" : "string"
 }
-          },
+                  },
           "fragment" : {
             "name" : "fragment",
             "key" : 6,
             "lineno" : 174,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -205,14 +214,14 @@
             "lineno" : 180,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "typeHashPrefixSha2_256" : {
             "name" : "typeHashPrefixSha2_256",
             "key" : 2,
             "lineno" : 182,
             "required" : "opt-in-req-out",
             "type" : "binary"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : true,
@@ -230,7 +239,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "byteType" : {
             "name" : "byteType",
             "key" : 2,
@@ -240,7 +249,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "i16Type" : {
             "name" : "i16Type",
             "key" : 3,
@@ -250,7 +259,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "i32Type" : {
             "name" : "i32Type",
             "key" : 4,
@@ -260,7 +269,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "i64Type" : {
             "name" : "i64Type",
             "key" : 5,
@@ -270,7 +279,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "floatType" : {
             "name" : "floatType",
             "key" : 6,
@@ -280,7 +289,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "doubleType" : {
             "name" : "doubleType",
             "key" : 7,
@@ -290,7 +299,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "stringType" : {
             "name" : "stringType",
             "key" : 8,
@@ -300,7 +309,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "binaryType" : {
             "name" : "binaryType",
             "key" : 9,
@@ -310,7 +319,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "enumType" : {
             "name" : "enumType",
             "key" : 10,
@@ -320,7 +329,7 @@
   "type" : "struct",
   "name" : "TypeUri"
 }
-          },
+                  },
           "typedefType" : {
             "name" : "typedefType",
             "key" : 17,
@@ -330,7 +339,7 @@
   "type" : "struct",
   "name" : "TypeUri"
 }
-          },
+                  },
           "structType" : {
             "name" : "structType",
             "key" : 11,
@@ -340,7 +349,7 @@
   "type" : "struct",
   "name" : "TypeUri"
 }
-          },
+                  },
           "unionType" : {
             "name" : "unionType",
             "key" : 12,
@@ -350,7 +359,7 @@
   "type" : "struct",
   "name" : "TypeUri"
 }
-          },
+                  },
           "exceptionType" : {
             "name" : "exceptionType",
             "key" : 13,
@@ -360,7 +369,7 @@
   "type" : "struct",
   "name" : "TypeUri"
 }
-          },
+                  },
           "listType" : {
             "name" : "listType",
             "key" : 14,
@@ -370,7 +379,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "setType" : {
             "name" : "setType",
             "key" : 15,
@@ -380,7 +389,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          },
+                  },
           "mapType" : {
             "name" : "mapType",
             "key" : 16,
@@ -390,7 +399,7 @@
   "type" : "enum",
   "name" : "Void"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : true,

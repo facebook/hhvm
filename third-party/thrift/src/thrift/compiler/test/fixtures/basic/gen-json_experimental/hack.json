@@ -14,6 +14,15 @@
   {
       "FieldWrapper" : {
         "name" : "FieldWrapper",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "name" : {
             "name" : "name",
@@ -21,7 +30,7 @@
             "lineno" : 38,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -29,6 +38,29 @@
       },
       "Wrapper" : {
         "name" : "Wrapper",
+        "structured_annotations": {
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      },
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "name" : {
             "name" : "name",
@@ -36,14 +68,14 @@
             "lineno" : 54,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "underlyingName" : {
             "name" : "underlyingName",
             "key" : 2,
             "lineno" : 61,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "extraNamespace" : {
             "name" : "extraNamespace",
             "default_value" : "thrift_adapted_types",
@@ -51,7 +83,7 @@
             "lineno" : 62,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -59,6 +91,22 @@
       },
       "Adapter" : {
         "name" : "Adapter",
+        "structured_annotations": {
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "name" : {
             "name" : "name",
@@ -66,7 +114,7 @@
             "lineno" : 78,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -74,6 +122,22 @@
       },
       "SkipCodegen" : {
         "name" : "SkipCodegen",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      },
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "reason" : {
             "name" : "reason",
@@ -81,7 +145,7 @@
             "lineno" : 84,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -96,14 +160,14 @@
             "lineno" : 92,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "reason" : {
             "name" : "reason",
             "key" : 2,
             "lineno" : 93,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -111,6 +175,15 @@
       },
       "UnionEnumAttributes" : {
         "name" : "UnionEnumAttributes",
+        "structured_annotations": {
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "attributes" : {
             "name" : "attributes",
@@ -121,7 +194,7 @@
   "type" : "list",
   "inner_type" : "string"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -129,6 +202,29 @@
       },
       "StructTrait" : {
         "name" : "StructTrait",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union"
+},
+        "value" : {}
+      },
+          "scope.Exception" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Exception"
+},
+        "value" : {}
+      }
+        },
         "fields" : {
           "name" : {
             "name" : "name",
@@ -136,7 +232,7 @@
             "lineno" : 107,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -154,7 +250,7 @@
   "type" : "list",
   "inner_type" : "string"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -162,6 +258,29 @@
       },
       "StructAsTrait" : {
         "name" : "StructAsTrait",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union"
+},
+        "value" : {}
+      },
+          "scope.Exception" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Exception"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 115

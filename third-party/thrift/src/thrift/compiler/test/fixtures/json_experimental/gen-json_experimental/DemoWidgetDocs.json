@@ -60,7 +60,7 @@
   "type" : "enum",
   "name" : "WidgetType"
 }
-          },
+                  },
           "budgetCents" : {
             "name" : "budgetCents",
             "docstring" : "How much can we spend on this order of widgets?\n@must _ > 0\n",
@@ -68,7 +68,7 @@
             "lineno" : 51,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "minWidgets" : {
             "name" : "minWidgets",
             "docstring" : "Negative quantities represent sale requisitions.\n",
@@ -76,7 +76,7 @@
             "lineno" : 53,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "maxWidgets" : {
             "name" : "maxWidgets",
             "docstring" : "@must minWidgets <= _\n",
@@ -84,7 +84,7 @@
             "lineno" : 55,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "minPriceCents" : {
             "name" : "minPriceCents",
             "default_value" : 0,
@@ -93,7 +93,7 @@
             "lineno" : 60,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "maxPriceCents" : {
             "name" : "maxPriceCents",
             "docstring" : "Our physical security can't deal with high-value items.\n@must minPrice <= _\n",
@@ -101,7 +101,7 @@
             "lineno" : 64,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -121,7 +121,7 @@
   "type" : "struct",
   "name" : "WidgetRequisition"
 }
-          },
+                  },
           "numWidgets" : {
             "name" : "numWidgets",
             "docstring" : "Negative quantities represent sale orders.\n",
@@ -129,7 +129,7 @@
             "lineno" : 79,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "priceCents" : {
             "name" : "priceCents",
             "docstring" : "@must _ >= 0\n",
@@ -137,7 +137,7 @@
             "lineno" : 81,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "numComments" : {
             "name" : "numComments",
             "docstring" : "count of comments\n",
@@ -145,7 +145,7 @@
             "lineno" : 82,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          },
+                  },
           "comments" : {
             "name" : "comments",
             "docstring" : "all comments\nmay support multiline\n",
@@ -153,7 +153,7 @@
             "lineno" : 83,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

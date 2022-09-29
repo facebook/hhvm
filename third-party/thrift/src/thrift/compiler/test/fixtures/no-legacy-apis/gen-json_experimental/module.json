@@ -41,14 +41,14 @@
             "lineno" : 34,
             "required" : "opt-in-req-out",
             "type" : "i64"
-          },
+                  },
           "myStringField" : {
             "name" : "myStringField",
             "key" : 2,
             "lineno" : 35,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -66,7 +66,7 @@
   "type" : "enum",
   "name" : "MyEnum"
 }
-          },
+                  },
           "myDataItem" : {
             "name" : "myDataItem",
             "key" : 2,
@@ -76,7 +76,7 @@
   "type" : "struct",
   "name" : "MyStruct"
 }
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : true,
@@ -101,7 +101,7 @@
                 "key" : 1,
                 "lineno" : 44,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : {
   "type" : "struct",
@@ -110,7 +110,7 @@
             "lineno" : 44
           }
         }
-      }
+          }
       },
   "source_path" : "src/module",
   "py_namespace" : ""

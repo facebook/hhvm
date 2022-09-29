@@ -370,6 +370,8 @@ class json_experimental_const_value : public mstch_const_value {
         {
             {"value:lineno", &json_experimental_const_value::get_lineno},
             {"value:type_name", &json_experimental_const_value::get_type_name},
+            {"value:qualified_name",
+             &json_experimental_const_value::get_qualified_name},
             {"value:string_value_any",
              &json_experimental_const_value::string_value_any},
             {"value:docstring?", &json_experimental_const_value::has_docstring},
@@ -388,6 +390,9 @@ class json_experimental_const_value : public mstch_const_value {
     return current_const_->get_type()->get_true_type()->get_full_name();
   }
 
+  mstch::node get_qualified_name() {
+    return current_const_->get_type()->get_true_type()->get_scoped_name();
+  }
   mstch::node string_value_any() { return to_string(const_value_); }
 
  private:

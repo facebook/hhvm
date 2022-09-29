@@ -89,6 +89,22 @@
   {
       "GeneratePatch" : {
         "name" : "GeneratePatch",
+        "structured_annotations": {
+          "scope.Program" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Program"
+},
+        "value" : {}
+      },
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured"
+},
+        "value" : {}
+      }
+        },
         "docstring" : "An annotation that indicates a patch representation\nshould be generated for the associated definition.\n",
         "is_exception" : false,
         "is_union" : false,
@@ -96,6 +112,15 @@
       },
       "BoolPatch" : {
         "name" : "BoolPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "BoolPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BoolPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a boolean value.\n",
         "fields" : {
           "assign" : {
@@ -105,7 +130,7 @@
             "lineno" : 55,
             "required" : "optional",
             "type" : "bool"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -113,7 +138,7 @@
             "lineno" : 58,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "invert" : {
             "name" : "invert",
             "docstring" : "If the bool value should be inverted.\n",
@@ -121,7 +146,7 @@
             "lineno" : 61,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -129,6 +154,15 @@
       },
       "BytePatch" : {
         "name" : "BytePatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "BytePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for an 8-bit integer value.\n",
         "fields" : {
           "assign" : {
@@ -138,7 +172,7 @@
             "lineno" : 76,
             "required" : "optional",
             "type" : "byte"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -146,7 +180,7 @@
             "lineno" : 79,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -154,7 +188,7 @@
             "lineno" : 82,
             "required" : "opt-in-req-out",
             "type" : "byte"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -162,6 +196,15 @@
       },
       "I16Patch" : {
         "name" : "I16Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "I16PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a 16-bit integer value.\n",
         "fields" : {
           "assign" : {
@@ -171,7 +214,7 @@
             "lineno" : 97,
             "required" : "optional",
             "type" : "i16"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -179,7 +222,7 @@
             "lineno" : 100,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -187,7 +230,7 @@
             "lineno" : 103,
             "required" : "opt-in-req-out",
             "type" : "i16"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -195,6 +238,15 @@
       },
       "I32Patch" : {
         "name" : "I32Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "I32PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a 32-bit integer value.\n",
         "fields" : {
           "assign" : {
@@ -204,7 +256,7 @@
             "lineno" : 118,
             "required" : "optional",
             "type" : "i32"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -212,7 +264,7 @@
             "lineno" : 121,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -220,7 +272,7 @@
             "lineno" : 124,
             "required" : "opt-in-req-out",
             "type" : "i32"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -228,6 +280,15 @@
       },
       "I64Patch" : {
         "name" : "I64Patch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "I64PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a 64-bit integer value.\n",
         "fields" : {
           "assign" : {
@@ -237,7 +298,7 @@
             "lineno" : 139,
             "required" : "optional",
             "type" : "i64"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -245,7 +306,7 @@
             "lineno" : 142,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -253,7 +314,7 @@
             "lineno" : 145,
             "required" : "opt-in-req-out",
             "type" : "i64"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -261,6 +322,15 @@
       },
       "FloatPatch" : {
         "name" : "FloatPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "FloatPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a 32-bit floating point value.\n",
         "fields" : {
           "assign" : {
@@ -270,7 +340,7 @@
             "lineno" : 160,
             "required" : "optional",
             "type" : "float"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -278,7 +348,7 @@
             "lineno" : 163,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -286,7 +356,7 @@
             "lineno" : 166,
             "required" : "opt-in-req-out",
             "type" : "float"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -294,6 +364,15 @@
       },
       "DoublePatch" : {
         "name" : "DoublePatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "DoublePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for an 64-bit floating point value.\n",
         "fields" : {
           "assign" : {
@@ -303,7 +382,7 @@
             "lineno" : 181,
             "required" : "optional",
             "type" : "double"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear any set value.\n",
@@ -311,7 +390,7 @@
             "lineno" : 184,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "add" : {
             "name" : "add",
             "docstring" : "Add to a given value.\n",
@@ -319,7 +398,7 @@
             "lineno" : 187,
             "required" : "opt-in-req-out",
             "type" : "double"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -327,6 +406,15 @@
       },
       "StringPatch" : {
         "name" : "StringPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "StringPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::StringPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a string value.\n",
         "fields" : {
           "assign" : {
@@ -336,7 +424,7 @@
             "lineno" : 202,
             "required" : "optional",
             "type" : "string"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear a given string.\n",
@@ -344,7 +432,7 @@
             "lineno" : 205,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
@@ -352,7 +440,7 @@
             "lineno" : 208,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "append" : {
             "name" : "append",
             "docstring" : "Append to a given value.\n",
@@ -360,7 +448,7 @@
             "lineno" : 211,
             "required" : "opt-in-req-out",
             "type" : "string"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,
@@ -368,6 +456,15 @@
       },
       "BinaryPatch" : {
         "name" : "BinaryPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"underlyingName": "BinaryPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BinaryPatchAdapter"}
+      }
+        },
         "docstring" : "A patch for a binary value.\n",
         "fields" : {
           "assign" : {
@@ -377,7 +474,7 @@
             "lineno" : 226,
             "required" : "optional",
             "type" : "binary"
-          },
+                  },
           "clear" : {
             "name" : "clear",
             "docstring" : "Clear a given binary.\n",
@@ -385,7 +482,7 @@
             "lineno" : 229,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "prepend" : {
             "name" : "prepend",
             "docstring" : "Prepend to a given value.\n",
@@ -393,7 +490,7 @@
             "lineno" : 232,
             "required" : "opt-in-req-out",
             "type" : "binary"
-          },
+                  },
           "append" : {
             "name" : "append",
             "docstring" : "Append to a given value.\n",
@@ -401,7 +498,7 @@
             "lineno" : 235,
             "required" : "opt-in-req-out",
             "type" : "binary"
-          }
+                  }
         },
         "is_exception" : false,
         "is_union" : false,

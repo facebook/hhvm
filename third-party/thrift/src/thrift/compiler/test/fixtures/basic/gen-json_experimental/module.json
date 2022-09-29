@@ -55,14 +55,14 @@
             "lineno" : 31,
             "required" : "opt-in-req-out",
             "type" : "i64"
-          },
+                  },
           "MyStringField" : {
             "name" : "MyStringField",
             "key" : 2,
             "lineno" : 32,
             "required" : "opt-in-req-out",
             "type" : "string"
-          },
+                  },
           "MyDataField" : {
             "name" : "MyDataField",
             "key" : 3,
@@ -72,7 +72,7 @@
   "type" : "struct",
   "name" : "MyDataItem"
 }
-          },
+                  },
           "myEnum" : {
             "name" : "myEnum",
             "key" : 4,
@@ -82,28 +82,28 @@
   "type" : "enum",
   "name" : "MyEnum"
 }
-          },
+                  },
           "oneway" : {
             "name" : "oneway",
             "key" : 5,
             "lineno" : 36,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "readonly" : {
             "name" : "readonly",
             "key" : 6,
             "lineno" : 37,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "idempotent" : {
             "name" : "idempotent",
             "key" : 7,
             "lineno" : 38,
             "required" : "opt-in-req-out",
             "type" : "bool"
-          },
+                  },
           "floatSet" : {
             "name" : "floatSet",
             "key" : 8,
@@ -113,6 +113,16 @@
   "type" : "set",
   "inner_type" : "float"
 }
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "SkipCodegen"
+},
+            "value" : {"reason": "Invalid key type"}
+          }
+                }
           },
           "no_hack_codegen_field" : {
             "name" : "no_hack_codegen_field",
@@ -120,6 +130,16 @@
             "lineno" : 41,
             "required" : "opt-in-req-out",
             "type" : "string"
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "SkipCodegen"
+},
+            "value" : {"reason": "skip field codegen for deprecation"}
+          }
+                }
           }
         },
         "is_exception" : false,
@@ -144,7 +164,7 @@
   "type" : "enum",
   "name" : "MyEnum"
 }
-          },
+                  },
           "myStruct" : {
             "name" : "myStruct",
             "key" : 2,
@@ -154,7 +174,7 @@
   "type" : "struct",
   "name" : "MyStruct"
 }
-          },
+                  },
           "myDataItem" : {
             "name" : "myDataItem",
             "key" : 3,
@@ -164,7 +184,7 @@
   "type" : "struct",
   "name" : "MyDataItem"
 }
-          },
+                  },
           "floatSet" : {
             "name" : "floatSet",
             "key" : 4,
@@ -174,6 +194,16 @@
   "type" : "set",
   "inner_type" : "float"
 }
+            ,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "SkipCodegen"
+},
+            "value" : {"reason": "Invalid key type"}
+          }
+                }
           }
         },
         "is_exception" : false,
@@ -182,6 +212,15 @@
       },
       "ReservedKeyword" : {
         "name" : "ReservedKeyword",
+        "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+        "value" : {"name": "MyRenamedStruct"}
+      }
+        },
         "fields" : {
           "reserved_field" : {
             "name" : "reserved_field",
@@ -189,6 +228,16 @@
             "lineno" : 57,
             "required" : "opt-in-req-out",
             "type" : "i32"
+            ,
+            "structured_annotations": {
+              "hack.Name" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+            "value" : {"name": "renamed_field"}
+          }
+                }
           }
         },
         "is_exception" : false,
@@ -197,6 +246,15 @@
       },
       "UnionToBeRenamed" : {
         "name" : "UnionToBeRenamed",
+        "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+        "value" : {"name": "MyRenamedUnion"}
+      }
+        },
         "fields" : {
           "reserved_field" : {
             "name" : "reserved_field",
@@ -204,6 +262,16 @@
             "lineno" : 70,
             "required" : "opt-in-req-out",
             "type" : "i32"
+            ,
+            "structured_annotations": {
+              "hack.Name" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+            "value" : {"name": "renamed_field"}
+          }
+                }
           }
         },
         "is_exception" : false,
@@ -223,6 +291,16 @@
             "lineno" : 76
           }
         }
+        ,
+        "structured_annotations": {
+          "hack.Name" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+        "value" : {"name": "RenamedService"}
+      }
+        }
       },
       "FB303Service" : { 
         "name" : "FB303Service",
@@ -237,16 +315,35 @@
                 "key" : 1,
                 "lineno" : 82,
                 "required" : "opt-in-req-out"
+                ,
+                "structured_annotations": {
+                  "hack.Name" : {
+                "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+                "value" : {"name": "renamed_parameter"}
+              }
+                        }
               }
             },
             "returnType" : {
   "type" : "struct",
   "name" : "ReservedKeyword"
 },
-            "lineno" : 80
+            "lineno" : 80,
+            "structured_annotations": {
+              "hack.Name" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "Name"
+},
+            "value" : {"name": "renamed_rpc"}
+          }
+                }
           }
         }
-      },
+          },
       "MyService" : { 
         "name" : "MyService",
         "lineno" : 87,
@@ -270,7 +367,7 @@
                 "key" : 1,
                 "lineno" : 90,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "void",
             "lineno" : 90
@@ -284,14 +381,14 @@
                 "key" : 1,
                 "lineno" : 92,
                 "required" : "opt-in-req-out"
-              },
+                          },
               "data": {
                 "name" : "data",
                 "type" : "string",
                 "key" : 2,
                 "lineno" : 92,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "void",
             "lineno" : 92
@@ -305,7 +402,7 @@
                 "key" : 1,
                 "lineno" : 93,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "bool",
             "lineno" : 93
@@ -319,7 +416,7 @@
                 "key" : 1,
                 "lineno" : 94,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "string",
             "lineno" : 94
@@ -333,7 +430,7 @@
                 "key" : 1,
                 "lineno" : 95,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "void",
             "lineno" : 95
@@ -347,14 +444,14 @@
                 "key" : 1,
                 "lineno" : 96,
                 "required" : "opt-in-req-out"
-              },
+                          },
               "data": {
                 "name" : "data",
                 "type" : "string",
                 "key" : 2,
                 "lineno" : 96,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "void",
             "lineno" : 96
@@ -365,15 +462,33 @@
   "type" : "set",
   "inner_type" : "float"
 },
-            "lineno" : 98
+            "lineno" : 98,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "SkipCodegen"
+},
+            "value" : {"reason": "Invalid key type"}
+          }
+                }
           },
           "rpc_skipped_codegen" : {
             "name" : "rpc_skipped_codegen",
             "returnType" : "void",
-            "lineno" : 101
+            "lineno" : 101,
+            "structured_annotations": {
+              "hack.SkipCodegen" : {
+            "type" : {
+  "type" : "struct",
+  "name" : "SkipCodegen"
+},
+            "value" : {"reason": "Skip function deprecation"}
+          }
+                }
           }
         }
-      },
+          },
       "DbMixedStackArguments" : { 
         "name" : "DbMixedStackArguments",
         "lineno" : 105,
@@ -387,7 +502,7 @@
                 "key" : 1,
                 "lineno" : 106,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "binary",
             "lineno" : 106
@@ -401,13 +516,13 @@
                 "key" : 1,
                 "lineno" : 107,
                 "required" : "opt-in-req-out"
-              }
+                          }
             },
             "returnType" : "binary",
             "lineno" : 107
           }
         }
-      }
+          }
       },
   "source_path" : "src/module",
   "py_namespace" : ""

@@ -105,24 +105,158 @@
       },
       "Structured" : {
         "name" : "Structured",
+        "structured_annotations": {
+          "scope.Struct" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Struct"
+},
+        "value" : {}
+      },
+          "scope.Union" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Union"
+},
+        "value" : {}
+      },
+          "scope.Exception" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Exception"
+},
+        "value" : {}
+      },
+          "scope.Transitive" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Transitive"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 96
       },
       "Interface" : {
         "name" : "Interface",
+        "structured_annotations": {
+          "scope.Service" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Service"
+},
+        "value" : {}
+      },
+          "scope.Interaction" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interaction"
+},
+        "value" : {}
+      },
+          "scope.Transitive" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Transitive"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 102
       },
       "RootDefinition" : {
         "name" : "RootDefinition",
+        "structured_annotations": {
+          "scope.Structured" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Structured"
+},
+        "value" : {}
+      },
+          "scope.Interface" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Interface"
+},
+        "value" : {}
+      },
+          "scope.Typedef" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Typedef"
+},
+        "value" : {}
+      },
+          "scope.FbthriftInternalEnum" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "FbthriftInternalEnum"
+},
+        "value" : {}
+      },
+          "scope.Const" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Const"
+},
+        "value" : {}
+      },
+          "scope.Transitive" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Transitive"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 107
       },
       "Definition" : {
         "name" : "Definition",
+        "structured_annotations": {
+          "scope.RootDefinition" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "RootDefinition"
+},
+        "value" : {}
+      },
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      },
+          "scope.Function" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Function"
+},
+        "value" : {}
+      },
+          "scope.EnumValue" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "EnumValue"
+},
+        "value" : {}
+      },
+          "scope.Transitive" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Transitive"
+},
+        "value" : {}
+      }
+        },
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 115

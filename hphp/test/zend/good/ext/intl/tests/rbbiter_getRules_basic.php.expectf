@@ -1,2 +1,2 @@
-string(128) "$LN = [[:letter:] [:number:]];$S = [.;,:];!!forward;$LN+ {1};$S+ {42};!!reverse;$LN+ {1};$S+ {42};!!safe_forward;!!safe_reverse;"
+string(%d) "$LN%w=%w[[:letter:]%w[:number:]];$S%w=%w[.;,:];!!forward;$LN+%w{1};$S+%w{42};!!reverse;$LN+%w{1};$S+%w{42};!!safe_forward;!!safe_reverse;"
 ==DONE==

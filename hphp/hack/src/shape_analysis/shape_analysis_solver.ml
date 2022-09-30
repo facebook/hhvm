@@ -203,17 +203,24 @@ let derive_definitely_has_static_accesses adjacency_table static_accesses =
   let find_candidates delta =
     let accum (e, _, _) =
       let nexts =
-        Hashtbl.find adjacency_table e
+        Hashtbl.Poly.find adjacency_table e
         |> Option.value_map ~default:EntitySet.empty ~f:(fun a -> a.forwards)
       in
       EntitySet.union nexts
     in
     fold accum delta EntitySet.empty
   in
+  let indexed_acc = Hashtbl.Poly.create () in
   let rec close_upwards ~delta ~acc =
     if is_empty delta then
       acc
     else
+      let update_indexed_acc (e, k, ty) =
+        Hashtbl.Poly.update indexed_acc e ~f:(function
+            | Some keys_tys -> (k, ty) :: keys_tys
+            | None -> [(k, ty)])
+      in
+      StaticAccess.Set.iter update_indexed_acc delta;
       (* The following collects the intersection of all keys that occur in
          predecessors of an entity along with possible types of those keys. *)
       let common_predecessor_keys e =
@@ -222,17 +229,19 @@ let derive_definitely_has_static_accesses adjacency_table static_accesses =
           |> Option.value_map ~default:EntitySet.empty ~f:(fun a -> a.backwards)
         in
         let collect_common_keys e common_keys =
-          let collect_keys (e', k, ty) =
+          let keys_tys =
+            Option.value ~default:[] @@ Hashtbl.find indexed_acc e
+          in
+          let collect_keys m (k, ty) =
             let add_ty = function
               | None -> Some [ty]
               | Some tys -> Some (ty :: tys)
             in
-            if equal_entity_ e e' then
-              T.TShapeMap.update k add_ty
-            else
-              Fn.id
+            T.TShapeMap.update k add_ty m
           in
-          let keys = fold collect_keys acc T.TShapeMap.empty in
+          let keys =
+            List.fold ~f:collect_keys keys_tys ~init:T.TShapeMap.empty
+          in
           (* Here `None` represents the universe set *)
           match common_keys with
           | None -> Some keys

@@ -89,6 +89,7 @@ let compute_results tast_env id params return body =
     let error_count = List.length errors in
     let successes =
       fst constraints
+      |> DecoratedConstraintSet.elements
       |> List.map ~f:strip_decorations
       |> SA.simplify typing_env
       |> List.filter ~f:SA.is_shape_like_dict

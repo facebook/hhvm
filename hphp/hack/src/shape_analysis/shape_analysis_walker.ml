@@ -638,7 +638,7 @@ and stmt (env : env) ((pos, stmt) : T.stmt) : env =
 and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
-    (constraint_ decorated list * inter_constraint_ decorated list) * entity =
+    decorated_constraints * entity =
   if might_be_dict tast_env ty then
     let hint_pos = pos_of_hint hint in
     let entity_ =
@@ -652,8 +652,10 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     let inter_constraints =
       match kind with
       | `Parameter (id, idx) ->
-        [decorate ~origin:__LINE__ @@ HT.Param ((hint_pos, id), idx)]
-      | `Return -> []
+        DecoratedInterConstraintSet.singleton
+        @@ decorate ~origin:__LINE__
+        @@ HT.Param ((hint_pos, id), idx)
+      | `Return -> DecoratedInterConstraintSet.empty
     in
     let kind =
       match kind with
@@ -664,21 +666,20 @@ let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
       decorate ~origin:__LINE__ @@ Marks (kind, hint_pos)
     in
 
-    let constraints = [marker_constraint] in
+    let constraints = DecoratedConstraintSet.singleton marker_constraint in
     let constraints =
       when_local_mode tast_env ~default:constraints @@ fun () ->
       let invalidation_constraint =
         decorate ~origin:__LINE__ @@ Has_dynamic_key entity_
       in
-      invalidation_constraint :: constraints
+      DecoratedConstraintSet.add invalidation_constraint constraints
     in
     ((constraints, inter_constraints), Some entity_)
   else
-    (([], []), None)
+    ((DecoratedConstraintSet.empty, DecoratedInterConstraintSet.empty), None)
 
 let init_params id tast_env (params : T.fun_param list) :
-    (constraint_ decorated list * inter_constraint_ decorated list)
-    * entity LMap.t =
+    decorated_constraints * entity LMap.t =
   let add_param
       idx
       ((intra_constraints, inter_constraints), lmap)
@@ -692,11 +693,22 @@ let init_params id tast_env (params : T.fun_param list) :
       in
       let param_lid = Local_id.make_unscoped param_name in
       let lmap = LMap.add param_lid entity lmap in
-      let intra_constraints = new_intra_constraints @ intra_constraints in
-      let inter_constraints = new_inter_constraints @ inter_constraints in
+      let intra_constraints =
+        DecoratedConstraintSet.union new_intra_constraints intra_constraints
+      in
+      let inter_constraints =
+        DecoratedInterConstraintSet.union
+          new_inter_constraints
+          inter_constraints
+      in
       ((intra_constraints, inter_constraints), lmap)
   in
-  List.foldi ~f:add_param ~init:(([], []), LMap.empty) params
+  List.foldi
+    ~f:add_param
+    ~init:
+      ( (DecoratedConstraintSet.empty, DecoratedInterConstraintSet.empty),
+        LMap.empty )
+    params
 
 let callable id tast_env params ~return body =
   (* TODO(T130457262): inout parameters should have the entity of their final
@@ -707,8 +719,16 @@ let callable id tast_env params ~return body =
   let ((return_intra_constraints, return_inter_constraints), return) =
     decl_hint `Return tast_env return
   in
-  let intra_constraints = return_intra_constraints @ param_intra_constraints in
-  let inter_constraints = return_inter_constraints @ param_inter_constraints in
+  let intra_constraints =
+    DecoratedConstraintSet.union
+      return_intra_constraints
+      param_intra_constraints
+  in
+  let inter_constraints =
+    DecoratedInterConstraintSet.union
+      return_inter_constraints
+      param_inter_constraints
+  in
   let env =
     Env.init tast_env intra_constraints inter_constraints param_env ~return
   in
@@ -761,7 +781,14 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
         let id = class_name ^ "::" ^ snd cc_id in
         let hint_pos = pos_of_hint cc_type in
         let (env, ent) =
-          let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
+          let empty_env =
+            Env.init
+              tast_env
+              DecoratedConstraintSet.empty
+              DecoratedInterConstraintSet.empty
+              ~return:None
+              LMap.empty
+          in
           match cc_kind with
           | A.CCAbstract initial_expr_opt ->
             (match initial_expr_opt with
@@ -806,7 +833,14 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
               constraint_ = HT.ClassExtends class_id_of_extends;
             }
           in
-          let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
+          let empty_env =
+            Env.init
+              tast_env
+              DecoratedConstraintSet.empty
+              DecoratedInterConstraintSet.empty
+              ~return:None
+              LMap.empty
+          in
           let env = Env.add_inter_constraint empty_env extends_constr in
           Some
             (class_name, ((env.constraints, env.inter_constraints), env.errors))
@@ -817,9 +851,15 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
       @ List.filter_map ~f:handle_extends c_extends
     | A.Constant A.{ cst_name; cst_value; cst_type; _ } ->
       let hint_pos = pos_of_hint cst_type in
-      let (env, ent) =
-        expr_ (Env.init tast_env [] [] ~return:None LMap.empty) cst_value
+      let env =
+        Env.init
+          tast_env
+          DecoratedConstraintSet.empty
+          DecoratedInterConstraintSet.empty
+          ~return:None
+          LMap.empty
       in
+      let (env, ent) = expr_ env cst_value in
       let marker_constraint =
         marker_constraint_of ~hack_pos:hint_pos hint_pos
       in

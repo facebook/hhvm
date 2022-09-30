@@ -142,14 +142,19 @@ type 'constraint_ decorated = {
   constraint_: 'constraint_;  (** The constraint proper *)
 }
 
-(** Tuple of lists of decorated intra- and inter-procedural constraints *)
+module DecoratedConstraintSet : Caml.Set.S with type elt = constraint_ decorated
+
+module DecoratedInterConstraintSet :
+  Caml.Set.S with type elt = inter_constraint_ decorated
+
+(** Tuple of sets of decorated intra- and inter-procedural constraints *)
 type decorated_constraints =
-  constraint_ decorated list * inter_constraint_ decorated list
+  DecoratedConstraintSet.t * DecoratedInterConstraintSet.t
 
 type env = {
-  constraints: constraint_ decorated list;
+  constraints: DecoratedConstraintSet.t;
       (** Append-only set of intra-procedural constraints *)
-  inter_constraints: inter_constraint_ decorated list;
+  inter_constraints: DecoratedInterConstraintSet.t;
       (** Append-only set of inter-procedural constraints *)
   lenv: lenv;  (** Local variable information *)
   return: entity;  (** Entity for the return of a callable *)

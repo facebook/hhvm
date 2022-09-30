@@ -15,8 +15,8 @@ val fresh_var : unit -> entity_
 (** Initialise shape analysis environment *)
 val init :
   Tast_env.env ->
-  constraint_ decorated list ->
-  inter_constraint_ decorated list ->
+  DecoratedConstraintSet.t ->
+  DecoratedInterConstraintSet.t ->
   entity LMap.t ->
   return:entity ->
   env

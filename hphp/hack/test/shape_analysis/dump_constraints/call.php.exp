@@ -1,11 +1,11 @@
 === Shape analysis results for call.php
 Constraints for \f:
-   4: ! SK [4:9-24] : shape('a' => int)
    4: Allocation at [4:9-24]
-   5: ! SK [5:9-24] : shape('b' => int)
+   4: ! SK [4:9-24] : shape('a' => int)
    5: Allocation at [5:9-24]
-   6: Arg(\g, 1, [5:9-24])
+   5: ! SK [5:9-24] : shape('b' => int)
    6: Arg(\g, 0, [4:9-24])
+   6: Arg(\g, 1, [5:9-24])
 
 Constraints for \g:
    9: Parameter at [9:12-30]

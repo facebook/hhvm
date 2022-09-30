@@ -17,7 +17,7 @@ type 'pos t = {
   pos: 'pos; [@opaque]
   message: string;
   bypass_changed_lines: bool;
-  autofix: (string * string * int * int) option;
+  autofix: (string * Pos.t) option;
 }
 [@@deriving show]
 
@@ -27,7 +27,7 @@ val get_pos : 'pos t -> 'pos
 
 val add :
   ?bypass_changed_lines:bool ->
-  ?autofix:(string * string * int * int) option ->
+  ?autofix:(string * Pos.t) option ->
   int ->
   severity ->
   Pos.t ->

@@ -31,7 +31,7 @@ type 'pos t = {
    * lines they are raised on overlap with lines changed in a diff. This
    * flag bypasses that behavior *)
   bypass_changed_lines: bool;
-  autofix: (string * string * int * int) option;
+  autofix: (string * Pos.t) option;
 }
 [@@deriving show]
 
@@ -84,9 +84,15 @@ let to_highlighted_string (lint : string Pos.pos t) =
 
 let to_json { pos; code; severity; message; bypass_changed_lines; autofix } =
   let (line, scol, ecol) = Pos.info_pos pos in
-  let (origin, repl, start, w) =
+  let (origin, replacement, start, w) =
     match autofix with
-    | Some (original, replacement, start_offset, width) ->
+    | Some (replacement, replacement_pos) ->
+      let path = Pos.filename (Pos.to_absolute replacement_pos) in
+      let lines = Errors.read_lines path in
+      let src = String.concat "\n" lines in
+      let original = Pos.get_text_from_pos ~content:src replacement_pos in
+      let (start_offset, end_offset) = Pos.info_raw replacement_pos in
+      let width = end_offset - start_offset in
       ( Hh_json.JSON_String original,
         Hh_json.JSON_String replacement,
         Hh_json.int_ start_offset,
@@ -108,7 +114,7 @@ let to_json { pos; code; severity; message; bypass_changed_lines; autofix } =
       ("code", Hh_json.int_ code);
       ("bypass_changed_lines", Hh_json.JSON_Bool bypass_changed_lines);
       ("original", origin);
-      ("replacement", repl);
+      ("replacement", replacement);
       ("start_offset", start);
       ("width", w);
     ]

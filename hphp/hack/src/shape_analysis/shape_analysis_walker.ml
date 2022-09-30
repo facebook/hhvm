@@ -190,7 +190,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.Float _
   | A.String _
   | A.True
-  | A.False ->
+  | A.False
+  | A.Null ->
     (env, None)
   | A.Varray (_, values)
   | A.ValCollection (_, _, values) ->

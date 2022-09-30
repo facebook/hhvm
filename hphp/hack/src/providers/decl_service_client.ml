@@ -56,9 +56,8 @@ type t = {
   mutable current_file_decls: decl SymbolMap.t;
 }
 
-let from_raw_client
-    (client : Decl_ipc_ffi_externs.decl_client) (opts : DeclParserOptions.t) : t
-    =
+let connect ~(decl_state_dir : string) ~(opts : DeclParserOptions.t) : t =
+  let client = Decl_ipc_ffi_externs.connect decl_state_dir in
   { client; opts; current_file_decls = SymbolMap.empty }
 
 let get_and_cache_decl (t : t) (symbol_hash : Typing_deps.Dep.t) =

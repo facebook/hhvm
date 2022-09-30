@@ -48,46 +48,31 @@ let not_yet_supported (env : env) pos msg =
 
 let failwith = failwithpos Pos.none
 
-(* Is the type a suitable dict that can be coverted into shape. For the moment,
-   that's only the case if the key is a string. *)
-let rec is_suitable_target_ty tast_env ty =
-  let ty = Tast_env.fully_expand tast_env ty in
-  match Typing_defs.get_node ty with
-  | Typing_defs.Tclass ((_, id), _, [ty])
-    when String.equal id SN.Classes.cAwaitable ->
-    is_suitable_target_ty tast_env ty
-  | Typing_defs.Tclass ((_, id), _, [key_ty; _])
-    when String.equal id SN.Collections.cDict ->
-    Tast_env.can_subtype
-      tast_env
-      key_ty
-      (Typing_make_type.arraykey Typing_reason.Rnone)
-    || Typing_utils.is_nothing (Tast_env.tast_env_as_typing_env tast_env) key_ty
-  | _ -> false
-
-(* Extract position of a dictionary hint. This requires searching for the
-   dictionary hint recursively in the case of awaitables. *)
-let dict_pos_of_hint hint_opt =
-  let rec go (pos, hint) =
-    match hint with
-    | A.Happly ((_, id), [_; _]) when String.equal id SN.Collections.cDict ->
-      pos
-    | A.Happly ((_, id), [hint]) when String.equal id SN.Classes.cAwaitable ->
-      go hint
-    | _ -> failwithpos pos "seeked position of unsuitable parameter hint"
-  in
+let pos_of_hint hint_opt =
   match hint_opt with
-  | Some hint -> go hint
+  | Some (pos, _hint) -> pos
   | None -> failwith "parameter hint is missing"
 
-let is_dict env ty =
+let might_be_dict tast_env ty =
   let open Typing_make_type in
   let open Typing_reason in
   let mixed = mixed Rnone in
   let dict_top = dict Rnone mixed mixed in
-  Tast_env.is_sub_type env.tast_env ty dict_top
+  let nothing = nothing Rnone in
+  let dict_bottom = dict Rnone nothing nothing in
+  let typing_env = Tast_env.tast_env_as_typing_env tast_env in
+  not
+  @@ (Typing_subtype.is_type_disjoint typing_env ty dict_top
+     && Typing_subtype.is_type_disjoint typing_env ty dict_bottom)
 
-let is_cow env ty =
+let is_dict tast_env ty =
+  let open Typing_make_type in
+  let open Typing_reason in
+  let mixed = mixed Rnone in
+  let dict_top = dict Rnone mixed mixed in
+  Tast_env.is_sub_type tast_env ty dict_top
+
+let is_cow tast_env ty =
   let open Typing_make_type in
   let open Typing_reason in
   let mixed = mixed Rnone in
@@ -99,7 +84,7 @@ let is_cow env ty =
       Typing_reason.Rnone
       [dict_bottom; vec_bottom; keyset_bottom]
   in
-  Tast_env.is_sub_type env.tast_env ty cow_ty
+  Tast_env.is_sub_type tast_env ty cow_ty
 
 let add_key_constraint
     ~(pos : Pos.t)
@@ -110,7 +95,7 @@ let add_key_constraint
     (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
     (env : env)
     entity : env =
-  if is_dict env base_ty then
+  if is_dict env.tast_env base_ty then
     match key with
     | A.String str ->
       let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
@@ -149,7 +134,7 @@ let rec assign
       match entity with
       | Some entity_ ->
         let (env, entity_) =
-          if is_cow env ty then
+          if is_cow env.tast_env ty then
             (* Handle copy-on-write by creating a variable indirection *)
             let (env, entity_) = redirect ~pos ~origin env entity_ in
             let env = Env.set_local env lid (Some entity_) in
@@ -654,8 +639,8 @@ and block (env : env) : T.block -> env = List.fold ~init:env ~f:stmt
 
 let decl_hint kind tast_env ((ty, hint) : T.type_hint) :
     (constraint_ decorated list * inter_constraint_ decorated list) * entity =
-  if is_suitable_target_ty tast_env ty then
-    let hint_pos = dict_pos_of_hint hint in
+  if might_be_dict tast_env ty then
+    let hint_pos = pos_of_hint hint in
     let entity_ =
       match kind with
       | `Parameter (id, idx) -> Inter (HT.Param ((hint_pos, id), idx))
@@ -774,7 +759,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
       in
       let handle_constant A.{ cc_type; cc_id; cc_kind; _ } =
         let id = class_name ^ "::" ^ snd cc_id in
-        let hint_pos = dict_pos_of_hint cc_type in
+        let hint_pos = pos_of_hint cc_type in
         let (env, ent) =
           let empty_env = Env.init tast_env [] [] ~return:None LMap.empty in
           match cc_kind with
@@ -831,7 +816,7 @@ let program (ctx : Provider_context.t) (tast : Tast.program) =
       @ List.map ~f:handle_constant c_consts
       @ List.filter_map ~f:handle_extends c_extends
     | A.Constant A.{ cst_name; cst_value; cst_type; _ } ->
-      let hint_pos = dict_pos_of_hint cst_type in
+      let hint_pos = pos_of_hint cst_type in
       let (env, ent) =
         expr_ (Env.init tast_env [] [] ~return:None LMap.empty) cst_value
       in

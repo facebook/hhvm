@@ -38,6 +38,13 @@ let when_local_mode tast_env ~default f =
   | Some level when level > 0 -> f ()
   | _ -> default
 
+let dynamic_when_local ~origin pos env entity_ =
+  when_local_mode env.tast_env ~default:env @@ fun () ->
+  let constraint_ =
+    { hack_pos = pos; origin; constraint_ = Has_dynamic_key entity_ }
+  in
+  Env.add_constraint env constraint_
+
 let failwithpos pos msg =
   raise
   @@ Shape_analysis_exn (Error.mk @@ Format.asprintf "%a: %s" Pos.pp pos msg)
@@ -177,6 +184,7 @@ let rec assign
 
 and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   let decorate ~origin constraint_ = { hack_pos = pos; origin; constraint_ } in
+  let dynamic_when_local = dynamic_when_local pos in
   match e with
   | A.Int _
   | A.Float _
@@ -316,14 +324,9 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
       let env =
         (* During local mode we cannot know what happens to the entity, so we
            conservatively assume there is a dynamic access. *)
-        when_local_mode env.tast_env ~default:env @@ fun () ->
         Option.fold
           ~init:env
-          ~f:(fun env arg_entity_ ->
-            let constraint_ =
-              decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
-            in
-            Env.add_constraint env constraint_)
+          ~f:(dynamic_when_local ~origin:__LINE__)
           arg_entity
       in
       let (env, arg_entity) =
@@ -340,12 +343,12 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
               let arg_entity_ = Env.fresh_var () in
               let arg_entity = Some arg_entity_ in
               let env = Env.set_local env lid arg_entity in
-              when_local_mode env.tast_env ~default:(env, arg_entity)
-              @@ fun () ->
-              let constraint_ =
-                decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
+              let env =
+                Option.fold
+                  ~init:env
+                  ~f:(dynamic_when_local ~origin:__LINE__)
+                  arg_entity
               in
-              let env = Env.add_constraint env constraint_ in
               (env, arg_entity)
             | (_, pos, _) ->
               let env = not_yet_supported env pos "inout argument" in
@@ -375,11 +378,10 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
           | _ -> env
         in
         let env =
-          when_local_mode env.tast_env ~default:env @@ fun () ->
-          let constraint_ =
-            decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
-          in
-          Env.add_constraint env constraint_
+          Option.fold
+            ~init:env
+            ~f:(dynamic_when_local ~origin:__LINE__)
+            arg_entity
         in
         env
       | None -> env
@@ -446,53 +448,39 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
     let (env, _) = expr_ env e2 in
     (env, None)
   | A.Id name ->
+    let entity__ =
+      {
+        HT.ident_pos = fst name;
+        HT.class_name_opt = None;
+        HT.const_name = snd name;
+      }
+    in
+    let entity_ = Inter (HT.ConstantIdentifier entity__) in
+    let env = dynamic_when_local ~origin:__LINE__ env entity_ in
     let constr_ =
       {
         hack_pos = fst name;
         origin = __LINE__;
-        constraint_ =
-          HT.ConstantIdentifier
-            {
-              HT.ident_pos = fst name;
-              HT.class_name_opt = None;
-              HT.const_name = snd name;
-            };
+        constraint_ = HT.ConstantIdentifier entity__;
       }
     in
     let env = Env.add_inter_constraint env constr_ in
-    ( env,
-      Some
-        (Inter
-           (HT.ConstantIdentifier
-              {
-                HT.ident_pos = fst name;
-                HT.class_name_opt = None;
-                HT.const_name = snd name;
-              })) )
+    (env, Some entity_)
   | A.Class_const ((_, ident_pos, A.CI class_id), (_, const_name)) ->
+    let entity__ =
+      { HT.ident_pos; HT.class_name_opt = Some (snd class_id); HT.const_name }
+    in
+    let entity_ = Inter (HT.ConstantIdentifier entity__) in
+    let env = dynamic_when_local ~origin:__LINE__ env entity_ in
     let constr_ =
       {
         hack_pos = ident_pos;
         origin = __LINE__;
-        constraint_ =
-          HT.ConstantIdentifier
-            {
-              HT.ident_pos;
-              HT.class_name_opt = Some (snd class_id);
-              HT.const_name;
-            };
+        constraint_ = HT.ConstantIdentifier entity__;
       }
     in
     let env = Env.add_inter_constraint env constr_ in
-    ( env,
-      Some
-        (Inter
-           (HT.ConstantIdentifier
-              {
-                HT.ident_pos;
-                HT.class_name_opt = Some (snd class_id);
-                HT.const_name;
-              })) )
+    (env, Some entity_)
   | _ ->
     let env = not_yet_supported env pos ("expression: " ^ Utils.expr_name e) in
     (env, None)

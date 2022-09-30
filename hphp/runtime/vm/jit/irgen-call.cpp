@@ -1984,9 +1984,7 @@ void emitFCallClsMethodM(IRGS& env, FCallArgs fca, const StringData* clsHint,
     !RO::EvalLogKnownMethodsAsDynamicCalls;
 
   fcallClsMethodCommon(env, fca, clsHint, cls, cns(env, methName), false,
-                       name->isA(TStr) || RO::EvalEmitClassPointers == 0,
-                       suppressDynCallCheck,
-                       1);
+                       name->isA(TStr), suppressDynCallCheck, 1);
 }
 
 void emitFCallClsMethodS(IRGS& env, FCallArgs fca, const StringData* clsHint,

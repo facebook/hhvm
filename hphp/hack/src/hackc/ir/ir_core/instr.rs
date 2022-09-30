@@ -485,6 +485,7 @@ pub enum Hhbc {
     #[has_operands(none)]
     IterFree(IterId, LocId),
     LateBoundCls(LocId),
+    LazyClass(ClassId, LocId),
     LockObj(ValueId, LocId),
     MemoSet(ValueId, Box<[LocalId]>, LocId),
     MemoSetEager(ValueId, Box<[LocalId]>, LocId),

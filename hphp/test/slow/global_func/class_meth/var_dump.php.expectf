@@ -1,5 +1,5 @@
 vec [
-  'A',
+  A::class,
   'f1',
 ]
 vec(2) {

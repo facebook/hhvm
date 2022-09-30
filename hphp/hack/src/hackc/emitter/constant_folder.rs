@@ -109,11 +109,7 @@ fn class_const_to_typed_value<'arena, 'decl>(
         if let ClassExpr::Id(ast_defs::Id(_, cname)) = cexpr {
             let classid =
                 hhbc::ClassName::from_ast_name_and_mangle(emitter.alloc, cname).as_ffi_str();
-            if emitter.options().emit_class_pointers() == 2 {
-                return Ok(TypedValue::LazyClass(classid));
-            } else {
-                return Ok(TypedValue::String(classid));
-            }
+            return Ok(TypedValue::LazyClass(classid));
         }
     }
     Err(Error::UserDefinedConstant)
@@ -303,17 +299,13 @@ pub fn expr_to_typed_value<'arena, 'decl>(
     e: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
 ) -> Result<TypedValue<'arena>, Error> {
-    expr_to_typed_value_(
-        e, expr, false, /*allow_maps*/
-        false, /*force_class_const*/
-    )
+    expr_to_typed_value_(e, expr, false /*allow_maps*/)
 }
 
 pub fn expr_to_typed_value_<'arena, 'decl>(
     emitter: &Emitter<'arena, 'decl>,
     expr: &ast::Expr,
     allow_maps: bool,
-    force_class_const: bool,
 ) -> Result<TypedValue<'arena>, Error> {
     stack_limit::maybe_grow(|| {
         // TODO: ML equivalent has this as an implicit parameter that defaults to false.
@@ -364,28 +356,16 @@ pub fn expr_to_typed_value_<'arena, 'decl>(
             }
             Expr_::KeyValCollection(x) => keyvalcollection_expr_to_typed_value(emitter, x),
             Expr_::Shape(fields) => shape_to_typed_value(emitter, fields),
-            Expr_::ClassConst(x) => class_const_expr_to_typed_value(emitter, x, force_class_const),
+            Expr_::ClassConst(x) => class_const_to_typed_value(emitter, &x.0, &x.1),
 
             Expr_::ClassGet(_) => Err(Error::UserDefinedConstant),
             ast::Expr_::As(x) if (x.1).1.is_hlike() => {
-                expr_to_typed_value_(emitter, &x.0, allow_maps, false)
+                expr_to_typed_value_(emitter, &x.0, allow_maps)
             }
             Expr_::Upcast(e) => expr_to_typed_value(emitter, &e.0),
             _ => Err(Error::NotLiteral),
         }
     })
-}
-
-fn class_const_expr_to_typed_value<'arena, 'decl>(
-    emitter: &Emitter<'arena, 'decl>,
-    x: &(ast::ClassId, ast::Pstring),
-    force_class_const: bool,
-) -> Result<TypedValue<'arena>, Error> {
-    if emitter.options().emit_class_pointers() == 1 && !force_class_const {
-        Err(Error::NotLiteral)
-    } else {
-        class_const_to_typed_value(emitter, &x.0, &x.1)
-    }
 }
 
 fn valcollection_keyset_expr_to_typed_value<'arena, 'decl>(
@@ -720,7 +700,7 @@ pub fn literals_from_exprs<'arena, 'decl>(
     }
     let ret = exprs
         .iter()
-        .map(|expr| expr_to_typed_value_(e, expr, false, true))
+        .map(|expr| expr_to_typed_value_(e, expr, false))
         .collect();
     if let Err(Error::NotLiteral) = ret {
         Err(Error::unrecoverable("literals_from_exprs: not literal"))

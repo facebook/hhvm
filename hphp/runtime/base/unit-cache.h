@@ -107,7 +107,6 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalEnforceGenericsUB)                      \
   R(EvalEmitMethCallerFuncPointers)             \
   R(EvalAssemblerMaxScalarSize)                 \
-  R(EvalEmitClassPointers)                      \
   R(EvalFoldLazyClassKeys)                      \
   R(EvalEnableAbstractContextConstants)         \
   R(EvalTraitConstantInterfaceBehavior)         \

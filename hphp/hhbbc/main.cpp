@@ -265,7 +265,6 @@ RepoGlobalData get_global_data() {
     RuntimeOption::EvalInitialNamedEntityTableSize;
   gd.InitialStaticStringTableSize =
     RuntimeOption::EvalInitialStaticStringTableSize;
-  gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.RaiseClassConversionWarning =

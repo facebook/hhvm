@@ -1245,11 +1245,6 @@ struct RuntimeOption {
   F(bool, RaiseClassConversionWarning, false)                           \
   F(bool, EmitClsMethPointers, true)                                    \
   F(bool, FoldLazyClassKeys, true)                                      \
-  /* EmitClassPointers:
-   * 0 => convert Foo::class to string "Foo"
-   * 1 => convert Foo::class to class pointer
-   * 2 => convert Foo::class to lazy class */                           \
-  F(int32_t, EmitClassPointers, 2)                                      \
   /* When this flag is on, var_dump for
    * classes and lazy classes outputs string(...). */                   \
   F(bool, ClassAsStringVarDump, true)                                   \

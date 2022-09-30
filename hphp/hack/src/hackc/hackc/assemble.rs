@@ -1022,12 +1022,13 @@ fn assemble_typed_value<'arena>(
             ))
         }
 
-        /// s:s.len():"(escaped s)";
-        fn deserialize_string<'arena, 'a>(
+        /// s:s.len():"(escaped s)"; or l:s.len():"(escaped s)";
+        fn deserialize_string_or_lazyclass<'arena, 'a>(
             alloc: &'arena Bump,
             src: &'a [u8],
+            s_or_l: StringOrLazyClass,
         ) -> Result<(&'a [u8], hhbc::TypedValue<'arena>)> {
-            let src = expect(src, b"s")?;
+            let src = expect(src, s_or_l.prefix())?;
             let src = expect(src, b":")?;
             let (len, src) = expect_usize(src)?;
             let src = expect(src, b":")?;
@@ -1044,7 +1045,29 @@ fn assemble_typed_value<'arena>(
             let src = &src[len..];
             let src = expect(src, b"\"")?;
             let src = expect(src, b";")?;
-            Ok((src, hhbc::TypedValue::String(Str::new_slice(alloc, s))))
+            Ok((src, s_or_l.build(Str::new_slice(alloc, s))))
+        }
+
+        #[derive(PartialEq)]
+        pub enum StringOrLazyClass {
+            String,
+            LazyClass,
+        }
+
+        impl StringOrLazyClass {
+            pub fn prefix(&self) -> &[u8] {
+                match self {
+                    StringOrLazyClass::String => b"s",
+                    StringOrLazyClass::LazyClass => b"l",
+                }
+            }
+
+            pub fn build<'arena>(&self, content: Str<'arena>) -> hhbc::TypedValue<'arena> {
+                match self {
+                    StringOrLazyClass::String => hhbc::TypedValue::String(content),
+                    StringOrLazyClass::LazyClass => hhbc::TypedValue::LazyClass(content),
+                }
+            }
         }
 
         #[derive(PartialEq)]
@@ -1125,13 +1148,15 @@ fn assemble_typed_value<'arena>(
                 b'd' => deserialize_float(src).context("Assembling a TV float")?,
                 b'N' => deserialize_null(src).context("Assembling a TV Null")?,
                 b'u' => deserialize_uninit(src).context("Assembling a uninit")?,
-                b's' => deserialize_string(alloc, src).context("Assembling a TV string")?,
+                b's' => deserialize_string_or_lazyclass(alloc, src, StringOrLazyClass::String)
+                    .context("Assembling a TV string")?,
                 b'v' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Vec)
                     .context("Assembling a TV vec")?,
                 b'k' => deserialize_vec_or_keyset(alloc, src, VecOrKeyset::Keyset)
                     .context("Assembling a TV keyset")?,
                 b'D' => deserialize_dict(alloc, src).context("Assembling a TV dict")?,
-                b'l' => todo!(), // Never encounter LazyClass in all WWW...
+                b'l' => deserialize_string_or_lazyclass(alloc, src, StringOrLazyClass::LazyClass)
+                    .context("Assembling a LazyClass")?,
                 _ => bail!("Unknown tv: {}", src[0]),
             };
             Ok((src, tr))
@@ -2054,6 +2079,12 @@ fn assemble_instr<'arena>(
                     b"True" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::True, "True")
                     }
+                    b"LazyClass" => assemble_lazyclass_opcode(alloc, &mut sl_lexer),
+                    b"LazyClassFromClass" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::LazyClassFromClass,
+                        "LazyClassFromClass",
+                    ),
                     b"VerifyOutType" => assemble_local_carrying_opcode_instr(
                         &mut sl_lexer,
                         decl_map,
@@ -3714,6 +3745,20 @@ fn assemble_double_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
     token_iter.expect_end()?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Double(
         hhbc::FloatBits(num),
+    )))
+}
+
+fn assemble_lazyclass_opcode<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::Instruct<'arena>> {
+    token_iter.expect_is_str(Token::into_identifier, "LazyClass")?;
+    let st_data = token_iter.expect(Token::into_str_literal)?;
+    let st_data =
+        escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(st_data.as_bytes()))?;
+    token_iter.expect_end()?;
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::LazyClass(
+        hhbc::ClassName::new(Str::new_slice(alloc, &st_data)),
     )))
 }
 

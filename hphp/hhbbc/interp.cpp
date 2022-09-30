@@ -4490,8 +4490,7 @@ void in(ISS& env, const bc::FCallClsMethodM& op) {
   }();
   auto const methName = op.str4;
   auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
-  auto const maybeDynamicCall =
-    RuntimeOption::EvalEmitClassPointers == 0 || t.couldBe(TStr);
+  auto const maybeDynamicCall = t.couldBe(TStr);
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;

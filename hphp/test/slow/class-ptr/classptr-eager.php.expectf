@@ -12,9 +12,8 @@ string(3) "Foo"
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 26
 string(3) "Bar"
 
-Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 19
+Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
 
 Notice: Implicit Class to string conversion for type-hint in %s/test/slow/class-ptr/classptr-eager.php on line 39
 string(3) "Bar"
-
-Fatal error: Failure to resolve undefined class T in %s/test/slow/class-ptr/classptr-eager.php on line 41
+class(T)

@@ -35,7 +35,6 @@ void RepoGlobalData::load(bool loadConstantFuncs) const {
   RO::EnableArgsInBacktraces                       = EnableArgsInBacktraces;
   RO::EvalAbortBuildOnVerifyError                  = AbortBuildOnVerifyError;
   RO::StrictArrayFillKeys                          = StrictArrayFillKeys;
-  RO::EvalEmitClassPointers                        = EmitClassPointers;
   RO::EvalEmitClsMethPointers                      = EmitClsMethPointers;
   RO::EvalForbidDynamicCallsWithAttr               = ForbidDynamicCallsWithAttr;
   RO::EvalRaiseClassConversionWarning              = RaiseClassConversionWarning;
@@ -93,7 +92,6 @@ std::string show(const RepoGlobalData& gd) {
   SHOW(AbortBuildOnVerifyError);
   SHOW(EnableArgsInBacktraces);
   SHOW(Signature);
-  SHOW(EmitClassPointers);
   SHOW(EmitClsMethPointers);
   SHOW(IsVecNotices);
   SHOW(RaiseClassConversionWarning);

@@ -617,13 +617,13 @@ void appendGlobResultToNameAndDTypeVec(
     std::vector<NameAndDType>& results,
     Glob&& glob) {
   size_t i = 0;
-  size_t numDTypes = glob.get_dtypes().size();
+  size_t numDTypes = glob.dtypes().value().size();
 
-  for (auto& name : glob.get_matchingFiles()) {
+  for (auto& name : glob.matchingFiles().value()) {
     // The server may not support dtypes, so this list may be empty.
     // This cast is OK because eden returns the system dependent bits to us, and
     // our DType enum is declared in terms of those bits
-    auto dtype = i < numDTypes ? static_cast<DType>(glob.get_dtypes()[i])
+    auto dtype = i < numDTypes ? static_cast<DType>(glob.dtypes().value()[i])
                                : DType::Unknown;
     results.emplace_back(name, dtype);
     ++i;

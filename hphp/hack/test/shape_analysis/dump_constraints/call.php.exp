@@ -4,15 +4,12 @@ Constraints for \f:
    4: Allocation at [4:9-24]
    5: ! SK [5:9-24] : shape('b' => int)
    5: Allocation at [5:9-24]
-   6: [5:9-24] ⊆ [6:10-13]
-   6: [4:9-24] ⊆ [6:5-8]
    6: Arg(\g, 1, [5:9-24])
    6: Arg(\g, 0, [4:9-24])
 
 Constraints for \g:
    9: Parameter at [9:12-30]
    9: Parameter at [9:36-54]
-  10: (Param (([9:12-30], "\\g"), 0)) ⊆ [10:5-8]
    9: Parameter (([9:12-30], "\\g"), 0)
    9: Parameter (([9:36-54], "\\g"), 1)
   10: Arg(\h, 0, (Param (([9:12-30], "\\g"), 0)))
@@ -22,3 +19,4 @@ Constraints for \h:
   14: ! SK ?1 : shape('c' => int)
   14: (Param (([13:12-30], "\\h"), 0)) ⊆ ?1
   13: Parameter (([13:12-30], "\\h"), 0)
+

@@ -262,40 +262,111 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         in
         (env, None)
     end
-  | A.Call ((_, _, A.Id (_, f_id)), _targs, args, _unpacked) ->
-    let expr_arg arg_idx env (_param_kind, ((_ty, pos, _exp) as arg)) =
+  | A.Call (base, _targs, args, unpacked) ->
+    let handle_arg arg_idx env (param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in
+      let env =
+        (* During local mode we cannot know what happens to the entity, so we
+           conservatively assume there is a dynamic access. *)
+        when_local_mode env.tast_env ~default:env @@ fun () ->
+        Option.fold
+          ~init:env
+          ~f:(fun env arg_entity_ ->
+            let constraint_ =
+              decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
+            in
+            Env.add_constraint env constraint_)
+          arg_entity
+      in
+      let (env, arg_entity) =
+        match param_kind with
+        | Ast_defs.Pinout _ ->
+          (* When we have an inout parameter, we sever the connection between
+             what goes into the parameter and what comes out.
+
+             Once again in local mode, we do not know what happened to the
+             dictionary, so we assume it was dynamically accessed. *)
+          begin
+            match arg with
+            | (_, _, A.Lvar (_, lid)) ->
+              let arg_entity_ = Env.fresh_var () in
+              let arg_entity = Some arg_entity_ in
+              let env = Env.set_local env lid arg_entity in
+              when_local_mode env.tast_env ~default:(env, arg_entity)
+              @@ fun () ->
+              let constraint_ =
+                decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
+              in
+              let env = Env.add_constraint env constraint_ in
+              (env, arg_entity)
+            | (_, pos, _) ->
+              let env = not_yet_supported env pos "inout argument" in
+              (env, arg_entity)
+          end
+        | Ast_defs.Pnormal -> (env, arg_entity)
+      in
       match arg_entity with
       | Some arg_entity_ ->
         let env =
-          if String.equal f_id SN.Hips.inspect then
+          match base with
+          | (_, _, A.Id (_, f_id)) when String.equal f_id SN.Hips.inspect ->
             let constraint_ = decorate ~origin:__LINE__ @@ Marks (Debug, pos) in
-            Env.add_constraint env constraint_
-          else
+            let env = Env.add_constraint env constraint_ in
+            let constraint_ =
+              decorate ~origin:__LINE__ @@ Subsets (arg_entity_, Literal pos)
+            in
+            let env = Env.add_constraint env constraint_ in
+            env
+          | (_, _, A.Id (_, f_id)) ->
+            (* TODO: inout parameters need special treatment inter-procedurally *)
             let inter_constraint_ =
               decorate ~origin:__LINE__
               @@ HT.Arg (((pos, f_id), arg_idx), arg_entity_)
             in
             Env.add_inter_constraint env inter_constraint_
+          | _ -> env
         in
-        (* TODO(T128046165) Generate and add inter-procedural constraints *)
-        let new_entity_ = Literal pos in
         let env =
           when_local_mode env.tast_env ~default:env @@ fun () ->
           let constraint_ =
-            decorate ~origin:__LINE__ @@ Has_dynamic_key new_entity_
+            decorate ~origin:__LINE__ @@ Has_dynamic_key arg_entity_
           in
           Env.add_constraint env constraint_
         in
-        let constraint_ =
-          decorate ~origin:__LINE__ @@ Subsets (arg_entity_, new_entity_)
-        in
-        let env = Env.add_constraint env constraint_ in
         env
       | None -> env
     in
-    let env = List.foldi ~f:expr_arg ~init:env args in
-    (env, None)
+    (* Handle the bast of the call *)
+    let (env, _base_entity) =
+      match base with
+      | (_, _, A.Id _) ->
+        (* Use of identifiers inside function calls is not compositional.
+           This could be cleaned up... *)
+        (env, None)
+      | _ -> expr_ env base
+    in
+    (* Handle the vanilla arguments *)
+    let env = List.foldi ~f:handle_arg ~init:env args in
+    (* Handle the unpaced argument (e.g., ...$args) *)
+    let env =
+      Option.value_map
+        ~default:env
+        ~f:(fun exp ->
+          let idx = List.length args + 1 in
+          handle_arg idx env (Ast_defs.Pnormal, exp))
+        unpacked
+    in
+    (* Handle the return. *)
+    let (env, return_entity) =
+      when_local_mode env.tast_env ~default:(env, None) @@ fun () ->
+      let return_entity_ = Env.fresh_var () in
+      let constraint_ =
+        decorate ~origin:__LINE__ @@ Has_dynamic_key return_entity_
+      in
+      let env = Env.add_constraint env constraint_ in
+      (env, Some return_entity_)
+    in
+    (env, return_entity)
   | A.Await e -> expr_ env e
   | A.As (e, _ty, _) -> expr_ env e
   | A.Is (e, _ty) ->
@@ -595,6 +666,8 @@ let init_params id tast_env (params : T.fun_param list) :
   List.foldi ~f:add_param ~init:(([], []), LMap.empty) params
 
 let callable id tast_env params ~return body =
+  (* TODO(T130457262): inout parameters should have the entity of their final
+     binding flow back into them. *)
   let ((param_intra_constraints, param_inter_constraints), param_env) =
     init_params id tast_env params
   in

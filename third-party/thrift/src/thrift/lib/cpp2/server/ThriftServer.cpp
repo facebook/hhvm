@@ -829,8 +829,8 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
       std::shared_ptr<folly::ThreadFactory> factory =
           std::make_shared<folly::NamedThreadFactory>(name);
       // 2 is the default for the priorities other than NORMAL.
-      auto executor =
-          std::make_shared<folly::CPUThreadPoolExecutor>(2, std::move(factory));
+      auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+          2, ResourcePool::kPreferredExecutorNumPriorities, std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile =
           std::make_unique<apache::thrift::RoundRobinRequestPile>(
@@ -949,7 +949,8 @@ void ThriftServer::ensureResourcePools() {
         executor = std::make_shared<folly::CPUThreadPoolExecutor>(
             i == concurrency::PRIORITY::NORMAL
                 ? std::thread::hardware_concurrency()
-                : 2);
+                : 2,
+            ResourcePool::kPreferredExecutorNumPriorities);
       }
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile =
@@ -1069,11 +1070,10 @@ void ThriftServer::ensureResourcePools() {
             std::move(threadInitializer_),
             std::move(threadFinalizer_));
       }
-      // By default there will be 2 priorities so that we can prioritize
-      // internal requests over external ones
-      unsigned defaultNumPrioritiesExecutor = 2;
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          pool.numThreads, defaultNumPrioritiesExecutor, std::move(factory));
+          pool.numThreads,
+          ResourcePool::kPreferredExecutorNumPriorities,
+          std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       if (threadManagerType_ == ThreadManagerType::PRIORITY_QUEUE) {
         options.setNumPriorities(concurrency::N_PRIORITIES);

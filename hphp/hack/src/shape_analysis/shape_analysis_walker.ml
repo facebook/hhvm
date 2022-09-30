@@ -295,6 +295,13 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
         in
         (env, None)
     end
+  | A.New (class_id, targs, args, unpacked, _instantiation) ->
+    (* What is new object creation but a call to a static method call to a
+       class constructor? *)
+    let base = (ty, pos, A.Class_const (class_id, (pos, "__construct"))) in
+    let args = List.map ~f:(fun arg -> (Ast_defs.Pnormal, arg)) args in
+    let call_expr = (ty, pos, A.Call (base, targs, args, unpacked)) in
+    expr_ env call_expr
   | A.Call (base, _targs, args, unpacked) ->
     let handle_arg arg_idx env (param_kind, ((_ty, pos, _exp) as arg)) =
       let (env, arg_entity) = expr_ env arg in

@@ -80,26 +80,51 @@ let dict_pos_of_hint hint_opt =
   | Some hint -> go hint
   | None -> failwith "parameter hint is missing"
 
+let is_dict env ty =
+  let open Typing_make_type in
+  let open Typing_reason in
+  let mixed = mixed Rnone in
+  let dict_top = dict Rnone mixed mixed in
+  Tast_env.is_sub_type env.tast_env ty dict_top
+
+let is_cow env ty =
+  let open Typing_make_type in
+  let open Typing_reason in
+  let mixed = mixed Rnone in
+  let dict_bottom = dict Rnone mixed mixed in
+  let vec_bottom = vec Rnone mixed in
+  let keyset_bottom = keyset Rnone mixed in
+  let cow_ty =
+    Typing_make_type.union
+      Typing_reason.Rnone
+      [dict_bottom; vec_bottom; keyset_bottom]
+  in
+  Tast_env.is_sub_type env.tast_env ty cow_ty
+
 let add_key_constraint
     ~(pos : Pos.t)
     ~(origin : int)
     ~certainty
     ~variety
+    ~base_ty
     (((_, _, key), ty) : T.expr * Typing_defs.locl_ty)
     (env : env)
     entity : env =
-  match key with
-  | A.String str ->
-    let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
-    let ty = Tast_env.fully_expand env.tast_env ty in
-    let add_static_key env variety =
-      let constraint_ = Static_key (variety, certainty, entity, key, ty) in
+  if is_dict env base_ty then
+    match key with
+    | A.String str ->
+      let key = Typing_defs.TSFlit_str (Pos_or_decl.none, str) in
+      let ty = Tast_env.fully_expand env.tast_env ty in
+      let add_static_key env variety =
+        let constraint_ = Static_key (variety, certainty, entity, key, ty) in
+        Env.add_constraint env { hack_pos = pos; origin; constraint_ }
+      in
+      List.fold ~f:add_static_key variety ~init:env
+    | _ ->
+      let constraint_ = Has_dynamic_key entity in
       Env.add_constraint env { hack_pos = pos; origin; constraint_ }
-    in
-    List.fold ~f:add_static_key variety ~init:env
-  | _ ->
-    let constraint_ = Has_dynamic_key entity in
-    Env.add_constraint env { hack_pos = pos; origin; constraint_ }
+  else
+    env
 
 let redirect ~pos ~origin (env : env) (entity_ : entity_) : env * entity_ =
   let var = Env.fresh_var () in
@@ -115,26 +140,41 @@ let rec assign
     ((_, lhs_pos, lval) : T.expr)
     (rhs : entity)
     (ty_rhs : Typing_defs.locl_ty) : env =
+  let decorate origin constraint_ = { hack_pos = pos; origin; constraint_ } in
   match lval with
   | A.Lvar (_, lid) -> Env.set_local env lid rhs
-  | A.Array_get ((_, _, A.Lvar (_, lid)), Some ix) ->
+  | A.Array_get ((ty, _, A.Lvar (_, lid)), ix_opt) ->
     let entity = Env.get_local env lid in
     begin
       match entity with
       | Some entity_ ->
-        (* Handle copy-on-write by creating a variable indirection *)
-        let (env, entity_) = redirect ~pos ~origin env entity_ in
-        let env =
-          add_key_constraint
-            ~pos
-            ~origin
-            ~certainty:Definite
-            ~variety:[Has]
-            (ix, ty_rhs)
-            env
-            entity_
+        let (env, entity_) =
+          if is_cow env ty then
+            (* Handle copy-on-write by creating a variable indirection *)
+            let (env, entity_) = redirect ~pos ~origin env entity_ in
+            let env = Env.set_local env lid (Some entity_) in
+            (env, entity_)
+          else
+            (env, entity_)
         in
-        Env.set_local env lid (Some entity_)
+        let env =
+          Option.fold ~init:env ix_opt ~f:(fun env ix ->
+              add_key_constraint
+                ~pos
+                ~origin
+                ~certainty:Definite
+                ~variety:[Has]
+                ~base_ty:ty
+                (ix, ty_rhs)
+                env
+                entity_)
+        in
+        let env =
+          Option.fold ~init:env rhs ~f:(fun env rhs_entity_ ->
+              decorate __LINE__ (Subsets (rhs_entity_, entity_))
+              |> Env.add_constraint env)
+        in
+        env
       | None ->
         (* We might end up here as a result of deadcode, such as a dictionary
            assignment after an unconditional break in a loop. In this
@@ -152,15 +192,39 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.True
   | A.False ->
     (env, None)
+  | A.Varray (_, values)
+  | A.ValCollection (_, _, values) ->
+    (* TODO(T131709581): This is an approximation where we identify the the
+       surrounding collection with whatever might be inside. *)
+    let collection_entity_ = Env.fresh_var () in
+    let collection_entity = Some collection_entity_ in
+    let add_value env value =
+      let (env, value_entity) = expr_ env value in
+      Option.fold ~init:env value_entity ~f:(fun env value_entity_ ->
+          let constraint_ =
+            decorate ~origin:__LINE__
+            @@ Subsets (value_entity_, collection_entity_)
+          in
+          Env.add_constraint env constraint_)
+    in
+    let env = List.fold ~init:env ~f:add_value values in
+    (env, collection_entity)
   | A.Darray (_, key_value_pairs)
   | A.KeyValCollection (A.Dict, _, key_value_pairs) ->
     let entity_ = Literal pos in
     let entity = Some entity_ in
     let constraint_ = decorate ~origin:__LINE__ @@ Marks (Allocation, pos) in
     let env = Env.add_constraint env constraint_ in
-    let add_key_constraint env (key, ((ty, _, _) as value)) : env =
+    let handle_key_value env (key, ((val_ty, _, _) as value)) : env =
       let (env, _key_entity) = expr_ env key in
-      let (env, _val_entity) = expr_ env value in
+      let (env, val_entity) = expr_ env value in
+      let env =
+        (* TODO(T131709581): This is an approximation where we identify the the
+           surrounding collection with whatever might be inside. *)
+        Option.fold ~init:env val_entity ~f:(fun env val_entity_ ->
+            decorate ~origin:__LINE__ @@ Subsets (val_entity_, entity_)
+            |> Env.add_constraint env)
+      in
       Option.fold
         ~init:env
         ~f:
@@ -169,13 +233,28 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
              ~origin:__LINE__
              ~certainty:Definite
              ~variety:[Has]
-             (key, ty))
+             ~base_ty:ty
+             (key, val_ty))
         entity
     in
-    let env = List.fold ~init:env ~f:add_key_constraint key_value_pairs in
+    let env = List.fold ~init:env ~f:handle_key_value key_value_pairs in
     (env, entity)
-  | A.Array_get (base, Some ix) ->
-    let (env, entity_exp) = expr_ env base in
+  | A.KeyValCollection (_, _, key_value_pairs) ->
+    (* TODO(T131709581): This is an approximation where we identify the the
+       surrounding collection with whatever might be inside. *)
+    let entity_ = Env.fresh_var () in
+    let entity = Some entity_ in
+    let handle_key_value env (key, value) : env =
+      let (env, _key_entity) = expr_ env key in
+      let (env, val_entity) = expr_ env value in
+      Option.fold ~init:env val_entity ~f:(fun env val_entity_ ->
+          decorate ~origin:__LINE__ @@ Subsets (val_entity_, entity_)
+          |> Env.add_constraint env)
+    in
+    let env = List.fold ~init:env ~f:handle_key_value key_value_pairs in
+    (env, entity)
+  | A.Array_get (((base_ty, _, _) as base), Some ix) ->
+    let (env, base_exp) = expr_ env base in
     let (env, _entity_ix) = expr_ env ix in
     let env =
       Option.fold
@@ -186,10 +265,13 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
              ~origin:__LINE__
              ~certainty:Definite
              ~variety:[Has; Needs]
+             ~base_ty
              (ix, ty))
-        entity_exp
+        base_exp
     in
-    (env, None)
+    (* TODO(T131709581): Returning the collection is an approximation where we
+       identify the the surrounding collection with whatever might be inside. *)
+    (env, base_exp)
   | A.Lvar (_, lid) ->
     let entity = Env.get_local env lid in
     (env, entity)
@@ -203,8 +285,8 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
        Essentially following the case for A.Array_get after extracting the right data. *)
     begin
       match args with
-      | [(_, base); (_, ix)]
-      | [(_, base); (_, ix); _] ->
+      | [(_, ((base_ty, _, _) as base)); (_, ix)]
+      | [(_, ((base_ty, _, _) as base)); (_, ix); _] ->
         let (env, entity_exp) = expr_ env base in
         let (env, _entity_ix) = expr_ env ix in
         let env =
@@ -216,6 +298,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
                  ~origin:__LINE__
                  ~certainty:Maybe
                  ~variety:[Has; Needs]
+                 ~base_ty
                  (ix, ty))
             entity_exp
         in

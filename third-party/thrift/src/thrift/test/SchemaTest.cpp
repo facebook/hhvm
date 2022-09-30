@@ -146,7 +146,7 @@ static void verify_function(
   if (paramsValidator) {
     paramsValidator(*func.paramlist());
   } else {
-    EXPECT_TRUE(func.paramlist()->get_fields().empty());
+    EXPECT_TRUE(func.paramlist()->fields()->empty());
   }
 
   if (exValidator) {
@@ -276,8 +276,8 @@ TEST(SchemaTest, Enum) {
   auto value1 = values.at(1);
 
   EXPECT_EQ(value0.name(), "unspecified");
-  EXPECT_EQ(value0.get_value(), 0);
+  EXPECT_EQ(value0.value().value(), 0);
 
   EXPECT_EQ(value1.name(), "test");
-  EXPECT_EQ(value1.get_value(), 22);
+  EXPECT_EQ(value1.value().value(), 22);
 }

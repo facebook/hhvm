@@ -60,7 +60,7 @@ void checkLongType(int typeBytes, int expectedOutBytes) {
     EXPECT_FALSE(any.typeHashPrefixSha2_256());
     EXPECT_TRUE(any.type());
     EXPECT_EQ(
-        registry.getSerializerByUri(*any.get_type(), intCodec.getProtocol()),
+        registry.getSerializerByUri(*any.type(), intCodec.getProtocol()),
         &intCodec);
   } else {
     EXPECT_FALSE(any.type());
@@ -71,7 +71,7 @@ void checkLongType(int typeBytes, int expectedOutBytes) {
     EXPECT_EQ(
         registry.getSerializerByHash(
             type::UniversalHashAlgorithm::Sha2_256,
-            *any.get_typeHashPrefixSha2_256(),
+            *any.typeHashPrefixSha2_256(),
             intCodec.getProtocol()),
         &intCodec);
   }
@@ -147,15 +147,13 @@ TEST(AnyRegistryTest, TypeHashToShort) {
   EXPECT_TRUE(registry.registerType<int>(anyType, {&intCodec}));
   Any any = registry.store(1, intCodec.getProtocol());
   ASSERT_TRUE(any.typeHashPrefixSha2_256());
-  EXPECT_EQ(any.get_typeHashPrefixSha2_256()->size(), 17);
+  EXPECT_EQ(any.typeHashPrefixSha2_256()->size(), 17);
   EXPECT_EQ(registry.load<int>(any), 1);
 
-  any.set_typeHashPrefixSha2_256(
-      any.get_typeHashPrefixSha2_256()->substr(0, 8));
+  any.set_typeHashPrefixSha2_256(any.typeHashPrefixSha2_256()->substr(0, 8));
   EXPECT_EQ(registry.load<int>(any), 1);
 
-  any.set_typeHashPrefixSha2_256(
-      any.get_typeHashPrefixSha2_256()->substr(0, 7));
+  any.set_typeHashPrefixSha2_256(any.typeHashPrefixSha2_256()->substr(0, 7));
   EXPECT_THROW(registry.load<int>(any), std::out_of_range);
 }
 

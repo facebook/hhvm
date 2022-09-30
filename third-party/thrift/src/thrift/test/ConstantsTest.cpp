@@ -118,8 +118,8 @@ TEST(constants, examples) {
   EXPECT_EQ(6.7, test_constants::u_2_2().get_d());
 
   EXPECT_EQ(union2::Type::s, test_constants::u_2_3().getType());
-  EXPECT_EQ(8, test_constants::u_2_3().get_s().get_a());
-  EXPECT_EQ("abacabb", test_constants::u_2_3().get_s().get_b());
+  EXPECT_EQ(8, test_constants::u_2_3().get_s().a().value());
+  EXPECT_EQ("abacabb", test_constants::u_2_3().get_s().b().value());
 
   EXPECT_EQ(union2::Type::u, test_constants::u_2_4().getType());
   EXPECT_EQ(union1::Type::i, test_constants::u_2_4().get_u().getType());

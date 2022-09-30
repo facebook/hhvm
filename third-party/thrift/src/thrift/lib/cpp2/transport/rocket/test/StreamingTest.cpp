@@ -355,8 +355,8 @@ TEST_F(StreamingTest, ClientStreamBridge) {
         EXPECT_TRUE(next.hasException());
         EXPECT_TRUE(next.template hasException<FirstEx>());
         EXPECT_TRUE(next.exception().with_exception([](FirstEx& ex) {
-          EXPECT_EQ(1, ex.get_errCode());
-          EXPECT_STREQ("FirstEx", ex.get_errMsg().c_str());
+          EXPECT_EQ(1, ex.errCode().value());
+          EXPECT_STREQ("FirstEx", ex.errMsg().value().c_str());
         }));
       });
       EXPECT_TRUE(thrown);
@@ -763,8 +763,8 @@ TEST_F(StreamingTest, StreamThrowsKnownException) {
             thrown = true;
             EXPECT_TRUE(ew.template is_compatible_with<FirstEx>());
             EXPECT_TRUE(ew.with_exception([](FirstEx& ex) {
-              EXPECT_EQ(1, ex.get_errCode());
-              EXPECT_STREQ("FirstEx", ex.get_errMsg().c_str());
+              EXPECT_EQ(1, ex.errCode().value());
+              EXPECT_STREQ("FirstEx", ex.errMsg().value().c_str());
             }));
           }
         });
@@ -835,8 +835,8 @@ TEST_F(StreamingTest, ResponseAndStreamThrowsKnownException) {
             thrown = true;
             EXPECT_TRUE(ew.template is_compatible_with<FirstEx>());
             EXPECT_TRUE(ew.with_exception([](FirstEx& ex) {
-              EXPECT_EQ(1, ex.get_errCode());
-              EXPECT_STREQ("FirstEx", ex.get_errMsg().c_str());
+              EXPECT_EQ(1, ex.errCode().value());
+              EXPECT_STREQ("FirstEx", ex.errMsg().value().c_str());
             }));
           }
         });

@@ -53,7 +53,7 @@ folly::fbstring maybeGetTypeHash(
   }
   return maybeGetUniversalHashPrefix(
       type::UniversalHashAlgorithm::Sha2_256,
-      type.get_uri(),
+      type.uri().value(),
       defaultTypeHashBytes);
 }
 
@@ -88,7 +88,7 @@ std::string_view AnyRegistry::getTypeUri(
   if (entry == nullptr) {
     return {};
   }
-  return entry->type.get_uri();
+  return entry->type.uri().value();
 }
 
 std::string_view AnyRegistry::getTypeUri(const Any& value) const noexcept {
@@ -96,7 +96,7 @@ std::string_view AnyRegistry::getTypeUri(const Any& value) const noexcept {
   if (entry == nullptr) {
     return {};
   }
-  return entry->type.get_uri();
+  return entry->type.uri().value();
 }
 
 const std::type_info& AnyRegistry::getTypeId(const Any& value) const {
@@ -150,7 +150,7 @@ Any AnyRegistry::store(any_ref value, const Protocol& protocol) const {
 
   Any result;
   if (entry.typeHash.empty()) {
-    result.set_type(entry.type.get_uri());
+    result.set_type(entry.type.uri().value());
   } else {
     result.set_typeHashPrefixSha2_256(entry.typeHash);
   }
@@ -185,7 +185,7 @@ std::string AnyRegistry::debugString() const {
   for (const auto& indx : hashIndex_) {
     const TypeEntry& entry = *indx.second;
     result += "  ";
-    result += entry.type.get_uri();
+    result += entry.type.uri().value();
     result += " (";
     result += folly::hexlify(indx.first);
     result += ")";
@@ -424,7 +424,9 @@ const AnySerializer& AnyRegistry::getAndCheckSerializer(
   auto itr = entry.serializers.find(protocol);
   if (itr == entry.serializers.end()) {
     folly::throw_exception<std::out_of_range>(fmt::format(
-        "Serializer not found: {}#{}", entry.type.get_uri(), protocol.name()));
+        "Serializer not found: {}#{}",
+        entry.type.uri().value(),
+        protocol.name()));
   }
   return *itr->second;
 }

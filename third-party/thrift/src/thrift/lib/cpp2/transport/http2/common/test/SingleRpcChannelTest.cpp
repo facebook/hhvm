@@ -377,8 +377,10 @@ TEST(H2ChannelTest, decodeHeaders) {
   EXPECT_EQ(
       otherMetadata[std::string("Content-Language")],
       "Arrgh, this be pirate tongue matey");
-  EXPECT_EQ(*metadata.get_clientTimeoutMs(), 500);
-  EXPECT_EQ(*metadata.get_kind(), RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
+  EXPECT_EQ(*apache::thrift::get_pointer(metadata.clientTimeoutMs()), 500);
+  EXPECT_EQ(
+      *apache::thrift::get_pointer(metadata.kind()),
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 }
 
 } // namespace thrift

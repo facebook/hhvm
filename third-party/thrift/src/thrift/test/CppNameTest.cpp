@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ TEST(cpp_name_test, rename) {
   s.unique_name() = 42;
   s.opt_unique_name() = 4; // chosen by fair dice roll
   EXPECT_EQ(42, *s.unique_name());
-  EXPECT_EQ(42, s.get_unique_name());
-  EXPECT_EQ(4, *s.get_opt_unique_name());
+  EXPECT_EQ(42, s.unique_name().value());
+  EXPECT_EQ(4, *apache::thrift::get_pointer(s.opt_unique_name()));
   EXPECT_EQ(4, *s.opt_unique_name());
 }
 

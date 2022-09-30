@@ -45,15 +45,6 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     | Inter_shape.Divergent constr_map -> constr_map
   in
   match mode with
-  | FlagTargets ->
-    let log_pos = Format.printf "%a\n" Pos.pp in
-    let { expressions_to_modify; hints_to_modify } =
-      Walker.collect_analysis_targets ctx tast
-    in
-    Format.printf "~Expressions~\n";
-    List.iter expressions_to_modify ~f:log_pos;
-    Format.printf "~Hints~\n";
-    List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
     let print_function_constraints
         (id : string) (constraints : decorated_constraints) : unit =

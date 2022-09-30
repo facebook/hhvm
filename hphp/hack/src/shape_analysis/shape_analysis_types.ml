@@ -32,7 +32,6 @@ type potential_targets = {
 }
 
 type mode =
-  | FlagTargets
   | DumpConstraints
   | DumpDerivedConstraints
   | SimplifyConstraints

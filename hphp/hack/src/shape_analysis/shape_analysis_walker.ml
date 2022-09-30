@@ -48,42 +48,6 @@ let not_yet_supported (env : env) pos msg =
 
 let failwith = failwithpos Pos.none
 
-let collect_analysis_targets :
-    Provider_context.t -> Tast.program -> potential_targets =
-  let reducer =
-    object (this)
-      inherit [_] Tast_visitor.reduce as super
-
-      method zero = { expressions_to_modify = []; hints_to_modify = [] }
-
-      method plus
-          { expressions_to_modify = es1; hints_to_modify = hs1 }
-          { expressions_to_modify = es2; hints_to_modify = hs2 } =
-        { expressions_to_modify = es1 @ es2; hints_to_modify = hs1 @ hs2 }
-
-      method! on_expr env ((_, pos, exp_proper) as exp) =
-        let expressions_to_modify =
-          match exp_proper with
-          | A.Darray _ -> [pos]
-          | A.KeyValCollection (A.Dict, _, _) -> [pos]
-          | _ -> []
-        in
-        let accumulator = { expressions_to_modify; hints_to_modify = [] } in
-        this#plus accumulator (super#on_expr env exp)
-
-      method! on_hint env ((pos, hint_proper) as hint) =
-        let hints_to_modify =
-          match hint_proper with
-          | A.Happly ((_, id), _) when String.equal id SN.Collections.cDict ->
-            [pos]
-          | _ -> []
-        in
-        let accumulator = { expressions_to_modify = []; hints_to_modify } in
-        this#plus accumulator (super#on_hint env hint)
-    end
-  in
-  reducer#go
-
 (* Is the type a suitable dict that can be coverted into shape. For the moment,
    that's only the case if the key is a string. *)
 let rec is_suitable_target_ty tast_env ty =

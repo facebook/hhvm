@@ -25,6 +25,80 @@ from thrift.py3.types cimport (
 )
 
 
+cdef __StructSpec get_reflection__DurationStruct():
+    cdef _apache_thrift_type_standard_types.DurationStruct defaults = _apache_thrift_type_standard_types.DurationStruct._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_type_standard_types.cDurationStruct](
+            default_inst[_apache_thrift_type_standard_types.cDurationStruct]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="DurationStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+            """thrift.uri""": """facebook.com/thrift/type/Duration""",        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="seconds",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="nanos",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=defaults.nanos,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__TimeStruct():
+    cdef _apache_thrift_type_standard_types.TimeStruct defaults = _apache_thrift_type_standard_types.TimeStruct._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_type_standard_types.cTimeStruct](
+            default_inst[_apache_thrift_type_standard_types.cTimeStruct]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="TimeStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+            """thrift.uri""": """facebook.com/thrift/type/Time""",        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="seconds",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="nanos",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__FractionStruct():
     cdef _apache_thrift_type_standard_types.FractionStruct defaults = _apache_thrift_type_standard_types.FractionStruct._fbthrift_create(
         constant_shared_ptr[_apache_thrift_type_standard_types.cFractionStruct](

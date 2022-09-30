@@ -46,6 +46,30 @@ cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 
 
+ctypedef void (*__DurationStruct_FieldsSetterFunc)(__DurationStruct_FieldsSetter, object) except *
+
+cdef class __DurationStruct_FieldsSetter(__StructFieldsSetter):
+    cdef _apache_thrift_type_standard_types.cDurationStruct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __DurationStruct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __DurationStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cDurationStruct* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+
+
+ctypedef void (*__TimeStruct_FieldsSetterFunc)(__TimeStruct_FieldsSetter, object) except *
+
+cdef class __TimeStruct_FieldsSetter(__StructFieldsSetter):
+    cdef _apache_thrift_type_standard_types.cTimeStruct* _struct_cpp_obj
+    cdef cumap[__cstring_view, __TimeStruct_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __TimeStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cTimeStruct* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+
+
 ctypedef void (*__FractionStruct_FieldsSetterFunc)(__FractionStruct_FieldsSetter, object) except *
 
 cdef class __FractionStruct_FieldsSetter(__StructFieldsSetter):

@@ -17,6 +17,16 @@ cimport facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotatio
 
 cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
+cdef class DurationStruct_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint seconds
+    cdef public pint nanos
+
+
+cdef class TimeStruct_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint seconds
+    cdef public pint nanos
+
+
 cdef class FractionStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint numerator
     cdef public pint denominator

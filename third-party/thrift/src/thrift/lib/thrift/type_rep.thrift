@@ -40,37 +40,6 @@ namespace py.asyncio apache_thrift_asyncio.type_rep
 namespace go thrift.lib.thrift.type_rep
 namespace py thrift.lib.thrift.type_rep
 
-/**
- * A fixed-length span of time, represented as a signed count of seconds and
- * nanoseconds (nanos).
- *
- * Considered 'normal', when `nanos` is in the range 0 to 999'999'999
- * inclusive, or `seconds` is 0 and `nanos` is in the range -999'999'999 to
- * 999'999'999 inclusive.
- */
-struct DurationStruct {
-  /** The count of seconds. */
-  1: i64 seconds;
-  /** The count of nanoseconds. */
-  // TODO(afuller): Fix to not require a default for terse fields.
-  2: i32 nanos = 0;
-} (thrift.uri = "facebook.com/thrift/type/Duration")
-
-/**
- * An instant in time encoded as a count of seconds and nanoseconds (nanos)
- * since midnight on January 1, 1970 UTC (i.e. Unix epoch).
- *
- * Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
- */
-// TODO(afuller): Consider making this a 'strong' typedef of `Duration`, which
-// would ensure both a separate URI and native type in all languages.
-struct TimeStruct {
-  /** The count of seconds. */
-  1: i64 seconds;
-  /** The count of nanoseconds. */
-  2: i32 nanos;
-} (thrift.uri = "facebook.com/thrift/type/Time")
-
 /** A union representation of a protocol. */
 union ProtocolUnion {
   /** A standard protocol, known by all Thrift implementations. */

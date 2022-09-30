@@ -88,6 +88,32 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apa
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" namespace "::apache::thrift::type":
 
+    cdef cppclass cDurationStruct "::apache::thrift::type::DurationStruct":
+        cDurationStruct() except +
+        cDurationStruct(const cDurationStruct&) except +
+        bint operator==(cDurationStruct&)
+        bint operator!=(cDurationStruct&)
+        bint operator<(cDurationStruct&)
+        bint operator>(cDurationStruct&)
+        bint operator<=(cDurationStruct&)
+        bint operator>=(cDurationStruct&)
+        __field_ref[cint64_t] seconds_ref "seconds_ref" ()
+        __field_ref[cint32_t] nanos_ref "nanos_ref" ()
+
+
+    cdef cppclass cTimeStruct "::apache::thrift::type::TimeStruct":
+        cTimeStruct() except +
+        cTimeStruct(const cTimeStruct&) except +
+        bint operator==(cTimeStruct&)
+        bint operator!=(cTimeStruct&)
+        bint operator<(cTimeStruct&)
+        bint operator>(cTimeStruct&)
+        bint operator<=(cTimeStruct&)
+        bint operator>=(cTimeStruct&)
+        __field_ref[cint64_t] seconds_ref "seconds_ref" ()
+        __field_ref[cint32_t] nanos_ref "nanos_ref" ()
+
+
     cdef cppclass cFractionStruct "::apache::thrift::type::FractionStruct":
         cFractionStruct() except +
         cFractionStruct(const cFractionStruct&) except +
@@ -201,6 +227,28 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         const cVoid& get_mapType "get_mapType" () const
         cVoid& set_mapType "set_mapType" (const cVoid&)
 
+
+
+
+cdef class DurationStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[cDurationStruct] _cpp_obj
+    cdef _fbthrift_types_fields.__DurationStruct_FieldsSetter _fields_setter
+    cdef inline object seconds_impl(self)
+    cdef inline object nanos_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cDurationStruct])
+
+
+
+cdef class TimeStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[cTimeStruct] _cpp_obj
+    cdef _fbthrift_types_fields.__TimeStruct_FieldsSetter _fields_setter
+    cdef inline object seconds_impl(self)
+    cdef inline object nanos_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cTimeStruct])
 
 
 

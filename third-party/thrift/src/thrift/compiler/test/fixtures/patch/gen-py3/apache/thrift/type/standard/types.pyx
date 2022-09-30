@@ -241,6 +241,254 @@ __SetMetaClass(<PyTypeObject*> __TypeNameType, <PyTypeObject*> __TypeName_Union_
 
 
 @__cython.auto_pickle(False)
+cdef class DurationStruct(thrift.py3.types.Struct):
+    def __init__(DurationStruct self, **kwargs):
+        self._cpp_obj = make_shared[cDurationStruct]()
+        self._fields_setter = _fbthrift_types_fields.__DurationStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(DurationStruct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef DurationStruct __fbthrift_inst = DurationStruct.__new__(DurationStruct)
+        __fbthrift_inst._cpp_obj = make_shared[cDurationStruct](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__DurationStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("DurationStruct", {
+          "seconds": deref(self._cpp_obj).seconds_ref().has_value(),
+          "nanos": deref(self._cpp_obj).nanos_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cDurationStruct] cpp_obj):
+        __fbthrift_inst = <DurationStruct>DurationStruct.__new__(DurationStruct)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline seconds_impl(self):
+
+        return deref(self._cpp_obj).seconds_ref().value()
+
+    @property
+    def seconds(self):
+        return self.seconds_impl()
+
+    cdef inline nanos_impl(self):
+
+        return deref(self._cpp_obj).nanos_ref().value()
+
+    @property
+    def nanos(self):
+        return self.nanos_impl()
+
+
+    def __hash__(DurationStruct self):
+        return super().__hash__()
+
+    def __repr__(DurationStruct self):
+        return super().__repr__()
+
+    def __str__(DurationStruct self):
+        return super().__str__()
+
+
+    def __copy__(DurationStruct self):
+        cdef shared_ptr[cDurationStruct] cpp_obj = make_shared[cDurationStruct](
+            deref(self._cpp_obj)
+        )
+        return DurationStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cDurationStruct](
+            self._cpp_obj,
+            (<DurationStruct>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__DurationStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cDurationStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "standard.DurationStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cDurationStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(DurationStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cDurationStruct](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(DurationStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cDurationStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[cDurationStruct](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "apache.thrift.type.standard.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.DurationStruct, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.DurationStruct, self)
+@__cython.auto_pickle(False)
+cdef class TimeStruct(thrift.py3.types.Struct):
+    def __init__(TimeStruct self, **kwargs):
+        self._cpp_obj = make_shared[cTimeStruct]()
+        self._fields_setter = _fbthrift_types_fields.__TimeStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(TimeStruct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef TimeStruct __fbthrift_inst = TimeStruct.__new__(TimeStruct)
+        __fbthrift_inst._cpp_obj = make_shared[cTimeStruct](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__TimeStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("TimeStruct", {
+          "seconds": deref(self._cpp_obj).seconds_ref().has_value(),
+          "nanos": deref(self._cpp_obj).nanos_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cTimeStruct] cpp_obj):
+        __fbthrift_inst = <TimeStruct>TimeStruct.__new__(TimeStruct)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline seconds_impl(self):
+
+        return deref(self._cpp_obj).seconds_ref().value()
+
+    @property
+    def seconds(self):
+        return self.seconds_impl()
+
+    cdef inline nanos_impl(self):
+
+        return deref(self._cpp_obj).nanos_ref().value()
+
+    @property
+    def nanos(self):
+        return self.nanos_impl()
+
+
+    def __hash__(TimeStruct self):
+        return super().__hash__()
+
+    def __repr__(TimeStruct self):
+        return super().__repr__()
+
+    def __str__(TimeStruct self):
+        return super().__str__()
+
+
+    def __copy__(TimeStruct self):
+        cdef shared_ptr[cTimeStruct] cpp_obj = make_shared[cTimeStruct](
+            deref(self._cpp_obj)
+        )
+        return TimeStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cTimeStruct](
+            self._cpp_obj,
+            (<TimeStruct>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__TimeStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cTimeStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "standard.TimeStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cTimeStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(TimeStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cTimeStruct](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(TimeStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cTimeStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[cTimeStruct](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "apache.thrift.type.standard.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.TimeStruct, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.TimeStruct, self)
+@__cython.auto_pickle(False)
 cdef class FractionStruct(thrift.py3.types.Struct):
     def __init__(FractionStruct self, **kwargs):
         self._cpp_obj = make_shared[cFractionStruct]()

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-include "thrift/lib/thrift/type_rep.thrift"
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+include "thrift/lib/thrift/standard.thrift"
+include "thrift/lib/thrift/type_rep.thrift"
 
 cpp_include "<thrift/lib/cpp2/type/BaseType.h>"
 cpp_include "<thrift/lib/cpp2/type/Protocol.h>"
@@ -111,7 +112,7 @@ const byte defaultTypeHashBytes = 16;
  */
 // TODO(afuller): Provide const definitions for +/-infinite time.
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef type_rep.DurationStruct Duration (thrift.uri = "")
+typedef standard.DurationStruct Duration (thrift.uri = "")
 
 /**
  * A 'normal' Time.
@@ -121,7 +122,7 @@ typedef type_rep.DurationStruct Duration (thrift.uri = "")
  */
 // TODO(afuller): Provide const definitions for infinite future/past.
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef type_rep.TimeStruct Time (thrift.uri = "")
+typedef standard.TimeStruct Time (thrift.uri = "")
 
 /**
  * An 'internet timestamp' as described in [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt).
@@ -135,7 +136,7 @@ typedef type_rep.TimeStruct Time (thrift.uri = "")
  * min/max allowed 'date string' values, instead of overflowing.
  */
 @thrift.Experimental // TODO(afuller): Adapt!
-typedef type_rep.TimeStruct Timestamp
+typedef standard.TimeStruct Timestamp
 
 /**
  * The minimum timestamp allowed by [RFC 3339](https://www.ietf.org/rfc/rfc3339.txt).

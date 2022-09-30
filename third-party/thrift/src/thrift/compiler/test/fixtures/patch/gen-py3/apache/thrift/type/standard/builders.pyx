@@ -4,6 +4,20 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+cdef class DurationStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _apache_thrift_type_standard_types.DurationStruct
+
+    def __iter__(self):
+        yield "seconds", self.seconds
+        yield "nanos", self.nanos
+
+cdef class TimeStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _apache_thrift_type_standard_types.TimeStruct
+
+    def __iter__(self):
+        yield "seconds", self.seconds
+        yield "nanos", self.nanos
+
 cdef class FractionStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_type_standard_types.FractionStruct
 

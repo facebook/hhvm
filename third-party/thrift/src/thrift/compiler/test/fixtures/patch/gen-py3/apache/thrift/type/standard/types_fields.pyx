@@ -19,6 +19,84 @@ from thrift.py3.types cimport const_pointer_cast
 
 
 @__cython.auto_pickle(False)
+cdef class __DurationStruct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __DurationStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cDurationStruct* struct_cpp_obj):
+        cdef __DurationStruct_FieldsSetter __fbthrift_inst = __DurationStruct_FieldsSetter.__new__(__DurationStruct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"seconds")] = __DurationStruct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"nanos")] = __DurationStruct_FieldsSetter._set_field_1
+        return __fbthrift_inst
+
+    cdef void set_field(__DurationStruct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __DurationStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field seconds
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cDurationStruct](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'seconds is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).seconds_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field nanos
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cDurationStruct](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'nanos is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).nanos_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
+cdef class __TimeStruct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __TimeStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cTimeStruct* struct_cpp_obj):
+        cdef __TimeStruct_FieldsSetter __fbthrift_inst = __TimeStruct_FieldsSetter.__new__(__TimeStruct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"seconds")] = __TimeStruct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"nanos")] = __TimeStruct_FieldsSetter._set_field_1
+        return __fbthrift_inst
+
+    cdef void set_field(__TimeStruct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __TimeStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field seconds
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cTimeStruct](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'seconds is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).seconds_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field nanos
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cTimeStruct](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'nanos is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).nanos_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
 cdef class __FractionStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

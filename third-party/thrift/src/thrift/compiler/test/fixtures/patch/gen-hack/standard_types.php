@@ -77,6 +77,322 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
 }
 
 /**
+ * A fixed-length span of time, represented as a signed count of seconds and
+ * nanoseconds (nanos).
+ * 
+ * Considered 'normal', when `nanos` is in the range 0 to 999'999'999
+ * inclusive, or `seconds` is 0 and `nanos` is in the range -999'999'999 to
+ * 999'999'999 inclusive.
+ *
+ * Original thrift struct:-
+ * DurationStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Duration'))>>
+class apache_thrift_type_standard_DurationStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'seconds',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'nanos',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'seconds' => 1,
+    'nanos' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'seconds' => ?int,
+    ?'nanos' => ?int,
+  );
+
+  const type TShape = shape(
+    'seconds' => int,
+    'nanos' => int,
+    ...
+  );
+  const int STRUCTURAL_ID = 6068468838865178106;
+  /**
+   * The count of seconds.
+   * 
+   * Original thrift field:-
+   * 1: i64 seconds
+   */
+  public int $seconds;
+  /**
+   * The count of nanoseconds.
+   * 
+   * Original thrift field:-
+   * 2: i32 nanos
+   */
+  public int $nanos;
+
+  public function __construct(?int $seconds = null, ?int $nanos = null)[] {
+    $this->seconds = $seconds ?? 0;
+    $this->nanos = $nanos ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'seconds'),
+      Shapes::idx($shape, 'nanos'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DurationStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "standard.DurationStruct",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "seconds",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "nanos",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['seconds'],
+      $shape['nanos'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'seconds' => $this->seconds,
+      'nanos' => $this->nanos,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'seconds') !== null) {
+      $this->seconds = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['seconds']);
+    }
+    if (idx($parsed, 'nanos') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['nanos']);
+      if ($_tmp0 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->nanos = (int)$_tmp0;
+      }
+    }
+  }
+
+}
+
+/**
+ * An instant in time encoded as a count of seconds and nanoseconds (nanos)
+ * since midnight on January 1, 1970 UTC (i.e. Unix epoch).
+ * 
+ * Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
+ *
+ * Original thrift struct:-
+ * TimeStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Time'))>>
+class apache_thrift_type_standard_TimeStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'seconds',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'nanos',
+      'type' => \TType::I32,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'seconds' => 1,
+    'nanos' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'seconds' => ?int,
+    ?'nanos' => ?int,
+  );
+
+  const type TShape = shape(
+    'seconds' => int,
+    'nanos' => int,
+    ...
+  );
+  const int STRUCTURAL_ID = 6068468838865178106;
+  /**
+   * The count of seconds.
+   * 
+   * Original thrift field:-
+   * 1: i64 seconds
+   */
+  public int $seconds;
+  /**
+   * The count of nanoseconds.
+   * 
+   * Original thrift field:-
+   * 2: i32 nanos
+   */
+  public int $nanos;
+
+  public function __construct(?int $seconds = null, ?int $nanos = null)[] {
+    $this->seconds = $seconds ?? 0;
+    $this->nanos = $nanos ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'seconds'),
+      Shapes::idx($shape, 'nanos'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TimeStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "standard.TimeStruct",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "seconds",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "nanos",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['seconds'],
+      $shape['nanos'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'seconds' => $this->seconds,
+      'nanos' => $this->nanos,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'seconds') !== null) {
+      $this->seconds = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['seconds']);
+    }
+    if (idx($parsed, 'nanos') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['nanos']);
+      if ($_tmp0 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->nanos = (int)$_tmp0;
+      }
+    }
+  }
+
+}
+
+/**
  * A integer fraction of the form {numerator} / {denominator}
  * 
  * Useful for representing ratios, rates, and metric accumulators.

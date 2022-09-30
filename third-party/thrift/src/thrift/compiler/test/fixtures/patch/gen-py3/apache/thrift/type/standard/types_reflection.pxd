@@ -14,6 +14,10 @@ from thrift.py3.reflection cimport (
     FieldSpec as __FieldSpec,
 )
 
+cdef __StructSpec get_reflection__DurationStruct()
+
+cdef __StructSpec get_reflection__TimeStruct()
+
 cdef __StructSpec get_reflection__FractionStruct()
 
 cdef __StructSpec get_reflection__UriStruct()

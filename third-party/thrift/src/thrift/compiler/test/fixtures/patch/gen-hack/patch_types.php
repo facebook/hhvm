@@ -2097,3 +2097,437 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
 }
 
+/**
+ * A patch for a Duration value.
+ *
+ * Original thrift struct:-
+ * DurationPatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/DurationPatch'))>>
+class DurationPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \apache_thrift_type_standard_DurationStruct::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'add',
+      'type' => \TType::STRUCT,
+      'class' => \apache_thrift_type_standard_DurationStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'add' => 8,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\apache_thrift_type_standard_DurationStruct,
+    ?'clear' => ?bool,
+    ?'add' => ?\apache_thrift_type_standard_DurationStruct,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\apache_thrift_type_standard_DurationStruct::TShape,
+    'clear' => bool,
+    ?'add' => ?\apache_thrift_type_standard_DurationStruct::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 566871531090175355;
+  /**
+   * Assign to a given value.
+   * 
+   * If set, all other patch operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct standard.DurationStruct assign
+   */
+  public ?\apache_thrift_type_standard_DurationStruct $assign;
+  /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Add to a given value.
+   * 
+   * Original thrift field:-
+   * 8: struct standard.DurationStruct add
+   */
+  public ?\apache_thrift_type_standard_DurationStruct $add;
+
+  public function __construct(?\apache_thrift_type_standard_DurationStruct $assign = null, ?bool $clear = null, ?\apache_thrift_type_standard_DurationStruct $add = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->add = $add;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'add'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DurationPatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "patch.DurationPatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "standard.DurationStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "standard.DurationStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "add",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "DurationStructPatch",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'add' => shape(
+          'field' => dict[
+            '\thrift\annotation\Testing' => \thrift\annotation\Testing::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\apache_thrift_type_standard_DurationStruct::__fromShape($shape['assign'])),
+      $shape['clear'],
+      Shapes::idx($shape, 'add') === null ? null : (\apache_thrift_type_standard_DurationStruct::__fromShape($shape['add'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+      'add' => $this->add?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache_thrift_type_standard_DurationStruct>($parsed['assign']));
+      $_tmp1 = \apache_thrift_type_standard_DurationStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'add') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache_thrift_type_standard_DurationStruct>($parsed['add']));
+      $_tmp3 = \apache_thrift_type_standard_DurationStruct::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->add = $_tmp3;
+    }
+  }
+
+}
+
+/**
+ * A patch for a Time value.
+ *
+ * Original thrift struct:-
+ * TimePatch
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/TimePatch'))>>
+class TimePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'assign',
+      'type' => \TType::STRUCT,
+      'class' => \apache_thrift_type_standard_TimeStruct::class,
+    ),
+    2 => shape(
+      'var' => 'clear',
+      'type' => \TType::BOOL,
+    ),
+    8 => shape(
+      'var' => 'add',
+      'type' => \TType::STRUCT,
+      'class' => \apache_thrift_type_standard_DurationStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'assign' => 1,
+    'clear' => 2,
+    'add' => 8,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'assign' => ?\apache_thrift_type_standard_TimeStruct,
+    ?'clear' => ?bool,
+    ?'add' => ?\apache_thrift_type_standard_DurationStruct,
+  );
+
+  const type TShape = shape(
+    ?'assign' => ?\apache_thrift_type_standard_TimeStruct::TShape,
+    'clear' => bool,
+    ?'add' => ?\apache_thrift_type_standard_DurationStruct::TShape,
+    ...
+  );
+  const int STRUCTURAL_ID = 2651075519081273310;
+  /**
+   * Assign to a given value.
+   * 
+   * If set, all other patch operations are ignored.
+   * 
+   * Original thrift field:-
+   * 1: struct standard.TimeStruct assign
+   */
+  public ?\apache_thrift_type_standard_TimeStruct $assign;
+  /**
+   * Clear any set value.
+   * 
+   * Original thrift field:-
+   * 2: bool clear
+   */
+  public bool $clear;
+  /**
+   * Add to a given value.
+   * 
+   * Original thrift field:-
+   * 8: struct standard.DurationStruct add
+   */
+  public ?\apache_thrift_type_standard_DurationStruct $add;
+
+  public function __construct(?\apache_thrift_type_standard_TimeStruct $assign = null, ?bool $clear = null, ?\apache_thrift_type_standard_DurationStruct $add = null)[] {
+    $this->assign = $assign;
+    $this->clear = $clear ?? false;
+    $this->add = $add;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign'),
+      Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'add'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TimePatch';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "patch.TimePatch",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "standard.TimeStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "assign",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                )
+              ),
+              "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "standard.DurationStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "add",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
+            "underlyingName" => "TimeStructPatch",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+        'add' => shape(
+          'field' => dict[
+            '\thrift\annotation\Testing' => \thrift\annotation\Testing::fromShape(
+              shape(
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'assign') === null ? null : (\apache_thrift_type_standard_TimeStruct::__fromShape($shape['assign'])),
+      $shape['clear'],
+      Shapes::idx($shape, 'add') === null ? null : (\apache_thrift_type_standard_DurationStruct::__fromShape($shape['add'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'assign' => $this->assign?->__toShape(),
+      'clear' => $this->clear,
+      'add' => $this->add?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'assign') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache_thrift_type_standard_TimeStruct>($parsed['assign']));
+      $_tmp1 = \apache_thrift_type_standard_TimeStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->assign = $_tmp1;
+    }
+    if (idx($parsed, 'clear') !== null) {
+      $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
+    }
+    if (idx($parsed, 'add') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \apache_thrift_type_standard_DurationStruct>($parsed['add']));
+      $_tmp3 = \apache_thrift_type_standard_DurationStruct::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->add = $_tmp3;
+    }
+  }
+
+}
+

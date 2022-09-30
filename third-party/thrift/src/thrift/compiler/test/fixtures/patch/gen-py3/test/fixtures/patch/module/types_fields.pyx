@@ -76,21 +76,23 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         __fbthrift_inst._setters[__cstring_view(<const char*>"structVal")] = __MyStruct_FieldsSetter._set_field_10
         __fbthrift_inst._setters[__cstring_view(<const char*>"unionVal")] = __MyStruct_FieldsSetter._set_field_11
         __fbthrift_inst._setters[__cstring_view(<const char*>"lateStructVal")] = __MyStruct_FieldsSetter._set_field_12
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optBoolVal")] = __MyStruct_FieldsSetter._set_field_13
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optByteVal")] = __MyStruct_FieldsSetter._set_field_14
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optI16Val")] = __MyStruct_FieldsSetter._set_field_15
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optI32Val")] = __MyStruct_FieldsSetter._set_field_16
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optI64Val")] = __MyStruct_FieldsSetter._set_field_17
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optFloatVal")] = __MyStruct_FieldsSetter._set_field_18
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optDoubleVal")] = __MyStruct_FieldsSetter._set_field_19
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optStringVal")] = __MyStruct_FieldsSetter._set_field_20
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optBinaryVal")] = __MyStruct_FieldsSetter._set_field_21
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optEnumVal")] = __MyStruct_FieldsSetter._set_field_22
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optStructVal")] = __MyStruct_FieldsSetter._set_field_23
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optLateStructVal")] = __MyStruct_FieldsSetter._set_field_24
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optListVal")] = __MyStruct_FieldsSetter._set_field_25
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optSetVal")] = __MyStruct_FieldsSetter._set_field_26
-        __fbthrift_inst._setters[__cstring_view(<const char*>"optMapVal")] = __MyStruct_FieldsSetter._set_field_27
+        __fbthrift_inst._setters[__cstring_view(<const char*>"durationVal")] = __MyStruct_FieldsSetter._set_field_13
+        __fbthrift_inst._setters[__cstring_view(<const char*>"timeVal")] = __MyStruct_FieldsSetter._set_field_14
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optBoolVal")] = __MyStruct_FieldsSetter._set_field_15
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optByteVal")] = __MyStruct_FieldsSetter._set_field_16
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optI16Val")] = __MyStruct_FieldsSetter._set_field_17
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optI32Val")] = __MyStruct_FieldsSetter._set_field_18
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optI64Val")] = __MyStruct_FieldsSetter._set_field_19
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optFloatVal")] = __MyStruct_FieldsSetter._set_field_20
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optDoubleVal")] = __MyStruct_FieldsSetter._set_field_21
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optStringVal")] = __MyStruct_FieldsSetter._set_field_22
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optBinaryVal")] = __MyStruct_FieldsSetter._set_field_23
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optEnumVal")] = __MyStruct_FieldsSetter._set_field_24
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optStructVal")] = __MyStruct_FieldsSetter._set_field_25
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optLateStructVal")] = __MyStruct_FieldsSetter._set_field_26
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optListVal")] = __MyStruct_FieldsSetter._set_field_27
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optSetVal")] = __MyStruct_FieldsSetter._set_field_28
+        __fbthrift_inst._setters[__cstring_view(<const char*>"optMapVal")] = __MyStruct_FieldsSetter._set_field_29
         return __fbthrift_inst
 
     cdef void set_field(__MyStruct_FieldsSetter self, const char* name, object value) except *:
@@ -222,135 +224,153 @@ cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
         deref(self._struct_cpp_obj).lateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj))
 
     cdef void _set_field_13(self, _fbthrift_value) except *:
-        # for field optBoolVal
+        # for field durationVal
         if _fbthrift_value is None:
             __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 13)
+            return
+        if not isinstance(_fbthrift_value, _apache_thrift_type_standard_types.DurationStruct):
+            raise TypeError(f'durationVal is not a { _apache_thrift_type_standard_types.DurationStruct !r}.')
+        deref(self._struct_cpp_obj).durationVal_ref().assign(deref((<_apache_thrift_type_standard_types.DurationStruct?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_14(self, _fbthrift_value) except *:
+        # for field timeVal
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 14)
+            return
+        if not isinstance(_fbthrift_value, _apache_thrift_type_standard_types.TimeStruct):
+            raise TypeError(f'timeVal is not a { _apache_thrift_type_standard_types.TimeStruct !r}.')
+        deref(self._struct_cpp_obj).timeVal_ref().assign(deref((<_apache_thrift_type_standard_types.TimeStruct?> _fbthrift_value)._cpp_obj))
+
+    cdef void _set_field_15(self, _fbthrift_value) except *:
+        # for field optBoolVal
+        if _fbthrift_value is None:
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 15)
             return
         if not isinstance(_fbthrift_value, bool):
             raise TypeError(f'optBoolVal is not a { bool !r}.')
         deref(self._struct_cpp_obj).optBoolVal_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_14(self, _fbthrift_value) except *:
+    cdef void _set_field_16(self, _fbthrift_value) except *:
         # for field optByteVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 14)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 16)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'optByteVal is not a { int !r}.')
         _fbthrift_value = <cint8_t> _fbthrift_value
         deref(self._struct_cpp_obj).optByteVal_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_15(self, _fbthrift_value) except *:
+    cdef void _set_field_17(self, _fbthrift_value) except *:
         # for field optI16Val
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 15)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 17)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'optI16Val is not a { int !r}.')
         _fbthrift_value = <cint16_t> _fbthrift_value
         deref(self._struct_cpp_obj).optI16Val_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_16(self, _fbthrift_value) except *:
+    cdef void _set_field_18(self, _fbthrift_value) except *:
         # for field optI32Val
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 16)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 18)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'optI32Val is not a { int !r}.')
         _fbthrift_value = <cint32_t> _fbthrift_value
         deref(self._struct_cpp_obj).optI32Val_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_17(self, _fbthrift_value) except *:
+    cdef void _set_field_19(self, _fbthrift_value) except *:
         # for field optI64Val
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 17)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 19)
             return
         if not isinstance(_fbthrift_value, int):
             raise TypeError(f'optI64Val is not a { int !r}.')
         _fbthrift_value = <cint64_t> _fbthrift_value
         deref(self._struct_cpp_obj).optI64Val_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_18(self, _fbthrift_value) except *:
+    cdef void _set_field_20(self, _fbthrift_value) except *:
         # for field optFloatVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 18)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 20)
             return
         if not isinstance(_fbthrift_value, (float, int)):
             raise TypeError(f'optFloatVal is not a { float !r}.')
         deref(self._struct_cpp_obj).optFloatVal_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_19(self, _fbthrift_value) except *:
+    cdef void _set_field_21(self, _fbthrift_value) except *:
         # for field optDoubleVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 19)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 21)
             return
         if not isinstance(_fbthrift_value, (float, int)):
             raise TypeError(f'optDoubleVal is not a { float !r}.')
         deref(self._struct_cpp_obj).optDoubleVal_ref().assign(_fbthrift_value)
 
-    cdef void _set_field_20(self, _fbthrift_value) except *:
+    cdef void _set_field_22(self, _fbthrift_value) except *:
         # for field optStringVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 20)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 22)
             return
         if not isinstance(_fbthrift_value, str):
             raise TypeError(f'optStringVal is not a { str !r}.')
         deref(self._struct_cpp_obj).optStringVal_ref().assign(cmove(bytes_to_string(_fbthrift_value.encode('utf-8'))))
 
-    cdef void _set_field_21(self, _fbthrift_value) except *:
+    cdef void _set_field_23(self, _fbthrift_value) except *:
         # for field optBinaryVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 21)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 23)
             return
         if not isinstance(_fbthrift_value, _fbthrift_iobuf.IOBuf):
             raise TypeError(f'optBinaryVal is not a { _fbthrift_iobuf.IOBuf !r}.')
         deref(self._struct_cpp_obj).optBinaryVal_ref().assign(deref((<_fbthrift_iobuf.IOBuf?>_fbthrift_value).c_clone()))
 
-    cdef void _set_field_22(self, _fbthrift_value) except *:
+    cdef void _set_field_24(self, _fbthrift_value) except *:
         # for field optEnumVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 22)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 24)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyEnum):
             raise TypeError(f'field optEnumVal value: {repr(_fbthrift_value)} is not of the enum type { _test_fixtures_patch_module_types.MyEnum }.')
         deref(self._struct_cpp_obj).optEnumVal_ref().assign(<_test_fixtures_patch_module_types.cMyEnum><int>_fbthrift_value)
 
-    cdef void _set_field_23(self, _fbthrift_value) except *:
+    cdef void _set_field_25(self, _fbthrift_value) except *:
         # for field optStructVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 23)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 25)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.MyData):
             raise TypeError(f'optStructVal is not a { _test_fixtures_patch_module_types.MyData !r}.')
         deref(self._struct_cpp_obj).optStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.MyData?> _fbthrift_value)._cpp_obj))
 
-    cdef void _set_field_24(self, _fbthrift_value) except *:
+    cdef void _set_field_26(self, _fbthrift_value) except *:
         # for field optLateStructVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 24)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 26)
             return
         if not isinstance(_fbthrift_value, _test_fixtures_patch_module_types.LateDefStruct):
             raise TypeError(f'optLateStructVal is not a { _test_fixtures_patch_module_types.LateDefStruct !r}.')
         deref(self._struct_cpp_obj).optLateStructVal_ref().assign(deref((<_test_fixtures_patch_module_types.LateDefStruct?> _fbthrift_value)._cpp_obj))
 
-    cdef void _set_field_25(self, _fbthrift_value) except *:
+    cdef void _set_field_27(self, _fbthrift_value) except *:
         # for field optListVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 25)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 27)
             return
         deref(self._struct_cpp_obj).optListVal_ref().assign(deref(_test_fixtures_patch_module_types.List__i16(_fbthrift_value)._cpp_obj))
 
-    cdef void _set_field_26(self, _fbthrift_value) except *:
+    cdef void _set_field_28(self, _fbthrift_value) except *:
         # for field optSetVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 26)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 28)
             return
         deref(self._struct_cpp_obj).optSetVal_ref().assign(deref(_test_fixtures_patch_module_types.Set__string(_fbthrift_value)._cpp_obj))
 
-    cdef void _set_field_27(self, _fbthrift_value) except *:
+    cdef void _set_field_29(self, _fbthrift_value) except *:
         # for field optMapVal
         if _fbthrift_value is None:
-            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 27)
+            __reset_field[_test_fixtures_patch_module_types.cMyStruct](deref(self._struct_cpp_obj), 29)
             return
         deref(self._struct_cpp_obj).optMapVal_ref().assign(deref(_test_fixtures_patch_module_types.Map__string_string(_fbthrift_value)._cpp_obj))
 

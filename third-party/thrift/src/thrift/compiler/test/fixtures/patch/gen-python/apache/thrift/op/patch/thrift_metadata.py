@@ -326,6 +326,70 @@ def _fbthrift_gen_metadata_struct_BinaryPatch(metadata_struct: _fbthrift_metadat
 def gen_metadata_struct_BinaryPatch() -> _fbthrift_metadata.ThriftMetadata:
     return _fbthrift_gen_metadata_struct_BinaryPatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
 
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_DurationPatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "patch.DurationPatch"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DurationStruct")), name="assign", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=8, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DurationStruct")), name="add", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Testing"), fields= {  }),
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="DurationStructPatch"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""), "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::AssignPatchAdapter"),  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+    new_struct = apache.thrift.type.standard.thrift_metadata._fbthrift_gen_metadata_struct_DurationStruct(new_struct) # assign
+     # clear
+    new_struct = apache.thrift.type.standard.thrift_metadata._fbthrift_gen_metadata_struct_DurationStruct(new_struct) # add
+
+    return new_struct
+def gen_metadata_struct_DurationPatch() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_DurationPatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
+# TODO (ffrancet): This general pattern can be optimized by using tuples and dicts
+# instead of re-generating thrift structs
+def _fbthrift_gen_metadata_struct_TimePatch(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
+    qualified_name = "patch.TimePatch"
+
+    if qualified_name in metadata_struct.structs:
+        return metadata_struct
+    fields = [
+        _fbthrift_metadata.ThriftField(id=1, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.TimeStruct")), name="assign", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=2, type=_fbthrift_metadata.ThriftType(t_primitive=_fbthrift_metadata.ThriftPrimitiveType.THRIFT_BOOL_TYPE), name="clear", is_optional=False, structured_annotations=[
+        ]),
+        _fbthrift_metadata.ThriftField(id=8, type=_fbthrift_metadata.ThriftType(t_struct=_fbthrift_metadata.ThriftStructType(name="patch.DurationStruct")), name="add", is_optional=False, structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="thrift.Testing"), fields= {  }),
+        ]),
+    ]
+    struct_dict = dict(metadata_struct.structs)
+    struct_dict[qualified_name] = _fbthrift_metadata.ThriftStruct(name=qualified_name, fields=fields,
+        is_union=False,
+        structured_annotations=[
+            _fbthrift_metadata.ThriftConstStruct(type=_fbthrift_metadata.ThriftStructType(name="cpp.Adapter"), fields= { "underlyingName": _fbthrift_metadata.ThriftConstValue(cv_string="TimeStructPatch"), "extraNamespace": _fbthrift_metadata.ThriftConstValue(cv_string=""), "name": _fbthrift_metadata.ThriftConstValue(cv_string="::apache::thrift::op::detail::AssignPatchAdapter"),  }),
+        ])
+    new_struct = metadata_struct(structs=struct_dict)
+
+    new_struct = apache.thrift.type.standard.thrift_metadata._fbthrift_gen_metadata_struct_TimeStruct(new_struct) # assign
+     # clear
+    new_struct = apache.thrift.type.standard.thrift_metadata._fbthrift_gen_metadata_struct_DurationStruct(new_struct) # add
+
+    return new_struct
+def gen_metadata_struct_TimePatch() -> _fbthrift_metadata.ThriftMetadata:
+    return _fbthrift_gen_metadata_struct_TimePatch(_fbthrift_metadata.ThriftMetadata(structs={}, enums={}, exceptions={}, services={}))
+
 
 
 def _fbthrift_gen_metadata_enum_PatchOp(metadata_struct: _fbthrift_metadata.ThriftMetadata) -> _fbthrift_metadata.ThriftMetadata:
@@ -367,4 +431,6 @@ def getThriftModuleMetadata() -> _fbthrift_metadata.ThriftMetadata:
     meta = _fbthrift_gen_metadata_struct_DoublePatch(meta)
     meta = _fbthrift_gen_metadata_struct_StringPatch(meta)
     meta = _fbthrift_gen_metadata_struct_BinaryPatch(meta)
+    meta = _fbthrift_gen_metadata_struct_DurationPatch(meta)
+    meta = _fbthrift_gen_metadata_struct_TimePatch(meta)
     return meta

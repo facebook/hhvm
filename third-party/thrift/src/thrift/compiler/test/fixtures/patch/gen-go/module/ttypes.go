@@ -12,6 +12,7 @@ import (
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	thrift0 "thrift/annotation/thrift"
 	patch1 "thrift/lib/thrift/patch"
+	standard2 "thrift/lib/thrift/standard"
 
 )
 
@@ -24,6 +25,7 @@ var _ = context.Background
 
 var _ = thrift0.GoUnusedProtection__
 var _ = patch1.GoUnusedProtection__
+var _ = standard2.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type MyEnum int64
@@ -603,6 +605,8 @@ func (p *MyUnion) String() string {
 //  - StructVal
 //  - UnionVal
 //  - LateStructVal
+//  - DurationVal
+//  - TimeVal
 //  - OptBoolVal
 //  - OptByteVal
 //  - OptI16Val
@@ -632,6 +636,8 @@ type MyStruct struct {
   StructVal *MyData
   UnionVal *MyUnion
   LateStructVal *LateDefStruct
+  DurationVal *standard2.DurationStruct
+  TimeVal *standard2.TimeStruct
   OptBoolVal bool
   OptByteVal int8
   OptI16Val int16
@@ -653,6 +659,8 @@ func NewMyStruct() *MyStruct {
   return &MyStruct{
     StructVal: NewMyData(),
     LateStructVal: NewLateDefStruct(),
+    DurationVal: standard2.NewDurationStruct(),
+    TimeVal: standard2.NewTimeStruct(),
   }
 }
 
@@ -716,6 +724,20 @@ func (p *MyStruct) GetLateStructVal() *LateDefStruct {
     return MyStruct_LateStructVal_DEFAULT
   }
 return p.LateStructVal
+}
+var MyStruct_DurationVal_DEFAULT *standard2.DurationStruct
+func (p *MyStruct) GetDurationVal() *standard2.DurationStruct {
+  if !p.IsSetDurationVal() {
+    return MyStruct_DurationVal_DEFAULT
+  }
+return p.DurationVal
+}
+var MyStruct_TimeVal_DEFAULT *standard2.TimeStruct
+func (p *MyStruct) GetTimeVal() *standard2.TimeStruct {
+  if !p.IsSetTimeVal() {
+    return MyStruct_TimeVal_DEFAULT
+  }
+return p.TimeVal
 }
 var MyStruct_OptBoolVal_DEFAULT bool
 func (p *MyStruct) GetOptBoolVal() bool {
@@ -826,6 +848,14 @@ func (p *MyStruct) IsSetLateStructVal() bool {
   return p != nil && p.LateStructVal != nil
 }
 
+func (p *MyStruct) IsSetDurationVal() bool {
+  return p != nil && p.DurationVal != nil
+}
+
+func (p *MyStruct) IsSetTimeVal() bool {
+  return p != nil && p.TimeVal != nil
+}
+
 func (p *MyStruct) IsSetOptBoolVal() bool {
   return p != nil && p.OptBoolVal != nil
 }
@@ -911,6 +941,8 @@ func (p MyStructBuilder) Emit() *MyStruct{
     StructVal: p.obj.StructVal,
     UnionVal: p.obj.UnionVal,
     LateStructVal: p.obj.LateStructVal,
+    DurationVal: p.obj.DurationVal,
+    TimeVal: p.obj.TimeVal,
     OptBoolVal: p.obj.OptBoolVal,
     OptByteVal: p.obj.OptByteVal,
     OptI16Val: p.obj.OptI16Val,
@@ -991,6 +1023,16 @@ func (m *MyStructBuilder) UnionVal(unionVal *MyUnion) *MyStructBuilder {
 
 func (m *MyStructBuilder) LateStructVal(lateStructVal *LateDefStruct) *MyStructBuilder {
   m.obj.LateStructVal = lateStructVal
+  return m
+}
+
+func (m *MyStructBuilder) DurationVal(durationVal *standard2.DurationStruct) *MyStructBuilder {
+  m.obj.DurationVal = durationVal
+  return m
+}
+
+func (m *MyStructBuilder) TimeVal(timeVal *standard2.TimeStruct) *MyStructBuilder {
+  m.obj.TimeVal = timeVal
   return m
 }
 
@@ -1131,6 +1173,16 @@ func (m *MyStruct) SetUnionVal(unionVal *MyUnion) *MyStruct {
 
 func (m *MyStruct) SetLateStructVal(lateStructVal *LateDefStruct) *MyStruct {
   m.LateStructVal = lateStructVal
+  return m
+}
+
+func (m *MyStruct) SetDurationVal(durationVal *standard2.DurationStruct) *MyStruct {
+  m.DurationVal = durationVal
+  return m
+}
+
+func (m *MyStruct) SetTimeVal(timeVal *standard2.TimeStruct) *MyStruct {
+  m.TimeVal = timeVal
   return m
 }
 
@@ -1334,6 +1386,14 @@ func (p *MyStruct) Read(iprot thrift.Protocol) error {
       if err := p.ReadField_28(iprot); err != nil {
         return err
       }
+    case -29:
+      if err := p.ReadField_29(iprot); err != nil {
+        return err
+      }
+    case -30:
+      if err := p.ReadField_30(iprot); err != nil {
+        return err
+      }
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -1466,17 +1526,33 @@ func (p *MyStruct)  ReadField_13(iprot thrift.Protocol) error {
 }
 
 func (p *MyStruct)  ReadField_14(iprot thrift.Protocol) error {
+  p.DurationVal = standard2.NewDurationStruct()
+  if err := p.DurationVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.DurationVal), err)
+  }
+  return nil
+}
+
+func (p *MyStruct)  ReadField_15(iprot thrift.Protocol) error {
+  p.TimeVal = standard2.NewTimeStruct()
+  if err := p.TimeVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.TimeVal), err)
+  }
+  return nil
+}
+
+func (p *MyStruct)  ReadField_16(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBool(); err != nil {
-    return thrift.PrependError("error reading field -14: ", err)
+    return thrift.PrependError("error reading field -16: ", err)
   } else {
     p.OptBoolVal = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_15(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_17(iprot thrift.Protocol) error {
   if v, err := iprot.ReadByte(); err != nil {
-    return thrift.PrependError("error reading field -15: ", err)
+    return thrift.PrependError("error reading field -17: ", err)
   } else {
     temp := int8(v)
     p.OptByteVal = &temp
@@ -1484,72 +1560,72 @@ func (p *MyStruct)  ReadField_15(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_16(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_18(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI16(); err != nil {
-    return thrift.PrependError("error reading field -16: ", err)
+    return thrift.PrependError("error reading field -18: ", err)
   } else {
     p.OptI16Val = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_17(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_19(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
-    return thrift.PrependError("error reading field -17: ", err)
+    return thrift.PrependError("error reading field -19: ", err)
   } else {
     p.OptI32Val = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_18(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_20(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
-    return thrift.PrependError("error reading field -18: ", err)
+    return thrift.PrependError("error reading field -20: ", err)
   } else {
     p.OptI64Val = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_19(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_21(iprot thrift.Protocol) error {
   if v, err := iprot.ReadFloat(); err != nil {
-    return thrift.PrependError("error reading field -19: ", err)
+    return thrift.PrependError("error reading field -21: ", err)
   } else {
     p.OptFloatVal = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_20(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_22(iprot thrift.Protocol) error {
   if v, err := iprot.ReadDouble(); err != nil {
-    return thrift.PrependError("error reading field -20: ", err)
+    return thrift.PrependError("error reading field -22: ", err)
   } else {
     p.OptDoubleVal = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_21(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_23(iprot thrift.Protocol) error {
   if v, err := iprot.ReadString(); err != nil {
-    return thrift.PrependError("error reading field -21: ", err)
+    return thrift.PrependError("error reading field -23: ", err)
   } else {
     p.OptStringVal = &v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_22(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_24(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
-    return thrift.PrependError("error reading field -22: ", err)
+    return thrift.PrependError("error reading field -24: ", err)
   } else {
     p.OptBinaryVal = v
   }
   return nil
 }
 
-func (p *MyStruct)  ReadField_23(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_25(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
-    return thrift.PrependError("error reading field -23: ", err)
+    return thrift.PrependError("error reading field -25: ", err)
   } else {
     temp := MyEnum(v)
     p.OptEnumVal = &temp
@@ -1557,7 +1633,7 @@ func (p *MyStruct)  ReadField_23(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_24(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_26(iprot thrift.Protocol) error {
   p.OptStructVal = NewMyData()
   if err := p.OptStructVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptStructVal), err)
@@ -1565,7 +1641,7 @@ func (p *MyStruct)  ReadField_24(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_25(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_27(iprot thrift.Protocol) error {
   p.OptLateStructVal = NewLateDefStruct()
   if err := p.OptLateStructVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptLateStructVal), err)
@@ -1573,7 +1649,7 @@ func (p *MyStruct)  ReadField_25(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_26(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_28(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -1581,13 +1657,13 @@ func (p *MyStruct)  ReadField_26(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.OptListVal =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem2 int16
+    var _elem3 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem2 = v
+      _elem3 = v
     }
-    p.OptListVal = append(p.OptListVal, _elem2)
+    p.OptListVal = append(p.OptListVal, _elem3)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -1595,7 +1671,7 @@ func (p *MyStruct)  ReadField_26(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_27(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_29(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadSetBegin()
   if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -1603,13 +1679,13 @@ func (p *MyStruct)  ReadField_27(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.OptSetVal =  tSet
   for i := 0; i < size; i ++ {
-    var _elem3 string
+    var _elem4 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem3 = v
+      _elem4 = v
     }
-    p.OptSetVal = append(p.OptSetVal, _elem3)
+    p.OptSetVal = append(p.OptSetVal, _elem4)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -1617,7 +1693,7 @@ func (p *MyStruct)  ReadField_27(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct)  ReadField_28(iprot thrift.Protocol) error {
+func (p *MyStruct)  ReadField_30(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1625,19 +1701,19 @@ func (p *MyStruct)  ReadField_28(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.OptMapVal =  tMap
   for i := 0; i < size; i ++ {
-    var _key4 string
+    var _key5 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key4 = v
+      _key5 = v
     }
-    var _val5 string
+    var _val6 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val5 = v
+      _val6 = v
     }
-    p.OptMapVal[_key4] = _val5
+    p.OptMapVal[_key5] = _val6
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -1648,6 +1724,8 @@ func (p *MyStruct)  ReadField_28(iprot thrift.Protocol) error {
 func (p *MyStruct) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("MyStruct"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_30(oprot); err != nil { return err }
+  if err := p.writeField_29(oprot); err != nil { return err }
   if err := p.writeField_28(oprot); err != nil { return err }
   if err := p.writeField_27(oprot); err != nil { return err }
   if err := p.writeField_26(oprot); err != nil { return err }
@@ -1683,10 +1761,10 @@ func (p *MyStruct) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStruct) writeField_28(oprot thrift.Protocol) (err error) {
+func (p *MyStruct) writeField_30(oprot thrift.Protocol) (err error) {
   if p.IsSetOptMapVal() {
-    if err := oprot.WriteFieldBegin("optMapVal", thrift.MAP, -28); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -28:optMapVal: ", p), err) }
+    if err := oprot.WriteFieldBegin("optMapVal", thrift.MAP, -30); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -30:optMapVal: ", p), err) }
     if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.OptMapVal)); err != nil {
       return thrift.PrependError("error writing map begin: ", err)
     }
@@ -1700,15 +1778,15 @@ func (p *MyStruct) writeField_28(oprot thrift.Protocol) (err error) {
       return thrift.PrependError("error writing map end: ", err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -28:optMapVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -30:optMapVal: ", p), err) }
   }
   return err
 }
 
-func (p *MyStruct) writeField_27(oprot thrift.Protocol) (err error) {
+func (p *MyStruct) writeField_29(oprot thrift.Protocol) (err error) {
   if p.IsSetOptSetVal() {
-    if err := oprot.WriteFieldBegin("optSetVal", thrift.SET, -27); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -27:optSetVal: ", p), err) }
+    if err := oprot.WriteFieldBegin("optSetVal", thrift.SET, -29); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -29:optSetVal: ", p), err) }
     if err := oprot.WriteSetBegin(thrift.STRING, len(p.OptSetVal)); err != nil {
       return thrift.PrependError("error writing set begin: ", err)
     }
@@ -1727,15 +1805,15 @@ func (p *MyStruct) writeField_27(oprot thrift.Protocol) (err error) {
       return thrift.PrependError("error writing set end: ", err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -27:optSetVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -29:optSetVal: ", p), err) }
   }
   return err
 }
 
-func (p *MyStruct) writeField_26(oprot thrift.Protocol) (err error) {
+func (p *MyStruct) writeField_28(oprot thrift.Protocol) (err error) {
   if p.IsSetOptListVal() {
-    if err := oprot.WriteFieldBegin("optListVal", thrift.LIST, -26); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -26:optListVal: ", p), err) }
+    if err := oprot.WriteFieldBegin("optListVal", thrift.LIST, -28); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -28:optListVal: ", p), err) }
     if err := oprot.WriteListBegin(thrift.I16, len(p.OptListVal)); err != nil {
       return thrift.PrependError("error writing list begin: ", err)
     }
@@ -1747,154 +1825,176 @@ func (p *MyStruct) writeField_26(oprot thrift.Protocol) (err error) {
       return thrift.PrependError("error writing list end: ", err)
     }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -26:optListVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -28:optListVal: ", p), err) }
+  }
+  return err
+}
+
+func (p *MyStruct) writeField_27(oprot thrift.Protocol) (err error) {
+  if p.IsSetOptLateStructVal() {
+    if err := oprot.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -27); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -27:optLateStructVal: ", p), err) }
+    if err := p.OptLateStructVal.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptLateStructVal), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -27:optLateStructVal: ", p), err) }
+  }
+  return err
+}
+
+func (p *MyStruct) writeField_26(oprot thrift.Protocol) (err error) {
+  if p.IsSetOptStructVal() {
+    if err := oprot.WriteFieldBegin("optStructVal", thrift.STRUCT, -26); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -26:optStructVal: ", p), err) }
+    if err := p.OptStructVal.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptStructVal), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -26:optStructVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_25(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptLateStructVal() {
-    if err := oprot.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -25); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -25:optLateStructVal: ", p), err) }
-    if err := p.OptLateStructVal.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptLateStructVal), err)
-    }
+  if p.IsSetOptEnumVal() {
+    if err := oprot.WriteFieldBegin("optEnumVal", thrift.I32, -25); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -25:optEnumVal: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.OptEnumVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optEnumVal (-25) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -25:optLateStructVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -25:optEnumVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_24(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptStructVal() {
-    if err := oprot.WriteFieldBegin("optStructVal", thrift.STRUCT, -24); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -24:optStructVal: ", p), err) }
-    if err := p.OptStructVal.Write(oprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptStructVal), err)
-    }
+  if p.IsSetOptBinaryVal() {
+    if err := oprot.WriteFieldBegin("optBinaryVal", thrift.STRING, -24); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -24:optBinaryVal: ", p), err) }
+    if err := oprot.WriteBinary(p.OptBinaryVal); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optBinaryVal (-24) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -24:optStructVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -24:optBinaryVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_23(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptEnumVal() {
-    if err := oprot.WriteFieldBegin("optEnumVal", thrift.I32, -23); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -23:optEnumVal: ", p), err) }
-    if err := oprot.WriteI32(int32(*p.OptEnumVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optEnumVal (-23) field write error: ", p), err) }
+  if p.IsSetOptStringVal() {
+    if err := oprot.WriteFieldBegin("optStringVal", thrift.STRING, -23); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -23:optStringVal: ", p), err) }
+    if err := oprot.WriteString(string(*p.OptStringVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optStringVal (-23) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -23:optEnumVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -23:optStringVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_22(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptBinaryVal() {
-    if err := oprot.WriteFieldBegin("optBinaryVal", thrift.STRING, -22); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -22:optBinaryVal: ", p), err) }
-    if err := oprot.WriteBinary(p.OptBinaryVal); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optBinaryVal (-22) field write error: ", p), err) }
+  if p.IsSetOptDoubleVal() {
+    if err := oprot.WriteFieldBegin("optDoubleVal", thrift.DOUBLE, -22); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -22:optDoubleVal: ", p), err) }
+    if err := oprot.WriteDouble(float64(*p.OptDoubleVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optDoubleVal (-22) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -22:optBinaryVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -22:optDoubleVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_21(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptStringVal() {
-    if err := oprot.WriteFieldBegin("optStringVal", thrift.STRING, -21); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -21:optStringVal: ", p), err) }
-    if err := oprot.WriteString(string(*p.OptStringVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optStringVal (-21) field write error: ", p), err) }
+  if p.IsSetOptFloatVal() {
+    if err := oprot.WriteFieldBegin("optFloatVal", thrift.FLOAT, -21); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -21:optFloatVal: ", p), err) }
+    if err := oprot.WriteFloat(float32(*p.OptFloatVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optFloatVal (-21) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -21:optStringVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -21:optFloatVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_20(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptDoubleVal() {
-    if err := oprot.WriteFieldBegin("optDoubleVal", thrift.DOUBLE, -20); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -20:optDoubleVal: ", p), err) }
-    if err := oprot.WriteDouble(float64(*p.OptDoubleVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optDoubleVal (-20) field write error: ", p), err) }
+  if p.IsSetOptI64Val() {
+    if err := oprot.WriteFieldBegin("optI64Val", thrift.I64, -20); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -20:optI64Val: ", p), err) }
+    if err := oprot.WriteI64(int64(*p.OptI64Val)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optI64Val (-20) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -20:optDoubleVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -20:optI64Val: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_19(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptFloatVal() {
-    if err := oprot.WriteFieldBegin("optFloatVal", thrift.FLOAT, -19); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -19:optFloatVal: ", p), err) }
-    if err := oprot.WriteFloat(float32(*p.OptFloatVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optFloatVal (-19) field write error: ", p), err) }
+  if p.IsSetOptI32Val() {
+    if err := oprot.WriteFieldBegin("optI32Val", thrift.I32, -19); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -19:optI32Val: ", p), err) }
+    if err := oprot.WriteI32(int32(*p.OptI32Val)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optI32Val (-19) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -19:optFloatVal: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -19:optI32Val: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_18(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptI64Val() {
-    if err := oprot.WriteFieldBegin("optI64Val", thrift.I64, -18); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -18:optI64Val: ", p), err) }
-    if err := oprot.WriteI64(int64(*p.OptI64Val)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optI64Val (-18) field write error: ", p), err) }
+  if p.IsSetOptI16Val() {
+    if err := oprot.WriteFieldBegin("optI16Val", thrift.I16, -18); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -18:optI16Val: ", p), err) }
+    if err := oprot.WriteI16(int16(*p.OptI16Val)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optI16Val (-18) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -18:optI64Val: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -18:optI16Val: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_17(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptI32Val() {
-    if err := oprot.WriteFieldBegin("optI32Val", thrift.I32, -17); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -17:optI32Val: ", p), err) }
-    if err := oprot.WriteI32(int32(*p.OptI32Val)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optI32Val (-17) field write error: ", p), err) }
+  if p.IsSetOptByteVal() {
+    if err := oprot.WriteFieldBegin("optByteVal", thrift.BYTE, -17); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -17:optByteVal: ", p), err) }
+    if err := oprot.WriteByte(byte(*p.OptByteVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optByteVal (-17) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -17:optI32Val: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -17:optByteVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_16(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptI16Val() {
-    if err := oprot.WriteFieldBegin("optI16Val", thrift.I16, -16); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -16:optI16Val: ", p), err) }
-    if err := oprot.WriteI16(int16(*p.OptI16Val)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optI16Val (-16) field write error: ", p), err) }
+  if p.IsSetOptBoolVal() {
+    if err := oprot.WriteFieldBegin("optBoolVal", thrift.BOOL, -16); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error -16:optBoolVal: ", p), err) }
+    if err := oprot.WriteBool(bool(*p.OptBoolVal)); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T.optBoolVal (-16) field write error: ", p), err) }
     if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -16:optI16Val: ", p), err) }
+      return thrift.PrependError(fmt.Sprintf("%T write field end error -16:optBoolVal: ", p), err) }
   }
   return err
 }
 
 func (p *MyStruct) writeField_15(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptByteVal() {
-    if err := oprot.WriteFieldBegin("optByteVal", thrift.BYTE, -15); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -15:optByteVal: ", p), err) }
-    if err := oprot.WriteByte(byte(*p.OptByteVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optByteVal (-15) field write error: ", p), err) }
-    if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -15:optByteVal: ", p), err) }
+  if err := oprot.WriteFieldBegin("timeVal", thrift.STRUCT, -15); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -15:timeVal: ", p), err) }
+  if err := p.TimeVal.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.TimeVal), err)
   }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -15:timeVal: ", p), err) }
   return err
 }
 
 func (p *MyStruct) writeField_14(oprot thrift.Protocol) (err error) {
-  if p.IsSetOptBoolVal() {
-    if err := oprot.WriteFieldBegin("optBoolVal", thrift.BOOL, -14); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field begin error -14:optBoolVal: ", p), err) }
-    if err := oprot.WriteBool(bool(*p.OptBoolVal)); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T.optBoolVal (-14) field write error: ", p), err) }
-    if err := oprot.WriteFieldEnd(); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T write field end error -14:optBoolVal: ", p), err) }
+  if err := oprot.WriteFieldBegin("durationVal", thrift.STRUCT, -14); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -14:durationVal: ", p), err) }
+  if err := p.DurationVal.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.DurationVal), err)
   }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -14:durationVal: ", p), err) }
   return err
 }
 
@@ -2106,6 +2206,18 @@ func (p *MyStruct) String() string {
   } else {
     optBoolValVal = fmt.Sprintf("%v", *p.OptBoolVal)
   }
+  var timeValVal string
+  if p.TimeVal == nil {
+    timeValVal = "<nil>"
+  } else {
+    timeValVal = fmt.Sprintf("%v", p.TimeVal)
+  }
+  var durationValVal string
+  if p.DurationVal == nil {
+    durationValVal = "<nil>"
+  } else {
+    durationValVal = fmt.Sprintf("%v", p.DurationVal)
+  }
   var lateStructValVal string
   if p.LateStructVal == nil {
     lateStructValVal = "<nil>"
@@ -2134,7 +2246,7 @@ func (p *MyStruct) String() string {
   i16ValVal := fmt.Sprintf("%v", p.I16Val)
   byteValVal := fmt.Sprintf("%v", p.ByteVal)
   boolValVal := fmt.Sprintf("%v", p.BoolVal)
-  return fmt.Sprintf("MyStruct({OptMapVal:%s OptSetVal:%s OptListVal:%s OptLateStructVal:%s OptStructVal:%s OptEnumVal:%s OptBinaryVal:%s OptStringVal:%s OptDoubleVal:%s OptFloatVal:%s OptI64Val:%s OptI32Val:%s OptI16Val:%s OptByteVal:%s OptBoolVal:%s LateStructVal:%s UnionVal:%s StructVal:%s EnumVal:%s BinaryVal:%s StringVal:%s DoubleVal:%s FloatVal:%s I64Val:%s I32Val:%s I16Val:%s ByteVal:%s BoolVal:%s})", optMapValVal, optSetValVal, optListValVal, optLateStructValVal, optStructValVal, optEnumValVal, optBinaryValVal, optStringValVal, optDoubleValVal, optFloatValVal, optI64ValVal, optI32ValVal, optI16ValVal, optByteValVal, optBoolValVal, lateStructValVal, unionValVal, structValVal, enumValVal, binaryValVal, stringValVal, doubleValVal, floatValVal, i64ValVal, i32ValVal, i16ValVal, byteValVal, boolValVal)
+  return fmt.Sprintf("MyStruct({OptMapVal:%s OptSetVal:%s OptListVal:%s OptLateStructVal:%s OptStructVal:%s OptEnumVal:%s OptBinaryVal:%s OptStringVal:%s OptDoubleVal:%s OptFloatVal:%s OptI64Val:%s OptI32Val:%s OptI16Val:%s OptByteVal:%s OptBoolVal:%s TimeVal:%s DurationVal:%s LateStructVal:%s UnionVal:%s StructVal:%s EnumVal:%s BinaryVal:%s StringVal:%s DoubleVal:%s FloatVal:%s I64Val:%s I32Val:%s I16Val:%s ByteVal:%s BoolVal:%s})", optMapValVal, optSetValVal, optListValVal, optLateStructValVal, optStructValVal, optEnumValVal, optBinaryValVal, optStringValVal, optDoubleValVal, optFloatValVal, optI64ValVal, optI32ValVal, optI16ValVal, optByteValVal, optBoolValVal, timeValVal, durationValVal, lateStructValVal, unionValVal, structValVal, enumValVal, binaryValVal, stringValVal, doubleValVal, floatValVal, i64ValVal, i32ValVal, i16ValVal, byteValVal, boolValVal)
 }
 
 type LateDefStruct struct {
@@ -3756,6 +3868,8 @@ func (p *MyUnionPatch) String() string {
 //  - StructVal
 //  - UnionVal
 //  - LateStructVal
+//  - DurationVal
+//  - TimeVal
 //  - OptBoolVal
 //  - OptByteVal
 //  - OptI16Val
@@ -3785,6 +3899,8 @@ type MyStructFieldPatch struct {
   StructVal *MyDataPatch
   UnionVal *MyUnionPatch
   LateStructVal *LateDefStructPatch
+  DurationVal *patch1.DurationPatch
+  TimeVal *patch1.TimePatch
   OptBoolVal *patch1.BoolPatch
   OptByteVal *patch1.BytePatch
   OptI16Val *patch1.I16Patch
@@ -3794,12 +3910,12 @@ type MyStructFieldPatch struct {
   OptDoubleVal *patch1.DoublePatch
   OptStringVal *patch1.StringPatch
   OptBinaryVal *patch1.BinaryPatch
-  OptEnumVal *MyStructFieldN23Patch
+  OptEnumVal *MyStructFieldN25Patch
   OptStructVal *MyDataPatch
   OptLateStructVal *LateDefStructPatch
-  OptListVal *MyStructFieldN26Patch
-  OptSetVal *MyStructFieldN27Patch
-  OptMapVal *MyStructFieldN28Patch
+  OptListVal *MyStructFieldN28Patch
+  OptSetVal *MyStructFieldN29Patch
+  OptMapVal *MyStructFieldN30Patch
 }
 
 func NewMyStructFieldPatch() *MyStructFieldPatch {
@@ -3817,6 +3933,8 @@ func NewMyStructFieldPatch() *MyStructFieldPatch {
     StructVal: NewMyDataPatch(),
     UnionVal: NewMyUnionPatch(),
     LateStructVal: NewLateDefStructPatch(),
+    DurationVal: patch1.NewDurationPatch(),
+    TimeVal: patch1.NewTimePatch(),
     OptBoolVal: patch1.NewBoolPatch(),
     OptByteVal: patch1.NewBytePatch(),
     OptI16Val: patch1.NewI16Patch(),
@@ -3826,12 +3944,12 @@ func NewMyStructFieldPatch() *MyStructFieldPatch {
     OptDoubleVal: patch1.NewDoublePatch(),
     OptStringVal: patch1.NewStringPatch(),
     OptBinaryVal: patch1.NewBinaryPatch(),
-    OptEnumVal: NewMyStructFieldN23Patch(),
+    OptEnumVal: NewMyStructFieldN25Patch(),
     OptStructVal: NewMyDataPatch(),
     OptLateStructVal: NewLateDefStructPatch(),
-    OptListVal: NewMyStructFieldN26Patch(),
-    OptSetVal: NewMyStructFieldN27Patch(),
-    OptMapVal: NewMyStructFieldN28Patch(),
+    OptListVal: NewMyStructFieldN28Patch(),
+    OptSetVal: NewMyStructFieldN29Patch(),
+    OptMapVal: NewMyStructFieldN30Patch(),
   }
 }
 
@@ -3926,6 +4044,20 @@ func (p *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
   }
 return p.LateStructVal
 }
+var MyStructFieldPatch_DurationVal_DEFAULT *patch1.DurationPatch
+func (p *MyStructFieldPatch) GetDurationVal() *patch1.DurationPatch {
+  if !p.IsSetDurationVal() {
+    return MyStructFieldPatch_DurationVal_DEFAULT
+  }
+return p.DurationVal
+}
+var MyStructFieldPatch_TimeVal_DEFAULT *patch1.TimePatch
+func (p *MyStructFieldPatch) GetTimeVal() *patch1.TimePatch {
+  if !p.IsSetTimeVal() {
+    return MyStructFieldPatch_TimeVal_DEFAULT
+  }
+return p.TimeVal
+}
 var MyStructFieldPatch_OptBoolVal_DEFAULT *patch1.BoolPatch
 func (p *MyStructFieldPatch) GetOptBoolVal() *patch1.BoolPatch {
   if !p.IsSetOptBoolVal() {
@@ -3989,8 +4121,8 @@ func (p *MyStructFieldPatch) GetOptBinaryVal() *patch1.BinaryPatch {
   }
 return p.OptBinaryVal
 }
-var MyStructFieldPatch_OptEnumVal_DEFAULT *MyStructFieldN23Patch
-func (p *MyStructFieldPatch) GetOptEnumVal() *MyStructFieldN23Patch {
+var MyStructFieldPatch_OptEnumVal_DEFAULT *MyStructFieldN25Patch
+func (p *MyStructFieldPatch) GetOptEnumVal() *MyStructFieldN25Patch {
   if !p.IsSetOptEnumVal() {
     return MyStructFieldPatch_OptEnumVal_DEFAULT
   }
@@ -4010,22 +4142,22 @@ func (p *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
   }
 return p.OptLateStructVal
 }
-var MyStructFieldPatch_OptListVal_DEFAULT *MyStructFieldN26Patch
-func (p *MyStructFieldPatch) GetOptListVal() *MyStructFieldN26Patch {
+var MyStructFieldPatch_OptListVal_DEFAULT *MyStructFieldN28Patch
+func (p *MyStructFieldPatch) GetOptListVal() *MyStructFieldN28Patch {
   if !p.IsSetOptListVal() {
     return MyStructFieldPatch_OptListVal_DEFAULT
   }
 return p.OptListVal
 }
-var MyStructFieldPatch_OptSetVal_DEFAULT *MyStructFieldN27Patch
-func (p *MyStructFieldPatch) GetOptSetVal() *MyStructFieldN27Patch {
+var MyStructFieldPatch_OptSetVal_DEFAULT *MyStructFieldN29Patch
+func (p *MyStructFieldPatch) GetOptSetVal() *MyStructFieldN29Patch {
   if !p.IsSetOptSetVal() {
     return MyStructFieldPatch_OptSetVal_DEFAULT
   }
 return p.OptSetVal
 }
-var MyStructFieldPatch_OptMapVal_DEFAULT *MyStructFieldN28Patch
-func (p *MyStructFieldPatch) GetOptMapVal() *MyStructFieldN28Patch {
+var MyStructFieldPatch_OptMapVal_DEFAULT *MyStructFieldN30Patch
+func (p *MyStructFieldPatch) GetOptMapVal() *MyStructFieldN30Patch {
   if !p.IsSetOptMapVal() {
     return MyStructFieldPatch_OptMapVal_DEFAULT
   }
@@ -4081,6 +4213,14 @@ func (p *MyStructFieldPatch) IsSetUnionVal() bool {
 
 func (p *MyStructFieldPatch) IsSetLateStructVal() bool {
   return p != nil && p.LateStructVal != nil
+}
+
+func (p *MyStructFieldPatch) IsSetDurationVal() bool {
+  return p != nil && p.DurationVal != nil
+}
+
+func (p *MyStructFieldPatch) IsSetTimeVal() bool {
+  return p != nil && p.TimeVal != nil
 }
 
 func (p *MyStructFieldPatch) IsSetOptBoolVal() bool {
@@ -4168,6 +4308,8 @@ func (p MyStructFieldPatchBuilder) Emit() *MyStructFieldPatch{
     StructVal: p.obj.StructVal,
     UnionVal: p.obj.UnionVal,
     LateStructVal: p.obj.LateStructVal,
+    DurationVal: p.obj.DurationVal,
+    TimeVal: p.obj.TimeVal,
     OptBoolVal: p.obj.OptBoolVal,
     OptByteVal: p.obj.OptByteVal,
     OptI16Val: p.obj.OptI16Val,
@@ -4251,6 +4393,16 @@ func (m *MyStructFieldPatchBuilder) LateStructVal(lateStructVal *LateDefStructPa
   return m
 }
 
+func (m *MyStructFieldPatchBuilder) DurationVal(durationVal *patch1.DurationPatch) *MyStructFieldPatchBuilder {
+  m.obj.DurationVal = durationVal
+  return m
+}
+
+func (m *MyStructFieldPatchBuilder) TimeVal(timeVal *patch1.TimePatch) *MyStructFieldPatchBuilder {
+  m.obj.TimeVal = timeVal
+  return m
+}
+
 func (m *MyStructFieldPatchBuilder) OptBoolVal(optBoolVal *patch1.BoolPatch) *MyStructFieldPatchBuilder {
   m.obj.OptBoolVal = optBoolVal
   return m
@@ -4296,7 +4448,7 @@ func (m *MyStructFieldPatchBuilder) OptBinaryVal(optBinaryVal *patch1.BinaryPatc
   return m
 }
 
-func (m *MyStructFieldPatchBuilder) OptEnumVal(optEnumVal *MyStructFieldN23Patch) *MyStructFieldPatchBuilder {
+func (m *MyStructFieldPatchBuilder) OptEnumVal(optEnumVal *MyStructFieldN25Patch) *MyStructFieldPatchBuilder {
   m.obj.OptEnumVal = optEnumVal
   return m
 }
@@ -4311,17 +4463,17 @@ func (m *MyStructFieldPatchBuilder) OptLateStructVal(optLateStructVal *LateDefSt
   return m
 }
 
-func (m *MyStructFieldPatchBuilder) OptListVal(optListVal *MyStructFieldN26Patch) *MyStructFieldPatchBuilder {
+func (m *MyStructFieldPatchBuilder) OptListVal(optListVal *MyStructFieldN28Patch) *MyStructFieldPatchBuilder {
   m.obj.OptListVal = optListVal
   return m
 }
 
-func (m *MyStructFieldPatchBuilder) OptSetVal(optSetVal *MyStructFieldN27Patch) *MyStructFieldPatchBuilder {
+func (m *MyStructFieldPatchBuilder) OptSetVal(optSetVal *MyStructFieldN29Patch) *MyStructFieldPatchBuilder {
   m.obj.OptSetVal = optSetVal
   return m
 }
 
-func (m *MyStructFieldPatchBuilder) OptMapVal(optMapVal *MyStructFieldN28Patch) *MyStructFieldPatchBuilder {
+func (m *MyStructFieldPatchBuilder) OptMapVal(optMapVal *MyStructFieldN30Patch) *MyStructFieldPatchBuilder {
   m.obj.OptMapVal = optMapVal
   return m
 }
@@ -4391,6 +4543,16 @@ func (m *MyStructFieldPatch) SetLateStructVal(lateStructVal *LateDefStructPatch)
   return m
 }
 
+func (m *MyStructFieldPatch) SetDurationVal(durationVal *patch1.DurationPatch) *MyStructFieldPatch {
+  m.DurationVal = durationVal
+  return m
+}
+
+func (m *MyStructFieldPatch) SetTimeVal(timeVal *patch1.TimePatch) *MyStructFieldPatch {
+  m.TimeVal = timeVal
+  return m
+}
+
 func (m *MyStructFieldPatch) SetOptBoolVal(optBoolVal *patch1.BoolPatch) *MyStructFieldPatch {
   m.OptBoolVal = optBoolVal
   return m
@@ -4436,7 +4598,7 @@ func (m *MyStructFieldPatch) SetOptBinaryVal(optBinaryVal *patch1.BinaryPatch) *
   return m
 }
 
-func (m *MyStructFieldPatch) SetOptEnumVal(optEnumVal *MyStructFieldN23Patch) *MyStructFieldPatch {
+func (m *MyStructFieldPatch) SetOptEnumVal(optEnumVal *MyStructFieldN25Patch) *MyStructFieldPatch {
   m.OptEnumVal = optEnumVal
   return m
 }
@@ -4451,17 +4613,17 @@ func (m *MyStructFieldPatch) SetOptLateStructVal(optLateStructVal *LateDefStruct
   return m
 }
 
-func (m *MyStructFieldPatch) SetOptListVal(optListVal *MyStructFieldN26Patch) *MyStructFieldPatch {
+func (m *MyStructFieldPatch) SetOptListVal(optListVal *MyStructFieldN28Patch) *MyStructFieldPatch {
   m.OptListVal = optListVal
   return m
 }
 
-func (m *MyStructFieldPatch) SetOptSetVal(optSetVal *MyStructFieldN27Patch) *MyStructFieldPatch {
+func (m *MyStructFieldPatch) SetOptSetVal(optSetVal *MyStructFieldN29Patch) *MyStructFieldPatch {
   m.OptSetVal = optSetVal
   return m
 }
 
-func (m *MyStructFieldPatch) SetOptMapVal(optMapVal *MyStructFieldN28Patch) *MyStructFieldPatch {
+func (m *MyStructFieldPatch) SetOptMapVal(optMapVal *MyStructFieldN30Patch) *MyStructFieldPatch {
   m.OptMapVal = optMapVal
   return m
 }
@@ -4591,6 +4753,14 @@ func (p *MyStructFieldPatch) Read(iprot thrift.Protocol) error {
       if err := p.ReadField_28(iprot); err != nil {
         return err
       }
+    case -29:
+      if err := p.ReadField_29(iprot); err != nil {
+        return err
+      }
+    case -30:
+      if err := p.ReadField_30(iprot); err != nil {
+        return err
+      }
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -4711,6 +4881,22 @@ func (p *MyStructFieldPatch)  ReadField_13(iprot thrift.Protocol) error {
 }
 
 func (p *MyStructFieldPatch)  ReadField_14(iprot thrift.Protocol) error {
+  p.DurationVal = patch1.NewDurationPatch()
+  if err := p.DurationVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.DurationVal), err)
+  }
+  return nil
+}
+
+func (p *MyStructFieldPatch)  ReadField_15(iprot thrift.Protocol) error {
+  p.TimeVal = patch1.NewTimePatch()
+  if err := p.TimeVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.TimeVal), err)
+  }
+  return nil
+}
+
+func (p *MyStructFieldPatch)  ReadField_16(iprot thrift.Protocol) error {
   p.OptBoolVal = patch1.NewBoolPatch()
   if err := p.OptBoolVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptBoolVal), err)
@@ -4718,7 +4904,7 @@ func (p *MyStructFieldPatch)  ReadField_14(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_15(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_17(iprot thrift.Protocol) error {
   p.OptByteVal = patch1.NewBytePatch()
   if err := p.OptByteVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptByteVal), err)
@@ -4726,7 +4912,7 @@ func (p *MyStructFieldPatch)  ReadField_15(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_16(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_18(iprot thrift.Protocol) error {
   p.OptI16Val = patch1.NewI16Patch()
   if err := p.OptI16Val.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptI16Val), err)
@@ -4734,7 +4920,7 @@ func (p *MyStructFieldPatch)  ReadField_16(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_17(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_19(iprot thrift.Protocol) error {
   p.OptI32Val = patch1.NewI32Patch()
   if err := p.OptI32Val.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptI32Val), err)
@@ -4742,7 +4928,7 @@ func (p *MyStructFieldPatch)  ReadField_17(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_18(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_20(iprot thrift.Protocol) error {
   p.OptI64Val = patch1.NewI64Patch()
   if err := p.OptI64Val.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptI64Val), err)
@@ -4750,7 +4936,7 @@ func (p *MyStructFieldPatch)  ReadField_18(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_19(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_21(iprot thrift.Protocol) error {
   p.OptFloatVal = patch1.NewFloatPatch()
   if err := p.OptFloatVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptFloatVal), err)
@@ -4758,7 +4944,7 @@ func (p *MyStructFieldPatch)  ReadField_19(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_20(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_22(iprot thrift.Protocol) error {
   p.OptDoubleVal = patch1.NewDoublePatch()
   if err := p.OptDoubleVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptDoubleVal), err)
@@ -4766,7 +4952,7 @@ func (p *MyStructFieldPatch)  ReadField_20(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_21(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_23(iprot thrift.Protocol) error {
   p.OptStringVal = patch1.NewStringPatch()
   if err := p.OptStringVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptStringVal), err)
@@ -4774,7 +4960,7 @@ func (p *MyStructFieldPatch)  ReadField_21(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_22(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_24(iprot thrift.Protocol) error {
   p.OptBinaryVal = patch1.NewBinaryPatch()
   if err := p.OptBinaryVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptBinaryVal), err)
@@ -4782,15 +4968,15 @@ func (p *MyStructFieldPatch)  ReadField_22(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_23(iprot thrift.Protocol) error {
-  p.OptEnumVal = NewMyStructFieldN23Patch()
+func (p *MyStructFieldPatch)  ReadField_25(iprot thrift.Protocol) error {
+  p.OptEnumVal = NewMyStructFieldN25Patch()
   if err := p.OptEnumVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptEnumVal), err)
   }
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_24(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_26(iprot thrift.Protocol) error {
   p.OptStructVal = NewMyDataPatch()
   if err := p.OptStructVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptStructVal), err)
@@ -4798,7 +4984,7 @@ func (p *MyStructFieldPatch)  ReadField_24(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_25(iprot thrift.Protocol) error {
+func (p *MyStructFieldPatch)  ReadField_27(iprot thrift.Protocol) error {
   p.OptLateStructVal = NewLateDefStructPatch()
   if err := p.OptLateStructVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptLateStructVal), err)
@@ -4806,24 +4992,24 @@ func (p *MyStructFieldPatch)  ReadField_25(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_26(iprot thrift.Protocol) error {
-  p.OptListVal = NewMyStructFieldN26Patch()
+func (p *MyStructFieldPatch)  ReadField_28(iprot thrift.Protocol) error {
+  p.OptListVal = NewMyStructFieldN28Patch()
   if err := p.OptListVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptListVal), err)
   }
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_27(iprot thrift.Protocol) error {
-  p.OptSetVal = NewMyStructFieldN27Patch()
+func (p *MyStructFieldPatch)  ReadField_29(iprot thrift.Protocol) error {
+  p.OptSetVal = NewMyStructFieldN29Patch()
   if err := p.OptSetVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptSetVal), err)
   }
   return nil
 }
 
-func (p *MyStructFieldPatch)  ReadField_28(iprot thrift.Protocol) error {
-  p.OptMapVal = NewMyStructFieldN28Patch()
+func (p *MyStructFieldPatch)  ReadField_30(iprot thrift.Protocol) error {
+  p.OptMapVal = NewMyStructFieldN30Patch()
   if err := p.OptMapVal.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.OptMapVal), err)
   }
@@ -4833,6 +5019,8 @@ func (p *MyStructFieldPatch)  ReadField_28(iprot thrift.Protocol) error {
 func (p *MyStructFieldPatch) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("MyStructFieldPatch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField_30(oprot); err != nil { return err }
+  if err := p.writeField_29(oprot); err != nil { return err }
   if err := p.writeField_28(oprot); err != nil { return err }
   if err := p.writeField_27(oprot); err != nil { return err }
   if err := p.writeField_26(oprot); err != nil { return err }
@@ -4868,168 +5056,190 @@ func (p *MyStructFieldPatch) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldPatch) writeField_28(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optMapVal", thrift.STRUCT, -28); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -28:optMapVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_30(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optMapVal", thrift.STRUCT, -30); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -30:optMapVal: ", p), err) }
   if err := p.OptMapVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptMapVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -28:optMapVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -30:optMapVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_27(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optSetVal", thrift.STRUCT, -27); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -27:optSetVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_29(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optSetVal", thrift.STRUCT, -29); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -29:optSetVal: ", p), err) }
   if err := p.OptSetVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptSetVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -27:optSetVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -29:optSetVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_26(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optListVal", thrift.STRUCT, -26); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -26:optListVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_28(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optListVal", thrift.STRUCT, -28); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -28:optListVal: ", p), err) }
   if err := p.OptListVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptListVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -26:optListVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -28:optListVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_25(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -25); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -25:optLateStructVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_27(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optLateStructVal", thrift.STRUCT, -27); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -27:optLateStructVal: ", p), err) }
   if err := p.OptLateStructVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptLateStructVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -25:optLateStructVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -27:optLateStructVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_24(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optStructVal", thrift.STRUCT, -24); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -24:optStructVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_26(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optStructVal", thrift.STRUCT, -26); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -26:optStructVal: ", p), err) }
   if err := p.OptStructVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptStructVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -24:optStructVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -26:optStructVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_23(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optEnumVal", thrift.STRUCT, -23); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -23:optEnumVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_25(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optEnumVal", thrift.STRUCT, -25); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -25:optEnumVal: ", p), err) }
   if err := p.OptEnumVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptEnumVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -23:optEnumVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -25:optEnumVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_22(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optBinaryVal", thrift.STRUCT, -22); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -22:optBinaryVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_24(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optBinaryVal", thrift.STRUCT, -24); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -24:optBinaryVal: ", p), err) }
   if err := p.OptBinaryVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptBinaryVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -22:optBinaryVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -24:optBinaryVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_21(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optStringVal", thrift.STRUCT, -21); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -21:optStringVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_23(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optStringVal", thrift.STRUCT, -23); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -23:optStringVal: ", p), err) }
   if err := p.OptStringVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptStringVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -21:optStringVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -23:optStringVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_20(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optDoubleVal", thrift.STRUCT, -20); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -20:optDoubleVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_22(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optDoubleVal", thrift.STRUCT, -22); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -22:optDoubleVal: ", p), err) }
   if err := p.OptDoubleVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptDoubleVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -20:optDoubleVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -22:optDoubleVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_19(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optFloatVal", thrift.STRUCT, -19); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -19:optFloatVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_21(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optFloatVal", thrift.STRUCT, -21); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -21:optFloatVal: ", p), err) }
   if err := p.OptFloatVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptFloatVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -19:optFloatVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -21:optFloatVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_18(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optI64Val", thrift.STRUCT, -18); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -18:optI64Val: ", p), err) }
+func (p *MyStructFieldPatch) writeField_20(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optI64Val", thrift.STRUCT, -20); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -20:optI64Val: ", p), err) }
   if err := p.OptI64Val.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptI64Val), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -18:optI64Val: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -20:optI64Val: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_17(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optI32Val", thrift.STRUCT, -17); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -17:optI32Val: ", p), err) }
+func (p *MyStructFieldPatch) writeField_19(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optI32Val", thrift.STRUCT, -19); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -19:optI32Val: ", p), err) }
   if err := p.OptI32Val.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptI32Val), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -17:optI32Val: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -19:optI32Val: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_16(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optI16Val", thrift.STRUCT, -16); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -16:optI16Val: ", p), err) }
+func (p *MyStructFieldPatch) writeField_18(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optI16Val", thrift.STRUCT, -18); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -18:optI16Val: ", p), err) }
   if err := p.OptI16Val.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptI16Val), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -16:optI16Val: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -18:optI16Val: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_15(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optByteVal", thrift.STRUCT, -15); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -15:optByteVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_17(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optByteVal", thrift.STRUCT, -17); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -17:optByteVal: ", p), err) }
   if err := p.OptByteVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptByteVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -15:optByteVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -17:optByteVal: ", p), err) }
   return err
 }
 
-func (p *MyStructFieldPatch) writeField_14(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("optBoolVal", thrift.STRUCT, -14); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error -14:optBoolVal: ", p), err) }
+func (p *MyStructFieldPatch) writeField_16(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("optBoolVal", thrift.STRUCT, -16); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -16:optBoolVal: ", p), err) }
   if err := p.OptBoolVal.Write(oprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.OptBoolVal), err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error -14:optBoolVal: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -16:optBoolVal: ", p), err) }
+  return err
+}
+
+func (p *MyStructFieldPatch) writeField_15(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("timeVal", thrift.STRUCT, -15); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -15:timeVal: ", p), err) }
+  if err := p.TimeVal.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.TimeVal), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -15:timeVal: ", p), err) }
+  return err
+}
+
+func (p *MyStructFieldPatch) writeField_14(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("durationVal", thrift.STRUCT, -14); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error -14:durationVal: ", p), err) }
+  if err := p.DurationVal.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.DurationVal), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error -14:durationVal: ", p), err) }
   return err
 }
 
@@ -5271,6 +5481,18 @@ func (p *MyStructFieldPatch) String() string {
   } else {
     optBoolValVal = fmt.Sprintf("%v", p.OptBoolVal)
   }
+  var timeValVal string
+  if p.TimeVal == nil {
+    timeValVal = "<nil>"
+  } else {
+    timeValVal = fmt.Sprintf("%v", p.TimeVal)
+  }
+  var durationValVal string
+  if p.DurationVal == nil {
+    durationValVal = "<nil>"
+  } else {
+    durationValVal = fmt.Sprintf("%v", p.DurationVal)
+  }
   var lateStructValVal string
   if p.LateStructVal == nil {
     lateStructValVal = "<nil>"
@@ -5349,7 +5571,7 @@ func (p *MyStructFieldPatch) String() string {
   } else {
     boolValVal = fmt.Sprintf("%v", p.BoolVal)
   }
-  return fmt.Sprintf("MyStructFieldPatch({OptMapVal:%s OptSetVal:%s OptListVal:%s OptLateStructVal:%s OptStructVal:%s OptEnumVal:%s OptBinaryVal:%s OptStringVal:%s OptDoubleVal:%s OptFloatVal:%s OptI64Val:%s OptI32Val:%s OptI16Val:%s OptByteVal:%s OptBoolVal:%s LateStructVal:%s UnionVal:%s StructVal:%s EnumVal:%s BinaryVal:%s StringVal:%s DoubleVal:%s FloatVal:%s I64Val:%s I32Val:%s I16Val:%s ByteVal:%s BoolVal:%s})", optMapValVal, optSetValVal, optListValVal, optLateStructValVal, optStructValVal, optEnumValVal, optBinaryValVal, optStringValVal, optDoubleValVal, optFloatValVal, optI64ValVal, optI32ValVal, optI16ValVal, optByteValVal, optBoolValVal, lateStructValVal, unionValVal, structValVal, enumValVal, binaryValVal, stringValVal, doubleValVal, floatValVal, i64ValVal, i32ValVal, i16ValVal, byteValVal, boolValVal)
+  return fmt.Sprintf("MyStructFieldPatch({OptMapVal:%s OptSetVal:%s OptListVal:%s OptLateStructVal:%s OptStructVal:%s OptEnumVal:%s OptBinaryVal:%s OptStringVal:%s OptDoubleVal:%s OptFloatVal:%s OptI64Val:%s OptI32Val:%s OptI16Val:%s OptByteVal:%s OptBoolVal:%s TimeVal:%s DurationVal:%s LateStructVal:%s UnionVal:%s StructVal:%s EnumVal:%s BinaryVal:%s StringVal:%s DoubleVal:%s FloatVal:%s I64Val:%s I32Val:%s I16Val:%s ByteVal:%s BoolVal:%s})", optMapValVal, optSetValVal, optListValVal, optLateStructValVal, optStructValVal, optEnumValVal, optBinaryValVal, optStringValVal, optDoubleValVal, optFloatValVal, optI64ValVal, optI32ValVal, optI16ValVal, optByteValVal, optBoolValVal, timeValVal, durationValVal, lateStructValVal, unionValVal, structValVal, enumValVal, binaryValVal, stringValVal, doubleValVal, floatValVal, i64ValVal, i32ValVal, i16ValVal, byteValVal, boolValVal)
 }
 
 // Attributes:
@@ -5523,68 +5745,68 @@ func (p *MyStructFieldN10Patch) String() string {
 // Attributes:
 //  - Assign: Assigns a value. If set, all other operations are ignored.
 //  - Clear: Clears a value. Applies first.
-type MyStructFieldN23Patch struct {
+type MyStructFieldN25Patch struct {
   Assign *MyEnum `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
 }
 
-func NewMyStructFieldN23Patch() *MyStructFieldN23Patch {
-  return &MyStructFieldN23Patch{}
+func NewMyStructFieldN25Patch() *MyStructFieldN25Patch {
+  return &MyStructFieldN25Patch{}
 }
 
-var MyStructFieldN23Patch_Assign_DEFAULT MyEnum
-func (p *MyStructFieldN23Patch) GetAssign() MyEnum {
+var MyStructFieldN25Patch_Assign_DEFAULT MyEnum
+func (p *MyStructFieldN25Patch) GetAssign() MyEnum {
   if !p.IsSetAssign() {
-    return MyStructFieldN23Patch_Assign_DEFAULT
+    return MyStructFieldN25Patch_Assign_DEFAULT
   }
 return *p.Assign
 }
 
-func (p *MyStructFieldN23Patch) GetClear() bool {
+func (p *MyStructFieldN25Patch) GetClear() bool {
   return p.Clear
 }
-func (p *MyStructFieldN23Patch) IsSetAssign() bool {
+func (p *MyStructFieldN25Patch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
 }
 
-type MyStructFieldN23PatchBuilder struct {
-  obj *MyStructFieldN23Patch
+type MyStructFieldN25PatchBuilder struct {
+  obj *MyStructFieldN25Patch
 }
 
-func NewMyStructFieldN23PatchBuilder() *MyStructFieldN23PatchBuilder{
-  return &MyStructFieldN23PatchBuilder{
-    obj: NewMyStructFieldN23Patch(),
+func NewMyStructFieldN25PatchBuilder() *MyStructFieldN25PatchBuilder{
+  return &MyStructFieldN25PatchBuilder{
+    obj: NewMyStructFieldN25Patch(),
   }
 }
 
-func (p MyStructFieldN23PatchBuilder) Emit() *MyStructFieldN23Patch{
-  return &MyStructFieldN23Patch{
+func (p MyStructFieldN25PatchBuilder) Emit() *MyStructFieldN25Patch{
+  return &MyStructFieldN25Patch{
     Assign: p.obj.Assign,
     Clear: p.obj.Clear,
   }
 }
 
-func (m *MyStructFieldN23PatchBuilder) Assign(assign *MyEnum) *MyStructFieldN23PatchBuilder {
+func (m *MyStructFieldN25PatchBuilder) Assign(assign *MyEnum) *MyStructFieldN25PatchBuilder {
   m.obj.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN23PatchBuilder) Clear(clear bool) *MyStructFieldN23PatchBuilder {
+func (m *MyStructFieldN25PatchBuilder) Clear(clear bool) *MyStructFieldN25PatchBuilder {
   m.obj.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN23Patch) SetAssign(assign *MyEnum) *MyStructFieldN23Patch {
+func (m *MyStructFieldN25Patch) SetAssign(assign *MyEnum) *MyStructFieldN25Patch {
   m.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN23Patch) SetClear(clear bool) *MyStructFieldN23Patch {
+func (m *MyStructFieldN25Patch) SetClear(clear bool) *MyStructFieldN25Patch {
   m.Clear = clear
   return m
 }
 
-func (p *MyStructFieldN23Patch) Read(iprot thrift.Protocol) error {
+func (p *MyStructFieldN25Patch) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -5620,7 +5842,7 @@ func (p *MyStructFieldN23Patch) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN23Patch)  ReadField1(iprot thrift.Protocol) error {
+func (p *MyStructFieldN25Patch)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
@@ -5630,7 +5852,7 @@ func (p *MyStructFieldN23Patch)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN23Patch)  ReadField2(iprot thrift.Protocol) error {
+func (p *MyStructFieldN25Patch)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBool(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -5639,8 +5861,8 @@ func (p *MyStructFieldN23Patch)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN23Patch) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("MyStructFieldN23Patch"); err != nil {
+func (p *MyStructFieldN25Patch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("MyStructFieldN25Patch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -5651,7 +5873,7 @@ func (p *MyStructFieldN23Patch) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN23Patch) writeField1(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN25Patch) writeField1(oprot thrift.Protocol) (err error) {
   if p.IsSetAssign() {
     if err := oprot.WriteFieldBegin("assign", thrift.I32, 1); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
@@ -5663,7 +5885,7 @@ func (p *MyStructFieldN23Patch) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN23Patch) writeField2(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN25Patch) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
   if err := oprot.WriteBool(bool(p.Clear)); err != nil {
@@ -5673,7 +5895,7 @@ func (p *MyStructFieldN23Patch) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN23Patch) String() string {
+func (p *MyStructFieldN25Patch) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -5685,7 +5907,7 @@ func (p *MyStructFieldN23Patch) String() string {
     assignVal = fmt.Sprintf("%v", *p.Assign)
   }
   clearVal := fmt.Sprintf("%v", p.Clear)
-  return fmt.Sprintf("MyStructFieldN23Patch({Assign:%s Clear:%s})", assignVal, clearVal)
+  return fmt.Sprintf("MyStructFieldN25Patch({Assign:%s Clear:%s})", assignVal, clearVal)
 }
 
 // Attributes:
@@ -5695,7 +5917,7 @@ func (p *MyStructFieldN23Patch) String() string {
 //  - Remove: Removes entries, if present. Applies third.
 //  - Prepend: Prepends to the front of a given list.
 //  - Append: Appends to the back of a given list.
-type MyStructFieldN26Patch struct {
+type MyStructFieldN28Patch struct {
   Assign []int16 `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   Patch map[int32]*patch1.I16Patch `thrift:"patch,3" db:"patch" json:"patch"`
@@ -5705,51 +5927,51 @@ type MyStructFieldN26Patch struct {
   Append []int16 `thrift:"append,9" db:"append" json:"append"`
 }
 
-func NewMyStructFieldN26Patch() *MyStructFieldN26Patch {
-  return &MyStructFieldN26Patch{}
+func NewMyStructFieldN28Patch() *MyStructFieldN28Patch {
+  return &MyStructFieldN28Patch{}
 }
 
-var MyStructFieldN26Patch_Assign_DEFAULT []int16
+var MyStructFieldN28Patch_Assign_DEFAULT []int16
 
-func (p *MyStructFieldN26Patch) GetAssign() []int16 {
+func (p *MyStructFieldN28Patch) GetAssign() []int16 {
   return p.Assign
 }
 
-func (p *MyStructFieldN26Patch) GetClear() bool {
+func (p *MyStructFieldN28Patch) GetClear() bool {
   return p.Clear
 }
 
-func (p *MyStructFieldN26Patch) GetPatch() map[int32]*patch1.I16Patch {
+func (p *MyStructFieldN28Patch) GetPatch() map[int32]*patch1.I16Patch {
   return p.Patch
 }
 
-func (p *MyStructFieldN26Patch) GetRemove() []int16 {
+func (p *MyStructFieldN28Patch) GetRemove() []int16 {
   return p.Remove
 }
 
-func (p *MyStructFieldN26Patch) GetPrepend() []int16 {
+func (p *MyStructFieldN28Patch) GetPrepend() []int16 {
   return p.Prepend
 }
 
-func (p *MyStructFieldN26Patch) GetAppend() []int16 {
+func (p *MyStructFieldN28Patch) GetAppend() []int16 {
   return p.Append
 }
-func (p *MyStructFieldN26Patch) IsSetAssign() bool {
+func (p *MyStructFieldN28Patch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
 }
 
-type MyStructFieldN26PatchBuilder struct {
-  obj *MyStructFieldN26Patch
+type MyStructFieldN28PatchBuilder struct {
+  obj *MyStructFieldN28Patch
 }
 
-func NewMyStructFieldN26PatchBuilder() *MyStructFieldN26PatchBuilder{
-  return &MyStructFieldN26PatchBuilder{
-    obj: NewMyStructFieldN26Patch(),
+func NewMyStructFieldN28PatchBuilder() *MyStructFieldN28PatchBuilder{
+  return &MyStructFieldN28PatchBuilder{
+    obj: NewMyStructFieldN28Patch(),
   }
 }
 
-func (p MyStructFieldN26PatchBuilder) Emit() *MyStructFieldN26Patch{
-  return &MyStructFieldN26Patch{
+func (p MyStructFieldN28PatchBuilder) Emit() *MyStructFieldN28Patch{
+  return &MyStructFieldN28Patch{
     Assign: p.obj.Assign,
     Clear: p.obj.Clear,
     Patch: p.obj.Patch,
@@ -5759,67 +5981,67 @@ func (p MyStructFieldN26PatchBuilder) Emit() *MyStructFieldN26Patch{
   }
 }
 
-func (m *MyStructFieldN26PatchBuilder) Assign(assign []int16) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Assign(assign []int16) *MyStructFieldN28PatchBuilder {
   m.obj.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN26PatchBuilder) Clear(clear bool) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Clear(clear bool) *MyStructFieldN28PatchBuilder {
   m.obj.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN26PatchBuilder) Patch(patch map[int32]*patch1.I16Patch) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Patch(patch map[int32]*patch1.I16Patch) *MyStructFieldN28PatchBuilder {
   m.obj.Patch = patch
   return m
 }
 
-func (m *MyStructFieldN26PatchBuilder) Remove(remove []int16) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Remove(remove []int16) *MyStructFieldN28PatchBuilder {
   m.obj.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN26PatchBuilder) Prepend(prepend []int16) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Prepend(prepend []int16) *MyStructFieldN28PatchBuilder {
   m.obj.Prepend = prepend
   return m
 }
 
-func (m *MyStructFieldN26PatchBuilder) Append(append []int16) *MyStructFieldN26PatchBuilder {
+func (m *MyStructFieldN28PatchBuilder) Append(append []int16) *MyStructFieldN28PatchBuilder {
   m.obj.Append = append
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetAssign(assign []int16) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetAssign(assign []int16) *MyStructFieldN28Patch {
   m.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetClear(clear bool) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetClear(clear bool) *MyStructFieldN28Patch {
   m.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetPatch(patch map[int32]*patch1.I16Patch) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetPatch(patch map[int32]*patch1.I16Patch) *MyStructFieldN28Patch {
   m.Patch = patch
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetRemove(remove []int16) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetRemove(remove []int16) *MyStructFieldN28Patch {
   m.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetPrepend(prepend []int16) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetPrepend(prepend []int16) *MyStructFieldN28Patch {
   m.Prepend = prepend
   return m
 }
 
-func (m *MyStructFieldN26Patch) SetAppend(append []int16) *MyStructFieldN26Patch {
+func (m *MyStructFieldN28Patch) SetAppend(append []int16) *MyStructFieldN28Patch {
   m.Append = append
   return m
 }
 
-func (p *MyStructFieldN26Patch) Read(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -5871,7 +6093,7 @@ func (p *MyStructFieldN26Patch) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField1(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField1(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -5879,13 +6101,13 @@ func (p *MyStructFieldN26Patch)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Assign =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem6 int16
+    var _elem7 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem6 = v
+      _elem7 = v
     }
-    p.Assign = append(p.Assign, _elem6)
+    p.Assign = append(p.Assign, _elem7)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -5893,7 +6115,7 @@ func (p *MyStructFieldN26Patch)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField2(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBool(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -5902,7 +6124,7 @@ func (p *MyStructFieldN26Patch)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField3(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField3(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -5910,17 +6132,17 @@ func (p *MyStructFieldN26Patch)  ReadField3(iprot thrift.Protocol) error {
   tMap := make(map[int32]*patch1.I16Patch, size)
   p.Patch =  tMap
   for i := 0; i < size; i ++ {
-    var _key7 int32
+    var _key8 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key7 = v
+      _key8 = v
     }
-    _val8 := patch1.NewI16Patch()
-    if err := _val8.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val8), err)
+    _val9 := patch1.NewI16Patch()
+    if err := _val9.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _val9), err)
     }
-    p.Patch[_key7] = _val8
+    p.Patch[_key8] = _val9
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -5928,7 +6150,7 @@ func (p *MyStructFieldN26Patch)  ReadField3(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField7(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField7(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -5936,13 +6158,13 @@ func (p *MyStructFieldN26Patch)  ReadField7(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Remove =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem9 int16
+    var _elem10 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem9 = v
+      _elem10 = v
     }
-    p.Remove = append(p.Remove, _elem9)
+    p.Remove = append(p.Remove, _elem10)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -5950,7 +6172,7 @@ func (p *MyStructFieldN26Patch)  ReadField7(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField8(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField8(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -5958,13 +6180,13 @@ func (p *MyStructFieldN26Patch)  ReadField8(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Prepend =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem10 int16
+    var _elem11 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem10 = v
+      _elem11 = v
     }
-    p.Prepend = append(p.Prepend, _elem10)
+    p.Prepend = append(p.Prepend, _elem11)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -5972,7 +6194,7 @@ func (p *MyStructFieldN26Patch)  ReadField8(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch)  ReadField9(iprot thrift.Protocol) error {
+func (p *MyStructFieldN28Patch)  ReadField9(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -5980,13 +6202,13 @@ func (p *MyStructFieldN26Patch)  ReadField9(iprot thrift.Protocol) error {
   tSlice := make([]int16, 0, size)
   p.Append =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem11 int16
+    var _elem12 int16
     if v, err := iprot.ReadI16(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem11 = v
+      _elem12 = v
     }
-    p.Append = append(p.Append, _elem11)
+    p.Append = append(p.Append, _elem12)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -5994,8 +6216,8 @@ func (p *MyStructFieldN26Patch)  ReadField9(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("MyStructFieldN26Patch"); err != nil {
+func (p *MyStructFieldN28Patch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("MyStructFieldN28Patch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -6010,7 +6232,7 @@ func (p *MyStructFieldN26Patch) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN26Patch) writeField1(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField1(oprot thrift.Protocol) (err error) {
   if p.IsSetAssign() {
     if err := oprot.WriteFieldBegin("assign", thrift.LIST, 1); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
@@ -6030,7 +6252,7 @@ func (p *MyStructFieldN26Patch) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) writeField2(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
   if err := oprot.WriteBool(bool(p.Clear)); err != nil {
@@ -6040,7 +6262,7 @@ func (p *MyStructFieldN26Patch) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) writeField3(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField3(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("patch", thrift.MAP, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:patch: ", p), err) }
   if err := oprot.WriteMapBegin(thrift.I32, thrift.STRUCT, len(p.Patch)); err != nil {
@@ -6061,7 +6283,7 @@ func (p *MyStructFieldN26Patch) writeField3(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) writeField7(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField7(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("remove", thrift.LIST, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
   if err := oprot.WriteListBegin(thrift.I16, len(p.Remove)); err != nil {
@@ -6079,7 +6301,7 @@ func (p *MyStructFieldN26Patch) writeField7(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) writeField8(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField8(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("prepend", thrift.LIST, 8); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:prepend: ", p), err) }
   if err := oprot.WriteListBegin(thrift.I16, len(p.Prepend)); err != nil {
@@ -6097,7 +6319,7 @@ func (p *MyStructFieldN26Patch) writeField8(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) writeField9(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN28Patch) writeField9(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("append", thrift.LIST, 9); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 9:append: ", p), err) }
   if err := oprot.WriteListBegin(thrift.I16, len(p.Append)); err != nil {
@@ -6115,7 +6337,7 @@ func (p *MyStructFieldN26Patch) writeField9(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN26Patch) String() string {
+func (p *MyStructFieldN28Patch) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -6126,7 +6348,7 @@ func (p *MyStructFieldN26Patch) String() string {
   removeVal := fmt.Sprintf("%v", p.Remove)
   prependVal := fmt.Sprintf("%v", p.Prepend)
   appendVal := fmt.Sprintf("%v", p.Append)
-  return fmt.Sprintf("MyStructFieldN26Patch({Assign:%s Clear:%s Patch:%s Remove:%s Prepend:%s Append:%s})", assignVal, clearVal, patchVal, removeVal, prependVal, appendVal)
+  return fmt.Sprintf("MyStructFieldN28Patch({Assign:%s Clear:%s Patch:%s Remove:%s Prepend:%s Append:%s})", assignVal, clearVal, patchVal, removeVal, prependVal, appendVal)
 }
 
 // Attributes:
@@ -6134,7 +6356,7 @@ func (p *MyStructFieldN26Patch) String() string {
 //  - Clear: Clears a value. Applies first.
 //  - Remove: Removes entries, if present. Applies third.
 //  - Add: Adds entries, if not already present. Applies fourth.
-type MyStructFieldN27Patch struct {
+type MyStructFieldN29Patch struct {
   Assign []string `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   // unused fields # 3 to 6
@@ -6142,43 +6364,43 @@ type MyStructFieldN27Patch struct {
   Add []string `thrift:"add,8" db:"add" json:"add"`
 }
 
-func NewMyStructFieldN27Patch() *MyStructFieldN27Patch {
-  return &MyStructFieldN27Patch{}
+func NewMyStructFieldN29Patch() *MyStructFieldN29Patch {
+  return &MyStructFieldN29Patch{}
 }
 
-var MyStructFieldN27Patch_Assign_DEFAULT []string
+var MyStructFieldN29Patch_Assign_DEFAULT []string
 
-func (p *MyStructFieldN27Patch) GetAssign() []string {
+func (p *MyStructFieldN29Patch) GetAssign() []string {
   return p.Assign
 }
 
-func (p *MyStructFieldN27Patch) GetClear() bool {
+func (p *MyStructFieldN29Patch) GetClear() bool {
   return p.Clear
 }
 
-func (p *MyStructFieldN27Patch) GetRemove() []string {
+func (p *MyStructFieldN29Patch) GetRemove() []string {
   return p.Remove
 }
 
-func (p *MyStructFieldN27Patch) GetAdd() []string {
+func (p *MyStructFieldN29Patch) GetAdd() []string {
   return p.Add
 }
-func (p *MyStructFieldN27Patch) IsSetAssign() bool {
+func (p *MyStructFieldN29Patch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
 }
 
-type MyStructFieldN27PatchBuilder struct {
-  obj *MyStructFieldN27Patch
+type MyStructFieldN29PatchBuilder struct {
+  obj *MyStructFieldN29Patch
 }
 
-func NewMyStructFieldN27PatchBuilder() *MyStructFieldN27PatchBuilder{
-  return &MyStructFieldN27PatchBuilder{
-    obj: NewMyStructFieldN27Patch(),
+func NewMyStructFieldN29PatchBuilder() *MyStructFieldN29PatchBuilder{
+  return &MyStructFieldN29PatchBuilder{
+    obj: NewMyStructFieldN29Patch(),
   }
 }
 
-func (p MyStructFieldN27PatchBuilder) Emit() *MyStructFieldN27Patch{
-  return &MyStructFieldN27Patch{
+func (p MyStructFieldN29PatchBuilder) Emit() *MyStructFieldN29Patch{
+  return &MyStructFieldN29Patch{
     Assign: p.obj.Assign,
     Clear: p.obj.Clear,
     Remove: p.obj.Remove,
@@ -6186,47 +6408,47 @@ func (p MyStructFieldN27PatchBuilder) Emit() *MyStructFieldN27Patch{
   }
 }
 
-func (m *MyStructFieldN27PatchBuilder) Assign(assign []string) *MyStructFieldN27PatchBuilder {
+func (m *MyStructFieldN29PatchBuilder) Assign(assign []string) *MyStructFieldN29PatchBuilder {
   m.obj.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN27PatchBuilder) Clear(clear bool) *MyStructFieldN27PatchBuilder {
+func (m *MyStructFieldN29PatchBuilder) Clear(clear bool) *MyStructFieldN29PatchBuilder {
   m.obj.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN27PatchBuilder) Remove(remove []string) *MyStructFieldN27PatchBuilder {
+func (m *MyStructFieldN29PatchBuilder) Remove(remove []string) *MyStructFieldN29PatchBuilder {
   m.obj.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN27PatchBuilder) Add(add []string) *MyStructFieldN27PatchBuilder {
+func (m *MyStructFieldN29PatchBuilder) Add(add []string) *MyStructFieldN29PatchBuilder {
   m.obj.Add = add
   return m
 }
 
-func (m *MyStructFieldN27Patch) SetAssign(assign []string) *MyStructFieldN27Patch {
+func (m *MyStructFieldN29Patch) SetAssign(assign []string) *MyStructFieldN29Patch {
   m.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN27Patch) SetClear(clear bool) *MyStructFieldN27Patch {
+func (m *MyStructFieldN29Patch) SetClear(clear bool) *MyStructFieldN29Patch {
   m.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN27Patch) SetRemove(remove []string) *MyStructFieldN27Patch {
+func (m *MyStructFieldN29Patch) SetRemove(remove []string) *MyStructFieldN29Patch {
   m.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN27Patch) SetAdd(add []string) *MyStructFieldN27Patch {
+func (m *MyStructFieldN29Patch) SetAdd(add []string) *MyStructFieldN29Patch {
   m.Add = add
   return m
 }
 
-func (p *MyStructFieldN27Patch) Read(iprot thrift.Protocol) error {
+func (p *MyStructFieldN29Patch) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -6270,7 +6492,7 @@ func (p *MyStructFieldN27Patch) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch)  ReadField1(iprot thrift.Protocol) error {
+func (p *MyStructFieldN29Patch)  ReadField1(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadSetBegin()
   if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -6278,13 +6500,13 @@ func (p *MyStructFieldN27Patch)  ReadField1(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Assign =  tSet
   for i := 0; i < size; i ++ {
-    var _elem12 string
+    var _elem13 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem12 = v
+      _elem13 = v
     }
-    p.Assign = append(p.Assign, _elem12)
+    p.Assign = append(p.Assign, _elem13)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -6292,7 +6514,7 @@ func (p *MyStructFieldN27Patch)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch)  ReadField2(iprot thrift.Protocol) error {
+func (p *MyStructFieldN29Patch)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBool(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -6301,7 +6523,7 @@ func (p *MyStructFieldN27Patch)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch)  ReadField7(iprot thrift.Protocol) error {
+func (p *MyStructFieldN29Patch)  ReadField7(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadSetBegin()
   if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -6309,13 +6531,13 @@ func (p *MyStructFieldN27Patch)  ReadField7(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Remove =  tSet
   for i := 0; i < size; i ++ {
-    var _elem13 string
+    var _elem14 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem13 = v
+      _elem14 = v
     }
-    p.Remove = append(p.Remove, _elem13)
+    p.Remove = append(p.Remove, _elem14)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -6323,7 +6545,7 @@ func (p *MyStructFieldN27Patch)  ReadField7(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch)  ReadField8(iprot thrift.Protocol) error {
+func (p *MyStructFieldN29Patch)  ReadField8(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadSetBegin()
   if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -6331,13 +6553,13 @@ func (p *MyStructFieldN27Patch)  ReadField8(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Add =  tSet
   for i := 0; i < size; i ++ {
-    var _elem14 string
+    var _elem15 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem14 = v
+      _elem15 = v
     }
-    p.Add = append(p.Add, _elem14)
+    p.Add = append(p.Add, _elem15)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -6345,8 +6567,8 @@ func (p *MyStructFieldN27Patch)  ReadField8(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("MyStructFieldN27Patch"); err != nil {
+func (p *MyStructFieldN29Patch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("MyStructFieldN29Patch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -6359,7 +6581,7 @@ func (p *MyStructFieldN27Patch) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN27Patch) writeField1(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN29Patch) writeField1(oprot thrift.Protocol) (err error) {
   if p.IsSetAssign() {
     if err := oprot.WriteFieldBegin("assign", thrift.SET, 1); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
@@ -6386,7 +6608,7 @@ func (p *MyStructFieldN27Patch) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN27Patch) writeField2(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN29Patch) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
   if err := oprot.WriteBool(bool(p.Clear)); err != nil {
@@ -6396,7 +6618,7 @@ func (p *MyStructFieldN27Patch) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN27Patch) writeField7(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN29Patch) writeField7(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
   if err := oprot.WriteSetBegin(thrift.STRING, len(p.Remove)); err != nil {
@@ -6421,7 +6643,7 @@ func (p *MyStructFieldN27Patch) writeField7(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN27Patch) writeField8(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN29Patch) writeField8(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("add", thrift.SET, 8); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:add: ", p), err) }
   if err := oprot.WriteSetBegin(thrift.STRING, len(p.Add)); err != nil {
@@ -6446,7 +6668,7 @@ func (p *MyStructFieldN27Patch) writeField8(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN27Patch) String() string {
+func (p *MyStructFieldN29Patch) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -6455,7 +6677,7 @@ func (p *MyStructFieldN27Patch) String() string {
   clearVal := fmt.Sprintf("%v", p.Clear)
   removeVal := fmt.Sprintf("%v", p.Remove)
   addVal := fmt.Sprintf("%v", p.Add)
-  return fmt.Sprintf("MyStructFieldN27Patch({Assign:%s Clear:%s Remove:%s Add:%s})", assignVal, clearVal, removeVal, addVal)
+  return fmt.Sprintf("MyStructFieldN29Patch({Assign:%s Clear:%s Remove:%s Add:%s})", assignVal, clearVal, removeVal, addVal)
 }
 
 // Attributes:
@@ -6464,7 +6686,7 @@ func (p *MyStructFieldN27Patch) String() string {
 //  - Add: Add the given values, if the keys are not already present. Applies forth.
 //  - Remove: Removes entries, if present. Applies third.
 //  - Put: Adds or replaces the given key/value pairs. Applies fifth.
-type MyStructFieldN28Patch struct {
+type MyStructFieldN30Patch struct {
   Assign map[string]string `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
   Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
   // unused fields # 3 to 4
@@ -6475,47 +6697,47 @@ type MyStructFieldN28Patch struct {
   Put map[string]string `thrift:"put,9" db:"put" json:"put"`
 }
 
-func NewMyStructFieldN28Patch() *MyStructFieldN28Patch {
-  return &MyStructFieldN28Patch{}
+func NewMyStructFieldN30Patch() *MyStructFieldN30Patch {
+  return &MyStructFieldN30Patch{}
 }
 
-var MyStructFieldN28Patch_Assign_DEFAULT map[string]string
+var MyStructFieldN30Patch_Assign_DEFAULT map[string]string
 
-func (p *MyStructFieldN28Patch) GetAssign() map[string]string {
+func (p *MyStructFieldN30Patch) GetAssign() map[string]string {
   return p.Assign
 }
 
-func (p *MyStructFieldN28Patch) GetClear() bool {
+func (p *MyStructFieldN30Patch) GetClear() bool {
   return p.Clear
 }
 
-func (p *MyStructFieldN28Patch) GetAdd() map[string]string {
+func (p *MyStructFieldN30Patch) GetAdd() map[string]string {
   return p.Add
 }
 
-func (p *MyStructFieldN28Patch) GetRemove() []string {
+func (p *MyStructFieldN30Patch) GetRemove() []string {
   return p.Remove
 }
 
-func (p *MyStructFieldN28Patch) GetPut() map[string]string {
+func (p *MyStructFieldN30Patch) GetPut() map[string]string {
   return p.Put
 }
-func (p *MyStructFieldN28Patch) IsSetAssign() bool {
+func (p *MyStructFieldN30Patch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
 }
 
-type MyStructFieldN28PatchBuilder struct {
-  obj *MyStructFieldN28Patch
+type MyStructFieldN30PatchBuilder struct {
+  obj *MyStructFieldN30Patch
 }
 
-func NewMyStructFieldN28PatchBuilder() *MyStructFieldN28PatchBuilder{
-  return &MyStructFieldN28PatchBuilder{
-    obj: NewMyStructFieldN28Patch(),
+func NewMyStructFieldN30PatchBuilder() *MyStructFieldN30PatchBuilder{
+  return &MyStructFieldN30PatchBuilder{
+    obj: NewMyStructFieldN30Patch(),
   }
 }
 
-func (p MyStructFieldN28PatchBuilder) Emit() *MyStructFieldN28Patch{
-  return &MyStructFieldN28Patch{
+func (p MyStructFieldN30PatchBuilder) Emit() *MyStructFieldN30Patch{
+  return &MyStructFieldN30Patch{
     Assign: p.obj.Assign,
     Clear: p.obj.Clear,
     Add: p.obj.Add,
@@ -6524,57 +6746,57 @@ func (p MyStructFieldN28PatchBuilder) Emit() *MyStructFieldN28Patch{
   }
 }
 
-func (m *MyStructFieldN28PatchBuilder) Assign(assign map[string]string) *MyStructFieldN28PatchBuilder {
+func (m *MyStructFieldN30PatchBuilder) Assign(assign map[string]string) *MyStructFieldN30PatchBuilder {
   m.obj.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN28PatchBuilder) Clear(clear bool) *MyStructFieldN28PatchBuilder {
+func (m *MyStructFieldN30PatchBuilder) Clear(clear bool) *MyStructFieldN30PatchBuilder {
   m.obj.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN28PatchBuilder) Add(add map[string]string) *MyStructFieldN28PatchBuilder {
+func (m *MyStructFieldN30PatchBuilder) Add(add map[string]string) *MyStructFieldN30PatchBuilder {
   m.obj.Add = add
   return m
 }
 
-func (m *MyStructFieldN28PatchBuilder) Remove(remove []string) *MyStructFieldN28PatchBuilder {
+func (m *MyStructFieldN30PatchBuilder) Remove(remove []string) *MyStructFieldN30PatchBuilder {
   m.obj.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN28PatchBuilder) Put(put map[string]string) *MyStructFieldN28PatchBuilder {
+func (m *MyStructFieldN30PatchBuilder) Put(put map[string]string) *MyStructFieldN30PatchBuilder {
   m.obj.Put = put
   return m
 }
 
-func (m *MyStructFieldN28Patch) SetAssign(assign map[string]string) *MyStructFieldN28Patch {
+func (m *MyStructFieldN30Patch) SetAssign(assign map[string]string) *MyStructFieldN30Patch {
   m.Assign = assign
   return m
 }
 
-func (m *MyStructFieldN28Patch) SetClear(clear bool) *MyStructFieldN28Patch {
+func (m *MyStructFieldN30Patch) SetClear(clear bool) *MyStructFieldN30Patch {
   m.Clear = clear
   return m
 }
 
-func (m *MyStructFieldN28Patch) SetAdd(add map[string]string) *MyStructFieldN28Patch {
+func (m *MyStructFieldN30Patch) SetAdd(add map[string]string) *MyStructFieldN30Patch {
   m.Add = add
   return m
 }
 
-func (m *MyStructFieldN28Patch) SetRemove(remove []string) *MyStructFieldN28Patch {
+func (m *MyStructFieldN30Patch) SetRemove(remove []string) *MyStructFieldN30Patch {
   m.Remove = remove
   return m
 }
 
-func (m *MyStructFieldN28Patch) SetPut(put map[string]string) *MyStructFieldN28Patch {
+func (m *MyStructFieldN30Patch) SetPut(put map[string]string) *MyStructFieldN30Patch {
   m.Put = put
   return m
 }
 
-func (p *MyStructFieldN28Patch) Read(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -6622,7 +6844,7 @@ func (p *MyStructFieldN28Patch) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch)  ReadField1(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch)  ReadField1(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -6630,19 +6852,19 @@ func (p *MyStructFieldN28Patch)  ReadField1(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Assign =  tMap
   for i := 0; i < size; i ++ {
-    var _key15 string
+    var _key16 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key15 = v
+      _key16 = v
     }
-    var _val16 string
+    var _val17 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val16 = v
+      _val17 = v
     }
-    p.Assign[_key15] = _val16
+    p.Assign[_key16] = _val17
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -6650,7 +6872,7 @@ func (p *MyStructFieldN28Patch)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch)  ReadField2(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBool(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -6659,7 +6881,7 @@ func (p *MyStructFieldN28Patch)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch)  ReadField5(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch)  ReadField5(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -6667,19 +6889,19 @@ func (p *MyStructFieldN28Patch)  ReadField5(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Add =  tMap
   for i := 0; i < size; i ++ {
-    var _key17 string
+    var _key18 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key17 = v
+      _key18 = v
     }
-    var _val18 string
+    var _val19 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val18 = v
+      _val19 = v
     }
-    p.Add[_key17] = _val18
+    p.Add[_key18] = _val19
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -6687,7 +6909,7 @@ func (p *MyStructFieldN28Patch)  ReadField5(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch)  ReadField7(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch)  ReadField7(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadSetBegin()
   if err != nil {
     return thrift.PrependError("error reading set begin: ", err)
@@ -6695,13 +6917,13 @@ func (p *MyStructFieldN28Patch)  ReadField7(iprot thrift.Protocol) error {
   tSet := make([]string, 0, size)
   p.Remove =  tSet
   for i := 0; i < size; i ++ {
-    var _elem19 string
+    var _elem20 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem19 = v
+      _elem20 = v
     }
-    p.Remove = append(p.Remove, _elem19)
+    p.Remove = append(p.Remove, _elem20)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -6709,7 +6931,7 @@ func (p *MyStructFieldN28Patch)  ReadField7(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch)  ReadField9(iprot thrift.Protocol) error {
+func (p *MyStructFieldN30Patch)  ReadField9(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -6717,19 +6939,19 @@ func (p *MyStructFieldN28Patch)  ReadField9(iprot thrift.Protocol) error {
   tMap := make(map[string]string, size)
   p.Put =  tMap
   for i := 0; i < size; i ++ {
-    var _key20 string
+    var _key21 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key20 = v
+      _key21 = v
     }
-    var _val21 string
+    var _val22 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val21 = v
+      _val22 = v
     }
-    p.Put[_key20] = _val21
+    p.Put[_key21] = _val22
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -6737,8 +6959,8 @@ func (p *MyStructFieldN28Patch)  ReadField9(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("MyStructFieldN28Patch"); err != nil {
+func (p *MyStructFieldN30Patch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("MyStructFieldN30Patch"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -6752,7 +6974,7 @@ func (p *MyStructFieldN28Patch) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *MyStructFieldN28Patch) writeField1(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN30Patch) writeField1(oprot thrift.Protocol) (err error) {
   if p.IsSetAssign() {
     if err := oprot.WriteFieldBegin("assign", thrift.MAP, 1); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
@@ -6774,7 +6996,7 @@ func (p *MyStructFieldN28Patch) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN28Patch) writeField2(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN30Patch) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
   if err := oprot.WriteBool(bool(p.Clear)); err != nil {
@@ -6784,7 +7006,7 @@ func (p *MyStructFieldN28Patch) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN28Patch) writeField5(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN30Patch) writeField5(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("add", thrift.MAP, 5); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:add: ", p), err) }
   if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Add)); err != nil {
@@ -6804,7 +7026,7 @@ func (p *MyStructFieldN28Patch) writeField5(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN28Patch) writeField7(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN30Patch) writeField7(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("remove", thrift.SET, 7); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 7:remove: ", p), err) }
   if err := oprot.WriteSetBegin(thrift.STRING, len(p.Remove)); err != nil {
@@ -6829,7 +7051,7 @@ func (p *MyStructFieldN28Patch) writeField7(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN28Patch) writeField9(oprot thrift.Protocol) (err error) {
+func (p *MyStructFieldN30Patch) writeField9(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("put", thrift.MAP, 9); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 9:put: ", p), err) }
   if err := oprot.WriteMapBegin(thrift.STRING, thrift.STRING, len(p.Put)); err != nil {
@@ -6849,7 +7071,7 @@ func (p *MyStructFieldN28Patch) writeField9(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *MyStructFieldN28Patch) String() string {
+func (p *MyStructFieldN30Patch) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -6859,7 +7081,7 @@ func (p *MyStructFieldN28Patch) String() string {
   addVal := fmt.Sprintf("%v", p.Add)
   removeVal := fmt.Sprintf("%v", p.Remove)
   putVal := fmt.Sprintf("%v", p.Put)
-  return fmt.Sprintf("MyStructFieldN28Patch({Assign:%s Clear:%s Add:%s Remove:%s Put:%s})", assignVal, clearVal, addVal, removeVal, putVal)
+  return fmt.Sprintf("MyStructFieldN30Patch({Assign:%s Clear:%s Add:%s Remove:%s Put:%s})", assignVal, clearVal, addVal, removeVal, putVal)
 }
 
 // Attributes:

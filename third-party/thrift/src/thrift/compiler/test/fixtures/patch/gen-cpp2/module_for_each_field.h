@@ -64,21 +64,23 @@ struct ForEachField<::test::fixtures::patch::MyStruct> {
     f(10, static_cast<T&&>(t).structVal_ref()...);
     f(11, static_cast<T&&>(t).unionVal_ref()...);
     f(12, static_cast<T&&>(t).lateStructVal_ref()...);
-    f(13, static_cast<T&&>(t).optBoolVal_ref()...);
-    f(14, static_cast<T&&>(t).optByteVal_ref()...);
-    f(15, static_cast<T&&>(t).optI16Val_ref()...);
-    f(16, static_cast<T&&>(t).optI32Val_ref()...);
-    f(17, static_cast<T&&>(t).optI64Val_ref()...);
-    f(18, static_cast<T&&>(t).optFloatVal_ref()...);
-    f(19, static_cast<T&&>(t).optDoubleVal_ref()...);
-    f(20, static_cast<T&&>(t).optStringVal_ref()...);
-    f(21, static_cast<T&&>(t).optBinaryVal_ref()...);
-    f(22, static_cast<T&&>(t).optEnumVal_ref()...);
-    f(23, static_cast<T&&>(t).optStructVal_ref()...);
-    f(24, static_cast<T&&>(t).optLateStructVal_ref()...);
-    f(25, static_cast<T&&>(t).optListVal_ref()...);
-    f(26, static_cast<T&&>(t).optSetVal_ref()...);
-    f(27, static_cast<T&&>(t).optMapVal_ref()...);
+    f(13, static_cast<T&&>(t).durationVal_ref()...);
+    f(14, static_cast<T&&>(t).timeVal_ref()...);
+    f(15, static_cast<T&&>(t).optBoolVal_ref()...);
+    f(16, static_cast<T&&>(t).optByteVal_ref()...);
+    f(17, static_cast<T&&>(t).optI16Val_ref()...);
+    f(18, static_cast<T&&>(t).optI32Val_ref()...);
+    f(19, static_cast<T&&>(t).optI64Val_ref()...);
+    f(20, static_cast<T&&>(t).optFloatVal_ref()...);
+    f(21, static_cast<T&&>(t).optDoubleVal_ref()...);
+    f(22, static_cast<T&&>(t).optStringVal_ref()...);
+    f(23, static_cast<T&&>(t).optBinaryVal_ref()...);
+    f(24, static_cast<T&&>(t).optEnumVal_ref()...);
+    f(25, static_cast<T&&>(t).optStructVal_ref()...);
+    f(26, static_cast<T&&>(t).optLateStructVal_ref()...);
+    f(27, static_cast<T&&>(t).optListVal_ref()...);
+    f(28, static_cast<T&&>(t).optSetVal_ref()...);
+    f(29, static_cast<T&&>(t).optMapVal_ref()...);
   }
 };
 
@@ -174,7 +176,7 @@ struct ForEachField<::test::fixtures::patch::LateDefStructPatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN25PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -183,7 +185,7 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructFieldN26PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -196,7 +198,7 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldN26PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructFieldN27PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN29PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -207,7 +209,7 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldN27PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
+struct ForEachField<::test::fixtures::patch::MyStructFieldN30PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).assign_ref()...);
@@ -235,21 +237,23 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldPatchStruct> {
     f(10, static_cast<T&&>(t).structVal_ref()...);
     f(11, static_cast<T&&>(t).unionVal_ref()...);
     f(12, static_cast<T&&>(t).lateStructVal_ref()...);
-    f(13, static_cast<T&&>(t).optBoolVal_ref()...);
-    f(14, static_cast<T&&>(t).optByteVal_ref()...);
-    f(15, static_cast<T&&>(t).optI16Val_ref()...);
-    f(16, static_cast<T&&>(t).optI32Val_ref()...);
-    f(17, static_cast<T&&>(t).optI64Val_ref()...);
-    f(18, static_cast<T&&>(t).optFloatVal_ref()...);
-    f(19, static_cast<T&&>(t).optDoubleVal_ref()...);
-    f(20, static_cast<T&&>(t).optStringVal_ref()...);
-    f(21, static_cast<T&&>(t).optBinaryVal_ref()...);
-    f(22, static_cast<T&&>(t).optEnumVal_ref()...);
-    f(23, static_cast<T&&>(t).optStructVal_ref()...);
-    f(24, static_cast<T&&>(t).optLateStructVal_ref()...);
-    f(25, static_cast<T&&>(t).optListVal_ref()...);
-    f(26, static_cast<T&&>(t).optSetVal_ref()...);
-    f(27, static_cast<T&&>(t).optMapVal_ref()...);
+    f(13, static_cast<T&&>(t).durationVal_ref()...);
+    f(14, static_cast<T&&>(t).timeVal_ref()...);
+    f(15, static_cast<T&&>(t).optBoolVal_ref()...);
+    f(16, static_cast<T&&>(t).optByteVal_ref()...);
+    f(17, static_cast<T&&>(t).optI16Val_ref()...);
+    f(18, static_cast<T&&>(t).optI32Val_ref()...);
+    f(19, static_cast<T&&>(t).optI64Val_ref()...);
+    f(20, static_cast<T&&>(t).optFloatVal_ref()...);
+    f(21, static_cast<T&&>(t).optDoubleVal_ref()...);
+    f(22, static_cast<T&&>(t).optStringVal_ref()...);
+    f(23, static_cast<T&&>(t).optBinaryVal_ref()...);
+    f(24, static_cast<T&&>(t).optEnumVal_ref()...);
+    f(25, static_cast<T&&>(t).optStructVal_ref()...);
+    f(26, static_cast<T&&>(t).optLateStructVal_ref()...);
+    f(27, static_cast<T&&>(t).optListVal_ref()...);
+    f(28, static_cast<T&&>(t).optSetVal_ref()...);
+    f(29, static_cast<T&&>(t).optMapVal_ref()...);
   }
 };
 

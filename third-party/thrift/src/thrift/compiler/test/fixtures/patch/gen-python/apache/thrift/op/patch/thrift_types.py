@@ -574,6 +574,118 @@ class BinaryPatch(metaclass=_fbthrift_python_types.StructMeta):
         import thrift.util.converter
         return thrift.util.converter.to_py_struct(py_deprecated_types.BinaryPatch, self)
 
+
+class DurationPatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.type.standard.thrift_types.DurationStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "add",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.type.standard.thrift_types.DurationStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "patch.DurationPatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "facebook.com/thrift/type/DurationPatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_DurationPatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("apache.thrift.op.patch.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.DurationPatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.DurationPatch, self)
+
+
+class TimePatch(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Optional, # qualifier
+            "assign",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.type.standard.thrift_types.TimeStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "clear",  # name
+            _fbthrift_python_types.typeinfo_bool,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            8,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "add",  # name
+            lambda: _fbthrift_python_types.StructTypeInfo(apache.thrift.type.standard.thrift_types.DurationStruct),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "patch.TimePatch"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "facebook.com/thrift/type/TimePatch"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_TimePatch()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("apache.thrift.op.patch.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.TimePatch, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.patch.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.TimePatch, self)
+
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.op.patch.thrift_metadata
 
@@ -627,6 +739,10 @@ def _fbthrift_metadata__struct_StringPatch():
     return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_StringPatch()
 def _fbthrift_metadata__struct_BinaryPatch():
     return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_BinaryPatch()
+def _fbthrift_metadata__struct_DurationPatch():
+    return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_DurationPatch()
+def _fbthrift_metadata__struct_TimePatch():
+    return apache.thrift.op.patch.thrift_metadata.gen_metadata_struct_TimePatch()
 
 _fbthrift_all_structs = [
     GeneratePatch,
@@ -639,5 +755,7 @@ _fbthrift_all_structs = [
     DoublePatch,
     StringPatch,
     BinaryPatch,
+    DurationPatch,
+    TimePatch,
 ]
 _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)

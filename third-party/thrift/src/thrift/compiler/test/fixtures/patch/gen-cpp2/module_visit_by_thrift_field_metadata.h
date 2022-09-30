@@ -101,35 +101,39 @@ struct VisitByFieldId<::test::fixtures::patch::MyStruct> {
     case -13:
       return f(12, static_cast<T&&>(t).lateStructVal_ref());
     case -14:
-      return f(13, static_cast<T&&>(t).optBoolVal_ref());
+      return f(13, static_cast<T&&>(t).durationVal_ref());
     case -15:
-      return f(14, static_cast<T&&>(t).optByteVal_ref());
+      return f(14, static_cast<T&&>(t).timeVal_ref());
     case -16:
-      return f(15, static_cast<T&&>(t).optI16Val_ref());
+      return f(15, static_cast<T&&>(t).optBoolVal_ref());
     case -17:
-      return f(16, static_cast<T&&>(t).optI32Val_ref());
+      return f(16, static_cast<T&&>(t).optByteVal_ref());
     case -18:
-      return f(17, static_cast<T&&>(t).optI64Val_ref());
+      return f(17, static_cast<T&&>(t).optI16Val_ref());
     case -19:
-      return f(18, static_cast<T&&>(t).optFloatVal_ref());
+      return f(18, static_cast<T&&>(t).optI32Val_ref());
     case -20:
-      return f(19, static_cast<T&&>(t).optDoubleVal_ref());
+      return f(19, static_cast<T&&>(t).optI64Val_ref());
     case -21:
-      return f(20, static_cast<T&&>(t).optStringVal_ref());
+      return f(20, static_cast<T&&>(t).optFloatVal_ref());
     case -22:
-      return f(21, static_cast<T&&>(t).optBinaryVal_ref());
+      return f(21, static_cast<T&&>(t).optDoubleVal_ref());
     case -23:
-      return f(22, static_cast<T&&>(t).optEnumVal_ref());
+      return f(22, static_cast<T&&>(t).optStringVal_ref());
     case -24:
-      return f(23, static_cast<T&&>(t).optStructVal_ref());
+      return f(23, static_cast<T&&>(t).optBinaryVal_ref());
     case -25:
-      return f(24, static_cast<T&&>(t).optLateStructVal_ref());
+      return f(24, static_cast<T&&>(t).optEnumVal_ref());
     case -26:
-      return f(25, static_cast<T&&>(t).optListVal_ref());
+      return f(25, static_cast<T&&>(t).optStructVal_ref());
     case -27:
-      return f(26, static_cast<T&&>(t).optSetVal_ref());
+      return f(26, static_cast<T&&>(t).optLateStructVal_ref());
     case -28:
-      return f(27, static_cast<T&&>(t).optMapVal_ref());
+      return f(27, static_cast<T&&>(t).optListVal_ref());
+    case -29:
+      return f(28, static_cast<T&&>(t).optSetVal_ref());
+    case -30:
+      return f(29, static_cast<T&&>(t).optMapVal_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStruct");
     }
@@ -292,7 +296,7 @@ struct VisitByFieldId<::test::fixtures::patch::LateDefStructPatchStruct> {
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
+struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN25PatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
@@ -301,13 +305,13 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
     case 2:
       return f(1, static_cast<T&&>(t).clear_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN23PatchStruct");
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN25PatchStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN26PatchStruct> {
+struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
@@ -324,13 +328,13 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN26PatchStruct> {
     case 9:
       return f(5, static_cast<T&&>(t).append_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN26PatchStruct");
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN28PatchStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN27PatchStruct> {
+struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN29PatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
@@ -343,13 +347,13 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN27PatchStruct> {
     case 8:
       return f(3, static_cast<T&&>(t).add_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN27PatchStruct");
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN29PatchStruct");
     }
   }
 };
 
 template <>
-struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
+struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN30PatchStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
     switch (fieldId) {
@@ -364,7 +368,7 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
     case 9:
       return f(4, static_cast<T&&>(t).put_ref());
     default:
-      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN28PatchStruct");
+      throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldN30PatchStruct");
     }
   }
 };
@@ -401,35 +405,39 @@ struct VisitByFieldId<::test::fixtures::patch::MyStructFieldPatchStruct> {
     case -13:
       return f(12, static_cast<T&&>(t).lateStructVal_ref());
     case -14:
-      return f(13, static_cast<T&&>(t).optBoolVal_ref());
+      return f(13, static_cast<T&&>(t).durationVal_ref());
     case -15:
-      return f(14, static_cast<T&&>(t).optByteVal_ref());
+      return f(14, static_cast<T&&>(t).timeVal_ref());
     case -16:
-      return f(15, static_cast<T&&>(t).optI16Val_ref());
+      return f(15, static_cast<T&&>(t).optBoolVal_ref());
     case -17:
-      return f(16, static_cast<T&&>(t).optI32Val_ref());
+      return f(16, static_cast<T&&>(t).optByteVal_ref());
     case -18:
-      return f(17, static_cast<T&&>(t).optI64Val_ref());
+      return f(17, static_cast<T&&>(t).optI16Val_ref());
     case -19:
-      return f(18, static_cast<T&&>(t).optFloatVal_ref());
+      return f(18, static_cast<T&&>(t).optI32Val_ref());
     case -20:
-      return f(19, static_cast<T&&>(t).optDoubleVal_ref());
+      return f(19, static_cast<T&&>(t).optI64Val_ref());
     case -21:
-      return f(20, static_cast<T&&>(t).optStringVal_ref());
+      return f(20, static_cast<T&&>(t).optFloatVal_ref());
     case -22:
-      return f(21, static_cast<T&&>(t).optBinaryVal_ref());
+      return f(21, static_cast<T&&>(t).optDoubleVal_ref());
     case -23:
-      return f(22, static_cast<T&&>(t).optEnumVal_ref());
+      return f(22, static_cast<T&&>(t).optStringVal_ref());
     case -24:
-      return f(23, static_cast<T&&>(t).optStructVal_ref());
+      return f(23, static_cast<T&&>(t).optBinaryVal_ref());
     case -25:
-      return f(24, static_cast<T&&>(t).optLateStructVal_ref());
+      return f(24, static_cast<T&&>(t).optEnumVal_ref());
     case -26:
-      return f(25, static_cast<T&&>(t).optListVal_ref());
+      return f(25, static_cast<T&&>(t).optStructVal_ref());
     case -27:
-      return f(26, static_cast<T&&>(t).optSetVal_ref());
+      return f(26, static_cast<T&&>(t).optLateStructVal_ref());
     case -28:
-      return f(27, static_cast<T&&>(t).optMapVal_ref());
+      return f(27, static_cast<T&&>(t).optListVal_ref());
+    case -29:
+      return f(28, static_cast<T&&>(t).optSetVal_ref());
+    case -30:
+      return f(29, static_cast<T&&>(t).optMapVal_ref());
     default:
       throwInvalidThriftId(fieldId, "::test::fixtures::patch::MyStructFieldPatchStruct");
     }

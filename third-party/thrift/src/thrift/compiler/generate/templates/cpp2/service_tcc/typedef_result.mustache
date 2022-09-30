@@ -17,23 +17,30 @@
 %><%#function:return_type%>
 <%^function:oneway?%>
 <%^type:streamresponse?%>
-<%^type:sink?%><%!
-  %>typedef apache::thrift::ThriftPresult<true<% > service_tcc/field_data_return%><% > service_tcc/field_data_throws%>> <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
+<%^type:sink?%>
+typedef apache::thrift::ThriftPresult<true<% > service_tcc/field_data_return%><%!
+    %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>><%!
+    %> <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/type:sink?%><%!
 
 %><%#type:sink?%>
 typedef apache::thrift::ThriftPResultSink<
-    apache::thrift::ThriftPresult<true<%#type:sink_first_response_type%><% > service_tcc/field_data_return%><%/type:sink_first_response_type%><% > service_tcc/field_data_throws%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_elem_type%><% > service_tcc/field_data_return%><%/type:sink_elem_type%><% > service_tcc/field_data_sink_throws%>>,
-    apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><% > service_tcc/field_data_sink_final_throws%>>
+    apache::thrift::ThriftPresult<true<%#type:sink_first_response_type%><% > service_tcc/field_data_return%><%/type:sink_first_response_type%><%!
+      %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
+    apache::thrift::ThriftPresult<true<%#type:sink_elem_type%><% > service_tcc/field_data_return%><%/type:sink_elem_type%><%!
+      %><%#function:sink_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_exceptions%>>,
+    apache::thrift::ThriftPresult<true<%#type:sink_final_response_type%><% > service_tcc/field_data_return%><%/type:sink_final_response_type%><%!
+      %><%#function:sink_final_response_exceptions%><% > service_tcc/field_data_throws%><%/function:sink_final_response_exceptions%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/type:sink?%>
 <%/type:streamresponse?%><%!
 
 %><%#type:streamresponse?%>
 typedef apache::thrift::ThriftPResultStream<
-    apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><% > service_tcc/field_data_throws%>>,
-    apache::thrift::ThriftPresult<true<%#type:stream_elem_type%><% > service_tcc/field_data_return%><%/type:stream_elem_type%><% > service_tcc/field_data_stream_throws%>>
+    apache::thrift::ThriftPresult<true<%#type:stream_first_response_type%><% > service_tcc/field_data_return%><%/type:stream_first_response_type%><%!
+      %><%#function:exceptions%><% > service_tcc/field_data_throws%><%/function:exceptions%>>,
+    apache::thrift::ThriftPresult<true<%#type:stream_elem_type%><% > service_tcc/field_data_return%><%/type:stream_elem_type%><%!
+      %><%#function:stream_exceptions%><% > service_tcc/field_data_throws%><%/function:stream_exceptions%>>
     > <%service:parent_service_cpp_name%>_<%#service:interaction?%><%service:cpp_name%>_<%/service:interaction?%><%function:cpp_name%>_presult;
 <%/type:streamresponse?%>
 <%/function:oneway?%>

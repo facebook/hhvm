@@ -740,6 +740,7 @@ module Typing = struct
     | ConstructNotInstanceMethod [@value 4463]
     | InvalidMethCallerReadonlyReturn [@value 4464]
     | AbstractMemberInConcreteClass [@value 4465]
+    | TraitNotUsed [@value 4466]
   (* Add new Typing codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

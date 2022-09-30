@@ -1,1 +1,18 @@
-No errors
+File "trait_require_class.php", line 6, characters 7-8:
+Trait T1 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "trait_require_class.php", line 15, characters 7-7:
+  Class C is defined here.
+  File "trait_require_class.php", line 7, characters 17-17:
+  The require class requirement is here.
+File "trait_require_class.php", line 10, characters 7-8:
+Trait T2 requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "trait_require_class.php", line 15, characters 7-7:
+  Class C is defined here.
+  File "trait_require_class.php", line 11, characters 17-17:
+  The require class requirement is here.
+File "trait_require_class.php", line 10, characters 7-8:
+Trait T2 requires class D but D does not use it. Either use the trait or delete it. (Typing[4466])
+  File "trait_require_class.php", line 16, characters 7-7:
+  Class D is defined here.
+  File "trait_require_class.php", line 12, characters 17-17:
+  The require class requirement is here.

@@ -4,17 +4,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-<<file:__EnableUnstableFeatures('require_class')>>
+<<file: __EnableUnstableFeatures('require_class')>>
 
-final class C {
-
-  protected function foo(): void {}
+trait T1 {
+  require class C;
 }
 
-trait T {
-  require class C;
+trait T2 {
+  use T1;
+}
 
-  public function bar(): void {
-    $this->foo();
-  }
+final class C {
+  use T2;
 }

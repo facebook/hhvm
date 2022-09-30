@@ -1,6 +1,0 @@
-File "requireclass_conflict_03.bad.php", line 11, characters 7-7:
-This trait defines incompatible requirements. (Typing[4111])
-  File "requireclass_conflict_03.bad.php", line 8, characters 26-26:
-  This requires exactly class C
-  File "requireclass_conflict_03.bad.php", line 9, characters 28-28:
-  This requires a subtype of class C

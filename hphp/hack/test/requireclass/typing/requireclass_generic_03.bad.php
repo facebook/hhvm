@@ -3,14 +3,9 @@
 
 <<file:__EnableUnstableFeatures('require_class')>>
 
-abstract class C {}
-
-final abstract class D {}
-
-trait T1 {
-  require class C;
+trait MyTrait {
+  require class C<int>;
 }
 
-trait T2 {
-  require class D;
+final class C<T> {
 }

@@ -4,17 +4,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-<<file:__EnableUnstableFeatures('require_class')>>
+<<file: __EnableUnstableFeatures('require_class')>>
 
-trait T {
+trait T1 {
   require class C;
-
-  public static function foo(): void { self::bar(); }
 }
 
-class D {
-  public static function bar(): void { }
+trait T2 {
+  use T1;
 }
 
-final class C extends D {
+final class C {
 }

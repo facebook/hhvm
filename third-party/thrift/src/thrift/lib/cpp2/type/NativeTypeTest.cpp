@@ -65,6 +65,20 @@ TEST(InferTagTest, Integer) {
   test::same_tag<cpp_type<uint16_t, i16_t>, infer_tag<uint16_t>>;
   test::same_tag<cpp_type<uint32_t, i32_t>, infer_tag<uint32_t>>;
   test::same_tag<cpp_type<uint64_t, i64_t>, infer_tag<uint64_t>>;
+
+  static_assert(type::is_a_v<infer_tag<char>, byte_t>);
+  static_assert(type::is_a_v<infer_tag<signed char>, byte_t>);
+  static_assert(type::is_a_v<infer_tag<unsigned char>, byte_t>);
+
+  static_assert(type::is_a_v<infer_tag<short int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<unsigned short int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<unsigned int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<long int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<unsigned long int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<long long int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<unsigned long long int>, integral_c>);
+  static_assert(type::is_a_v<infer_tag<size_t>, integral_c>);
 }
 
 TEST(InferTagTest, Floating) {

@@ -79,6 +79,7 @@ let test () =
     {
       Typing_service_types.init_id = "";
       check_reason = "test_interrupt";
+      log_errors = false;
       recheck_id = Some "";
       use_max_typechecker_worker_memory_for_decl_deferral = false;
       per_file_profiling = HackEventLogger.PerFileProfilingConfig.default;

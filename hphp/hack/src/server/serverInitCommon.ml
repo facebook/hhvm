@@ -240,6 +240,7 @@ let type_check
         ~check_info:
           (ServerCheckUtils.get_check_info
              ~check_reason:(ServerEnv.Init_telemetry.get_reason init_telemetry)
+             ~log_errors:true
              genv
              env)
     in

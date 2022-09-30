@@ -147,6 +147,7 @@ let scrape_class_names (ast : Nast.program) : SSet.t =
 let process_file
     (ctx : Provider_context.t)
     (file : check_file_workitem)
+    ~(log_errors : bool)
     ~(decl_cap_mb : int option) : process_file_results =
   let fn = file.path in
   let (file_errors, ast) = Ast_provider.get_ast_with_error ~full:true ctx fn in
@@ -196,6 +197,20 @@ let process_file
             ctx
             tasts
             global_tvenvs;
+        if log_errors then
+          List.iter (Errors.get_error_list file_errors) ~f:(fun error ->
+              let { User_error.claim; code; _ } = error in
+              let (pos, msg) = claim in
+              let (l1, l2, c1, c2) = Pos.info_pos_extended pos in
+              Hh_logger.log
+                "%s(%d:%d-%d:%d) [%d] %s"
+                (Relative_path.suffix fn)
+                l1
+                c1
+                l2
+                c2
+                code
+                msg);
         { file_errors; deferred_decls = [] }
       | Error () ->
         let deferred_decls =
@@ -293,6 +308,7 @@ let process_one_workitem
     ~batch_info
     ~memory_cap
     ~longlived_workers
+    ~error_count_at_start_of_batch
     ~progress
     ~errors
     ~stats
@@ -313,7 +329,14 @@ let process_one_workitem
   let (file, decl, mid_stats, file_errors, deferred, tally) =
     match fn with
     | Check file ->
-      let result = process_file ctx file ~decl_cap_mb in
+      (* We'll show at least the first five errors in the project. Maybe more,
+         if this file has more in it, or if other concurrent workers race to print
+         the first five errors before us. *)
+      let log_errors =
+        check_info.log_errors
+        && error_count_at_start_of_batch + Errors.count errors < 5
+      in
+      let result = process_file ctx file ~decl_cap_mb ~log_errors in
       let mid_stats =
         if type_check_twice then
           Some (get_stats ~include_slightly_costly_stats:false tally)
@@ -420,6 +443,7 @@ let process_workitems
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
+    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * typing_progress =
   Decl_counters.set_mode
@@ -445,6 +469,7 @@ let process_workitems
       ~ctx
       ~check_info
       ~batch_info
+      ~error_count_at_start_of_batch
       ~memory_cap
       ~longlived_workers
   in
@@ -507,6 +532,7 @@ let load_and_process_workitems
     ~(check_info : check_info)
     ~(worker_id : string)
     ~(batch_number : int)
+    ~(error_count_at_start_of_batch : int)
     ~(typecheck_info : HackEventLogger.ProfileTypeCheck.typecheck_info) :
     typing_result * typing_progress =
   Option.iter check_info.memtrace_dir ~f:(fun temp_dir ->
@@ -526,6 +552,7 @@ let load_and_process_workitems
     ~check_info
     ~worker_id
     ~batch_number
+    ~error_count_at_start_of_batch
     ~typecheck_info
 
 (*****************************************************************************)
@@ -567,6 +594,7 @@ let possibly_push_new_errors_to_lsp_client :
 let merge
     ~(should_prefetch_deferred_files : bool)
     ~(batch_counts_by_worker_id : int SMap.t ref)
+    ~(errors_so_far : int ref)
     (delegate_state : Delegate.state ref)
     (workitems_to_process : workitem BigList.t ref)
     (workitems_initial_count : int)
@@ -591,6 +619,9 @@ let merge
     | DelegateProgress _ -> ()
     | SimpleDelegateProgress _ -> ()
   end;
+
+  (* And error count *)
+  errors_so_far := !errors_so_far + Errors.count produced_by_job.errors;
 
   (* Merge in remote-worker results *)
   begin
@@ -891,6 +922,7 @@ let process_in_parallel
   let remote_payloads = ref [] in
   let diagnostic_pusher = ref diagnostic_pusher in
   let time_first_error = ref None in
+  let errors_so_far = ref 0 in
   let delegate_progress =
     Typing_service_delegate.get_progress !delegate_state
   in
@@ -956,6 +988,7 @@ let process_in_parallel
           ~check_info
           ~typecheck_info
           ~worker_id
+          ~error_count_at_start_of_batch:!errors_so_far
           ~batch_number:
             (SMap.find_opt worker_id !batch_counts_by_worker_id
             |> Option.value ~default:0)
@@ -975,6 +1008,7 @@ let process_in_parallel
         (merge
            ~should_prefetch_deferred_files
            ~batch_counts_by_worker_id
+           ~errors_so_far
            delegate_state
            workitems_to_process
            workitems_initial_count
@@ -1047,6 +1081,7 @@ let process_sequentially
       progress
       ~memory_cap:None
       ~longlived_workers
+      ~error_count_at_start_of_batch:0
       ~check_info
       ~worker_id:"master"
       ~batch_number:(-1)

@@ -21,6 +21,7 @@ val should_enable_deferring : Typing_service_types.check_file_workitem -> bool
 val process_file :
   Provider_context.t ->
   Typing_service_types.check_file_workitem ->
+  log_errors:bool ->
   decl_cap_mb:int option ->
   process_file_results
 

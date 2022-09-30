@@ -19,7 +19,7 @@
 @ThriftConstructor
 public {{struct:javaCapitalName}}() {
   {{#struct:fields}}
-  this.{{field:javaName}} = {{> struct/FieldValue}};
+  this.{{field:javaName}} = {{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> struct/FieldValue}}{{/field:hasWrapper?}};
   {{/struct:fields}}
 }
 {{/struct:asBean?}}
@@ -41,7 +41,7 @@ public {{struct:javaCapitalName}}(
 @ThriftConstructor
 protected {{struct:javaCapitalName}}() {
   {{#struct:fields}}
-  this.{{field:javaName}} = {{> struct/FieldValue}};
+  this.{{field:javaName}} = {{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> struct/FieldValue}}{{/field:hasWrapper?}};
   {{/struct:fields}}
 }{{/struct:fields?}}
 {{/struct:asBean?}}

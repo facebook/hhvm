@@ -25,11 +25,16 @@ public void write0(TProtocol oprot) throws TException {
   {{#struct:fields_in_serialization_order}}
   {{#field:hasAdapter?}}
   {{#field:hasMultipleTypeAdapters?}}
-  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(_{{field:javaName}}_Adapter2.toThrift(this.{{field:javaName}}));
+  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(_{{field:javaName}}_Adapter2.toThrift({{#field:hasWrapper?}}_{{field:javaName}}_Wrapper.toThrift({{/field:hasWrapper?}}this.{{field:javaName}})){{#field:hasWrapper?}}){{/field:hasWrapper?}};
   {{/field:hasMultipleTypeAdapters?}}
   {{^field:hasMultipleTypeAdapters?}}
-  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift(this.{{field:javaName}});
+  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Adapter.toThrift({{#field:hasWrapper?}}_{{field:javaName}}_Wrapper.toThrift({{/field:hasWrapper?}}this.{{field:javaName}}){{#field:hasWrapper?}}){{/field:hasWrapper?}};
   {{/field:hasMultipleTypeAdapters?}}
+  {{/field:hasAdapter?}}
+  {{^field:hasAdapter?}}
+  {{#field:hasWrapper?}}
+  {{#field:type}}{{> BoxedType}}{{/field:type}} {{field:javaName}} = _{{field:javaName}}_Wrapper.toThrift(this.{{field:javaName}});
+  {{/field:hasWrapper?}}
   {{/field:hasAdapter?}}
   {{#field:isNullableOrOptionalNotEnum?}}
   {{#field:terse?}}  
@@ -104,7 +109,7 @@ public void write0(TProtocol oprot) throws TException {
   };
   {{/field:terse?}}
   {{^field:terse?}}
-  {{#field:hasAdapter?}}
+  {{#field:hasAdapterOrWrapper?}}
   if ({{field:javaName}} != null) {
     oprot.writeFieldBegin({{field:javaTFieldName}});
     {{#field:type}}
@@ -112,14 +117,14 @@ public void write0(TProtocol oprot) throws TException {
     {{/field:type}}{{!
     }}oprot.writeFieldEnd();
   }
-  {{/field:hasAdapter?}}
-  {{^field:hasAdapter?}}
+  {{/field:hasAdapterOrWrapper?}}
+  {{^field:hasAdapterOrWrapper?}}
   oprot.writeFieldBegin({{field:javaTFieldName}});
   {{#field:type}}
   {{field:nestedDepth++}}{{> WriteType}}{{field:nestedDepth--}}
   {{/field:type}}{{!
   }}oprot.writeFieldEnd();
-  {{/field:hasAdapter?}}{{!
+  {{/field:hasAdapterOrWrapper?}}{{!
   }}{{/field:terse?}}{{!
   }}{{/field:isNullableOrOptionalNotEnum?}}
   {{/struct:fields_in_serialization_order}}

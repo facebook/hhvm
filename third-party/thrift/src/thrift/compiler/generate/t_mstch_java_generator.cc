@@ -37,6 +37,9 @@ namespace thrift {
 namespace compiler {
 
 namespace {
+
+constexpr auto kJavaWrapperUri = "facebook.com/thrift/annotation/java/Wrapper";
+
 /**
  * Gets the java namespace, throws a runtime error if not found.
  */
@@ -478,6 +481,7 @@ class mstch_java_struct : public mstch_struct {
              &mstch_java_struct::needs_exception_message},
             {"struct:enableIsSet?", &mstch_java_struct::enable_is_set},
             {"struct:hasTerseField?", &mstch_java_struct::has_terse_field},
+            {"struct:hasWrapper?", &mstch_java_struct::has_wrapper},
         });
   }
   mstch::node java_package() {
@@ -500,6 +504,16 @@ class mstch_java_struct : public mstch_struct {
   mstch::node has_terse_field() {
     for (const auto& field : struct_->fields()) {
       if (field.qualifier() == t_field_qualifier::terse) {
+        return true;
+      }
+    }
+    return false;
+  }
+  mstch::node has_wrapper() {
+    for (const auto& field : struct_->fields()) {
+      auto has_annotation =
+          field.find_structured_annotation_or_null(kJavaWrapperUri);
+      if (has_annotation) {
         return true;
       }
     }
@@ -722,6 +736,13 @@ class mstch_java_field : public mstch_field {
          {"field:isSensitive?", &mstch_java_field::is_sensitive},
          {"field:hasInitialValue?", &mstch_java_field::has_initial_value},
          {"field:isPrimitive?", &mstch_java_field::is_primitive},
+         {"field:wrapper",
+          &mstch_java_field::get_structured_wrapper_class_name},
+         {"field:wrapperType",
+          &mstch_java_field::get_structured_wrapper_type_class_name},
+         {"field:hasAdapterOrWrapper?",
+          &mstch_java_field::has_adapter_or_wrapper},
+         {"field:hasWrapper?", &mstch_java_field::has_wrapper},
          {"field:adapterClassName",
           &mstch_java_field::get_structured_adapter_class_name},
          {"field:typeClassName",
@@ -776,31 +797,73 @@ class mstch_java_field : public mstch_field {
   }
 
   mstch::node has_type_adapter() {
+    return has_structured_annotation(kJavaAdapterUri);
+  }
+
+  mstch::node has_structured_annotation(const char* uri) {
     auto type = field_->get_type();
     if (type->is_typedef()) {
-      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
-              type, kJavaAdapterUri)) {
+      if (auto annotation =
+              t_typedef::get_first_structured_annotation_or_null(type, uri)) {
         return true;
       }
     }
-    auto has_annotation =
-        field_->find_structured_annotation_or_null(kJavaAdapterUri);
+    auto has_annotation = field_->find_structured_annotation_or_null(uri);
     return has_annotation != nullptr;
   }
 
+  mstch::node has_wrapper() {
+    return has_structured_annotation(kJavaWrapperUri);
+  }
+
+  mstch::node has_adapter_or_wrapper() {
+    if (field_->find_structured_annotation_or_null(kJavaAdapterUri)) {
+      return true;
+    };
+
+    auto type = field_->get_type();
+    if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+            type, kJavaAdapterUri)) {
+      return true;
+    }
+
+    if (type->is_typedef()) {
+      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
+              type, kJavaWrapperUri)) {
+        return true;
+      }
+    }
+    if (field_->find_structured_annotation_or_null(kJavaWrapperUri)) {
+      return true;
+    };
+
+    return false;
+  }
+
   mstch::node get_structured_adapter_class_name() {
-    return get_structed_annotation_attribute("adapterClassName");
+    return get_structed_annotation_attribute(
+        kJavaAdapterUri, "adapterClassName");
   }
 
   mstch::node get_structured_type_class_name() {
-    return get_structed_annotation_attribute("typeClassName");
+    return get_structed_annotation_attribute(kJavaAdapterUri, "typeClassName");
   }
 
-  mstch::node get_structed_annotation_attribute(const std::string& field) {
+  mstch::node get_structured_wrapper_class_name() {
+    return get_structed_annotation_attribute2(
+        kJavaWrapperUri, "wrapperClassName");
+  }
+
+  mstch::node get_structured_wrapper_type_class_name() {
+    return get_structed_annotation_attribute2(kJavaWrapperUri, "typeClassName");
+  }
+
+  mstch::node get_structed_annotation_attribute(
+      const char* uri, const std::string& field) {
     auto type = field_->get_type();
     if (type->is_typedef()) {
-      if (auto annotation = t_typedef::get_first_structured_annotation_or_null(
-              type, kJavaAdapterUri)) {
+      if (auto annotation =
+              t_typedef::get_first_structured_annotation_or_null(type, uri)) {
         for (const auto& item : annotation->value()->get_map()) {
           if (item.first->get_string() == field) {
             return item.second->get_string();
@@ -808,12 +871,24 @@ class mstch_java_field : public mstch_field {
         }
       }
     } else {
-      if (auto annotation =
-              field_->find_structured_annotation_or_null(kJavaAdapterUri)) {
+      if (auto annotation = field_->find_structured_annotation_or_null(uri)) {
         for (const auto& item : annotation->value()->get_map()) {
           if (item.first->get_string() == field) {
             return item.second->get_string();
           }
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  mstch::node get_structed_annotation_attribute2(
+      const char* uri, const std::string& field) {
+    if (auto annotation = field_->find_structured_annotation_or_null(uri)) {
+      for (const auto& item : annotation->value()->get_map()) {
+        if (item.first->get_string() == field) {
+          return item.second->get_string();
         }
       }
     }

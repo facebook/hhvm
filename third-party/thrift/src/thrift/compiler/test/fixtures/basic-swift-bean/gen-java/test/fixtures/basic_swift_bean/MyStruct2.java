@@ -61,20 +61,20 @@ public final class MyStruct2 implements com.facebook.thrift.payload.ThriftSerial
             MyStruct2 result = new MyStruct2();
             result.myStruct1 = this.myStruct1;
             result.myString = this.myString;
-            return result;
-        }
+        return result;    }
     }
-            public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
+    
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct2");
     private test.fixtures.basic_swift_bean.MyStruct1 myStruct1;
     public static final int _MYSTRUCT1 = 1;
     private static final TField MY_STRUCT1_FIELD_DESC = new TField("myStruct1", TType.STRUCT, (short)1);
-    private String myString;
+        private String myString;
     public static final int _MYSTRING = 2;
     private static final TField MY_STRING_FIELD_DESC = new TField("myString", TType.STRING, (short)2);
-static {
+    static {
       NAMES_TO_IDS.put("myStruct1", 1);
       THRIFT_NAMES_TO_IDS.put("myStruct1", 1);
       FIELD_METADATA.put(1, MY_STRUCT1_FIELD_DESC);

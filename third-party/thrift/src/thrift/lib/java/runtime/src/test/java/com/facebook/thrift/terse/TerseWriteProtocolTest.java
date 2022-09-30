@@ -319,4 +319,17 @@ public class TerseWriteProtocolTest {
     assertEquals(3000, received.getIntDefault2());
     assertEquals(IntrinsicDefaults.defaultInt(), received.getDoubleTypedefIntField());
   }
+
+  @Test
+  public void testBuildFromOther() {
+    TerseStructWithDateAdapter st =
+        new TerseStructWithDateAdapter.Builder()
+            .setStringField("foo")
+            .setDateField(new Date(54321))
+            .build();
+    byte[] bytes = SerializerUtil.toByteArray(st, serializationProtocol);
+
+    TerseStructWithDateAdapter other = new TerseStructWithDateAdapter.Builder(st).build();
+    assertTrue(Arrays.equals(bytes, SerializerUtil.toByteArray(other, serializationProtocol)));
+  }
 }

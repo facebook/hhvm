@@ -20,5 +20,5 @@
 
 {{> ThriftFieldAnnotation}}
 
-public {{> FieldType}} {{> GetterName}}() { return {{field:javaName}}; }
+public {{> FieldType}} {{#field:hasWrapper?}}get{{field:javaCapitalName}}{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> GetterName}}{{/field:hasWrapper?}}() { return {{field:javaName}}; }
 {{! terminate with newline }}

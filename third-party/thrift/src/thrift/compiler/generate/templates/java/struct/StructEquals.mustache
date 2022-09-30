@@ -28,6 +28,10 @@ public boolean equals(java.lang.Object o) {
 
     return
         {{#struct:fields}}
+        {{#field:hasWrapper?}}
+        _{{field:javaName}}_Wrapper.equals({{field:javaName}}, other.{{field:javaName}}) && 
+        {{/field:hasWrapper?}}
+        {{^field:hasWrapper?}}
         {{#field:hasAdapter?}}
         {{#field:hasMultipleTypeAdapters?}}
         _{{field:javaName}}_Adapter2.equals({{field:javaName}}, other.{{field:javaName}}) && 
@@ -40,6 +44,7 @@ public boolean equals(java.lang.Object o) {
         {{#field:type}}{{^type:javaType}}{{#type:binary?}}Arrays{{/type:binary?}}{{^type:binary?}}Objects{{/type:binary?}}{{/type:javaType}}{{!
         }}{{#type:javaType}}Objects{{/type:javaType}}{{/field:type}}.equals({{field:javaName}}, other.{{field:javaName}}) &&
         {{/field:hasAdapter?}}
+        {{/field:hasWrapper?}}
         {{/struct:fields}}
         true;
 }

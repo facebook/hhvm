@@ -217,50 +217,50 @@ public final class MyStruct3 implements com.facebook.thrift.payload.ThriftSerial
             result.myMapList = this.myMapList;
             result.myEmptyList = this.myEmptyList;
             result.myEmptyMapList = this.myEmptyMapList;
-            return result;
-        }
+        return result;    }
     }
-                                                    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
+    
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyStruct3");
     private short myInt16;
     public static final int _MYINT16 = 1;
     private static final TField MY_INT16_FIELD_DESC = new TField("myInt16", TType.I16, (short)1);
-    private int myInt32;
+        private int myInt32;
     public static final int _MYINT32 = 2;
     private static final TField MY_INT32_FIELD_DESC = new TField("myInt32", TType.I32, (short)2);
-    private long myInt64;
+        private long myInt64;
     public static final int _MYINT64 = 3;
     private static final TField MY_INT64_FIELD_DESC = new TField("myInt64", TType.I64, (short)3);
-    private String myString;
+        private String myString;
     public static final int _MYSTRING = 4;
     private static final TField MY_STRING_FIELD_DESC = new TField("myString", TType.STRING, (short)4);
-    private boolean myBool;
+        private boolean myBool;
     public static final int _MYBOOL = 5;
     private static final TField MY_BOOL_FIELD_DESC = new TField("myBool", TType.BOOL, (short)5);
-    private double myDouble;
+        private double myDouble;
     public static final int _MYDOUBLE = 6;
     private static final TField MY_DOUBLE_FIELD_DESC = new TField("myDouble", TType.DOUBLE, (short)6);
-    private Set<String> mySet;
+        private Set<String> mySet;
     public static final int _MYSET = 7;
     private static final TField MY_SET_FIELD_DESC = new TField("mySet", TType.SET, (short)7);
-    private test.fixtures.basic_swift_bean.MyDataItem myDataItem;
+        private test.fixtures.basic_swift_bean.MyDataItem myDataItem;
     public static final int _MYDATAITEM = 8;
     private static final TField MY_DATA_ITEM_FIELD_DESC = new TField("MyDataItem", TType.STRUCT, (short)8);
-    private List<test.fixtures.basic_swift_bean.MyDataItem> myList;
+        private List<test.fixtures.basic_swift_bean.MyDataItem> myList;
     public static final int _MYLIST = 9;
     private static final TField MY_LIST_FIELD_DESC = new TField("myList", TType.LIST, (short)9);
-    private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList;
+        private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myMapList;
     public static final int _MYMAPLIST = 10;
     private static final TField MY_MAP_LIST_FIELD_DESC = new TField("myMapList", TType.MAP, (short)10);
-    private List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList;
+        private List<test.fixtures.basic_swift_bean.MyDataItem> myEmptyList;
     public static final int _MYEMPTYLIST = 11;
     private static final TField MY_EMPTY_LIST_FIELD_DESC = new TField("myEmptyList", TType.LIST, (short)11);
-    private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList;
+        private Map<Integer, List<test.fixtures.basic_swift_bean.MyDataItem>> myEmptyMapList;
     public static final int _MYEMPTYMAPLIST = 12;
     private static final TField MY_EMPTY_MAP_LIST_FIELD_DESC = new TField("myEmptyMapList", TType.MAP, (short)12);
-static {
+    static {
       NAMES_TO_IDS.put("myInt16", 1);
       THRIFT_NAMES_TO_IDS.put("myInt16", 1);
       FIELD_METADATA.put(1, MY_INT16_FIELD_DESC);

@@ -164,3 +164,151 @@ class Adapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
 }
 
+/**
+ * Original thrift struct:-
+ * Wrapper
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/annotation/java/Wrapper'))>>
+class Wrapper implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'wrapperClassName',
+      'type' => \TType::STRING,
+    ),
+    2 => shape(
+      'var' => 'typeClassName',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'wrapperClassName' => 1,
+    'typeClassName' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'wrapperClassName' => ?string,
+    ?'typeClassName' => ?string,
+  );
+
+  const type TShape = shape(
+    'wrapperClassName' => string,
+    'typeClassName' => string,
+    ...
+  );
+  const int STRUCTURAL_ID = 8397972237530040802;
+  /**
+   * Original thrift field:-
+   * 1: string wrapperClassName
+   */
+  public string $wrapperClassName;
+  /**
+   * Original thrift field:-
+   * 2: string typeClassName
+   */
+  public string $typeClassName;
+
+  public function __construct(?string $wrapperClassName = null, ?string $typeClassName = null)[] {
+    $this->wrapperClassName = $wrapperClassName ?? '';
+    $this->typeClassName = $typeClassName ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'wrapperClassName'),
+      Shapes::idx($shape, 'typeClassName'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Wrapper';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "java.Wrapper",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "wrapperClassName",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "typeClassName",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\Field' => \thrift\annotation\Field::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['wrapperClassName'],
+      $shape['typeClassName'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'wrapperClassName' => $this->wrapperClassName,
+      'typeClassName' => $this->typeClassName,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'wrapperClassName') !== null) {
+      $this->wrapperClassName = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['wrapperClassName']);
+    }
+    if (idx($parsed, 'typeClassName') !== null) {
+      $this->typeClassName = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['typeClassName']);
+    }
+  }
+
+}
+

@@ -145,7 +145,15 @@ module ConstraintSet = Caml.Set.Make (struct
   let compare = compare_constraint_
 end)
 
-type event = string * (shape_result, Error.t) Either.t
+type analysis_result = {
+  result: shape_result;
+  error_count: int;
+}
+
+type log = {
+  location: string;
+  result: (analysis_result, Error.t) Either.t;
+}
 
 type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_
 [@@deriving ord]

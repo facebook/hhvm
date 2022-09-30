@@ -175,9 +175,20 @@ end
 
 module ConstraintSet : Caml.Set.S with type elt = constraint_
 
-(** Either an analysis result or an error, in either case paired with an
-    identifier for its origin *)
-type event = string * (shape_result, Error.t) Either.t
+(** A shape result paired with how many analysis errors were encountered while
+    obtaining that result. The error count is intended as a rough measure of
+    confidence in the result. *)
+type analysis_result = {
+  result: shape_result;
+  error_count: int;
+}
+
+(** Either an analysis result or an error. In either case, the event is paired
+    with an identifier for its origin. *)
+type log = {
+  location: string;
+  result: (analysis_result, Error.t) Either.t;
+}
 
 type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_
 

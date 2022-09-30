@@ -27,14 +27,11 @@ let strip_decoration_of_lists
   List.map ~f:(fun { constraint_; _ } -> HT.Intra constraint_) intra_dec_list
   @ List.map ~f:(fun { constraint_; _ } -> HT.Inter constraint_) inter_dec_list
 
-let process_errors_out map =
-  let process_errors _id (_, errors) =
-    if not (List.is_empty errors) then Printf.eprintf "\nErrors:\n";
-    let print_error err = Printf.eprintf "%s\n" (Error.show err) in
-    List.iter ~f:print_error errors
-  in
-  SMap.iter process_errors map;
-  SMap.map (fun (constraints, _errors) -> constraints) map
+let process_errors_out (constraints, errors) =
+  if not (List.is_empty errors) then Printf.eprintf "\nErrors:\n";
+  let print_error err = Printf.eprintf "%s\n" (Error.show err) in
+  List.iter ~f:print_error errors;
+  constraints
 
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let { mode; verbosity } = options in
@@ -72,7 +69,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> SMap.iter print_function_constraints
   | CloseConstraints ->
     let print_function_constraints
@@ -89,7 +86,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> analyse
     |> SMap.iter print_function_constraints
   | DumpDerivedConstraints ->
@@ -104,7 +101,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : shape_result list) :
@@ -117,19 +114,18 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
-    |> process_errors_out
-    |> SMap.map fst
-    |> SMap.map (List.map ~f:strip_decorations)
+    |> SMap.map (fun rs ->
+           process_errors_out rs |> fst |> List.map ~f:strip_decorations)
     |> SMap.iter process_callable
   | Codemod ->
-    let process_callable constraints =
-      simplify empty_typing_env constraints
-      |> Codemod.of_results empty_typing_env
+    let process_callable (decorated_constraints, errors) =
+      let error_count = List.length errors in
+      fst decorated_constraints
+      |> List.map ~f:strip_decorations
+      |> simplify empty_typing_env
+      |> Codemod.group_of_results ~error_count empty_typing_env
     in
     Walker.program ctx tast
-    |> process_errors_out
-    |> SMap.map fst
-    |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.map process_callable
     |> SMap.values
     |> JSON.array_ (fun json -> json)
@@ -145,7 +141,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> analyse
     |> SMap.map
          (List.filter_map ~f:(function

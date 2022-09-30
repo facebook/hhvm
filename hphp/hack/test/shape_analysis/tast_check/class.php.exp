@@ -1,5 +1,5 @@
-[RESULT] \C::f: [5:10-38] [Allocation]:
+[RESULT] \C::f: (# of errors: 0) [5:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
-[RESULT] \C::g: [13:10-38] [Allocation]:
+[RESULT] \C::g: (# of errors: 0) [13:10-38] [Allocation]:
   shape('a' => int, 'b' => bool)
 No errors

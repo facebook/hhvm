@@ -1,10 +1,13 @@
 === Shape analysis results for argument.php
 [
-  [
-    {
-      "pos":{"path":"argument.php","line":4,"start":8,"end":24},
-      "kind":"Allocation",
-      "type":"shape('a' => bool)"
-    }
-  ]
+  {
+    "directives":[
+      {
+        "pos":{"path":"argument.php","line":4,"start":8,"end":24},
+        "kind":"Allocation",
+        "type":"shape('a' => bool)"
+      }
+    ],
+    "error_count":0
+  }
 ]

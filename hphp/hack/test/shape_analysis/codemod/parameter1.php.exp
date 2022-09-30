@@ -1,10 +1,13 @@
 === Shape analysis results for parameter1.php
 [
-  [
-    {
-      "pos":{"path":"parameter1.php","line":3,"start":12,"end":29},
-      "kind":"Hint",
-      "type":"shape()"
-    }
-  ]
+  {
+    "directives":[
+      {
+        "pos":{"path":"parameter1.php","line":3,"start":12,"end":29},
+        "kind":"Hint",
+        "type":"shape()"
+      }
+    ],
+    "error_count":0
+  }
 ]

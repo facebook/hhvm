@@ -58,19 +58,26 @@ let might_be_dict tast_env ty =
   let open Typing_reason in
   let mixed = mixed Rnone in
   let dict_top = dict Rnone mixed mixed in
+  let awaitable_dict_top = awaitable Rnone dict_top in
   let nothing = nothing Rnone in
   let dict_bottom = dict Rnone nothing nothing in
+  let awaitable_dict_bottom = awaitable Rnone dict_bottom in
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
+  let is_type_disjoint = Typing_subtype.is_type_disjoint typing_env in
   not
-  @@ (Typing_subtype.is_type_disjoint typing_env ty dict_top
-     && Typing_subtype.is_type_disjoint typing_env ty dict_bottom)
+  @@ (is_type_disjoint ty dict_top
+     && is_type_disjoint ty dict_bottom
+     && is_type_disjoint ty awaitable_dict_top
+     && is_type_disjoint ty awaitable_dict_bottom)
 
 let is_dict tast_env ty =
   let open Typing_make_type in
   let open Typing_reason in
   let mixed = mixed Rnone in
   let dict_top = dict Rnone mixed mixed in
-  Tast_env.is_sub_type tast_env ty dict_top
+  let awaitable_dict_top = awaitable Rnone dict_top in
+  let is_sub_type = Tast_env.is_sub_type tast_env in
+  is_sub_type ty dict_top || is_sub_type ty awaitable_dict_top
 
 let is_cow tast_env ty =
   let open Typing_make_type in

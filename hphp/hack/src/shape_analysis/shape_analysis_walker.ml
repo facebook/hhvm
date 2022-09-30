@@ -185,6 +185,7 @@ and expr_ (env : env) ((ty, pos, e) : T.expr) : env * entity =
   | A.False
   | A.Null ->
     (env, None)
+  | A.Tuple values
   | A.Varray (_, values)
   | A.ValCollection (_, _, values) ->
     (* TODO(T131709581): This is an approximation where we identify the the

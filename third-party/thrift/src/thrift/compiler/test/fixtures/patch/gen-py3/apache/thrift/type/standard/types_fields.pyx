@@ -19,6 +19,45 @@ from thrift.py3.types cimport const_pointer_cast
 
 
 @__cython.auto_pickle(False)
+cdef class __FractionStruct_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __FractionStruct_FieldsSetter _fbthrift_create(_apache_thrift_type_standard_types.cFractionStruct* struct_cpp_obj):
+        cdef __FractionStruct_FieldsSetter __fbthrift_inst = __FractionStruct_FieldsSetter.__new__(__FractionStruct_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"numerator")] = __FractionStruct_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"denominator")] = __FractionStruct_FieldsSetter._set_field_1
+        return __fbthrift_inst
+
+    cdef void set_field(__FractionStruct_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __FractionStruct_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field numerator
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cFractionStruct](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'numerator is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).numerator_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field denominator
+        if _fbthrift_value is None:
+            __reset_field[_apache_thrift_type_standard_types.cFractionStruct](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'denominator is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).denominator_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
 cdef class __UriStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

@@ -149,22 +149,6 @@ const Timestamp minTimestamp = {"seconds": -62135769600};
  */
 const Timestamp maxTimestamp = {"seconds": 253402300799, "nanos": 999999999};
 
-/**
- * A 'normal' Fraction.
- *
- * This representation is always safe to 'normalize'.
- */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef type_rep.FractionStruct Fraction (thrift.uri = "")
-
-/**
- * A 'simple' Fraction.
- *
- * This representation is always safe to 'simplify'.
- */
-@thrift.Experimental // TODO(afuller): Adapt!
-typedef type_rep.FractionStruct SimpleFraction
-
 @cpp.Adapter{
   name = "::apache::thrift::InlineAdapter<::apache::thrift::type::Protocol>",
 }

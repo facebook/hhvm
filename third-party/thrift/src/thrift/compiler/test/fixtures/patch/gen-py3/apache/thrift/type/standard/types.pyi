@@ -39,6 +39,41 @@ class StandardProtocol(thrift.py3.types.Enum):
     def _to_py_deprecated(self) -> int: ...
 
 
+class FractionStruct(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        numerator: bool
+        denominator: bool
+        pass
+
+    numerator: Final[int] = ...
+
+    denominator: Final[int] = ...
+
+    def __init__(
+        self, *,
+        numerator: _typing.Optional[int]=None,
+        denominator: _typing.Optional[int]=None
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        numerator: _typing.Union[int, '__NotSet', None]=NOTSET,
+        denominator: _typing.Union[int, '__NotSet', None]=NOTSET
+    ) -> FractionStruct: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['FractionStruct'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'FractionStruct') -> bool: ...
+    def __gt__(self, other: 'FractionStruct') -> bool: ...
+    def __le__(self, other: 'FractionStruct') -> bool: ...
+    def __ge__(self, other: 'FractionStruct') -> bool: ...
+
+    def _to_python(self) -> "apache.thrift.type.standard.thrift_types.FractionStruct": ...   # type: ignore
+    def _to_py3(self) -> FractionStruct: ...
+    def _to_py_deprecated(self) -> "thrift.lib.thrift.standard.ttypes.FractionStruct": ...   # type: ignore
+
 class UriStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:
         scheme: bool
@@ -277,6 +312,8 @@ class Map__string_string(_typing.Mapping[str, str], _typing.Hashable):
 
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
+Fraction = FractionStruct
+SimpleFraction = FractionStruct
 Uuid = bytes
 UuidString = str
 Path = str

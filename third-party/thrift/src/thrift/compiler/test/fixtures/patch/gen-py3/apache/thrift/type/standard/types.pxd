@@ -88,6 +88,19 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_metadata.h" namespace "apa
         void gen(__fbthrift_cThriftMetadata &metadata)
 cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" namespace "::apache::thrift::type":
 
+    cdef cppclass cFractionStruct "::apache::thrift::type::FractionStruct":
+        cFractionStruct() except +
+        cFractionStruct(const cFractionStruct&) except +
+        bint operator==(cFractionStruct&)
+        bint operator!=(cFractionStruct&)
+        bint operator<(cFractionStruct&)
+        bint operator>(cFractionStruct&)
+        bint operator<=(cFractionStruct&)
+        bint operator>=(cFractionStruct&)
+        __field_ref[cint64_t] numerator_ref "numerator_ref" ()
+        __field_ref[cint64_t] denominator_ref "denominator_ref" ()
+
+
     cdef cppclass cUriStruct "::apache::thrift::type::UriStruct":
         cUriStruct() except +
         cUriStruct(const cUriStruct&) except +
@@ -188,6 +201,17 @@ cdef extern from "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h" n
         const cVoid& get_mapType "get_mapType" () const
         cVoid& set_mapType "set_mapType" (const cVoid&)
 
+
+
+
+cdef class FractionStruct(thrift.py3.types.Struct):
+    cdef shared_ptr[cFractionStruct] _cpp_obj
+    cdef _fbthrift_types_fields.__FractionStruct_FieldsSetter _fields_setter
+    cdef inline object numerator_impl(self)
+    cdef inline object denominator_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cFractionStruct])
 
 
 

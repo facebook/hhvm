@@ -18,6 +18,13 @@ import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation
 import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 
+class FractionStruct_Builder(thrift.py3.builder.StructBuilder):
+    numerator: _typing.Optional[int]
+    denominator: _typing.Optional[int]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class UriStruct_Builder(thrift.py3.builder.StructBuilder):
     scheme: _typing.Optional[str]
     domain: _typing.Optional[list]

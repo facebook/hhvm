@@ -29,23 +29,41 @@
         "is_exception": false,
         "lineno": 60
       },
+      "Fraction": {
+        "name": "Fraction",
+        "type": {
+  "type" : "struct",
+  "name" : "FractionStruct"
+},
+        "is_exception": false,
+        "lineno": 87
+      },
+      "SimpleFraction": {
+        "name": "SimpleFraction",
+        "type": {
+  "type" : "struct",
+  "name" : "FractionStruct"
+},
+        "is_exception": false,
+        "lineno": 95
+      },
       "Uuid": {
         "name": "Uuid",
         "type": "binary",
         "is_exception": false,
-        "lineno": 74
+        "lineno": 106
       },
       "UuidString": {
         "name": "UuidString",
         "type": "string",
         "is_exception": false,
-        "lineno": 88
+        "lineno": 120
       },
       "Path": {
         "name": "Path",
         "type": "string",
         "is_exception": false,
-        "lineno": 94
+        "lineno": 126
       },
       "PathSegments": {
         "name": "PathSegments",
@@ -54,13 +72,13 @@
   "inner_type" : "string"
 },
         "is_exception": false,
-        "lineno": 102
+        "lineno": 134
       },
       "Domain": {
         "name": "Domain",
         "type": "string",
         "is_exception": false,
-        "lineno": 110
+        "lineno": 142
       },
       "DomainLabels": {
         "name": "DomainLabels",
@@ -69,13 +87,13 @@
   "inner_type" : "string"
 },
         "is_exception": false,
-        "lineno": 118
+        "lineno": 150
       },
       "QueryString": {
         "name": "QueryString",
         "type": "string",
         "is_exception": false,
-        "lineno": 128
+        "lineno": 160
       },
       "QueryArgs": {
         "name": "QueryArgs",
@@ -85,13 +103,13 @@
   "value_type" : "string"
 },
         "is_exception": false,
-        "lineno": 137
+        "lineno": 169
       },
       "Uri": {
         "name": "Uri",
         "type": "string",
         "is_exception": false,
-        "lineno": 148
+        "lineno": 180
       }
   },
   "enumerations" :
@@ -112,36 +130,61 @@
         "constants" : {
           "Custom" : {
             "name" : "Custom",
-            "lineno" : 228,
+            "lineno" : 260,
             "value" : 0
           },
           "Binary" : {
             "name" : "Binary",
-            "lineno" : 231,
+            "lineno" : 263,
             "value" : 1
           },
           "Compact" : {
             "name" : "Compact",
-            "lineno" : 232,
+            "lineno" : 264,
             "value" : 2
           },
           "Json" : {
             "name" : "Json",
-            "lineno" : 235,
+            "lineno" : 267,
             "value" : 3
           },
           "SimpleJson" : {
             "name" : "SimpleJson",
-            "lineno" : 236,
+            "lineno" : 268,
             "value" : 4
           }
         },
         "docstring" : "The standard Thrift protocols.\n",
-        "lineno" : 227
+        "lineno" : 259
       }
       },
   "structs" :
   {
+      "FractionStruct" : {
+        "name" : "FractionStruct",
+        "docstring" : "A integer fraction of the form {numerator} / {denominator}\n\nUseful for representing ratios, rates, and metric accumulators.\n\nConsidered 'normal' when the denominator is positive.\nConsidered 'simple' when `normal` and the greatest common divisor of the\nand `numerator` and `denominator`, is 1.\n",
+        "fields" : {
+          "numerator" : {
+            "name" : "numerator",
+            "docstring" : "The numerator/dividend/antecedent/upper integer.\n",
+            "key" : 1,
+            "lineno" : 77,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  },
+          "denominator" : {
+            "name" : "denominator",
+            "docstring" : "The denominator/divisor/consequent/lower integer.\n",
+            "key" : 2,
+            "lineno" : 79,
+            "required" : "opt-in-req-out",
+            "type" : "i64"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 75
+      },
       "UriStruct" : {
         "name" : "UriStruct",
         "structured_annotations": {
@@ -158,14 +201,14 @@
           "scheme" : {
             "name" : "scheme",
             "key" : 1,
-            "lineno" : 162,
+            "lineno" : 194,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "domain" : {
             "name" : "domain",
             "key" : 2,
-            "lineno" : 165,
+            "lineno" : 197,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -175,7 +218,7 @@
           "path" : {
             "name" : "path",
             "key" : 4,
-            "lineno" : 168,
+            "lineno" : 200,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "list",
@@ -185,7 +228,7 @@
           "query" : {
             "name" : "query",
             "key" : 5,
-            "lineno" : 171,
+            "lineno" : 203,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "map",
@@ -196,14 +239,14 @@
           "fragment" : {
             "name" : "fragment",
             "key" : 6,
-            "lineno" : 174,
+            "lineno" : 206,
             "required" : "opt-in-req-out",
             "type" : "string"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 159
+        "lineno" : 191
       },
       "TypeUri" : {
         "name" : "TypeUri",
@@ -211,21 +254,21 @@
           "uri" : {
             "name" : "uri",
             "key" : 1,
-            "lineno" : 180,
+            "lineno" : 212,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "typeHashPrefixSha2_256" : {
             "name" : "typeHashPrefixSha2_256",
             "key" : 2,
-            "lineno" : 182,
+            "lineno" : 214,
             "required" : "opt-in-req-out",
             "type" : "binary"
                   }
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 178
+        "lineno" : 210
       },
       "TypeName" : {
         "name" : "TypeName",
@@ -233,7 +276,7 @@
           "boolType" : {
             "name" : "boolType",
             "key" : 1,
-            "lineno" : 188,
+            "lineno" : 220,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -243,7 +286,7 @@
           "byteType" : {
             "name" : "byteType",
             "key" : 2,
-            "lineno" : 191,
+            "lineno" : 223,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -253,7 +296,7 @@
           "i16Type" : {
             "name" : "i16Type",
             "key" : 3,
-            "lineno" : 194,
+            "lineno" : 226,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -263,7 +306,7 @@
           "i32Type" : {
             "name" : "i32Type",
             "key" : 4,
-            "lineno" : 197,
+            "lineno" : 229,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -273,7 +316,7 @@
           "i64Type" : {
             "name" : "i64Type",
             "key" : 5,
-            "lineno" : 200,
+            "lineno" : 232,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -283,7 +326,7 @@
           "floatType" : {
             "name" : "floatType",
             "key" : 6,
-            "lineno" : 203,
+            "lineno" : 235,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -293,7 +336,7 @@
           "doubleType" : {
             "name" : "doubleType",
             "key" : 7,
-            "lineno" : 206,
+            "lineno" : 238,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -303,7 +346,7 @@
           "stringType" : {
             "name" : "stringType",
             "key" : 8,
-            "lineno" : 209,
+            "lineno" : 241,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -313,7 +356,7 @@
           "binaryType" : {
             "name" : "binaryType",
             "key" : 9,
-            "lineno" : 212,
+            "lineno" : 244,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -323,7 +366,7 @@
           "enumType" : {
             "name" : "enumType",
             "key" : 10,
-            "lineno" : 215,
+            "lineno" : 247,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -333,7 +376,7 @@
           "typedefType" : {
             "name" : "typedefType",
             "key" : 17,
-            "lineno" : 217,
+            "lineno" : 249,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -343,7 +386,7 @@
           "structType" : {
             "name" : "structType",
             "key" : 11,
-            "lineno" : 218,
+            "lineno" : 250,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -353,7 +396,7 @@
           "unionType" : {
             "name" : "unionType",
             "key" : 12,
-            "lineno" : 219,
+            "lineno" : 251,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -363,7 +406,7 @@
           "exceptionType" : {
             "name" : "exceptionType",
             "key" : 13,
-            "lineno" : 220,
+            "lineno" : 252,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
@@ -373,7 +416,7 @@
           "listType" : {
             "name" : "listType",
             "key" : 14,
-            "lineno" : 221,
+            "lineno" : 253,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -383,7 +426,7 @@
           "setType" : {
             "name" : "setType",
             "key" : 15,
-            "lineno" : 222,
+            "lineno" : 254,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -393,7 +436,7 @@
           "mapType" : {
             "name" : "mapType",
             "key" : 16,
-            "lineno" : 223,
+            "lineno" : 255,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -403,7 +446,7 @@
         },
         "is_exception" : false,
         "is_union" : true,
-        "lineno" : 186
+        "lineno" : 218
       }
       },
   "source_path" : "thrift/lib/thrift/standard",

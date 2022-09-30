@@ -62,6 +62,19 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 
 
 template<>
+void reset_field<::apache::thrift::type::FractionStruct>(
+    ::apache::thrift::type::FractionStruct& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.numerator_ref().copy_from(default_inst<::apache::thrift::type::FractionStruct>().numerator_ref());
+      return;
+    case 1:
+      obj.denominator_ref().copy_from(default_inst<::apache::thrift::type::FractionStruct>().denominator_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::apache::thrift::type::UriStruct>(
     ::apache::thrift::type::UriStruct& obj, uint16_t index) {
   switch (index) {
@@ -81,6 +94,16 @@ void reset_field<::apache::thrift::type::UriStruct>(
       obj.fragment_ref().copy_from(default_inst<::apache::thrift::type::UriStruct>().fragment_ref());
       return;
   }
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::type::FractionStruct>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
 }
 
 template<>

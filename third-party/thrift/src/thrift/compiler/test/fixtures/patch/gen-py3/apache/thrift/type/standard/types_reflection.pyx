@@ -25,6 +25,43 @@ from thrift.py3.types cimport (
 )
 
 
+cdef __StructSpec get_reflection__FractionStruct():
+    cdef _apache_thrift_type_standard_types.FractionStruct defaults = _apache_thrift_type_standard_types.FractionStruct._fbthrift_create(
+        constant_shared_ptr[_apache_thrift_type_standard_types.cFractionStruct](
+            default_inst[_apache_thrift_type_standard_types.cFractionStruct]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="FractionStruct",
+        kind=__StructType.STRUCT,
+        annotations={
+            """thrift.uri""": """facebook.com/thrift/type/Fraction""",        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="numerator",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="denominator",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__UriStruct():
     cdef _apache_thrift_type_standard_types.UriStruct defaults = _apache_thrift_type_standard_types.UriStruct._fbthrift_create(
         constant_shared_ptr[_apache_thrift_type_standard_types.cUriStruct](

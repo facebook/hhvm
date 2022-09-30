@@ -241,6 +241,130 @@ __SetMetaClass(<PyTypeObject*> __TypeNameType, <PyTypeObject*> __TypeName_Union_
 
 
 @__cython.auto_pickle(False)
+cdef class FractionStruct(thrift.py3.types.Struct):
+    def __init__(FractionStruct self, **kwargs):
+        self._cpp_obj = make_shared[cFractionStruct]()
+        self._fields_setter = _fbthrift_types_fields.__FractionStruct_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(FractionStruct self, **kwargs):
+        if not kwargs:
+            return self
+        cdef FractionStruct __fbthrift_inst = FractionStruct.__new__(FractionStruct)
+        __fbthrift_inst._cpp_obj = make_shared[cFractionStruct](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__FractionStruct_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("FractionStruct", {
+          "numerator": deref(self._cpp_obj).numerator_ref().has_value(),
+          "denominator": deref(self._cpp_obj).denominator_ref().has_value(),
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cFractionStruct] cpp_obj):
+        __fbthrift_inst = <FractionStruct>FractionStruct.__new__(FractionStruct)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline numerator_impl(self):
+
+        return deref(self._cpp_obj).numerator_ref().value()
+
+    @property
+    def numerator(self):
+        return self.numerator_impl()
+
+    cdef inline denominator_impl(self):
+
+        return deref(self._cpp_obj).denominator_ref().value()
+
+    @property
+    def denominator(self):
+        return self.denominator_impl()
+
+
+    def __hash__(FractionStruct self):
+        return super().__hash__()
+
+    def __repr__(FractionStruct self):
+        return super().__repr__()
+
+    def __str__(FractionStruct self):
+        return super().__str__()
+
+
+    def __copy__(FractionStruct self):
+        cdef shared_ptr[cFractionStruct] cpp_obj = make_shared[cFractionStruct](
+            deref(self._cpp_obj)
+        )
+        return FractionStruct._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cFractionStruct](
+            self._cpp_obj,
+            (<FractionStruct>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__FractionStruct()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cFractionStruct].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "standard.FractionStruct"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cFractionStruct](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 2
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(FractionStruct self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cFractionStruct](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(FractionStruct self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cFractionStruct]()
+        with nogil:
+            needed = serializer.cdeserialize[cFractionStruct](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "apache.thrift.type.standard.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.FractionStruct, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FractionStruct, self)
+@__cython.auto_pickle(False)
 cdef class UriStruct(thrift.py3.types.Struct):
     def __init__(UriStruct self, **kwargs):
         self._cpp_obj = make_shared[cUriStruct]()
@@ -1143,6 +1267,8 @@ Mapping.register(Map__string_string)
 
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
+Fraction = FractionStruct
+SimpleFraction = FractionStruct
 Uuid = bytes
 UuidString = str
 Path = str

@@ -136,6 +136,24 @@ type ByteBuffer = []byte
 
 func ByteBufferPtr(v ByteBuffer) *ByteBuffer { return &v }
 
+//A 'normal' Fraction.
+//
+//This representation is always safe to 'normalize'.
+type Fraction = FractionStruct
+
+func FractionPtr(v Fraction) *Fraction { return &v }
+
+func NewFraction() *Fraction { return NewFractionStruct() }
+
+//A 'simple' Fraction.
+//
+//This representation is always safe to 'simplify'.
+type SimpleFraction = FractionStruct
+
+func SimpleFractionPtr(v SimpleFraction) *SimpleFraction { return &v }
+
+func NewSimpleFraction() *SimpleFraction { return NewFractionStruct() }
+
 //The binary form of a universally unique identifier (UUID).
 //
 //Considered 'valid' if contains exactly 0 or 16 bytes.
@@ -210,6 +228,167 @@ func QueryArgs_Ptr(v QueryArgs_) *QueryArgs_ { return &v }
 type Uri = string
 
 func UriPtr(v Uri) *Uri { return &v }
+
+// A integer fraction of the form {numerator} / {denominator}
+// 
+// Useful for representing ratios, rates, and metric accumulators.
+// 
+// Considered 'normal' when the denominator is positive.
+// Considered 'simple' when `normal` and the greatest common divisor of the
+// and `numerator` and `denominator`, is 1.
+// 
+// Attributes:
+//  - Numerator: The numerator/dividend/antecedent/upper integer.
+//  - Denominator: The denominator/divisor/consequent/lower integer.
+type FractionStruct struct {
+  Numerator int64 `thrift:"numerator,1" db:"numerator" json:"numerator"`
+  Denominator int64 `thrift:"denominator,2" db:"denominator" json:"denominator"`
+}
+
+func NewFractionStruct() *FractionStruct {
+  return &FractionStruct{}
+}
+
+
+func (p *FractionStruct) GetNumerator() int64 {
+  return p.Numerator
+}
+
+func (p *FractionStruct) GetDenominator() int64 {
+  return p.Denominator
+}
+type FractionStructBuilder struct {
+  obj *FractionStruct
+}
+
+func NewFractionStructBuilder() *FractionStructBuilder{
+  return &FractionStructBuilder{
+    obj: NewFractionStruct(),
+  }
+}
+
+func (p FractionStructBuilder) Emit() *FractionStruct{
+  return &FractionStruct{
+    Numerator: p.obj.Numerator,
+    Denominator: p.obj.Denominator,
+  }
+}
+
+func (f *FractionStructBuilder) Numerator(numerator int64) *FractionStructBuilder {
+  f.obj.Numerator = numerator
+  return f
+}
+
+func (f *FractionStructBuilder) Denominator(denominator int64) *FractionStructBuilder {
+  f.obj.Denominator = denominator
+  return f
+}
+
+func (f *FractionStruct) SetNumerator(numerator int64) *FractionStruct {
+  f.Numerator = numerator
+  return f
+}
+
+func (f *FractionStruct) SetDenominator(denominator int64) *FractionStruct {
+  f.Denominator = denominator
+  return f
+}
+
+func (p *FractionStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *FractionStruct)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Numerator = v
+  }
+  return nil
+}
+
+func (p *FractionStruct)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Denominator = v
+  }
+  return nil
+}
+
+func (p *FractionStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("FractionStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *FractionStruct) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("numerator", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numerator: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Numerator)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numerator (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numerator: ", p), err) }
+  return err
+}
+
+func (p *FractionStruct) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("denominator", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:denominator: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Denominator)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.denominator (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:denominator: ", p), err) }
+  return err
+}
+
+func (p *FractionStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  numeratorVal := fmt.Sprintf("%v", p.Numerator)
+  denominatorVal := fmt.Sprintf("%v", p.Denominator)
+  return fmt.Sprintf("FractionStruct({Numerator:%s Denominator:%s})", numeratorVal, denominatorVal)
+}
 
 // The 'parsed' form of a `Uri`.
 // 

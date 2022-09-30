@@ -19,6 +19,54 @@ import facebook.thrift.annotation.java.thrift_types
 import facebook.thrift.annotation.thrift.thrift_types
 
 
+class FractionStruct(metaclass=_fbthrift_python_types.StructMeta):
+    _fbthrift_SPEC = (
+        (
+            1,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "numerator",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
+            2,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "denominator",  # name
+            _fbthrift_python_types.typeinfo_i64,  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+    )
+
+    @staticmethod
+    def __get_thrift_name__() -> str:
+        return "standard.FractionStruct"
+
+    @staticmethod
+    def __get_thrift_uri__():
+        return "facebook.com/thrift/type/Fraction"
+
+    @staticmethod
+    def __get_metadata__():
+        return _fbthrift_metadata__struct_FractionStruct()
+
+    def _to_python(self):
+        return self
+
+    def _to_py3(self):
+        import importlib
+        py3_types = importlib.import_module("apache.thrift.type.standard.types")
+        import thrift.py3.converter
+        return thrift.py3.converter.to_py3_struct(py3_types.FractionStruct, self)
+
+    def _to_py_deprecated(self):
+        import importlib
+        py_deprecated_types = importlib.import_module("thrift.lib.thrift.standard.ttypes")
+        import thrift.util.converter
+        return thrift.util.converter.to_py_struct(py_deprecated_types.FractionStruct, self)
+
+
 class UriStruct(metaclass=_fbthrift_python_types.StructMeta):
     _fbthrift_SPEC = (
         (
@@ -354,6 +402,8 @@ class StandardProtocol(_fbthrift_python_types.Enum, enum.Enum):
     def _to_py_deprecated(self):
         return self.value
 
+def _fbthrift_metadata__struct_FractionStruct():
+    return apache.thrift.type.standard.thrift_metadata.gen_metadata_struct_FractionStruct()
 def _fbthrift_metadata__struct_UriStruct():
     return apache.thrift.type.standard.thrift_metadata.gen_metadata_struct_UriStruct()
 def _fbthrift_metadata__struct_TypeUri():
@@ -362,6 +412,7 @@ def _fbthrift_metadata__struct_TypeName():
     return apache.thrift.type.standard.thrift_metadata.gen_metadata_struct_TypeName()
 
 _fbthrift_all_structs = [
+    FractionStruct,
     UriStruct,
     TypeUri,
     TypeName,
@@ -370,6 +421,8 @@ _fbthrift_python_types.fill_specs(*_fbthrift_all_structs)
 
 ByteString = bytes
 ByteBuffer = _fbthrift_iobuf.IOBuf
+Fraction = FractionStruct
+SimpleFraction = FractionStruct
 Uuid = bytes
 UuidString = str
 Path = str

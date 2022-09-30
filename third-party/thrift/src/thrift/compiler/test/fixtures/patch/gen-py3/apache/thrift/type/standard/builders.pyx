@@ -4,6 +4,13 @@
 # DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 #  @generated
 #
+cdef class FractionStruct_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _apache_thrift_type_standard_types.FractionStruct
+
+    def __iter__(self):
+        yield "numerator", self.numerator
+        yield "denominator", self.denominator
+
 cdef class UriStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _apache_thrift_type_standard_types.UriStruct
 

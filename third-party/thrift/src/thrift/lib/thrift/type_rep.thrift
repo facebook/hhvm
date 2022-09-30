@@ -71,22 +71,6 @@ struct TimeStruct {
   2: i32 nanos;
 } (thrift.uri = "facebook.com/thrift/type/Time")
 
-/**
- * A integer fraction of the form {numerator} / {denominator}
- *
- * Useful for representing ratios, rates, and metric accumulators.
- *
- * Considered 'normal' when the denominator is positive.
- * Considered 'simple' when `normal` and the greatest common divisor of the
- * and `numerator` and `denominator`, is 1.
- */
-struct FractionStruct {
-  /** The numerator/dividend/antecedent/upper integer. */
-  1: i64 numerator;
-  /** The denominator/divisor/consequent/lower integer. */
-  2: i64 denominator;
-} (thrift.uri = "facebook.com/thrift/type/Fraction")
-
 /** A union representation of a protocol. */
 union ProtocolUnion {
   /** A standard protocol, known by all Thrift implementations. */

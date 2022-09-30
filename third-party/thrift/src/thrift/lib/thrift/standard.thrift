@@ -64,6 +64,38 @@ typedef binary (cpp2.type = "folly::fbstring") ByteString
 typedef binary (cpp2.type = "folly::IOBuf") ByteBuffer
 
 /**
+ * A integer fraction of the form {numerator} / {denominator}
+ *
+ * Useful for representing ratios, rates, and metric accumulators.
+ *
+ * Considered 'normal' when the denominator is positive.
+ * Considered 'simple' when `normal` and the greatest common divisor of the
+ * and `numerator` and `denominator`, is 1.
+ */
+struct FractionStruct {
+  /** The numerator/dividend/antecedent/upper integer. */
+  1: i64 numerator;
+  /** The denominator/divisor/consequent/lower integer. */
+  2: i64 denominator;
+} (thrift.uri = "facebook.com/thrift/type/Fraction")
+
+/**
+ * A 'normal' Fraction.
+ *
+ * This representation is always safe to 'normalize'.
+ */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef FractionStruct Fraction (thrift.uri = "")
+
+/**
+ * A 'simple' Fraction.
+ *
+ * This representation is always safe to 'simplify'.
+ */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef FractionStruct SimpleFraction
+
+/**
  * The binary form of a universally unique identifier (UUID).
  *
  * Considered 'valid' if contains exactly 0 or 16 bytes.

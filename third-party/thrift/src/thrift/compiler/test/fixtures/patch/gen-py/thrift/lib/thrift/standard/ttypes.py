@@ -35,7 +35,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'Void', 'StandardProtocol', 'UriStruct', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer', 'Uuid', 'UuidString', 'Path', 'PathSegments', 'Domain', 'DomainLabels', 'QueryString', 'QueryArgs', 'Uri']
+__all__ = ['UTF8STRINGS', 'Void', 'StandardProtocol', 'FractionStruct', 'UriStruct', 'TypeUri', 'TypeName', 'ByteString', 'ByteBuffer', 'Fraction', 'SimpleFraction', 'Uuid', 'UuidString', 'Path', 'PathSegments', 'Domain', 'DomainLabels', 'QueryString', 'QueryArgs', 'Uri']
 
 class Void:
   NoValue = 0
@@ -73,6 +73,138 @@ class StandardProtocol:
     "Json": 3,
     "SimpleJson": 4,
   }
+
+class FractionStruct:
+  """
+  A integer fraction of the form {numerator} / {denominator}
+  
+  Useful for representing ratios, rates, and metric accumulators.
+  
+  Considered 'normal' when the denominator is positive.
+  Considered 'simple' when `normal` and the greatest common divisor of the
+  and `numerator` and `denominator`, is 1.
+  
+  Attributes:
+   - numerator: The numerator/dividend/antecedent/upper integer.
+   - denominator: The denominator/divisor/consequent/lower integer.
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.numerator = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.denominator = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('FractionStruct')
+    if self.numerator != None:
+      oprot.writeFieldBegin('numerator', TType.I64, 1)
+      oprot.writeI64(self.numerator)
+      oprot.writeFieldEnd()
+    if self.denominator != None:
+      oprot.writeFieldBegin('denominator', TType.I64, 2)
+      oprot.writeI64(self.denominator)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'numerator' in json_obj and json_obj['numerator'] is not None:
+      self.numerator = long(json_obj['numerator'])
+    if 'denominator' in json_obj and json_obj['denominator'] is not None:
+      self.denominator = long(json_obj['denominator'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.numerator is not None:
+      value = pprint.pformat(self.numerator, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    numerator=%s' % (value))
+    if self.denominator is not None:
+      value = pprint.pformat(self.denominator, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    denominator=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'numerator',
+      'denominator',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("apache.thrift.type.standard.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.FractionStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("apache.thrift.type.standard.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.FractionStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
 
 class UriStruct:
   """
@@ -1127,6 +1259,8 @@ class TypeName(object):
 
 ByteString = UnimplementedTypedef()
 ByteBuffer = UnimplementedTypedef()
+Fraction = FractionStruct
+SimpleFraction = FractionStruct
 Uuid = UnimplementedTypedef()
 UuidString = UnimplementedTypedef()
 Path = UnimplementedTypedef()
@@ -1136,6 +1270,33 @@ DomainLabels = UnimplementedTypedef()
 QueryString = UnimplementedTypedef()
 QueryArgs = UnimplementedTypedef()
 Uri = UnimplementedTypedef()
+all_structs.append(FractionStruct)
+FractionStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'numerator', None, None, 2, ), # 1
+  (2, TType.I64, 'denominator', None, None, 2, ), # 2
+)
+
+FractionStruct.thrift_struct_annotations = {
+  "thrift.uri": "facebook.com/thrift/type/Fraction",
+}
+FractionStruct.thrift_field_annotations = {
+}
+
+def FractionStruct__init__(self, numerator=None, denominator=None,):
+  self.numerator = numerator
+  self.denominator = denominator
+
+FractionStruct.__init__ = FractionStruct__init__
+
+def FractionStruct__setstate__(self, state):
+  state.setdefault('numerator', None)
+  state.setdefault('denominator', None)
+  self.__dict__ = state
+
+FractionStruct.__getstate__ = lambda self: self.__dict__.copy()
+FractionStruct.__setstate__ = FractionStruct__setstate__
+
 all_structs.append(UriStruct)
 UriStruct.thrift_spec = (
   None, # 0

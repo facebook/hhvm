@@ -77,6 +77,161 @@ class apache_thrift_type_standard_StandardProtocol_TEnumStaticMetadata implement
 }
 
 /**
+ * A integer fraction of the form {numerator} / {denominator}
+ * 
+ * Useful for representing ratios, rates, and metric accumulators.
+ * 
+ * Considered 'normal' when the denominator is positive.
+ * Considered 'simple' when `normal` and the greatest common divisor of the
+ * and `numerator` and `denominator`, is 1.
+ *
+ * Original thrift struct:-
+ * FractionStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/type/Fraction'))>>
+class apache_thrift_type_standard_FractionStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'numerator',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'denominator',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'numerator' => 1,
+    'denominator' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'numerator' => ?int,
+    ?'denominator' => ?int,
+  );
+
+  const type TShape = shape(
+    'numerator' => int,
+    'denominator' => int,
+    ...
+  );
+  const int STRUCTURAL_ID = 5321021846126388061;
+  /**
+   * The numerator/dividend/antecedent/upper integer.
+   * 
+   * Original thrift field:-
+   * 1: i64 numerator
+   */
+  public int $numerator;
+  /**
+   * The denominator/divisor/consequent/lower integer.
+   * 
+   * Original thrift field:-
+   * 2: i64 denominator
+   */
+  public int $denominator;
+
+  public function __construct(?int $numerator = null, ?int $denominator = null)[] {
+    $this->numerator = $numerator ?? 0;
+    $this->denominator = $denominator ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'numerator'),
+      Shapes::idx($shape, 'denominator'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'FractionStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "standard.FractionStruct",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "numerator",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "denominator",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['numerator'],
+      $shape['denominator'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'numerator' => $this->numerator,
+      'denominator' => $this->denominator,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'numerator') !== null) {
+      $this->numerator = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['numerator']);
+    }
+    if (idx($parsed, 'denominator') !== null) {
+      $this->denominator = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['denominator']);
+    }
+  }
+
+}
+
+/**
  * The 'parsed' form of a `Uri`.
  * 
  *   {scheme}://{domain}/{path}?{query}#{fragment}

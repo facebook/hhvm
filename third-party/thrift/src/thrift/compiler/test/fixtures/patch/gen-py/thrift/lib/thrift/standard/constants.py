@@ -20,5 +20,5 @@ import thrift.annotation.thrift.ttypes
 import thrift.annotation.java.ttypes
 
 
-from .ttypes import UTF8STRINGS, Void, StandardProtocol, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri
+from .ttypes import UTF8STRINGS, Void, StandardProtocol, FractionStruct, UriStruct, TypeUri, TypeName, ByteString, ByteBuffer, Fraction, SimpleFraction, Uuid, UuidString, Path, PathSegments, Domain, DomainLabels, QueryString, QueryArgs, Uri
 

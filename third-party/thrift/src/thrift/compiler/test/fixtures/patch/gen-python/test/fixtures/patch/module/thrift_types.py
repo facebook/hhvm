@@ -1591,7 +1591,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.patch.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     MyValue0 = 0
     @staticmethod
     def __get_thrift_name__() -> str:

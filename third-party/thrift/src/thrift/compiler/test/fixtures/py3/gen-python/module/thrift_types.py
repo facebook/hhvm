@@ -379,7 +379,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
-class AnEnum(_fbthrift_python_types.Enum, enum.Enum):
+class AnEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     NOTSET = 0
     ONE = 1
     TWO = 2
@@ -403,7 +403,7 @@ class AnEnum(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class AnEnumRenamed(_fbthrift_python_types.Enum, enum.Enum):
+class AnEnumRenamed(_fbthrift_python_types.Enum, enum.IntEnum):
     name_ = 0
     value_ = 1
     renamed_ = 2

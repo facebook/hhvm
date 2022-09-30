@@ -19,7 +19,7 @@ import thrift.python.exceptions as _fbthrift_python_exceptions
 import facebook.thrift.annotation.thrift.thrift_types
 
 
-class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     MyValue1: MyEnum = ...
     MyValue2: MyEnum = ...
 

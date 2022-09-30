@@ -299,7 +299,7 @@ class UnionToBeRenamed(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.basic.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod
@@ -320,7 +320,7 @@ class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class HackEnum(_fbthrift_python_types.Enum, enum.Enum):
+class HackEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     Value1 = 0
     Value2 = 1
     @staticmethod

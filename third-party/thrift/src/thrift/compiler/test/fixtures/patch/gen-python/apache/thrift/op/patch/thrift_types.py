@@ -689,7 +689,7 @@ class TimePatch(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.op.patch.thrift_metadata
 
-class PatchOp(_fbthrift_python_types.Enum, enum.Enum):
+class PatchOp(_fbthrift_python_types.Enum, enum.IntEnum):
     Assign = 1
     Clear = 2
     PatchPrior = 3

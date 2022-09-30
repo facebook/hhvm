@@ -1255,6 +1255,11 @@ class Enum:
     def __get_thrift_name__() -> str:
         return NotImplementedError()
 
+    def __format__(self, format_spec):
+        return format(str(self), format_spec)
+
+    def __bool__(self):
+        return bool(self._value_) if isinstance(self, enum.Flag) else True
 
 cdef class ServiceInterface:
     @staticmethod

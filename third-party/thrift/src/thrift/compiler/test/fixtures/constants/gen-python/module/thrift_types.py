@@ -473,7 +473,7 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
-class EmptyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class EmptyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.EmptyEnum"
@@ -492,7 +492,7 @@ class EmptyEnum(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class City(_fbthrift_python_types.Enum, enum.Enum):
+class City(_fbthrift_python_types.Enum, enum.IntEnum):
     NYC = 0
     MPK = 1
     SEA = 2
@@ -515,7 +515,7 @@ class City(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class Company(_fbthrift_python_types.Enum, enum.Enum):
+class Company(_fbthrift_python_types.Enum, enum.IntEnum):
     FACEBOOK = 0
     WHATSAPP = 1
     OCULUS = 2

@@ -453,7 +453,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.type.standard.thrift_metadata
 
-class Void(_fbthrift_python_types.Enum, enum.Enum):
+class Void(_fbthrift_python_types.Enum, enum.IntEnum):
     NoValue = 0
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -473,7 +473,7 @@ class Void(_fbthrift_python_types.Enum, enum.Enum):
 
     def _to_py_deprecated(self):
         return self.value
-class StandardProtocol(_fbthrift_python_types.Enum, enum.Enum):
+class StandardProtocol(_fbthrift_python_types.Enum, enum.IntEnum):
     Custom = 0
     Binary = 1
     Compact = 2

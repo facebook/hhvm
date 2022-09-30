@@ -297,7 +297,6 @@ class PyDeprecatedToPythonConverterTest(unittest.TestCase):
             python_types.Color,
         )
 
-        # pyre-ignore[6]: This is a BadEnum not an enum, so it can have int called on it
         self.assertEqual(int(simple.color), 1234)
 
     def test_union_with_mismatching_field(self) -> None:

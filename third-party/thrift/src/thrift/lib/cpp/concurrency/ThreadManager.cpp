@@ -43,6 +43,7 @@
 #include <folly/io/async/Request.h>
 #include <folly/portability/GFlags.h>
 #include <folly/synchronization/LifoSem.h>
+#include <folly/synchronization/RelaxedAtomic.h>
 #include <folly/synchronization/SmallLocks.h>
 #include <folly/tracing/StaticTracepoint.h>
 
@@ -389,7 +390,7 @@ class ThreadManager::Impl : public ThreadManager,
   ExpireCallback codelCallback_;
   InitCallback initCallback_;
 
-  ThreadManager::STATE state_;
+  folly::relaxed_atomic<ThreadManager::STATE> state_;
   std::shared_ptr<ThreadFactory> threadFactory_;
 
   folly::PriorityUMPMCQueueSet<std::unique_ptr<Task>, /* MayBlock = */ false>

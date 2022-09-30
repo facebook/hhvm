@@ -5221,6 +5221,20 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
       'var' => 'clear',
       'type' => \TType::BOOL,
     ),
+    3 => shape(
+      'var' => 'patch',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I32,
+      'vtype' => \TType::STRUCT,
+      'key' => shape(
+        'type' => \TType::I32,
+      ),
+      'val' => shape(
+        'type' => \TType::STRUCT,
+        'class' => \thrift\op\I16Patch::class,
+      ),
+      'format' => 'collection',
+    ),
     7 => shape(
       'var' => 'remove',
       'type' => \TType::LST,
@@ -5252,6 +5266,7 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   const dict<string, int> FIELDMAP = dict[
     'assign' => 1,
     'clear' => 2,
+    'patch' => 3,
     'remove' => 7,
     'prepend' => 8,
     'append' => 9,
@@ -5260,6 +5275,7 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   const type TConstructorShape = shape(
     ?'assign' => ?Vector<int>,
     ?'clear' => ?bool,
+    ?'patch' => ?Map<int, \thrift\op\I16Patch>,
     ?'remove' => ?Vector<int>,
     ?'prepend' => ?Vector<int>,
     ?'append' => ?Vector<int>,
@@ -5268,12 +5284,13 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
   const type TShape = shape(
     ?'assign' => ?vec<int>,
     'clear' => bool,
+    'patch' => dict<int, \thrift\op\I16Patch::TShape>,
     'remove' => vec<int>,
     'prepend' => vec<int>,
     'append' => vec<int>,
     ...
   );
-  const int STRUCTURAL_ID = 6645680550365314285;
+  const int STRUCTURAL_ID = 8909257665578209994;
   /**
    * Assigns a value. If set, all other operations are ignored.
    * 
@@ -5288,6 +5305,13 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
    * 2: bool clear
    */
   public bool $clear;
+  /**
+   * Patches list values by index. Applies second.
+   * 
+   * Original thrift field:-
+   * 3: map<i32, struct patch.I16Patch> patch
+   */
+  public Map<int, \thrift\op\I16Patch> $patch;
   /**
    * Removes entries, if present. Applies third.
    * 
@@ -5310,9 +5334,10 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
    */
   public Vector<int> $append;
 
-  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Vector<int> $remove = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
+  public function __construct(?Vector<int> $assign = null, ?bool $clear = null, ?Map<int, \thrift\op\I16Patch> $patch = null, ?Vector<int> $remove = null, ?Vector<int> $prepend = null, ?Vector<int> $append = null)[] {
     $this->assign = $assign;
     $this->clear = $clear ?? false;
+    $this->patch = $patch ?? Map {};
     $this->remove = $remove ?? Vector {};
     $this->prepend = $prepend ?? Vector {};
     $this->append = $append ?? Vector {};
@@ -5326,6 +5351,7 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
     return new static(
       Shapes::idx($shape, 'assign'),
       Shapes::idx($shape, 'clear'),
+      Shapes::idx($shape, 'patch'),
       Shapes::idx($shape, 'remove'),
       Shapes::idx($shape, 'prepend'),
       Shapes::idx($shape, 'append'),
@@ -5373,6 +5399,34 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
                 )
               ),
               "name" => "clear",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "patch.I16Patch",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "patch",
             )
           ),
           \tmeta_ThriftField::fromShape(
@@ -5458,6 +5512,9 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
     return new static(
       Shapes::idx($shape, 'assign') === null ? null : ((new Vector($shape['assign']))),
       $shape['clear'],
+      (new Map($shape['patch']))->map(
+        $val0 ==> \thrift\op\I16Patch::__fromShape($val0),
+      ),
       (new Vector($shape['remove'])),
       (new Vector($shape['prepend'])),
       (new Vector($shape['append'])),
@@ -5469,6 +5526,10 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
       'assign' => $this->assign
         |> $$ === null ? null : vec($$),
       'clear' => $this->clear,
+      'patch' => $this->patch->map(
+        ($_val0) ==> $_val0->__toShape(),
+      )
+        |> dict($$),
       'remove' => vec($this->remove),
       'prepend' => vec($this->prepend),
       'append' => vec($this->append),
@@ -5503,50 +5564,63 @@ class MyStructFieldN26Patch implements \IThriftSyncStruct, \IThriftShapishSyncSt
     if (idx($parsed, 'clear') !== null) {
       $this->clear = HH\FIXME\UNSAFE_CAST<mixed, bool>($parsed['clear']);
     }
-    if (idx($parsed, 'remove') !== null) {
-      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
-      $_container11 = Vector {};
+    if (idx($parsed, 'patch') !== null) {
+      $_json10 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, \thrift\op\I16Patch>>($parsed['patch']);
+      $_container11 = Map {};
       foreach($_json10 as $_key8 => $_value9) {
-        $_elem12 = 0;
-        $_tmp13 = (int)$_value9;
-        if ($_tmp13 > 0x7fff) {
+        $_value12 = \thrift\op\I16Patch::withDefaultValues();
+        $_tmp13 = \json_encode($_value9);
+        $_tmp14 = \thrift\op\I16Patch::withDefaultValues();
+        $_tmp14->readFromJson($_tmp13);
+        $_value12 = $_tmp14;
+        $_container11[$_key8] = $_value12;
+      }
+      $this->patch = $_container11;
+    }
+    if (idx($parsed, 'remove') !== null) {
+      $_json18 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['remove']);
+      $_container19 = Vector {};
+      foreach($_json18 as $_key16 => $_value17) {
+        $_elem20 = 0;
+        $_tmp21 = (int)$_value17;
+        if ($_tmp21 > 0x7fff) {
           throw new \TProtocolException("number exceeds limit in field");
         } else {
-          $_elem12 = (int)$_tmp13;
+          $_elem20 = (int)$_tmp21;
         }
-        $_container11 []= $_elem12;
+        $_container19 []= $_elem20;
       }
-      $this->remove = $_container11;
+      $this->remove = $_container19;
     }
     if (idx($parsed, 'prepend') !== null) {
-      $_json17 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
-      $_container18 = Vector {};
-      foreach($_json17 as $_key15 => $_value16) {
-        $_elem19 = 0;
-        $_tmp20 = (int)$_value16;
-        if ($_tmp20 > 0x7fff) {
+      $_json25 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['prepend']);
+      $_container26 = Vector {};
+      foreach($_json25 as $_key23 => $_value24) {
+        $_elem27 = 0;
+        $_tmp28 = (int)$_value24;
+        if ($_tmp28 > 0x7fff) {
           throw new \TProtocolException("number exceeds limit in field");
         } else {
-          $_elem19 = (int)$_tmp20;
+          $_elem27 = (int)$_tmp28;
         }
-        $_container18 []= $_elem19;
+        $_container26 []= $_elem27;
       }
-      $this->prepend = $_container18;
+      $this->prepend = $_container26;
     }
     if (idx($parsed, 'append') !== null) {
-      $_json24 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
-      $_container25 = Vector {};
-      foreach($_json24 as $_key22 => $_value23) {
-        $_elem26 = 0;
-        $_tmp27 = (int)$_value23;
-        if ($_tmp27 > 0x7fff) {
+      $_json32 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['append']);
+      $_container33 = Vector {};
+      foreach($_json32 as $_key30 => $_value31) {
+        $_elem34 = 0;
+        $_tmp35 = (int)$_value31;
+        if ($_tmp35 > 0x7fff) {
           throw new \TProtocolException("number exceeds limit in field");
         } else {
-          $_elem26 = (int)$_tmp27;
+          $_elem34 = (int)$_tmp35;
         }
-        $_container25 []= $_elem26;
+        $_container33 []= $_elem34;
       }
-      $this->append = $_container25;
+      $this->append = $_container33;
     }
   }
 

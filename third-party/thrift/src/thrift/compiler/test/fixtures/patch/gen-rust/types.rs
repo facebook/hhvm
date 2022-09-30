@@ -242,12 +242,14 @@ pub struct MyStructFieldN23Patch {
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
 
-#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Clone, PartialEq)]
 pub struct MyStructFieldN26Patch {
     #[doc = "Assigns a value. If set, all other operations are ignored."]
     pub assign: ::std::option::Option<::std::vec::Vec<::std::primitive::i16>>,
     #[doc = "Clears a value. Applies first."]
     pub clear: ::std::primitive::bool,
+    #[doc = "Patches list values by index. Applies second."]
+    pub patch: ::fbthrift::builtin_types::HashMap<::std::primitive::i32, patch::types::I16Patch>,
     #[doc = "Removes entries, if present. Applies third."]
     pub remove: ::std::vec::Vec<::std::primitive::i16>,
     #[doc = "Prepends to the front of a given list."]
@@ -2193,6 +2195,7 @@ impl ::std::default::Default for self::MyStructFieldN26Patch {
         Self {
             assign: ::std::option::Option::None,
             clear: ::std::default::Default::default(),
+            patch: ::std::default::Default::default(),
             remove: ::std::default::Default::default(),
             prepend: ::std::default::Default::default(),
             append: ::std::default::Default::default(),
@@ -2207,6 +2210,7 @@ impl ::std::fmt::Debug for self::MyStructFieldN26Patch {
             .debug_struct("MyStructFieldN26Patch")
             .field("assign", &self.assign)
             .field("clear", &self.clear)
+            .field("patch", &self.patch)
             .field("remove", &self.remove)
             .field("prepend", &self.prepend)
             .field("append", &self.append)
@@ -2241,6 +2245,9 @@ where
         p.write_field_begin("clear", ::fbthrift::TType::Bool, 2);
         ::fbthrift::Serialize::write(&self.clear, p);
         p.write_field_end();
+        p.write_field_begin("patch", ::fbthrift::TType::Map, 3);
+        ::fbthrift::Serialize::write(&self.patch, p);
+        p.write_field_end();
         p.write_field_begin("remove", ::fbthrift::TType::List, 7);
         ::fbthrift::Serialize::write(&self.remove, p);
         p.write_field_end();
@@ -2264,11 +2271,13 @@ where
             ::fbthrift::Field::new("append", ::fbthrift::TType::List, 9),
             ::fbthrift::Field::new("assign", ::fbthrift::TType::List, 1),
             ::fbthrift::Field::new("clear", ::fbthrift::TType::Bool, 2),
+            ::fbthrift::Field::new("patch", ::fbthrift::TType::Map, 3),
             ::fbthrift::Field::new("prepend", ::fbthrift::TType::List, 8),
             ::fbthrift::Field::new("remove", ::fbthrift::TType::List, 7),
         ];
         let mut field_assign = ::std::option::Option::None;
         let mut field_clear = ::std::option::Option::None;
+        let mut field_patch = ::std::option::Option::None;
         let mut field_remove = ::std::option::Option::None;
         let mut field_prepend = ::std::option::Option::None;
         let mut field_append = ::std::option::Option::None;
@@ -2279,6 +2288,7 @@ where
                 (::fbthrift::TType::Stop, _) => break,
                 (::fbthrift::TType::List, 1) => field_assign = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::Bool, 2) => field_clear = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 3) => field_patch = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 7) => field_remove = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 8) => field_prepend = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
                 (::fbthrift::TType::List, 9) => field_append = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
@@ -2290,6 +2300,7 @@ where
         ::std::result::Result::Ok(Self {
             assign: field_assign,
             clear: field_clear.unwrap_or_default(),
+            patch: field_patch.unwrap_or_default(),
             remove: field_remove.unwrap_or_default(),
             prepend: field_prepend.unwrap_or_default(),
             append: field_append.unwrap_or_default(),

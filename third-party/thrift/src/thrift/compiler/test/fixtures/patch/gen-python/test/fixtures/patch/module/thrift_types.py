@@ -1182,6 +1182,14 @@ class MyStructFieldN26Patch(metaclass=_fbthrift_python_types.StructMeta):
             None,  # adapter info
         ),
         (
+            3,  # id
+            _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
+            "patch",  # name
+            lambda: _fbthrift_python_types.MapTypeInfo(_fbthrift_python_types.typeinfo_i32, _fbthrift_python_types.StructTypeInfo(apache.thrift.op.patch.thrift_types.I16Patch)),  # typeinfo
+            None,  # default value
+            None,  # adapter info
+        ),
+        (
             7,  # id
             _fbthrift_python_types.FieldQualifier.Unqualified, # qualifier
             "remove",  # name

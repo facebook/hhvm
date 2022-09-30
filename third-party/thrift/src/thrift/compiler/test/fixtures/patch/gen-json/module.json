@@ -1607,6 +1607,21 @@
             }
           }
         },
+        "patch" : {
+          "type_enum" : "MAP",
+          "spec_args" : { "key_type" : { "type_enum" : "I32", "spec_args" : null }, "val_type" : { "type_enum" : "STRUCT", "spec_args" : "patch.I16Patch"} } ,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 21,
+              "column" : 1
+            },
+            "end" : {
+              "line" : 21,
+              "column" : 21
+            }
+          }
+        },
         "remove" : {
           "type_enum" : "LIST",
           "spec_args" : { "type_enum" : "I16", "spec_args" : null} ,

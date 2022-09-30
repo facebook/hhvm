@@ -1048,6 +1048,21 @@
             "required" : "opt-in-req-out",
             "type" : "bool"
                   },
+          "patch" : {
+            "name" : "patch",
+            "docstring" : "Patches list values by index. Applies second.\n",
+            "key" : 3,
+            "lineno" : 21,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "map",
+  "key_type" : "i32",
+  "value_type" : {
+  "type" : "struct",
+  "name" : "I16Patch"
+}
+}
+                  },
           "remove" : {
             "name" : "remove",
             "docstring" : "Removes entries, if present. Applies third.\n",

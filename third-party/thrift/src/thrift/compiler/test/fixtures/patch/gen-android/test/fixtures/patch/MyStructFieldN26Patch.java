@@ -28,6 +28,7 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
   private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldN26Patch");
   private static final TField ASSIGN_FIELD_DESC = new TField("assign", TType.LIST, (short)1);
   private static final TField CLEAR_FIELD_DESC = new TField("clear", TType.BOOL, (short)2);
+  private static final TField PATCH_FIELD_DESC = new TField("patch", TType.MAP, (short)3);
   private static final TField REMOVE_FIELD_DESC = new TField("remove", TType.LIST, (short)7);
   private static final TField PREPEND_FIELD_DESC = new TField("prepend", TType.LIST, (short)8);
   private static final TField APPEND_FIELD_DESC = new TField("append", TType.LIST, (short)9);
@@ -40,6 +41,10 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
    * Clears a value. Applies first.
    */
   public final Boolean clear;
+  /**
+   * Patches list values by index. Applies second.
+   */
+  public final Map<Integer,I16Patch> patch;
   /**
    * Removes entries, if present. Applies third.
    */
@@ -54,6 +59,7 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
   public final List<Short> append;
   public static final int ASSIGN = 1;
   public static final int CLEAR = 2;
+  public static final int PATCH = 3;
   public static final int REMOVE = 7;
   public static final int PREPEND = 8;
   public static final int APPEND = 9;
@@ -61,11 +67,13 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
   public MyStructFieldN26Patch(
       List<Short> assign,
       Boolean clear,
+      Map<Integer,I16Patch> patch,
       List<Short> remove,
       List<Short> prepend,
       List<Short> append) {
     this.assign = assign;
     this.clear = clear;
+    this.patch = patch;
     this.remove = remove;
     this.prepend = prepend;
     this.append = append;
@@ -84,6 +92,11 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
       this.clear = TBaseHelper.deepCopy(other.clear);
     } else {
       this.clear = null;
+    }
+    if (other.isSetPatch()) {
+      this.patch = TBaseHelper.deepCopy(other.patch);
+    } else {
+      this.patch = null;
     }
     if (other.isSetRemove()) {
       this.remove = TBaseHelper.deepCopy(other.remove);
@@ -128,6 +141,18 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
   // Returns true if field clear is set (has been assigned a value) and false otherwise
   public boolean isSetClear() {
     return this.clear != null;
+  }
+
+  /**
+   * Patches list values by index. Applies second.
+   */
+  public Map<Integer,I16Patch> getPatch() {
+    return this.patch;
+  }
+
+  // Returns true if field patch is set (has been assigned a value) and false otherwise
+  public boolean isSetPatch() {
+    return this.patch != null;
   }
 
   /**
@@ -180,6 +205,8 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
 
     if (!TBaseHelper.equalsNobinary(this.isSetClear(), that.isSetClear(), this.clear, that.clear)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetPatch(), that.isSetPatch(), this.patch, that.patch)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.isSetRemove(), that.isSetRemove(), this.remove, that.remove)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetPrepend(), that.isSetPrepend(), this.prepend, that.prepend)) { return false; }
@@ -191,7 +218,7 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {assign, clear, remove, prepend, append});
+    return Arrays.deepHashCode(new Object[] {assign, clear, patch, remove, prepend, append});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -202,6 +229,7 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
   public static MyStructFieldN26Patch deserialize(TProtocol iprot) throws TException {
     List<Short> tmp_assign = null;
     Boolean tmp_clear = null;
+    Map<Integer,I16Patch> tmp_patch = null;
     List<Short> tmp_remove = null;
     List<Short> tmp_prepend = null;
     List<Short> tmp_append = null;
@@ -241,18 +269,39 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case PATCH:
+          if (__field.type == TType.MAP) {
+            {
+              TMap _map16 = iprot.readMapBegin();
+              tmp_patch = new HashMap<Integer,I16Patch>(Math.max(0, 2*_map16.size));
+              for (int _i17 = 0; 
+                   (_map16.size < 0) ? iprot.peekMap() : (_i17 < _map16.size); 
+                   ++_i17)
+              {
+                Integer _key18;
+                I16Patch _val19;
+                _key18 = iprot.readI32();
+                _val19 = I16Patch.deserialize(iprot);
+                tmp_patch.put(_key18, _val19);
+              }
+              iprot.readMapEnd();
+            }
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         case REMOVE:
           if (__field.type == TType.LIST) {
             {
-              TList _list16 = iprot.readListBegin();
-              tmp_remove = new ArrayList<Short>(Math.max(0, _list16.size));
-              for (int _i17 = 0; 
-                   (_list16.size < 0) ? iprot.peekList() : (_i17 < _list16.size); 
-                   ++_i17)
+              TList _list20 = iprot.readListBegin();
+              tmp_remove = new ArrayList<Short>(Math.max(0, _list20.size));
+              for (int _i21 = 0; 
+                   (_list20.size < 0) ? iprot.peekList() : (_i21 < _list20.size); 
+                   ++_i21)
               {
-                Short _elem18;
-                _elem18 = iprot.readI16();
-                tmp_remove.add(_elem18);
+                Short _elem22;
+                _elem22 = iprot.readI16();
+                tmp_remove.add(_elem22);
               }
               iprot.readListEnd();
             }
@@ -263,15 +312,15 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
         case PREPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list19 = iprot.readListBegin();
-              tmp_prepend = new ArrayList<Short>(Math.max(0, _list19.size));
-              for (int _i20 = 0; 
-                   (_list19.size < 0) ? iprot.peekList() : (_i20 < _list19.size); 
-                   ++_i20)
+              TList _list23 = iprot.readListBegin();
+              tmp_prepend = new ArrayList<Short>(Math.max(0, _list23.size));
+              for (int _i24 = 0; 
+                   (_list23.size < 0) ? iprot.peekList() : (_i24 < _list23.size); 
+                   ++_i24)
               {
-                Short _elem21;
-                _elem21 = iprot.readI16();
-                tmp_prepend.add(_elem21);
+                Short _elem25;
+                _elem25 = iprot.readI16();
+                tmp_prepend.add(_elem25);
               }
               iprot.readListEnd();
             }
@@ -282,15 +331,15 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
         case APPEND:
           if (__field.type == TType.LIST) {
             {
-              TList _list22 = iprot.readListBegin();
-              tmp_append = new ArrayList<Short>(Math.max(0, _list22.size));
-              for (int _i23 = 0; 
-                   (_list22.size < 0) ? iprot.peekList() : (_i23 < _list22.size); 
-                   ++_i23)
+              TList _list26 = iprot.readListBegin();
+              tmp_append = new ArrayList<Short>(Math.max(0, _list26.size));
+              for (int _i27 = 0; 
+                   (_list26.size < 0) ? iprot.peekList() : (_i27 < _list26.size); 
+                   ++_i27)
               {
-                Short _elem24;
-                _elem24 = iprot.readI16();
-                tmp_append.add(_elem24);
+                Short _elem28;
+                _elem28 = iprot.readI16();
+                tmp_append.add(_elem28);
               }
               iprot.readListEnd();
             }
@@ -310,6 +359,7 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
     _that = new MyStructFieldN26Patch(
       tmp_assign
       ,tmp_clear
+      ,tmp_patch
       ,tmp_remove
       ,tmp_prepend
       ,tmp_append
@@ -327,8 +377,8 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
         oprot.writeFieldBegin(ASSIGN_FIELD_DESC);
         {
           oprot.writeListBegin(new TList(TType.I16, this.assign.size()));
-          for (Short _iter25 : this.assign)          {
-            oprot.writeI16(_iter25);
+          for (Short _iter29 : this.assign)          {
+            oprot.writeI16(_iter29);
           }
           oprot.writeListEnd();
         }
@@ -340,12 +390,24 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
       oprot.writeBool(this.clear);
       oprot.writeFieldEnd();
     }
+    if (this.patch != null) {
+      oprot.writeFieldBegin(PATCH_FIELD_DESC);
+      {
+        oprot.writeMapBegin(new TMap(TType.I32, TType.STRUCT, this.patch.size()));
+        for (Map.Entry<Integer, I16Patch> _iter30 : this.patch.entrySet())        {
+          oprot.writeI32(_iter30.getKey());
+          _iter30.getValue().write(oprot);
+        }
+        oprot.writeMapEnd();
+      }
+      oprot.writeFieldEnd();
+    }
     if (this.remove != null) {
       oprot.writeFieldBegin(REMOVE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.remove.size()));
-        for (Short _iter26 : this.remove)        {
-          oprot.writeI16(_iter26);
+        for (Short _iter31 : this.remove)        {
+          oprot.writeI16(_iter31);
         }
         oprot.writeListEnd();
       }
@@ -355,8 +417,8 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(PREPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.prepend.size()));
-        for (Short _iter27 : this.prepend)        {
-          oprot.writeI16(_iter27);
+        for (Short _iter32 : this.prepend)        {
+          oprot.writeI16(_iter32);
         }
         oprot.writeListEnd();
       }
@@ -366,8 +428,8 @@ public class MyStructFieldN26Patch implements TBase, java.io.Serializable, Clone
       oprot.writeFieldBegin(APPEND_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.I16, this.append.size()));
-        for (Short _iter28 : this.append)        {
-          oprot.writeI16(_iter28);
+        for (Short _iter33 : this.append)        {
+          oprot.writeI16(_iter33);
         }
         oprot.writeListEnd();
       }

@@ -76,9 +76,9 @@ def cp_dir(source_dir, dest_dir):
         source_full_path = os.path.join(source_dir, src)
         dest_full_path = os.path.join(dest_dir, src)
 
-        dest_dir = os.path.dirname(dest_full_path)
-        if not os.path.isdir(dest_dir):
-            os.makedirs(dest_dir, 0o700)
+        dest_full_dir = os.path.dirname(dest_full_path)
+        if not os.path.isdir(dest_full_dir):
+            os.makedirs(dest_full_dir, 0o700)
 
         shutil.copy2(source_full_path, dest_full_path)
 

@@ -877,6 +877,7 @@ class cpp_mstch_type : public mstch_type {
              &cpp_mstch_type::type_class_with_indirection},
             {"type:program_name", &cpp_mstch_type::program_name},
             {"type:cpp_use_allocator?", &cpp_mstch_type::cpp_use_allocator},
+            {"type:use_op_encode?", &cpp_mstch_type::use_op_encode},
         });
     register_has_option(
         "type:sync_methods_return_try?", "sync_methods_return_try");
@@ -1002,6 +1003,11 @@ class cpp_mstch_type : public mstch_type {
       name = prog->name();
     }
     return name;
+  }
+  mstch::node use_op_encode() {
+    return t_typedef::get_first_structured_annotation_or_null(
+               type_, kCppUseOpEncodeUri) ||
+        gen::cpp::type_resolver::find_first_adapter(*type_);
   }
 
  private:

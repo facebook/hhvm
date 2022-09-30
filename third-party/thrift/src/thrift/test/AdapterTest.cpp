@@ -798,6 +798,20 @@ TEST(AdaptTest, MoveOnlyAdapter) {
   EXPECT_FALSE(std::is_copy_constructible_v<basic::AlsoMoveOnly>);
 }
 
+TEST(AdaptTest, MoveOnlyArgsReturn) {
+  struct Handler : apache::thrift::ServiceHandler<basic::AdapterService> {
+    void sync_adaptedTypes(
+        basic::HeapAllocated& ret, std::unique_ptr<basic::HeapAllocated> arg) {
+      ret = std::move(*arg);
+    }
+  };
+  basic::HeapAllocated arg = std::make_unique<basic::detail::HeapAllocated>();
+  basic::HeapAllocated ret;
+  EXPECT_FALSE(ret);
+  makeTestClient(std::make_shared<Handler>())->sync_adaptedTypes(ret, arg);
+  EXPECT_TRUE(ret);
+}
+
 TEST(AdaptTest, NumAdapterConversions) {
   // When an adapter implements serializedSize we guarantee to only call
   // toThrift once during deserialization.

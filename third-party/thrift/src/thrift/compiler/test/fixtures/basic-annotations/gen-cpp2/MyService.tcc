@@ -12,7 +12,7 @@
 
 namespace cpp2 {
 typedef apache::thrift::ThriftPresult<false> MyService_ping_pargs;
-typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::YourException>> MyService_ping_presult;
+typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<1, ::apache::thrift::type_class::structure, ::cpp2::YourException, ::apache::thrift::type::adapted<::StaticCast, ::apache::thrift::type::exception_t<::cpp2::detail::YourException>>>> MyService_ping_presult;
 typedef apache::thrift::ThriftPresult<false> MyService_getRandomData_pargs;
 typedef apache::thrift::ThriftPresult<true, apache::thrift::FieldData<0, ::apache::thrift::type_class::string, ::std::string*>> MyService_getRandomData_presult;
 typedef apache::thrift::ThriftPresult<false, apache::thrift::FieldData<1, ::apache::thrift::type_class::integral, ::std::int64_t*>> MyService_hasDataById_pargs;

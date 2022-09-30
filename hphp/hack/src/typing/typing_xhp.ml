@@ -60,18 +60,22 @@ let rec walk_and_gather_xhp_ ~env ~pos cty =
   | Tdynamic ->
     (env, [], [])
   | Tunion tyl ->
-    (* If it's unresolved, make sure it can only be XHP and add every
+    (* If it's a union, make sure it can only be XHP and add every
      * possible class. *)
     walk_list_and_gather_xhp env pos tyl
   | Tintersection tyl ->
-    let (env, xhp, non_xhp) = walk_list_and_gather_xhp env pos tyl in
-    (* ok to have non_xhp if there are some xhp *)
-    let non_xhp =
-      match xhp with
-      | _ :: _ -> []
-      | _ -> non_xhp
-    in
-    (env, xhp, non_xhp)
+    (* If any conjunct is dynamic then we let it pass *)
+    if List.exists tyl ~f:is_dynamic then
+      (env, [], [])
+    else
+      let (env, xhp, non_xhp) = walk_list_and_gather_xhp env pos tyl in
+      (* ok to have non_xhp if there are some xhp *)
+      let non_xhp =
+        match xhp with
+        | _ :: _ -> []
+        | _ -> non_xhp
+      in
+      (env, xhp, non_xhp)
   | Tgeneric ("this", []) ->
     (* This is unsound, but we want to do best-effort checking
      * of attribute spreads even on XHP classes not marked `final`. We should

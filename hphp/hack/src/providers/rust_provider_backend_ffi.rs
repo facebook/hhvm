@@ -19,8 +19,8 @@ use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use ocamlrep_ocamlpool::Bump;
 use oxidized::file_info;
+use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types;
-use oxidized::parser_options::ParserOptions;
 use oxidized_by_ref::direct_decl_parser;
 use oxidized_by_ref::shallow_decl_defs;
 use pos::RelativePath;
@@ -99,7 +99,7 @@ ocaml_ffi! {
         root: PathBuf,
         hhi_root: PathBuf,
         tmp: PathBuf,
-        opts: ParserOptions,
+        opts: GlobalOptions,
     ) -> Backend {
         let path_ctx = RelativePathCtx {
             root,
@@ -109,7 +109,7 @@ ocaml_ffi! {
         };
         let backend = Arc::new(HhServerProviderBackend::new(Config {
             path_ctx,
-            parser_options: opts,
+            opts,
             db_path: None,
         }).unwrap());
         BackendWrapper::positioned(backend)
@@ -311,6 +311,16 @@ ocaml_ffi! {
         name: (pos::TypeName, pos::PropName),
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
+            // If we're not populating member heaps, return None to trigger lazy
+            // member lookup behavior in OCaml. Our shallow decl store will do
+            // lazy member lookup as well (since we constructed it with
+            // ShallowDeclStore::with_no_member_stores), but it's faster to
+            // unmarshal the shallow class into OCaml and let OCaml find the
+            // member than to unmarshal it, convert to a Rust value, find the
+            // member, then convert the member to OCaml.
+            if !backend.opts().tco_populate_member_heaps {
+                return to_ocaml(&None::<()>);
+            }
             if let opt @ Some(_) = unsafe { backend.get_ocaml_property(name) } {
                 return to_ocaml(&opt);
             }
@@ -336,6 +346,10 @@ ocaml_ffi! {
         name: (pos::TypeName, pos::PropName),
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
+            // Let OCaml do the lazy member lookup
+            if !backend.opts().tco_populate_member_heaps {
+                return to_ocaml(&None::<()>);
+            }
             if let opt @ Some(_) = unsafe { backend.get_ocaml_static_property(name) } {
                 return to_ocaml(&opt);
             }
@@ -361,6 +375,10 @@ ocaml_ffi! {
         name: (pos::TypeName, pos::MethodName),
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
+            // Let OCaml do the lazy member lookup
+            if !backend.opts().tco_populate_member_heaps {
+                return to_ocaml(&None::<()>);
+            }
             if let opt @ Some(_) = unsafe { backend.get_ocaml_method(name) } {
                 return to_ocaml(&opt);
             }
@@ -386,6 +404,10 @@ ocaml_ffi! {
         name: (pos::TypeName, pos::MethodName),
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
+            // Let OCaml do the lazy member lookup
+            if !backend.opts().tco_populate_member_heaps {
+                return to_ocaml(&None::<()>);
+            }
             if let opt @ Some(_) = unsafe { backend.get_ocaml_static_method(name) } {
                 return to_ocaml(&opt);
             }
@@ -411,6 +433,10 @@ ocaml_ffi! {
         name: pos::TypeName,
     ) -> UnsafeOcamlPtr {
         if let Some(backend) = backend.as_hh_server_backend() {
+            // Let OCaml do the lazy member lookup
+            if !backend.opts().tco_populate_member_heaps {
+                return to_ocaml(&None::<()>);
+            }
             if let opt @ Some(_) = unsafe { backend.get_ocaml_constructor(name) } {
                 return to_ocaml(&opt);
             }

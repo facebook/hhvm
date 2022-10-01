@@ -425,6 +425,12 @@ cdef class StructOrUnion:
     cdef _fbthrift_get_field_value(self, int16_t index):
         raise NotImplementedError("Not implemented on base StructOrUnion class")
 
+def _unpickle_struct(klass, bytes data):
+    cdef IOBuf iobuf = IOBuf(data)
+    inst = klass.__new__(klass)
+    (<Struct>inst)._deserialize(iobuf, Protocol.COMPACT)
+    return inst
+
 cdef class Struct(StructOrUnion):
     def __cinit__(self):
         cdef StructInfo info = self._fbthrift_struct_info
@@ -539,6 +545,9 @@ cdef class Struct(StructOrUnion):
         fields = ", ".join(f"{name}={repr(value)}" for name, value in self)
         return f"{type(self).__name__}({fields})"
 
+    def __reduce__(self):
+        return (_unpickle_struct, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
+
     cdef folly.iobuf.IOBuf _serialize(self, Protocol proto):
         cdef StructInfo info = self._fbthrift_struct_info
         return folly.iobuf.from_unique_ptr(
@@ -582,6 +591,11 @@ cdef class Struct(StructOrUnion):
     def __get_thrift_uri__():
         return NotImplementedError()
 
+def _unpickle_union(klass, bytes data):
+    cdef IOBuf iobuf = IOBuf(data)
+    inst = klass.__new__(klass)
+    (<Union>inst)._deserialize(iobuf, Protocol.COMPACT)
+    return inst
 
 cdef class Union(StructOrUnion):
     def __cinit__(self):
@@ -725,6 +739,16 @@ cdef class Union(StructOrUnion):
 
     def __dir__(self):
         return dir(type(self))
+
+    def _unpickle(self, klass, bytes data):
+        cdef IOBuf iobuf = IOBuf(data)
+        inst = klass.__new__(klass)
+        (<Union>inst)._deserialize(iobuf, Protocol.COMPACT)
+        return inst
+
+    def __reduce__(self):
+        return (_unpickle_union, (type(self), b''.join(self._serialize(Protocol.COMPACT))))
+
 
 
 cdef make_fget_struct(i, field_id, adapter_info):

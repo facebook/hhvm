@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import pickle
 import unittest
 from enum import Enum
 from typing import cast, Type, TypeVar
@@ -171,6 +172,11 @@ class EnumTests(unittest.TestCase):
     def test_bool(self) -> None:
         self.assertTrue(Kind.None_)
         self.assertTrue(Color.red)
+
+    def test_pickle(self) -> None:
+        serialized = pickle.dumps(Color.green)
+        green = pickle.loads(serialized)
+        self.assertIs(green, Color.green)
 
 
 class FlagTests(unittest.TestCase):

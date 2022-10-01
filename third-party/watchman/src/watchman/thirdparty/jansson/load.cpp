@@ -47,6 +47,11 @@
 typedef int (*get_func)(void* data);
 
 namespace {
+
+// We could write the JSON parser to use O(1) stack depth, but in the short term
+// let's limit container depth.
+constexpr size_t kMaximumDepth = 1000;
+
 typedef struct {
   get_func get;
   void* data;
@@ -67,6 +72,26 @@ struct lex_t {
     json_int_t integer;
     double real;
   } value;
+
+  size_t depth = 0;
+};
+
+class BumpDepth {
+public:
+  explicit BumpDepth(lex_t* lex): lex_{lex} {
+    ++lex_->depth;
+  }
+  ~BumpDepth() {
+    --lex_->depth;
+  }
+
+  BumpDepth(const BumpDepth&) = delete;
+  BumpDepth(BumpDepth&&) = delete;
+  BumpDepth& operator=(const BumpDepth&) = delete;
+  BumpDepth& operator=(BumpDepth&&) = delete;
+
+private:
+  lex_t* lex_;
 };
 }
 
@@ -720,11 +745,23 @@ static std::optional<json_ref> parse_value(lex_t* lex, size_t flags, json_error_
     case TOKEN_NULL:
       return json_null();
 
-    case '{':
+    case '{': {
+      if (lex->depth >= kMaximumDepth) {
+        error_set(error, lex, "document too deep");
+        return std::nullopt;
+      }
+      BumpDepth scope(lex);
       return parse_object(lex, flags, error);
+    }
 
-    case '[':
+    case '[': {
+      if (lex->depth >= kMaximumDepth) {
+        error_set(error, lex, "document too deep");
+        return std::nullopt;
+      }
+      BumpDepth scope(lex);
       return parse_array(lex, flags, error);
+    }
 
     case TOKEN_INVALID:
       error_set(error, lex, "invalid token");

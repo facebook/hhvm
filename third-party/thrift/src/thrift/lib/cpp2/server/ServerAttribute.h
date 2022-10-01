@@ -18,9 +18,9 @@
 
 #include <atomic>
 #include <functional>
+#include <optional>
 #include <type_traits>
 
-#include <folly/Optional.h>
 #include <folly/SharedMutex.h>
 #include <folly/experimental/observer/SimpleObservable.h>
 #include <folly/synchronization/DelayedInit.h>
@@ -40,9 +40,25 @@ namespace thrift {
 
 // source of a server's attribute, precedence takes place in descending order
 // (APP will override CONF). see comment on ServerAttribute to learn more
-enum class AttributeSource : uint32_t {
-  OVERRIDE, // when set directly in application code
-  BASELINE, // e.g., may come from external configuration mechanism
+class AttributeSource final {
+ public:
+  AttributeSource() = delete;
+  constexpr operator uint32_t() const { return value_; }
+  bool operator==(const AttributeSource& other) {
+    return value_ == other.value_;
+  }
+
+ private:
+  constexpr AttributeSource(uint32_t value) : value_{value} {}
+  const uint32_t value_;
+
+  // Begin enum values
+ public:
+  static const AttributeSource BASELINE;
+  static const AttributeSource OVERRIDE;
+
+ private:
+  static const AttributeSource OVERRIDE_INTERNAL;
 };
 
 /**
@@ -86,21 +102,35 @@ template <typename T>
 struct ServerAttributeRawValues {
   T baseline_;
   T override_;
+  T override_internal_;
 
-  template <typename U, typename V>
-  ServerAttributeRawValues(U&& baseline, V&& override)
+  template <typename U, typename V, typename W>
+  ServerAttributeRawValues(U&& baseline, V&& override, W&& override_internal)
       : baseline_(std::forward<U>(baseline)),
-        override_(std::forward<V>(override)) {}
+        override_(std::forward<V>(override)),
+        override_internal_(std::forward<W>(override_internal)) {}
 
   T& choose(AttributeSource source) {
-    return source == AttributeSource::OVERRIDE ? override_ : baseline_;
+    if (source == AttributeSource::BASELINE) {
+      return baseline_;
+    } else if (source == AttributeSource::OVERRIDE) {
+      return override_;
+    }
+
+    return override_internal_;
   }
 };
 
 template <typename T>
 T& mergeServerAttributeRawValues(
-    std::optional<T>& override, std::optional<T>& baseline, T& defaultValue) {
-  return override ? *override : baseline ? *baseline : defaultValue;
+    std::optional<T>& overrideInternal,
+    std::optional<T>& override,
+    std::optional<T>& baseline,
+    T& defaultValue) {
+  return overrideInternal ? *overrideInternal
+      : override          ? *override
+      : baseline          ? *baseline
+                          : defaultValue;
 }
 
 template <typename T>
@@ -118,16 +148,19 @@ struct ServerAttributeObservable {
   const folly::observer::Observer<T>& getObserver() const {
     return mergedObserver_.try_emplace_with([&] {
       return folly::observer::makeObserver(
-          [overrideObserver = rawValues_.override_.getObserver(),
+          [overrideInternalObserver =
+               rawValues_.override_internal_.getObserver(),
+           overrideObserver = rawValues_.override_.getObserver(),
            baselineObserver = rawValues_.baseline_.getObserver(),
            defaultObserver =
                default_.getObserver()]() mutable -> std::shared_ptr<T> {
+            std::optional<T> overrideInternal = **overrideInternalObserver;
             std::optional<T> override = **overrideObserver;
             std::optional<T> baseline = **baselineObserver;
             T defaultValue = **defaultObserver;
             return std::make_shared<T>(
                 apache::thrift::detail::mergeServerAttributeRawValues(
-                    override, baseline, defaultValue));
+                    overrideInternal, override, baseline, defaultValue));
           });
     });
   }
@@ -150,6 +183,7 @@ struct ServerAttributeObservable {
   ServerAttributeRawValues<folly::observer::SimpleObservable<
       folly::observer::Observer<std::optional<T>>>>
       rawValues_{
+          folly::observer::makeStaticObserver<std::optional<T>>(std::nullopt),
           folly::observer::makeStaticObserver<std::optional<T>>(std::nullopt),
           folly::observer::makeStaticObserver<std::optional<T>>(std::nullopt)};
   folly::observer::SimpleObservable<folly::observer::Observer<T>> default_;
@@ -217,12 +251,15 @@ struct ServerAttributeStatic {
  protected:
   void updateMergedValue() {
     auto& merged = apache::thrift::detail::mergeServerAttributeRawValues(
-        rawValues_.override_, rawValues_.baseline_, default_);
+        rawValues_.override_internal_,
+        rawValues_.override_,
+        rawValues_.baseline_,
+        default_);
     merged_ = std::cref(merged);
   }
 
   apache::thrift::detail::ServerAttributeRawValues<std::optional<T>> rawValues_{
-      std::nullopt, std::nullopt};
+      std::nullopt, std::nullopt, std::nullopt};
   T default_;
   std::reference_wrapper<const T> merged_;
 };

@@ -105,6 +105,17 @@ pub struct ShallowProp<R: Reason> {
 
 walkable!(ShallowProp<R> => [ty]);
 
+impl<R: Reason> ShallowProp<R> {
+    /// In OCaml folding, we use Tany when a shallow property has no type. This
+    /// method provides the same behavior.
+    pub fn ty_or_tany(&self) -> Ty<R> {
+        match &self.ty {
+            Some(ty) => ty.clone(),
+            None => Ty::any(R::witness_from_decl(self.name.pos().clone())),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]

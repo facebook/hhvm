@@ -187,15 +187,12 @@ impl<R: Reason> ShallowDeclStore<R> {
     fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) -> Result<()> {
         let cid = cls.name.id();
         for prop in cls.props.iter().rev() {
-            if let Some(ty) = &prop.ty {
-                self.properties.insert((cid, prop.name.id()), ty.clone())?
-            }
+            self.properties
+                .insert((cid, prop.name.id()), prop.ty_or_tany())?
         }
         for prop in cls.static_props.iter().rev() {
-            if let Some(ty) = &prop.ty {
-                self.static_properties
-                    .insert((cid, prop.name.id()), ty.clone())?
-            }
+            self.static_properties
+                .insert((cid, prop.name.id()), prop.ty_or_tany())?
         }
         for meth in cls.methods.iter().rev() {
             self.methods
@@ -224,7 +221,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    prop.ty.clone()
+                    Some(prop.ty_or_tany())
                 } else {
                     None
                 }
@@ -250,7 +247,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.static_props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    prop.ty.clone()
+                    Some(prop.ty_or_tany())
                 } else {
                     None
                 }

@@ -250,6 +250,47 @@ class OptionalPrinter(object):
         return ptr.dereference()
 
 #------------------------------------------------------------------------------
+# (HPHP::req|std)::vector
+
+
+class ReqVectorPrinter(object):
+    RECOGNIZE = '^(HPHP::req|std)::vector<.*>$'
+
+    class _iterator(_BaseIterator):
+        def __init__(self, obj, size):
+            self.obj = obj
+            self.cur = 0
+            self.end = size
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            try:
+                val = idx.vector_at(self.obj, self.cur)
+            except gdb.MemoryError:
+                val = '<unknown>'
+
+            self.cur = self.cur + 1
+
+            return (str(self.cur - 1), val)
+
+    def __init__(self, val):
+        self.val = val
+        self.size = sizeof(val)
+
+    def to_string(self):
+        typ = self.val.type.template_argument(0)
+        return "HPHP::req::vector [%s]: %d element(s)" % (
+            typ,
+            self.size,
+        )
+
+    def children(self):
+        return self._iterator(self.val, self.size)
+
+
+#------------------------------------------------------------------------------
 # ArrayData.
 
 
@@ -566,6 +607,7 @@ printer_classes = [
     CompactVectorPrinter,
     SrcKeyPrinter,
     OptionalPrinter,
+    ReqVectorPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

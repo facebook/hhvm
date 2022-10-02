@@ -1,5 +1,4 @@
 <?hh
-// Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 final class WilfredDemo2 {
   static mixed $f = null;

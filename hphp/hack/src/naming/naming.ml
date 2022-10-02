@@ -1934,17 +1934,18 @@ and expr_ env p (e : Nast.expr_) =
     let x1 = (p, Local_id.to_string lid) in
     N.Class_get (make_class_id env x1, N.CGstring x2, prop_or_method)
   | Aast.Class_get
-      ( (_, _, Aast.CIexpr (_, _, Aast.Id _)),
-        Aast.CGexpr (_, p, _),
+      ( (_, _, Aast.CIexpr (_, _, Aast.Id x1)),
+        Aast.CGexpr ((_, p, _) as x2),
         Ast_defs.Is_method ) ->
     Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
-    invalid_expr_ p
+    N.Class_get (make_class_id env x1, N.CGexpr x2, Ast_defs.Is_method)
   | Aast.Class_get
-      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar _)),
-        Aast.CGexpr (_, p, _),
+      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar (p1, lid))),
+        Aast.CGexpr ((_, p, _) as x2),
         Ast_defs.Is_method ) ->
     Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
-    invalid_expr_ p
+    let x1 = (p1, Local_id.to_string lid) in
+    N.Class_get (make_class_id env x1, N.CGexpr x2, Ast_defs.Is_method)
   | Aast.Class_get ((_, _, Aast.CIexpr x1), Aast.CGstring _, _) ->
     ensure_name_not_dynamic x1;
     ignored_expr_ p

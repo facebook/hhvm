@@ -68,8 +68,6 @@ module Dep = struct
           add local (Fake.make_id x y) acc
         | Class_get ((_, _, x), CGstring (_, y), _) ->
           add local (Fake.make_static_id x y) acc
-        | Class_get _ ->
-          failwith "Dynamic Class_get should never occur after naming"
         | _ -> parent#on_expr acc e
     end
 
@@ -93,7 +91,6 @@ end = struct
       Some (Local_id.to_string (Fake.make_id x y))
     | Class_get ((_, _, x), CGstring (_, y), _) ->
       Some (Local_id.to_string (Fake.make_static_id x y))
-    | Class_get _ -> failwith "This case should never occur after naming"
     | _ -> None
 
   let visitor =

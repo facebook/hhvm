@@ -1,0 +1,6 @@
+File "dynamic_static_method2.php", line 18, characters 8-9:
+No static method `$x` in `Foo` (Typing[4090])
+  File "dynamic_static_method2.php", line 6, characters 26-30:
+  Did you mean `greet` instead?
+  File "dynamic_static_method2.php", line 3, characters 7-9:
+  Declaration of `Foo` is here

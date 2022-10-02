@@ -3,15 +3,24 @@ Errors:
   [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:10-16] Unbound name: `string`
   [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:10-12] Variable `$_` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:12-14] Variable `$_` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-11] Variable `$_` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [154:1-6] Variable `$much` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [31:8-15] No class constant `bar\baz` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
@@ -117,8 +126,8 @@ Errors:
   [108:8-10] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
-  [110:8-10] No class variable `$x` in `Foo`
-  [10:17-34] Did you mean `$_` instead?
+  [110:8-10] No static method `$x` in `Foo`
+  [11:26-29] Did you mean `bar` instead?
   [7:13-16] Declaration of `Foo` is here
   [113:9-11] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
@@ -126,17 +135,23 @@ Errors:
   [115:11-13] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
+  [120:8-10] No static method `$_` in `Foo`
+  [11:26-29] Did you mean `bar` instead?
+  [7:13-16] Declaration of `Foo` is here
   [123:9-11] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
   [124:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
-  [125:9-11] No class variable `$x` in `Foo`
-  [10:17-34] Did you mean `$_` instead?
+  [125:9-11] No static method `$x` in `Foo`
+  [11:26-29] Did you mean `bar` instead?
   [7:13-16] Declaration of `Foo` is here
   [126:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
+  [7:13-16] Declaration of `Foo` is here
+  [130:9-11] No static method `$_` in `Foo`
+  [11:26-29] Did you mean `bar` instead?
   [7:13-16] Declaration of `Foo` is here
 [(Fun
     { fd_namespace =
@@ -330,9 +345,7 @@ Errors:
                      [], [], None)))));
              ([118:3-11], (Expr (((function(): int)), [118:3-10], (Class_get (((Foo), [118:3-6], (CI ([118:3-6], "\\Foo"))), (CGstring ([118:8-10], "$_")), Is_prop)))));
              ([119:3-13], (Expr (((function(): int)), [119:4-11], (Class_get (((Foo), [119:4-7], (CI ([119:4-7], "\\Foo"))), (CGstring ([119:9-11], "$_")), Is_prop)))));
-             ([120:3-13],
-              (Expr
-                 ((int), [120:3-12], (Call ((((function(): int)), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGstring ([120:8-10], "$_")), Is_method))), [], [], None)))));
+             ([120:3-13], (Expr ((_), [120:3-12], (Call (((_), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGstring ([120:8-10], "$_")), Is_method))), [], [], None)))));
              ([121:3-15],
               (Expr ((int), [121:3-14], (Call ((((function(): int)), [121:4-11], (Class_get (((Foo), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))), [], [], None)))));
              ([123:3-13], (Expr ((_), [123:3-12], (Class_get (((Foo), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
@@ -341,334 +354,106 @@ Errors:
              ([126:3-17], (Expr ((_), [126:3-16], (Call (((_), [126:4-13], (Class_get (((Foo), [126:4-7], (CI ([126:4-7], "\\Foo"))), (CGstring ([126:10-12], "$x")), Is_prop))), [], [], None)))));
              ([128:3-13], (Expr (((function(): int)), [128:3-12], (Class_get (((Foo), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGstring ([128:9-11], "$_")), Is_prop)))));
              ([129:3-15], (Expr (((function(): int)), [129:4-13], (Class_get (((Foo), [129:4-7], (CI ([129:4-7], "\\Foo"))), (CGstring ([129:10-12], "$_")), Is_prop)))));
-             ([130:3-15],
-              (Expr
-                 ((int), [130:3-14], (Call ((((function(): int)), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGstring ([130:9-11], "$_")), Is_method))), [], [], None)))));
+             ([130:3-15], (Expr ((_), [130:3-14], (Call (((_), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGstring ([130:9-11], "$_")), Is_method))), [], [], None)))));
              ([131:3-17],
               (Expr ((int), [131:3-16], (Call ((((function(): int)), [131:4-13], (Class_get (((Foo), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))), [], [], None)))));
              ([133:3-18],
               (Expr
-                 ((nothing), [133:3-17],
+                 ((_), [133:3-17],
                   (Call (
-                     ((nothing), [133:3-15],
-                      (Call (
-                         (((function(): nothing)), [133:9-14],
-                          (Lfun (
-                             { f_span = [133:9-14]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([133:9-14], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([133:9-14],
-                                   (Throw
-                                      ((Exception), [133:9-14],
-                                       (New (((Exception), [133:9-14], (CI ([133:9-14], "\\Exception"))), 
-                                          [], [((string), [133:9-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [133:3-15],
+                      (Class_get (((Foo), [133:3-6], (CI ([133:3-6], "\\Foo"))), (
+                         CGexpr ((_), [133:9-14], (Call ((((function(): string)), [133:9-12], (Id ([133:9-12], "\\bar"))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([134:3-34],
               (Expr
-                 ((nothing), [134:3-33],
+                 ((_), [134:3-33],
                   (Call (
-                     ((nothing), [134:3-31],
-                      (Call (
-                         (((function(): nothing)), [134:9-30],
-                          (Lfun (
-                             { f_span = [134:9-30]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([134:9-30], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([134:9-30],
-                                   (Throw
-                                      ((Exception), [134:9-30],
-                                       (New (((Exception), [134:9-30], (CI ([134:9-30], "\\Exception"))), 
-                                          [], [((string), [134:9-30], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [134:3-31],
+                      (Class_get (((Foo), [134:3-6], (CI ([134:3-6], "\\Foo"))),
+                         (CGexpr
+                            ((_), [134:9-30],
+                             (Call ((((function($format, $args)[]: _)), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), 
+                                [], [(Pnormal, ((string), [134:18-22], (String "%s"))); (Pnormal, ((string), [134:24-29], (String "wow")))], None)))),
+                         Is_method))),
                      [], [], None)))));
              ([135:3-32],
               (Expr
-                 ((nothing), [135:3-31],
+                 ((_), [135:3-31],
                   (Call (
-                     ((nothing), [135:3-29],
-                      (Call (
-                         (((function(): nothing)), [135:9-28],
-                          (Lfun (
-                             { f_span = [135:9-28]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([135:9-28], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([135:9-28],
-                                   (Throw
-                                      ((Exception), [135:9-28],
-                                       (New (((Exception), [135:9-28], (CI ([135:9-28], "\\Exception"))), 
-                                          [], [((string), [135:9-28], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [135:3-29],
+                      (Class_get (((Foo), [135:3-6], (CI ([135:3-6], "\\Foo"))),
+                         (CGexpr
+                            ((_), [135:9-28],
+                             (Cast (([135:10-16], (Happly (([135:10-16], "string"), []))), ((int), [135:18-27], (Binop (Plus, ((int), [135:18-21], (Int "123")), ((int), [135:24-27], (Int "456"))))))))),
+                         Is_method))),
                      [], [], None)))));
              ([137:3-21],
               (Expr
-                 ((nothing), [137:3-20],
+                 ((_), [137:3-20],
                   (Call (
-                     ((nothing), [137:3-18],
-                      (Call (
-                         (((function(): nothing)), [137:9-17],
-                          (Lfun (
-                             { f_span = [137:9-17]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([137:9-17], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([137:9-17],
-                                   (Throw
-                                      ((Exception), [137:9-17],
-                                       (New (((Exception), [137:9-17], (CI ([137:9-17], "\\Exception"))), 
-                                          [], [((string), [137:9-17], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [137:3-18],
+                      (Class_get (((Foo), [137:3-6], (CI ([137:3-6], "\\Foo"))),
+                         (CGexpr ((_), [137:9-17], (Binop (Dot, ((string), [137:9-13], (String "ba")), ((string), [137:14-17], (String "r")))))), Is_method))),
                      [], [], None)))));
              ([139:3-26],
               (Expr
-                 ((nothing), [139:3-25],
+                 ((_), [139:3-25],
                   (Call (
-                     ((nothing), [139:3-23],
-                      (Call (
-                         (((function(): nothing)), [139:9-22],
-                          (Lfun (
-                             { f_span = [139:9-22]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([139:9-22], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([139:9-22],
-                                   (Throw
-                                      ((Exception), [139:9-22],
-                                       (New (((Exception), [139:9-22], (CI ([139:9-22], "\\Exception"))), 
-                                          [], [((string), [139:9-22], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [139:3-23],
+                      (Class_get (((Foo), [139:3-6], (CI ([139:3-6], "\\Foo"))),
+                         (CGexpr ((_), [139:9-22], (Binop (Dot, ((string), [139:9-16], (String "bar\\")), ((string), [139:17-22], (String "baz")))))), Is_method))),
                      [], [], None)))));
              ([141:3-17],
               (Expr
-                 ((nothing), [141:3-16],
+                 ((_), [141:3-16],
                   (Call (
-                     ((nothing), [141:3-14],
-                      (Call (
-                         (((function(): nothing)), [141:9-13],
-                          (Lfun (
-                             { f_span = [141:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([141:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([141:9-13],
-                                   (Throw
-                                      ((Exception), [141:9-13],
-                                       (New (((Exception), [141:9-13], (CI ([141:9-13], "\\Exception"))), 
-                                          [], [((string), [141:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [141:3-14],
+                      (Class_get (((Foo), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((_), [141:9-13], (String2 [((dynamic), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method))),
                      [], [], None)))));
              ([143:3-17],
               (Expr
-                 ((nothing), [143:3-16],
+                 ((_), [143:3-16],
                   (Call (
-                     ((nothing), [143:3-14],
-                      (Call (
-                         (((function(): nothing)), [143:9-13],
-                          (Lfun (
-                             { f_span = [143:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([143:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([143:9-13],
-                                   (Throw
-                                      ((Exception), [143:9-13],
-                                       (New (((Exception), [143:9-13], (CI ([143:9-13], "\\Exception"))), 
-                                          [], [((string), [143:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [143:3-14], (Class_get (((Foo), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((_), [143:9-13], (String2 [((_), [143:10-12], (Lvar ([143:10-12], $_)))]))), Is_method))),
                      [], [], None)))));
              ([145:3-19],
               (Expr
-                 ((nothing), [145:3-18],
+                 ((_), [145:3-18],
                   (Call (
-                     ((nothing), [145:3-16],
-                      (Call (
-                         (((function(): nothing)), [145:9-15],
-                          (Lfun (
-                             { f_span = [145:9-15]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([145:9-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([145:9-15],
-                                   (Throw
-                                      ((Exception), [145:9-15],
-                                       (New (((Exception), [145:9-15], (CI ([145:9-15], "\\Exception"))), 
-                                          [], [((string), [145:9-15], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [145:3-16],
+                      (Class_get (((Foo), [145:3-6], (CI ([145:3-6], "\\Foo"))),
+                         (CGexpr ((_), [145:9-15], (String2 [((string), [145:10-12], (String "ba")); ((dynamic), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method))),
                      [], [], None)))));
              ([147:3-19],
               (Expr
-                 ((nothing), [147:3-18],
+                 ((_), [147:3-18],
                   (Call (
-                     ((nothing), [147:3-16],
-                      (Call (
-                         (((function(): nothing)), [147:9-15],
-                          (Lfun (
-                             { f_span = [147:9-15]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([147:9-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([147:9-15],
-                                   (Throw
-                                      ((Exception), [147:9-15],
-                                       (New (((Exception), [147:9-15], (CI ([147:9-15], "\\Exception"))), 
-                                          [], [((string), [147:9-15], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [147:3-16],
+                      (Class_get (((Foo), [147:3-6], (CI ([147:3-6], "\\Foo"))),
+                         (CGexpr ((_), [147:9-15], (String2 [((string), [147:10-12], (String "ba")); ((_), [147:12-14], (Lvar ([147:12-14], $_)))]))), Is_method))),
                      [], [], None)))));
              ([149:3-17],
               (Expr
-                 ((nothing), [149:3-16],
+                 ((_), [149:3-16],
                   (Call (
-                     ((nothing), [149:3-14],
-                      (Call (
-                         (((function(): nothing)), [149:9-13],
-                          (Lfun (
-                             { f_span = [149:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([149:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([149:9-13],
-                                   (Throw
-                                      ((Exception), [149:9-13],
-                                       (New (((Exception), [149:9-13], (CI ([149:9-13], "\\Exception"))), 
-                                          [], [((string), [149:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [149:3-14],
+                      (Class_get (((Foo), [149:3-6], (CI ([149:3-6], "\\Foo"))), (CGexpr ((_), [149:9-13], (Call (((dynamic), [149:9-11], (Lvar ([149:9-11], $x))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([151:3-17],
               (Expr
-                 ((nothing), [151:3-16],
+                 ((_), [151:3-16],
                   (Call (
-                     ((nothing), [151:3-14],
-                      (Call (
-                         (((function(): nothing)), [151:9-13],
-                          (Lfun (
-                             { f_span = [151:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([151:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([151:9-13],
-                                   (Throw
-                                      ((Exception), [151:9-13],
-                                       (New (((Exception), [151:9-13], (CI ([151:9-13], "\\Exception"))), 
-                                          [], [((string), [151:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [151:3-14],
+                      (Class_get (((Foo), [151:3-6], (CI ([151:3-6], "\\Foo"))), (CGexpr ((_), [151:9-13], (Call (((_), [151:9-11], (Lvar ([151:9-11], $_))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([153:3-156:7],
               (Expr
-                 ((nothing), [153:3-156:6],
+                 ((_), [153:3-156:6],
                   (Call (
-                     ((nothing), [153:3-156:4],
-                      (Call (
-                         (((function(): nothing)), [153:9-155:4],
-                          (Lfun (
-                             { f_span = [153:9-155:4]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([153:9-155:4], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([153:9-155:4],
-                                   (Throw
-                                      ((Exception), [153:9-155:4],
-                                       (New (((Exception), [153:9-155:4], (CI ([153:9-155:4], "\\Exception"))), 
-                                          [], [((string), [153:9-155:4], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
-                                   ]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((_), [153:3-156:4],
+                      (Class_get (((Foo), [153:3-6], (CI ([153:3-6], "\\Foo"))),
+                         (CGexpr ((_), [153:9-155:4], (String2 [((_), [154:1-6], (Lvar ([154:1-6], $much))); ((string), [154:6-11], (String " doge"))]))), Is_method))),
                      [], [], None)))))
              ]
            };

@@ -232,265 +232,90 @@ Errors:
                  ((), [133:3-17],
                   (Call (
                      ((), [133:3-15],
-                      (Call (
-                         ((), [133:9-14],
-                          (Lfun (
-                             { f_span = [133:9-14]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([133:9-14], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([133:9-14], (Throw ((), [133:9-14], (New (((), [133:9-14], (CI ([133:9-14], "\\Exception"))), [], [((), [133:9-14], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [133:3-6], (CI ([133:3-6], "\\Foo"))), (CGexpr ((), [133:9-14], (Call (((), [133:9-12], (Id ([133:9-12], "\\bar"))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([134:3-34],
               (Expr
                  ((), [134:3-33],
                   (Call (
                      ((), [134:3-31],
-                      (Call (
-                         ((), [134:9-30],
-                          (Lfun (
-                             { f_span = [134:9-30]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([134:9-30], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([134:9-30], (Throw ((), [134:9-30], (New (((), [134:9-30], (CI ([134:9-30], "\\Exception"))), [], [((), [134:9-30], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [134:3-6], (CI ([134:3-6], "\\Foo"))),
+                         (CGexpr
+                            ((), [134:9-30],
+                             (Call (((), [134:9-17], (Id ([134:9-17], "\\vsprintf"))), [], [(Pnormal, ((), [134:18-22], (String "%s"))); (Pnormal, ((), [134:24-29], (String "wow")))], None)))),
+                         Is_method))),
                      [], [], None)))));
              ([135:3-32],
               (Expr
                  ((), [135:3-31],
                   (Call (
                      ((), [135:3-29],
-                      (Call (
-                         ((), [135:9-28],
-                          (Lfun (
-                             { f_span = [135:9-28]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([135:9-28], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([135:9-28], (Throw ((), [135:9-28], (New (((), [135:9-28], (CI ([135:9-28], "\\Exception"))), [], [((), [135:9-28], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [135:3-6], (CI ([135:3-6], "\\Foo"))),
+                         (CGexpr
+                            ((), [135:9-28],
+                             (Cast (([135:10-16], (Happly (([135:10-16], "string"), []))), ((), [135:18-27], (Binop (Plus, ((), [135:18-21], (Int "123")), ((), [135:24-27], (Int "456"))))))))),
+                         Is_method))),
                      [], [], None)))));
              ([137:3-21],
               (Expr
                  ((), [137:3-20],
                   (Call (
                      ((), [137:3-18],
-                      (Call (
-                         ((), [137:9-17],
-                          (Lfun (
-                             { f_span = [137:9-17]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([137:9-17], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([137:9-17], (Throw ((), [137:9-17], (New (((), [137:9-17], (CI ([137:9-17], "\\Exception"))), [], [((), [137:9-17], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [137:3-6], (CI ([137:3-6], "\\Foo"))), (CGexpr ((), [137:9-17], (Binop (Dot, ((), [137:9-13], (String "ba")), ((), [137:14-17], (String "r")))))), Is_method))),
                      [], [], None)))));
              ([139:3-26],
               (Expr
                  ((), [139:3-25],
                   (Call (
                      ((), [139:3-23],
-                      (Call (
-                         ((), [139:9-22],
-                          (Lfun (
-                             { f_span = [139:9-22]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([139:9-22], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([139:9-22], (Throw ((), [139:9-22], (New (((), [139:9-22], (CI ([139:9-22], "\\Exception"))), [], [((), [139:9-22], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [139:3-6], (CI ([139:3-6], "\\Foo"))), (
+                         CGexpr ((), [139:9-22], (Binop (Dot, ((), [139:9-16], (String "bar\\")), ((), [139:17-22], (String "baz")))))), Is_method))),
                      [], [], None)))));
              ([141:3-17],
               (Expr
                  ((), [141:3-16],
-                  (Call (
-                     ((), [141:3-14],
-                      (Call (
-                         ((), [141:9-13],
-                          (Lfun (
-                             { f_span = [141:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([141:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([141:9-13], (Throw ((), [141:9-13], (New (((), [141:9-13], (CI ([141:9-13], "\\Exception"))), [], [((), [141:9-13], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                  (Call (((), [141:3-14], (Class_get (((), [141:3-6], (CI ([141:3-6], "\\Foo"))), (CGexpr ((), [141:9-13], (String2 [((), [141:10-12], (Lvar ([141:10-12], $x)))]))), Is_method))), 
                      [], [], None)))));
              ([143:3-17],
               (Expr
                  ((), [143:3-16],
-                  (Call (
-                     ((), [143:3-14],
-                      (Call (
-                         ((), [143:9-13],
-                          (Lfun (
-                             { f_span = [143:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([143:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([143:9-13], (Throw ((), [143:9-13], (New (((), [143:9-13], (CI ([143:9-13], "\\Exception"))), [], [((), [143:9-13], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                  (Call (((), [143:3-14], (Class_get (((), [143:3-6], (CI ([143:3-6], "\\Foo"))), (CGexpr ((), [143:9-13], (String2 [((), [143:10-12], (Lvar ([143:10-12], $_)))]))), Is_method))), 
                      [], [], None)))));
              ([145:3-19],
               (Expr
                  ((), [145:3-18],
                   (Call (
                      ((), [145:3-16],
-                      (Call (
-                         ((), [145:9-15],
-                          (Lfun (
-                             { f_span = [145:9-15]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([145:9-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([145:9-15], (Throw ((), [145:9-15], (New (((), [145:9-15], (CI ([145:9-15], "\\Exception"))), [], [((), [145:9-15], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [145:3-6], (CI ([145:3-6], "\\Foo"))), (
+                         CGexpr ((), [145:9-15], (String2 [((), [145:10-12], (String "ba")); ((), [145:12-14], (Lvar ([145:12-14], $x)))]))), Is_method))),
                      [], [], None)))));
              ([147:3-19],
               (Expr
                  ((), [147:3-18],
                   (Call (
                      ((), [147:3-16],
-                      (Call (
-                         ((), [147:9-15],
-                          (Lfun (
-                             { f_span = [147:9-15]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([147:9-15], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([147:9-15], (Throw ((), [147:9-15], (New (((), [147:9-15], (CI ([147:9-15], "\\Exception"))), [], [((), [147:9-15], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [147:3-6], (CI ([147:3-6], "\\Foo"))), (
+                         CGexpr ((), [147:9-15], (String2 [((), [147:10-12], (String "ba")); ((), [147:12-14], (Lvar ([147:12-14], $_)))]))), Is_method))),
                      [], [], None)))));
              ([149:3-17],
               (Expr
                  ((), [149:3-16],
                   (Call (
-                     ((), [149:3-14],
-                      (Call (
-                         ((), [149:9-13],
-                          (Lfun (
-                             { f_span = [149:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([149:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([149:9-13], (Throw ((), [149:9-13], (New (((), [149:9-13], (CI ([149:9-13], "\\Exception"))), [], [((), [149:9-13], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((), [149:3-14], (Class_get (((), [149:3-6], (CI ([149:3-6], "\\Foo"))), (CGexpr ((), [149:9-13], (Call (((), [149:9-11], (Lvar ([149:9-11], $x))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([151:3-17],
               (Expr
                  ((), [151:3-16],
                   (Call (
-                     ((), [151:3-14],
-                      (Call (
-                         ((), [151:9-13],
-                          (Lfun (
-                             { f_span = [151:9-13]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([151:9-13], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([151:9-13], (Throw ((), [151:9-13], (New (((), [151:9-13], (CI ([151:9-13], "\\Exception"))), [], [((), [151:9-13], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                     ((), [151:3-14], (Class_get (((), [151:3-6], (CI ([151:3-6], "\\Foo"))), (CGexpr ((), [151:9-13], (Call (((), [151:9-11], (Lvar ([151:9-11], $_))), [], [], None)))), Is_method))),
                      [], [], None)))));
              ([153:3-156:7],
               (Expr
                  ((), [153:3-156:6],
                   (Call (
                      ((), [153:3-156:4],
-                      (Call (
-                         ((), [153:9-155:4],
-                          (Lfun (
-                             { f_span = [153:9-155:4]; f_readonly_this = None; 
-                               f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([153:9-155:4], "invalid_expr"); 
-                               f_tparams = []; f_where_constraints = []; 
-                               f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
-                               f_body =
-                               { fb_ast =
-                                 [([153:9-155:4],
-                                   (Throw ((), [153:9-155:4], (New (((), [153:9-155:4], (CI ([153:9-155:4], "\\Exception"))), [], [((), [153:9-155:4], (String "invalid expression"))], None, ())))))]
-                                 };
-                               f_fun_kind = FSync; f_user_attributes = []; 
-                               f_external = false; f_doc_comment = None },
-                             []))),
-                         [], [], None))),
+                      (Class_get (((), [153:3-6], (CI ([153:3-6], "\\Foo"))), (
+                         CGexpr ((), [153:9-155:4], (String2 [((), [154:1-6], (Lvar ([154:1-6], $much))); ((), [154:6-11], (String " doge"))]))), Is_method))),
                      [], [], None)))))
              ]
            };

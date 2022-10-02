@@ -1,0 +1,18 @@
+File "dynamic_static_method3.php", line 18, characters 3-56:
+  (dynamic, dynamic, dynamic, dynamic, _, _, _, _)
+File "dynamic_static_method3.php", line 13, characters 14-15:
+No static method `$x` in `Foo` (Typing[4090])
+  File "dynamic_static_method3.php", line 3, characters 7-9:
+  Declaration of `Foo` is here
+File "dynamic_static_method3.php", line 14, characters 14-15:
+No static method `$y` in `Foo` (Typing[4090])
+  File "dynamic_static_method3.php", line 3, characters 7-9:
+  Declaration of `Foo` is here
+File "dynamic_static_method3.php", line 15, characters 14-15:
+No static method `$z` in `Foo` (Typing[4090])
+  File "dynamic_static_method3.php", line 3, characters 7-9:
+  Declaration of `Foo` is here
+File "dynamic_static_method3.php", line 16, characters 14-15:
+No static method `$w` in `Foo` (Typing[4090])
+  File "dynamic_static_method3.php", line 3, characters 7-9:
+  Declaration of `Foo` is here

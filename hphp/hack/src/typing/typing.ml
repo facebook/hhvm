@@ -4413,23 +4413,20 @@ and expr_
         expr_error env (Reason.Rwitness p) outer
     end
   | Class_const (cid, mid) -> class_const env p (cid, mid)
-  | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method)
+  | Class_get (((_, _, cid_) as cid), CGstring mid, Is_prop)
     when Env.FakeMembers.is_valid_static env cid_ (snd mid) ->
     let (env, local) = Env.FakeMembers.make_static env cid_ (snd mid) p in
     let local = ((), p, Lvar (p, local)) in
     let (env, _, ty) = expr env local in
     let (env, _tal, te, _) = class_expr env [] cid in
-    make_result
-      env
-      p
-      (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
-      ty
+    make_result env p (Aast.Class_get (te, Aast.CGstring mid, Is_prop)) ty
+  (* Statically-known static property access e.g. Foo::$x *)
   | Class_get (((_, _, cid_) as cid), CGstring mid, prop_or_method) ->
     let (env, _tal, te, cty) = class_expr env [] cid in
     let env = might_throw env in
     let (env, (ty, _tal)) =
       class_get
-        ~is_method:false
+        ~is_method:(equal_prop_or_method prop_or_method Is_method)
         ~is_const:false
         ~coerce_from_ty:None
         env
@@ -4445,11 +4442,24 @@ and expr_
       p
       (Aast.Class_get (te, Aast.CGstring mid, prop_or_method))
       ty
+  (* Dynamic static method invocation or property access. `$y = "bar"; Foo::$y()` is interpreted as `Foo::bar()` *)
+  | Class_get (cid, CGexpr m, prop_or_method) ->
+    let (env, _tal, te, cty) = class_expr env [] cid in
+    (* Match Obj_get dynamic instance property access behavior *)
+    let (env, tm, _) = expr env m in
+    let ty =
+      if TUtils.is_dynamic env cty then
+        MakeType.dynamic (Reason.Rwitness p)
+      else
+        Typing_utils.mk_tany env p
+    in
+    let (_, pos, tm) = tm in
+    let env = might_throw env in
+    let tm = Tast.make_typed_expr pos ty tm in
+    make_result env p (Aast.Class_get (te, Aast.CGexpr tm, prop_or_method)) ty
   (* Fake member property access. For example:
    *   if ($x->f !== null) { ...$x->f... }
    *)
-  | Class_get (_, CGexpr _, _) ->
-    failwith "AST should not have any CGexprs after naming"
   | Obj_get (e, (_, pid, Id (py, y)), nf, is_prop)
     when Env.FakeMembers.is_valid env e y ->
     let env = might_throw env in
@@ -6332,26 +6342,6 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
           (env, te1, ty2, rval_ty_mismatch_opt)
         | _ -> (env, te1, ty2, rval_ty_mismatch_opt)
       end
-    | (_, _, Obj_get _) ->
-      let lenv = env.lenv in
-      let no_fakes = LEnv.env_with_empty_fakes env in
-      let (env, te1, real_type) = lvalue no_fakes e1 in
-      let (env, exp_real_type) = Env.expand_type env real_type in
-      let env = { env with lenv } in
-      let (env, ty_err_opt) =
-        Typing_coercion.coerce_type
-          p
-          ur
-          env
-          ty2
-          (MakeType.unenforced exp_real_type)
-          Typing_error.Callback.unify_error
-      in
-      Option.iter ty_err_opt ~f:Errors.add_typing_error;
-      let ty_mismatch = mk_ty_mismatch_opt ty2 exp_real_type ty_err_opt in
-      (env, te1, ty2, ty_mismatch)
-    | (_, _, Class_get (_, CGexpr _, _)) ->
-      failwith "AST should not have any CGexprs after naming"
     | (_, _, Class_get (((_, _, x) as cid), CGstring (pos_member, y), _)) ->
       let lenv = env.lenv in
       let no_fakes = LEnv.env_with_empty_fakes env in
@@ -6377,6 +6367,25 @@ and assign_with_subtype_err_ p ur env (e1 : Nast.expr) pos2 ty2 =
       in
       let env = set_valid_rvalue p env local refined_ty in
       (env, te1, ty2, rval_err_opt)
+    | (_, _, Obj_get _)
+    | (_, _, Class_get _) ->
+      let lenv = env.lenv in
+      let no_fakes = LEnv.env_with_empty_fakes env in
+      let (env, te1, real_type) = lvalue no_fakes e1 in
+      let (env, exp_real_type) = Env.expand_type env real_type in
+      let env = { env with lenv } in
+      let (env, ty_err_opt) =
+        Typing_coercion.coerce_type
+          p
+          ur
+          env
+          ty2
+          (MakeType.unenforced exp_real_type)
+          Typing_error.Callback.unify_error
+      in
+      Option.iter ty_err_opt ~f:Errors.add_typing_error;
+      let ty_mismatch = mk_ty_mismatch_opt ty2 exp_real_type ty_err_opt in
+      (env, te1, ty2, ty_mismatch)
     | (_, pos, Array_get (e1, None)) ->
       let (env, te1, ty1) = update_array_type pos env e1 `lvalue in
       let (_, p1, _) = e1 in

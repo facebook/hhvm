@@ -7,7 +7,7 @@ File "static_props.php", line 21, characters 3-22:
 File "static_props.php", line 22, characters 3-26:
   nothing
 File "static_props.php", line 27, characters 3-22:
-  float
+  _
 File "static_props.php", line 28, characters 3-25:
   dynamic
 File "static_props.php", line 33, characters 3-24:
@@ -15,8 +15,20 @@ File "static_props.php", line 33, characters 3-24:
 File "static_props.php", line 34, characters 3-26:
   float
 File "static_props.php", line 37, characters 3-22:
-  float
+  _
 File "static_props.php", line 38, characters 3-25:
   dynamic
 File "static_props.php", line 22, characters 17-24:
 Cannot use dynamic class or method name in strict mode (Naming[2078])
+File "static_props.php", line 27, characters 16-19:
+No static method `$baz` in `Foo` (Typing[4090])
+  File "static_props.php", line 7, characters 26-28:
+  Did you mean `bar` instead?
+  File "static_props.php", line 3, characters 7-9:
+  Declaration of `Foo` is here
+File "static_props.php", line 37, characters 16-19:
+No static method `$baz` in `Foo` (Typing[4090])
+  File "static_props.php", line 7, characters 26-28:
+  Did you mean `bar` instead?
+  File "static_props.php", line 3, characters 7-9:
+  Declaration of `Foo` is here

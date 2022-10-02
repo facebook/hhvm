@@ -14,6 +14,7 @@ import gdbutils
 from gdbutils import *
 from lookup import lookup_func
 from sizeof import sizeof
+from asio import WaitHandle
 import idx
 from hhbc import as_idx
 
@@ -587,6 +588,34 @@ class SrcKeyPrinter(object):
 
         return '%s@%d%s' % (func, offset, mode)
 
+
+#------------------------------------------------------------------------------
+# AsioBlockable.
+
+
+class AsioBlockablePrinter(object):
+    RECOGNIZE = '^HPHP::AsioBlockable$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def kind(self):
+        kind = (self.val['m_bits'] & 0x7).cast(T('HPHP::AsioBlockable::Kind'))
+        return str(kind).split('::')[-1]
+
+    def next(self):
+        ty = T('HPHP::AsioBlockable').pointer()
+        return (self.val['m_bits'] & ~0x7).cast(ty)
+
+    def to_string(self):
+        wh = WaitHandle.from_blockable(self.val.address)
+        return 'AsioBlockable kind=%s next=%s wh=%s' % (
+            self.kind(),
+            self.next(),
+            wh.to_string() if wh is not None else 'unresolved'
+        )
+
+
 #------------------------------------------------------------------------------
 # Lookup function.
 
@@ -606,6 +635,7 @@ printer_classes = [
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,
+    AsioBlockablePrinter,
     OptionalPrinter,
     ReqVectorPrinter,
 ]

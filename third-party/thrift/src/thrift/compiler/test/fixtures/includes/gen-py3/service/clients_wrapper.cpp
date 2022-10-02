@@ -27,9 +27,9 @@ MyServiceClientWrapper::query(
       arg_s,
       arg_i
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -52,9 +52,9 @@ MyServiceClientWrapper::has_arg_docs(
       arg_s,
       arg_i
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

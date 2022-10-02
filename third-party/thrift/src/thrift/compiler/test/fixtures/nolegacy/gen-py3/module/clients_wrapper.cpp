@@ -27,9 +27,9 @@ MyServiceClientWrapper::query(
       std::move(callback),
       arg_val
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::test::fixtures::nolegacy::TestStruct>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

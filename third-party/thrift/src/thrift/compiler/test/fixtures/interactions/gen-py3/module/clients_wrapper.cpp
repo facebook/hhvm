@@ -23,9 +23,9 @@ MyServiceClientWrapper::foo(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -46,9 +46,9 @@ MyServiceClientWrapper::interact(
       std::move(callback),
       arg_arg
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -67,9 +67,9 @@ MyServiceClientWrapper::interactFast(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -88,9 +88,9 @@ MyServiceClientWrapper::serialize(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -145,9 +145,9 @@ MyServiceClientWrapper::MyInteractionInteractionWrapper::frobnicate(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -166,9 +166,9 @@ MyServiceClientWrapper::MyInteractionInteractionWrapper::ping(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -187,9 +187,9 @@ MyServiceClientWrapper::MyInteractionInteractionWrapper::truthify(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<bool>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -208,9 +208,9 @@ MyServiceClientWrapper::MyInteractionFastInteractionWrapper::frobnicate(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -229,9 +229,9 @@ MyServiceClientWrapper::MyInteractionFastInteractionWrapper::ping(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -250,9 +250,9 @@ MyServiceClientWrapper::MyInteractionFastInteractionWrapper::truthify(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<bool>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -271,9 +271,9 @@ MyServiceClientWrapper::SerialInteractionInteractionWrapper::frobnicate(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

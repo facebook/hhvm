@@ -27,9 +27,9 @@ PubSubStreamingServiceClientWrapper::returnstream(
       arg_i32_from,
       arg_i32_to
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -50,9 +50,9 @@ PubSubStreamingServiceClientWrapper::streamthrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -73,9 +73,9 @@ PubSubStreamingServiceClientWrapper::servicethrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -96,9 +96,9 @@ PubSubStreamingServiceClientWrapper::boththrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -119,9 +119,9 @@ PubSubStreamingServiceClientWrapper::responseandstreamstreamthrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -142,9 +142,9 @@ PubSubStreamingServiceClientWrapper::responseandstreamservicethrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -165,9 +165,9 @@ PubSubStreamingServiceClientWrapper::responseandstreamboththrows(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ResponseAndClientBufferedStream<int32_t,int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -190,9 +190,9 @@ PubSubStreamingServiceClientWrapper::returnstreamFast(
       arg_i32_from,
       arg_i32_to
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<apache::thrift::ClientBufferedStream<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

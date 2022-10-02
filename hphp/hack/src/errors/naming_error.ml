@@ -236,6 +236,7 @@ type t =
       classish_kind: Ast_defs.classish_kind;
     }
   | Module_declaration_outside_allowed_files of Pos.t
+  | Dynamic_method_access of Pos.t
 
 let const_without_typehint pos name type_ =
   let name = Utils.strip_all_ns name in
@@ -329,7 +330,7 @@ let method_needs_visibility pos =
 let dynamic_class_name_in_strict_mode pos =
   User_error.make
     Error_code.(to_enum DynamicClassNameInStrictMode)
-    (pos, "Cannot use dynamic class name in strict mode")
+    (pos, "Cannot use dynamic class or method name in strict mode")
     []
 
 let xhp_optional_required_attr pos id =
@@ -855,6 +856,14 @@ let lvar_in_obj_get pos =
     )
     []
 
+let dynamic_method_access pos =
+  User_error.make
+    Error_code.(to_enum DynamicMethodAccess)
+    ( pos,
+      "Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`"
+    )
+    []
+
 let class_meth_non_final_self pos class_name =
   User_error.make
     Error_code.(to_enum ClassMethNonFinalSelf)
@@ -1200,3 +1209,4 @@ let to_user_error = function
     explicit_consistent_constructor classish_kind pos
   | Module_declaration_outside_allowed_files pos ->
     module_declaration_outside_allowed_files pos
+  | Dynamic_method_access pos -> dynamic_method_access pos

@@ -1933,6 +1933,18 @@ and expr_ env p (e : Nast.expr_) =
         prop_or_method ) ->
     let x1 = (p, Local_id.to_string lid) in
     N.Class_get (make_class_id env x1, N.CGstring x2, prop_or_method)
+  | Aast.Class_get
+      ( (_, _, Aast.CIexpr (_, _, Aast.Id _)),
+        Aast.CGexpr (_, p, _),
+        Ast_defs.Is_method ) ->
+    Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
+    invalid_expr_ p
+  | Aast.Class_get
+      ( (_, _, Aast.CIexpr (_, _, Aast.Lvar _)),
+        Aast.CGexpr (_, p, _),
+        Ast_defs.Is_method ) ->
+    Errors.add_naming_error @@ Naming_error.Dynamic_method_access p;
+    invalid_expr_ p
   | Aast.Class_get ((_, _, Aast.CIexpr x1), Aast.CGstring _, _) ->
     ensure_name_not_dynamic x1;
     ignored_expr_ p
@@ -1940,7 +1952,10 @@ and expr_ env p (e : Nast.expr_) =
     ensure_name_not_dynamic x1;
     ensure_name_not_dynamic x2;
     ignored_expr_ p
-  | Aast.Class_get _ -> failwith "Error in Ast_to_nast module for Class_get"
+  | Aast.Class_get
+      ((_, _, (Aast.CIparent | Aast.CIself | Aast.CIstatic | Aast.CI _)), _, _)
+    ->
+    failwith "Error in Ast_to_nast module for Class_get"
   | Aast.Class_const ((_, _, Aast.CIexpr (_, _, Aast.Id x1)), ((_, str) as x2))
     when String.equal str "class" ->
     N.Class_const (make_class_id env x1, x2)

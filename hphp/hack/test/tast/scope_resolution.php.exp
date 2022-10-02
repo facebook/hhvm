@@ -1,17 +1,17 @@
 Errors:
   [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
-  [133:9-14] Cannot use dynamic class name in strict mode
-  [134:9-30] Cannot use dynamic class name in strict mode
-  [135:9-28] Cannot use dynamic class name in strict mode
-  [137:9-17] Cannot use dynamic class name in strict mode
-  [139:9-22] Cannot use dynamic class name in strict mode
-  [141:9-13] Cannot use dynamic class name in strict mode
-  [143:9-13] Cannot use dynamic class name in strict mode
-  [145:9-15] Cannot use dynamic class name in strict mode
-  [147:9-15] Cannot use dynamic class name in strict mode
-  [149:9-13] Cannot use dynamic class name in strict mode
-  [151:9-13] Cannot use dynamic class name in strict mode
-  [153:9-155:4] Cannot use dynamic class name in strict mode
+  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [31:8-15] No class constant `bar\baz` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
@@ -352,20 +352,20 @@ Errors:
                   (Call (
                      ((nothing), [133:3-15],
                       (Call (
-                         (((function(): nothing)), [133:3-15],
+                         (((function(): nothing)), [133:9-14],
                           (Lfun (
-                             { f_span = [133:3-15]; f_readonly_this = None; 
+                             { f_span = [133:9-14]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([133:3-15], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([133:9-14], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([133:3-15],
+                                 [([133:9-14],
                                    (Throw
-                                      ((Exception), [133:3-15],
-                                       (New (((Exception), [133:3-15], (CI ([133:3-15], "\\Exception"))), 
-                                          [], [((string), [133:3-15], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [133:9-14],
+                                       (New (((Exception), [133:9-14], (CI ([133:9-14], "\\Exception"))), 
+                                          [], [((string), [133:9-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -379,20 +379,20 @@ Errors:
                   (Call (
                      ((nothing), [134:3-31],
                       (Call (
-                         (((function(): nothing)), [134:3-31],
+                         (((function(): nothing)), [134:9-30],
                           (Lfun (
-                             { f_span = [134:3-31]; f_readonly_this = None; 
+                             { f_span = [134:9-30]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([134:3-31], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([134:9-30], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([134:3-31],
+                                 [([134:9-30],
                                    (Throw
-                                      ((Exception), [134:3-31],
-                                       (New (((Exception), [134:3-31], (CI ([134:3-31], "\\Exception"))), 
-                                          [], [((string), [134:3-31], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [134:9-30],
+                                       (New (((Exception), [134:9-30], (CI ([134:9-30], "\\Exception"))), 
+                                          [], [((string), [134:9-30], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -406,20 +406,20 @@ Errors:
                   (Call (
                      ((nothing), [135:3-29],
                       (Call (
-                         (((function(): nothing)), [135:3-29],
+                         (((function(): nothing)), [135:9-28],
                           (Lfun (
-                             { f_span = [135:3-29]; f_readonly_this = None; 
+                             { f_span = [135:9-28]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([135:3-29], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([135:9-28], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([135:3-29],
+                                 [([135:9-28],
                                    (Throw
-                                      ((Exception), [135:3-29],
-                                       (New (((Exception), [135:3-29], (CI ([135:3-29], "\\Exception"))), 
-                                          [], [((string), [135:3-29], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [135:9-28],
+                                       (New (((Exception), [135:9-28], (CI ([135:9-28], "\\Exception"))), 
+                                          [], [((string), [135:9-28], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -433,20 +433,20 @@ Errors:
                   (Call (
                      ((nothing), [137:3-18],
                       (Call (
-                         (((function(): nothing)), [137:3-18],
+                         (((function(): nothing)), [137:9-17],
                           (Lfun (
-                             { f_span = [137:3-18]; f_readonly_this = None; 
+                             { f_span = [137:9-17]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([137:3-18], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([137:9-17], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([137:3-18],
+                                 [([137:9-17],
                                    (Throw
-                                      ((Exception), [137:3-18],
-                                       (New (((Exception), [137:3-18], (CI ([137:3-18], "\\Exception"))), 
-                                          [], [((string), [137:3-18], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [137:9-17],
+                                       (New (((Exception), [137:9-17], (CI ([137:9-17], "\\Exception"))), 
+                                          [], [((string), [137:9-17], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -460,20 +460,20 @@ Errors:
                   (Call (
                      ((nothing), [139:3-23],
                       (Call (
-                         (((function(): nothing)), [139:3-23],
+                         (((function(): nothing)), [139:9-22],
                           (Lfun (
-                             { f_span = [139:3-23]; f_readonly_this = None; 
+                             { f_span = [139:9-22]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([139:3-23], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([139:9-22], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([139:3-23],
+                                 [([139:9-22],
                                    (Throw
-                                      ((Exception), [139:3-23],
-                                       (New (((Exception), [139:3-23], (CI ([139:3-23], "\\Exception"))), 
-                                          [], [((string), [139:3-23], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [139:9-22],
+                                       (New (((Exception), [139:9-22], (CI ([139:9-22], "\\Exception"))), 
+                                          [], [((string), [139:9-22], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -487,20 +487,20 @@ Errors:
                   (Call (
                      ((nothing), [141:3-14],
                       (Call (
-                         (((function(): nothing)), [141:3-14],
+                         (((function(): nothing)), [141:9-13],
                           (Lfun (
-                             { f_span = [141:3-14]; f_readonly_this = None; 
+                             { f_span = [141:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([141:3-14], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([141:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([141:3-14],
+                                 [([141:9-13],
                                    (Throw
-                                      ((Exception), [141:3-14],
-                                       (New (((Exception), [141:3-14], (CI ([141:3-14], "\\Exception"))), 
-                                          [], [((string), [141:3-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [141:9-13],
+                                       (New (((Exception), [141:9-13], (CI ([141:9-13], "\\Exception"))), 
+                                          [], [((string), [141:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -514,20 +514,20 @@ Errors:
                   (Call (
                      ((nothing), [143:3-14],
                       (Call (
-                         (((function(): nothing)), [143:3-14],
+                         (((function(): nothing)), [143:9-13],
                           (Lfun (
-                             { f_span = [143:3-14]; f_readonly_this = None; 
+                             { f_span = [143:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([143:3-14], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([143:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([143:3-14],
+                                 [([143:9-13],
                                    (Throw
-                                      ((Exception), [143:3-14],
-                                       (New (((Exception), [143:3-14], (CI ([143:3-14], "\\Exception"))), 
-                                          [], [((string), [143:3-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [143:9-13],
+                                       (New (((Exception), [143:9-13], (CI ([143:9-13], "\\Exception"))), 
+                                          [], [((string), [143:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -541,20 +541,20 @@ Errors:
                   (Call (
                      ((nothing), [145:3-16],
                       (Call (
-                         (((function(): nothing)), [145:3-16],
+                         (((function(): nothing)), [145:9-15],
                           (Lfun (
-                             { f_span = [145:3-16]; f_readonly_this = None; 
+                             { f_span = [145:9-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([145:3-16], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([145:9-15], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([145:3-16],
+                                 [([145:9-15],
                                    (Throw
-                                      ((Exception), [145:3-16],
-                                       (New (((Exception), [145:3-16], (CI ([145:3-16], "\\Exception"))), 
-                                          [], [((string), [145:3-16], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [145:9-15],
+                                       (New (((Exception), [145:9-15], (CI ([145:9-15], "\\Exception"))), 
+                                          [], [((string), [145:9-15], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -568,20 +568,20 @@ Errors:
                   (Call (
                      ((nothing), [147:3-16],
                       (Call (
-                         (((function(): nothing)), [147:3-16],
+                         (((function(): nothing)), [147:9-15],
                           (Lfun (
-                             { f_span = [147:3-16]; f_readonly_this = None; 
+                             { f_span = [147:9-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([147:3-16], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([147:9-15], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([147:3-16],
+                                 [([147:9-15],
                                    (Throw
-                                      ((Exception), [147:3-16],
-                                       (New (((Exception), [147:3-16], (CI ([147:3-16], "\\Exception"))), 
-                                          [], [((string), [147:3-16], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [147:9-15],
+                                       (New (((Exception), [147:9-15], (CI ([147:9-15], "\\Exception"))), 
+                                          [], [((string), [147:9-15], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -595,20 +595,20 @@ Errors:
                   (Call (
                      ((nothing), [149:3-14],
                       (Call (
-                         (((function(): nothing)), [149:3-14],
+                         (((function(): nothing)), [149:9-13],
                           (Lfun (
-                             { f_span = [149:3-14]; f_readonly_this = None; 
+                             { f_span = [149:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([149:3-14], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([149:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([149:3-14],
+                                 [([149:9-13],
                                    (Throw
-                                      ((Exception), [149:3-14],
-                                       (New (((Exception), [149:3-14], (CI ([149:3-14], "\\Exception"))), 
-                                          [], [((string), [149:3-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [149:9-13],
+                                       (New (((Exception), [149:9-13], (CI ([149:9-13], "\\Exception"))), 
+                                          [], [((string), [149:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -622,20 +622,20 @@ Errors:
                   (Call (
                      ((nothing), [151:3-14],
                       (Call (
-                         (((function(): nothing)), [151:3-14],
+                         (((function(): nothing)), [151:9-13],
                           (Lfun (
-                             { f_span = [151:3-14]; f_readonly_this = None; 
+                             { f_span = [151:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([151:3-14], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([151:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([151:3-14],
+                                 [([151:9-13],
                                    (Throw
-                                      ((Exception), [151:3-14],
-                                       (New (((Exception), [151:3-14], (CI ([151:3-14], "\\Exception"))), 
-                                          [], [((string), [151:3-14], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [151:9-13],
+                                       (New (((Exception), [151:9-13], (CI ([151:9-13], "\\Exception"))), 
+                                          [], [((string), [151:9-13], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
@@ -649,20 +649,20 @@ Errors:
                   (Call (
                      ((nothing), [153:3-156:4],
                       (Call (
-                         (((function(): nothing)), [153:3-156:4],
+                         (((function(): nothing)), [153:9-155:4],
                           (Lfun (
-                             { f_span = [153:3-156:4]; f_readonly_this = None; 
+                             { f_span = [153:9-155:4]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((nothing), None); f_name = ([153:3-156:4], "invalid_expr"); 
+                               f_ret = ((nothing), None); f_name = ([153:9-155:4], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([153:3-156:4],
+                                 [([153:9-155:4],
                                    (Throw
-                                      ((Exception), [153:3-156:4],
-                                       (New (((Exception), [153:3-156:4], (CI ([153:3-156:4], "\\Exception"))), 
-                                          [], [((string), [153:3-156:4], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
+                                      ((Exception), [153:9-155:4],
+                                       (New (((Exception), [153:9-155:4], (CI ([153:9-155:4], "\\Exception"))), 
+                                          [], [((string), [153:9-155:4], (String "invalid expression"))], None, ((function(string $message=_, int $code=_, ?Exception $previous=_)[]: void)))))))
                                    ]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 

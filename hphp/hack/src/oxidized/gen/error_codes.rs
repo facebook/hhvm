@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<9480c2e743783e67761e773e89e603ea>>
+// @generated SignedSource<<1572e8b213d9602480691c85aa02eaf6>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -144,6 +144,7 @@ pub enum Naming {
     ExplicitConsistentConstructor = 2118,
     InvalidReqClass = 2119,
     ModuleDeclarationOutsideAllowedFiles = 2120,
+    DynamicMethodAccess = 2121,
 }
 impl TrivialDrop for Naming {}
 arena_deserializer::impl_deserialize_in_arena!(Naming);

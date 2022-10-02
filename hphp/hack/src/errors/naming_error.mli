@@ -232,6 +232,7 @@ type t =
       classish_kind: Ast_defs.classish_kind;
     }
   | Module_declaration_outside_allowed_files of Pos.t
+  | Dynamic_method_access of Pos.t
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.Naming

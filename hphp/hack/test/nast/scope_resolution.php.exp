@@ -1,40 +1,40 @@
 Errors:
-  [133:9-14] Cannot use dynamic class name in strict mode
-  [134:9-30] Cannot use dynamic class name in strict mode
-  [135:9-28] Cannot use dynamic class name in strict mode
-  [137:9-17] Cannot use dynamic class name in strict mode
-  [139:9-22] Cannot use dynamic class name in strict mode
-  [141:9-13] Cannot use dynamic class name in strict mode
-  [143:9-13] Cannot use dynamic class name in strict mode
-  [145:9-15] Cannot use dynamic class name in strict mode
-  [147:9-15] Cannot use dynamic class name in strict mode
-  [149:9-13] Cannot use dynamic class name in strict mode
-  [151:9-13] Cannot use dynamic class name in strict mode
-  [153:9-155:4] Cannot use dynamic class name in strict mode
-  [165:9-14] Cannot use dynamic class name in strict mode
-  [166:10-21] Cannot use dynamic class name in strict mode
-  [167:10-31] Cannot use dynamic class name in strict mode
-  [169:9-17] Cannot use dynamic class name in strict mode
-  [170:10-18] Cannot use dynamic class name in strict mode
-  [171:10-18] Cannot use dynamic class name in strict mode
-  [173:9-13] Cannot use dynamic class name in strict mode
-  [174:10-14] Cannot use dynamic class name in strict mode
-  [175:10-14] Cannot use dynamic class name in strict mode
-  [177:9-13] Cannot use dynamic class name in strict mode
-  [178:10-14] Cannot use dynamic class name in strict mode
-  [179:10-14] Cannot use dynamic class name in strict mode
-  [181:9-15] Cannot use dynamic class name in strict mode
-  [182:10-16] Cannot use dynamic class name in strict mode
-  [183:10-16] Cannot use dynamic class name in strict mode
-  [185:9-15] Cannot use dynamic class name in strict mode
-  [186:10-16] Cannot use dynamic class name in strict mode
-  [187:10-16] Cannot use dynamic class name in strict mode
-  [189:9-13] Cannot use dynamic class name in strict mode
-  [190:10-14] Cannot use dynamic class name in strict mode
-  [191:10-14] Cannot use dynamic class name in strict mode
-  [193:9-13] Cannot use dynamic class name in strict mode
-  [194:10-14] Cannot use dynamic class name in strict mode
-  [195:10-14] Cannot use dynamic class name in strict mode
+  [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [137:9-17] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [139:9-22] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [141:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [143:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [145:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [147:9-15] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [149:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [151:9-13] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [153:9-155:4] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [165:9-14] Cannot use dynamic class or method name in strict mode
+  [166:10-21] Cannot use dynamic class or method name in strict mode
+  [167:10-31] Cannot use dynamic class or method name in strict mode
+  [169:9-17] Cannot use dynamic class or method name in strict mode
+  [170:10-18] Cannot use dynamic class or method name in strict mode
+  [171:10-18] Cannot use dynamic class or method name in strict mode
+  [173:9-13] Cannot use dynamic class or method name in strict mode
+  [174:10-14] Cannot use dynamic class or method name in strict mode
+  [175:10-14] Cannot use dynamic class or method name in strict mode
+  [177:9-13] Cannot use dynamic class or method name in strict mode
+  [178:10-14] Cannot use dynamic class or method name in strict mode
+  [179:10-14] Cannot use dynamic class or method name in strict mode
+  [181:9-15] Cannot use dynamic class or method name in strict mode
+  [182:10-16] Cannot use dynamic class or method name in strict mode
+  [183:10-16] Cannot use dynamic class or method name in strict mode
+  [185:9-15] Cannot use dynamic class or method name in strict mode
+  [186:10-16] Cannot use dynamic class or method name in strict mode
+  [187:10-16] Cannot use dynamic class or method name in strict mode
+  [189:9-13] Cannot use dynamic class or method name in strict mode
+  [190:10-14] Cannot use dynamic class or method name in strict mode
+  [191:10-14] Cannot use dynamic class or method name in strict mode
+  [193:9-13] Cannot use dynamic class or method name in strict mode
+  [194:10-14] Cannot use dynamic class or method name in strict mode
+  [195:10-14] Cannot use dynamic class or method name in strict mode
 [(Fun
     { fd_namespace =
       { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
@@ -233,16 +233,16 @@ Errors:
                   (Call (
                      ((), [133:3-15],
                       (Call (
-                         ((), [133:3-15],
+                         ((), [133:9-14],
                           (Lfun (
-                             { f_span = [133:3-15]; f_readonly_this = None; 
+                             { f_span = [133:9-14]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([133:3-15], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([133:9-14], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([133:3-15], (Throw ((), [133:3-15], (New (((), [133:3-15], (CI ([133:3-15], "\\Exception"))), [], [((), [133:3-15], (String "invalid expression"))], None, ())))))]
+                                 [([133:9-14], (Throw ((), [133:9-14], (New (((), [133:9-14], (CI ([133:9-14], "\\Exception"))), [], [((), [133:9-14], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -255,16 +255,16 @@ Errors:
                   (Call (
                      ((), [134:3-31],
                       (Call (
-                         ((), [134:3-31],
+                         ((), [134:9-30],
                           (Lfun (
-                             { f_span = [134:3-31]; f_readonly_this = None; 
+                             { f_span = [134:9-30]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([134:3-31], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([134:9-30], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([134:3-31], (Throw ((), [134:3-31], (New (((), [134:3-31], (CI ([134:3-31], "\\Exception"))), [], [((), [134:3-31], (String "invalid expression"))], None, ())))))]
+                                 [([134:9-30], (Throw ((), [134:9-30], (New (((), [134:9-30], (CI ([134:9-30], "\\Exception"))), [], [((), [134:9-30], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -277,16 +277,16 @@ Errors:
                   (Call (
                      ((), [135:3-29],
                       (Call (
-                         ((), [135:3-29],
+                         ((), [135:9-28],
                           (Lfun (
-                             { f_span = [135:3-29]; f_readonly_this = None; 
+                             { f_span = [135:9-28]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([135:3-29], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([135:9-28], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([135:3-29], (Throw ((), [135:3-29], (New (((), [135:3-29], (CI ([135:3-29], "\\Exception"))), [], [((), [135:3-29], (String "invalid expression"))], None, ())))))]
+                                 [([135:9-28], (Throw ((), [135:9-28], (New (((), [135:9-28], (CI ([135:9-28], "\\Exception"))), [], [((), [135:9-28], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -299,16 +299,16 @@ Errors:
                   (Call (
                      ((), [137:3-18],
                       (Call (
-                         ((), [137:3-18],
+                         ((), [137:9-17],
                           (Lfun (
-                             { f_span = [137:3-18]; f_readonly_this = None; 
+                             { f_span = [137:9-17]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([137:3-18], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([137:9-17], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([137:3-18], (Throw ((), [137:3-18], (New (((), [137:3-18], (CI ([137:3-18], "\\Exception"))), [], [((), [137:3-18], (String "invalid expression"))], None, ())))))]
+                                 [([137:9-17], (Throw ((), [137:9-17], (New (((), [137:9-17], (CI ([137:9-17], "\\Exception"))), [], [((), [137:9-17], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -321,16 +321,16 @@ Errors:
                   (Call (
                      ((), [139:3-23],
                       (Call (
-                         ((), [139:3-23],
+                         ((), [139:9-22],
                           (Lfun (
-                             { f_span = [139:3-23]; f_readonly_this = None; 
+                             { f_span = [139:9-22]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([139:3-23], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([139:9-22], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([139:3-23], (Throw ((), [139:3-23], (New (((), [139:3-23], (CI ([139:3-23], "\\Exception"))), [], [((), [139:3-23], (String "invalid expression"))], None, ())))))]
+                                 [([139:9-22], (Throw ((), [139:9-22], (New (((), [139:9-22], (CI ([139:9-22], "\\Exception"))), [], [((), [139:9-22], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -343,16 +343,16 @@ Errors:
                   (Call (
                      ((), [141:3-14],
                       (Call (
-                         ((), [141:3-14],
+                         ((), [141:9-13],
                           (Lfun (
-                             { f_span = [141:3-14]; f_readonly_this = None; 
+                             { f_span = [141:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([141:3-14], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([141:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([141:3-14], (Throw ((), [141:3-14], (New (((), [141:3-14], (CI ([141:3-14], "\\Exception"))), [], [((), [141:3-14], (String "invalid expression"))], None, ())))))]
+                                 [([141:9-13], (Throw ((), [141:9-13], (New (((), [141:9-13], (CI ([141:9-13], "\\Exception"))), [], [((), [141:9-13], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -365,16 +365,16 @@ Errors:
                   (Call (
                      ((), [143:3-14],
                       (Call (
-                         ((), [143:3-14],
+                         ((), [143:9-13],
                           (Lfun (
-                             { f_span = [143:3-14]; f_readonly_this = None; 
+                             { f_span = [143:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([143:3-14], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([143:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([143:3-14], (Throw ((), [143:3-14], (New (((), [143:3-14], (CI ([143:3-14], "\\Exception"))), [], [((), [143:3-14], (String "invalid expression"))], None, ())))))]
+                                 [([143:9-13], (Throw ((), [143:9-13], (New (((), [143:9-13], (CI ([143:9-13], "\\Exception"))), [], [((), [143:9-13], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -387,16 +387,16 @@ Errors:
                   (Call (
                      ((), [145:3-16],
                       (Call (
-                         ((), [145:3-16],
+                         ((), [145:9-15],
                           (Lfun (
-                             { f_span = [145:3-16]; f_readonly_this = None; 
+                             { f_span = [145:9-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([145:3-16], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([145:9-15], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([145:3-16], (Throw ((), [145:3-16], (New (((), [145:3-16], (CI ([145:3-16], "\\Exception"))), [], [((), [145:3-16], (String "invalid expression"))], None, ())))))]
+                                 [([145:9-15], (Throw ((), [145:9-15], (New (((), [145:9-15], (CI ([145:9-15], "\\Exception"))), [], [((), [145:9-15], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -409,16 +409,16 @@ Errors:
                   (Call (
                      ((), [147:3-16],
                       (Call (
-                         ((), [147:3-16],
+                         ((), [147:9-15],
                           (Lfun (
-                             { f_span = [147:3-16]; f_readonly_this = None; 
+                             { f_span = [147:9-15]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([147:3-16], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([147:9-15], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([147:3-16], (Throw ((), [147:3-16], (New (((), [147:3-16], (CI ([147:3-16], "\\Exception"))), [], [((), [147:3-16], (String "invalid expression"))], None, ())))))]
+                                 [([147:9-15], (Throw ((), [147:9-15], (New (((), [147:9-15], (CI ([147:9-15], "\\Exception"))), [], [((), [147:9-15], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -431,16 +431,16 @@ Errors:
                   (Call (
                      ((), [149:3-14],
                       (Call (
-                         ((), [149:3-14],
+                         ((), [149:9-13],
                           (Lfun (
-                             { f_span = [149:3-14]; f_readonly_this = None; 
+                             { f_span = [149:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([149:3-14], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([149:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([149:3-14], (Throw ((), [149:3-14], (New (((), [149:3-14], (CI ([149:3-14], "\\Exception"))), [], [((), [149:3-14], (String "invalid expression"))], None, ())))))]
+                                 [([149:9-13], (Throw ((), [149:9-13], (New (((), [149:9-13], (CI ([149:9-13], "\\Exception"))), [], [((), [149:9-13], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -453,16 +453,16 @@ Errors:
                   (Call (
                      ((), [151:3-14],
                       (Call (
-                         ((), [151:3-14],
+                         ((), [151:9-13],
                           (Lfun (
-                             { f_span = [151:3-14]; f_readonly_this = None; 
+                             { f_span = [151:9-13]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([151:3-14], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([151:9-13], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([151:3-14], (Throw ((), [151:3-14], (New (((), [151:3-14], (CI ([151:3-14], "\\Exception"))), [], [((), [151:3-14], (String "invalid expression"))], None, ())))))]
+                                 [([151:9-13], (Throw ((), [151:9-13], (New (((), [151:9-13], (CI ([151:9-13], "\\Exception"))), [], [((), [151:9-13], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },
@@ -475,17 +475,17 @@ Errors:
                   (Call (
                      ((), [153:3-156:4],
                       (Call (
-                         ((), [153:3-156:4],
+                         ((), [153:9-155:4],
                           (Lfun (
-                             { f_span = [153:3-156:4]; f_readonly_this = None; 
+                             { f_span = [153:9-155:4]; f_readonly_this = None; 
                                f_annotation = (); f_readonly_ret = None; 
-                               f_ret = ((), None); f_name = ([153:3-156:4], "invalid_expr"); 
+                               f_ret = ((), None); f_name = ([153:9-155:4], "invalid_expr"); 
                                f_tparams = []; f_where_constraints = []; 
                                f_params = []; f_ctxs = None; f_unsafe_ctxs = None;
                                f_body =
                                { fb_ast =
-                                 [([153:3-156:4],
-                                   (Throw ((), [153:3-156:4], (New (((), [153:3-156:4], (CI ([153:3-156:4], "\\Exception"))), [], [((), [153:3-156:4], (String "invalid expression"))], None, ())))))]
+                                 [([153:9-155:4],
+                                   (Throw ((), [153:9-155:4], (New (((), [153:9-155:4], (CI ([153:9-155:4], "\\Exception"))), [], [((), [153:9-155:4], (String "invalid expression"))], None, ())))))]
                                  };
                                f_fun_kind = FSync; f_user_attributes = []; 
                                f_external = false; f_doc_comment = None },

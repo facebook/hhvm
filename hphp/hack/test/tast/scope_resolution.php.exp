@@ -1,5 +1,14 @@
 Errors:
   [9:22-27] Cannot declare a constant named `class`. The name `class` is reserved for the class constant that represents the name of the class
+  [110:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [111:7-9] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [120:8-10] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [120:8-10] Variable `$_` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
+  [125:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [130:9-11] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
+  [130:9-11] Variable `$_` is undefined, or not always defined.
+  [107:28-30] Did you mean `$x` instead?
   [133:9-14] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [134:9-30] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
   [135:9-28] Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()`
@@ -126,17 +135,11 @@ Errors:
   [108:8-10] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
-  [110:8-10] No static method `$x` in `Foo`
-  [11:26-29] Did you mean `bar` instead?
-  [7:13-16] Declaration of `Foo` is here
   [113:9-11] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
   [115:11-13] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
-  [7:13-16] Declaration of `Foo` is here
-  [120:8-10] No static method `$_` in `Foo`
-  [11:26-29] Did you mean `bar` instead?
   [7:13-16] Declaration of `Foo` is here
   [123:9-11] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
@@ -144,14 +147,8 @@ Errors:
   [124:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
   [7:13-16] Declaration of `Foo` is here
-  [125:9-11] No static method `$x` in `Foo`
-  [11:26-29] Did you mean `bar` instead?
-  [7:13-16] Declaration of `Foo` is here
   [126:10-12] No class variable `$x` in `Foo`
   [10:17-34] Did you mean `$_` instead?
-  [7:13-16] Declaration of `Foo` is here
-  [130:9-11] No static method `$_` in `Foo`
-  [11:26-29] Did you mean `bar` instead?
   [7:13-16] Declaration of `Foo` is here
 [(Fun
     { fd_namespace =
@@ -330,11 +327,17 @@ Errors:
          { fb_ast =
            [([108:3-11], (Expr ((_), [108:3-10], (Class_get (((Foo), [108:3-6], (CI ([108:3-6], "\\Foo"))), (CGstring ([108:8-10], "$x")), Is_prop)))));
              ([109:3-10], (Expr ((dynamic), [109:3-9], (Class_get (((dynamic), [109:3-5], (CIexpr ((dynamic), [109:3-5], (Lvar ([109:3-5], $x))))), (CGstring ([109:7-9], "$x")), Is_prop)))));
-             ([110:3-13], (Expr ((_), [110:3-12], (Call (((_), [110:3-10], (Class_get (((Foo), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGstring ([110:8-10], "$x")), Is_method))), [], [], None)))));
+             ([110:3-13],
+              (Expr
+                 ((_), [110:3-12],
+                  (Call (((_), [110:3-10], (Class_get (((Foo), [110:3-6], (CI ([110:3-6], "\\Foo"))), (CGexpr ((_), [110:8-10], (Lvar ([110:8-10], $x)))), Is_method))), [], [], None)))));
              ([111:3-12],
               (Expr
                  ((dynamic), [111:3-11],
-                  (Call (((dynamic), [111:3-9], (Class_get (((dynamic), [111:3-5], (CIexpr ((dynamic), [111:3-5], (Lvar ([111:3-5], $x))))), (CGstring ([111:7-9], "$x")), Is_method))), [], [], None)))));
+                  (Call (
+                     ((dynamic), [111:3-9],
+                      (Class_get (((dynamic), [111:3-5], (CIexpr ((dynamic), [111:3-5], (Lvar ([111:3-5], $x))))), (CGexpr ((dynamic), [111:7-9], (Lvar ([111:7-9], $x)))), Is_method))),
+                     [], [], None)))));
              ([113:3-13], (Expr ((_), [113:4-11], (Class_get (((Foo), [113:4-7], (CI ([113:4-7], "\\Foo"))), (CGstring ([113:9-11], "$x")), Is_prop)))));
              ([114:3-14], (Expr ((dynamic), [114:5-11], (Class_get (((dynamic), [114:5-7], (CIexpr ((dynamic), [114:5-7], (Lvar ([114:5-7], $x))))), (CGstring ([114:9-11], "$x")), Is_prop)))));
              ([115:3-19], (Expr ((_), [115:3-18], (Call (((_), [115:6-13], (Class_get (((Foo), [115:6-9], (CI ([115:6-9], "\\Foo"))), (CGstring ([115:11-13], "$x")), Is_prop))), [], [], None)))));
@@ -345,16 +348,25 @@ Errors:
                      [], [], None)))));
              ([118:3-11], (Expr (((function(): int)), [118:3-10], (Class_get (((Foo), [118:3-6], (CI ([118:3-6], "\\Foo"))), (CGstring ([118:8-10], "$_")), Is_prop)))));
              ([119:3-13], (Expr (((function(): int)), [119:4-11], (Class_get (((Foo), [119:4-7], (CI ([119:4-7], "\\Foo"))), (CGstring ([119:9-11], "$_")), Is_prop)))));
-             ([120:3-13], (Expr ((_), [120:3-12], (Call (((_), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGstring ([120:8-10], "$_")), Is_method))), [], [], None)))));
+             ([120:3-13],
+              (Expr
+                 ((_), [120:3-12],
+                  (Call (((_), [120:3-10], (Class_get (((Foo), [120:3-6], (CI ([120:3-6], "\\Foo"))), (CGexpr ((_), [120:8-10], (Lvar ([120:8-10], $_)))), Is_method))), [], [], None)))));
              ([121:3-15],
               (Expr ((int), [121:3-14], (Call ((((function(): int)), [121:4-11], (Class_get (((Foo), [121:4-7], (CI ([121:4-7], "\\Foo"))), (CGstring ([121:9-11], "$_")), Is_prop))), [], [], None)))));
              ([123:3-13], (Expr ((_), [123:3-12], (Class_get (((Foo), [123:3-6], (CI ([123:3-6], "\\Foo"))), (CGstring ([123:9-11], "$x")), Is_prop)))));
              ([124:3-15], (Expr ((_), [124:4-13], (Class_get (((Foo), [124:4-7], (CI ([124:4-7], "\\Foo"))), (CGstring ([124:10-12], "$x")), Is_prop)))));
-             ([125:3-15], (Expr ((_), [125:3-14], (Call (((_), [125:3-12], (Class_get (((Foo), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGstring ([125:9-11], "$x")), Is_method))), [], [], None)))));
+             ([125:3-15],
+              (Expr
+                 ((_), [125:3-14],
+                  (Call (((_), [125:3-12], (Class_get (((Foo), [125:3-6], (CI ([125:3-6], "\\Foo"))), (CGexpr ((_), [125:9-11], (Lvar ([125:9-11], $x)))), Is_method))), [], [], None)))));
              ([126:3-17], (Expr ((_), [126:3-16], (Call (((_), [126:4-13], (Class_get (((Foo), [126:4-7], (CI ([126:4-7], "\\Foo"))), (CGstring ([126:10-12], "$x")), Is_prop))), [], [], None)))));
              ([128:3-13], (Expr (((function(): int)), [128:3-12], (Class_get (((Foo), [128:3-6], (CI ([128:3-6], "\\Foo"))), (CGstring ([128:9-11], "$_")), Is_prop)))));
              ([129:3-15], (Expr (((function(): int)), [129:4-13], (Class_get (((Foo), [129:4-7], (CI ([129:4-7], "\\Foo"))), (CGstring ([129:10-12], "$_")), Is_prop)))));
-             ([130:3-15], (Expr ((_), [130:3-14], (Call (((_), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGstring ([130:9-11], "$_")), Is_method))), [], [], None)))));
+             ([130:3-15],
+              (Expr
+                 ((_), [130:3-14],
+                  (Call (((_), [130:3-12], (Class_get (((Foo), [130:3-6], (CI ([130:3-6], "\\Foo"))), (CGexpr ((_), [130:9-11], (Lvar ([130:9-11], $_)))), Is_method))), [], [], None)))));
              ([131:3-17],
               (Expr ((int), [131:3-16], (Call ((((function(): int)), [131:4-13], (Class_get (((Foo), [131:4-7], (CI ([131:4-7], "\\Foo"))), (CGstring ([131:10-12], "$_")), Is_prop))), [], [], None)))));
              ([133:3-18],

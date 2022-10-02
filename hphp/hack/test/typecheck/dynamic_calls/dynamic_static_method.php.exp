@@ -1,6 +1,2 @@
 File "dynamic_static_method.php", line 10, characters 19-20:
-No static method `$f` in `WilfredDemo2` (Typing[4090])
-  File "dynamic_static_method.php", line 6, characters 26-48:
-  Did you mean `accessMethodDynamically` instead?
-  File "dynamic_static_method.php", line 3, characters 13-24:
-  Declaration of `WilfredDemo2` is here
+Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])

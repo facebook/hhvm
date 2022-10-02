@@ -11,6 +11,7 @@ open Hh_json
 module File_info = Symbol_file_info
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
+module Indexable = Symbol_indexable
 
 module JobReturn = struct
   type t = {
@@ -99,7 +100,7 @@ let recheck_job
     ~(gen_sym_hash : bool)
     (ownership : bool)
     (_ : JobReturn.t)
-    (progress : Relative_path.t list) : JobReturn.t =
+    (progress : Indexable.t list) : JobReturn.t =
   let start_time = Unix.gettimeofday () in
   let files_info =
     List.map
@@ -109,6 +110,7 @@ let recheck_job
   write_json ctx ownership out_dir files_info start_time
 
 let index_files ctx ~out_dir ~files =
+  let idx = List.map files ~f:Indexable.from_file in
   recheck_job
     ctx
     out_dir
@@ -117,7 +119,7 @@ let index_files ctx ~out_dir ~files =
     ~gen_sym_hash:false
     false
     JobReturn.dummy
-    files
+    idx
   |> ignore
 
 (* TODO create a type for all these options *)
@@ -130,7 +132,7 @@ let go
     ~(out_dir : string)
     ~(root_path : string)
     ~(hhi_path : string)
-    ~(files : Relative_path.t list) : unit =
+    ~(files : Indexable.t list) : unit =
   let num_workers =
     match workers with
     | Some w -> List.length w

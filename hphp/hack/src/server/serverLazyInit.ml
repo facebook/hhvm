@@ -1093,7 +1093,10 @@ let write_symbol_info
   in
   match env.swriteopt.symbol_write_index_paths_file_output with
   | Some output ->
-    List.map ~f:Relative_path.storage_to_string files
+    List.map
+      ~f:(fun Symbol_indexable.{ path; _ } ->
+        Relative_path.storage_to_string path)
+      files
     |> Out_channel.write_lines output;
     (env, t)
   | None ->

@@ -8,6 +8,8 @@
 
 (* entry point to the hack indexer *)
 
+module Indexable = Symbol_indexable
+
 val index_files :
   Provider_context.t -> out_dir:string -> files:Relative_path.t list -> unit
 
@@ -20,5 +22,5 @@ val go :
   out_dir:string ->
   root_path:string ->
   hhi_path:string ->
-  files:Relative_path.t list ->
+  files:Indexable.t list ->
   unit

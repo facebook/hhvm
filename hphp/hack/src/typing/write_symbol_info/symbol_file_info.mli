@@ -6,17 +6,22 @@
  *
  *)
 
+open Hh_prelude
+
 type t = private {
   (* path to be used in the glean index *)
   path: string;
   cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
+  symbols: Relative_path.t SymbolOccurrence.t list;
+  sym_hash: Md5.t option;
 }
 
 val create :
   Provider_context.t ->
   Relative_path.t ->
+  gen_sym_hash:bool ->
   root_path:string ->
   hhi_path:string ->
   t

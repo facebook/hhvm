@@ -12,6 +12,23 @@ module File_info = Symbol_file_info
 module Add_fact = Symbol_add_fact
 module Fact_acc = Symbol_predicate.Fact_acc
 
+module JobReturn = struct
+  type t = {
+    elapsed: float;
+    hashes: Md5.Set.t;
+  }
+
+  let dummy = { elapsed = 0.0; hashes = Md5.Set.empty }
+
+  let neutral = { elapsed = 0.0; hashes = Md5.Set.empty }
+
+  let merge t1 t2 =
+    {
+      elapsed = t1.elapsed +. t2.elapsed;
+      hashes = Md5.Set.union t1.hashes t2.hashes;
+    }
+end
+
 let log_elapsed s elapsed =
   let { Unix.tm_min; tm_sec; _ } = Unix.gmtime elapsed in
   Hh_logger.log "%s %dm%ds" s tm_min tm_sec
@@ -32,11 +49,14 @@ let write_file out_dir num_tasts json_chunks =
     (Byte_units.to_string_hum (Byte_units.of_bytes_int json_length))
     num_tasts
 
-let index_namespace_map ns ~ownership =
+let gen_shard_facts ns ~ownership ~shard_name all_hashes =
   let progress = Fact_acc.init ~ownership in
+  let list_hashes = Md5.Set.to_list all_hashes in
   if ownership then Fact_acc.set_ownership_unit progress (Some ".hhconfig");
   List.fold ns ~init:progress ~f:(fun progress (from, to_) ->
       Add_fact.global_namespace_alias progress ~from ~to_ |> snd)
+  |> Add_fact.indexerInputsHash shard_name list_hashes
+  |> snd
   |> Fact_acc.to_json
 
 let write_json
@@ -44,7 +64,7 @@ let write_json
     (ownership : bool)
     (out_dir : string)
     (files_info : File_info.t list)
-    (start_time : float) : float =
+    (start_time : float) : JobReturn.t =
   (* Large file may lead to large json files which timeout when sent
      to the server. Not an issue currently, but if it is, we can index
      xrefs/decls separately, or split in batches according to files size *)
@@ -64,29 +84,48 @@ let write_json
      Printf.eprintf "WARNING: symbol write failure: \n%s\n" (Exn.to_string e));
   let elapsed = Unix.gettimeofday () -. start_time in
   log_elapsed "Processed batch in" elapsed;
-  elapsed
+  let hashes =
+    List.filter_map files_info ~f:(fun file_info ->
+        file_info.File_info.sym_hash)
+    |> Md5.Set.of_list
+  in
+  JobReturn.{ elapsed; hashes }
 
 let recheck_job
     (ctx : Provider_context.t)
     (out_dir : string)
     (root_path : string)
     (hhi_path : string)
+    ~(gen_sym_hash : bool)
     (ownership : bool)
-    (_ : float)
-    (progress : Relative_path.t list) : float =
+    (_ : JobReturn.t)
+    (progress : Relative_path.t list) : JobReturn.t =
   let start_time = Unix.gettimeofday () in
   let files_info =
-    List.map progress ~f:(File_info.create ctx ~root_path ~hhi_path)
+    List.map
+      progress
+      ~f:(File_info.create ctx ~root_path ~hhi_path ~gen_sym_hash)
   in
   write_json ctx ownership out_dir files_info start_time
 
 let index_files ctx ~out_dir ~files =
-  recheck_job ctx out_dir "www" "hhi" false 0.0 files |> ignore
+  recheck_job
+    ctx
+    out_dir
+    "www"
+    "hhi"
+    ~gen_sym_hash:false
+    false
+    JobReturn.dummy
+    files
+  |> ignore
 
+(* TODO create a type for all these options *)
 let go
     (workers : MultiWorker.worker list option)
     (ctx : Provider_context.t)
     ~(namespace_map : (string * string) list)
+    ~(gen_sym_hash : bool)
     ~(ownership : bool)
     ~(out_dir : string)
     ~(root_path : string)
@@ -98,16 +137,23 @@ let go
     | None -> 1
   in
   let start_time = Unix.gettimeofday () in
-  let cumulated_elapsed =
+  let jobs =
     MultiWorker.call
       workers
-      ~job:(recheck_job ctx out_dir root_path hhi_path ownership)
-      ~merge:(fun f1 f2 -> f1 +. f2)
+      ~job:(recheck_job ctx out_dir root_path hhi_path ~gen_sym_hash ownership)
+      ~merge:JobReturn.merge
       ~next:(Bucket.make ~num_workers ~max_size:115 files)
-      ~neutral:0.
+      ~neutral:JobReturn.neutral
   in
-  let json_namespace_map = index_namespace_map namespace_map ~ownership in
-  write_file out_dir 1 json_namespace_map;
+  (* just a uid *)
+  let shard_name =
+    Md5.digest_string (Float.to_string start_time) |> Md5.to_hex
+  in
+  let shard_facts =
+    gen_shard_facts namespace_map ~ownership ~shard_name jobs.JobReturn.hashes
+  in
+  write_file out_dir 1 shard_facts;
+  let cumulated_elapsed = jobs.JobReturn.elapsed in
   log_elapsed "Processed all batches (cumulated time) in " cumulated_elapsed;
   let elapsed = Unix.gettimeofday () -. start_time in
   log_elapsed "Processed all batches in " elapsed

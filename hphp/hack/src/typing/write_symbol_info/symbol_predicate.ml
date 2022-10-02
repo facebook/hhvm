@@ -47,6 +47,7 @@ type hack =
   | ModuleDefinition
   | FileCall
   | GlobalNamespaceAlias
+  | IndexerInputsHash
 [@@deriving ord]
 
 type src = FileLines [@@deriving ord]
@@ -102,6 +103,7 @@ let hack_to_string = function
   | ModuleDefinition -> "ModuleDefinition"
   | FileCall -> "FileCall"
   | GlobalNamespaceAlias -> "GlobalNamespaceAlias"
+  | IndexerInputsHash -> "IndexerInputsHash"
 
 (* List of all predicates, in the order in which they should appear in the JSON.
    This guarantee that facts are introduced before they are referenced. *)
@@ -143,6 +145,7 @@ let ordered_all =
     Hack FileDeclarations;
     Hack FileCall;
     Hack GlobalNamespaceAlias;
+    Hack IndexerInputsHash;
     Src FileLines;
   ]
 
@@ -255,10 +258,17 @@ module Fact_acc = struct
     in
     { progress with resultJson; factIds }
 
-  let add_fact predicate json_key ({ ownership_unit; ownership; _ } as progress)
-      =
+  let add_fact
+      predicate json_key ?value ({ ownership_unit; ownership; _ } as progress) =
+    let value =
+      match value with
+      | None -> []
+      | Some v -> [("value", v)]
+    in
     let fact_id = Fact_id.next () in
-    let fields = [("id", Fact_id.to_json_number fact_id); ("key", json_key)] in
+    let fields =
+      [("id", Fact_id.to_json_number fact_id); ("key", json_key)] @ value
+    in
     let json_fact = JSON_Object fields in
     match
       ( should_cache predicate,

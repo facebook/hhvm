@@ -15,6 +15,7 @@ val go :
   MultiWorker.worker list option ->
   Provider_context.t ->
   namespace_map:(string * string) list ->
+  gen_sym_hash:bool ->
   ownership:bool ->
   out_dir:string ->
   root_path:string ->

@@ -12,17 +12,17 @@ type override_info = {
   method_name: string;
   is_static: bool;
 }
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type class_id_type =
   | ClassId
   | Other
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type receiver_class =
   | ClassName of string
   | UnknownClass (* invoked dynamically *)
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type keyword_with_hover_docs =
   | FinalOnClass
@@ -45,7 +45,7 @@ type keyword_with_hover_docs =
   | Internal
   | ModuleInModuleDeclaration
   | ModuleInModuleMembershipDeclaration
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type built_in_type_hint =
   | BIprimitive of Aast_defs.tprim
@@ -57,7 +57,7 @@ type built_in_type_hint =
   (* TODO: support self and static too.*)
   | BIthis
   | BIoption
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type receiver =
   | FunctionReceiver of string
@@ -66,7 +66,7 @@ type receiver =
       meth_name: string;
       is_static: bool;
     }
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type kind =
   | Class of class_id_type
@@ -94,7 +94,7 @@ type kind =
   | BestEffortArgument of receiver * int
   | HhFixme
   | Module
-[@@deriving ord, eq]
+[@@deriving ord, eq, show]
 
 type 'a t = {
   name: string;

@@ -6,14 +6,29 @@
  *
  *)
 
+open Hh_prelude
+
 type t = {
   path: string;
   cst: Full_fidelity_positioned_syntax.t;
   tast: Tast.program;
   source_text: Full_fidelity_source_text.t;
+  symbols: Relative_path.t SymbolOccurrence.t list;
+  sym_hash: Md5.t option;
 }
 
-let create ctx rel_path ~root_path ~hhi_path =
+(* TODO we hash the string representation of the symbol types. We
+   should move a more robust scheme and make sure this is enough to
+   identify files which need reindexing *)
+let compute_sym_hash path symbols =
+  let concat hash str = Md5.digest_string (Md5.to_binary hash ^ str) in
+  let f cur occ =
+    concat cur SymbolOccurrence.(occ.name ^ show_kind occ.type_)
+  in
+  let hash = List.fold ~init:(Md5.digest_string "") ~f symbols in
+  concat hash path
+
+let create ctx rel_path ~gen_sym_hash ~root_path ~hhi_path =
   let (ctx, entry) =
     Provider_context.add_entry_if_missing ~ctx ~path:rel_path
   in
@@ -31,4 +46,11 @@ let create ctx rel_path ~root_path ~hhi_path =
     Provider_context.PositionedSyntaxTree.root
       (Ast_provider.compute_cst ~ctx ~entry)
   in
-  { path; tast; source_text; cst }
+  let symbols = IdentifySymbolService.all_symbols ctx tast in
+  let sym_hash =
+    if gen_sym_hash then
+      Some (compute_sym_hash path symbols)
+    else
+      None
+  in
+  { path; tast; source_text; cst; symbols; sym_hash }

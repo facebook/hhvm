@@ -973,7 +973,10 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
         RequestsRegistry::DebugStub& stub,
         std::shared_ptr<RequestsRegistry> registry)
         : registry_(registry),
-          stateMachine_(true, controller_, cpuConcurrencyController_) {
+          stateMachine_(
+              true,
+              serverConfigs.getAdaptiveConcurrencyController(),
+              serverConfigs.getCPUConcurrencyController()) {
       new (&stub) RequestsRegistry::DebugStub(
           *registry,
           *this,
@@ -1009,17 +1012,7 @@ class RegistryTests : public testing::TestWithParam<std::tuple<size_t, bool>> {
         (override));
 
    private:
-    folly::observer::SimpleObservable<AdaptiveConcurrencyController::Config>
-        oConfig{AdaptiveConcurrencyController::Config{}};
-    folly::observer::SimpleObservable<uint32_t> oMaxRequests{0u};
-    AdaptiveConcurrencyController controller_{
-        oConfig.getObserver(), oMaxRequests.getObserver()};
     server::ServerConfigsMock serverConfigs;
-    folly::observer::SimpleObservable<
-        apache::thrift::CPUConcurrencyController::Config>
-        cConfig_{apache::thrift::CPUConcurrencyController::Config{}};
-    apache::thrift::CPUConcurrencyController cpuConcurrencyController_{
-        cConfig_.getObserver(), serverConfigs};
     RequestStateMachine stateMachine_;
   };
 };

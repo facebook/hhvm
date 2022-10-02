@@ -749,16 +749,22 @@ void ThriftServer::setupThreadManager() {
   // client did.
   if (!resourcePoolSet().empty()) {
     // Keep concurrency controller in sync with max requests for now.
-    auto maxRequests = getMaxRequests();
-    resourcePoolSet()
-        .resourcePool(ResourcePoolHandle::defaultAsync())
-        .concurrencyController()
-        .value()
-        .get()
-        .setExecutionLimitRequests(
-            maxRequests != 0
-                ? maxRequests
-                : std::numeric_limits<decltype(maxRequests)>::max());
+    setMaxRequestsCallbackHandle =
+        detail::getThriftServerConfig(*this)
+            .getMaxRequests()
+            .getObserver()
+            .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
+              auto maxRequests = *snapshot;
+              resourcePoolSet()
+                  .resourcePool(ResourcePoolHandle::defaultAsync())
+                  .concurrencyController()
+                  .value()
+                  .get()
+                  .setExecutionLimitRequests(
+                      maxRequests != 0
+                          ? maxRequests
+                          : std::numeric_limits<decltype(maxRequests)>::max());
+            });
 
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools

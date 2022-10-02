@@ -15,6 +15,7 @@
  */
 
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
+#include <thrift/lib/cpp2/server/ServerAttribute.h>
 
 #include <algorithm>
 
@@ -33,6 +34,36 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
   return -1;
 }
 } // namespace detail
+
+CPUConcurrencyController::CPUConcurrencyController(
+    folly::observer::Observer<Config> config,
+    apache::thrift::server::ServerConfigs& serverConfigs,
+    apache::thrift::ThriftServerConfig& thriftServerConfig)
+    : config_(std::move(config)),
+      serverConfigs_(serverConfigs),
+      thriftServerConfig_(thriftServerConfig) {
+  thriftServerConfig_.setMaxRequests(
+      activeRequestsLimit_.getObserver(),
+      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+  thriftServerConfig_.setMaxQps(
+      qpsLimit_.getObserver(),
+      apache::thrift::AttributeSource::OVERRIDE_INTERNAL);
+
+  scheduler_.setThreadName("CPUConcurrencyController-loop");
+  scheduler_.start();
+  configSchedulerCallback_ = config_.getUnderlyingObserver().addCallback(
+      [this](folly::observer::Snapshot<Config>) {
+        this->cancel();
+        this->schedule();
+      });
+}
+
+CPUConcurrencyController::~CPUConcurrencyController() {
+  // Cancel to avoid using CPUConcurrencyController members while its
+  // partially destructed
+  configSchedulerCallback_.cancel();
+  cancel();
+}
 
 void CPUConcurrencyController::cycleOnce() {
   if (!enabled()) {
@@ -138,6 +169,8 @@ void CPUConcurrencyController::schedule() {
 
 void CPUConcurrencyController::cancel() {
   scheduler_.cancelAllFunctionsAndWait();
+  activeRequestsLimit_.setValue(std::nullopt);
+  qpsLimit_.setValue(std::nullopt);
   stableConcurrencySamples_.clear();
   stableEstimate_.exchange(-1);
 }
@@ -162,10 +195,12 @@ uint32_t CPUConcurrencyController::getLimit() const {
   uint32_t limit = 0;
   switch (config().mode) {
     case Mode::ENABLED_CONCURRENCY_LIMITS:
+      // Using ServiceConfigs instead of ThriftServerConfig, because the value
+      // may come from AdaptiveConcurrencyController
       limit = serverConfigs_.getMaxRequests();
       break;
     case Mode::ENABLED_TOKEN_BUCKET:
-      limit = serverConfigs_.getMaxQps();
+      limit = thriftServerConfig_.getMaxQps().get();
       break;
     default:
       DCHECK(false);
@@ -180,10 +215,10 @@ uint32_t CPUConcurrencyController::getLimit() const {
 void CPUConcurrencyController::setLimit(uint32_t newLimit) {
   switch (config().mode) {
     case Mode::ENABLED_CONCURRENCY_LIMITS:
-      serverConfigs_.setMaxRequests(newLimit);
+      activeRequestsLimit_.setValue(newLimit);
       break;
     case Mode::ENABLED_TOKEN_BUCKET:
-      serverConfigs_.setMaxQps(newLimit);
+      qpsLimit_.setValue(newLimit);
       break;
     default:
       DCHECK(false);

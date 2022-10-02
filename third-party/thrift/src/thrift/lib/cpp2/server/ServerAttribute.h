@@ -40,6 +40,9 @@ namespace thrift {
 
 // source of a server's attribute, precedence takes place in descending order
 // (APP will override CONF). see comment on ServerAttribute to learn more
+
+class CPUConcurrencyController;
+
 class AttributeSource final {
  public:
   AttributeSource() = delete;
@@ -58,6 +61,7 @@ class AttributeSource final {
   static const AttributeSource OVERRIDE;
 
  private:
+  friend CPUConcurrencyController;
   static const AttributeSource OVERRIDE_INTERNAL;
 };
 

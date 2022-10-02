@@ -293,6 +293,7 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
  protected:
   folly::observer::CallbackHandle getSSLCallbackHandle();
+  folly::observer::CallbackHandle setMaxRequestsCallbackHandle{};
 
  public:
   /**

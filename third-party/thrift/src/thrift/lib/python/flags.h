@@ -26,22 +26,24 @@
 namespace apache::thrift::python {
 
 template <typename T>
-using enable_if_bool_or_int = std::
+using enable_if_bool_or_int64 = std::
     enable_if_t<std::is_same_v<bool, T> || std::is_same_v<int64_t, T>, int>;
 
-template <typename T, enable_if_bool_or_int<T> = true>
+template <typename T, enable_if_bool_or_int64<T> = true>
 class FlagWrapperWithIndestructibleName {
  public:
   FlagWrapperWithIndestructibleName(const std::string& name, T defaultValue)
       : name_(name), wrapper_(name_, defaultValue) {}
   T get() { return wrapper_.get(); }
+  void setMockValue(T value) { wrapper_.setMockValue(value); }
+  void unmock() { wrapper_.unmock(); }
 
  private:
   std::string name_;
   apache::thrift::detail::FlagWrapper<T> wrapper_;
 };
 
-template <typename T, enable_if_bool_or_int<T> = true>
+template <typename T, enable_if_bool_or_int64<T> = true>
 class FlagRegistry final {
  public:
   FlagRegistry() = delete;
@@ -53,6 +55,12 @@ class FlagRegistry final {
   }
   static T get(const std::string& name) {
     return allFlags().wlock()->at(name).get();
+  }
+  static void mock(const std::string& name, T value) {
+    allFlags().wlock()->at(name).setMockValue(value);
+  }
+  static void unmock(const std::string& name) {
+    allFlags().wlock()->at(name).unmock();
   }
 
  private:

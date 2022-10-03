@@ -62,49 +62,30 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     bool, includeInRecentRequestsCount, const std::string_view /*methodName*/);
 
-template <int N, int Size, class F, class Tuple>
-struct ForEachImpl {
-  static uint32_t forEach(Tuple&& tuple, F&& f) {
-    uint32_t res = f(std::get<N>(tuple), N);
-    res += ForEachImpl<N + 1, Size, F, Tuple>::forEach(
-        std::forward<Tuple>(tuple), std::forward<F>(f));
-    return res;
-  }
-};
-template <int Size, class F, class Tuple>
-struct ForEachImpl<Size, Size, F, Tuple> {
-  static uint32_t forEach(Tuple&& /*tuple*/, F&& /*f*/) { return 0; }
-};
-
-template <int N = 0, class F, class Tuple>
-uint32_t forEach(Tuple&& tuple, F&& f) {
-  return ForEachImpl<
-      N,
-      std::tuple_size<typename std::remove_reference<Tuple>::type>::value,
-      F,
-      Tuple>::forEach(std::forward<Tuple>(tuple), std::forward<F>(f));
+template <class Tuple, class F, size_t... Index>
+uint32_t forEach(Tuple& tuple, F& f, std::index_sequence<Index...>) {
+  return (f(std::get<Index>(tuple), Index) + ... + 0);
+}
+template <class Tuple, class F>
+uint32_t forEach(Tuple& tuple, F f) {
+  return forEach(
+      tuple,
+      f,
+      std::make_index_sequence<std::tuple_size<
+          typename std::remove_reference<Tuple>::type>::value>());
 }
 
-template <int N, int Size, class F, class Tuple>
-struct ForEachVoidImpl {
-  static void forEach(Tuple&& tuple, F&& f) {
-    f(std::get<N>(tuple), N);
-    ForEachVoidImpl<N + 1, Size, F, Tuple>::forEach(
-        std::forward<Tuple>(tuple), std::forward<F>(f));
-  }
-};
-template <int Size, class F, class Tuple>
-struct ForEachVoidImpl<Size, Size, F, Tuple> {
-  static void forEach(Tuple&& /*tuple*/, F&& /*f*/) {}
-};
-
-template <int N = 0, class F, class Tuple>
-void forEachVoid(Tuple&& tuple, F&& f) {
-  ForEachVoidImpl<
-      N,
-      std::tuple_size<typename std::remove_reference<Tuple>::type>::value,
-      F,
-      Tuple>::forEach(std::forward<Tuple>(tuple), std::forward<F>(f));
+template <class Tuple, class F, size_t... Index>
+void forEachVoid(Tuple& tuple, F& f, std::index_sequence<Index...>) {
+  (f(std::get<Index>(tuple), Index), ...);
+}
+template <class Tuple, class F>
+void forEachVoid(Tuple& tuple, F f) {
+  forEachVoid(
+      tuple,
+      f,
+      std::make_index_sequence<std::tuple_size<
+          typename std::remove_reference<Tuple>::type>::value>());
 }
 
 template <typename Protocol, typename IsSet>

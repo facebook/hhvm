@@ -109,7 +109,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - run: |
-        sudo tee /etc/locale.gen << EOF
+        sudo tee -a /etc/locale.gen << EOF
         de_DE.UTF-8 UTF-8
         de_DE ISO-8859-1
         de_DE@euro ISO-8859-15

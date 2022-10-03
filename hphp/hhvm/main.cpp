@@ -52,11 +52,6 @@ std::vector<std::string> dummy_vec { "hello", "foo" };
 std::set<std::string> dummy_set { "hello" };
 
 int main(int argc, char** argv) {
-#ifdef ENABLE_SYSTEM_LOCALE_ARCHIVE
-  if (::getenv("LOCALE_ARCHIVE") == nullptr) {
-    ::setenv("LOCALE_ARCHIVE", "/usr/lib/locale/locale-archive", true);
-  }
-#endif
   HPHP::StaticString::CreateAll();
 
   // Also for t15096405

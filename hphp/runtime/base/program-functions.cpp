@@ -1614,6 +1614,14 @@ static int execute_program_impl(int argc, char** argv) {
     cout << desc << "\n";
     return -1;
   }
+
+#ifdef ENABLE_SYSTEM_LOCALE_ARCHIVE
+  // Use system locales as the default LOCALE_ARCHIVE for nix patched glibc
+  if (::getenv("LOCALE_ARCHIVE") == nullptr) {
+    ::setenv("LOCALE_ARCHIVE", "/usr/lib/locale/locale-archive", true);
+  }
+#endif
+
   // reuse -h for help command if possible
   if (vm.count("help") || (vm.count("debug-host") && po.mode != "debug")) {
     cout << desc << "\n";

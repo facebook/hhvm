@@ -1,3 +1,4 @@
+/built/
 /external
 buck-out
 buck-cache
@@ -36,7 +37,7 @@ buck-cache
 /configure.lineno
 /python/build
 /python/dist/
-/python/pywatchman.egg-info/
+/watchman/python/pywatchman.egg-info/
 *.pyc
 *.pyd
 *.so

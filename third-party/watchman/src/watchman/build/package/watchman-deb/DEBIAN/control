@@ -4,3 +4,4 @@ Architecture: amd64
 Maintainer: Meta Platforms, Inc.
 Standards-Version: 4.6.1.1
 Description: A file watching service
+Depends: %DEPENDS%

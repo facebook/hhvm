@@ -34,6 +34,8 @@ namespace type {
 class Ref;
 template <typename RefT>
 class DynList;
+template <typename RefT>
+class DynSet;
 namespace detail {
 
 const TypeInfo& voidTypeInfo();
@@ -478,7 +480,7 @@ class Iterable {
   Cursor cur_;
 };
 
-// TODO(afuller): Consider adding asMap(), asSet(), to create type-safe
+// TODO(afuller): Consider adding asMap(), to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
@@ -591,6 +593,17 @@ class BaseDyn : public Dyn,
   }
   DynList<ConstT> asList() const&& {
     return DynList<ConstT>{Base::withContext(true, true)};
+  }
+
+  DynSet<MutT> asSet() & { return DynSet<MutT>{Base::withContext(false)}; }
+  DynSet<MutT> asSet() && {
+    return DynSet<MutT>{Base::withContext(false, true)};
+  }
+  DynSet<ConstT> asSet() const& {
+    return DynSet<ConstT>{Base::withContext(true, false)};
+  }
+  DynSet<ConstT> asSet() const&& {
+    return DynSet<ConstT>{Base::withContext(true, true)};
   }
 
  protected:

@@ -433,6 +433,36 @@ TEST(RuntimeTest, ListValue) {
   EXPECT_THROW(Ref::to(0).asList(), std::bad_any_cast);
 }
 
+TEST(RuntimeTest, SetValue) {
+  Value value;
+  value = Value::create<set<string_t>>();
+  EXPECT_TRUE(value.empty());
+  value.as<set<string_t>>().emplace("hi");
+  EXPECT_FALSE(value.empty());
+  Value other(value);
+  EXPECT_FALSE(other.empty());
+  value.clear();
+  EXPECT_TRUE(value.empty());
+  EXPECT_TRUE(value.as<set<string_t>>().empty());
+  value = other;
+  EXPECT_FALSE(value.empty());
+
+  DynSet<Ref> setVal = value.asSet();
+  EXPECT_THAT(setVal, ::testing::Not(::testing::IsEmpty()));
+  EXPECT_THAT(setVal, ::testing::SizeIs(1));
+  EXPECT_THAT(setVal, ::testing::ElementsAre("hi"));
+  EXPECT_TRUE(setVal.contains("hi"));
+  EXPECT_FALSE(setVal.contains("bye"));
+  EXPECT_EQ(setVal.count("hi"), 1);
+  EXPECT_EQ(setVal.count("bye"), 0);
+
+  setVal.insert({"bye"});
+  EXPECT_THAT(setVal, ::testing::ElementsAre("bye", "hi"));
+  EXPECT_EQ(setVal.erase("hi"), 1);
+  EXPECT_EQ(setVal.erase("hi"), 0);
+  EXPECT_THAT(setVal, ::testing::ElementsAre("bye"));
+}
+
 TEST(RuntimeTest, ListCppType) {
   using T = std::list<std::string>;
   using Tag = cpp_type<T, type::list<string_t>>;

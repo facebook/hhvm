@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/Conv.h>
+#include <fmt/core.h>
 #include <memory>
 #include "watchman/Errors.h"
 #include "watchman/fs/FileSystem.h"
@@ -76,24 +76,23 @@ class PcreExpr : public QueryExpr {
     if (term.array().size() > 1 && term.at(1).isString()) {
       pattern = json_string_value(term.at(1));
     } else {
-      throw QueryParseError(folly::to<std::string>(
-          "First parameter to \"", which, "\" term must be a pattern string"));
+      throw QueryParseError(fmt::format(
+          "First parameter to \"{}\" term must be a pattern string", which));
     }
 
     if (term.array().size() > 2) {
       if (term.at(2).isString()) {
         scope = json_string_value(term.at(2));
       } else {
-        throw QueryParseError(folly::to<std::string>(
-            "Second parameter to \"",
-            which,
-            "\" term must be an optional scope string"));
+        throw QueryParseError(fmt::format(
+            "Second parameter to \"{}\" term must be an optional scope string",
+            which));
       }
     }
 
     if (strcmp(scope, "basename") && strcmp(scope, "wholename")) {
-      throw QueryParseError(folly::to<std::string>(
-          "Invalid scope '", scope, "' for ", which, " expression"));
+      throw QueryParseError(
+          fmt::format("Invalid scope '{}' for {} expression", scope, which));
     }
 
     logf(ERR, "PATTERN: {}\n", pattern);
@@ -114,16 +113,12 @@ class PcreExpr : public QueryExpr {
           sizeof(char) == sizeof(PCRE2_UCHAR),
           "Watchman uses the 8-bit PCRE2 library");
       pcre2_get_error_message(errcode, buffer, 120);
-      throw QueryParseError(folly::to<std::string>(
-          "invalid ",
+      throw QueryParseError(fmt::format(
+          "invalid {}: code {} {} at offset {} in {}",
           which,
-          ": code ",
           errcode,
-          " ",
           reinterpret_cast<const char*>(&buffer),
-          " at offset ",
           erroff,
-          " in ",
           pattern));
     }
 

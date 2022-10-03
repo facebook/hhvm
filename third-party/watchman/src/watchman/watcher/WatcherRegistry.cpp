@@ -6,7 +6,7 @@
  */
 
 #include "watchman/watcher/WatcherRegistry.h"
-#include <folly/Conv.h>
+
 #include "watchman/CommandRegistry.h"
 #include "watchman/Logging.h"
 #include "watchman/QueryableView.h"

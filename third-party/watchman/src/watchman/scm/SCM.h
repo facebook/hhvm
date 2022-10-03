@@ -6,10 +6,9 @@
  */
 
 #pragma once
+
 #include <chrono>
-#include <memory>
 #include <optional>
-#include <stdexcept>
 #include <vector>
 #include "watchman/Errors.h"
 #include "watchman/watchman_string.h"

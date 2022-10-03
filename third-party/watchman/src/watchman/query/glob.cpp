@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/Conv.h>
 #include <folly/ScopeGuard.h>
 #include <memory>
 #include "watchman/CommandRegistry.h"
@@ -94,10 +93,9 @@ bool add_glob(GlobTree* tree, const w_string& glob_str) {
   bool had_specials;
 
   if (glob_str.piece().pathIsAbsolute()) {
-    throw QueryParseError(folly::to<std::string>(
-        "glob `",
-        glob_str.view(),
-        "` is an absolute path.  All globs must be relative paths!"));
+    throw QueryParseError(fmt::format(
+        "glob `{}` is an absolute path.  All globs must be relative paths!",
+        glob_str));
   }
 
   while (pattern < pattern_end) {

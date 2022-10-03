@@ -5,7 +5,6 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/Conv.h>
 #include <folly/String.h>
 #include <map>
 #include <optional>
@@ -86,7 +85,7 @@ class VersionCommand : public PrettyCommand<VersionCommand> {
       if (!missing.empty()) {
         response.error = w_string::build(
             "client required capabilities [",
-            folly::join(", ", missing),
+            fmt::join(missing, ", "),
             "] not supported by this server");
       }
     }

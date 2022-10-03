@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include <folly/Conv.h>
+#include <fmt/core.h>
 #include "watchman/Errors.h"
 #include "watchman/fs/FileInformation.h"
 #include "watchman/query/FileResult.h"
@@ -89,8 +89,8 @@ class TypeExpr : public QueryExpr {
     if (term.array().size() > 1 && term.at(1).isString()) {
       typestr = json_string_value(term.at(1));
     } else {
-      throw QueryParseError(folly::to<std::string>(
-          "First parameter to \"type\" term must be a type string"));
+      throw QueryParseError(
+          "First parameter to \"type\" term must be a type string");
     }
 
     found = strpbrk(typestr, "bcdfplsD");

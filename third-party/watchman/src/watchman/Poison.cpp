@@ -5,10 +5,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/core.h>
 #include "watchman/Logging.h"
 #include "watchman/WatchmanConfig.h"
-
-#include <folly/Conv.h>
 
 namespace watchman {
 
@@ -23,23 +22,18 @@ void set_poison_state(
     return;
   }
 
-  auto why = folly::to<std::string>(
+  auto why = fmt::format(
       "A non-recoverable condition has triggered.  Watchman needs your help!\n"
-      "The triggering condition was at timestamp=",
-      std::chrono::system_clock::to_time_t(now),
-      ": ",
-      syscall,
-      "(",
-      dir.view(),
-      ") -> ",
-      err.message(),
-      "\n"
+      "The triggering condition was at timestamp={}: {}({}) -> {}\n"
       "All requests will continue to fail with this message until you resolve\n"
-      "the underlying problem.  You will find more information on fixing this at\n",
-      cfg_get_trouble_url(),
-      "#poison-",
+      "the underlying problem.  You will find more information on fixing this at\n"
+      "{}#poison-{}\n",
+      std::chrono::system_clock::to_time_t(now),
       syscall,
-      "\n");
+      dir.view(),
+      err.message(),
+      cfg_get_trouble_url(),
+      syscall);
 
   watchman::log(watchman::ERR, why);
   *poisoned_reason.wlock() = why;

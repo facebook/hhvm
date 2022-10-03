@@ -21,15 +21,32 @@ using apache::thrift::protocol::FieldIdToMask;
 namespace apache::thrift::protocol {
 
 Mask reverseMask(Mask mask) {
-  detail::throwIfContainsMapMask(mask);
-  if (mask.includes_ref()) {
-    auto tmp = std::move(mask.includes_ref().value());
-    mask.excludes_ref() = std::move(tmp);
-  } else {
-    auto tmp = std::move(mask.excludes_ref().value());
-    mask.includes_ref() = std::move(tmp);
+  switch (mask.getType()) {
+    case Mask::Type::includes: {
+      // We need to move the data to temporary variable since the mask is a
+      // union, we can't move it from one field to another directly.
+      auto tmp = std::move(mask.includes_ref().value());
+      mask.excludes_ref() = std::move(tmp);
+      return mask;
+    }
+    case Mask::Type::excludes: {
+      auto tmp = std::move(mask.excludes_ref().value());
+      mask.includes_ref() = std::move(tmp);
+      return mask;
+    }
+    case Mask::Type::includes_map: {
+      auto tmp = std::move(mask.includes_map_ref().value());
+      mask.excludes_map_ref() = std::move(tmp);
+      return mask;
+    }
+    case Mask::Type::excludes_map: {
+      auto tmp = std::move(mask.excludes_map_ref().value());
+      mask.includes_map_ref() = std::move(tmp);
+      return mask;
+    }
+    case Mask::Type::__EMPTY__:
+      folly::throw_exception<std::runtime_error>("Can not reverse empty masks");
   }
-  return mask;
 }
 
 void clear(const Mask& mask, protocol::Object& obj) {

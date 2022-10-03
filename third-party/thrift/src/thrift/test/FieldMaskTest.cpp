@@ -2193,6 +2193,23 @@ TEST(FieldMaskTest, ReverseMask) {
 
   EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
   EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
+
+  Mask empty;
+  EXPECT_THROW(reverseMask(empty), std::runtime_error);
+}
+
+TEST(FieldMaskTest, ReverseMapMask) {
+  Mask inclusiveMask;
+  auto& includes = inclusiveMask.includes_map_ref().emplace();
+  includes[1] = allMask();
+  includes[2].includes_ref().emplace()[3] = allMask();
+  Mask exclusiveMask;
+  auto& excludes = exclusiveMask.excludes_map_ref().emplace();
+  excludes[1] = allMask();
+  excludes[2].includes_ref().emplace()[3] = allMask();
+
+  EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
+  EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
 }
 
 TEST(FieldMaskTest, Compare) {

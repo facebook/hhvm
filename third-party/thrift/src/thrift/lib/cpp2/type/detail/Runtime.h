@@ -104,7 +104,7 @@ class Cursor {
   friend class Dyn;
 
   RuntimeType type_;
-  void* ptr_ = nullptr; // Only needed for end().
+  void* ptr_ = nullptr;
   IterType iterType_;
   std::any itr_;
 
@@ -429,7 +429,7 @@ class BaseIter : public BaseDerived<Derived> {
 
 template <typename RefT, typename MutT = RefT>
 class Iter : public BaseIter<RefT, Iter<RefT, MutT>> {
-  using Base = BaseIter<RefT, Iter<RefT, MutT>>;
+  using Base = BaseIter<RefT, Iter>;
 
  public:
   using Base::Base;
@@ -455,7 +455,7 @@ class Iter : public BaseIter<RefT, Iter<RefT, MutT>> {
 };
 template <typename MutT>
 class Iter<MutT> : public BaseIter<MutT, Iter<MutT>> {
-  using Base = BaseIter<MutT, Iter<MutT>>;
+  using Base = BaseIter<MutT, Iter>;
 
  public:
   using Base::Base;
@@ -742,6 +742,7 @@ class BaseRef : public BaseDyn<ConstT, Derived, Derived> {
 
  public:
   using Base::Base;
+  using Base::reset;
 
   template <typename Tag>
   static Derived to(native_type<Tag>& val) {

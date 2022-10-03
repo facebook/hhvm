@@ -386,16 +386,50 @@ class BaseDynView {
   // Returns the number of elements in the container.
   FOLLY_NODISCARD size_t size() const { return ref_.size(); }
 
+  ConstRef asRef() const { return ref_; }
+
  protected:
   Ref ref_;
 
   BaseDynView(detail::Ptr ptr, BaseType baseType) : ref_(ptr) {
-    if (ref_.type().baseType() != baseType) {
-      folly::throw_exception<std::bad_any_cast>();
-    }
+    checkBaseType(ref_, baseType);
   }
 
   ~BaseDynView() = default;
+
+  static void checkBaseType(const Dyn& val, BaseType baseType) {
+    if (val.type().baseType() != baseType) {
+      folly::throw_exception<std::bad_any_cast>();
+    }
+  }
+};
+
+class BaseDynKeyView : public BaseDynView {
+  using Base = BaseDynView;
+
+ public:
+  using key_type = ConstRef;
+
+  // Returns the number of elements with key that compares equal to the
+  // specified argument `key`, which is either 1 or 0 since this container does
+  // not allow duplicates.
+  FOLLY_NODISCARD size_t count(ConstRef key) const { return contains(key); }
+  FOLLY_NODISCARD size_t count(const std::string& key) const {
+    return contains(key);
+  }
+
+  // Checks if there is an element with key equivalent to `key` in the
+  // container.
+  FOLLY_NODISCARD bool contains(ConstRef key) const {
+    return !ref_.get(key).type().empty();
+  }
+  FOLLY_NODISCARD bool contains(const std::string& key) const {
+    return !ref_.get(key).type().empty();
+  }
+
+ protected:
+  using Base::Base;
+  ~BaseDynKeyView() = default;
 };
 
 } // namespace detail
@@ -443,7 +477,11 @@ class DynList<Ref> : public DynList<ConstRef> {
     detail::BaseErasedOp::unimplemented();
   }
   [[noreturn]] void assign(ConstRef) { detail::BaseErasedOp::unimplemented(); }
-  DynList& operator=(ConstRef other) { return (assign(other), *this); }
+  DynList& operator=(ConstRef other) { return operator=(other.asList()); }
+  template <typename RefT>
+  DynList& operator=(DynList<RefT> other) {
+    return (ref_.assign(other.asRef()), *this);
+  }
 
   // Returns a reference to the element at specified location pos, with bounds
   // checking.
@@ -497,36 +535,20 @@ class DynList<Ref> : public DynList<ConstRef> {
   void pop_back() { ref_.remove(std::max<size_type>(1, size()) - 1); }
   // Removes the first element of the container.
   void pop_front() { ref_.remove(0); }
+
+  Ref asRef() { return ref_; }
+  using Base::asRef;
 };
 
 // The constant portions of an unordered c++ set.
 template <>
-class DynSet<ConstRef> : public detail::BaseDynView {
-  using Base = detail::BaseDynView;
+class DynSet<ConstRef> : public detail::BaseDynKeyView {
+  using Base = detail::BaseDynKeyView;
 
  public:
-  using key_type = ConstRef;
-
-  // Returns the number of elements with key that compares equal to the
-  // specified argument `key`, which is either 1 or 0 since this container does
-  // not allow duplicates.
-  FOLLY_NODISCARD size_t count(ConstRef key) const { return contains(key); }
-  FOLLY_NODISCARD size_t count(const std::string& key) const {
-    return contains(key);
-  }
-
   // Finds an element with key equivalent to `key`.
   [[noreturn]] Base::const_iterator find(ConstRef) const {
     detail::BaseErasedOp::unimplemented();
-  }
-
-  // Checks if there is an element with key equivalent to `key` in the
-  // container.
-  FOLLY_NODISCARD bool contains(ConstRef key) const {
-    return !ref_.get(key).type().empty();
-  }
-  FOLLY_NODISCARD bool contains(const std::string& key) const {
-    return !ref_.get(key).type().empty();
   }
 
   explicit DynSet(detail::Ptr ptr) : Base(ptr, BaseType::Set) {}
@@ -542,8 +564,11 @@ class DynSet<Ref> : public DynSet<ConstRef> {
  public:
   using Base::Base;
 
-  [[noreturn]] void assign(ConstRef) { detail::BaseErasedOp::unimplemented(); }
-  DynSet& operator=(ConstRef other) { return (assign(other), *this); }
+  DynSet& operator=(ConstRef other) { return operator=(other.asSet()); }
+  template <typename RefT>
+  DynSet& operator=(DynSet<RefT> other) {
+    return (ref_.assign(other.asRef()), *this);
+  }
 
   // Erases all elements from the container. After this call, size() returns
   // zero.
@@ -593,6 +618,9 @@ class DynSet<Ref> : public DynSet<ConstRef> {
     detail::BaseErasedOp::unimplemented();
   }
   using Base::find;
+
+  Ref asRef() { return ref_; }
+  using Base::asRef;
 };
 
 } // namespace type

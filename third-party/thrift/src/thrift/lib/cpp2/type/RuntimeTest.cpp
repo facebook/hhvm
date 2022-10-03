@@ -428,6 +428,7 @@ TEST(RuntimeTest, ListValue) {
   EXPECT_THAT(listVal, ::testing::SizeIs(0));
   EXPECT_THAT(listVal, ::testing::ElementsAre());
 
+  EXPECT_THROW(listVal = Ref::to(0), std::bad_any_cast);
   EXPECT_THROW(listVal.pop_front(), std::out_of_range);
   EXPECT_THROW(listVal.pop_back(), std::out_of_range);
   EXPECT_THROW(Ref::to(0).asList(), std::bad_any_cast);
@@ -461,6 +462,8 @@ TEST(RuntimeTest, SetValue) {
   EXPECT_EQ(setVal.erase("hi"), 1);
   EXPECT_EQ(setVal.erase("hi"), 0);
   EXPECT_THAT(setVal, ::testing::ElementsAre("bye"));
+
+  EXPECT_THROW(setVal = Ref::to(0), std::bad_any_cast);
 }
 
 TEST(RuntimeTest, ListCppType) {

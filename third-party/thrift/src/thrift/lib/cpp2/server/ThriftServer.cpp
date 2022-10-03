@@ -1407,7 +1407,14 @@ void ThriftServer::callOnStartServing() {
           return handler->semifuture_onStartServing();
         }));
   }
-  folly::collectAll(futures).via(getHandlerExecutorKeepAlive()).get();
+  auto results =
+      folly::collectAll(futures).via(getHandlerExecutorKeepAlive()).get();
+  for (auto& result : results) {
+    if (result.hasException()) {
+      LOG(FATAL) << "Exception thrown by onStartServing(): "
+                 << folly::exceptionStr(result.exception());
+    }
+  }
 }
 
 void ThriftServer::callOnStopRequested() {

@@ -35,6 +35,26 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 } // namespace detail
 
+namespace {
+
+struct ModeInfo {
+  std::string_view name;
+  std::string_view concurrencyUnit;
+};
+
+ModeInfo getModeInfo(CPUConcurrencyController::Mode mode) {
+  if (mode == CPUConcurrencyController::Mode::ENABLED_CONCURRENCY_LIMITS) {
+    return {"CONCURRENCY_LIMITS", "Active Requests"};
+  } else if (mode == CPUConcurrencyController::Mode::ENABLED_TOKEN_BUCKET) {
+    return {"TOKEN_BUCKET", "QPS"};
+  }
+
+  DCHECK(false);
+  return {"UNKNOWN", "UNKNOWN"};
+}
+
+} // namespace
+
 CPUConcurrencyController::CPUConcurrencyController(
     folly::observer::Observer<Config> config,
     apache::thrift::server::ServerConfigs& serverConfigs,
@@ -154,9 +174,14 @@ void CPUConcurrencyController::schedule() {
     return;
   }
 
-  LOG(INFO) << "Enabling CPUConcurrencyController. CPU Target: "
-            << static_cast<int32_t>(this->config().cpuTarget)
-            << " Refresh Period Ms: " << this->config().refreshPeriodMs.count();
+  auto modeInfo = getModeInfo(config().mode);
+  LOG(INFO) << "Enabling CPUConcurrencyController. Mode: " << modeInfo.name
+            << " CPU Target: " << static_cast<int32_t>(this->config().cpuTarget)
+            << " Refresh Period (Ms): "
+            << this->config().refreshPeriodMs.count()
+            << " Concurrency Upper Bound (" << modeInfo.concurrencyUnit
+            << "): " << this->config().concurrencyUpperBound;
+  this->setLimit(this->config().concurrencyUpperBound);
   scheduler_.addFunctionGenericNextRunTimeFunctor(
       [this] { this->cycleOnce(); },
       [this](time_point, time_point now) {

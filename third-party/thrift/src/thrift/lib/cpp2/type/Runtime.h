@@ -162,6 +162,8 @@ class Ref final : private detail::DynCmp<Ref, ConstRef>,
   }
 
   explicit Ref(detail::Ptr data) noexcept : Base(data) {}
+  // Enable `const Ref&` to implicitly capture ConstRef&&
+  /*implicit*/ Ref(ConstRef&& ref) noexcept : Base(ref) {}
 
  private:
   friend class detail::Ptr;
@@ -363,10 +365,10 @@ class BaseDynView {
  public:
   using value_type = ConstRef;
   using size_type = size_t;
-  using reference = const ConstRef&;
-  using const_reference = reference;
-  using pointer = const ConstRef*;
-  using const_pointer = const ConstRef*;
+  using reference = ConstRef;
+  using const_reference = ConstRef;
+  using pointer = ConstRef*;
+  using const_pointer = ConstRef*;
   using iterator = Ref::const_iterator;
   using const_iterator = Ref::const_iterator;
 
@@ -431,8 +433,9 @@ class DynList<Ref> : public DynList<ConstRef> {
 
  public:
   using Base::Base;
-  using reference = const Ref&;
-  using pointer = const Ref*;
+  using value_type = Ref;
+  using reference = Ref;
+  using pointer = Ref*;
   using iterator = Ref::iterator;
 
   // Replaces the contents with count copies of value value

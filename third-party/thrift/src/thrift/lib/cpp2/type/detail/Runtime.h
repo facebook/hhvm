@@ -373,8 +373,8 @@ template <typename RefT, typename Derived>
 class BaseIter : public BaseDerived<Derived> {
  public:
   using value_type = RefT;
-  using reference_type = const RefT&;
-  using pointer_type = const RefT*;
+  using reference_type = RefT;
+  using pointer_type = RefT*;
   using difference_type = std::ptrdiff_t;
   using iterator_category = std::forward_iterator_tag;
 
@@ -467,7 +467,7 @@ class Iterable {
  public:
   using iterator = Iter<MutT>;
   using const_iterator = Iter<ConstT, MutT>;
-  using value_type = ConstT;
+  using value_type = MutT;
 
   /*implicit*/ Iterable(Cursor cur) : cur_(cur) {}
 
@@ -494,7 +494,7 @@ class BaseDyn : public Dyn,
   using const_iterable = Iterable<ConstT>;
   using iterator = Iter<MutT>;
   using const_iterator = Iter<ConstT, MutT>;
-  using value_type = ConstT;
+  using value_type = MutT;
   using size_type = size_t;
 
   using Base::Base;

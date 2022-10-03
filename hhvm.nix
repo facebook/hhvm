@@ -254,7 +254,7 @@ stdenv.mkDerivation rec {
 
   checkPhase =
     ''
-      set -ex
+      set -e
       runHook preCheck
       export HHVM_BIN="$PWD/hphp/hhvm/hhvm"
       (cd ${./.} && "$HHVM_BIN" hphp/test/run.php quick)

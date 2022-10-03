@@ -23,13 +23,8 @@
 #include <thrift/lib/thrift/gen-cpp2/protocol_types.h>
 
 namespace apache::thrift::protocol {
-// FieldMask constants
-inline const Mask& allMask() {
-  return field_mask_constants::allMask();
-}
-inline const Mask& noneMask() {
-  return field_mask_constants::noneMask();
-}
+FOLLY_INLINE_VARIABLE constexpr auto allMask = field_mask_constants::allMask;
+FOLLY_INLINE_VARIABLE constexpr auto noneMask = field_mask_constants::noneMask;
 
 // Constructs a new FieldMask that is reverse of the given mask.
 Mask reverseMask(const Mask& mask);

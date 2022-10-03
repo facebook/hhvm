@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <folly/CppAttributes.h>
 #include <folly/Traits.h>
 #include <thrift/lib/cpp2/op/Clear.h>
 #include <thrift/lib/cpp2/op/Copy.h>
@@ -29,6 +30,13 @@ namespace apache::thrift::protocol::detail {
 // TODO: replace MapId with ValueId
 // Runtime and compile time representations for a map id.
 enum class MapId : int64_t {};
+
+// If mask is a field mask, return it, otherwise return nullptr
+[[nodiscard]] const FieldIdToMask* FOLLY_NULLABLE
+getFieldMask(const Mask& mask);
+
+// If mask is a map mask, return it, otherwise return nullptr
+[[nodiscard]] const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask);
 
 // MaskRef struct represents the Field Mask and whether the mask is coming from
 // excludes mask. MaskRef is used for inputs and outputs for Field Mask

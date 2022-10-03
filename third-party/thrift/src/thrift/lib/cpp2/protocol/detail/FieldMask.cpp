@@ -37,6 +37,30 @@ const Mask& getMask(const MapIdToMask& map, MapId id) {
                                       : field_mask_constants::noneMask();
 }
 
+const FieldIdToMask* FOLLY_NULLABLE getFieldMask(const Mask& mask) {
+  if (mask.includes_ref()) {
+    return &*mask.includes_ref();
+  }
+
+  if (mask.excludes_ref()) {
+    return &*mask.excludes_ref();
+  }
+
+  return nullptr;
+}
+
+const MapIdToMask* FOLLY_NULLABLE getMapMask(const Mask& mask) {
+  if (mask.includes_map_ref()) {
+    return &*mask.includes_map_ref();
+  }
+
+  if (mask.excludes_map_ref()) {
+    return &*mask.excludes_map_ref();
+  }
+
+  return nullptr;
+}
+
 void MaskRef::throwIfNotFieldMask() const {
   if (!isFieldMask()) {
     folly::throw_exception<std::runtime_error>("not a field mask");

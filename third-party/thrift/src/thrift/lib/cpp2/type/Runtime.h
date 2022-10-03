@@ -357,6 +357,132 @@ class Value : private detail::DynCmp<Value, ConstRef>,
   }
 };
 
+// The constant portions of a c++ 'SequenceContainer'.
+//
+// See: https://en.cppreference.com/w/cpp/named_req/SequenceContainer
+template <>
+class DynList<ConstRef> {
+ public:
+  using value_type = ConstRef;
+  using size_type = size_t;
+  using reference = const ConstRef&;
+  using const_reference = reference;
+  using pointer = const ConstRef*;
+  using const_pointer = const ConstRef*;
+  using iterator = Ref::const_iterator;
+  using const_iterator = Ref::const_iterator;
+
+  // Returns a reference to the element at specified location pos, with bounds
+  // checking.
+  ConstRef at(size_type pos) const { return ref_.at(pos); }
+  ConstRef operator[](size_type pos) const { return at(pos); }
+
+  // Returns a reference to the first element in the container.
+  ConstRef front() const { return at(0); }
+
+  // Returns a reference to the last element in the container.
+  ConstRef back() const { return at(ref_.size() - 1); }
+
+  // Returns an iterator to the first element of the container.
+  const_iterator begin() const { return ref_.cbegin(); }
+  const_iterator cbegin() const { return ref_.cbegin(); }
+
+  // Returns an iterator to the last element of the container.
+  const_iterator end() const { return ref_.cend(); }
+  const_iterator cend() const { return ref_.cend(); }
+
+  // Checks if the container has no elements.
+  FOLLY_NODISCARD bool empty() const { return ref_.empty(); }
+
+  // Returns the number of elements in the container.
+  FOLLY_NODISCARD size_type size() const { return ref_.size(); }
+
+  explicit DynList(detail::Ptr ptr) : ref_(ptr) {
+    if (ref_.type().baseType() != BaseType::List) {
+      folly::throw_exception<std::bad_any_cast>();
+    }
+  }
+
+ protected:
+  Ref ref_;
+};
+
+// The mutable portions of a c++ 'SequenceContainer'.
+//
+// See: https://en.cppreference.com/w/cpp/named_req/SequenceContainer
+//
+// TODO(afuller): Add type-erased iterator features, needed for full API.
+template <>
+class DynList<Ref> : public DynList<ConstRef> {
+  using Base = DynList<ConstRef>;
+
+ public:
+  using Base::Base;
+  using reference = const Ref&;
+  using pointer = const Ref*;
+  using iterator = Ref::iterator;
+
+  // Replaces the contents with count copies of value value
+  [[noreturn]] void assign(size_type, ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+  [[noreturn]] void assign(ConstRef) { detail::BaseErasedOp::unimplemented(); }
+  DynList& operator=(ConstRef other) { return (assign(other), *this); }
+
+  // Returns a reference to the element at specified location pos, with bounds
+  // checking.
+  Ref at(size_type pos) { return ref_.at(pos); }
+  using Base::at;
+  Ref operator[](size_type pos) { return at(pos); }
+  using Base::operator[];
+
+  // Returns a reference to the first element in the container.
+  Ref front() { return at(0); }
+  using Base::front;
+
+  // Returns a reference to the last element in the container.
+  Ref back() { return at(ref_.size() - 1); }
+  using Base::back;
+
+  // Returns an iterator to the first element of the container.
+  iterator begin() { return ref_.begin(); }
+  using Base::begin;
+
+  // Returns an iterator to the last element of the container.
+  iterator end() { return ref_.end(); }
+  using Base::end;
+
+  // Erases all elements from the container. After this call, size() returns
+  // zero.
+  void clear() { ref_.clear(); }
+
+  // Inserts `value` before `pos`.
+  [[noreturn]] iterator insert(const_iterator, ConstRef) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+  // Removes the element at pos.
+  [[noreturn]] iterator erase(const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+  // Removes the elements in the range [first, last).
+  [[noreturn]] iterator erase(const_iterator, const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+
+  // Appends the given element value to the end of the container.
+  void push_back(ConstRef value) { ref_.insert(size(), value); }
+  void push_back(const std::string& value) { ref_.insert(size(), value); }
+
+  // Prepent the given element value to the beginning of the container.
+  void push_front(ConstRef value) { ref_.insert(0, value); }
+  void push_front(const std::string& value) { ref_.insert(0, value); }
+
+  // Removes the last element of the container.
+  void pop_back() { ref_.remove(std::max<size_type>(1, size()) - 1); }
+  // Removes the first element of the container.
+  void pop_front() { ref_.remove(0); }
+};
+
 } // namespace type
 } // namespace thrift
 } // namespace apache

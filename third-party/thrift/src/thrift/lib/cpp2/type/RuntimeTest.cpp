@@ -406,6 +406,31 @@ TEST(RuntimeTest, ListValue) {
   EXPECT_TRUE(value.as<list<string_t>>().empty());
   value = other;
   EXPECT_FALSE(value.empty());
+
+  DynList<Ref> listVal = value.asList();
+  EXPECT_THAT(listVal, ::testing::Not(::testing::IsEmpty()));
+  EXPECT_THAT(listVal, ::testing::SizeIs(1));
+  EXPECT_THAT(listVal, ::testing::ElementsAre("hi"));
+
+  listVal.push_back("bye");
+  EXPECT_THAT(listVal, ::testing::ElementsAre("hi", "bye"));
+  EXPECT_EQ(listVal.front(), "hi");
+  EXPECT_EQ(listVal.back(), "bye");
+  listVal.pop_back();
+  EXPECT_EQ(listVal.front(), "hi");
+  EXPECT_EQ(listVal.back(), "hi");
+  listVal.push_front("bye");
+  EXPECT_THAT(listVal, ::testing::ElementsAre("bye", "hi"));
+  listVal.pop_front();
+  EXPECT_THAT(listVal, ::testing::ElementsAre("hi"));
+  listVal.clear();
+  EXPECT_THAT(listVal, ::testing::IsEmpty());
+  EXPECT_THAT(listVal, ::testing::SizeIs(0));
+  EXPECT_THAT(listVal, ::testing::ElementsAre());
+
+  EXPECT_THROW(listVal.pop_front(), std::out_of_range);
+  EXPECT_THROW(listVal.pop_back(), std::out_of_range);
+  EXPECT_THROW(Ref::to(0).asList(), std::bad_any_cast);
 }
 
 TEST(RuntimeTest, ListCppType) {

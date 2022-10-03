@@ -123,6 +123,10 @@ Ptr Dyn::at(size_t pos, bool ctxConst, bool ctxRvalue) const {
   return checkFound(get(pos, ctxConst, ctxRvalue));
 }
 
+Ptr Dyn::withContext(bool ctxConst, bool ctxRvalue) const noexcept {
+  return {type_.withContext(ctxConst, ctxRvalue), ptr_};
+}
+
 } // namespace detail
 
 void Value::reset() {

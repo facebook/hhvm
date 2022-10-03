@@ -32,6 +32,8 @@ namespace apache {
 namespace thrift {
 namespace type {
 class Ref;
+template <typename RefT>
+class DynList;
 namespace detail {
 
 const TypeInfo& voidTypeInfo();
@@ -251,6 +253,8 @@ class Dyn {
     type_ = {};
     ptr_ = {};
   }
+
+  Ptr withContext(bool ctxConst, bool ctxRvalue = false) const noexcept;
 
  private:
   friend bool operator==(const Dyn& lhs, std::nullptr_t) {
@@ -474,7 +478,7 @@ class Iterable {
   Cursor cur_;
 };
 
-// TODO(afuller): Consider adding asMap(), asList(), etc, to create type-safe
+// TODO(afuller): Consider adding asMap(), asSet(), to create type-safe
 // views, with APIs that match c++ standard containers (vs the Thrift 'op' names
 // used in the core API).
 template <typename ConstT, typename MutT, typename Derived>
@@ -578,6 +582,17 @@ class BaseDyn : public Dyn,
   const_iterable values() const& { return Base::values(true); }
   const_iterable values() const&& { return Base::values(true, true); }
 
+  DynList<MutT> asList() & { return DynList<MutT>{Base::withContext(false)}; }
+  DynList<MutT> asList() && {
+    return DynList<MutT>{Base::withContext(false, true)};
+  }
+  DynList<ConstT> asList() const& {
+    return DynList<ConstT>{Base::withContext(true, false)};
+  }
+  DynList<ConstT> asList() const&& {
+    return DynList<ConstT>{Base::withContext(true, true)};
+  }
+
  protected:
   using BaseDerived<Derived>::derived;
   template <typename IdT>
@@ -635,7 +650,7 @@ class BaseDyn : public Dyn,
     return put(asRef<string_t>(name), asRef(val));
   }
 
-  bool insert(size_t pos, ConstT val) { return Base::insert(pos, val); }
+  void insert(size_t pos, ConstT val) { Base::insert(pos, val); }
   void insert(size_t pos, const std::string& val) {
     Base::insert(pos, asRef(val));
   }

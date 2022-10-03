@@ -147,6 +147,7 @@ pub mod compile_ffi {
         pub flags: isize,
         pub require_extends: Vec<String>,
         pub require_implements: Vec<String>,
+        pub require_class: Vec<String>,
         pub methods: Vec<Method>,
     }
 

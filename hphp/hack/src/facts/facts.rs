@@ -79,6 +79,9 @@ pub struct TypeFacts {
     #[serde(default, skip_serializing_if = "StringSet::is_empty")]
     pub require_implements: StringSet,
 
+    #[serde(default, skip_serializing_if = "StringSet::is_empty")]
+    pub require_class: StringSet,
+
     #[serde(default, skip_serializing_if = "Methods::is_empty")]
     pub methods: Methods,
 }
@@ -271,6 +274,9 @@ fn types_to_json<S: Serializer>(types_by_name: &TypeFactsByName, s: S) -> Result
                 .as_object_mut()
                 .map(|m| m.remove("requireImplements"));
         }
+        if types.skip_require_class() {
+            types_json.as_object_mut().map(|m| m.remove("requireClass"));
+        }
         seq.serialize_element(&types_json)?;
     }
     seq.end()
@@ -353,6 +359,12 @@ impl TypeFacts {
             _ => self.require_implements.is_empty(),
         }
     }
+    fn skip_require_class(&self) -> bool {
+        match self.kind {
+            TypeKind::Trait => false,
+            _ => self.require_class.is_empty(),
+        }
+    }
     fn skip_attributes(&self) -> bool {
         self.attributes.is_empty()
     }
@@ -363,6 +375,7 @@ impl TypeFacts {
             final_,
             req_implements,
             req_extends,
+            req_class,
             uses,
             extends,
             implements,
@@ -440,6 +453,16 @@ impl TypeFacts {
                 }
             })
             .collect::<StringSet>();
+        let require_class = req_class
+            .iter()
+            .filter_map(|&ty| {
+                if check_require {
+                    Some(extract_type_name(ty))
+                } else {
+                    None
+                }
+            })
+            .collect::<StringSet>();
 
         // TODO(T101762617): modify the direct decl parser to
         // preserve the attribute params that facts expects
@@ -466,6 +489,7 @@ impl TypeFacts {
             require_extends,
             flags,
             require_implements,
+            require_class,
             attributes,
             methods,
         }
@@ -479,6 +503,7 @@ impl TypeFacts {
             require_extends: StringSet::new(),
             flags: Flags::default(),
             require_implements: StringSet::new(),
+            require_class: StringSet::new(),
             methods: BTreeMap::new(),
         }
     }
@@ -497,6 +522,7 @@ fn add_or_update_classish_decl(name: String, mut delta: TypeFacts, types: &mut T
             tf.attributes.append(&mut delta.attributes);
             tf.require_extends.append(&mut delta.require_extends);
             tf.require_implements.append(&mut delta.require_implements);
+            tf.require_class.append(&mut delta.require_class)
         })
         .or_insert(delta);
 }
@@ -614,7 +640,7 @@ mod tests {
                 ..Default::default()
             },
         );
-        // verify requireImplements and requireExtends are skipped if empty and Class kind
+        // verify requireImplements, requireExtends and requireClass are skipped if empty and Class kind
         types.insert(
             String::from("include_empty_neither_when_class_kind"),
             TypeFacts {
@@ -652,6 +678,11 @@ mod tests {
                 require_implements: {
                     let mut set = StringSet::new();
                     set.insert("impl1".into());
+                    set
+                },
+                require_class: {
+                    let mut set = StringSet::new();
+                    set.insert("class1".into());
                     set
                 },
                 ..Default::default()
@@ -780,6 +811,9 @@ mod tests {
       "flags": 9,
       "kindOf": "unknown",
       "name": "include_nonempty_always",
+      "requireClass": [
+        "class1"
+      ],
       "requireExtends": [
         "extends1"
       ],

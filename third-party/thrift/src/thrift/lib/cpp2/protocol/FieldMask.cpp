@@ -20,15 +20,16 @@ using apache::thrift::protocol::FieldIdToMask;
 
 namespace apache::thrift::protocol {
 
-Mask reverseMask(const Mask& mask) {
+Mask reverseMask(Mask mask) {
   detail::throwIfContainsMapMask(mask);
-  Mask reverse;
   if (mask.includes_ref()) {
-    reverse.excludes_ref() = mask.includes_ref().value();
+    auto tmp = std::move(mask.includes_ref().value());
+    mask.excludes_ref() = std::move(tmp);
   } else {
-    reverse.includes_ref() = mask.excludes_ref().value();
+    auto tmp = std::move(mask.excludes_ref().value());
+    mask.includes_ref() = std::move(tmp);
   }
-  return reverse;
+  return mask;
 }
 
 void clear(const Mask& mask, protocol::Object& obj) {

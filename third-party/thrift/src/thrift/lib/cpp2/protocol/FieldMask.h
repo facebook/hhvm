@@ -27,7 +27,7 @@ FOLLY_INLINE_VARIABLE constexpr auto allMask = field_mask_constants::allMask;
 FOLLY_INLINE_VARIABLE constexpr auto noneMask = field_mask_constants::noneMask;
 
 // Constructs a new FieldMask that is reverse of the given mask.
-Mask reverseMask(const Mask& mask);
+Mask reverseMask(Mask mask);
 
 // Removes masked fields in schemaless Thrift Object (Protocol Object).
 // Throws a runtime exception if the mask and object are incompatible.
@@ -112,7 +112,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   }
 
   MaskBuilder& invert() {
-    data_ = reverseMask(data_);
+    data_ = reverseMask(std::move(data_));
     return *this;
   }
 

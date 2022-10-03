@@ -601,7 +601,7 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
   EXPECT_EQ(
       p.structured_annotations_ref()->at(0), *cons("service").cv_struct_ref());
   EXPECT_EQ(p.functions_ref()->size(), 1);
-  EXPECT_EQ(p.get_parent(), nullptr);
+  EXPECT_EQ(apache::thrift::get_pointer(p.parent()), nullptr);
 
   const auto& f = p.functions_ref()[0];
   EXPECT_EQ(*f.name_ref(), "parentFun");
@@ -619,7 +619,8 @@ TEST_F(ServiceMetadataTest, ServiceTest) {
       *response_.services_ref()->front().service_name_ref());
   EXPECT_EQ(*s.name_ref(), "service_test.MyTestService");
   EXPECT_EQ(s.functions_ref()->size(), 3);
-  EXPECT_EQ(*s.get_parent(), "service_test.ParentService");
+  EXPECT_EQ(
+      *apache::thrift::get_pointer(s.parent()), "service_test.ParentService");
 
   const auto& f0 = s.functions_ref()[0];
   EXPECT_EQ(*f0.name_ref(), "getAllTypes");

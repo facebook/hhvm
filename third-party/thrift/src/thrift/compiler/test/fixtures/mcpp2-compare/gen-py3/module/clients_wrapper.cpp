@@ -25,9 +25,9 @@ ReturnServiceClientWrapper::noReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -46,9 +46,9 @@ ReturnServiceClientWrapper::boolReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -67,9 +67,9 @@ ReturnServiceClientWrapper::i16Return(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int16_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -88,9 +88,9 @@ ReturnServiceClientWrapper::i32Return(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -109,9 +109,9 @@ ReturnServiceClientWrapper::i64Return(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int64_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -130,9 +130,9 @@ ReturnServiceClientWrapper::floatReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<float>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -151,9 +151,9 @@ ReturnServiceClientWrapper::doubleReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<double>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -172,9 +172,9 @@ ReturnServiceClientWrapper::stringReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -193,9 +193,9 @@ ReturnServiceClientWrapper::binaryReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -214,9 +214,9 @@ ReturnServiceClientWrapper::mapReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::map<std::string,int64_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -235,9 +235,9 @@ ReturnServiceClientWrapper::simpleTypedefReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -256,9 +256,9 @@ ReturnServiceClientWrapper::complexTypedefReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -277,9 +277,9 @@ ReturnServiceClientWrapper::list_mostComplexTypedefReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<std::vector<std::vector<std::map<::some::valid::ns::Empty,::some::valid::ns::MyStruct>>>>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -298,9 +298,9 @@ ReturnServiceClientWrapper::enumReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::MyEnumA>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -319,9 +319,9 @@ ReturnServiceClientWrapper::list_EnumReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<::some::valid::ns::MyEnumA>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -340,9 +340,9 @@ ReturnServiceClientWrapper::structReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::MyStruct>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -361,9 +361,9 @@ ReturnServiceClientWrapper::set_StructReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::set<::some::valid::ns::MyStruct>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -382,9 +382,9 @@ ReturnServiceClientWrapper::unionReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::ComplexUnion>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -403,9 +403,9 @@ ReturnServiceClientWrapper::list_UnionReturn(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<::some::valid::ns::ComplexUnion>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -426,9 +426,9 @@ ReturnServiceClientWrapper::readDataEb(
       std::move(callback),
       arg_size
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::IOBuf>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -449,9 +449,9 @@ ReturnServiceClientWrapper::readData(
       std::move(callback),
       arg_size
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::unique_ptr<folly::IOBuf>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -472,9 +472,9 @@ ParamServiceClientWrapper::void_ret_i16_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -497,9 +497,9 @@ ParamServiceClientWrapper::void_ret_byte_i16_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -520,9 +520,9 @@ ParamServiceClientWrapper::void_ret_map_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -545,9 +545,9 @@ ParamServiceClientWrapper::void_ret_map_setlist_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -568,9 +568,9 @@ ParamServiceClientWrapper::void_ret_map_typedef_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -591,9 +591,9 @@ ParamServiceClientWrapper::void_ret_enum_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -614,9 +614,9 @@ ParamServiceClientWrapper::void_ret_struct_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -637,9 +637,9 @@ ParamServiceClientWrapper::void_ret_listunion_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -662,9 +662,9 @@ ParamServiceClientWrapper::bool_ret_i32_i64_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -685,9 +685,9 @@ ParamServiceClientWrapper::bool_ret_map_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -708,9 +708,9 @@ ParamServiceClientWrapper::bool_ret_union_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -733,9 +733,9 @@ ParamServiceClientWrapper::i64_ret_float_double_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int64_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -758,9 +758,9 @@ ParamServiceClientWrapper::i64_ret_string_typedef_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int64_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -789,9 +789,9 @@ ParamServiceClientWrapper::i64_ret_i32_i32_i32_i32_i32_param(
       arg_param4,
       arg_param5
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int64_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -812,9 +812,9 @@ ParamServiceClientWrapper::double_ret_setstruct_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<double>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -835,9 +835,9 @@ ParamServiceClientWrapper::string_ret_string_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -858,9 +858,9 @@ ParamServiceClientWrapper::binary_ret_binary_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -881,9 +881,9 @@ ParamServiceClientWrapper::map_ret_bool_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::map<std::string,int64_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -906,9 +906,9 @@ ParamServiceClientWrapper::list_ret_map_setlist_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<bool>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -929,9 +929,9 @@ ParamServiceClientWrapper::mapsetlistmapliststring_ret_listlistlist_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::map<std::set<std::vector<int32_t>>,std::map<std::vector<std::set<std::string>>,std::string>>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -952,9 +952,9 @@ ParamServiceClientWrapper::typedef_ret_i32_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -975,9 +975,9 @@ ParamServiceClientWrapper::listtypedef_ret_typedef_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<int32_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -998,9 +998,9 @@ ParamServiceClientWrapper::enum_ret_double_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::MyEnumA>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1023,9 +1023,9 @@ ParamServiceClientWrapper::enum_ret_double_enum_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::MyEnumA>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1046,9 +1046,9 @@ ParamServiceClientWrapper::listenum_ret_map_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<::some::valid::ns::MyEnumA>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1069,9 +1069,9 @@ ParamServiceClientWrapper::struct_ret_i16_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::MyStruct>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1092,9 +1092,9 @@ ParamServiceClientWrapper::setstruct_ret_set_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::set<::some::valid::ns::MyStruct>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1117,9 +1117,9 @@ ParamServiceClientWrapper::union_ret_i32_i32_param(
       arg_param1,
       arg_param2
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::some::valid::ns::ComplexUnion>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -1140,9 +1140,9 @@ ParamServiceClientWrapper::listunion_string_param(
       std::move(callback),
       arg_param1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::vector<::some::valid::ns::ComplexUnion>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

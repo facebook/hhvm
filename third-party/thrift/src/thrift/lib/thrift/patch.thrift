@@ -235,6 +235,50 @@ struct BinaryPatch {
   9: standard.ByteBuffer append;
 }
 
+/** A patch for a Duration value. */
+@cpp.Adapter{
+  underlyingName = "DurationStructPatch",
+  extraNamespace = "",
+  name = "::apache::thrift::op::detail::AssignPatchAdapter",
+}
+struct DurationPatch {
+  /**
+   * Assign to a given value.
+   *
+   * If set, all other patch operations are ignored.
+   */
+  1: optional standard.DurationStruct assign;
+
+  /** Clear any set value. */
+  2: bool clear;
+
+  /** Add to a given value. */
+  @thrift.Testing // TODO(afuller): Implement.
+  8: standard.DurationStruct add;
+} (thrift.uri = "facebook.com/thrift/type/DurationPatch")
+
+/** A patch for a Time value. */
+@cpp.Adapter{
+  underlyingName = "TimeStructPatch",
+  extraNamespace = "",
+  name = "::apache::thrift::op::detail::AssignPatchAdapter",
+}
+struct TimePatch {
+  /**
+   * Assign to a given value.
+   *
+   * If set, all other patch operations are ignored.
+   */
+  1: optional standard.TimeStruct assign;
+
+  /** Clear any set value. */
+  2: bool clear;
+
+  /** Add to a given value. */
+  @thrift.Testing // TODO(afuller): Implement.
+  8: standard.DurationStruct add;
+} (thrift.uri = "facebook.com/thrift/type/TimePatch")
+
 /**
  * The meaning of the patch op field ids, in all properly formulated patch
  * definitions.

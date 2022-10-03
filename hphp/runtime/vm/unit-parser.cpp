@@ -164,7 +164,6 @@ CompilerResult hackc_compile(
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .emit_class_pointers = RO::EvalEmitClassPointers,
     .check_int_overflow = RO::CheckIntOverflow,
     .hhbc_flags = hackc::HhbcFlags {
       .repo_authoritative = RO::RepoAuthoritative,

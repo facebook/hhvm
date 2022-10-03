@@ -749,16 +749,22 @@ void ThriftServer::setupThreadManager() {
   // client did.
   if (!resourcePoolSet().empty()) {
     // Keep concurrency controller in sync with max requests for now.
-    auto maxRequests = getMaxRequests();
-    resourcePoolSet()
-        .resourcePool(ResourcePoolHandle::defaultAsync())
-        .concurrencyController()
-        .value()
-        .get()
-        .setExecutionLimitRequests(
-            maxRequests != 0
-                ? maxRequests
-                : std::numeric_limits<decltype(maxRequests)>::max());
+    setMaxRequestsCallbackHandle =
+        detail::getThriftServerConfig(*this)
+            .getMaxRequests()
+            .getObserver()
+            .addCallback([this](folly::observer::Snapshot<uint32_t> snapshot) {
+              auto maxRequests = *snapshot;
+              resourcePoolSet()
+                  .resourcePool(ResourcePoolHandle::defaultAsync())
+                  .concurrencyController()
+                  .value()
+                  .get()
+                  .setExecutionLimitRequests(
+                      maxRequests != 0
+                          ? maxRequests
+                          : std::numeric_limits<decltype(maxRequests)>::max());
+            });
 
     // Create an adapter so calls to getThreadManager_deprecated will work
     // when we are using resource pools
@@ -829,8 +835,8 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
       std::shared_ptr<folly::ThreadFactory> factory =
           std::make_shared<folly::NamedThreadFactory>(name);
       // 2 is the default for the priorities other than NORMAL.
-      auto executor =
-          std::make_shared<folly::CPUThreadPoolExecutor>(2, std::move(factory));
+      auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
+          2, ResourcePool::kPreferredExecutorNumPriorities, std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile =
           std::make_unique<apache::thrift::RoundRobinRequestPile>(
@@ -916,9 +922,8 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
   }
 
   if (isActiveRequestsTrackingDisabled()) {
-    LOG(INFO) << "Resource pools disabled. Active request tracking disabled";
+    // Record this but don't disable. Managed in configuration instead.
     runtimeServerActions_.activeRequestTrackingDisabled = true;
-    runtimeDisableResourcePoolsDeprecated();
   }
 
   return !runtimeDisableResourcePoolsSet();
@@ -950,7 +955,8 @@ void ThriftServer::ensureResourcePools() {
         executor = std::make_shared<folly::CPUThreadPoolExecutor>(
             i == concurrency::PRIORITY::NORMAL
                 ? std::thread::hardware_concurrency()
-                : 2);
+                : 2,
+            ResourcePool::kPreferredExecutorNumPriorities);
       }
       apache::thrift::RoundRobinRequestPile::Options options;
       auto requestPile =
@@ -1070,11 +1076,10 @@ void ThriftServer::ensureResourcePools() {
             std::move(threadInitializer_),
             std::move(threadFinalizer_));
       }
-      // By default there will be 2 priorities so that we can prioritize
-      // internal requests over external ones
-      unsigned defaultNumPrioritiesExecutor = 2;
       auto executor = std::make_shared<folly::CPUThreadPoolExecutor>(
-          pool.numThreads, defaultNumPrioritiesExecutor, std::move(factory));
+          pool.numThreads,
+          ResourcePool::kPreferredExecutorNumPriorities,
+          std::move(factory));
       apache::thrift::RoundRobinRequestPile::Options options;
       if (threadManagerType_ == ThreadManagerType::PRIORITY_QUEUE) {
         options.setNumPriorities(concurrency::N_PRIORITIES);
@@ -1402,7 +1407,14 @@ void ThriftServer::callOnStartServing() {
           return handler->semifuture_onStartServing();
         }));
   }
-  folly::collectAll(futures).via(getHandlerExecutorKeepAlive()).get();
+  auto results =
+      folly::collectAll(futures).via(getHandlerExecutorKeepAlive()).get();
+  for (auto& result : results) {
+    if (result.hasException()) {
+      LOG(FATAL) << "Exception thrown by onStartServing(): "
+                 << folly::exceptionStr(result.exception());
+    }
+  }
 }
 
 void ThriftServer::callOnStopRequested() {

@@ -1120,10 +1120,7 @@ fn emit_collection<'a, 'arena, 'decl>(
     transform_to_collection: Option<CollectionType>,
 ) -> Result<InstrSeq<'arena>> {
     let pos = &expr.1;
-    match constant_folder::expr_to_typed_value_(
-        e, expr, true,  /*allow_map*/
-        false, /*force_class_const*/
-    ) {
+    match constant_folder::expr_to_typed_value_(e, expr, true /*allow_map*/) {
         Ok(tv) => {
             let instr = emit_adata::typed_value_into_instr(e, tv)?;
             emit_static_collection(env, transform_to_collection, pos, instr)
@@ -4550,17 +4547,10 @@ fn get_elem_member_key<'a, 'arena, 'decl>(
                 };
                 let fq_id = hhbc::ClassName::<'arena>::from_ast_name_and_mangle(alloc, cname)
                     .unsafe_as_str();
-                if e.options().emit_class_pointers() > 0 {
-                    Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::raise_class_string_conversion_warning(),
-                    ))
-                } else {
-                    Ok((
-                        MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
-                        instr::empty(),
-                    ))
-                }
+                Ok((
+                    MemberKey::ET(Str::from(fq_id), ReadonlyOp::Any),
+                    instr::raise_class_string_conversion_warning(),
+                ))
             }
             _ => {
                 // General case
@@ -4740,15 +4730,8 @@ fn emit_class_const<'a, 'arena, 'decl>(
     match cexpr {
         ClassExpr::Id(ast_defs::Id(pos, name)) => {
             let cid = hhbc::ClassName::from_ast_name_and_mangle(alloc, &name);
-            let cname = cid.unsafe_as_str();
             Ok(if string_utils::is_class(&id.1) {
-                if e.options().emit_class_pointers() == 1 {
-                    emit_pos_then(&pos, instr::resolve_class(cid))
-                } else if e.options().emit_class_pointers() == 2 {
-                    emit_pos_then(&pos, instr::lazy_class(cid))
-                } else {
-                    emit_pos_then(&pos, instr::string(alloc, cname))
-                }
+                emit_pos_then(&pos, instr::lazy_class(cid))
             } else {
                 e.add_class_ref(cid.clone());
                 // TODO(hrust) enabel `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
@@ -4760,11 +4743,7 @@ fn emit_class_const<'a, 'arena, 'decl>(
         }
         _ => {
             let load_const = if string_utils::is_class(&id.1) {
-                if e.options().emit_class_pointers() == 2 {
-                    instr::lazy_class_from_class()
-                } else {
-                    instr::class_name()
-                }
+                instr::lazy_class_from_class()
             } else {
                 // TODO(hrust) enable `let const_id = hhbc::ConstName::from_ast_name(&id.1);`,
                 // `from_ast_name` should be able to accpet Cow<str>
@@ -4772,14 +4751,10 @@ fn emit_class_const<'a, 'arena, 'decl>(
                     hhbc::ConstName::new(Str::new_str(alloc, string_utils::strip_global_ns(&id.1)));
                 instr::cls_cns(const_id)
             };
-            if string_utils::is_class(&id.1) && e.options().emit_class_pointers() == 1 {
-                emit_load_class_ref(e, env, pos, cexpr)
-            } else {
-                Ok(InstrSeq::gather(vec![
-                    emit_load_class_ref(e, env, pos, cexpr)?,
-                    load_const,
-                ]))
-            }
+            Ok(InstrSeq::gather(vec![
+                emit_load_class_ref(e, env, pos, cexpr)?,
+                load_const,
+            ]))
         }
     }
 }

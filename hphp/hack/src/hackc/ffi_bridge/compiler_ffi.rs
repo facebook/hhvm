@@ -44,7 +44,6 @@ pub mod compile_ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
-        emit_class_pointers: i32,
         check_int_overflow: i32,
 
         hhbc_flags: HhbcFlags,
@@ -148,6 +147,7 @@ pub mod compile_ffi {
         pub flags: isize,
         pub require_extends: Vec<String>,
         pub require_implements: Vec<String>,
+        pub require_class: Vec<String>,
         pub methods: Vec<Method>,
     }
 
@@ -239,7 +239,6 @@ impl compile_ffi::NativeEnv {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
                     .collect(),
-                emit_class_pointers: self.emit_class_pointers,
                 check_int_overflow: self.check_int_overflow,
                 parser_options: ParserOptions {
                     po_auto_namespace_map: (self.aliased_namespaces.iter())

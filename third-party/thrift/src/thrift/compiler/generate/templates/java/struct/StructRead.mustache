@@ -53,14 +53,14 @@ public static {{struct:javaCapitalName}} read0(TProtocol oprot) throws TExceptio
         {{/field:type}}
         {{#field:hasAdapter?}}
         {{#field:hasMultipleTypeAdapters?}}
-        builder.{{> SetterName}}(_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}})));
+        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}(_{{field:javaName}}_Adapter2.fromThrift(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}})));
         {{/field:hasMultipleTypeAdapters?}}
         {{^field:hasMultipleTypeAdapters?}}
-        builder.{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));
+        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}(_{{field:javaName}}_Adapter.fromThrift({{field:javaName}}));
         {{/field:hasMultipleTypeAdapters?}}
         {{/field:hasAdapter?}}
         {{^field:hasAdapter?}}
-        builder.{{> SetterName}}({{field:javaName}});
+        builder.{{#field:hasWrapper?}}_{{/field:hasWrapper?}}{{> SetterName}}({{field:javaName}});
         {{/field:hasAdapter?}}
       } else {
         TProtocolUtil.skip(oprot, __field.type);

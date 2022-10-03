@@ -105,6 +105,17 @@ pub struct ShallowProp<R: Reason> {
 
 walkable!(ShallowProp<R> => [ty]);
 
+impl<R: Reason> ShallowProp<R> {
+    /// In OCaml folding, we use Tany when a shallow property has no type. This
+    /// method provides the same behavior.
+    pub fn ty_or_tany(&self) -> Ty<R> {
+        match &self.ty {
+            Some(ty) => ty.clone(),
+            None => Ty::any(R::witness_from_decl(self.name.pos().clone())),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
@@ -180,7 +191,7 @@ pub type ModuleDecl<R> = ModuleDefType<R>;
 #[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
 #[derive(ToOcamlRep, FromOcamlRep)]
 #[serde(bound = "R: Reason")]
-pub enum Decl<R: Reason> {
+pub enum NamedDecl<R: Reason> {
     Class(TypeName, ClassDecl<R>),
     Fun(FunName, FunDecl<R>),
     Typedef(TypeName, TypedefDecl<R>),
@@ -188,22 +199,22 @@ pub enum Decl<R: Reason> {
     Module(ModuleName, ModuleDecl<R>),
 }
 
-walkable!(Decl<R> => {
-    Decl::Class(_, x) => [x],
-    Decl::Fun(_, x) => [x],
-    Decl::Typedef(_, x) => [x],
-    Decl::Const(_, x) => [x],
-    Decl::Module(_, x) =>  [x],
+walkable!(NamedDecl<R> => {
+    Self::Class(_, x) => [x],
+    Self::Fun(_, x) => [x],
+    Self::Typedef(_, x) => [x],
+    Self::Const(_, x) => [x],
+    Self::Module(_, x) =>  [x],
 });
 
-impl<R: Reason> Decl<R> {
+impl<R: Reason> NamedDecl<R> {
     pub fn name(&self) -> Symbol {
         match self {
-            Decl::Class(name, _) => name.as_symbol(),
-            Decl::Fun(name, _) => name.as_symbol(),
-            Decl::Typedef(name, _) => name.as_symbol(),
-            Decl::Const(name, _) => name.as_symbol(),
-            Decl::Module(name, _) => name.as_symbol(),
+            Self::Class(name, _) => name.as_symbol(),
+            Self::Fun(name, _) => name.as_symbol(),
+            Self::Typedef(name, _) => name.as_symbol(),
+            Self::Const(name, _) => name.as_symbol(),
+            Self::Module(name, _) => name.as_symbol(),
         }
     }
 
@@ -211,11 +222,44 @@ impl<R: Reason> Decl<R> {
         use oxidized::naming_types::KindOfType;
         use oxidized::naming_types::NameKind;
         match self {
-            Decl::Class(..) => NameKind::TypeKind(KindOfType::TClass),
-            Decl::Typedef(..) => NameKind::TypeKind(KindOfType::TTypedef),
-            Decl::Fun(..) => NameKind::FunKind,
-            Decl::Const(..) => NameKind::ConstKind,
-            Decl::Module(..) => NameKind::ModuleKind,
+            Self::Class(..) => NameKind::TypeKind(KindOfType::TClass),
+            Self::Typedef(..) => NameKind::TypeKind(KindOfType::TTypedef),
+            Self::Fun(..) => NameKind::FunKind,
+            Self::Const(..) => NameKind::ConstKind,
+            Self::Module(..) => NameKind::ModuleKind,
+        }
+    }
+}
+
+#[derive(Clone, Debug, Eq, EqModuloPos, Hash, PartialEq, Serialize, Deserialize)]
+#[derive(ToOcamlRep, FromOcamlRep)]
+#[serde(bound = "R: Reason")]
+pub enum Decl<R: Reason> {
+    Class(ClassDecl<R>),
+    Fun(FunDecl<R>),
+    Typedef(TypedefDecl<R>),
+    Const(ConstDecl<R>),
+    Module(ModuleDecl<R>),
+}
+
+walkable!(Decl<R> => {
+    Self::Class(x) => [x],
+    Self::Fun(x) => [x],
+    Self::Typedef(x) => [x],
+    Self::Const(x) => [x],
+    Self::Module(x) => [x],
+});
+
+impl<R: Reason> Decl<R> {
+    pub fn name_kind(&self) -> oxidized::naming_types::NameKind {
+        use oxidized::naming_types::KindOfType;
+        use oxidized::naming_types::NameKind;
+        match self {
+            Self::Class(..) => NameKind::TypeKind(KindOfType::TClass),
+            Self::Typedef(..) => NameKind::TypeKind(KindOfType::TTypedef),
+            Self::Fun(..) => NameKind::FunKind,
+            Self::Const(..) => NameKind::ConstKind,
+            Self::Module(..) => NameKind::ModuleKind,
         }
     }
 }

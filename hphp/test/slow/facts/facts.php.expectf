@@ -84,14 +84,20 @@ Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths
+this/path/does/not/exist.php has 0 modules
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
 this/path/does/not/exist.php has 0 constants
 this/path/does/not/exist.php has 0 type aliases
+/this/path/does/not/exist.php has 0 modules
 /this/path/does/not/exist.php has 0 types
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants
 /this/path/does/not/exist.php has 0 type aliases
+
+Getting all modules
+a => types-with-kinds.inc
+b => types-with-kinds.inc
 
 Getting all types
 AbstractFinalClass => derived-class.inc
@@ -221,6 +227,7 @@ Getting all type aliases
 SomeTypeAlias => type_aliases.inc
 TypeAliasWithAttr => type_aliases.inc
 Facts in attribute-classes.inc:
+  modules:
   types:
     name: AppleThenBanana
       kind: class
@@ -339,6 +346,7 @@ Facts in attribute-classes.inc:
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
   sha1sum: fe4faa5bf21efb6db5dc8931206d2d1c9a31f1be
 Facts in attribute-namespace.inc:
+  modules:
   types:
     name: AnnoyingNS\TerribleClass
       kind: class
@@ -353,6 +361,7 @@ Facts in attribute-namespace.inc:
   attributes: []
   sha1sum: ce28eb765a28e396aea841e63dfe1029c5754526
 Facts in base-class.inc:
+  modules:
   types:
     name: BaseClass
       kind: class
@@ -383,12 +392,14 @@ Facts in base-class.inc:
   attributes: []
   sha1sum: 2f253deefa52e71a8a5cae3e954ba26d10172999
 Facts in constants.inc:
+  modules:
   types:
   functions: []
   constants: ["SOME_CONSTANT"]
   attributes: []
   sha1sum: 25b6ab5854b0b0fc25b639ffb08bdd82323a4779
 Facts in derived-class.inc:
+  modules:
   types:
     name: AbstractFinalClass
       kind: class
@@ -475,6 +486,7 @@ Facts in derived-class.inc:
   attributes: []
   sha1sum: 4caa71dcecf49e17116eb04c3dd4f4288aa7d47d
 Facts in type_aliases.inc:
+  modules:
   types:
     name: SomeTypeAlias
       kind: typeAlias
@@ -505,6 +517,9 @@ Facts in type_aliases.inc:
   attributes: []
   sha1sum: 55b4f0b2eb4cd492a0a4292f047ca9d497754451
 Facts in types-with-kinds.inc:
+  modules:
+    name: a
+    name: b
   types:
     name: C1
       kind: class
@@ -541,7 +556,7 @@ Facts in types-with-kinds.inc:
   functions: []
   constants: []
   attributes: []
-  sha1sum: ab9174ca801a2104da9f4f32b12abd2fd56a366c
+  sha1sum: e44a009b2636c3f82c752f578bce58ec3cd9397b
 Finished.
 bool(true)
 string(5) "class"
@@ -629,14 +644,20 @@ Files decorated with TwoArgFileAttr: ["attribute-classes.inc"]
 Attributes of attribute-classes.inc: {"NoArgFileAttr":[],"TwoArgFileAttr":["Hello","There"]}
 
 Checking nonexistent paths
+this/path/does/not/exist.php has 0 modules
 this/path/does/not/exist.php has 0 types
 this/path/does/not/exist.php has 0 functions
 this/path/does/not/exist.php has 0 constants
 this/path/does/not/exist.php has 0 type aliases
+/this/path/does/not/exist.php has 0 modules
 /this/path/does/not/exist.php has 0 types
 /this/path/does/not/exist.php has 0 functions
 /this/path/does/not/exist.php has 0 constants
 /this/path/does/not/exist.php has 0 type aliases
+
+Getting all modules
+a => types-with-kinds.inc
+b => types-with-kinds.inc
 
 Getting all types
 AbstractFinalClass => derived-class.inc
@@ -766,6 +787,7 @@ Getting all type aliases
 SomeTypeAlias => type_aliases.inc
 TypeAliasWithAttr => type_aliases.inc
 Facts in attribute-classes.inc:
+  modules:
   types:
     name: AppleThenBanana
       kind: class
@@ -884,6 +906,7 @@ Facts in attribute-classes.inc:
   attributes: [{"name":"NoArgFileAttr","args":[]},{"name":"TwoArgFileAttr","args":["Hello","There"]}]
   sha1sum: fe4faa5bf21efb6db5dc8931206d2d1c9a31f1be
 Facts in attribute-namespace.inc:
+  modules:
   types:
     name: AnnoyingNS\TerribleClass
       kind: class
@@ -898,6 +921,7 @@ Facts in attribute-namespace.inc:
   attributes: []
   sha1sum: ce28eb765a28e396aea841e63dfe1029c5754526
 Facts in base-class.inc:
+  modules:
   types:
     name: BaseClass
       kind: class
@@ -928,12 +952,14 @@ Facts in base-class.inc:
   attributes: []
   sha1sum: 2f253deefa52e71a8a5cae3e954ba26d10172999
 Facts in constants.inc:
+  modules:
   types:
   functions: []
   constants: ["SOME_CONSTANT"]
   attributes: []
   sha1sum: 25b6ab5854b0b0fc25b639ffb08bdd82323a4779
 Facts in derived-class.inc:
+  modules:
   types:
     name: AbstractFinalClass
       kind: class
@@ -1020,6 +1046,7 @@ Facts in derived-class.inc:
   attributes: []
   sha1sum: 4caa71dcecf49e17116eb04c3dd4f4288aa7d47d
 Facts in type_aliases.inc:
+  modules:
   types:
     name: SomeTypeAlias
       kind: typeAlias
@@ -1050,6 +1077,9 @@ Facts in type_aliases.inc:
   attributes: []
   sha1sum: 55b4f0b2eb4cd492a0a4292f047ca9d497754451
 Facts in types-with-kinds.inc:
+  modules:
+    name: a
+    name: b
   types:
     name: C1
       kind: class
@@ -1086,5 +1116,5 @@ Facts in types-with-kinds.inc:
   functions: []
   constants: []
   attributes: []
-  sha1sum: ab9174ca801a2104da9f4f32b12abd2fd56a366c
+  sha1sum: e44a009b2636c3f82c752f578bce58ec3cd9397b
 Finished.

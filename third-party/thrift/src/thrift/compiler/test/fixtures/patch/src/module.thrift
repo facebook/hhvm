@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/patch.thrift"
+include "thrift/lib/thrift/standard.thrift"
 
 @thrift.TerseWrite
 @patch.GeneratePatch
@@ -59,6 +60,8 @@ struct MyStruct {
   MyData structVal;
   MyUnion unionVal;
   LateDefStruct lateStructVal;
+  standard.DurationStruct durationVal;
+  standard.TimeStruct timeVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;

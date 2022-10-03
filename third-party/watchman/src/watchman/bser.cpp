@@ -245,7 +245,7 @@ int bser_array(const bser_ctx_t* ctx, const json_ref& array, void* data) {
   }
 
   auto templ = json_array_get_template(array);
-  if (templ) {
+  if (templ && !templ->array().empty()) {
     return bser_template(ctx, array, *templ, data);
   }
 
@@ -591,6 +591,11 @@ class BserParser {
 
     // Load in the property names template
     auto templ = expectArray();
+    if (templ.empty()) {
+      // To avoid "decompression bombs" -- small documents that expand into huge
+      // memory requirements -- require that templates have a non-empty key set.
+      throw BserParseError("templates require a non-empty key set");
+    }
 
     // Validate that all template keys are strings before entering the main
     // loop.
@@ -607,32 +612,21 @@ class BserParser {
     // Now load up the array with object values
     std::vector<json_ref> rv;
     limitedReservation(rv, element_count);
-
-    // It's possible for hostile inputs to request a template of millions of
-    // inputs with an empty template. To avoid allocating a separate json map
-    // object in that case, share an empty one.
-    if (templ.size() == 0) {
-      static json_ref empty_object = json_object();
-      for (size_t i = 0; i < element_count; ++i) {
-        rv.push_back(empty_object);
-      }
-    } else {
-      for (size_t i = 0; i < element_count; ++i) {
-        std::unordered_map<w_string, json_ref> item;
-        limitedReservation(item, templ.size());
-        for (const auto& template_key : templ) {
-          char type = *ensure(1);
-          if (type == BSER_SKIP) {
-            continue;
-          }
-
-          assert(template_key.isString());
-          item.insert_or_assign(
-              json_string_value(template_key), parseValue(type));
+    for (size_t i = 0; i < element_count; ++i) {
+      std::unordered_map<w_string, json_ref> item;
+      limitedReservation(item, templ.size());
+      for (const auto& template_key : templ) {
+        char type = *ensure(1);
+        if (type == BSER_SKIP) {
+          continue;
         }
 
-        rv.push_back(json_object(std::move(item)));
+        assert(template_key.isString());
+        item.insert_or_assign(
+            json_string_value(template_key), parseValue(type));
       }
+
+      rv.push_back(json_object(std::move(item)));
     }
 
     return json_array(std::move(rv));

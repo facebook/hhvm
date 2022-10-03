@@ -53,6 +53,53 @@
           "column" : 63
         }
       }
+    },
+    "Wrapper" : {
+      "lineno" : 42,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+        "wrapperClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 45,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 45,
+              "column" : 30
+            }
+          }
+        },
+        "typeClassName" : {
+          "type_enum" : "STRING",
+          "spec_args" : null,
+          "required" : true,
+          "source_range" : {
+            "begin" : {
+              "line" : 48,
+              "column" : 3
+            },
+            "end" : {
+              "line" : 48,
+              "column" : 27
+            }
+          }
+        }
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 42,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 49,
+          "column" : 63
+        }
+      }
     }
   }
 }

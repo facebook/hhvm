@@ -28,7 +28,7 @@ Protocol getProtocol(const Any& any) noexcept {
     return getStandardProtocol<StandardProtocol::Compact>();
   }
   if (*any.protocol() != StandardProtocol::Custom) {
-    return Protocol(*any.get_protocol());
+    return Protocol(*any.protocol());
   }
   if (any.customProtocol()) {
     return Protocol(any.customProtocol().value_unchecked());
@@ -37,11 +37,11 @@ Protocol getProtocol(const Any& any) noexcept {
 }
 
 bool hasProtocol(const Any& any, const Protocol& protocol) noexcept {
-  if (any.get_protocol() == nullptr) {
+  if (!any.protocol()) {
     return protocol.standard() == StandardProtocol::Compact;
   }
-  if (*any.get_protocol() != StandardProtocol::Custom) {
-    return *any.get_protocol() == protocol.standard();
+  if (*any.protocol() != StandardProtocol::Custom) {
+    return *any.protocol() == protocol.standard();
   }
   if (any.customProtocol() && !any.customProtocol().value_unchecked().empty()) {
     return any.customProtocol().value_unchecked() == protocol.custom();

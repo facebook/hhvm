@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import pickle
 import unittest
 from enum import Enum
 from typing import cast, Type, TypeVar
@@ -52,8 +53,8 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(x.type, Kind)
         self.assertEqual(x.type, Kind.DIR)
         self.assertNotEqual(x.type, Kind.SOCK)
-        self.assertNotEqual(x.type, 4, "Enums are not Ints")
-        self.assertNotIsInstance(4, Kind, "Enums are not Ints")
+        self.assertNotIsInstance(4, Kind, "Ints are not Enums")
+        self.assertIsInstance(Kind.DIR, int, "Enums are Ints")
         self.assertIn(x.type, Kind)
         self.assertEqual(x.type.value, 4)
 
@@ -165,6 +166,18 @@ class EnumTests(unittest.TestCase):
         self.assertEqual(e.enum, cls)
         self.assertEqual(int(e), val)
 
+    def test_format(self) -> None:
+        self.assertEqual(f"{Color.red}", "Color.red")
+
+    def test_bool(self) -> None:
+        self.assertTrue(Kind.None_)
+        self.assertTrue(Color.red)
+
+    def test_pickle(self) -> None:
+        serialized = pickle.dumps(Color.green)
+        green = pickle.loads(serialized)
+        self.assertIs(green, Color.green)
+
 
 class FlagTests(unittest.TestCase):
     def test_flag_enum(self) -> None:
@@ -174,11 +187,13 @@ class FlagTests(unittest.TestCase):
         x = File(name="/bin/sh", permissions=Perm.read | Perm.execute)
         self.assertIsInstance(x.permissions, Perm)
         self.assertEqual(x.permissions, Perm.read | Perm.execute)
+        self.assertTrue(x.permissions)
         self.assertNotIsInstance(2, Perm, "Flags are not ints")
         self.assertEqual(x.permissions.value, 5)
         x = File(name="")
         self.assertFalse(x.permissions)
         self.assertIsInstance(x.permissions, Perm)
+        self.assertEqual(f"{Perm.read}", "Perm.read")
 
     def test_flag_enum_serialization_roundtrip(self) -> None:
         x = File(name="/dev/null", type=Kind.CHAR, permissions=Perm.read | Perm.write)

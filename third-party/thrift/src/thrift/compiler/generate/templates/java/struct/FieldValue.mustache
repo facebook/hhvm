@@ -38,7 +38,8 @@
       }}null{{!
     }}{{/field:hasAdapter?}}{{!
     }}{{^field:hasAdapter?}}{{!
-      }}{{field:javaDefaultValue}}{{!
+      }}{{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{!
+      }}{{^field:hasWrapper?}}{{field:javaDefaultValue}}{{/field:hasWrapper?}}{{!
     }}{{/field:hasAdapter?}}{{!
   }}{{/field:terse?}}{{!
 }}{{/field:value}}{{!

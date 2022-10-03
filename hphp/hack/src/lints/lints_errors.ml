@@ -392,18 +392,16 @@ let duplicate_property pos ~class_name ~prop_name ~class_names =
 
 let loose_unsafe_cast_lower_bound p ty_str_opt =
   let msg =
-    "HH\\FIXME\\UNSAFE_CAST input type annotation is too loose, please use a more specific type."
+    "The input type to `HH\\FIXME\\UNSAFE_CAST` should be as specific as possible."
   in
-  let msg =
+  let (msg, autofix) =
     match ty_str_opt with
     | Some ty_str ->
-      msg
-      ^ " The typechecker infers "
-      ^ Markdown_lite.md_codify ty_str
-      ^ " as the most specific type."
-    | None -> msg
+      ( msg ^ " Consider using " ^ Markdown_lite.md_codify ty_str ^ " instead.",
+        Some (ty_str, p) )
+    | None -> (msg, None)
   in
-  Lints.add Codes.loose_unsafe_cast_lower_bound Lint_error p msg
+  Lints.add ~autofix Codes.loose_unsafe_cast_lower_bound Lint_error p msg
 
 let loose_unsafe_cast_upper_bound p =
   Lints.add
@@ -423,15 +421,8 @@ let switch_nonexhaustive p =
     ^ " Consider adding a default case.")
 
 let calling_pointless_boolean p_lint p_quickfix txt =
-  let path = Pos.filename (Pos.to_absolute p_lint) in
-  let lines = Errors.read_lines path in
-  let src = String.concat ~sep:"\n" lines in
-  let original = Pos.get_text_from_pos ~content:src p_quickfix in
-  let replacement = "" in
-  let (start_offset, end_offset) = Pos.info_raw p_quickfix in
-  let width = end_offset - start_offset in
   Lints.add
-    ~autofix:(Some (original, replacement, start_offset, width))
+    ~autofix:(Some ("", p_quickfix))
     Codes.pointless_booleans_expression
     Lint_warning
     p_lint
@@ -444,12 +435,9 @@ let comparing_booleans p_expr p_var name value =
     else
       "Consider changing this statement to " ^ "(!" ^ name ^ ") instead"
   in
-  let path = Pos.filename (Pos.to_absolute p_expr) in
+  let path = Pos.filename (Pos.to_absolute p_var) in
   let lines = Errors.read_lines path in
   let src = String.concat ~sep:"\n" lines in
-  let (start_offset, end_offset) = Pos.info_raw p_expr in
-  let width = end_offset - start_offset in
-  let original = Pos.get_text_from_pos ~content:src p_expr in
   let replacement =
     if value then
       Pos.get_text_from_pos ~content:src p_var
@@ -457,7 +445,7 @@ let comparing_booleans p_expr p_var name value =
       String.make 1 '!' ^ Pos.get_text_from_pos ~content:src p_var
   in
   Lints.add
-    ~autofix:(Some (original, replacement, start_offset, width))
+    ~autofix:(Some (replacement, p_expr))
     Codes.comparing_booleans
     Lint_advice
     p_expr

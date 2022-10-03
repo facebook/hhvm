@@ -6,7 +6,10 @@
  */
 
 #pragma once
-#include "folly/Synchronized.h"
+
+#include <fmt/ranges.h>
+#include <folly/Synchronized.h>
+
 #include "watchman/PubSub.h"
 #include "watchman/watchman_preprocessor.h"
 #include "watchman/watchman_string.h"
@@ -133,8 +136,9 @@ LONG WINAPI exception_filter(LPEXCEPTION_POINTERS excep);
 } // namespace watchman
 
 template <typename... Args>
-const char* w_set_thread_name(Args&&... args) {
-  auto name = folly::to<std::string>(std::forward<Args>(args)...);
+const char* w_set_thread_name(const Args&... args) {
+  auto name =
+      fmt::to_string(fmt::join(std::make_tuple<const Args&...>(args...), ""));
   return watchman::Log::setThreadName(std::move(name));
 }
 

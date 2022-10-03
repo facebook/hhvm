@@ -5,4 +5,6 @@ trait T {
   require class C;
 }
 
-final class C {}
+final class C {
+  use T;
+}

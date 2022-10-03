@@ -24,7 +24,7 @@ use naming_table::NamingTable;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
-use oxidized::parser_options::ParserOptions;
+use oxidized::global_options::GlobalOptions;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
@@ -39,7 +39,7 @@ use ty::reason::BReason as BR;
 
 pub struct HhServerProviderBackend {
     path_ctx: Arc<RelativePathCtx>,
-    parser_options: ParserOptions,
+    opts: GlobalOptions,
     decl_parser: DeclParser<BR>,
     file_store: Arc<ChangesStore<RelativePath, FileType>>,
     file_provider: Arc<FileProviderWithChanges>,
@@ -57,7 +57,7 @@ pub struct HhServerProviderBackend {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Config {
     pub path_ctx: RelativePathCtx,
-    pub parser_options: ParserOptions,
+    pub opts: GlobalOptions,
     pub db_path: Option<PathBuf>,
 }
 
@@ -65,7 +65,7 @@ impl HhServerProviderBackend {
     pub fn new(config: Config) -> Result<Self> {
         let Config {
             path_ctx,
-            parser_options,
+            opts,
             db_path,
         } = config;
         let path_ctx = Arc::new(path_ctx);
@@ -78,13 +78,13 @@ impl HhServerProviderBackend {
             delta_and_changes: Arc::clone(&file_store),
             disk: DiskProvider::new(Arc::clone(&path_ctx), None),
         });
-        let decl_parser =
-            DeclParser::with_options(Arc::clone(&file_provider) as _, parser_options.clone());
+        let decl_parser = DeclParser::with_options(Arc::clone(&file_provider) as _, opts.clone());
         let dependency_graph = Arc::new(depgraph_api::NoDepGraph::new());
         let naming_table = Arc::new(NamingTable::new(db_path)?);
 
-        let shallow_decl_changes_store = Arc::new(ShallowStoreWithChanges::new());
-        let shallow_decl_store = Arc::new(shallow_decl_changes_store.as_shallow_decl_store());
+        let shallow_decl_changes_store =
+            Arc::new(ShallowStoreWithChanges::new(opts.tco_populate_member_heaps));
+        let shallow_decl_store = shallow_decl_changes_store.as_shallow_decl_store();
 
         let lazy_shallow_decl_provider = Arc::new(LazyShallowDeclProvider::new(
             Arc::clone(&shallow_decl_store),
@@ -101,7 +101,7 @@ impl HhServerProviderBackend {
             Arc::new(ChangesStore::new(Arc::clone(&folded_classes_shm) as _));
 
         let folded_decl_provider = Arc::new(LazyFoldedDeclProvider::new(
-            Arc::new(parser_options.clone()),
+            Arc::new(opts.clone()),
             Arc::clone(&folded_classes_store) as _,
             Arc::clone(&lazy_shallow_decl_provider) as _,
             dependency_graph,
@@ -109,7 +109,7 @@ impl HhServerProviderBackend {
 
         Ok(Self {
             path_ctx,
-            parser_options,
+            opts,
             file_store,
             file_provider,
             decl_parser,
@@ -127,8 +127,12 @@ impl HhServerProviderBackend {
         Config {
             path_ctx: (*self.path_ctx).clone(),
             db_path: self.naming_table.db_path(),
-            parser_options: self.parser_options.clone(),
+            opts: self.opts.clone(),
         }
+    }
+
+    pub fn opts(&self) -> &GlobalOptions {
+        &self.opts
     }
 
     pub fn naming_table(&self) -> &NamingTable {
@@ -278,11 +282,12 @@ struct ShallowStoreWithChanges {
     static_methods_shm: Arc<OcamlShmStore<(TypeName, pos::MethodName), decl::Ty<BR>>>,
     constructors:       Arc<ChangesStore <TypeName, decl::Ty<BR>>>,
     constructors_shm:   Arc<OcamlShmStore<TypeName, decl::Ty<BR>>>,
+    store_view: Arc<ShallowDeclStore<BR>>,
 }
 
 impl ShallowStoreWithChanges {
     #[rustfmt::skip]
-    pub fn new() -> Self {
+    fn new(populate_member_heaps: bool) -> Self {
         use shm_store::{Compression, Evictability::Evictable};
         let classes_shm =        Arc::new(OcamlShmStore::new("Classes", Evictable, Compression::default()));
         let typedefs_shm =       Arc::new(OcamlShmStore::new("Typedefs", Evictable, Compression::default()));
@@ -294,17 +299,51 @@ impl ShallowStoreWithChanges {
         let methods_shm =        Arc::new(OcamlShmStore::new("Methods", Evictable, Compression::default()));
         let static_methods_shm = Arc::new(OcamlShmStore::new("StaticMethods", Evictable, Compression::default()));
         let constructors_shm =   Arc::new(OcamlShmStore::new("Constructors", Evictable, Compression::default()));
+
+        let classes =        Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _));
+        let typedefs =       Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _));
+        let funs =           Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _));
+        let consts =         Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _));
+        let modules =        Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _));
+        let props =          Arc::new(ChangesStore::new(Arc::clone(&props_shm) as _));
+        let static_props =   Arc::new(ChangesStore::new(Arc::clone(&static_props_shm) as _));
+        let methods =        Arc::new(ChangesStore::new(Arc::clone(&methods_shm) as _));
+        let static_methods = Arc::new(ChangesStore::new(Arc::clone(&static_methods_shm) as _));
+        let constructors =   Arc::new(ChangesStore::new(Arc::clone(&constructors_shm) as _));
+
+        let store_view = if populate_member_heaps {
+            Arc::new(ShallowDeclStore::new(
+                Arc::clone(&classes) as _,
+                Arc::clone(&typedefs) as _,
+                Arc::clone(&funs) as _,
+                Arc::clone(&consts) as _,
+                Arc::clone(&modules) as _,
+                Arc::clone(&props) as _,
+                Arc::clone(&static_props) as _,
+                Arc::clone(&methods) as _,
+                Arc::clone(&static_methods) as _,
+                Arc::clone(&constructors) as _,
+            ))
+        } else {
+            Arc::new(ShallowDeclStore::with_no_member_stores(
+                Arc::clone(&classes) as _,
+                Arc::clone(&typedefs) as _,
+                Arc::clone(&funs) as _,
+                Arc::clone(&consts) as _,
+                Arc::clone(&modules) as _,
+            ))
+        };
         Self {
-            classes:        Arc::new(ChangesStore::new(Arc::clone(&classes_shm) as _)),
-            typedefs:       Arc::new(ChangesStore::new(Arc::clone(&typedefs_shm) as _)),
-            funs:           Arc::new(ChangesStore::new(Arc::clone(&funs_shm) as _)),
-            consts:         Arc::new(ChangesStore::new(Arc::clone(&consts_shm) as _)),
-            modules:        Arc::new(ChangesStore::new(Arc::clone(&modules_shm) as _)),
-            props:          Arc::new(ChangesStore::new(Arc::clone(&props_shm) as _)),
-            static_props:   Arc::new(ChangesStore::new(Arc::clone(&static_props_shm) as _)),
-            methods:        Arc::new(ChangesStore::new(Arc::clone(&methods_shm) as _)),
-            static_methods: Arc::new(ChangesStore::new(Arc::clone(&static_methods_shm) as _)),
-            constructors:   Arc::new(ChangesStore::new(Arc::clone(&constructors_shm) as _)),
+            classes,
+            typedefs,
+            funs,
+            consts,
+            modules,
+            props,
+            static_props,
+            methods,
+            static_methods,
+            constructors,
             classes_shm,
             typedefs_shm,
             funs_shm,
@@ -315,10 +354,11 @@ impl ShallowStoreWithChanges {
             methods_shm,
             static_methods_shm,
             constructors_shm,
+            store_view,
         }
     }
 
-    pub fn push_local_changes(&self) {
+    fn push_local_changes(&self) {
         self.classes.push_local_changes();
         self.typedefs.push_local_changes();
         self.funs.push_local_changes();
@@ -331,7 +371,7 @@ impl ShallowStoreWithChanges {
         self.constructors.push_local_changes();
     }
 
-    pub fn pop_local_changes(&self) {
+    fn pop_local_changes(&self) {
         self.classes.pop_local_changes();
         self.typedefs.pop_local_changes();
         self.funs.pop_local_changes();
@@ -344,19 +384,8 @@ impl ShallowStoreWithChanges {
         self.constructors.pop_local_changes();
     }
 
-    pub fn as_shallow_decl_store(&self) -> ShallowDeclStore<BR> {
-        ShallowDeclStore::new(
-            Arc::clone(&self.classes) as _,
-            Arc::clone(&self.typedefs) as _,
-            Arc::clone(&self.funs) as _,
-            Arc::clone(&self.consts) as _,
-            Arc::clone(&self.modules) as _,
-            Arc::clone(&self.props) as _,
-            Arc::clone(&self.static_props) as _,
-            Arc::clone(&self.methods) as _,
-            Arc::clone(&self.static_methods) as _,
-            Arc::clone(&self.constructors) as _,
-        )
+    fn as_shallow_decl_store(&self) -> Arc<ShallowDeclStore<BR>> {
+        Arc::clone(&self.store_view)
     }
 }
 

@@ -78,6 +78,11 @@ class FlagWrapper {
     folly::observer_detail::ObserverManager::waitForAllUpdates();
   }
 
+  void unmock() {
+    mockObservable_.setValue(folly::none);
+    folly::observer_detail::ObserverManager::waitForAllUpdates();
+  }
+
  private:
   folly::observer::ReadMostlyAtomicObserver<T>& ensureInit() {
     return observer_.try_emplace_with([this] {

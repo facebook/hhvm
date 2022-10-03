@@ -284,10 +284,9 @@ let process_xrefs ctx symbols prog : XRefs.t * Fact_acc.t =
               process_container_xref con_kind name pos (xrefs, prog)
             | _ -> (xrefs, prog))))
 
-let process_xrefs_and_calls ctx prog File_info.{ path; tast; _ } =
-  let symbols = IdentifySymbolService.all_symbols ctx tast in
+let process_xrefs_and_calls ctx prog File_info.{ path; tast; symbols; _ } =
   Fact_acc.set_ownership_unit prog (Some path);
-  let (XRefs.{ fact_map; pos_map }, prog) = process_xrefs ctx symbols prog in
+  let (XRefs.{ fact_map; pos_map; _ }, prog) = process_xrefs ctx symbols prog in
   let prog =
     if Fact_id.Map.is_empty fact_map then
       prog

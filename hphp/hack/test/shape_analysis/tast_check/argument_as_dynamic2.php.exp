@@ -1,3 +1,3 @@
-[RESULT] \f: [6:8-23] [Allocation]:
+[RESULT] \f: (# of errors: 0) [6:8-23] [Allocation]:
   shape('a' => int)
 No errors

@@ -620,3 +620,12 @@ let global_namespace_alias ~from ~to_ progress =
       ]
   in
   Fact_acc.add_fact Predicate.(Hack GlobalNamespaceAlias) json progress
+
+let indexerInputsHash key hashes progress =
+  let value =
+    JSON_String
+      (List.map hashes ~f:(fun x -> Md5.to_binary x |> Base64.encode_string)
+      |> String.concat)
+  in
+  let key = JSON_String key in
+  Fact_acc.add_fact Predicate.(Hack IndexerInputsHash) key ~value progress

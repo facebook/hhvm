@@ -1,0 +1,4 @@
+[RESULT] \main: (# of errors: 1) [9:9-26] [Allocation]:
+  shape('w' => string)
+[FAILURE] \main: "[10:3-8]: Unsupported expression: Obj_get"
+No errors

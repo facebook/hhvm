@@ -1078,8 +1078,7 @@ let write_symbol_info
   let exclude_hhi = not env.swriteopt.symbol_write_include_hhi in
   let ignore_paths = env.swriteopt.symbol_write_ignore_paths in
   let _ = env.swriteopt.symbol_write_sym_hash_in in
-  let _ = env.swriteopt.symbol_write_exclude_out in
-  let _ = env.swriteopt.symbol_write_sym_hash_out in
+  let gen_sym_hash = env.swriteopt.symbol_write_sym_hash_out in
   let files =
     if List.length paths > 0 || Option.is_some paths_file then
       Symbol_indexable.from_options ~paths ~paths_file
@@ -1094,7 +1093,10 @@ let write_symbol_info
   in
   match env.swriteopt.symbol_write_index_paths_file_output with
   | Some output ->
-    List.map ~f:Relative_path.storage_to_string files
+    List.map
+      ~f:(fun Symbol_indexable.{ path; _ } ->
+        Relative_path.storage_to_string path)
+      files
     |> Out_channel.write_lines output;
     (env, t)
   | None ->
@@ -1125,10 +1127,12 @@ let write_symbol_info
     let hhi_path = env.swriteopt.symbol_write_hhi_path in
     let ownership = env.swriteopt.symbol_write_ownership in
     Hh_logger.log "Ownership mode: %b" ownership;
+    Hh_logger.log "Gen_sym_hash: %b" gen_sym_hash;
     Symbol_entrypoint.go
       genv.workers
       ctx
       ~namespace_map
+      ~gen_sym_hash
       ~ownership
       ~out_dir
       ~root_path

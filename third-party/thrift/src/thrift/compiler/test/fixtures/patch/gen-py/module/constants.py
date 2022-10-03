@@ -18,7 +18,8 @@ if sys.version_info[0] >= 3:
 
 import thrift.annotation.thrift.ttypes
 import thrift.lib.thrift.patch.ttypes
+import thrift.lib.thrift.standard.ttypes
 
 
-from .ttypes import UTF8STRINGS, MyEnum, MyData, InnerUnion, MyUnion, MyStruct, LateDefStruct, MyDataFieldPatch, MyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, MyStructFieldPatch, MyStructFieldN10Patch, MyStructFieldN23Patch, MyStructFieldN26Patch, MyStructFieldN27Patch, MyStructFieldN28Patch, MyStructPatch, LateDefStructFieldPatch, LateDefStructPatch
+from .ttypes import UTF8STRINGS, MyEnum, MyData, InnerUnion, MyUnion, MyStruct, LateDefStruct, MyDataFieldPatch, MyDataPatch, InnerUnionFieldPatch, InnerUnionPatch, MyUnionFieldPatch, MyUnionPatch, MyStructFieldPatch, MyStructFieldN10Patch, MyStructFieldN25Patch, MyStructFieldN28Patch, MyStructFieldN29Patch, MyStructFieldN30Patch, MyStructPatch, LateDefStructFieldPatch, LateDefStructPatch
 

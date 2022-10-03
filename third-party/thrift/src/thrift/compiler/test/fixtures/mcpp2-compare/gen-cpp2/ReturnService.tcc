@@ -76,8 +76,8 @@ void ReturnServiceAsyncProcessor::executeRequest_noReturn(apache::thrift::Server
   try {
     deserializeRequest<ProtocolIn_>(args, "noReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -142,8 +142,8 @@ void ReturnServiceAsyncProcessor::executeRequest_boolReturn(apache::thrift::Serv
   try {
     deserializeRequest<ProtocolIn_>(args, "boolReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -210,8 +210,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i16Return(apache::thrift::Serve
   try {
     deserializeRequest<ProtocolIn_>(args, "i16Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -278,8 +278,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i32Return(apache::thrift::Serve
   try {
     deserializeRequest<ProtocolIn_>(args, "i32Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -346,8 +346,8 @@ void ReturnServiceAsyncProcessor::executeRequest_i64Return(apache::thrift::Serve
   try {
     deserializeRequest<ProtocolIn_>(args, "i64Return", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -414,8 +414,8 @@ void ReturnServiceAsyncProcessor::executeRequest_floatReturn(apache::thrift::Ser
   try {
     deserializeRequest<ProtocolIn_>(args, "floatReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -482,8 +482,8 @@ void ReturnServiceAsyncProcessor::executeRequest_doubleReturn(apache::thrift::Se
   try {
     deserializeRequest<ProtocolIn_>(args, "doubleReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -553,8 +553,8 @@ void ReturnServiceAsyncProcessor::executeRequest_stringReturn(apache::thrift::Se
   try {
     deserializeRequest<ProtocolIn_>(args, "stringReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -621,8 +621,8 @@ void ReturnServiceAsyncProcessor::executeRequest_binaryReturn(apache::thrift::Se
   try {
     deserializeRequest<ProtocolIn_>(args, "binaryReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -689,8 +689,8 @@ void ReturnServiceAsyncProcessor::executeRequest_mapReturn(apache::thrift::Serve
   try {
     deserializeRequest<ProtocolIn_>(args, "mapReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -757,8 +757,8 @@ void ReturnServiceAsyncProcessor::executeRequest_simpleTypedefReturn(apache::thr
   try {
     deserializeRequest<ProtocolIn_>(args, "simpleTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -825,8 +825,8 @@ void ReturnServiceAsyncProcessor::executeRequest_complexTypedefReturn(apache::th
   try {
     deserializeRequest<ProtocolIn_>(args, "complexTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -893,8 +893,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_mostComplexTypedefReturn(a
   try {
     deserializeRequest<ProtocolIn_>(args, "list_mostComplexTypedefReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -964,8 +964,8 @@ void ReturnServiceAsyncProcessor::executeRequest_enumReturn(apache::thrift::Serv
   try {
     deserializeRequest<ProtocolIn_>(args, "enumReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1035,8 +1035,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_EnumReturn(apache::thrift:
   try {
     deserializeRequest<ProtocolIn_>(args, "list_EnumReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1103,8 +1103,8 @@ void ReturnServiceAsyncProcessor::executeRequest_structReturn(apache::thrift::Se
   try {
     deserializeRequest<ProtocolIn_>(args, "structReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1171,8 +1171,8 @@ void ReturnServiceAsyncProcessor::executeRequest_set_StructReturn(apache::thrift
   try {
     deserializeRequest<ProtocolIn_>(args, "set_StructReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1242,8 +1242,8 @@ void ReturnServiceAsyncProcessor::executeRequest_unionReturn(apache::thrift::Ser
   try {
     deserializeRequest<ProtocolIn_>(args, "unionReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1310,8 +1310,8 @@ void ReturnServiceAsyncProcessor::executeRequest_list_UnionReturn(apache::thrift
   try {
     deserializeRequest<ProtocolIn_>(args, "list_UnionReturn", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1383,8 +1383,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readDataEb(apache::thrift::Serv
   try {
     deserializeRequest<ProtocolIn_>(args, "readDataEb", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -1453,8 +1453,8 @@ void ReturnServiceAsyncProcessor::executeRequest_readData(apache::thrift::Server
   try {
     deserializeRequest<ProtocolIn_>(args, "readData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))

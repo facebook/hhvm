@@ -119,7 +119,6 @@ struct RepoGlobalData {
    */
   uint64_t Signature = 0;
 
-  int32_t EmitClassPointers = 0;
   bool EmitClsMethPointers = true;
 
   /*
@@ -200,7 +199,6 @@ struct RepoGlobalData {
       (Signature)
       (AbortBuildOnVerifyError)
       (EnableArgsInBacktraces)
-      (EmitClassPointers)
       (EmitClsMethPointers)
       (IsVecNotices)
       (RaiseClassConversionWarning)

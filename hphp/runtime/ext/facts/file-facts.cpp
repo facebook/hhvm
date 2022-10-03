@@ -38,6 +38,7 @@ X(requireImplements)
 X(methods)
 
 // FileFacts
+X(modules)
 X(types)
 X(functions)
 X(constants)

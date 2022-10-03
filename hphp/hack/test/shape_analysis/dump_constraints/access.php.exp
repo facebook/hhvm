@@ -1,7 +1,7 @@
 === Shape analysis results for access.php
 Constraints for \f:
-   4: ! SK [4:3-18] : shape('a' => int)
    4: Allocation at [4:3-18]
-   4: ? SK [4:3-18] : shape('a' => int)
    4: ! SK [4:3-18] : shape('a' => int)
+   4: ! SK [4:3-18] : shape('a' => int)
+   4: ? SK [4:3-18] : shape('a' => int)
 

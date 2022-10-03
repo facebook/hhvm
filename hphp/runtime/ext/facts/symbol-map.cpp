@@ -118,6 +118,13 @@ typename std::enable_if<
 getAllSymbolsFromDB(AutoloadDB& db) {
   return db.getAllConstantPaths();
 }
+template <SymKind k>
+typename std::enable_if<
+    k == SymKind::Module,
+    AutoloadDB::MultiResult<AutoloadDB::SymbolPath>>::type
+getAllSymbolsFromDB(AutoloadDB& db) {
+  return db.getAllModulePaths();
+}
 
 } // namespace
 
@@ -309,6 +316,11 @@ SymbolMap::getAllFunctions() {
 std::vector<std::pair<Symbol<SymKind::Constant>, Path>>
 SymbolMap::getAllConstants() {
   return getAllSymbols<SymKind::Constant>();
+}
+
+std::vector<std::pair<Symbol<SymKind::Module>, Path>>
+SymbolMap::getAllModules() {
+  return getAllSymbols<SymKind::Module>();
 }
 
 std::vector<std::pair<Symbol<SymKind::Type>, Path>>

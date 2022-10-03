@@ -451,7 +451,8 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
        PatchOp::PatchPrior,
        PatchOp::EnsureStruct,
        PatchOp::EnsureUnion,
-       PatchOp::PatchAfter});
+       PatchOp::PatchAfter,
+       PatchOp::Add});
   if (applyAssign<type::struct_c>(patch, value)) {
     return; // Ignore all other ops.
   }
@@ -516,6 +517,9 @@ void ApplyPatch::operator()(const Object& patch, Object& value) const {
 
   if (auto* patchFields = findOp(patch, PatchOp::PatchAfter)) {
     applyFieldPatch(patchFields);
+  }
+  if (auto* addFields = findOp(patch, PatchOp::Add)) {
+    // TODO(afuller): Implement field-wise add.
   }
 }
 // Inserts the next mask to getIncludesRef(mask)[id].

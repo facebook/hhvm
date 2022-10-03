@@ -43,6 +43,7 @@ type hack =
   | ModuleDefinition
   | FileCall
   | GlobalNamespaceAlias
+  | IndexerInputsHash
 
 type src = FileLines
 
@@ -92,5 +93,10 @@ module Fact_acc : sig
 
      If [ownership] is set, we distinguish between identical facts with different
      owners *)
-  val add_fact : predicate -> Hh_json.json -> t -> Symbol_fact_id.t * t
+  val add_fact :
+    predicate ->
+    Hh_json.json ->
+    ?value:Hh_json.json ->
+    t ->
+    Symbol_fact_id.t * t
 end

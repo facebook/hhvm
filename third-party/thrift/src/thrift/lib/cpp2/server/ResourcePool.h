@@ -41,6 +41,11 @@ namespace apache::thrift {
 // but the executor may be shared amongst multiple resource pools if desired.
 class ResourcePool {
  public:
+  // It is prefereble that the executor used in a resource pool has at least
+  // this many priorities so that we can deprioritize tasks that start new
+  // requests (compared to tasks that are continuations of existing requests).
+  static constexpr unsigned int kPreferredExecutorNumPriorities = 2;
+
   ~ResourcePool();
 
   // Access to the request pile if it exists.

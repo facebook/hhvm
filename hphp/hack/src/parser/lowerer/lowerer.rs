@@ -2061,15 +2061,25 @@ fn p_scope_resolution_expr<'a>(
     }
     match &c.name.children {
         Token(token) if token.kind() == TK::Variable => {
-            let ast::Id(p, name) = pos_name(&c.name, env)?;
-            Ok(Expr_::mk_class_get(
-                ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
-                ast::ClassGetExpr::CGstring((p, name)),
-                match location {
-                    ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                    _ => ast::PropOrMethod::IsProp,
-                },
-            ))
+            if location == ExprLocation::CallReceiver {
+                let ast::Id(p, name) = pos_name(&c.name, env)?;
+                Ok(Expr_::mk_class_get(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    ast::ClassGetExpr::CGexpr(Expr(
+                        (),
+                        p.clone(),
+                        Expr_::mk_lvar(ast::Lid::new(p, name)),
+                    )),
+                    ast::PropOrMethod::IsMethod,
+                ))
+            } else {
+                let ast::Id(p, name) = pos_name(&c.name, env)?;
+                Ok(Expr_::mk_class_get(
+                    ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
+                    ast::ClassGetExpr::CGstring((p, name)),
+                    ast::PropOrMethod::IsProp,
+                ))
+            }
         }
         _ => {
             let Expr(_, p, expr_) = p_expr(&c.name, env)?;
@@ -2091,15 +2101,12 @@ fn p_scope_resolution_expr<'a>(
                         (p, n),
                     ))
                 }
-                Expr_::Lvar(id) => {
+                Expr_::Lvar(id) if location != ExprLocation::CallReceiver => {
                     let ast::Lid(p, (_, n)) = *id;
                     Ok(Expr_::mk_class_get(
                         ast::ClassId((), pos, ast::ClassId_::CIexpr(qual)),
                         ast::ClassGetExpr::CGstring((p, n)),
-                        match location {
-                            ExprLocation::CallReceiver => ast::PropOrMethod::IsMethod,
-                            _ => ast::PropOrMethod::IsProp,
-                        },
+                        ast::PropOrMethod::IsProp,
                     ))
                 }
                 _ => Ok(Expr_::mk_class_get(

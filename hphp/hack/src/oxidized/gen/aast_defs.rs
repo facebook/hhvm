@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<bfece38ef8ee0a8373d0a6464078188b>>
+// @generated SignedSource<<d77ccb17aaf45143187ca5de1077efab>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -608,34 +608,43 @@ pub enum Expr_<Ex, En> {
     ///   - the receiver in a Call node.
     ///
     ///     $foo->bar      // OG_nullthrows, Is_prop: access named property
-    ///     $foo->bar()    // OG_nullthrows, Is_method: call named method
     ///     ($foo->bar)()  // OG_nullthrows, Is_prop: call lambda stored in named property
     ///     $foo?->bar     // OG_nullsafe,   Is_prop
-    ///     $foo?->bar()   // OG_nullsafe,   Is_method
     ///     ($foo?->bar)() // OG_nullsafe,   Is_prop
+    ///
+    ///     $foo->bar()    // OG_nullthrows, Is_method: call named method
+    ///     $foo->$bar()   // OG_nullthrows, Is_method: dynamic call, method name stored in local $bar
+    ///     $foo?->bar()   // OG_nullsafe,   Is_method
+    ///     $foo?->$bar()  // OG_nullsafe,   Is_method
     #[rust_to_ocaml(name = "Obj_get")]
     #[rust_to_ocaml(inline_tuple)]
     ObjGet(Box<(Expr<Ex, En>, Expr<Ex, En>, OgNullFlavor, PropOrMethod)>),
-    /// Static property or dynamic method access. The rhs of the :: begins with a $.
+    /// Static property or dynamic method access. The rhs of the :: begins
+    /// with $ or is some non-name expression appearing within braces {}.
     ///
-    ///     Foo::$bar               // Is_prop
-    ///     $some_classname::$bar   // Is_prop
-    ///     Foo::${$bar}            // Is_prop, only in partial mode
-    ///     (Foo::$bar)();          // Is_prop: call lambda stored in property Foo::$bar
+    ///     Foo::$bar               // Is_prop: access named static property
+    ///     Foo::{$bar}             // Is_prop
+    ///     (Foo::$bar)();          // Is_prop: call lambda stored in static property Foo::$bar
+    ///     $classname::$bar        // Is_prop
     ///
-    ///     Foo::$bar();            // Is_method, name stored in local $bar
+    ///     Foo::$bar();            // Is_method: dynamic call, method name stored in local $bar
+    ///     Foo::{$bar}();          // Is_method
     #[rust_to_ocaml(name = "Class_get")]
     #[rust_to_ocaml(inline_tuple)]
     ClassGet(Box<(ClassId<Ex, En>, ClassGetExpr<Ex, En>, PropOrMethod)>),
     /// Class constant or static method call. As a standalone expression,
     /// this is a class constant. Inside a Call node, this is a static
-    /// method call. The rhs of the :: does not begin with $.
+    /// method call. The rhs of the :: does not begin with $ or is a name
+    /// appearing within braces {}.
     ///
     /// This is not ambiguous, because constants are not allowed to
     /// contain functions.
     ///
-    ///     Foo::some_const // Class_const
-    ///     Foo::someStaticMeth() // Call (Class_const)
+    ///     Foo::some_const            // Const
+    ///     Foo::{another_const}       // Const: braces are elided
+    ///     Foo::class                 // Const: fully qualified class name of Foo
+    ///     Foo::staticMeth()          // Call
+    ///     $classname::staticMeth()   // Call
     ///
     /// This syntax is used for both static and instance methods when
     /// calling the implementation on the superclass.

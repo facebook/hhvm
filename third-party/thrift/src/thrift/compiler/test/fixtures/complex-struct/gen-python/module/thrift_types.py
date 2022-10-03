@@ -1369,7 +1369,7 @@ class complexException(metaclass=_fbthrift_python_exceptions.GeneratedErrorMeta)
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     MyValue1 = 0
     MyValue2 = 1
     MyValue3 = 3

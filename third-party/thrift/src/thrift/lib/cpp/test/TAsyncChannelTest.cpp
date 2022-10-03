@@ -932,8 +932,9 @@ class RecvChunksTest : public SocketPairTest<ChannelT> {
       EXPECT_EQ(this->channel1_->good(), true);
       msg_.checkEqual(&recvBuf_);
 
-      T_CHECK_TIMEOUT(
-          start_, recvCallback_.getTimestamp(), expectedMS, tolerance);
+      EXPECT_GE(
+          recvCallback_.getTimestamp().getTime() - start_.getTime(),
+          expectedMS);
     }
   }
 

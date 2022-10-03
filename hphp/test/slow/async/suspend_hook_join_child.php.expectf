@@ -1,0 +1,10 @@
+suspending or returning from main
+suspending or returning from main
+
+Fatal error: Uncaught exception 'InvalidOperationException' with message 'The suspend await event hook entered a new asio scheduler context and awaited the same child, revoking the reason for suspension.' in %s/suspend_hook_join_child.php:18
+Stack trace:
+#0 (): main()
+#1 (): Closure$__SystemLib\enter_async_entry_point()
+#2 (): HH\Asio\join()
+#3 (): __SystemLib\enter_async_entry_point()
+#4 {main}

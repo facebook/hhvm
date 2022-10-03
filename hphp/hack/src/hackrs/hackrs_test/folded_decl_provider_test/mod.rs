@@ -97,7 +97,7 @@ fn when_file_missing_error(fb: FacebookInit) -> Result<()> {
         .parse(RelativePath::new(Prefix::Root, "d.php"))?
     {
         match decl {
-            shallow::Decl::Class(cls, _) => {
+            shallow::NamedDecl::Class(cls, _) => {
                 assert_eq!(cls, d);
             }
             _ => panic!("unexpected decl in 'd.php'"),

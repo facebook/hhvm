@@ -7,10 +7,11 @@
  */
 
 #include <proxygen/lib/http/codec/HTTPBinaryCodec.h>
-#include <quic/codec/QuicInteger.h>
 
 #include <folly/String.h>
 #include <folly/portability/GTest.h>
+#include <proxygen/lib/http/codec/test/TestUtils.h>
+#include <quic/codec/QuicInteger.h>
 
 namespace proxygen::test {
 
@@ -52,52 +53,6 @@ class HTTPBinaryCodecForTest : public HTTPBinaryCodec {
   folly::IOBuf& getMsgBody() {
     return *msgBody_;
   }
-};
-
-class HTTPBinaryCodecCallback : public HTTPCodec::Callback {
- public:
-  HTTPBinaryCodecCallback() = default;
-
-  void onMessageBegin(HTTPCodec::StreamID /*stream*/,
-                      HTTPMessage* /*msg*/) override {
-  }
-  void onPushMessageBegin(HTTPCodec::StreamID /*stream*/,
-                          HTTPCodec::StreamID /*assocStream*/,
-                          HTTPMessage* /*msg*/) override {
-  }
-  void onHeadersComplete(HTTPCodec::StreamID /*stream*/,
-                         std::unique_ptr<HTTPMessage> msg) override {
-    msg_ = std::move(msg);
-  }
-  void onBody(HTTPCodec::StreamID /*stream*/,
-              std::unique_ptr<folly::IOBuf> chain,
-              uint16_t /*padding*/) override {
-    if (chain) {
-      body_ = chain->clone();
-    }
-  }
-  void onChunkHeader(HTTPCodec::StreamID /*stream*/,
-                     size_t /*length*/) override {
-  }
-  void onChunkComplete(HTTPCodec::StreamID /*stream*/) override {
-  }
-  void onTrailersComplete(HTTPCodec::StreamID /*stream*/,
-                          std::unique_ptr<HTTPHeaders> trailers) override {
-    trailers_ = std::move(trailers);
-  }
-  void onMessageComplete(HTTPCodec::StreamID /*stream*/,
-                         bool /*upgrade*/) override {
-  }
-  void onError(HTTPCodec::StreamID /*stream*/,
-               const HTTPException& error,
-               bool /*newTxn*/) override {
-    error_ = std::make_unique<HTTPException>(error);
-  }
-
-  std::unique_ptr<HTTPMessage> msg_;
-  std::unique_ptr<folly::IOBuf> body_;
-  std::unique_ptr<HTTPHeaders> trailers_;
-  std::unique_ptr<HTTPException> error_;
 };
 
 class HTTPBinaryCodecTest : public ::testing::Test {
@@ -449,19 +404,19 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccess) {
       folly::ByteRange(binaryHTTPMessage.data(), binaryHTTPMessage.size()));
   folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
 
-  HTTPBinaryCodecCallback callback;
+  FakeHTTPCodecCallback callback;
   downstreamBinaryCodec_->setCallback(&callback);
   downstreamBinaryCodec_->onIngress(*binaryHTTPMessageIOBuf);
   downstreamBinaryCodec_->onIngressEOF();
 
   // Check onError was not called for the callback
-  EXPECT_EQ(callback.error_, nullptr);
+  EXPECT_EQ(callback.lastParseError, nullptr);
 
   // Check msg and header fields
-  EXPECT_EQ(callback.msg_->isSecure(), true);
-  EXPECT_EQ(callback.msg_->getMethod(), proxygen::HTTPMethod::GET);
-  EXPECT_EQ(callback.msg_->getURL(), "/hello.txt");
-  HTTPHeaders httpHeaders = callback.msg_->getHeaders();
+  EXPECT_EQ(callback.msg->isSecure(), true);
+  EXPECT_EQ(callback.msg->getMethod(), proxygen::HTTPMethod::GET);
+  EXPECT_EQ(callback.msg->getURL(), "/hello.txt");
+  HTTPHeaders httpHeaders = callback.msg->getHeaders();
   EXPECT_EQ(httpHeaders.exists("user-agent"), true);
   EXPECT_EQ(httpHeaders.exists("host"), true);
   EXPECT_EQ(httpHeaders.exists("accept-language"), true);
@@ -481,18 +436,18 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressSuccessForControlData) {
       folly::ByteRange(binaryHTTPMessage.data(), binaryHTTPMessage.size()));
   folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
 
-  HTTPBinaryCodecCallback callback;
+  FakeHTTPCodecCallback callback;
   downstreamBinaryCodec_->setCallback(&callback);
   downstreamBinaryCodec_->onIngress(*binaryHTTPMessageIOBuf);
   downstreamBinaryCodec_->onIngressEOF();
 
   // Check onError was not called for the callback
-  EXPECT_EQ(callback.error_, nullptr);
+  EXPECT_EQ(callback.lastParseError, nullptr);
 
   // Check msg and header fields
-  EXPECT_EQ(callback.msg_->isSecure(), true);
-  EXPECT_EQ(callback.msg_->getMethod(), proxygen::HTTPMethod::GET);
-  EXPECT_EQ(callback.msg_->getURL(), "/");
+  EXPECT_EQ(callback.msg->isSecure(), true);
+  EXPECT_EQ(callback.msg->getMethod(), proxygen::HTTPMethod::GET);
+  EXPECT_EQ(callback.msg->getURL(), "/");
 }
 
 TEST_F(HTTPBinaryCodecTest, testOnIngressFailure) {
@@ -518,13 +473,13 @@ TEST_F(HTTPBinaryCodecTest, testOnIngressFailure) {
       binaryInvalidHTTPMessage.data(), binaryInvalidHTTPMessage.size()));
   folly::io::Cursor cursor(binaryHTTPMessageIOBuf.get());
 
-  HTTPBinaryCodecCallback callback;
+  FakeHTTPCodecCallback callback;
   downstreamBinaryCodec_->setCallback(&callback);
   downstreamBinaryCodec_->onIngress(*binaryHTTPMessageIOBuf);
   downstreamBinaryCodec_->onIngressEOF();
 
   // Check onError was called with the correct error
-  EXPECT_EQ(std::string(callback.error_.get()->what()),
+  EXPECT_EQ(std::string(callback.lastParseError.get()->what()),
             "Invalid Message: Failure to parse: headerValue");
 }
 
@@ -544,15 +499,15 @@ TEST_F(HTTPBinaryCodecTest, testGenerateHeaders) {
   downstreamBinaryCodec_->generateHeader(writeBuffer, 0, msgEncoded);
 
   // Now, decode the HTTPMessage from the buffer and check values
-  HTTPBinaryCodecCallback callback;
+  FakeHTTPCodecCallback callback;
   downstreamBinaryCodec_->setCallback(&callback);
   downstreamBinaryCodec_->onIngress(*writeBuffer.front());
   downstreamBinaryCodec_->onIngressEOF();
 
-  EXPECT_EQ(callback.msg_->getMethod(), msgEncoded.getMethod());
-  EXPECT_EQ(callback.msg_->isSecure(), msgEncoded.isSecure());
-  EXPECT_EQ(callback.msg_->getURL(), msgEncoded.getURL());
-  auto headersDecoded = callback.msg_->getHeaders();
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
   EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
   headersEncoded.forEach([&headersDecoded](const std::string& headerName,
                                            const std::string& headerValue) {
@@ -609,15 +564,15 @@ TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequest) {
       writeBuffer, 0, *msgEncoded.getTrailers());
 
   // Now, decode the request and check values
-  HTTPBinaryCodecCallback callback;
+  FakeHTTPCodecCallback callback;
   downstreamBinaryCodec_->setCallback(&callback);
   downstreamBinaryCodec_->onIngress(*writeBuffer.front());
   downstreamBinaryCodec_->onIngressEOF();
 
-  EXPECT_EQ(callback.msg_->getMethod(), msgEncoded.getMethod());
-  EXPECT_EQ(callback.msg_->isSecure(), msgEncoded.isSecure());
-  EXPECT_EQ(callback.msg_->getURL(), msgEncoded.getURL());
-  auto headersDecoded = callback.msg_->getHeaders();
+  EXPECT_EQ(callback.msg->getMethod(), msgEncoded.getMethod());
+  EXPECT_EQ(callback.msg->isSecure(), msgEncoded.isSecure());
+  EXPECT_EQ(callback.msg->getURL(), msgEncoded.getURL());
+  auto headersDecoded = callback.msg->getHeaders();
   EXPECT_EQ(headersDecoded.size(), headersEncoded.size());
   headersEncoded.forEach([&headersDecoded](const std::string& headerName,
                                            const std::string& headerValue) {
@@ -625,10 +580,10 @@ TEST_F(HTTPBinaryCodecTest, testEncodeAndDecodeRequest) {
     EXPECT_EQ(headersDecoded.getSingleOrEmpty(headerName), headerValue);
   });
 
-  EXPECT_EQ(callback.body_->moveToFbString().toStdString(),
+  EXPECT_EQ(callback.data_.move()->moveToFbString().toStdString(),
             "Sample Test Body!");
 
-  auto trailersDecoded = *callback.trailers_;
+  auto trailersDecoded = *callback.msg->getTrailers();
   EXPECT_EQ(trailersDecoded.size(), 1);
   EXPECT_EQ(trailersDecoded.exists("test-trailer"), true);
   EXPECT_EQ(trailersDecoded.getSingleOrEmpty("test-trailer"),

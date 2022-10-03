@@ -1101,7 +1101,12 @@ functor
             ~memory_cap
             ~longlived_workers
             ~mode
-            ~check_info:(ServerCheckUtils.get_check_info ~check_reason genv env)
+            ~check_info:
+              (ServerCheckUtils.get_check_info
+                 ~check_reason
+                 ~log_errors:CheckKind.is_full
+                 genv
+                 env)
         in
         let env =
           {
@@ -1775,7 +1780,10 @@ functor
       let heap_size = SharedMem.SMTelemetry.heap_size () in
 
       let logstring =
-        Printf.sprintf "Typechecked %d files" total_rechecked_count
+        Printf.sprintf
+          "Typechecked %d files [%d errors]"
+          total_rechecked_count
+          (Errors.count errors)
       in
       let t = Hh_logger.log_duration logstring t in
       Hh_logger.log "Total: %f\n%!" (t -. start_time);

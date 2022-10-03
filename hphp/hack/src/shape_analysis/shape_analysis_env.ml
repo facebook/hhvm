@@ -18,29 +18,33 @@ let fresh_var () : entity_ =
   Variable !var_counter
 
 let union_continuation_at_lid ~pos ~origin (entity1 : entity) (entity2 : entity)
-    : constraint_ decorated list * entity =
+    : DecoratedConstraintSet.t * entity =
   let decorate constraint_ = { hack_pos = pos; origin; constraint_ } in
   match (entity1, entity2) with
   | (Some left, Some right) ->
     let join = fresh_var () in
     let constraints =
       List.map ~f:decorate [Subsets (left, join); Subsets (right, join)]
+      |> DecoratedConstraintSet.of_list
     in
     (constraints, Some join)
   | (entity, None)
   | (None, entity) ->
-    ([], entity)
+    (DecoratedConstraintSet.empty, entity)
 
 let union_continuation
-    ~pos ~origin (constraints : constraint_ decorated list) cont1 cont2 =
+    ~pos ~origin (constraints : DecoratedConstraintSet.t) cont1 cont2 =
   let union_continuation_at_lid constraints _lid entity1_opt entity2_opt :
-      constraint_ decorated list * entity option =
+      DecoratedConstraintSet.t * entity option =
     match (entity1_opt, entity2_opt) with
     | (Some entity1, Some entity2) ->
       let (new_constraints, entity) =
         union_continuation_at_lid ~pos ~origin entity1 entity2
       in
-      (new_constraints @ constraints, Some entity)
+      let constraints =
+        DecoratedConstraintSet.union new_constraints constraints
+      in
+      (constraints, Some entity)
     | (Some entity, None)
     | (None, Some entity) ->
       (constraints, Some entity)
@@ -89,15 +93,15 @@ module LEnv = struct
   let restore_conts_from lenv ~from conts : t =
     List.fold ~f:(restore_cont_from ~from) ~init:lenv conts
 
-  let union ~pos ~origin (lenv1 : t) (lenv2 : t) :
-      constraint_ decorated list * t =
+  let union ~pos ~origin (lenv1 : t) (lenv2 : t) : DecoratedConstraintSet.t * t
+      =
     let combine constraints _ cont1 cont2 =
       let (constraints, cont) =
         union_continuation ~pos ~origin constraints cont1 cont2
       in
       (constraints, Some cont)
     in
-    Cont.Map.union_env [] lenv1 lenv2 ~combine
+    Cont.Map.union_env DecoratedConstraintSet.empty lenv1 lenv2 ~combine
 
   let refresh (lenv : t) : constraint_ list * t =
     let refresh_local constraints _ = function
@@ -123,14 +127,22 @@ let init tast_env constraints inter_constraints bindings ~return =
   }
 
 let add_constraint env constraint_ =
-  { env with constraints = constraint_ :: env.constraints }
+  {
+    env with
+    constraints = DecoratedConstraintSet.add constraint_ env.constraints;
+  }
 
 let add_inter_constraint env inter_constraint_ =
-  { env with inter_constraints = inter_constraint_ :: env.inter_constraints }
+  {
+    env with
+    inter_constraints =
+      DecoratedInterConstraintSet.add inter_constraint_ env.inter_constraints;
+  }
 
 let add_error env err = { env with errors = err :: env.errors }
 
-let reset_constraints env = { env with constraints = [] }
+let reset_constraints env =
+  { env with constraints = DecoratedConstraintSet.empty }
 
 let get_local env = LEnv.get_local env.lenv
 
@@ -143,10 +155,11 @@ let union ~pos ~origin (parent_env : env) (env1 : env) (env2 : env) : env =
     LEnv.union ~pos ~origin env1.lenv env2.lenv
   in
   let constraints =
-    points_to_constraints
-    @ env1.constraints
-    @ env2.constraints
-    @ parent_env.constraints
+    let open DecoratedConstraintSet in
+    union points_to_constraints
+    @@ union env1.constraints
+    @@ union env2.constraints
+    @@ parent_env.constraints
   in
   { parent_env with lenv; constraints }
 
@@ -173,8 +186,7 @@ let stash_and_do env conts f : env =
   restore_conts_from env ~from:parent_locals conts
 
 let union_cont_opt
-    ~pos ~origin (constraints : constraint_ decorated list) cont_opt1 cont_opt2
-    =
+    ~pos ~origin (constraints : DecoratedConstraintSet.t) cont_opt1 cont_opt2 =
   match (cont_opt1, cont_opt2) with
   | (None, opt)
   | (opt, None) ->
@@ -229,25 +241,39 @@ let loop_continuation
       let new_constraints =
         match (entity_before_opt, entity_after_opt) with
         | (Some (Some entity_before), Some (Some entity_after)) ->
-          [decorate @@ Subsets (entity_after, entity_before)]
-        | _ -> []
+          DecoratedConstraintSet.singleton
+          @@ decorate
+          @@ Subsets (entity_after, entity_before)
+        | _ -> DecoratedConstraintSet.empty
       in
-      let constraints = new_constraints @ constraints in
+      let constraints =
+        DecoratedConstraintSet.union new_constraints constraints
+      in
       (constraints, None)
     in
     match (cont_before_iteration_opt, cont_after_iteration_opt) with
     | (Some cont_before_iteration, Some cont_after_iteration) ->
       fst
-      @@ LMap.merge_env [] cont_before_iteration cont_after_iteration ~combine
-    | _ -> []
+      @@ LMap.merge_env
+           DecoratedConstraintSet.empty
+           cont_before_iteration
+           cont_after_iteration
+           ~combine
+    | _ -> DecoratedConstraintSet.empty
   in
-  {
-    env_after_iteration with
-    constraints = new_constraints @ env_after_iteration.constraints;
-  }
+  let constraints =
+    DecoratedConstraintSet.union new_constraints env_after_iteration.constraints
+  in
+  { env_after_iteration with constraints }
 
 let refresh ~pos ~origin (env : env) : env =
   let (redirection_constraints, lenv) = LEnv.refresh env.lenv in
   let decorate constraint_ = { hack_pos = pos; origin; constraint_ } in
-  let redirection_constraints = List.map ~f:decorate redirection_constraints in
-  { env with lenv; constraints = redirection_constraints @ env.constraints }
+  let redirection_constraints =
+    List.map ~f:decorate redirection_constraints
+    |> DecoratedConstraintSet.of_list
+  in
+  let constraints =
+    DecoratedConstraintSet.union redirection_constraints env.constraints
+  in
+  { env with lenv; constraints }

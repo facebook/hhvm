@@ -177,3 +177,156 @@ func (p *Adapter) String() string {
   return fmt.Sprintf("Adapter({AdapterClassName:%s TypeClassName:%s})", adapterClassNameVal, typeClassNameVal)
 }
 
+// Attributes:
+//  - WrapperClassName
+//  - TypeClassName
+type Wrapper struct {
+  WrapperClassName string `thrift:"wrapperClassName,1" db:"wrapperClassName" json:"wrapperClassName"`
+  TypeClassName string `thrift:"typeClassName,2" db:"typeClassName" json:"typeClassName"`
+}
+
+func NewWrapper() *Wrapper {
+  return &Wrapper{}
+}
+
+
+func (p *Wrapper) GetWrapperClassName() string {
+  return p.WrapperClassName
+}
+
+func (p *Wrapper) GetTypeClassName() string {
+  return p.TypeClassName
+}
+type WrapperBuilder struct {
+  obj *Wrapper
+}
+
+func NewWrapperBuilder() *WrapperBuilder{
+  return &WrapperBuilder{
+    obj: NewWrapper(),
+  }
+}
+
+func (p WrapperBuilder) Emit() *Wrapper{
+  return &Wrapper{
+    WrapperClassName: p.obj.WrapperClassName,
+    TypeClassName: p.obj.TypeClassName,
+  }
+}
+
+func (w *WrapperBuilder) WrapperClassName(wrapperClassName string) *WrapperBuilder {
+  w.obj.WrapperClassName = wrapperClassName
+  return w
+}
+
+func (w *WrapperBuilder) TypeClassName(typeClassName string) *WrapperBuilder {
+  w.obj.TypeClassName = typeClassName
+  return w
+}
+
+func (w *Wrapper) SetWrapperClassName(wrapperClassName string) *Wrapper {
+  w.WrapperClassName = wrapperClassName
+  return w
+}
+
+func (w *Wrapper) SetTypeClassName(typeClassName string) *Wrapper {
+  w.TypeClassName = typeClassName
+  return w
+}
+
+func (p *Wrapper) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *Wrapper)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.WrapperClassName = v
+  }
+  return nil
+}
+
+func (p *Wrapper)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadString(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.TypeClassName = v
+  }
+  return nil
+}
+
+func (p *Wrapper) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("Wrapper"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *Wrapper) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("wrapperClassName", thrift.STRING, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:wrapperClassName: ", p), err) }
+  if err := oprot.WriteString(string(p.WrapperClassName)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.wrapperClassName (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:wrapperClassName: ", p), err) }
+  return err
+}
+
+func (p *Wrapper) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("typeClassName", thrift.STRING, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:typeClassName: ", p), err) }
+  if err := oprot.WriteString(string(p.TypeClassName)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.typeClassName (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:typeClassName: ", p), err) }
+  return err
+}
+
+func (p *Wrapper) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  wrapperClassNameVal := fmt.Sprintf("%v", p.WrapperClassName)
+  typeClassNameVal := fmt.Sprintf("%v", p.TypeClassName)
+  return fmt.Sprintf("Wrapper({WrapperClassName:%s TypeClassName:%s})", wrapperClassNameVal, typeClassNameVal)
+}
+

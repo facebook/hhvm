@@ -113,7 +113,7 @@ import {{program:module_path}}.thrift_metadata
 {{#program:enums}}
 class {{enum:name}}(_fbthrift_python_types.Enum, enum.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum{{/enum:flags?}}):
+        }}{{^enum:flags?}}IntEnum{{/enum:flags?}}):
     {{#enum:values}}
     {{enum_value:py_name}} = {{enum_value:value}}
     {{/enum:values}}

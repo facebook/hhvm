@@ -263,6 +263,12 @@ bunser_array(const char** ptr, const char* end, const unser_ctx_t* ctx) {
     return NULL;
   }
 
+  if (nitems > end - buf) {
+    // BSER guarantees each value will consume at least one byte of the input.
+    PyErr_Format(PyExc_ValueError, "document too short for array's size");
+    return NULL;
+  }
+
   if (mutable) {
     res = PyList_New((Py_ssize_t)nitems);
   } else {

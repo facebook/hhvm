@@ -33,8 +33,8 @@ void MyServicePrioChildAsyncProcessor::executeRequest_pang(apache::thrift::Serve
   try {
     deserializeRequest<ProtocolIn_>(args, "pang", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))

@@ -105,6 +105,8 @@ function autoload_function_to_path(string $function): ?string;
 <<__Native>>
 function autoload_constant_to_path(string $constant): ?string;
 <<__Native>>
+function autoload_module_to_path(string $module): ?string;
+<<__Native>>
 function autoload_type_alias_to_path(string $type_alias): ?string;
 
 /**
@@ -122,6 +124,8 @@ function autoload_path_to_types(string $path): vec<classname<mixed>>;
 function autoload_path_to_functions(string $path): vec<string>;
 <<__Native>>
 function autoload_path_to_constants(string $path): vec<string>;
+<<__Native>>
+function autoload_path_to_modules(string $path): vec<string>;
 <<__Native>>
 function autoload_path_to_type_aliases(string $path): vec<string>;
 

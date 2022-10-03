@@ -87,7 +87,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.basic.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.Enum):
+class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod

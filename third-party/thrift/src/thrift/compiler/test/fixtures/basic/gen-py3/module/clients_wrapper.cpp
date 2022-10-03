@@ -25,9 +25,9 @@ FooServiceClientWrapper::simple_rpc(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -48,9 +48,9 @@ FB303ServiceClientWrapper::simple_rpc(
       std::move(callback),
       arg_int_parameter
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<::test::fixtures::basic::ReservedKeyword>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -69,9 +69,9 @@ MyServiceClientWrapper::ping(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -90,9 +90,9 @@ MyServiceClientWrapper::getRandomData(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -113,9 +113,9 @@ MyServiceClientWrapper::sink(
       std::move(callback),
       arg_sink
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -138,9 +138,9 @@ MyServiceClientWrapper::putDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -161,9 +161,9 @@ MyServiceClientWrapper::hasDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -184,9 +184,9 @@ MyServiceClientWrapper::getDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -207,9 +207,9 @@ MyServiceClientWrapper::deleteDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -232,9 +232,9 @@ MyServiceClientWrapper::lobDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -253,9 +253,9 @@ MyServiceClientWrapper::invalid_return_for_hack(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::set<float>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -274,9 +274,9 @@ MyServiceClientWrapper::rpc_skipped_codegen(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -297,9 +297,9 @@ DbMixedStackArgumentsClientWrapper::getDataByKey0(
       std::move(callback),
       arg_key
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -320,9 +320,9 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
       std::move(callback),
       arg_key
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

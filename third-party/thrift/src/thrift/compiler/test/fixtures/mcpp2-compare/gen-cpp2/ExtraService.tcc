@@ -44,8 +44,8 @@ void ExtraServiceAsyncProcessor::executeRequest_simple_function(apache::thrift::
   try {
     deserializeRequest<ProtocolIn_>(args, "simple_function", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -115,8 +115,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function(apache::thrift::
   try {
     deserializeRequest<ProtocolIn_>(args, "throws_function", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -210,8 +210,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function2(apache::thrift:
   try {
     deserializeRequest<ProtocolIn_>(args, "throws_function2", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -309,8 +309,8 @@ void ExtraServiceAsyncProcessor::executeRequest_throws_function3(apache::thrift:
   try {
     deserializeRequest<ProtocolIn_>(args, "throws_function3", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -404,8 +404,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret(apache::thrift::
   try {
     deserializeRequest<ProtocolIn_>(args, "oneway_void_ret", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    LOG(ERROR) << ex.what() << " in function oneway_void_ret";
+  catch (...) {
+    LOG(ERROR) << "exception in function oneway_void_ret: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -454,8 +454,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_i32_i32_i32_i32_
   try {
     deserializeRequest<ProtocolIn_>(args, "oneway_void_ret_i32_i32_i32_i32_i32_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    LOG(ERROR) << ex.what() << " in function oneway_void_ret_i32_i32_i32_i32_i32_param";
+  catch (...) {
+    LOG(ERROR) << "exception in function oneway_void_ret_i32_i32_i32_i32_i32_param: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -497,8 +497,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_map_setlist_para
   try {
     deserializeRequest<ProtocolIn_>(args, "oneway_void_ret_map_setlist_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    LOG(ERROR) << ex.what() << " in function oneway_void_ret_map_setlist_param";
+  catch (...) {
+    LOG(ERROR) << "exception in function oneway_void_ret_map_setlist_param: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -539,8 +539,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_struct_param(apa
   try {
     deserializeRequest<ProtocolIn_>(args, "oneway_void_ret_struct_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    LOG(ERROR) << ex.what() << " in function oneway_void_ret_struct_param";
+  catch (...) {
+    LOG(ERROR) << "exception in function oneway_void_ret_struct_param: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -581,8 +581,8 @@ void ExtraServiceAsyncProcessor::executeRequest_oneway_void_ret_listunion_param(
   try {
     deserializeRequest<ProtocolIn_>(args, "oneway_void_ret_listunion_param", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    LOG(ERROR) << ex.what() << " in function oneway_void_ret_listunion_param";
+  catch (...) {
+    LOG(ERROR) << "exception in function oneway_void_ret_listunion_param: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }

@@ -45,7 +45,7 @@ import {{module_path}}
 
 class {{enum:name}}(_fbthrift_python_types.Enum, enum.{{!
         }}{{#enum:flags?}}Flag{{/enum:flags?}}{{!
-        }}{{^enum:flags?}}Enum{{/enum:flags?}}):
+        }}{{^enum:flags?}}IntEnum{{/enum:flags?}}):
     {{#enum:values}}
     {{enum_value:py_name}}: {{enum:name}} = ...
     {{/enum:values}}

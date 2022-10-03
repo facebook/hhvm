@@ -17,7 +17,10 @@
 from __future__ import annotations
 
 import asyncio
+import pickle
 import unittest
+from collections.abc import Sequence, Set
+from typing import Any, Mapping, Union
 
 from apache.thrift.test.terse_write.terse_write.thrift_types import (
     EmptyStruct,
@@ -37,11 +40,15 @@ from testing.thrift_types import (
     ColorGroups,
     Complex,
     ComplexUnion,
+    Digits,
     easy,
     hard,
+    I32List,
     Integers,
     IOBufListStruct,
+    SetI32,
     StringBucket,
+    StrStrMap,
 )
 from thrift.python.exceptions import Error
 from thrift.python.serializer import (
@@ -105,9 +112,23 @@ class SerializerTests(unittest.TestCase):
             self.assertIsInstance(decoded, type(control))
             self.assertEqual(control, decoded)
 
+    def pickle_round_trip(
+        self,
+        # pyre-ignore[2]
+        control: Union[StructOrUnion, Sequence, Set, Mapping[Any, Any]],
+    ) -> None:
+        encoded = pickle.dumps(control, protocol=pickle.HIGHEST_PROTOCOL)
+        decoded = pickle.loads(encoded)
+        self.assertIsInstance(decoded, type(control))
+        self.assertEqual(control, decoded)
+
     def test_serialize_easy_struct(self) -> None:
         control = easy(val=5, val_list=[1, 2, 3, 4])
         self.thrift_serialization_round_trip(control)
+
+    def test_pickle_easy_struct(self) -> None:
+        control = easy(val=0, val_list=[5, 6, 7])
+        self.pickle_round_trip(control)
 
     def test_serialize_hard_struct(self) -> None:
         control = hard(
@@ -115,10 +136,40 @@ class SerializerTests(unittest.TestCase):
         )
         self.thrift_serialization_round_trip(control)
 
+    def test_pickle_hard_struct(self) -> None:
+        control = hard(
+            val=0, val_list=[1, 2, 3, 4], name="foo", an_int=Integers(tiny=1)
+        )
+        self.pickle_round_trip(control)
+
     def test_serialize_Integers_union(self) -> None:
         control = Integers(medium=1337)
 
         self.thrift_serialization_round_trip(control)
+
+    def test_pickle_Integers_union(self) -> None:
+        control = Integers(large=2**32)
+        self.pickle_round_trip(control)
+
+    @unittest.skip("Pickling containers doesn't work yet")
+    def test_pickle_sequence(self) -> None:
+        control = I32List([1, 2, 3, 4])
+        self.pickle_round_trip(control)
+
+        digits = Digits(data=[Integers(tiny=1), Integers(tiny=2), Integers(large=0)])
+        data = digits.data
+        assert data
+        self.pickle_round_trip(data)
+
+    @unittest.skip("Pickling containers doesn't work yet")
+    def test_pickle_set(self) -> None:
+        control = SetI32({1, 2, 3, 4})
+        self.pickle_round_trip(control)
+
+    @unittest.skip("Pickling containers doesn't work yet")
+    def test_pickle_mapping(self) -> None:
+        control = StrStrMap({"test": "test", "foo": "bar"})
+        self.pickle_round_trip(control)
 
     def test_serialize_Complex(self) -> None:
         control = Complex(

@@ -17,6 +17,8 @@
 from libc.stdint cimport int64_t
 from libcpp cimport bool
 
+from contextlib import contextmanager
+
 def define_int_flag(name, default_value):
     FlagRegistry[int64_t].define(name, default_value)
 
@@ -26,6 +28,14 @@ def get_int_flag(name):
     except IndexError:
         raise KeyError(f"No such flag: {name}")
 
+@contextmanager
+def mock_int_flag(name, value):
+    try:
+        FlagRegistry[int64_t].mock(name, value)
+        yield
+    finally:
+        FlagRegistry[int64_t].unmock(name)
+
 def define_bool_flag(name, default_value):
     FlagRegistry[bool].define(name, default_value)
 
@@ -34,3 +44,11 @@ def get_bool_flag(name):
         return FlagRegistry[bool].get(name)
     except IndexError:
         raise KeyError(f"No such flag: {name}")
+
+@contextmanager
+def mock_bool_flag(name, value):
+    try:
+        FlagRegistry[bool].mock(name, value)
+        yield
+    finally:
+        FlagRegistry[bool].unmock(name)

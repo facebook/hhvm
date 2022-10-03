@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import asyncio
-import sys
+
+import click
 
 from thrift.conformance.rpc.thrift_clients import RPCConformanceService
 from thrift.conformance.rpc.thrift_types import (
@@ -25,11 +26,16 @@ from thrift.conformance.rpc.thrift_types import (
     RequestResponseTimeoutClientTestResult,
     RequestResponseUndeclaredExceptionClientTestResult,
     RpcTestCase,
+    StreamBasicClientTestResult,
+    StreamChunkTimeoutClientTestResult,
+    StreamCreditTimeoutClientTestResult,
+    StreamInitialResponseClientTestResult,
     UserException,
 )
-from thrift.python.client import get_client
+from thrift.python.client import ClientType, get_client
 from thrift.python.exceptions import (
     ApplicationError,
+    ApplicationErrorType,
     TransportError,
     TransportErrorType,
 )
@@ -54,6 +60,10 @@ class RpcTestClient:
             ClientInstruction.Type.requestResponseUndeclaredException: self.__request_response_undeclared_exception_test,
             ClientInstruction.Type.requestResponseNoArgVoidResponse: self.__request_response_noarg_void_response_test,
             ClientInstruction.Type.requestResponseTimeout: self.__request_response_timeout_test,
+            ClientInstruction.Type.streamBasic: self.__stream_basic_test,
+            ClientInstruction.Type.streamInitialResponse: self.__stream_initial_response_test,
+            ClientInstruction.Type.streamChunkTimeout: self.__stream_chunk_timeout_test,
+            ClientInstruction.Type.streamCreditTimeout: self.__stream_credit_timeout_test,
         }
 
     async def __request_response_basic_test(
@@ -109,7 +119,7 @@ class RpcTestClient:
     ) -> None:
         receivedTimeoutException = False
         try:
-            # TO-DO: T132887459 implement timeout in rpc options
+            # TODO: T132887459 timeout should be passed via rpc options
             await asyncio.wait_for(
                 client.requestResponseTimeout(
                     req=instruction.requestResponseTimeout.request
@@ -117,7 +127,9 @@ class RpcTestClient:
                 timeout=float(instruction.requestResponseTimeout.timeoutMs / 1000.0),
             )
         except asyncio.TimeoutError:
-            # T132887459: this time out is just needed to complete await
+            # TODO: T132887459 specifically marking it as False because as per
+            # conformance design we are supposed to catch TransportError.
+            # Catch below is a valid branch. Revise when rpc options support is ready
             receivedTimeoutException = False
         except TransportError as error:
             if error.type == TransportErrorType.TIMED_OUT:
@@ -129,33 +141,116 @@ class RpcTestClient:
         )
         await client.sendTestResult(result=clientTestResult)
 
+    async def __stream_basic_test(self, client, instruction: ClientInstruction) -> None:
+        # TODO: T132887459 buffer size should be passed via rpc options
+        streamResponse = await client.streamBasic(req=instruction.streamBasic.request)
+
+        payload = []
+        async for chunk in streamResponse:
+            payload.append(chunk)
+
+        clientTestResult = ClientTestResult.fromValue(
+            StreamBasicClientTestResult(streamPayloads=payload)
+        )
+        await client.sendTestResult(result=clientTestResult)
+
+    async def __stream_initial_response_test(
+        self, client, instruction: ClientInstruction
+    ) -> None:
+        response, streamResponse = await client.streamInitialResponse(
+            req=instruction.streamInitialResponse.request
+        )
+
+        payload = []
+        async for chunk in streamResponse:
+            payload.append(chunk)
+
+        clientTestResult = ClientTestResult.fromValue(
+            StreamInitialResponseClientTestResult(
+                streamPayloads=payload, initialResponse=response
+            )
+        )
+        await client.sendTestResult(result=clientTestResult)
+
+    async def __stream_chunk_timeout_test(
+        self, client, instruction: ClientInstruction
+    ) -> None:
+        # TODO: T132887459 timeout should be passed via rpc options
+        receivedTimeoutException = False
+        payload = []
+        try:
+            streamResponse = await asyncio.wait_for(
+                client.streamChunkTimeout(req=instruction.streamChunkTimeout.request),
+                timeout=float(instruction.streamChunkTimeout.chunkTimeoutMs / 1000.0),
+            )
+            async for chunk in streamResponse:
+                payload.append(chunk)
+        except asyncio.TimeoutError:
+            # TODO: T132887459 specifically marking it as False because as per
+            # conformance design we are supposed to catch TransportError.
+            # Catch below is a valid branch. Revise when rpc options support is ready
+            receivedTimeoutException = False
+        except TransportError as error:
+            if error.type == TransportErrorType.TIMED_OUT:
+                receivedTimeoutException = True
+
+        clientTestResult = ClientTestResult.fromValue(
+            StreamChunkTimeoutClientTestResult(
+                streamPayloads=payload, chunkTimeoutException=receivedTimeoutException
+            )
+        )
+        await client.sendTestResult(result=clientTestResult)
+
+    async def __stream_credit_timeout_test(
+        self, client, instruction: ClientInstruction
+    ) -> None:
+        receivedTimeoutException = False
+        streamResponse = await client.streamCreditTimeout(
+            req=instruction.streamCreditTimeout.request
+        )
+        # TODO: T132887459. This test is failing for some reason.
+        # maybe try to specify chunkbuffersize=0 (as in fbcode/thrift/conformance/cpp2/RPCClient.cpp)
+        # but that has to be done via rpc options
+        try:
+            await streamResponse.__anext__()
+            # Sleep longer than the stream expiration time so that the server
+            # will run out of credit and throw a credit timeout exception
+            await asyncio.sleep(
+                float(instruction.streamCreditTimeout.creditTimeoutMs / 1000.0)
+            )
+            await streamResponse.__anext__()
+            raise RuntimeError(
+                "Should not get here. Should catch server's ApplicationError instead"
+            )
+        except ApplicationError as error:
+            if error.type == ApplicationErrorType.TIMED_OUT:
+                receivedTimeoutException = True
+
+        clientTestResult = ClientTestResult.fromValue(
+            StreamCreditTimeoutClientTestResult(
+                creditTimeoutException=receivedTimeoutException
+            )
+        )
+        await client.sendTestResult(result=clientTestResult)
+
     async def run_test(self, port: int) -> None:
         async with get_client(
-            RPCConformanceService, host=self.__HOST_ADDRESS, port=port
+            RPCConformanceService,
+            host=self.__HOST_ADDRESS,
+            port=port,
+            client_type=ClientType.THRIFT_ROCKET_CLIENT_TYPE,
         ) as client:
             test = await client.getTestCase()
             instruction = RpcTestClient.__get_client_instruction(test)
             await self.dispatch_table[instruction.get_type()](client, instruction)
 
 
-def get_port() -> int:
-    idx = 0
-    for arg in sys.argv:
-        if arg == "--port":
-            break
-        idx = idx + 1
-    if idx >= len(sys.argv) - 1:
-        raise RuntimeError("Port argument is not provided")
-    port = int(sys.argv[idx + 1])
-    print(f"Port={port}")
-    return port
-
-
-async def main():
-    port = get_port()
+@click.command()
+@click.option("--port", default=7777, help="RPC conformance test server port")
+def main(port):
     testClient = RpcTestClient()
-    await testClient.run_test(port)
+    asyncio.run(testClient.run_test(port))
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()

@@ -32,7 +32,6 @@ type potential_targets = {
 }
 
 type mode =
-  | FlagTargets
   | DumpConstraints
   | DumpDerivedConstraints
   | SimplifyConstraints
@@ -100,13 +99,26 @@ type 'constraint_ decorated = {
   origin: int;
   constraint_: 'constraint_;
 }
+[@@deriving ord]
+
+module DecoratedConstraintSet = Caml.Set.Make (struct
+  type t = constraint_ decorated
+
+  let compare = compare_decorated compare_constraint_
+end)
+
+module DecoratedInterConstraintSet = Caml.Set.Make (struct
+  type t = inter_constraint_ decorated
+
+  let compare = compare_decorated (HT.compare_inter_constraint_ compare_entity_)
+end)
 
 type decorated_constraints =
-  constraint_ decorated list * inter_constraint_ decorated list
+  DecoratedConstraintSet.t * DecoratedInterConstraintSet.t
 
 type env = {
-  constraints: constraint_ decorated list;
-  inter_constraints: inter_constraint_ decorated list;
+  constraints: DecoratedConstraintSet.t;
+  inter_constraints: DecoratedInterConstraintSet.t;
   lenv: lenv;
   return: entity;
   tast_env: Tast_env.t;
@@ -145,7 +157,15 @@ module ConstraintSet = Caml.Set.Make (struct
   let compare = compare_constraint_
 end)
 
-type event = string * (shape_result, Error.t) Either.t
+type analysis_result = {
+  result: shape_result;
+  error_count: int;
+}
+
+type log = {
+  location: string;
+  result: (analysis_result, Error.t) Either.t;
+}
 
 type any_constraint = (constraint_, inter_constraint_) HT.any_constraint_
 [@@deriving ord]

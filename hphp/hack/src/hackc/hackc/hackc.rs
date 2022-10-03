@@ -57,9 +57,6 @@ struct Opts {
     pub(crate) env_flags: EnvFlags,
 
     #[clap(long, default_value("0"))]
-    emit_class_pointers: i32,
-
-    #[clap(long, default_value("0"))]
     check_int_overflow: i32,
 
     /// Number of parallel worker threads for subcommands that support parallelism,
@@ -227,7 +224,6 @@ impl Opts {
             hhvm: Hhvm {
                 include_roots: Default::default(),
                 parser_options,
-                emit_class_pointers: self.emit_class_pointers,
                 check_int_overflow: self.check_int_overflow,
             },
             flags: self.env_flags.clone(),

@@ -11,6 +11,7 @@
  * to the running result.
  *)
 
+open Hh_prelude
 module Fact_id = Symbol_fact_id
 module Predicate = Symbol_predicate
 module Fact_acc = Symbol_predicate.Fact_acc
@@ -190,3 +191,6 @@ val method_occ :
   string ->
   Fact_acc.t ->
   Fact_id.t * Fact_acc.t
+
+val indexerInputsHash :
+  string -> Md5.t list -> Fact_acc.t -> Fact_id.t * Fact_acc.t

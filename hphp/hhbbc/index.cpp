@@ -7124,10 +7124,10 @@ bool Index::is_effect_free(Context ctx, const php::Func* func) const {
 
 bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
   auto const processFF = [&] (FuncFamily* ff) {
-    add_dependency(*m_data, ff, ctx, Dep::InlineDepthLimit);
     for (auto const mte : ff->possibleFuncs()) {
-      auto const effectFree =
-        func_info(*m_data, func_from_mte(*m_data, mte->second))->effectFree;
+      auto const func = func_from_mte(*m_data, mte->second);
+      add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
+      auto const effectFree = func_info(*m_data, func)->effectFree;
       if (!effectFree) return false;
     }
     return true;

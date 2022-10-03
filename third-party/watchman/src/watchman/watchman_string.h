@@ -9,7 +9,7 @@
 
 #include "watchman/watchman_system.h"
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include <folly/Conv.h>
 #include <folly/FBString.h>
 #include <folly/ScopeGuard.h>

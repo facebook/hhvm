@@ -25,9 +25,9 @@ HsTestServiceClientWrapper::init(
       std::move(callback),
       arg_int1
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int64_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

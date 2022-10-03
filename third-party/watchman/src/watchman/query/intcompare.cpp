@@ -6,6 +6,7 @@
  */
 
 #include "watchman/query/intcompare.h"
+#include <fmt/core.h>
 #include "watchman/Errors.h"
 #include "watchman/query/FileResult.h"
 #include "watchman/query/QueryExpr.h"
@@ -58,8 +59,8 @@ void parse_int_compare(const json_ref& term, struct w_query_int_compare* comp) {
   }
 
   if (!found) {
-    throw QueryParseError(folly::to<std::string>(
-        "integer comparator opname `", opname, "' is invalid"));
+    throw QueryParseError(
+        fmt::format("integer comparator opname `{}' is invalid", opname));
   }
 
   comp->operand = arr[2].asInt();

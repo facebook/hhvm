@@ -933,6 +933,7 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
   assertx(suspending->func()->isAsync());
   assertx(isResumed(suspending));
   assertx(child->isWaitHandle());
+  assertx(!static_cast<c_Awaitable*>(child)->isFinished());
 
   auto const flags = handle_request_surprise();
   onFunctionExit(suspending, nullptr, false, nullptr, flags, true, sourceType);
@@ -953,6 +954,12 @@ void EventHook::onFunctionSuspendAwaitR(ActRec* suspending,
         );
       }
     }
+  }
+
+  if (UNLIKELY(static_cast<c_Awaitable*>(child)->isFinished())) {
+    SystemLib::throwInvalidOperationExceptionObject(
+      "The suspend await event hook entered a new asio scheduler context and "
+      "awaited the same child, revoking the reason for suspension.");
   }
 }
 

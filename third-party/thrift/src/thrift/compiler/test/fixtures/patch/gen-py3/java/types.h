@@ -33,8 +33,31 @@ void reset_field<::facebook::thrift::annotation::java::Adapter>(
 }
 
 template<>
+void reset_field<::facebook::thrift::annotation::java::Wrapper>(
+    ::facebook::thrift::annotation::java::Wrapper& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.wrapperClassName_ref().copy_from(default_inst<::facebook::thrift::annotation::java::Wrapper>().wrapperClassName_ref());
+      return;
+    case 1:
+      obj.typeClassName_ref().copy_from(default_inst<::facebook::thrift::annotation::java::Wrapper>().typeClassName_ref());
+      return;
+  }
+}
+
+template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::facebook::thrift::annotation::java::Adapter>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::facebook::thrift::annotation::java::Wrapper>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

@@ -1738,6 +1738,13 @@ module Primary = struct
         req_class_pos: Pos_or_decl.t;
         req_extends_pos: Pos_or_decl.t;
       }
+    | Trait_not_used of {
+        pos: Pos.t;
+        trait_name: string;
+        req_class_pos: Pos_or_decl.t;
+        class_pos: Pos_or_decl.t;
+        class_name: string;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;
@@ -2828,6 +2835,28 @@ module Primary = struct
     in
     let claim = lazy (pos, "This trait defines incompatible requirements.") in
     (Error_code.UnsatisfiedReq, claim, reasons, [])
+
+  let trait_not_used pos trait_name req_class_pos class_pos class_name =
+    let class_name = Render.strip_ns class_name in
+    let reasons =
+      lazy
+        [
+          (class_pos, "Class " ^ class_name ^ " is defined here.");
+          (req_class_pos, "The require class requirement is here.");
+        ]
+    in
+    let claim =
+      lazy
+        ( pos,
+          "Trait "
+          ^ Render.strip_ns trait_name
+          ^ " requires class "
+          ^ Render.strip_ns class_name
+          ^ " but "
+          ^ Render.strip_ns class_name
+          ^ " does not use it. Either use the trait or delete it." )
+    in
+    (Error_code.TraitNotUsed, claim, reasons, [])
 
   let invalid_echo_argument pos =
     let claim =
@@ -5610,6 +5639,9 @@ module Primary = struct
       req_class_not_final pos trait_pos req_pos
     | Incompatible_reqs { pos; req_name; req_class_pos; req_extends_pos } ->
       incompatible_reqs pos req_name req_class_pos req_extends_pos
+    | Trait_not_used { pos; trait_name; req_class_pos; class_pos; class_name }
+      ->
+      trait_not_used pos trait_name req_class_pos class_pos class_name
     | Invalid_echo_argument pos -> invalid_echo_argument pos
     | Index_type_mismatch { pos; is_covariant_container; msg_opt; reasons_opt }
       ->

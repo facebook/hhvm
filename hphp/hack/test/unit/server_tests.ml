@@ -91,7 +91,11 @@ let test_process_file_deferring () =
   Decl_counters.set_mode HackEventLogger.PerFileProfilingConfig.DeclingTopCounts;
   let prev_counter_state = Counters.reset () in
   let { Typing_check_service.deferred_decls; _ } =
-    Typing_check_service.process_file ctx file ~decl_cap_mb:None
+    Typing_check_service.process_file
+      ctx
+      file
+      ~log_errors:false
+      ~decl_cap_mb:None
   in
   Counters.restore_state prev_counter_state;
 

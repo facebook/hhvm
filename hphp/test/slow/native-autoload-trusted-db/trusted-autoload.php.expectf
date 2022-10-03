@@ -6,11 +6,13 @@ Paths:
       TestClass => PASS
     Functions:
     Constants:
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-type-alias.inc:
     Types:
     Functions:
     Constants:
+    Modules:
     TypeAliases:
       TestTypeAlias => PASS
   %s/test/slow/native-autoload-trusted-db/dir1/native-autoload-const.inc:
@@ -18,12 +20,14 @@ Paths:
     Functions:
     Constants:
       TEST_CONSTANT => PASS
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/native-autoload-function.inc:
     Types:
     Functions:
       test_fn => PASS
     Constants:
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/trusted-autoload.php:
     Types:
@@ -32,6 +36,7 @@ Paths:
       print_enabled_stats => PASS
       sorted => PASS
     Constants:
+    Modules:
     TypeAliases:
 Overriding: 1
 Native Autoload: false
@@ -43,11 +48,13 @@ Paths:
       TestClass => PASS
     Functions:
     Constants:
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/dir1/dir2/native-autoload-type-alias.inc:
     Types:
     Functions:
     Constants:
+    Modules:
     TypeAliases:
       TestTypeAlias => PASS
   %s/test/slow/native-autoload-trusted-db/dir1/native-autoload-const.inc:
@@ -55,12 +62,14 @@ Paths:
     Functions:
     Constants:
       TEST_CONSTANT => PASS
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/native-autoload-function.inc:
     Types:
     Functions:
       test_fn => PASS
     Constants:
+    Modules:
     TypeAliases:
   %s/test/slow/native-autoload-trusted-db/trusted-autoload.php:
     Types:
@@ -69,6 +78,7 @@ Paths:
       print_enabled_stats => PASS
       sorted => PASS
     Constants:
+    Modules:
     TypeAliases:
 Overriding: 1
 Native Autoload: false

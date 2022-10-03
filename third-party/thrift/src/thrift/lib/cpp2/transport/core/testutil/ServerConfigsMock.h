@@ -23,6 +23,7 @@
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <thrift/lib/cpp2/server/CPUConcurrencyController.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 #include <thrift/lib/cpp2/transport/core/testutil/FakeServerObserver.h>
 
 namespace apache {
@@ -33,7 +34,9 @@ namespace server {
 // ThriftProcessor.
 class ServerConfigsMock : public ServerConfigs {
  public:
-  uint64_t getMaxResponseSize() const override { return maxResponseSize_; }
+  uint64_t getMaxResponseSize() const override {
+    return thriftServerConfig_.getMaxResponseSize().get();
+  }
 
   /**
    * @see BaseThriftServer::getTaskExpireTimeForRequest function.
@@ -94,16 +97,24 @@ class ServerConfigsMock : public ServerConfigs {
   }
 
   uint32_t getMaxRequests() const override {
-    return **oMaxRequests_.getObserver();
+    return thriftServerConfig_.getMaxRequests().get();
   }
 
   void setMaxRequests(uint32_t maxRequests) override {
-    oMaxRequests_.setValue(maxRequests);
+    thriftServerConfig_.setMaxRequests(
+        folly::observer::makeStaticObserver(std::optional{maxRequests}),
+        AttributeSource::OVERRIDE);
   }
 
-  uint32_t getMaxQps() const override { return **oMaxQps_.getObserver(); }
+  uint32_t getMaxQps() const override {
+    return thriftServerConfig_.getMaxQps().get();
+  }
 
-  void setMaxQps(uint32_t maxQps) override { oMaxQps_.setValue(maxQps); }
+  void setMaxQps(uint32_t maxQps) override {
+    thriftServerConfig_.setMaxQps(
+        folly::observer::makeStaticObserver(std::optional{maxQps}),
+        AttributeSource::OVERRIDE);
+  }
 
   uint32_t getListenerTos() const override { return 0; }
 
@@ -134,18 +145,18 @@ class ServerConfigsMock : public ServerConfigs {
   size_t numIOWorkerThreads_{10};
   std::chrono::milliseconds streamExpireTime_{std::chrono::minutes(1)};
 
+  ThriftServerConfig thriftServerConfig_{};
   folly::observer::SimpleObservable<AdaptiveConcurrencyController::Config>
       oConfig_{AdaptiveConcurrencyController::Config{}};
-  folly::observer::SimpleObservable<uint32_t> oMaxRequests_{0};
-  folly::observer::SimpleObservable<uint32_t> oMaxQps_{0};
   AdaptiveConcurrencyController adaptiveConcurrencyController_{
-      oConfig_.getObserver(), oMaxRequests_.getObserver()};
+      oConfig_.getObserver(),
+      thriftServerConfig_.getMaxRequests().getObserver()};
 
   folly::observer::SimpleObservable<
       apache::thrift::CPUConcurrencyController::Config>
       cConfig_{apache::thrift::CPUConcurrencyController::Config{}};
   apache::thrift::CPUConcurrencyController cpuConcurrencyController_{
-      cConfig_.getObserver(), *this};
+      cConfig_.getObserver(), *this, thriftServerConfig_};
 };
 
 } // namespace server

@@ -101,7 +101,7 @@ type kind =
   | BestEffortArgument of receiver * int
   | HhFixme
   | Module
-[@@deriving eq]
+[@@deriving eq, show]
 
 type 'a t = {
   name: string;

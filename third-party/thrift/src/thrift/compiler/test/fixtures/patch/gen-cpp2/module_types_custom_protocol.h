@@ -18,3 +18,4 @@
 
 #include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"
 #include "thrift/lib/thrift/gen-cpp2/patch_types_custom_protocol.h"
+#include "thrift/lib/thrift/gen-cpp2/standard_types_custom_protocol.h"

@@ -60,8 +60,6 @@ let make_typing_result () =
 let accumulate_job_output
     (produced_by_job : typing_result) (accumulated_so_far : typing_result) :
     typing_result =
-  (* The Measure API is mutating, but we want to be functional, so we'll serialize+deserialize
-     This might sound expensive, but the actual implementation makes it cheap. *)
   {
     errors = Errors.merge produced_by_job.errors accumulated_so_far.errors;
     dep_edges =
@@ -89,6 +87,7 @@ type job_progress = {
 type check_info = {
   init_id: string;
   check_reason: string;
+  log_errors: bool;
   recheck_id: string option;
   use_max_typechecker_worker_memory_for_decl_deferral: bool;
   per_file_profiling: HackEventLogger.PerFileProfilingConfig.t;

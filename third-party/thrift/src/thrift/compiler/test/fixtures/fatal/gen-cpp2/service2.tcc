@@ -43,8 +43,8 @@ void service2AsyncProcessor::executeRequest_methodA(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodA", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -115,8 +115,8 @@ void service2AsyncProcessor::executeRequest_methodB(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodB", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -181,8 +181,8 @@ void service2AsyncProcessor::executeRequest_methodC(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodC", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -255,8 +255,8 @@ void service2AsyncProcessor::executeRequest_methodD(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodD", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -323,8 +323,8 @@ void service2AsyncProcessor::executeRequest_methodE(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodE", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -397,8 +397,8 @@ void service2AsyncProcessor::executeRequest_methodF(apache::thrift::ServerReques
   try {
     deserializeRequest<ProtocolIn_>(args, "methodF", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))

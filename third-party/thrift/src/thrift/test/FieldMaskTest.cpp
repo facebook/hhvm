@@ -159,6 +159,41 @@ TEST(FieldMaskTest, MaskRefIsMask) {
   }
 }
 
+TEST(FieldMaskTest, MaskRefGetMask) {
+  {
+    Mask m;
+    m.includes_ref().emplace()[5] = allMask();
+    EXPECT_EQ(getFieldMask(m), &*m.includes_ref());
+    EXPECT_EQ(getFieldMask(m), &*m.includes_ref());
+    EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), nullptr);
+  }
+  {
+    Mask m;
+    m.excludes_ref().emplace()[5] = noneMask();
+    EXPECT_EQ(getFieldMask(m), &*m.excludes_ref());
+    EXPECT_EQ(getFieldMask(m), &*m.excludes_ref());
+    EXPECT_EQ(getMapMask(m), nullptr);
+    EXPECT_EQ(getMapMask(m), nullptr);
+  }
+  {
+    Mask m;
+    m.includes_map_ref().emplace()[5] = allMask();
+    EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
+    EXPECT_EQ(getMapMask(m), &*m.includes_map_ref());
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getFieldMask(m), nullptr);
+  }
+  {
+    Mask m;
+    m.excludes_map_ref().emplace()[5] = noneMask();
+    EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
+    EXPECT_EQ(getMapMask(m), &*m.excludes_map_ref());
+    EXPECT_EQ(getFieldMask(m), nullptr);
+    EXPECT_EQ(getFieldMask(m), nullptr);
+  }
+}
+
 TEST(FieldMaskTest, ThrowIfContainsMapMask) {
   throwIfContainsMapMask(allMask()); // don't throw
   throwIfContainsMapMask(noneMask()); // don't throw
@@ -2188,6 +2223,23 @@ TEST(FieldMaskTest, ReverseMask) {
   includes[2].includes_ref().emplace()[3] = allMask();
   Mask exclusiveMask;
   auto& excludes = exclusiveMask.excludes_ref().emplace();
+  excludes[1] = allMask();
+  excludes[2].includes_ref().emplace()[3] = allMask();
+
+  EXPECT_EQ(reverseMask(inclusiveMask), exclusiveMask);
+  EXPECT_EQ(reverseMask(exclusiveMask), inclusiveMask);
+
+  Mask empty;
+  EXPECT_THROW(reverseMask(empty), std::runtime_error);
+}
+
+TEST(FieldMaskTest, ReverseMapMask) {
+  Mask inclusiveMask;
+  auto& includes = inclusiveMask.includes_map_ref().emplace();
+  includes[1] = allMask();
+  includes[2].includes_ref().emplace()[3] = allMask();
+  Mask exclusiveMask;
+  auto& excludes = exclusiveMask.excludes_map_ref().emplace();
   excludes[1] = allMask();
   excludes[2].includes_ref().emplace()[3] = allMask();
 

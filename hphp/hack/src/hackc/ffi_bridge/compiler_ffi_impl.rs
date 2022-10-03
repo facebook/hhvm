@@ -87,6 +87,7 @@ impl From<compile_ffi::TypeFacts> for facts::TypeFacts {
             flags: facts.flags,
             require_extends: vec_to_set(facts.require_extends),
             require_implements: vec_to_set(facts.require_implements),
+            require_class: vec_to_set(facts.require_class),
             methods: vec_to_map(facts.methods),
         }
     }
@@ -100,6 +101,7 @@ impl From<facts::TypeFacts> for compile_ffi::TypeFacts {
             flags: facts.flags,
             require_extends: set_to_vec(facts.require_extends),
             require_implements: set_to_vec(facts.require_implements),
+            require_class: set_to_vec(facts.require_class),
             methods: map_to_vec(facts.methods),
         }
     }
@@ -318,6 +320,7 @@ mod tests {
         let base_types = vec!["int".to_string(), "string".to_string()];
         let require_extends = vec!["A".to_string()];
         let require_implements = vec!["B".to_string()];
+        let require_class = vec!["D".to_string()];
 
         let rust_type_facts = facts::TypeFacts {
             base_types: vec_to_set(base_types.clone()),
@@ -326,6 +329,7 @@ mod tests {
             flags: 0,
             require_extends: vec_to_set(require_extends.clone()),
             require_implements: vec_to_set(require_implements.clone()),
+            require_class: vec_to_set(require_class.clone()),
             methods: rust_methods,
         };
 
@@ -336,6 +340,7 @@ mod tests {
             flags: 0,
             require_extends,
             require_implements,
+            require_class,
             methods: ffi_methods,
         };
 

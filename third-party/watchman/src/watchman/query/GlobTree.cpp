@@ -6,7 +6,8 @@
  */
 
 #include "watchman/query/GlobTree.h"
-#include <folly/Conv.h>
+
+#include <fmt/core.h>
 #include <folly/Range.h>
 
 namespace watchman {
@@ -37,20 +38,22 @@ void GlobTree::unparse_into(
       !relative.empty() && !folly::StringPiece{relative}.endsWith('/');
   auto optSlash = needSlash ? "/" : "";
 
+  auto join = [&]() -> std::string {
+    return fmt::format("{}{}{}", relative, optSlash, pattern);
+  };
+
   // If there are no children of this node, it is effectively a leaf
   // node. Leaves correspond to a concrete glob string that we need
   // to emit, so here's where we do that.
   if (is_leaf || children.size() + doublestar_children.size() == 0) {
-    globStrings.push_back(folly::to<std::string>(relative, optSlash, pattern));
+    globStrings.push_back(join());
   }
 
   for (auto& child : children) {
-    child->unparse_into(
-        globStrings, folly::to<std::string>(relative, optSlash, pattern));
+    child->unparse_into(globStrings, join());
   }
   for (auto& child : doublestar_children) {
-    child->unparse_into(
-        globStrings, folly::to<std::string>(relative, optSlash, pattern));
+    child->unparse_into(globStrings, join());
   }
 }
 

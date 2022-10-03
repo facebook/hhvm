@@ -52,7 +52,159 @@ std::unordered_map<std::string, t_const_value*> flatten_map(
   }
   return map;
 }
+
+void validate_nested_struct_type(t_const_value& type, std::string struct_uri) {
+  auto schema = flatten_map(type);
+  EXPECT_EQ(
+      schema.at("name")->get_map().at(0).first->get_string(), "structType");
+  EXPECT_EQ(
+      schema.at("name")
+          ->get_map()
+          .at(0)
+          .second->get_map()
+          .at(0)
+          .second->get_string(),
+      struct_uri);
+  EXPECT_FALSE(schema.count("params"));
+}
+
+void validate_nested_struct(
+    t_const_value& field,
+    std::string struct_name,
+    std::string struct_uri,
+    int id,
+    int qualifier) {
+  auto field_schema = flatten_map(field);
+  EXPECT_EQ(field_schema.at("id")->get_integer(), id);
+  EXPECT_EQ(field_schema.at("qualifier")->get_integer(), qualifier);
+  EXPECT_EQ(field_schema.at("name")->get_string(), struct_name);
+  validate_nested_struct_type(*field_schema.at("type"), struct_uri);
+}
+
+void validate_test_struct(
+    t_const_value& schema, std::string struct_name, std::string struct_uri) {
+  auto map = flatten_map(schema);
+  const auto& fields = map.at("fields")->get_list();
+
+  validateDefinition(map, struct_name, struct_uri);
+
+  EXPECT_EQ(fields.size(), 3);
+
+  auto field1 = flatten_map(*fields.at(0));
+  EXPECT_EQ(field1.at("id")->get_integer(), 1);
+  EXPECT_EQ(field1.at("qualifier")->get_integer(), 3);
+  EXPECT_EQ(field1.at("name")->get_string(), "i16");
+  auto type1 = flatten_map(*field1.at("type"));
+  EXPECT_EQ(type1.at("name")->get_map().at(0).first->get_string(), "i16Type");
+  EXPECT_FALSE(type1.count("params"));
+
+  validate_nested_struct(*fields.at(1), struct_name, struct_uri, 2, 1);
+
+  auto field3 = flatten_map(*fields.at(2));
+  EXPECT_EQ(field3.at("name")->get_string(), "Map");
+  auto type3 = flatten_map(*field3.at("type"));
+  EXPECT_EQ(type3.at("name")->get_map().at(0).first->get_string(), "mapType");
+  auto params3 = type3.at("params")->get_list();
+  EXPECT_EQ(params3.size(), 2);
+  EXPECT_EQ(
+      flatten_map(*params3.at(0))
+          .at("name")
+          ->get_map()
+          .at(0)
+          .first->get_string(),
+      "stringType");
+  EXPECT_EQ(
+      flatten_map(*params3.at(1))
+          .at("name")
+          ->get_map()
+          .at(0)
+          .first->get_string(),
+      "doubleType");
+}
 } // namespace
+
+TEST(SchematizerTest, Service) {
+  std::string service_name("Service");
+  std::string service_uri("path/to/Service");
+
+  t_service svc(nullptr, service_name);
+  svc.set_uri(service_uri);
+  std::string struct_name("Struct");
+  std::string struct_uri("path/to/Struct");
+
+  t_struct return_type(nullptr, struct_name);
+  return_type.set_uri(struct_uri);
+
+  auto func0 = std::make_unique<t_function>(nullptr, return_type, "my_rpc");
+
+  t_struct param0(nullptr, struct_name);
+  param0.set_uri(struct_uri);
+  func0->params().create_field(param0, "param0");
+
+  svc.add_function(std::move(func0));
+
+  auto schema = schematizer::gen_schema(svc);
+  auto map = flatten_map(*schema);
+
+  validateDefinition(map, service_name, service_uri);
+
+  auto funcs = map.at("functions")->get_list();
+  EXPECT_EQ(funcs.size(), 1);
+  auto func0_schema = flatten_map(*funcs.at(0));
+  auto func0_params =
+      flatten_map(*func0_schema.at("paramlist")).at("fields")->get_list();
+  EXPECT_EQ(func0_params.size(), 1);
+  auto param0_schema = func0_params.at(0);
+  validate_nested_struct(*param0_schema, "param0", struct_uri, 0, 3);
+
+  auto retTypes = func0_schema.at("returnTypes")->get_list();
+  EXPECT_EQ(retTypes.size(), 1);
+  auto ret0_type = flatten_map(*retTypes.at(0)).at("thriftType");
+  validate_nested_struct_type(*ret0_type, struct_uri);
+}
+
+TEST(SchematizerTest, Structured) {
+  std::string struct_name("Struct");
+  std::string struct_uri("path/to/Struct");
+
+  t_struct s(nullptr, struct_name);
+  s.set_uri(struct_uri);
+  s.create_field(t_base_type::t_i16(), "i16", 1);
+  s.create_field(s, "Struct", 2).set_qualifier(t_field_qualifier::optional);
+  t_map tmap(t_base_type::t_string(), t_base_type::t_double());
+  s.create_field(tmap, "Map", 3);
+
+  auto schema = schematizer::gen_schema(s);
+  validate_test_struct(*schema, struct_name, struct_uri);
+}
+
+TEST(SchematizerTest, Const) {
+  std::string program_path("path/to/Program.thrift");
+  t_program program(program_path);
+
+  std::string const_name("Const");
+  std::string const_uri("path/to/Const");
+  t_type_ref const_type(t_base_type::t_string());
+
+  t_const c(
+      &program,
+      const_type,
+      const_name,
+      std::make_unique<t_const_value>("Hello"));
+  c.set_uri(const_uri);
+
+  auto schema = schematizer::gen_schema(c);
+  auto map = flatten_map(*schema);
+
+  validateDefinition(map, const_name, const_uri);
+
+  auto type = flatten_map(*map.at("type"));
+  EXPECT_EQ(type.at("name")->get_map().at(0).first->get_string(), "stringType");
+
+  auto& container = program.intern_list();
+  EXPECT_EQ(container.size(), 1);
+  EXPECT_EQ(container[0]->get_value()->get_string(), "Hello");
+}
 
 TEST(SchematizerTest, Enum) {
   std::string enum_name("Enum");
@@ -88,124 +240,4 @@ TEST(SchematizerTest, Enum) {
   EXPECT_EQ(value1.at("name")->get_string(), ev_1_name);
   EXPECT_EQ(value1.at("value")->get_integer(), ev_1_value);
 }
-
-TEST(SchematizerTest, Service) {
-  std::string service_name("Service");
-  std::string service_uri("path/to/Service");
-
-  t_service svc(nullptr, service_name);
-  svc.set_uri(service_uri);
-
-  t_struct return_type(nullptr, "ReturnStruct");
-  return_type.set_uri("path/to/ReturnStruct");
-  return_type.create_field(t_base_type::t_i16(), "i16", 1);
-
-  t_struct param_0(nullptr, "Param0");
-  param_0.set_uri("path/to/Param0");
-  param_0.create_field(t_base_type::t_i16(), "i16", 1);
-
-  auto params = std::make_unique<t_paramlist>(nullptr);
-  svc.add_function(
-      std::make_unique<t_function>(return_type, "my_rpc", std::move(params)));
-
-  auto schema = schematizer::gen_schema(svc);
-  auto map = flatten_map(*schema);
-
-  validateDefinition(map, service_name, service_uri);
-}
-
-TEST(SchematizerTest, Structured) {
-  std::string struct_name("Struct");
-  std::string struct_uri("path/to/Struct");
-
-  t_struct s(nullptr, struct_name);
-  s.set_uri(struct_uri);
-  s.create_field(t_base_type::t_i16(), "i16", 1);
-  s.create_field(s, "Struct", 2).set_qualifier(t_field_qualifier::optional);
-  t_map tmap(t_base_type::t_string(), t_base_type::t_double());
-  s.create_field(tmap, "Map", 3);
-
-  auto schema = schematizer::gen_schema(s);
-  auto map = flatten_map(*schema);
-  const auto& fields = map.at("fields")->get_list();
-
-  validateDefinition(map, struct_name, struct_uri);
-
-  EXPECT_EQ(fields.size(), 3);
-
-  auto field1 = flatten_map(*fields.at(0));
-  EXPECT_EQ(field1.at("id")->get_integer(), 1);
-  EXPECT_EQ(field1.at("qualifier")->get_integer(), 3);
-  EXPECT_EQ(field1.at("name")->get_string(), "i16");
-  auto type1 = flatten_map(*field1.at("type"));
-  EXPECT_EQ(type1.at("name")->get_map().at(0).first->get_string(), "i16Type");
-  EXPECT_FALSE(type1.count("params"));
-
-  auto field2 = flatten_map(*fields.at(1));
-  EXPECT_EQ(field2.at("id")->get_integer(), 2);
-  EXPECT_EQ(field2.at("qualifier")->get_integer(), 1);
-  EXPECT_EQ(field2.at("name")->get_string(), "Struct");
-  auto type2 = flatten_map(*field2.at("type"));
-  EXPECT_EQ(
-      type2.at("name")->get_map().at(0).first->get_string(), "structType");
-  EXPECT_EQ(
-      type2.at("name")
-          ->get_map()
-          .at(0)
-          .second->get_map()
-          .at(0)
-          .second->get_string(),
-      "path/to/Struct");
-  EXPECT_FALSE(type2.count("params"));
-
-  auto field3 = flatten_map(*fields.at(2));
-  EXPECT_EQ(field3.at("name")->get_string(), "Map");
-  auto type3 = flatten_map(*field3.at("type"));
-  EXPECT_EQ(type3.at("name")->get_map().at(0).first->get_string(), "mapType");
-  auto params3 = type3.at("params")->get_list();
-  EXPECT_EQ(params3.size(), 2);
-  EXPECT_EQ(
-      flatten_map(*params3.at(0))
-          .at("name")
-          ->get_map()
-          .at(0)
-          .first->get_string(),
-      "stringType");
-  EXPECT_EQ(
-      flatten_map(*params3.at(1))
-          .at("name")
-          ->get_map()
-          .at(0)
-          .first->get_string(),
-      "doubleType");
-}
-
-TEST(SchematizerTest, Const) {
-  std::string program_path("path/to/Program.thrift");
-  t_program program(program_path);
-
-  std::string const_name("Const");
-  std::string const_uri("path/to/Const");
-  t_type_ref const_type(t_base_type::t_string());
-
-  t_const c(
-      &program,
-      const_type,
-      const_name,
-      std::make_unique<t_const_value>("Hello"));
-  c.set_uri(const_uri);
-
-  auto schema = schematizer::gen_schema(c);
-  auto map = flatten_map(*schema);
-
-  validateDefinition(map, const_name, const_uri);
-
-  auto type = flatten_map(*map.at("type"));
-  EXPECT_EQ(type.at("name")->get_map().at(0).first->get_string(), "stringType");
-
-  auto& container = program.intern_list();
-  EXPECT_EQ(container.size(), 1);
-  EXPECT_EQ(container[0]->get_value()->get_string(), "Hello");
-}
-
 } // namespace apache::thrift::compiler

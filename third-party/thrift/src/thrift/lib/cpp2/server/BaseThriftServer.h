@@ -757,20 +757,6 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     thriftConfig_.setMaxRequests(
         folly::observer::makeStaticObserver(std::optional{maxRequests}),
         AttributeSource::OVERRIDE);
-    // Eventually we'll remove the simple setMaxRequests but for now ensure
-    // it updates the concurrency controller for the default async pool.
-    if (!resourcePoolSet().empty()) {
-      if (resourcePoolSet_.hasResourcePool(
-              ResourcePoolHandle::defaultAsync())) {
-        resourcePoolSet_.resourcePool(ResourcePoolHandle::defaultAsync())
-            .concurrencyController()
-            .value()
-            .get()
-            .setExecutionLimitRequests(
-                maxRequests != 0 ? maxRequests
-                                 : std::numeric_limits<uint32_t>::max());
-      }
-    }
   }
 
   uint64_t getMaxResponseSize() const final {

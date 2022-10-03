@@ -43,6 +43,7 @@ from thrift.py3.common cimport (
 from folly.optional cimport cOptional as __cOptional
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.op.patch.types as _apache_thrift_op_patch_types
+cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport test.fixtures.patch.module.types_fields as _fbthrift_types_fields
 
@@ -150,6 +151,8 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test
         __terse_field_ref[cMyData] structVal_ref "structVal_ref" ()
         __terse_field_ref[cMyUnion] unionVal_ref "unionVal_ref" ()
         __terse_field_ref[cLateDefStruct] lateStructVal_ref "lateStructVal_ref" ()
+        __terse_field_ref[_apache_thrift_type_standard_types.cDurationStruct] durationVal_ref "durationVal_ref" ()
+        __terse_field_ref[_apache_thrift_type_standard_types.cTimeStruct] timeVal_ref "timeVal_ref" ()
         __optional_field_ref[cbool] optBoolVal_ref "optBoolVal_ref" ()
         __optional_field_ref[cint8_t] optByteVal_ref "optByteVal_ref" ()
         __optional_field_ref[cint16_t] optI16Val_ref "optI16Val_ref" ()
@@ -251,6 +254,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef inline object structVal_impl(self)
     cdef inline object unionVal_impl(self)
     cdef inline object lateStructVal_impl(self)
+    cdef inline object durationVal_impl(self)
+    cdef inline object timeVal_impl(self)
     cdef inline object optBoolVal_impl(self)
     cdef inline object optByteVal_impl(self)
     cdef inline object optI16Val_impl(self)
@@ -271,6 +276,8 @@ cdef class MyStruct(thrift.py3.types.Struct):
     cdef MyData __fbthrift_cached_structVal
     cdef MyUnion __fbthrift_cached_unionVal
     cdef LateDefStruct __fbthrift_cached_lateStructVal
+    cdef _apache_thrift_type_standard_types.DurationStruct __fbthrift_cached_durationVal
+    cdef _apache_thrift_type_standard_types.TimeStruct __fbthrift_cached_timeVal
     cdef _fbthrift_iobuf.IOBuf __fbthrift_cached_optBinaryVal
     cdef object __fbthrift_cached_optEnumVal
     cdef MyData __fbthrift_cached_optStructVal

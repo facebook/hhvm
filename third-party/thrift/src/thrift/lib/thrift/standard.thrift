@@ -64,6 +64,69 @@ typedef binary (cpp2.type = "folly::fbstring") ByteString
 typedef binary (cpp2.type = "folly::IOBuf") ByteBuffer
 
 /**
+ * A fixed-length span of time, represented as a signed count of seconds and
+ * nanoseconds (nanos).
+ *
+ * Considered 'normal', when `nanos` is in the range 0 to 999'999'999
+ * inclusive, or `seconds` is 0 and `nanos` is in the range -999'999'999 to
+ * 999'999'999 inclusive.
+ */
+struct DurationStruct {
+  /** The count of seconds. */
+  1: i64 seconds;
+  /** The count of nanoseconds. */
+  // TODO(afuller): Fix to not require a default for terse fields.
+  2: i32 nanos = 0;
+} (thrift.uri = "facebook.com/thrift/type/Duration")
+
+/**
+ * An instant in time encoded as a count of seconds and nanoseconds (nanos)
+ * since midnight on January 1, 1970 UTC (i.e. Unix epoch).
+ *
+ * Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
+ */
+// TODO(afuller): Consider making this a 'strong' typedef of `Duration`, which
+// would ensure both a separate URI and native type in all languages.
+struct TimeStruct {
+  /** The count of seconds. */
+  1: i64 seconds;
+  /** The count of nanoseconds. */
+  2: i32 nanos;
+} (thrift.uri = "facebook.com/thrift/type/Time")
+
+/**
+ * A integer fraction of the form {numerator} / {denominator}
+ *
+ * Useful for representing ratios, rates, and metric accumulators.
+ *
+ * Considered 'normal' when the denominator is positive.
+ * Considered 'simple' when `normal` and the greatest common divisor of the
+ * and `numerator` and `denominator`, is 1.
+ */
+struct FractionStruct {
+  /** The numerator/dividend/antecedent/upper integer. */
+  1: i64 numerator;
+  /** The denominator/divisor/consequent/lower integer. */
+  2: i64 denominator;
+} (thrift.uri = "facebook.com/thrift/type/Fraction")
+
+/**
+ * A 'normal' Fraction.
+ *
+ * This representation is always safe to 'normalize'.
+ */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef FractionStruct Fraction (thrift.uri = "")
+
+/**
+ * A 'simple' Fraction.
+ *
+ * This representation is always safe to 'simplify'.
+ */
+@thrift.Experimental // TODO(afuller): Adapt!
+typedef FractionStruct SimpleFraction
+
+/**
  * The binary form of a universally unique identifier (UUID).
  *
  * Considered 'valid' if contains exactly 0 or 16 bytes.

@@ -16,6 +16,7 @@
 
 include "thrift/annotation/thrift.thrift"
 include "thrift/lib/thrift/patch.thrift"
+include "thrift/lib/thrift/standard.thrift"
 include "thrift/test/StructPatchTestInclude.thrift"
 
 @thrift.Testing
@@ -43,6 +44,8 @@ struct MyStruct {
   StructPatchTestInclude.MyData structVal;
   StructPatchTestInclude.MyUnion unionVal;
   LateDefStruct lateStructVal;
+  standard.DurationStruct durationVal;
+  standard.TimeStruct timeVal;
 
   optional bool optBoolVal;
   optional byte optByteVal;

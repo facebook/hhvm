@@ -55,6 +55,23 @@ THRIFT_FLAG_DECLARE_bool(raw_client_rocket_upgrade_enabled_v2);
 THRIFT_FLAG_DECLARE_bool(server_rocket_upgrade_enabled);
 THRIFT_FLAG_DECLARE_int64(thrift_client_checksum_sampling_rate);
 
+// Timeout used for polling callCompleted_ to make the test more robust.
+constexpr auto kPollTimeout = std::chrono::seconds(5);
+
+void pollSleep() {
+  std::this_thread::sleep_for(std::chrono::milliseconds(1)); // NOLINT
+}
+
+#define EXPECT_EQ_POLL(actual_ref, expected, timeout)                \
+  {                                                                  \
+    auto start = std::chrono::steady_clock::now();                   \
+    while ((actual_ref) != (expected) &&                             \
+           (std::chrono::steady_clock::now() - start) < (timeout)) { \
+      pollSleep();                                                   \
+    }                                                                \
+  }                                                                  \
+  EXPECT_EQ(actual_ref, expected)
+
 namespace apache {
 namespace thrift {
 
@@ -348,7 +365,7 @@ void TransportCompatibilityTest::TestObserverSendReceiveRequests() {
     EXPECT_EQ(5, server_->observer_->sentReply_);
     EXPECT_EQ(5, server_->observer_->receivedRequest_);
     if (FLAGS_transport != "http2") {
-      EXPECT_EQ(5, server_->observer_->callCompleted_);
+      EXPECT_EQ_POLL(server_->observer_->callCompleted_, 5, kPollTimeout);
     }
   });
 }
@@ -405,14 +422,7 @@ void TransportCompatibilityTest::TestRequestResponse_Simple() {
     EXPECT_EQ(3, client->future_sumTwoNumbers(1, 2).get());
     EXPECT_EQ(8, client->future_add(5).get());
     if (FLAGS_transport != "http2") {
-      // Poll callCompleted_ to make the test more robust.
-      auto start = std::chrono::steady_clock::now();
-      while (server_->observer_->callCompleted_ != 5 &&
-             (std::chrono::steady_clock::now() - start) <
-                 std::chrono::seconds(5)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1)); // NOLINT
-      }
-      EXPECT_EQ(5, server_->observer_->callCompleted_);
+      EXPECT_EQ_POLL(server_->observer_->callCompleted_, 5, kPollTimeout);
     }
   });
 }
@@ -886,7 +896,7 @@ void TransportCompatibilityTest::TestOneway_Simple() {
     EXPECT_EQ(2, server_->observer_->receivedRequest_);
     EXPECT_EQ(1, server_->observer_->sentReply_);
     if (FLAGS_transport != "http2") {
-      EXPECT_EQ(1, server_->observer_->callCompleted_);
+      EXPECT_EQ_POLL(server_->observer_->callCompleted_, 1, kPollTimeout);
     }
   });
 }

@@ -131,3 +131,6 @@ The precise sequence is:
 0c          skip      -- object 3, prop 1, not set
 0319        int, 0x19 -- object 3, prop 2 age=25
 ~~~
+
+Note: to avoid hostile "decompression bombs", Watchman will reject parsing
+template objects that have an empty set of keys.

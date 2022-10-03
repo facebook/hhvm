@@ -6,6 +6,7 @@
  */
 
 #include "watchman/query/TermRegistry.h"
+#include <fmt/core.h>
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/query/QueryExpr.h"
@@ -44,12 +45,11 @@ QueryExprParser getQueryExprParser(const w_string& name) {
       if (auto* parser = *parserp) {
         return parser;
       }
-      throw QueryParseError(folly::to<std::string>(
-          "unsupported expression term '", name.view(), "'"));
+      throw QueryParseError(
+          fmt::format("unsupported expression term '{}'", name));
     }
   }
-  throw QueryParseError(
-      folly::to<std::string>("unknown expression term '", name.view(), "'"));
+  throw QueryParseError(fmt::format("unknown expression term '{}'", name));
 }
 
 std::unique_ptr<QueryExpr> parseQueryExpr(Query* query, const json_ref& exp) {

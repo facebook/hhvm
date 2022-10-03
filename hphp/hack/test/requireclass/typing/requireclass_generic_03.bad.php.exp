@@ -1,0 +1,8 @@
+File "requireclass_generic_03.bad.php", line 7, characters 17-22:
+Require class cannot be used with a generic class (Parsing[1002])
+File "requireclass_generic_03.bad.php", line 6, characters 7-13:
+Trait MyTrait requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  File "requireclass_generic_03.bad.php", line 10, characters 13-13:
+  Class C is defined here.
+  File "requireclass_generic_03.bad.php", line 7, characters 17-17:
+  The require class requirement is here.

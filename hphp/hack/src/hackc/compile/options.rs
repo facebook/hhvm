@@ -37,7 +37,6 @@ impl Default for CompilerFlags {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
-    pub emit_class_pointers: i32,
     pub check_int_overflow: i32,
     pub parser_options: ParserOptions,
 }
@@ -145,10 +144,6 @@ impl Options {
 
     pub fn check_int_overflow(&self) -> bool {
         self.hhvm.check_int_overflow > 0
-    }
-
-    pub fn emit_class_pointers(&self) -> i32 {
-        self.hhvm.emit_class_pointers
     }
 }
 

@@ -39,13 +39,17 @@ let codemod_kind_of_marker_kind = function
     Some Codemod.Hint
   | Debug -> None
 
-let of_results env results =
-  List.filter_map
-    ~f:(function
-      | Shape_like_dict (pos, kind, fields) ->
-        Option.map
-          ~f:(of_marker env pos fields)
-          (codemod_kind_of_marker_kind kind)
-      | Dynamically_accessed_dict _ -> None)
-    results
-  |> JSON.array_ (fun x -> x)
+let group_of_results ~error_count env results =
+  let directives =
+    List.filter_map
+      ~f:(function
+        | Shape_like_dict (pos, kind, fields) ->
+          Option.map
+            ~f:(of_marker env pos fields)
+            (codemod_kind_of_marker_kind kind)
+        | Dynamically_accessed_dict _ -> None)
+      results
+    |> JSON.array_ (fun x -> x)
+  in
+  JSON.JSON_Object
+    [("directives", directives); ("error_count", JSON.int_ error_count)]

@@ -75,8 +75,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstream(apache::t
   try {
     deserializeRequest<ProtocolIn_>(args, "returnstream", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -148,8 +148,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_streamthrows(apache::t
   try {
     deserializeRequest<ProtocolIn_>(args, "streamthrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -231,8 +231,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_servicethrows(apache::
   try {
     deserializeRequest<ProtocolIn_>(args, "servicethrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -321,8 +321,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_boththrows(apache::thr
   try {
     deserializeRequest<ProtocolIn_>(args, "boththrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -421,8 +421,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamstrea
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamstreamthrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -506,8 +506,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreamservi
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamservicethrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -598,8 +598,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_responseandstreambotht
   try {
     deserializeRequest<ProtocolIn_>(args, "responseandstreamboththrows", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))
@@ -705,8 +705,8 @@ void PubSubStreamingServiceAsyncProcessor::executeRequest_returnstreamFast(apach
   try {
     deserializeRequest<ProtocolIn_>(args, "returnstreamFast", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
-    folly::exception_wrapper ew(std::current_exception(), ex);
+  catch (...) {
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))

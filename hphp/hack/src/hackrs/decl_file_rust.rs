@@ -126,7 +126,7 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
     for path in filenames {
         for decl in decl_parser.parse(path).unwrap() {
             match decl {
-                shallow::Decl::Class(name, decl) => {
+                shallow::NamedDecl::Class(name, decl) => {
                     if opts.shallow {
                         println!("{:#?}", decl);
                     }
@@ -155,10 +155,10 @@ fn decl_files<R: Reason>(opts: &CliOptions) {
                         }
                     }
                 }
-                shallow::Decl::Fun(_, decl) => println!("{:#?}", decl),
-                shallow::Decl::Typedef(_, decl) => println!("{:#?}", decl),
-                shallow::Decl::Const(_, decl) => println!("{:#?}", decl),
-                shallow::Decl::Module(_, decl) => println!("{:#?}", decl),
+                shallow::NamedDecl::Fun(_, decl) => println!("{:#?}", decl),
+                shallow::NamedDecl::Typedef(_, decl) => println!("{:#?}", decl),
+                shallow::NamedDecl::Const(_, decl) => println!("{:#?}", decl),
+                shallow::NamedDecl::Module(_, decl) => println!("{:#?}", decl),
             }
         }
     }

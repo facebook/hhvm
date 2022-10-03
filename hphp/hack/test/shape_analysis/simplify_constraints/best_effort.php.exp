@@ -2,6 +2,8 @@
 Summary for \:div::__construct:
 [5:5-24] [Parameter]:
   shape()
+[6:5-23] [Parameter]:
+  shape()
 Summary for \f:
 [13:3-18] [Allocation]:
   shape('a' => int)

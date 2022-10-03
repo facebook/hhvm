@@ -44,6 +44,7 @@
 #include <thrift/lib/cpp2/async/StreamCallbacks.h>
 #include <thrift/lib/cpp2/detail/meta.h>
 #include <thrift/lib/cpp2/frozen/Frozen.h>
+#include <thrift/lib/cpp2/op/Encode.h>
 #include <thrift/lib/cpp2/protocol/Cpp2Ops.h>
 #include <thrift/lib/cpp2/protocol/Traits.h>
 #include <thrift/lib/cpp2/transport/core/RpcMetadataUtil.h>
@@ -61,49 +62,30 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     bool, includeInRecentRequestsCount, const std::string_view /*methodName*/);
 
-template <int N, int Size, class F, class Tuple>
-struct ForEachImpl {
-  static uint32_t forEach(Tuple&& tuple, F&& f) {
-    uint32_t res = f(std::get<N>(tuple), N);
-    res += ForEachImpl<N + 1, Size, F, Tuple>::forEach(
-        std::forward<Tuple>(tuple), std::forward<F>(f));
-    return res;
-  }
-};
-template <int Size, class F, class Tuple>
-struct ForEachImpl<Size, Size, F, Tuple> {
-  static uint32_t forEach(Tuple&& /*tuple*/, F&& /*f*/) { return 0; }
-};
-
-template <int N = 0, class F, class Tuple>
-uint32_t forEach(Tuple&& tuple, F&& f) {
-  return ForEachImpl<
-      N,
-      std::tuple_size<typename std::remove_reference<Tuple>::type>::value,
-      F,
-      Tuple>::forEach(std::forward<Tuple>(tuple), std::forward<F>(f));
+template <class Tuple, class F, size_t... Index>
+uint32_t forEach(Tuple& tuple, F& f, std::index_sequence<Index...>) {
+  return (f(std::get<Index>(tuple), Index) + ... + 0);
+}
+template <class Tuple, class F>
+uint32_t forEach(Tuple& tuple, F f) {
+  return forEach(
+      tuple,
+      f,
+      std::make_index_sequence<std::tuple_size<
+          typename std::remove_reference<Tuple>::type>::value>());
 }
 
-template <int N, int Size, class F, class Tuple>
-struct ForEachVoidImpl {
-  static void forEach(Tuple&& tuple, F&& f) {
-    f(std::get<N>(tuple), N);
-    ForEachVoidImpl<N + 1, Size, F, Tuple>::forEach(
-        std::forward<Tuple>(tuple), std::forward<F>(f));
-  }
-};
-template <int Size, class F, class Tuple>
-struct ForEachVoidImpl<Size, Size, F, Tuple> {
-  static void forEach(Tuple&& /*tuple*/, F&& /*f*/) {}
-};
-
-template <int N = 0, class F, class Tuple>
-void forEachVoid(Tuple&& tuple, F&& f) {
-  ForEachVoidImpl<
-      N,
-      std::tuple_size<typename std::remove_reference<Tuple>::type>::value,
-      F,
-      Tuple>::forEach(std::forward<Tuple>(tuple), std::forward<F>(f));
+template <class Tuple, class F, size_t... Index>
+void forEachVoid(Tuple& tuple, F& f, std::index_sequence<Index...>) {
+  (f(std::get<Index>(tuple), Index), ...);
+}
+template <class Tuple, class F>
+void forEachVoid(Tuple& tuple, F f) {
+  forEachVoid(
+      tuple,
+      f,
+      std::make_index_sequence<std::tuple_size<
+          typename std::remove_reference<Tuple>::type>::value>());
 }
 
 template <typename Protocol, typename IsSet>
@@ -111,20 +93,10 @@ struct Writer {
   Writer(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
   template <typename FieldData>
   uint32_t operator()(const FieldData& fieldData, int index) {
-    using Ops = Cpp2Ops<typename FieldData::ref_type>;
-
     if (!isset_.getIsSet(index)) {
       return 0;
     }
-
-    int16_t fid = FieldData::fid;
-    const auto& ex = fieldData.ref();
-
-    uint32_t xfer = 0;
-    xfer += prot_->writeFieldBegin("", Ops::thriftType(), fid);
-    xfer += Ops::write(prot_, &ex);
-    xfer += prot_->writeFieldEnd();
-    return xfer;
+    return fieldData.write(prot_);
   }
 
  private:
@@ -137,19 +109,10 @@ struct Sizer {
   Sizer(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
   template <typename FieldData>
   uint32_t operator()(const FieldData& fieldData, int index) {
-    using Ops = Cpp2Ops<typename FieldData::ref_type>;
-
     if (!isset_.getIsSet(index)) {
       return 0;
     }
-
-    int16_t fid = FieldData::fid;
-    const auto& ex = fieldData.ref();
-
-    uint32_t xfer = 0;
-    xfer += prot_->serializedFieldSize("", Ops::thriftType(), fid);
-    xfer += Ops::serializedSize(prot_, &ex);
-    return xfer;
+    return fieldData.size(prot_);
   }
 
  private:
@@ -162,19 +125,10 @@ struct SizerZC {
   SizerZC(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
   template <typename FieldData>
   uint32_t operator()(const FieldData& fieldData, int index) {
-    using Ops = Cpp2Ops<typename FieldData::ref_type>;
-
     if (!isset_.getIsSet(index)) {
       return 0;
     }
-
-    int16_t fid = FieldData::fid;
-    const auto& ex = fieldData.ref();
-
-    uint32_t xfer = 0;
-    xfer += prot_->serializedFieldSize("", Ops::thriftType(), fid);
-    xfer += Ops::serializedSizeZC(prot_, &ex);
-    return xfer;
+    return fieldData.sizeZC(prot_);
   }
 
  private:
@@ -197,21 +151,14 @@ struct Reader {
         success_(success) {}
   template <typename FieldData>
   void operator()(FieldData& fieldData, int index) {
-    using Ops = Cpp2Ops<typename FieldData::ref_type>;
-
-    if (ftype_ != Ops::thriftType()) {
+    if (fid_ != FieldData::fid) {
       return;
     }
 
-    int16_t myfid = FieldData::fid;
-    auto& ex = fieldData.ref();
-    if (myfid != fid_) {
-      return;
+    if (fieldData.read(prot_, ftype_)) {
+      success_ = true;
+      isset_.setIsSet(index);
     }
-
-    success_ = true;
-    isset_.setIsSet(index);
-    Ops::read(prot_, &ex);
   }
 
  private:
@@ -223,12 +170,12 @@ struct Reader {
 };
 
 template <typename T>
-T& maybe_remove_pointer(T& x) {
+T& maybe_deref(T& x) {
   return x;
 }
 
 template <typename T>
-T& maybe_remove_pointer(T* x) {
+T& maybe_deref(T* x) {
   return *x;
 }
 
@@ -249,19 +196,78 @@ struct IsSetHelper<true, count> {
 
 } // namespace detail
 
-template <int16_t Fid, typename TC, typename T>
+template <int16_t Fid, typename TC, typename T, typename Tag = void>
 struct FieldData {
   static const constexpr int16_t fid = Fid;
   static const constexpr protocol::TType ttype = protocol_type_v<TC, T>;
   typedef TC type_class;
   typedef T type;
-  typedef typename std::remove_pointer<T>::type ref_type;
+  typedef typename std::remove_pointer<T>::type value_type;
+  using Ops = Cpp2Ops<value_type>;
   T value;
-  ref_type& ref() {
-    return apache::thrift::detail::maybe_remove_pointer(value);
+  static_assert(std::is_pointer_v<T> != std::is_base_of_v<TException, T>, "");
+
+  value_type& ref() { return detail::maybe_deref(value); }
+  const value_type& ref() const { return detail::maybe_deref(value); }
+
+  template <typename Protocol>
+  uint32_t write(Protocol* prot) const {
+    uint32_t xfer = 0;
+    xfer += prot->writeFieldBegin("", thriftType(), fid);
+    if constexpr (std::is_void_v<Tag>) {
+      xfer += Ops::write(prot, &ref());
+    } else {
+      xfer += op::encode<Tag>(*prot, ref());
+    }
+    xfer += prot->writeFieldEnd();
+    return xfer;
   }
-  const ref_type& ref() const {
-    return apache::thrift::detail::maybe_remove_pointer(value);
+
+  template <typename Protocol>
+  uint32_t size(Protocol* prot) const {
+    uint32_t xfer = 0;
+    xfer += prot->serializedFieldSize("", thriftType(), fid);
+    if constexpr (std::is_void_v<Tag>) {
+      xfer += Ops::serializedSize(prot, &ref());
+    } else {
+      xfer += op::serialized_size<false, Tag>(*prot, ref());
+    }
+    return xfer;
+  }
+
+  template <typename Protocol>
+  uint32_t sizeZC(Protocol* prot) const {
+    uint32_t xfer = 0;
+    xfer += prot->serializedFieldSize("", thriftType(), fid);
+    if constexpr (std::is_void_v<Tag>) {
+      xfer += Ops::serializedSizeZC(prot, &ref());
+    } else {
+      xfer += op::serialized_size<true, Tag>(*prot, ref());
+    }
+    return xfer;
+  }
+
+  template <typename Protocol>
+  bool read(Protocol* prot, protocol::TType ftype) {
+    if (ftype != thriftType()) {
+      return false;
+    }
+
+    if constexpr (std::is_void_v<Tag>) {
+      Ops::read(prot, &ref());
+    } else {
+      op::decode<Tag>(*prot, ref());
+    }
+    return true;
+  }
+
+ private:
+  protocol::TType thriftType() const {
+    if constexpr (std::is_void_v<Tag>) {
+      return Ops::thriftType();
+    } else {
+      return op::detail::typeTagToTType<Tag>;
+    }
   }
 };
 
@@ -311,7 +317,7 @@ class ThriftPresult
       bool readSomething = false;
       apache::thrift::detail::forEachVoid(
           fields(),
-          apache::thrift::detail::Reader<Protocol, CurIsSetHelper>(
+          apache::thrift::detail::Reader(
               prot, isSet(), fid, ftype, readSomething));
       if (!readSomething) {
         prot->skip(ftype);
@@ -328,8 +334,7 @@ class ThriftPresult
     uint32_t xfer = 0;
     xfer += prot->serializedStructSize("");
     xfer += apache::thrift::detail::forEach(
-        fields(),
-        apache::thrift::detail::Sizer<Protocol, CurIsSetHelper>(prot, isSet()));
+        fields(), apache::thrift::detail::Sizer(prot, isSet()));
     xfer += prot->serializedSizeStop();
     return xfer;
   }
@@ -339,9 +344,7 @@ class ThriftPresult
     uint32_t xfer = 0;
     xfer += prot->serializedStructSize("");
     xfer += apache::thrift::detail::forEach(
-        fields(),
-        apache::thrift::detail::SizerZC<Protocol, CurIsSetHelper>(
-            prot, isSet()));
+        fields(), apache::thrift::detail::SizerZC(prot, isSet()));
     xfer += prot->serializedSizeStop();
     return xfer;
   }
@@ -351,9 +354,7 @@ class ThriftPresult
     uint32_t xfer = 0;
     xfer += prot->writeStructBegin("");
     xfer += apache::thrift::detail::forEach(
-        fields(),
-        apache::thrift::detail::Writer<Protocol, CurIsSetHelper>(
-            prot, isSet()));
+        fields(), apache::thrift::detail::Writer(prot, isSet()));
     xfer += prot->writeFieldStop();
     xfer += prot->writeStructEnd();
     return xfer;

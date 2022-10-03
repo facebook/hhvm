@@ -24,17 +24,16 @@ let simplify env constraints =
 let strip_decoration_of_lists
     ((intra_dec_list, inter_dec_list) : decorated_constraints) :
     any_constraint list =
-  List.map ~f:(fun { constraint_; _ } -> HT.Intra constraint_) intra_dec_list
-  @ List.map ~f:(fun { constraint_; _ } -> HT.Inter constraint_) inter_dec_list
+  (DecoratedConstraintSet.elements intra_dec_list
+  |> List.map ~f:(fun { constraint_; _ } -> HT.Intra constraint_))
+  @ (DecoratedInterConstraintSet.elements inter_dec_list
+    |> List.map ~f:(fun { constraint_; _ } -> HT.Inter constraint_))
 
-let process_errors_out map =
-  let process_errors _id (_, errors) =
-    if not (List.is_empty errors) then Printf.eprintf "\nErrors:\n";
-    let print_error err = Printf.eprintf "%s\n" (Error.show err) in
-    List.iter ~f:print_error errors
-  in
-  SMap.iter process_errors map;
-  SMap.map (fun (constraints, _errors) -> constraints) map
+let process_errors_out (constraints, errors) =
+  if not (List.is_empty errors) then Printf.eprintf "\nErrors:\n";
+  let print_error err = Printf.eprintf "%s\n" (Error.show err) in
+  List.iter ~f:print_error errors;
+  constraints
 
 let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
   let { mode; verbosity } = options in
@@ -48,31 +47,31 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
     | Inter_shape.Divergent constr_map -> constr_map
   in
   match mode with
-  | FlagTargets ->
-    let log_pos = Format.printf "%a\n" Pos.pp in
-    let { expressions_to_modify; hints_to_modify } =
-      Walker.collect_analysis_targets ctx tast
-    in
-    Format.printf "~Expressions~\n";
-    List.iter expressions_to_modify ~f:log_pos;
-    Format.printf "~Hints~\n";
-    List.iter hints_to_modify ~f:log_pos
   | DumpConstraints ->
     let print_function_constraints
-        (id : string) (constraints : decorated_constraints) : unit =
+        (id : string)
+        ((intra_constraints, inter_constraints) : decorated_constraints) : unit
+        =
       Format.printf "Constraints for %s:\n" id;
-      let print_help projection constr_printer constr =
-        projection constr
-        |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
-        |> List.map ~f:(constr_printer ~verbosity empty_typing_env)
-        |> List.iter ~f:(Format.printf "%s\n")
-      in
-      print_help fst show_decorated_constraint constraints;
-      print_help snd show_decorated_inter_constraint constraints;
+      DecoratedConstraintSet.elements intra_constraints
+      |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+      |> List.iter ~f:(fun constr ->
+             Format.printf
+               "%s\n"
+               (show_decorated_constraint ~verbosity empty_typing_env constr));
+      DecoratedInterConstraintSet.elements inter_constraints
+      |> List.sort ~compare:(fun c1 c2 -> Pos.compare c1.hack_pos c2.hack_pos)
+      |> List.iter ~f:(fun constr ->
+             Format.printf
+               "%s\n"
+               (show_decorated_inter_constraint
+                  ~verbosity
+                  empty_typing_env
+                  constr));
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> SMap.iter print_function_constraints
   | CloseConstraints ->
     let print_function_constraints
@@ -89,7 +88,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> analyse
     |> SMap.iter print_function_constraints
   | DumpDerivedConstraints ->
@@ -97,6 +96,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
         (id : string) ((intra_constraints, _) : decorated_constraints) : unit =
       Format.printf "Derived constraints for %s:\n" id;
       intra_constraints
+      |> DecoratedConstraintSet.elements
       |> List.map ~f:(fun c -> c.constraint_)
       |> Solver.deduce
       |> List.map ~f:(show_constraint empty_typing_env)
@@ -104,7 +104,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       Format.printf "\n"
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> SMap.iter print_function_constraints
   | SimplifyConstraints ->
     let print_callable_summary (id : string) (results : shape_result list) :
@@ -117,19 +117,22 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
-    |> process_errors_out
-    |> SMap.map fst
-    |> SMap.map (List.map ~f:strip_decorations)
+    |> SMap.map (fun rs ->
+           process_errors_out rs
+           |> fst
+           |> DecoratedConstraintSet.elements
+           |> List.map ~f:strip_decorations)
     |> SMap.iter process_callable
   | Codemod ->
-    let process_callable constraints =
-      simplify empty_typing_env constraints
-      |> Codemod.of_results empty_typing_env
+    let process_callable (decorated_constraints, errors) =
+      let error_count = List.length errors in
+      fst decorated_constraints
+      |> DecoratedConstraintSet.elements
+      |> List.map ~f:strip_decorations
+      |> simplify empty_typing_env
+      |> Codemod.group_of_results ~error_count empty_typing_env
     in
     Walker.program ctx tast
-    |> process_errors_out
-    |> SMap.map fst
-    |> SMap.map (List.map ~f:strip_decorations)
     |> SMap.map process_callable
     |> SMap.values
     |> JSON.array_ (fun json -> json)
@@ -145,7 +148,7 @@ let do_ (options : options) (ctx : Provider_context.t) (tast : T.program) =
       simplify empty_typing_env constraints |> print_callable_summary id
     in
     Walker.program ctx tast
-    |> process_errors_out
+    |> SMap.map process_errors_out
     |> analyse
     |> SMap.map
          (List.filter_map ~f:(function

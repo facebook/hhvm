@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <initializer_list>
 #include <string>
 #include <typeinfo>
 #include <utility>
@@ -355,6 +356,240 @@ class Value : private detail::DynCmp<Value, ConstRef>,
             op::detail::getAnyType<Tag, T>()->make(&val, true)) {
     assert(ptr_ != nullptr);
   }
+};
+
+namespace detail {
+class BaseDynView {
+ public:
+  using value_type = ConstRef;
+  using size_type = size_t;
+  using reference = const ConstRef&;
+  using const_reference = reference;
+  using pointer = const ConstRef*;
+  using const_pointer = const ConstRef*;
+  using iterator = Ref::const_iterator;
+  using const_iterator = Ref::const_iterator;
+
+  // Returns an iterator to the first element of the container.
+  const_iterator begin() const { return ref_.cbegin(); }
+  const_iterator cbegin() const { return ref_.cbegin(); }
+
+  // Returns an iterator to the last element of the container.
+  const_iterator end() const { return ref_.cend(); }
+  const_iterator cend() const { return ref_.cend(); }
+
+  // Checks if the container has no elements.
+  FOLLY_NODISCARD bool empty() const { return ref_.empty(); }
+
+  // Returns the number of elements in the container.
+  FOLLY_NODISCARD size_t size() const { return ref_.size(); }
+
+ protected:
+  Ref ref_;
+
+  BaseDynView(detail::Ptr ptr, BaseType baseType) : ref_(ptr) {
+    if (ref_.type().baseType() != baseType) {
+      folly::throw_exception<std::bad_any_cast>();
+    }
+  }
+
+  ~BaseDynView() = default;
+};
+
+} // namespace detail
+
+// The constant portions of a c++ 'SequenceContainer'.
+//
+// See: https://en.cppreference.com/w/cpp/named_req/SequenceContainer
+template <>
+class DynList<ConstRef> : public detail::BaseDynView {
+  using Base = detail::BaseDynView;
+
+ public:
+  // Returns a reference to the element at specified location pos, with bounds
+  // checking.
+  ConstRef at(size_t pos) const { return ref_.at(pos); }
+  ConstRef operator[](size_t pos) const { return at(pos); }
+
+  // Returns a reference to the first element in the container.
+  ConstRef front() const { return at(0); }
+
+  // Returns a reference to the last element in the container.
+  ConstRef back() const { return at(ref_.size() - 1); }
+
+  explicit DynList(detail::Ptr ptr) : Base(ptr, BaseType::List) {}
+};
+
+// The mutable portions of a c++ 'SequenceContainer'.
+//
+// See: https://en.cppreference.com/w/cpp/named_req/SequenceContainer
+//
+// TODO(afuller): Add type-erased iterator features, needed for full API.
+template <>
+class DynList<Ref> : public DynList<ConstRef> {
+  using Base = DynList<ConstRef>;
+
+ public:
+  using Base::Base;
+  using reference = const Ref&;
+  using pointer = const Ref*;
+  using iterator = Ref::iterator;
+
+  // Replaces the contents with count copies of value value
+  [[noreturn]] void assign(size_type, ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+  [[noreturn]] void assign(ConstRef) { detail::BaseErasedOp::unimplemented(); }
+  DynList& operator=(ConstRef other) { return (assign(other), *this); }
+
+  // Returns a reference to the element at specified location pos, with bounds
+  // checking.
+  Ref at(size_type pos) { return ref_.at(pos); }
+  using Base::at;
+  Ref operator[](size_type pos) { return at(pos); }
+  using Base::operator[];
+
+  // Returns a reference to the first element in the container.
+  Ref front() { return at(0); }
+  using Base::front;
+
+  // Returns a reference to the last element in the container.
+  Ref back() { return at(ref_.size() - 1); }
+  using Base::back;
+
+  // Returns an iterator to the first element of the container.
+  iterator begin() { return ref_.begin(); }
+  using Base::begin;
+
+  // Returns an iterator to the last element of the container.
+  iterator end() { return ref_.end(); }
+  using Base::end;
+
+  // Erases all elements from the container. After this call, size() returns
+  // zero.
+  void clear() { ref_.clear(); }
+
+  // Inserts `value` before `pos`.
+  [[noreturn]] iterator insert(const_iterator, ConstRef) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+  // Removes the element at `pos`.
+  [[noreturn]] iterator erase(const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+  // Removes the elements in the range `[first, last)`.
+  [[noreturn]] iterator erase(const_iterator, const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+
+  // Appends the given element `value` to the end of the container.
+  void push_back(ConstRef value) { ref_.insert(size(), value); }
+  void push_back(const std::string& value) { ref_.insert(size(), value); }
+
+  // Prepent the given element `value` to the beginning of the container.
+  void push_front(ConstRef value) { ref_.insert(0, value); }
+  void push_front(const std::string& value) { ref_.insert(0, value); }
+
+  // Removes the last element of the container.
+  void pop_back() { ref_.remove(std::max<size_type>(1, size()) - 1); }
+  // Removes the first element of the container.
+  void pop_front() { ref_.remove(0); }
+};
+
+// The constant portions of an unordered c++ set.
+template <>
+class DynSet<ConstRef> : public detail::BaseDynView {
+  using Base = detail::BaseDynView;
+
+ public:
+  using key_type = ConstRef;
+
+  // Returns the number of elements with key that compares equal to the
+  // specified argument `key`, which is either 1 or 0 since this container does
+  // not allow duplicates.
+  FOLLY_NODISCARD size_t count(ConstRef key) const { return contains(key); }
+  FOLLY_NODISCARD size_t count(const std::string& key) const {
+    return contains(key);
+  }
+
+  // Finds an element with key equivalent to `key`.
+  [[noreturn]] Base::const_iterator find(ConstRef) const {
+    detail::BaseErasedOp::unimplemented();
+  }
+
+  // Checks if there is an element with key equivalent to `key` in the
+  // container.
+  FOLLY_NODISCARD bool contains(ConstRef key) const {
+    return !ref_.get(key).type().empty();
+  }
+  FOLLY_NODISCARD bool contains(const std::string& key) const {
+    return !ref_.get(key).type().empty();
+  }
+
+  explicit DynSet(detail::Ptr ptr) : Base(ptr, BaseType::Set) {}
+};
+
+// The mutable portions of an unordered c++ set.
+//
+// TODO(afuller): Add type-erased iterator features, needed for full API.
+template <>
+class DynSet<Ref> : public DynSet<ConstRef> {
+  using Base = DynSet<ConstRef>;
+
+ public:
+  using Base::Base;
+
+  [[noreturn]] void assign(ConstRef) { detail::BaseErasedOp::unimplemented(); }
+  DynSet& operator=(ConstRef other) { return (assign(other), *this); }
+
+  // Erases all elements from the container. After this call, size() returns
+  // zero.
+  void clear() { ref_.clear(); }
+
+  // Inserts value.
+  [[noreturn]] std::pair<iterator, bool> insert(ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+
+  // Inserts value, using hint as a non-binding suggestion to where the search
+  // should start.
+  iterator insert(const_iterator, ConstRef value) {
+    // TODO(afuller): consider passing through hint.
+    return insert(value).first;
+  }
+
+  // Inserts elements from range `[first, last)`.
+  template <class InputIt>
+  void insert(InputIt first, InputIt last) {
+    for (; first != last; ++first) {
+      ref_.add(*first);
+    }
+  }
+
+  // Inserts elements from initializer list `ilist`.
+  template <class T>
+  void insert(std::initializer_list<T> ilist) {
+    insert(ilist.begin(), ilist.end());
+  }
+
+  // Removes the element (if one exists) with the key equivalent to `key`.
+  size_t erase(ConstRef key) { return ref_.remove(key); }
+  size_t erase(const std::string& key) { return ref_.remove(key); }
+
+  // Removes the element at `pos`.
+  [[noreturn]] iterator erase(const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+  // Removes the elements in the range `[first, last)`.
+  [[noreturn]] iterator erase(const_iterator, const_iterator) {
+    detail::BaseErasedOp::unimplemented(); // TODO(afuller): Implement.
+  }
+
+  // Finds an element with key equivalent to `key`.
+  [[noreturn]] iterator find(ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+  using Base::find;
 };
 
 } // namespace type

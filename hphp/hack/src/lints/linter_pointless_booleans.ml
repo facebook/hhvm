@@ -37,7 +37,7 @@ let send_to_lint_error pos str line1 line2 bol1 bol2 col1 col2 =
   let path_name = Pos.filename (Pos.to_absolute pos) in
   let pos_quickfix =
     Pos.make_from_lexing_pos
-      path_name
+      (Pos.filename pos)
       Lexing.
         {
           pos_fname = path_name;

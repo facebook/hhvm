@@ -20,3 +20,7 @@ cdef extern from "<thrift/lib/python/flags.h>" namespace "::apache::thrift::pyth
         void define(const string& name, T defaultValue) except +
         @staticmethod
         T get(const string& name) except +
+        @staticmethod
+        void mock(const string& name, T value) except +
+        @staticmethod
+        void unmock(const string& name) except +

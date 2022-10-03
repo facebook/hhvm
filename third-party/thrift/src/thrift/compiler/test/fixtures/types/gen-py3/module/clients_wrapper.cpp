@@ -28,9 +28,9 @@ SomeServiceClientWrapper::bounce_map(
       std::move(callback),
       arg_m
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::unordered_map<int32_t,std::string>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -51,9 +51,9 @@ SomeServiceClientWrapper::binary_keyed_map(
       std::move(callback),
       arg_r
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::map<std::string,int64_t>>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

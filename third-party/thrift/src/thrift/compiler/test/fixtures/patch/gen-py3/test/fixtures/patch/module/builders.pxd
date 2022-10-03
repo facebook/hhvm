@@ -14,6 +14,8 @@ cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_t
 cimport facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 cimport apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 cimport apache.thrift.op.patch.builders as _apache_thrift_op_patch_builders
+cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
+cimport apache.thrift.type.standard.builders as _apache_thrift_type_standard_builders
 
 cimport test.fixtures.patch.module.types as _test_fixtures_patch_module_types
 
@@ -46,6 +48,8 @@ cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     cdef public object structVal
     cdef public object unionVal
     cdef public object lateStructVal
+    cdef public object durationVal
+    cdef public object timeVal
     cdef public pbool optBoolVal
     cdef public pint optByteVal
     cdef public pint optI16Val

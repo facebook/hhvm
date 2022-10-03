@@ -23,9 +23,9 @@ RaiserClientWrapper::doBland(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -44,9 +44,9 @@ RaiserClientWrapper::doRaise(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -65,9 +65,9 @@ RaiserClientWrapper::get200(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -86,9 +86,9 @@ RaiserClientWrapper::get500(
       rpcOptions,
       std::move(callback)
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

@@ -39,13 +39,13 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
   getKeySplitRoute(size_t numReplicas, bool allSync, bool firstHit = false) {
     const auto jsonStr = fmt::format(
         R"TMPL(
-{{
-  "replicas": {numReplicas},
-  "all_sync": {allSync},
-  "first_hit": {firstHit},
-  "destination": "NullRoute"
-}}
-)TMPL",
+              {{
+                "replicas": {numReplicas},
+                "all_sync": {allSync},
+                "first_hit": {firstHit},
+                "destination": "NullRoute"
+              }}
+              )TMPL",
         fmt::arg(
             "numReplicas",
             folly::to<std::string>(static_cast<int>(numReplicas))),

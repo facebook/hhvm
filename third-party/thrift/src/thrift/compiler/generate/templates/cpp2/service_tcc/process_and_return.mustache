@@ -81,9 +81,9 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
   try {
     deserializeRequest<ProtocolIn_>(args, "<%function:name%>", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
-  catch (const std::exception& ex) {
+  catch (...) {
 <%#function:oneway?%>
-    LOG(ERROR) << ex.what() << " in function <%function:name%>";
+    LOG(ERROR) << "exception in function <%function:name%>: " << folly::exceptionStr(std::current_exception());
     apache::thrift::detail::ServerRequestHelper::eventBase(serverRequest)->runInEventBaseThread([req = apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))] {});
     return;
   }
@@ -101,7 +101,7 @@ void <%service:parent_service_cpp_name%>AsyncProcessor::executeRequest_<%#servic
     <%#function:in_or_creates_interaction?%>, std::move(tile)<%/function:in_or_creates_interaction?%>);
 <%/function:oneway?%>
 <%^function:oneway?%>
-    folly::exception_wrapper ew(std::current_exception(), ex);
+    folly::exception_wrapper ew(std::current_exception());
     apache::thrift::detail::ap::process_handle_exn_deserialization<ProtocolOut_>(
         ew
         , apache::thrift::detail::ServerRequestHelper::request(std::move(serverRequest))

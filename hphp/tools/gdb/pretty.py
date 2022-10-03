@@ -14,6 +14,7 @@ import gdbutils
 from gdbutils import *
 from lookup import lookup_func
 from sizeof import sizeof
+from asio import WaitHandle
 import idx
 from hhbc import as_idx
 
@@ -248,6 +249,47 @@ class OptionalPrinter(object):
         inner = self.val.type.template_argument(0)
         ptr = self.val['storage_']['value'].address.cast(inner.pointer())
         return ptr.dereference()
+
+#------------------------------------------------------------------------------
+# (HPHP::req|std)::vector
+
+
+class ReqVectorPrinter(object):
+    RECOGNIZE = '^(HPHP::req|std)::vector<.*>$'
+
+    class _iterator(_BaseIterator):
+        def __init__(self, obj, size):
+            self.obj = obj
+            self.cur = 0
+            self.end = size
+
+        def __next__(self):
+            if self.cur == self.end:
+                raise StopIteration
+
+            try:
+                val = idx.vector_at(self.obj, self.cur)
+            except gdb.MemoryError:
+                val = '<unknown>'
+
+            self.cur = self.cur + 1
+
+            return (str(self.cur - 1), val)
+
+    def __init__(self, val):
+        self.val = val
+        self.size = sizeof(val)
+
+    def to_string(self):
+        typ = self.val.type.template_argument(0)
+        return "HPHP::req::vector [%s]: %d element(s)" % (
+            typ,
+            self.size,
+        )
+
+    def children(self):
+        return self._iterator(self.val, self.size)
+
 
 #------------------------------------------------------------------------------
 # ArrayData.
@@ -546,6 +588,34 @@ class SrcKeyPrinter(object):
 
         return '%s@%d%s' % (func, offset, mode)
 
+
+#------------------------------------------------------------------------------
+# AsioBlockable.
+
+
+class AsioBlockablePrinter(object):
+    RECOGNIZE = '^HPHP::AsioBlockable$'
+
+    def __init__(self, val):
+        self.val = val
+
+    def kind(self):
+        kind = (self.val['m_bits'] & 0x7).cast(T('HPHP::AsioBlockable::Kind'))
+        return str(kind).split('::')[-1]
+
+    def next(self):
+        ty = T('HPHP::AsioBlockable').pointer()
+        return (self.val['m_bits'] & ~0x7).cast(ty)
+
+    def to_string(self):
+        wh = WaitHandle.from_blockable(self.val.address)
+        return 'AsioBlockable kind=%s next=%s wh=%s' % (
+            self.kind(),
+            self.next(),
+            wh.to_string() if wh is not None else 'unresolved'
+        )
+
+
 #------------------------------------------------------------------------------
 # Lookup function.
 
@@ -565,7 +635,9 @@ printer_classes = [
     HhbbcBytecodePrinter,
     CompactVectorPrinter,
     SrcKeyPrinter,
+    AsioBlockablePrinter,
     OptionalPrinter,
+    ReqVectorPrinter,
 ]
 type_printers = {(re.compile(cls.RECOGNIZE), cls)
                   for cls in printer_classes}

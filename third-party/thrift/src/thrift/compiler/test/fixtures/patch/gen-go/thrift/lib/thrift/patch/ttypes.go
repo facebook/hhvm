@@ -2192,3 +2192,459 @@ func (p *BinaryPatch) String() string {
   return fmt.Sprintf("BinaryPatch({Assign:%s Clear:%s Prepend:%s Append:%s})", assignVal, clearVal, prependVal, appendVal)
 }
 
+// A patch for a Duration value.
+// 
+// Attributes:
+//  - Assign: Assign to a given value.
+// 
+// If set, all other patch operations are ignored.
+//  - Clear: Clear any set value.
+//  - Add: Add to a given value.
+type DurationPatch struct {
+  Assign *standard3.DurationStruct `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+  // unused fields # 3 to 7
+  Add *standard3.DurationStruct `thrift:"add,8" db:"add" json:"add"`
+}
+
+func NewDurationPatch() *DurationPatch {
+  return &DurationPatch{
+    Add: standard3.NewDurationStruct(),
+  }
+}
+
+var DurationPatch_Assign_DEFAULT *standard3.DurationStruct
+func (p *DurationPatch) GetAssign() *standard3.DurationStruct {
+  if !p.IsSetAssign() {
+    return DurationPatch_Assign_DEFAULT
+  }
+return p.Assign
+}
+
+func (p *DurationPatch) GetClear() bool {
+  return p.Clear
+}
+var DurationPatch_Add_DEFAULT *standard3.DurationStruct
+func (p *DurationPatch) GetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return DurationPatch_Add_DEFAULT
+  }
+return p.Add
+}
+func (p *DurationPatch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+func (p *DurationPatch) IsSetAdd() bool {
+  return p != nil && p.Add != nil
+}
+
+type DurationPatchBuilder struct {
+  obj *DurationPatch
+}
+
+func NewDurationPatchBuilder() *DurationPatchBuilder{
+  return &DurationPatchBuilder{
+    obj: NewDurationPatch(),
+  }
+}
+
+func (p DurationPatchBuilder) Emit() *DurationPatch{
+  return &DurationPatch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+    Add: p.obj.Add,
+  }
+}
+
+func (d *DurationPatchBuilder) Assign(assign *standard3.DurationStruct) *DurationPatchBuilder {
+  d.obj.Assign = assign
+  return d
+}
+
+func (d *DurationPatchBuilder) Clear(clear bool) *DurationPatchBuilder {
+  d.obj.Clear = clear
+  return d
+}
+
+func (d *DurationPatchBuilder) Add(add *standard3.DurationStruct) *DurationPatchBuilder {
+  d.obj.Add = add
+  return d
+}
+
+func (d *DurationPatch) SetAssign(assign *standard3.DurationStruct) *DurationPatch {
+  d.Assign = assign
+  return d
+}
+
+func (d *DurationPatch) SetClear(clear bool) *DurationPatch {
+  d.Clear = clear
+  return d
+}
+
+func (d *DurationPatch) SetAdd(add *standard3.DurationStruct) *DurationPatch {
+  d.Add = add
+  return d
+}
+
+func (p *DurationPatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 8:
+      if err := p.ReadField8(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *DurationPatch)  ReadField1(iprot thrift.Protocol) error {
+  p.Assign = standard3.NewDurationStruct()
+  if err := p.Assign.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Assign), err)
+  }
+  return nil
+}
+
+func (p *DurationPatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *DurationPatch)  ReadField8(iprot thrift.Protocol) error {
+  p.Add = standard3.NewDurationStruct()
+  if err := p.Add.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Add), err)
+  }
+  return nil
+}
+
+func (p *DurationPatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("DurationPatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField8(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *DurationPatch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *DurationPatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *DurationPatch) writeField8(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("add", thrift.STRUCT, 8); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:add: ", p), err) }
+  if err := p.Add.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Add), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 8:add: ", p), err) }
+  return err
+}
+
+func (p *DurationPatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var assignVal string
+  if p.Assign == nil {
+    assignVal = "<nil>"
+  } else {
+    assignVal = fmt.Sprintf("%v", p.Assign)
+  }
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  var addVal string
+  if p.Add == nil {
+    addVal = "<nil>"
+  } else {
+    addVal = fmt.Sprintf("%v", p.Add)
+  }
+  return fmt.Sprintf("DurationPatch({Assign:%s Clear:%s Add:%s})", assignVal, clearVal, addVal)
+}
+
+// A patch for a Time value.
+// 
+// Attributes:
+//  - Assign: Assign to a given value.
+// 
+// If set, all other patch operations are ignored.
+//  - Clear: Clear any set value.
+//  - Add: Add to a given value.
+type TimePatch struct {
+  Assign *standard3.TimeStruct `thrift:"assign,1,optional" db:"assign" json:"assign,omitempty"`
+  Clear bool `thrift:"clear,2" db:"clear" json:"clear"`
+  // unused fields # 3 to 7
+  Add *standard3.DurationStruct `thrift:"add,8" db:"add" json:"add"`
+}
+
+func NewTimePatch() *TimePatch {
+  return &TimePatch{
+    Add: standard3.NewDurationStruct(),
+  }
+}
+
+var TimePatch_Assign_DEFAULT *standard3.TimeStruct
+func (p *TimePatch) GetAssign() *standard3.TimeStruct {
+  if !p.IsSetAssign() {
+    return TimePatch_Assign_DEFAULT
+  }
+return p.Assign
+}
+
+func (p *TimePatch) GetClear() bool {
+  return p.Clear
+}
+var TimePatch_Add_DEFAULT *standard3.DurationStruct
+func (p *TimePatch) GetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return TimePatch_Add_DEFAULT
+  }
+return p.Add
+}
+func (p *TimePatch) IsSetAssign() bool {
+  return p != nil && p.Assign != nil
+}
+
+func (p *TimePatch) IsSetAdd() bool {
+  return p != nil && p.Add != nil
+}
+
+type TimePatchBuilder struct {
+  obj *TimePatch
+}
+
+func NewTimePatchBuilder() *TimePatchBuilder{
+  return &TimePatchBuilder{
+    obj: NewTimePatch(),
+  }
+}
+
+func (p TimePatchBuilder) Emit() *TimePatch{
+  return &TimePatch{
+    Assign: p.obj.Assign,
+    Clear: p.obj.Clear,
+    Add: p.obj.Add,
+  }
+}
+
+func (t *TimePatchBuilder) Assign(assign *standard3.TimeStruct) *TimePatchBuilder {
+  t.obj.Assign = assign
+  return t
+}
+
+func (t *TimePatchBuilder) Clear(clear bool) *TimePatchBuilder {
+  t.obj.Clear = clear
+  return t
+}
+
+func (t *TimePatchBuilder) Add(add *standard3.DurationStruct) *TimePatchBuilder {
+  t.obj.Add = add
+  return t
+}
+
+func (t *TimePatch) SetAssign(assign *standard3.TimeStruct) *TimePatch {
+  t.Assign = assign
+  return t
+}
+
+func (t *TimePatch) SetClear(clear bool) *TimePatch {
+  t.Clear = clear
+  return t
+}
+
+func (t *TimePatch) SetAdd(add *standard3.DurationStruct) *TimePatch {
+  t.Add = add
+  return t
+}
+
+func (p *TimePatch) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 8:
+      if err := p.ReadField8(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *TimePatch)  ReadField1(iprot thrift.Protocol) error {
+  p.Assign = standard3.NewTimeStruct()
+  if err := p.Assign.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Assign), err)
+  }
+  return nil
+}
+
+func (p *TimePatch)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadBool(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Clear = v
+  }
+  return nil
+}
+
+func (p *TimePatch)  ReadField8(iprot thrift.Protocol) error {
+  p.Add = standard3.NewDurationStruct()
+  if err := p.Add.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Add), err)
+  }
+  return nil
+}
+
+func (p *TimePatch) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("TimePatch"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField8(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *TimePatch) writeField1(oprot thrift.Protocol) (err error) {
+  if p.IsSetAssign() {
+    if err := oprot.WriteFieldBegin("assign", thrift.STRUCT, 1); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:assign: ", p), err) }
+    if err := p.Assign.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Assign), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 1:assign: ", p), err) }
+  }
+  return err
+}
+
+func (p *TimePatch) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("clear", thrift.BOOL, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:clear: ", p), err) }
+  if err := oprot.WriteBool(bool(p.Clear)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.clear (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:clear: ", p), err) }
+  return err
+}
+
+func (p *TimePatch) writeField8(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("add", thrift.STRUCT, 8); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 8:add: ", p), err) }
+  if err := p.Add.Write(oprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.Add), err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 8:add: ", p), err) }
+  return err
+}
+
+func (p *TimePatch) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  var assignVal string
+  if p.Assign == nil {
+    assignVal = "<nil>"
+  } else {
+    assignVal = fmt.Sprintf("%v", p.Assign)
+  }
+  clearVal := fmt.Sprintf("%v", p.Clear)
+  var addVal string
+  if p.Add == nil {
+    addVal = "<nil>"
+  } else {
+    addVal = fmt.Sprintf("%v", p.Add)
+  }
+  return fmt.Sprintf("TimePatch({Assign:%s Clear:%s Add:%s})", assignVal, clearVal, addVal)
+}
+

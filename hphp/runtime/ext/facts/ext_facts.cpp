@@ -327,6 +327,7 @@ X(methods)
 X(types)
 X(functions)
 X(constants)
+X(modules)
 X(sha1sum)
 #undef X
 
@@ -400,6 +401,21 @@ Array makeVec(const std::vector<TypeDetails>& types) {
   return ret.toArray();
 }
 
+Array makeShape(const ModuleDetails& modules) {
+  size_t retSize = 1;
+  DictInit ret{retSize};
+  ret.set(StrNR{s_name}, modules.m_name);
+  return ret.toArray();
+}
+
+Array makeVec(const std::vector<ModuleDetails>& modules) {
+  VecInit ret{modules.size()};
+  for (auto const& module : modules) {
+    ret.append(makeShape(module));
+  }
+  return ret.toArray();
+}
+
 Array makeShape(const FileFacts& facts) {
   return make_dict_array(
       StrNR{s_types},
@@ -410,6 +426,9 @@ Array makeShape(const FileFacts& facts) {
 
       StrNR{s_constants},
       makeVec(facts.m_constants),
+
+      StrNR{s_modules},
+      makeVec(facts.m_modules),
 
       StrNR{s_attributes},
       makeVec(facts.m_attributes),
@@ -548,6 +567,7 @@ struct Facts final : Extension {
     HHVM_NAMED_FE(HH\\Facts\\type_to_path, HHVM_FN(facts_type_to_path));
     HHVM_NAMED_FE(HH\\Facts\\function_to_path, HHVM_FN(facts_function_to_path));
     HHVM_NAMED_FE(HH\\Facts\\constant_to_path, HHVM_FN(facts_constant_to_path));
+    HHVM_NAMED_FE(HH\\Facts\\module_to_path, HHVM_FN(facts_module_to_path));
     HHVM_NAMED_FE(
         HH\\Facts\\type_alias_to_path, HHVM_FN(facts_type_alias_to_path));
 
@@ -558,6 +578,7 @@ struct Facts final : Extension {
         HH\\Facts\\path_to_constants, HHVM_FN(facts_path_to_constants));
     HHVM_NAMED_FE(
         HH\\Facts\\path_to_type_aliases, HHVM_FN(facts_path_to_type_aliases));
+    HHVM_NAMED_FE(HH\\Facts\\path_to_modules, HHVM_FN(facts_path_to_modules));
     HHVM_NAMED_FE(HH\\Facts\\type_name, HHVM_FN(facts_type_name));
     HHVM_NAMED_FE(HH\\Facts\\kind, HHVM_FN(facts_kind));
     HHVM_NAMED_FE(HH\\Facts\\is_abstract, HHVM_FN(facts_is_abstract));
@@ -598,6 +619,7 @@ struct Facts final : Extension {
     HHVM_NAMED_FE(HH\\Facts\\all_functions, HHVM_FN(facts_all_functions));
     HHVM_NAMED_FE(HH\\Facts\\all_constants, HHVM_FN(facts_all_constants));
     HHVM_NAMED_FE(HH\\Facts\\all_type_aliases, HHVM_FN(facts_all_type_aliases));
+    HHVM_NAMED_FE(HH\\Facts\\all_modules, HHVM_FN(facts_all_modules));
     HHVM_NAMED_FE(HH\\Facts\\extract, HHVM_FN(facts_extract));
     loadSystemlib();
 
@@ -832,6 +854,15 @@ Variant HHVM_FUNCTION(facts_constant_to_path, const String& constantName) {
   }
 }
 
+Variant HHVM_FUNCTION(facts_module_to_path, const String& moduleName) {
+  auto path = Facts::getFactsOrThrow().getModuleFile(moduleName);
+  if (!path) {
+    return Variant{Variant::NullInit{}};
+  } else {
+    return Variant{*path};
+  }
+}
+
 Variant HHVM_FUNCTION(facts_type_alias_to_path, const String& typeAliasName) {
   auto path = Facts::getFactsOrThrow().getTypeAliasFile(typeAliasName);
   if (!path) {
@@ -851,6 +882,10 @@ Array HHVM_FUNCTION(facts_path_to_functions, const String& path) {
 
 Array HHVM_FUNCTION(facts_path_to_constants, const String& path) {
   return Facts::getFactsOrThrow().getFileConstants(path);
+}
+
+Array HHVM_FUNCTION(facts_path_to_modules, const String& path) {
+  return Facts::getFactsOrThrow().getFileModules(path);
 }
 
 Array HHVM_FUNCTION(facts_path_to_type_aliases, const String& path) {
@@ -957,6 +992,9 @@ Array HHVM_FUNCTION(facts_all_constants) {
 }
 Array HHVM_FUNCTION(facts_all_type_aliases) {
   return Facts::getFactsOrThrow().getAllTypeAliases();
+}
+Array HHVM_FUNCTION(facts_all_modules) {
+  return Facts::getFactsOrThrow().getAllModules();
 }
 
 Array HHVM_FUNCTION(

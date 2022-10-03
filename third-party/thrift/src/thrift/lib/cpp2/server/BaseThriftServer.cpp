@@ -53,7 +53,9 @@ BaseThriftServer::BaseThriftServer()
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver()},
       cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(), *this},
+          detail::makeCPUConcurrencyControllerConfig(),
+          *this,
+          detail::getThriftServerConfig(*this)},
       addresses_(1) {}
 
 BaseThriftServer::BaseThriftServer(
@@ -63,7 +65,9 @@ BaseThriftServer::BaseThriftServer(
           apache::thrift::detail::makeAdaptiveConcurrencyConfig(),
           thriftConfig_.getMaxRequests().getObserver()},
       cpuConcurrencyController_{
-          detail::makeCPUConcurrencyControllerConfig(), *this},
+          detail::makeCPUConcurrencyControllerConfig(),
+          *this,
+          detail::getThriftServerConfig(*this)},
       addresses_(1) {}
 
 void BaseThriftServer::CumulativeFailureInjection::set(

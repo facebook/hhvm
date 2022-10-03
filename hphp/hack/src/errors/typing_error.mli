@@ -487,6 +487,13 @@ module Primary : sig
         req_class_pos: Pos_or_decl.t;
         req_extends_pos: Pos_or_decl.t;
       }
+    | Trait_not_used of {
+        pos: Pos.t;
+        trait_name: string;
+        req_class_pos: Pos_or_decl.t;
+        class_pos: Pos_or_decl.t;
+        class_name: string;
+      }
     | Invalid_echo_argument of Pos.t
     | Index_type_mismatch of {
         pos: Pos.t;

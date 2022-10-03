@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,20 +34,20 @@ TEST(GetterSetter, BasicOptionalFields) {
   auto buf = std::make_unique<folly::IOBuf>();
 
   EXPECT_FALSE(obj.optionalInt().has_value());
-  EXPECT_EQ(nullptr, obj.get_optionalInt());
+  EXPECT_EQ(nullptr, apache::thrift::get_pointer(obj.optionalInt()));
   EXPECT_FALSE(obj.optionalList().has_value());
-  EXPECT_EQ(nullptr, obj.get_optionalList());
+  EXPECT_EQ(nullptr, apache::thrift::get_pointer(obj.optionalList()));
   EXPECT_FALSE(obj.optionalBuf().has_value());
-  EXPECT_EQ(nullptr, obj.get_optionalBuf());
+  EXPECT_EQ(nullptr, apache::thrift::get_pointer(obj.optionalBuf()));
 
   obj.optionalInt() = 42;
-  EXPECT_EQ(42, *obj.get_optionalInt());
+  EXPECT_EQ(42, *apache::thrift::get_pointer(obj.optionalInt()));
   EXPECT_TRUE(obj.optionalInt().has_value());
   obj.optionalList() = vec;
-  EXPECT_EQ(vec, *obj.get_optionalList());
+  EXPECT_EQ(vec, *apache::thrift::get_pointer(obj.optionalList()));
   EXPECT_TRUE(obj.optionalList().has_value());
   obj.optionalBuf() = std::move(buf);
-  EXPECT_TRUE((*obj.get_optionalBuf())->empty());
+  EXPECT_TRUE((*apache::thrift::get_pointer(obj.optionalBuf()))->empty());
   EXPECT_TRUE(obj.optionalBuf().has_value());
 }
 
@@ -57,13 +57,13 @@ TEST(GetterSetter, BasicDefaultFields) {
   folly::StringPiece str("abc123");
   auto buf = std::make_unique<folly::IOBuf>(folly::IOBuf::WRAP_BUFFER, str);
 
-  EXPECT_TRUE(obj.get_defaultList().empty());
-  EXPECT_EQ(nullptr, obj.get_defaultBuf());
+  EXPECT_TRUE(obj.defaultList().value().empty());
+  EXPECT_EQ(nullptr, obj.defaultBuf().value());
 
   obj.defaultInt() = 42;
-  EXPECT_EQ(42, obj.get_defaultInt());
+  EXPECT_EQ(42, obj.defaultInt().value());
   obj.defaultList() = vec;
-  EXPECT_EQ(vec, obj.get_defaultList());
+  EXPECT_EQ(vec, obj.defaultList().value());
   obj.defaultBuf() = std::move(buf);
-  EXPECT_EQ(6, obj.get_defaultBuf()->length());
+  EXPECT_EQ(6, obj.defaultBuf().value()->length());
 }

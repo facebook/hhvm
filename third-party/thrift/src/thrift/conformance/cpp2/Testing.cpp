@@ -74,7 +74,7 @@ void MultiSerializer::encode(
 ThriftTypeInfo shortThriftType(int ordinal) {
   ThriftTypeInfo type;
   type.set_uri(fmt::format("s.r/t/{}", ordinal));
-  assert(type.get_uri().size() <= kMinTypeHashBytes);
+  assert(type.uri().value().size() <= kMinTypeHashBytes);
   return type;
 }
 
@@ -83,7 +83,7 @@ ThriftTypeInfo longThriftType(int ordinal) {
   type.set_uri(
       fmt::format("seriously.long.type/seriously/long/type/{}", ordinal));
   assert(
-      type.get_uri().size() >
+      type.uri().value().size() >
       size_t(getUniversalHashSize(type::UniversalHashAlgorithm::Sha2_256)));
   return type;
 }

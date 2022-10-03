@@ -1,0 +1,2 @@
+File "dynamic_static_method.php", line 10, characters 19-20:
+Dynamic method access is not allowed. Please use the method name directly, for example `::myMethodName()` (Naming[2121])

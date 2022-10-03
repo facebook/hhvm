@@ -7,4 +7,6 @@ trait MyTrait {
   require class C<int>;
 }
 
-final class C<T> {}
+final class C<T> {
+  use MyTrait;
+}

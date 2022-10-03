@@ -34,7 +34,7 @@ function dune_build() {
   if [ -e "${HACK_ROOT}/${HACK_SUBDIR}/${TARGET}.rs" ]; then
     export CARGO_TARGET_DIR="${DUNE_BUILD_DIR}/cargo"
     (
-      cd "${HACK_ROOT}/${HACK_SUBDIR}/src"
+      cd "${HACK_ROOT}/${HACK_SUBDIR}"
       "${CARGO}" build --bin "${TARGET}"
     )
     exec "${CARGO_TARGET_DIR}/debug/${TARGET}" "${ARGS[@]}"

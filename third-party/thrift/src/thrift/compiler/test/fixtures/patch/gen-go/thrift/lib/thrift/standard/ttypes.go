@@ -136,6 +136,24 @@ type ByteBuffer = []byte
 
 func ByteBufferPtr(v ByteBuffer) *ByteBuffer { return &v }
 
+//A 'normal' Fraction.
+//
+//This representation is always safe to 'normalize'.
+type Fraction = FractionStruct
+
+func FractionPtr(v Fraction) *Fraction { return &v }
+
+func NewFraction() *Fraction { return NewFractionStruct() }
+
+//A 'simple' Fraction.
+//
+//This representation is always safe to 'simplify'.
+type SimpleFraction = FractionStruct
+
+func SimpleFractionPtr(v SimpleFraction) *SimpleFraction { return &v }
+
+func NewSimpleFraction() *SimpleFraction { return NewFractionStruct() }
+
 //The binary form of a universally unique identifier (UUID).
 //
 //Considered 'valid' if contains exactly 0 or 16 bytes.
@@ -210,6 +228,485 @@ func QueryArgs_Ptr(v QueryArgs_) *QueryArgs_ { return &v }
 type Uri = string
 
 func UriPtr(v Uri) *Uri { return &v }
+
+// A fixed-length span of time, represented as a signed count of seconds and
+// nanoseconds (nanos).
+// 
+// Considered 'normal', when `nanos` is in the range 0 to 999'999'999
+// inclusive, or `seconds` is 0 and `nanos` is in the range -999'999'999 to
+// 999'999'999 inclusive.
+// 
+// Attributes:
+//  - Seconds: The count of seconds.
+//  - Nanos: The count of nanoseconds.
+type DurationStruct struct {
+  Seconds int64 `thrift:"seconds,1" db:"seconds" json:"seconds"`
+  Nanos int32 `thrift:"nanos,2" db:"nanos" json:"nanos"`
+}
+
+func NewDurationStruct() *DurationStruct {
+  return &DurationStruct{}
+}
+
+
+func (p *DurationStruct) GetSeconds() int64 {
+  return p.Seconds
+}
+
+func (p *DurationStruct) GetNanos() int32 {
+  return p.Nanos
+}
+type DurationStructBuilder struct {
+  obj *DurationStruct
+}
+
+func NewDurationStructBuilder() *DurationStructBuilder{
+  return &DurationStructBuilder{
+    obj: NewDurationStruct(),
+  }
+}
+
+func (p DurationStructBuilder) Emit() *DurationStruct{
+  return &DurationStruct{
+    Seconds: p.obj.Seconds,
+    Nanos: p.obj.Nanos,
+  }
+}
+
+func (d *DurationStructBuilder) Seconds(seconds int64) *DurationStructBuilder {
+  d.obj.Seconds = seconds
+  return d
+}
+
+func (d *DurationStructBuilder) Nanos(nanos int32) *DurationStructBuilder {
+  d.obj.Nanos = nanos
+  return d
+}
+
+func (d *DurationStruct) SetSeconds(seconds int64) *DurationStruct {
+  d.Seconds = seconds
+  return d
+}
+
+func (d *DurationStruct) SetNanos(nanos int32) *DurationStruct {
+  d.Nanos = nanos
+  return d
+}
+
+func (p *DurationStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *DurationStruct)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Seconds = v
+  }
+  return nil
+}
+
+func (p *DurationStruct)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Nanos = v
+  }
+  return nil
+}
+
+func (p *DurationStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("DurationStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *DurationStruct) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("seconds", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:seconds: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Seconds)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.seconds (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:seconds: ", p), err) }
+  return err
+}
+
+func (p *DurationStruct) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("nanos", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:nanos: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Nanos)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.nanos (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:nanos: ", p), err) }
+  return err
+}
+
+func (p *DurationStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  secondsVal := fmt.Sprintf("%v", p.Seconds)
+  nanosVal := fmt.Sprintf("%v", p.Nanos)
+  return fmt.Sprintf("DurationStruct({Seconds:%s Nanos:%s})", secondsVal, nanosVal)
+}
+
+// An instant in time encoded as a count of seconds and nanoseconds (nanos)
+// since midnight on January 1, 1970 UTC (i.e. Unix epoch).
+// 
+// Considered 'normal', when `nanos` is in the range 0 to 999'999'999 inclusive.
+// 
+// Attributes:
+//  - Seconds: The count of seconds.
+//  - Nanos: The count of nanoseconds.
+type TimeStruct struct {
+  Seconds int64 `thrift:"seconds,1" db:"seconds" json:"seconds"`
+  Nanos int32 `thrift:"nanos,2" db:"nanos" json:"nanos"`
+}
+
+func NewTimeStruct() *TimeStruct {
+  return &TimeStruct{}
+}
+
+
+func (p *TimeStruct) GetSeconds() int64 {
+  return p.Seconds
+}
+
+func (p *TimeStruct) GetNanos() int32 {
+  return p.Nanos
+}
+type TimeStructBuilder struct {
+  obj *TimeStruct
+}
+
+func NewTimeStructBuilder() *TimeStructBuilder{
+  return &TimeStructBuilder{
+    obj: NewTimeStruct(),
+  }
+}
+
+func (p TimeStructBuilder) Emit() *TimeStruct{
+  return &TimeStruct{
+    Seconds: p.obj.Seconds,
+    Nanos: p.obj.Nanos,
+  }
+}
+
+func (t *TimeStructBuilder) Seconds(seconds int64) *TimeStructBuilder {
+  t.obj.Seconds = seconds
+  return t
+}
+
+func (t *TimeStructBuilder) Nanos(nanos int32) *TimeStructBuilder {
+  t.obj.Nanos = nanos
+  return t
+}
+
+func (t *TimeStruct) SetSeconds(seconds int64) *TimeStruct {
+  t.Seconds = seconds
+  return t
+}
+
+func (t *TimeStruct) SetNanos(nanos int32) *TimeStruct {
+  t.Nanos = nanos
+  return t
+}
+
+func (p *TimeStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *TimeStruct)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Seconds = v
+  }
+  return nil
+}
+
+func (p *TimeStruct)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Nanos = v
+  }
+  return nil
+}
+
+func (p *TimeStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("TimeStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *TimeStruct) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("seconds", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:seconds: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Seconds)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.seconds (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:seconds: ", p), err) }
+  return err
+}
+
+func (p *TimeStruct) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("nanos", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:nanos: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Nanos)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.nanos (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:nanos: ", p), err) }
+  return err
+}
+
+func (p *TimeStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  secondsVal := fmt.Sprintf("%v", p.Seconds)
+  nanosVal := fmt.Sprintf("%v", p.Nanos)
+  return fmt.Sprintf("TimeStruct({Seconds:%s Nanos:%s})", secondsVal, nanosVal)
+}
+
+// A integer fraction of the form {numerator} / {denominator}
+// 
+// Useful for representing ratios, rates, and metric accumulators.
+// 
+// Considered 'normal' when the denominator is positive.
+// Considered 'simple' when `normal` and the greatest common divisor of the
+// and `numerator` and `denominator`, is 1.
+// 
+// Attributes:
+//  - Numerator: The numerator/dividend/antecedent/upper integer.
+//  - Denominator: The denominator/divisor/consequent/lower integer.
+type FractionStruct struct {
+  Numerator int64 `thrift:"numerator,1" db:"numerator" json:"numerator"`
+  Denominator int64 `thrift:"denominator,2" db:"denominator" json:"denominator"`
+}
+
+func NewFractionStruct() *FractionStruct {
+  return &FractionStruct{}
+}
+
+
+func (p *FractionStruct) GetNumerator() int64 {
+  return p.Numerator
+}
+
+func (p *FractionStruct) GetDenominator() int64 {
+  return p.Denominator
+}
+type FractionStructBuilder struct {
+  obj *FractionStruct
+}
+
+func NewFractionStructBuilder() *FractionStructBuilder{
+  return &FractionStructBuilder{
+    obj: NewFractionStruct(),
+  }
+}
+
+func (p FractionStructBuilder) Emit() *FractionStruct{
+  return &FractionStruct{
+    Numerator: p.obj.Numerator,
+    Denominator: p.obj.Denominator,
+  }
+}
+
+func (f *FractionStructBuilder) Numerator(numerator int64) *FractionStructBuilder {
+  f.obj.Numerator = numerator
+  return f
+}
+
+func (f *FractionStructBuilder) Denominator(denominator int64) *FractionStructBuilder {
+  f.obj.Denominator = denominator
+  return f
+}
+
+func (f *FractionStruct) SetNumerator(numerator int64) *FractionStruct {
+  f.Numerator = numerator
+  return f
+}
+
+func (f *FractionStruct) SetDenominator(denominator int64) *FractionStruct {
+  f.Denominator = denominator
+  return f
+}
+
+func (p *FractionStruct) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *FractionStruct)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Numerator = v
+  }
+  return nil
+}
+
+func (p *FractionStruct)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Denominator = v
+  }
+  return nil
+}
+
+func (p *FractionStruct) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("FractionStruct"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *FractionStruct) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("numerator", thrift.I64, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:numerator: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Numerator)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.numerator (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:numerator: ", p), err) }
+  return err
+}
+
+func (p *FractionStruct) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("denominator", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:denominator: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Denominator)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.denominator (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:denominator: ", p), err) }
+  return err
+}
+
+func (p *FractionStruct) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  numeratorVal := fmt.Sprintf("%v", p.Numerator)
+  denominatorVal := fmt.Sprintf("%v", p.Denominator)
+  return fmt.Sprintf("FractionStruct({Numerator:%s Denominator:%s})", numeratorVal, denominatorVal)
+}
 
 // The 'parsed' form of a `Uri`.
 // 

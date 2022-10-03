@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <fmt/format.h>
+#include <fmt/core.h>
 #include "watchman/thirdparty/jansson/jansson.h"
 
 typedef struct bser_ctx {

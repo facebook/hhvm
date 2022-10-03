@@ -25,9 +25,9 @@ MyServiceClientWrapper::hasDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -48,9 +48,9 @@ MyServiceClientWrapper::getDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -73,9 +73,9 @@ MyServiceClientWrapper::putDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -98,9 +98,9 @@ MyServiceClientWrapper::lobDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -121,9 +121,9 @@ MyServiceFastClientWrapper::hasDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<bool>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -144,9 +144,9 @@ MyServiceFastClientWrapper::getDataById(
       std::move(callback),
       arg_id
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -169,9 +169,9 @@ MyServiceFastClientWrapper::putDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -194,9 +194,9 @@ MyServiceFastClientWrapper::lobDataById(
       arg_id,
       arg_data
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -217,9 +217,9 @@ DbMixedStackArgumentsClientWrapper::getDataByKey0(
       std::move(callback),
       arg_key
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -240,9 +240,9 @@ DbMixedStackArgumentsClientWrapper::getDataByKey1(
       std::move(callback),
       arg_key
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<std::string>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

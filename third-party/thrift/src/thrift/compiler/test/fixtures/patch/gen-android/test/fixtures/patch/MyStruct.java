@@ -39,21 +39,23 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   private static final TField STRUCT_VAL_FIELD_DESC = new TField("structVal", TType.STRUCT, (short)-11);
   private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)-12);
   private static final TField LATE_STRUCT_VAL_FIELD_DESC = new TField("lateStructVal", TType.STRUCT, (short)-13);
-  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-14);
-  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-15);
-  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-16);
-  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-17);
-  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-18);
-  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-19);
-  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-20);
-  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-21);
-  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-22);
-  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-23);
-  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-24);
-  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-25);
-  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-26);
-  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-27);
-  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-28);
+  private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)-14);
+  private static final TField TIME_VAL_FIELD_DESC = new TField("timeVal", TType.STRUCT, (short)-15);
+  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.BOOL, (short)-16);
+  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.BYTE, (short)-17);
+  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.I16, (short)-18);
+  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.I32, (short)-19);
+  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.I64, (short)-20);
+  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.FLOAT, (short)-21);
+  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.DOUBLE, (short)-22);
+  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRING, (short)-23);
+  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRING, (short)-24);
+  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.I32, (short)-25);
+  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-26);
+  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-27);
+  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.LIST, (short)-28);
+  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.SET, (short)-29);
+  private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.MAP, (short)-30);
 
   public final Boolean boolVal;
   public final Byte byteVal;
@@ -72,6 +74,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public final MyData structVal;
   public final MyUnion unionVal;
   public final LateDefStruct lateStructVal;
+  public final DurationStruct durationVal;
+  public final TimeStruct timeVal;
   public final Boolean optBoolVal;
   public final Byte optByteVal;
   public final Short optI16Val;
@@ -104,21 +108,23 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
   public static final int STRUCTVAL = -11;
   public static final int UNIONVAL = -12;
   public static final int LATESTRUCTVAL = -13;
-  public static final int OPTBOOLVAL = -14;
-  public static final int OPTBYTEVAL = -15;
-  public static final int OPTI16VAL = -16;
-  public static final int OPTI32VAL = -17;
-  public static final int OPTI64VAL = -18;
-  public static final int OPTFLOATVAL = -19;
-  public static final int OPTDOUBLEVAL = -20;
-  public static final int OPTSTRINGVAL = -21;
-  public static final int OPTBINARYVAL = -22;
-  public static final int OPTENUMVAL = -23;
-  public static final int OPTSTRUCTVAL = -24;
-  public static final int OPTLATESTRUCTVAL = -25;
-  public static final int OPTLISTVAL = -26;
-  public static final int OPTSETVAL = -27;
-  public static final int OPTMAPVAL = -28;
+  public static final int DURATIONVAL = -14;
+  public static final int TIMEVAL = -15;
+  public static final int OPTBOOLVAL = -16;
+  public static final int OPTBYTEVAL = -17;
+  public static final int OPTI16VAL = -18;
+  public static final int OPTI32VAL = -19;
+  public static final int OPTI64VAL = -20;
+  public static final int OPTFLOATVAL = -21;
+  public static final int OPTDOUBLEVAL = -22;
+  public static final int OPTSTRINGVAL = -23;
+  public static final int OPTBINARYVAL = -24;
+  public static final int OPTENUMVAL = -25;
+  public static final int OPTSTRUCTVAL = -26;
+  public static final int OPTLATESTRUCTVAL = -27;
+  public static final int OPTLISTVAL = -28;
+  public static final int OPTSETVAL = -29;
+  public static final int OPTMAPVAL = -30;
 
   public MyStruct(
       Boolean boolVal,
@@ -134,6 +140,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       MyData structVal,
       MyUnion unionVal,
       LateDefStruct lateStructVal,
+      DurationStruct durationVal,
+      TimeStruct timeVal,
       Boolean optBoolVal,
       Byte optByteVal,
       Short optI16Val,
@@ -162,6 +170,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     this.structVal = structVal;
     this.unionVal = unionVal;
     this.lateStructVal = lateStructVal;
+    this.durationVal = durationVal;
+    this.timeVal = timeVal;
     this.optBoolVal = optBoolVal;
     this.optByteVal = optByteVal;
     this.optI16Val = optI16Val;
@@ -247,6 +257,16 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       this.lateStructVal = TBaseHelper.deepCopy(other.lateStructVal);
     } else {
       this.lateStructVal = null;
+    }
+    if (other.isSetDurationVal()) {
+      this.durationVal = TBaseHelper.deepCopy(other.durationVal);
+    } else {
+      this.durationVal = null;
+    }
+    if (other.isSetTimeVal()) {
+      this.timeVal = TBaseHelper.deepCopy(other.timeVal);
+    } else {
+      this.timeVal = null;
     }
     if (other.isSetOptBoolVal()) {
       this.optBoolVal = TBaseHelper.deepCopy(other.optBoolVal);
@@ -450,6 +470,24 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     return this.lateStructVal != null;
   }
 
+  public DurationStruct getDurationVal() {
+    return this.durationVal;
+  }
+
+  // Returns true if field durationVal is set (has been assigned a value) and false otherwise
+  public boolean isSetDurationVal() {
+    return this.durationVal != null;
+  }
+
+  public TimeStruct getTimeVal() {
+    return this.timeVal;
+  }
+
+  // Returns true if field timeVal is set (has been assigned a value) and false otherwise
+  public boolean isSetTimeVal() {
+    return this.timeVal != null;
+  }
+
   public Boolean isOptBoolVal() {
     return this.optBoolVal;
   }
@@ -625,6 +663,10 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
 
     if (!TBaseHelper.equalsNobinary(this.isSetLateStructVal(), that.isSetLateStructVal(), this.lateStructVal, that.lateStructVal)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetDurationVal(), that.isSetDurationVal(), this.durationVal, that.durationVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetTimeVal(), that.isSetTimeVal(), this.timeVal, that.timeVal)) { return false; }
+
     if (!TBaseHelper.equalsNobinary(this.isSetOptBoolVal(), that.isSetOptBoolVal(), this.optBoolVal, that.optBoolVal)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetOptByteVal(), that.isSetOptByteVal(), this.optByteVal, that.optByteVal)) { return false; }
@@ -660,7 +702,7 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal});
+    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, timeVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -682,6 +724,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
     MyData tmp_structVal = null;
     MyUnion tmp_unionVal = null;
     LateDefStruct tmp_lateStructVal = null;
+    DurationStruct tmp_durationVal = null;
+    TimeStruct tmp_timeVal = null;
     Boolean tmp_optBoolVal = null;
     Byte tmp_optByteVal = null;
     Short tmp_optI16Val = null;
@@ -795,6 +839,20 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         case LATESTRUCTVAL:
           if (__field.type == TType.STRUCT) {
             tmp_lateStructVal = LateDefStruct.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case DURATIONVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_durationVal = DurationStruct.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case TIMEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_timeVal = TimeStruct.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -965,6 +1023,8 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
       ,tmp_structVal
       ,tmp_unionVal
       ,tmp_lateStructVal
+      ,tmp_durationVal
+      ,tmp_timeVal
       ,tmp_optBoolVal
       ,tmp_optByteVal
       ,tmp_optI16Val
@@ -1112,6 +1172,16 @@ public class MyStruct implements TBase, java.io.Serializable, Cloneable {
         oprot.writeBool(this.optBoolVal);
         oprot.writeFieldEnd();
       }
+    }
+    if (this.timeVal != null) {
+      oprot.writeFieldBegin(TIME_VAL_FIELD_DESC);
+      this.timeVal.write(oprot);
+      oprot.writeFieldEnd();
+    }
+    if (this.durationVal != null) {
+      oprot.writeFieldBegin(DURATION_VAL_FIELD_DESC);
+      this.durationVal.write(oprot);
+      oprot.writeFieldEnd();
     }
     if (this.lateStructVal != null) {
       oprot.writeFieldBegin(LATE_STRUCT_VAL_FIELD_DESC);

@@ -35,6 +35,15 @@ struct Adapter {
   // Fully qualified name to a class that implements com.facebook.thrift.adaptor.TypeAdapter
   1: string adapterClassName;
 
-  // Fully qualified name the above implmenantion adapts too
+  // Fully qualified name the above implementation adapts to
   2: string typeClassName;
 } (thrift.uri = "facebook.com/thrift/annotation/java/Adapter")
+
+@scope.Field
+struct Wrapper {
+  // Fully qualified name to a class that implements com.facebook.thrift.adaptor.Wrapper
+  1: string wrapperClassName;
+
+  // Fully qualified name the above implementation wraps to
+  2: string typeClassName;
+} (thrift.uri = "facebook.com/thrift/annotation/java/Wrapper")

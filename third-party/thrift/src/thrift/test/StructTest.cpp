@@ -637,10 +637,10 @@ TEST_F(StructTest, noexcept_move_annotation) {
   NoexceptMoveStruct a;
   a.string_field() = "hello world";
   NoexceptMoveStruct b(std::move(a));
-  EXPECT_EQ(b.get_string_field(), "hello world");
+  EXPECT_EQ(b.string_field().value(), "hello world");
   NoexceptMoveStruct c;
   c = std::move(b);
-  EXPECT_EQ(c.get_string_field(), "hello world");
+  EXPECT_EQ(c.string_field().value(), "hello world");
 }
 
 TEST_F(StructTest, clear) {

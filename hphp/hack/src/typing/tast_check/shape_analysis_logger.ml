@@ -29,12 +29,13 @@ let get_channel () =
     channel
   | Some channel -> channel
 
-let log_events_locally typing_env : event list -> unit =
-  let log_result id shape_result : unit =
+let log_events_locally typing_env : log list -> unit =
+  let log_result id result : unit =
     Format.sprintf
-      "[RESULT] %s: %s\n"
+      "[RESULT] %s: (# of errors: %d) %s\n"
       id
-      (SA.show_shape_result typing_env shape_result)
+      result.error_count
+      (SA.show_shape_result typing_env result.result)
     |> Out_channel.output_string !Typing_log.out_channel;
     Out_channel.flush !Typing_log.out_channel
   in
@@ -43,14 +44,17 @@ let log_events_locally typing_env : event list -> unit =
     |> Out_channel.output_string !Typing_log.out_channel;
     Out_channel.flush !Typing_log.out_channel
   in
-  List.iter ~f:(fun (id, result) ->
-      Either.iter ~first:(log_result id) ~second:(log_error id) result)
+  List.iter ~f:(fun result ->
+      Either.iter
+        ~first:(log_result result.location)
+        ~second:(log_error result.location)
+        result.result)
 
-let log_events_as_codemod typing_env : event list -> unit =
-  let log_result shape_result =
+let log_events_as_codemod typing_env : log list -> unit =
+  let log_success { result; error_count } =
     let channel = get_channel () in
     let len = Out_channel.length channel in
-    let result_json = SAC.of_results typing_env [shape_result] in
+    let result_json = SAC.group_of_results typing_env [result] ~error_count in
     let result_str =
       if Int64.(len = of_int 0) then
         Format.asprintf "[\n%a\n]" Hh_json.pp_json result_json
@@ -62,10 +66,10 @@ let log_events_as_codemod typing_env : event list -> unit =
     Out_channel.output_string channel result_str;
     Out_channel.flush channel
   in
-  List.iter ~f:(fun (_, result) ->
-      Either.iter ~first:log_result ~second:Fn.ignore result)
+  List.iter ~f:(fun result ->
+      Either.iter ~first:log_success ~second:Fn.ignore result.result)
 
-let log_events typing_env : event list -> unit =
+let log_events typing_env =
   let shape_analysis_log_level =
     Typing_env.get_tcopt typing_env
     |> TypecheckerOptions.log_levels
@@ -82,21 +86,28 @@ let compute_results tast_env id params return body =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in
   try
     let (constraints, errors) = SA.callable id tast_env params ~return body in
+    let error_count = List.length errors in
     let successes =
       fst constraints
+      |> DecoratedConstraintSet.elements
       |> List.map ~f:strip_decorations
       |> SA.simplify typing_env
       |> List.filter ~f:SA.is_shape_like_dict
-      |> List.map ~f:(fun shape_result -> (id, Either.First shape_result))
+      |> List.map ~f:(fun result ->
+             { location = id; result = Either.First { result; error_count } })
     in
-    let failures = List.map ~f:(fun err -> (id, Either.Second err)) errors in
+    let failures =
+      List.map
+        ~f:(fun err -> { location = id; result = Either.Second err })
+        errors
+    in
     successes @ failures
   with
   | SA.Shape_analysis_exn error_message ->
     (* Logging failures is expensive because there are so many of them right
        now, to see all the shape results in a timely manner, simply don't log
        failure events. *)
-    [(id, Either.Second error_message)]
+    [{ location = id; result = Either.Second error_message }]
 
 let should_not_skip tast_env =
   let typing_env = Tast_env.tast_env_as_typing_env tast_env in

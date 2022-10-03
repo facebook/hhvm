@@ -455,7 +455,6 @@ RepoGlobalData getGlobalData() {
   gd.HackArrCompatSerializeNotices =
     RuntimeOption::EvalHackArrCompatSerializeNotices;
   gd.AbortBuildOnVerifyError = RuntimeOption::EvalAbortBuildOnVerifyError;
-  gd.EmitClassPointers = RuntimeOption::EvalEmitClassPointers;
   gd.EmitClsMethPointers = RuntimeOption::EvalEmitClsMethPointers;
   gd.IsVecNotices = RuntimeOption::EvalIsVecNotices;
   gd.RaiseClassConversionWarning =

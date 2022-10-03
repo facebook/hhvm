@@ -20,8 +20,10 @@
 
 #include <folly/experimental/FunctionScheduler.h>
 #include <folly/experimental/observer/Observer.h>
+#include <folly/experimental/observer/SimpleObservable.h>
 #include <thrift/lib/cpp2/PluggableFunction.h>
 #include <thrift/lib/cpp2/server/ServerConfigs.h>
+#include <thrift/lib/cpp2/server/ThriftServerConfig.h>
 
 namespace apache::thrift {
 
@@ -81,23 +83,10 @@ class CPUConcurrencyController {
 
   CPUConcurrencyController(
       folly::observer::Observer<Config> config,
-      apache::thrift::server::ServerConfigs& serverConfigs)
-      : config_(std::move(config)), serverConfigs_(serverConfigs) {
-    scheduler_.setThreadName("CPUConcurrencyController-loop");
-    scheduler_.start();
-    configSchedulerCallback_ = config_.getUnderlyingObserver().addCallback(
-        [this](folly::observer::Snapshot<Config>) {
-          this->cancel();
-          this->schedule();
-        });
-  }
+      apache::thrift::server::ServerConfigs& serverConfigs,
+      apache::thrift::ThriftServerConfig& thriftServerConfig);
 
-  ~CPUConcurrencyController() {
-    // Cancel to avoid using CPUConcurrencyController members while its
-    // partially destructed
-    configSchedulerCallback_.cancel();
-    cancel();
-  }
+  ~CPUConcurrencyController();
 
   void requestStarted();
   void requestShed();
@@ -135,7 +124,12 @@ class CPUConcurrencyController {
 
   folly::observer::TLObserver<Config> config_;
   folly::observer::CallbackHandle configSchedulerCallback_;
+  folly::observer::SimpleObservable<std::optional<uint32_t>>
+      activeRequestsLimit_{std::nullopt};
+  folly::observer::SimpleObservable<std::optional<uint32_t>> qpsLimit_{
+      std::nullopt};
   apache::thrift::server::ServerConfigs& serverConfigs_;
+  apache::thrift::ThriftServerConfig& thriftServerConfig_;
 
   folly::FunctionScheduler scheduler_;
 

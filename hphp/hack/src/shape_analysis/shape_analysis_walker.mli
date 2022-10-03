@@ -8,9 +8,6 @@
 
 open Shape_analysis_types
 
-val collect_analysis_targets :
-  Provider_context.t -> Tast.program -> potential_targets
-
 val callable :
   Ast_defs.id_ ->
   Tast_env.t ->

@@ -403,8 +403,8 @@ w_getopt(const OptDesc* opts, int* argcp, char*** argvp) {
         }
 
         if (o->is_daemon) {
-          daemon_argv.push_back(folly::to<std::string>(
-              "--", o->optname, "=", optarg ? optarg : ""));
+          daemon_argv.push_back(
+              fmt::format("--{}={}", o->optname, optarg ? optarg : ""));
         }
 
         /* store the argument if we found one */

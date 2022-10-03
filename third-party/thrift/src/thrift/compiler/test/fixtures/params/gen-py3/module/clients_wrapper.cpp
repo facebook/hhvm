@@ -25,9 +25,9 @@ NestedContainersClientWrapper::mapList(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -48,9 +48,9 @@ NestedContainersClientWrapper::mapSet(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -71,9 +71,9 @@ NestedContainersClientWrapper::listMap(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -94,9 +94,9 @@ NestedContainersClientWrapper::listSet(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;
@@ -117,9 +117,9 @@ NestedContainersClientWrapper::turtles(
       std::move(callback),
       arg_foo
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<folly::Unit>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

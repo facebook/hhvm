@@ -13,8 +13,8 @@ use pos::MethodName;
 use pos::ModuleName;
 use pos::PropName;
 use pos::TypeName;
-use ty::decl::shallow::Decl;
 use ty::decl::shallow::ModuleDecl;
+use ty::decl::shallow::NamedDecl;
 use ty::decl::ConstDecl;
 use ty::decl::FunDecl;
 use ty::decl::ShallowClass;
@@ -115,14 +115,14 @@ impl<R: Reason> ShallowDeclStore<R> {
         }
     }
 
-    pub fn add_decls(&self, decls: impl IntoIterator<Item = Decl<R>>) -> Result<()> {
+    pub fn add_decls(&self, decls: impl IntoIterator<Item = NamedDecl<R>>) -> Result<()> {
         for decl in decls.into_iter() {
             match decl {
-                Decl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
-                Decl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
-                Decl::Typedef(name, decl) => self.typedefs.insert(name, Arc::new(decl))?,
-                Decl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
-                Decl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
+                NamedDecl::Class(name, decl) => self.add_class(name, Arc::new(decl))?,
+                NamedDecl::Fun(name, decl) => self.funs.insert(name, Arc::new(decl))?,
+                NamedDecl::Typedef(name, decl) => self.typedefs.insert(name, Arc::new(decl))?,
+                NamedDecl::Const(name, decl) => self.consts.insert(name, Arc::new(decl))?,
+                NamedDecl::Module(name, decl) => self.modules.insert(name, Arc::new(decl))?,
             }
         }
         Ok(())
@@ -187,15 +187,12 @@ impl<R: Reason> ShallowDeclStore<R> {
     fn add_class(&self, name: TypeName, cls: Arc<ShallowClass<R>>) -> Result<()> {
         let cid = cls.name.id();
         for prop in cls.props.iter().rev() {
-            if let Some(ty) = &prop.ty {
-                self.properties.insert((cid, prop.name.id()), ty.clone())?
-            }
+            self.properties
+                .insert((cid, prop.name.id()), prop.ty_or_tany())?
         }
         for prop in cls.static_props.iter().rev() {
-            if let Some(ty) = &prop.ty {
-                self.static_properties
-                    .insert((cid, prop.name.id()), ty.clone())?
-            }
+            self.static_properties
+                .insert((cid, prop.name.id()), prop.ty_or_tany())?
         }
         for meth in cls.methods.iter().rev() {
             self.methods
@@ -224,7 +221,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for PropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    prop.ty.clone()
+                    Some(prop.ty_or_tany())
                 } else {
                     None
                 }
@@ -250,7 +247,7 @@ impl<R: Reason> Store<(TypeName, PropName), Ty<R>> for StaticPropFinder<R> {
         Ok(self.classes.get(class_name)?.and_then(|cls| {
             cls.static_props.iter().rev().find_map(|prop| {
                 if prop.name.id() == property_name {
-                    prop.ty.clone()
+                    Some(prop.ty_or_tany())
                 } else {
                     None
                 }

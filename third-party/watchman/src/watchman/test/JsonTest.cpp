@@ -55,4 +55,11 @@ TEST(JsonTest, double_round_trip) {
   }
 }
 
+TEST(JsonTest, too_deep_parse_tree) {
+  std::string document(10000, '[');
+
+  json_error_t err;
+  json_loads(document.c_str(), JSON_DECODE_ANY, &err);
+}
+
 } // namespace

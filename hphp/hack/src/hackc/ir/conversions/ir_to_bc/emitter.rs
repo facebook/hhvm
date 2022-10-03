@@ -518,6 +518,10 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::IssetS(_, _) => Opcode::IssetS,
             Hhbc::IterFree(iter_id, _) => Opcode::IterFree(iter_id),
             Hhbc::LateBoundCls(_) => Opcode::LateBoundCls,
+            Hhbc::LazyClass(clsid, _) => {
+                let clsid = self.strings.lookup_class_name(clsid);
+                Opcode::LazyClass(clsid)
+            }
             Hhbc::LockObj(..) => Opcode::LockObj,
             Hhbc::MemoSet(_, ref locals, _) => {
                 let locals = self.convert_local_range(locals);

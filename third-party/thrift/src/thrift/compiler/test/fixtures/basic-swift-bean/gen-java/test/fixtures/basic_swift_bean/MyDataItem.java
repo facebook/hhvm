@@ -61,20 +61,20 @@ public final class MyDataItem implements com.facebook.thrift.payload.ThriftSeria
             MyDataItem result = new MyDataItem();
             result.field1 = this.field1;
             result.field2 = this.field2;
-            return result;
-        }
+        return result;    }
     }
-            public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
+    
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("MyDataItem");
     private int field1;
     public static final int _FIELD1 = 1;
     private static final TField FIELD1_FIELD_DESC = new TField("field1", TType.I32, (short)1);
-    private int field2;
+        private int field2;
     public static final int _FIELD2 = 2;
     private static final TField FIELD2_FIELD_DESC = new TField("field2", TType.I32, (short)2);
-static {
+    static {
       NAMES_TO_IDS.put("field1", 1);
       THRIFT_NAMES_TO_IDS.put("field1", 1);
       FIELD_METADATA.put(1, FIELD1_FIELD_DESC);

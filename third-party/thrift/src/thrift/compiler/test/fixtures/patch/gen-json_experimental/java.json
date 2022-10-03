@@ -55,6 +55,37 @@
         "is_exception" : false,
         "is_union" : false,
         "lineno" : 31
+      },
+      "Wrapper" : {
+        "name" : "Wrapper",
+        "structured_annotations": {
+          "scope.Field" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Field"
+},
+        "value" : {}
+      }
+        },
+        "fields" : {
+          "wrapperClassName" : {
+            "name" : "wrapperClassName",
+            "key" : 1,
+            "lineno" : 45,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  },
+          "typeClassName" : {
+            "name" : "typeClassName",
+            "key" : 2,
+            "lineno" : 48,
+            "required" : "opt-in-req-out",
+            "type" : "string"
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 42
       }
       },
   "source_path" : "thrift/annotation/java",

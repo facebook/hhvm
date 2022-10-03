@@ -134,33 +134,31 @@ type adjacencies = {
   forwards: EntitySet.t;
 }
 
-let mk_adjacency_map subsets =
-  let entities =
-    List.concat_map ~f:(fun (e1, e2) -> [e1; e2]) subsets |> EntitySet.of_list
+let mk_adjacency_table subsets =
+  let adjacency_table = Hashtbl.Poly.create () in
+  let add_forwards (e1, e2) =
+    Hashtbl.Poly.change adjacency_table e1 ~f:(function
+        | None ->
+          Some
+            { forwards = EntitySet.singleton e2; backwards = EntitySet.empty }
+        | Some adjacency ->
+          Some { adjacency with forwards = EntitySet.add e2 adjacency.forwards })
   in
-  let backwards_of e (e1, e2) =
-    if equal_entity_ e e2 then
-      Some e1
-    else
-      None
+  let add_backwards (e1, e2) =
+    Hashtbl.Poly.change adjacency_table e2 ~f:(function
+        | None ->
+          Some
+            { backwards = EntitySet.singleton e1; forwards = EntitySet.empty }
+        | Some adjacency ->
+          Some
+            { adjacency with backwards = EntitySet.add e1 adjacency.backwards })
   in
-  let forwards_of e (e1, e2) =
-    if equal_entity_ e e1 then
-      Some e2
-    else
-      None
+  let add edge =
+    add_forwards edge;
+    add_backwards edge
   in
-  let find_adjacent of_ entity =
-    List.filter_map ~f:(of_ entity) subsets |> EntitySet.of_list
-  in
-  let adjacency e =
-    {
-      backwards = find_adjacent backwards_of e;
-      forwards = find_adjacent forwards_of e;
-    }
-  in
-  let add e = EntityMap.add e (adjacency e) in
-  EntitySet.fold add entities EntityMap.empty
+  List.iter ~f:add subsets;
+  adjacency_table
 
 (*
   Propagates `Static_key` constraints conjunctively through the dataflow graph.
@@ -198,43 +196,52 @@ let mk_adjacency_map subsets =
       forall subsets(E', E).
       static_key(has, definite, E', K, _).
 *)
-let derive_definitely_has_static_accesses adjacency_map static_accesses =
+let derive_definitely_has_static_accesses adjacency_table static_accesses =
   let open StaticAccess.Set in
   (* All successors to the entities in recently generated facts can potentially
      obtain a new static key constraint. *)
   let find_candidates delta =
     let accum (e, _, _) =
       let nexts =
-        EntityMap.find_opt e adjacency_map
+        Hashtbl.Poly.find adjacency_table e
         |> Option.value_map ~default:EntitySet.empty ~f:(fun a -> a.forwards)
       in
       EntitySet.union nexts
     in
     fold accum delta EntitySet.empty
   in
+  let indexed_acc = Hashtbl.Poly.create () in
   let rec close_upwards ~delta ~acc =
     if is_empty delta then
       acc
     else
+      let update_indexed_acc (e, k, ty) =
+        Hashtbl.Poly.update indexed_acc e ~f:(function
+            | Some keys_tys -> (k, ty) :: keys_tys
+            | None -> [(k, ty)])
+      in
+      StaticAccess.Set.iter update_indexed_acc delta;
       (* The following collects the intersection of all keys that occur in
          predecessors of an entity along with possible types of those keys. *)
       let common_predecessor_keys e =
         let predecessors =
-          EntityMap.find_opt e adjacency_map
+          Hashtbl.find adjacency_table e
           |> Option.value_map ~default:EntitySet.empty ~f:(fun a -> a.backwards)
         in
         let collect_common_keys e common_keys =
-          let collect_keys (e', k, ty) =
+          let keys_tys =
+            Option.value ~default:[] @@ Hashtbl.find indexed_acc e
+          in
+          let collect_keys m (k, ty) =
             let add_ty = function
               | None -> Some [ty]
               | Some tys -> Some (ty :: tys)
             in
-            if equal_entity_ e e' then
-              T.TShapeMap.update k add_ty
-            else
-              Fn.id
+            T.TShapeMap.update k add_ty m
           in
-          let keys = fold collect_keys acc T.TShapeMap.empty in
+          let keys =
+            List.fold ~f:collect_keys keys_tys ~init:T.TShapeMap.empty
+          in
           (* Here `None` represents the universe set *)
           match common_keys with
           | None -> Some keys
@@ -283,14 +290,14 @@ let derive_definitely_has_static_accesses adjacency_map static_accesses =
     static_key(needs, Certainty, E, Key, Ty) :- static_key_base(needs, Certainty, E, Key, Ty).
     static_key(needs, Certainty, F, Key, Ty) :- static_key(needs, Certainty, E, Key, Ty), subsets(F,E).
 *)
-let derive_disjunctive_static_accesses adjacency_map variety static_accesses =
+let derive_disjunctive_static_accesses adjacency_table variety static_accesses =
   let open StaticAccess.Set in
   let rec close_upwards ~delta ~acc =
     if is_empty delta then
       acc
     else
       let propagate (e, k, ty) =
-        EntityMap.find_opt e adjacency_map
+        Hashtbl.find adjacency_table e
         |> Option.value_map ~default:empty ~f:(fun adjacency ->
                let adjacency =
                  match variety with
@@ -313,14 +320,14 @@ let derive_disjunctive_static_accesses adjacency_map variety static_accesses =
     has_dynamic_key(E) :- has_dynamic_key_base(E).
     has_dynamic_key(F) :- has_dynamic_key_ud(E), (subsets(E,F); subsets(F,E)).
 *)
-let derive_dynamic_accesses adjacency_map dynamic_accesses =
+let derive_dynamic_accesses adjacency_table dynamic_accesses =
   let open EntitySet in
   let rec close_upwards_and_downwards ~delta ~acc =
     if is_empty delta then
       acc
     else
       let propagate e =
-        match EntityMap.find_opt e adjacency_map with
+        match Hashtbl.find adjacency_table e with
         | Some adjacency -> union adjacency.forwards adjacency.backwards
         | None -> empty
       in
@@ -355,12 +362,12 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   } =
     disassemble constraints
   in
-  let adjacency_map = mk_adjacency_map subsets in
+  let adjacency_table = mk_adjacency_table subsets in
 
   (* Close upwards *)
   let maybe_has_static_accesses =
     derive_disjunctive_static_accesses
-      adjacency_map
+      adjacency_table
       Has
       (StaticAccess.Set.union
          maybe_has_static_accesses
@@ -370,14 +377,14 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   (* Close upwards *)
   let definitely_has_static_accesses =
     derive_definitely_has_static_accesses
-      adjacency_map
+      adjacency_table
       definitely_has_static_accesses
   in
 
   (* Close downwards *)
   let definitely_needs_static_accesses =
     derive_disjunctive_static_accesses
-      adjacency_map
+      adjacency_table
       Needs
       definitely_needs_static_accesses
   in
@@ -385,14 +392,14 @@ let deduce (constraints : constraint_ list) : constraint_ list =
   (* Close downwards *)
   let maybe_needs_static_accesses =
     derive_disjunctive_static_accesses
-      adjacency_map
+      adjacency_table
       Needs
       maybe_needs_static_accesses
   in
 
   (* Close upwards and downwards *)
   let dynamic_accesses =
-    derive_dynamic_accesses adjacency_map dynamic_accesses
+    derive_dynamic_accesses adjacency_table dynamic_accesses
   in
   assemble
     {

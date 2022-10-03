@@ -19,16 +19,22 @@ from thrift.python.flags import (
     define_int_flag,
     get_bool_flag,
     get_int_flag,
+    mock_bool_flag,
+    mock_int_flag,
 )
 
 
 class FlagsTest(unittest.TestCase):
     def test_int_flag(self) -> None:
         define_int_flag("foo", 42)
+        with mock_int_flag("foo", 404):
+            self.assertEqual(404, get_int_flag("foo"))
         self.assertEqual(42, get_int_flag("foo"))
 
     def test_bool_flag(self) -> None:
         define_bool_flag("bar", True)
+        with mock_bool_flag("bar", False):
+            self.assertFalse(get_bool_flag("bar"))
         self.assertTrue(get_bool_flag("bar"))
 
     def test_double_define_ignored(self) -> None:

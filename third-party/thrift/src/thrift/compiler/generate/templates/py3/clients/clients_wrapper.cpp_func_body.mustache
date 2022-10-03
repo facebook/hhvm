@@ -15,9 +15,9 @@ try {
     std::move(callback){{#function:args}},
     arg_{{field:py_name}}{{/function:args}}
   );
-} catch (const std::exception& ex) {
+} catch (...) {
   return folly::makeFuture<{{#function:return_type}}{{> clients/cpp_return_type}}{{/function:return_type}}>(folly::exception_wrapper(
-    std::current_exception(), ex
+    std::current_exception()
   ));
 }
 return _future;

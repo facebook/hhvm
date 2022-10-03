@@ -85,7 +85,7 @@ class VersionCommand : public PrettyCommand<VersionCommand> {
       if (!missing.empty()) {
         response.error = w_string::build(
             "client required capabilities [",
-            folly::join(", ", missing),
+            fmt::join(missing, ", "),
             "] not supported by this server");
       }
     }

@@ -71,6 +71,15 @@ std::unique_ptr<folly::IOBuf> process_serialize_xform_app_exn(
   return queue.move();
 }
 
+void inline sendTrustedServerExceptionHelper(
+    ResponseChannelRequest::UniquePtr request,
+    const TrustedServerException& trustedServerEx) {
+  request->sendErrorWrapped(
+      folly::make_exception_wrapper<TApplicationException>(
+          trustedServerEx.toApplicationException()),
+      std::string(trustedServerEx.errorCode()));
+}
+
 void inline sendExceptionHelper(
     ResponseChannelRequest::UniquePtr req, ResponsePayload&& payload) {
 #if !FOLLY_HAS_COROUTINES
@@ -101,13 +110,14 @@ void process_handle_exn_deserialization(
     const char* const method) {
   if (auto trustedServerEx =
           dynamic_cast<const TrustedServerException*>(ew.get_exception())) {
-    eb->runInEventBaseThread(
-        [request = std::move(req), ex = *trustedServerEx]() {
-          request->sendErrorWrapped(
-              folly::make_exception_wrapper<TApplicationException>(
-                  ex.toApplicationException()),
-              std::string(ex.errorCode()));
-        });
+    if (eb) {
+      eb->runInEventBaseThread(
+          [request = std::move(req), ex = *trustedServerEx]() mutable {
+            sendTrustedServerExceptionHelper(std::move(request), ex);
+          });
+    } else {
+      sendTrustedServerExceptionHelper(std::move(req), *trustedServerEx);
+    }
     return;
   }
   ::apache::thrift::util::appendExceptionToHeader(ew, *ctx);
@@ -116,10 +126,14 @@ void process_handle_exn_deserialization(
       ::apache::thrift::util::toTApplicationException(ew),
       ctx,
       method);
-  eb->runInEventBaseThread(
-      [buf = std::move(buf), req = std::move(req)]() mutable {
-        sendExceptionHelper(std::move(req), std::move(buf));
-      });
+  if (eb) {
+    eb->runInEventBaseThread(
+        [buf = std::move(buf), req = std::move(req)]() mutable {
+          sendExceptionHelper(std::move(req), std::move(buf));
+        });
+  } else {
+    sendExceptionHelper(std::move(req), std::move(buf));
+  }
 }
 
 template <typename Prot>

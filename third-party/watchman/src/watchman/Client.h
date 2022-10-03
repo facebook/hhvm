@@ -8,7 +8,7 @@
 #pragma once
 
 #include <eden/common/utils/ProcessNameCache.h>
-#include <fmt/format.h>
+#include <fmt/core.h>
 
 #include <chrono>
 #include <deque>

@@ -111,7 +111,9 @@ struct {
      "{\"age\": 30, \"name\": \"pete\"}, "
      "{\"age\": 25}"
      "]",
-     "[\"name\", \"age\"]"}};
+     "[\"name\", \"age\"]"},
+    {"[{}, {}, {}, {}, {}]", "[]"},
+};
 
 struct {
   const char* json_text;

@@ -45,16 +45,26 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
 
     {{> struct/ThriftConstructor}}
 
-    {{> struct/StructBuilder}}{{!
-    }}{{#struct:fields}}
+    {{> struct/StructBuilder}}
+
+    {{#struct:fields}}
     {{#field:hasAdapter?}}
     private static final com.facebook.thrift.adapter.TypeAdapter<{{#field:type}}{{> BoxedType}}{{/field:type}}, {{field:typeClassName}}> _{{field:javaName}}_Adapter = new {{field:adapterClassName}}();
     {{#field:hasMultipleTypeAdapters?}}
     private static final com.facebook.thrift.adapter.TypeAdapter<{{field:typeClassName}}, {{field:secondTypeClassName}}> _{{field:javaName}}_Adapter2 = new {{field:secondAdapterClassName}}();
     {{/field:hasMultipleTypeAdapters?}}
     {{/field:hasAdapter?}}
-    {{/struct:fields}}{{!
-    }}public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
+    {{#field:hasWrapper?}}
+    private static final com.facebook.thrift.adapter.Wrapper<{{!
+      }}{{#field:hasAdapter?}}{{!
+        }}{{#field:hasMultipleTypeAdapters?}}{{field:secondTypeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
+        }}{{^field:hasMultipleTypeAdapters?}}{{field:typeClassName}}{{/field:hasMultipleTypeAdapters?}}{{!
+      }}{{/field:hasAdapter?}}{{!
+      }}{{^field:hasAdapter?}}{{#field:type}}{{> BoxedType}}{{/field:type}}{{/field:hasAdapter?}}{{!
+      }}, {{field:wrapperType}}, com.facebook.thrift.payload.ThriftSerializable> _{{field:javaName}}_Wrapper = new {{field:wrapper}}();
+    {{/field:hasWrapper?}}
+    {{/struct:fields}}
+    public static final Map<String, Integer> NAMES_TO_IDS = new HashMap();
     public static final Map<String, Integer> THRIFT_NAMES_TO_IDS = new HashMap();
     public static final Map<Integer, TField> FIELD_METADATA = new HashMap<>();
     private static final TStruct STRUCT_DESC = new TStruct("{{struct:name}}");
@@ -73,12 +83,11 @@ public final class {{struct:javaCapitalName}} implements com.facebook.thrift.pay
     {{#field:isSensitive?}}
     @org.apache.thrift.annotations.Sensitive
     {{/field:isSensitive?}}
-    {{#field:javaAnnotations?}}{{field:javaAnnotations}} {{/field:javaAnnotations?}}private {{^struct:isBigStruct?}}final {{/struct:isBigStruct?}}{{> FieldType}} {{field:javaName}};
+    {{#field:javaAnnotations?}}{{field:javaAnnotations}} {{/field:javaAnnotations?}}private {{^struct:isBigStruct?}}{{^struct:hasWrapper?}}final {{/struct:hasWrapper?}}{{/struct:isBigStruct?}}{{> FieldType}} {{field:javaName}};
     public static final int _{{field:javaAllCapsName}} = {{field:key}};
     private static final TField {{field:javaTFieldName}} = new TField("{{field:name}}", TType.{{#field:type}}{{> TType}}{{/field:type}}, (short){{field:key}});
-    {{/struct:asBean?}}{{!
-
-    }}{{/struct:fields}}{{!
+    {{/struct:asBean?}}
+    {{/struct:fields}}{{!
 
     }}static {
       {{#struct:fields}}

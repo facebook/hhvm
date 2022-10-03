@@ -245,6 +245,7 @@ public:
   virtual MultiResult<SymbolPath> getAllTypePaths() = 0;
   virtual MultiResult<SymbolPath> getAllFunctionPaths() = 0;
   virtual MultiResult<SymbolPath> getAllConstantPaths() = 0;
+  virtual MultiResult<SymbolPath> getAllModulePaths() = 0;
 
   virtual void insertClock(const Clock& clock) = 0;
   virtual Clock getClock() = 0;

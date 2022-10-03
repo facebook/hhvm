@@ -10,8 +10,7 @@
 for decls and get back answers. Often these requests will block upon IO. *)
 type t
 
-val from_raw_client :
-  Decl_ipc_ffi_externs.decl_client -> DeclParserOptions.t -> t
+val connect : decl_state_dir:string -> opts:DeclParserOptions.t -> t
 
 val rpc_get_fun : t -> string -> Typing_defs.fun_elt option
 

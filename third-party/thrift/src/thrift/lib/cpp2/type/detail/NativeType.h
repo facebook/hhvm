@@ -102,28 +102,41 @@ template <>
 struct InferTag<void> : StandardTag<void_t> {};
 template <> // TODO: Consider also std::null_opt
 struct InferTag<std::nullptr_t> : StandardTag<void_t> {};
+template <typename T, size_t I = sizeof(T)>
+struct IntegerTag;
+template <typename T>
+struct InferTag<T, std::enable_if_t<folly::is_integral_v<T>>> : IntegerTag<T> {
+};
 
 // The native types for all primitive types.
 template <>
 struct NativeTypes<bool_t> : ConcreteType<bool> {};
 template <>
-struct InferTag<bool> : StandardTag<bool_t> {};
+struct IntegerTag<bool> : StandardTag<bool_t> {};
 template <>
 struct NativeTypes<byte_t> : ConcreteType<int8_t> {};
 template <>
-struct InferTag<int8_t> : StandardTag<byte_t> {};
+struct IntegerTag<int8_t> : StandardTag<byte_t> {};
+template <typename T>
+struct IntegerTag<T, sizeof(int8_t)> : CppTag<T, byte_t> {};
 template <>
 struct NativeTypes<i16_t> : ConcreteType<int16_t> {};
 template <>
-struct InferTag<int16_t> : StandardTag<i16_t> {};
+struct IntegerTag<int16_t> : StandardTag<i16_t> {};
+template <typename T>
+struct IntegerTag<T, sizeof(int16_t)> : CppTag<T, i16_t> {};
 template <>
 struct NativeTypes<i32_t> : ConcreteType<int32_t> {};
 template <>
-struct InferTag<int32_t> : StandardTag<i32_t> {};
+struct IntegerTag<int32_t> : StandardTag<i32_t> {};
+template <typename T>
+struct IntegerTag<T, sizeof(int32_t)> : CppTag<T, i32_t> {};
 template <>
 struct NativeTypes<i64_t> : ConcreteType<int64_t> {};
 template <>
-struct InferTag<int64_t> : StandardTag<i64_t> {};
+struct IntegerTag<int64_t> : StandardTag<i64_t> {};
+template <typename T>
+struct IntegerTag<T, sizeof(int64_t)> : CppTag<T, i64_t> {};
 template <>
 struct NativeTypes<float_t> : ConcreteType<float> {};
 template <>
@@ -136,11 +149,6 @@ template <>
 struct NativeTypes<string_t> : ConcreteType<std::string> {};
 template <>
 struct NativeTypes<binary_t> : ConcreteType<std::string> {};
-
-// Unsigned types.
-template <typename T>
-struct InferTag<T, std::enable_if_t<folly::is_unsigned_v<T>>>
-    : CppTag<T, typename InferTag<std::make_signed_t<T>>::type> {};
 
 // Traits for enums.
 template <typename E>

@@ -525,7 +525,20 @@ impl<R: Reason> From<&obr::shallow_decl_defs::ModuleDefType<'_>> for shallow::Mo
     }
 }
 
-impl<R: Reason> From<&(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::Decl<R> {
+impl<R: Reason> From<&obr::shallow_decl_defs::Decl<'_>> for shallow::Decl<R> {
+    fn from(decl: &obr::shallow_decl_defs::Decl<'_>) -> Self {
+        use obr::shallow_decl_defs::Decl as Obr;
+        match *decl {
+            Obr::Class(x) => Self::Class(x.into()),
+            Obr::Fun(x) => Self::Fun(x.into()),
+            Obr::Typedef(x) => Self::Typedef(x.into()),
+            Obr::Const(x) => Self::Const(x.into()),
+            Obr::Module(x) => Self::Module(x.into()),
+        }
+    }
+}
+
+impl<R: Reason> From<&(&str, obr::shallow_decl_defs::Decl<'_>)> for shallow::NamedDecl<R> {
     fn from(decl: &(&str, obr::shallow_decl_defs::Decl<'_>)) -> Self {
         use obr::shallow_decl_defs::Decl as Obr;
         match *decl {

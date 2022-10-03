@@ -58,10 +58,6 @@ const char* getPatchTypeName(t_base_type::type base_type) {
   }
 }
 
-std::string getSibName(const std::string& sibling, const std::string& name) {
-  return sibling.substr(0, sibling.find_last_of("/")) + name;
-}
-
 std::string getFieldPatchSuffix(const t_field& field) {
   if (field.id() < 0) {
     return fmt::format("FieldN{}Patch", -field.id());
@@ -384,10 +380,9 @@ t_type_ref patch_generator::find_patch_type(
 
   // Structured types use generated patch types..
   if (auto* structured = dynamic_cast<const t_structured*>(ttype)) {
-    std::string name = structured->name() + "Patch";
     if (!structured->uri().empty()) { // Try to look up by URI.
-      if (auto* result = dynamic_cast<const t_type*>(program_.scope()->find_def(
-              getSibName(structured->uri(), name)))) {
+      if (auto* result = dynamic_cast<const t_type*>(
+              program_.scope()->find_def(structured->uri() + "Patch"))) {
         return t_type_ref::from_ptr(result);
       }
     }
@@ -395,7 +390,9 @@ t_type_ref patch_generator::find_patch_type(
     // Try to look up by Name.
     // Look for it in the same program as the type itself.
     t_type_ref result = program_.scope()->ref_type(
-        *structured->program(), name, parent.src_range());
+        *structured->program(),
+        structured->name() + "Patch",
+        parent.src_range());
     if (auto* ph = result.get_unresolved_type()) {
       // Set the location info, in case the type can't be resolved later.
       ph->set_src_range(parent.src_range());
@@ -490,9 +487,16 @@ t_struct& patch_generator::gen_patch(
   const auto* ttype = type->get_true_type();
   if (auto* list = dynamic_cast<const t_list*>(ttype)) {
     // TODO(afuller): support 'replace' op.
-    // TODO(afuller): Fix py3 issues and re-enable
-    // auto elem_patch_type = find_patch_type(annot, orig, list->elem_type());
-    // gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    if (auto elem_patch_type =
+            find_patch_type(annot, orig, list->elem_type())) {
+      gen.patchList(inst_map(t_base_type::t_i32(), elem_patch_type));
+    } else {
+      // TODO(afuller): Support containers in lists.
+      ctx_.warning(
+          orig,
+          "Could not find patch type for: ",
+          list->elem_type()->get_full_name());
+    }
     // TODO(afuller): Support sets for all types in all languages, and switch
     // this to a set instead of a list.
     gen.remove(inst_list(list->elem_type()));

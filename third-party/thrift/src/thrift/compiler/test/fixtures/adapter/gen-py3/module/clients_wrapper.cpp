@@ -31,9 +31,9 @@ ServiceClientWrapper::func(
       arg_arg2,
       arg_arg3
     );
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeFuture<int32_t>(folly::exception_wrapper(
-      std::current_exception(), ex
+      std::current_exception()
     ));
   }
   return _future;

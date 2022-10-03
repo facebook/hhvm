@@ -4158,7 +4158,7 @@ iopFCallClsMethodM(bool retToJit, PC origpc, PC& pc, FCallArgs fca,
   assertx(cls && methNameC);
   auto const logAsDynamicCall = op == IsLogAsDynamicCallOp::LogAsDynamicCall ||
     RuntimeOption::EvalLogKnownMethodsAsDynamicCalls;
-  if (isString || RuntimeOption::EvalEmitClassPointers == 0) {
+  if (isString) {
     return fcallClsMethodImpl<true>(
       retToJit, origpc, pc, fca, cls, methNameC, false, logAsDynamicCall);
   } else {

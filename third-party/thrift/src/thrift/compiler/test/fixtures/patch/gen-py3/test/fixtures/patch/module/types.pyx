@@ -57,6 +57,8 @@ cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_t
 import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
+cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
+import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport test.fixtures.patch.module.types_reflection as _types_reflection
 
@@ -776,6 +778,26 @@ cdef class MyStruct(thrift.py3.types.Struct):
     def lateStructVal(self):
         return self.lateStructVal_impl()
 
+    cdef inline durationVal_impl(self):
+
+        if self.__fbthrift_cached_durationVal is None:
+            self.__fbthrift_cached_durationVal = _apache_thrift_type_standard_types.DurationStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).durationVal_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_durationVal
+
+    @property
+    def durationVal(self):
+        return self.durationVal_impl()
+
+    cdef inline timeVal_impl(self):
+
+        if self.__fbthrift_cached_timeVal is None:
+            self.__fbthrift_cached_timeVal = _apache_thrift_type_standard_types.TimeStruct._fbthrift_create(__reference_shared_ptr(deref(self._cpp_obj).timeVal_ref().ref(), self._cpp_obj))
+        return self.__fbthrift_cached_timeVal
+
+    @property
+    def timeVal(self):
+        return self.timeVal_impl()
+
     cdef inline optBoolVal_impl(self):
         if not deref(self._cpp_obj).optBoolVal_ref().has_value():
             return None
@@ -985,7 +1007,7 @@ cdef class MyStruct(thrift.py3.types.Struct):
 
     @classmethod
     def _fbthrift_get_struct_size(cls):
-        return 28
+        return 30
 
     cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MyStruct self, __Protocol proto):
         cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data

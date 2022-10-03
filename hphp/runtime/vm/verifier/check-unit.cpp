@@ -182,8 +182,7 @@ bool UnitChecker::checkPreClasses() {
       IterateV(
         sealed_attr.m_data.parr, [this, preclass, &ok](TypedValue tv) -> bool {
           if (!isStringType(tv.m_type) &&
-              (!isLazyClassType(tv.m_type) ||
-               RuntimeOption::EvalEmitClassPointers != 2)) {
+              !isLazyClassType(tv.m_type)) {
             ok = false;
             error("For Class %s, values in sealed whitelist must be strings\n",
                   preclass->name()->data());

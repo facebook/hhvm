@@ -197,6 +197,10 @@ function print_attr_files(
 function print_num_symbols(
   string $path,
 ): void {
+  $modules = HH\Facts\path_to_modules($path);
+  $num_modules = \count($modules);
+  print "$path has $num_modules modules\n";
+
   $types = HH\Facts\path_to_types($path);
   $num_types = \count($types);
   print "$path has $num_types types\n";
@@ -225,6 +229,12 @@ function print_extracted_facts(vec<string> $files): void {
     HH\Facts\extract($files_with_hashes) as $file => $facts
   ) {
     print "Facts in $file:\n";
+
+    print "  modules:\n";
+    foreach ($facts['modules'] as $module) {
+      $name = $module['name'];
+      print "    name: $name\n";
+    }
 
     print "  types:\n";
     foreach ($facts['types'] as $type) {
@@ -559,6 +569,29 @@ function facts(): void {
   print_num_symbols('this/path/does/not/exist.php');
   print_num_symbols('/this/path/does/not/exist.php');
 
+  $get_all = (
+    $symbol_type,
+    $get_all_method,
+    $inverse_method,
+  ) ==> {
+    print "\nGetting all $symbol_type\n";
+    $all = $get_all_method();
+    \ksort(inout $all);
+    foreach ($all as $symbol => $path) {
+      print "$symbol => $path\n";
+      $facts_path = relative_path($inverse_method($symbol) as nonnull);
+      if ($facts_path !== $path) {
+        print "FAILURE: $facts_path !== $path\n";
+      }
+    }
+  };
+
+  $get_all(
+    "modules",
+    () ==> HH\Facts\all_modules(),
+    ($module) ==> HH\Facts\module_to_path($module)
+  );
+
   print "\nGetting all types\n";
   $all_types = HH\Facts\all_types();
   \ksort(inout $all_types);
@@ -573,42 +606,24 @@ function facts(): void {
       print "FAILURE: $facts_path !== $path\n";
     }
   }
-  print "\nGetting all functions\n";
-  $all_functions = HH\Facts\all_functions();
-  \ksort(inout $all_functions);
-  foreach ($all_functions as $function => $path) {
-    print "$function => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\function_to_path($function) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-  print "\nGetting all constants\n";
-  $all_constants = HH\Facts\all_constants();
-  \ksort(inout $all_constants);
-  foreach ($all_constants as $constant => $path) {
-    print "$constant => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\constant_to_path($constant) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
-  print "\nGetting all type aliases\n";
-  $all_type_aliases = HH\Facts\all_type_aliases();
-  \ksort(inout $all_type_aliases);
-  foreach ($all_type_aliases as $type_alias => $path) {
-    print "$type_alias => $path\n";
-    $facts_path = relative_path(
-      HH\Facts\type_alias_to_path($type_alias) as nonnull,
-    );
-    if ($facts_path !== $path) {
-      print "FAILURE: $facts_path !== $path\n";
-    }
-  }
+
+  $get_all(
+    "functions",
+    () ==> HH\Facts\all_functions(),
+    ($func) ==> HH\Facts\function_to_path($func),
+  );
+
+  $get_all(
+    "constants",
+    () ==> HH\Facts\all_constants(),
+    ($constant) ==> HH\Facts\constant_to_path($constant),
+  );
+
+  $get_all(
+    "type aliases",
+    () ==> HH\Facts\all_type_aliases(),
+    ($alias) ==> HH\Facts\type_alias_to_path($alias),
+  );
 
   print_extracted_facts(
     vec[

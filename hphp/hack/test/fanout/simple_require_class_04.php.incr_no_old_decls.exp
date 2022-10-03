@@ -1,0 +1,9 @@
+=== base errors ===
+No errors!
+=== changed errors ===
+a.php:5:7,7: Trait A requires class C but C does not use it. Either use the trait or delete it. (Typing[4466])
+  b.php:2:13,13: Class C is defined here.
+  a.php:5:25,25: The require class requirement is here.
+=== fanout ===
+Type A
+Type C

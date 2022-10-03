@@ -21,7 +21,10 @@ public static class Builder {
     {{/struct:enableIsSet?}}
 
     {{#struct:fields}}
-    private {{> FieldType}} {{field:javaName}} = {{> struct/FieldValue}};
+    private {{> FieldType}} {{field:javaName}} = {{#field:hasWrapper?}}null{{/field:hasWrapper?}}{{^field:hasWrapper?}}{{> struct/FieldValue}}{{/field:hasWrapper?}};
+    {{#field:hasWrapper?}}
+    private {{> FieldTypeNoWrapper}} _{{field:javaName}} = {{> struct/FieldValueNoWrapper}};
+    {{/field:hasWrapper?}}
     {{/struct:fields}}
 
     {{#struct:fields}}
@@ -29,10 +32,22 @@ public static class Builder {
     @org.apache.thrift.annotations.Sensitive
     {{/field:isSensitive?}}
     {{> ThriftFieldAnnotation}}{{#field:javaAnnotation?}} @{{field:javaAnnotation}}{{/field:javaAnnotation?}}
+    {{#field:hasWrapper?}}
+    public Builder {{> SetterName}}({{field:wrapperType}} {{field:javaName}}) {
+        this.{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+    private Builder _{{> SetterName}}({{> FieldTypeNoWrapper}} {{field:javaName}}) {
+        this._{{field:javaName}} = {{field:javaName}};
+        return this;
+    }
+    {{/field:hasWrapper?}}
+    {{^field:hasWrapper?}}
     public Builder {{> SetterName}}({{> FieldType}} {{field:javaName}}) {
         this.{{field:javaName}} = {{field:javaName}};
         return this;
     }
+    {{/field:hasWrapper?}}
 
     public {{> FieldType}} {{> GetterName}}() { return {{field:javaName}}; }
 
@@ -47,7 +62,7 @@ public static class Builder {
 
     @ThriftConstructor
     public {{struct:javaCapitalName}} build() {
-       {{^struct:isBigStruct?}}{{^struct:asBean?}}
+       {{^struct:isBigStruct?}}{{^struct:asBean?}}{{^struct:hasWrapper?}}
         {{struct:javaCapitalName}} result = new {{struct:javaCapitalName}} (
             {{#struct:fields}}
             this.{{field:javaName}}{{^last?}},{{/last?}}
@@ -57,26 +72,21 @@ public static class Builder {
         result.__isset_bit_vector.or(__optional_isset);
         {{/struct:enableIsSet?}}
         return result;
-        {{/struct:asBean?}}{{#struct:asBean?}}
-        {{struct:javaCapitalName}} result = new {{struct:javaCapitalName}}();
-        {{#struct:fields}}
-        result.{{field:javaName}} = this.{{field:javaName}};
-        {{/struct:fields}}
-        {{#struct:enableIsSet?}}
-        result.__isset_bit_vector.or(__optional_isset);
-        {{/struct:enableIsSet?}}
-        return result;
-        {{/struct:asBean?}}{{/struct:isBigStruct?}}{{!
-        }}{{#struct:isBigStruct?}}
-        {{struct:javaCapitalName}} o{{struct:javaCapitalName}} = new {{struct:javaCapitalName}}();
-        {{#struct:fields}}
-        o{{struct:javaCapitalName}}.{{field:javaName}} = this.{{field:javaName}};
-        {{/struct:fields}}
-        {{#struct:enableIsSet?}}
-        o{{struct:javaCapitalName}}.__isset_bit_vector.or(__optional_isset);
-        {{/struct:enableIsSet?}}
-        return o{{struct:javaCapitalName}};
+        {{/struct:hasWrapper?}}
+        {{#struct:hasWrapper?}}
+        {{> struct/CreateStruct}}
+        {{/struct:hasWrapper?}}
+        {{/struct:asBean?}}{{!
+        
+        }}{{#struct:asBean?}}
+        {{> struct/CreateStruct}}
+        {{/struct:asBean?}}
         {{/struct:isBigStruct?}}{{!
+
+        }}{{#struct:isBigStruct?}}
+        {{> struct/CreateStruct}}
+        {{/struct:isBigStruct?}}{{!
+
         }}
     }
 }

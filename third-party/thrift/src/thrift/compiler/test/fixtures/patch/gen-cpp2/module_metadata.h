@@ -12,6 +12,7 @@
 #include "thrift/compiler/test/fixtures/patch/gen-cpp2/module_types.h"
 #include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 #include "thrift/lib/thrift/gen-cpp2/patch_metadata.h"
+#include "thrift/lib/thrift/gen-cpp2/standard_metadata.h"
 
 
 namespace apache {
@@ -95,22 +96,22 @@ class StructMetadata<::test::fixtures::patch::LateDefStructPatchStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::patch::MyStructFieldN23PatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::MyStructFieldN26PatchStruct> {
- public:
-  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
-};
-template <>
-class StructMetadata<::test::fixtures::patch::MyStructFieldN27PatchStruct> {
+class StructMetadata<::test::fixtures::patch::MyStructFieldN25PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::test::fixtures::patch::MyStructFieldN28PatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyStructFieldN29PatchStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::test::fixtures::patch::MyStructFieldN30PatchStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

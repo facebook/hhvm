@@ -14,6 +14,8 @@ import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_th
 import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 import apache.thrift.op.patch.types as _apache_thrift_op_patch_types
 import apache.thrift.op.patch.builders as _apache_thrift_op_patch_builders
+import apache.thrift.type.standard.types as _apache_thrift_type_standard_types
+import apache.thrift.type.standard.builders as _apache_thrift_type_standard_builders
 
 import test.fixtures.patch.module.types as _test_fixtures_patch_module_types
 
@@ -53,6 +55,8 @@ class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     structVal: _typing.Any
     unionVal: _typing.Any
     lateStructVal: _typing.Any
+    durationVal: _typing.Any
+    timeVal: _typing.Any
     optBoolVal: _typing.Optional[bool]
     optByteVal: _typing.Optional[int]
     optI16Val: _typing.Optional[int]

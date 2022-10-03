@@ -217,6 +217,7 @@ struct CountingStruct {
 
 service AdapterService {
   CountingStruct count();
+  HeapAllocated adaptedTypes(1: HeapAllocated arg);
 }
 
 @cpp.Adapter{name = "::apache::thrift::test::VariableAdapter"}

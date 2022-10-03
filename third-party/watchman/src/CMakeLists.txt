@@ -370,9 +370,12 @@ if(NOT WIN32)
   # Sometimes the environment has a Python installation earlier in the
   # PATH that is not suitable for building extensions. Prefer the
   # primary system installation.
+  set(Python3_FIND_STRATEGY LOCATION)
   if(USE_SYS_PYTHON)
+    message(STATUS "Using sys python")
     set(Python3_ROOT_DIR /usr/bin)
   else()
+    message(STATUS "Using local python")
     set(Python3_ROOT_DIR /usr/local/bin)
   endif()
 endif()
@@ -380,7 +383,9 @@ endif()
 find_package(Python3 COMPONENTS Interpreter Development)
 
 if(NOT Python3_Interpreter_FOUND)
+  message(STATUS "python not found, using default python")
   unset(Python3_ROOT_DIR)
+  unset(Python3_FIND_STRATEGY)
   find_package(Python3 COMPONENTS Interpreter Development)
 endif()
 

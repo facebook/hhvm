@@ -6,9 +6,12 @@
  */
 
 #include "watchman/WatchmanConfig.h"
+
+#include <folly/Conv.h>
 #include <folly/ExceptionString.h>
 #include <folly/Synchronized.h>
 #include <optional>
+
 #include "watchman/Errors.h"
 #include "watchman/Logging.h"
 

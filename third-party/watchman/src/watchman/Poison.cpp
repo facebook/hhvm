@@ -8,6 +8,8 @@
 #include "watchman/Logging.h"
 #include "watchman/WatchmanConfig.h"
 
+#include <folly/Conv.h>
+
 namespace watchman {
 
 folly::Synchronized<std::string> poisoned_reason;

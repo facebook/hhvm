@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/Conv.h>
 #include <folly/String.h>
 #include <map>
 #include <optional>

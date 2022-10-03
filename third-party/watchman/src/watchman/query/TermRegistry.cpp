@@ -6,6 +6,7 @@
  */
 
 #include "watchman/query/TermRegistry.h"
+#include <folly/Conv.h>
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/query/QueryExpr.h"

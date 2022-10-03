@@ -6,6 +6,7 @@
  */
 
 #include "watchman/query/intcompare.h"
+#include <folly/Conv.h>
 #include "watchman/Errors.h"
 #include "watchman/query/FileResult.h"
 #include "watchman/query/QueryExpr.h"

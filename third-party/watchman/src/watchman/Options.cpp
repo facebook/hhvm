@@ -6,6 +6,7 @@
  */
 
 #include "watchman/Options.h"
+#include <folly/Conv.h>
 #include <string.h>
 #include "watchman/CommandRegistry.h"
 #include "watchman/LogConfig.h"

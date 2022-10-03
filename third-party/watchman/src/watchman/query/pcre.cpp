@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <folly/Conv.h>
 #include <memory>
 #include "watchman/Errors.h"
 #include "watchman/fs/FileSystem.h"

@@ -10,7 +10,7 @@ members = [
     "facts/cargo/facts_rust",
     "facts/cargo/rust_facts_ffi",
     "hackc/bytecode_printer",
-    "hackc/cargo/hackc",
+    "hackc",
     "hackc/compile/cargo/closure_convert",
     "hackc/compile/cargo/compile",
     "hackc/compile/cargo/options",

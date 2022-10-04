@@ -1639,7 +1639,7 @@ _readField_field:
 _readField_shared_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>();
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(this->__fbthrift_field_shared_field)>>::value;
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(*ptr)>>::value;
     ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_shared_field);
@@ -1662,7 +1662,7 @@ _readField_shared_field:
 _readField_opt_shared_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 3, ::std::int32_t, StructWithFieldAdapter>>>();
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(this->__fbthrift_field_opt_shared_field)>>::value;
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(*ptr)>>::value;
     ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_opt_shared_field);
@@ -1685,7 +1685,7 @@ _readField_opt_shared_field:
 _readField_opt_boxed_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 4, ::std::int32_t, StructWithFieldAdapter>>>();
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(this->__fbthrift_field_opt_boxed_field)>>::value;
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(*ptr)>>::value;
     ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_opt_boxed_field);
@@ -1708,7 +1708,7 @@ _readField_opt_boxed_field:
 _readField_boxed_field:
   {
     auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<::apache::thrift::detail::boxed_value_ptr<::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 5, ::std::int32_t, StructWithFieldAdapter>>>();
-    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(this->__fbthrift_field_boxed_field)>>::value;
+    constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<::my::Adapter1, folly::remove_cvref_t<decltype(*ptr)>>::value;
     ::folly::if_constexpr<hasInplaceToThrift>(
       [&](auto& field) { ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::integral, ::std::int32_t>::readWithContext(*iprot, ::my::Adapter1::toThrift(field), _readState); },
       [&](auto&) {})(this->__fbthrift_field_boxed_field);

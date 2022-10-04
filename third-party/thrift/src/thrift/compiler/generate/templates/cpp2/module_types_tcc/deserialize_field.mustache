@@ -34,7 +34,7 @@ auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_
 <%^struct:cpp_use_op_encode%>
 <%#field:cpp_first_adapter%>
 <%#field:cpp_exactly_one_adapter?%>
-constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, folly::remove_cvref_t<decltype(<% > field/member%>)>>::value;
+constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_toThrift<<%field:cpp_first_adapter%>, folly::remove_cvref_t<decltype(<%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%>)>>::value;
 ::folly::if_constexpr<hasInplaceToThrift>(
   [&](auto& field) { <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(field), _readState); },
   [&](auto&) {})(<% > field/member%>);

@@ -532,20 +532,27 @@ and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
     =
   match typedef_info with
   | Some typedef_info ->
-    let tparams = typedef_info.Typing_defs.td_tparams in
-    let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
-    let ((env, e1), tyargs) =
-      localize_targs_by_kind
-        ~ety_env:{ ety_env with expand_visible_newtype = true }
-        env
+    if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
+      Decl_typedef_expand.expand_typedef
+        (Typing_env.get_ctx env)
+        type_name
         tyargs
-        nkinds
-    in
-    let ((env, e2), lty) =
-      TUtils.expand_typedef ety_env env r type_name tyargs
-    in
-    let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
-    ((env, ty_err_opt), lty)
+      |> localize ~ety_env env
+    else
+      let tparams = typedef_info.Typing_defs.td_tparams in
+      let nkinds = KindDefs.Simple.named_kinds_of_decl_tparams tparams in
+      let ((env, e1), tyargs) =
+        localize_targs_by_kind
+          ~ety_env:{ ety_env with expand_visible_newtype = true }
+          env
+          tyargs
+          nkinds
+      in
+      let ((env, e2), lty) =
+        TUtils.expand_typedef ety_env env r type_name tyargs
+      in
+      let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+      ((env, ty_err_opt), lty)
   | None ->
     (* This must be unreachable. We only call localize_typedef_instantiation if we *know* that
        we have a typedef with typedef info at hand. *)

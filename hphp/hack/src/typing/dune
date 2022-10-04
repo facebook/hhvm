@@ -297,7 +297,8 @@
   typing_env
   typing_log
   typing_utils
-  typing_visibility)
+  typing_visibility
+  decl_typedef_expand)
  (preprocess
   (pps ppx_deriving.std)))
 

@@ -259,6 +259,13 @@
   (pps ppx_deriving.std)))
 
 (library
+ (name decl_typedef_expand)
+ (modules decl_typedef_expand)
+ (libraries decl_subst decl_provider provider_context typing_defs)
+ (preprocess
+  (pps ppx_deriving.std)))
+
+(library
  (name decl_linearize)
  (modules decl_linearize)
  (libraries

@@ -447,8 +447,10 @@ t_struct& patch_generator::gen_struct(
   auto generated = std::make_unique<t_struct>(&program_, std::move(name));
   generated->set_generated();
   generated->set_uri(std::move(uri));
-  // Attribute the new struct to the anntation.
-  generated->set_src_range(annot.src_range());
+  // Attribute the new struct to the anntation, but give it a unique offset so
+  // thrift/compiler/lib/cpp2/util.cc sorts it correctly.
+  generated->set_src_range(
+      {annot.src_range().begin + (++count_), annot.src_range().end});
   program_.scope()->add_type(program_.scope_name(*generated), generated.get());
   return program_.add_def(std::move(generated));
 }

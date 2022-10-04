@@ -77,11 +77,6 @@ struct assign;
 struct clear;
 struct assign;
 struct clear;
-struct patchPrior;
-struct ensure;
-struct patch;
-struct assign;
-struct clear;
 struct assign;
 struct clear;
 struct patch;
@@ -97,6 +92,11 @@ struct clear;
 struct add;
 struct remove;
 struct put;
+struct assign;
+struct clear;
+struct patchPrior;
+struct ensure;
+struct patch;
 struct boolVal;
 struct byteVal;
 struct i16Val;
@@ -378,26 +378,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(assign);
 #define APACHE_THRIFT_ACCESSOR_clear
 APACHE_THRIFT_DEFINE_ACCESSOR(clear);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_patchPrior
-#define APACHE_THRIFT_ACCESSOR_patchPrior
-APACHE_THRIFT_DEFINE_ACCESSOR(patchPrior);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_ensure
-#define APACHE_THRIFT_ACCESSOR_ensure
-APACHE_THRIFT_DEFINE_ACCESSOR(ensure);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_patch
-#define APACHE_THRIFT_ACCESSOR_patch
-APACHE_THRIFT_DEFINE_ACCESSOR(patch);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_assign
-#define APACHE_THRIFT_ACCESSOR_assign
-APACHE_THRIFT_DEFINE_ACCESSOR(assign);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_clear
-#define APACHE_THRIFT_ACCESSOR_clear
-APACHE_THRIFT_DEFINE_ACCESSOR(clear);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_assign
 #define APACHE_THRIFT_ACCESSOR_assign
 APACHE_THRIFT_DEFINE_ACCESSOR(assign);
@@ -457,6 +437,26 @@ APACHE_THRIFT_DEFINE_ACCESSOR(remove);
 #ifndef APACHE_THRIFT_ACCESSOR_put
 #define APACHE_THRIFT_ACCESSOR_put
 APACHE_THRIFT_DEFINE_ACCESSOR(put);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_assign
+#define APACHE_THRIFT_ACCESSOR_assign
+APACHE_THRIFT_DEFINE_ACCESSOR(assign);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_clear
+#define APACHE_THRIFT_ACCESSOR_clear
+APACHE_THRIFT_DEFINE_ACCESSOR(clear);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_patchPrior
+#define APACHE_THRIFT_ACCESSOR_patchPrior
+APACHE_THRIFT_DEFINE_ACCESSOR(patchPrior);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_ensure
+#define APACHE_THRIFT_ACCESSOR_ensure
+APACHE_THRIFT_DEFINE_ACCESSOR(ensure);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_patch
+#define APACHE_THRIFT_ACCESSOR_patch
+APACHE_THRIFT_DEFINE_ACCESSOR(patch);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_boolVal
 #define APACHE_THRIFT_ACCESSOR_boolVal
@@ -677,12 +677,12 @@ class InnerUnionPatchStruct;
 class MyUnionFieldPatchStruct;
 class MyUnionPatchStruct;
 class MyStructFieldN10PatchStruct;
-class LateDefStructFieldPatchStruct;
-class LateDefStructPatchStruct;
 class MyStructFieldN25PatchStruct;
 class MyStructFieldN28PatchStruct;
 class MyStructFieldN29PatchStruct;
 class MyStructFieldN30PatchStruct;
+class LateDefStructFieldPatchStruct;
+class LateDefStructPatchStruct;
 class MyStructFieldPatchStruct;
 class MyStructPatchStruct;
 }}} // test::fixtures::patch

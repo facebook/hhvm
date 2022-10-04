@@ -157,25 +157,6 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldN10PatchStruct> {
 };
 
 template <>
-struct ForEachField<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-  }
-};
-
-template <>
-struct ForEachField<::test::fixtures::patch::LateDefStructPatchStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).assign_ref()...);
-    f(1, static_cast<T&&>(t).clear_ref()...);
-    f(2, static_cast<T&&>(t).patchPrior_ref()...);
-    f(3, static_cast<T&&>(t).ensure_ref()...);
-    f(4, static_cast<T&&>(t).patch_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::patch::MyStructFieldN25PatchStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -217,6 +198,25 @@ struct ForEachField<::test::fixtures::patch::MyStructFieldN30PatchStruct> {
     f(2, static_cast<T&&>(t).add_ref()...);
     f(3, static_cast<T&&>(t).remove_ref()...);
     f(4, static_cast<T&&>(t).put_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::patch::LateDefStructFieldPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::patch::LateDefStructPatchStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).assign_ref()...);
+    f(1, static_cast<T&&>(t).clear_ref()...);
+    f(2, static_cast<T&&>(t).patchPrior_ref()...);
+    f(3, static_cast<T&&>(t).ensure_ref()...);
+    f(4, static_cast<T&&>(t).patch_ref()...);
   }
 };
 

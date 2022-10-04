@@ -112,6 +112,9 @@ class patch_generator {
 
   diagnostic_context& ctx_;
   t_program& program_;
+  // TODO(afuller): Sort by decl order not offset in
+  // thrift/compiler/lib/cpp2/util.cc and remove this hack.
+  uint_least32_t count_ = 0;
 
   // Adds a new struct to the program, and return a reference to it.
   t_struct& gen_struct(const t_node& annot, std::string name, std::string uri);

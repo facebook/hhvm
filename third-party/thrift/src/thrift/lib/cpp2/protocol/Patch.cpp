@@ -268,6 +268,8 @@ void ApplyPatch::operator()(
           type::Ordinal(apache::thrift::util::zigzagToI32(*indexPtr)));
       if (index >= 0 && static_cast<size_t>(index) < value.size()) {
         applyPatch(*elPatch.objectValue_ref(), value[index]);
+      } else {
+        throw std::runtime_error("patch index out of range");
       }
     }
   }

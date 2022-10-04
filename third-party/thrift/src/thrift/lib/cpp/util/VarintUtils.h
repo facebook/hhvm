@@ -18,7 +18,6 @@
 #define THRIFT_UTIL_VARINTUTILS_H_ 1
 
 #include <stdint.h>
-#include <stdlib.h>
 
 namespace apache {
 namespace thrift {
@@ -66,10 +65,6 @@ constexpr uint64_t i64ToZigzag(const int64_t l);
 int64_t zigzagToI64(uint64_t n);
 
 int32_t zigzagToI32(uint32_t n);
-
-uint32_t toI32ZigZagOrdinal(size_t pos);
-
-size_t fromI32ZigZagOrdinal(uint32_t pos);
 
 } // namespace util
 } // namespace thrift

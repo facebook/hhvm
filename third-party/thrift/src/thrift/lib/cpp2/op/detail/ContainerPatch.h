@@ -16,13 +16,9 @@
 
 #pragma once
 
-#include <iostream>
-#include <stdexcept>
 #include <unordered_set>
 #include <utility>
 
-#include <folly/Utility.h>
-#include <thrift/lib/cpp/util/VarintUtils.h>
 #include <thrift/lib/cpp2/op/detail/BasePatch.h>
 
 namespace apache {
@@ -60,8 +56,6 @@ template <typename Patch>
 class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
   using Base = BaseContainerPatch<Patch, ListPatch>;
   using T = typename Base::value_type;
-  using VPMap = folly::remove_cvref_t<decltype(*std::declval<Patch>().patch())>;
-  using VP = typename VPMap::mapped_type;
 
  public:
   using Base::apply;
@@ -136,29 +130,12 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
         data_.remove()->end(), entries.begin(), entries.end());
   }
 
-  FOLLY_NODISCARD VP& patchAt(size_t pos) {
-    if (*data_.clear()) {
-      folly::throw_exception<bad_patch_access>();
-    }
-
-    return data_.patch()->operator[](util::toI32ZigZagOrdinal(pos));
-  }
-
   void apply(T& val) const {
-    if (applyAssignOrClear(val)) {
-      return;
+    if (!applyAssignOrClear(val)) {
+      remove_all_values(val, *data_.remove());
+      val.insert(val.begin(), data_.prepend()->begin(), data_.prepend()->end());
+      val.insert(val.end(), data_.append()->begin(), data_.append()->end());
     }
-
-    for (const auto& ep : *data_.patch()) {
-      auto idx = util::fromI32ZigZagOrdinal(ep.first);
-      if (idx >= 0 && idx < val.size()) {
-        ep.second.apply(val[idx]);
-      }
-    }
-
-    remove_all_values(val, *data_.remove());
-    val.insert(val.begin(), data_.prepend()->begin(), data_.prepend()->end());
-    val.insert(val.end(), data_.append()->begin(), data_.append()->end());
   }
 
   template <typename U>
@@ -166,15 +143,6 @@ class ListPatch : public BaseContainerPatch<Patch, ListPatch<Patch>> {
     if (mergeAssignAndClear(std::forward<U>(next))) {
       return;
     }
-
-    {
-      decltype(auto) rhs = *std::forward<U>(next).toThrift().patch();
-      auto& patch = data_.patch().ensure();
-      for (auto&& el : rhs) {
-        patch[el.first].merge(std::forward<decltype(el)>(el).second);
-      }
-    }
-
     {
       decltype(auto) rhs = *std::forward<U>(next).toThrift().remove();
       data_.remove()->reserve(data_.remove()->size() + rhs.size());

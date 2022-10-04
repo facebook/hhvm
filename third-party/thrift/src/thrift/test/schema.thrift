@@ -71,3 +71,10 @@ service TestService {
   i32 noParamsPrimitiveReturnNoEx();
   void primitiveParamsNoReturnNoEx(1: i32 param0);
 }
+
+typedef i32 TD
+@thrift.GenerateRuntimeSchema
+struct Typedefs {
+  1: TD named;
+  2: i32 (cpp.type = "uint32_t") unnamed;
+}

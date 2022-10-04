@@ -281,3 +281,23 @@ TEST(SchemaTest, Enum) {
   EXPECT_EQ(value1.name(), "test");
   EXPECT_EQ(value1.value().value(), 22);
 }
+
+TEST(SchemaTest, TypedefFields) {
+  facebook::thrift::type::Struct schema = schema_constants::schemaTypedefs();
+  EXPECT_EQ(schema.fields()->size(), 2);
+
+  auto field = schema.fields()->at(0);
+  EXPECT_EQ(*field.name(), "named");
+  EXPECT_EQ(
+      field.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::typedefType);
+  EXPECT_EQ(
+      *field.type()->toThrift().name()->typedefType_ref()->uri_ref(),
+      "facebook.com/thrift/test/schema/TD");
+
+  field = schema.fields()->at(1);
+  EXPECT_EQ(*field.name(), "unnamed");
+  EXPECT_EQ(
+      field.type()->toThrift().name()->getType(),
+      apache::thrift::type::TypeName::Type::i32Type);
+}

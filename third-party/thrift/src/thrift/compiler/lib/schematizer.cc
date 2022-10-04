@@ -53,6 +53,22 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
   auto type_name = val();
   type_name->set_map();
   std::unique_ptr<t_const_value> params;
+
+  auto* ptr = &type;
+  while (ptr->is_typedef()) {
+    if (ptr->uri().empty()) {
+      ptr = &*dynamic_cast<const t_typedef*>(ptr)->type();
+      continue;
+    }
+
+    auto td = val();
+    td->set_map();
+    td->add_map(val("uri"), val(ptr->uri()));
+    type_name->add_map(val("typedefType"), std::move(td));
+    schema->add_map(val("name"), std::move(type_name));
+    return schema;
+  }
+
   switch (type.get_type_value()) {
     case t_type::type::t_void:
       break;
@@ -87,15 +103,13 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
       type_name->add_map(val("listType"), val(0));
       params = val();
       params->set_list();
-      params->add_list(gen_type(
-          *static_cast<const t_list&>(type).elem_type()->get_true_type()));
+      params->add_list(gen_type(*static_cast<const t_list&>(type).elem_type()));
       break;
     case t_type::type::t_set:
       type_name->add_map(val("setType"), val(0));
       params = val();
       params->set_list();
-      params->add_list(gen_type(
-          *static_cast<const t_set&>(type).elem_type()->get_true_type()));
+      params->add_list(gen_type(*static_cast<const t_set&>(type).elem_type()));
       break;
     case t_type::type::t_map:
       type_name->add_map(val("mapType"), val(0));
@@ -103,8 +117,8 @@ std::unique_ptr<t_const_value> gen_type(const t_type& type) {
       params->set_list();
       {
         const auto& map = static_cast<const t_map&>(type);
-        params->add_list(gen_type(*map.key_type()->get_true_type()));
-        params->add_list(gen_type(*map.val_type()->get_true_type()));
+        params->add_list(gen_type(*map.key_type()));
+        params->add_list(gen_type(*map.val_type()));
       }
       break;
     case t_type::type::t_enum:
@@ -184,8 +198,7 @@ void add_fields(
       return 0; // Default
     }());
 
-    field_schema->add_map(
-        val("type"), gen_type(*field.type()->get_true_type()));
+    field_schema->add_map(val("type"), gen_type(*field.type()));
     if (auto deflt = field.default_value()) {
       assert(program);
       auto id = const_cast<t_program*>(program)->intern_value(
@@ -282,7 +295,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_const& node) {
   schema->set_map();
   add_definition(*schema, node);
 
-  schema->add_map(val("type"), gen_type(*node.type()->get_true_type()));
+  schema->add_map(val("type"), gen_type(*node.type()));
 
   const auto* program = node.program();
   assert(program);

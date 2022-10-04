@@ -26,314 +26,314 @@ import com.facebook.thrift.protocol.*;
 @SuppressWarnings({ "unused", "serial" })
 public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneable {
   private static final TStruct STRUCT_DESC = new TStruct("MyStructFieldPatch");
-  private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)-1);
-  private static final TField BYTE_VAL_FIELD_DESC = new TField("byteVal", TType.STRUCT, (short)-2);
-  private static final TField I16_VAL_FIELD_DESC = new TField("i16Val", TType.STRUCT, (short)-3);
-  private static final TField I32_VAL_FIELD_DESC = new TField("i32Val", TType.STRUCT, (short)-4);
-  private static final TField I64_VAL_FIELD_DESC = new TField("i64Val", TType.STRUCT, (short)-5);
-  private static final TField FLOAT_VAL_FIELD_DESC = new TField("floatVal", TType.STRUCT, (short)-6);
-  private static final TField DOUBLE_VAL_FIELD_DESC = new TField("doubleVal", TType.STRUCT, (short)-7);
-  private static final TField STRING_VAL_FIELD_DESC = new TField("stringVal", TType.STRUCT, (short)-8);
-  private static final TField BINARY_VAL_FIELD_DESC = new TField("binaryVal", TType.STRUCT, (short)-9);
-  private static final TField ENUM_VAL_FIELD_DESC = new TField("enumVal", TType.STRUCT, (short)-10);
-  private static final TField STRUCT_VAL_FIELD_DESC = new TField("structVal", TType.STRUCT, (short)-11);
-  private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)-12);
-  private static final TField LATE_STRUCT_VAL_FIELD_DESC = new TField("lateStructVal", TType.STRUCT, (short)-13);
-  private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)-14);
-  private static final TField TIME_VAL_FIELD_DESC = new TField("timeVal", TType.STRUCT, (short)-15);
-  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.STRUCT, (short)-16);
-  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.STRUCT, (short)-17);
-  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.STRUCT, (short)-18);
-  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.STRUCT, (short)-19);
-  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.STRUCT, (short)-20);
-  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.STRUCT, (short)-21);
-  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.STRUCT, (short)-22);
-  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRUCT, (short)-23);
-  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRUCT, (short)-24);
-  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.STRUCT, (short)-25);
-  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-26);
-  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-27);
-  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.STRUCT, (short)-28);
-  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.STRUCT, (short)-29);
   private static final TField OPT_MAP_VAL_FIELD_DESC = new TField("optMapVal", TType.STRUCT, (short)-30);
+  private static final TField OPT_SET_VAL_FIELD_DESC = new TField("optSetVal", TType.STRUCT, (short)-29);
+  private static final TField OPT_LIST_VAL_FIELD_DESC = new TField("optListVal", TType.STRUCT, (short)-28);
+  private static final TField OPT_LATE_STRUCT_VAL_FIELD_DESC = new TField("optLateStructVal", TType.STRUCT, (short)-27);
+  private static final TField OPT_STRUCT_VAL_FIELD_DESC = new TField("optStructVal", TType.STRUCT, (short)-26);
+  private static final TField OPT_ENUM_VAL_FIELD_DESC = new TField("optEnumVal", TType.STRUCT, (short)-25);
+  private static final TField OPT_BINARY_VAL_FIELD_DESC = new TField("optBinaryVal", TType.STRUCT, (short)-24);
+  private static final TField OPT_STRING_VAL_FIELD_DESC = new TField("optStringVal", TType.STRUCT, (short)-23);
+  private static final TField OPT_DOUBLE_VAL_FIELD_DESC = new TField("optDoubleVal", TType.STRUCT, (short)-22);
+  private static final TField OPT_FLOAT_VAL_FIELD_DESC = new TField("optFloatVal", TType.STRUCT, (short)-21);
+  private static final TField OPT_I64_VAL_FIELD_DESC = new TField("optI64Val", TType.STRUCT, (short)-20);
+  private static final TField OPT_I32_VAL_FIELD_DESC = new TField("optI32Val", TType.STRUCT, (short)-19);
+  private static final TField OPT_I16_VAL_FIELD_DESC = new TField("optI16Val", TType.STRUCT, (short)-18);
+  private static final TField OPT_BYTE_VAL_FIELD_DESC = new TField("optByteVal", TType.STRUCT, (short)-17);
+  private static final TField OPT_BOOL_VAL_FIELD_DESC = new TField("optBoolVal", TType.STRUCT, (short)-16);
+  private static final TField TIME_VAL_FIELD_DESC = new TField("timeVal", TType.STRUCT, (short)-15);
+  private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)-14);
+  private static final TField LATE_STRUCT_VAL_FIELD_DESC = new TField("lateStructVal", TType.STRUCT, (short)-13);
+  private static final TField UNION_VAL_FIELD_DESC = new TField("unionVal", TType.STRUCT, (short)-12);
+  private static final TField STRUCT_VAL_FIELD_DESC = new TField("structVal", TType.STRUCT, (short)-11);
+  private static final TField ENUM_VAL_FIELD_DESC = new TField("enumVal", TType.STRUCT, (short)-10);
+  private static final TField BINARY_VAL_FIELD_DESC = new TField("binaryVal", TType.STRUCT, (short)-9);
+  private static final TField STRING_VAL_FIELD_DESC = new TField("stringVal", TType.STRUCT, (short)-8);
+  private static final TField DOUBLE_VAL_FIELD_DESC = new TField("doubleVal", TType.STRUCT, (short)-7);
+  private static final TField FLOAT_VAL_FIELD_DESC = new TField("floatVal", TType.STRUCT, (short)-6);
+  private static final TField I64_VAL_FIELD_DESC = new TField("i64Val", TType.STRUCT, (short)-5);
+  private static final TField I32_VAL_FIELD_DESC = new TField("i32Val", TType.STRUCT, (short)-4);
+  private static final TField I16_VAL_FIELD_DESC = new TField("i16Val", TType.STRUCT, (short)-3);
+  private static final TField BYTE_VAL_FIELD_DESC = new TField("byteVal", TType.STRUCT, (short)-2);
+  private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.STRUCT, (short)-1);
 
-  public final BoolPatch boolVal;
-  public final BytePatch byteVal;
-  public final I16Patch i16Val;
-  public final I32Patch i32Val;
-  public final I64Patch i64Val;
-  public final FloatPatch floatVal;
-  public final DoublePatch doubleVal;
-  public final StringPatch stringVal;
-  public final BinaryPatch binaryVal;
-  public final MyStructFieldN10Patch enumVal;
-  public final MyDataPatch structVal;
-  public final MyUnionPatch unionVal;
-  public final LateDefStructPatch lateStructVal;
-  public final DurationPatch durationVal;
-  public final TimePatch timeVal;
-  public final BoolPatch optBoolVal;
-  public final BytePatch optByteVal;
-  public final I16Patch optI16Val;
-  public final I32Patch optI32Val;
-  public final I64Patch optI64Val;
-  public final FloatPatch optFloatVal;
-  public final DoublePatch optDoubleVal;
-  public final StringPatch optStringVal;
-  public final BinaryPatch optBinaryVal;
-  public final MyStructFieldN25Patch optEnumVal;
-  public final MyDataPatch optStructVal;
-  public final LateDefStructPatch optLateStructVal;
-  public final MyStructFieldN28Patch optListVal;
-  public final MyStructFieldN29Patch optSetVal;
   public final MyStructFieldN30Patch optMapVal;
-  public static final int BOOLVAL = -1;
-  public static final int BYTEVAL = -2;
-  public static final int I16VAL = -3;
-  public static final int I32VAL = -4;
-  public static final int I64VAL = -5;
-  public static final int FLOATVAL = -6;
-  public static final int DOUBLEVAL = -7;
-  public static final int STRINGVAL = -8;
-  public static final int BINARYVAL = -9;
-  public static final int ENUMVAL = -10;
-  public static final int STRUCTVAL = -11;
-  public static final int UNIONVAL = -12;
-  public static final int LATESTRUCTVAL = -13;
-  public static final int DURATIONVAL = -14;
-  public static final int TIMEVAL = -15;
-  public static final int OPTBOOLVAL = -16;
-  public static final int OPTBYTEVAL = -17;
-  public static final int OPTI16VAL = -18;
-  public static final int OPTI32VAL = -19;
-  public static final int OPTI64VAL = -20;
-  public static final int OPTFLOATVAL = -21;
-  public static final int OPTDOUBLEVAL = -22;
-  public static final int OPTSTRINGVAL = -23;
-  public static final int OPTBINARYVAL = -24;
-  public static final int OPTENUMVAL = -25;
-  public static final int OPTSTRUCTVAL = -26;
-  public static final int OPTLATESTRUCTVAL = -27;
-  public static final int OPTLISTVAL = -28;
-  public static final int OPTSETVAL = -29;
+  public final MyStructFieldN29Patch optSetVal;
+  public final MyStructFieldN28Patch optListVal;
+  public final LateDefStructPatch optLateStructVal;
+  public final MyDataPatch optStructVal;
+  public final MyStructFieldN25Patch optEnumVal;
+  public final BinaryPatch optBinaryVal;
+  public final StringPatch optStringVal;
+  public final DoublePatch optDoubleVal;
+  public final FloatPatch optFloatVal;
+  public final I64Patch optI64Val;
+  public final I32Patch optI32Val;
+  public final I16Patch optI16Val;
+  public final BytePatch optByteVal;
+  public final BoolPatch optBoolVal;
+  public final TimePatch timeVal;
+  public final DurationPatch durationVal;
+  public final LateDefStructPatch lateStructVal;
+  public final MyUnionPatch unionVal;
+  public final MyDataPatch structVal;
+  public final MyStructFieldN10Patch enumVal;
+  public final BinaryPatch binaryVal;
+  public final StringPatch stringVal;
+  public final DoublePatch doubleVal;
+  public final FloatPatch floatVal;
+  public final I64Patch i64Val;
+  public final I32Patch i32Val;
+  public final I16Patch i16Val;
+  public final BytePatch byteVal;
+  public final BoolPatch boolVal;
   public static final int OPTMAPVAL = -30;
+  public static final int OPTSETVAL = -29;
+  public static final int OPTLISTVAL = -28;
+  public static final int OPTLATESTRUCTVAL = -27;
+  public static final int OPTSTRUCTVAL = -26;
+  public static final int OPTENUMVAL = -25;
+  public static final int OPTBINARYVAL = -24;
+  public static final int OPTSTRINGVAL = -23;
+  public static final int OPTDOUBLEVAL = -22;
+  public static final int OPTFLOATVAL = -21;
+  public static final int OPTI64VAL = -20;
+  public static final int OPTI32VAL = -19;
+  public static final int OPTI16VAL = -18;
+  public static final int OPTBYTEVAL = -17;
+  public static final int OPTBOOLVAL = -16;
+  public static final int TIMEVAL = -15;
+  public static final int DURATIONVAL = -14;
+  public static final int LATESTRUCTVAL = -13;
+  public static final int UNIONVAL = -12;
+  public static final int STRUCTVAL = -11;
+  public static final int ENUMVAL = -10;
+  public static final int BINARYVAL = -9;
+  public static final int STRINGVAL = -8;
+  public static final int DOUBLEVAL = -7;
+  public static final int FLOATVAL = -6;
+  public static final int I64VAL = -5;
+  public static final int I32VAL = -4;
+  public static final int I16VAL = -3;
+  public static final int BYTEVAL = -2;
+  public static final int BOOLVAL = -1;
 
   public MyStructFieldPatch(
-      BoolPatch boolVal,
-      BytePatch byteVal,
-      I16Patch i16Val,
-      I32Patch i32Val,
-      I64Patch i64Val,
-      FloatPatch floatVal,
-      DoublePatch doubleVal,
-      StringPatch stringVal,
-      BinaryPatch binaryVal,
-      MyStructFieldN10Patch enumVal,
-      MyDataPatch structVal,
-      MyUnionPatch unionVal,
-      LateDefStructPatch lateStructVal,
-      DurationPatch durationVal,
-      TimePatch timeVal,
-      BoolPatch optBoolVal,
-      BytePatch optByteVal,
-      I16Patch optI16Val,
-      I32Patch optI32Val,
-      I64Patch optI64Val,
-      FloatPatch optFloatVal,
-      DoublePatch optDoubleVal,
-      StringPatch optStringVal,
-      BinaryPatch optBinaryVal,
-      MyStructFieldN25Patch optEnumVal,
-      MyDataPatch optStructVal,
-      LateDefStructPatch optLateStructVal,
-      MyStructFieldN28Patch optListVal,
+      MyStructFieldN30Patch optMapVal,
       MyStructFieldN29Patch optSetVal,
-      MyStructFieldN30Patch optMapVal) {
-    this.boolVal = boolVal;
-    this.byteVal = byteVal;
-    this.i16Val = i16Val;
-    this.i32Val = i32Val;
-    this.i64Val = i64Val;
-    this.floatVal = floatVal;
-    this.doubleVal = doubleVal;
-    this.stringVal = stringVal;
-    this.binaryVal = binaryVal;
-    this.enumVal = enumVal;
-    this.structVal = structVal;
-    this.unionVal = unionVal;
-    this.lateStructVal = lateStructVal;
-    this.durationVal = durationVal;
-    this.timeVal = timeVal;
-    this.optBoolVal = optBoolVal;
-    this.optByteVal = optByteVal;
-    this.optI16Val = optI16Val;
-    this.optI32Val = optI32Val;
-    this.optI64Val = optI64Val;
-    this.optFloatVal = optFloatVal;
-    this.optDoubleVal = optDoubleVal;
-    this.optStringVal = optStringVal;
-    this.optBinaryVal = optBinaryVal;
-    this.optEnumVal = optEnumVal;
-    this.optStructVal = optStructVal;
-    this.optLateStructVal = optLateStructVal;
-    this.optListVal = optListVal;
-    this.optSetVal = optSetVal;
+      MyStructFieldN28Patch optListVal,
+      LateDefStructPatch optLateStructVal,
+      MyDataPatch optStructVal,
+      MyStructFieldN25Patch optEnumVal,
+      BinaryPatch optBinaryVal,
+      StringPatch optStringVal,
+      DoublePatch optDoubleVal,
+      FloatPatch optFloatVal,
+      I64Patch optI64Val,
+      I32Patch optI32Val,
+      I16Patch optI16Val,
+      BytePatch optByteVal,
+      BoolPatch optBoolVal,
+      TimePatch timeVal,
+      DurationPatch durationVal,
+      LateDefStructPatch lateStructVal,
+      MyUnionPatch unionVal,
+      MyDataPatch structVal,
+      MyStructFieldN10Patch enumVal,
+      BinaryPatch binaryVal,
+      StringPatch stringVal,
+      DoublePatch doubleVal,
+      FloatPatch floatVal,
+      I64Patch i64Val,
+      I32Patch i32Val,
+      I16Patch i16Val,
+      BytePatch byteVal,
+      BoolPatch boolVal) {
     this.optMapVal = optMapVal;
+    this.optSetVal = optSetVal;
+    this.optListVal = optListVal;
+    this.optLateStructVal = optLateStructVal;
+    this.optStructVal = optStructVal;
+    this.optEnumVal = optEnumVal;
+    this.optBinaryVal = optBinaryVal;
+    this.optStringVal = optStringVal;
+    this.optDoubleVal = optDoubleVal;
+    this.optFloatVal = optFloatVal;
+    this.optI64Val = optI64Val;
+    this.optI32Val = optI32Val;
+    this.optI16Val = optI16Val;
+    this.optByteVal = optByteVal;
+    this.optBoolVal = optBoolVal;
+    this.timeVal = timeVal;
+    this.durationVal = durationVal;
+    this.lateStructVal = lateStructVal;
+    this.unionVal = unionVal;
+    this.structVal = structVal;
+    this.enumVal = enumVal;
+    this.binaryVal = binaryVal;
+    this.stringVal = stringVal;
+    this.doubleVal = doubleVal;
+    this.floatVal = floatVal;
+    this.i64Val = i64Val;
+    this.i32Val = i32Val;
+    this.i16Val = i16Val;
+    this.byteVal = byteVal;
+    this.boolVal = boolVal;
   }
 
   /**
    * Performs a deep copy on <i>other</i>.
    */
   public MyStructFieldPatch(MyStructFieldPatch other) {
-    if (other.isSetBoolVal()) {
-      this.boolVal = TBaseHelper.deepCopy(other.boolVal);
+    if (other.isSetOptMapVal()) {
+      this.optMapVal = TBaseHelper.deepCopy(other.optMapVal);
     } else {
-      this.boolVal = null;
-    }
-    if (other.isSetByteVal()) {
-      this.byteVal = TBaseHelper.deepCopy(other.byteVal);
-    } else {
-      this.byteVal = null;
-    }
-    if (other.isSetI16Val()) {
-      this.i16Val = TBaseHelper.deepCopy(other.i16Val);
-    } else {
-      this.i16Val = null;
-    }
-    if (other.isSetI32Val()) {
-      this.i32Val = TBaseHelper.deepCopy(other.i32Val);
-    } else {
-      this.i32Val = null;
-    }
-    if (other.isSetI64Val()) {
-      this.i64Val = TBaseHelper.deepCopy(other.i64Val);
-    } else {
-      this.i64Val = null;
-    }
-    if (other.isSetFloatVal()) {
-      this.floatVal = TBaseHelper.deepCopy(other.floatVal);
-    } else {
-      this.floatVal = null;
-    }
-    if (other.isSetDoubleVal()) {
-      this.doubleVal = TBaseHelper.deepCopy(other.doubleVal);
-    } else {
-      this.doubleVal = null;
-    }
-    if (other.isSetStringVal()) {
-      this.stringVal = TBaseHelper.deepCopy(other.stringVal);
-    } else {
-      this.stringVal = null;
-    }
-    if (other.isSetBinaryVal()) {
-      this.binaryVal = TBaseHelper.deepCopy(other.binaryVal);
-    } else {
-      this.binaryVal = null;
-    }
-    if (other.isSetEnumVal()) {
-      this.enumVal = TBaseHelper.deepCopy(other.enumVal);
-    } else {
-      this.enumVal = null;
-    }
-    if (other.isSetStructVal()) {
-      this.structVal = TBaseHelper.deepCopy(other.structVal);
-    } else {
-      this.structVal = null;
-    }
-    if (other.isSetUnionVal()) {
-      this.unionVal = TBaseHelper.deepCopy(other.unionVal);
-    } else {
-      this.unionVal = null;
-    }
-    if (other.isSetLateStructVal()) {
-      this.lateStructVal = TBaseHelper.deepCopy(other.lateStructVal);
-    } else {
-      this.lateStructVal = null;
-    }
-    if (other.isSetDurationVal()) {
-      this.durationVal = TBaseHelper.deepCopy(other.durationVal);
-    } else {
-      this.durationVal = null;
-    }
-    if (other.isSetTimeVal()) {
-      this.timeVal = TBaseHelper.deepCopy(other.timeVal);
-    } else {
-      this.timeVal = null;
-    }
-    if (other.isSetOptBoolVal()) {
-      this.optBoolVal = TBaseHelper.deepCopy(other.optBoolVal);
-    } else {
-      this.optBoolVal = null;
-    }
-    if (other.isSetOptByteVal()) {
-      this.optByteVal = TBaseHelper.deepCopy(other.optByteVal);
-    } else {
-      this.optByteVal = null;
-    }
-    if (other.isSetOptI16Val()) {
-      this.optI16Val = TBaseHelper.deepCopy(other.optI16Val);
-    } else {
-      this.optI16Val = null;
-    }
-    if (other.isSetOptI32Val()) {
-      this.optI32Val = TBaseHelper.deepCopy(other.optI32Val);
-    } else {
-      this.optI32Val = null;
-    }
-    if (other.isSetOptI64Val()) {
-      this.optI64Val = TBaseHelper.deepCopy(other.optI64Val);
-    } else {
-      this.optI64Val = null;
-    }
-    if (other.isSetOptFloatVal()) {
-      this.optFloatVal = TBaseHelper.deepCopy(other.optFloatVal);
-    } else {
-      this.optFloatVal = null;
-    }
-    if (other.isSetOptDoubleVal()) {
-      this.optDoubleVal = TBaseHelper.deepCopy(other.optDoubleVal);
-    } else {
-      this.optDoubleVal = null;
-    }
-    if (other.isSetOptStringVal()) {
-      this.optStringVal = TBaseHelper.deepCopy(other.optStringVal);
-    } else {
-      this.optStringVal = null;
-    }
-    if (other.isSetOptBinaryVal()) {
-      this.optBinaryVal = TBaseHelper.deepCopy(other.optBinaryVal);
-    } else {
-      this.optBinaryVal = null;
-    }
-    if (other.isSetOptEnumVal()) {
-      this.optEnumVal = TBaseHelper.deepCopy(other.optEnumVal);
-    } else {
-      this.optEnumVal = null;
-    }
-    if (other.isSetOptStructVal()) {
-      this.optStructVal = TBaseHelper.deepCopy(other.optStructVal);
-    } else {
-      this.optStructVal = null;
-    }
-    if (other.isSetOptLateStructVal()) {
-      this.optLateStructVal = TBaseHelper.deepCopy(other.optLateStructVal);
-    } else {
-      this.optLateStructVal = null;
-    }
-    if (other.isSetOptListVal()) {
-      this.optListVal = TBaseHelper.deepCopy(other.optListVal);
-    } else {
-      this.optListVal = null;
+      this.optMapVal = null;
     }
     if (other.isSetOptSetVal()) {
       this.optSetVal = TBaseHelper.deepCopy(other.optSetVal);
     } else {
       this.optSetVal = null;
     }
-    if (other.isSetOptMapVal()) {
-      this.optMapVal = TBaseHelper.deepCopy(other.optMapVal);
+    if (other.isSetOptListVal()) {
+      this.optListVal = TBaseHelper.deepCopy(other.optListVal);
     } else {
-      this.optMapVal = null;
+      this.optListVal = null;
+    }
+    if (other.isSetOptLateStructVal()) {
+      this.optLateStructVal = TBaseHelper.deepCopy(other.optLateStructVal);
+    } else {
+      this.optLateStructVal = null;
+    }
+    if (other.isSetOptStructVal()) {
+      this.optStructVal = TBaseHelper.deepCopy(other.optStructVal);
+    } else {
+      this.optStructVal = null;
+    }
+    if (other.isSetOptEnumVal()) {
+      this.optEnumVal = TBaseHelper.deepCopy(other.optEnumVal);
+    } else {
+      this.optEnumVal = null;
+    }
+    if (other.isSetOptBinaryVal()) {
+      this.optBinaryVal = TBaseHelper.deepCopy(other.optBinaryVal);
+    } else {
+      this.optBinaryVal = null;
+    }
+    if (other.isSetOptStringVal()) {
+      this.optStringVal = TBaseHelper.deepCopy(other.optStringVal);
+    } else {
+      this.optStringVal = null;
+    }
+    if (other.isSetOptDoubleVal()) {
+      this.optDoubleVal = TBaseHelper.deepCopy(other.optDoubleVal);
+    } else {
+      this.optDoubleVal = null;
+    }
+    if (other.isSetOptFloatVal()) {
+      this.optFloatVal = TBaseHelper.deepCopy(other.optFloatVal);
+    } else {
+      this.optFloatVal = null;
+    }
+    if (other.isSetOptI64Val()) {
+      this.optI64Val = TBaseHelper.deepCopy(other.optI64Val);
+    } else {
+      this.optI64Val = null;
+    }
+    if (other.isSetOptI32Val()) {
+      this.optI32Val = TBaseHelper.deepCopy(other.optI32Val);
+    } else {
+      this.optI32Val = null;
+    }
+    if (other.isSetOptI16Val()) {
+      this.optI16Val = TBaseHelper.deepCopy(other.optI16Val);
+    } else {
+      this.optI16Val = null;
+    }
+    if (other.isSetOptByteVal()) {
+      this.optByteVal = TBaseHelper.deepCopy(other.optByteVal);
+    } else {
+      this.optByteVal = null;
+    }
+    if (other.isSetOptBoolVal()) {
+      this.optBoolVal = TBaseHelper.deepCopy(other.optBoolVal);
+    } else {
+      this.optBoolVal = null;
+    }
+    if (other.isSetTimeVal()) {
+      this.timeVal = TBaseHelper.deepCopy(other.timeVal);
+    } else {
+      this.timeVal = null;
+    }
+    if (other.isSetDurationVal()) {
+      this.durationVal = TBaseHelper.deepCopy(other.durationVal);
+    } else {
+      this.durationVal = null;
+    }
+    if (other.isSetLateStructVal()) {
+      this.lateStructVal = TBaseHelper.deepCopy(other.lateStructVal);
+    } else {
+      this.lateStructVal = null;
+    }
+    if (other.isSetUnionVal()) {
+      this.unionVal = TBaseHelper.deepCopy(other.unionVal);
+    } else {
+      this.unionVal = null;
+    }
+    if (other.isSetStructVal()) {
+      this.structVal = TBaseHelper.deepCopy(other.structVal);
+    } else {
+      this.structVal = null;
+    }
+    if (other.isSetEnumVal()) {
+      this.enumVal = TBaseHelper.deepCopy(other.enumVal);
+    } else {
+      this.enumVal = null;
+    }
+    if (other.isSetBinaryVal()) {
+      this.binaryVal = TBaseHelper.deepCopy(other.binaryVal);
+    } else {
+      this.binaryVal = null;
+    }
+    if (other.isSetStringVal()) {
+      this.stringVal = TBaseHelper.deepCopy(other.stringVal);
+    } else {
+      this.stringVal = null;
+    }
+    if (other.isSetDoubleVal()) {
+      this.doubleVal = TBaseHelper.deepCopy(other.doubleVal);
+    } else {
+      this.doubleVal = null;
+    }
+    if (other.isSetFloatVal()) {
+      this.floatVal = TBaseHelper.deepCopy(other.floatVal);
+    } else {
+      this.floatVal = null;
+    }
+    if (other.isSetI64Val()) {
+      this.i64Val = TBaseHelper.deepCopy(other.i64Val);
+    } else {
+      this.i64Val = null;
+    }
+    if (other.isSetI32Val()) {
+      this.i32Val = TBaseHelper.deepCopy(other.i32Val);
+    } else {
+      this.i32Val = null;
+    }
+    if (other.isSetI16Val()) {
+      this.i16Val = TBaseHelper.deepCopy(other.i16Val);
+    } else {
+      this.i16Val = null;
+    }
+    if (other.isSetByteVal()) {
+      this.byteVal = TBaseHelper.deepCopy(other.byteVal);
+    } else {
+      this.byteVal = null;
+    }
+    if (other.isSetBoolVal()) {
+      this.boolVal = TBaseHelper.deepCopy(other.boolVal);
+    } else {
+      this.boolVal = null;
     }
   }
 
@@ -341,256 +341,13 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return new MyStructFieldPatch(this);
   }
 
-  public BoolPatch getBoolVal() {
-    return this.boolVal;
+  public MyStructFieldN30Patch getOptMapVal() {
+    return this.optMapVal;
   }
 
-  // Returns true if field boolVal is set (has been assigned a value) and false otherwise
-  public boolean isSetBoolVal() {
-    return this.boolVal != null;
-  }
-
-  public BytePatch getByteVal() {
-    return this.byteVal;
-  }
-
-  // Returns true if field byteVal is set (has been assigned a value) and false otherwise
-  public boolean isSetByteVal() {
-    return this.byteVal != null;
-  }
-
-  public I16Patch getI16Val() {
-    return this.i16Val;
-  }
-
-  // Returns true if field i16Val is set (has been assigned a value) and false otherwise
-  public boolean isSetI16Val() {
-    return this.i16Val != null;
-  }
-
-  public I32Patch getI32Val() {
-    return this.i32Val;
-  }
-
-  // Returns true if field i32Val is set (has been assigned a value) and false otherwise
-  public boolean isSetI32Val() {
-    return this.i32Val != null;
-  }
-
-  public I64Patch getI64Val() {
-    return this.i64Val;
-  }
-
-  // Returns true if field i64Val is set (has been assigned a value) and false otherwise
-  public boolean isSetI64Val() {
-    return this.i64Val != null;
-  }
-
-  public FloatPatch getFloatVal() {
-    return this.floatVal;
-  }
-
-  // Returns true if field floatVal is set (has been assigned a value) and false otherwise
-  public boolean isSetFloatVal() {
-    return this.floatVal != null;
-  }
-
-  public DoublePatch getDoubleVal() {
-    return this.doubleVal;
-  }
-
-  // Returns true if field doubleVal is set (has been assigned a value) and false otherwise
-  public boolean isSetDoubleVal() {
-    return this.doubleVal != null;
-  }
-
-  public StringPatch getStringVal() {
-    return this.stringVal;
-  }
-
-  // Returns true if field stringVal is set (has been assigned a value) and false otherwise
-  public boolean isSetStringVal() {
-    return this.stringVal != null;
-  }
-
-  public BinaryPatch getBinaryVal() {
-    return this.binaryVal;
-  }
-
-  // Returns true if field binaryVal is set (has been assigned a value) and false otherwise
-  public boolean isSetBinaryVal() {
-    return this.binaryVal != null;
-  }
-
-  public MyStructFieldN10Patch getEnumVal() {
-    return this.enumVal;
-  }
-
-  // Returns true if field enumVal is set (has been assigned a value) and false otherwise
-  public boolean isSetEnumVal() {
-    return this.enumVal != null;
-  }
-
-  public MyDataPatch getStructVal() {
-    return this.structVal;
-  }
-
-  // Returns true if field structVal is set (has been assigned a value) and false otherwise
-  public boolean isSetStructVal() {
-    return this.structVal != null;
-  }
-
-  public MyUnionPatch getUnionVal() {
-    return this.unionVal;
-  }
-
-  // Returns true if field unionVal is set (has been assigned a value) and false otherwise
-  public boolean isSetUnionVal() {
-    return this.unionVal != null;
-  }
-
-  public LateDefStructPatch getLateStructVal() {
-    return this.lateStructVal;
-  }
-
-  // Returns true if field lateStructVal is set (has been assigned a value) and false otherwise
-  public boolean isSetLateStructVal() {
-    return this.lateStructVal != null;
-  }
-
-  public DurationPatch getDurationVal() {
-    return this.durationVal;
-  }
-
-  // Returns true if field durationVal is set (has been assigned a value) and false otherwise
-  public boolean isSetDurationVal() {
-    return this.durationVal != null;
-  }
-
-  public TimePatch getTimeVal() {
-    return this.timeVal;
-  }
-
-  // Returns true if field timeVal is set (has been assigned a value) and false otherwise
-  public boolean isSetTimeVal() {
-    return this.timeVal != null;
-  }
-
-  public BoolPatch getOptBoolVal() {
-    return this.optBoolVal;
-  }
-
-  // Returns true if field optBoolVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptBoolVal() {
-    return this.optBoolVal != null;
-  }
-
-  public BytePatch getOptByteVal() {
-    return this.optByteVal;
-  }
-
-  // Returns true if field optByteVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptByteVal() {
-    return this.optByteVal != null;
-  }
-
-  public I16Patch getOptI16Val() {
-    return this.optI16Val;
-  }
-
-  // Returns true if field optI16Val is set (has been assigned a value) and false otherwise
-  public boolean isSetOptI16Val() {
-    return this.optI16Val != null;
-  }
-
-  public I32Patch getOptI32Val() {
-    return this.optI32Val;
-  }
-
-  // Returns true if field optI32Val is set (has been assigned a value) and false otherwise
-  public boolean isSetOptI32Val() {
-    return this.optI32Val != null;
-  }
-
-  public I64Patch getOptI64Val() {
-    return this.optI64Val;
-  }
-
-  // Returns true if field optI64Val is set (has been assigned a value) and false otherwise
-  public boolean isSetOptI64Val() {
-    return this.optI64Val != null;
-  }
-
-  public FloatPatch getOptFloatVal() {
-    return this.optFloatVal;
-  }
-
-  // Returns true if field optFloatVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptFloatVal() {
-    return this.optFloatVal != null;
-  }
-
-  public DoublePatch getOptDoubleVal() {
-    return this.optDoubleVal;
-  }
-
-  // Returns true if field optDoubleVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptDoubleVal() {
-    return this.optDoubleVal != null;
-  }
-
-  public StringPatch getOptStringVal() {
-    return this.optStringVal;
-  }
-
-  // Returns true if field optStringVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptStringVal() {
-    return this.optStringVal != null;
-  }
-
-  public BinaryPatch getOptBinaryVal() {
-    return this.optBinaryVal;
-  }
-
-  // Returns true if field optBinaryVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptBinaryVal() {
-    return this.optBinaryVal != null;
-  }
-
-  public MyStructFieldN25Patch getOptEnumVal() {
-    return this.optEnumVal;
-  }
-
-  // Returns true if field optEnumVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptEnumVal() {
-    return this.optEnumVal != null;
-  }
-
-  public MyDataPatch getOptStructVal() {
-    return this.optStructVal;
-  }
-
-  // Returns true if field optStructVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptStructVal() {
-    return this.optStructVal != null;
-  }
-
-  public LateDefStructPatch getOptLateStructVal() {
-    return this.optLateStructVal;
-  }
-
-  // Returns true if field optLateStructVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptLateStructVal() {
-    return this.optLateStructVal != null;
-  }
-
-  public MyStructFieldN28Patch getOptListVal() {
-    return this.optListVal;
-  }
-
-  // Returns true if field optListVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptListVal() {
-    return this.optListVal != null;
+  // Returns true if field optMapVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptMapVal() {
+    return this.optMapVal != null;
   }
 
   public MyStructFieldN29Patch getOptSetVal() {
@@ -602,13 +359,256 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
     return this.optSetVal != null;
   }
 
-  public MyStructFieldN30Patch getOptMapVal() {
-    return this.optMapVal;
+  public MyStructFieldN28Patch getOptListVal() {
+    return this.optListVal;
   }
 
-  // Returns true if field optMapVal is set (has been assigned a value) and false otherwise
-  public boolean isSetOptMapVal() {
-    return this.optMapVal != null;
+  // Returns true if field optListVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptListVal() {
+    return this.optListVal != null;
+  }
+
+  public LateDefStructPatch getOptLateStructVal() {
+    return this.optLateStructVal;
+  }
+
+  // Returns true if field optLateStructVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptLateStructVal() {
+    return this.optLateStructVal != null;
+  }
+
+  public MyDataPatch getOptStructVal() {
+    return this.optStructVal;
+  }
+
+  // Returns true if field optStructVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptStructVal() {
+    return this.optStructVal != null;
+  }
+
+  public MyStructFieldN25Patch getOptEnumVal() {
+    return this.optEnumVal;
+  }
+
+  // Returns true if field optEnumVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptEnumVal() {
+    return this.optEnumVal != null;
+  }
+
+  public BinaryPatch getOptBinaryVal() {
+    return this.optBinaryVal;
+  }
+
+  // Returns true if field optBinaryVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptBinaryVal() {
+    return this.optBinaryVal != null;
+  }
+
+  public StringPatch getOptStringVal() {
+    return this.optStringVal;
+  }
+
+  // Returns true if field optStringVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptStringVal() {
+    return this.optStringVal != null;
+  }
+
+  public DoublePatch getOptDoubleVal() {
+    return this.optDoubleVal;
+  }
+
+  // Returns true if field optDoubleVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptDoubleVal() {
+    return this.optDoubleVal != null;
+  }
+
+  public FloatPatch getOptFloatVal() {
+    return this.optFloatVal;
+  }
+
+  // Returns true if field optFloatVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptFloatVal() {
+    return this.optFloatVal != null;
+  }
+
+  public I64Patch getOptI64Val() {
+    return this.optI64Val;
+  }
+
+  // Returns true if field optI64Val is set (has been assigned a value) and false otherwise
+  public boolean isSetOptI64Val() {
+    return this.optI64Val != null;
+  }
+
+  public I32Patch getOptI32Val() {
+    return this.optI32Val;
+  }
+
+  // Returns true if field optI32Val is set (has been assigned a value) and false otherwise
+  public boolean isSetOptI32Val() {
+    return this.optI32Val != null;
+  }
+
+  public I16Patch getOptI16Val() {
+    return this.optI16Val;
+  }
+
+  // Returns true if field optI16Val is set (has been assigned a value) and false otherwise
+  public boolean isSetOptI16Val() {
+    return this.optI16Val != null;
+  }
+
+  public BytePatch getOptByteVal() {
+    return this.optByteVal;
+  }
+
+  // Returns true if field optByteVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptByteVal() {
+    return this.optByteVal != null;
+  }
+
+  public BoolPatch getOptBoolVal() {
+    return this.optBoolVal;
+  }
+
+  // Returns true if field optBoolVal is set (has been assigned a value) and false otherwise
+  public boolean isSetOptBoolVal() {
+    return this.optBoolVal != null;
+  }
+
+  public TimePatch getTimeVal() {
+    return this.timeVal;
+  }
+
+  // Returns true if field timeVal is set (has been assigned a value) and false otherwise
+  public boolean isSetTimeVal() {
+    return this.timeVal != null;
+  }
+
+  public DurationPatch getDurationVal() {
+    return this.durationVal;
+  }
+
+  // Returns true if field durationVal is set (has been assigned a value) and false otherwise
+  public boolean isSetDurationVal() {
+    return this.durationVal != null;
+  }
+
+  public LateDefStructPatch getLateStructVal() {
+    return this.lateStructVal;
+  }
+
+  // Returns true if field lateStructVal is set (has been assigned a value) and false otherwise
+  public boolean isSetLateStructVal() {
+    return this.lateStructVal != null;
+  }
+
+  public MyUnionPatch getUnionVal() {
+    return this.unionVal;
+  }
+
+  // Returns true if field unionVal is set (has been assigned a value) and false otherwise
+  public boolean isSetUnionVal() {
+    return this.unionVal != null;
+  }
+
+  public MyDataPatch getStructVal() {
+    return this.structVal;
+  }
+
+  // Returns true if field structVal is set (has been assigned a value) and false otherwise
+  public boolean isSetStructVal() {
+    return this.structVal != null;
+  }
+
+  public MyStructFieldN10Patch getEnumVal() {
+    return this.enumVal;
+  }
+
+  // Returns true if field enumVal is set (has been assigned a value) and false otherwise
+  public boolean isSetEnumVal() {
+    return this.enumVal != null;
+  }
+
+  public BinaryPatch getBinaryVal() {
+    return this.binaryVal;
+  }
+
+  // Returns true if field binaryVal is set (has been assigned a value) and false otherwise
+  public boolean isSetBinaryVal() {
+    return this.binaryVal != null;
+  }
+
+  public StringPatch getStringVal() {
+    return this.stringVal;
+  }
+
+  // Returns true if field stringVal is set (has been assigned a value) and false otherwise
+  public boolean isSetStringVal() {
+    return this.stringVal != null;
+  }
+
+  public DoublePatch getDoubleVal() {
+    return this.doubleVal;
+  }
+
+  // Returns true if field doubleVal is set (has been assigned a value) and false otherwise
+  public boolean isSetDoubleVal() {
+    return this.doubleVal != null;
+  }
+
+  public FloatPatch getFloatVal() {
+    return this.floatVal;
+  }
+
+  // Returns true if field floatVal is set (has been assigned a value) and false otherwise
+  public boolean isSetFloatVal() {
+    return this.floatVal != null;
+  }
+
+  public I64Patch getI64Val() {
+    return this.i64Val;
+  }
+
+  // Returns true if field i64Val is set (has been assigned a value) and false otherwise
+  public boolean isSetI64Val() {
+    return this.i64Val != null;
+  }
+
+  public I32Patch getI32Val() {
+    return this.i32Val;
+  }
+
+  // Returns true if field i32Val is set (has been assigned a value) and false otherwise
+  public boolean isSetI32Val() {
+    return this.i32Val != null;
+  }
+
+  public I16Patch getI16Val() {
+    return this.i16Val;
+  }
+
+  // Returns true if field i16Val is set (has been assigned a value) and false otherwise
+  public boolean isSetI16Val() {
+    return this.i16Val != null;
+  }
+
+  public BytePatch getByteVal() {
+    return this.byteVal;
+  }
+
+  // Returns true if field byteVal is set (has been assigned a value) and false otherwise
+  public boolean isSetByteVal() {
+    return this.byteVal != null;
+  }
+
+  public BoolPatch getBoolVal() {
+    return this.boolVal;
+  }
+
+  // Returns true if field boolVal is set (has been assigned a value) and false otherwise
+  public boolean isSetBoolVal() {
+    return this.boolVal != null;
   }
 
   @Override
@@ -621,72 +621,72 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       return false;
     MyStructFieldPatch that = (MyStructFieldPatch)_that;
 
-    if (!TBaseHelper.equalsNobinary(this.isSetBoolVal(), that.isSetBoolVal(), this.boolVal, that.boolVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetByteVal(), that.isSetByteVal(), this.byteVal, that.byteVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetI16Val(), that.isSetI16Val(), this.i16Val, that.i16Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetI32Val(), that.isSetI32Val(), this.i32Val, that.i32Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetI64Val(), that.isSetI64Val(), this.i64Val, that.i64Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetFloatVal(), that.isSetFloatVal(), this.floatVal, that.floatVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetDoubleVal(), that.isSetDoubleVal(), this.doubleVal, that.doubleVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetStringVal(), that.isSetStringVal(), this.stringVal, that.stringVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetBinaryVal(), that.isSetBinaryVal(), this.binaryVal, that.binaryVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetEnumVal(), that.isSetEnumVal(), this.enumVal, that.enumVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetStructVal(), that.isSetStructVal(), this.structVal, that.structVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetUnionVal(), that.isSetUnionVal(), this.unionVal, that.unionVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetLateStructVal(), that.isSetLateStructVal(), this.lateStructVal, that.lateStructVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetDurationVal(), that.isSetDurationVal(), this.durationVal, that.durationVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetTimeVal(), that.isSetTimeVal(), this.timeVal, that.timeVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptBoolVal(), that.isSetOptBoolVal(), this.optBoolVal, that.optBoolVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptByteVal(), that.isSetOptByteVal(), this.optByteVal, that.optByteVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptI16Val(), that.isSetOptI16Val(), this.optI16Val, that.optI16Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptI32Val(), that.isSetOptI32Val(), this.optI32Val, that.optI32Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptI64Val(), that.isSetOptI64Val(), this.optI64Val, that.optI64Val)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptFloatVal(), that.isSetOptFloatVal(), this.optFloatVal, that.optFloatVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptDoubleVal(), that.isSetOptDoubleVal(), this.optDoubleVal, that.optDoubleVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptStringVal(), that.isSetOptStringVal(), this.optStringVal, that.optStringVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptBinaryVal(), that.isSetOptBinaryVal(), this.optBinaryVal, that.optBinaryVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptEnumVal(), that.isSetOptEnumVal(), this.optEnumVal, that.optEnumVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptStructVal(), that.isSetOptStructVal(), this.optStructVal, that.optStructVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptLateStructVal(), that.isSetOptLateStructVal(), this.optLateStructVal, that.optLateStructVal)) { return false; }
-
-    if (!TBaseHelper.equalsNobinary(this.isSetOptListVal(), that.isSetOptListVal(), this.optListVal, that.optListVal)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetOptMapVal(), that.isSetOptMapVal(), this.optMapVal, that.optMapVal)) { return false; }
 
     if (!TBaseHelper.equalsNobinary(this.isSetOptSetVal(), that.isSetOptSetVal(), this.optSetVal, that.optSetVal)) { return false; }
 
-    if (!TBaseHelper.equalsNobinary(this.isSetOptMapVal(), that.isSetOptMapVal(), this.optMapVal, that.optMapVal)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetOptListVal(), that.isSetOptListVal(), this.optListVal, that.optListVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptLateStructVal(), that.isSetOptLateStructVal(), this.optLateStructVal, that.optLateStructVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptStructVal(), that.isSetOptStructVal(), this.optStructVal, that.optStructVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptEnumVal(), that.isSetOptEnumVal(), this.optEnumVal, that.optEnumVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptBinaryVal(), that.isSetOptBinaryVal(), this.optBinaryVal, that.optBinaryVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptStringVal(), that.isSetOptStringVal(), this.optStringVal, that.optStringVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptDoubleVal(), that.isSetOptDoubleVal(), this.optDoubleVal, that.optDoubleVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptFloatVal(), that.isSetOptFloatVal(), this.optFloatVal, that.optFloatVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptI64Val(), that.isSetOptI64Val(), this.optI64Val, that.optI64Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptI32Val(), that.isSetOptI32Val(), this.optI32Val, that.optI32Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptI16Val(), that.isSetOptI16Val(), this.optI16Val, that.optI16Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptByteVal(), that.isSetOptByteVal(), this.optByteVal, that.optByteVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetOptBoolVal(), that.isSetOptBoolVal(), this.optBoolVal, that.optBoolVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetTimeVal(), that.isSetTimeVal(), this.timeVal, that.timeVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetDurationVal(), that.isSetDurationVal(), this.durationVal, that.durationVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetLateStructVal(), that.isSetLateStructVal(), this.lateStructVal, that.lateStructVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetUnionVal(), that.isSetUnionVal(), this.unionVal, that.unionVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetStructVal(), that.isSetStructVal(), this.structVal, that.structVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetEnumVal(), that.isSetEnumVal(), this.enumVal, that.enumVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetBinaryVal(), that.isSetBinaryVal(), this.binaryVal, that.binaryVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetStringVal(), that.isSetStringVal(), this.stringVal, that.stringVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetDoubleVal(), that.isSetDoubleVal(), this.doubleVal, that.doubleVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetFloatVal(), that.isSetFloatVal(), this.floatVal, that.floatVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetI64Val(), that.isSetI64Val(), this.i64Val, that.i64Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetI32Val(), that.isSetI32Val(), this.i32Val, that.i32Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetI16Val(), that.isSetI16Val(), this.i16Val, that.i16Val)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetByteVal(), that.isSetByteVal(), this.byteVal, that.byteVal)) { return false; }
+
+    if (!TBaseHelper.equalsNobinary(this.isSetBoolVal(), that.isSetBoolVal(), this.boolVal, that.boolVal)) { return false; }
 
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {boolVal, byteVal, i16Val, i32Val, i64Val, floatVal, doubleVal, stringVal, binaryVal, enumVal, structVal, unionVal, lateStructVal, durationVal, timeVal, optBoolVal, optByteVal, optI16Val, optI32Val, optI64Val, optFloatVal, optDoubleVal, optStringVal, optBinaryVal, optEnumVal, optStructVal, optLateStructVal, optListVal, optSetVal, optMapVal});
+    return Arrays.deepHashCode(new Object[] {optMapVal, optSetVal, optListVal, optLateStructVal, optStructVal, optEnumVal, optBinaryVal, optStringVal, optDoubleVal, optFloatVal, optI64Val, optI32Val, optI16Val, optByteVal, optBoolVal, timeVal, durationVal, lateStructVal, unionVal, structVal, enumVal, binaryVal, stringVal, doubleVal, floatVal, i64Val, i32Val, i16Val, byteVal, boolVal});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -695,36 +695,36 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
   }
 
   public static MyStructFieldPatch deserialize(TProtocol iprot) throws TException {
-    BoolPatch tmp_boolVal = null;
-    BytePatch tmp_byteVal = null;
-    I16Patch tmp_i16Val = null;
-    I32Patch tmp_i32Val = null;
-    I64Patch tmp_i64Val = null;
-    FloatPatch tmp_floatVal = null;
-    DoublePatch tmp_doubleVal = null;
-    StringPatch tmp_stringVal = null;
-    BinaryPatch tmp_binaryVal = null;
-    MyStructFieldN10Patch tmp_enumVal = null;
-    MyDataPatch tmp_structVal = null;
-    MyUnionPatch tmp_unionVal = null;
-    LateDefStructPatch tmp_lateStructVal = null;
-    DurationPatch tmp_durationVal = null;
-    TimePatch tmp_timeVal = null;
-    BoolPatch tmp_optBoolVal = null;
-    BytePatch tmp_optByteVal = null;
-    I16Patch tmp_optI16Val = null;
-    I32Patch tmp_optI32Val = null;
-    I64Patch tmp_optI64Val = null;
-    FloatPatch tmp_optFloatVal = null;
-    DoublePatch tmp_optDoubleVal = null;
-    StringPatch tmp_optStringVal = null;
-    BinaryPatch tmp_optBinaryVal = null;
-    MyStructFieldN25Patch tmp_optEnumVal = null;
-    MyDataPatch tmp_optStructVal = null;
-    LateDefStructPatch tmp_optLateStructVal = null;
-    MyStructFieldN28Patch tmp_optListVal = null;
-    MyStructFieldN29Patch tmp_optSetVal = null;
     MyStructFieldN30Patch tmp_optMapVal = null;
+    MyStructFieldN29Patch tmp_optSetVal = null;
+    MyStructFieldN28Patch tmp_optListVal = null;
+    LateDefStructPatch tmp_optLateStructVal = null;
+    MyDataPatch tmp_optStructVal = null;
+    MyStructFieldN25Patch tmp_optEnumVal = null;
+    BinaryPatch tmp_optBinaryVal = null;
+    StringPatch tmp_optStringVal = null;
+    DoublePatch tmp_optDoubleVal = null;
+    FloatPatch tmp_optFloatVal = null;
+    I64Patch tmp_optI64Val = null;
+    I32Patch tmp_optI32Val = null;
+    I16Patch tmp_optI16Val = null;
+    BytePatch tmp_optByteVal = null;
+    BoolPatch tmp_optBoolVal = null;
+    TimePatch tmp_timeVal = null;
+    DurationPatch tmp_durationVal = null;
+    LateDefStructPatch tmp_lateStructVal = null;
+    MyUnionPatch tmp_unionVal = null;
+    MyDataPatch tmp_structVal = null;
+    MyStructFieldN10Patch tmp_enumVal = null;
+    BinaryPatch tmp_binaryVal = null;
+    StringPatch tmp_stringVal = null;
+    DoublePatch tmp_doubleVal = null;
+    FloatPatch tmp_floatVal = null;
+    I64Patch tmp_i64Val = null;
+    I32Patch tmp_i32Val = null;
+    I16Patch tmp_i16Val = null;
+    BytePatch tmp_byteVal = null;
+    BoolPatch tmp_boolVal = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -735,198 +735,9 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
       }
       switch (__field.id)
       {
-        case BOOLVAL:
+        case OPTMAPVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_boolVal = BoolPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case BYTEVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_byteVal = BytePatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case I16VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_i16Val = I16Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case I32VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_i32Val = I32Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case I64VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_i64Val = I64Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case FLOATVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_floatVal = FloatPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case DOUBLEVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_doubleVal = DoublePatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case STRINGVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_stringVal = StringPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case BINARYVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_binaryVal = BinaryPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case ENUMVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_enumVal = MyStructFieldN10Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case STRUCTVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_structVal = MyDataPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case UNIONVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_unionVal = MyUnionPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case LATESTRUCTVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_lateStructVal = LateDefStructPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case DURATIONVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_durationVal = DurationPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case TIMEVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_timeVal = TimePatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTBOOLVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optBoolVal = BoolPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTBYTEVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optByteVal = BytePatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTI16VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optI16Val = I16Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTI32VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optI32Val = I32Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTI64VAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optI64Val = I64Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTFLOATVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optFloatVal = FloatPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTDOUBLEVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optDoubleVal = DoublePatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTSTRINGVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optStringVal = StringPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTBINARYVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optBinaryVal = BinaryPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTENUMVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optEnumVal = MyStructFieldN25Patch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTSTRUCTVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optStructVal = MyDataPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTLATESTRUCTVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optLateStructVal = LateDefStructPatch.deserialize(iprot);
-          } else {
-            TProtocolUtil.skip(iprot, __field.type);
-          }
-          break;
-        case OPTLISTVAL:
-          if (__field.type == TType.STRUCT) {
-            tmp_optListVal = MyStructFieldN28Patch.deserialize(iprot);
+            tmp_optMapVal = MyStructFieldN30Patch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -938,9 +749,198 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
-        case OPTMAPVAL:
+        case OPTLISTVAL:
           if (__field.type == TType.STRUCT) {
-            tmp_optMapVal = MyStructFieldN30Patch.deserialize(iprot);
+            tmp_optListVal = MyStructFieldN28Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTLATESTRUCTVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optLateStructVal = LateDefStructPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTSTRUCTVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optStructVal = MyDataPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTENUMVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optEnumVal = MyStructFieldN25Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTBINARYVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optBinaryVal = BinaryPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTSTRINGVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optStringVal = StringPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTDOUBLEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optDoubleVal = DoublePatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTFLOATVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optFloatVal = FloatPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTI64VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optI64Val = I64Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTI32VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optI32Val = I32Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTI16VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optI16Val = I16Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTBYTEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optByteVal = BytePatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case OPTBOOLVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_optBoolVal = BoolPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case TIMEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_timeVal = TimePatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case DURATIONVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_durationVal = DurationPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case LATESTRUCTVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_lateStructVal = LateDefStructPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case UNIONVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_unionVal = MyUnionPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case STRUCTVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_structVal = MyDataPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case ENUMVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_enumVal = MyStructFieldN10Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case BINARYVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_binaryVal = BinaryPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case STRINGVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_stringVal = StringPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case DOUBLEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_doubleVal = DoublePatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case FLOATVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_floatVal = FloatPatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case I64VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_i64Val = I64Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case I32VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_i32Val = I32Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case I16VAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_i16Val = I16Patch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case BYTEVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_byteVal = BytePatch.deserialize(iprot);
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
+        case BOOLVAL:
+          if (__field.type == TType.STRUCT) {
+            tmp_boolVal = BoolPatch.deserialize(iprot);
           } else {
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -955,36 +955,36 @@ public class MyStructFieldPatch implements TBase, java.io.Serializable, Cloneabl
 
     MyStructFieldPatch _that;
     _that = new MyStructFieldPatch(
-      tmp_boolVal
-      ,tmp_byteVal
-      ,tmp_i16Val
-      ,tmp_i32Val
-      ,tmp_i64Val
-      ,tmp_floatVal
-      ,tmp_doubleVal
-      ,tmp_stringVal
-      ,tmp_binaryVal
-      ,tmp_enumVal
-      ,tmp_structVal
-      ,tmp_unionVal
-      ,tmp_lateStructVal
-      ,tmp_durationVal
-      ,tmp_timeVal
-      ,tmp_optBoolVal
-      ,tmp_optByteVal
-      ,tmp_optI16Val
-      ,tmp_optI32Val
-      ,tmp_optI64Val
-      ,tmp_optFloatVal
-      ,tmp_optDoubleVal
-      ,tmp_optStringVal
-      ,tmp_optBinaryVal
-      ,tmp_optEnumVal
-      ,tmp_optStructVal
-      ,tmp_optLateStructVal
-      ,tmp_optListVal
+      tmp_optMapVal
       ,tmp_optSetVal
-      ,tmp_optMapVal
+      ,tmp_optListVal
+      ,tmp_optLateStructVal
+      ,tmp_optStructVal
+      ,tmp_optEnumVal
+      ,tmp_optBinaryVal
+      ,tmp_optStringVal
+      ,tmp_optDoubleVal
+      ,tmp_optFloatVal
+      ,tmp_optI64Val
+      ,tmp_optI32Val
+      ,tmp_optI16Val
+      ,tmp_optByteVal
+      ,tmp_optBoolVal
+      ,tmp_timeVal
+      ,tmp_durationVal
+      ,tmp_lateStructVal
+      ,tmp_unionVal
+      ,tmp_structVal
+      ,tmp_enumVal
+      ,tmp_binaryVal
+      ,tmp_stringVal
+      ,tmp_doubleVal
+      ,tmp_floatVal
+      ,tmp_i64Val
+      ,tmp_i32Val
+      ,tmp_i16Val
+      ,tmp_byteVal
+      ,tmp_boolVal
     );
     _that.validate();
     return _that;

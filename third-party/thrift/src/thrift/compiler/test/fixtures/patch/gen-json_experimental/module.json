@@ -667,323 +667,6 @@
         "is_union" : false,
         "lineno" : 22
       },
-      "MyStructFieldPatch" : {
-        "name" : "MyStructFieldPatch",
-        "structured_annotations": {
-          "cpp.Adapter" : {
-        "type" : {
-  "type" : "struct",
-  "name" : "Adapter"
-},
-        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyStructFieldPatchStruct", "extraNamespace": ""}
-      }
-        },
-        "fields" : {
-          "boolVal" : {
-            "name" : "boolVal",
-            "key" : -1,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BoolPatch"
-}
-                  },
-          "byteVal" : {
-            "name" : "byteVal",
-            "key" : -2,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BytePatch"
-}
-                  },
-          "i16Val" : {
-            "name" : "i16Val",
-            "key" : -3,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I16Patch"
-}
-                  },
-          "i32Val" : {
-            "name" : "i32Val",
-            "key" : -4,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I32Patch"
-}
-                  },
-          "i64Val" : {
-            "name" : "i64Val",
-            "key" : -5,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I64Patch"
-}
-                  },
-          "floatVal" : {
-            "name" : "floatVal",
-            "key" : -6,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "FloatPatch"
-}
-                  },
-          "doubleVal" : {
-            "name" : "doubleVal",
-            "key" : -7,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "DoublePatch"
-}
-                  },
-          "stringVal" : {
-            "name" : "stringVal",
-            "key" : -8,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "StringPatch"
-}
-                  },
-          "binaryVal" : {
-            "name" : "binaryVal",
-            "key" : -9,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BinaryPatch"
-}
-                  },
-          "enumVal" : {
-            "name" : "enumVal",
-            "key" : -10,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldN10Patch"
-}
-                  },
-          "structVal" : {
-            "name" : "structVal",
-            "key" : -11,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyDataPatch"
-}
-                  },
-          "unionVal" : {
-            "name" : "unionVal",
-            "key" : -12,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyUnionPatch"
-}
-                  },
-          "lateStructVal" : {
-            "name" : "lateStructVal",
-            "key" : -13,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "LateDefStructPatch"
-}
-                  },
-          "durationVal" : {
-            "name" : "durationVal",
-            "key" : -14,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "DurationPatch"
-}
-                  },
-          "timeVal" : {
-            "name" : "timeVal",
-            "key" : -15,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "TimePatch"
-}
-                  },
-          "optBoolVal" : {
-            "name" : "optBoolVal",
-            "key" : -16,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BoolPatch"
-}
-                  },
-          "optByteVal" : {
-            "name" : "optByteVal",
-            "key" : -17,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BytePatch"
-}
-                  },
-          "optI16Val" : {
-            "name" : "optI16Val",
-            "key" : -18,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I16Patch"
-}
-                  },
-          "optI32Val" : {
-            "name" : "optI32Val",
-            "key" : -19,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I32Patch"
-}
-                  },
-          "optI64Val" : {
-            "name" : "optI64Val",
-            "key" : -20,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "I64Patch"
-}
-                  },
-          "optFloatVal" : {
-            "name" : "optFloatVal",
-            "key" : -21,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "FloatPatch"
-}
-                  },
-          "optDoubleVal" : {
-            "name" : "optDoubleVal",
-            "key" : -22,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "DoublePatch"
-}
-                  },
-          "optStringVal" : {
-            "name" : "optStringVal",
-            "key" : -23,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "StringPatch"
-}
-                  },
-          "optBinaryVal" : {
-            "name" : "optBinaryVal",
-            "key" : -24,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "BinaryPatch"
-}
-                  },
-          "optEnumVal" : {
-            "name" : "optEnumVal",
-            "key" : -25,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldN25Patch"
-}
-                  },
-          "optStructVal" : {
-            "name" : "optStructVal",
-            "key" : -26,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyDataPatch"
-}
-                  },
-          "optLateStructVal" : {
-            "name" : "optLateStructVal",
-            "key" : -27,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "LateDefStructPatch"
-}
-                  },
-          "optListVal" : {
-            "name" : "optListVal",
-            "key" : -28,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldN28Patch"
-}
-                  },
-          "optSetVal" : {
-            "name" : "optSetVal",
-            "key" : -29,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldN29Patch"
-}
-                  },
-          "optMapVal" : {
-            "name" : "optMapVal",
-            "key" : -30,
-            "lineno" : 22,
-            "required" : "opt-in-req-out",
-            "type" : {
-  "type" : "struct",
-  "name" : "MyStructFieldN30Patch"
-}
-                  }
-        },
-        "is_exception" : false,
-        "is_union" : false,
-        "lineno" : 22
-      },
       "MyStructFieldN10Patch" : {
         "name" : "MyStructFieldN10Patch",
         "structured_annotations": {
@@ -1263,6 +946,323 @@
   "type" : "map",
   "key_type" : "string",
   "value_type" : "string"
+}
+                  }
+        },
+        "is_exception" : false,
+        "is_union" : false,
+        "lineno" : 22
+      },
+      "MyStructFieldPatch" : {
+        "name" : "MyStructFieldPatch",
+        "structured_annotations": {
+          "cpp.Adapter" : {
+        "type" : {
+  "type" : "struct",
+  "name" : "Adapter"
+},
+        "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyStructFieldPatchStruct", "extraNamespace": ""}
+      }
+        },
+        "fields" : {
+          "optMapVal" : {
+            "name" : "optMapVal",
+            "key" : -30,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldN30Patch"
+}
+                  },
+          "optSetVal" : {
+            "name" : "optSetVal",
+            "key" : -29,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldN29Patch"
+}
+                  },
+          "optListVal" : {
+            "name" : "optListVal",
+            "key" : -28,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldN28Patch"
+}
+                  },
+          "optLateStructVal" : {
+            "name" : "optLateStructVal",
+            "key" : -27,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "LateDefStructPatch"
+}
+                  },
+          "optStructVal" : {
+            "name" : "optStructVal",
+            "key" : -26,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataPatch"
+}
+                  },
+          "optEnumVal" : {
+            "name" : "optEnumVal",
+            "key" : -25,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldN25Patch"
+}
+                  },
+          "optBinaryVal" : {
+            "name" : "optBinaryVal",
+            "key" : -24,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BinaryPatch"
+}
+                  },
+          "optStringVal" : {
+            "name" : "optStringVal",
+            "key" : -23,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "StringPatch"
+}
+                  },
+          "optDoubleVal" : {
+            "name" : "optDoubleVal",
+            "key" : -22,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "DoublePatch"
+}
+                  },
+          "optFloatVal" : {
+            "name" : "optFloatVal",
+            "key" : -21,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "FloatPatch"
+}
+                  },
+          "optI64Val" : {
+            "name" : "optI64Val",
+            "key" : -20,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I64Patch"
+}
+                  },
+          "optI32Val" : {
+            "name" : "optI32Val",
+            "key" : -19,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I32Patch"
+}
+                  },
+          "optI16Val" : {
+            "name" : "optI16Val",
+            "key" : -18,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I16Patch"
+}
+                  },
+          "optByteVal" : {
+            "name" : "optByteVal",
+            "key" : -17,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BytePatch"
+}
+                  },
+          "optBoolVal" : {
+            "name" : "optBoolVal",
+            "key" : -16,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BoolPatch"
+}
+                  },
+          "timeVal" : {
+            "name" : "timeVal",
+            "key" : -15,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "TimePatch"
+}
+                  },
+          "durationVal" : {
+            "name" : "durationVal",
+            "key" : -14,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "DurationPatch"
+}
+                  },
+          "lateStructVal" : {
+            "name" : "lateStructVal",
+            "key" : -13,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "LateDefStructPatch"
+}
+                  },
+          "unionVal" : {
+            "name" : "unionVal",
+            "key" : -12,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyUnionPatch"
+}
+                  },
+          "structVal" : {
+            "name" : "structVal",
+            "key" : -11,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyDataPatch"
+}
+                  },
+          "enumVal" : {
+            "name" : "enumVal",
+            "key" : -10,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "MyStructFieldN10Patch"
+}
+                  },
+          "binaryVal" : {
+            "name" : "binaryVal",
+            "key" : -9,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BinaryPatch"
+}
+                  },
+          "stringVal" : {
+            "name" : "stringVal",
+            "key" : -8,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "StringPatch"
+}
+                  },
+          "doubleVal" : {
+            "name" : "doubleVal",
+            "key" : -7,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "DoublePatch"
+}
+                  },
+          "floatVal" : {
+            "name" : "floatVal",
+            "key" : -6,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "FloatPatch"
+}
+                  },
+          "i64Val" : {
+            "name" : "i64Val",
+            "key" : -5,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I64Patch"
+}
+                  },
+          "i32Val" : {
+            "name" : "i32Val",
+            "key" : -4,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I32Patch"
+}
+                  },
+          "i16Val" : {
+            "name" : "i16Val",
+            "key" : -3,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "I16Patch"
+}
+                  },
+          "byteVal" : {
+            "name" : "byteVal",
+            "key" : -2,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BytePatch"
+}
+                  },
+          "boolVal" : {
+            "name" : "boolVal",
+            "key" : -1,
+            "lineno" : 22,
+            "required" : "opt-in-req-out",
+            "type" : {
+  "type" : "struct",
+  "name" : "BoolPatch"
 }
                   }
         },

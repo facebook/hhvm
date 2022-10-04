@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_1644c1a9 implements TypeList {
+public class __fbthrift_TypeList_c6fa3293 implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -27,12 +27,12 @@ public class __fbthrift_TypeList_1644c1a9 implements TypeList {
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/InnerUnionPatch", "test.fixtures.patch.InnerUnionPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionFieldPatch", "test.fixtures.patch.MyUnionFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyUnionPatch", "test.fixtures.patch.MyUnionPatch"));
-    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN10Patch", "test.fixtures.patch.MyStructFieldN10Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN25Patch", "test.fixtures.patch.MyStructFieldN25Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN28Patch", "test.fixtures.patch.MyStructFieldN28Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN29Patch", "test.fixtures.patch.MyStructFieldN29Patch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldN30Patch", "test.fixtures.patch.MyStructFieldN30Patch"));
+    list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructFieldPatch", "test.fixtures.patch.MyStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/MyStructPatch", "test.fixtures.patch.MyStructPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructFieldPatch", "test.fixtures.patch.LateDefStructFieldPatch"));
     list.add(new TypeList.TypeMapping("test.dev/fixtures/patch/LateDefStructPatch", "test.fixtures.patch.LateDefStructPatch"));

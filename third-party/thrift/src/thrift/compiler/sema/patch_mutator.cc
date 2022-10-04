@@ -313,13 +313,20 @@ patch_generator& patch_generator::get_for(
 
 t_struct& patch_generator::add_field_patch(
     const t_const& annot, t_structured& orig) {
-  StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch")};
+  // Resolve (and maybe create) all the field patch types, strictly before
+  // creating FieldPatch.
+  std::map<t_field_id, t_type_ref> types; // Ordered by field id.
   for (const auto& field : orig.fields()) {
     if (t_type_ref patch_type = find_patch_type(annot, orig, field)) {
-      gen.field(field.id(), patch_type, field.name());
+      types[field.id()] = patch_type;
     } else {
       ctx_.warning(field, "Could not resolve patch type for field.");
     }
+  }
+  StructGen gen{annot, gen_suffix_struct(annot, orig, "FieldPatch")};
+  for (const auto& entry : types) {
+    gen.field(
+        entry.first, entry.second, orig.get_field_by_id(entry.first)->name());
   }
   gen.set_adapter("FieldPatchAdapter", program_);
   return gen;

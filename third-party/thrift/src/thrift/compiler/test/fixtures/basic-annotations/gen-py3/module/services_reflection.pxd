@@ -12,24 +12,24 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__MyService(bint for_clients)
 
-cdef extern from "src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServiceSvIf "::cpp2::MyServiceSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__MyServicePrioParent(bint for_clients)
 
-cdef extern from "src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServicePrioParentSvIf "::cpp2::MyServicePrioParentSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__MyServicePrioChild(bint for_clients)
 
-cdef extern from "src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cMyServicePrioChildSvIf "::cpp2::MyServicePrioChildSvIf":
         pass
 
 cdef __InterfaceSpec get_reflection__BadService(bint for_clients)
 
-cdef extern from "src/gen-cpp2/module_handlers.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h" namespace "::cpp2":
     cdef cppclass cGoodServiceSvIf "::cpp2::GoodServiceSvIf":
         pass

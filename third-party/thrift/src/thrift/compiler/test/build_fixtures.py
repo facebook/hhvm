@@ -148,21 +148,26 @@ msg_format = "Building fixture {{0:>{w}}}/{{1}}: {{2}}".format(
 for name, index in zip(fixture_names, range(len(fixture_names))):
     msg = msg_format.format(index + 1, len(fixture_names), name)
     print(msg, file=sys.stderr)
-    cwd = os.path.join(fixture_dir, name)
-    for fn in set(os.listdir(cwd)) - {"cmd", "src"}:
+    fixture_src = os.path.join(fixture_dir, name)
+    for fn in set(os.listdir(fixture_src)) - {"cmd", "src"}:
         if fn.startswith("."):
             continue
-        shutil.rmtree(os.path.join(cwd, fn))
-    cmds = read_lines(os.path.join(cwd, "cmd"))
+        shutil.rmtree(os.path.join(fixture_src, fn))
+    cmds = read_lines(os.path.join(fixture_src, "cmd"))
     for cmd in cmds:
         if re.match(r"^\s*#", cmd):
             continue
         args = shlex.split(cmd.strip())
+        args[1] = os.path.relpath(os.path.join(fixture_src, args[1]), fixture_root)
         base_args = [
             thrift,
             "-r",
             "-I",
+            os.path.abspath(fixture_src),
+            "-I",
             os.path.abspath(fixture_root),
+            "-o",
+            os.path.abspath(fixture_src),
             "--allow-experimental-features",
             "all",
             "--gen",
@@ -180,7 +185,7 @@ for name, index in zip(fixture_names, range(len(fixture_names))):
             # This is a hack before this is resolved.
             base_args.remove("-r")
         xargs = base_args + args
-        processes.append(run_subprocess(xargs, cwd=cwd))
+        processes.append(run_subprocess(xargs, cwd=fixture_root))
 
 loop = asyncio.get_event_loop()
 loop.run_until_complete(asyncio.gather(*processes))

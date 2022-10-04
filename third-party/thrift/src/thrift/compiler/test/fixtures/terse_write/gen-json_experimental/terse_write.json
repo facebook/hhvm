@@ -786,6 +786,6 @@
         "lineno" : 138
       }
       },
-  "source_path" : "src/terse_write",
+  "source_path" : "thrift/compiler/test/fixtures/terse_write/src/terse_write",
   "py_namespace" : ""
 }

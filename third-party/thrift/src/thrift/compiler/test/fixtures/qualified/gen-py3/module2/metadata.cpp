@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include "src/gen-py3/module2/metadata.h"
+#include "thrift/compiler/test/fixtures/qualified/src/gen-py3/module2/metadata.h"
 
 namespace module2 {
 ::apache::thrift::metadata::ThriftMetadata module2_getThriftModuleMetadata() {

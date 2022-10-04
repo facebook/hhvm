@@ -132,9 +132,21 @@ class CompilerTest(unittest.TestCase):
 
     def runTest(self, name):
         fixture_dir = os.path.join(fixtures_root_dir, name)
-        # Copy source *.thrift files to temporary folder for relative code gen
-        cp_dir(os.path.join(fixture_dir, "src"), os.path.join(self.tmp, "src"))
 
+        # Copy source *.thrift files to temporary folder for relative code gen
+        cp_dir(
+            os.path.join(fixture_dir, "src"), os.path.join(self.tmp, fixture_dir, "src")
+        )
+        # Copy thrift/annotation/ folder to temporary folder
+        cp_dir(
+            os.path.join(FIXTURE_ROOT, "thrift/annotation"),
+            os.path.join(self.tmp, "thrift/annotation"),
+        )
+        # Copy thrift/lib/thrift/ folder to temporary folder
+        cp_dir(
+            os.path.join(FIXTURE_ROOT, "thrift/lib/thrift/"),
+            os.path.join(self.tmp, "thrift/lib/thrift/"),
+        )
         languages = set()
         for cmd in read_lines(os.path.join(fixture_dir, "cmd")):
             # Skip commented out commands
@@ -142,6 +154,7 @@ class CompilerTest(unittest.TestCase):
                 continue
 
             args = shlex.split(cmd.strip())
+            args[1] = os.path.relpath(os.path.join(fixture_dir, args[1]), FIXTURE_ROOT)
             # Get cmd language
             lang = args[0].rsplit(":", 1)[0] if ":" in args[0] else args[0]
 
@@ -160,7 +173,9 @@ class CompilerTest(unittest.TestCase):
                 thrift,
                 "-r",
                 "-I",
-                os.path.abspath(FIXTURE_ROOT),
+                self.tmp,
+                "-o",
+                os.path.join(self.tmp, fixture_dir),
                 "--allow-experimental-features",
                 "all",
                 "--gen",
@@ -179,7 +194,9 @@ class CompilerTest(unittest.TestCase):
                 args.remove("-r")
 
             # Run thrift compiler and generate files
-            subprocess.check_call(args, cwd=self.tmp, close_fds=True)
+            subprocess.check_call(
+                args, cwd=os.path.join(self.tmp, FIXTURE_ROOT), close_fds=True
+            )
 
         # Compare generated code to fixture code
         for lang in languages:
@@ -188,7 +205,7 @@ class CompilerTest(unittest.TestCase):
             lang = lang.rsplit("_", 1)[1] if "mstch_" in lang else lang
             lang = "py" if lang == "pyi" else lang
 
-            gen_code = os.path.join(self.tmp, "gen-" + lang)
+            gen_code = os.path.join(self.tmp, fixture_dir, "gen-" + lang)
             fixture_code = os.path.join(fixture_dir, "gen-" + lang)
             self.compare_code(gen_code, fixture_code)
 

@@ -28,7 +28,7 @@ cimport module.types as _module_types
 
 cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 
-cdef extern from "src/gen-cpp2/module_clients.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/exceptions/src/gen-cpp2/module_clients.h" namespace "::cpp2":
   cdef cppclass cRaiserAsyncClient "::cpp2::RaiserAsyncClient":
       pass
 
@@ -39,7 +39,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/exceptions/src/gen-py3/module/clients_wrapper.h" namespace "::cpp2":
   cdef cppclass cRaiserClientWrapper "::cpp2::RaiserClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

@@ -182,6 +182,6 @@
         "lineno" : 57
       }
       },
-  "source_path" : "src/module",
+  "source_path" : "thrift/compiler/test/fixtures/basic-enum/src/module",
   "py_namespace" : ""
 }

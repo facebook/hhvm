@@ -160,6 +160,6 @@
         "lineno" : 75
       }
       },
-  "source_path" : "src/DemoWidgetDocs",
+  "source_path" : "thrift/compiler/test/fixtures/json_experimental/src/DemoWidgetDocs",
   "py_namespace" : "thrift.compiler.test.fixtures.json_experimental.src.DemoWidgetDocs"
 }

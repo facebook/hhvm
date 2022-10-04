@@ -12,6 +12,6 @@ from thrift.py3.reflection cimport (
 
 cdef __InterfaceSpec get_reflection__MyService(bint for_clients)
 
-cdef extern from "src/gen-cpp2/module_handlers.h" namespace "::test::fixtures::nolegacy":
+cdef extern from "thrift/compiler/test/fixtures/nolegacy/src/gen-cpp2/module_handlers.h" namespace "::test::fixtures::nolegacy":
     cdef cppclass cMyServiceSvIf "::test::fixtures::nolegacy::MyServiceSvIf":
         pass

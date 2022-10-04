@@ -45,15 +45,15 @@ cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_
 
 cimport module.types_fields as _fbthrift_types_fields
 
-cdef extern from "src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_types.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_types.h" namespace "::cpp2":
     cdef cppclass cMyEnum "::cpp2::YourEnum":
         pass
 
@@ -64,15 +64,15 @@ cdef extern from "src/gen-cpp2/module_types.h" namespace "::cpp2":
 cdef class MyEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2":
 
     cdef cppclass cMyStructNestedAnnotation "::cpp2::MyStructNestedAnnotation":
         cMyStructNestedAnnotation() except +
@@ -122,5 +122,5 @@ cdef class SecretStruct(thrift.py3.types.Struct):
 
 
 
-cdef extern from "src/gen-cpp2/module_constants.h" namespace "::cpp2":
+cdef extern from "thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_constants.h" namespace "::cpp2":
     cdef cMyStruct cmyStruct "::cpp2::module_constants::myStruct"()

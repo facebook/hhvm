@@ -49,6 +49,6 @@
         }
           }
       },
-  "source_path" : "src/module",
+  "source_path" : "thrift/compiler/test/fixtures/namespace_from_package_without_module_name/src/module",
   "py_namespace" : "namespace_from_package_without_module_name.module"
 }

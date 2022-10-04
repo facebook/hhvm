@@ -326,6 +326,6 @@
         "lineno" : 72
       }
       },
-  "source_path" : "src/module",
+  "source_path" : "thrift/compiler/test/fixtures/enums/src/module",
   "py_namespace" : ""
 }

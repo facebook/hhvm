@@ -28,7 +28,7 @@ cimport module.types as _module_types
 
 cimport include.types as _include_types
 
-cdef extern from "src/gen-cpp2/module_clients.h" namespace "::apache::thrift::fixtures::types":
+cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_clients.h" namespace "::apache::thrift::fixtures::types":
   cdef cppclass cSomeServiceAsyncClient "::apache::thrift::fixtures::types::SomeServiceAsyncClient":
       pass
 
@@ -39,7 +39,7 @@ cdef extern from "thrift/lib/cpp/TProcessorEventHandler.h" namespace "::apache::
   cdef cppclass cTProcessorEventHandler "apache::thrift::TProcessorEventHandler":
     pass
 
-cdef extern from "src/gen-py3/module/clients_wrapper.h" namespace "::apache::thrift::fixtures::types":
+cdef extern from "thrift/compiler/test/fixtures/types/src/gen-py3/module/clients_wrapper.h" namespace "::apache::thrift::fixtures::types":
   cdef cppclass cSomeServiceClientWrapper "::apache::thrift::fixtures::types::SomeServiceClientWrapper":
     void setPersistentHeader(const string& key, const string& value)
     void addEventHandler(const shared_ptr[cTProcessorEventHandler]& handler)

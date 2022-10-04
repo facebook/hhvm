@@ -239,6 +239,6 @@
         }
           }
       },
-  "source_path" : "src/module",
+  "source_path" : "thrift/compiler/test/fixtures/sink/src/module",
   "py_namespace" : ""
 }

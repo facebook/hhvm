@@ -47,15 +47,15 @@ cimport apache.thrift.type.standard.types as _apache_thrift_type_standard_types
 
 cimport test.fixtures.patch.module.types_fields as _fbthrift_types_fields
 
-cdef extern from "src/gen-py3/module/types.h":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-py3/module/types.h":
   pass
 
 
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass EnumMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_types.h" namespace "::test::fixtures::patch":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types.h" namespace "::test::fixtures::patch":
     cdef cppclass cMyEnum "::test::fixtures::patch::MyEnum":
         pass
 
@@ -66,15 +66,15 @@ cdef extern from "src/gen-cpp2/module_types.h" namespace "::test::fixtures::patc
 cdef class MyEnum(thrift.py3.types.CompiledEnum):
     pass
 
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass StructMetadata[T]:
         @staticmethod
         void gen(__fbthrift_cThriftMetadata &metadata)
-cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::patch":
+cdef extern from "thrift/compiler/test/fixtures/patch/src/gen-cpp2/module_types_custom_protocol.h" namespace "::test::fixtures::patch":
 
     cdef cppclass cMyData "::test::fixtures::patch::MyData":
         cMyData() except +

@@ -5,7 +5,7 @@
  *  @generated
  */
 
-#include <src/gen-py3/module/clients_wrapper.h>
+#include <thrift/compiler/test/fixtures/nolegacy/src/gen-py3/module/clients_wrapper.h>
 
 namespace test {
 namespace fixtures {

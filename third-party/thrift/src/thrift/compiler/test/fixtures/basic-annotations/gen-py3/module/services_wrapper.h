@@ -6,25 +6,25 @@
  */
 
 #pragma once
-#if __has_include(<src/gen-cpp2/MyService.h>)
-#include <src/gen-cpp2/MyService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyService.h>
 #else
-#include <src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<src/gen-cpp2/MyServicePrioParent.h>)
-#include <src/gen-cpp2/MyServicePrioParent.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioParent.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioParent.h>
 #else
-#include <src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<src/gen-cpp2/MyServicePrioChild.h>)
-#include <src/gen-cpp2/MyServicePrioChild.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioChild.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/MyServicePrioChild.h>
 #else
-#include <src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
 #endif
-#if __has_include(<src/gen-cpp2/BadService.h>)
-#include <src/gen-cpp2/BadService.h>
+#if __has_include(<thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/BadService.h>)
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/BadService.h>
 #else
-#include <src/gen-cpp2/module_handlers.h>
+#include <thrift/compiler/test/fixtures/basic-annotations/src/gen-cpp2/module_handlers.h>
 #endif
 #include <folly/python/futures.h>
 #include <Python.h>

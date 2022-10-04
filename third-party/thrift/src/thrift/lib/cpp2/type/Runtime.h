@@ -506,8 +506,7 @@ class DynList<Ref> : public DynList<ConstRef> {
   iterator end() { return ref_.end(); }
   using Base::end;
 
-  // Erases all elements from the container. After this call, size() returns
-  // zero.
+  // Erases all elements from the container.
   void clear() { ref_.clear(); }
 
   // Inserts `value` before `pos`.
@@ -570,8 +569,7 @@ class DynSet<Ref> : public DynSet<ConstRef> {
     return (ref_.assign(other.asRef()), *this);
   }
 
-  // Erases all elements from the container. After this call, size() returns
-  // zero.
+  // Erases all elements from the container.
   void clear() { ref_.clear(); }
 
   // Inserts value.
@@ -595,7 +593,7 @@ class DynSet<Ref> : public DynSet<ConstRef> {
   }
 
   // Inserts elements from initializer list `ilist`.
-  template <class T>
+  template <class T = ConstRef>
   void insert(std::initializer_list<T> ilist) {
     insert(ilist.begin(), ilist.end());
   }
@@ -618,6 +616,151 @@ class DynSet<Ref> : public DynSet<ConstRef> {
     detail::BaseErasedOp::unimplemented();
   }
   using Base::find;
+};
+
+// The constant portions of an unordered c++ map.
+template <>
+class DynMap<ConstRef> : public detail::BaseDynKeyView {
+  using Base = detail::BaseDynKeyView;
+
+ public:
+  using mapped_type = ConstRef;
+  using value_type = std::pair<ConstRef, Ref>;
+  using reference = value_type&;
+  using const_reference = const value_type&;
+  using pointer = value_type*;
+  using const_pointer = const pointer;
+  using const_iterator = detail::MapIter<ConstRef, Ref>;
+  using iterator = const_iterator;
+
+  explicit DynMap(detail::Ptr ptr) : Base(ptr, BaseType::Map) {}
+
+  // Returns an iterator to the first element of the container.
+  const_iterator begin() const { return cbegin(); }
+  const_iterator cbegin() const {
+    return const_iterator{ref_.detail::Dyn::keys()};
+  }
+
+  // Returns an iterator to the last element of the container.
+  const_iterator end() const { return cend(); }
+  const_iterator cend() const { return const_iterator{}; }
+
+  // Returns a reference to the mapped value of the element with key
+  // equivalent to `key`. If no such element exists, an exception of type
+  // std::out_of_range is thrown.
+  ConstRef at(ConstRef key) const { return ref_.at(key); }
+  ConstRef at(const std::string& key) const { return ref_.at(key); }
+  ConstRef operator[](ConstRef key) const { return ref_.at(key); }
+  ConstRef operator[](const std::string& key) const { return ref_.at(key); }
+};
+
+// The mutable portions of an unordered c++ map.
+//
+// TODO(afuller): Add type-erased iterator features, needed for full API.
+template <>
+class DynMap<Ref> : public DynMap<ConstRef> {
+  using Base = DynMap<ConstRef>;
+
+ public:
+  using Base::Base;
+  using mapped_type = Ref;
+  using iterator = detail::MapIter<ConstRef, Ref, true>;
+
+  DynMap& operator=(ConstRef other) { return operator=(other.asMap()); }
+  template <typename RefT>
+  DynMap& operator=(DynMap<RefT> other) {
+    return (ref_.assign(other.asRef()), *this);
+  }
+
+  // Erases all elements from the container.
+  void clear() { ref_.clear(); }
+
+  // Returns an iterator to the first element of the container.
+  iterator begin() { return iterator{ref_.detail::Dyn::keys()}; }
+  using Base::begin;
+
+  // Returns an iterator to the last element of the container.
+  iterator end() { return iterator{}; }
+  using Base::end;
+
+  // Inserts `value`.
+  [[noreturn]] std::pair<iterator, bool> insert(const value_type&) {
+    detail::BaseErasedOp::unimplemented();
+  }
+
+  // Inserts `value`, using `hint` as a non-binding suggestion to where the
+  // search should start.
+  iterator insert(const_iterator, const value_type& value) {
+    return insert(value).first;
+  }
+
+  // Inserts elements from range `[first, last)`.
+  template <class InputIt>
+  void insert(InputIt first, InputIt last) {
+    for (; first != last; ++first) {
+      ref_.ensure(first->first, first->second);
+    }
+  }
+
+  // Inserts elements from initializer list `ilist`.
+  template <class T = std::pair<ConstRef, ConstRef>>
+  void insert(std::initializer_list<T> ilist) {
+    insert(ilist.begin(), ilist.end());
+  }
+
+  // If a key equivalent to `key` already exists in the container, assigns
+  // `val` to the corresponding mapped_type. If the `key` does not exist,
+  // inserts the new value as if by `insert`.
+  [[noreturn]] std::pair<iterator, bool> insert_or_assign(ConstRef, ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+  iterator insert_or_assign(const_iterator, ConstRef key, ConstRef val) {
+    return insert_or_assign(key, val).first;
+  }
+
+  // Inserts a new element into the container constructed with the
+  // given key-value pair, if there is no element with the key in the
+  // container.
+  [[noreturn]] std::pair<iterator, bool> emplace(ConstRef, ConstRef) {
+    detail::BaseErasedOp::unimplemented();
+  }
+  iterator emplace(const_iterator, ConstRef key, ConstRef value) {
+    return emplace(key, value).first;
+  }
+
+  // Inserts a new element into the container with key `key` and `value`, if
+  // there is no element with the key in the container.
+  std::pair<iterator, bool> try_emplace(ConstRef key, ConstRef value) {
+    return emplace(key, value);
+  }
+  iterator try_emplace(const_iterator hint, ConstRef key, ConstRef value) {
+    return emplace(hint, key, value);
+  }
+
+  // Removes the element at `pos`.
+  [[noreturn]] iterator erase(const_iterator) {
+    detail::BaseErasedOp::unimplemented();
+  }
+
+  // Removes the elements in the range `[first; last)`, which must be a valid
+  // range in `*this`.
+  [[noreturn]] iterator erase(const_iterator, const_iterator) {
+    detail::BaseErasedOp::unimplemented();
+  }
+
+  // Removes the element (if one exists) with the key equivalent to `key`.
+  size_type erase(ConstRef key) { return ref_.remove(key); }
+  size_type erase(const std::string& key) { return ref_.remove(key); }
+
+  // Returns a reference to the mapped value of the element with key
+  // equivalent to `key`. If no such element exists, an exception of type
+  // std::out_of_range is thrown.
+  Ref at(ConstRef key) { return ref_.at(key); }
+  Ref at(const std::string& key) { return ref_.at(key); }
+  using Base::at;
+  Ref operator[](ConstRef key) { return ref_.ensure(key); }
+  Ref operator[](const std::string& key) { return ref_.ensure(key); }
+  using Base::operator[];
 
   Ref asRef() { return ref_; }
   using Base::asRef;

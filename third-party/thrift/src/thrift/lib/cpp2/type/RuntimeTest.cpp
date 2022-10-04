@@ -24,6 +24,7 @@
 #include <set>
 #include <stdexcept>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <folly/io/IOBuf.h>
@@ -464,6 +465,48 @@ TEST(RuntimeTest, SetValue) {
   EXPECT_THAT(setVal, ::testing::ElementsAre("bye"));
 
   EXPECT_THROW(setVal = Ref::to(0), std::bad_any_cast);
+}
+
+TEST(RuntimeTest, MapValue) {
+  Value value;
+  value = Value::create<map<string_t, string_t>>();
+  EXPECT_TRUE(value.empty());
+  value.as<map<string_t, string_t>>().emplace("hi", "bye");
+  EXPECT_FALSE(value.empty());
+  Value other(value);
+  EXPECT_FALSE(other.empty());
+  value.clear();
+  EXPECT_TRUE(value.empty());
+  EXPECT_TRUE((value.as<map<string_t, string_t>>().empty()));
+  value = other;
+  EXPECT_FALSE(value.empty());
+
+  DynMap<Ref> mapVal = value.asMap();
+  EXPECT_THAT(mapVal, ::testing::Not(::testing::IsEmpty()));
+  EXPECT_THAT(mapVal, ::testing::SizeIs(1));
+  EXPECT_THAT(
+      mapVal, ::testing::UnorderedElementsAre(::testing::Pair("hi", "bye")));
+  EXPECT_TRUE(mapVal.contains("hi"));
+  EXPECT_FALSE(mapVal.contains("bye"));
+  EXPECT_EQ(mapVal["hi"], "bye");
+  EXPECT_EQ(mapVal.count("hi"), 1);
+  EXPECT_EQ(mapVal.count("bye"), 0);
+
+  mapVal["oops"];
+  EXPECT_THAT(
+      mapVal,
+      ::testing::UnorderedElementsAre(
+          ::testing::Pair("hi", "bye"), ::testing::Pair("oops", "")));
+
+  EXPECT_EQ(mapVal.erase("hi"), 1);
+  EXPECT_EQ(mapVal.erase("hi"), 0);
+  EXPECT_THAT(mapVal, ::testing::ElementsAre(::testing::Pair("oops", "")));
+
+  mapVal.clear();
+  EXPECT_THAT(mapVal, ::testing::IsEmpty());
+  EXPECT_THAT(mapVal, ::testing::SizeIs(0));
+  EXPECT_THAT(mapVal, ::testing::ElementsAre());
+  EXPECT_THROW(mapVal = Ref::to(0), std::bad_any_cast);
 }
 
 TEST(RuntimeTest, ListCppType) {

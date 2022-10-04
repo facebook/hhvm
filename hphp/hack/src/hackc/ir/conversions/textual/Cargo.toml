@@ -13,7 +13,7 @@ ascii = "1.0"
 hash = { path = "../../../../utils/hash" }
 ir = { path = "../.." }
 itertools = "0.10.3"
-log = { version = "0.4.14", features = ["kv_unstable", "kv_unstable_std"] }
+log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 newtype = { path = "../../../../utils/newtype" }
 num-derive = "0.3.3"
 num-traits = "0.2"

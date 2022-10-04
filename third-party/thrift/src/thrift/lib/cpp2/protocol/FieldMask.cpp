@@ -58,12 +58,14 @@ void copy(
   (detail::MaskRef{mask, false}).copy(src, dst);
 }
 
-void insertIfNotNoneMask(
-    FieldIdToMask& map, int16_t fieldId, const Mask& mask) {
+namespace {
+
+template <class Map, class Key>
+void insertIfNotNoneMask(Map& map, Key key, const Mask& mask) {
   // This doesn't use isNoneMask() as we just want to remove includes{} mask
   // rather than masks that logically contain no fields.
   if (mask != noneMask()) {
-    map[fieldId] = mask;
+    map[key] = mask;
   }
 }
 
@@ -94,117 +96,127 @@ void insertIfNotNoneMask(
 
 // Returns the intersection, union, or subtraction of the given FieldIdToMasks.
 // This basically treats the maps as inclusive sets.
-FieldIdToMask intersectMask(
-    const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
-  FieldIdToMask map;
-  for (auto& [fieldId, lhsMask] : lhs) {
-    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
-      continue;
+struct IntersectMaskImpl {
+  template <class Map>
+  Map operator()(const Map& lhs, const Map& rhs) const {
+    Map map;
+    for (auto& [fieldId, lhsMask] : lhs) {
+      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
+        continue;
+      }
+      // Both maps have the field, so the mask is their intersection.
+      insertIfNotNoneMask(map, fieldId, lhsMask & rhs.at(fieldId));
     }
-    // Both maps have the field, so the mask is their intersection.
-    insertIfNotNoneMask(map, fieldId, lhsMask & rhs.at(fieldId));
+    return map;
   }
-  return map;
-}
-FieldIdToMask unionMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
-  FieldIdToMask map;
-  for (auto& [fieldId, lhsMask] : lhs) {
-    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
-      insertIfNotNoneMask(map, fieldId, lhsMask);
-      continue;
+};
+
+struct UnionMaskImpl {
+  template <class Map>
+  Map operator()(const Map& lhs, const Map& rhs) const {
+    Map map;
+    for (auto& [fieldId, lhsMask] : lhs) {
+      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
+        insertIfNotNoneMask(map, fieldId, lhsMask);
+        continue;
+      }
+      // Both maps have the field, so the mask is their union.
+      insertIfNotNoneMask(map, fieldId, lhsMask | rhs.at(fieldId));
     }
-    // Both maps have the field, so the mask is their union.
-    insertIfNotNoneMask(map, fieldId, lhsMask | rhs.at(fieldId));
-  }
-  for (auto& [fieldId, rhsMask] : rhs) {
-    if (lhs.find(fieldId) == lhs.end()) { // Only rhs contains the field.
-      insertIfNotNoneMask(map, fieldId, rhsMask);
+    for (auto& [fieldId, rhsMask] : rhs) {
+      if (lhs.find(fieldId) == lhs.end()) { // Only rhs contains the field.
+        insertIfNotNoneMask(map, fieldId, rhsMask);
+      }
     }
+    return map;
   }
-  return map;
-}
-FieldIdToMask subtractMask(const FieldIdToMask& lhs, const FieldIdToMask& rhs) {
-  FieldIdToMask map;
-  for (auto& [fieldId, lhsMask] : lhs) {
-    if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
-      insertIfNotNoneMask(map, fieldId, lhsMask);
-      continue;
+};
+
+struct SubtractMaskImpl {
+  template <class Map>
+  Map operator()(const Map& lhs, const Map& rhs) const {
+    Map map;
+    for (auto& [fieldId, lhsMask] : lhs) {
+      if (rhs.find(fieldId) == rhs.end()) { // Only lhs contains the field.
+        insertIfNotNoneMask(map, fieldId, lhsMask);
+        continue;
+      }
+      // Both maps have the field, so the mask is their subtraction.
+      insertIfNotNoneMask(map, fieldId, lhsMask - rhs.at(fieldId));
     }
-    // Both maps have the field, so the mask is their subtraction.
-    insertIfNotNoneMask(map, fieldId, lhsMask - rhs.at(fieldId));
+    return map;
   }
-  return map;
+};
+
+template <class Func>
+Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
+  using detail::getFieldMask;
+
+  Mask mask;
+  mask.includes_ref() = func(*getFieldMask(lhs), *getFieldMask(rhs));
+  return mask;
 }
 
-Mask createIncludesMask(FieldIdToMask&& map) {
-  Mask mask;
-  mask.includes_ref() = map;
-  return mask;
+Mask intersectMask(const Mask& lhs, const Mask& rhs) {
+  return apply(lhs, rhs, IntersectMaskImpl{});
 }
-Mask createExcludesMask(FieldIdToMask&& map) {
-  Mask mask;
-  mask.excludes_ref() = map;
-  return mask;
+
+Mask unionMask(const Mask& lhs, const Mask& rhs) {
+  return apply(lhs, rhs, UnionMaskImpl{});
 }
+
+Mask subtractMask(const Mask& lhs, const Mask& rhs) {
+  return apply(lhs, rhs, SubtractMaskImpl{});
+}
+
+} // namespace
 
 Mask operator&(const Mask& lhs, const Mask& rhs) {
   detail::throwIfContainsMapMask(lhs);
   detail::throwIfContainsMapMask(rhs);
   if (lhs.includes_ref()) {
     if (rhs.includes_ref()) { // lhs=includes rhs=includes
-      return createIncludesMask(intersectMask(
-          lhs.includes_ref().value(), rhs.includes_ref().value()));
+      return intersectMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
-    return createIncludesMask(
-        subtractMask(lhs.includes_ref().value(), rhs.excludes_ref().value()));
+    return subtractMask(lhs, rhs);
   }
   if (rhs.includes_ref()) { // lhs=excludes rhs=includes
-    return createIncludesMask(
-        subtractMask(rhs.includes_ref().value(), lhs.excludes_ref().value()));
+    return subtractMask(rhs, lhs);
   }
   // lhs=excludes rhs=excludes
-  return createExcludesMask(
-      unionMask(lhs.excludes_ref().value(), rhs.excludes_ref().value()));
+  return reverseMask(unionMask(lhs, rhs));
 }
 Mask operator|(const Mask& lhs, const Mask& rhs) {
   detail::throwIfContainsMapMask(lhs);
   detail::throwIfContainsMapMask(rhs);
   if (lhs.includes_ref()) {
     if (rhs.includes_ref()) { // lhs=includes rhs=includes
-      return createIncludesMask(
-          unionMask(lhs.includes_ref().value(), rhs.includes_ref().value()));
+      return unionMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
-    return createExcludesMask(
-        subtractMask(rhs.excludes_ref().value(), lhs.includes_ref().value()));
+    return reverseMask(subtractMask(rhs, lhs));
   }
   if (rhs.includes_ref()) { // lhs=excludes rhs=includes
-    return createExcludesMask(
-        subtractMask(lhs.excludes_ref().value(), rhs.includes_ref().value()));
+    return reverseMask(subtractMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes
-  return createExcludesMask(
-      intersectMask(lhs.excludes_ref().value(), rhs.excludes_ref().value()));
+  return reverseMask(intersectMask(lhs, rhs));
 }
 Mask operator-(const Mask& lhs, const Mask& rhs) {
   detail::throwIfContainsMapMask(lhs);
   detail::throwIfContainsMapMask(rhs);
   if (lhs.includes_ref()) {
     if (rhs.includes_ref()) { // lhs=includes rhs=includes
-      return createIncludesMask(
-          subtractMask(lhs.includes_ref().value(), rhs.includes_ref().value()));
+      return subtractMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
-    return createIncludesMask(
-        intersectMask(lhs.includes_ref().value(), rhs.excludes_ref().value()));
+    return intersectMask(lhs, rhs);
   }
   if (rhs.includes_ref()) { // lhs=excludes rhs=includes
-    return createExcludesMask(
-        unionMask(lhs.excludes_ref().value(), rhs.includes_ref().value()));
+    return reverseMask(unionMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes
-  return createIncludesMask(
-      subtractMask(rhs.excludes_ref().value(), lhs.excludes_ref().value()));
+  return subtractMask(rhs, lhs);
 }
 } // namespace apache::thrift::protocol

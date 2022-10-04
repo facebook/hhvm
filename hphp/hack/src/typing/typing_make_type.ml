@@ -109,7 +109,10 @@ let locl_like r ty =
     ty
   else
     match get_node ty with
-    | Tprim Aast.Tnoreturn -> ty
+    | Tprim Aast.Tnoreturn
+    | Tany _
+    | Terr ->
+      ty
     | _ -> mk (r, Tunion [dynamic r; ty])
 
 let supportdyn r ty =

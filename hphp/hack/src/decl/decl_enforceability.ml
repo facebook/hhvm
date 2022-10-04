@@ -201,7 +201,9 @@ let make_like_type ~return_from_async ty =
     match get_node ty with
     | Tapply ((pos, name), [ty])
       when String.equal Naming_special_names.Classes.cAwaitable name ->
-      mk (get_reason ty, Tapply ((pos, name), [like_if_not_void ty]))
+      mk
+        ( get_reason ty,
+          Tapply ((pos, name), [Typing_make_type.like (get_reason ty) ty]) )
     | _ -> like_if_not_void ty
   else
     like_if_not_void ty

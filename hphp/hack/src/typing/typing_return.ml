@@ -168,7 +168,7 @@ let make_return_type
         Option.iter ~f:Errors.add_typing_error ty_err_opt;
         let et_type =
           match get_node ty with
-          | Tprim Aast.Tvoid -> ty
+          | Tprim Aast.Tvoid when not wrap -> ty
           | _ -> Typing_utils.make_like env ty
         in
         let et_type =

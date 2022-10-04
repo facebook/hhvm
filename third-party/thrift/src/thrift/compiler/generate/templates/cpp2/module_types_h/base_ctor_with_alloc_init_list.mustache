@@ -22,9 +22,10 @@
 <%#struct:fields_in_layout_order%>
     <%field:cpp_storage_name%>(<%!
     %><%#field:type%><%!
-      %><%#field:cpp_ref?%><%!
+      %><%#field:cpp_ref?%><%^field:boxed_ref?%><%!
         %><% > module_types_h/smart_ptr_constructor%><%!
-      %><%/field:cpp_ref?%><%!
+      %><%/field:boxed_ref?%><%/field:cpp_ref?%><%!
+      %><%#field:boxed_ref?%><% > field/default%><%/field:boxed_ref?%><%!
       %><%^field:cpp_ref?%><%!
         %><%#type:cpp_use_allocator?%>__fbthrift_alloc<%/type:cpp_use_allocator?%><%!
       %><%/field:cpp_ref?%><%!

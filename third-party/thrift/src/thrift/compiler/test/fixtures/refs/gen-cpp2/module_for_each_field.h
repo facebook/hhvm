@@ -117,6 +117,16 @@ struct ForEachField<::cpp2::StructWithBox> {
 };
 
 template <>
+struct ForEachField<::cpp2::StructWithNonOptionalBox> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).a_ref()...);
+    f(1, static_cast<T&&>(t).b_ref()...);
+    f(2, static_cast<T&&>(t).c_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::cpp2::StructWithRefTypeUnique> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

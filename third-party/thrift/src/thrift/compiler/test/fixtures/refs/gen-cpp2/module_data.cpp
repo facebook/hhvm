@@ -314,6 +314,32 @@ const std::array<int, 3> TStructDataStorage<::cpp2::StructWithBox>::isset_indexe
   -1,
 }};
 
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_names = {{
+  "a",
+  "b",
+  "c",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::fields_types = {{
+  TType::T_STRING,
+  TType::T_LIST,
+  TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::storage_names = {{
+  "__fbthrift_field_a",
+  "__fbthrift_field_b",
+  "__fbthrift_field_c",
+}};
+const std::array<int, 3> TStructDataStorage<::cpp2::StructWithNonOptionalBox>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+}};
+
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::StructWithRefTypeUnique>::fields_names = {{
   "def_field",
   "opt_field",

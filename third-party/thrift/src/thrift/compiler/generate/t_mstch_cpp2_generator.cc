@@ -1741,7 +1741,16 @@ class cpp_mstch_field : public mstch_field {
     static const std::string ns = "::apache::thrift::";
 
     if (gen::cpp::find_ref_type(*field_) == gen::cpp::reference_type::boxed) {
-      return ns + "optional_boxed_field_ref";
+      switch (field_->get_req()) {
+        case t_field::e_req::optional:
+          return ns + "optional_boxed_field_ref";
+        case t_field::e_req::opt_in_req_out:
+        case t_field::e_req::terse:
+          return ns + "boxed_field_ref";
+        case t_field::e_req::required:
+        default:
+          throw std::runtime_error("unsupported boxed field");
+      }
     }
 
     switch (field_->get_req()) {

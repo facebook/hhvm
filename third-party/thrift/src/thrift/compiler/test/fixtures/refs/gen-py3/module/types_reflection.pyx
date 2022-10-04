@@ -545,6 +545,55 @@ cdef __StructSpec get_reflection__StructWithBox():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__StructWithNonOptionalBox():
+    cdef _module_types.StructWithNonOptionalBox defaults = _module_types.StructWithNonOptionalBox._fbthrift_create(
+        constant_shared_ptr[_module_types.cStructWithNonOptionalBox](
+            default_inst[_module_types.cStructWithNonOptionalBox]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="StructWithNonOptionalBox",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="a",
+            type=str,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+                """cpp.box""": """1""",            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="b",
+            type=_module_types.List__i64,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+                """cpp.box""": """1""",            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="c",
+            type=_module_types.StructWithRef,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+                """cpp.box""": """1""",            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__StructWithRefTypeUnique():
     cdef _module_types.StructWithRefTypeUnique defaults = _module_types.StructWithRefTypeUnique._fbthrift_create(
         constant_shared_ptr[_module_types.cStructWithRefTypeUnique](

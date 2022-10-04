@@ -135,6 +135,19 @@ pub struct StructWithBox {
 }
 
 #[derive(Clone, PartialEq)]
+pub struct StructWithNonOptionalBox {
+    pub a: ::std::string::String,
+    pub b: ::std::vec::Vec<::std::primitive::i64>,
+    pub c: crate::types::StructWithRef,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
 pub struct StructWithRefTypeUnique {
     pub def_field: crate::types::Empty,
     pub opt_field: ::std::option::Option<crate::types::Empty>,
@@ -1320,6 +1333,92 @@ where
             a: field_a,
             b: field_b,
             c: field_c,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithNonOptionalBox {
+    fn default() -> Self {
+        Self {
+            a: ::std::default::Default::default(),
+            b: ::std::default::Default::default(),
+            c: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithNonOptionalBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithNonOptionalBox")
+            .field("a", &self.a)
+            .field("b", &self.b)
+            .field("c", &self.c)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithNonOptionalBox {}
+unsafe impl ::std::marker::Sync for self::StructWithNonOptionalBox {}
+
+impl ::fbthrift::GetTType for self::StructWithNonOptionalBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithNonOptionalBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithNonOptionalBox");
+        p.write_field_begin("a", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::write(&self.a, p);
+        p.write_field_end();
+        p.write_field_begin("b", ::fbthrift::TType::List, 2);
+        ::fbthrift::Serialize::write(&self.b, p);
+        p.write_field_end();
+        p.write_field_begin("c", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::write(&self.c, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithNonOptionalBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("a", ::fbthrift::TType::String, 1),
+            ::fbthrift::Field::new("b", ::fbthrift::TType::List, 2),
+            ::fbthrift::Field::new("c", ::fbthrift::TType::Struct, 3),
+        ];
+        let mut field_a = ::std::option::Option::None;
+        let mut field_b = ::std::option::Option::None;
+        let mut field_c = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::String, 1) => field_a = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 2) => field_b = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 3) => field_c = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            a: field_a.unwrap_or_default(),
+            b: field_b.unwrap_or_default(),
+            c: field_c.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

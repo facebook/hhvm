@@ -48,6 +48,7 @@ struct ReferringStruct {
     cpp2.ref_type = "shared_const",
   );
   13: optional PlainStruct opt_box_field (thrift.box);
+  14: PlainStruct box_field (cpp.box);
 }
 
 struct ReferringStructWithBaseTypeFields {
@@ -64,6 +65,7 @@ struct ReferringStructWithBaseTypeFields {
   11: optional i64 opt_shared_const_field (cpp2.ref_type = "shared_const");
   12: required i64 req_shared_const_field (cpp2.ref_type = "shared_const");
   13: optional i64 opt_box_field (cpp.box);
+  14: i64 box_field (cpp.box);
 }
 
 struct ReferringStructWithStringFields {
@@ -80,6 +82,7 @@ struct ReferringStructWithStringFields {
   11: optional string opt_shared_const_field (cpp2.ref_type = "shared_const");
   12: required string req_shared_const_field (cpp2.ref_type = "shared_const");
   13: optional string opt_box_field (thrift.box);
+  14: string box_field (cpp.box);
 }
 
 struct ReferringStructWithListFields {
@@ -100,6 +103,7 @@ struct ReferringStructWithListFields {
     cpp2.ref_type = "shared_const",
   );
   13: optional list<i32> opt_box_field (cpp.box);
+  14: list<i32> box_field (cpp.box);
 }
 
 struct ReferringStructWithSetFields {
@@ -116,6 +120,7 @@ struct ReferringStructWithSetFields {
   11: optional set<i32> opt_shared_const_field (cpp2.ref_type = "shared_const");
   12: required set<i32> req_shared_const_field (cpp2.ref_type = "shared_const");
   13: optional set<i32> opt_box_field (cpp.box);
+  14: set<i32> box_field (cpp.box);
 }
 
 struct ReferringStructWithMapFields {
@@ -136,6 +141,7 @@ struct ReferringStructWithMapFields {
     cpp2.ref_type = "shared_const",
   );
   13: optional map<i32, i32> opt_box_field (cpp.box);
+  14: map<i32, i32> box_field (cpp.box);
 }
 
 struct TypeAdapterRefStruct {
@@ -160,6 +166,8 @@ struct TypeAdapterRefStruct {
   @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   @thrift.Box
   7: optional string opt_box_field;
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
+  8: string box_field (cpp.box);
 }
 
 struct FieldAdapterRefStruct {
@@ -185,6 +193,8 @@ struct FieldAdapterRefStruct {
   @thrift.Box
   7: optional string opt_box_field;
   8: string meta;
+  @cpp.Adapter{name = "::apache::thrift::test::AdapterWithContext"}
+  9: string box_field (cpp.box);
 }
 
 struct StructuredAnnotation {

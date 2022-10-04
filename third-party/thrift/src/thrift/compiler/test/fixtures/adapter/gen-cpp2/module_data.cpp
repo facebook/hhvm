@@ -207,32 +207,37 @@ const std::array<int, 7> TStructDataStorage<::facebook::thrift::test::Bar>::isse
   6,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = {{
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_names = {{
   "field",
   "shared_field",
   "opt_shared_field",
   "opt_boxed_field",
+  "boxed_field",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_ids = {{
+const std::array<int16_t, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_ids = {{
   1,
   2,
   3,
   4,
+  5,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_types = {{
+const std::array<protocol::TType, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::fields_types = {{
+  TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::storage_names = {{
+const std::array<folly::StringPiece, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::storage_names = {{
   "__fbthrift_field_field",
   "__fbthrift_field_shared_field",
   "__fbthrift_field_opt_shared_field",
   "__fbthrift_field_opt_boxed_field",
+  "__fbthrift_field_boxed_field",
 }};
-const std::array<int, 4> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::isset_indexes = {{
+const std::array<int, 5> TStructDataStorage<::facebook::thrift::test::StructWithFieldAdapter>::isset_indexes = {{
   0,
+  -1,
   -1,
   -1,
   -1,

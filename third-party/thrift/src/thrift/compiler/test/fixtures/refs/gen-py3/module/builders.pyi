@@ -99,6 +99,14 @@ class StructWithBox_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
+class StructWithNonOptionalBox_Builder(thrift.py3.builder.StructBuilder):
+    a: _typing.Optional[str]
+    b: _typing.Optional[list]
+    c: _typing.Any
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
 class StructWithRefTypeUnique_Builder(thrift.py3.builder.StructBuilder):
     def_field: _typing.Any
     opt_field: _typing.Any

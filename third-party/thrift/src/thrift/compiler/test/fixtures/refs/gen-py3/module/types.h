@@ -208,6 +208,22 @@ void reset_field<::cpp2::StructWithBox>(
 }
 
 template<>
+void reset_field<::cpp2::StructWithNonOptionalBox>(
+    ::cpp2::StructWithNonOptionalBox& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.a_ref().copy_from(default_inst<::cpp2::StructWithNonOptionalBox>().a_ref());
+      return;
+    case 1:
+      obj.b_ref().copy_from(default_inst<::cpp2::StructWithNonOptionalBox>().b_ref());
+      return;
+    case 2:
+      obj.c_ref().copy_from(default_inst<::cpp2::StructWithNonOptionalBox>().c_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::cpp2::StructWithRefTypeUnique>(
     ::cpp2::StructWithRefTypeUnique& obj, uint16_t index) {
   switch (index) {
@@ -380,6 +396,16 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::cpp2::StructWithBox>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::cpp2::StructWithNonOptionalBox>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

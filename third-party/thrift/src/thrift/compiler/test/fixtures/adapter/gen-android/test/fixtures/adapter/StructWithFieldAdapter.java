@@ -30,25 +30,30 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
   private static final TField SHARED_FIELD_FIELD_DESC = new TField("shared_field", TType.I32, (short)2);
   private static final TField OPT_SHARED_FIELD_FIELD_DESC = new TField("opt_shared_field", TType.I32, (short)3);
   private static final TField OPT_BOXED_FIELD_FIELD_DESC = new TField("opt_boxed_field", TType.I32, (short)4);
+  private static final TField BOXED_FIELD_FIELD_DESC = new TField("boxed_field", TType.I32, (short)5);
 
   public final Integer field;
   public final Integer shared_field;
   public final Integer opt_shared_field;
   public final Integer opt_boxed_field;
+  public final Integer boxed_field;
   public static final int FIELD = 1;
   public static final int SHARED_FIELD = 2;
   public static final int OPT_SHARED_FIELD = 3;
   public static final int OPT_BOXED_FIELD = 4;
+  public static final int BOXED_FIELD = 5;
 
   public StructWithFieldAdapter(
       Integer field,
       Integer shared_field,
       Integer opt_shared_field,
-      Integer opt_boxed_field) {
+      Integer opt_boxed_field,
+      Integer boxed_field) {
     this.field = field;
     this.shared_field = shared_field;
     this.opt_shared_field = opt_shared_field;
     this.opt_boxed_field = opt_boxed_field;
+    this.boxed_field = boxed_field;
   }
 
   /**
@@ -74,6 +79,11 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
       this.opt_boxed_field = TBaseHelper.deepCopy(other.opt_boxed_field);
     } else {
       this.opt_boxed_field = null;
+    }
+    if (other.isSetBoxed_field()) {
+      this.boxed_field = TBaseHelper.deepCopy(other.boxed_field);
+    } else {
+      this.boxed_field = null;
     }
   }
 
@@ -117,6 +127,15 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
     return this.opt_boxed_field != null;
   }
 
+  public Integer getBoxed_field() {
+    return this.boxed_field;
+  }
+
+  // Returns true if field boxed_field is set (has been assigned a value) and false otherwise
+  public boolean isSetBoxed_field() {
+    return this.boxed_field != null;
+  }
+
   @Override
   public boolean equals(Object _that) {
     if (_that == null)
@@ -135,12 +154,14 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
 
     if (!TBaseHelper.equalsNobinary(this.isSetOpt_boxed_field(), that.isSetOpt_boxed_field(), this.opt_boxed_field, that.opt_boxed_field)) { return false; }
 
+    if (!TBaseHelper.equalsNobinary(this.isSetBoxed_field(), that.isSetBoxed_field(), this.boxed_field, that.boxed_field)) { return false; }
+
     return true;
   }
 
   @Override
   public int hashCode() {
-    return Arrays.deepHashCode(new Object[] {field, shared_field, opt_shared_field, opt_boxed_field});
+    return Arrays.deepHashCode(new Object[] {field, shared_field, opt_shared_field, opt_boxed_field, boxed_field});
   }
 
   // This is required to satisfy the TBase interface, but can't be implemented on immutable struture.
@@ -153,6 +174,7 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
     Integer tmp_shared_field = null;
     Integer tmp_opt_shared_field = null;
     Integer tmp_opt_boxed_field = null;
+    Integer tmp_boxed_field = null;
     TField __field;
     iprot.readStructBegin();
     while (true)
@@ -191,6 +213,13 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
             TProtocolUtil.skip(iprot, __field.type);
           }
           break;
+        case BOXED_FIELD:
+          if (__field.type == TType.I32) {
+            tmp_boxed_field = iprot.readI32();
+          } else {
+            TProtocolUtil.skip(iprot, __field.type);
+          }
+          break;
         default:
           TProtocolUtil.skip(iprot, __field.type);
           break;
@@ -205,6 +234,7 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
       ,tmp_shared_field
       ,tmp_opt_shared_field
       ,tmp_opt_boxed_field
+      ,tmp_boxed_field
     );
     _that.validate();
     return _that;
@@ -237,6 +267,11 @@ public class StructWithFieldAdapter implements TBase, java.io.Serializable, Clon
         oprot.writeI32(this.opt_boxed_field);
         oprot.writeFieldEnd();
       }
+    }
+    if (this.boxed_field != null) {
+      oprot.writeFieldBegin(BOXED_FIELD_FIELD_DESC);
+      oprot.writeI32(this.boxed_field);
+      oprot.writeFieldEnd();
     }
     oprot.writeFieldStop();
     oprot.writeStructEnd();

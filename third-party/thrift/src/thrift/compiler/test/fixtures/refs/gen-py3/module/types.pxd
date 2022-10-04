@@ -231,6 +231,20 @@ cdef extern from "src/gen-cpp2/module_types_custom_protocol.h" namespace "::cpp2
         __optional_field_ref[cStructWithRef] c_ref "c_ref" ()
 
 
+    cdef cppclass cStructWithNonOptionalBox "::cpp2::StructWithNonOptionalBox":
+        cStructWithNonOptionalBox() except +
+        cStructWithNonOptionalBox(const cStructWithNonOptionalBox&) except +
+        bint operator==(cStructWithNonOptionalBox&)
+        bint operator!=(cStructWithNonOptionalBox&)
+        bint operator<(cStructWithNonOptionalBox&)
+        bint operator>(cStructWithNonOptionalBox&)
+        bint operator<=(cStructWithNonOptionalBox&)
+        bint operator>=(cStructWithNonOptionalBox&)
+        __field_ref[string] a_ref "a_ref" ()
+        __field_ref[vector[cint64_t]] b_ref "b_ref" ()
+        __field_ref[cStructWithRef] c_ref "c_ref" ()
+
+
     cdef cppclass cStructWithRefTypeUnique "::cpp2::StructWithRefTypeUnique":
         cStructWithRefTypeUnique() except +
         cStructWithRefTypeUnique(const cStructWithRefTypeUnique&) except +
@@ -457,6 +471,20 @@ cdef class StructWithBox(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cStructWithBox])
+
+
+
+cdef class StructWithNonOptionalBox(thrift.py3.types.Struct):
+    cdef shared_ptr[cStructWithNonOptionalBox] _cpp_obj
+    cdef _fbthrift_types_fields.__StructWithNonOptionalBox_FieldsSetter _fields_setter
+    cdef inline object a_impl(self)
+    cdef inline object b_impl(self)
+    cdef inline object c_impl(self)
+    cdef List__i64 __fbthrift_cached_b
+    cdef StructWithRef __fbthrift_cached_c
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cStructWithNonOptionalBox])
 
 
 

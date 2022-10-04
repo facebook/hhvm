@@ -1942,11 +1942,13 @@ func (p *DirectlyAdapted) String() string {
 //  - SharedField
 //  - OptSharedField
 //  - OptBoxedField
+//  - BoxedField
 type StructWithFieldAdapter struct {
   Field int32 `thrift:"field,1" db:"field" json:"field"`
   SharedField int32 `thrift:"shared_field,2" db:"shared_field" json:"shared_field"`
   OptSharedField *int32 `thrift:"opt_shared_field,3,optional" db:"opt_shared_field" json:"opt_shared_field,omitempty"`
   OptBoxedField *int32 `thrift:"opt_boxed_field,4,optional" db:"opt_boxed_field" json:"opt_boxed_field,omitempty"`
+  BoxedField int32 `thrift:"boxed_field,5" db:"boxed_field" json:"boxed_field"`
 }
 
 func NewStructWithFieldAdapter() *StructWithFieldAdapter {
@@ -1975,6 +1977,10 @@ func (p *StructWithFieldAdapter) GetOptBoxedField() int32 {
   }
 return *p.OptBoxedField
 }
+
+func (p *StructWithFieldAdapter) GetBoxedField() int32 {
+  return p.BoxedField
+}
 func (p *StructWithFieldAdapter) IsSetOptSharedField() bool {
   return p != nil && p.OptSharedField != nil
 }
@@ -1999,6 +2005,7 @@ func (p StructWithFieldAdapterBuilder) Emit() *StructWithFieldAdapter{
     SharedField: p.obj.SharedField,
     OptSharedField: p.obj.OptSharedField,
     OptBoxedField: p.obj.OptBoxedField,
+    BoxedField: p.obj.BoxedField,
   }
 }
 
@@ -2022,6 +2029,11 @@ func (s *StructWithFieldAdapterBuilder) OptBoxedField(optBoxedField *int32) *Str
   return s
 }
 
+func (s *StructWithFieldAdapterBuilder) BoxedField(boxedField int32) *StructWithFieldAdapterBuilder {
+  s.obj.BoxedField = boxedField
+  return s
+}
+
 func (s *StructWithFieldAdapter) SetField(field int32) *StructWithFieldAdapter {
   s.Field = field
   return s
@@ -2039,6 +2051,11 @@ func (s *StructWithFieldAdapter) SetOptSharedField(optSharedField *int32) *Struc
 
 func (s *StructWithFieldAdapter) SetOptBoxedField(optBoxedField *int32) *StructWithFieldAdapter {
   s.OptBoxedField = optBoxedField
+  return s
+}
+
+func (s *StructWithFieldAdapter) SetBoxedField(boxedField int32) *StructWithFieldAdapter {
+  s.BoxedField = boxedField
   return s
 }
 
@@ -2069,6 +2086,10 @@ func (p *StructWithFieldAdapter) Read(iprot thrift.Protocol) error {
       }
     case 4:
       if err := p.ReadField4(iprot); err != nil {
+        return err
+      }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
         return err
       }
     default:
@@ -2122,6 +2143,15 @@ func (p *StructWithFieldAdapter)  ReadField4(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *StructWithFieldAdapter)  ReadField5(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 5: ", err)
+  } else {
+    p.BoxedField = v
+  }
+  return nil
+}
+
 func (p *StructWithFieldAdapter) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("StructWithFieldAdapter"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
@@ -2129,6 +2159,7 @@ func (p *StructWithFieldAdapter) Write(oprot thrift.Protocol) error {
   if err := p.writeField2(oprot); err != nil { return err }
   if err := p.writeField3(oprot); err != nil { return err }
   if err := p.writeField4(oprot); err != nil { return err }
+  if err := p.writeField5(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -2180,6 +2211,16 @@ func (p *StructWithFieldAdapter) writeField4(oprot thrift.Protocol) (err error) 
   return err
 }
 
+func (p *StructWithFieldAdapter) writeField5(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("boxed_field", thrift.I32, 5); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:boxed_field: ", p), err) }
+  if err := oprot.WriteI32(int32(p.BoxedField)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.boxed_field (5) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 5:boxed_field: ", p), err) }
+  return err
+}
+
 func (p *StructWithFieldAdapter) String() string {
   if p == nil {
     return "<nil>"
@@ -2199,7 +2240,8 @@ func (p *StructWithFieldAdapter) String() string {
   } else {
     optBoxedFieldVal = fmt.Sprintf("%v", *p.OptBoxedField)
   }
-  return fmt.Sprintf("StructWithFieldAdapter({Field:%s SharedField:%s OptSharedField:%s OptBoxedField:%s})", fieldVal, sharedFieldVal, optSharedFieldVal, optBoxedFieldVal)
+  boxedFieldVal := fmt.Sprintf("%v", p.BoxedField)
+  return fmt.Sprintf("StructWithFieldAdapter({Field:%s SharedField:%s OptSharedField:%s OptBoxedField:%s BoxedField:%s})", fieldVal, sharedFieldVal, optSharedFieldVal, optBoxedFieldVal, boxedFieldVal)
 }
 
 // Attributes:

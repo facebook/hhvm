@@ -1486,8 +1486,12 @@ class CompilerFailureTest(unittest.TestCase):
             "foo.thrift",
             textwrap.dedent(
                 """\
+                include "thrift/annotation/thrift.thrift"
+
                 struct A {
-                    1: i64 field (thrift.box)
+                    1: i64 field (cpp.box)
+                    @thrift.Box
+                    2: i64 field2
                 }
                 """
             ),
@@ -1499,9 +1503,8 @@ class CompilerFailureTest(unittest.TestCase):
         self.assertEqual(
             err,
             textwrap.dedent(
-                "[WARNING:foo.thrift:2] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
-                "[ERROR:foo.thrift:2] The `cpp.box` annotation can only be used with "
-                "optional fields. Make sure `field` is optional.\n"
+                "[WARNING:foo.thrift:4] cpp.box and thrift.box are deprecated. Please use @thrift.Box annotation instead in `field`.\n"
+                "[ERROR:foo.thrift:5] The `thrift.box` annotation can only be used with optional fields. Make sure `field2` is optional.\n"
             ),
         )
 

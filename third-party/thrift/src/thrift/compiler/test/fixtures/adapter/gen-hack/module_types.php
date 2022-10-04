@@ -2377,12 +2377,17 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
       'var' => 'opt_boxed_field',
       'type' => \TType::I32,
     ),
+    5 => shape(
+      'var' => 'boxed_field',
+      'type' => \TType::I32,
+    ),
   ];
   const dict<string, int> FIELDMAP = dict[
     'field' => 1,
     'shared_field' => 2,
     'opt_shared_field' => 3,
     'opt_boxed_field' => 4,
+    'boxed_field' => 5,
   ];
 
   const type TConstructorShape = shape(
@@ -2390,6 +2395,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
     ?'shared_field' => ?int,
     ?'opt_shared_field' => ?int,
     ?'opt_boxed_field' => ?int,
+    ?'boxed_field' => ?int,
   );
 
   const type TShape = shape(
@@ -2397,8 +2403,9 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
     'shared_field' => int,
     ?'opt_shared_field' => ?int,
     ?'opt_boxed_field' => ?int,
+    'boxed_field' => int,
   );
-  const int STRUCTURAL_ID = 1940453594051247312;
+  const int STRUCTURAL_ID = 7106375852569079700;
   /**
    * Original thrift field:-
    * 1: i32 field
@@ -2419,12 +2426,18 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
    * 4: i32 opt_boxed_field
    */
   public ?int $opt_boxed_field;
+  /**
+   * Original thrift field:-
+   * 5: i32 boxed_field
+   */
+  public int $boxed_field;
 
-  public function __construct(?int $field = null, ?int $shared_field = null, ?int $opt_shared_field = null, ?int $opt_boxed_field = null)[] {
+  public function __construct(?int $field = null, ?int $shared_field = null, ?int $opt_shared_field = null, ?int $opt_boxed_field = null, ?int $boxed_field = null)[] {
     $this->field = $field ?? 0;
     $this->shared_field = $shared_field ?? 0;
     $this->opt_shared_field = $opt_shared_field;
     $this->opt_boxed_field = $opt_boxed_field;
+    $this->boxed_field = $boxed_field ?? 0;
   }
 
   public static function withDefaultValues()[]: this {
@@ -2437,6 +2450,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
       Shapes::idx($shape, 'shared_field'),
       Shapes::idx($shape, 'opt_shared_field'),
       Shapes::idx($shape, 'opt_boxed_field'),
+      Shapes::idx($shape, 'boxed_field'),
     );
   }
 
@@ -2496,6 +2510,17 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
               ),
               "name" => "opt_boxed_field",
               "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "boxed_field",
             )
           ),
         ],
@@ -2568,6 +2593,16 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
           ],
           'type' => dict[],
         ),
+        'boxed_field' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter1",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
       ],
     );
   }
@@ -2578,6 +2613,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
       $shape['shared_field'],
       Shapes::idx($shape, 'opt_shared_field'),
       Shapes::idx($shape, 'opt_boxed_field'),
+      $shape['boxed_field'],
     );
   }
 
@@ -2587,6 +2623,7 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
       'shared_field' => $this->shared_field,
       'opt_shared_field' => $this->opt_shared_field,
       'opt_boxed_field' => $this->opt_boxed_field,
+      'boxed_field' => $this->boxed_field,
     );
   }
   public function getInstanceKey()[write_props]: string {
@@ -2630,6 +2667,14 @@ class StructWithFieldAdapter implements \IThriftSyncStruct, \IThriftShapishSyncS
         throw new \TProtocolException("number exceeds limit in field");
       } else {
         $this->opt_boxed_field = (int)$_tmp3;
+      }
+    }
+    if (idx($parsed, 'boxed_field') !== null) {
+      $_tmp4 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['boxed_field']);
+      if ($_tmp4 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->boxed_field = (int)$_tmp4;
       }
     }
   }

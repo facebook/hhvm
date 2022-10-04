@@ -111,6 +111,12 @@ struct StructWithBox {
   3: optional StructWithRef c (thrift.box);
 }
 
+struct StructWithNonOptionalBox {
+  1: string a (cpp.box);
+  2: list<i64> b (cpp.box);
+  3: StructWithRef c (cpp.box);
+}
+
 const StructWithRef kStructWithRef = {
   "def_field": {},
   "opt_field": {},

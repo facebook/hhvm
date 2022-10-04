@@ -1195,8 +1195,9 @@ TEST_F(AsyncFizzClientTest, TestHandshakeRecordAlignedReads) {
   socketReadCallback_->getReadBuffer(&buf, &len);
 
   // Not caring about record alignment, we should be able to get a buffer of
-  // at least AsyncFizzBase::kMinReadSize
-  EXPECT_GE(len, 1460);
+  // at least TransportOptions::readBufferMinReadSize
+  AsyncFizzBase::TransportOptions options;
+  EXPECT_GE(len, options.readBufferMinReadSize);
 }
 
 } // namespace test

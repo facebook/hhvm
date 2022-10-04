@@ -117,6 +117,33 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
      */
     size_t readVecBlockSize{
         folly::IOBufIovecBuilder::Options::kDefaultBlockSize};
+
+    /*
+     * AsyncTransport read vec read size
+     */
+    size_t readVecReadSize{4000};
+
+    /**
+     * Under ReadMode::ReadBuffer, whenever Fizz's available read buffer space
+     * is under `readBufferMinReadSize`, `readBufferAllocationSize` controls the
+     * size of the buffer that Fizz will allocate.
+     *
+     * Higher values will result in larger memory allocations which may
+     * negatively affect memory usage on servers with many idle connections.
+     * However, this may result in fewer syscalls and allocation calls being
+     * made on the data path.
+     */
+    size_t readBufferAllocationSize{4000};
+
+    /**
+     * Under ReadMode::ReadBuffer, whenever the underlying transport becomes
+     * available to read, Fizz will ensure that *at least*
+     * `readBuferMinReadSize` worth of contiguous data is read per read call. If
+     * the internal read buffer is smaller than `readBufferMinReadSize`, then
+     * Fizz will allocate `readBufferAllocationSize` worth of new buffer space
+     * to satisfy this read.
+     */
+    size_t readBufferMinReadSize{1460};
   };
 
   explicit AsyncFizzBase(

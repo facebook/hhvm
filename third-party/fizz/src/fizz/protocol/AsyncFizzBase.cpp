@@ -16,12 +16,6 @@ namespace fizz {
 using folly::AsyncSocketException;
 
 /**
- * Min and max read buffer sizes when using non-movable buffer.
- */
-static const uint32_t kMinReadSize = 1460;
-static const uint32_t kMaxReadSize = 4000;
-
-/**
  * Buffer size above which we should unset our read callback to apply back
  * pressure on the transport.
  */
@@ -390,8 +384,9 @@ void AsyncFizzBase::eventRecvmsgCallback(FizzMsgHdr* msgHdr, int res) {
 }
 
 void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
-  std::pair<void*, uint32_t> readSpace =
-      transportReadBuf_.preallocate(kMinReadSize, kMaxReadSize);
+  std::pair<void*, uint32_t> readSpace = transportReadBuf_.preallocate(
+      transportOptions_.readBufferMinReadSize,
+      transportOptions_.readBufferAllocationSize);
   *bufReturn = readSpace.first;
 
   // `readSizeHint_`, if zero, indicates that we do not care about how much
@@ -409,14 +404,16 @@ void AsyncFizzBase::getReadBuffer(void** bufReturn, size_t* lenReturn) {
   // in WaitForData actions.
   if (readSizeHint_ > 0) {
     *lenReturn = std::min(
-        static_cast<decltype(readSizeHint_)>(kMinReadSize), readSizeHint_);
+        static_cast<decltype(readSizeHint_)>(
+            transportOptions_.readBufferMinReadSize),
+        readSizeHint_);
   } else {
     *lenReturn = readSpace.second;
   }
 }
 
 void AsyncFizzBase::getReadBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) {
-  ioVecQueue_.allocateBuffers(iovs, kMaxReadSize);
+  ioVecQueue_.allocateBuffers(iovs, transportOptions_.readVecReadSize);
 }
 
 void AsyncFizzBase::readDataAvailable(size_t len) noexcept {

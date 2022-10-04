@@ -42,7 +42,6 @@
 using apache::thrift::TApplicationException;
 using namespace facebook::eden;
 using folly::AsyncSocket;
-using folly::to;
 using std::make_unique;
 
 namespace {
@@ -137,12 +136,12 @@ class SettleCallback : public folly::HHWheelTimer::Callback {
 // the toml config file with the path to the socket.
 std::string resolveSocketPath(w_string_piece rootPath) {
 #ifdef _WIN32
-  auto configPath = to<std::string>(rootPath.view(), "/.eden/config");
+  auto configPath = fmt::format("{}/.eden/config", rootPath);
   auto config = cpptoml::parse_file(configPath);
 
   return *config->get_qualified_as<std::string>("Config.socket");
 #else
-  auto path = to<std::string>(rootPath.view(), "/.eden/socket");
+  auto path = fmt::format("{}/.eden/socket", rootPath);
   // It is important to resolve the link because the path in the eden mount
   // may exceed the maximum permitted unix domain socket path length.
   // This is actually how things our in our integration test environment.
@@ -154,7 +153,7 @@ folly::SocketAddress getEdenSocketAddress(w_string_piece rootPath) {
   folly::SocketAddress addr;
 
   auto socketPath = resolveSocketPath(rootPath);
-  addr.setFromPath(to<std::string>(socketPath));
+  addr.setFromPath(socketPath);
   return addr;
 }
 
@@ -1368,18 +1367,17 @@ std::shared_ptr<QueryableView> detectEden(
   (void)fstype;
   auto maybeEdenRoot = findEdenFSRoot(root_path);
   if (!maybeEdenRoot) {
-    throw std::runtime_error(
-        to<std::string>("Not an Eden clone: ", root_path.view()));
+    throw std::runtime_error(fmt::format("Not an Eden clone: {}", root_path));
   }
   auto edenRoot = *maybeEdenRoot;
   log(DBG, "detected eden root: ", edenRoot, "\n");
 
   if (isEdenStopped(root_path)) {
-    throw TerminalWatcherError(to<std::string>(
-        root_path.view(),
-        " appears to be an offline EdenFS mount. "
+    throw TerminalWatcherError(fmt::format(
+        "{} appears to be an offline EdenFS mount. "
         "Try running `edenfsctl start` to bring it back online and "
-        "then retry your watch"));
+        "then retry your watch",
+        root_path));
   }
 
 #else
@@ -1387,7 +1385,7 @@ std::shared_ptr<QueryableView> detectEden(
       fstype != "osxfuse_eden" && fstype != "macfuse_eden" &&
       fstype != "edenfs_eden") {
     // Not an active EdenFS mount.  Perhaps it isn't mounted yet?
-    auto readme = to<std::string>(root_path.view(), "/README_EDEN.txt");
+    auto readme = fmt::format("{}/README_EDEN.txt", root_path);
     try {
       (void)getFileInformation(readme.c_str());
     } catch (const std::exception&) {
@@ -1397,7 +1395,7 @@ std::shared_ptr<QueryableView> detectEden(
       // this as an EdenFS mount so record the issue and allow falling
       // back to one of the other watchers.
       throw std::runtime_error(
-          to<std::string>(fstype.view(), " is not a FUSE file system"));
+          fmt::format("{} is not a FUSE file system", fstype));
     }
 
     // If we get here, then the readme file/symlink exists.
@@ -1405,16 +1403,16 @@ std::shared_ptr<QueryableView> detectEden(
     // We can't watch it using this watcher in its current state,
     // and we don't want to allow falling back to inotify as that
     // will be horribly slow.
-    throw TerminalWatcherError(to<std::string>(
-        root_path.view(),
-        " appears to be an offline EdenFS mount. "
+    throw TerminalWatcherError(fmt::format(
+        "{} appears to be an offline EdenFS mount. "
         "Try running `eden doctor` to bring it back online and "
-        "then retry your watch"));
+        "then retry your watch",
+        root_path));
   }
 
   // Given that the readlink() succeeded, assume this is an Eden mount.
-  auto edenRoot = readSymbolicLink(
-      to<std::string>(root_path.view(), "/.eden/root").c_str());
+  auto edenRoot =
+      readSymbolicLink(fmt::format("{}/.eden/root", root_path).c_str());
 
 #endif
   if (edenRoot != root_path) {
@@ -1422,18 +1420,18 @@ std::shared_ptr<QueryableView> detectEden(
     // Throw a TerminalWatcherError to indicate that the Eden watcher is the
     // correct watcher type for this directory (so don't try other watcher
     // types), but that it can't be used due to an error.
-    throw TerminalWatcherError(to<std::string>(
+    throw TerminalWatcherError(fmt::format(
         "you may only watch from the root of an eden mount point. "
-        "Try again using ",
+        "Try again using {}",
         edenRoot));
   }
 
   try {
     return std::make_shared<EdenView>(root_path, config);
   } catch (const std::exception& exc) {
-    throw TerminalWatcherError(to<std::string>(
+    throw TerminalWatcherError(fmt::format(
         "Failed to initialize eden watcher, and since this is an Eden "
-        "repo, will not allow falling back to another watcher.  Error was: ",
+        "repo, will not allow falling back to another watcher.  Error was: {}",
         exc.what()));
   }
 }

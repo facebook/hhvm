@@ -186,6 +186,56 @@ impl HhServerProviderBackend {
         self.shallow_decl_changes_store.pop_local_changes();
         self.folded_classes_store.pop_local_changes();
     }
+
+    // ---
+    // Deletion support
+
+    pub fn oldify_funs_batch(&self, _names: &[String]) {}
+    pub fn remove_funs_batch(&self, _names: &[String]) {}
+    pub fn remove_old_funs_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_shallow_classes_batch(&self, _names: &[String]) {}
+    pub fn remove_shallow_classes_batch(&self, _names: &[String]) {}
+    pub fn remove_old_shallow_classes_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_folded_classes_batch(&self, _names: &[String]) {}
+    pub fn remove_folded_classes_batch(&self, _names: &[String]) {}
+    pub fn remove_old_folded_classes_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_typedefs_batch(&self, _names: &[String]) {}
+    pub fn remove_typedefs_batch(&self, _names: &[String]) {}
+    pub fn remove_old_typedefs_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_gconsts_batch(&self, _names: &[String]) {}
+    pub fn remove_gconsts_batch(&self, _names: &[String]) {}
+    pub fn remove_old_gconsts_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_modules_batch(&self, _names: &[String]) {}
+    pub fn remove_modules_batch(&self, _names: &[String]) {}
+    pub fn remove_old_modules_batch(&self, _names: &[String]) {}
+
+    pub fn oldify_props_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_props_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_old_props_batch(&self, _names: &[(String, String)]) {}
+
+    pub fn oldify_static_props_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_static_props_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_old_static_props_batch(&self, _names: &[(String, String)]) {}
+
+    pub fn oldify_methods_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_methods_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_old_methods_batch(&self, _names: &[(String, String)]) {}
+
+    pub fn oldify_static_methods_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_static_methods_batch(&self, _names: &[(String, String)]) {}
+    pub fn remove_old_static_methods_batch(&self, _names: &[(String, String)]) {}
+
+    pub fn oldify_constructors_batch(&self, _names: &[String]) {}
+    pub fn remove_constructors_batch(&self, _names: &[String]) {}
+    pub fn remove_old_constructors_batch(&self, _names: &[String]) {}
+
+    //
+    // ---
 }
 
 impl rust_provider_backend_api::RustProviderBackend<BR> for HhServerProviderBackend {

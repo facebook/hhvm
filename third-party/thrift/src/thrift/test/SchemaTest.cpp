@@ -134,8 +134,7 @@ static void verify_function(
     facebook::thrift::type::Function func,
     std::string name,
     std::function<void(facebook::thrift::type::Paramlist&)> paramsValidator,
-    std::function<void(std::vector<facebook::thrift::type::Exception>&)>
-        exValidator,
+    std::function<void(facebook::thrift::type::Exceptions&)> exValidator,
     std::function<void(std::vector<facebook::thrift::type::ReturnType>&)>
         retValidator) {
   EXPECT_EQ(*func.name(), name);
@@ -245,22 +244,32 @@ TEST(SchemaTest, TestService) {
 
   verify_function(
       schema.functions()->at(2),
-      "primitiveParamsNoReturnNoEx",
+      "primitiveParamsNoReturnEx",
       [](facebook::thrift::type::Paramlist& params) {
         auto fields = params.fields();
         EXPECT_EQ(fields->size(), 1);
 
-        // 1: i32 num;
-        auto field = fields->at(0);
-        EXPECT_EQ(*field.name(), "param0");
-        EXPECT_EQ(*field.id(), apache::thrift::type::FieldId{1});
+        auto field0 = fields->at(0);
+        EXPECT_EQ(*field0.name(), "param0");
+        EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
         EXPECT_EQ(
-            *field.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+            *field0.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
         EXPECT_EQ(
-            field.type()->toThrift().name()->getType(),
+            field0.type()->toThrift().name()->getType(),
             apache::thrift::type::TypeName::Type::i32Type);
       },
-      nullptr,
+      [](facebook::thrift::type::Exceptions& ex) {
+        EXPECT_EQ(ex.size(), 1);
+
+        auto field0 = ex.at(0);
+        EXPECT_EQ(*field0.name(), "ex0");
+        EXPECT_EQ(*field0.id(), apache::thrift::type::FieldId{1});
+        EXPECT_EQ(
+            *field0.qualifier(), facebook::thrift::type::FieldQualifier::Fill);
+        EXPECT_EQ(
+            field0.type()->toThrift().name()->getType(),
+            apache::thrift::type::TypeName::Type::exceptionType);
+      },
       &verify_void_return);
 }
 

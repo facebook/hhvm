@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <string>
 #include <utility>
 #include <thrift/compiler/ast/t_const.h>
 #include <thrift/compiler/ast/t_exception.h>
@@ -171,6 +172,7 @@ void add_qualifier(const t_enum* t_enum, t_const_value& schema, int enum_val) {
 void add_fields(
     const t_program* program,
     t_const_value& schema,
+    std::string fields_name,
     node_list_view<const t_field> fields) {
   auto fields_schema = val();
   fields_schema->set_list();
@@ -208,7 +210,7 @@ void add_fields(
     fields_schema->add_list(std::move(field_schema));
   }
 
-  schema.add_map(val("fields"), std::move(fields_schema));
+  schema.add_map(val(fields_name), std::move(fields_schema));
 }
 } // namespace
 
@@ -217,7 +219,7 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(
   auto schema = val();
   schema->set_map();
   add_definition(*schema, node);
-  add_fields(node.program(), *schema, node.fields());
+  add_fields(node.program(), *schema, "fields", node.fields());
 
   if (node.is_exception()) {
     const auto& ex = static_cast<const t_exception&>(node);
@@ -276,10 +278,17 @@ std::unique_ptr<t_const_value> schematizer::gen_schema(const t_service& node) {
 
     auto param_list_schema = val();
     param_list_schema->set_map();
-    add_fields(node.program(), *param_list_schema, func.params().fields());
+    add_fields(
+        node.program(), *param_list_schema, "fields", func.params().fields());
     func_schema->add_map(val("paramlist"), std::move(param_list_schema));
 
-    // TODO: add exceptions
+    if (func.exceptions()) {
+      add_fields(
+          node.program(),
+          *func_schema,
+          "exceptions",
+          func.exceptions()->fields());
+    }
 
     functions_schema->add_list(std::move(func_schema));
   }

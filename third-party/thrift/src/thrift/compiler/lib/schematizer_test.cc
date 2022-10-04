@@ -18,6 +18,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <utility>
 #include <folly/portability/GTest.h>
 #include <thrift/compiler/ast/t_base_type.h>
 #include <thrift/compiler/ast/t_const.h>
@@ -53,10 +54,11 @@ std::unordered_map<std::string, t_const_value*> flatten_map(
   return map;
 }
 
-void validate_nested_struct_type(t_const_value& type, std::string struct_uri) {
+void validate_nested_type(
+    t_const_value& type, std::string type_string, std::string uri) {
   auto schema = flatten_map(type);
   EXPECT_EQ(
-      schema.at("name")->get_map().at(0).first->get_string(), "structType");
+      schema.at("name")->get_map().at(0).first->get_string(), type_string);
   EXPECT_EQ(
       schema.at("name")
           ->get_map()
@@ -64,7 +66,7 @@ void validate_nested_struct_type(t_const_value& type, std::string struct_uri) {
           .second->get_map()
           .at(0)
           .second->get_string(),
-      struct_uri);
+      uri);
   EXPECT_FALSE(schema.count("params"));
 }
 
@@ -78,7 +80,20 @@ void validate_nested_struct(
   EXPECT_EQ(field_schema.at("id")->get_integer(), id);
   EXPECT_EQ(field_schema.at("qualifier")->get_integer(), qualifier);
   EXPECT_EQ(field_schema.at("name")->get_string(), struct_name);
-  validate_nested_struct_type(*field_schema.at("type"), struct_uri);
+  validate_nested_type(*field_schema.at("type"), "structType", struct_uri);
+}
+
+void validate_exception(
+    t_const_value& field,
+    std::string name,
+    std::string uri,
+    int id,
+    int qualifier) {
+  auto field_schema = flatten_map(field);
+  EXPECT_EQ(field_schema.at("id")->get_integer(), id);
+  EXPECT_EQ(field_schema.at("qualifier")->get_integer(), qualifier);
+  EXPECT_EQ(field_schema.at("name")->get_string(), name);
+  validate_nested_type(*field_schema.at("type"), "exceptionType", uri);
 }
 
 void validate_test_struct(
@@ -141,6 +156,11 @@ TEST(SchematizerTest, Service) {
   param0.set_uri(struct_uri);
   func0->params().create_field(param0, "param0");
 
+  t_exception ex0(nullptr, "MyException");
+  auto ex = std::make_unique<t_throws>();
+  ex->create_field(ex0, "ex0");
+  func0->set_exceptions(std::move(ex));
+
   svc.add_function(std::move(func0));
 
   auto schema = schematizer::gen_schema(svc);
@@ -160,7 +180,12 @@ TEST(SchematizerTest, Service) {
   auto retTypes = func0_schema.at("returnTypes")->get_list();
   EXPECT_EQ(retTypes.size(), 1);
   auto ret0_type = flatten_map(*retTypes.at(0)).at("thriftType");
-  validate_nested_struct_type(*ret0_type, struct_uri);
+  validate_nested_type(*ret0_type, "structType", struct_uri);
+
+  auto func0_exs = func0_schema.at("exceptions")->get_list();
+  EXPECT_EQ(func0_exs.size(), 1);
+  auto ex0_schema = func0_exs.at(0);
+  validate_exception(*ex0_schema, "ex0", "", 0, 3);
 }
 
 TEST(SchematizerTest, Structured) {

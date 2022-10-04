@@ -315,7 +315,7 @@ struct Exception {
  * Changing the order of exceptions is always backward compatible.
  */
 @thrift.Experimental // TODO: Adapt!
-typedef list<Exception> Exceptions
+typedef list<Field> Exceptions
 
 /**
  * A Thrift Param list. A param list is unnamed.

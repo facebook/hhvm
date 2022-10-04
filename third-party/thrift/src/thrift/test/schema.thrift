@@ -69,7 +69,7 @@ const list<i32> ListConst = [2, 3, 5, 7, IntConst];
 service TestService {
   void noParamsNoReturnNoEx();
   i32 noParamsPrimitiveReturnNoEx();
-  void primitiveParamsNoReturnNoEx(1: i32 param0);
+  void primitiveParamsNoReturnEx(1: i32 param0) throws (1: SimpleException ex0);
 }
 
 typedef i32 TD

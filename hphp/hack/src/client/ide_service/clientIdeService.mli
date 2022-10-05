@@ -63,6 +63,7 @@ val initialize_from_saved_state :
     ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info option ->
   use_ranked_autocomplete:bool ->
   config:(string * string) list ->
+  ignore_hh_version:bool ->
   open_files:Path.t list ->
   (unit, ClientIdeMessage.stopped_reason) Lwt_result.t
 

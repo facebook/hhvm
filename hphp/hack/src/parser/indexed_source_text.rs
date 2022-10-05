@@ -7,7 +7,6 @@
 use std::rc::Rc;
 
 use line_break_map::LineBreakMap;
-use oxidized::pos::Pos;
 
 use crate::source_text::SourceText;
 
@@ -38,12 +37,27 @@ impl<'a> IndexedSourceText<'a> {
     }
 
     pub fn relative_pos(&self, start_offset: usize, end_offset: usize) -> Pos {
-        let pos_start = self.0.offset_map.offset_to_file_pos_triple(start_offset);
-        let pos_end = self.0.offset_map.offset_to_file_pos_triple(end_offset);
-        Pos::from_lnum_bol_offset(self.0.source_text.file_path_rc(), pos_start, pos_end)
+        Pos {
+            path: self.0.source_text.file_path_rc(),
+            start: self.0.offset_map.offset_to_file_pos_triple(start_offset),
+            end: self.0.offset_map.offset_to_file_pos_triple(end_offset),
+        }
     }
 
     pub fn offset_to_file_pos_triple(&self, offset: usize) -> (usize, usize, usize) {
         self.0.offset_map.offset_to_file_pos_triple(offset)
     }
+}
+
+pub struct Pos {
+    pub path: ocamlrep::rc::RcOc<relative_path::RelativePath>,
+    /// The three usizes represent (lnum, bol, offset):
+    /// - lnum: Line number. Starts at 1.
+    /// - bol: Byte offset from beginning of file to the beginning of the line
+    ///   containing this position. The column number is therefore offset - bol.
+    ///   Starts at 0.
+    /// - offset: Byte offset from the beginning of the file. Starts at 0.
+    pub start: (usize, usize, usize),
+    /// (lnum, bol, offset), as above
+    pub end: (usize, usize, usize),
 }

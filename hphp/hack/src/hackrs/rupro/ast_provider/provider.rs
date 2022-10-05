@@ -93,7 +93,7 @@ impl AstProvider {
     ) {
         for e in errs {
             acc.push(ParsingError::ParsingError {
-                pos: src.relative_pos(e.start_offset, e.end_offset),
+                pos: src.relative_pos(e.start_offset, e.end_offset).into(),
                 msg: e.message.into_owned(),
             });
         }

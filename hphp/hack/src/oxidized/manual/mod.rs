@@ -41,3 +41,4 @@ pub mod typing_logic;
 pub mod typing_set;
 
 mod decl_parser_options_impl;
+mod full_fidelity_parser_env_impl;

@@ -445,6 +445,12 @@ pub mod map {
     pub type Map<T> = std::collections::BTreeMap<super::Pos, T>;
 }
 
+impl From<parser_core_types::indexed_source_text::Pos> for Pos {
+    fn from(pos: parser_core_types::indexed_source_text::Pos) -> Self {
+        Self::from_lnum_bol_offset(pos.path, pos.start, pos.end)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;

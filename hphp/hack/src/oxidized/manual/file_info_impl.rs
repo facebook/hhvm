@@ -9,9 +9,37 @@ use rusqlite::types::FromSqlError;
 use rusqlite::types::FromSqlResult;
 use rusqlite::types::ValueRef;
 
+use crate::gen::file_info::Mode;
 use crate::gen::file_info::NameType;
 use crate::gen::file_info::Pos;
 use crate::gen::naming_types::KindOfType;
+
+impl From<Mode> for parser_core_types::FileMode {
+    fn from(mode: Mode) -> Self {
+        match mode {
+            Mode::Mhhi => Self::Hhi,
+            Mode::Mstrict => Self::Strict,
+        }
+    }
+}
+impl From<parser_core_types::FileMode> for Mode {
+    fn from(mode: parser_core_types::FileMode) -> Self {
+        match mode {
+            parser_core_types::FileMode::Hhi => Self::Mhhi,
+            parser_core_types::FileMode::Strict => Self::Mstrict,
+        }
+    }
+}
+impl std::cmp::PartialEq<parser_core_types::FileMode> for Mode {
+    fn eq(&self, other: &parser_core_types::FileMode) -> bool {
+        self.eq(&Self::from(*other))
+    }
+}
+impl std::cmp::PartialEq<Mode> for parser_core_types::FileMode {
+    fn eq(&self, other: &Mode) -> bool {
+        self.eq(&Self::from(*other))
+    }
+}
 
 impl Pos {
     pub fn path(&self) -> &RelativePath {

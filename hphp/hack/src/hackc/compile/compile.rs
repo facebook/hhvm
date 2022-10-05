@@ -441,7 +441,7 @@ fn parse_file(
                 let pos = indexed_source_text
                     .relative_pos(syntax_error.start_offset, syntax_error.end_offset);
                 Err(ParseError(
-                    pos,
+                    pos.into(),
                     syntax_error.message.to_string(),
                     match syntax_error.error_type {
                         ErrorType::ParseError => FatalOp::Parse,

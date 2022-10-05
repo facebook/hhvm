@@ -15,6 +15,5 @@ line_break_map = { path = "../../../utils/line_break_map" }
 ocaml_helper = { path = "../../../utils/ocaml_helper" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../ocamlrep_derive" }
-oxidized = { path = "../../../oxidized" }
 relative_path = { path = "../../../utils/rust/relative_path" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

@@ -2857,6 +2857,7 @@ dependencies = [
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_derive",
+ "parser_core_types",
  "pretty_assertions",
  "relative_path",
  "rusqlite",
@@ -2980,7 +2981,6 @@ dependencies = [
  "ocaml_helper",
  "ocamlrep",
  "ocamlrep_derive",
- "oxidized",
  "relative_path",
  "serde",
 ]

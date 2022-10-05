@@ -294,11 +294,11 @@ impl<'src> AastParser {
         let tree = if quick_mode {
             let (tree, errors, _state) =
                 decl_mode_parser::parse_script(arena, source_text, parser_env);
-            PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState)
+            PositionedSyntaxTree::create(source_text, tree, errors, mode.map(Into::into), NoState)
         } else {
             let (tree, errors, _state) =
                 positioned_by_ref_parser::parse_script(arena, source_text, parser_env);
-            PositionedSyntaxTree::create(source_text, tree, errors, mode, NoState)
+            PositionedSyntaxTree::create(source_text, tree, errors, mode.map(Into::into), NoState)
         };
         Ok(tree)
     }

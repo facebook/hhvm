@@ -158,10 +158,10 @@ where
 
     fn p_pos(&self, node: &Syntax<'arena, T, V>) -> Pos {
         node.position_exclusive(self.indexed_source_text)
-            .unwrap_or_else(Pos::make_none)
+            .map_or_else(Pos::make_none, Into::into)
     }
 
     fn pos_of_offset(&self, start: usize, end: usize) -> Pos {
-        self.indexed_source_text.relative_pos(start, end)
+        self.indexed_source_text.relative_pos(start, end).into()
     }
 }

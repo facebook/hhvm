@@ -56,7 +56,7 @@ pub fn parse_script<'a, 'o>(
     let errors = parser.errors();
     let has_first_pass_parse_errors = !errors.is_empty();
     let sc_state = parser.into_sc_state();
-    let cst = ConcreteSyntaxTree::build(source, root.0, errors, mode, NoState);
+    let cst = ConcreteSyntaxTree::build(source, root.0, errors, mode.map(Into::into), NoState);
     let file_attributes = sc_state.1.file_attributes;
     let mut attrs = bumpalo::collections::Vec::with_capacity_in(file_attributes.len(), arena);
     attrs.extend(file_attributes.iter().copied());

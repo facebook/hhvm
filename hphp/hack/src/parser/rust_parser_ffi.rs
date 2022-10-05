@@ -71,7 +71,13 @@ where
     let ocaml_state = pool.add(&state).to_bits();
     let tree = if leak_rust_tree {
         let (_, mode) = parse_mode(&source_text);
-        let tree = Box::new(SyntaxTree::build(&source_text, root, errors, mode, ()));
+        let tree = Box::new(SyntaxTree::build(
+            &source_text,
+            root,
+            errors,
+            mode.map(Into::into),
+            (),
+        ));
         // A rust pointer of (&SyntaxTree, &Arena) is passed to Ocaml,
         // Ocaml will pass it back to `rust_parser_errors::rust_parser_errors_positioned`
         // PLEASE ENSURE TYPE SAFETY MANUALLY!!!

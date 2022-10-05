@@ -5,8 +5,6 @@
 
 use std::borrow::Borrow;
 
-use oxidized::file_info::Mode;
-
 use crate::lexable_token::LexableToken;
 use crate::source_text::SourceText;
 use crate::syntax_by_ref::syntax::Syntax;
@@ -17,7 +15,7 @@ pub struct SyntaxTree<'a, Syntax, State> {
     text: &'a SourceText<'a>,
     root: Syntax,
     errors: Vec<SyntaxError>,
-    mode: Option<Mode>,
+    mode: Option<FileMode>,
     state: State,
 }
 
@@ -101,7 +99,7 @@ where
         text: &'a SourceText<'a>,
         root: Syntax,
         errors: Vec<SyntaxError>,
-        mode: Option<Mode>,
+        mode: Option<FileMode>,
         state: State,
     ) -> Self {
         Self {
@@ -152,7 +150,7 @@ where
         text: &'a SourceText<'a>,
         root: Syntax,
         mut errors: Vec<SyntaxError>,
-        mode: Option<Mode>,
+        mode: Option<FileMode>,
         state: State,
     ) -> Self {
         Self::process_errors(&mut errors);
@@ -189,7 +187,7 @@ where
         &self.errors
     }
 
-    pub fn mode(&self) -> Option<Mode> {
+    pub fn mode(&self) -> Option<FileMode> {
         self.mode
     }
 
@@ -198,11 +196,11 @@ where
     }
 
     pub fn is_strict(&self) -> bool {
-        self.mode == Some(Mode::Mstrict)
+        self.mode == Some(FileMode::Strict)
     }
 
     pub fn is_hhi(&self) -> bool {
-        self.mode == Some(Mode::Mhhi)
+        self.mode == Some(FileMode::Hhi)
     }
 
     // "unsafe" because it can break the invariant that text is consistent with other syntax
@@ -229,6 +227,15 @@ impl<'a, Syntax, State> AsRef<SyntaxTree<'a, Syntax, State>> for SyntaxTree<'a, 
     fn as_ref(&self) -> &Self {
         self
     }
+}
+
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
+#[repr(u8)]
+pub enum FileMode {
+    /// just declare signatures, don't check anything
+    Hhi,
+    /// check everything!
+    Strict,
 }
 
 #[cfg(test)]

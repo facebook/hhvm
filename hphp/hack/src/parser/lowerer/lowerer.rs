@@ -413,7 +413,7 @@ type S<'arena> = &'arena Syntax<'arena, PositionedToken<'arena>, PositionedValue
 
 fn p_pos<'a>(node: S<'a>, env: &Env<'_>) -> Pos {
     node.position_exclusive(env.indexed_source_text)
-        .unwrap_or_else(|| env.mk_none_pos())
+        .map_or_else(|| env.mk_none_pos(), Into::into)
 }
 
 fn raise_parsing_error<'a>(node: S<'a>, env: &mut Env<'a>, msg: &str) {
@@ -432,7 +432,7 @@ fn raise_parsing_error_<'a>(node_or_pos: Either<S<'a>, &Pos>, env: &mut Env<'a>,
         let pos = node_or_pos.either(
             |node| {
                 node.position_exclusive(env.indexed_source_text)
-                    .unwrap_or_else(|| env.mk_none_pos())
+                    .map_or_else(|| env.mk_none_pos(), Into::into)
             },
             |pos| pos.clone(),
         );
@@ -4552,7 +4552,8 @@ fn extract_docblock<'a>(node: S<'a>, env: &Env<'_>) -> Option<DocComment> {
         let anchor = node.leading_start_offset();
         let pos = env
             .indexed_source_text
-            .relative_pos(anchor + start, anchor + end);
+            .relative_pos(anchor + start, anchor + end)
+            .into();
         let ps = (pos, txt);
         oxidized::doc_comment::DocComment::new(ps)
     })

@@ -2777,6 +2777,20 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
     auto state = states[label];
     auto& block = unit.blocks[label];
 
+    if (state.hasIndirectFixup && isPrologue(unit.context->kind)) {
+      auto curState = state.in;
+      for (auto it = block.code.begin(); it != block.code.end(); ++it) {
+        // Note that if the instruction at the start or end of the spill
+        // regions has fixup, this loop does not account for it.
+        // This is not ideal but currently there are no instructions that
+        // have fixups that can start/end spill regions, so it is fine.
+        curState = instrInState(unit, *it, curState, ctx.sp);
+        if (curState == NeedSpill && instrHasIndirectFixup(*it)) {
+          updateIndirectFixupBySpill(*it, spillSize);
+        }
+      }
+    }
+
     // Any block with a state change should be walked to check for allocation
     // or free of spill space.
     if (state.changes) {
@@ -2826,22 +2840,6 @@ void allocateSpillSpace(Vunit& unit, const VxlsContext& ctx,
       FTRACE(3, "free spill before {}: {}\n", label, show(unit, (*it)));
       free.set_irctx(it->irctx());
       block.code.insert(it, free);
-    }
-
-    if (isPrologue(unit.context->kind)) {
-      if (state.hasIndirectFixup) {
-        auto curState = state.in;
-        for (auto it = block.code.begin(); it != block.code.end(); ++it) {
-          // Note that if the instruction at the start or end of the spill
-          // regions has fixup, this loop does not account for it.
-          // This is not ideal but currently there are no instructions that
-          // have fixups that can start/end spill regions, so it is fine.
-          curState = instrInState(unit, *it, curState, ctx.sp);
-          if (curState == NeedSpill && instrHasIndirectFixup(*it)) {
-            updateIndirectFixupBySpill(*it, spillSize);
-          }
-        }
-      }
     }
   }
 }

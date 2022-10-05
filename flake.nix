@@ -47,12 +47,12 @@
             lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.ccacheStdenv;
             isDefaultStdlib = true;
-          }).overrideAttrs {
+          }).overrideAttrs (finalAttrs: previousAttrs: {
             preConfigure = ''
               export CCACHE_DIR=/nix/var/cache/ccache
               export CCACHE_UMASK=007
             '';
-          };
+          });
           packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.llvmPackages_14.stdenv;

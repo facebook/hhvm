@@ -109,8 +109,6 @@ void implShift(Vout& v, IRLS& env, const IRInstruction* inst) {
   AO(AddOffset, BinopSF,  addq)    \
   AO(SubInt,    BinopSF,  subq)    \
   AO(MulInt,    BinopSF,  imul)    \
-  AO(AddIntO,   ArithO,   addq)    \
-  AO(SubIntO,   ArithO,   subq)    \
   AO(MulIntO,   ArithO,   imul)    \
   AO(AddDbl,    Binop,    addsd)   \
   AO(SubDbl,    Binop,    subsd)   \

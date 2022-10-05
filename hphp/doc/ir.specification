@@ -272,10 +272,6 @@ Instruction set
 
 | MulInt, D(Int), S(Int) S(Int), NF
 
-| AddIntO, D(Int), S(Int) S(Int), B
-
-| SubIntO, D(Int), S(Int) S(Int), B
-
 | MulIntO, D(Int), S(Int) S(Int), B
 
 | AddDbl, D(Dbl), S(Dbl) S(Dbl), NF
@@ -332,8 +328,8 @@ Instruction set
   than their input respectively. Their use requires SSE 4.1, availability
   should be checked before they are emitted.
 
-  AddIntO, SubIntO, MulIntO perform integer arithmetic on S0 and S1, but will
-  branch to block B on integer overflow.
+  MulIntO performs integer arithmetic on S0 and S1, but will branch to 
+  block B on integer overflow.
 
 | XorBool, D(Bool), S(Bool) S(Bool), NF
 

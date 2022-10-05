@@ -46,10 +46,12 @@
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.ccacheStdenv;
+            isDefaultStdlib = true;
           };
           packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.llvmPackages_14.stdenv;
+            isDefaultStdlib = true;
           };
           packages.default = packages.hhvm;
 

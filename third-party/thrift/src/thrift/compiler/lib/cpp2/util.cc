@@ -207,6 +207,22 @@ gen_adapter_dependency_graph(
   return edges;
 }
 
+std::unordered_map<const t_type*, std::vector<const t_type*>>
+gen_dependency_graph(
+    const t_program* program, const std::vector<const t_type*>& nodes) {
+  auto deps = gen_adapter_dependency_graph(program, nodes, program->typedefs());
+  auto struct_deps = gen_struct_dependency_graph(program, program->objects());
+  for (auto& [k, v] : struct_deps) {
+    deps[k].insert(deps[k].end(), v.begin(), v.end());
+    // Order all deps in the order they are defined in.
+    std::sort(
+        deps[k].begin(), deps[k].end(), [](const t_type* a, const t_type* b) {
+          return a->src_range().begin.offset() < b->src_range().begin.offset();
+        });
+  }
+  return deps;
+}
+
 bool is_orderable(
     std::unordered_set<t_type const*>& seen,
     std::unordered_map<t_type const*, bool>& memo,

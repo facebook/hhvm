@@ -574,13 +574,7 @@ class cpp_mstch_program : public mstch_program {
         nodes.end(), program_->typedefs().begin(), program_->typedefs().end());
     nodes.insert(
         nodes.end(), program_->objects().begin(), program_->objects().end());
-    auto deps = cpp2::gen_adapter_dependency_graph(
-        program_, nodes, program_->typedefs());
-    auto struct_deps =
-        cpp2::gen_struct_dependency_graph(program_, program_->objects());
-    for (auto& [k, v] : struct_deps) {
-      deps[k].insert(deps[k].end(), v.begin(), v.end());
-    }
+    auto deps = cpp2::gen_dependency_graph(program_, nodes);
     auto sorted =
         cpp2::topological_sort<const t_type*>(nodes.begin(), nodes.end(), deps);
 

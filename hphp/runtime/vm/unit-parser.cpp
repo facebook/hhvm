@@ -164,7 +164,6 @@ CompilerResult hackc_compile(
   hackc::NativeEnv native_env{
     .decl_provider = reinterpret_cast<uint64_t>(provider),
     .filepath = filename,
-    .check_int_overflow = 0,
     .hhbc_flags = hackc::HhbcFlags {
       .repo_authoritative = RO::RepoAuthoritative,
       .jit_enable_rename_function = RO::EvalJitEnableRenameFunction,

@@ -44,7 +44,6 @@ pub mod compile_ffi {
         filepath: String,
         aliased_namespaces: Vec<StringMapEntry>,
         include_roots: Vec<StringMapEntry>,
-        check_int_overflow: i32,
 
         hhbc_flags: HhbcFlags,
         parser_flags: ParserFlags,
@@ -239,7 +238,6 @@ impl compile_ffi::NativeEnv {
                 include_roots: (self.include_roots.iter())
                     .map(|e| (e.key.clone().into(), e.value.clone().into()))
                     .collect(),
-                check_int_overflow: self.check_int_overflow,
                 parser_options: ParserOptions {
                     po_auto_namespace_map: (self.aliased_namespaces.iter())
                         .map(|e| (e.key.clone(), e.value.clone()))

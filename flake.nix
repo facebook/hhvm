@@ -45,8 +45,10 @@
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
+            stdenv = pkgs.ccacheStdenv;
           };
-          packages.hhvm_clang = packages.hhvm.override {
+          packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
+            lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.llvmPackages_14.stdenv;
           };
           packages.default = packages.hhvm;

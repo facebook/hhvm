@@ -173,10 +173,6 @@ pub mod ffi {
         PostInc,
         PreDec,
         PostDec,
-        PreIncO,
-        PostIncO,
-        PreDecO,
-        PostDecO,
     }
 
     #[repr(u8)]
@@ -206,9 +202,6 @@ pub mod ffi {
         XorEqual,
         SlEqual,
         SrEqual,
-        PlusEqualO,
-        MinusEqualO,
-        MulEqualO,
     }
 
     #[repr(u8)]

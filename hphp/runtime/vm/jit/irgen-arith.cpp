@@ -36,9 +36,6 @@ bool areBinaryArithTypesSupported(Op op, Type t1, Type t2) {
   case Op::Mul:
   case Op::Div:
   case Op::Mod:
-  case Op::AddO:
-  case Op::SubO:
-  case Op::MulO:
     return is_numeric(t1) && is_numeric(t2);
   case Op::BitAnd:
   case Op::BitOr:
@@ -54,9 +51,6 @@ Opcode intArithOp(Op op) {
   case Op::Add:  return AddInt;
   case Op::Sub:  return SubInt;
   case Op::Mul:  return MulInt;
-  case Op::AddO: return AddIntO;
-  case Op::SubO: return SubIntO;
-  case Op::MulO: return MulIntO;
   default:
     break;
   }
@@ -68,9 +62,6 @@ Opcode dblArithOp(Op op) {
   case Op::Add:  return AddDbl;
   case Op::Sub:  return SubDbl;
   case Op::Mul:  return MulDbl;
-  case Op::AddO: return AddDbl;
-  case Op::SubO: return SubDbl;
-  case Op::MulO: return MulDbl;
   default:
     break;
   }
@@ -138,17 +129,11 @@ void binaryArith(IRGS& env, Op op) {
     return;
   }
 
-  auto const exitSlow = makeExitSlow(env);
   auto src2 = popC(env);
   auto src1 = popC(env);
   auto const opc = promoteBinaryDoubles(env, op, src1, src2);
 
-  if (opc == AddIntO || opc == SubIntO || opc == MulIntO) {
-    assertx(src1->isA(TInt) && src2->isA(TInt));
-    push(env, gen(env, opc, exitSlow, src1, src2));
-  } else {
-    push(env, gen(env, opc, src1, src2));
-  }
+  push(env, gen(env, opc, src1, src2));
 }
 
 // Helpers for comparison generation:
@@ -576,9 +561,6 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return Op::AddO;
-    case SetOpOp::MinusEqualO: return Op::SubO;
-    case SetOpOp::MulEqualO:   return Op::MulO;
     case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return Op::Concat;
     case SetOpOp::ModEqual:    return std::nullopt;
@@ -612,16 +594,13 @@ void emitSetOpL(IRGS& env, int32_t id, SetOpOp subop) {
     PUNT(SetOpL);
   }
 
-  auto const exitSlow = makeExitSlow(env);
   auto val = popC(env);
   env.irb->constrainValue(loc, DataTypeSpecific);
   auto opc = isBitOp(*subOpc)
     ? bitOp(*subOpc)
     : promoteBinaryDoubles(env, *subOpc, loc, val);
 
-  auto const result = opc == AddIntO || opc == SubIntO || opc == MulIntO
-    ? gen(env, opc, exitSlow, loc, val)
-    : gen(env, opc, loc, val);
+  auto const result = gen(env, opc, loc, val);
   pushStLoc(env, id, result);
 }
 
@@ -879,8 +858,6 @@ void emitBitXor(IRGS& env) { binaryBitOp(env, Op::BitXor); }
 
 void emitSub(IRGS& env)    { binaryArith(env, Op::Sub); }
 void emitMul(IRGS& env)    { binaryArith(env, Op::Mul); }
-void emitSubO(IRGS& env)   { binaryArith(env, Op::SubO); }
-void emitMulO(IRGS& env)   { binaryArith(env, Op::MulO); }
 
 void emitGt(IRGS& env)     { implCmp(env, Op::Gt);    }
 void emitGte(IRGS& env)    { implCmp(env, Op::Gte);   }
@@ -893,7 +870,6 @@ void emitNSame(IRGS& env)  { implCmp(env, Op::NSame); }
 void emitCmp(IRGS& env)    { implCmp(env, Op::Cmp); }
 
 void emitAdd(IRGS& env)    { implAdd(env, Op::Add); }
-void emitAddO(IRGS& env)   { implAdd(env, Op::AddO); }
 
 //////////////////////////////////////////////////////////////////////
 

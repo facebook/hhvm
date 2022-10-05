@@ -69,9 +69,6 @@ namespace HPHP {
   O(Add,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Sub,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mul,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(AddO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(SubO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
-  O(MulO,            NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Div,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Mod,             NA,               TWO(CV,CV),      ONE(CV),    NF) \
   O(Pow,             NA,               TWO(CV,CV),      ONE(CV),    NF) \

@@ -359,10 +359,6 @@ fn write_inc_dec_l<'a>(
         IncDecOp::PostInc => hack::Builtin::Hhbc(hack::Hhbc::Add),
         IncDecOp::PreDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
         IncDecOp::PostDec => hack::Builtin::Hhbc(hack::Hhbc::Sub),
-        IncDecOp::PreIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
-        IncDecOp::PostIncO => hack::Builtin::Hhbc(hack::Hhbc::AddO),
-        IncDecOp::PreDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
-        IncDecOp::PostDecO => hack::Builtin::Hhbc(hack::Hhbc::SubO),
         _ => unreachable!(),
     };
 
@@ -371,8 +367,8 @@ fn write_inc_dec_l<'a>(
     w.store(textual::Expr::deref(lid), post, tx_ty!(mixed))?;
 
     let sid = match op {
-        IncDecOp::PreInc | IncDecOp::PreDec | IncDecOp::PreIncO | IncDecOp::PreDecO => pre,
-        IncDecOp::PostInc | IncDecOp::PostDec | IncDecOp::PostIncO | IncDecOp::PostDecO => post,
+        IncDecOp::PreInc | IncDecOp::PreDec => pre,
+        IncDecOp::PostInc | IncDecOp::PostDec => post,
         _ => unreachable!(),
     };
     state.set_iid(iid, sid);

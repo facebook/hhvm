@@ -1451,14 +1451,11 @@ bool setOpLSideEffects(const bc::SetOpL& op, const Type& lhs, const Type& rhs) {
       return !lhs.subtypeOf(BInt) || !rhs.subtypeOf(BInt);
 
     case SetOpOp::PlusEqual:
-    case SetOpOp::PlusEqualO:
     case SetOpOp::MinusEqual:
     case SetOpOp::MulEqual:
     case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
-    case SetOpOp::MinusEqualO:
-    case SetOpOp::MulEqualO:
       return lhs.subtypeOf(BStr) || rhs.subtypeOf(BStr);
   }
   not_reached();
@@ -1489,7 +1486,6 @@ void dce(Env& env, const bc::SetOpL& op) {
 
 void dce(Env& env, const bc::Add&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::AddNewElemC&)      { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::AddO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::AKExists&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayIdx&)         { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ArrayMarkLegacy&)  { pushRemovableIfNoThrow(env); }
@@ -1530,7 +1526,6 @@ void dce(Env& env, const bc::Lt&)               { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Lte&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Mod&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Mul&)              { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::MulO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Neq&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Not&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::NSame&)            { pushRemovableIfNoThrow(env); }
@@ -1539,7 +1534,6 @@ void dce(Env& env, const bc::Same&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Shl&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Shr&)              { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::Sub&)              { pushRemovableIfNoThrow(env); }
-void dce(Env& env, const bc::SubO&)             { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::LateBoundCls&)     { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::SelfCls&)          { pushRemovableIfNoThrow(env); }
 void dce(Env& env, const bc::ParentCls&)        { pushRemovableIfNoThrow(env); }

@@ -82,7 +82,7 @@ Type typeArithImpl(Type t1, Type t2, CellOp op) {
   if (t1.subtypeOf(BInt) && t2.subtypeOf(BInt)) {
     // can't switch on pointers, so use template magic
     auto is_any = [](auto first, auto ...t) { return ((first == t) || ...); };
-    return is_any(op, tvSubO, tvMulO, tvAddO, tvDiv, tvPow) ? TNum : TInt;
+    return is_any(op, tvDiv, tvPow) ? TNum : TInt;
   }
   if (t1.subtypeOf(BNum) && t2.subtypeOf(BNum) &&
      (t1.subtypeOf(BDbl) || t2.subtypeOf(BDbl))) return TDbl;
@@ -95,10 +95,6 @@ Type typeMul(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMul); }
 Type typeDiv(Type t1, Type t2) { return typeArithImpl(t1, t2, tvDiv); }
 Type typePow(Type t1, Type t2) { return typeArithImpl(t1, t2, tvPow); }
 Type typeMod(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMod); }
-
-Type typeSubO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvSubO); }
-Type typeMulO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvMulO); }
-Type typeAddO(Type t1, Type t2) { return typeArithImpl(t1, t2, tvAddO); }
 
 Type typeConcat(Type t1, Type t2) {
   auto const tv = eval_const(t1, t2, [&] (auto v1, auto v2) {
@@ -121,7 +117,6 @@ Type typeShr(Type t1, Type t2) { return shift_impl(t1, t2, tvShr); }
 //////////////////////////////////////////////////////////////////////
 
 Type typeIncDec(IncDecOp op, Type t) {
-  auto const overflowToDbl = isIncDecO(op);
   auto const val = tv(t);
 
   if (!val) {
@@ -131,13 +126,13 @@ Type typeIncDec(IncDecOp op, Type t) {
     if (t.subtypeOf(BOptInt)) {
       // Ints stay ints unless they can overflow to doubles
       if (t.subtypeOf(BInt)) {
-        return overflowToDbl ? TNum : TInt;
+        return TInt;
       }
       // ++ on null throws, stays null on --. Uninit is folded to init.
       if (t.subtypeOf(BNull)) return isInc(op) ? TBottom : TInitNull;
       // Optional integer case. The union of the above two cases.
-      if (isInc(op)) return overflowToDbl ? TNum : TInt;
-      return overflowToDbl ? TOptNum : TOptInt;
+      if (isInc(op)) return TInt;
+      return TOptInt;
     }
 
     // No-op on bool, array, resource, object.
@@ -150,12 +145,12 @@ Type typeIncDec(IncDecOp op, Type t) {
 
   // We can't constprop with this eval_cell, because of the effects
   // on locals.
-  auto resultTy = eval_cell([inc,overflowToDbl,val] {
+  auto resultTy = eval_cell([inc,val] {
     auto c = *val;
     if (inc) {
-      (overflowToDbl ? tvIncO : tvInc)(&c);
+      tvInc(&c);
     } else {
-      (overflowToDbl ? tvDecO : tvDec)(&c);
+      tvDec(&c);
     }
     return c;
   });
@@ -203,10 +198,6 @@ Type typeSetOp(SetOpOp op, Type lhs, Type rhs) {
   case SetOpOp::AndEqual:    return typeBitAnd(lhs, rhs);
   case SetOpOp::OrEqual:     return typeBitOr(lhs, rhs);
   case SetOpOp::XorEqual:    return typeBitXor(lhs, rhs);
-
-  case SetOpOp::PlusEqualO:  return typeAddO(lhs, rhs);
-  case SetOpOp::MinusEqualO: return typeSubO(lhs, rhs);
-  case SetOpOp::MulEqualO:   return typeMulO(lhs, rhs);
 
   case SetOpOp::ConcatEqual: return typeConcat(lhs, rhs);
   case SetOpOp::SlEqual:     return typeShl(lhs, rhs);

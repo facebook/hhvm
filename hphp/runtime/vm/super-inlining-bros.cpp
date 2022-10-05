@@ -1233,9 +1233,6 @@ bool mayReadOrWriteGlobals(Op op) {
     case Op::Add:
     case Op::Sub:
     case Op::Mul:
-    case Op::AddO:
-    case Op::SubO:
-    case Op::MulO:
     case Op::Div:
     case Op::Mod:
     case Op::Pow:

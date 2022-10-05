@@ -23,8 +23,6 @@ type Result<T = (), E = Error> = std::result::Result<T, E>;
 pub(crate) enum Hhbc {
     #[strum(props(Function = "hhbc_add"))]
     Add,
-    #[strum(props(Function = "hhbc_add_o"))]
-    AddO,
     #[strum(props(Function = "hhbc_cmp_eq"))]
     CmpEq,
     #[strum(props(Function = "hhbc_cmp_gt"))]
@@ -53,8 +51,6 @@ pub(crate) enum Hhbc {
     Print,
     #[strum(props(Function = "hhbc_sub"))]
     Sub,
-    #[strum(props(Function = "hhbc_sub_o"))]
-    SubO,
     #[strum(props(Function = "hhbc_verify_failed"))]
     VerifyFailed,
 }

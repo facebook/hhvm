@@ -46,14 +46,6 @@ TypedNum tvSub(TypedValue, TypedValue);
 TypedNum tvMul(TypedValue, TypedValue);
 
 /*
- * Same as their corresponding non-O functions, but will cast their sources to
- * doubles instead of doing integer overflow.
- */
-TypedValue tvAddO(TypedValue, TypedValue);
-TypedNum tvSubO(TypedValue, TypedValue);
-TypedNum tvMulO(TypedValue, TypedValue);
-
-/*
  * PHP operators / and %.
  *
  * The operators return numbers unless the second argument converts to
@@ -189,9 +181,6 @@ inline void tvConcatEq(tv_lval lhs, TypedValue rhs) {
  */
 void tvInc(tv_lval);
 void tvDec(tv_lval);
-
-void tvIncO(tv_lval);
-void tvDecO(tv_lval);
 
 /*
  * PHP unary operator ~.

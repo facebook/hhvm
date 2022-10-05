@@ -112,17 +112,6 @@ TypedValue tvArith(Op o, TypedValue c1, TypedValue c2) {
     : o(c1.m_data.dbl, c2.m_data.dbl);
 }
 
-// Check is the function that checks for overflow, Over is the function that
-// returns the overflowed value.
-template<class Op, class Check, class Over>
-TypedValue tvArithO(Op o, Check ck, Over ov, TypedValue c1, TypedValue c2) {
-  check_numeric(c1, c2);
-  int64_t a = c1.m_data.num;
-  int64_t b = c2.m_data.num;
-
-  return (tvIsInt(c1) && tvIsInt(c2) && ck(a,b)) ? ov(a,b) : tvArith(o, c1, c2);
-}
-
 /*
  * Template params:
  * 1. A functor class for doing the standard mathematical operation
@@ -351,7 +340,11 @@ void tvIncDecOp(Op op, tv_lval cell) {
 const StaticString s_1("1");
 
 
-struct IncBase {
+struct Inc {
+  void intCase(tv_lval cell) const {
+    auto& n = val(cell).num;
+    n = add_ignore_overflow(n, 1);
+  }
   void dblCase(tv_lval cell) const { ++val(cell).dbl; }
   void nullCase(tv_lval cell) const {
     throwIncDecBadTypeException("null");
@@ -375,45 +368,15 @@ struct IncBase {
   }
 };
 
-struct Inc : IncBase {
-  void intCase(tv_lval cell) const {
-    auto& n = val(cell).num;
-    n = add_ignore_overflow(n, 1);
-  }
-};
-
-struct IncO : IncBase {
-  void intCase(tv_lval cell) const {
-    if (add_overflow(val(cell).num, int64_t{1})) {
-      tvCopy(tvAddO(*cell, make_int(1)), cell);
-    } else {
-      Inc().intCase(cell);
-    }
-  }
-};
-
-struct DecBase {
-  void dblCase(tv_lval cell) { --val(cell).dbl; }
-  void nullCase(tv_lval) const {}
-  void nonNumericString(tv_lval cell) const {
-    raise_notice("Decrement on string '%s'", val(cell).pstr->data());
-  }
-};
-
-struct Dec : DecBase {
+struct Dec {
   void intCase(tv_lval cell) {
     auto& n = val(cell).num;
     n = sub_ignore_overflow(n, 1);
   }
-};
-
-struct DecO : DecBase {
-  void intCase(tv_lval cell) {
-    if (sub_overflow(val(cell).num, int64_t{1})) {
-      tvCopy(tvSubO(*cell, make_int(1)), cell);
-    } else {
-      Dec().intCase(cell);
-    }
+  void dblCase(tv_lval cell) { --val(cell).dbl; }
+  void nullCase(tv_lval) const {}
+  void nonNumericString(tv_lval cell) const {
+    raise_notice("Decrement on string '%s'", val(cell).pstr->data());
   }
 };
 
@@ -431,27 +394,6 @@ TypedNum tvSub(TypedValue c1, TypedValue c2) {
 
 TypedNum tvMul(TypedValue c1, TypedValue c2) {
   return tvArith(Mul(), c1, c2);
-}
-
-TypedValue tvAddO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_int(a + b);
-  };
-  return tvArithO(Add(), add_overflow<int64_t>, over, c1, c2);
-}
-
-TypedNum tvSubO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_int(a - b);
-  };
-  return tvArithO(Sub(), sub_overflow<int64_t>, over, c1, c2);
-}
-
-TypedNum tvMulO(TypedValue c1, TypedValue c2) {
-  auto over = [](int64_t a, int64_t b) {
-    return make_int(a * b);
-  };
-  return tvArithO(Mul(), mul_overflow<int64_t>, over, c1, c2);
 }
 
 TypedValue tvDiv(TypedValue c1, TypedValue c2) {
@@ -524,10 +466,6 @@ void tvMulEq(tv_lval c1, TypedValue c2) {
   tvOpEq(MulEq(), c1, c2);
 }
 
-void tvAddEqO(tv_lval c1, TypedValue c2) { tvSet(tvAddO(*c1, c2), c1); }
-void tvSubEqO(tv_lval c1, TypedValue c2) { tvSet(tvSubO(*c1, c2), c1); }
-void tvMulEqO(tv_lval c1, TypedValue c2) { tvSet(tvMulO(*c1, c2), c1); }
-
 void tvDivEq(tv_lval c1, TypedValue c2) {
   assertx(tvIsPlausible(*c1));
   assertx(tvIsPlausible(c2));
@@ -559,9 +497,7 @@ void tvShlEq(tv_lval c1, TypedValue c2) { tvSet(tvShl(*c1, c2), c1); }
 void tvShrEq(tv_lval c1, TypedValue c2) { tvSet(tvShr(*c1, c2), c1); }
 
 void tvInc(tv_lval cell) { tvIncDecOp(Inc(), cell); }
-void tvIncO(tv_lval cell) { tvIncDecOp(IncO(), cell); }
 void tvDec(tv_lval cell) { tvIncDecOp(Dec(), cell); }
-void tvDecO(tv_lval cell) { tvIncDecOp(DecO(), cell); }
 
 void tvBitNot(TypedValue& cell) {
   assertx(tvIsPlausible(cell));

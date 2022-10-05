@@ -74,9 +74,6 @@ void setopBody(tv_lval lhs, SetOpOp op, TypedValue* rhs) {
   case SetOpOp::XorEqual:       tvBitXorEq(lhs, *rhs); return;
   case SetOpOp::SlEqual:        tvShlEq(lhs, *rhs); return;
   case SetOpOp::SrEqual:        tvShrEq(lhs, *rhs); return;
-  case SetOpOp::PlusEqualO:     tvAddEqO(lhs, *rhs); return;
-  case SetOpOp::MinusEqualO:    tvSubEqO(lhs, *rhs); return;
-  case SetOpOp::MulEqualO:      tvMulEqO(lhs, *rhs); return;
   }
   not_reached();
 }

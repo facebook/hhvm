@@ -1339,7 +1339,6 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Add
             | Opcode::AddElemC
             | Opcode::AddNewElemC
-            | Opcode::AddO
             | Opcode::ArrayIdx
             | Opcode::ArrayMarkLegacy
             | Opcode::ArrayUnmarkLegacy
@@ -1440,7 +1439,6 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::MemoSet(..)
             | Opcode::MemoSetEager(..)
             | Opcode::Mul
-            | Opcode::MulO
             | Opcode::NSame
             | Opcode::NativeImpl
             | Opcode::Neq
@@ -1491,7 +1489,6 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Shr
             | Opcode::Silence(..)
             | Opcode::Sub
-            | Opcode::SubO
             | Opcode::Switch(..)
             | Opcode::Throw
             | Opcode::ThrowAsTypeStructException
@@ -1510,10 +1507,8 @@ fn is_checkpoint_instr(instr: &NodeInstr<'_>) -> bool {
 
 fn apply_inc_dec_op(inc_dec_op: IncDecOp, pre_value: Value, post_value: Value) -> Value {
     match inc_dec_op {
-        IncDecOp::PreInc | IncDecOp::PreDec | IncDecOp::PreIncO | IncDecOp::PreDecO => post_value,
-        IncDecOp::PostInc | IncDecOp::PostDec | IncDecOp::PostIncO | IncDecOp::PostDecO => {
-            pre_value
-        }
+        IncDecOp::PreInc | IncDecOp::PreDec => post_value,
+        IncDecOp::PostInc | IncDecOp::PostDec => pre_value,
         _ => unreachable!(),
     }
 }
@@ -1552,7 +1547,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Add
         | Opcode::AddElemC
         | Opcode::AddNewElemC
-        | Opcode::AddO
         | Opcode::ArrayIdx
         | Opcode::ArrayMarkLegacy
         | Opcode::ArrayUnmarkLegacy
@@ -1619,7 +1613,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Method
         | Opcode::Mod
         | Opcode::Mul
-        | Opcode::MulO
         | Opcode::NSame
         | Opcode::NativeImpl
         | Opcode::Neq
@@ -1650,7 +1643,6 @@ fn clean_opcode<'arena>(opcode: &Opcode<'arena>) -> Opcode<'arena> {
         | Opcode::Shl
         | Opcode::Shr
         | Opcode::Sub
-        | Opcode::SubO
         | Opcode::This
         | Opcode::Throw
         | Opcode::ThrowAsTypeStructException

@@ -531,7 +531,7 @@ void structDictIncDec(IRGS& env, IncDecOp op, SSATmp* arr, SSATmp* key,
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return finish(gen(env, IncDecElem, IncDecData{op}, ldMBase(env), key));
   }
 

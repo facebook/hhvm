@@ -1220,9 +1220,6 @@ void in(ISS& env, const bc::Pow& op)    { arithImpl(env, op, typePow); }
 void in(ISS& env, const bc::BitAnd& op) { arithImpl(env, op, typeBitAnd); }
 void in(ISS& env, const bc::BitOr& op)  { arithImpl(env, op, typeBitOr); }
 void in(ISS& env, const bc::BitXor& op) { arithImpl(env, op, typeBitXor); }
-void in(ISS& env, const bc::AddO& op)   { arithImpl(env, op, typeAddO); }
-void in(ISS& env, const bc::SubO& op)   { arithImpl(env, op, typeSubO); }
-void in(ISS& env, const bc::MulO& op)   { arithImpl(env, op, typeMulO); }
 void in(ISS& env, const bc::Shl& op)    { arithImpl(env, op, typeShl); }
 void in(ISS& env, const bc::Shr& op)    { arithImpl(env, op, typeShr); }
 

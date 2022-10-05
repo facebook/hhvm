@@ -196,7 +196,6 @@ where
             Opcode::AKExists
             | Opcode::AddElemC
             | Opcode::AddNewElemC
-            | Opcode::AddO
             | Opcode::Add
             | Opcode::ArrayIdx
             | Opcode::ArrayMarkLegacy
@@ -310,7 +309,6 @@ where
             | Opcode::MemoSetEager(..)
             | Opcode::Method
             | Opcode::Mod
-            | Opcode::MulO
             | Opcode::Mul
             | Opcode::NSame
             | Opcode::NativeImpl
@@ -373,7 +371,6 @@ where
             | Opcode::Shr
             | Opcode::Silence(..)
             | Opcode::String(..)
-            | Opcode::SubO
             | Opcode::Sub
             | Opcode::This
             | Opcode::ThrowAsTypeStructException

@@ -1380,9 +1380,9 @@ fn print_member_op(
 
     match op.final_op {
         FinalOp::IncDecM { inc_dec_op, .. } => match inc_dec_op {
-            IncDecOp::PreInc | IncDecOp::PreIncO => write!(w, "++")?,
-            IncDecOp::PreDec | IncDecOp::PreDecO => write!(w, "--")?,
-            IncDecOp::PostInc | IncDecOp::PostDec | IncDecOp::PostIncO | IncDecOp::PostDecO => {}
+            IncDecOp::PreInc => write!(w, "++")?,
+            IncDecOp::PreDec => write!(w, "--")?,
+            IncDecOp::PostInc | IncDecOp::PostDec => {}
             _ => unreachable!(),
         },
         FinalOp::QueryM { .. }
@@ -1513,11 +1513,8 @@ fn print_member_op(
     match op.final_op {
         FinalOp::IncDecM { inc_dec_op, .. } => match inc_dec_op {
             IncDecOp::PreInc | IncDecOp::PreDec => {}
-            IncDecOp::PreIncO | IncDecOp::PreDecO => write!(w, " overflow")?,
             IncDecOp::PostInc => write!(w, "++")?,
             IncDecOp::PostDec => write!(w, "--")?,
-            IncDecOp::PostIncO => write!(w, "++ overflow")?,
-            IncDecOp::PostDecO => write!(w, "++ overflow")?,
             _ => unreachable!(),
         },
         FinalOp::QueryM { query_m_op, .. } => match query_m_op {
@@ -1607,25 +1604,20 @@ fn print_method(
 fn incdec_flag(op: IncDecOp) -> &'static str {
     match op {
         IncDecOp::PreInc | IncDecOp::PostInc | IncDecOp::PreDec | IncDecOp::PostDec => "",
-        IncDecOp::PreIncO | IncDecOp::PostIncO | IncDecOp::PreDecO | IncDecOp::PostDecO => {
-            "overflow"
-        }
         _ => panic!("bad IncDecOp value"),
     }
 }
 
 fn incdec_what(op: IncDecOp) -> (&'static str, &'static str) {
     let what = match op {
-        IncDecOp::PreInc | IncDecOp::PreIncO | IncDecOp::PostInc | IncDecOp::PostIncO => "++",
-        IncDecOp::PreDec | IncDecOp::PreDecO | IncDecOp::PostDec | IncDecOp::PostDecO => "--",
+        IncDecOp::PreInc | IncDecOp::PostInc => "++",
+        IncDecOp::PreDec | IncDecOp::PostDec => "--",
         _ => panic!("bad IncDecOp value"),
     };
 
     match op {
-        IncDecOp::PreInc | IncDecOp::PreDec | IncDecOp::PreIncO | IncDecOp::PreDecO => (what, ""),
-        IncDecOp::PostInc | IncDecOp::PostDec | IncDecOp::PostIncO | IncDecOp::PostDecO => {
-            ("", what)
-        }
+        IncDecOp::PreInc | IncDecOp::PreDec => (what, ""),
+        IncDecOp::PostInc | IncDecOp::PostDec => ("", what),
         _ => panic!("bad IncDecOp value"),
     }
 }

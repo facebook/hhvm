@@ -1533,7 +1533,7 @@ SSATmp* incDecDictImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key,
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1594,7 +1594,7 @@ SSATmp* incDecVecImpl(IRGS& env, IncDecOp op, SSATmp* base, SSATmp* key) {
     curClass(env)
   ).first;
 
-  if (isIncDecO(op) || !lhsType.maybe(TInt)) {
+  if (!lhsType.maybe(TInt)) {
     return gen(
       env,
       IncDecElem,
@@ -1805,9 +1805,6 @@ Optional<Type> simpleSetOpType(SetOpOp op) {
     case SetOpOp::OrEqual:
     case SetOpOp::XorEqual:    return TInt;
     case SetOpOp::ConcatEqual: return TStr;
-    case SetOpOp::PlusEqualO:
-    case SetOpOp::MinusEqualO:
-    case SetOpOp::MulEqualO:
     case SetOpOp::DivEqual:
     case SetOpOp::ModEqual:
     case SetOpOp::PowEqual:
@@ -1835,9 +1832,6 @@ SSATmp* simpleSetOpAction(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
       case SetOpOp::OrEqual:     return OrInt;
       case SetOpOp::XorEqual:    return XorInt;
       case SetOpOp::ConcatEqual: return ConcatStrStr;
-      case SetOpOp::PlusEqualO:
-      case SetOpOp::MinusEqualO:
-      case SetOpOp::MulEqualO:
       case SetOpOp::DivEqual:
       case SetOpOp::ModEqual:
       case SetOpOp::PowEqual:
@@ -2086,9 +2080,6 @@ SSATmp* inlineSetOp(IRGS& env, SetOpOp op, SSATmp* lhs, SSATmp* rhs) {
     case SetOpOp::PlusEqual:   return Op::Add;
     case SetOpOp::MinusEqual:  return Op::Sub;
     case SetOpOp::MulEqual:    return Op::Mul;
-    case SetOpOp::PlusEqualO:  return std::nullopt;
-    case SetOpOp::MinusEqualO: return std::nullopt;
-    case SetOpOp::MulEqualO:   return std::nullopt;
     case SetOpOp::DivEqual:    return std::nullopt;
     case SetOpOp::ConcatEqual: return std::nullopt;
     case SetOpOp::ModEqual:    return std::nullopt;

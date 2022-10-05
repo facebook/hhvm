@@ -67,7 +67,6 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
         let name = builtin.into_str();
         match hhbc {
             Hhbc::Add
-            | Hhbc::AddO
             | Hhbc::CmpEq
             | Hhbc::CmpGt
             | Hhbc::CmpGte
@@ -77,8 +76,7 @@ pub fn write_decls(w: &mut dyn std::io::Write) -> Result<()> {
             | Hhbc::CmpNeq
             | Hhbc::CmpSame
             | Hhbc::Modulo
-            | Hhbc::Sub
-            | Hhbc::SubO => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
+            | Hhbc::Sub => declare_function(w, &name, &[ty!(mixed), ty!(mixed)], ty!(mixed))?,
 
             Hhbc::Print | Hhbc::IsTypeInt | Hhbc::IsTypeStr | Hhbc::Not => {
                 declare_function(w, &name, &[ty!(mixed)], ty!(mixed))?

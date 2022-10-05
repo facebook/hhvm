@@ -296,7 +296,6 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
         // Operators
         NodeInstr::Opcode(
             Opcode::Add
-            | Opcode::AddO
             | Opcode::BitAnd
             | Opcode::BitNot
             | Opcode::BitOr
@@ -309,7 +308,6 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Idx
             | Opcode::Lte
             | Opcode::Mul
-            | Opcode::MulO
             | Opcode::NSame
             | Opcode::Neq
             | Opcode::Not
@@ -319,7 +317,6 @@ fn is_cow_instr(instr: &NodeInstr<'_>) -> bool {
             | Opcode::Shl
             | Opcode::Shr
             | Opcode::Sub
-            | Opcode::SubO
             | Opcode::AKExists
             | Opcode::ArrayIdx
             | Opcode::AssertRATL(..)

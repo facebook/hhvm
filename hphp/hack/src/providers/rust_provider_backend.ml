@@ -41,7 +41,7 @@ module Decl = struct
       (Value : SharedMem.Value) (Ffi : sig
         val get : t -> Key.t -> Value.t option
 
-        (* val remove_batch : t -> Key.t list -> unit *)
+        val remove_batch : t -> Key.t list -> unit
       end) : Store with type key = Key.t and type value = Value.t = struct
     type key = Key.t
 
@@ -63,9 +63,11 @@ module Decl = struct
         | None -> ());
         value_opt
 
-    (* let remove_batch backend keys =
-       Cache.remove_batch keys;
-       Ffi.remove_batch backend keys *)
+    let remove_batch backend (keys : Key.t list) =
+      List.iter ~f:Cache.remove keys;
+      Ffi.remove_batch backend keys
+      [@@ocaml.warning "-32"]
+    (* Currently an unused value. *)
 
     let clear_cache = Cache.clear
   end
@@ -81,6 +83,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.fun_decl option
           = "hh_rust_provider_backend_get_fun"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_funs_batch"
       end)
 
   module ShallowClasses =
@@ -94,6 +99,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.class_decl option
           = "hh_rust_provider_backend_get_shallow_class"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_shallow_classes_batch"
       end)
 
   module Typedefs =
@@ -107,6 +115,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.typedef_decl option
           = "hh_rust_provider_backend_get_typedef"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_typedefs_batch"
       end)
 
   module GConsts =
@@ -120,6 +131,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.const_decl option
           = "hh_rust_provider_backend_get_gconst"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_gconsts_batch"
       end)
 
   module Modules =
@@ -133,6 +147,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Shallow_decl_defs.module_decl option
           = "hh_rust_provider_backend_get_module"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_modules_batch"
       end)
 
   module ClassEltKey = struct
@@ -159,6 +176,9 @@ module Decl = struct
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
           = "hh_rust_provider_backend_get_prop"
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_props_batch"
       end)
 
   module StaticProps =
@@ -172,6 +192,9 @@ module Decl = struct
       (struct
         external get : t -> string * string -> Typing_defs.decl_ty option
           = "hh_rust_provider_backend_get_static_prop"
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_static_props_batch"
       end)
 
   let build_fun_elt fe_type =
@@ -199,6 +222,9 @@ module Decl = struct
           = "hh_rust_provider_backend_get_method"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_methods_batch"
       end)
 
   module StaticMethods =
@@ -214,6 +240,9 @@ module Decl = struct
           = "hh_rust_provider_backend_get_static_method"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> (string * string) list -> unit
+          = "hh_rust_provider_backend_remove_static_methods_batch"
       end)
 
   module Constructors =
@@ -229,6 +258,9 @@ module Decl = struct
           = "hh_rust_provider_backend_get_constructor"
 
         let get t name = get_ffi t name |> Option.map ~f:build_fun_elt
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_constructors_batch"
       end)
 
   module FoldedClasses =
@@ -242,6 +274,9 @@ module Decl = struct
       (struct
         external get : t -> string -> Decl_defs.decl_class_type option
           = "hh_rust_provider_backend_get_folded_class"
+
+        external remove_batch : t -> string list -> unit
+          = "hh_rust_provider_backend_remove_folded_classes_batch"
       end)
 
   let decl_store t =

@@ -53,3 +53,4 @@ IF (NOT DEFAULT_CONFIG_DIR)
 ENDIF()
 
 option(ENABLE_XED "Use the XED library for HHVM. If ON, tc-print will be built for X86." OFF)
+option(ENABLE_SYSTEM_LOCALE_ARCHIVE "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc." OFF)

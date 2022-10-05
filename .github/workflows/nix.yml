@@ -144,6 +144,9 @@ jobs:
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
         "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all
+    - run: sed '/^ *#/d;s/#.*//' ./github_excluded_tests | xargs "$HHVM_BIN" ./run.php
+      working-directory: ./hphp/test
+      continue-on-error: true
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

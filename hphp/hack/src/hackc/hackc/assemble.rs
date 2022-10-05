@@ -1911,15 +1911,6 @@ fn assemble_instr<'arena>(
                     b"Mul" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mul, "Mul")
                     }
-                    b"AddO" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::AddO, "AddO")
-                    }
-                    b"SubO" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::SubO, "SubO")
-                    }
-                    b"MulO" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::MulO, "MulO")
-                    }
                     b"Pow" => {
                         assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Pow, "Pow")
                     }
@@ -3309,9 +3300,6 @@ fn assemble_set_op_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetOpOp> {
         b"XorEqual" => Ok(hhbc::SetOpOp::XorEqual),
         b"SlEqual" => Ok(hhbc::SetOpOp::SlEqual),
         b"SrEqual" => Ok(hhbc::SetOpOp::SrEqual),
-        b"PlusEqualO" => Ok(hhbc::SetOpOp::PlusEqualO),
-        b"MinusEqualO" => Ok(hhbc::SetOpOp::MinusEqualO),
-        b"MulEqualO" => Ok(hhbc::SetOpOp::MulEqualO),
         sop => bail!("Expected a SetOpOp but got: {:?}", sop),
     }
 }
@@ -3322,10 +3310,6 @@ fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
         b"PostInc" => Ok(hhbc::IncDecOp::PostInc),
         b"PreDec" => Ok(hhbc::IncDecOp::PreDec),
         b"PostDec" => Ok(hhbc::IncDecOp::PostDec),
-        b"PreIncO" => Ok(hhbc::IncDecOp::PreIncO),
-        b"PostIncO" => Ok(hhbc::IncDecOp::PostIncO),
-        b"PreDecO" => Ok(hhbc::IncDecOp::PreDecO),
-        b"PostDecO" => Ok(hhbc::IncDecOp::PostDecO),
 
         ido => bail!("Expected a IncDecOp but got: {:?}", ido),
     }

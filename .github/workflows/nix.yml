@@ -105,6 +105,9 @@ jobs:
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
+        flags:
+        - ''
+        - --repo
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v3
@@ -143,7 +146,7 @@ jobs:
     - run: sudo apt-get install ./${{matrix.package}}.deb
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
-        "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all
+        "$HHVM_BIN" hphp/test/run.php ${{matrix.flags}} -x hphp/test/github_excluded_tests all
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

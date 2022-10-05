@@ -25,7 +25,6 @@ constexpr char FUNCTION_ALREADY_DEFINED[] = "Function already defined: %s";
 constexpr char CONSTANT_ALREADY_DEFINED[] = "Constant %s already defined";
 constexpr char DIVISION_BY_ZERO[] =
   "Division by zero";
-constexpr char INTEGER_OVERFLOW[] = "Integer overflow";
 constexpr char UNKNOWN_CLASS[] = "Class undefined: %s";
 constexpr char CANT_ACCESS_SELF[] =
   "Cannot access self:: when no class scope is active";

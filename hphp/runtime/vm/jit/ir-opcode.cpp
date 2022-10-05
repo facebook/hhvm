@@ -464,7 +464,6 @@ bool opcodeMayRaise(Opcode opc) {
   case AbsDbl:
   case AddDbl:
   case AddInt:
-  case AddIntO:
   case AddNewElemVec:
   case AddOffset:
   case AdvanceDictPtrIter:
@@ -923,7 +922,6 @@ bool opcodeMayRaise(Opcode opc) {
   case StTVInRDS:
   case SubDbl:
   case SubInt:
-  case SubIntO:
   case Unreachable:
   case UnwindCheckSideExit:
   case VecFirst:

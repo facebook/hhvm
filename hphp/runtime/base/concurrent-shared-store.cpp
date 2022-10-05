@@ -1122,9 +1122,9 @@ ConcurrentTableSharedStore::sampleEntriesInfo(uint32_t count) {
   return samples;
 }
 
-std::vector<EntryInfo>
+std::vector<std::tuple<EntryInfo, uint32_t>>
 ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
-  std::vector<EntryInfo> samples;
+  std::vector<std::tuple<EntryInfo, uint32_t>> samples;
   if (bytes == 0) return samples;
   int64_t next = folly::Random::rand32(bytes);
   int64_t curr_time = time(nullptr);
@@ -1134,13 +1134,18 @@ ConcurrentTableSharedStore::sampleEntriesInfoBySize(uint32_t bytes) {
     auto const key = iter.first;
     StoreValue& value = iter.second;
     if (value.expired()) continue;
-    int size = sizeof(StoreValue) + strlen(key) + 1;
-    size += value.dataSize;
-    next -= size;
-    if (next < 0) {
-      samples.push_back(makeEntryInfo(key, &value, curr_time));
-      next += ((-next) / bytes + 1) * bytes;
-      assertx(next > 0);
+    int size = sizeof(StoreValue) + strlen(key) + 1 + value.dataSize;
+
+    if (size > next) {
+      uint32_t left = size - next;
+      uint32_t weight = ((left - 1) / bytes) + 1;
+
+      samples.push_back(std::make_tuple(makeEntryInfo(key, &value, curr_time),
+                                        weight));
+
+      next = weight * bytes - left;
+    } else {
+      next -= size;
     }
   }
   return samples;

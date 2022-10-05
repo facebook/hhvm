@@ -326,21 +326,11 @@ enum InstrFlags {
 };
 
 inline bool isPre(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PreDec || op == IncDecOp::PreDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PreDec;
 }
 
 inline bool isInc(IncDecOp op) {
-  return
-    op == IncDecOp::PreInc || op == IncDecOp::PreIncO ||
-    op == IncDecOp::PostInc || op == IncDecOp::PostIncO;
-}
-
-inline bool isIncDecO(IncDecOp op) {
-  return
-    op == IncDecOp::PreIncO || op == IncDecOp::PreDecO ||
-    op == IncDecOp::PostIncO || op == IncDecOp::PostDecO;
+  return op == IncDecOp::PreInc || op == IncDecOp::PostInc;
 }
 
 constexpr uint32_t kMaxConcatN = 4;

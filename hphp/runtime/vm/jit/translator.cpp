@@ -139,10 +139,6 @@ static const struct {
   { OpAdd,         {StackTop2,        Stack1,       OutArith        }},
   { OpSub,         {StackTop2,        Stack1,       OutArith        }},
   { OpMul,         {StackTop2,        Stack1,       OutArith        }},
-  /* Arithmetic ops that overflow ints to floats */
-  { OpAddO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpSubO,        {StackTop2,        Stack1,       OutArithO       }},
-  { OpMulO,        {StackTop2,        Stack1,       OutArithO       }},
   /* Div and mod might return boolean false. Sigh. */
   { OpDiv,         {StackTop2,        Stack1,       OutUnknown      }},
   { OpMod,         {StackTop2,        Stack1,       OutUnknown      }},
@@ -911,10 +907,7 @@ bool dontGuardAnyInputs(const NormalizedInstruction& ni) {
   case Op::BitXor:
   case Op::Sub:
   case Op::Mul:
-  case Op::SubO:
-  case Op::MulO:
   case Op::Add:
-  case Op::AddO:
   case Op::ClassGetC:
   case Op::ClassGetTS:
   case Op::AKExists:

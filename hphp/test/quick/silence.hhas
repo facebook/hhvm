@@ -2,7 +2,7 @@
 .function <"" N  > add($x, $y) {
   CGetL $y
   CGetL2 $x
-  AddO
+  Add
   RetC
 }
 

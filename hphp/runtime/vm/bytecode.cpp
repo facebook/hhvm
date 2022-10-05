@@ -1390,18 +1390,6 @@ OPTBLD_INLINE void iopMul() {
   implTvBinOp(tvMul);
 }
 
-OPTBLD_INLINE void iopAddO() {
-  implTvBinOp(tvAddO);
-}
-
-OPTBLD_INLINE void iopSubO() {
-  implTvBinOp(tvSubO);
-}
-
-OPTBLD_INLINE void iopMulO() {
-  implTvBinOp(tvMulO);
-}
-
 OPTBLD_INLINE void iopDiv() {
   implTvBinOp(tvDiv);
 }

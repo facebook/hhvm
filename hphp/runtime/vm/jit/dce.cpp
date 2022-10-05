@@ -350,9 +350,7 @@ bool canDCE(const IRInstruction& inst) {
   case CheckNonNull:
   case DivDbl:
   case DivInt:
-  case AddIntO:
   case AddOffset:
-  case SubIntO:
   case MulIntO:
 
   case GtObj:

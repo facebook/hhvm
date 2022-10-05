@@ -91,22 +91,6 @@ TypedValue incDecBodySlow(IncDecOp op, tv_lval fr) {
     tvDec(fr);
     return tmp;
   }
-  case IncDecOp::PreIncO:
-    tvIncO(fr);
-    return dup();
-  case IncDecOp::PostIncO: {
-    auto const tmp = dup();
-    tvIncO(fr);
-    return tmp;
-  }
-  case IncDecOp::PreDecO:
-    tvDecO(fr);
-    return dup();
-  case IncDecOp::PostDecO: {
-    auto const tmp = dup();
-    tvDecO(fr);
-    return tmp;
-  }
   }
   not_reached();
 }

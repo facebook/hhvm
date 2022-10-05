@@ -40,11 +40,6 @@ Type arithOpResult(Type t1, Type t2) {
   return TInt;
 }
 
-Type arithOpOverResult(Type t1, Type t2) {
-  if (t1 <= TInt && t2 <= TInt) return TInt | TDbl;
-  return arithOpResult(t1, t2);
-}
-
 Type bitOpResult(Type t1, Type t2) {
   if (!t1.isKnownDataType() || !t2.isKnownDataType()) {
     return TCell;
@@ -60,9 +55,6 @@ Type setOpResult(Type locType, Type valType, SetOpOp op) {
   case SetOpOp::PlusEqual:
   case SetOpOp::MinusEqual:
   case SetOpOp::MulEqual:    return arithOpResult(locType, valType);
-  case SetOpOp::PlusEqualO:
-  case SetOpOp::MinusEqualO:
-  case SetOpOp::MulEqualO:   return arithOpOverResult(locType, valType);
   case SetOpOp::ConcatEqual: return TStr;
   case SetOpOp::PowEqual:
   case SetOpOp::DivEqual:
@@ -135,9 +127,7 @@ Optional<Type> interpOutputType(IRGS& env,
     case OutArith:
       return arithOpResult(topType(env, BCSPRelOffset{0}),
                            topType(env, BCSPRelOffset{1}));
-    case OutArithO:
-      return arithOpOverResult(topType(env, BCSPRelOffset{0}),
-                               topType(env, BCSPRelOffset{1}));
+
     case OutUnknown:     return TCell;
 
     case OutBitOp:

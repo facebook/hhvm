@@ -1450,7 +1450,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case AbsDbl:
   case AddDbl:
   case AddInt:
-  case AddIntO:
   case AddOffset:
   case AdvanceDictPtrIter:
   case AdvanceVecPtrIter:
@@ -1519,7 +1518,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
   case CmpDbl:
   case SubDbl:
   case SubInt:
-  case SubIntO:
   case XorBool:
   case XorInt:
   case OrInt:

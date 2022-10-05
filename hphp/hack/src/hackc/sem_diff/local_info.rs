@@ -68,7 +68,6 @@ impl LocalInfo {
             | Opcode::Add
             | Opcode::AddElemC
             | Opcode::AddNewElemC
-            | Opcode::AddO
             | Opcode::ArrayIdx
             | Opcode::ArrayMarkLegacy
             | Opcode::ArrayUnmarkLegacy
@@ -181,7 +180,6 @@ impl LocalInfo {
             | Opcode::Method
             | Opcode::Mod
             | Opcode::Mul
-            | Opcode::MulO
             | Opcode::NSame
             | Opcode::NativeImpl
             | Opcode::Neq
@@ -240,7 +238,6 @@ impl LocalInfo {
             | Opcode::Shr
             | Opcode::String(..)
             | Opcode::Sub
-            | Opcode::SubO
             | Opcode::Switch(..)
             | Opcode::This
             | Opcode::Throw

@@ -37,7 +37,6 @@ impl Default for CompilerFlags {
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub struct Hhvm {
     pub include_roots: BTreeMap<BString, BString>,
-    pub check_int_overflow: i32,
     pub parser_options: ParserOptions,
 }
 
@@ -140,10 +139,6 @@ impl bytecode_printer::IncludeProcessor for Options {
 impl Options {
     pub fn array_provenance(&self) -> bool {
         self.hhbc.array_provenance
-    }
-
-    pub fn check_int_overflow(&self) -> bool {
-        self.hhvm.check_int_overflow > 0
     }
 }
 

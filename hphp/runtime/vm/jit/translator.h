@@ -268,7 +268,6 @@ enum OutTypeConstraints {
   OutCInputL,           // type is C(type) of local input
 
   OutArith,             // For Add, Sub, Mul
-  OutArithO,            // For AddO, SubO, MulO
   OutBitOp,             // For BitAnd, BitOr, BitXor
   OutSetOp,             // For SetOpL
   OutIncDec,            // For IncDecL

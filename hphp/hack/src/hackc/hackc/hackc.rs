@@ -54,9 +54,6 @@ struct Opts {
     #[clap(flatten)]
     pub(crate) env_flags: EnvFlags,
 
-    #[clap(long, default_value("0"))]
-    check_int_overflow: i32,
-
     /// Number of parallel worker threads for subcommands that support parallelism,
     /// otherwise ignored. If 0, use available parallelism, typically num-cpus.
     #[clap(long, default_value("0"))]
@@ -222,7 +219,6 @@ impl Opts {
             hhvm: Hhvm {
                 include_roots: Default::default(),
                 parser_options,
-                check_int_overflow: self.check_int_overflow,
             },
             flags: self.env_flags.clone(),
             hhbc_flags,

@@ -207,8 +207,6 @@ bool supportsGVN(const IRInstruction* inst) {
   case Shr:
   case Floor:
   case Ceil:
-  case AddIntO:
-  case SubIntO:
   case MulIntO:
   case XorBool:
   case ConvDblToBool:

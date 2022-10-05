@@ -461,18 +461,6 @@ void iopMul() {
   iopUnhandled("Mul");
 }
 
-void iopAddO() {
-  iopUnhandled("AddO");
-}
-
-void iopSubO() {
-  iopUnhandled("SubO");
-}
-
-void iopMulO() {
-  iopUnhandled("MulO");
-}
-
 void iopDiv() {
   iopUnhandled("Div");
 }

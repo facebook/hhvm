@@ -59,7 +59,6 @@ use naming_special_names_rust::special_idents;
 use naming_special_names_rust::superglobals;
 use naming_special_names_rust::typehints;
 use naming_special_names_rust::user_attributes;
-use options::Options;
 use oxidized::aast;
 use oxidized::aast_defs;
 use oxidized::aast_visitor::visit;
@@ -4770,19 +4769,19 @@ fn emit_unop<'a, 'arena, 'decl>(
     match uop {
         Uop::Utild | Uop::Unot => Ok(InstrSeq::gather(vec![
             emit_expr(e, env, expr)?,
-            emit_pos_then(pos, from_unop(e.options(), uop)?),
+            emit_pos_then(pos, from_unop(uop)?),
         ])),
         Uop::Uplus | Uop::Uminus => Ok(InstrSeq::gather(vec![
             emit_pos(pos),
             instr::int(0),
             emit_expr(e, env, expr)?,
-            emit_pos_then(pos, from_unop(e.options(), uop)?),
+            emit_pos_then(pos, from_unop(uop)?),
         ])),
         Uop::Uincr | Uop::Udecr | Uop::Upincr | Uop::Updecr => emit_lval_op(
             e,
             env,
             pos,
-            LValOp::IncDec(unop_to_incdec_op(e.options(), uop)?),
+            LValOp::IncDec(unop_to_incdec_op(uop)?),
             expr,
             None,
             false,
@@ -4811,37 +4810,24 @@ fn emit_unop<'a, 'arena, 'decl>(
     }
 }
 
-fn unop_to_incdec_op(opts: &Options, op: &ast_defs::Uop) -> Result<IncDecOp> {
+fn unop_to_incdec_op(op: &ast_defs::Uop) -> Result<IncDecOp> {
     use ast_defs::Uop;
-    let if_check_or = |op1, op2| Ok(if opts.check_int_overflow() { op1 } else { op2 });
     match op {
-        Uop::Uincr => if_check_or(IncDecOp::PreIncO, IncDecOp::PreInc),
-        Uop::Udecr => if_check_or(IncDecOp::PreDecO, IncDecOp::PreDec),
-        Uop::Upincr => if_check_or(IncDecOp::PostIncO, IncDecOp::PostInc),
-        Uop::Updecr => if_check_or(IncDecOp::PostDecO, IncDecOp::PostDec),
+        Uop::Uincr => Ok(IncDecOp::PreInc),
+        Uop::Udecr => Ok(IncDecOp::PreDec),
+        Uop::Upincr => Ok(IncDecOp::PostInc),
+        Uop::Updecr => Ok(IncDecOp::PostDec),
         _ => Err(Error::unrecoverable("invalid incdec op")),
     }
 }
 
-fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'arena>> {
+fn from_unop<'arena>(op: &ast_defs::Uop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Uop;
     Ok(match op {
         Uop::Utild => instr::bit_not(),
         Uop::Unot => instr::not(),
-        Uop::Uplus => {
-            if opts.check_int_overflow() {
-                instr::add_o()
-            } else {
-                instr::add()
-            }
-        }
-        Uop::Uminus => {
-            if opts.check_int_overflow() {
-                instr::sub_o()
-            } else {
-                instr::sub()
-            }
-        }
+        Uop::Uplus => instr::add(),
+        Uop::Uminus => instr::sub(),
         _ => {
             return Err(Error::unrecoverable(
                 "this unary operation cannot be translated",
@@ -4850,24 +4836,12 @@ fn from_unop<'arena>(opts: &Options, op: &ast_defs::Uop) -> Result<InstrSeq<'are
     })
 }
 
-fn binop_to_setopop(opts: &Options, op: &ast_defs::Bop) -> Option<SetOpOp> {
+fn binop_to_setopop(op: &ast_defs::Bop) -> Option<SetOpOp> {
     use ast_defs::Bop;
     match op {
-        Bop::Plus => Some(if opts.check_int_overflow() {
-            SetOpOp::PlusEqualO
-        } else {
-            SetOpOp::PlusEqual
-        }),
-        Bop::Minus => Some(if opts.check_int_overflow() {
-            SetOpOp::MinusEqualO
-        } else {
-            SetOpOp::MinusEqual
-        }),
-        Bop::Star => Some(if opts.check_int_overflow() {
-            SetOpOp::MulEqualO
-        } else {
-            SetOpOp::MulEqual
-        }),
+        Bop::Plus => Some(SetOpOp::PlusEqual),
+        Bop::Minus => Some(SetOpOp::MinusEqual),
+        Bop::Star => Some(SetOpOp::MulEqual),
         Bop::Slash => Some(SetOpOp::DivEqual),
         Bop::Starstar => Some(SetOpOp::PowEqual),
         Bop::Amp => Some(SetOpOp::AndEqual),
@@ -4885,30 +4859,12 @@ fn optimize_null_checks<'arena, 'decl>(e: &Emitter<'arena, 'decl>) -> bool {
     e.options().compiler_flags.optimize_null_checks
 }
 
-fn from_binop<'arena>(opts: &Options, op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
+fn from_binop<'arena>(op: &ast_defs::Bop) -> Result<InstrSeq<'arena>> {
     use ast_defs::Bop as B;
     Ok(match op {
-        B::Plus => {
-            if opts.check_int_overflow() {
-                instr::add_o()
-            } else {
-                instr::add()
-            }
-        }
-        B::Minus => {
-            if opts.check_int_overflow() {
-                instr::sub_o()
-            } else {
-                instr::sub()
-            }
-        }
-        B::Star => {
-            if opts.check_int_overflow() {
-                instr::mul_o()
-            } else {
-                instr::mul()
-            }
-        }
+        B::Plus => instr::add(),
+        B::Minus => instr::sub(),
+        B::Star => instr::mul(),
         B::Slash => instr::div(),
         B::Eqeq => instr::eq(),
         B::Eqeqeq => instr::same(),
@@ -5124,7 +5080,7 @@ fn emit_binop<'a, 'arena, 'decl>(
         B::Eq(Some(eop)) if eop.is_question_question() => {
             emit_null_coalesce_assignment(e, env, pos, e1, e2)
         }
-        B::Eq(Some(eop)) => match binop_to_setopop(e.options(), eop) {
+        B::Eq(Some(eop)) => match binop_to_setopop(eop) {
             None => Err(Error::unrecoverable("illegal eq op")),
             Some(op) => emit_lval_op(e, env, pos, LValOp::SetOp(op), e1, Some(e2), false),
         },
@@ -5146,7 +5102,7 @@ fn emit_binop<'a, 'arena, 'decl>(
             let default = |e: &mut Emitter<'arena, 'decl>| {
                 Ok(InstrSeq::gather(vec![
                     emit_two_exprs(e, env, pos, e1, e2)?,
-                    from_binop(e.options(), op)?,
+                    from_binop(op)?,
                 ]))
             };
             if optimize_null_checks(e) {
@@ -5408,7 +5364,7 @@ pub fn is_reified_tparam<'a, 'arena>(
 ///   # Section 1, pushing the value of $ix+2 on the stack
 ///   Int 2
 ///   CGetL2 $ix
-///   AddO
+///   Add
 ///   # Section 2, constructing the base address of $arr[3]
 ///   BaseL $arr Warn
 ///   Dim Warn EI:3
@@ -6488,7 +6444,7 @@ pub fn emit_lval_op_nonlist_steps<'a, 'arena, 'decl>(
                         false,
                         false, // all unary operations (++, --, etc) are on primitives, so no HHVM readonly checks
                     )?,
-                    from_unop(e.options(), &uop.0)?,
+                    from_unop(&uop.0)?,
                 ]),
             ),
             _ => {

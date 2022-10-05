@@ -758,21 +758,6 @@ SSATmp* simplifyAddInt(State& env, const IRInstruction* inst) {
   return nullptr;
 }
 
-SSATmp* simplifyAddIntO(State& env, const IRInstruction* inst) {
-  auto const src1 = inst->src(0);
-  auto const src2 = inst->src(1);
-  if (src1->hasConstVal() && src2->hasConstVal()) {
-    auto const a = src1->intVal();
-    auto const b = src2->intVal();
-    if (add_overflow(a, b)) {
-      gen(env, Jmp, inst->taken());
-      return cns(env, TBottom);
-    }
-    return cns(env, a + b);
-  }
-  return nullptr;
-}
-
 SSATmp* simplifySubInt(State& env, const IRInstruction* inst) {
   auto const src1 = inst->src(0);
   auto const src2 = inst->src(1);
@@ -801,21 +786,6 @@ SSATmp* simplifySubInt(State& env, const IRInstruction* inst) {
   if (inst2->op() == SubInt) {
     auto const src = inst2->src(0);
     if (src->hasConstVal(0)) return gen(env, AddInt, src1, inst2->src(1));
-  }
-  return nullptr;
-}
-
-SSATmp* simplifySubIntO(State& env, const IRInstruction* inst) {
-  auto const src1 = inst->src(0);
-  auto const src2 = inst->src(1);
-  if (src1->hasConstVal() && src2->hasConstVal()) {
-    auto const a = src1->intVal();
-    auto const b = src2->intVal();
-    if (sub_overflow(a, b)) {
-      gen(env, Jmp, inst->taken());
-      return cns(env, TBottom);
-    }
-    return cns(env, a - b);
   }
   return nullptr;
 }
@@ -4001,8 +3971,6 @@ SSATmp* simplifyWork(State& env, const IRInstruction* inst) {
       X(AndInt)
       X(XorInt)
       X(XorBool)
-      X(AddIntO)
-      X(SubIntO)
       X(MulIntO)
       X(GtBool)
       X(GteBool)

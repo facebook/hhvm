@@ -980,27 +980,6 @@ Mul    [C:<T2> C:<T1>]  ->  [C:Dbl]    (where T1 == Dbl || T2 == Dbl)
   Multiplication (*). Pushes ($2 * $1) onto the stack. This instruction throws a
   fatal error if either $1 or $2 is not numeric.
 
-AddO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Add, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 + (double)$2.
-
-SubO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Sub, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$2 - (double)$1.
-
-MulO   [C:<T2> C:<T1>]  ->  [C:Dbl]     (where T1 == Dbl || T2 == Dbl)
-       [C:<T2> C:<T1>]  ->  [C:Int|Dbl] (where T1 != Dbl && T2 != Dbl)
-
-  Same behavior as Mul, except for when both inputs have type Int and the
-  result would not fit in a 64-bit integer. Then this instruction will push
-  (double)$1 * (double)$2.
-
 Div    [C C]  ->  [C:Bool|Int|Dbl]
        [C:Dbl C:Int]  ->  [C:Bool|Dbl]
        [C:Int C:Dbl]  ->  [C:Bool|Dbl]
@@ -1491,7 +1470,7 @@ SetOpL <local variable id> <op>    [C]  ->  [C]
   Next, this instruction reads the local variable into x, then executes y = x
   <op> $1, assigns y into local variable %1, and then pushes y onto the stack.
   The immediate value must be one of the following opcodes:
-    Add, AddO, Sub, SubO, Mul, MulO, Div, Mod, Shl, Shr, Concat, BitAnd,
+    Add, Sub, Mul, Div, Mod, Shl, Shr, Concat, BitAnd,
     BitOr, BitXor.
 
 SetOpG <op>    [C C]  ->  [C]

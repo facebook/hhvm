@@ -42,16 +42,8 @@ TypedValue tvAdd(TypedValue, TypedValue);
  *
  * These arithmetic operators on any php value only return numbers.
  */
-TypedNum tvSub(TypedValue, TypedValue);
-TypedNum tvMul(TypedValue, TypedValue);
-
-/*
- * Same as their corresponding non-O functions, but will cast their sources to
- * doubles instead of doing integer overflow.
- */
-TypedValue tvAddO(TypedValue, TypedValue);
-TypedNum tvSubO(TypedValue, TypedValue);
-TypedNum tvMulO(TypedValue, TypedValue);
+TypedValue tvSub(TypedValue, TypedValue);
+TypedValue tvMul(TypedValue, TypedValue);
 
 /*
  * PHP operators / and %.
@@ -65,7 +57,7 @@ TypedValue tvMod(TypedValue, TypedValue);
 /*
  * PHP Operator **.
  *
- * Always returns a TypedNum.
+ * Always returns KindOfInt64 or KindOfDouble.
  */
 TypedValue tvPow(TypedValue, TypedValue);
 
@@ -189,9 +181,6 @@ inline void tvConcatEq(tv_lval lhs, TypedValue rhs) {
  */
 void tvInc(tv_lval);
 void tvDec(tv_lval);
-
-void tvIncO(tv_lval);
-void tvDecO(tv_lval);
 
 /*
  * PHP unary operator ~.

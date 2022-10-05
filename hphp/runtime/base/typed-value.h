@@ -235,11 +235,6 @@ struct TypedValueAux : TypedValue {
  */
 constexpr size_t kTVSimdAlign = 0x10;
 
-/*
- * A TypedNum is a TypedValue that is either KindOfDouble or KindOfInt64.
- */
-using TypedNum = TypedValue;
-
 ///////////////////////////////////////////////////////////////////////////////
 
 /*

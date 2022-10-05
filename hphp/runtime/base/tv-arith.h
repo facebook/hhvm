@@ -42,8 +42,8 @@ TypedValue tvAdd(TypedValue, TypedValue);
  *
  * These arithmetic operators on any php value only return numbers.
  */
-TypedNum tvSub(TypedValue, TypedValue);
-TypedNum tvMul(TypedValue, TypedValue);
+TypedValue tvSub(TypedValue, TypedValue);
+TypedValue tvMul(TypedValue, TypedValue);
 
 /*
  * PHP operators / and %.
@@ -57,7 +57,7 @@ TypedValue tvMod(TypedValue, TypedValue);
 /*
  * PHP Operator **.
  *
- * Always returns a TypedNum.
+ * Always returns KindOfInt64 or KindOfDouble.
  */
 TypedValue tvPow(TypedValue, TypedValue);
 

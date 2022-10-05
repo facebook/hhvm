@@ -388,11 +388,11 @@ TypedValue tvAdd(TypedValue c1, TypedValue c2) {
   return tvArith(Add(), c1, c2);
 }
 
-TypedNum tvSub(TypedValue c1, TypedValue c2) {
+TypedValue tvSub(TypedValue c1, TypedValue c2) {
   return tvArith(Sub(), c1, c2);
 }
 
-TypedNum tvMul(TypedValue c1, TypedValue c2) {
+TypedValue tvMul(TypedValue c1, TypedValue c2) {
   return tvArith(Mul(), c1, c2);
 }
 

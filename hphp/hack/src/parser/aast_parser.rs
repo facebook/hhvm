@@ -277,7 +277,7 @@ impl<'src> AastParser {
                 .parser_options
                 .po_interpret_soft_types_as_like_types,
         };
-        (language, mode, parser_env)
+        (language, mode.map(Into::into), parser_env)
     }
 
     fn parse<'arena>(

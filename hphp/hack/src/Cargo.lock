@@ -2482,7 +2482,6 @@ name = "mode_parser"
 version = "0.0.0"
 dependencies = [
  "bumpalo",
- "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
 ]

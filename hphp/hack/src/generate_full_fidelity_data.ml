@@ -590,6 +590,10 @@ module GenerateFFRustSyntax = struct
       fields
 
   let syntax_as_slice x =
+    (* SAFETY: We have `#[repr(C)]` on all the children structs, and all their
+       fields are of type Syntax. So a child struct with 3 fields should have
+       the same layout as the array `[Syntax; 3]`, and it should be valid to
+       take a slice of length 3 from a pointer to its first field. *)
     sprintf
       "            SyntaxVariant::%s(x) => unsafe { std::slice::from_raw_parts(&x.%s_%s, %d) },\n"
       x.kind_name
@@ -598,6 +602,7 @@ module GenerateFFRustSyntax = struct
       (List.length x.fields)
 
   let syntax_as_slice_mut x =
+    (* SAFETY: As above in `syntax_as_slice` *)
     sprintf
       "            SyntaxVariant::%s(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.%s_%s, %d) },\n"
       x.kind_name
@@ -638,6 +643,9 @@ module GenerateFFRustSyntax = struct
       sprintf "    pub %s_%s: Syntax<T, V>," prefix f
     in
     let fields = map_and_concat_separated "\n" (mapper x.prefix) x.fields in
+    (* NB: The `#[repr(C)]` here is required for the `from_raw_parts` and
+       `from_raw_parts_mut` above (in `syntax_as_slice` and
+       `syntax_as_slice_mut`) to be valid. *)
     sprintf
       "#[derive(Debug, Clone)]\n#[repr(C)]\npub struct %sChildren<T, V> {\n%s\n}\n\n"
       x.kind_name

@@ -1463,9 +1463,10 @@ void emitUninitDefaultArgs(Vout& v, SrcKey sk) {
   assertx(numEntryArgs <= numParams);
   if (numEntryArgs == numParams) return;
 
+  // The callee's ActRec is at rvmsp().
   v << vcall{
     CallSpec::direct(svcreq::uninitDefaultArgs),
-    v.makeVcallArgs({{rvmfp(), v.cns(numEntryArgs), v.cns(numParams)}}),
+    v.makeVcallArgs({{rvmsp(), v.cns(numEntryArgs), v.cns(numParams)}}),
     v.makeTuple({}),
     Fixup::none()
   };

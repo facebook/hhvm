@@ -43,10 +43,15 @@
               };
         in
         rec {
-          packages.hhvm = pkgs.callPackage ./hhvm.nix {
+          packages.hhvm = (pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
             stdenv = pkgs.ccacheStdenv;
             isDefaultStdlib = true;
+          }).overrideAttrs {
+            preConfigure = ''
+              export CCACHE_DIR=/nix/var/cache/ccache
+              export CCACHE_UMASK=007
+            ''
           };
           packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;

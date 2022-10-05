@@ -100,7 +100,6 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(EvalNoticeOnBuiltinDynamicCalls)            \
   R(EvalAssemblerFoldDefaultValues)             \
   R(RepoDebugInfo)                              \
-  R(CheckIntOverflow)                           \
   R(EvalEmitClsMethPointers)                    \
   R(EvalIsVecNotices)                           \
   R(EvalAllowHhas)                              \

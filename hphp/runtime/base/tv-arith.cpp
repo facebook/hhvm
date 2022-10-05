@@ -435,11 +435,6 @@ TypedNum tvMul(TypedValue c1, TypedValue c2) {
 
 TypedValue tvAddO(TypedValue c1, TypedValue c2) {
   auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
     return make_int(a + b);
   };
   return tvArithO(Add(), add_overflow<int64_t>, over, c1, c2);
@@ -447,11 +442,6 @@ TypedValue tvAddO(TypedValue c1, TypedValue c2) {
 
 TypedNum tvSubO(TypedValue c1, TypedValue c2) {
   auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
     return make_int(a - b);
   };
   return tvArithO(Sub(), sub_overflow<int64_t>, over, c1, c2);
@@ -459,11 +449,6 @@ TypedNum tvSubO(TypedValue c1, TypedValue c2) {
 
 TypedNum tvMulO(TypedValue c1, TypedValue c2) {
   auto over = [](int64_t a, int64_t b) {
-    if (RuntimeOption::CheckIntOverflow > 1) {
-      SystemLib::throwArithmeticErrorObject(Strings::INTEGER_OVERFLOW);
-    } else if (RuntimeOption::CheckIntOverflow == 1) {
-      raise_warning(Strings::INTEGER_OVERFLOW);
-    }
     return make_int(a * b);
   };
   return tvArithO(Mul(), mul_overflow<int64_t>, over, c1, c2);

@@ -107,12 +107,6 @@ impl RelativePath {
         self.prefix
     }
 
-    pub fn to_absolute(&self) -> PathBuf {
-        let prefix_map = PrefixPathMap::default();
-        let prefix = self.prefix.to_path(&prefix_map);
-        prefix.join(&self.path)
-    }
-
     pub fn utf8_path(&self) -> &Utf8Path {
         Utf8Path::new(self.path_str())
     }

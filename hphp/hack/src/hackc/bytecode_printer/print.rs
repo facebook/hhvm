@@ -86,7 +86,7 @@ macro_rules! write_if {
 fn print_unit(ctx: &Context<'_>, w: &mut dyn Write, prog: &Unit<'_>) -> Result<()> {
     match ctx.path {
         Some(p) => {
-            let abs = p.to_absolute();
+            let abs = p.path(); // consider: should we also show prefix?
             let p = escaper::escape(
                 abs.to_str()
                     .ok_or_else(|| <io::Error as From<Error>>::from(Error::InvalidUTF8))?,
@@ -628,7 +628,7 @@ fn print_pos_as_prov_tag(
     match loc {
         Some(l) if ctx.array_provenance => {
             let (line, ..) = l.info_pos();
-            let filename = l.filename().to_absolute();
+            let filename = l.filename().path(); // consider: should we also show prefix?
             let filename = match filename.to_str().unwrap() {
                 "" => "(unknown hackc filename)",
                 x => x,

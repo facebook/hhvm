@@ -17,6 +17,7 @@
 #pragma once
 
 #include <atomic>
+#include <cstdint>
 #include <utility>
 #include <vector>
 #include <string>
@@ -313,7 +314,7 @@ struct ConcurrentTableSharedStore {
    * Return a list of entries with consideration of memory usage. Roughly one
    * sample every 'bytes' of memory is used.
    */
-  std::vector<EntryInfo> sampleEntriesInfoBySize(uint32_t bytes);
+  std::vector<std::tuple<EntryInfo, uint32_t>> sampleEntriesInfoBySize(uint32_t bytes);
 
   /*
    * Debugging.  Access information about all the entries in this table.

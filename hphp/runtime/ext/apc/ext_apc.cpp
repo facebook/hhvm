@@ -867,11 +867,14 @@ void apc_sample_by_size() {
   auto entries =
     apc_store().sampleEntriesInfoBySize(apcExtension::SizedSampleBytes);
   StructuredLogEntry sample;
-  for (auto& entry : entries) {
+  for (auto& tuple : entries) {
+    auto& entry = std::get<0>(tuple);
+    auto& weight = std::get<1>(tuple);
     sample.setStr("key", entry.key);
     sample.setInt("in_mem", 1);
     sample.setInt("ttl", entry.ttl);
     sample.setInt("size", entry.size);
+    sample.setInt("weight", weight);
     StructuredLog::log("apc_samples", sample);
   }
 }

@@ -51,7 +51,7 @@
             preConfigure = ''
               export CCACHE_DIR=/nix/var/cache/ccache
               export CCACHE_UMASK=007
-            ''
+            '';
           };
           packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;

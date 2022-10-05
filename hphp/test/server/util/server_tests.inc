@@ -129,7 +129,10 @@ function getServerCmd($serverPort, $adminPort, $debugPort, $home, $root,
     if (!isset(ServerUtilServerTests::$repo_builds[$repoKey])) {
       ServerUtilServerTests::$repo_builds[$repoKey] =
         "{$LOG_ROOT}_bytecode{$test_run_id}_{$instance_id}";
-      $cmd = "$hhvm --hphp -l2 -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+      $cmd = "$hhvm --hphp -l1 -o " . ServerUtilServerTests::$repo_builds[$repoKey] .
+        " -vParserThreadCount=1" .
+        " -vRuntime.ResourceLimit.CoreFileSize=0" .
+        " -vRuntime.Eval.EnableLogBridge=false" .
         " --input-dir $root $repoArgs";
 
       tlog('Building repo with command: '.$cmd);

@@ -13,8 +13,6 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   See the License for the specific language governing permissions and
   limitations under the License.
-
-  // TODO(afuller): Support adapted types.
 %>
 <%#type:resolves_to_container_or_struct?%>
 _readState.beforeSubobject(iprot);
@@ -23,13 +21,7 @@ _readState.beforeSubobject(iprot);
 auto ptr = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
 <%/field:cpp_ref?%>
 <%#struct:cpp_use_op_encode%>
-::apache::thrift::op::decode<<%field:type_tag%>>(<%!
-  %><%#field:cpp_first_adapter%><%!
-  %>::apache::thrift::field_id<<%field:key%>>{}, <%!
-  %>*this, <%!
-  %><%/field:cpp_first_adapter%><%!
-  %>*iprot, <%!
-  %><%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%>);
+::apache::thrift::op::decode<<%field:type_tag%>>(<%#field:cpp_first_adapter%>::apache::thrift::field_id<<%field:key%>>{}, *this, <%/field:cpp_first_adapter%>*iprot, <% > module_types_tcc/member_or_ptr%>);
 <%/struct:cpp_use_op_encode%>
 <%^struct:cpp_use_op_encode%>
 <%#field:cpp_first_adapter%>
@@ -42,26 +34,24 @@ constexpr bool hasInplaceToThrift = ::apache::thrift::adapt_detail::has_inplace_
     <%/type:resolves_to_container?%><%/field:cpp_ref?%>
     <% > module_types_tcc/pm%>::readWithContext(*iprot, <%field:cpp_first_adapter%>::toThrift(field), _readState);
   },
-  [&](auto&) {})(<%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%>);
+  [&](auto&) {})(<% > module_types_tcc/member_or_ptr%>);
 if (!hasInplaceToThrift) {
 <%/field:cpp_exactly_one_adapter?%>
 <%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><%type:cpp_standard_type%> tvalue<%#type:resolves_to_container?%><%#type:cpp_use_allocator?%>(this->get_allocator())<%/type:cpp_use_allocator?%><%/type:resolves_to_container?%>;
 <%#field:cpp_exactly_one_adapter?%>  <%/field:cpp_exactly_one_adapter?%><% > module_types_tcc/pm%>::readWithContext(*iprot, tvalue, _readState);
 <%#field:cpp_exactly_one_adapter?%>
-  <%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%> = <%!
-    %>::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(::std::move(tvalue), *this);
+  <% > module_types_tcc/member_or_ptr%> = ::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(::std::move(tvalue), *this);
 }
 <%/field:cpp_exactly_one_adapter?%>
 <%^field:cpp_exactly_one_adapter?%>
-<%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%> = <%!
-  %>::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(<% > types/adapter_pre%>::std::move(tvalue)<% > types/adapter_post%>, *this);
+<% > module_types_tcc/member_or_ptr%> = ::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(<% > types/adapter_pre%>::std::move(tvalue)<% > types/adapter_post%>, *this);
 <%/field:cpp_exactly_one_adapter?%>
 <%/field:cpp_first_adapter%>
 <%^field:cpp_first_adapter%>
 <%^field:cpp_ref?%><%#type:resolves_to_container?%>
 <% > field/member%> = <%type:cpp_type%>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
 <%/type:resolves_to_container?%><%/field:cpp_ref?%>
-<% > module_types_tcc/pm%>::readWithContext(*iprot, <%#field:cpp_ref?%>*ptr<%/field:cpp_ref?%><%^field:cpp_ref?%><% > field/member%><%/field:cpp_ref?%>, _readState);
+<% > module_types_tcc/pm%>::readWithContext(*iprot, <% > module_types_tcc/member_or_ptr%>, _readState);
 <%/field:cpp_first_adapter%>
 <%/struct:cpp_use_op_encode%>
 <%#field:cpp_ref?%>

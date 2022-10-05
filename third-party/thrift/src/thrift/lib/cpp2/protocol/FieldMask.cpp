@@ -148,11 +148,37 @@ struct SubtractMaskImpl {
   }
 };
 
+const MapIdToMask& toMapMask(const Mask& mask) {
+  using detail::getMapMask;
+
+  if (const auto* mapMask = getMapMask(mask)) {
+    return *mapMask;
+  }
+
+  if (mask == allMask() || mask == noneMask()) {
+    static const MapIdToMask map;
+    return map;
+  }
+
+  // The mask can't be applied to a map since it's not map mask or
+  // allMask/noneMask
+  folly::throw_exception<std::runtime_error>("Incompatible masks");
+}
+
 template <class Func>
 Mask apply(const Mask& lhs, const Mask& rhs, Func&& func) {
   using detail::getFieldMask;
+  using detail::getMapMask;
 
   Mask mask;
+
+  // If one of them is map mask, the other one must be either map mask, or
+  // allMask/noneMask which either mask the whole map, or nothing.
+  if (getMapMask(lhs) || getMapMask(rhs)) {
+    mask.includes_map_ref() = func(toMapMask(lhs), toMapMask(rhs));
+    return mask;
+  }
+
   mask.includes_ref() = func(*getFieldMask(lhs), *getFieldMask(rhs));
   return mask;
 }
@@ -169,51 +195,49 @@ Mask subtractMask(const Mask& lhs, const Mask& rhs) {
   return apply(lhs, rhs, SubtractMaskImpl{});
 }
 
+bool isInclusive(const Mask& mask) {
+  return folly::to_underlying(mask.getType()) % 2 == 0;
+}
+
 } // namespace
 
 Mask operator&(const Mask& lhs, const Mask& rhs) {
-  detail::throwIfContainsMapMask(lhs);
-  detail::throwIfContainsMapMask(rhs);
-  if (lhs.includes_ref()) {
-    if (rhs.includes_ref()) { // lhs=includes rhs=includes
+  if (isInclusive(lhs)) {
+    if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return intersectMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return subtractMask(lhs, rhs);
   }
-  if (rhs.includes_ref()) { // lhs=excludes rhs=includes
+  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
     return subtractMask(rhs, lhs);
   }
   // lhs=excludes rhs=excludes
   return reverseMask(unionMask(lhs, rhs));
 }
 Mask operator|(const Mask& lhs, const Mask& rhs) {
-  detail::throwIfContainsMapMask(lhs);
-  detail::throwIfContainsMapMask(rhs);
-  if (lhs.includes_ref()) {
-    if (rhs.includes_ref()) { // lhs=includes rhs=includes
+  if (isInclusive(lhs)) {
+    if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return unionMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return reverseMask(subtractMask(rhs, lhs));
   }
-  if (rhs.includes_ref()) { // lhs=excludes rhs=includes
+  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
     return reverseMask(subtractMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes
   return reverseMask(intersectMask(lhs, rhs));
 }
 Mask operator-(const Mask& lhs, const Mask& rhs) {
-  detail::throwIfContainsMapMask(lhs);
-  detail::throwIfContainsMapMask(rhs);
-  if (lhs.includes_ref()) {
-    if (rhs.includes_ref()) { // lhs=includes rhs=includes
+  if (isInclusive(lhs)) {
+    if (isInclusive(rhs)) { // lhs=includes rhs=includes
       return subtractMask(lhs, rhs);
     }
     // lhs=includes rhs=excludes
     return intersectMask(lhs, rhs);
   }
-  if (rhs.includes_ref()) { // lhs=excludes rhs=includes
+  if (isInclusive(rhs)) { // lhs=excludes rhs=includes
     return reverseMask(unionMask(lhs, rhs));
   }
   // lhs=excludes rhs=excludes

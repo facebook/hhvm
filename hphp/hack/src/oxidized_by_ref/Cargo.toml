@@ -14,7 +14,6 @@ arena_trait = { path = "../arena_trait" }
 bitflags = "1.3"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
-camino = { version = "1.0.7", features = ["serde1"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
 hh_hash = { path = "../utils/hh_hash" }
 no_pos_hash = { path = "../utils/no_pos_hash" }

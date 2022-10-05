@@ -7,15 +7,12 @@ use std::fmt;
 use std::fmt::Debug;
 use std::fmt::Display;
 use std::path::Path;
-use std::path::PathBuf;
 
 use bumpalo::Bump;
-use camino::Utf8Path;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
 pub use oxidized::relative_path::Prefix;
-pub use oxidized::relative_path::PrefixPathMap;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -85,17 +82,6 @@ impl<'a> RelativePath<'a> {
 
     pub fn prefix(&self) -> Prefix {
         self.prefix
-    }
-
-    pub fn to_absolute(&self, prefix_map: &PrefixPathMap) -> PathBuf {
-        let prefix = self.prefix.to_path(prefix_map);
-        let mut r = PathBuf::from(prefix);
-        r.push(self.path());
-        r
-    }
-
-    pub fn utf8_path(&self) -> &Utf8Path {
-        Utf8Path::new(self.path_str().unwrap())
     }
 
     pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {

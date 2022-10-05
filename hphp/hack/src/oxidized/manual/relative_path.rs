@@ -8,7 +8,6 @@ use std::fmt::Display;
 use std::path::Path;
 use std::path::PathBuf;
 
-use camino::Utf8Path;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
@@ -56,25 +55,6 @@ impl Display for Prefix {
     }
 }
 
-#[derive(Default)]
-pub struct PrefixPathMap {
-    root: PathBuf,
-    hhi: PathBuf,
-    tmp: PathBuf,
-    dummy: PathBuf,
-}
-
-impl Prefix {
-    pub fn to_path(self, map: &PrefixPathMap) -> &Path {
-        match self {
-            Self::Root => &map.root,
-            Self::Hhi => &map.hhi,
-            Self::Tmp => &map.tmp,
-            Self::Dummy => &map.dummy,
-        }
-    }
-}
-
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[derive(EqModuloPos, FromOcamlRep, ToOcamlRep, NoPosHash)]
 pub struct RelativePath {
@@ -105,10 +85,6 @@ impl RelativePath {
 
     pub fn prefix(&self) -> Prefix {
         self.prefix
-    }
-
-    pub fn utf8_path(&self) -> &Utf8Path {
-        Utf8Path::new(self.path_str())
     }
 }
 

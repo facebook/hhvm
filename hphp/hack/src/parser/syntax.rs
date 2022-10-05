@@ -7,6 +7,7 @@
 use std::fmt::Debug;
 use std::iter::empty;
 use std::iter::once;
+use std::ops::ControlFlow;
 
 use itertools::Either::Left;
 use itertools::Either::Right;
@@ -360,20 +361,72 @@ where
         self.syntax.iter_children()
     }
 
-    pub fn all_tokens<'a>(node: &'a Self) -> Vec<&'a T> {
-        Self::all_tokens_with_acc(node, vec![])
+    pub fn all_tokens(&self) -> Vec<&T> {
+        let mut acc = vec![];
+        self.iter_pre(|node| {
+            if let Some(t) = node.get_token() {
+                acc.push(t)
+            }
+        });
+        acc
     }
 
-    fn all_tokens_with_acc<'a>(node: &'a Self, mut acc: Vec<&'a T>) -> Vec<&'a T> {
-        match &node.syntax {
-            SyntaxVariant::Token(t) => acc.push(t),
-            _ => {
-                for child in node.iter_children() {
-                    acc = Self::all_tokens_with_acc(child, acc)
-                }
+    /// Invoke `f` on every node in the tree in a preorder traversal.
+    pub fn iter_pre<'a, F: FnMut(&'a Self)>(&'a self, mut f: F) {
+        self.iter_pre_impl(&mut f)
+    }
+
+    fn iter_pre_impl<'a, F: FnMut(&'a Self)>(&'a self, f: &mut F) {
+        f(self);
+        for child in self.children() {
+            child.iter_pre_impl(f);
+        }
+    }
+
+    /// Invoke `f` on every node in the tree in a preorder traversal.
+    pub fn try_iter_pre<'a, F, E>(&'a self, mut f: F) -> Result<(), E>
+    where
+        F: FnMut(&'a Self) -> Result<(), E>,
+    {
+        self.try_iter_pre_impl(&mut f)
+    }
+
+    fn try_iter_pre_impl<'a, F, E>(&'a self, f: &mut F) -> Result<(), E>
+    where
+        F: FnMut(&'a Self) -> Result<(), E>,
+    {
+        f(self)?;
+        for child in self.children() {
+            child.try_iter_pre_impl(f)?;
+        }
+        Ok(())
+    }
+
+    /// Invoke `f` on every node in the tree in a preorder traversal.
+    pub fn rewrite_pre<F: FnMut(&mut Self)>(&mut self, mut f: F) {
+        self.rewrite_pre_impl(&mut f)
+    }
+
+    fn rewrite_pre_impl<F: FnMut(&mut Self)>(&mut self, f: &mut F) {
+        f(self);
+        for child in self.children_mut() {
+            child.rewrite_pre_impl(f);
+        }
+    }
+
+    /// Invoke `f` on every node in the tree in a preorder traversal. If `f`
+    /// returns `ControlFlow::Break`, do not recurse into that node's children
+    /// (but do continue traversing the rest of the tree).
+    pub fn rewrite_pre_and_stop<F: FnMut(&mut Self) -> ControlFlow<()>>(&mut self, mut f: F) {
+        self.rewrite_pre_and_stop_impl(&mut f)
+    }
+
+    fn rewrite_pre_and_stop_impl<F: FnMut(&mut Self) -> ControlFlow<()>>(&mut self, f: &mut F) {
+        if let ControlFlow::Continue(()) = f(self) {
+            for child in self.children_mut() {
+                child.rewrite_pre_and_stop_impl(f);
             }
-        };
-        acc
+        }
     }
 }
 

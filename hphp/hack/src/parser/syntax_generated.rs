@@ -4679,45 +4679,415 @@ where
              _ => panic!("from_children called with wrong number of children"),
          }
     }
+
+    pub fn children(&self) -> &[Self] {
+        match &self.syntax {
+            SyntaxVariant::Missing => &[],
+            SyntaxVariant::Token(..) => &[],
+            SyntaxVariant::SyntaxList(l) => l.as_slice(),
+            SyntaxVariant::EndOfFile(x) => unsafe { std::slice::from_raw_parts(&x.end_of_file_token, 1) },
+            SyntaxVariant::Script(x) => unsafe { std::slice::from_raw_parts(&x.script_declarations, 1) },
+            SyntaxVariant::QualifiedName(x) => unsafe { std::slice::from_raw_parts(&x.qualified_name_parts, 1) },
+            SyntaxVariant::ModuleName(x) => unsafe { std::slice::from_raw_parts(&x.module_name_parts, 1) },
+            SyntaxVariant::SimpleTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.simple_type_specifier, 1) },
+            SyntaxVariant::LiteralExpression(x) => unsafe { std::slice::from_raw_parts(&x.literal_expression, 1) },
+            SyntaxVariant::PrefixedStringExpression(x) => unsafe { std::slice::from_raw_parts(&x.prefixed_string_name, 2) },
+            SyntaxVariant::PrefixedCodeExpression(x) => unsafe { std::slice::from_raw_parts(&x.prefixed_code_prefix, 4) },
+            SyntaxVariant::VariableExpression(x) => unsafe { std::slice::from_raw_parts(&x.variable_expression, 1) },
+            SyntaxVariant::PipeVariableExpression(x) => unsafe { std::slice::from_raw_parts(&x.pipe_variable_expression, 1) },
+            SyntaxVariant::FileAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.file_attribute_specification_left_double_angle, 5) },
+            SyntaxVariant::EnumDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.enum_attribute_spec, 11) },
+            SyntaxVariant::EnumUse(x) => unsafe { std::slice::from_raw_parts(&x.enum_use_keyword, 3) },
+            SyntaxVariant::Enumerator(x) => unsafe { std::slice::from_raw_parts(&x.enumerator_name, 4) },
+            SyntaxVariant::EnumClassDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.enum_class_attribute_spec, 12) },
+            SyntaxVariant::EnumClassEnumerator(x) => unsafe { std::slice::from_raw_parts(&x.enum_class_enumerator_modifiers, 5) },
+            SyntaxVariant::AliasDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.alias_attribute_spec, 10) },
+            SyntaxVariant::ContextAliasDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.ctx_alias_attribute_spec, 8) },
+            SyntaxVariant::PropertyDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.property_attribute_spec, 5) },
+            SyntaxVariant::PropertyDeclarator(x) => unsafe { std::slice::from_raw_parts(&x.property_name, 2) },
+            SyntaxVariant::NamespaceDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.namespace_header, 2) },
+            SyntaxVariant::NamespaceDeclarationHeader(x) => unsafe { std::slice::from_raw_parts(&x.namespace_keyword, 2) },
+            SyntaxVariant::NamespaceBody(x) => unsafe { std::slice::from_raw_parts(&x.namespace_left_brace, 3) },
+            SyntaxVariant::NamespaceEmptyBody(x) => unsafe { std::slice::from_raw_parts(&x.namespace_semicolon, 1) },
+            SyntaxVariant::NamespaceUseDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.namespace_use_keyword, 4) },
+            SyntaxVariant::NamespaceGroupUseDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.namespace_group_use_keyword, 7) },
+            SyntaxVariant::NamespaceUseClause(x) => unsafe { std::slice::from_raw_parts(&x.namespace_use_clause_kind, 4) },
+            SyntaxVariant::FunctionDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.function_attribute_spec, 3) },
+            SyntaxVariant::FunctionDeclarationHeader(x) => unsafe { std::slice::from_raw_parts(&x.function_modifiers, 12) },
+            SyntaxVariant::Contexts(x) => unsafe { std::slice::from_raw_parts(&x.contexts_left_bracket, 3) },
+            SyntaxVariant::WhereClause(x) => unsafe { std::slice::from_raw_parts(&x.where_clause_keyword, 2) },
+            SyntaxVariant::WhereConstraint(x) => unsafe { std::slice::from_raw_parts(&x.where_constraint_left_type, 3) },
+            SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.methodish_attribute, 4) },
+            SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts(&x.methodish_trait_attribute, 5) },
+            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.classish_attribute, 12) },
+            SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts(&x.classish_body_left_brace, 3) },
+            SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts(&x.trait_use_keyword, 3) },
+            SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts(&x.require_keyword, 4) },
+            SyntaxVariant::ConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.const_attribute_spec, 6) },
+            SyntaxVariant::ConstantDeclarator(x) => unsafe { std::slice::from_raw_parts(&x.constant_declarator_name, 2) },
+            SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.type_const_attribute_spec, 10) },
+            SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.context_const_modifiers, 9) },
+            SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts(&x.decorated_expression_decorator, 2) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.parameter_attribute, 7) },
+            SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts(&x.variadic_parameter_call_convention, 3) },
+            SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.old_attribute_specification_left_double_angle, 3) },
+            SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts(&x.attribute_specification_attributes, 1) },
+            SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts(&x.attribute_at, 2) },
+            SyntaxVariant::InclusionExpression(x) => unsafe { std::slice::from_raw_parts(&x.inclusion_require, 2) },
+            SyntaxVariant::InclusionDirective(x) => unsafe { std::slice::from_raw_parts(&x.inclusion_expression, 2) },
+            SyntaxVariant::CompoundStatement(x) => unsafe { std::slice::from_raw_parts(&x.compound_left_brace, 3) },
+            SyntaxVariant::ExpressionStatement(x) => unsafe { std::slice::from_raw_parts(&x.expression_statement_expression, 2) },
+            SyntaxVariant::MarkupSection(x) => unsafe { std::slice::from_raw_parts(&x.markup_hashbang, 2) },
+            SyntaxVariant::MarkupSuffix(x) => unsafe { std::slice::from_raw_parts(&x.markup_suffix_less_than_question, 2) },
+            SyntaxVariant::UnsetStatement(x) => unsafe { std::slice::from_raw_parts(&x.unset_keyword, 5) },
+            SyntaxVariant::UsingStatementBlockScoped(x) => unsafe { std::slice::from_raw_parts(&x.using_block_await_keyword, 6) },
+            SyntaxVariant::UsingStatementFunctionScoped(x) => unsafe { std::slice::from_raw_parts(&x.using_function_await_keyword, 4) },
+            SyntaxVariant::WhileStatement(x) => unsafe { std::slice::from_raw_parts(&x.while_keyword, 5) },
+            SyntaxVariant::IfStatement(x) => unsafe { std::slice::from_raw_parts(&x.if_keyword, 6) },
+            SyntaxVariant::ElseClause(x) => unsafe { std::slice::from_raw_parts(&x.else_keyword, 2) },
+            SyntaxVariant::TryStatement(x) => unsafe { std::slice::from_raw_parts(&x.try_keyword, 4) },
+            SyntaxVariant::CatchClause(x) => unsafe { std::slice::from_raw_parts(&x.catch_keyword, 6) },
+            SyntaxVariant::FinallyClause(x) => unsafe { std::slice::from_raw_parts(&x.finally_keyword, 2) },
+            SyntaxVariant::DoStatement(x) => unsafe { std::slice::from_raw_parts(&x.do_keyword, 7) },
+            SyntaxVariant::ForStatement(x) => unsafe { std::slice::from_raw_parts(&x.for_keyword, 9) },
+            SyntaxVariant::ForeachStatement(x) => unsafe { std::slice::from_raw_parts(&x.foreach_keyword, 10) },
+            SyntaxVariant::SwitchStatement(x) => unsafe { std::slice::from_raw_parts(&x.switch_keyword, 7) },
+            SyntaxVariant::SwitchSection(x) => unsafe { std::slice::from_raw_parts(&x.switch_section_labels, 3) },
+            SyntaxVariant::SwitchFallthrough(x) => unsafe { std::slice::from_raw_parts(&x.fallthrough_keyword, 2) },
+            SyntaxVariant::CaseLabel(x) => unsafe { std::slice::from_raw_parts(&x.case_keyword, 3) },
+            SyntaxVariant::DefaultLabel(x) => unsafe { std::slice::from_raw_parts(&x.default_keyword, 2) },
+            SyntaxVariant::ReturnStatement(x) => unsafe { std::slice::from_raw_parts(&x.return_keyword, 3) },
+            SyntaxVariant::YieldBreakStatement(x) => unsafe { std::slice::from_raw_parts(&x.yield_break_keyword, 3) },
+            SyntaxVariant::ThrowStatement(x) => unsafe { std::slice::from_raw_parts(&x.throw_keyword, 3) },
+            SyntaxVariant::BreakStatement(x) => unsafe { std::slice::from_raw_parts(&x.break_keyword, 2) },
+            SyntaxVariant::ContinueStatement(x) => unsafe { std::slice::from_raw_parts(&x.continue_keyword, 2) },
+            SyntaxVariant::EchoStatement(x) => unsafe { std::slice::from_raw_parts(&x.echo_keyword, 3) },
+            SyntaxVariant::ConcurrentStatement(x) => unsafe { std::slice::from_raw_parts(&x.concurrent_keyword, 2) },
+            SyntaxVariant::SimpleInitializer(x) => unsafe { std::slice::from_raw_parts(&x.simple_initializer_equal, 2) },
+            SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_class_class_keyword, 9) },
+            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_attribute_spec, 12) },
+            SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts(&x.anonymous_use_keyword, 4) },
+            SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts(&x.lambda_attribute_spec, 5) },
+            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts(&x.lambda_left_paren, 7) },
+            SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts(&x.cast_left_paren, 4) },
+            SyntaxVariant::ScopeResolutionExpression(x) => unsafe { std::slice::from_raw_parts(&x.scope_resolution_qualifier, 3) },
+            SyntaxVariant::MemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts(&x.member_object, 3) },
+            SyntaxVariant::SafeMemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts(&x.safe_member_object, 3) },
+            SyntaxVariant::EmbeddedMemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts(&x.embedded_member_object, 3) },
+            SyntaxVariant::YieldExpression(x) => unsafe { std::slice::from_raw_parts(&x.yield_keyword, 2) },
+            SyntaxVariant::PrefixUnaryExpression(x) => unsafe { std::slice::from_raw_parts(&x.prefix_unary_operator, 2) },
+            SyntaxVariant::PostfixUnaryExpression(x) => unsafe { std::slice::from_raw_parts(&x.postfix_unary_operand, 2) },
+            SyntaxVariant::BinaryExpression(x) => unsafe { std::slice::from_raw_parts(&x.binary_left_operand, 3) },
+            SyntaxVariant::IsExpression(x) => unsafe { std::slice::from_raw_parts(&x.is_left_operand, 3) },
+            SyntaxVariant::AsExpression(x) => unsafe { std::slice::from_raw_parts(&x.as_left_operand, 3) },
+            SyntaxVariant::NullableAsExpression(x) => unsafe { std::slice::from_raw_parts(&x.nullable_as_left_operand, 3) },
+            SyntaxVariant::UpcastExpression(x) => unsafe { std::slice::from_raw_parts(&x.upcast_left_operand, 3) },
+            SyntaxVariant::ConditionalExpression(x) => unsafe { std::slice::from_raw_parts(&x.conditional_test, 5) },
+            SyntaxVariant::EvalExpression(x) => unsafe { std::slice::from_raw_parts(&x.eval_keyword, 4) },
+            SyntaxVariant::IssetExpression(x) => unsafe { std::slice::from_raw_parts(&x.isset_keyword, 4) },
+            SyntaxVariant::FunctionCallExpression(x) => unsafe { std::slice::from_raw_parts(&x.function_call_receiver, 5) },
+            SyntaxVariant::FunctionPointerExpression(x) => unsafe { std::slice::from_raw_parts(&x.function_pointer_receiver, 2) },
+            SyntaxVariant::ParenthesizedExpression(x) => unsafe { std::slice::from_raw_parts(&x.parenthesized_expression_left_paren, 3) },
+            SyntaxVariant::BracedExpression(x) => unsafe { std::slice::from_raw_parts(&x.braced_expression_left_brace, 3) },
+            SyntaxVariant::ETSpliceExpression(x) => unsafe { std::slice::from_raw_parts(&x.et_splice_expression_dollar, 4) },
+            SyntaxVariant::EmbeddedBracedExpression(x) => unsafe { std::slice::from_raw_parts(&x.embedded_braced_expression_left_brace, 3) },
+            SyntaxVariant::ListExpression(x) => unsafe { std::slice::from_raw_parts(&x.list_keyword, 4) },
+            SyntaxVariant::CollectionLiteralExpression(x) => unsafe { std::slice::from_raw_parts(&x.collection_literal_name, 4) },
+            SyntaxVariant::ObjectCreationExpression(x) => unsafe { std::slice::from_raw_parts(&x.object_creation_new_keyword, 2) },
+            SyntaxVariant::ConstructorCall(x) => unsafe { std::slice::from_raw_parts(&x.constructor_call_type, 4) },
+            SyntaxVariant::DarrayIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts(&x.darray_intrinsic_keyword, 5) },
+            SyntaxVariant::DictionaryIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_intrinsic_keyword, 5) },
+            SyntaxVariant::KeysetIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts(&x.keyset_intrinsic_keyword, 5) },
+            SyntaxVariant::VarrayIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts(&x.varray_intrinsic_keyword, 5) },
+            SyntaxVariant::VectorIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts(&x.vector_intrinsic_keyword, 5) },
+            SyntaxVariant::ElementInitializer(x) => unsafe { std::slice::from_raw_parts(&x.element_key, 3) },
+            SyntaxVariant::SubscriptExpression(x) => unsafe { std::slice::from_raw_parts(&x.subscript_receiver, 4) },
+            SyntaxVariant::EmbeddedSubscriptExpression(x) => unsafe { std::slice::from_raw_parts(&x.embedded_subscript_receiver, 4) },
+            SyntaxVariant::AwaitableCreationExpression(x) => unsafe { std::slice::from_raw_parts(&x.awaitable_attribute_spec, 3) },
+            SyntaxVariant::XHPChildrenDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.xhp_children_keyword, 3) },
+            SyntaxVariant::XHPChildrenParenthesizedList(x) => unsafe { std::slice::from_raw_parts(&x.xhp_children_list_left_paren, 3) },
+            SyntaxVariant::XHPCategoryDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.xhp_category_keyword, 3) },
+            SyntaxVariant::XHPEnumType(x) => unsafe { std::slice::from_raw_parts(&x.xhp_enum_like, 5) },
+            SyntaxVariant::XHPLateinit(x) => unsafe { std::slice::from_raw_parts(&x.xhp_lateinit_at, 2) },
+            SyntaxVariant::XHPRequired(x) => unsafe { std::slice::from_raw_parts(&x.xhp_required_at, 2) },
+            SyntaxVariant::XHPClassAttributeDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.xhp_attribute_keyword, 3) },
+            SyntaxVariant::XHPClassAttribute(x) => unsafe { std::slice::from_raw_parts(&x.xhp_attribute_decl_type, 4) },
+            SyntaxVariant::XHPSimpleClassAttribute(x) => unsafe { std::slice::from_raw_parts(&x.xhp_simple_class_attribute_type, 1) },
+            SyntaxVariant::XHPSimpleAttribute(x) => unsafe { std::slice::from_raw_parts(&x.xhp_simple_attribute_name, 3) },
+            SyntaxVariant::XHPSpreadAttribute(x) => unsafe { std::slice::from_raw_parts(&x.xhp_spread_attribute_left_brace, 4) },
+            SyntaxVariant::XHPOpen(x) => unsafe { std::slice::from_raw_parts(&x.xhp_open_left_angle, 4) },
+            SyntaxVariant::XHPExpression(x) => unsafe { std::slice::from_raw_parts(&x.xhp_open, 3) },
+            SyntaxVariant::XHPClose(x) => unsafe { std::slice::from_raw_parts(&x.xhp_close_left_angle, 3) },
+            SyntaxVariant::TypeConstant(x) => unsafe { std::slice::from_raw_parts(&x.type_constant_left_type, 3) },
+            SyntaxVariant::VectorTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.vector_type_keyword, 5) },
+            SyntaxVariant::KeysetTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.keyset_type_keyword, 5) },
+            SyntaxVariant::TupleTypeExplicitSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_type_keyword, 4) },
+            SyntaxVariant::VarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.varray_keyword, 5) },
+            SyntaxVariant::FunctionCtxTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.function_ctx_type_keyword, 2) },
+            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts(&x.type_attribute_spec, 6) },
+            SyntaxVariant::TypeConstraint(x) => unsafe { std::slice::from_raw_parts(&x.constraint_keyword, 2) },
+            SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts(&x.ctx_constraint_keyword, 2) },
+            SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.darray_keyword, 7) },
+            SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.dictionary_type_keyword, 4) },
+            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_outer_left_paren, 11) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.closure_parameter_call_convention, 3) },
+            SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_refinement_type, 5) },
+            SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.type_in_refinement_keyword, 6) },
+            SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts(&x.ctx_in_refinement_keyword, 6) },
+            SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.classname_keyword, 5) },
+            SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.field_question, 4) },
+            SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts(&x.field_initializer_name, 3) },
+            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.shape_type_keyword, 5) },
+            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts(&x.shape_expression_keyword, 4) },
+            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts(&x.tuple_expression_keyword, 4) },
+            SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.generic_class_type, 2) },
+            SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.nullable_question, 2) },
+            SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.like_tilde, 2) },
+            SyntaxVariant::SoftTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.soft_at, 2) },
+            SyntaxVariant::AttributizedSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.attributized_specifier_attribute_spec, 2) },
+            SyntaxVariant::ReifiedTypeArgument(x) => unsafe { std::slice::from_raw_parts(&x.reified_type_argument_reified, 2) },
+            SyntaxVariant::TypeArguments(x) => unsafe { std::slice::from_raw_parts(&x.type_arguments_left_angle, 3) },
+            SyntaxVariant::TypeParameters(x) => unsafe { std::slice::from_raw_parts(&x.type_parameters_left_angle, 3) },
+            SyntaxVariant::TupleTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.tuple_left_paren, 3) },
+            SyntaxVariant::UnionTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.union_left_paren, 3) },
+            SyntaxVariant::IntersectionTypeSpecifier(x) => unsafe { std::slice::from_raw_parts(&x.intersection_left_paren, 3) },
+            SyntaxVariant::ErrorSyntax(x) => unsafe { std::slice::from_raw_parts(&x.error_error, 1) },
+            SyntaxVariant::ListItem(x) => unsafe { std::slice::from_raw_parts(&x.list_item, 2) },
+            SyntaxVariant::EnumClassLabelExpression(x) => unsafe { std::slice::from_raw_parts(&x.enum_class_label_qualifier, 3) },
+            SyntaxVariant::ModuleDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.module_declaration_attribute_spec, 8) },
+            SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts(&x.module_exports_exports_keyword, 4) },
+            SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts(&x.module_imports_imports_keyword, 4) },
+            SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts(&x.module_membership_declaration_module_keyword, 3) },
+        }
+    }
+
+    pub fn children_mut(&mut self) -> &mut [Self] {
+        match &mut self.syntax {
+            SyntaxVariant::Missing => &mut [],
+            SyntaxVariant::Token(..) => &mut [],
+            SyntaxVariant::SyntaxList(l) => l.as_mut_slice(),
+            SyntaxVariant::EndOfFile(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.end_of_file_token, 1) },
+            SyntaxVariant::Script(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.script_declarations, 1) },
+            SyntaxVariant::QualifiedName(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.qualified_name_parts, 1) },
+            SyntaxVariant::ModuleName(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_name_parts, 1) },
+            SyntaxVariant::SimpleTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.simple_type_specifier, 1) },
+            SyntaxVariant::LiteralExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.literal_expression, 1) },
+            SyntaxVariant::PrefixedStringExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.prefixed_string_name, 2) },
+            SyntaxVariant::PrefixedCodeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.prefixed_code_prefix, 4) },
+            SyntaxVariant::VariableExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variable_expression, 1) },
+            SyntaxVariant::PipeVariableExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.pipe_variable_expression, 1) },
+            SyntaxVariant::FileAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.file_attribute_specification_left_double_angle, 5) },
+            SyntaxVariant::EnumDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enum_attribute_spec, 11) },
+            SyntaxVariant::EnumUse(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enum_use_keyword, 3) },
+            SyntaxVariant::Enumerator(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enumerator_name, 4) },
+            SyntaxVariant::EnumClassDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enum_class_attribute_spec, 12) },
+            SyntaxVariant::EnumClassEnumerator(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enum_class_enumerator_modifiers, 5) },
+            SyntaxVariant::AliasDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.alias_attribute_spec, 10) },
+            SyntaxVariant::ContextAliasDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_alias_attribute_spec, 8) },
+            SyntaxVariant::PropertyDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.property_attribute_spec, 5) },
+            SyntaxVariant::PropertyDeclarator(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.property_name, 2) },
+            SyntaxVariant::NamespaceDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_header, 2) },
+            SyntaxVariant::NamespaceDeclarationHeader(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_keyword, 2) },
+            SyntaxVariant::NamespaceBody(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_left_brace, 3) },
+            SyntaxVariant::NamespaceEmptyBody(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_semicolon, 1) },
+            SyntaxVariant::NamespaceUseDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_use_keyword, 4) },
+            SyntaxVariant::NamespaceGroupUseDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_group_use_keyword, 7) },
+            SyntaxVariant::NamespaceUseClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.namespace_use_clause_kind, 4) },
+            SyntaxVariant::FunctionDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_attribute_spec, 3) },
+            SyntaxVariant::FunctionDeclarationHeader(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_modifiers, 12) },
+            SyntaxVariant::Contexts(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.contexts_left_bracket, 3) },
+            SyntaxVariant::WhereClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.where_clause_keyword, 2) },
+            SyntaxVariant::WhereConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.where_constraint_left_type, 3) },
+            SyntaxVariant::MethodishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_attribute, 4) },
+            SyntaxVariant::MethodishTraitResolution(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.methodish_trait_attribute, 5) },
+            SyntaxVariant::ClassishDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_attribute, 12) },
+            SyntaxVariant::ClassishBody(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classish_body_left_brace, 3) },
+            SyntaxVariant::TraitUse(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.trait_use_keyword, 3) },
+            SyntaxVariant::RequireClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.require_keyword, 4) },
+            SyntaxVariant::ConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.const_attribute_spec, 6) },
+            SyntaxVariant::ConstantDeclarator(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constant_declarator_name, 2) },
+            SyntaxVariant::TypeConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_const_attribute_spec, 10) },
+            SyntaxVariant::ContextConstDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.context_const_modifiers, 9) },
+            SyntaxVariant::DecoratedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.decorated_expression_decorator, 2) },
+            SyntaxVariant::ParameterDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parameter_attribute, 7) },
+            SyntaxVariant::VariadicParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.variadic_parameter_call_convention, 3) },
+            SyntaxVariant::OldAttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.old_attribute_specification_left_double_angle, 3) },
+            SyntaxVariant::AttributeSpecification(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_specification_attributes, 1) },
+            SyntaxVariant::Attribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attribute_at, 2) },
+            SyntaxVariant::InclusionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.inclusion_require, 2) },
+            SyntaxVariant::InclusionDirective(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.inclusion_expression, 2) },
+            SyntaxVariant::CompoundStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.compound_left_brace, 3) },
+            SyntaxVariant::ExpressionStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.expression_statement_expression, 2) },
+            SyntaxVariant::MarkupSection(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.markup_hashbang, 2) },
+            SyntaxVariant::MarkupSuffix(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.markup_suffix_less_than_question, 2) },
+            SyntaxVariant::UnsetStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.unset_keyword, 5) },
+            SyntaxVariant::UsingStatementBlockScoped(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.using_block_await_keyword, 6) },
+            SyntaxVariant::UsingStatementFunctionScoped(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.using_function_await_keyword, 4) },
+            SyntaxVariant::WhileStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.while_keyword, 5) },
+            SyntaxVariant::IfStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.if_keyword, 6) },
+            SyntaxVariant::ElseClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.else_keyword, 2) },
+            SyntaxVariant::TryStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.try_keyword, 4) },
+            SyntaxVariant::CatchClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.catch_keyword, 6) },
+            SyntaxVariant::FinallyClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.finally_keyword, 2) },
+            SyntaxVariant::DoStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.do_keyword, 7) },
+            SyntaxVariant::ForStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.for_keyword, 9) },
+            SyntaxVariant::ForeachStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.foreach_keyword, 10) },
+            SyntaxVariant::SwitchStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.switch_keyword, 7) },
+            SyntaxVariant::SwitchSection(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.switch_section_labels, 3) },
+            SyntaxVariant::SwitchFallthrough(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.fallthrough_keyword, 2) },
+            SyntaxVariant::CaseLabel(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.case_keyword, 3) },
+            SyntaxVariant::DefaultLabel(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.default_keyword, 2) },
+            SyntaxVariant::ReturnStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.return_keyword, 3) },
+            SyntaxVariant::YieldBreakStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.yield_break_keyword, 3) },
+            SyntaxVariant::ThrowStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.throw_keyword, 3) },
+            SyntaxVariant::BreakStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.break_keyword, 2) },
+            SyntaxVariant::ContinueStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.continue_keyword, 2) },
+            SyntaxVariant::EchoStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.echo_keyword, 3) },
+            SyntaxVariant::ConcurrentStatement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.concurrent_keyword, 2) },
+            SyntaxVariant::SimpleInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.simple_initializer_equal, 2) },
+            SyntaxVariant::AnonymousClass(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_class_class_keyword, 9) },
+            SyntaxVariant::AnonymousFunction(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_attribute_spec, 12) },
+            SyntaxVariant::AnonymousFunctionUseClause(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.anonymous_use_keyword, 4) },
+            SyntaxVariant::LambdaExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_attribute_spec, 5) },
+            SyntaxVariant::LambdaSignature(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.lambda_left_paren, 7) },
+            SyntaxVariant::CastExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.cast_left_paren, 4) },
+            SyntaxVariant::ScopeResolutionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.scope_resolution_qualifier, 3) },
+            SyntaxVariant::MemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.member_object, 3) },
+            SyntaxVariant::SafeMemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.safe_member_object, 3) },
+            SyntaxVariant::EmbeddedMemberSelectionExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.embedded_member_object, 3) },
+            SyntaxVariant::YieldExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.yield_keyword, 2) },
+            SyntaxVariant::PrefixUnaryExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.prefix_unary_operator, 2) },
+            SyntaxVariant::PostfixUnaryExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.postfix_unary_operand, 2) },
+            SyntaxVariant::BinaryExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.binary_left_operand, 3) },
+            SyntaxVariant::IsExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.is_left_operand, 3) },
+            SyntaxVariant::AsExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.as_left_operand, 3) },
+            SyntaxVariant::NullableAsExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.nullable_as_left_operand, 3) },
+            SyntaxVariant::UpcastExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.upcast_left_operand, 3) },
+            SyntaxVariant::ConditionalExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.conditional_test, 5) },
+            SyntaxVariant::EvalExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.eval_keyword, 4) },
+            SyntaxVariant::IssetExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.isset_keyword, 4) },
+            SyntaxVariant::FunctionCallExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_call_receiver, 5) },
+            SyntaxVariant::FunctionPointerExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_pointer_receiver, 2) },
+            SyntaxVariant::ParenthesizedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.parenthesized_expression_left_paren, 3) },
+            SyntaxVariant::BracedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.braced_expression_left_brace, 3) },
+            SyntaxVariant::ETSpliceExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.et_splice_expression_dollar, 4) },
+            SyntaxVariant::EmbeddedBracedExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.embedded_braced_expression_left_brace, 3) },
+            SyntaxVariant::ListExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.list_keyword, 4) },
+            SyntaxVariant::CollectionLiteralExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.collection_literal_name, 4) },
+            SyntaxVariant::ObjectCreationExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.object_creation_new_keyword, 2) },
+            SyntaxVariant::ConstructorCall(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constructor_call_type, 4) },
+            SyntaxVariant::DarrayIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_intrinsic_keyword, 5) },
+            SyntaxVariant::DictionaryIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_intrinsic_keyword, 5) },
+            SyntaxVariant::KeysetIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.keyset_intrinsic_keyword, 5) },
+            SyntaxVariant::VarrayIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.varray_intrinsic_keyword, 5) },
+            SyntaxVariant::VectorIntrinsicExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.vector_intrinsic_keyword, 5) },
+            SyntaxVariant::ElementInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.element_key, 3) },
+            SyntaxVariant::SubscriptExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.subscript_receiver, 4) },
+            SyntaxVariant::EmbeddedSubscriptExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.embedded_subscript_receiver, 4) },
+            SyntaxVariant::AwaitableCreationExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.awaitable_attribute_spec, 3) },
+            SyntaxVariant::XHPChildrenDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_children_keyword, 3) },
+            SyntaxVariant::XHPChildrenParenthesizedList(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_children_list_left_paren, 3) },
+            SyntaxVariant::XHPCategoryDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_category_keyword, 3) },
+            SyntaxVariant::XHPEnumType(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_enum_like, 5) },
+            SyntaxVariant::XHPLateinit(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_lateinit_at, 2) },
+            SyntaxVariant::XHPRequired(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_required_at, 2) },
+            SyntaxVariant::XHPClassAttributeDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_attribute_keyword, 3) },
+            SyntaxVariant::XHPClassAttribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_attribute_decl_type, 4) },
+            SyntaxVariant::XHPSimpleClassAttribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_simple_class_attribute_type, 1) },
+            SyntaxVariant::XHPSimpleAttribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_simple_attribute_name, 3) },
+            SyntaxVariant::XHPSpreadAttribute(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_spread_attribute_left_brace, 4) },
+            SyntaxVariant::XHPOpen(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_open_left_angle, 4) },
+            SyntaxVariant::XHPExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_open, 3) },
+            SyntaxVariant::XHPClose(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.xhp_close_left_angle, 3) },
+            SyntaxVariant::TypeConstant(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_constant_left_type, 3) },
+            SyntaxVariant::VectorTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.vector_type_keyword, 5) },
+            SyntaxVariant::KeysetTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.keyset_type_keyword, 5) },
+            SyntaxVariant::TupleTypeExplicitSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_type_keyword, 4) },
+            SyntaxVariant::VarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.varray_keyword, 5) },
+            SyntaxVariant::FunctionCtxTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.function_ctx_type_keyword, 2) },
+            SyntaxVariant::TypeParameter(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_attribute_spec, 6) },
+            SyntaxVariant::TypeConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.constraint_keyword, 2) },
+            SyntaxVariant::ContextConstraint(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_constraint_keyword, 2) },
+            SyntaxVariant::DarrayTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.darray_keyword, 7) },
+            SyntaxVariant::DictionaryTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.dictionary_type_keyword, 4) },
+            SyntaxVariant::ClosureTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_outer_left_paren, 11) },
+            SyntaxVariant::ClosureParameterTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.closure_parameter_call_convention, 3) },
+            SyntaxVariant::TypeRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_refinement_type, 5) },
+            SyntaxVariant::TypeInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_in_refinement_keyword, 6) },
+            SyntaxVariant::CtxInRefinement(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.ctx_in_refinement_keyword, 6) },
+            SyntaxVariant::ClassnameTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.classname_keyword, 5) },
+            SyntaxVariant::FieldSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_question, 4) },
+            SyntaxVariant::FieldInitializer(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.field_initializer_name, 3) },
+            SyntaxVariant::ShapeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_type_keyword, 5) },
+            SyntaxVariant::ShapeExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.shape_expression_keyword, 4) },
+            SyntaxVariant::TupleExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_expression_keyword, 4) },
+            SyntaxVariant::GenericTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.generic_class_type, 2) },
+            SyntaxVariant::NullableTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.nullable_question, 2) },
+            SyntaxVariant::LikeTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.like_tilde, 2) },
+            SyntaxVariant::SoftTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.soft_at, 2) },
+            SyntaxVariant::AttributizedSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.attributized_specifier_attribute_spec, 2) },
+            SyntaxVariant::ReifiedTypeArgument(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.reified_type_argument_reified, 2) },
+            SyntaxVariant::TypeArguments(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_arguments_left_angle, 3) },
+            SyntaxVariant::TypeParameters(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.type_parameters_left_angle, 3) },
+            SyntaxVariant::TupleTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.tuple_left_paren, 3) },
+            SyntaxVariant::UnionTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.union_left_paren, 3) },
+            SyntaxVariant::IntersectionTypeSpecifier(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.intersection_left_paren, 3) },
+            SyntaxVariant::ErrorSyntax(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.error_error, 1) },
+            SyntaxVariant::ListItem(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.list_item, 2) },
+            SyntaxVariant::EnumClassLabelExpression(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.enum_class_label_qualifier, 3) },
+            SyntaxVariant::ModuleDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_declaration_attribute_spec, 8) },
+            SyntaxVariant::ModuleExports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_exports_exports_keyword, 4) },
+            SyntaxVariant::ModuleImports(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_imports_imports_keyword, 4) },
+            SyntaxVariant::ModuleMembershipDeclaration(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.module_membership_declaration_module_keyword, 3) },
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EndOfFileChildren<T, V> {
     pub end_of_file_token: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ScriptChildren<T, V> {
     pub script_declarations: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct QualifiedNameChildren<T, V> {
     pub qualified_name_parts: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ModuleNameChildren<T, V> {
     pub module_name_parts: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SimpleTypeSpecifierChildren<T, V> {
     pub simple_type_specifier: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct LiteralExpressionChildren<T, V> {
     pub literal_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PrefixedStringExpressionChildren<T, V> {
     pub prefixed_string_name: Syntax<T, V>,
     pub prefixed_string_str: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PrefixedCodeExpressionChildren<T, V> {
     pub prefixed_code_prefix: Syntax<T, V>,
     pub prefixed_code_left_backtick: Syntax<T, V>,
@@ -4726,16 +5096,19 @@ pub struct PrefixedCodeExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VariableExpressionChildren<T, V> {
     pub variable_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PipeVariableExpressionChildren<T, V> {
     pub pipe_variable_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FileAttributeSpecificationChildren<T, V> {
     pub file_attribute_specification_left_double_angle: Syntax<T, V>,
     pub file_attribute_specification_keyword: Syntax<T, V>,
@@ -4745,6 +5118,7 @@ pub struct FileAttributeSpecificationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumDeclarationChildren<T, V> {
     pub enum_attribute_spec: Syntax<T, V>,
     pub enum_modifiers: Syntax<T, V>,
@@ -4760,6 +5134,7 @@ pub struct EnumDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumUseChildren<T, V> {
     pub enum_use_keyword: Syntax<T, V>,
     pub enum_use_names: Syntax<T, V>,
@@ -4767,6 +5142,7 @@ pub struct EnumUseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumeratorChildren<T, V> {
     pub enumerator_name: Syntax<T, V>,
     pub enumerator_equal: Syntax<T, V>,
@@ -4775,6 +5151,7 @@ pub struct EnumeratorChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumClassDeclarationChildren<T, V> {
     pub enum_class_attribute_spec: Syntax<T, V>,
     pub enum_class_modifiers: Syntax<T, V>,
@@ -4791,6 +5168,7 @@ pub struct EnumClassDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumClassEnumeratorChildren<T, V> {
     pub enum_class_enumerator_modifiers: Syntax<T, V>,
     pub enum_class_enumerator_type: Syntax<T, V>,
@@ -4800,6 +5178,7 @@ pub struct EnumClassEnumeratorChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AliasDeclarationChildren<T, V> {
     pub alias_attribute_spec: Syntax<T, V>,
     pub alias_modifiers: Syntax<T, V>,
@@ -4814,6 +5193,7 @@ pub struct AliasDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ContextAliasDeclarationChildren<T, V> {
     pub ctx_alias_attribute_spec: Syntax<T, V>,
     pub ctx_alias_keyword: Syntax<T, V>,
@@ -4826,6 +5206,7 @@ pub struct ContextAliasDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PropertyDeclarationChildren<T, V> {
     pub property_attribute_spec: Syntax<T, V>,
     pub property_modifiers: Syntax<T, V>,
@@ -4835,24 +5216,28 @@ pub struct PropertyDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PropertyDeclaratorChildren<T, V> {
     pub property_name: Syntax<T, V>,
     pub property_initializer: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceDeclarationChildren<T, V> {
     pub namespace_header: Syntax<T, V>,
     pub namespace_body: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceDeclarationHeaderChildren<T, V> {
     pub namespace_keyword: Syntax<T, V>,
     pub namespace_name: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceBodyChildren<T, V> {
     pub namespace_left_brace: Syntax<T, V>,
     pub namespace_declarations: Syntax<T, V>,
@@ -4860,11 +5245,13 @@ pub struct NamespaceBodyChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceEmptyBodyChildren<T, V> {
     pub namespace_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceUseDeclarationChildren<T, V> {
     pub namespace_use_keyword: Syntax<T, V>,
     pub namespace_use_kind: Syntax<T, V>,
@@ -4873,6 +5260,7 @@ pub struct NamespaceUseDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceGroupUseDeclarationChildren<T, V> {
     pub namespace_group_use_keyword: Syntax<T, V>,
     pub namespace_group_use_kind: Syntax<T, V>,
@@ -4884,6 +5272,7 @@ pub struct NamespaceGroupUseDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NamespaceUseClauseChildren<T, V> {
     pub namespace_use_clause_kind: Syntax<T, V>,
     pub namespace_use_name: Syntax<T, V>,
@@ -4892,6 +5281,7 @@ pub struct NamespaceUseClauseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionDeclarationChildren<T, V> {
     pub function_attribute_spec: Syntax<T, V>,
     pub function_declaration_header: Syntax<T, V>,
@@ -4899,6 +5289,7 @@ pub struct FunctionDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionDeclarationHeaderChildren<T, V> {
     pub function_modifiers: Syntax<T, V>,
     pub function_keyword: Syntax<T, V>,
@@ -4915,6 +5306,7 @@ pub struct FunctionDeclarationHeaderChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ContextsChildren<T, V> {
     pub contexts_left_bracket: Syntax<T, V>,
     pub contexts_types: Syntax<T, V>,
@@ -4922,12 +5314,14 @@ pub struct ContextsChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct WhereClauseChildren<T, V> {
     pub where_clause_keyword: Syntax<T, V>,
     pub where_clause_constraints: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct WhereConstraintChildren<T, V> {
     pub where_constraint_left_type: Syntax<T, V>,
     pub where_constraint_operator: Syntax<T, V>,
@@ -4935,6 +5329,7 @@ pub struct WhereConstraintChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct MethodishDeclarationChildren<T, V> {
     pub methodish_attribute: Syntax<T, V>,
     pub methodish_function_decl_header: Syntax<T, V>,
@@ -4943,6 +5338,7 @@ pub struct MethodishDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct MethodishTraitResolutionChildren<T, V> {
     pub methodish_trait_attribute: Syntax<T, V>,
     pub methodish_trait_function_decl_header: Syntax<T, V>,
@@ -4952,6 +5348,7 @@ pub struct MethodishTraitResolutionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ClassishDeclarationChildren<T, V> {
     pub classish_attribute: Syntax<T, V>,
     pub classish_modifiers: Syntax<T, V>,
@@ -4968,6 +5365,7 @@ pub struct ClassishDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ClassishBodyChildren<T, V> {
     pub classish_body_left_brace: Syntax<T, V>,
     pub classish_body_elements: Syntax<T, V>,
@@ -4975,6 +5373,7 @@ pub struct ClassishBodyChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TraitUseChildren<T, V> {
     pub trait_use_keyword: Syntax<T, V>,
     pub trait_use_names: Syntax<T, V>,
@@ -4982,6 +5381,7 @@ pub struct TraitUseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct RequireClauseChildren<T, V> {
     pub require_keyword: Syntax<T, V>,
     pub require_kind: Syntax<T, V>,
@@ -4990,6 +5390,7 @@ pub struct RequireClauseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ConstDeclarationChildren<T, V> {
     pub const_attribute_spec: Syntax<T, V>,
     pub const_modifiers: Syntax<T, V>,
@@ -5000,12 +5401,14 @@ pub struct ConstDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ConstantDeclaratorChildren<T, V> {
     pub constant_declarator_name: Syntax<T, V>,
     pub constant_declarator_initializer: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeConstDeclarationChildren<T, V> {
     pub type_const_attribute_spec: Syntax<T, V>,
     pub type_const_modifiers: Syntax<T, V>,
@@ -5020,6 +5423,7 @@ pub struct TypeConstDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ContextConstDeclarationChildren<T, V> {
     pub context_const_modifiers: Syntax<T, V>,
     pub context_const_const_keyword: Syntax<T, V>,
@@ -5033,12 +5437,14 @@ pub struct ContextConstDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DecoratedExpressionChildren<T, V> {
     pub decorated_expression_decorator: Syntax<T, V>,
     pub decorated_expression_expression: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ParameterDeclarationChildren<T, V> {
     pub parameter_attribute: Syntax<T, V>,
     pub parameter_visibility: Syntax<T, V>,
@@ -5050,6 +5456,7 @@ pub struct ParameterDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VariadicParameterChildren<T, V> {
     pub variadic_parameter_call_convention: Syntax<T, V>,
     pub variadic_parameter_type: Syntax<T, V>,
@@ -5057,6 +5464,7 @@ pub struct VariadicParameterChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct OldAttributeSpecificationChildren<T, V> {
     pub old_attribute_specification_left_double_angle: Syntax<T, V>,
     pub old_attribute_specification_attributes: Syntax<T, V>,
@@ -5064,29 +5472,34 @@ pub struct OldAttributeSpecificationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AttributeSpecificationChildren<T, V> {
     pub attribute_specification_attributes: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AttributeChildren<T, V> {
     pub attribute_at: Syntax<T, V>,
     pub attribute_attribute_name: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct InclusionExpressionChildren<T, V> {
     pub inclusion_require: Syntax<T, V>,
     pub inclusion_filename: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct InclusionDirectiveChildren<T, V> {
     pub inclusion_expression: Syntax<T, V>,
     pub inclusion_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CompoundStatementChildren<T, V> {
     pub compound_left_brace: Syntax<T, V>,
     pub compound_statements: Syntax<T, V>,
@@ -5094,24 +5507,28 @@ pub struct CompoundStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ExpressionStatementChildren<T, V> {
     pub expression_statement_expression: Syntax<T, V>,
     pub expression_statement_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct MarkupSectionChildren<T, V> {
     pub markup_hashbang: Syntax<T, V>,
     pub markup_suffix: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct MarkupSuffixChildren<T, V> {
     pub markup_suffix_less_than_question: Syntax<T, V>,
     pub markup_suffix_name: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct UnsetStatementChildren<T, V> {
     pub unset_keyword: Syntax<T, V>,
     pub unset_left_paren: Syntax<T, V>,
@@ -5121,6 +5538,7 @@ pub struct UnsetStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct UsingStatementBlockScopedChildren<T, V> {
     pub using_block_await_keyword: Syntax<T, V>,
     pub using_block_using_keyword: Syntax<T, V>,
@@ -5131,6 +5549,7 @@ pub struct UsingStatementBlockScopedChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct UsingStatementFunctionScopedChildren<T, V> {
     pub using_function_await_keyword: Syntax<T, V>,
     pub using_function_using_keyword: Syntax<T, V>,
@@ -5139,6 +5558,7 @@ pub struct UsingStatementFunctionScopedChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct WhileStatementChildren<T, V> {
     pub while_keyword: Syntax<T, V>,
     pub while_left_paren: Syntax<T, V>,
@@ -5148,6 +5568,7 @@ pub struct WhileStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct IfStatementChildren<T, V> {
     pub if_keyword: Syntax<T, V>,
     pub if_left_paren: Syntax<T, V>,
@@ -5158,12 +5579,14 @@ pub struct IfStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ElseClauseChildren<T, V> {
     pub else_keyword: Syntax<T, V>,
     pub else_statement: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TryStatementChildren<T, V> {
     pub try_keyword: Syntax<T, V>,
     pub try_compound_statement: Syntax<T, V>,
@@ -5172,6 +5595,7 @@ pub struct TryStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CatchClauseChildren<T, V> {
     pub catch_keyword: Syntax<T, V>,
     pub catch_left_paren: Syntax<T, V>,
@@ -5182,12 +5606,14 @@ pub struct CatchClauseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FinallyClauseChildren<T, V> {
     pub finally_keyword: Syntax<T, V>,
     pub finally_body: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DoStatementChildren<T, V> {
     pub do_keyword: Syntax<T, V>,
     pub do_body: Syntax<T, V>,
@@ -5199,6 +5625,7 @@ pub struct DoStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ForStatementChildren<T, V> {
     pub for_keyword: Syntax<T, V>,
     pub for_left_paren: Syntax<T, V>,
@@ -5212,6 +5639,7 @@ pub struct ForStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ForeachStatementChildren<T, V> {
     pub foreach_keyword: Syntax<T, V>,
     pub foreach_left_paren: Syntax<T, V>,
@@ -5226,6 +5654,7 @@ pub struct ForeachStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SwitchStatementChildren<T, V> {
     pub switch_keyword: Syntax<T, V>,
     pub switch_left_paren: Syntax<T, V>,
@@ -5237,6 +5666,7 @@ pub struct SwitchStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SwitchSectionChildren<T, V> {
     pub switch_section_labels: Syntax<T, V>,
     pub switch_section_statements: Syntax<T, V>,
@@ -5244,12 +5674,14 @@ pub struct SwitchSectionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SwitchFallthroughChildren<T, V> {
     pub fallthrough_keyword: Syntax<T, V>,
     pub fallthrough_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CaseLabelChildren<T, V> {
     pub case_keyword: Syntax<T, V>,
     pub case_expression: Syntax<T, V>,
@@ -5257,12 +5689,14 @@ pub struct CaseLabelChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DefaultLabelChildren<T, V> {
     pub default_keyword: Syntax<T, V>,
     pub default_colon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ReturnStatementChildren<T, V> {
     pub return_keyword: Syntax<T, V>,
     pub return_expression: Syntax<T, V>,
@@ -5270,6 +5704,7 @@ pub struct ReturnStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct YieldBreakStatementChildren<T, V> {
     pub yield_break_keyword: Syntax<T, V>,
     pub yield_break_break: Syntax<T, V>,
@@ -5277,6 +5712,7 @@ pub struct YieldBreakStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ThrowStatementChildren<T, V> {
     pub throw_keyword: Syntax<T, V>,
     pub throw_expression: Syntax<T, V>,
@@ -5284,18 +5720,21 @@ pub struct ThrowStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct BreakStatementChildren<T, V> {
     pub break_keyword: Syntax<T, V>,
     pub break_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ContinueStatementChildren<T, V> {
     pub continue_keyword: Syntax<T, V>,
     pub continue_semicolon: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EchoStatementChildren<T, V> {
     pub echo_keyword: Syntax<T, V>,
     pub echo_expressions: Syntax<T, V>,
@@ -5303,18 +5742,21 @@ pub struct EchoStatementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ConcurrentStatementChildren<T, V> {
     pub concurrent_keyword: Syntax<T, V>,
     pub concurrent_statement: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SimpleInitializerChildren<T, V> {
     pub simple_initializer_equal: Syntax<T, V>,
     pub simple_initializer_value: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AnonymousClassChildren<T, V> {
     pub anonymous_class_class_keyword: Syntax<T, V>,
     pub anonymous_class_left_paren: Syntax<T, V>,
@@ -5328,6 +5770,7 @@ pub struct AnonymousClassChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AnonymousFunctionChildren<T, V> {
     pub anonymous_attribute_spec: Syntax<T, V>,
     pub anonymous_async_keyword: Syntax<T, V>,
@@ -5344,6 +5787,7 @@ pub struct AnonymousFunctionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AnonymousFunctionUseClauseChildren<T, V> {
     pub anonymous_use_keyword: Syntax<T, V>,
     pub anonymous_use_left_paren: Syntax<T, V>,
@@ -5352,6 +5796,7 @@ pub struct AnonymousFunctionUseClauseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct LambdaExpressionChildren<T, V> {
     pub lambda_attribute_spec: Syntax<T, V>,
     pub lambda_async: Syntax<T, V>,
@@ -5361,6 +5806,7 @@ pub struct LambdaExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct LambdaSignatureChildren<T, V> {
     pub lambda_left_paren: Syntax<T, V>,
     pub lambda_parameters: Syntax<T, V>,
@@ -5372,6 +5818,7 @@ pub struct LambdaSignatureChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CastExpressionChildren<T, V> {
     pub cast_left_paren: Syntax<T, V>,
     pub cast_type: Syntax<T, V>,
@@ -5380,6 +5827,7 @@ pub struct CastExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ScopeResolutionExpressionChildren<T, V> {
     pub scope_resolution_qualifier: Syntax<T, V>,
     pub scope_resolution_operator: Syntax<T, V>,
@@ -5387,6 +5835,7 @@ pub struct ScopeResolutionExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct MemberSelectionExpressionChildren<T, V> {
     pub member_object: Syntax<T, V>,
     pub member_operator: Syntax<T, V>,
@@ -5394,6 +5843,7 @@ pub struct MemberSelectionExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SafeMemberSelectionExpressionChildren<T, V> {
     pub safe_member_object: Syntax<T, V>,
     pub safe_member_operator: Syntax<T, V>,
@@ -5401,6 +5851,7 @@ pub struct SafeMemberSelectionExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EmbeddedMemberSelectionExpressionChildren<T, V> {
     pub embedded_member_object: Syntax<T, V>,
     pub embedded_member_operator: Syntax<T, V>,
@@ -5408,24 +5859,28 @@ pub struct EmbeddedMemberSelectionExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct YieldExpressionChildren<T, V> {
     pub yield_keyword: Syntax<T, V>,
     pub yield_operand: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PrefixUnaryExpressionChildren<T, V> {
     pub prefix_unary_operator: Syntax<T, V>,
     pub prefix_unary_operand: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct PostfixUnaryExpressionChildren<T, V> {
     pub postfix_unary_operand: Syntax<T, V>,
     pub postfix_unary_operator: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct BinaryExpressionChildren<T, V> {
     pub binary_left_operand: Syntax<T, V>,
     pub binary_operator: Syntax<T, V>,
@@ -5433,6 +5888,7 @@ pub struct BinaryExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct IsExpressionChildren<T, V> {
     pub is_left_operand: Syntax<T, V>,
     pub is_operator: Syntax<T, V>,
@@ -5440,6 +5896,7 @@ pub struct IsExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AsExpressionChildren<T, V> {
     pub as_left_operand: Syntax<T, V>,
     pub as_operator: Syntax<T, V>,
@@ -5447,6 +5904,7 @@ pub struct AsExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NullableAsExpressionChildren<T, V> {
     pub nullable_as_left_operand: Syntax<T, V>,
     pub nullable_as_operator: Syntax<T, V>,
@@ -5454,6 +5912,7 @@ pub struct NullableAsExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct UpcastExpressionChildren<T, V> {
     pub upcast_left_operand: Syntax<T, V>,
     pub upcast_operator: Syntax<T, V>,
@@ -5461,6 +5920,7 @@ pub struct UpcastExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ConditionalExpressionChildren<T, V> {
     pub conditional_test: Syntax<T, V>,
     pub conditional_question: Syntax<T, V>,
@@ -5470,6 +5930,7 @@ pub struct ConditionalExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EvalExpressionChildren<T, V> {
     pub eval_keyword: Syntax<T, V>,
     pub eval_left_paren: Syntax<T, V>,
@@ -5478,6 +5939,7 @@ pub struct EvalExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct IssetExpressionChildren<T, V> {
     pub isset_keyword: Syntax<T, V>,
     pub isset_left_paren: Syntax<T, V>,
@@ -5486,6 +5948,7 @@ pub struct IssetExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionCallExpressionChildren<T, V> {
     pub function_call_receiver: Syntax<T, V>,
     pub function_call_type_args: Syntax<T, V>,
@@ -5495,12 +5958,14 @@ pub struct FunctionCallExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionPointerExpressionChildren<T, V> {
     pub function_pointer_receiver: Syntax<T, V>,
     pub function_pointer_type_args: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ParenthesizedExpressionChildren<T, V> {
     pub parenthesized_expression_left_paren: Syntax<T, V>,
     pub parenthesized_expression_expression: Syntax<T, V>,
@@ -5508,6 +5973,7 @@ pub struct ParenthesizedExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct BracedExpressionChildren<T, V> {
     pub braced_expression_left_brace: Syntax<T, V>,
     pub braced_expression_expression: Syntax<T, V>,
@@ -5515,6 +5981,7 @@ pub struct BracedExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ETSpliceExpressionChildren<T, V> {
     pub et_splice_expression_dollar: Syntax<T, V>,
     pub et_splice_expression_left_brace: Syntax<T, V>,
@@ -5523,6 +5990,7 @@ pub struct ETSpliceExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EmbeddedBracedExpressionChildren<T, V> {
     pub embedded_braced_expression_left_brace: Syntax<T, V>,
     pub embedded_braced_expression_expression: Syntax<T, V>,
@@ -5530,6 +5998,7 @@ pub struct EmbeddedBracedExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ListExpressionChildren<T, V> {
     pub list_keyword: Syntax<T, V>,
     pub list_left_paren: Syntax<T, V>,
@@ -5538,6 +6007,7 @@ pub struct ListExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CollectionLiteralExpressionChildren<T, V> {
     pub collection_literal_name: Syntax<T, V>,
     pub collection_literal_left_brace: Syntax<T, V>,
@@ -5546,12 +6016,14 @@ pub struct CollectionLiteralExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ObjectCreationExpressionChildren<T, V> {
     pub object_creation_new_keyword: Syntax<T, V>,
     pub object_creation_object: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ConstructorCallChildren<T, V> {
     pub constructor_call_type: Syntax<T, V>,
     pub constructor_call_left_paren: Syntax<T, V>,
@@ -5560,6 +6032,7 @@ pub struct ConstructorCallChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DarrayIntrinsicExpressionChildren<T, V> {
     pub darray_intrinsic_keyword: Syntax<T, V>,
     pub darray_intrinsic_explicit_type: Syntax<T, V>,
@@ -5569,6 +6042,7 @@ pub struct DarrayIntrinsicExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DictionaryIntrinsicExpressionChildren<T, V> {
     pub dictionary_intrinsic_keyword: Syntax<T, V>,
     pub dictionary_intrinsic_explicit_type: Syntax<T, V>,
@@ -5578,6 +6052,7 @@ pub struct DictionaryIntrinsicExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct KeysetIntrinsicExpressionChildren<T, V> {
     pub keyset_intrinsic_keyword: Syntax<T, V>,
     pub keyset_intrinsic_explicit_type: Syntax<T, V>,
@@ -5587,6 +6062,7 @@ pub struct KeysetIntrinsicExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VarrayIntrinsicExpressionChildren<T, V> {
     pub varray_intrinsic_keyword: Syntax<T, V>,
     pub varray_intrinsic_explicit_type: Syntax<T, V>,
@@ -5596,6 +6072,7 @@ pub struct VarrayIntrinsicExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VectorIntrinsicExpressionChildren<T, V> {
     pub vector_intrinsic_keyword: Syntax<T, V>,
     pub vector_intrinsic_explicit_type: Syntax<T, V>,
@@ -5605,6 +6082,7 @@ pub struct VectorIntrinsicExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ElementInitializerChildren<T, V> {
     pub element_key: Syntax<T, V>,
     pub element_arrow: Syntax<T, V>,
@@ -5612,6 +6090,7 @@ pub struct ElementInitializerChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SubscriptExpressionChildren<T, V> {
     pub subscript_receiver: Syntax<T, V>,
     pub subscript_left_bracket: Syntax<T, V>,
@@ -5620,6 +6099,7 @@ pub struct SubscriptExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EmbeddedSubscriptExpressionChildren<T, V> {
     pub embedded_subscript_receiver: Syntax<T, V>,
     pub embedded_subscript_left_bracket: Syntax<T, V>,
@@ -5628,6 +6108,7 @@ pub struct EmbeddedSubscriptExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AwaitableCreationExpressionChildren<T, V> {
     pub awaitable_attribute_spec: Syntax<T, V>,
     pub awaitable_async: Syntax<T, V>,
@@ -5635,6 +6116,7 @@ pub struct AwaitableCreationExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPChildrenDeclarationChildren<T, V> {
     pub xhp_children_keyword: Syntax<T, V>,
     pub xhp_children_expression: Syntax<T, V>,
@@ -5642,6 +6124,7 @@ pub struct XHPChildrenDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPChildrenParenthesizedListChildren<T, V> {
     pub xhp_children_list_left_paren: Syntax<T, V>,
     pub xhp_children_list_xhp_children: Syntax<T, V>,
@@ -5649,6 +6132,7 @@ pub struct XHPChildrenParenthesizedListChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPCategoryDeclarationChildren<T, V> {
     pub xhp_category_keyword: Syntax<T, V>,
     pub xhp_category_categories: Syntax<T, V>,
@@ -5656,6 +6140,7 @@ pub struct XHPCategoryDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPEnumTypeChildren<T, V> {
     pub xhp_enum_like: Syntax<T, V>,
     pub xhp_enum_keyword: Syntax<T, V>,
@@ -5665,18 +6150,21 @@ pub struct XHPEnumTypeChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPLateinitChildren<T, V> {
     pub xhp_lateinit_at: Syntax<T, V>,
     pub xhp_lateinit_keyword: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPRequiredChildren<T, V> {
     pub xhp_required_at: Syntax<T, V>,
     pub xhp_required_keyword: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPClassAttributeDeclarationChildren<T, V> {
     pub xhp_attribute_keyword: Syntax<T, V>,
     pub xhp_attribute_attributes: Syntax<T, V>,
@@ -5684,6 +6172,7 @@ pub struct XHPClassAttributeDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPClassAttributeChildren<T, V> {
     pub xhp_attribute_decl_type: Syntax<T, V>,
     pub xhp_attribute_decl_name: Syntax<T, V>,
@@ -5692,11 +6181,13 @@ pub struct XHPClassAttributeChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPSimpleClassAttributeChildren<T, V> {
     pub xhp_simple_class_attribute_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPSimpleAttributeChildren<T, V> {
     pub xhp_simple_attribute_name: Syntax<T, V>,
     pub xhp_simple_attribute_equal: Syntax<T, V>,
@@ -5704,6 +6195,7 @@ pub struct XHPSimpleAttributeChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPSpreadAttributeChildren<T, V> {
     pub xhp_spread_attribute_left_brace: Syntax<T, V>,
     pub xhp_spread_attribute_spread_operator: Syntax<T, V>,
@@ -5712,6 +6204,7 @@ pub struct XHPSpreadAttributeChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPOpenChildren<T, V> {
     pub xhp_open_left_angle: Syntax<T, V>,
     pub xhp_open_name: Syntax<T, V>,
@@ -5720,6 +6213,7 @@ pub struct XHPOpenChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPExpressionChildren<T, V> {
     pub xhp_open: Syntax<T, V>,
     pub xhp_body: Syntax<T, V>,
@@ -5727,6 +6221,7 @@ pub struct XHPExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct XHPCloseChildren<T, V> {
     pub xhp_close_left_angle: Syntax<T, V>,
     pub xhp_close_name: Syntax<T, V>,
@@ -5734,6 +6229,7 @@ pub struct XHPCloseChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeConstantChildren<T, V> {
     pub type_constant_left_type: Syntax<T, V>,
     pub type_constant_separator: Syntax<T, V>,
@@ -5741,6 +6237,7 @@ pub struct TypeConstantChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VectorTypeSpecifierChildren<T, V> {
     pub vector_type_keyword: Syntax<T, V>,
     pub vector_type_left_angle: Syntax<T, V>,
@@ -5750,6 +6247,7 @@ pub struct VectorTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct KeysetTypeSpecifierChildren<T, V> {
     pub keyset_type_keyword: Syntax<T, V>,
     pub keyset_type_left_angle: Syntax<T, V>,
@@ -5759,6 +6257,7 @@ pub struct KeysetTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TupleTypeExplicitSpecifierChildren<T, V> {
     pub tuple_type_keyword: Syntax<T, V>,
     pub tuple_type_left_angle: Syntax<T, V>,
@@ -5767,6 +6266,7 @@ pub struct TupleTypeExplicitSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct VarrayTypeSpecifierChildren<T, V> {
     pub varray_keyword: Syntax<T, V>,
     pub varray_left_angle: Syntax<T, V>,
@@ -5776,12 +6276,14 @@ pub struct VarrayTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FunctionCtxTypeSpecifierChildren<T, V> {
     pub function_ctx_type_keyword: Syntax<T, V>,
     pub function_ctx_type_variable: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeParameterChildren<T, V> {
     pub type_attribute_spec: Syntax<T, V>,
     pub type_reified: Syntax<T, V>,
@@ -5792,18 +6294,21 @@ pub struct TypeParameterChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeConstraintChildren<T, V> {
     pub constraint_keyword: Syntax<T, V>,
     pub constraint_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ContextConstraintChildren<T, V> {
     pub ctx_constraint_keyword: Syntax<T, V>,
     pub ctx_constraint_ctx_list: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DarrayTypeSpecifierChildren<T, V> {
     pub darray_keyword: Syntax<T, V>,
     pub darray_left_angle: Syntax<T, V>,
@@ -5815,6 +6320,7 @@ pub struct DarrayTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct DictionaryTypeSpecifierChildren<T, V> {
     pub dictionary_type_keyword: Syntax<T, V>,
     pub dictionary_type_left_angle: Syntax<T, V>,
@@ -5823,6 +6329,7 @@ pub struct DictionaryTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ClosureTypeSpecifierChildren<T, V> {
     pub closure_outer_left_paren: Syntax<T, V>,
     pub closure_readonly_keyword: Syntax<T, V>,
@@ -5838,6 +6345,7 @@ pub struct ClosureTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ClosureParameterTypeSpecifierChildren<T, V> {
     pub closure_parameter_call_convention: Syntax<T, V>,
     pub closure_parameter_readonly: Syntax<T, V>,
@@ -5845,6 +6353,7 @@ pub struct ClosureParameterTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeRefinementChildren<T, V> {
     pub type_refinement_type: Syntax<T, V>,
     pub type_refinement_keyword: Syntax<T, V>,
@@ -5854,6 +6363,7 @@ pub struct TypeRefinementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeInRefinementChildren<T, V> {
     pub type_in_refinement_keyword: Syntax<T, V>,
     pub type_in_refinement_name: Syntax<T, V>,
@@ -5864,6 +6374,7 @@ pub struct TypeInRefinementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct CtxInRefinementChildren<T, V> {
     pub ctx_in_refinement_keyword: Syntax<T, V>,
     pub ctx_in_refinement_name: Syntax<T, V>,
@@ -5874,6 +6385,7 @@ pub struct CtxInRefinementChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ClassnameTypeSpecifierChildren<T, V> {
     pub classname_keyword: Syntax<T, V>,
     pub classname_left_angle: Syntax<T, V>,
@@ -5883,6 +6395,7 @@ pub struct ClassnameTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FieldSpecifierChildren<T, V> {
     pub field_question: Syntax<T, V>,
     pub field_name: Syntax<T, V>,
@@ -5891,6 +6404,7 @@ pub struct FieldSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct FieldInitializerChildren<T, V> {
     pub field_initializer_name: Syntax<T, V>,
     pub field_initializer_arrow: Syntax<T, V>,
@@ -5898,6 +6412,7 @@ pub struct FieldInitializerChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ShapeTypeSpecifierChildren<T, V> {
     pub shape_type_keyword: Syntax<T, V>,
     pub shape_type_left_paren: Syntax<T, V>,
@@ -5907,6 +6422,7 @@ pub struct ShapeTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ShapeExpressionChildren<T, V> {
     pub shape_expression_keyword: Syntax<T, V>,
     pub shape_expression_left_paren: Syntax<T, V>,
@@ -5915,6 +6431,7 @@ pub struct ShapeExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TupleExpressionChildren<T, V> {
     pub tuple_expression_keyword: Syntax<T, V>,
     pub tuple_expression_left_paren: Syntax<T, V>,
@@ -5923,42 +6440,49 @@ pub struct TupleExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct GenericTypeSpecifierChildren<T, V> {
     pub generic_class_type: Syntax<T, V>,
     pub generic_argument_list: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct NullableTypeSpecifierChildren<T, V> {
     pub nullable_question: Syntax<T, V>,
     pub nullable_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct LikeTypeSpecifierChildren<T, V> {
     pub like_tilde: Syntax<T, V>,
     pub like_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct SoftTypeSpecifierChildren<T, V> {
     pub soft_at: Syntax<T, V>,
     pub soft_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct AttributizedSpecifierChildren<T, V> {
     pub attributized_specifier_attribute_spec: Syntax<T, V>,
     pub attributized_specifier_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ReifiedTypeArgumentChildren<T, V> {
     pub reified_type_argument_reified: Syntax<T, V>,
     pub reified_type_argument_type: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeArgumentsChildren<T, V> {
     pub type_arguments_left_angle: Syntax<T, V>,
     pub type_arguments_types: Syntax<T, V>,
@@ -5966,6 +6490,7 @@ pub struct TypeArgumentsChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TypeParametersChildren<T, V> {
     pub type_parameters_left_angle: Syntax<T, V>,
     pub type_parameters_parameters: Syntax<T, V>,
@@ -5973,6 +6498,7 @@ pub struct TypeParametersChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct TupleTypeSpecifierChildren<T, V> {
     pub tuple_left_paren: Syntax<T, V>,
     pub tuple_types: Syntax<T, V>,
@@ -5980,6 +6506,7 @@ pub struct TupleTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct UnionTypeSpecifierChildren<T, V> {
     pub union_left_paren: Syntax<T, V>,
     pub union_types: Syntax<T, V>,
@@ -5987,6 +6514,7 @@ pub struct UnionTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct IntersectionTypeSpecifierChildren<T, V> {
     pub intersection_left_paren: Syntax<T, V>,
     pub intersection_types: Syntax<T, V>,
@@ -5994,17 +6522,20 @@ pub struct IntersectionTypeSpecifierChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ErrorSyntaxChildren<T, V> {
     pub error_error: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ListItemChildren<T, V> {
     pub list_item: Syntax<T, V>,
     pub list_separator: Syntax<T, V>,
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct EnumClassLabelExpressionChildren<T, V> {
     pub enum_class_label_qualifier: Syntax<T, V>,
     pub enum_class_label_hash: Syntax<T, V>,
@@ -6012,6 +6543,7 @@ pub struct EnumClassLabelExpressionChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ModuleDeclarationChildren<T, V> {
     pub module_declaration_attribute_spec: Syntax<T, V>,
     pub module_declaration_new_keyword: Syntax<T, V>,
@@ -6024,6 +6556,7 @@ pub struct ModuleDeclarationChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ModuleExportsChildren<T, V> {
     pub module_exports_exports_keyword: Syntax<T, V>,
     pub module_exports_left_brace: Syntax<T, V>,
@@ -6032,6 +6565,7 @@ pub struct ModuleExportsChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ModuleImportsChildren<T, V> {
     pub module_imports_imports_keyword: Syntax<T, V>,
     pub module_imports_left_brace: Syntax<T, V>,
@@ -6040,6 +6574,7 @@ pub struct ModuleImportsChildren<T, V> {
 }
 
 #[derive(Debug, Clone)]
+#[repr(C)]
 pub struct ModuleMembershipDeclarationChildren<T, V> {
     pub module_membership_declaration_module_keyword: Syntax<T, V>,
     pub module_membership_declaration_name: Syntax<T, V>,

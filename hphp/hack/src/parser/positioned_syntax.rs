@@ -253,3 +253,40 @@ impl SyntaxTrait for PositionedSyntax {
         Some(self.text(source_text))
     }
 }
+
+impl PositionedSyntax {
+    /// Invariant: every token in the tree must have a valid offset&width,
+    /// leading trivia offset&width, and trailing trivia offset&width (meaning,
+    /// they point to an empty or valid non-empty slice of `source_text`), with
+    /// one exception: fixed-width tokens (tokens where `TokenKind::fixed_width`
+    /// returns `Some`) need not point to a valid offset&width (but their
+    /// leading and trailing trivia offset&width should be empty or valid slices
+    /// of `source_text`), since their text will be that returned by
+    /// `TokenKind::to_string`. Undefined (but valid) slices of `source_text`
+    /// will be used for invalid offsets/widths.
+    pub fn text_from_edited_tree(&self, source_text: &SourceText<'_>) -> std::io::Result<Vec<u8>> {
+        let mut text = vec![];
+        self.write_text_from_edited_tree(source_text, &mut text)?;
+        Ok(text)
+    }
+
+    /// Invariant: Same requirements as `text_from_edited_tree`.
+    pub fn write_text_from_edited_tree(
+        &self,
+        source_text: &SourceText<'_>,
+        w: &mut impl std::io::Write,
+    ) -> std::io::Result<()> {
+        self.try_iter_pre(|node| {
+            if let Some(token) = node.get_token() {
+                if token.kind().fixed_width().is_some() {
+                    w.write_all(token.leading_text(source_text))?;
+                    w.write_all(token.kind().to_string().as_bytes())?;
+                    w.write_all(token.trailing_text(source_text))?;
+                } else {
+                    w.write_all(source_text.sub(token.offset(), token.full_width()))?;
+                }
+            }
+            Ok(())
+        })
+    }
+}

@@ -589,6 +589,22 @@ module GenerateFFRustSyntax = struct
       (List.length x.fields)
       fields
 
+  let syntax_as_slice x =
+    sprintf
+      "            SyntaxVariant::%s(x) => unsafe { std::slice::from_raw_parts(&x.%s_%s, %d) },\n"
+      x.kind_name
+      x.prefix
+      (fst (List.hd_exn x.fields))
+      (List.length x.fields)
+
+  let syntax_as_slice_mut x =
+    sprintf
+      "            SyntaxVariant::%s(x) => unsafe { std::slice::from_raw_parts_mut(&mut x.%s_%s, %d) },\n"
+      x.kind_name
+      x.prefix
+      (fst (List.hd_exn x.fields))
+      (List.length x.fields)
+
   let fold_over_owned x =
     let fold_mapper prefix (f, _) =
       sprintf "let acc = f(%s_%s, acc)" prefix f
@@ -623,7 +639,7 @@ module GenerateFFRustSyntax = struct
     in
     let fields = map_and_concat_separated "\n" (mapper x.prefix) x.fields in
     sprintf
-      "#[derive(Debug, Clone)]\npub struct %sChildren<T, V> {\n%s\n}\n\n"
+      "#[derive(Debug, Clone)]\n#[repr(C)]\npub struct %sChildren<T, V> {\n%s\n}\n\n"
       x.kind_name
       fields
 
@@ -715,6 +731,22 @@ TO_KIND        }
 SYNTAX_FROM_CHILDREN             _ => panic!(\"from_children called with wrong number of children\"),
          }
     }
+
+    pub fn children(&self) -> &[Self] {
+        match &self.syntax {
+            SyntaxVariant::Missing => &[],
+            SyntaxVariant::Token(..) => &[],
+            SyntaxVariant::SyntaxList(l) => l.as_slice(),
+SYNTAX_AS_SLICE        }
+    }
+
+    pub fn children_mut(&mut self) -> &mut [Self] {
+        match &mut self.syntax {
+            SyntaxVariant::Missing => &mut [],
+            SyntaxVariant::Token(..) => &mut [],
+            SyntaxVariant::SyntaxList(l) => l.as_mut_slice(),
+SYNTAX_AS_SLICE_MUT        }
+    }
 }
 
 SYNTAX_CHILDREN
@@ -770,6 +802,8 @@ ITER_CHILDREN
           { pattern = "FOLD_OVER_CHILDREN_OWNED"; func = fold_over_owned };
           { pattern = "TO_KIND"; func = to_kind };
           { pattern = "SYNTAX_FROM_CHILDREN"; func = to_syntax_from_children };
+          { pattern = "SYNTAX_AS_SLICE"; func = syntax_as_slice };
+          { pattern = "SYNTAX_AS_SLICE_MUT"; func = syntax_as_slice_mut };
         ]
       ~filename:(full_fidelity_path_prefix ^ "syntax_generated.rs")
       ~template:full_fidelity_syntax_template

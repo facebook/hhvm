@@ -144,7 +144,7 @@ jobs:
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
         "$HHVM_BIN" hphp/test/run.php -x hphp/test/github_excluded_tests all
-    - run: sed '/^ *#/d;s/#.*//' ./github_excluded_tests | xargs "$HHVM_BIN" ./run.php
+    - run: sed 's/#.*//' ./github_excluded_tests | xargs "$HHVM_BIN" ./run.php --write-to-checkout
       working-directory: ./hphp/test
       continue-on-error: true
   upload-deb:

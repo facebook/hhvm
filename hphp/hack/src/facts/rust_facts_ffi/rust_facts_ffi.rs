@@ -11,7 +11,7 @@ use hhbc_string_utils::without_xhp_mangling;
 use ocamlrep::bytes_from_ocamlrep;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_ocamlpool::ocaml_ffi;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 
 ocaml_ffi! {
     fn extract_as_json_ffi(

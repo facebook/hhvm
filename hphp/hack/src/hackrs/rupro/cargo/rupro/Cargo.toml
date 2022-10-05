@@ -22,6 +22,7 @@ oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }
 pos = { path = "../../../pos/cargo/pos" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 rust_aast_parser_types = { path = "../../../../parser/cargo/rust_aast_parser_types" }
 special_names = { path = "../../../special_names/cargo/special_names" }
 thiserror = "1.0.36"

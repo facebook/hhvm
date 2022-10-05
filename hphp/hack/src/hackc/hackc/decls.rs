@@ -8,8 +8,8 @@ use anyhow::Result;
 use clap::Parser;
 use direct_decl_parser::ParsedFile;
 use hash::IndexMap;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 
 /// Decls subcommand options
 #[derive(Parser, Debug, Default)]

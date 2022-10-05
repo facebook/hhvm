@@ -9,9 +9,9 @@ use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use oxidized::file_info;
 use oxidized::file_info::NameType;
-use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use relative_path::RelativePath;
 
 /// Similar to `oxidized::file_info::FileInfo`, but containing only the
 /// information which is necessary to populate the naming table (i.e., omitting

@@ -13,7 +13,7 @@ use ocamlrep::FromOcamlRep;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
-pub use oxidized::relative_path::Prefix;
+pub use relative_path::Prefix;
 
 use crate::Bytes;
 use crate::ToOxidized;
@@ -93,12 +93,12 @@ impl<'a> FromOcamlRepIn<'a> for RelativePath {
         value: ocamlrep::Value<'_>,
         _arena: &'a bumpalo::Bump,
     ) -> Result<Self, ocamlrep::FromError> {
-        let path = oxidized::relative_path::RelativePath::from_ocamlrep(value)?;
+        let path = relative_path::RelativePath::from_ocamlrep(value)?;
         Ok(Self::from(&path))
     }
 }
 
-impl From<RelativePath> for oxidized::relative_path::RelativePath {
+impl From<RelativePath> for relative_path::RelativePath {
     fn from(path: RelativePath) -> Self {
         Self::make(
             path.prefix,
@@ -107,8 +107,8 @@ impl From<RelativePath> for oxidized::relative_path::RelativePath {
     }
 }
 
-impl From<&oxidized::relative_path::RelativePath> for RelativePath {
-    fn from(path: &oxidized::relative_path::RelativePath) -> Self {
+impl From<&relative_path::RelativePath> for RelativePath {
+    fn from(path: &relative_path::RelativePath) -> Self {
         Self::new(path.prefix(), path.path())
     }
 }

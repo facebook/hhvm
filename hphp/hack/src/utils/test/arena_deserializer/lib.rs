@@ -155,7 +155,7 @@ fn example() {
     round_trip(x, &arena);
 
     let s = oxidized_by_ref::relative_path::RelativePath::new(
-        oxidized_by_ref::relative_path::Prefix::Dummy,
+        relative_path::Prefix::Dummy,
         std::path::Path::new("/tmp/foo.php"),
     );
     let x: Num<'_, ()> = Num::RP(&s);

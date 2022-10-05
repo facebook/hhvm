@@ -26,5 +26,6 @@ oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 pos = { path = "../../pos/cargo/pos" }
 rayon = "1.2"
+relative_path = { path = "../../../utils/rust/relative_path" }
 tempdir = "0.3"
 ty = { path = "../../ty/cargo/ty" }

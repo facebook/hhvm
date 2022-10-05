@@ -478,9 +478,9 @@ pub mod map {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
+    use relative_path::Prefix;
 
     use super::*;
-    use crate::relative_path::Prefix;
 
     fn make_pos<'a>(
         b: &'a Bump,

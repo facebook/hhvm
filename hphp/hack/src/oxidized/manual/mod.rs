@@ -28,7 +28,6 @@ pub mod phase_map;
 pub mod pos;
 pub mod pos_span_raw;
 pub mod pos_span_tiny;
-pub mod relative_path;
 pub mod s_map;
 pub mod s_set;
 pub mod scoured_comments_impl;

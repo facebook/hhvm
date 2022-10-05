@@ -12,11 +12,11 @@ use ocamlrep_caml_builtins::Int64;
 use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use parser_core_types::indexed_source_text::IndexedSourceText;
+use relative_path::RelativePath;
 
 ocaml_ffi_arena_result! {
     fn hh_parse_decls_ffi<'a>(

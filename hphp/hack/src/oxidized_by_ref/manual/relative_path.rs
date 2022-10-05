@@ -12,7 +12,7 @@ use bumpalo::Bump;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep::ToOcamlRep;
-pub use oxidized::relative_path::Prefix;
+use relative_path::Prefix;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -84,14 +84,13 @@ impl<'a> RelativePath<'a> {
         self.prefix
     }
 
-    pub fn to_oxidized(&self) -> oxidized::relative_path::RelativePath {
-        oxidized::relative_path::RelativePath::make(self.prefix, self.path().to_owned())
+    /// TODO(ljw): rename this
+    pub fn to_oxidized(&self) -> relative_path::RelativePath {
+        relative_path::RelativePath::make(self.prefix, self.path().to_owned())
     }
 
-    pub fn from_oxidized_in(
-        path: &oxidized::relative_path::RelativePath,
-        arena: &'a Bump,
-    ) -> &'a Self {
+    /// TODO(ljw): rename this
+    pub fn from_oxidized_in(path: &relative_path::RelativePath, arena: &'a Bump) -> &'a Self {
         let path_str =
             bumpalo::collections::String::from_str_in(path.path_str(), arena).into_bump_str();
         arena.alloc(Self::make(path.prefix(), path_str))

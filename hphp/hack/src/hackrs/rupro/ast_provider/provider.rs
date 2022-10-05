@@ -139,8 +139,8 @@ impl AstProvider {
             file: fln.clone(),
             err: format!("{:?}", io_err),
         })?;
-        let rel_path = RcOc::new(oxidized::relative_path::RelativePath::make(
-            oxidized::relative_path::Prefix::Dummy,
+        let rel_path = RcOc::new(relative_path::RelativePath::make(
+            relative_path::Prefix::Dummy,
             abs_fln,
         ));
         let source_text = SourceText::make(rel_path, text.as_bytes());

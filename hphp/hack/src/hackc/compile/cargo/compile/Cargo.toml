@@ -28,6 +28,7 @@ oxidized = { path = "../../../../oxidized" }
 parser_core_types = { path = "../../../../parser/cargo/core_types" }
 print_expr = { path = "../../../print_expr" }
 profile_rust = { path = "../../../../utils/perf/cargo/profile" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 rewrite_program = { path = "../rewrite_program" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 stack_limit = { path = "../../../../utils/stack_limit" }

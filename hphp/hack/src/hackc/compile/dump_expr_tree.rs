@@ -15,8 +15,8 @@ use oxidized::aast_visitor::Visitor;
 use oxidized::ast;
 use oxidized::namespace_env::Env as NamespaceEnv;
 use oxidized::pos::Pos;
-use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
+use relative_path::RelativePath;
 
 use crate::EnvFlags;
 use crate::ParseError;

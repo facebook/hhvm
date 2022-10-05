@@ -9,7 +9,7 @@ use std::io::Write;
 use std::path::PathBuf;
 
 use hhbc::IncludePath;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 
 /// Indent is an abstraction of indentation. Configurable indentation
 /// and perf tweaking will be easier.

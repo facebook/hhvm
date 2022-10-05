@@ -31,7 +31,6 @@ pub use manual::phase_map;
 pub use manual::pos;
 pub use manual::pos_span_raw;
 pub use manual::pos_span_tiny;
-pub use manual::relative_path;
 pub use manual::s_map;
 pub use manual::s_set;
 pub use manual::scoured_comments_impl;

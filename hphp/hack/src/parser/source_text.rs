@@ -10,7 +10,7 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep::rc::RcOc;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 
 pub const INVALID: char = '\x00';
 

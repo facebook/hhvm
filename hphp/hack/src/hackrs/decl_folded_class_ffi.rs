@@ -78,7 +78,7 @@ ocaml_ffi! {
     fn fold_classes_in_files_ffi(
         root: PathBuf,
         opts: ParserOptions,
-        files: Vec<oxidized::relative_path::RelativePath>,
+        files: Vec<relative_path::RelativePath>,
     ) -> Result<BTreeMap<RelativePath, Vec<Arc<FoldedClass<BReason>>>>, String> {
         let files: Vec<RelativePath> = files.iter().map(Into::into).collect();
         let path_ctx = Arc::new(RelativePathCtx {

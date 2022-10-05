@@ -12,10 +12,10 @@ use aast_parser::rust_aast_parser_types::Env as AastParserEnv;
 use bumpalo::Bump;
 use criterion::Criterion;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
 use parser_core_types::indexed_source_text::IndexedSourceText;
 use parser_core_types::source_text::SourceText;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]

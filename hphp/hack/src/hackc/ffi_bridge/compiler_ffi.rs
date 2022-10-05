@@ -28,9 +28,9 @@ use hhbc::Unit;
 use options::HhbcFlags;
 use options::Hhvm;
 use options::ParserOptions;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use sha1::Digest;
 use sha1::Sha1;
 

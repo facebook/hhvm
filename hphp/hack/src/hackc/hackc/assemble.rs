@@ -32,10 +32,9 @@ use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
 use once_cell::sync::OnceCell;
 use options::Options;
-use oxidized::relative_path;
-use oxidized::relative_path::RelativePath;
 use rayon::prelude::*;
 use regex::bytes::Regex;
+use relative_path::RelativePath;
 
 use crate::regex;
 use crate::FileOpts;

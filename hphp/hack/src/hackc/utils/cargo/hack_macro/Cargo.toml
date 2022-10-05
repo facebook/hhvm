@@ -19,4 +19,5 @@ parser_core_types = { path = "../../../../parser/cargo/core_types" }
 proc-macro2 = "1.0"
 quote = "1.0"
 regex = "1.5.4"
+relative_path = { path = "../../../../utils/rust/relative_path" }
 syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

@@ -20,5 +20,6 @@ ocamlrep = { path = "../../../../ocamlrep" }
 ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 static_assertions = "1.1.0"

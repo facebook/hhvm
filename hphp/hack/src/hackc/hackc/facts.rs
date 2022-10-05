@@ -7,8 +7,8 @@ use anyhow::Result;
 use clap::Parser;
 use facts_rust::Facts;
 use facts_rust::{self as facts};
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use serde_json::json;
 use serde_json::Value;
 

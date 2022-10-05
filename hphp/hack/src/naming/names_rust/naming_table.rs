@@ -11,7 +11,7 @@ use hh24_types::RichChecksum;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntMap;
 use nohash_hasher::IntSet;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 
 pub struct NamingTable {
     path_cache: IntMap<ToplevelSymbolHash, Option<RelativePath>>,

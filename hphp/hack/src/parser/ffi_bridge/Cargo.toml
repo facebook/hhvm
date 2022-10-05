@@ -14,9 +14,9 @@ crate-type = ["lib", "staticlib"]
 bumpalo = { version = "3.8", features = ["collections"] }
 cxx = "1.0.76"
 ocamlrep = { path = "../../ocamlrep" }
-oxidized = { path = "../../oxidized" }
 parser_core_types = { path = "../cargo/core_types" }
 positioned_full_trivia_parser = { path = "../api/cargo/positioned_full_trivia_parser" }
+relative_path = { path = "../../utils/rust/relative_path" }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }
 
 [build-dependencies]

@@ -14,9 +14,9 @@ use clap::Parser;
 use compile::Profile;
 use decl_provider::SelfProvider;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 
 use crate::compile::SingleFileOpts;
 use crate::FileOpts;

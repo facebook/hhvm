@@ -10,9 +10,8 @@ use std::path::PathBuf;
 
 use ::anyhow::Context;
 use ::anyhow::Result;
-use oxidized::relative_path;
-use oxidized::relative_path::RelativePath;
 use oxidized_by_ref::direct_decl_parser::Decls;
+use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 use structopt::StructOpt;

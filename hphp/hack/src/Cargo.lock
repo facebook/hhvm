@@ -136,6 +136,7 @@ dependencies = [
  "bstr",
  "bumpalo",
  "oxidized_by_ref",
+ "relative_path",
  "serde",
  "serde_json",
 ]
@@ -291,8 +292,8 @@ dependencies = [
  "cst_and_decl_parser",
  "direct_decl_parser",
  "ocamlrep",
- "oxidized",
  "parser_core_types",
+ "relative_path",
  "structopt",
 ]
 
@@ -384,6 +385,7 @@ dependencies = [
  "itertools 0.10.3",
  "oxidized",
  "print_opcode",
+ "relative_path",
  "thiserror",
  "write_bytes",
 ]
@@ -588,6 +590,7 @@ dependencies = [
  "parser_core_types",
  "print_expr",
  "profile_rust",
+ "relative_path",
  "rewrite_program",
  "serde",
  "stack_limit",
@@ -615,8 +618,8 @@ dependencies = [
  "no_pos_hash",
  "ocamlrep",
  "options",
- "oxidized",
  "parser_core_types",
+ "relative_path",
  "sha-1",
 ]
 
@@ -1145,6 +1148,7 @@ dependencies = [
  "oxidized_by_ref",
  "parser",
  "parser_core_types",
+ "relative_path",
 ]
 
 [[package]]
@@ -1643,6 +1647,7 @@ dependencies = [
  "proc-macro2",
  "quote",
  "regex",
+ "relative_path",
  "syn",
 ]
 
@@ -1704,6 +1709,7 @@ dependencies = [
  "profile_rust",
  "rayon",
  "regex",
+ "relative_path",
  "sem_diff",
  "serde_json",
  "shallow_decl_provider",
@@ -2369,6 +2375,7 @@ dependencies = [
  "oxidized",
  "parser_core_types",
  "regex",
+ "relative_path",
  "rescan_trivia",
  "stack_limit",
  "thiserror",
@@ -2525,6 +2532,7 @@ dependencies = [
  "nohash-hasher",
  "oxidized",
  "oxidized_by_ref",
+ "relative_path",
  "rusqlite",
  "typing_deps_hash",
 ]
@@ -2806,6 +2814,7 @@ dependencies = [
  "bytecode_printer",
  "hhbc",
  "oxidized",
+ "relative_path",
  "serde",
 ]
 
@@ -2849,6 +2858,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "pretty_assertions",
+ "relative_path",
  "rusqlite",
  "rust_to_ocaml_attr",
  "serde",
@@ -2873,6 +2883,7 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "pretty_assertions",
+ "relative_path",
  "rust_to_ocaml_attr",
  "serde",
  "serde_json",
@@ -2970,6 +2981,7 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_derive",
  "oxidized",
+ "relative_path",
  "serde",
 ]
 
@@ -2981,9 +2993,9 @@ dependencies = [
  "cxx",
  "cxx-build",
  "ocamlrep",
- "oxidized",
  "parser_core_types",
  "positioned_full_trivia_parser",
+ "relative_path",
  "serde_json",
 ]
 
@@ -3062,6 +3074,7 @@ dependencies = [
  "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
+ "relative_path",
  "serde",
  "static_assertions",
 ]
@@ -3442,6 +3455,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a3f87b73ce11b1619a3c6332f45341e0047173771e8b8b73f87bfeefb7b56244"
 
 [[package]]
+name = "relative_path"
+version = "0.0.0"
+dependencies = [
+ "arena_trait",
+ "eq_modulo_pos",
+ "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "pretty_assertions",
+ "serde",
+]
+
+[[package]]
 name = "remove_dir_all"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3470,6 +3496,7 @@ dependencies = [
  "hhbc",
  "ocamlrep",
  "oxidized",
+ "relative_path",
  "rewrite_xml",
 ]
 
@@ -3553,6 +3580,7 @@ dependencies = [
  "oxidized",
  "oxidized_by_ref",
  "parser_core_types",
+ "relative_path",
 ]
 
 [[package]]
@@ -3565,7 +3593,7 @@ dependencies = [
  "hhbc_string_utils",
  "ocamlrep",
  "ocamlrep_ocamlpool",
- "oxidized",
+ "relative_path",
 ]
 
 [[package]]

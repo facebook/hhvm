@@ -26,8 +26,8 @@ use oxidized::ast::UserAttribute;
 use oxidized::file_info::Mode;
 use oxidized::local_id;
 use oxidized::namespace_env;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use rewrite_xml::rewrite_xml;
 
 fn debugger_eval_should_modify(tast: &[ast::Def]) -> Result<bool> {

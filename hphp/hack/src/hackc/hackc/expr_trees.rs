@@ -3,8 +3,8 @@
 // LICENSE file in the "hack" directory of this source tree.
 use anyhow::Result;
 use clap::Parser;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 
 use crate::FileOpts;
 

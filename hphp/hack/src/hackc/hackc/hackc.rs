@@ -29,8 +29,6 @@ use log::info;
 use options::Hhvm;
 use options::ParserOptions;
 use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::relative_path;
-use oxidized::relative_path::RelativePath;
 
 use crate::profile::DurationEx;
 
@@ -220,7 +218,7 @@ impl Opts {
         };
         let hhbc_flags = hhvm_config::hhbc_flags(&hhvm_config)?;
         Ok(NativeEnv {
-            filepath: RelativePath::make(relative_path::Prefix::Dummy, path),
+            filepath: relative_path::RelativePath::make(relative_path::Prefix::Dummy, path),
             hhvm: Hhvm {
                 include_roots: Default::default(),
                 parser_options,

@@ -19,6 +19,7 @@ itertools = "0.10.3"
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
+relative_path = { path = "../utils/rust/relative_path" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 rust_to_ocaml_attr = { path = "../rust_to_ocaml/rust_to_ocaml_attr" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

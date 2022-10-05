@@ -13,6 +13,8 @@ use ocamlrep::rc::RcOc;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -21,8 +23,6 @@ use crate::file_pos_large::FilePosLarge;
 use crate::file_pos_small::FilePosSmall;
 use crate::pos_span_raw::PosSpanRaw;
 use crate::pos_span_tiny::PosSpanTiny;
-use crate::relative_path::Prefix;
-use crate::relative_path::RelativePath;
 
 #[derive(
     Clone,

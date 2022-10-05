@@ -13,7 +13,7 @@ use bstr::BString;
 use bstr::ByteSlice;
 use hhbc::IncludePath;
 pub use oxidized::parser_options::ParserOptions;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 use serde::Deserialize;
 use serde::Serialize;
 

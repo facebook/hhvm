@@ -14,5 +14,6 @@ hh_hash = { path = "../../utils/hh_hash" }
 nohash-hasher = "0.2"
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
+relative_path = { path = "../../utils/rust/relative_path" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

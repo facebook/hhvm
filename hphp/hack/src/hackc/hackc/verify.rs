@@ -16,11 +16,11 @@ use decl_provider::SelfProvider;
 use itertools::Itertools;
 use multifile_rust as multifile;
 use ocamlrep::rc::RcOc;
-use oxidized::relative_path::Prefix;
-use oxidized::relative_path::RelativePath;
 use parser_core_types::source_text::SourceText;
 use rayon::prelude::*;
 use regex::Regex;
+use relative_path::Prefix;
+use relative_path::RelativePath;
 use thiserror::Error;
 
 use crate::compile::SingleFileOpts;

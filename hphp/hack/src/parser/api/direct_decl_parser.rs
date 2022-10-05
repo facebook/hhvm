@@ -12,7 +12,6 @@ use direct_decl_smart_constructors::SourceTextAllocator;
 use mode_parser::parse_mode;
 use ocamlrep::rc::RcOc;
 pub use oxidized::decl_parser_options::DeclParserOptions;
-use oxidized::relative_path::RelativePath;
 pub use oxidized_by_ref::direct_decl_parser::Decls;
 pub use oxidized_by_ref::direct_decl_parser::ParsedFile;
 use oxidized_by_ref::file_info;
@@ -21,6 +20,7 @@ use parser::parser::Parser;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_error::SyntaxError;
+use relative_path::RelativePath;
 
 /// Parse decls for typechecking.
 /// - References the source text to avoid spending time or space copying

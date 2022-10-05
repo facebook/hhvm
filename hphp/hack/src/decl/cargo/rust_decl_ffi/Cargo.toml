@@ -21,3 +21,4 @@ ocamlrep_ocamlpool = { path = "../../../ocamlrep_ocamlpool" }
 oxidized = { path = "../../../oxidized" }
 oxidized_by_ref = { path = "../../../oxidized_by_ref" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
+relative_path = { path = "../../../utils/rust/relative_path" }

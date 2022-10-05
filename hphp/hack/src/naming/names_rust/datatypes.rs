@@ -6,7 +6,7 @@
 use std::path::PathBuf;
 
 use oxidized::file_info::Mode;
-use oxidized::relative_path::Prefix;
+use relative_path::Prefix;
 use rusqlite::types::FromSql;
 use rusqlite::types::FromSqlError;
 use rusqlite::types::FromSqlResult;

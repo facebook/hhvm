@@ -8,9 +8,9 @@ use anyhow::Result;
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
 use oxidized::file_pos_large::FilePosLarge;
-use oxidized::relative_path::Prefix;
 use pos::BPos;
 use pos::RelativePath;
+use relative_path::Prefix;
 
 #[test]
 fn bpos_from_ocamlrep() -> Result<()> {

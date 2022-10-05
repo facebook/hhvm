@@ -16,4 +16,5 @@ hack_macro = { path = "../../../utils/cargo/hack_macro" }
 hhbc = { path = "../../../hhbc/cargo/hhbc" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 rewrite_xml = { path = "../rewrite_xml" }

@@ -11,7 +11,7 @@ use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
 use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
-use oxidized::relative_path::RelativePath;
+use relative_path::RelativePath;
 use rusqlite::params;
 use rusqlite::Connection;
 use rusqlite::OptionalExtension;

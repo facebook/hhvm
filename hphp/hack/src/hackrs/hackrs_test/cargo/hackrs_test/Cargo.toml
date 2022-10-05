@@ -23,6 +23,7 @@ naming_provider = { path = "../../../naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../../../ocamlrep" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
+relative_path = { path = "../../../../utils/rust/relative_path" }
 shallow_decl_provider = { path = "../../../shallow_decl_provider/cargo/shallow_decl_provider" }
 tempdir = "0.3"
 ty = { path = "../../../ty/cargo/ty" }

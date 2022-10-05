@@ -33,6 +33,8 @@ module Decl = struct
 
     val get : t -> key -> value option
 
+    val remove_batch : t -> key list -> unit
+
     val clear_cache : unit -> unit
   end
 
@@ -66,8 +68,6 @@ module Decl = struct
     let remove_batch backend (keys : Key.t list) =
       List.iter ~f:Cache.remove keys;
       Ffi.remove_batch backend keys
-      [@@ocaml.warning "-32"]
-    (* Currently an unused value. *)
 
     let clear_cache = Cache.clear
   end
@@ -355,6 +355,52 @@ module Decl = struct
   let get_folded_class t =
     set_decl_store t;
     FoldedClasses.get t
+
+  (* Deletion support *)
+
+  let remove_funs_batch t keys =
+    set_decl_store t;
+    Funs.remove_batch t keys
+
+  let remove_shallow_classes_batch t keys =
+    set_decl_store t;
+    ShallowClasses.remove_batch t keys
+
+  let remove_folded_classes_batch t keys =
+    set_decl_store t;
+    FoldedClasses.remove_batch t keys
+
+  let remove_typedefs_batch t keys =
+    set_decl_store t;
+    Typedefs.remove_batch t keys
+
+  let remove_gconsts_batch t keys =
+    set_decl_store t;
+    GConsts.remove_batch t keys
+
+  let remove_modules_batch t keys =
+    set_decl_store t;
+    Modules.remove_batch t keys
+
+  let remove_props_batch t keys =
+    set_decl_store t;
+    Props.remove_batch t keys
+
+  let remove_static_props_batch t keys =
+    set_decl_store t;
+    StaticProps.remove_batch t keys
+
+  let remove_methods_batch t keys =
+    set_decl_store t;
+    Methods.remove_batch t keys
+
+  let remove_static_methods_batch t keys =
+    set_decl_store t;
+    StaticMethods.remove_batch t keys
+
+  let remove_constructors_batch t keys =
+    set_decl_store t;
+    Constructors.remove_batch t keys
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

@@ -5364,7 +5364,7 @@ pub fn is_reified_tparam<'a, 'arena>(
 ///   # Section 1, pushing the value of $ix+2 on the stack
 ///   Int 2
 ///   CGetL2 $ix
-///   AddO
+///   Add
 ///   # Section 2, constructing the base address of $arr[3]
 ///   BaseL $arr Warn
 ///   Dim Warn EI:3

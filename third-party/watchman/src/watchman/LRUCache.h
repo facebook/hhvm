@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <fmt/core.h>
 #include <folly/Synchronized.h>
 #include <folly/futures/Future.h>
 #include <chrono>
@@ -285,15 +286,13 @@ class LRUCache {
       size_t errorTTLSeconds,
       size_t fetchTimeoutSeconds = 60)
       : maxItems_(cfg.getInt(
-            folly::to<std::string>(configPrefix, "_cache_size").c_str(),
+            fmt::format("{}_cache_size", configPrefix).c_str(),
             defaultMaxItems)),
         errorTTL_(std::chrono::seconds(cfg.getInt(
-            folly::to<std::string>(configPrefix, "_cache_error_ttl_seconds")
-                .c_str(),
+            fmt::format("{}_cache_error_ttl_seconds", configPrefix).c_str(),
             errorTTLSeconds))),
         fetchTimeout_(std::chrono::seconds(cfg.getInt(
-            folly::to<std::string>(configPrefix, "_fetch_timeout_seconds")
-                .c_str(),
+            fmt::format("{}_fetch_timeout_seconds", configPrefix).c_str(),
             fetchTimeoutSeconds))) {}
 
   // No moving or copying

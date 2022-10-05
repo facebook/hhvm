@@ -6,6 +6,7 @@
  */
 
 #include "watchman/scm/Git.h"
+#include <fmt/core.h>
 #include <folly/String.h>
 #include "watchman/ChildProcess.h"
 #include "watchman/CommandRegistry.h"
@@ -16,7 +17,6 @@
 W_CAP_REG("scm-git")
 
 using namespace std::chrono;
-using folly::to;
 
 namespace {
 using namespace watchman;
@@ -70,7 +70,7 @@ namespace watchman {
 
 Git::Git(w_string_piece rootPath, w_string_piece scmRoot)
     : SCM(rootPath, scmRoot),
-      indexPath_(to<std::string>(getSCMRoot().view(), "/.git/index")),
+      indexPath_(fmt::format("{}/.git/index", getSCMRoot())),
       commitsPrior_(Configuration(), "scm_git_commits_prior", 32, 10),
       mergeBases_(Configuration(), "scm_git_mergebase", 32, 10),
       filesChangedSinceMergeBaseWith_(
@@ -110,8 +110,7 @@ w_string Git::mergeBaseWith(
     w_string_piece commitId,
     const std::optional<w_string>& requestId) const {
   auto mtime = getIndexMtime();
-  auto key = folly::to<std::string>(
-      commitId.view(), ":", mtime.tv_sec, ":", mtime.tv_nsec);
+  auto key = fmt::format("{}:{}:{}", commitId, mtime.tv_sec, mtime.tv_nsec);
   auto commit = std::string{commitId.view()};
 
   return mergeBases_
@@ -145,7 +144,7 @@ std::vector<w_string> Git::getFilesChangedSinceMergeBaseWith(
     w_string_piece commitId,
     w_string_piece clock,
     const std::optional<w_string>& requestId) const {
-  auto key = folly::to<std::string>(commitId.view(), ":", clock.view());
+  auto key = fmt::format("{}:{}", commitId, clock);
   auto commitCopy = std::string{commitId.view()};
   return filesChangedSinceMergeBaseWith_
       .get(
@@ -174,10 +173,8 @@ std::chrono::time_point<std::chrono::system_clock> Git::getCommitDate(
       "get commit date");
   double timestamp;
   if (std::sscanf(result.output.c_str(), "%lf", &timestamp) != 1) {
-    throw std::runtime_error(to<std::string>(
-        "failed to parse date value `",
-        result.output.view(),
-        "` into a double"));
+    throw std::runtime_error(fmt::format(
+        "failed to parse date value `{}` into a double", result.output));
   }
   return system_clock::from_time_t(timestamp);
 }
@@ -187,8 +184,8 @@ std::vector<w_string> Git::getCommitsPriorToAndIncluding(
     int numCommits,
     const std::optional<w_string>& requestId) const {
   auto mtime = getIndexMtime();
-  auto key = folly::to<std::string>(
-      commitId.view(), ":", numCommits, ":", mtime.tv_sec, ":", mtime.tv_nsec);
+  auto key = fmt::format(
+      "{}:{}:{}:{}", commitId, numCommits, mtime.tv_sec, mtime.tv_nsec);
   auto commitCopy = std::string{commitId.view()};
 
   return commitsPrior_
@@ -200,7 +197,7 @@ std::vector<w_string> Git::getCommitsPriorToAndIncluding(
                 {gitExecutablePath(),
                  "log",
                  "-n",
-                 to<std::string>(numCommits),
+                 fmt::to_string(numCommits),
                  "--format=%H",
                  commit},
                 makeGitOptions(requestId),

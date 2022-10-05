@@ -6,6 +6,7 @@
  */
 
 #include "watchman/InMemoryView.h"
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <algorithm>
 #include <chrono>
@@ -1025,10 +1026,9 @@ CookieSync::SyncResult InMemoryView::syncToNow(
     try {
       std::move(result).get(timeout);
     } catch (folly::FutureTimeout&) {
-      auto why = folly::to<std::string>(
-          "syncToNow: timed out waiting for pending watcher events to be flushed within ",
-          timeout.count(),
-          " milliseconds");
+      auto why = fmt::format(
+          "syncToNow: timed out waiting for pending watcher events to be flushed within {} milliseconds",
+          timeout.count());
       log(ERR, why, "\n");
       throw std::system_error(ETIMEDOUT, std::generic_category(), why);
     }
@@ -1089,12 +1089,11 @@ CookieSync::SyncResult InMemoryView::syncToNowCookies(
 
       if (!root->inner.done_initial || info->shouldRecrawl) {
         std::string extra = (info->recrawlCount > 0)
-            ? folly::to<std::string>(
-                  "(re-crawling, count=", info->recrawlCount, ")")
+            ? fmt::format("(re-crawling, count={})", info->recrawlCount)
             : "(performing initial crawl)";
 
         throw std::system_error(
-            exc.code(), folly::to<std::string>(exc.what(), ". ", extra));
+            exc.code(), fmt::format("{}. {}", exc.what(), extra));
       }
     }
 

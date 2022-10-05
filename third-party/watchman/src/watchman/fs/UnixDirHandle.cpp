@@ -7,6 +7,7 @@
 
 #include "watchman/fs/DirHandle.h"
 
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <system_error>
 #include "watchman/Logging.h"
@@ -153,7 +154,7 @@ static std::string flagsToLabel(
   if (flags == 0) {
     return str;
   }
-  return folly::to<std::string>(str, " unknown:", flags);
+  return fmt::format("{} unknown:{}", str, flags);
 }
 
 static const std::unordered_map<uint32_t, const char*> commonLabels = {
@@ -315,10 +316,9 @@ const DirEntry* UnixDirHandle::readDir() {
       throw std::system_error(
           EIO,
           std::generic_category(),
-          folly::to<std::string>(
-              "getattrlistbulk didn't return a name for a directory entry under ",
-              dirName_,
-              "!?"));
+          fmt::format(
+              "getattrlistbulk didn't return a name for a directory entry under {}!?",
+              dirName_));
     }
 
     if ((item->returned.commonattr & attrlist_.commonattr) !=

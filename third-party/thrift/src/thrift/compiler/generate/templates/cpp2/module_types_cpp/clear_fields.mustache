@@ -32,7 +32,12 @@
         %>  <% > field/member%> = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);<%!
       %><%/field:boxed_ref?%><%!
       %><%#field:boxed_ref?%><%!
-        %>  <% > field/member%> = <% > field/default%>;<%!
+        %><%#field:cpp_first_adapter%><%!
+          %>  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(*<%field:cpp_storage_name%>, *this);<%!
+        %><%/field:cpp_first_adapter%><%!
+        %><%^field:cpp_first_adapter%><%!
+          %>  <% > field/member%> = <% > field/default%>;<%!
+        %><%/field:cpp_first_adapter%><%!
       %><%/field:boxed_ref?%><%!
     %><%/field:optional?%><%!
     %><%#field:optional?%><%!
@@ -51,7 +56,12 @@
   <% > field/member%> = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
 <%/field:boxed_ref?%>
 <%#field:boxed_ref?%>
+<%#field:cpp_first_adapter%>
+  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(*<%field:cpp_storage_name%>, *this);
+<%/field:cpp_first_adapter%>
+<%^field:cpp_first_adapter%>
   <% > field/member%> = <% > field/default%>;
+<%/field:cpp_first_adapter%>
 <%/field:boxed_ref?%>
 <%/field:optional?%>
 <%#field:optional?%>
@@ -82,7 +92,12 @@
   if (<% > field/member%>) <% > field/member%> = ::apache::thrift::detail::make_mutable_smart_ptr<<%field:cpp_storage_type%>>(<%#type:cpp_use_allocator?%>this->get_allocator()<%/type:cpp_use_allocator?%>);
 <%/field:boxed_ref?%>
 <%#field:boxed_ref?%>
+<%#field:cpp_first_adapter%>
+  ::apache::thrift::adapt_detail::clear<<%field:cpp_first_adapter%>, <%field:key%>>(*<%field:cpp_storage_name%>, *this);
+<%/field:cpp_first_adapter%>
+<%^field:cpp_first_adapter%>
   <% > field/member%> = <% > field/default%>;
+<%/field:cpp_first_adapter%>
 <%/field:boxed_ref?%>
 <%/field:cpp_ref_unique?%>
 <%/field:optional?%>

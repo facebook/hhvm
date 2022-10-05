@@ -913,7 +913,7 @@ void StructWithFieldAdapter::__fbthrift_clear() {
   this->__fbthrift_field_shared_field = ::apache::thrift::detail::make_mutable_smart_ptr<::std::shared_ptr<const ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter1, 2, ::std::int32_t, StructWithFieldAdapter>>>();
   this->__fbthrift_field_opt_shared_field.reset();
   this->__fbthrift_field_opt_boxed_field.reset();
-  this->__fbthrift_field_boxed_field = ::apache::thrift::adapt_detail::fromThriftField<::my::Adapter1, 5>(::std::int32_t(), *this);
+  ::apache::thrift::adapt_detail::clear<::my::Adapter1, 5>(*__fbthrift_field_boxed_field, *this);
   __isset = {};
 }
 

@@ -52,7 +52,11 @@ impl<'shm, K, V, S> Map<'shm, K, V, S> {
     ///
     /// Uses the given file allocator to allocate the hashmap's table.
     pub fn reset_with_hasher(&mut self, alloc: &'shm FileAlloc, hash_builder: S) {
-        let map = HashMap::with_hasher_in(hash_builder, alloc);
+        // ??? apparently if we construct HashMap without capacity, then it won't
+        // allocate any space for its table via alloc, but subsequent access
+        // will assume that something was allocated. By giving it a capacity, we
+        // avoid this.
+        let map = HashMap::with_capacity_and_hasher_in(1, hash_builder, alloc);
         self.0 = Some(map);
     }
 }

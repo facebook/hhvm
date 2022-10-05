@@ -44,6 +44,17 @@ impl<'shm, T> ShmemTableSegment<'shm, T> {
     /// Initialize a shared memory segment, by setting up the file allocator
     /// and the hash tables.
     ///
+    /// Space requirements:
+    ///  - There will be NUM_SHARDS "evictable" shards; each will, upon first write, allocate max_evictable_bytes_per_shard
+    ///    which never subsequently grows: items will be allocated within it.
+    ///    Also each shard will have a hashmap, about the size of (K,V) per entry with some overhead,
+    ///    which gets allocated with small capacity at the start and grows with count of items.
+    ///  - There will be NUM_SHARDS "non-evitable" shards; each will, upon first write,
+    ///    allocate NON_EVICTABLE_CHUNK_SIZE bytes (currently 1024k) and each time this chunk is filled then it will allocate more.
+    ///    Additionally there's another hashmap, as above.
+    ///  - And there's a fixed overhead of sizeof(ShmemTableSegment) at the start
+    ///  - file_size must be large enough to fit all of these, else you'll get panics!
+    ///
     /// Safety:
     ///  - You must only intialize once and exactly once.
     ///  - Use `attach` to attach other processes to this memory location.

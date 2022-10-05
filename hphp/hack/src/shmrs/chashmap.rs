@@ -284,6 +284,9 @@ impl<'shm, K, V, S: Clone> CMap<'shm, K, V, S> {
 
 impl<'shm, K: Hash + Eq, V: CMapValue, S: BuildHasher> CMapRef<'shm, K, V, S> {
     fn shard_index_for(&self, key: &K) -> usize {
+        if NUM_SHARDS == 1 {
+            return 0;
+        }
         let mut hasher = self.hash_builder.build_hasher();
         key.hash(&mut hasher);
         let hash = hasher.finish();

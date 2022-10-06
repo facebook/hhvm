@@ -28,7 +28,6 @@ constexpr int64_t k_PHP_INT_MAX = std::numeric_limits<int64_t>::max();
 
 StaticString get_PHP_VERSION();
 
-int64_t HHVM_FUNCTION(connection_status);
 Variant HHVM_FUNCTION(constant, const String& name);
 bool HHVM_FUNCTION(defined, const String& name, bool autoload = true);
 

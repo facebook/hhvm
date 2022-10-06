@@ -37,13 +37,5 @@ Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level = -1,
                                 int64_t encoding_mode = k_FORCE_GZIP);
 
 ///////////////////////////////////////////////////////////////////////////////
-// stream functions
-
-Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
-                              int64_t use_include_path = 0);
-Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length = 0);
-Variant HHVM_FUNCTION(gzpassthru, const Resource& zp);
-
-///////////////////////////////////////////////////////////////////////////////
 
 }

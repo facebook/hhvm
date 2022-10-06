@@ -67,8 +67,6 @@ Variant HHVM_FUNCTION(socket_recvfrom,
 bool HHVM_FUNCTION(socket_shutdown,
                    const Resource& socket,
                    int64_t how = 0);
-String HHVM_FUNCTION(socket_strerror,
-                     int64_t errnum);
 Variant HHVM_FUNCTION(getaddrinfo,
                       const String& host,
                       const String& port,

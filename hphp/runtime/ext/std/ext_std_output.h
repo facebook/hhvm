@@ -39,7 +39,6 @@ bool HHVM_FUNCTION(ob_start, const Variant& output_callback = uninit_null(),
                              int64_t flags = k_PHP_OUTPUT_HANDLER_STDFLAGS);
 bool HHVM_FUNCTION(ob_end_clean);
 Variant HHVM_FUNCTION(ob_get_contents);
-int64_t HHVM_FUNCTION(ob_get_level);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

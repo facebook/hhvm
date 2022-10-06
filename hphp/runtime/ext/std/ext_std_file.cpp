@@ -804,29 +804,6 @@ Variant HHVM_FUNCTION(readfile,
   return ret;
 }
 
-bool HHVM_FUNCTION(move_uploaded_file,
-                   const String& filename,
-                   const String& destination) {
-  Transport *transport = g_context->getTransport();
-  if (!transport || !transport->isUploadedFile(filename)) {
-    return false;
-  }
-
-  CHECK_PATH_FALSE(destination, 2);
-
-  if (HHVM_FN(rename)(filename, destination)) {
-    return true;
-  }
-
-  // If rename didn't work, fall back to copy followed by unlink
-  if (!HHVM_FN(copy)(filename, destination)) {
-    return false;
-  }
-  HHVM_FN(unlink)(filename);
-
-  return true;
-}
-
 namespace {
 
 String resolve_parse_ini_filename(const String& filename) {
@@ -1693,6 +1670,29 @@ bool HHVM_FUNCTION(unlink, const String& filename,
   return true;
 }
 
+bool HHVM_FUNCTION(move_uploaded_file,
+                   const String& filename,
+                   const String& destination) {
+  Transport *transport = g_context->getTransport();
+  if (!transport || !transport->isUploadedFile(filename)) {
+    return false;
+  }
+
+  CHECK_PATH_FALSE(destination, 2);
+
+  if (HHVM_FN(rename)(filename, destination, uninit_null())) {
+    return true;
+  }
+
+  // If rename didn't work, fall back to copy followed by unlink
+  if (!HHVM_FN(copy)(filename, destination, uninit_null())) {
+    return false;
+  }
+  HHVM_FN(unlink)(filename, uninit_null());
+
+  return true;
+}
+
 bool HHVM_FUNCTION(link,
                    const String& target,
                    const String& link) {
@@ -2013,20 +2013,6 @@ bool StringAscending(const String& s1, const String& s2) {
 
 }
 
-Variant HHVM_FUNCTION(dir,
-                      const String& directory) {
-  CHECK_PATH(directory, 1);
-  Variant dir = HHVM_FN(opendir)(directory);
-  if (same(dir, false)) {
-    return false;
-  }
-  auto d = SystemLib::AllocDirectoryObject();
-  // public properties
-  d->setProp(nullctx, s_path.get(), directory.asTypedValue());
-  d->setProp(nullctx, s_handle.get(), *dir.asTypedValue());
-  return d;
-}
-
 Variant HHVM_FUNCTION(opendir, const String& path,
                       const Variant& /*context*/ /* = null */) {
   CHECK_PATH(path, 1);
@@ -2038,6 +2024,20 @@ Variant HHVM_FUNCTION(opendir, const String& path,
   }
   s_directory_data->defaultDirectory = p;
   return Variant(p);
+}
+
+Variant HHVM_FUNCTION(dir,
+                      const String& directory) {
+  CHECK_PATH(directory, 1);
+  Variant dir = HHVM_FN(opendir)(directory, uninit_null());
+  if (same(dir, false)) {
+    return false;
+  }
+  auto d = SystemLib::AllocDirectoryObject();
+  // public properties
+  d->setProp(nullctx, s_path.get(), directory.asTypedValue());
+  d->setProp(nullctx, s_handle.get(), *dir.asTypedValue());
+  return d;
 }
 
 Variant HHVM_FUNCTION(readdir,

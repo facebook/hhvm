@@ -129,10 +129,6 @@ Variant HHVM_FUNCTION(sscanf,
 
 bool str_contains_any_of(const String& haystack, const String& char_list);
 
-TypedValue HHVM_FUNCTION(strstr,
-                         const String& haystack,
-                         const Variant& needle,
-                         bool before_needle = false);
 TypedValue HHVM_FUNCTION(strpos,
                          const String& haystack,
                          const Variant& needle,

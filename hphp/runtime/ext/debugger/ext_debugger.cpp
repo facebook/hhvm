@@ -53,12 +53,6 @@ String HHVM_FUNCTION(hphp_debug_session_auth) {
   return String();
 }
 
-void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
-  TRACE(5, "in f_hphpd_break()\n");
-  f_hphp_debug_break(condition);
-  TRACE(5, "out f_hphpd_break()\n");
-}
-
 // Hard breakpoint for the VSDebug extension debugger.
 bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
   TRACE(5, "in f_hphp_debug_break()\n");
@@ -85,6 +79,12 @@ bool HHVM_FUNCTION(hphp_debug_break, bool condition /* = true */) {
 
   TRACE(5, "out f_hphp_debug_break()\n");
   return false;
+}
+
+void HHVM_FUNCTION(hphpd_break, bool condition /* = true */) {
+  TRACE(5, "in f_hphpd_break()\n");
+  f_hphp_debug_break(condition);
+  TRACE(5, "out f_hphpd_break()\n");
 }
 
 // Quickly determine if a debugger is attached to the current thread.

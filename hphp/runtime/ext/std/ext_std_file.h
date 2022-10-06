@@ -125,17 +125,6 @@ Variant HHVM_FUNCTION(readfile,
 ///////////////////////////////////////////////////////////////////////////////
 // shell commands
 
-bool HHVM_FUNCTION(copy,
-                   const String& source,
-                   const String& dest,
-                   const Variant& context = uninit_null());
-bool HHVM_FUNCTION(rename,
-                   const String& oldname,
-                   const String& newname,
-                   const Variant& context = uninit_null());
-bool HHVM_FUNCTION(unlink,
-                   const String& filename,
-                   const Variant& context = uninit_null());
 String HHVM_FUNCTION(basename,
                      const String& path,
                      const String& suffix = null_string);
@@ -173,9 +162,6 @@ bool HHVM_FUNCTION(mkdir,
 String HHVM_FUNCTION(dirname,
                      const String& path);
 Variant HHVM_FUNCTION(getcwd);
-Variant HHVM_FUNCTION(opendir,
-                      const String& path,
-                      const Variant& context = uninit_null());
 Variant HHVM_FUNCTION(readdir,
                       const Variant& dir_handle = uninit_variant);
 Variant HHVM_FUNCTION(scandir,

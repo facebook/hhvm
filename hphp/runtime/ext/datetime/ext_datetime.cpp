@@ -171,7 +171,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
   }
   Object obj{DateTimeData::getClass()};
   DateTimeData* data = Native::data<DateTimeData>(obj);
-  const auto curr = (format.find("!") != String::npos) ? 0 : f_time() ;
+  const auto curr = (format.find("!") != String::npos) ? 0 : ::time(0);
   data->m_dt = req::make<DateTime>(curr, false);
   if (!data->m_dt->fromString(time, tz, format.data(), false)) {
     return false;

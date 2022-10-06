@@ -201,13 +201,13 @@ StaticString get_PHP_VERSION() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t HHVM_FUNCTION(connection_aborted) {
-  return HHVM_FN(connection_status)() == k_CONNECTION_ABORTED;
-}
-
 int64_t HHVM_FUNCTION(connection_status) {
   // FIXME: WAT?
   return k_CONNECTION_NORMAL;
+}
+
+int64_t HHVM_FUNCTION(connection_aborted) {
+  return HHVM_FN(connection_status)() == k_CONNECTION_ABORTED;
 }
 
 int64_t HHVM_FUNCTION(connection_timeout) {

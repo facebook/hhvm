@@ -53,6 +53,7 @@ const std::string& get_name(const Node* node) {
   return gen::cpp::namespace_resolver::get_cpp_name(*node);
 }
 
+bool is_custom_type(const t_field& field);
 bool is_custom_type(const t_type& type);
 
 std::unordered_map<t_struct*, std::vector<t_struct*>>

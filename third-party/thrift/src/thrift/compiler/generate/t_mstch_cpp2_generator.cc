@@ -1448,11 +1448,11 @@ class cpp_mstch_struct : public mstch_struct {
     if (cpp2::is_ref(field)) {
       return ret = 8;
     }
-    const t_type* type = field->get_type();
-    if (cpp2::is_custom_type(*type)) {
+    if (cpp2::is_custom_type(*field)) {
       return ret = 0;
     }
 
+    const t_type* type = field->get_type();
     switch (type->get_type_value()) {
       case t_type::type::t_bool:
       case t_type::type::t_byte:

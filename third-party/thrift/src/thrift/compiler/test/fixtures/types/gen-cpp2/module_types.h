@@ -2699,10 +2699,10 @@ class MinPaddingWithCustomType final  {
  public:
 
   MinPaddingWithCustomType() :
-      __fbthrift_field_big(),
-      __fbthrift_field_biggish(),
-      __fbthrift_field_medium(),
       __fbthrift_field_small(),
+      __fbthrift_field_big(),
+      __fbthrift_field_medium(),
+      __fbthrift_field_biggish(),
       __fbthrift_field_tiny() {
     ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
   }
@@ -2717,13 +2717,13 @@ class MinPaddingWithCustomType final  {
   MinPaddingWithCustomType& operator=(MinPaddingWithCustomType&&) noexcept;
   MinPaddingWithCustomType& operator=(const MinPaddingWithCustomType& src);
  private:
-  ::std::int64_t __fbthrift_field_big;
+  ::std::int8_t __fbthrift_field_small;
  private:
-  ::std::int32_t __fbthrift_field_biggish;
+  ::std::int64_t __fbthrift_field_big;
  private:
   ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> __fbthrift_field_medium;
  private:
-  ::std::int8_t __fbthrift_field_small;
+  ::std::int32_t __fbthrift_field_biggish;
  private:
   ::std::int8_t __fbthrift_field_tiny;
 

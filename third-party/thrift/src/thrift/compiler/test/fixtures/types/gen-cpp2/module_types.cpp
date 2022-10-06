@@ -1343,10 +1343,10 @@ const folly::StringPiece MinPaddingWithCustomType::__fbthrift_get_field_name(::a
 }
 
 MinPaddingWithCustomType::MinPaddingWithCustomType(const MinPaddingWithCustomType& srcObj) :
-    __fbthrift_field_big(srcObj.__fbthrift_field_big),
-    __fbthrift_field_biggish(srcObj.__fbthrift_field_biggish),
-    __fbthrift_field_medium(srcObj.__fbthrift_field_medium),
     __fbthrift_field_small(srcObj.__fbthrift_field_small),
+    __fbthrift_field_big(srcObj.__fbthrift_field_big),
+    __fbthrift_field_medium(srcObj.__fbthrift_field_medium),
+    __fbthrift_field_biggish(srcObj.__fbthrift_field_biggish),
     __fbthrift_field_tiny(srcObj.__fbthrift_field_tiny) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
 }
@@ -1358,29 +1358,29 @@ MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(const MinPaddingWi
 }
 
 MinPaddingWithCustomType::MinPaddingWithCustomType(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept :
-    __fbthrift_field_big(std::move(other.__fbthrift_field_big)),
-    __fbthrift_field_biggish(std::move(other.__fbthrift_field_biggish)),
-    __fbthrift_field_medium(std::move(other.__fbthrift_field_medium)),
     __fbthrift_field_small(std::move(other.__fbthrift_field_small)),
+    __fbthrift_field_big(std::move(other.__fbthrift_field_big)),
+    __fbthrift_field_medium(std::move(other.__fbthrift_field_medium)),
+    __fbthrift_field_biggish(std::move(other.__fbthrift_field_biggish)),
     __fbthrift_field_tiny(std::move(other.__fbthrift_field_tiny)) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
 }
 
 MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept {
-    this->__fbthrift_field_big = std::move(other.__fbthrift_field_big);
-    this->__fbthrift_field_biggish = std::move(other.__fbthrift_field_biggish);
-    this->__fbthrift_field_medium = std::move(other.__fbthrift_field_medium);
     this->__fbthrift_field_small = std::move(other.__fbthrift_field_small);
+    this->__fbthrift_field_big = std::move(other.__fbthrift_field_big);
+    this->__fbthrift_field_medium = std::move(other.__fbthrift_field_medium);
+    this->__fbthrift_field_biggish = std::move(other.__fbthrift_field_biggish);
     this->__fbthrift_field_tiny = std::move(other.__fbthrift_field_tiny);
     return *this;
 }
 
 
 MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstructor, ::std::int8_t small__arg, ::std::int64_t big__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> medium__arg, ::std::int32_t biggish__arg, ::std::int8_t tiny__arg) :
-    __fbthrift_field_big(std::move(big__arg)),
-    __fbthrift_field_biggish(std::move(biggish__arg)),
-    __fbthrift_field_medium(std::move(medium__arg)),
     __fbthrift_field_small(std::move(small__arg)),
+    __fbthrift_field_big(std::move(big__arg)),
+    __fbthrift_field_medium(std::move(medium__arg)),
+    __fbthrift_field_biggish(std::move(biggish__arg)),
     __fbthrift_field_tiny(std::move(tiny__arg)) {
   ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
 }
@@ -1454,10 +1454,10 @@ bool MinPaddingWithCustomType::operator<(FOLLY_MAYBE_UNUSED const MinPaddingWith
 
 void swap(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& a, FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& b) {
   using ::std::swap;
-  swap(a.__fbthrift_field_big, b.__fbthrift_field_big);
-  swap(a.__fbthrift_field_biggish, b.__fbthrift_field_biggish);
-  swap(a.__fbthrift_field_medium, b.__fbthrift_field_medium);
   swap(a.__fbthrift_field_small, b.__fbthrift_field_small);
+  swap(a.__fbthrift_field_big, b.__fbthrift_field_big);
+  swap(a.__fbthrift_field_medium, b.__fbthrift_field_medium);
+  swap(a.__fbthrift_field_biggish, b.__fbthrift_field_biggish);
   swap(a.__fbthrift_field_tiny, b.__fbthrift_field_tiny);
 }
 

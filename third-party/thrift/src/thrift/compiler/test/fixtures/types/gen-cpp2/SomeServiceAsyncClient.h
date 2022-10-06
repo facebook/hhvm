@@ -127,7 +127,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
  private:
   template <typename Protocol_, typename RpcOptions>
   void bounce_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::apache::thrift::fixtures::types::SomeMap& p_m);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> bounce_mapCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bounce_mapCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void binary_keyed_map(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r);
   virtual void binary_keyed_map(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::int64_t>& p_r);
@@ -222,7 +222,7 @@ class Client<::apache::thrift::fixtures::types::SomeService> : public apache::th
  private:
   template <typename Protocol_, typename RpcOptions>
   void binary_keyed_mapT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::int64_t>& p_r);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> binary_keyed_mapCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_keyed_mapCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

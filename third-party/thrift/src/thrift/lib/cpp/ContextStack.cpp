@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ ContextStack::~ContextStack() {
   }
 }
 
-std::unique_ptr<ContextStack> ContextStack::create(
+ContextStack::UniquePtr ContextStack::create(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
@@ -77,10 +77,10 @@ std::unique_ptr<ContextStack> ContextStack::create(
   auto* object = new (storage)
       ContextStack(handlers, serviceName, method, connectionContext);
 
-  return std::unique_ptr<ContextStack>(object);
+  return ContextStack::UniquePtr(object);
 }
 
-std::unique_ptr<ContextStack> ContextStack::createWithClientContext(
+ContextStack::UniquePtr ContextStack::createWithClientContext(
     const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
         handlers,
     const char* serviceName,
@@ -104,7 +104,7 @@ std::unique_ptr<ContextStack> ContextStack::createWithClientContext(
       method,
       connectionContext);
 
-  return std::unique_ptr<ContextStack>(object);
+  return ContextStack::UniquePtr(object);
 }
 
 void ContextStack::preWrite() {

@@ -41,7 +41,7 @@ using namespace apache::thrift;
 namespace {
 
 inline std::pair<
-    std::unique_ptr<apache::thrift::ContextStack>,
+    apache::thrift::ContextStack::UniquePtr,
     std::shared_ptr<apache::thrift::transport::THeader>>
 makeOmniClientRequestContext(
     uint16_t protocolId,

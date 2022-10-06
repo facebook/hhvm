@@ -133,7 +133,7 @@ class Client<::facebook::thrift::test::Service> : public apache::thrift::Generat
  private:
   template <typename Protocol_, typename RpcOptions>
   void funcT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::facebook::thrift::test::StringWithAdapter& p_arg1, const ::std::string& p_arg2, const ::facebook::thrift::test::Foo& p_arg3);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> funcCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> funcCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

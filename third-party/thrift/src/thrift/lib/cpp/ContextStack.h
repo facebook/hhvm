@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,25 @@ class ContextStack {
   friend class EventHandlerBase;
 
  public:
+  // Customly sized allocation is used for ContextStack, so we can't use default
+  // unique_ptr deleter.
+  struct Deleter {
+    void operator()(ContextStack* ptr) {
+      ptr->~ContextStack();
+      operator delete (ptr, std::align_val_t{alignof(ContextStack)});
+    }
+  };
+  using UniquePtr = std::unique_ptr<ContextStack, Deleter>;
+
   // Note: factory functions return nullptr if handlers is nullptr or empty.
-  static std::unique_ptr<ContextStack> create(
+  static UniquePtr create(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
       const char* serviceName,
       const char* method,
       TConnectionContext* connectionContext);
 
-  static std::unique_ptr<ContextStack> createWithClientContext(
+  static UniquePtr createWithClientContext(
       const std::shared_ptr<
           std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
       const char* serviceName,

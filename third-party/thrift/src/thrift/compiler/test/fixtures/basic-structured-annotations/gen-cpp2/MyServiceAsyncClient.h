@@ -130,7 +130,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
  private:
   template <typename Protocol_, typename RpcOptions>
   void firstT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> firstCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> firstCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void second(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
   virtual void second(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_count);
@@ -225,7 +225,7 @@ class Client<::test::fixtures::basic-structured-annotations::MyService> : public
  private:
   template <typename Protocol_, typename RpcOptions>
   void secondT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_count);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> secondCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> secondCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

@@ -1171,7 +1171,7 @@ class HandlerCallbackBase {
 
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       exnw_ptr ewp,
       folly::EventBase* eb,
       concurrency::ThreadManager* tm,
@@ -1193,7 +1193,7 @@ class HandlerCallbackBase {
 
   HandlerCallbackBase(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       exnw_ptr ewp,
       folly::EventBase* eb,
       folly::Executor::KeepAlive<> executor,
@@ -1308,7 +1308,7 @@ class HandlerCallbackBase {
 
   // Required for this call
   ResponseChannelRequest::UniquePtr req_;
-  std::unique_ptr<ContextStack> ctx_;
+  ContextStack::UniquePtr ctx_;
   TilePtr interaction_;
 
   // May be null in a oneway call
@@ -1340,7 +1340,7 @@ class HandlerCallback : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1351,7 +1351,7 @@ class HandlerCallback : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1386,7 +1386,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1397,7 +1397,7 @@ class HandlerCallback<void> : public HandlerCallbackBase {
 
   HandlerCallback(
       ResponseChannelRequest::UniquePtr req,
-      std::unique_ptr<ContextStack> ctx,
+      ContextStack::UniquePtr ctx,
       cob_ptr cp,
       exnw_ptr ewp,
       int32_t protoSeqId,
@@ -1725,7 +1725,7 @@ void HandlerCallbackBase::putMessageInReplyQueue(
 template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -1748,7 +1748,7 @@ HandlerCallback<T>::HandlerCallback(
 template <typename T>
 HandlerCallback<T>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,

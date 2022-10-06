@@ -127,7 +127,7 @@ class Client<::cpp2::MyLeaf> : public ::cpp2::MyNodeAsyncClient {
  private:
   template <typename Protocol_, typename RpcOptions>
   void do_leafT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> do_leafCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_leafCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

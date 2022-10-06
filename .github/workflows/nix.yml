@@ -147,6 +147,9 @@ jobs:
     - run: echo "HHVM_BIN=$(command -v hhvm)" >> "$GITHUB_ENV"
     - run: |
         "$HHVM_BIN" hphp/test/run.php ${{matrix.flags}} -x hphp/test/github_excluded_tests all
+      # TODO: Remove `continue-on-error` once repo mode is fixed
+      # See https://github.com/facebook/hhvm/issues/9236
+      continue-on-error: ${{contains(matrix.flags, '--repo')}}
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

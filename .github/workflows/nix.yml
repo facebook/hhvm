@@ -151,7 +151,7 @@ jobs:
       run: |
         "$HHVM_BIN" ./run.php --working-dir ./.known-failed-tests.tmp $(sed 's/#.*//' ./github_excluded_tests)
     - if: steps.configure-aws-credentials.outcome != 'success'
-      run: echo ./hphp/test/.known-failed-tests.tmp/hphp-test-*/test-failures
+      run: cat ./hphp/test/.known-failed-tests.tmp/hphp-test-*/test-failures
   upload-deb:
     if: github.event_name == 'push' && github.ref_type == 'tag'
     runs-on: ubuntu-latest

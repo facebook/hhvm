@@ -55,6 +55,13 @@ class ContextStack {
       const char* method,
       transport::THeader& header);
 
+  static ContextStack::UniquePtr createWithClientContextCopyNames(
+      const std::shared_ptr<
+          std::vector<std::shared_ptr<TProcessorEventHandler>>>& handlers,
+      const std::string& serviceName,
+      const std::string& methodName,
+      transport::THeader& header);
+
   ContextStack(ContextStack&&) = delete;
   ContextStack& operator=(ContextStack&&) = delete;
   ContextStack(const ContextStack&) = delete;

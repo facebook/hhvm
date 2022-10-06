@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <cstdio>
 #include <thrift/lib/cpp/ContextStack.h>
 
 #include <folly/tracing/StaticTracepoint.h>
@@ -102,6 +103,47 @@ ContextStack::UniquePtr ContextStack::createWithClientContext(
       handlers,
       serviceName,
       method,
+      connectionContext);
+
+  return ContextStack::UniquePtr(object);
+}
+
+ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
+    const std::shared_ptr<std::vector<std::shared_ptr<TProcessorEventHandler>>>&
+        handlers,
+    const std::string& serviceName,
+    const std::string& methodName,
+    transport::THeader& header) {
+  if (!handlers || handlers->empty()) {
+    return {};
+  }
+
+  size_t serviceNameBytes = serviceName.size() + 1;
+  size_t methodNameBytes = serviceName.size() + 1 + methodName.size() + 1;
+
+  const size_t nbytes = sizeof(ContextStack) +
+      sizeof(Cpp2ClientRequestContext) + handlers->size() * sizeof(void*) +
+      serviceNameBytes + methodNameBytes;
+  auto* storage = static_cast<ContextStack*>(operator new (
+      nbytes, std::align_val_t{alignof(ContextStack)}));
+
+  auto* connectionContext = new (storage + 1) Cpp2ClientRequestContext(&header);
+  auto serviceNameStorage = reinterpret_cast<char*>(storage) + nbytes -
+      serviceNameBytes - methodNameBytes;
+  auto methodNameStorage = serviceNameStorage + serviceNameBytes;
+  snprintf(serviceNameStorage, serviceNameBytes, "%s", serviceName.c_str());
+  snprintf(
+      methodNameStorage,
+      methodNameBytes,
+      "%s:%s",
+      serviceName.c_str(),
+      methodName.c_str());
+
+  auto* object = new (storage) ContextStack(
+      WithEmbeddedClientRequestContext(),
+      handlers,
+      serviceNameStorage,
+      methodNameStorage,
       connectionContext);
 
   return ContextStack::UniquePtr(object);

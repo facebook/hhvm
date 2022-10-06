@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+<<file:__EnableUnstableFeatures("modules", "require_class")>>
 // !!! Please contact devx_www oncall if this breaks. !!!
 //
 // "Fact parsing" is a core part of www infrastructure on devservers.
@@ -59,6 +59,11 @@ trait TR2 implements I0, I1<int> {
   use TR0, TR1<int>;
   require extends CL1;
   require implements I2;
+  require class CL3;
+}
+
+abstract final class CL3 extends CL1 implements I2 {
+  use TR2;
 }
 
 new module m0 {}

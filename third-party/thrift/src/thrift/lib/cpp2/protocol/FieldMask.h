@@ -38,7 +38,7 @@ void clear(const Mask& mask, protocol::Object& t);
 // Throws a runtime exception if the mask and objects are incompatible.
 void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 
-// Returns whether field mask is compatible with thrift type T.
+// Returns whether field mask is compatible with thrift type tag.
 // If it is not a struct, it is only compatible when it is allMask or noneMask.
 // Otherwise, it is incompatible if the mask contains a field that doesn't exist
 // in the struct or that exists with a different type.
@@ -97,7 +97,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   static_assert(is_thrift_struct_v<Struct>);
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) {
-    detail::errorIfNotCompatible<Struct>(mask);
+    detail::errorIfNotCompatible<type::struct_t<Struct>>(mask);
     data_ = mask;
   }
 
@@ -122,14 +122,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& includes(const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<Struct, Id...>(mask);
+    data_ = data_ | detail::path<type::struct_t<Struct>, Id...>(mask);
     return *this;
   }
 
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<Struct>(fieldNames, 0, mask);
+    data_ = data_ | detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -139,14 +139,14 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& excludes(const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<Struct, Id...>(mask);
+    data_ = data_ - detail::path<type::struct_t<Struct>, Id...>(mask);
     return *this;
   }
 
   MaskBuilder& excludes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<Struct>(fieldNames, 0, mask);
+    data_ = data_ - detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
     return *this;
   }
 

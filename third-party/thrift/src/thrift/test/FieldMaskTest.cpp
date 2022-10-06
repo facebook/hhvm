@@ -866,67 +866,69 @@ TEST(FieldMaskTest, SchemalessCopyExceptionMap) {
 }
 
 TEST(FieldMaskTest, IsCompatibleWithSimple) {
-  EXPECT_TRUE(protocol::is_compatible_with<Foo>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<Foo>(noneMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(noneMask()));
 
   Mask m;
   auto& includes = m.includes_ref().emplace();
   includes[1] = allMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Foo>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(m));
   includes[3] = noneMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Foo>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Foo>>(m));
 
   includes[2] = allMask(); // doesn't exist
-  EXPECT_FALSE(protocol::is_compatible_with<Foo>(m));
+  EXPECT_FALSE(protocol::is_compatible_with<type::struct_t<Foo>>(m));
 }
 
 TEST(FieldMaskTest, IsCompatibleWithNested) {
-  EXPECT_TRUE(protocol::is_compatible_with<Bar>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<Bar>(noneMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Bar>>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Bar>>(noneMask()));
 
   // These are valid field masks for Bar.
   Mask m;
   // includes{1: excludes{}}
   m.includes_ref().emplace()[1] = allMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
   // includes{2: includes{}}
   m.includes_ref().emplace()[2] = noneMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
   // includes{1: includes{1: excludes{}}, 2: excludes{}}
   auto& includes = m.includes_ref().emplace();
   includes[1].includes_ref().emplace()[1] = allMask();
   includes[2] = allMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
 
   // There are invalid field masks for Bar.
   // includes{3: excludes{}}
   m.includes_ref().emplace()[3] = allMask();
-  EXPECT_FALSE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_FALSE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
   // includes{2: includes{1: includes{}}}
   m.includes_ref().emplace()[2].includes_ref().emplace()[1] = noneMask();
-  EXPECT_FALSE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_FALSE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
   // includes{1: excludes{2: excludes{}}}
   m.includes_ref().emplace()[1].excludes_ref().emplace()[2] = allMask();
-  EXPECT_FALSE(protocol::is_compatible_with<Bar>(m));
+  EXPECT_FALSE(protocol::is_compatible_with<type::struct_t<Bar>>(m));
 }
 
 TEST(FieldMaskTest, IsCompatibleWithAdaptedField) {
-  EXPECT_TRUE(protocol::is_compatible_with<Baz>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<Baz>(noneMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Baz>>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Baz>>(noneMask()));
 
   Mask m;
   // includes{1: excludes{}}
   m.includes_ref().emplace()[1] = allMask();
-  EXPECT_TRUE(protocol::is_compatible_with<Baz>(m));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<Baz>>(m));
   // includes{1: includes{1: excludes{}}}
   m.includes_ref().emplace()[1].includes_ref().emplace()[1] = allMask();
   // adapted struct field is treated as non struct field.
-  EXPECT_FALSE(protocol::is_compatible_with<Baz>(m));
+  EXPECT_FALSE(protocol::is_compatible_with<type::struct_t<Baz>>(m));
 }
 
 TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
-  EXPECT_TRUE(protocol::is_compatible_with<SmartPointerStruct>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<SmartPointerStruct>(noneMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
+      allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(
+      noneMask()));
 
   {
     Mask mask;
@@ -937,7 +939,8 @@ TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
     includes[1] = allMask();
     includes[2] = allMask();
     includes[3] = noneMask();
-    EXPECT_TRUE(protocol::is_compatible_with<SmartPointerStruct>(mask));
+    EXPECT_TRUE(
+        protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(mask));
   }
 
   {
@@ -949,19 +952,22 @@ TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
     includes[1].excludes_ref().emplace()[2] = allMask();
     includes[2].excludes_ref().emplace()[2] = noneMask();
     includes[3].includes_ref().emplace()[1] = allMask();
-    EXPECT_TRUE(protocol::is_compatible_with<SmartPointerStruct>(mask));
+    EXPECT_TRUE(
+        protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(mask));
   }
   {
     Mask mask;
     // includes{1: excludes{100: excludes{}}}
     mask.includes_ref().emplace()[1].excludes_ref().emplace()[100] = allMask();
-    EXPECT_FALSE(protocol::is_compatible_with<SmartPointerStruct>(mask));
+    EXPECT_FALSE(
+        protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(mask));
   }
   {
     Mask mask;
     // includes{2: includes{100: excludes{}}}
     mask.includes_ref().emplace()[2].includes_ref().emplace()[100] = allMask();
-    EXPECT_FALSE(protocol::is_compatible_with<SmartPointerStruct>(mask));
+    EXPECT_FALSE(
+        protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(mask));
   }
   {
     Mask mask;
@@ -969,7 +975,8 @@ TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
     auto& includes = mask.includes_ref().emplace();
     includes[3].includes_ref().emplace()[1].excludes_ref().emplace()[1] =
         allMask();
-    EXPECT_FALSE(protocol::is_compatible_with<SmartPointerStruct>(mask));
+    EXPECT_FALSE(
+        protocol::is_compatible_with<type::struct_t<SmartPointerStruct>>(mask));
   }
 }
 
@@ -977,12 +984,14 @@ TEST(FieldMaskTest, IsCompatibleWithOtherTypes) {
   Mask mask;
   mask.includes_ref().emplace()[1] = allMask();
 
-  EXPECT_TRUE(protocol::is_compatible_with<int>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<int>(noneMask()));
-  EXPECT_FALSE(protocol::is_compatible_with<int>(mask));
-  EXPECT_TRUE(protocol::is_compatible_with<std::list<std::string>>(allMask()));
-  EXPECT_TRUE(protocol::is_compatible_with<std::list<std::string>>(noneMask()));
-  EXPECT_FALSE(protocol::is_compatible_with<std::list<std::string>>(mask));
+  EXPECT_TRUE(protocol::is_compatible_with<type::i32_t>(allMask()));
+  EXPECT_TRUE(protocol::is_compatible_with<type::i32_t>(noneMask()));
+  EXPECT_FALSE(protocol::is_compatible_with<type::i32_t>(mask));
+  EXPECT_TRUE(
+      protocol::is_compatible_with<type::list<type::string_t>>(allMask()));
+  EXPECT_TRUE(
+      protocol::is_compatible_with<type::list<type::string_t>>(noneMask()));
+  EXPECT_FALSE(protocol::is_compatible_with<type::list<type::string_t>>(mask));
 }
 
 TEST(FieldMaskTest, Ensure) {

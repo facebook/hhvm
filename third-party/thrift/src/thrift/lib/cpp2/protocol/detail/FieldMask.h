@@ -152,22 +152,32 @@ bool validate_fields(MaskRef ref) {
   return isValid;
 }
 
-template <typename T>
-bool is_compatible_with(const Mask& mask) {
-  MaskRef ref{mask, false};
-  if (ref.isAllMask() || ref.isNoneMask()) {
-    return true;
-  }
-  if constexpr (is_thrift_struct_v<T>) {
-    return validate_fields<T>(ref);
-  }
+template <typename Tag>
+bool is_compatible_with(const Mask&);
+
+template <typename Tag>
+bool is_compatible_with_impl(Tag, const Mask&) {
   return false;
 }
 
-// Throws an error if a thrift struct type is not compatible with the mask.
 template <typename T>
+bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
+  return validate_fields<T>({mask});
+}
+
+template <typename Tag>
+bool is_compatible_with(const Mask& mask) {
+  if (mask == field_mask_constants::allMask() ||
+      mask == field_mask_constants::noneMask()) {
+    return true;
+  }
+  return is_compatible_with_impl(Tag{}, mask);
+}
+
+// Throws an error if a thrift struct type is not compatible with the mask.
+template <typename Tag>
 void errorIfNotCompatible(const Mask& mask) {
-  if (!::apache::thrift::protocol::detail::is_compatible_with<T>(mask)) {
+  if (!::apache::thrift::protocol::detail::is_compatible_with<Tag>(mask)) {
     folly::throw_exception<std::runtime_error>(
         "The mask and struct are incompatible.");
   }
@@ -230,7 +240,7 @@ void clear_fields(MaskRef ref, Struct& t) {
       using FieldType = op::get_native_type<Ord, Struct>;
       auto* field_value = op::getValueOrNull(field_ref);
       if (!field_value) {
-        errorIfNotCompatible<FieldType>(next.mask);
+        errorIfNotCompatible<op::get_type_tag<Ord, Struct>>(next.mask);
         return;
       }
       // Need to clear the struct object.
@@ -285,7 +295,7 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
       bool srcHasValue = bool(op::getValueOrNull(src_ref));
       bool dstHasValue = bool(op::getValueOrNull(dst_ref));
       if (!srcHasValue && !dstHasValue) { // skip
-        errorIfNotCompatible<FieldType>(next.mask);
+        errorIfNotCompatible<op::get_type_tag<Ord, DstStruct>>(next.mask);
         return;
       }
       // Id that we want to copy.
@@ -331,37 +341,38 @@ bool copy_fields(MaskRef ref, SrcStruct& src, DstStruct& dst) {
 }
 
 // This converts id list to a field mask with a single field.
-template <typename T>
+template <typename Tag>
 Mask path(const Mask& other) {
   // This is the base case as there is no more id.
-  errorIfNotCompatible<T>(other);
+  errorIfNotCompatible<Tag>(other);
   return other;
 }
 
-template <typename Struct, typename Id, typename... Ids>
+template <typename Tag, typename Id, typename... Ids>
 Mask path(const Mask& other) {
+  using Struct = type::native_type<Tag>;
   static_assert(is_thrift_struct_v<Struct>);
   Mask mask;
   using fieldId = op::get_field_id<Id, Struct>;
   static_assert(fieldId::value != FieldId{});
-  using FieldType = op::get_native_type<Id, Struct>;
   mask.includes_ref().emplace()[static_cast<int16_t>(fieldId::value)] =
-      path<FieldType, Ids...>(other);
+      path<op::get_type_tag<Id, Struct>, Ids...>(other);
   return mask;
 }
 
 // This converts field name list from the given index to a field mask with a
 // single field.
-template <typename Struct>
+template <typename Tag>
 Mask path(
     const std::vector<folly::StringPiece>& fieldNames,
     size_t index,
     const Mask& other) {
   if (index == fieldNames.size()) {
-    errorIfNotCompatible<Struct>(other);
+    errorIfNotCompatible<Tag>(other);
     return other;
   }
   // static_assert doesn't work as it compiles this code for every field.
+  using Struct = type::native_type<Tag>;
   if constexpr (is_thrift_struct_v<Struct>) {
     Mask mask;
     op::for_each_field_id<Struct>([&](auto id) {
@@ -370,9 +381,8 @@ Mask path(
         return;
       }
       if (op::get_name_v<Id, Struct> == fieldNames[index]) {
-        using FieldType = op::get_native_type<Id, Struct>;
         mask.includes_ref().emplace()[folly::to_underlying(id())] =
-            path<FieldType>(fieldNames, index + 1, other);
+            path<op::get_type_tag<Id, Struct>>(fieldNames, index + 1, other);
       }
     });
     if (!mask.includes_ref()) { // field not found

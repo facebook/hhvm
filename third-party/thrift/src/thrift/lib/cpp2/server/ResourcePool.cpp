@@ -303,6 +303,9 @@ std::size_t ResourcePoolSet::idleWorkerCount() const {
 }
 
 void ResourcePoolSet::stopAndJoin() {
+  auto guard = locked_ ? std::unique_lock<std::mutex>()
+                       : std::unique_lock<std::mutex>(mutex_);
+
   for (auto& resourcePool : resourcePools_) {
     if (resourcePool) {
       resourcePool->stop();

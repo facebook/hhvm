@@ -39,29 +39,29 @@
                 ];
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
-                  CMAKE_INIT_CACHE;
+                  CMAKE_INIT_CACHE
+                  CCACHE_DIR
+                  CCACHE_UMASK;
               };
         in
         rec {
-          packages.hhvm = (pkgs.callPackage ./hhvm.nix {
+          packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
+            isDefaultStdlib = true;
+          };
+          packages.hhvm_ccache = (packages.hhvm.override {
             stdenv = pkgs.ccacheStdenv;
-            isDefaultStdlib = true;
           }).overrideAttrs (finalAttrs: previousAttrs: {
-            preConfigure = ''
-              export CCACHE_DIR=/nix/var/cache/ccache
-              export CCACHE_UMASK=007
-            '';
+            CCACHE_DIR = "/nix/var/cache/ccache";
+            CCACHE_UMASK = 007;
           });
-          packages.hhvm_clang = pkgs.callPackage ./hhvm.nix {
-            lastModifiedDate = self.lastModifiedDate;
+          packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
-            isDefaultStdlib = true;
           };
           packages.default = packages.hhvm;
 
           devShells.clang = devShellForPackage packages.hhvm_clang;
-          devShells.default = devShellForPackage packages.hhvm;
+          devShells.default = devShellForPackage packages.hhvm_ccache;
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =
             let

@@ -114,27 +114,6 @@ static char **build_envp(const Array& envs, std::vector<std::string> &senvs) {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-
-void StandardExtension::initProcess() {
-  HHVM_FE(shell_exec);
-  HHVM_FE(exec);
-  HHVM_FE(passthru);
-  HHVM_FE(system);
-  HHVM_FE(proc_open);
-  HHVM_FE(proc_terminate);
-  HHVM_FE(proc_close);
-  HHVM_FE(proc_get_status);
-#ifndef _WIN32
-  HHVM_FE(proc_nice);
-#endif
-  HHVM_FE(escapeshellarg);
-  HHVM_FE(escapeshellcmd);
-
-  loadSystemlib("std_process");
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
 // popen
 
 #define EXEC_INPUT_BUF 4096
@@ -1025,6 +1004,26 @@ String HHVM_FUNCTION(escapeshellcmd,
     return string_escape_shell_cmd(command.c_str());
   }
   return command;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void StandardExtension::initProcess() {
+  HHVM_FE(shell_exec);
+  HHVM_FE(exec);
+  HHVM_FE(passthru);
+  HHVM_FE(system);
+  HHVM_FE(proc_open);
+  HHVM_FE(proc_terminate);
+  HHVM_FE(proc_close);
+  HHVM_FE(proc_get_status);
+#ifndef _WIN32
+  HHVM_FE(proc_nice);
+#endif
+  HHVM_FE(escapeshellarg);
+  HHVM_FE(escapeshellcmd);
+
+  loadSystemlib("std_process");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

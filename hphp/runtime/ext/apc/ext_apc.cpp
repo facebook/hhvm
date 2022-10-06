@@ -158,51 +158,6 @@ void apcExtension::moduleLoad(const IniSetting::Map& ini, Hdf config) {
                    &EnableCLI);
 }
 
-void apcExtension::moduleInit() {
-  if (use_lowptr && !UseUncounted) {
-    Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
-    UseUncounted = true;
-  }
-  apc_store().init();
-
-  HHVM_RC_INT(APC_ITER_TYPE, 0x1);
-  HHVM_RC_INT(APC_ITER_KEY, 0x2);
-  HHVM_RC_INT(APC_ITER_FILENAME, 0x4);
-  HHVM_RC_INT(APC_ITER_DEVICE, 0x8);
-  HHVM_RC_INT(APC_ITER_INODE, 0x10);
-  HHVM_RC_INT(APC_ITER_VALUE, 0x20);
-  HHVM_RC_INT(APC_ITER_MD5, 0x40);
-  HHVM_RC_INT(APC_ITER_NUM_HITS, 0x80);
-  HHVM_RC_INT(APC_ITER_MTIME, 0x100);
-  HHVM_RC_INT(APC_ITER_CTIME, 0x200);
-  HHVM_RC_INT(APC_ITER_DTIME, 0x400);
-  HHVM_RC_INT(APC_ITER_ATIME, 0x800);
-  HHVM_RC_INT(APC_ITER_REFCOUNT, 0x1000);
-  HHVM_RC_INT(APC_ITER_MEM_SIZE, 0x2000);
-  HHVM_RC_INT(APC_ITER_TTL, 0x4000);
-  HHVM_RC_INT(APC_ITER_NONE, 0x0);
-  HHVM_RC_INT(APC_ITER_ALL, 0xFFFFFFFFFF);
-  HHVM_RC_INT(APC_LIST_ACTIVE, 1);
-  HHVM_RC_INT(APC_LIST_DELETED, 2);
-
-  HHVM_FE(apc_add);
-  HHVM_FE(apc_add_with_pure_sleep);
-  HHVM_FE(apc_store);
-  HHVM_FE(apc_store_with_pure_sleep);
-  HHVM_FE(apc_fetch);
-  HHVM_FE(apc_fetch_with_pure_wakeup);
-  HHVM_FE(apc_delete);
-  HHVM_FE(apc_clear_cache);
-  HHVM_FE(apc_inc);
-  HHVM_FE(apc_dec);
-  HHVM_FE(apc_cas);
-  HHVM_FE(apc_exists);
-  HHVM_FE(apc_size);
-  HHVM_FE(apc_extend_ttl);
-  HHVM_FE(apc_cache_info);
-  loadSystemlib();
-}
-
 void apcExtension::moduleShutdown() {
 }
 
@@ -877,6 +832,51 @@ void apc_sample_by_size() {
     sample.setInt("weight", weight);
     StructuredLog::log("apc_samples", sample);
   }
+}
+
+void apcExtension::moduleInit() {
+  if (use_lowptr && !UseUncounted) {
+    Logger::Error("Server.APC.MemModelTreadmill=false ignored in lowptr build");
+    UseUncounted = true;
+  }
+  apc_store().init();
+
+  HHVM_RC_INT(APC_ITER_TYPE, 0x1);
+  HHVM_RC_INT(APC_ITER_KEY, 0x2);
+  HHVM_RC_INT(APC_ITER_FILENAME, 0x4);
+  HHVM_RC_INT(APC_ITER_DEVICE, 0x8);
+  HHVM_RC_INT(APC_ITER_INODE, 0x10);
+  HHVM_RC_INT(APC_ITER_VALUE, 0x20);
+  HHVM_RC_INT(APC_ITER_MD5, 0x40);
+  HHVM_RC_INT(APC_ITER_NUM_HITS, 0x80);
+  HHVM_RC_INT(APC_ITER_MTIME, 0x100);
+  HHVM_RC_INT(APC_ITER_CTIME, 0x200);
+  HHVM_RC_INT(APC_ITER_DTIME, 0x400);
+  HHVM_RC_INT(APC_ITER_ATIME, 0x800);
+  HHVM_RC_INT(APC_ITER_REFCOUNT, 0x1000);
+  HHVM_RC_INT(APC_ITER_MEM_SIZE, 0x2000);
+  HHVM_RC_INT(APC_ITER_TTL, 0x4000);
+  HHVM_RC_INT(APC_ITER_NONE, 0x0);
+  HHVM_RC_INT(APC_ITER_ALL, 0xFFFFFFFFFF);
+  HHVM_RC_INT(APC_LIST_ACTIVE, 1);
+  HHVM_RC_INT(APC_LIST_DELETED, 2);
+
+  HHVM_FE(apc_add);
+  HHVM_FE(apc_add_with_pure_sleep);
+  HHVM_FE(apc_store);
+  HHVM_FE(apc_store_with_pure_sleep);
+  HHVM_FE(apc_fetch);
+  HHVM_FE(apc_fetch_with_pure_wakeup);
+  HHVM_FE(apc_delete);
+  HHVM_FE(apc_clear_cache);
+  HHVM_FE(apc_inc);
+  HHVM_FE(apc_dec);
+  HHVM_FE(apc_cas);
+  HHVM_FE(apc_exists);
+  HHVM_FE(apc_size);
+  HHVM_FE(apc_extend_ttl);
+  HHVM_FE(apc_cache_info);
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

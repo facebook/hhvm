@@ -22,6 +22,16 @@
 
 namespace HPHP {
 
+int64_t HHVM_FUNCTION(hphp_get_thread_id) {
+  return  (unsigned long)Process::GetThreadId();
+}
+
+int64_t HHVM_FUNCTION(hphp_gettid) {
+  return (unsigned int)Process::GetThreadPid();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 static struct ThreadExtension final : Extension {
   ThreadExtension() : Extension("thread", NO_EXTENSION_VERSION_YET) {}
   void moduleInit() override {
@@ -31,16 +41,6 @@ static struct ThreadExtension final : Extension {
     loadSystemlib();
   }
 } s_thread_extension;
-
-///////////////////////////////////////////////////////////////////////////////
-
-int64_t HHVM_FUNCTION(hphp_get_thread_id) {
-  return  (unsigned long)Process::GetThreadId();
-}
-
-int64_t HHVM_FUNCTION(hphp_gettid) {
-  return (unsigned int)Process::GetThreadPid();
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

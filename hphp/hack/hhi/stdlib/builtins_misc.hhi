@@ -34,8 +34,6 @@ function connection_timeout();
 <<__PHPStdLib>>
 function constant(string $name);
 <<__PHPStdLib>>
-function define(string $name, $value, bool $case_insensitive = false);
-<<__PHPStdLib>>
 function defined(string $name, bool $autoload = true);
 <<__PHPStdLib>>
 function get_browser($user_agent = null, $return_array = false);

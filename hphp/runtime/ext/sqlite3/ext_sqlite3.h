@@ -44,51 +44,14 @@ public:
   static const StaticString s_className;
 };
 
-void HHVM_METHOD(SQLite3, __construct,
-                 const String& filename,
-                 int64_t flags /* = SQLITE3_OPEN_READWRITE |
-                   SQLITE3_OPEN_CREATE */,
-                 const Variant& encryption_key /* = null */);
 void HHVM_METHOD(SQLite3, open,
                  const String& filename,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
                  const Variant& encryption_key /* = null */);
-bool HHVM_METHOD(SQLite3, busytimeout,
-                 int64_t msecs);
-bool HHVM_METHOD(SQLite3, close);
-bool HHVM_METHOD(SQLite3, exec,
-                 const String& sql);
 Array HHVM_STATIC_METHOD(SQLite3, version);
-int64_t HHVM_METHOD(SQLite3, lastinsertrowid);
-int64_t HHVM_METHOD(SQLite3, lasterrorcode);
-String HHVM_METHOD(SQLite3, lasterrormsg);
-bool HHVM_METHOD(SQLite3, loadExtension,
-                 const String& extension);
-int64_t HHVM_METHOD(SQLite3, changes);
 String HHVM_STATIC_METHOD(SQLite3, escapestring,
                           const String& sql);
-Variant HHVM_METHOD(SQLite3, prepare,
-                    const String& sql);
-Variant HHVM_METHOD(SQLite3, query,
-                    const String& sql);
-Variant HHVM_METHOD(SQLite3, querysingle,
-                    const String& sql,
-                    bool entire_row /* = false */);
-bool HHVM_METHOD(SQLite3, createfunction,
-                 const String& name,
-                 const Variant& callback,
-                 int64_t argcount /* = -1 */);
-bool HHVM_METHOD(SQLite3, createaggregate,
-                 const String& name,
-                 const Variant& step,
-                 const Variant& final,
-                 int64_t argcount /* = -1 */);
-bool HHVM_METHOD(SQLite3, openblob,
-                 const String& table,
-                 const String& column,
-                 int64_t rowid,
-                 const Variant& dbname /* = null */);
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -115,14 +78,6 @@ public:
 void HHVM_METHOD(SQLite3Stmt, __construct,
                  const Object& dbobject,
                  const String& statement);
-int64_t HHVM_METHOD(SQLite3Stmt, paramcount);
-bool HHVM_METHOD(SQLite3Stmt, close);
-bool HHVM_METHOD(SQLite3Stmt, reset);
-bool HHVM_METHOD(SQLite3Stmt, clear);
-bool HHVM_METHOD(SQLite3Stmt, bindvalue,
-                 const Variant& name,
-                 const Variant& parameter,
-                 int64_t type /* = SQLITE3_TEXT */);
 Variant HHVM_METHOD(SQLite3Stmt, execute);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -139,16 +94,5 @@ public:
   static const StaticString s_className;
 };
 
-int64_t HHVM_METHOD(SQLite3Result, numcolumns);
-String HHVM_METHOD(SQLite3Result, columnname,
-                   int64_t column);
-int64_t HHVM_METHOD(SQLite3Result, columntype,
-                    int64_t column);
-Variant HHVM_METHOD(SQLite3Result, fetcharray,
-                    int64_t mode /* = SQLITE3_BOTH */);
-bool HHVM_METHOD(SQLite3Result, reset);
-bool HHVM_METHOD(SQLite3Result, finalize);
-
 ///////////////////////////////////////////////////////////////////////////////
 }
-

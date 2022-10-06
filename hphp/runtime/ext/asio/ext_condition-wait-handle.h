@@ -73,8 +73,6 @@ void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
                         const Variant& callback);
 Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
                           const Variant& child);
-void HHVM_METHOD(ConditionWaitHandle, succeed, const Variant& result);
-void HHVM_METHOD(ConditionWaitHandle, fail, const Object& exception);
 
 inline c_ConditionWaitHandle* c_Awaitable::asCondition() {
   assertx(getKind() == Kind::Condition);

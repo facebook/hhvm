@@ -70,40 +70,7 @@ Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
                            const String& format,
                            const String& time,
                            const Variant& timezone /*= uninit_variant */);
-Variant HHVM_METHOD(DateTime, diff,
-                    const Variant& datetime2,
-                    const Variant& absolute);
-String HHVM_METHOD(DateTime, format,
-                   const Variant& format);
 Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
-int64_t HHVM_METHOD(DateTime, getOffset);
-int64_t HHVM_METHOD(DateTime, gettimestamp);
-Variant HHVM_METHOD(DateTime, getTimezone);
-Variant HHVM_METHOD(DateTime, modify,
-                   const String& modify);
-Object HHVM_METHOD(DateTime, setDate,
-                   int64_t year,
-                   int64_t month,
-                   int64_t day);
-Object HHVM_METHOD(DateTime, setISODate,
-                   int64_t year,
-                   int64_t week,
-                   int64_t day /*= 1*/);
-Object HHVM_METHOD(DateTime, setTime,
-                   int64_t hour,
-                   int64_t minute,
-                   int64_t second /*= 0*/);
-Object HHVM_METHOD(DateTime, setTimestamp,
-                   int64_t unixtimestamp);
-Variant HHVM_METHOD(DateTime, setTimezone,
-                    const Object& timezone);
-Variant HHVM_METHOD(DateTime, add,
-                    const Object& interval);
-Variant HHVM_METHOD(DateTime, sub,
-                    const Object& interval);
-Array HHVM_METHOD(DateTime, __sleep);
-void HHVM_METHOD(DateTime, __wakeup);
-Array HHVM_METHOD(DateTime, __debugInfo);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
@@ -149,14 +116,6 @@ struct DateTimeZoneData {
 
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
-Array HHVM_METHOD(DateTimeZone, getLocation);
-String HHVM_METHOD(DateTimeZone, getName);
-Array HHVM_METHOD(DateTimeZone, __debugInfo);
-Variant HHVM_METHOD(DateTimeZone, getOffset,
-                    const Object& datetime);
-TypedValue HHVM_METHOD(DateTimeZone, getTransitions,
-                       int64_t timestamp_begin = k_PHP_INT_MIN,
-                       int64_t timestamp_end = k_PHP_INT_MAX);
 Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
 Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
                            int64_t what,
@@ -183,12 +142,8 @@ struct DateIntervalData {
   static const StaticString s_className;
 };
 
-void HHVM_METHOD(DateInterval, __construct,
-                 const String& interval_spec);
 Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
                           const String& time);
-String HHVM_METHOD(DateInterval, format,
-                   const String& format);
 
 ///////////////////////////////////////////////////////////////////////////////
 // timestamp

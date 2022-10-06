@@ -980,6 +980,36 @@ TEST(FieldMaskTest, IsCompatibleWithSmartPointer) {
   }
 }
 
+TEST(FieldMaskTest, IsCompatibleWithMap) {
+  Mask m;
+  auto& includes = m.includes_map_ref().emplace()[1].includes_ref().emplace();
+  includes[1] = allMask();
+  using Tag = type::map<type::i32_t, type::struct_t<Foo>>;
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[3] = noneMask();
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[2] = allMask(); // field 2 doesn't exist in Foo
+  EXPECT_FALSE(protocol::is_compatible_with<Tag>(m));
+}
+
+TEST(FieldMaskTest, IsCompatibleWithNestedMap) {
+  Mask m;
+  auto& includes = m.includes_map_ref()
+                       .emplace()[1]
+                       .includes_map_ref()
+                       .emplace()[1]
+                       .includes_ref()
+                       .emplace();
+  includes[1] = allMask();
+  using Tag =
+      type::map<type::i32_t, type::map<type::i64_t, type::struct_t<Foo>>>;
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[3] = noneMask();
+  EXPECT_TRUE(protocol::is_compatible_with<Tag>(m));
+  includes[2] = allMask(); // field 2 doesn't exist in Foo
+  EXPECT_FALSE(protocol::is_compatible_with<Tag>(m));
+}
+
 TEST(FieldMaskTest, IsCompatibleWithOtherTypes) {
   Mask mask;
   mask.includes_ref().emplace()[1] = allMask();

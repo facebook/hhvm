@@ -165,6 +165,24 @@ bool is_compatible_with_impl(type::struct_t<T>, const Mask& mask) {
   return validate_fields<T>({mask});
 }
 
+template <typename Key, typename Value>
+bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
+  const auto* p = getMapMask(mask);
+
+  if (p == nullptr) {
+    return false;
+  }
+
+  // map mask is compatible only if all nested masks are compatible with `Value`
+  for (const auto& [_, v] : *p) {
+    if (!is_compatible_with<Value>(v)) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 template <typename Tag>
 bool is_compatible_with(const Mask& mask) {
   if (mask == field_mask_constants::allMask() ||

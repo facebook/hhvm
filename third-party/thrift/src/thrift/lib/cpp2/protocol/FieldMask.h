@@ -39,14 +39,16 @@ void clear(const Mask& mask, protocol::Object& t);
 void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 
 // Returns whether field mask is compatible with thrift type tag.
-// If it is not a struct, it is only compatible when it is allMask or noneMask.
-// Otherwise, it is incompatible if the mask contains a field that doesn't exist
-// in the struct or that exists with a different type.
-template <typename T>
-bool is_compatible_with(const Mask& mask) {
-  detail::throwIfContainsMapMask(mask);
-  return detail::is_compatible_with<T>(mask);
-}
+//
+// If it is a struct, it is incompatible if the mask contains a field that
+// doesn't exist in the struct or that exists with a different type.
+//
+// If it is a map, it is incompatible only if mask is not a map mask, or any
+// nested mask in the map mask is incompatible with mapped type.
+//
+// If it is not a struct or a map, it is only compatible when it is allMask or
+// noneMask.
+using detail::is_compatible_with;
 
 // Ensures that the masked fields have value in the thrift struct.
 // If it doesn't, it emplaces the field.

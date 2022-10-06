@@ -20,6 +20,7 @@
 #include <exception>
 #include <stdexcept>
 
+#include <folly/ExceptionString.h>
 #include <folly/experimental/coro/AsyncGenerator.h>
 #include <folly/experimental/coro/BlockingWait.h>
 #include <folly/experimental/coro/Sleep.h>
@@ -35,13 +36,15 @@ testing::AssertionResult runRoundTripTest(
   RoundTripResponse res;
   try {
     client.sync_roundTrip(res, *roundTrip.request());
-  } catch (const apache::thrift::TApplicationException&) {
-    return *roundTrip.expectException() ? testing::AssertionSuccess()
-                                        : testing::AssertionFailure();
+  } catch (const apache::thrift::TApplicationException& e) {
+    return *roundTrip.expectException()
+        ? testing::AssertionSuccess()
+        : (testing::AssertionFailure()
+           << "Unexpected exception: " << folly::exceptionStr(e));
   }
 
   if (*roundTrip.expectException()) {
-    return testing::AssertionFailure();
+    return testing::AssertionFailure() << "No expected exception.";
   }
 
   const Any& expectedAny = roundTrip.expectedResponse()

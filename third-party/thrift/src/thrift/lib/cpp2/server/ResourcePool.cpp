@@ -242,6 +242,7 @@ bool ResourcePoolSet::hasResourcePool(const ResourcePoolHandle& handle) const {
 
 ResourcePool& ResourcePoolSet::resourcePool(
     const ResourcePoolHandle& handle) const {
+  folly::annotate_ignore_thread_sanitizer_guard g(__FILE__, __LINE__);
   auto guard = locked_ ? std::unique_lock<std::mutex>()
                        : std::unique_lock<std::mutex>(mutex_);
   DCHECK_LT(handle.index(), resourcePools_.size());

@@ -128,6 +128,13 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
     return *this;
   }
 
+  template <typename... Id>
+  MaskBuilder& includes_map_element(int64_t key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return includes<Id...>(map);
+  }
+
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
@@ -143,6 +150,13 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   MaskBuilder& excludes(const Mask& mask = allMask()) {
     data_ = data_ - detail::path<type::struct_t<Struct>, Id...>(mask);
     return *this;
+  }
+
+  template <typename... Id>
+  MaskBuilder& excludes_map_element(int64_t key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return excludes<Id...>(map);
   }
 
   MaskBuilder& excludes(

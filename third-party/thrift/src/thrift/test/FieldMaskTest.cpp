@@ -2304,6 +2304,33 @@ TEST(FieldMaskTest, MaskBuilderOtherTypes) {
   }
 }
 
+TEST(FieldMaskTest, MaskBuilderMap) {
+  MaskBuilder<HasMap> builder(noneMask());
+  Mask expected;
+
+  builder.includes_map_element<ident::foos>(1);
+  expected.includes_ref().ensure()[1].includes_map_ref().ensure()[1] =
+      allMask();
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.includes<ident::foo>();
+  expected.includes_ref().ensure()[2] = allMask();
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.includes_map_element<ident::foos>(2);
+  expected.includes_ref().ensure()[1].includes_map_ref().ensure()[2] =
+      allMask();
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.excludes_map_element<ident::foos>(2);
+  expected.includes_ref().ensure()[1].includes_map_ref().ensure().erase(2);
+  EXPECT_EQ(builder.toThrift(), expected);
+
+  builder.excludes_map_element<ident::foos>(1);
+  expected.includes_ref().ensure()[1].includes_map_ref().ensure().erase(1);
+  EXPECT_EQ(builder.toThrift(), expected);
+}
+
 TEST(FieldMaskTest, ReverseMask) {
   EXPECT_EQ(reverseMask(allMask()), noneMask());
   EXPECT_EQ(reverseMask(noneMask()), allMask());

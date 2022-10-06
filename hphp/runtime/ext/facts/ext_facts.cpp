@@ -50,7 +50,6 @@
 #include "hphp/runtime/base/watchman-connection.h"
 #include "hphp/runtime/base/watchman.h"
 #include "hphp/runtime/ext/extension.h"
-#include "hphp/runtime/ext/facts/ext_facts.h"
 #include "hphp/runtime/ext/facts/fact-extractor.h"
 #include "hphp/runtime/ext/facts/facts-store.h"
 #include "hphp/runtime/ext/facts/logging.h"

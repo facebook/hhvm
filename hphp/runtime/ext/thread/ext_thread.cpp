@@ -15,7 +15,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/thread/ext_thread.h"
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/server/http-server.h"
 #include "hphp/runtime/base/program-functions.h"
 #include "hphp/util/process.h"

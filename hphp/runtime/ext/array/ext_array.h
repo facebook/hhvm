@@ -25,208 +25,28 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-TypedValue HHVM_FUNCTION(array_chunk,
-                         const Variant& input,
-                         int64_t size,
-                         bool preserve_keys = false);
-TypedValue HHVM_FUNCTION(array_combine,
-                         const Variant& keys,
-                         const Variant& values);
-Array HHVM_FUNCTION(array_fill_keys,
-                    const Variant& keys,
-                    const Variant& value);
-TypedValue HHVM_FUNCTION(array_fill,
-                         int64_t start_index,
-                         int64_t num,
-                         const Variant& value);
-TypedValue HHVM_FUNCTION(array_flip,
-                         const Variant& trans);
 bool HHVM_FUNCTION(array_key_exists,
-                   const Variant& key,
-                   const Variant& search);
-bool HHVM_FUNCTION(key_exists,
                    const Variant& key,
                    const Variant& search);
 TypedValue HHVM_FUNCTION(array_keys,
                          TypedValue input);
-TypedValue HHVM_FUNCTION(array_map,
-                         const Variant& callback,
-                         const Variant& arr1,
-                         const Array& _argv = null_array);
-TypedValue HHVM_FUNCTION(array_replace_recursive,
-                         const Variant& array1,
-                         const Variant& array2 = uninit_variant,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_replace,
-                         const Variant& array1,
-                         const Variant& array2 = uninit_variant,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_pad,
-                         const Variant& input,
-                         int64_t pad_size,
-                         const Variant& pad_value);
-TypedValue HHVM_FUNCTION(array_product,
-                         const Variant& array);
-TypedValue HHVM_FUNCTION(array_push,
-                         Variant& container,
-                         const Variant& var,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_rand,
-                         const Variant& input,
-                         int64_t num_req = 1);
 TypedValue HHVM_FUNCTION(array_search,
                          const Variant& needle,
                          const Variant& haystack,
                          bool strict = false);
-TypedValue HHVM_FUNCTION(array_shift,
-                         Variant& array);
 TypedValue HHVM_FUNCTION(array_splice,
                          Variant& input,
                          int64_t offset,
                          const Variant& length = uninit_variant,
                          const Variant& replacement = uninit_variant);
-TypedValue HHVM_FUNCTION(array_sum,
-                         const Variant& array);
-TypedValue HHVM_FUNCTION(array_unique,
-                         const Variant& array,
-                         int64_t sort_flags = 2);
-TypedValue HHVM_FUNCTION(array_unshift,
-                         Variant& array,
-                         const Variant& var,
-                         const Array& args = null_array);
 TypedValue HHVM_FUNCTION(array_values,
                          const Variant& input);
-bool HHVM_FUNCTION(shuffle,
-                   Variant& array);
 int64_t HHVM_FUNCTION(count,
                       const Variant& var,
                       int64_t mode = 0);
-int64_t HHVM_FUNCTION(sizeof,
-                      const Variant& var);
-bool HHVM_FUNCTION(in_array,
-                   const Variant& needle,
-                   const Variant& haystack,
-                   bool strict = false);
-TypedValue HHVM_FUNCTION(range,
-                         const Variant& low,
-                         const Variant& high,
-                         const Variant& step = 1);
-TypedValue HHVM_FUNCTION(array_diff,
-                         const Variant& container1,
-                         const Variant& container2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_diff_key,
-                         const Variant& container1,
-                         const Variant& container2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_udiff,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_diff_assoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_diff_uassoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_udiff_assoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_udiff_uassoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_diff_ukey,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_intersect,
-                         const Variant& container1,
-                         const Variant& container2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_intersect_key,
-                         const Variant& container1,
-                         const Variant& container2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_uintersect,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_intersect_assoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_intersect_uassoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_uintersect_assoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_uintersect_uassoc,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& data_compare_func,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-TypedValue HHVM_FUNCTION(array_intersect_ukey,
-                         const Variant& array1,
-                         const Variant& array2,
-                         const Variant& key_compare_func,
-                         const Array& args = null_array);
-bool HHVM_FUNCTION(sort,
-                   Variant& array,
-                   int64_t sort_flags = 0);
-bool HHVM_FUNCTION(rsort,
-                   Variant& array,
-                   int64_t sort_flags = 0);
-bool HHVM_FUNCTION(asort,
-                   Variant& array,
-                   int64_t sort_flags = 0);
-bool HHVM_FUNCTION(arsort,
-                   Variant& array,
-                   int64_t sort_flags = 0);
 bool HHVM_FUNCTION(ksort,
                    Variant& array,
                    int64_t sort_flags = 0);
-bool HHVM_FUNCTION(krsort,
-                   Variant& array,
-                   int64_t sort_flags = 0);
-bool HHVM_FUNCTION(usort,
-                   Variant& array,
-                   const Variant& cmp_function);
-bool HHVM_FUNCTION(uasort,
-                   Variant& array,
-                   const Variant& cmp_function);
-bool HHVM_FUNCTION(uksort,
-                   Variant& array,
-                   const Variant& cmp_function);
-bool HHVM_FUNCTION(natsort,
-                   Variant& array);
-bool HHVM_FUNCTION(natcasesort,
-                   Variant& array);
-String HHVM_FUNCTION(i18n_loc_get_default);
-bool HHVM_FUNCTION(i18n_loc_set_default,
-                   const String& locale);
-bool HHVM_FUNCTION(i18n_loc_set_attribute,
-                   int64_t attr,
-                   int64_t val);
-bool HHVM_FUNCTION(i18n_loc_set_strength,
-                   int64_t strength);
-Variant HHVM_FUNCTION(i18n_loc_get_error_code);
 TypedValue HHVM_FUNCTION(hphp_array_idx,
                          const Variant& search,
                          const Variant& key,

@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/std/ext_std_process.h"
-
 #include <cstdlib>
 #include <vector>
 #include <string>

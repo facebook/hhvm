@@ -28,51 +28,21 @@ extern const int64_t k_FORCE_DEFLATE;
 ///////////////////////////////////////////////////////////////////////////////
 // zlib functions
 
-Variant HHVM_FUNCTION(readgzfile, const String& filename,
-                                  int64_t use_include_path = 0);
-Variant HHVM_FUNCTION(gzfile, const String& filename,
-                              int64_t use_include_path = 0);
-Variant HHVM_FUNCTION(zlib_encode, const String& data,
-                                   int64_t encoding,
-                                   int64_t level = -1);
-Variant HHVM_FUNCTION(zlib_decode, const String& data,
-                                   int64_t maxlen);
 Variant HHVM_FUNCTION(gzcompress, const String& data,
                                   int64_t level = -1);
 Variant HHVM_FUNCTION(gzuncompress, const String& data,
                                     int64_t limit = 0);
-Variant HHVM_FUNCTION(gzdeflate, const String& data, int64_t level = -1);
 Variant HHVM_FUNCTION(gzinflate, const String& data, int64_t limit = 0);
 Variant HHVM_FUNCTION(gzencode, const String& data, int64_t level = -1,
                                 int64_t encoding_mode = k_FORCE_GZIP);
-Variant HHVM_FUNCTION(gzdecode, const String& data, int64_t limit = 0);
-String HHVM_FUNCTION(zlib_get_coding_type);
-#ifdef HAVE_QUICKLZ
-Variant HHVM_FUNCTION(qlzcompress, const String& data, int64_t level = 1);
-Variant HHVM_FUNCTION(qlzuncompress, const String& data, int64_t level = 1);
-#endif
-Variant HHVM_FUNCTION(nzcompress, const String& uncompressed);
-Variant HHVM_FUNCTION(nzuncompress, const String& compressed);
 
 ///////////////////////////////////////////////////////////////////////////////
 // stream functions
 
 Variant HHVM_FUNCTION(gzopen, const String& filename, const String& mode,
                               int64_t use_include_path = 0);
-bool HHVM_FUNCTION(gzclose, const Resource& zp);
-Variant HHVM_FUNCTION(gzread, const Resource& zp, int64_t length = 0);
-Variant HHVM_FUNCTION(gzseek, const Resource& zp, int64_t offset,
-                              int64_t whence = SEEK_SET);
-Variant HHVM_FUNCTION(gztell, const Resource& zp);
-bool HHVM_FUNCTION(gzeof, const Resource& zp);
-bool HHVM_FUNCTION(gzrewind, const Resource& zp);
-Variant HHVM_FUNCTION(gzgetc, const Resource& zp);
 Variant HHVM_FUNCTION(gzgets, const Resource& zp, int64_t length = 0);
-Variant HHVM_FUNCTION(gzgetss, const Resource& zp, int64_t length = 0,
-                            const String& allowable_tags = null_string);
 Variant HHVM_FUNCTION(gzpassthru, const Resource& zp);
-Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
-                               int64_t length = 0);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -22,14 +22,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool HHVM_FUNCTION(use_soap_error_handler,
-                   bool handler = true);
-bool HHVM_FUNCTION(is_soap_fault,
-                   const Variant& fault);
-int64_t HHVM_FUNCTION(_soap_active_version);
-
-///////////////////////////////////////////////////////////////////////////////
-
 struct SoapServer {
   SoapServer();
 

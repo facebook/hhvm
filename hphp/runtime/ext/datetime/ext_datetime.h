@@ -193,64 +193,12 @@ String HHVM_METHOD(DateInterval, format,
 ///////////////////////////////////////////////////////////////////////////////
 // timestamp
 
-Variant HHVM_FUNCTION(gettimeofday,
-                      bool return_float = false);
-Variant HHVM_FUNCTION(microtime,
-                      bool get_as_float = false);
 int64_t HHVM_FUNCTION(time);
-Variant HHVM_FUNCTION(mktime,
-                      int64_t hour,
-                      int64_t minute,
-                      int64_t second,
-                      int64_t month,
-                      int64_t day,
-                      int64_t year);
-Variant HHVM_FUNCTION(gmmktime,
-                      int64_t hour,
-                      int64_t minute,
-                      int64_t second,
-                      int64_t month,
-                      int64_t day,
-                      int64_t year);
-Variant HHVM_FUNCTION(strptime,
-                      const String& date,
-                      const String& format);
 
 ///////////////////////////////////////////////////////////////////////////////
 // timezone
 
 String HHVM_FUNCTION(date_default_timezone_get);
-bool HHVM_FUNCTION(date_default_timezone_set,
-                   const String& name);
-Variant HHVM_FUNCTION(timezone_name_from_abbr,
-                      const String& abbr,
-                      int64_t gmtoffset = -1,
-                      int64_t isdst = 1);
-String HHVM_FUNCTION(timezone_version_get);
-
-///////////////////////////////////////////////////////////////////////////////
-// datetime
-
-bool HHVM_FUNCTION(checkdate,
-                   int64_t month,
-                   int64_t day,
-                   int64_t year);
-Variant HHVM_FUNCTION(date_create,
-                      const Variant& time = uninit_variant,
-                      const Variant& timezone = uninit_variant);
-Variant HHVM_FUNCTION(date_format,
-                      const Object& datetime,
-                      const String& format);
-Variant HHVM_FUNCTION(date_parse,
-                      const String& date);
-
-///////////////////////////////////////////////////////////////////////////////
-// sun
-
-Array HHVM_FUNCTION(date_sun_info,
-                    int64_t ts,
-                    double latitude,
-                    double longitude);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

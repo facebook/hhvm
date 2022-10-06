@@ -30,9 +30,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(dom_import_simplexml,
-                      const Object& node);
-
 Variant php_dom_create_object(xmlNodePtr obj, req::ptr<XMLDocumentData> doc);
 
 Object newDOMDocument(bool construct = true);

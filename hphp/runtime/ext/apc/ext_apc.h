@@ -63,57 +63,12 @@ struct apcExtension final : Extension {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant HHVM_FUNCTION(apc_add,
-                      const Variant& key_or_array,
-                      const Variant& var = uninit_variant,
-                      int64_t ttl = 0,
-                      int64_t bump_ttl = 0);
-Variant HHVM_FUNCTION(apc_add_with_pure_sleep,
-                      const Variant& key_or_array,
-                      const Variant& var = uninit_variant,
-                      int64_t ttl = 0,
-                      int64_t bump_ttl = 0);
 Variant HHVM_FUNCTION(apc_store,
                       const Variant& key_or_array,
                       const Variant& var = uninit_variant,
                       int64_t ttl = 0,
                       int64_t bump_ttl = 0);
-Variant HHVM_FUNCTION(apc_store_with_pure_sleep,
-                      const Variant& key_or_array,
-                      const Variant& var = uninit_variant,
-                      int64_t ttl = 0,
-                      int64_t bump_ttl = 0);
 TypedValue HHVM_FUNCTION(apc_fetch, const Variant& key, bool& success);
-TypedValue HHVM_FUNCTION(apc_fetch_with_pure_wakeup, const Variant& key, bool& success);
-Variant HHVM_FUNCTION(apc_delete,
-                      const Variant& key);
-bool HHVM_FUNCTION(apc_clear_cache,
-                   const String& cache_type = "");
-Variant HHVM_FUNCTION(apc_inc,
-                      const String& key,
-                      int64_t step,
-                      bool& success);
-Variant HHVM_FUNCTION(apc_dec,
-                      const String& key,
-                      int64_t step,
-                      bool& success);
-bool HHVM_FUNCTION(apc_cas,
-                   const String& key,
-                   int64_t old_cas,
-                   int64_t new_cas);
-Variant HHVM_FUNCTION(apc_exists,
-                      const Variant& key);
-bool HHVM_FUNCTION(apc_extend_ttl,
-                   const String& key,
-                   int64_t new_ttl);
-TypedValue HHVM_FUNCTION(apc_size, const String& key);
-
-
-///////////////////////////////////////////////////////////////////////////////
-
-Array HHVM_FUNCTION(apc_cache_info,
-                    const String& cache_type /* = "" */,
-                    bool limited /* = false */);
 
 ///////////////////////////////////////////////////////////////////////////////
 // loading APC from archive files

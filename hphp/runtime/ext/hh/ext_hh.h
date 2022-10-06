@@ -22,9 +22,7 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-bool HHVM_FUNCTION(could_include, const String& file);
 TypedValue HHVM_FUNCTION(serialize_memoize_param, TypedValue param);
-void HHVM_FUNCTION(set_frame_metadata, const Variant& metadata);
 
 TypedValue serialize_memoize_param_set(ArrayData*);
 TypedValue serialize_memoize_param_arr(ArrayData*);

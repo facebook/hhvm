@@ -1318,6 +1318,165 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift { namespace fixtures { namespace types {
+
+const folly::StringPiece MinPaddingWithCustomType::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MinPaddingWithCustomType>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+MinPaddingWithCustomType::MinPaddingWithCustomType(const MinPaddingWithCustomType& srcObj) :
+    __fbthrift_field_big(srcObj.__fbthrift_field_big),
+    __fbthrift_field_biggish(srcObj.__fbthrift_field_biggish),
+    __fbthrift_field_medium(srcObj.__fbthrift_field_medium),
+    __fbthrift_field_small(srcObj.__fbthrift_field_small),
+    __fbthrift_field_tiny(srcObj.__fbthrift_field_tiny) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
+
+MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(const MinPaddingWithCustomType& other) {
+  MinPaddingWithCustomType tmp(other);
+  swap(*this, tmp);
+  return *this;
+}
+
+MinPaddingWithCustomType::MinPaddingWithCustomType(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept :
+    __fbthrift_field_big(std::move(other.__fbthrift_field_big)),
+    __fbthrift_field_biggish(std::move(other.__fbthrift_field_biggish)),
+    __fbthrift_field_medium(std::move(other.__fbthrift_field_medium)),
+    __fbthrift_field_small(std::move(other.__fbthrift_field_small)),
+    __fbthrift_field_tiny(std::move(other.__fbthrift_field_tiny)) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
+
+MinPaddingWithCustomType& MinPaddingWithCustomType::operator=(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType&& other) noexcept {
+    this->__fbthrift_field_big = std::move(other.__fbthrift_field_big);
+    this->__fbthrift_field_biggish = std::move(other.__fbthrift_field_biggish);
+    this->__fbthrift_field_medium = std::move(other.__fbthrift_field_medium);
+    this->__fbthrift_field_small = std::move(other.__fbthrift_field_small);
+    this->__fbthrift_field_tiny = std::move(other.__fbthrift_field_tiny);
+    return *this;
+}
+
+
+MinPaddingWithCustomType::MinPaddingWithCustomType(apache::thrift::FragileConstructor, ::std::int8_t small__arg, ::std::int64_t big__arg, ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> medium__arg, ::std::int32_t biggish__arg, ::std::int8_t tiny__arg) :
+    __fbthrift_field_big(std::move(big__arg)),
+    __fbthrift_field_biggish(std::move(biggish__arg)),
+    __fbthrift_field_medium(std::move(medium__arg)),
+    __fbthrift_field_small(std::move(small__arg)),
+    __fbthrift_field_tiny(std::move(tiny__arg)) {
+  ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+}
+
+
+void MinPaddingWithCustomType::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_small = ::std::int8_t();
+  this->__fbthrift_field_big = ::std::int64_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_biggish = ::std::int32_t();
+  this->__fbthrift_field_tiny = ::std::int8_t();
+}
+
+void MinPaddingWithCustomType::__fbthrift_clear_terse_fields() {
+  this->__fbthrift_field_small = ::std::int8_t();
+  this->__fbthrift_field_big = ::std::int64_t();
+  ::apache::thrift::adapt_detail::clear<::my::Adapter, 3>(__fbthrift_field_medium, *this);
+  this->__fbthrift_field_biggish = ::std::int32_t();
+  this->__fbthrift_field_tiny = ::std::int8_t();
+}
+
+bool MinPaddingWithCustomType::__fbthrift_is_empty() const {
+  return this->__fbthrift_field_small == ::std::int8_t() &&
+ this->__fbthrift_field_big == ::std::int64_t() &&
+ this->__fbthrift_field_medium == ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType>() &&
+ this->__fbthrift_field_biggish == ::std::int32_t() &&
+ this->__fbthrift_field_tiny == ::std::int8_t();
+}
+
+bool MinPaddingWithCustomType::operator==(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.small_ref() == rhs.small_ref())) {
+    return false;
+  }
+  if (!(lhs.big_ref() == rhs.big_ref())) {
+    return false;
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium)) {
+    return false;
+  }
+  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
+    return false;
+  }
+  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool MinPaddingWithCustomType::operator<(FOLLY_MAYBE_UNUSED const MinPaddingWithCustomType& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.small_ref() == rhs.small_ref())) {
+    return lhs.small_ref() < rhs.small_ref();
+  }
+  if (!(lhs.big_ref() == rhs.big_ref())) {
+    return lhs.big_ref() < rhs.big_ref();
+  }
+  if (::apache::thrift::adapt_detail::not_equal<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium)) {
+    return ::apache::thrift::adapt_detail::less<::my::Adapter>(lhs.__fbthrift_field_medium, rhs.__fbthrift_field_medium);
+  }
+  if (!(lhs.biggish_ref() == rhs.biggish_ref())) {
+    return lhs.biggish_ref() < rhs.biggish_ref();
+  }
+  if (!(lhs.tiny_ref() == rhs.tiny_ref())) {
+    return lhs.tiny_ref() < rhs.tiny_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& a, FOLLY_MAYBE_UNUSED MinPaddingWithCustomType& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_big, b.__fbthrift_field_big);
+  swap(a.__fbthrift_field_biggish, b.__fbthrift_field_biggish);
+  swap(a.__fbthrift_field_medium, b.__fbthrift_field_medium);
+  swap(a.__fbthrift_field_small, b.__fbthrift_field_small);
+  swap(a.__fbthrift_field_tiny, b.__fbthrift_field_tiny);
+}
+
+template void MinPaddingWithCustomType::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MinPaddingWithCustomType::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MinPaddingWithCustomType::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MinPaddingWithCustomType::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MinPaddingWithCustomType::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MinPaddingWithCustomType::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MinPaddingWithCustomType::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MinPaddingWithCustomType::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+}}}} // apache::thrift::fixtures::types
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::apache::thrift::fixtures::types::MyDataItem>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -3055,5 +3214,6 @@ template uint32_t StructWithDoubleUnderscores::serializedSizeZC<>(apache::thrift
 
 namespace apache { namespace thrift { namespace fixtures { namespace types { namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+  ::apache::thrift::adapt_detail::validateFieldAdapter<::my::Adapter, 3, ::std::int16_t, ::apache::thrift::fixtures::types::MinPaddingWithCustomType>();
 }
 }}}}} // apache::thrift::fixtures::types

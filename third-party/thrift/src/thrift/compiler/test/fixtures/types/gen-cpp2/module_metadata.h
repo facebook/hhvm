@@ -11,6 +11,8 @@
 #include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/include_metadata.h"
+#include "thrift/annotation/gen-cpp2/cpp_metadata.h"
+#include "thrift/annotation/gen-cpp2/thrift_metadata.h"
 
 namespace apache {
 namespace thrift {
@@ -91,6 +93,11 @@ class StructMetadata<::apache::thrift::fixtures::types::ComplexNestedWithDefault
 };
 template <>
 class StructMetadata<::apache::thrift::fixtures::types::MinPadding> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

@@ -10,6 +10,10 @@ cimport folly.iobuf as _fbthrift_iobuf
 
 cimport thrift.py3.builder
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+cimport facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 cimport include.types as _include_types
 cimport include.builders as _include_builders
 
@@ -64,6 +68,14 @@ cdef class ComplexNestedWithDefault_Builder(thrift.py3.builder.StructBuilder):
 
 
 cdef class MinPadding_Builder(thrift.py3.builder.StructBuilder):
+    cdef public pint small
+    cdef public pint big
+    cdef public pint medium
+    cdef public pint biggish
+    cdef public pint tiny
+
+
+cdef class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
     cdef public pint small
     cdef public pint big
     cdef public pint medium

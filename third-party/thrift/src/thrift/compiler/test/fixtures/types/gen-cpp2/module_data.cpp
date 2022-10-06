@@ -305,6 +305,42 @@ const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::M
   -1,
 }};
 
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_names = {{
+  "small",
+  "big",
+  "medium",
+  "biggish",
+  "tiny",
+}};
+const std::array<int16_t, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+const std::array<protocol::TType, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::fields_types = {{
+  TType::T_BYTE,
+  TType::T_I64,
+  TType::T_I16,
+  TType::T_I32,
+  TType::T_BYTE,
+}};
+const std::array<folly::StringPiece, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::storage_names = {{
+  "__fbthrift_field_small",
+  "__fbthrift_field_big",
+  "__fbthrift_field_medium",
+  "__fbthrift_field_biggish",
+  "__fbthrift_field_tiny",
+}};
+const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::isset_indexes = {{
+  -1,
+  -1,
+  -1,
+  -1,
+  -1,
+}};
+
 const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
 }};
 const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{

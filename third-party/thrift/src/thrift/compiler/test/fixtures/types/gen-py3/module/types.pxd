@@ -41,6 +41,8 @@ from thrift.py3.common cimport (
     MetadataBox as __MetadataBox,
 )
 from folly.optional cimport cOptional as __cOptional
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport include.types as _include_types
 
 cimport module.types_fields as _fbthrift_types_fields
@@ -529,6 +531,22 @@ cdef extern from "thrift/compiler/test/fixtures/types/src/gen-cpp2/module_types_
         __required_field_ref[cint8_t] tiny_ref "tiny_ref" ()
 
 
+    cdef cppclass cMinPaddingWithCustomType "::apache::thrift::fixtures::types::MinPaddingWithCustomType":
+        cMinPaddingWithCustomType() except +
+        cMinPaddingWithCustomType(const cMinPaddingWithCustomType&) except +
+        bint operator==(cMinPaddingWithCustomType&)
+        bint operator!=(cMinPaddingWithCustomType&)
+        bint operator<(cMinPaddingWithCustomType&)
+        bint operator>(cMinPaddingWithCustomType&)
+        bint operator<=(cMinPaddingWithCustomType&)
+        bint operator>=(cMinPaddingWithCustomType&)
+        __terse_field_ref[cint8_t] small_ref "small_ref" ()
+        __terse_field_ref[cint64_t] big_ref "big_ref" ()
+        __terse_field_ref[cint16_t] medium_ref "medium_ref" ()
+        __terse_field_ref[cint32_t] biggish_ref "biggish_ref" ()
+        __terse_field_ref[cint8_t] tiny_ref "tiny_ref" ()
+
+
     cdef cppclass cMyStruct "::apache::thrift::fixtures::types::MyStruct":
         cMyStruct() except +
         cMyStruct(const cMyStruct&) except +
@@ -849,6 +867,20 @@ cdef class MinPadding(thrift.py3.types.Struct):
 
     @staticmethod
     cdef _fbthrift_create(shared_ptr[cMinPadding])
+
+
+
+cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
+    cdef shared_ptr[cMinPaddingWithCustomType] _cpp_obj
+    cdef _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter _fields_setter
+    cdef inline object small_impl(self)
+    cdef inline object big_impl(self)
+    cdef inline object medium_impl(self)
+    cdef inline object biggish_impl(self)
+    cdef inline object tiny_impl(self)
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cMinPaddingWithCustomType])
 
 
 

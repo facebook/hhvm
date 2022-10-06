@@ -110,6 +110,18 @@ struct ForEachField<::apache::thrift::fixtures::types::MinPadding> {
 };
 
 template <>
+struct ForEachField<::apache::thrift::fixtures::types::MinPaddingWithCustomType> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).small_ref()...);
+    f(1, static_cast<T&&>(t).big_ref()...);
+    f(2, static_cast<T&&>(t).medium_ref()...);
+    f(3, static_cast<T&&>(t).biggish_ref()...);
+    f(4, static_cast<T&&>(t).tiny_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::apache::thrift::fixtures::types::MyDataItem> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {

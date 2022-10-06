@@ -10,6 +10,8 @@
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.h"
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/include_types.h"
+#include "thrift/annotation/gen-cpp2/cpp_types.h"
+#include "thrift/annotation/gen-cpp2/thrift_types.h"
 
 namespace apache { namespace thrift {
   class Cpp2RequestContext;

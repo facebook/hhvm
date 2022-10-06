@@ -17,3 +17,5 @@
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/module_types.tcc"
 
 #include "thrift/compiler/test/fixtures/types/gen-cpp2/include_types_custom_protocol.h"
+#include "thrift/annotation/gen-cpp2/cpp_types_custom_protocol.h"
+#include "thrift/annotation/gen-cpp2/thrift_types_custom_protocol.h"

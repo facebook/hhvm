@@ -1834,7 +1834,12 @@ class MinPadding implements \IThriftSyncStruct {
 
   public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
     return shape(
-      'struct' => dict[],
+      'struct' => dict[
+        '\thrift\annotation\cpp\MinimizePadding' => \thrift\annotation\cpp\MinimizePadding::fromShape(
+          shape(
+          )
+        ),
+      ],
       'fields' => dict[
       ],
     );
@@ -1895,6 +1900,260 @@ class MinPadding implements \IThriftSyncStruct {
       }
     } else {
       throw new \TProtocolException("Required field tiny cannot be found.");
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * MinPaddingWithCustomType
+ */
+class MinPaddingWithCustomType implements \IThriftSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'small',
+      'is_terse' => true,
+      'type' => \TType::BYTE,
+    ),
+    2 => shape(
+      'var' => 'big',
+      'is_terse' => true,
+      'type' => \TType::I64,
+    ),
+    3 => shape(
+      'var' => 'medium',
+      'is_terse' => true,
+      'type' => \TType::I16,
+    ),
+    4 => shape(
+      'var' => 'biggish',
+      'is_terse' => true,
+      'type' => \TType::I32,
+    ),
+    5 => shape(
+      'var' => 'tiny',
+      'is_terse' => true,
+      'type' => \TType::BYTE,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'small' => 1,
+    'big' => 2,
+    'medium' => 3,
+    'biggish' => 4,
+    'tiny' => 5,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'small' => ?int,
+    ?'big' => ?int,
+    ?'medium' => ?int,
+    ?'biggish' => ?int,
+    ?'tiny' => ?int,
+  );
+
+  const int STRUCTURAL_ID = 7925816223011912416;
+  /**
+   * Original thrift field:-
+   * 1: byte small
+   */
+  public int $small;
+  /**
+   * Original thrift field:-
+   * 2: i64 big
+   */
+  public int $big;
+  /**
+   * Original thrift field:-
+   * 3: i16 medium
+   */
+  public int $medium;
+  /**
+   * Original thrift field:-
+   * 4: i32 biggish
+   */
+  public int $biggish;
+  /**
+   * Original thrift field:-
+   * 5: byte tiny
+   */
+  public int $tiny;
+
+  public function __construct(?int $small = null, ?int $big = null, ?int $medium = null, ?int $biggish = null, ?int $tiny = null)[] {
+    $this->small = $small ?? 0;
+    $this->big = $big ?? 0;
+    $this->medium = $medium ?? 0;
+    $this->biggish = $biggish ?? 0;
+    $this->tiny = $tiny ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'small'),
+      Shapes::idx($shape, 'big'),
+      Shapes::idx($shape, 'medium'),
+      Shapes::idx($shape, 'biggish'),
+      Shapes::idx($shape, 'tiny'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MinPaddingWithCustomType';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->small = 0;
+    $this->big = 0;
+    $this->medium = 0;
+    $this->biggish = 0;
+    $this->tiny = 0;
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MinPaddingWithCustomType",
+        "fields" => vec[
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                )
+              ),
+              "name" => "small",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "big",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                )
+              ),
+              "name" => "medium",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                )
+              ),
+              "name" => "biggish",
+            )
+          ),
+          tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                )
+              ),
+              "name" => "tiny",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\MinimizePadding' => \thrift\annotation\cpp\MinimizePadding::fromShape(
+          shape(
+          )
+        ),
+        '\thrift\annotation\TerseWrite' => \thrift\annotation\TerseWrite::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+        'medium' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::my::Adapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'small') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['small']);
+      if ($_tmp0 > 0x7f) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->small = (int)$_tmp0;
+      }
+    }
+    if (idx($parsed, 'big') !== null) {
+      $this->big = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['big']);
+    }
+    if (idx($parsed, 'medium') !== null) {
+      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['medium']);
+      if ($_tmp1 > 0x7fff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->medium = (int)$_tmp1;
+      }
+    }
+    if (idx($parsed, 'biggish') !== null) {
+      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['biggish']);
+      if ($_tmp2 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->biggish = (int)$_tmp2;
+      }
+    }
+    if (idx($parsed, 'tiny') !== null) {
+      $_tmp3 = (int)HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['tiny']);
+      if ($_tmp3 > 0x7f) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->tiny = (int)$_tmp3;
+      }
     }
   }
 

@@ -39,6 +39,8 @@ from thrift.py3.types cimport (
 )
 from folly.optional cimport cOptional as __cOptional
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport include.types as _include_types
 
 cimport module.types as _module_types
@@ -164,6 +166,21 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod
     cdef __MinPadding_FieldsSetter _fbthrift_create(_module_types.cMinPadding* struct_cpp_obj)
+    cdef void _set_field_0(self, _fbthrift_value) except *
+    cdef void _set_field_1(self, _fbthrift_value) except *
+    cdef void _set_field_2(self, _fbthrift_value) except *
+    cdef void _set_field_3(self, _fbthrift_value) except *
+    cdef void _set_field_4(self, _fbthrift_value) except *
+
+
+ctypedef void (*__MinPaddingWithCustomType_FieldsSetterFunc)(__MinPaddingWithCustomType_FieldsSetter, object) except *
+
+cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
+    cdef _module_types.cMinPaddingWithCustomType* _struct_cpp_obj
+    cdef cumap[__cstring_view, __MinPaddingWithCustomType_FieldsSetterFunc] _setters
+
+    @staticmethod
+    cdef __MinPaddingWithCustomType_FieldsSetter _fbthrift_create(_module_types.cMinPaddingWithCustomType* struct_cpp_obj)
     cdef void _set_field_0(self, _fbthrift_value) except *
     cdef void _set_field_1(self, _fbthrift_value) except *
     cdef void _set_field_2(self, _fbthrift_value) except *

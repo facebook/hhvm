@@ -69,11 +69,6 @@ struct c_ConditionWaitHandle final : c_WaitableWaitHandle {
   }
 };
 
-void HHVM_STATIC_METHOD(ConditionWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-Object HHVM_STATIC_METHOD(ConditionWaitHandle, create,
-                          const Variant& child);
-
 inline c_ConditionWaitHandle* c_Awaitable::asCondition() {
   assertx(getKind() == Kind::Condition);
   return static_cast<c_ConditionWaitHandle*>(this);

@@ -49,9 +49,6 @@ void HHVM_METHOD(SQLite3, open,
                  int64_t flags /* = SQLITE3_OPEN_READWRITE |
                    SQLITE3_OPEN_CREATE */,
                  const Variant& encryption_key /* = null */);
-Array HHVM_STATIC_METHOD(SQLite3, version);
-String HHVM_STATIC_METHOD(SQLite3, escapestring,
-                          const String& sql);
 
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -140,17 +140,6 @@ struct c_AwaitAllWaitHandle final : c_WaitableWaitHandle {
   static const int8_t STATE_BLOCKED = 2;
 };
 
-void HHVM_STATIC_METHOD(AwaitAllWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVec,
-                          const Array& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromDict,
-                          const Array& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromMap,
-                          const Variant& dependencies);
-Object HHVM_STATIC_METHOD(AwaitAllWaitHandle, fromVector,
-                          const Variant& dependencies);
-
 inline c_AwaitAllWaitHandle* c_Awaitable::asAwaitAll() {
   assertx(getKind() == Kind::AwaitAll);
   return static_cast<c_AwaitAllWaitHandle*>(this);

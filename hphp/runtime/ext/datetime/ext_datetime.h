@@ -66,11 +66,6 @@ struct DateTimeData {
 void HHVM_METHOD(DateTime, __construct,
                  const String& time = "now",
                  const Variant& timezone = uninit_variant);
-Variant HHVM_STATIC_METHOD(DateTime, createFromFormat,
-                           const String& format,
-                           const String& time,
-                           const Variant& timezone /*= uninit_variant */);
-Array HHVM_STATIC_METHOD(DateTime, getLastErrors);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
@@ -116,10 +111,6 @@ struct DateTimeZoneData {
 
 void HHVM_METHOD(DateTimeZone, __construct,
                  const String& timezone);
-Array HHVM_STATIC_METHOD(DateTimeZone, listAbbreviations);
-Variant HHVM_STATIC_METHOD(DateTimeZone, listIdentifiers,
-                           int64_t what,
-                           const String& country);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DateInterval
@@ -141,9 +132,6 @@ struct DateIntervalData {
   static Class* s_class;
   static const StaticString s_className;
 };
-
-Object HHVM_STATIC_METHOD(DateInterval, createFromDateString,
-                          const String& time);
 
 ///////////////////////////////////////////////////////////////////////////////
 // timestamp

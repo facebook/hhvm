@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - hhvm
+        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_ccache' }}
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
@@ -48,6 +48,11 @@ jobs:
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
           extra-sandbox-paths = /nix/var/cache/ccache
           sandbox = false
+    - if: matrix.package == 'hhvm_ccache'
+      uses: actions/cache@v3
+      with:
+        key: ${{github.run_id}}
+        path: /nix/var/cache/ccache
     - run: |
         # See https://nixos.wiki/wiki/CCache
         sudo mkdir -m0770 -p /nix/var/cache/ccache
@@ -106,7 +111,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - hhvm
+        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_ccache' }}
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}

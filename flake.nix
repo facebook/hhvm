@@ -53,7 +53,7 @@
             stdenv = pkgs.ccacheStdenv;
           }).overrideAttrs (finalAttrs: previousAttrs: {
             CCACHE_DIR = "/nix/var/cache/ccache";
-            CCACHE_UMASK = 007;
+            CCACHE_UMASK = "007";
           });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;

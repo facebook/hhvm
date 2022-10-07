@@ -1106,13 +1106,11 @@ int main(int argc, char** argv) {
   try {
     return inner_main(argc, argv);
   } catch (const std::exception& e) {
-    log(ERR,
-        "Uncaught C++ exception: ",
-        folly::exceptionStr(e).toStdString(),
-        "\n");
+    logf_stderr(
+        "Uncaught C++ exception: {}\n", folly::exceptionStr(e).toStdString());
     return 1;
   } catch (...) {
-    log(ERR, "Uncaught C++ exception: ...\n");
+    logf_stderr("Uncaught C++ exception: ...\n");
     return 1;
   }
 }

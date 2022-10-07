@@ -43,6 +43,7 @@
                   CCACHE_DIR
                   CCACHE_UMASK
                   CCACHE_HARDLINK;
+                  CCACHE_MAXSIZE;
               };
         in
         rec {
@@ -53,6 +54,7 @@
           packages.hhvm_ccache = (packages.hhvm.override {
             stdenv = pkgs.ccacheStdenv;
           }).overrideAttrs (finalAttrs: previousAttrs: {
+            CCACHE_MAXSIZE = "64G";
             CCACHE_DIR = "/nix/var/cache/ccache";
             CCACHE_UMASK = "007";
             CCACHE_HARDLINK = "1";

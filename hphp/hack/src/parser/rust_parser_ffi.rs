@@ -129,7 +129,7 @@ where
 ocaml_ffi! {
     fn rust_parse_mode(source_text: SourceText<'_>) -> Option<file_info::Mode> {
         let (_, mode) = parse_mode(&source_text);
-        mode
+        mode.map(Into::into)
     }
 
     fn scan_leading_xhp_trivia(

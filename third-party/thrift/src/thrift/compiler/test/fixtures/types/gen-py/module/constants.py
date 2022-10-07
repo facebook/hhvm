@@ -13,7 +13,9 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 import include.ttypes
+import thrift.annotation.cpp.ttypes
+import thrift.annotation.thrift.ttypes
 
 
-from .ttypes import UTF8STRINGS, has_bitwise_ops, is_unscoped, MyForwardRefEnum, MyEnumA, decorated_struct, ContainerStruct, CppTypeStruct, VirtualStruct, MyStructWithForwardRefEnum, TrivialNumeric, TrivialNestedWithDefault, ComplexString, ComplexNestedWithDefault, MinPadding, MyStruct, MyDataItem, Renaming, AnnotatedTypes, ForwardUsageRoot, ForwardUsageStruct, ForwardUsageByRef, NoexceptMoveEmpty, NoexceptMoveSimpleStruct, NoexceptMoveComplexStruct, NoExceptMoveUnion, AllocatorAware, AllocatorAware2, TypedefStruct, StructWithDoubleUnderscores, TBinary, IntTypedef, UintTypedef
+from .ttypes import UTF8STRINGS, has_bitwise_ops, is_unscoped, MyForwardRefEnum, MyEnumA, decorated_struct, ContainerStruct, CppTypeStruct, VirtualStruct, MyStructWithForwardRefEnum, TrivialNumeric, TrivialNestedWithDefault, ComplexString, ComplexNestedWithDefault, MinPadding, MinPaddingWithCustomType, MyStruct, MyDataItem, Renaming, AnnotatedTypes, ForwardUsageRoot, ForwardUsageStruct, ForwardUsageByRef, NoexceptMoveEmpty, NoexceptMoveSimpleStruct, NoexceptMoveComplexStruct, NoExceptMoveUnion, AllocatorAware, AllocatorAware2, TypedefStruct, StructWithDoubleUnderscores, TBinary, IntTypedef, UintTypedef
 

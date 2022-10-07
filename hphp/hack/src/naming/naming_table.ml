@@ -605,6 +605,9 @@ let load_from_sqlite_for_type_checking
   Db_path_provider.set_naming_db_path
     (Provider_context.get_backend ctx)
     (Some db_path);
+  (* I believe that changes_since_baseline is never used. I want to check... *)
+  if Option.is_some changes_since_baseline then
+    HackEventLogger.naming_sqlite_has_changes_since_baseline ();
   let local_changes =
     choose_local_changes
       ~local_changes:(Naming_sqlite.get_local_changes db_path)

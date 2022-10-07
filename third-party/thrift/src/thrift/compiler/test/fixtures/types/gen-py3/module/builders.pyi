@@ -10,6 +10,10 @@ import typing as _typing
 import folly.iobuf as _fbthrift_iobuf
 import thrift.py3.builder
 
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.cpp.builders as _facebook_thrift_annotation_cpp_builders
+import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+import facebook.thrift.annotation.thrift.builders as _facebook_thrift_annotation_thrift_builders
 import include.types as _include_types
 import include.builders as _include_builders
 
@@ -83,6 +87,16 @@ class ComplexNestedWithDefault_Builder(thrift.py3.builder.StructBuilder):
 
 
 class MinPadding_Builder(thrift.py3.builder.StructBuilder):
+    small: _typing.Optional[int]
+    big: _typing.Optional[int]
+    medium: _typing.Optional[int]
+    biggish: _typing.Optional[int]
+    tiny: _typing.Optional[int]
+
+    def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
+
+
+class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
     small: _typing.Optional[int]
     big: _typing.Optional[int]
     medium: _typing.Optional[int]

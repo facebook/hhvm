@@ -159,7 +159,6 @@ struct ImmutableFuncLookup {
   bool needsUnitLoad;
 };
 
-ImmutableFuncLookup lookupImmutableFunc(const Unit* unit,
-                                        const StringData* name);
+ImmutableFuncLookup lookupImmutableFunc(const StringData* name);
 
 }

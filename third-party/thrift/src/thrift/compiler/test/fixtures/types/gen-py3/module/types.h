@@ -222,6 +222,28 @@ void reset_field<::apache::thrift::fixtures::types::MinPadding>(
 }
 
 template<>
+void reset_field<::apache::thrift::fixtures::types::MinPaddingWithCustomType>(
+    ::apache::thrift::fixtures::types::MinPaddingWithCustomType& obj, uint16_t index) {
+  switch (index) {
+    case 0:
+      obj.small_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().small_ref());
+      return;
+    case 1:
+      obj.big_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().big_ref());
+      return;
+    case 2:
+      obj.medium_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().medium_ref());
+      return;
+    case 3:
+      obj.biggish_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().biggish_ref());
+      return;
+    case 4:
+      obj.tiny_ref().copy_from(default_inst<::apache::thrift::fixtures::types::MinPaddingWithCustomType>().tiny_ref());
+      return;
+  }
+}
+
+template<>
 void reset_field<::apache::thrift::fixtures::types::MyStruct>(
     ::apache::thrift::fixtures::types::MyStruct& obj, uint16_t index) {
   switch (index) {
@@ -511,6 +533,16 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
     ::apache::thrift::fixtures::types::MinPadding>::namesmap() {
+  static const folly::Indestructible<NamesMap> map {
+    {
+    }
+  };
+  return *map;
+}
+
+template<>
+const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
+    ::apache::thrift::fixtures::types::MinPaddingWithCustomType>::namesmap() {
   static const folly::Indestructible<NamesMap> map {
     {
     }

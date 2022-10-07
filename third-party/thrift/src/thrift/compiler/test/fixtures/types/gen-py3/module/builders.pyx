@@ -80,6 +80,16 @@ cdef class MinPadding_Builder(thrift.py3.builder.StructBuilder):
         yield "biggish", self.biggish
         yield "tiny", self.tiny
 
+cdef class MinPaddingWithCustomType_Builder(thrift.py3.builder.StructBuilder):
+    _struct_type = _module_types.MinPaddingWithCustomType
+
+    def __iter__(self):
+        yield "small", self.small
+        yield "big", self.big
+        yield "medium", self.medium
+        yield "biggish", self.biggish
+        yield "tiny", self.tiny
+
 cdef class MyStruct_Builder(thrift.py3.builder.StructBuilder):
     _struct_type = _module_types.MyStruct
 

@@ -338,6 +338,8 @@ let naming_from_saved_state_end _ = ()
 
 let naming_sqlite_local_changes_nonempty _ = ()
 
+let naming_sqlite_has_changes_since_baseline _ = ()
+
 let type_decl_end _ = ()
 
 let remote_old_decl_end _ _ = ()

@@ -9,6 +9,8 @@
 
 #include <cstdlib>
 
+#include <fmt/core.h>
+
 #include <folly/ExceptionWrapper.h>
 #include <folly/SocketAddress.h>
 #include <folly/executors/InlineExecutor.h>
@@ -88,15 +90,16 @@ folly::Future<std::string> WatchmanConnection::getSockPath() {
     auto out_pair = proc.communicate();
     auto returnCode = proc.wait();
     if (returnCode.exitStatus() != 0) {
-      throw WatchmanError{folly::to<std::string>(
-          "`watchman get-sockname` returned error code ",
-          returnCode.exitStatus(),
 #ifndef _WIN32
-          " when called as user ",
+      throw WatchmanError{fmt::format(
+          "`watchman get-sockname` returned error code {} when called as user {}. Error: {}",
+          returnCode.exitStatus(),
           geteuid(),
-#endif
-          ". Error: ",
           out_pair.second)};
+#else
+      throw WatchmanError{fmt::format(
+          "`watchman get-sockname` returned error code {}. Error: {}", returnCode.exitStatus(), out_pair.second)};
+#endif
     }
     auto result = parseBser(out_pair.first);
 

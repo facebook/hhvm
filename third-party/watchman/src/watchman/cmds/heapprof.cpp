@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <folly/memory/Malloc.h>
 #include "watchman/Client.h"
@@ -26,8 +27,7 @@ static UntypedResponse cmd_debug_prof_dump(Client*, const json_ref&) {
   resp.set(
       "prof.dump",
       w_string_to_json(
-          folly::to<std::string>(
-              "mallctl prof.dump returned: ", folly::errnoStr(result))
+          fmt::format("mallctl prof.dump returned: {}", folly::errnoStr(result))
               .c_str()));
   return resp;
 }

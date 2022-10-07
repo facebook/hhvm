@@ -129,7 +129,7 @@ class Client<::py3::simple::DerivedService> : public ::py3::simple::SimpleServic
  private:
   template <typename Protocol_, typename RpcOptions>
   void get_sixT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> get_sixCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> get_sixCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

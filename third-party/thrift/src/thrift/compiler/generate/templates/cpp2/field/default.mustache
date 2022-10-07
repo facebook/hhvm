@@ -18,6 +18,7 @@
   // TODO(afuller): Merge with other impls and move to a shared location.
 %><%#field:cpp_first_adapter%><%!
   %>::apache::thrift::adapt_detail::fromThriftField<<%field:cpp_first_adapter%>, <%field:key%>>(<%!
+%><%^field:cpp_exactly_one_adapter?%><% > types/adapter_pre%><%/field:cpp_exactly_one_adapter?%><%!
 %><%/field:cpp_first_adapter%><%!
 %><%#field:value%><%!
     %><% > common/cxx_value_prefix%><% > common/iterate_const_values%><% > common/cxx_value_suffix%><%!
@@ -32,5 +33,6 @@
   %><%/type:string_or_binary?%><%!
 %><%/field:value%><%!
 %><%#field:cpp_first_adapter%><%!
+%><%^field:cpp_exactly_one_adapter?%><% > types/adapter_post%><%/field:cpp_exactly_one_adapter?%><%!
   %>, *this)<%!
 %><%/field:cpp_first_adapter%>

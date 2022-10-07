@@ -499,4 +499,93 @@ TEST(References, UnionLessThan) {
   }
 }
 
+TEST(References, StructAdapterRefStruct) {
+  using apache::thrift::test::basic::DirectlyAdaptedStruct;
+  StructAdapterRefStruct obj;
+  DirectlyAdaptedStruct wrapper = {};
+  wrapper.value.data() = 1;
+
+  create_adapted_reference_default_test(obj);
+
+  obj.def_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.opt_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.req_shared_field_ref() = std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.def_shared_const_field_ref() =
+      std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.opt_shared_const_field_ref() =
+      std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.req_shared_const_field_ref() =
+      std::make_shared<DirectlyAdaptedStruct>(wrapper);
+  obj.opt_box_field() = DirectlyAdaptedStruct{wrapper};
+  obj.box_field() = DirectlyAdaptedStruct{wrapper};
+
+  EXPECT_EQ(obj.def_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.req_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.def_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.req_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(obj.opt_box_field()->value.data(), 1);
+  EXPECT_EQ(obj.box_field()->value.data(), 1);
+
+  auto objs = CompactSerializer::serialize<std::string>(obj);
+  StructAdapterRefStruct objd;
+  CompactSerializer::deserialize(objs, objd);
+
+  EXPECT_EQ(objd.def_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.req_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.def_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.req_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_const_field_ref()->value.data(), 1);
+  EXPECT_EQ(objd.opt_box_field()->value.data(), 1);
+  EXPECT_EQ(objd.box_field()->value.data(), 1);
+}
+
+TEST(References, DoubleAdaptedRefStruct) {
+  using apache::thrift::test::basic::DirectlyAdaptedStruct;
+  DoubleAdaptedRefStruct obj;
+  Wrapper<DirectlyAdaptedStruct> wrapper = {};
+  wrapper.value.value.data() = 1;
+
+  create_adapted_reference_default_test(obj);
+
+  obj.def_shared_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.opt_shared_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.req_shared_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.def_shared_const_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.opt_shared_const_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.req_shared_const_field_ref() =
+      std::make_shared<Wrapper<DirectlyAdaptedStruct>>(wrapper);
+  obj.opt_box_field() = wrapper;
+  obj.box_field() = wrapper;
+
+  EXPECT_EQ(obj.def_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.req_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.def_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.req_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.opt_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(obj.opt_box_field()->value.value.data(), 1);
+  EXPECT_EQ(obj.box_field()->value.value.data(), 1);
+
+  auto objs = CompactSerializer::serialize<std::string>(obj);
+  DoubleAdaptedRefStruct objd;
+  CompactSerializer::deserialize(objs, objd);
+
+  EXPECT_EQ(objd.def_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.req_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.def_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.req_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.opt_shared_const_field_ref()->value.value.data(), 1);
+  EXPECT_EQ(objd.opt_box_field()->value.value.data(), 1);
+  EXPECT_EQ(objd.box_field()->value.value.data(), 1);
+}
+
 } // namespace cpp2

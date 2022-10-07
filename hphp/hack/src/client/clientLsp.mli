@@ -11,6 +11,8 @@ type args = {
   from: string;
       (** The source where the client was spawned from, i.e. nuclide, vim, emacs, etc. *)
   config: (string * string) list;  (** --config overrides at the command-line *)
+  ignore_hh_version: bool;
+  naming_table: string option;
   verbose: bool;
       (** Extra logging, including logs per LSP message (voluminous!) *)
 }

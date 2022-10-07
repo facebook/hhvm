@@ -31,7 +31,7 @@ void MyServiceAsyncProcessor::executeRequest_query(apache::thrift::ServerRequest
   ::test::fixtures::basic::MyService_query_pargs args;
   auto uarg_u = std::make_unique<::test::fixtures::basic::MyUnion>();
   args.get<0>().value = uarg_u.get();
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.query", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.query", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "query", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

@@ -595,7 +595,7 @@ void HandlerCallbackBase::breakTilePromise() {
 
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,
@@ -617,7 +617,7 @@ HandlerCallback<void>::HandlerCallback(
 
 HandlerCallback<void>::HandlerCallback(
     ResponseChannelRequest::UniquePtr req,
-    std::unique_ptr<ContextStack> ctx,
+    ContextStack::UniquePtr ctx,
     cob_ptr cp,
     exnw_ptr ewp,
     int32_t protoSeqId,

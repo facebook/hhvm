@@ -1486,19 +1486,25 @@ and simplify_subtype_i
                   ||| simplify_subtype_i ~subtype_env ~this_ty ty_sub ty_super)
             in
             (* Heuristicky logic to decide whether to "break" the intersection
-               or the union first, based on observing that the following cases often occur:
-                 - A & B <: (A & B) | C
-                   In which case we want to "break" the union on the right first
-                   in order to have the following recursive calls :
-                       A & B <: A & B
-                       A & B <: C
-                 - A & (B | C) <: B | C
-                   In which case we want to "break" the intersection on the left first
-                   in order to have the following recursive calls:
-                       A <: B | C
-                       B | C <: B | C
+                or the union first, based on observing that the following cases often occur:
+                  - A & B <: (A & B) | C
+                    In which case we want to "break" the union on the right first
+                    in order to have the following recursive calls :
+                        A & B <: A & B
+                        A & B <: C
+                  - A & (B | C) <: B | C
+                    In which case we want to "break" the intersection on the left first
+                    in order to have the following recursive calls:
+                        A <: B | C
+                        B | C <: B | C
+               If there is a type variable in the union, then generally it's helpful to
+               break the union apart.
             *)
-            if List.exists tyl_super ~f:(Typing_utils.is_tintersection env) then
+            if
+              List.exists tyl_super ~f:(fun t ->
+                  Typing_utils.is_tintersection env t
+                  || Typing_utils.is_tyvar env t)
+            then
               simplify_sub_union env ety_sub tyl_super
             else if List.exists tyl_sub ~f:(Typing_utils.is_tunion env) then
               simplify_super_intersection env tyl_sub (LoclType ty_super)

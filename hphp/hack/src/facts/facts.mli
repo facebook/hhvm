@@ -37,6 +37,7 @@ type type_facts = {
   flags: int;
   require_extends: InvSSet.t;
   require_implements: InvSSet.t;
+  require_class: InvSSet.t;
   attributes: string list InvSMap.t;
 }
 

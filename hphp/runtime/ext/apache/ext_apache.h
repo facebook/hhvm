@@ -25,9 +25,6 @@
 
 namespace HPHP {
 
-Array HHVM_FUNCTION(apache_request_headers);
-Array HHVM_FUNCTION(apache_proxygen_headers);
-
 struct ApacheExtension final : Extension {
   ApacheExtension();
   ~ApacheExtension() override;

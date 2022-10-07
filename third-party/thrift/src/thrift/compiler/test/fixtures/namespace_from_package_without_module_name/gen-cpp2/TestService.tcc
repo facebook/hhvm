@@ -31,7 +31,7 @@ void TestServiceAsyncProcessor::executeRequest_init(apache::thrift::ServerReques
   ::test::namespace_from_package_without_module_name::TestService_init_pargs args;
   ::std::int64_t uarg_int1{0};
   args.get<0>().value = &uarg_int1;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "TestService.init", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "TestService.init", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "init", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

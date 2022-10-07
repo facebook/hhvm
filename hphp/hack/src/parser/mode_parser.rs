@@ -5,12 +5,12 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use bumpalo::Bump;
-use oxidized::file_info::Mode;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::source_text::SourceText;
 use parser_core_types::syntax_by_ref::syntax::Syntax;
 use parser_core_types::syntax_by_ref::syntax_variant_generated::SyntaxVariant;
 use parser_core_types::syntax_by_ref::syntax_variant_generated::{self as syntax};
+use parser_core_types::syntax_tree::FileMode;
 
 pub enum Language {
     Hack,
@@ -21,7 +21,7 @@ pub enum Language {
 // with anything other than <?hh). Correctly recognizing PHP files is important
 // for open-source projects, which may need Hack and PHP files to coexist in the
 // same directory.
-pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
+pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<FileMode>) {
     let bump = Bump::new();
     if let Some(header) =
         positioned_by_ref_parser::parse_header_only(ParserEnv::default(), &bump, text)
@@ -44,9 +44,9 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
                             // <?hh
                             _ => {
                                 if text.file_path().has_extension("hhi") {
-                                    (Language::Hack, Some(Mode::Mhhi))
+                                    (Language::Hack, Some(FileMode::Hhi))
                                 } else {
-                                    (Language::Hack, Some(Mode::Mstrict))
+                                    (Language::Hack, Some(FileMode::Strict))
                                 }
                             }
                         }
@@ -54,15 +54,15 @@ pub fn parse_mode(text: &SourceText<'_>) -> (Language, Option<Mode>) {
                     _ => {
                         // unreachable (parser either returns a value that matches
                         // the above expressions, or None)
-                        (Language::Hack, Some(Mode::Mstrict))
+                        (Language::Hack, Some(FileMode::Strict))
                     }
                 }
             }
             // unreachable (parser either returns a value that matches
             // the above expression, or None)
-            _ => (Language::Hack, Some(Mode::Mstrict)),
+            _ => (Language::Hack, Some(FileMode::Strict)),
         }
     } else {
-        (Language::Hack, Some(Mode::Mstrict))
+        (Language::Hack, Some(FileMode::Strict))
     }
 }

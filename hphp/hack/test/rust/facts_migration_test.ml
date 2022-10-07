@@ -32,6 +32,7 @@ let test_json_deser_ser_idempotent () =
                   ( "attributes",
                     JSON_Object
                       [("A", JSON_Array [JSON_String "B"; JSON_String "C"])] );
+                  ("requireClass", JSON_Array []);
                   ("requireImplements", JSON_Array []);
                   ("requireExtends", JSON_Array []);
                 ];

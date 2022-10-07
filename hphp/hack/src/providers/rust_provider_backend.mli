@@ -39,6 +39,28 @@ module Decl : sig
   val get_folded_class : t -> string -> Decl_defs.decl_class_type option
 
   val declare_folded_class : t -> string -> unit
+
+  val remove_funs_batch : t -> string list -> unit
+
+  val remove_shallow_classes_batch : t -> string list -> unit
+
+  val remove_folded_classes_batch : t -> string list -> unit
+
+  val remove_typedefs_batch : t -> string list -> unit
+
+  val remove_gconsts_batch : t -> string list -> unit
+
+  val remove_modules_batch : t -> string list -> unit
+
+  val remove_props_batch : t -> (string * string) list -> unit
+
+  val remove_static_props_batch : t -> (string * string) list -> unit
+
+  val remove_methods_batch : t -> (string * string) list -> unit
+
+  val remove_static_methods_batch : t -> (string * string) list -> unit
+
+  val remove_constructors_batch : t -> string list -> unit
 end
 
 module File : sig

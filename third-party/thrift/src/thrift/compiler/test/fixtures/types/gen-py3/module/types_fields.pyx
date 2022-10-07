@@ -437,6 +437,78 @@ cdef class __MinPadding_FieldsSetter(__StructFieldsSetter):
 
 
 @__cython.auto_pickle(False)
+cdef class __MinPaddingWithCustomType_FieldsSetter(__StructFieldsSetter):
+
+    @staticmethod
+    cdef __MinPaddingWithCustomType_FieldsSetter _fbthrift_create(_module_types.cMinPaddingWithCustomType* struct_cpp_obj):
+        cdef __MinPaddingWithCustomType_FieldsSetter __fbthrift_inst = __MinPaddingWithCustomType_FieldsSetter.__new__(__MinPaddingWithCustomType_FieldsSetter)
+        __fbthrift_inst._struct_cpp_obj = struct_cpp_obj
+        __fbthrift_inst._setters[__cstring_view(<const char*>"small")] = __MinPaddingWithCustomType_FieldsSetter._set_field_0
+        __fbthrift_inst._setters[__cstring_view(<const char*>"big")] = __MinPaddingWithCustomType_FieldsSetter._set_field_1
+        __fbthrift_inst._setters[__cstring_view(<const char*>"medium")] = __MinPaddingWithCustomType_FieldsSetter._set_field_2
+        __fbthrift_inst._setters[__cstring_view(<const char*>"biggish")] = __MinPaddingWithCustomType_FieldsSetter._set_field_3
+        __fbthrift_inst._setters[__cstring_view(<const char*>"tiny")] = __MinPaddingWithCustomType_FieldsSetter._set_field_4
+        return __fbthrift_inst
+
+    cdef void set_field(__MinPaddingWithCustomType_FieldsSetter self, const char* name, object value) except *:
+        cdef __cstring_view cname = __cstring_view(name)
+        cdef cumap[__cstring_view, __MinPaddingWithCustomType_FieldsSetterFunc].iterator found = self._setters.find(cname)
+        if found == self._setters.end():
+            raise TypeError(f"invalid field name {name.decode('utf-8')}")
+        deref(found).second(self, value)
+
+    cdef void _set_field_0(self, _fbthrift_value) except *:
+        # for field small
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 0)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'small is not a { int !r}.')
+        _fbthrift_value = <cint8_t> _fbthrift_value
+        deref(self._struct_cpp_obj).small_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_1(self, _fbthrift_value) except *:
+        # for field big
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 1)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'big is not a { int !r}.')
+        _fbthrift_value = <cint64_t> _fbthrift_value
+        deref(self._struct_cpp_obj).big_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_2(self, _fbthrift_value) except *:
+        # for field medium
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 2)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'medium is not a { int !r}.')
+        _fbthrift_value = <cint16_t> _fbthrift_value
+        deref(self._struct_cpp_obj).medium_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_3(self, _fbthrift_value) except *:
+        # for field biggish
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 3)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'biggish is not a { int !r}.')
+        _fbthrift_value = <cint32_t> _fbthrift_value
+        deref(self._struct_cpp_obj).biggish_ref().assign(_fbthrift_value)
+
+    cdef void _set_field_4(self, _fbthrift_value) except *:
+        # for field tiny
+        if _fbthrift_value is None:
+            __reset_field[_module_types.cMinPaddingWithCustomType](deref(self._struct_cpp_obj), 4)
+            return
+        if not isinstance(_fbthrift_value, int):
+            raise TypeError(f'tiny is not a { int !r}.')
+        _fbthrift_value = <cint8_t> _fbthrift_value
+        deref(self._struct_cpp_obj).tiny_ref().assign(_fbthrift_value)
+
+
+@__cython.auto_pickle(False)
 cdef class __MyStruct_FieldsSetter(__StructFieldsSetter):
 
     @staticmethod

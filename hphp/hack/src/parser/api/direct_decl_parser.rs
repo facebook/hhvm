@@ -114,6 +114,7 @@ fn parse_script_with_text_allocator<'a, 'o, 't, S: SourceTextAllocator<'t, 'a>>(
 ) {
     let env = ParserEnv::from(opts);
     let (_, mode_opt) = parse_mode(source);
+    let mode_opt = mode_opt.map(file_info::Mode::from);
     let mode = mode_opt.unwrap_or(file_info::Mode::Mstrict);
     let sc = DirectDeclSmartConstructors::new(
         opts,

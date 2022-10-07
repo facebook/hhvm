@@ -328,6 +328,37 @@ StructMetadata<::apache::thrift::fixtures::types::MinPadding>::gen(ThriftMetadat
     field.structured_annotations() = f.structured_annotations;
     module_MinPadding.fields()->push_back(std::move(field));
   }
+  module_MinPadding.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.MinPaddingWithCustomType", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_MinPaddingWithCustomType = res.first->second;
+  module_MinPaddingWithCustomType.name() = "module.MinPaddingWithCustomType";
+  module_MinPaddingWithCustomType.is_union() = false;
+  static const auto* const
+  module_MinPaddingWithCustomType_fields = new std::array<EncodedThriftField, 5>{{
+    {1, "small", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "big", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "medium", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}}).cv_struct_ref(), }},
+    {4, "biggish", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {5, "tiny", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_MinPaddingWithCustomType_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_MinPaddingWithCustomType.fields()->push_back(std::move(field));
+  }
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("cpp.MinimizePadding", {}).cv_struct_ref());
+  module_MinPaddingWithCustomType.structured_annotations()->push_back(*cvStruct("thrift.TerseWrite", {}).cv_struct_ref());
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&

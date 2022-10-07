@@ -24,22 +24,8 @@ namespace HPHP {
 
 constexpr int64_t k_HASH_HMAC = 1;
 
-Variant HHVM_FUNCTION(hash, const String& algo, const String& data,
-                            bool raw_output = false);
-Array HHVM_FUNCTION(hash_algos);
-Variant HHVM_FUNCTION(hash_init, const String& algo, int64_t options = 0,
-                                 const String& key = null_string);
 Variant HHVM_FUNCTION(hash_file, const String& algo, const String& filename,
                                  bool raw_output = false);
-Variant HHVM_FUNCTION(hash_final, const Resource& context,
-                                  bool raw_output = false);
-bool HHVM_FUNCTION(hash_update, const Resource& context, const String& data);
-Variant HHVM_FUNCTION(hash_copy, const Resource& context);
-bool HHVM_FUNCTION(hash_equals, const Variant& known, const Variant& user);
-int64_t HHVM_FUNCTION(furchash_hphp_ext, const String& key,
-                                         int64_t len, int64_t nPart);
-int64_t HHVM_FUNCTION(hphp_murmurhash, const String& key,
-                                       int64_t len, int64_t seed);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

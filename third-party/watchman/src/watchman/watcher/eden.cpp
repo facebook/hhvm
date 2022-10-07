@@ -6,6 +6,7 @@
  */
 
 #include <cpptoml.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 #include <folly/futures/Future.h>
 #include <folly/io/async/AsyncSocket.h>

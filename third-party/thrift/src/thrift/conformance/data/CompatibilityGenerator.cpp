@@ -443,6 +443,60 @@ template <class TT>
   return ret;
 }
 
+template <class TT>
+[[nodiscard]] std::vector<TestCase> switchSingularAndContainer(
+    const Protocol& protocol) {
+  std::vector<TestCase> ret;
+  for (const auto& value : ValueGenerator<TT>::getInterestingValues()) {
+    typename struct_ByFieldType<TT, mod_set<>>::type singular, defSingular;
+    singular.field_1() = value.value;
+
+    typename struct_ByFieldType<type::list<TT>, mod_set<>>::type container,
+        defContainer;
+    container.field_1()->push_back(value.value);
+
+    ret.push_back(genCompatibilityRoundTripTestCase(
+        protocol,
+        fmt::format(
+            "testset.{}/ChangeSingularToContainer/{}",
+            type::getName<TT>(),
+            value.name),
+        singular,
+        container));
+
+    // Due to type mismatch, struct should have default initialized value after
+    // deserialization.
+    ret.back()
+        .test()
+        ->roundTrip_ref()
+        ->expectedResponse()
+        .ensure()
+        .value()
+        ->data() = *serializeThriftStruct(defContainer, protocol);
+
+    ret.push_back(genCompatibilityRoundTripTestCase(
+        protocol,
+        fmt::format(
+            "testset.{}/ChangeContainerToSingular/{}",
+            type::getName<TT>(),
+            value.name),
+        container,
+        singular));
+
+    // Due to type mismatch, struct should have default initialized value after
+    // deserialization.
+    ret.back()
+        .test()
+        ->roundTrip_ref()
+        ->expectedResponse()
+        .ensure()
+        .value()
+        ->data() = *serializeThriftStruct(defSingular, protocol);
+  }
+
+  return ret;
+}
+
 template <typename TT>
 Test createCompatibilityTestWithTypeTag(const Protocol& protocol) {
   Test test;
@@ -461,6 +515,7 @@ Test createCompatibilityTestWithTypeTag(const Protocol& protocol) {
   addToTest({addOptionalFieldWithCustomDefaultTestCase<TT>(protocol)});
   addToTest({addTerseFieldWithCustomDefaultTestCase<TT>(protocol)});
   addToTest(changeStructType<TT>(protocol));
+  addToTest(switchSingularAndContainer<TT>(protocol));
 
   addToTest({changeFieldCustomDefaultTestCase<TT, false>(protocol)});
   addToTest({changeFieldCustomDefaultTestCase<TT, true>(protocol)});

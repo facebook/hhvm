@@ -14,6 +14,8 @@ from typing_extensions import Final
 
 import sys
 import itertools
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 import include.types as _include_types
 
 
@@ -431,6 +433,51 @@ class MinPadding(thrift.py3.types.Struct, _typing.Hashable):
     def _to_python(self) -> "module.thrift_types.MinPadding": ...   # type: ignore
     def _to_py3(self) -> MinPadding: ...
     def _to_py_deprecated(self) -> "module.ttypes.MinPadding": ...   # type: ignore
+
+class MinPaddingWithCustomType(thrift.py3.types.Struct, _typing.Hashable):
+    class __fbthrift_IsSet:
+        pass
+
+    small: Final[int] = ...
+
+    big: Final[int] = ...
+
+    medium: Final[int] = ...
+
+    biggish: Final[int] = ...
+
+    tiny: Final[int] = ...
+
+    def __init__(
+        self, *,
+        small: _typing.Optional[int]=None,
+        big: _typing.Optional[int]=None,
+        medium: _typing.Optional[int]=None,
+        biggish: _typing.Optional[int]=None,
+        tiny: _typing.Optional[int]=None
+    ) -> None: ...
+
+    def __call__(
+        self, *,
+        small: _typing.Union[int, '__NotSet', None]=NOTSET,
+        big: _typing.Union[int, '__NotSet', None]=NOTSET,
+        medium: _typing.Union[int, '__NotSet', None]=NOTSET,
+        biggish: _typing.Union[int, '__NotSet', None]=NOTSET,
+        tiny: _typing.Union[int, '__NotSet', None]=NOTSET
+    ) -> MinPaddingWithCustomType: ...
+
+    def __reduce__(self) -> _typing.Tuple[_typing.Callable, _typing.Tuple[_typing.Type['MinPaddingWithCustomType'], bytes]]: ...
+    def __hash__(self) -> int: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __lt__(self, other: 'MinPaddingWithCustomType') -> bool: ...
+    def __gt__(self, other: 'MinPaddingWithCustomType') -> bool: ...
+    def __le__(self, other: 'MinPaddingWithCustomType') -> bool: ...
+    def __ge__(self, other: 'MinPaddingWithCustomType') -> bool: ...
+
+    def _to_python(self) -> "module.thrift_types.MinPaddingWithCustomType": ...   # type: ignore
+    def _to_py3(self) -> MinPaddingWithCustomType: ...
+    def _to_py_deprecated(self) -> "module.ttypes.MinPaddingWithCustomType": ...   # type: ignore
 
 class MyStruct(thrift.py3.types.Struct, _typing.Hashable):
     class __fbthrift_IsSet:

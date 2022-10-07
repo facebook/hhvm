@@ -7,6 +7,7 @@
 
 #include "watchman/UserDir.h"
 #include <eden/common/utils/StringConv.h>
+#include <fmt/core.h>
 #include <folly/String.h>
 #include "watchman/Logging.h"
 #include "watchman/Options.h"
@@ -52,7 +53,7 @@ std::string getWatchmanAppDataPath() {
   // Perform path mapping from wide string to our preferred UTF8
   w_string temp_location(local_app_data, wcslen(local_app_data));
   // and use the watchman subdir of LOCALAPPDATA
-  auto watchmanDir = folly::to<std::string>(temp_location.view(), "/watchman");
+  auto watchmanDir = fmt::format("{}/watchman", temp_location);
   if (mkdir(watchmanDir.c_str(), 0700) == 0 || errno == EEXIST) {
     return watchmanDir;
   }
@@ -137,7 +138,7 @@ const std::string& getTemporaryDirectory() {
 
 std::string computeWatchmanStateDirectory(const std::string& user) {
   if (!flags.test_state_dir.empty()) {
-    return folly::to<std::string>(flags.test_state_dir, "/", user, "-state");
+    return fmt::format("{}/{}-state", flags.test_state_dir, user);
   }
 
 #ifdef _WIN32
@@ -150,7 +151,7 @@ std::string computeWatchmanStateDirectory(const std::string& user) {
       getTemporaryDirectory().c_str()
 #endif
       ;
-  return folly::to<std::string>(state_parent, "/", user, "-state");
+  return fmt::format("{}/{}-state", state_parent, user);
 #endif
 }
 

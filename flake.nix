@@ -42,7 +42,7 @@
                   CMAKE_INIT_CACHE
                   CCACHE_DIR
                   CCACHE_UMASK
-                  CCACHE_HARDLINK;
+                  CCACHE_HARDLINK
                   CCACHE_MAXSIZE;
               };
         in

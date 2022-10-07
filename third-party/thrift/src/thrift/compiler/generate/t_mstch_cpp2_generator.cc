@@ -1437,9 +1437,10 @@ class cpp_mstch_struct : public mstch_struct {
 
  protected:
   // Computes the alignment of field on the target platform.
-  // Returns 0 if cannot compute the alignment.
+  // Returns max alignment if cannot compute the alignment.
   static size_t compute_alignment(
       const t_field* field, std::unordered_map<const t_field*, size_t>& memo) {
+    const size_t kMaxAlign = alignof(std::max_align_t);
     auto find = memo.emplace(field, 0);
     auto& ret = find.first->second;
     if (!find.second) {
@@ -1449,7 +1450,7 @@ class cpp_mstch_struct : public mstch_struct {
       return ret = 8;
     }
     if (cpp2::is_custom_type(*field)) {
-      return ret = 0;
+      return ret = kMaxAlign;
     }
 
     const t_type* type = field->get_type();
@@ -1475,16 +1476,11 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = 8;
       case t_type::type::t_struct: {
         size_t align = 1;
-        const size_t kMaxAlign = 8;
         const t_struct* strct =
             dynamic_cast<const t_struct*>(type->get_true_type());
         assert(strct);
         for (const auto& field : strct->fields()) {
           size_t field_align = compute_alignment(&field, memo);
-          if (field_align == 0) {
-            // Unknown alignment, bail out.
-            return ret = 0;
-          }
           align = std::max(align, field_align);
           if (align == kMaxAlign) {
             // No need to continue because the struct already has the maximum
@@ -1498,7 +1494,7 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = align;
       }
       default:
-        return ret = 0;
+        return ret = kMaxAlign;
     }
   }
 
@@ -1523,7 +1519,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   // Returns the struct members reordered to minimize padding if the
-  // cpp.minimize_padding annotation is specified.
+  // @cpp.MinimizePadding annotation is specified.
   const std::vector<const t_field*>& get_members_in_layout_order() {
     if (struct_->fields().size() == fields_in_layout_order_.size()) {
       // Already reordered.
@@ -1544,11 +1540,8 @@ class cpp_mstch_struct : public mstch_struct {
     field_alignments.reserve(struct_->fields().size());
     std::unordered_map<const t_field*, size_t> memo;
     for (const auto& field : struct_->fields()) {
-      auto align = compute_alignment(&field, memo);
-      if (align == 0) {
-        // Unknown alignment, don't reorder anything.
-        return fields_in_layout_order_ = struct_->fields().copy();
-      }
+      size_t align = compute_alignment(&field, memo);
+      assert(align);
       field_alignments.push_back(FieldAlign{&field, align});
     }
 

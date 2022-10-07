@@ -1151,6 +1151,19 @@ static Array HHVM_METHOD(ReflectionModule, getAttributesNamespaced) {
   return ai.toArray();
 }
 
+static TypedValue HHVM_METHOD(ReflectionModule, getDocComment) {
+  auto const module = ReflectionModuleHandle::GetModuleFor(this_);
+  assertx(module);
+
+  auto const comment = module->docComment();
+  if (comment == nullptr || comment->empty()) {
+    return make_tv<KindOfBoolean>(false);
+  } else {
+    assertx(!comment->isRefCounted());
+    return make_tv<KindOfPersistentString>(const_cast<StringData*>(comment));
+  }
+}
+
 // ------------------------- class ReflectionFunction
 
 // helper for __construct
@@ -2291,6 +2304,7 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionModule, __init);
     HHVM_ME(ReflectionModule, getAttributesNamespaced);
+    HHVM_ME(ReflectionModule, getDocComment);
 
     HHVM_ME(ReflectionTypeConstant, __init);
     HHVM_ME(ReflectionTypeConstant, getName);

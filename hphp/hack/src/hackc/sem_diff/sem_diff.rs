@@ -491,16 +491,19 @@ fn sem_diff_module<'arena>(
         attributes: a_attributes,
         name: a_name,
         span: a_span,
+        doc_comment: a_doc_comment,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
+        doc_comment: b_doc_comment,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
+    sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
     Ok(())
 }
 

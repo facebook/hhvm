@@ -29,6 +29,7 @@ namespace HPHP {
  */
 struct Module {
   LowStringPtr name;
+  LowStringPtr m_docComment;
   int line0; // start line number on the src file
   int line1; // end line number on the src file
   Attr attrs;
@@ -36,7 +37,8 @@ struct Module {
 
   template<class SerDe>
   void serde(SerDe& sd) {
-    sd(line0)
+    sd(m_docComment)
+      (line0)
       (line1)
       (attrs)
       (userAttributes)
@@ -44,6 +46,8 @@ struct Module {
   }
 
   void prettyPrint(std::ostream& out) const;
+
+  const StringData* docComment() const { return m_docComment; }
 
   /*
    * Look up the defined Module in this request with name `name'.
@@ -80,4 +84,3 @@ bool will_symbol_raise_module_boundary_violation(
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

@@ -43,6 +43,7 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
             attributes: module.attributes.iter().map(convert_attribute).collect(),
             name: ir::ClassId::from_hhbc(module.name, &mut strings),
             src_loc: ir::SrcLoc::from_span(filename, &module.span),
+            doc_comment: module.doc_comment.into(),
         })
         .collect();
 

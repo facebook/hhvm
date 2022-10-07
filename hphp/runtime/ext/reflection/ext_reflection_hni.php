@@ -2528,6 +2528,9 @@ final class ReflectionModule implements Reflector {
 
   use ReflectionTypedAttribute;
 
+  <<__Native>>
+  public function getDocComment()[]: mixed;
+
   /**
    * Get the name of the file.
    *

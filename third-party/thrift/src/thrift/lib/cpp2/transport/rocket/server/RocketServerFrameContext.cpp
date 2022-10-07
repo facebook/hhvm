@@ -90,10 +90,19 @@ void RocketServerFrameContext::onFullFrame(RequestFnfFrame&& fullFrame) && {
 void RocketServerFrameContext::onFullFrame(RequestStreamFrame&& fullFrame) && {
   auto& connection = *connection_;
   auto& frameHandler = *connection.frameHandler_;
-  auto& clientCallback = connection.createStreamClientCallback(
-      streamId_, connection, fullFrame.initialRequestN());
-  frameHandler.handleRequestStreamFrame(
-      std::move(fullFrame), std::move(*this), &clientCallback);
+  if (auto clientCallback = connection.createStreamClientCallback(
+          streamId_, connection, fullFrame.initialRequestN())) {
+    frameHandler.handleRequestStreamFrame(
+        std::move(fullFrame), std::move(*this), clientCallback);
+  } else {
+    connection.close(folly::make_exception_wrapper<
+                     transport::TTransportException>(
+        transport::TTransportException::TTransportExceptionType::
+            STREAMING_CONTRACT_VIOLATION,
+        fmt::format(
+            "Received stream request frame with already in use stream id {}",
+            static_cast<uint32_t>(streamId_))));
+  }
 }
 
 void RocketServerFrameContext::onFullFrame(RequestChannelFrame&& fullFrame) && {
@@ -104,12 +113,20 @@ void RocketServerFrameContext::onFullFrame(RequestChannelFrame&& fullFrame) && {
             transport::TTransportException::TTransportExceptionType::
                 STREAMING_CONTRACT_VIOLATION,
             "initialRequestN of Sink must be 2 or greater"));
-  } else {
-    auto& clientCallback =
-        connection.createSinkClientCallback(streamId_, connection);
+  } else if (
+      auto clientCallback =
+          connection.createSinkClientCallback(streamId_, connection)) {
     auto& frameHandler = *connection.frameHandler_;
     frameHandler.handleRequestChannelFrame(
-        std::move(fullFrame), std::move(*this), &clientCallback);
+        std::move(fullFrame), std::move(*this), clientCallback);
+  } else {
+    connection.close(
+        folly::make_exception_wrapper<transport::TTransportException>(
+            transport::TTransportException::TTransportExceptionType::
+                STREAMING_CONTRACT_VIOLATION,
+            fmt::format(
+                "Received sink request frame with already in use stream id {}",
+                static_cast<uint32_t>(streamId_))));
   }
 }
 

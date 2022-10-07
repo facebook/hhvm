@@ -26,6 +26,8 @@ namespace testservice {
 class TestStreamGeneratorService
     : public apache::thrift::ServiceHandler<TestStreamService> {
  public:
+  folly::coro::Task<::std::int32_t> co_test() override { co_return 42; }
+
   apache::thrift::ServerStream<int32_t> range(
       int32_t from, int32_t to) override;
 
@@ -39,6 +41,8 @@ class TestStreamGeneratorService
 class TestStreamPublisherService
     : public apache::thrift::ServiceHandler<TestStreamService> {
  public:
+  folly::coro::Task<::std::int32_t> co_test() override { co_return 42; }
+
   apache::thrift::ServerStream<int32_t> range(
       int32_t from, int32_t to) override;
 
@@ -52,6 +56,8 @@ class TestStreamPublisherService
 class TestStreamGeneratorWithHeaderService
     : public apache::thrift::ServiceHandler<TestStreamService> {
  public:
+  folly::coro::Task<::std::int32_t> co_test() override { co_return 42; }
+
   apache::thrift::ServerStream<int32_t> range(
       int32_t from, int32_t to) override;
 
@@ -65,6 +71,8 @@ class TestStreamGeneratorWithHeaderService
 class TestStreamPublisherWithHeaderService
     : public apache::thrift::ServiceHandler<TestStreamService> {
  public:
+  folly::coro::Task<::std::int32_t> co_test() override { co_return 42; }
+
   apache::thrift::ServerStream<int32_t> range(
       int32_t from, int32_t to) override;
 

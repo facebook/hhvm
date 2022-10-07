@@ -26,12 +26,12 @@ namespace thrift {
 using namespace testutil::testservice;
 
 struct SinkServiceTest
-    : public AsyncTestSetup<TestSinkService, TestSinkServiceAsyncClient> {};
+    : public AsyncTestSetup<TestSinkService, Client<TestSinkService>> {};
 
 struct SinkServiceTestAllocFn
-    : public AsyncTestSetup<TestSinkService, TestSinkServiceAsyncClient> {
+    : public AsyncTestSetup<TestSinkService, Client<TestSinkService>> {
   void SetUp() override {
-    AsyncTestSetup<TestSinkService, TestSinkServiceAsyncClient>::SetUp();
+    AsyncTestSetup<TestSinkService, Client<TestSinkService>>::SetUp();
 
     // add the custom alloc function
     folly::Function<BaseThriftServer::AllocIOBufFn> fn = [&](size_t size) {
@@ -50,7 +50,7 @@ struct SinkServiceTestAllocFn
   }
 };
 
-folly::coro::Task<bool> waitNoLeak(TestSinkServiceAsyncClient& client) {
+folly::coro::Task<bool> waitNoLeak(Client<TestSinkService>& client) {
   auto deadline = std::chrono::steady_clock::now() + std::chrono::seconds{2};
   do {
     bool unsubscribed = co_await client.co_isSinkUnSubscribed();
@@ -63,10 +63,11 @@ folly::coro::Task<bool> waitNoLeak(TestSinkServiceAsyncClient& client) {
 
 TEST_F(SinkServiceTest, SimpleSink) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_range(0, 100);
         bool finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
                 co_yield std::move(i);
               }
@@ -77,7 +78,7 @@ TEST_F(SinkServiceTest, SimpleSink) {
 
 TEST_F(SinkServiceTest, SinkThrow) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_rangeThrow(0, 100);
         EXPECT_THROW(
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
@@ -91,37 +92,37 @@ TEST_F(SinkServiceTest, SinkThrow) {
 }
 
 TEST_F(SinkServiceTest, SinkThrowStruct) {
-  connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
-        auto sink = co_await client.co_sinkThrow();
-        bool exceptionThrown = false;
-        try {
-          co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
-            co_yield 0;
-            co_yield 1;
-            SinkException e;
-            e.reason_ref() = "test";
-            throw e;
-          }());
-        } catch (const SinkThrew& ex) {
-          exceptionThrown = true;
-          EXPECT_EQ(TApplicationException::UNKNOWN, ex.getType());
-          EXPECT_EQ(
-              "testutil::testservice::SinkException: ::testutil::testservice::SinkException",
-              ex.getMessage());
-        }
-        EXPECT_TRUE(exceptionThrown);
-        co_await client.co_purge();
-      });
+  connectToServer([](Client<TestSinkService>& client) -> folly::coro::Task<void> {
+    auto sink = co_await client.co_sinkThrow();
+    bool exceptionThrown = false;
+    try {
+      co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+        co_yield 0;
+        co_yield 1;
+        SinkException e;
+        e.reason_ref() = "test";
+        throw e;
+      }());
+    } catch (const SinkThrew& ex) {
+      exceptionThrown = true;
+      EXPECT_EQ(TApplicationException::UNKNOWN, ex.getType());
+      EXPECT_EQ(
+          "testutil::testservice::SinkException: ::testutil::testservice::SinkException",
+          ex.getMessage());
+    }
+    EXPECT_TRUE(exceptionThrown);
+    co_await client.co_purge();
+  });
 }
 
 TEST_F(SinkServiceTest, SinkFinalThrow) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_rangeFinalResponseThrow(0, 100);
         bool throwed = false;
         try {
           co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+            // @lint-ignore CLANGTIDY bugprone-use-after-move
             for (int i = 0; i <= 100; i++) {
               co_yield std::move(i);
             }
@@ -136,11 +137,12 @@ TEST_F(SinkServiceTest, SinkFinalThrow) {
 
 TEST_F(SinkServiceTest, SinkFinalThrowStruct) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_sinkFinalThrow();
         bool throwed = false;
         try {
           co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+            // @lint-ignore CLANGTIDY bugprone-use-after-move
             for (int i = 0; i <= 100; i++) {
               co_yield std::move(i);
             }
@@ -155,11 +157,12 @@ TEST_F(SinkServiceTest, SinkFinalThrowStruct) {
 
 TEST_F(SinkServiceTest, SinkEarlyFinalResponse) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_rangeEarlyResponse(0, 100, 20);
 
         int finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
                 co_yield std::move(i);
               }
@@ -170,14 +173,14 @@ TEST_F(SinkServiceTest, SinkEarlyFinalResponse) {
 
 TEST_F(SinkServiceTest, SinkUnimplemented) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         EXPECT_THROW(co_await client.co_unimplemented(), std::exception);
       });
 }
 
 TEST_F(SinkServiceTest, SinkNotCalled) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         // even though don't really call sink.sink(...),
         // after sink get out of scope, the sink should be cancelled properly
         co_await client.co_unSubscribedSink();
@@ -187,7 +190,7 @@ TEST_F(SinkServiceTest, SinkNotCalled) {
 
 TEST_F(SinkServiceTest, SinkInitialThrows) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         try {
           co_await client.co_initialThrow();
         } catch (const MyException& ex) {
@@ -237,7 +240,7 @@ TEST_F(SinkServiceTest, SinkInitialThrowsOnFinalResponseCalled) {
     void resetServerCallback(SinkServerCallback&) override {}
   };
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         ThriftPresult<false> pargs;
         auto req = CompactSerializer::serialize<std::string>(pargs);
         for (auto onFirstResponseBool : {true, false}) {
@@ -260,13 +263,14 @@ TEST_F(SinkServiceTest, SinkInitialThrowsOnFinalResponseCalled) {
 
 TEST_F(SinkServiceTest, SinkChunkTimeout) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_rangeChunkTimeout();
 
         bool exceptionThrown = false;
         try {
           co_await [&]() -> folly::coro::Task<void> {
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
+              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 100; i++) {
                 if (i == 20) {
                   co_await folly::coro::sleep(std::chrono::milliseconds{500});
@@ -285,7 +289,7 @@ TEST_F(SinkServiceTest, SinkChunkTimeout) {
 
 TEST_F(SinkServiceTest, ClientTimeoutNoLeak) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         EXPECT_THROW(
             co_await client.co_unSubscribedSinkSlowReturn(), std::exception);
         EXPECT_TRUE(co_await waitNoLeak(client));
@@ -294,7 +298,7 @@ TEST_F(SinkServiceTest, ClientTimeoutNoLeak) {
 
 TEST_F(SinkServiceTest, AssignmentNoLeak) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           auto sink = co_await client.co_unSubscribedSink();
           sink = co_await client.co_unSubscribedSink();
@@ -305,7 +309,7 @@ TEST_F(SinkServiceTest, AssignmentNoLeak) {
 
 TEST_F(SinkServiceTest, AlignedSink) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           apache::thrift::RpcOptions option;
           option.setMemAllocType(
@@ -323,7 +327,7 @@ TEST_F(SinkServiceTest, AlignedSink) {
 
 TEST_F(SinkServiceTest, CustomAllocSink) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           apache::thrift::RpcOptions option;
           option.setMemAllocType(
@@ -341,7 +345,7 @@ TEST_F(SinkServiceTest, CustomAllocSink) {
 
 TEST_F(SinkServiceTest, CustomAllocSinkDefault) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           apache::thrift::RpcOptions option;
           option.setMemAllocType(
@@ -367,7 +371,7 @@ folly::coro::Task<void> neverStream() {
 
 TEST_F(SinkServiceTest, SinkEarlyFinalResponseWithLongWait) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         // return final response once received two numbers
         auto sink = co_await client.co_rangeEarlyResponse(0, 5, 2);
         int finalResponse =
@@ -386,7 +390,7 @@ TEST_F(SinkServiceTest, SinkEarlyClose) {
   for (int i = 0; i < 100; i++) {
     ths.push_back(std::thread([this]() {
       connectToServer(
-          [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+          [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
             auto sink = co_await client.co_range(0, 100);
           });
     }));
@@ -398,12 +402,13 @@ TEST_F(SinkServiceTest, SinkEarlyClose) {
 
 TEST_F(SinkServiceTest, SinkServerCancellation) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         // client sends values 0..100, server initiates cancellation at value 5
         auto sink = co_await client.co_rangeCancelAt(0, 100, 5);
         bool finalResponse =
             co_await sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
               // enter wait after 5 values, server should cancel
+              // @lint-ignore CLANGTIDY bugprone-use-after-move
               for (int i = 0; i <= 5; i++) {
                 co_yield std::move(i);
               }
@@ -417,7 +422,7 @@ TEST_F(SinkServiceTest, SinkServerCancellation) {
 TEST_F(SinkServiceTest, SinkClientCancellation) {
   // cancel when async generator get stuck
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_unSubscribedSink();
         folly::CancellationSource cancelSource;
 
@@ -433,6 +438,7 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
                 cancelSource.getToken(),
                 sink.sink([]() -> folly::coro::AsyncGenerator<int&&> {
                   co_await neverStream();
+                  // @lint-ignore CLANGTIDY bugprone-use-after-move
                   for (int i = 0; i <= 10; i++) {
                     co_yield std::move(i);
                   }
@@ -443,7 +449,7 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
 
   // cancel when final response being slow
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         auto sink = co_await client.co_rangeSlowFinalResponse(0, 10);
         folly::CancellationSource cancelSource;
 
@@ -451,6 +457,7 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
             co_await folly::coro::co_withCancellation(
                 cancelSource.getToken(),
                 sink.sink([&]() -> folly::coro::AsyncGenerator<int&&> {
+                  // @lint-ignore CLANGTIDY bugprone-use-after-move
                   for (int i = 0; i <= 10; i++) {
                     co_yield std::move(i);
                   }
@@ -462,7 +469,7 @@ TEST_F(SinkServiceTest, SinkClientCancellation) {
 
 TEST_F(SinkServiceTestAllocFn, CustomAllocSink) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           apache::thrift::RpcOptions option;
           option.setMemAllocType(
@@ -480,7 +487,7 @@ TEST_F(SinkServiceTestAllocFn, CustomAllocSink) {
 
 TEST_F(SinkServiceTestAllocFn, CustomAllocSinkDefault) {
   connectToServer(
-      [](TestSinkServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
         {
           apache::thrift::RpcOptions option;
           option.setMemAllocType(
@@ -493,6 +500,16 @@ TEST_F(SinkServiceTestAllocFn, CustomAllocSinkDefault) {
               }());
           EXPECT_FALSE(custom);
         }
+      });
+}
+
+TEST_F(SinkServiceTest, DuplicateStreamIdThrows) {
+  connectToServer<DuplicateWriteSocket>(
+      [](Client<TestSinkService>& client) -> folly::coro::Task<void> {
+        // dummy request to send setup frame
+        co_await client.co_test();
+        // sink request frame will now be sent twice with the same stream id
+        EXPECT_THROW(co_await client.co_range(0, 100), TTransportException);
       });
 }
 

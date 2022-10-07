@@ -38,7 +38,7 @@ jobs:
       uses: dawidd6/action-checkout-pr@v1
       with:
         pr: ${{ github.event.issue.number }}
-    - uses: cachix/install-nix-action@v15
+    - uses: cachix/install-nix-action@v17
       with:
         install_options: --no-daemon
         extra_nix_config: |

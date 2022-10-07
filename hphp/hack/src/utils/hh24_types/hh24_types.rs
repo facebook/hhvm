@@ -74,12 +74,8 @@ impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
 pub struct Checksum(pub u64);
 
 impl Checksum {
-    fn xor(&mut self, combined_hash: (ToplevelSymbolHash, DeclHash)) {
-        self.0 ^= hh_hash::hash(&combined_hash);
-    }
-
     pub fn addremove(&mut self, symbol_hash: ToplevelSymbolHash, decl_hash: DeclHash) {
-        self.xor((symbol_hash, decl_hash));
+        self.0 ^= hh_hash::hash(&(symbol_hash, decl_hash));
     }
 }
 

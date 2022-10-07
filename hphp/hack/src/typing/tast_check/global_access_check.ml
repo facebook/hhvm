@@ -213,7 +213,7 @@ let rec print_global_expr env expr =
     (* For Obj_get (e.g. $baz->memoized_method()), we concatenate the class type and the method id. *)
     let class_ty_str = Tast_env.print_ty env (Tast.get_type obj) in
     let (_, _, m_id) = m in
-    class_ty_str ^ "::" ^ print_global_expr env m_id
+    class_ty_str ^ "->" ^ print_global_expr env m_id
   | _ -> "Unknown"
 
 (* Given the environment, the context and an expression, this function returns

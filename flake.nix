@@ -41,7 +41,8 @@
                   NIX_CFLAGS_COMPILE
                   CMAKE_INIT_CACHE
                   CCACHE_DIR
-                  CCACHE_UMASK;
+                  CCACHE_UMASK
+                  CCACHE_HARDLINK;
               };
         in
         rec {
@@ -54,6 +55,7 @@
           }).overrideAttrs (finalAttrs: previousAttrs: {
             CCACHE_DIR = "/nix/var/cache/ccache";
             CCACHE_UMASK = "007";
+            CCACHE_HARDLINK = "1";
           });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;

@@ -319,9 +319,21 @@ class CommonTestDriver(TestDriver):
         if expected_output is not None:
             # pyre-fixme[8]: Attribute has type `int`; used as `None`.
             self.maxDiff = None
-            self.assertCountEqual(
-                map(lambda x: x.format(root=root), expected_output), output.splitlines()
-            )
+            expected_lines = [x.format(root=root) for x in expected_output]
+            try:
+                # assertCountEqual basically sorts the two lists and determines
+                # if the sorted outputs are equal. We use this because we want
+                # to be insensitive to non-determinism in error message order.
+                self.assertCountEqual(expected_lines, output.splitlines())
+            except Exception:
+                # the error messages produced by assertCountEqual can be quite hard
+                # to read. Let's just write everything out plainly.
+                nl = "\n"
+                print(
+                    f"EXPECTED OUTPUT\n{nl.join(expected_lines)}\nACTUAL OUTPUT:\n{output}\n",
+                    file=sys.stderr,
+                )
+                raise
         return err
 
     def check_cmd_and_json_cmd(

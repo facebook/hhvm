@@ -180,7 +180,7 @@ namespace HPHP {
  */
 void (*g_vmProcessInit)();
 
-std::string get_and_check_systemlib(std::string *hhas);
+std::string get_and_check_systemlib();
 
 void timezone_init();
 
@@ -2252,40 +2252,27 @@ String canonicalize_path(const String& p, const char* root, int rootLen) {
   return path;
 }
 
-static std::string systemlib_split(const std::string& slib, std::string* hhas) {
-  auto pos = slib.find("\n<?hhas\n");
-  if (pos != std::string::npos) {
-    if (hhas) *hhas = slib.substr(pos + 8);
-    return slib.substr(0, pos);
-  }
-  return slib;
-}
-
 // Retrieve a systemlib (or mini systemlib) from the
 // current executable or another ELF object file.
 //
 // Additionally, when retrieving the main systemlib
 // from the current executable, honor the
 // HHVM_SYSTEMLIB environment variable as an override.
-std::string get_systemlib(std::string* hhas,
-                          const std::string &section /*= "systemlib" */,
+std::string get_systemlib(const std::string &section /*= "systemlib" */,
                           const std::string &filename /*= "" */) {
   if (filename.empty() && section == "systemlib") {
     if (auto const file = getenv("HHVM_SYSTEMLIB")) {
       std::ifstream ifs(file);
       if (ifs.good()) {
-        return systemlib_split(std::string(
-                                 std::istreambuf_iterator<char>(ifs),
-                                 std::istreambuf_iterator<char>()), hhas);
+        return std::string(std::istreambuf_iterator<char>(ifs),
+                           std::istreambuf_iterator<char>());
       }
     }
   }
 
   embedded_data desc;
   if (!get_embedded_data(section.c_str(), &desc, filename)) return "";
-
-  auto const data = read_embedded_data(desc);
-  return systemlib_split(data, hhas);
+  return read_embedded_data(desc);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2484,11 +2471,7 @@ void hphp_process_init(bool skipModules) {
   jit::mcgen::processInit();
   jit::processInitProfData();
   if (RuntimeOption::EvalEnableDecl) {
-    // There are no `.hhas` files left in `hphp/system/` or `hphp/runtime/ext/`
-    // so I suspect that `hhas` will always be empty. However the API requires
-    // we pass something in to receive the `.hhas` code.
-    std::string hhas;
-    auto const slib = get_and_check_systemlib(&hhas);
+    auto const slib = get_and_check_systemlib();
     Native::registerBuiltinSymbols("/:systemlib.php", slib);
     if (!skipModules) {
       ExtensionRegistry::moduleDeclInit();

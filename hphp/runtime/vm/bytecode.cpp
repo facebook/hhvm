@@ -5302,10 +5302,6 @@ void recordCodeCoverage(PC /*pc*/) {
   auto const func = vmfp()->func();
   Unit* unit = func->unit();
   assertx(unit != nullptr);
-  if (unit == SystemLib::s_hhas_unit) {
-    return;
-  }
-
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
     if (unit->isCoverageEnabled()) {
       unit->recordCoverage(func->getLineNumber(pcOff()));

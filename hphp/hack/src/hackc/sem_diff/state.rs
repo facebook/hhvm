@@ -308,7 +308,6 @@ impl<'arena, 'a> State<'arena, 'a> {
                 | ref opcode @ Opcode::Keyset(_)
                 | ref opcode @ Opcode::LateBoundCls
                 | ref opcode @ Opcode::LazyClass(..)
-                | ref opcode @ Opcode::LazyClassFromClass
                 | ref opcode @ Opcode::Method
                 | ref opcode @ Opcode::NewCol(..)
                 | ref opcode @ Opcode::NewDictArray(_)

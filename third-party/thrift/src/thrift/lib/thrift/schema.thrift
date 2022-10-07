@@ -111,10 +111,15 @@ struct DefinitionAttrs {
    * For example, only annotations explicitly marked with '@scope.Schema' are
    * present in the runtime schema, while all annotations are present in the AST.
    */
-  // TODO(afuller): Consider supporting unstructured annotations for backward
-  // compatibility, by documenting and populating a map<string, string>
-  // pseudo-structured annotation value.
   3: AnnotationIds annotations;
+
+  /**
+   * The unstructured annotations associated with this definition, for the current context.
+   *
+   * For example, none are present in the runtime schema while all are present in the AST.
+   */
+  @thrift.Deprecated
+  4: map<string, string> unstructuredAnnotations;
 }
 
 /**

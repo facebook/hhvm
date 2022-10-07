@@ -70,6 +70,17 @@ module Common_argspecs = struct
       Arg.Set value_ref,
       " Override build mode check triggered by warn_on_non_opt_build .hhconfig option"
     )
+
+  let ignore_hh_version value_ref =
+    ( "--ignore-hh-version",
+      Arg.Set value_ref,
+      " ignore hh_version check when loading saved states (default: false)" )
+
+  let naming_table value_ref =
+    ( "--naming-table",
+      Arg.String (fun s -> value_ref := Some s),
+      " use the provided naming table instead of fetching it from a saved state"
+    )
 end
 
 let parse_command () =
@@ -451,9 +462,7 @@ let parse_check_args cmd =
       ( "--identify",
         Arg.String (fun x -> set_mode (MODE_IDENTIFY_SYMBOL x)),
         " (mode) identify the named symbol" );
-      ( "--ignore-hh-version",
-        Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)" );
+      Common_argspecs.ignore_hh_version ignore_hh_version;
       ( "--in-memory-dep-table-size",
         Arg.Unit (fun () -> set_mode MODE_IN_MEMORY_DEP_TABLE_SIZE),
         " number of entries in the in-memory dependency table" );
@@ -913,9 +922,7 @@ let parse_start_env command =
       Common_argspecs.custom_hhi_path custom_hhi_path;
       Common_argspecs.custom_telemetry_data custom_telemetry_data;
       Common_argspecs.from from;
-      ( "--ignore-hh-version",
-        Arg.Set ignore_hh_version,
-        " ignore hh_version check when loading saved states (default: false)" );
+      Common_argspecs.ignore_hh_version ignore_hh_version;
       ( "--log-inference-constraints",
         Arg.Set log_inference_constraints,
         " (for hh debugging purpose only) log type"
@@ -1003,6 +1010,8 @@ let parse_lsp_args () =
   let from = ref "" in
   let config = ref [] in
   let verbose = ref false in
+  let ignore_hh_version = ref false in
+  let naming_table = ref None in
   let options =
     [
       Common_argspecs.from from;
@@ -1010,6 +1019,8 @@ let parse_lsp_args () =
       (* Please keep these sorted in the alphabetical order *)
       ("--enhanced-hover", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--ffp-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
+      Common_argspecs.ignore_hh_version ignore_hh_version;
+      Common_argspecs.naming_table naming_table;
       ("--ranked-autocomplete", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ("--serverless-ide", Arg.Unit (fun () -> ()), " [legacy] no-op");
       ( "--verbose",
@@ -1020,7 +1031,15 @@ let parse_lsp_args () =
   in
   let args = parse_without_command options usage "lsp" in
   match args with
-  | [] -> CLsp { ClientLsp.from = !from; config = !config; verbose = !verbose }
+  | [] ->
+    CLsp
+      {
+        ClientLsp.from = !from;
+        config = !config;
+        ignore_hh_version = !ignore_hh_version;
+        naming_table = !naming_table;
+        verbose = !verbose;
+      }
   | _ ->
     Printf.printf "%s\n" usage;
     exit 2

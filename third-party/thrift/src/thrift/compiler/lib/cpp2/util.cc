@@ -56,6 +56,20 @@ fmt::string_view value_or_empty(const std::string* value) {
 
 } // namespace
 
+bool is_custom_type(const t_field& field) {
+  const t_type* type = field.get_type();
+  return gen::cpp::type_resolver::find_first_adapter(field) ||
+      t_typedef::get_first_annotation_or_null(
+             type,
+             {
+                 "cpp.template",
+                 "cpp2.template",
+                 "cpp.type",
+                 "cpp2.type",
+             }) ||
+      t_typedef::get_first_structured_annotation_or_null(type, kCppAdapterUri);
+}
+
 bool is_custom_type(const t_type& type) {
   return t_typedef::get_first_annotation_or_null(
              &type,
@@ -205,6 +219,22 @@ gen_adapter_dependency_graph(
     });
   };
   return edges;
+}
+
+std::unordered_map<const t_type*, std::vector<const t_type*>>
+gen_dependency_graph(
+    const t_program* program, const std::vector<const t_type*>& nodes) {
+  auto deps = gen_adapter_dependency_graph(program, nodes, program->typedefs());
+  auto struct_deps = gen_struct_dependency_graph(program, program->objects());
+  for (auto& [k, v] : struct_deps) {
+    deps[k].insert(deps[k].end(), v.begin(), v.end());
+    // Order all deps in the order they are defined in.
+    std::sort(
+        deps[k].begin(), deps[k].end(), [](const t_type* a, const t_type* b) {
+          return a->src_range().begin.offset() < b->src_range().begin.offset();
+        });
+  }
+  return deps;
 }
 
 bool is_orderable(

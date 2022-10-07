@@ -30,6 +30,7 @@ struct __fbthrift_strings_module {
   using ForwardUsageStruct = ::fatal::sequence<char, 'F', 'o', 'r', 'w', 'a', 'r', 'd', 'U', 's', 'a', 'g', 'e', 'S', 't', 'r', 'u', 'c', 't'>;
   using IntTypedef_field = ::fatal::sequence<char, 'I', 'n', 't', 'T', 'y', 'p', 'e', 'd', 'e', 'f', '_', 'f', 'i', 'e', 'l', 'd'>;
   using MinPadding = ::fatal::sequence<char, 'M', 'i', 'n', 'P', 'a', 'd', 'd', 'i', 'n', 'g'>;
+  using MinPaddingWithCustomType = ::fatal::sequence<char, 'M', 'i', 'n', 'P', 'a', 'd', 'd', 'i', 'n', 'g', 'W', 'i', 't', 'h', 'C', 'u', 's', 't', 'o', 'm', 'T', 'y', 'p', 'e'>;
   using MyBinaryField = ::fatal::sequence<char, 'M', 'y', 'B', 'i', 'n', 'a', 'r', 'y', 'F', 'i', 'e', 'l', 'd'>;
   using MyBinaryField2 = ::fatal::sequence<char, 'M', 'y', 'B', 'i', 'n', 'a', 'r', 'y', 'F', 'i', 'e', 'l', 'd', '2'>;
   using MyBinaryField3 = ::fatal::sequence<char, 'M', 'y', 'B', 'i', 'n', 'a', 'r', 'y', 'F', 'i', 'e', 'l', 'd', '3'>;
@@ -70,6 +71,7 @@ struct __fbthrift_strings_module {
   using __fbthrift_hash_2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae = ::fatal::sequence<char, 'f', 'o', 'o'>;
   using __fbthrift_hash_2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824 = ::fatal::sequence<char, 'h', 'e', 'l', 'l', 'o'>;
   using __fbthrift_hash_2e54f5233578189784a1df2243a55418ebaf80680ada3332bff39422aad513cf = ::fatal::sequence<char, 'M', 'y', 'B', 'i', 'n', 'a', 'r', 'y', 'L', 'i', 's', 't', 'F', 'i', 'e', 'l', 'd', '4'>;
+  using __fbthrift_hash_3057376b8e4caae0679dad516a162bab52247e7d3487e78b24d7324cf7d1f223 = ::fatal::sequence<char, 'M', 'i', 'n', 'P', 'a', 'd', 'd', 'i', 'n', 'g', 'W', 'i', 't', 'h', 'C', 'u', 's', 't', 'o', 'm', 'T', 'y', 'p', 'e'>;
   using __fbthrift_hash_3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7 = ::fatal::sequence<char, 'd', 'a', 't', 'a'>;
   using __fbthrift_hash_3b88d9bd5cbf2a4ba8d2bb23cfb27676df2fdf0eaa2f9e147f4e5b71fe43b04a = ::fatal::sequence<char, 'T', 'r', 'i', 'v', 'i', 'a', 'l', 'N', 'e', 's', 't', 'e', 'd', 'W', 'i', 't', 'h', 'D', 'e', 'f', 'a', 'u', 'l', 't'>;
   using __fbthrift_hash_3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d = ::fatal::sequence<char, 'b'>;
@@ -166,7 +168,6 @@ struct __fbthrift_strings_module {
   using cpp_declare_equal_to = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'e', 'q', 'u', 'a', 'l', '_', 't', 'o'>;
   using cpp_declare_hash = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'c', 'l', 'a', 'r', 'e', '_', 'h', 'a', 's', 'h'>;
   using cpp_deprecated_enum_unscoped = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'd', 'e', 'p', 'r', 'e', 'c', 'a', 't', 'e', 'd', '_', 'e', 'n', 'u', 'm', '_', 'u', 'n', 's', 'c', 'o', 'p', 'e', 'd'>;
-  using cpp_minimize_padding = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'm', 'i', 'n', 'i', 'm', 'i', 'z', 'e', '_', 'p', 'a', 'd', 'd', 'i', 'n', 'g'>;
   using cpp_noncomparable = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'n', 'o', 'n', 'c', 'o', 'm', 'p', 'a', 'r', 'a', 'b', 'l', 'e'>;
   using cpp_virtual = ::fatal::sequence<char, 'c', 'p', 'p', '.', 'v', 'i', 'r', 't', 'u', 'a', 'l'>;
   using data = ::fatal::sequence<char, 'd', 'a', 't', 'a'>;
@@ -232,6 +233,7 @@ struct module_module_traits {
       ::fatal::pair<::apache::thrift::fixtures::types::ComplexString, strings::ComplexString>,
       ::fatal::pair<::apache::thrift::fixtures::types::ComplexNestedWithDefault, strings::ComplexNestedWithDefault>,
       ::fatal::pair<::apache::thrift::fixtures::types::MinPadding, strings::MinPadding>,
+      ::fatal::pair<::apache::thrift::fixtures::types::MinPaddingWithCustomType, strings::MinPaddingWithCustomType>,
       ::fatal::pair<::apache::thrift::fixtures::types::MyStruct, strings::MyStruct>,
       ::fatal::pair<::apache::thrift::fixtures::types::MyDataItem, strings::MyDataItem>,
       ::fatal::pair<::apache::thrift::fixtures::types::Renamed, strings::Renamed>,
@@ -282,6 +284,7 @@ class module_tags {
     using ComplexString = __fbthrift_strings::ComplexString;
     using ComplexNestedWithDefault = __fbthrift_strings::ComplexNestedWithDefault;
     using MinPadding = __fbthrift_strings::MinPadding;
+    using MinPaddingWithCustomType = __fbthrift_strings::MinPaddingWithCustomType;
     using MyStruct = __fbthrift_strings::MyStruct;
     using MyDataItem = __fbthrift_strings::MyDataItem;
     using Renamed = __fbthrift_strings::Renamed;

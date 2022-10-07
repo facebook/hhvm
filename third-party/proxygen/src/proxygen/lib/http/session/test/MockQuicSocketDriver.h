@@ -62,7 +62,12 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
  private:
   struct StreamState {
-    uint64_t writeOffset{0};
+    bool fireByteEventAt(uint64_t offset) {
+      return (offset < nextWriteOffset ||
+              (offset == nextWriteOffset && writeEOF));
+    }
+
+    uint64_t nextWriteOffset{0};
     // data to be read by application
     folly::IOBufQueue readBuf{folly::IOBufQueue::cacheChainLength()};
     uint64_t readBufOffset{0};
@@ -79,7 +84,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     // data waiting to be flushed
     folly::IOBufQueue pendingWriteBuf{folly::IOBufQueue::cacheChainLength()};
     // BufMeta waiting to be flushed
-    WriteBufferMeta pendingBufMeta;
+    uint64_t pendingBufMetaLength{0};
     // data 'delivered' to peer. There is currently no BufMeta version of this.
     folly::IOBufQueue writeBuf{folly::IOBufQueue::cacheChainLength()};
     StateEnum readState{NEW};
@@ -87,9 +92,10 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
     folly::Optional<quic::ApplicationErrorCode> error;
     QuicSocket::ReadCallback* readCB{nullptr};
     QuicSocket::PeekCallback* peekCB{nullptr};
-    std::list<std::pair<uint64_t, QuicSocket::ByteEventCallback*>> txCallbacks;
-    std::list<std::pair<uint64_t, QuicSocket::ByteEventCallback*>>
-        deliveryCallbacks;
+    using ByteEventList =
+        std::list<std::pair<uint64_t, QuicSocket::ByteEventCallback*>>;
+    ByteEventList txCallbacks;
+    ByteEventList deliveryCallbacks;
     uint64_t flowControlWindow{65536};
     bool isControl{false};
     uint64_t lastSkipOffset{0};
@@ -188,7 +194,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
           flowControlAccess_.emplace(kConnectionStreamId);
           return QuicSocket::FlowControlState(
               {connection.flowControlWindow,
-               connection.writeOffset + connection.flowControlWindow,
+               connection.nextWriteOffset + connection.flowControlWindow,
                0,
                0});
         }));
@@ -210,7 +216,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               flowControlAccess_.emplace(id);
               return QuicSocket::FlowControlState(
                   {stream.flowControlWindow,
-                   stream.writeOffset + stream.flowControlWindow,
+                   stream.nextWriteOffset + stream.flowControlWindow,
                    0,
                    0});
             }));
@@ -532,7 +538,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               setConnectionFlowControlWindow(connState.flowControlWindow -
                                              length);
               // handle non-zero -> 0 transition, call flowControlUpdate
-              stream.writeOffset += length;
+              stream.nextWriteOffset += length;
               if (stream.unsentBuf.empty() && eof) {
                 stream.writeEOF = true;
               } else if (eof) {
@@ -540,11 +546,14 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               }
               if (cb) {
                 // The API doesn't allow for registering a last-byte tx cb here
-                auto targetOffset =
-                    stream.writeOffset + stream.unsentBuf.chainLength();
-                cb->onByteEventRegistered(
-                    {id, targetOffset, quic::QuicSocket::ByteEvent::Type::ACK});
-                stream.deliveryCallbacks.push_back({targetOffset, cb});
+                auto finOffset =
+                    stream.nextWriteOffset + stream.unsentBuf.chainLength();
+                auto type = quic::QuicSocket::ByteEvent::Type::ACK;
+                VLOG(4) << "onByteEventRegistered id=" << id
+                        << " offset=" << finOffset
+                        << " type=" << uint64_t(type);
+                cb->onByteEventRegistered({id, finOffset, type});
+                stream.deliveryCallbacks.push_back({finOffset, cb});
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
                 if (!*deleted) {
@@ -582,15 +591,15 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 return folly::makeUnexpected(
                     quic::LocalErrorCode::INTERNAL_ERROR);
               }
-              auto bufMetaStartingOffset =
-                  stream.writeOffset + stream.unsentBuf.chainLength();
-              if (bufMetaStartingOffset == 0) {
+              auto totalStreamLength =
+                  stream.nextWriteOffset + stream.unsentBuf.chainLength();
+              if (totalStreamLength == 0) {
                 return folly::makeUnexpected(
                     quic::LocalErrorCode::INTERNAL_ERROR);
               }
               if (stream.unsentBufMeta.offset == 0) {
-                stream.unsentBufMeta.offset = bufMetaStartingOffset;
-                stream.pendingBufMeta.offset = bufMetaStartingOffset;
+                // beginning offset = totalStreamLength
+                stream.unsentBufMeta.offset = totalStreamLength;
               }
               stream.unsentBufMeta.length += data.length;
               if (eof) {
@@ -610,8 +619,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                   // localAppCb_->readCallback(id, toSend->clone());
                 }
               }
-              stream.pendingBufMeta.length += toSend.length;
-              stream.pendingBufMeta.eof |= toSend.eof;
+              stream.pendingBufMetaLength += toSend.length;
               setStreamFlowControlWindow(id, stream.flowControlWindow - length);
               setConnectionFlowControlWindow(connState.flowControlWindow -
                                              length);
@@ -622,12 +630,15 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               }
               if (cb) {
                 // The API doesn't allow for registering a last-byte tx cb here
-                auto targetOffset = stream.pendingBufMeta.offset +
-                                    stream.pendingBufMeta.length +
-                                    stream.unsentBufMeta.length;
-                cb->onByteEventRegistered(
-                    {id, targetOffset, quic::QuicSocket::ByteEvent::Type::ACK});
-                stream.deliveryCallbacks.push_back({targetOffset, cb});
+                auto finOffset = stream.nextWriteOffset +
+                                 stream.pendingBufMetaLength +
+                                 stream.unsentBufMeta.length;
+                auto type = quic::QuicSocket::ByteEvent::Type::ACK;
+                VLOG(4) << "onByteEventRegistered id=" << id
+                        << " offset=" << finOffset
+                        << " type=" << uint64_t(type);
+                cb->onByteEventRegistered({id, finOffset, type});
+                stream.deliveryCallbacks.push_back({finOffset, cb});
               }
               eventBase_->runInLoop([this, deleted = deleted_] {
                 if (!*deleted) {
@@ -670,7 +681,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
               stream.unsentBuf.move();
               stream.pendingWriteBuf.move();
               stream.pendingWriteCb = nullptr;
-              stream.pendingBufMeta.length = 0;
+              stream.pendingBufMetaLength = 0;
               stream.unsentBufMeta.length = 0;
               cancelDeliveryCallbacks(id, stream);
               return folly::unit;
@@ -752,7 +763,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                   return folly::makeUnexpected(
                       LocalErrorCode::STREAM_NOT_EXISTS));
               // TODO: :/ sigh. BufMeta breaks this.
-              return it->second.writeOffset -
+              return it->second.nextWriteOffset -
                      it->second.pendingWriteBuf.chainLength();
             }));
     EXPECT_CALL(*sock_, getStreamWriteBufferedBytes(testing::_))
@@ -773,7 +784,7 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                       LocalErrorCode::STREAM_NOT_EXISTS));
               return it->second.pendingWriteBuf.chainLength() +
                      it->second.unsentBuf.chainLength() +
-                     it->second.pendingBufMeta.length +
+                     it->second.pendingBufMetaLength +
                      it->second.unsentBufMeta.length;
             }));
     EXPECT_CALL(*sock_,
@@ -785,6 +796,15 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                 -> folly::Expected<folly::Unit, LocalErrorCode> {
               return sock_->registerByteEventCallback(
                   quic::QuicSocket::ByteEvent::Type::ACK, id, offset, cb);
+            }));
+    EXPECT_CALL(*sock_, registerTxCallback(testing::_, testing::_, testing::_))
+        .WillRepeatedly(testing::Invoke(
+            [this](quic::StreamId id,
+                   uint64_t offset,
+                   MockQuicSocket::ByteEventCallback* cb)
+                -> folly::Expected<folly::Unit, LocalErrorCode> {
+              return sock_->registerByteEventCallback(
+                  quic::QuicSocket::ByteEvent::Type::TX, id, offset, cb);
             }));
     EXPECT_CALL(*sock_,
                 registerByteEventCallback(
@@ -806,11 +826,15 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
                               id),
                   return folly::makeUnexpected(
                       LocalErrorCode::STREAM_NOT_EXISTS));
+              VLOG(4) << "onByteEventRegistered id=" << id
+                      << " offset=" << offset << " type=" << uint64_t(type);
               cb->onByteEventRegistered({id, offset, type});
-              if (it->second.writeOffset >= offset) {
+              if (it->second.fireByteEventAt(offset)) {
                 // already available, fire the cb from the loop
                 eventBase_->runInLoop(
                     [id, offset, type, cb] {
+                      VLOG(4) << "onByteEvent id=" << id << " offset=" << offset
+                              << " type=" << uint64_t(type);
                       cb->onByteEvent({id, offset, type});
                     },
                     /*thisIteration=*/true);
@@ -1109,44 +1133,46 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
 
   void writePendingDataAndAck(StreamState& stream, StreamId id) {
     stream.writeBuf.append(stream.pendingWriteBuf.move());
-    stream.pendingBufMeta.offset += stream.pendingBufMeta.length;
-    stream.pendingBufMeta.length = 0;
+    if (stream.pendingBufMetaLength > 0) {
+      stream.nextWriteOffset += stream.pendingBufMetaLength;
+      stream.pendingBufMetaLength = 0;
+    }
     if (stream.writeEOF) {
       stream.writeState = CLOSED;
     }
 
     // Deliver tx callbacks
-    while (!stream.txCallbacks.empty() &&
-           (stream.txCallbacks.front().first <= stream.writeOffset ||
-            stream.txCallbacks.front().first <=
-                stream.pendingBufMeta.offset + stream.pendingBufMeta.length)) {
-      stream.txCallbacks.front().second->onByteEvent(
-          {id,
-           stream.txCallbacks.front().first,
-           QuicSocket::ByteEvent::Type::TX});
-      stream.txCallbacks.pop_front();
-    }
+    fireCallbacks(
+        id, stream, stream.txCallbacks, QuicSocket::ByteEvent::Type::TX);
 
     // delay delivery callbacks 50ms
     eventBase_->runAfterDelay(
-        [&stream, id, deleted = deleted_] {
+        [this, &stream, id, deleted = deleted_] {
           if (*deleted) {
             return;
           }
-          while (
-              !stream.deliveryCallbacks.empty() &&
-              (stream.deliveryCallbacks.front().first <= stream.writeOffset ||
-               stream.deliveryCallbacks.front().first <=
-                   stream.pendingBufMeta.offset +
-                       stream.pendingBufMeta.length)) {
-            stream.deliveryCallbacks.front().second->onByteEvent(
-                {id,
-                 stream.deliveryCallbacks.front().first,
-                 QuicSocket::ByteEvent::Type::ACK});
-            stream.deliveryCallbacks.pop_front();
-          }
+          fireCallbacks(id,
+                        stream,
+                        stream.deliveryCallbacks,
+                        QuicSocket::ByteEvent::Type::ACK);
         },
         50);
+  }
+
+  void fireCallbacks(uint64_t id,
+                     StreamState& stream,
+                     StreamState::ByteEventList& callbacks,
+                     QuicSocket::ByteEvent::Type type) {
+    while (!callbacks.empty()) {
+      auto cb = callbacks.front();
+      if (!stream.fireByteEventAt(cb.first)) {
+        break;
+      }
+      VLOG(4) << "onByteEvent id=" << id << " offset=" << cb.first
+              << " type=" << uint64_t(type);
+      cb.second->onByteEvent({id, cb.first, type});
+      callbacks.pop_front();
+    }
   }
 
   void closeConnection() {
@@ -1185,18 +1211,18 @@ class MockQuicSocketDriver : public folly::EventBase::LoopCallback {
       }
       auto& stream = it.second;
       bool hasDataToWrite =
-          (!stream.pendingWriteBuf.empty() ||
-           stream.pendingBufMeta.length > 0 || stream.writeEOF);
+          (!stream.pendingWriteBuf.empty() || stream.pendingBufMetaLength > 0 ||
+           stream.writeEOF);
       if (connState.writeState == OPEN && stream.writeState == OPEN &&
           hasDataToWrite) {
         // handle 0->non-zero transition, call flowControlUpdate
         setStreamFlowControlWindow(it.first,
                                    stream.flowControlWindow +
                                        stream.pendingWriteBuf.chainLength() +
-                                       stream.pendingBufMeta.length);
+                                       stream.pendingBufMetaLength);
         setConnectionFlowControlWindow(connState.flowControlWindow +
                                        stream.pendingWriteBuf.chainLength() +
-                                       stream.pendingBufMeta.length);
+                                       stream.pendingBufMetaLength);
         writePendingDataAndAck(stream, it.first);
       } else if (hasDataToWrite) {
         // If we are paused only write the data that we have pending and don't

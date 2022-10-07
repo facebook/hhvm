@@ -518,7 +518,7 @@ static SpawnResult spawn_via_launchd() {
     watchman_args = {"/bin/sh", "-c", folly::join(" ", watchman_args)};
   }
 
-  auto plist_content = folly::to<std::string>(
+  auto plist_content = fmt::format(
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
       "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
@@ -529,8 +529,8 @@ static SpawnResult spawn_via_launchd() {
       "    <key>Disabled</key>\n"
       "    <false/>\n"
       "    <key>ProgramArguments</key>\n"
-      "    <array>\n",
-      prep_args_for_plist(watchman_args, 8),
+      "    <array>\n"
+      "{}"
       "    </array>\n"
       "    <key>KeepAlive</key>\n"
       "    <dict>\n"
@@ -542,8 +542,8 @@ static SpawnResult spawn_via_launchd() {
       "    <key>EnvironmentVariables</key>\n"
       "    <dict>\n"
       "        <key>PATH</key>\n"
-      "        <string>",
-      path_env,
+      "        <string>"
+      "{}"
       "</string>\n"
       "    </dict>\n"
       "    <key>ProcessType</key>\n"
@@ -551,7 +551,9 @@ static SpawnResult spawn_via_launchd() {
       "    <key>Nice</key>\n"
       "    <integer>-5</integer>\n"
       "</dict>\n"
-      "</plist>\n");
+      "</plist>\n",
+      prep_args_for_plist(watchman_args, 8),
+      path_env);
   fwrite(plist_content.data(), 1, plist_content.size(), fp);
   fclose(fp);
   // Don't rely on umask, ensure we have the correct perms
@@ -721,7 +723,7 @@ static void compute_file_name(
       exit(1);
     }
 
-    str = folly::to<std::string>(state_dir, "/", suffix);
+    str = fmt::format("{}/{}", state_dir, suffix);
   }
 #ifndef _WIN32
   if (require_absolute && !w_string_piece(str).pathIsAbsolute()) {

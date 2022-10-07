@@ -125,7 +125,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_byte_i16_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
   virtual void void_ret_byte_i16_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
@@ -218,7 +218,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_byte_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int8_t p_param1, ::std::int16_t p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_byte_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   virtual void void_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
@@ -311,7 +311,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
   virtual void void_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
@@ -404,7 +404,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1, const ::std::set<::std::vector<::std::string>>& p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_map_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::simpleTypeDef p_param1);
   virtual void void_ret_map_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::simpleTypeDef p_param1);
@@ -497,7 +497,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_map_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::simpleTypeDef p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_map_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_enum_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::MyEnumA p_param1);
   virtual void void_ret_enum_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::some::valid::ns::MyEnumA p_param1);
@@ -590,7 +590,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::some::valid::ns::MyEnumA p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_struct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
   virtual void void_ret_struct_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::MyStruct& p_param1);
@@ -683,7 +683,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_struct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::MyStruct& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_struct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void void_ret_listunion_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
   virtual void void_ret_listunion_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
@@ -776,7 +776,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void void_ret_listunion_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::some::valid::ns::ComplexUnion>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> void_ret_listunion_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void bool_ret_i32_i64_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
   virtual void bool_ret_i32_i64_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
@@ -871,7 +871,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_i32_i64_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int64_t p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_i32_i64_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void bool_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   virtual void bool_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
@@ -966,7 +966,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void bool_ret_union_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::ComplexUnion& p_param1);
   virtual void bool_ret_union_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::ComplexUnion& p_param1);
@@ -1061,7 +1061,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void bool_ret_union_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::ComplexUnion& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> bool_ret_union_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i64_ret_float_double_param(std::unique_ptr<apache::thrift::RequestCallback> callback, float p_param1, double p_param2);
   virtual void i64_ret_float_double_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, float p_param1, double p_param2);
@@ -1156,7 +1156,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_float_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, float p_param1, double p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_float_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i64_ret_string_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
   virtual void i64_ret_string_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
@@ -1251,7 +1251,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_string_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1, const ::std::set<::some::valid::ns::mostComplexTypeDef>& p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_string_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void i64_ret_i32_i32_i32_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
   virtual void i64_ret_i32_i32_i32_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
@@ -1346,7 +1346,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void i64_ret_i32_i32_i32_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2, ::std::int32_t p_param3, ::std::int32_t p_param4, ::std::int32_t p_param5);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> i64_ret_i32_i32_i32_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void double_ret_setstruct_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
   virtual void double_ret_setstruct_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
@@ -1441,7 +1441,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void double_ret_setstruct_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::some::valid::ns::MyStruct>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> double_ret_setstruct_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void string_ret_string_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
   virtual void string_ret_string_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
@@ -1536,7 +1536,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void string_ret_string_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> string_ret_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void binary_ret_binary_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
   virtual void binary_ret_binary_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
@@ -1631,7 +1631,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void binary_ret_binary_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> binary_ret_binary_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void map_ret_bool_param(std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
   virtual void map_ret_bool_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, bool p_param1);
@@ -1726,7 +1726,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void map_ret_bool_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, bool p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> map_ret_bool_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void list_ret_map_setlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
   virtual void list_ret_map_setlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
@@ -1821,7 +1821,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void list_ret_map_setlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::int32_t, ::std::vector<::std::string>>& p_param1, const ::std::vector<::std::string>& p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> list_ret_map_setlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void mapsetlistmapliststring_ret_listlistlist_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
   virtual void mapsetlistmapliststring_ret_listlistlist_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
@@ -1916,7 +1916,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void mapsetlistmapliststring_ret_listlistlist_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::vector<::std::vector<::std::vector<::std::vector<::std::int32_t>>>>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> mapsetlistmapliststring_ret_listlistlist_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void typedef_ret_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1);
   virtual void typedef_ret_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1);
@@ -2011,7 +2011,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void typedef_ret_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> typedef_ret_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void listtypedef_ret_typedef_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
   virtual void listtypedef_ret_typedef_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
@@ -2106,7 +2106,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void listtypedef_ret_typedef_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::some::valid::ns::complexStructTypeDef& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listtypedef_ret_typedef_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void enum_ret_double_param(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1);
   virtual void enum_ret_double_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1);
@@ -2201,7 +2201,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void enum_ret_double_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void enum_ret_double_enum_param(std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
   virtual void enum_ret_double_enum_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
@@ -2296,7 +2296,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void enum_ret_double_enum_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, double p_param1, ::some::valid::ns::MyEnumA p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> enum_ret_double_enum_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void listenum_ret_map_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
   virtual void listenum_ret_map_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
@@ -2391,7 +2391,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void listenum_ret_map_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::map<::std::string, ::std::int64_t>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listenum_ret_map_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void struct_ret_i16_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
   virtual void struct_ret_i16_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int16_t p_param1);
@@ -2486,7 +2486,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void struct_ret_i16_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int16_t p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> struct_ret_i16_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void setstruct_ret_set_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_param1);
   virtual void setstruct_ret_set_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::set<::std::string>& p_param1);
@@ -2581,7 +2581,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void setstruct_ret_set_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::set<::std::string>& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> setstruct_ret_set_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void union_ret_i32_i32_param(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
   virtual void union_ret_i32_i32_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
@@ -2676,7 +2676,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void union_ret_i32_i32_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int32_t p_param1, ::std::int32_t p_param2);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> union_ret_i32_i32_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
   virtual void listunion_string_param(std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
   virtual void listunion_string_param(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const ::std::string& p_param1);
@@ -2771,7 +2771,7 @@ class Client<::some::valid::ns::ParamService> : public apache::thrift::Generated
  private:
   template <typename Protocol_, typename RpcOptions>
   void listunion_string_paramT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const ::std::string& p_param1);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> listunion_string_paramCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

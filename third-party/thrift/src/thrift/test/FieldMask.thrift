@@ -40,6 +40,11 @@ struct Baz {
   1: Foo foo;
 }
 
+struct HasMap {
+  1: map<i64, Foo> foos;
+  2: Foo foo;
+}
+
 struct Foo2 {
   // They have different types to use op::get_ with type tags.
   1: optional i32 field_1;

@@ -122,7 +122,7 @@ class Client<::cpp2::MyRoot> : public apache::thrift::GeneratedAsyncClient {
  private:
   template <typename Protocol_, typename RpcOptions>
   void do_rootT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback);
-  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> do_rootCtx(apache::thrift::RpcOptions* rpcOptions);
+  std::pair<::apache::thrift::ContextStack::UniquePtr, std::shared_ptr<::apache::thrift::transport::THeader>> do_rootCtx(apache::thrift::RpcOptions* rpcOptions);
  public:
 };
 

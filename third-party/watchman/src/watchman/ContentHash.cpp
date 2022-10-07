@@ -6,6 +6,7 @@
  */
 
 #include "watchman/ContentHash.h"
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <string>
 #include "watchman/Hash.h"
@@ -22,8 +23,6 @@
 #else
 #include <openssl/sha.h>
 #endif
-
-using folly::to;
 
 namespace watchman {
 
@@ -63,9 +62,7 @@ HashValue ContentHashCache::computeHashImmediate(const char* fullPath) {
   auto stm = w_stm_open(fullPath, O_RDONLY);
   if (!stm) {
     throw std::system_error(
-        errno,
-        std::generic_category(),
-        to<std::string>("w_stm_open ", fullPath));
+        errno, std::generic_category(), fmt::format("w_stm_open {}", fullPath));
   }
 
 #ifndef _WIN32
@@ -81,7 +78,7 @@ HashValue ContentHashCache::computeHashImmediate(const char* fullPath) {
       throw std::system_error(
           errno,
           std::generic_category(),
-          to<std::string>("while reading from ", fullPath));
+          fmt::format("while reading from {}", fullPath));
     }
     SHA1_Update(&ctx, buf, n);
   }
@@ -123,7 +120,7 @@ HashValue ContentHashCache::computeHashImmediate(const char* fullPath) {
       throw std::system_error(
           errno,
           std::generic_category(),
-          to<std::string>("while reading from ", fullPath));
+          fmt::format("while reading from {}", fullPath));
     }
 
     if (!CryptHashData(ctx, buf, n, 0)) {

@@ -491,6 +491,353 @@ ocaml_ffi! {
             BackendWrapper::PositionFree(backend) => { backend.folded_decl_provider().get_class(name.into(), name).unwrap(); }
         }
     }
+
+    // ---
+    // Deletion support
+
+    fn hh_rust_provider_backend_oldify_funs_batch(
+        backend: Backend,
+        names: Vec<pos::FunName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_funs_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_funs_batch(
+        backend: Backend,
+        names: Vec<pos::FunName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_funs_batch(&names)
+        }
+        else {
+            unimplemented!("remove_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_funs_batch(
+        backend: Backend,
+        names: Vec<pos::FunName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_funs_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_funs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_shallow_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_shallow_classes_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_shallow_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_shallow_classes_batch(&names)
+        }
+        else {
+            unimplemented!("remove_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_shallow_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_shallow_classes_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_shallow_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_folded_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_folded_classes_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_folded_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_folded_classes_batch(&names)
+        }
+        else {
+            unimplemented!("remove_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_folded_classes_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_folded_classes_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_folded_classes_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_typedefs_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_typedefs_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_typedefs_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_typedefs_batch(&names)
+        }
+        else {
+            unimplemented!("remove_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_typedefs_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_typedefs_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_typedefs_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_gconsts_batch(
+        backend: Backend,
+        names: Vec<pos::ConstName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_gconsts_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_gconsts_batch(
+        backend: Backend,
+        names: Vec<pos::ConstName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_gconsts_batch(&names)
+        }
+        else {
+            unimplemented!("remove_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_gconsts_batch(
+        backend: Backend,
+        names: Vec<pos::ConstName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_gconsts_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_gconsts_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_modules_batch(
+        backend: Backend,
+        names: Vec<pos::ModuleName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_modules_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_modules_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_modules_batch(
+        backend: Backend,
+        names: Vec<pos::ModuleName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_modules_batch(&names)
+        }
+        else {
+            unimplemented!("remove_modules_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_modules_batch(
+        backend: Backend,
+        names: Vec<pos::ModuleName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_modules_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_modules_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::PropName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_props_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::PropName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_props_batch(&names)
+        }
+        else {
+            unimplemented!("remove_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::PropName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_props_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_static_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_static_props_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_static_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_static_props_batch(&names)
+        }
+        else {
+            unimplemented!("remove_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_static_props_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_static_props_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_static_props_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_methods_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_methods_batch(&names)
+        }
+        else {
+            unimplemented!("remove_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_methods_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_static_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_static_methods_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_static_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_static_methods_batch(&names)
+        }
+        else {
+            unimplemented!("remove_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_static_methods_batch(
+        backend: Backend,
+        names: Vec<(pos::TypeName, pos::MethodName)>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_static_methods_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_static_methods_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    fn hh_rust_provider_backend_oldify_constructors_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.oldify_constructors_batch(&names)
+        }
+        else {
+            unimplemented!("oldify_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_constructors_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_constructors_batch(&names)
+        }
+        else {
+            unimplemented!("remove_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+    fn hh_rust_provider_backend_remove_old_constructors_batch(
+        backend: Backend,
+        names: Vec<pos::TypeName>) {
+        if let Some(backend) = backend.as_hh_server_backend() {
+            backend.remove_old_constructors_batch(&names)
+        }
+        else {
+            unimplemented!("remove_old_constructors_batch: {UNIMPLEMENTED_MESSAGE}")
+        }
+    }
+
+    //
+    // ---
 }
 
 // File_provider ////////////////////////////////////////////////////////////

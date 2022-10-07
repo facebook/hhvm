@@ -427,6 +427,24 @@ static int php_read(req::ptr<Socket> sock, void *buf, int64_t maxlen,
   return n;
 }
 
+String HHVM_FUNCTION(socket_strerror,
+                     int64_t errnum) {
+  /*
+   * PHP5 encodes both the h_errno and errno values into a single int:
+   * < -10000: transformed h_errno value
+   * >= -10000: errno value
+   */
+  if (errnum < -10000) {
+    errnum = (-errnum) - 10000;
+#if HAVE_HSTRERROR
+    return String(hstrerror(errnum), CopyString);
+#endif
+    return folly::format("Host lookup error {}", errnum).str();
+  }
+
+  return String(folly::errnoStr(errnum));
+}
+
 static req::ptr<Socket> create_new_socket(
   const HostURL &hosturl,
   Variant& errnum,
@@ -1458,24 +1476,6 @@ bool HHVM_FUNCTION(socket_shutdown,
 void HHVM_FUNCTION(socket_close,
                    const Resource& socket) {
   cast<Socket>(socket)->close();
-}
-
-String HHVM_FUNCTION(socket_strerror,
-                     int64_t errnum) {
-  /*
-   * PHP5 encodes both the h_errno and errno values into a single int:
-   * < -10000: transformed h_errno value
-   * >= -10000: errno value
-   */
-  if (errnum < -10000) {
-    errnum = (-errnum) - 10000;
-#if HAVE_HSTRERROR
-    return String(hstrerror(errnum), CopyString);
-#endif
-    return folly::format("Host lookup error {}", errnum).str();
-  }
-
-  return String(folly::errnoStr(errnum));
 }
 
 int64_t HHVM_FUNCTION(socket_last_error,

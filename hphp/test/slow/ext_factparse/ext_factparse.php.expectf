@@ -29,9 +29,9 @@ dict(3) {
       }
     }
     ["sha1sum"]=>
-    string(40) "9dcc2eb8ab7630a16e99d679e0887c33f81d7f16"
+    string(40) "e77e7090eec10f616f9418b200b5cce68a1ec912"
     ["types"]=>
-    vec(13) {
+    vec(14) {
       dict(3) {
         ["flags"]=>
         int(0)
@@ -63,6 +63,20 @@ dict(3) {
         string(5) "class"
         ["name"]=>
         string(3) "CL2"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(3) {
+          string(3) "CL1"
+          string(2) "I2"
+          string(3) "TR2"
+        }
+        ["flags"]=>
+        int(3)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(3) "CL3"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -149,7 +163,7 @@ dict(3) {
         ["name"]=>
         string(3) "TR1"
       }
-      dict(6) {
+      dict(7) {
         ["baseTypes"]=>
         vec(4) {
           string(2) "I0"
@@ -163,6 +177,10 @@ dict(3) {
         string(5) "trait"
         ["name"]=>
         string(3) "TR2"
+        ["requireClass"]=>
+        vec(1) {
+          string(3) "CL3"
+        }
         ["requireExtends"]=>
         vec(1) {
           string(3) "CL1"
@@ -204,9 +222,9 @@ dict(3) {
       }
     }
     ["sha1sum"]=>
-    string(40) "befff750465e114b4e8251021a4845423e5e35cb"
+    string(40) "065841be94f3e543434cef38c97724d44dec0d75"
     ["types"]=>
-    vec(13) {
+    vec(14) {
       dict(3) {
         ["flags"]=>
         int(0)
@@ -238,6 +256,20 @@ dict(3) {
         string(5) "class"
         ["name"]=>
         string(6) "NS\CL2"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(3) {
+          string(6) "NS\CL1"
+          string(5) "NS\I2"
+          string(6) "NS\TR2"
+        }
+        ["flags"]=>
+        int(3)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(6) "NS\CL3"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -324,7 +356,7 @@ dict(3) {
         ["name"]=>
         string(6) "NS\TR1"
       }
-      dict(6) {
+      dict(7) {
         ["baseTypes"]=>
         vec(4) {
           string(5) "NS\I0"
@@ -338,6 +370,10 @@ dict(3) {
         string(5) "trait"
         ["name"]=>
         string(6) "NS\TR2"
+        ["requireClass"]=>
+        vec(1) {
+          string(6) "NS\CL3"
+        }
         ["requireExtends"]=>
         vec(1) {
           string(6) "NS\CL1"
@@ -379,9 +415,9 @@ dict(3) {
       }
     }
     ["sha1sum"]=>
-    string(40) "85e2970540941c1fb4eb4ebb7bfdc326bd6c5071"
+    string(40) "99eb4ab50db60931a96afeac4400b76724ea7ab9"
     ["types"]=>
-    vec(13) {
+    vec(14) {
       dict(3) {
         ["flags"]=>
         int(0)
@@ -413,6 +449,20 @@ dict(3) {
         string(5) "class"
         ["name"]=>
         string(9) "NS\NS\CL2"
+      }
+      dict(4) {
+        ["baseTypes"]=>
+        vec(3) {
+          string(9) "NS\NS\CL1"
+          string(8) "NS\NS\I2"
+          string(9) "NS\NS\TR2"
+        }
+        ["flags"]=>
+        int(3)
+        ["kindOf"]=>
+        string(5) "class"
+        ["name"]=>
+        string(9) "NS\NS\CL3"
       }
       dict(4) {
         ["baseTypes"]=>
@@ -499,7 +549,7 @@ dict(3) {
         ["name"]=>
         string(9) "NS\NS\TR1"
       }
-      dict(6) {
+      dict(7) {
         ["baseTypes"]=>
         vec(4) {
           string(8) "NS\NS\I0"
@@ -513,6 +563,10 @@ dict(3) {
         string(5) "trait"
         ["name"]=>
         string(9) "NS\NS\TR2"
+        ["requireClass"]=>
+        vec(1) {
+          string(9) "NS\NS\CL3"
+        }
         ["requireExtends"]=>
         vec(1) {
           string(9) "NS\NS\CL1"

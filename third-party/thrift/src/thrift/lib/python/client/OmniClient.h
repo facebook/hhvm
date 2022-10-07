@@ -124,10 +124,9 @@ class OmniClient : public apache::thrift::TClientBase {
    */
   void sendImpl(
       apache::thrift::RpcOptions rpcOptions,
-      const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
-      const char* serviceNameForContextStack,
-      const char* functionNameForContextStack,
+      const std::string& serviceName,
+      const std::string& functionName,
       std::unique_ptr<apache::thrift::RequestCallback> callback,
       const apache::thrift::RpcKind rpcKind,
       ::apache::thrift::MethodMetadata::Data&& metadata);

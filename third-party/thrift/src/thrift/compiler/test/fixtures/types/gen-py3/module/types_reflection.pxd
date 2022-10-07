@@ -34,6 +34,8 @@ cdef __StructSpec get_reflection__ComplexNestedWithDefault()
 
 cdef __StructSpec get_reflection__MinPadding()
 
+cdef __StructSpec get_reflection__MinPaddingWithCustomType()
+
 cdef __StructSpec get_reflection__MyStruct()
 
 cdef __StructSpec get_reflection__MyDataItem()

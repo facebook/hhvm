@@ -101,12 +101,6 @@ bool HHVM_FUNCTION(ob_end_flush) {
 void HHVM_FUNCTION(flush) {
   g_context->flush();
 }
-Variant HHVM_FUNCTION(ob_get_contents) {
-  if (HHVM_FN(ob_get_level)() == 0) {
-    return false;
-  }
-  return g_context->obCopyContents();
-}
 Variant HHVM_FUNCTION(ob_get_clean) {
   auto output = HHVM_FN(ob_get_contents)();
   if (!HHVM_FN(ob_end_clean)()) {
@@ -126,6 +120,12 @@ int64_t HHVM_FUNCTION(ob_get_length) {
 }
 int64_t HHVM_FUNCTION(ob_get_level) {
   return g_context->obGetLevel();
+}
+Variant HHVM_FUNCTION(ob_get_contents) {
+  if (HHVM_FN(ob_get_level)() == 0) {
+    return false;
+  }
+  return g_context->obCopyContents();
 }
 Variant HHVM_FUNCTION(ob_get_status, bool full_status /* = false */) {
   return g_context->obGetStatus(full_status);

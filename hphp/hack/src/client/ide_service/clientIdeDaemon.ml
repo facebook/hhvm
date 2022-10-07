@@ -231,7 +231,8 @@ let load_saved_state
     ~(root : Path.t)
     ~(naming_table_load_info :
        ClientIdeMessage.Initialize_from_saved_state.naming_table_load_info
-       option) : load_saved_state_result Lwt.t =
+       option)
+    ~(ignore_hh_version : bool) : load_saved_state_result Lwt.t =
   log "[saved-state] Starting load in root %s" (Path.to_string root);
   let%lwt result =
     try%lwt
@@ -294,7 +295,7 @@ let load_saved_state
               ~progress_callback:(fun _ -> ())
               ~watchman_opts:
                 Saved_state_loader.Watchman_options.{ root; sockname = None }
-              ~ignore_hh_version:false
+              ~ignore_hh_version
               ~saved_state_type:Saved_state_loader.Naming_table
           in
           Lwt.return result
@@ -742,6 +743,7 @@ let handle_request :
                    ~deps_mode:(Typing_deps_mode.InMemoryMode None))
                 ~root:param.root
                 ~naming_table_load_info:param.naming_table_load_info
+                ~ignore_hh_version:param.ignore_hh_version
             in
             (* if the following push fails, that must be because the queues
                have been shut down, in which case there's nothing to do. *)

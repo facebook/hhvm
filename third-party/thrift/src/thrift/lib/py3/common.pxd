@@ -68,7 +68,7 @@ cdef class Headers:
     cdef const F14NodeMap[string, string]* _getMap(self)
 
 
-cdef extern from "thrift/lib/cpp2/async/RequestChannel.h" namespace "apache::thrift":
+cdef extern from "thrift/lib/cpp2/async/RpcOptions.h" namespace "apache::thrift":
     cdef cppclass cRpcOptions "apache::thrift::RpcOptions":
         cRpcOptions()
         cRpcOptions& setTimeout(milliseconds timeout)

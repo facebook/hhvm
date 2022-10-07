@@ -14,6 +14,8 @@ from thrift.py3.reflection cimport (
     Qualifier as __Qualifier,
 )
 
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport include.types as _include_types
 
 cimport module.types as _module_types
@@ -403,7 +405,7 @@ cdef __StructSpec get_reflection__MinPadding():
         name="MinPadding",
         kind=__StructType.STRUCT,
         annotations={
-            """cpp.minimize_padding""": """1""",        },
+        },
     )
     spec.add_field(
         __FieldSpec._fbthrift_create(
@@ -460,6 +462,79 @@ cdef __StructSpec get_reflection__MinPadding():
             type=int,
             kind=__NumberType.BYTE,
             qualifier=__Qualifier.REQUIRED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
+cdef __StructSpec get_reflection__MinPaddingWithCustomType():
+    cdef _module_types.MinPaddingWithCustomType defaults = _module_types.MinPaddingWithCustomType._fbthrift_create(
+        constant_shared_ptr[_module_types.cMinPaddingWithCustomType](
+            default_inst[_module_types.cMinPaddingWithCustomType]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="MinPaddingWithCustomType",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="small",
+            type=int,
+            kind=__NumberType.BYTE,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="big",
+            type=int,
+            kind=__NumberType.I64,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=3,
+            name="medium",
+            type=int,
+            kind=__NumberType.I16,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=4,
+            name="biggish",
+            type=int,
+            kind=__NumberType.I32,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=5,
+            name="tiny",
+            type=int,
+            kind=__NumberType.BYTE,
+            qualifier=__Qualifier.UNQUALIFIED,
             default=None,
             annotations={
             },

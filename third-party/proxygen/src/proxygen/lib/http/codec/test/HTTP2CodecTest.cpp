@@ -1366,6 +1366,23 @@ TEST_F(HTTP2CodecTest, BadGoaway) {
   EXPECT_EQ(bytes, 0);
 }
 
+TEST_F(HTTP2CodecTest, RstStreamNoError) {
+  SetUpUpstreamTest();
+  HTTPMessage resp;
+  resp.setStatusCode(200);
+  resp.setStatusMessage("OK");
+  downstreamCodec_.generateHeader(output_, 1, resp);
+  downstreamCodec_.generateBody(
+      output_, 1, makeBuf(10), HTTPCodec::NoPadding, true);
+  downstreamCodec_.generateRstStream(output_, 1, ErrorCode::NO_ERROR);
+  parseUpstream();
+  EXPECT_EQ(callbacks_.messageBegin, 1);
+  EXPECT_EQ(callbacks_.headersComplete, 1);
+  EXPECT_EQ(callbacks_.bodyCalls, 1);
+  EXPECT_EQ(callbacks_.messageComplete, 1);
+  EXPECT_EQ(callbacks_.aborts, 1);
+}
+
 TEST_F(HTTP2CodecTest, DoubleGoaway) {
   SetUpUpstreamTest();
   downstreamCodec_.generateGoaway(output_);

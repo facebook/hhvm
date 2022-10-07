@@ -6,6 +6,7 @@
  */
 
 #include "watchman/ChildProcess.h"
+#include <fmt/core.h>
 #include <folly/ScopeGuard.h>
 #include <folly/String.h>
 #include <memory>
@@ -304,7 +305,7 @@ ChildProcess::ChildProcess(
       throw std::system_error(
           errno,
           std::generic_category(),
-          folly::to<std::string>("failed to chdir to ", options.cwd_));
+          fmt::format("failed to chdir to {}", options.cwd_));
     }
   }
 #endif

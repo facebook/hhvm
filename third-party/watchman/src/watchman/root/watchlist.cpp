@@ -6,6 +6,7 @@
  */
 
 #include "watchman/root/watchlist.h"
+#include <fmt/core.h>
 #include <folly/Synchronized.h>
 #include <vector>
 #include "watchman/QueryableView.h"
@@ -167,25 +168,21 @@ RootDebugStatus Root::getStatus() const {
                             .count();
     if (!inner.done_initial) {
       recrawl_info.started_at = -start_ago;
-      crawl_status = folly::to<std::string>(
-          info->recrawlCount ? "re-" : "", "crawling for ", start_ago, "ms");
+      crawl_status = fmt::format(
+          "{}crawling for {} ms", info->recrawlCount ? "re-" : "", start_ago);
     } else if (info->shouldRecrawl) {
       recrawl_info.completed_at = -finish_ago;
-      crawl_status = folly::to<std::string>(
-          "needs recrawl: ",
+      crawl_status = fmt::format(
+          "needs recrawl: {}. Last crawl was {}ms ago",
           info->warning ? info->warning->view() : std::string_view{},
-          ". Last crawl was ",
-          finish_ago,
-          "ms ago");
+          finish_ago);
     } else {
       recrawl_info.started_at = -start_ago;
       recrawl_info.completed_at = -finish_ago;
-      crawl_status = folly::to<std::string>(
-          "crawl completed ",
+      crawl_status = fmt::format(
+          "crawl completed {}ms ago, and took {}ms",
           finish_ago,
-          "ms ago, and took ",
-          start_ago - finish_ago,
-          "ms");
+          start_ago - finish_ago);
     }
   }
 

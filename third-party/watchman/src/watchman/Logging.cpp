@@ -15,6 +15,7 @@
 
 #include "watchman/portability/Backtrace.h"
 
+#include <fmt/core.h>
 #include <array>
 #include <limits>
 #include <optional>
@@ -239,7 +240,7 @@ LONG WINAPI exception_filter(LPEXCEPTION_POINTERS excep) {
       ": [",
       watchman::Log::getThreadName(),
       "] Unhandled win32 exception code=",
-      folly::to<std::string>(excep->ExceptionRecord->ExceptionCode),
+      fmt::to_string(excep->ExceptionRecord->ExceptionCode),
       ".  Fatal error detected at:\n");
 
   for (i = 0; i < size; i++) {

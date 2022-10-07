@@ -5,13 +5,15 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "watchman/query/parse.h"
+#include <fmt/core.h>
+
 #include "watchman/CommandRegistry.h"
 #include "watchman/Errors.h"
 #include "watchman/query/GlobTree.h"
 #include "watchman/query/Query.h"
 #include "watchman/query/QueryExpr.h"
 #include "watchman/query/TermRegistry.h"
+#include "watchman/query/parse.h"
 #include "watchman/root/Root.h"
 
 namespace watchman {
@@ -200,7 +202,7 @@ bool parse_bool_param(
     bool default_value) {
   auto value = query.get_default(name, json_boolean(default_value));
   if (!value.isBool()) {
-    throw QueryParseError(folly::to<std::string>(name, " must be a boolean"));
+    throw QueryParseError(fmt::format("{} must be a boolean", name));
   }
 
   return value.asBool();
@@ -356,8 +358,8 @@ std::shared_ptr<Query> parseQueryLegacy(
     const char* arg = json_string_value(args_array[i]);
     if (!arg) {
       /* not a string value! */
-      throw QueryParseError(folly::to<std::string>(
-          "rule @ position ", i, " is not a string value"));
+      throw QueryParseError(
+          fmt::format("rule @ position {} is not a string value", i));
     }
   }
 

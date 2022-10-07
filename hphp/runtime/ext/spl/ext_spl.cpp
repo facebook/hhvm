@@ -15,8 +15,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "hphp/runtime/ext/spl/ext_spl.h"
-
 #include "hphp/runtime/ext/std/ext_std_classobj.h"
 #include "hphp/runtime/ext/std/ext_std_math.h"
 #include "hphp/runtime/ext/std/ext_std_file.h"

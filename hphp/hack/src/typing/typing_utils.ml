@@ -277,6 +277,12 @@ let is_tintersection env ty =
   | Tintersection _ -> true
   | _ -> false
 
+let is_tyvar env ty =
+  let (_env, ty) = Env.expand_type env ty in
+  match get_node ty with
+  | Tvar _ -> true
+  | _ -> false
+
 (** Simplify unions and intersections of constraint
 types which involve mixed or nothing. *)
 let simplify_constraint_type env ty =
@@ -309,7 +315,7 @@ let contains_unresolved_tyvars env ty =
 
       method! on_tvar (env, occurs) r v =
         let (env, ty) = Env.expand_var env r v in
-        if is_tyvar ty then
+        if Typing_defs.is_tyvar ty then
           (env, true)
         else
           this#on_type (env, occurs) ty

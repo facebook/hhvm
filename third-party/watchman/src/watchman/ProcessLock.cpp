@@ -7,6 +7,7 @@
 
 #include "ProcessLock.h"
 
+#include <fmt/core.h>
 #include <folly/String.h>
 
 #include "watchman/Logging.h"
@@ -34,10 +35,9 @@ std::variant<ProcessLock, ProcessLock::LockError> ProcessLock::tryAcquire(
       FileDescriptor::FDType::Generic);
 
   if (!fd) {
-    return folly::to<std::string>(
-        "Failed to open pidfile ",
+    return fmt::format(
+        "Failed to open pidfile {} for write: {}",
         pid_file,
-        " for write: ",
         folly::errnoStr(errno));
   }
   // Ensure that no children inherit the locked pidfile descriptor
@@ -139,7 +139,7 @@ ProcessLock::Handle ProcessLock::writePid(const std::string& pid_file) {
   // Replace contents of the pidfile with our pid string
   if (0 == ftruncate(fd_.fd(), 0)) {
     pid_t mypid = getpid();
-    auto pidString = folly::to<std::string>(mypid);
+    auto pidString = fmt::to_string(mypid);
     ignore_result(write(fd_.fd(), pidString.data(), pidString.size()));
     fsync(fd_.fd());
   } else {

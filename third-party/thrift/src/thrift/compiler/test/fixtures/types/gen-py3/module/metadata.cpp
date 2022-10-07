@@ -28,6 +28,7 @@ namespace types {
   ::apache::thrift::detail::md::StructMetadata<ComplexString>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<ComplexNestedWithDefault>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MinPadding>::gen(metadata);
+  ::apache::thrift::detail::md::StructMetadata<MinPaddingWithCustomType>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyStruct>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<MyDataItem>::gen(metadata);
   ::apache::thrift::detail::md::StructMetadata<Renaming>::gen(metadata);

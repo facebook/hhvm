@@ -113,6 +113,8 @@ impl Default for GlobalOptions {
             tco_ifc_enabled: vec![],
             tco_global_access_check_files_enabled: vec![],
             tco_global_access_check_functions_enabled: s_set::SSet::new(),
+            tco_global_access_check_on_write: true,
+            tco_global_access_check_on_read: true,
             po_enable_enum_supertyping: true,
             po_interpret_soft_types_as_like_types: false,
             tco_enable_strict_string_concat_interp: false,

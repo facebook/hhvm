@@ -330,6 +330,8 @@ let parse_options () =
   let memtrace = ref None in
   let enable_global_access_check_files = ref [] in
   let enable_global_access_check_functions = ref SSet.empty in
+  let global_access_check_on_write = ref true in
+  let global_access_check_on_read = ref true in
   let refactor_mode = ref "" in
   let refactor_analysis_mode = ref "" in
   let set_enable_global_access_check_functions s =
@@ -824,6 +826,12 @@ let parse_options () =
         Arg.String set_enable_global_access_check_functions,
         " Run global access checker on functions listed in the given JSON file"
       );
+      ( "--disable-global-access-check-on-write",
+        Arg.Clear global_access_check_on_write,
+        " Disable global access checker to check global writes" );
+      ( "--disable-global-access-check-on-read",
+        Arg.Clear global_access_check_on_read,
+        " Disable global access checker to check global reads" );
       ( "--overwrite-loop-iteration-upper-bound",
         Arg.Int (fun u -> loop_iteration_upper_bound := Some u),
         " Sets the maximum number of iterations that will be used to typecheck loops"
@@ -969,6 +977,8 @@ let parse_options () =
       ~tco_global_access_check_files_enabled:!enable_global_access_check_files
       ~tco_global_access_check_functions_enabled:
         !enable_global_access_check_functions
+      ~tco_global_access_check_on_write:!global_access_check_on_write
+      ~tco_global_access_check_on_read:!global_access_check_on_read
       ~tco_use_direct_decl_parser:!use_direct_decl_parser
       ~po_enable_enum_classes:(not !disable_enum_classes)
       ~po_interpret_soft_types_as_like_types:!interpret_soft_types_as_like_types

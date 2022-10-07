@@ -164,6 +164,12 @@ let global_access_check_files_enabled t =
 let global_access_check_functions_enabled t =
   t.GlobalOptions.tco_global_access_check_functions_enabled
 
+let global_access_check_on_write t =
+  t.GlobalOptions.tco_global_access_check_on_write
+
+let global_access_check_on_read t =
+  t.GlobalOptions.tco_global_access_check_on_read
+
 let like_type_hints t = t.GlobalOptions.tco_like_type_hints
 
 let like_casts t = t.GlobalOptions.tco_like_casts

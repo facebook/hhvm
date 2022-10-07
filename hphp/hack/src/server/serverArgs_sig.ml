@@ -52,6 +52,10 @@ module type S = sig
 
   val enable_global_access_check_functions : options -> SSet.t
 
+  val global_access_check_on_write : options -> bool
+
+  val global_access_check_on_read : options -> bool
+
   val from : options -> string
 
   val gen_saved_ignore_type_errors : options -> bool

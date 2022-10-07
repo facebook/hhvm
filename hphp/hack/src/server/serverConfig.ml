@@ -446,6 +446,10 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
         (ServerArgs.enable_global_access_check_files options)
       ~tco_global_access_check_functions_enabled:
         (ServerArgs.enable_global_access_check_functions options)
+      ~tco_global_access_check_on_write:
+        (ServerArgs.global_access_check_on_write options)
+      ~tco_global_access_check_on_read:
+        (ServerArgs.global_access_check_on_read options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)
       ?po_enable_enum_supertyping:(bool_opt "enable_enum_supertyping" config)
       ?po_interpret_soft_types_as_like_types:

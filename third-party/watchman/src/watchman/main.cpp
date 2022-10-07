@@ -169,16 +169,22 @@ void detect_low_process_priority() {
   }
 #endif
 
-  watchman::getThreadPool().start(
-      cfg_get_int("thread_pool_worker_threads", 16),
-      cfg_get_int("thread_pool_max_items", 1024 * 1024));
+  bool res = false;
+  {
+    watchman::getThreadPool().start(
+        cfg_get_int("thread_pool_worker_threads", 16),
+        cfg_get_int("thread_pool_max_items", 1024 * 1024));
 
-  ClockSpec::init();
-  w_state_load();
-  bool res = w_start_listener();
-  w_root_free_watched_roots();
-  perf_shutdown();
-  cfg_shutdown();
+    ClockSpec::init();
+    w_state_load();
+    SCOPE_EXIT {
+      w_state_shutdown();
+    };
+    res = w_start_listener();
+    w_root_free_watched_roots();
+    perf_shutdown();
+    cfg_shutdown();
+  }
 
   log(ERR, "Exiting from service with res=", res, "\n");
 

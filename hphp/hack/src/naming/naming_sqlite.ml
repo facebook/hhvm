@@ -557,8 +557,7 @@ let validate_can_open_db (db_path : db_path) : unit =
 
 let free_db_cache () : unit = db_cache := `Not_yet_cached
 
-let save_file_info db stmt_cache relative_path file_info :
-    int * insertion_error list =
+let save_file_info db stmt_cache relative_path file_info : save_result =
   let open Core_kernel in
   FileInfoTable.insert
     db
@@ -656,7 +655,8 @@ let save_file_info db stmt_cache relative_path file_info :
         (insert ~name_kind:Naming_types.Module_kind ~dep_ctor:(fun name ->
              Typing_deps.Dep.Module name))
   in
-  results
+  let (symbols_added, errors) = results in
+  { files_added = 1; symbols_added; errors }
 
 let save_file_infos db_name file_info_map ~base_content_version =
   let db = Sqlite3.db_open db_name in
@@ -675,11 +675,11 @@ let save_file_infos db_name file_info_map ~base_content_version =
         file_info_map
         ~init:empty_save_result
         ~f:(fun path fi acc ->
-          let (symbols_added, errors) = save_file_info db stmt_cache path fi in
+          let per_file = save_file_info db stmt_cache path fi in
           {
-            files_added = acc.files_added + 1;
-            symbols_added = acc.symbols_added + symbols_added;
-            errors = List.rev_append acc.errors errors;
+            files_added = acc.files_added + per_file.files_added;
+            symbols_added = acc.symbols_added + per_file.symbols_added;
+            errors = List.rev_append acc.errors per_file.errors;
           })
     in
     Sqlite3.exec db FileInfoTable.create_index_sqlite |> check_rc db;
@@ -706,21 +706,37 @@ let copy_and_update
   Sqlite3.exec new_db SymbolTable.create_temporary_index_sqlite
   |> check_rc new_db;
 
-  (*
-     First do all symbol deletions to prevent file_deltas order from causing duplicate
-     symbol sqlite errors
+  (* Our update plan is to use two phases: (1) go through every single file that has been
+     changed in any way and delete the old entries, (2) go through every file and add the
+     updated entries if any. First step is to gather from the database the FILE_INFO_ID
+     of every old file... *)
+  let old_files : (Relative_path.t * Int64.t) list =
+    List.filter_map
+      (Relative_path.Map.elements local_changes.file_deltas)
+      ~f:(fun (path, _delta) ->
+        match FileInfoTable.get_file_info_id new_db stmt_cache path with
+        | None -> None
+        | Some file_info_id -> Some (path, file_info_id))
+  in
 
-     * if there are truly no symbol collisions then we won't fail due to order of inserts
-     * if there truly is a symbol collision then we will fail
-  *)
-  Relative_path.Map.iter local_changes.file_deltas ~f:(fun path _ ->
-      let file_info_id =
-        FileInfoTable.get_file_info_id new_db stmt_cache path
-      in
-      Option.iter file_info_id ~f:(fun file_info_id ->
-          SymbolTable.delete new_db stmt_cache file_info_id;
-          FileInfoTable.delete new_db stmt_cache path));
+  (* Symbols: phase 1 is to remove from forward and reverse naming table every symbol
+     which used to be there. Our strategy here is to read the forward-naming-table to learn
+     the FILE_INFO_ID, and then bulk delete all entries from the reverse-naming-table which
+     have this same FILE_INFO_ID. (The reverse table isn't indexed by FILE_INFO_ID, which is
+     why we had to create a temporary index for it. It would have been more efficient to
+     get ToplevelSymbolHash from the forward naming table and remove by that, since the reverse
+     naming table is already indexed by ToplevelSymbolHash. *)
+  List.iter old_files ~f:(fun (path, file_info_id) ->
+      SymbolTable.delete new_db stmt_cache file_info_id;
+      FileInfoTable.delete new_db stmt_cache path;
+      ());
 
+  (* Symbols: phase 2 is to add forward and reverse entries for every item in file_deltas.
+      Note: if we tried to combine phases 1 and 2, then in the case of symbol X being moved from
+      b.php to a.php, we might have done local-change b.php first and tried to add X->b.php,
+      even before X->a.php had been deleted. That would have lead to a duplicate primary key violation.
+      By doing it in two phases we avoid that problem. (Of course if someone adds a duplicate entry
+      then that truly will result in a duplicate primary key violation.) *)
   let result =
     Relative_path.Map.fold
       local_changes.file_deltas
@@ -729,13 +745,11 @@ let copy_and_update
         match file_info with
         | Deleted -> acc
         | Modified file_info ->
-          let (symbols_added, errors) =
-            save_file_info new_db stmt_cache path file_info
-          in
+          let per_file = save_file_info new_db stmt_cache path file_info in
           {
-            files_added = acc.files_added + 1;
-            symbols_added = acc.symbols_added + symbols_added;
-            errors = List.rev_append acc.errors errors;
+            files_added = acc.files_added + per_file.files_added;
+            symbols_added = acc.symbols_added + per_file.symbols_added;
+            errors = List.rev_append acc.errors per_file.errors;
           })
   in
   Sqlite3.exec new_db "END TRANSACTION;" |> check_rc new_db;

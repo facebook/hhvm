@@ -39,15 +39,22 @@ let visitor ctx =
   let skip_hierarchy_checks =
     TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
   in
+  (* Global access check is turned on only if certain files or functions are enabled
+     for checking global writes or global reads. *)
   let is_global_access_check_enabled =
-    0
-    <> List.length
-         (TypecheckerOptions.global_access_check_files_enabled
-            (Provider_context.get_tcopt ctx))
-    || 0
-       <> SSet.cardinal
-            (TypecheckerOptions.global_access_check_functions_enabled
-               (Provider_context.get_tcopt ctx))
+    let tcopt = Provider_context.get_tcopt ctx in
+    let check_write = TypecheckerOptions.global_access_check_on_write tcopt in
+    let check_read = TypecheckerOptions.global_access_check_on_read tcopt in
+    let files_enabled =
+      List.length (TypecheckerOptions.global_access_check_files_enabled tcopt)
+      > 0
+    in
+    let function_enabled =
+      SSet.cardinal
+        (TypecheckerOptions.global_access_check_functions_enabled tcopt)
+      > 0
+    in
+    (check_write || check_read) && (files_enabled || function_enabled)
   in
   let handlers =
     handlers

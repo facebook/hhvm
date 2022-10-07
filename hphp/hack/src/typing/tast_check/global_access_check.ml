@@ -23,8 +23,8 @@
  *
  * When the checker is turned on, both global writes and reads are checked by default.
  * To check only global writes or global reads:
- * - use the argument --disable-global-access-check-on-write;
- * - use the argument --disable-global-access-check-on-read.
+ * - use the flag --disable-global-access-check-on-write;
+ * - use the flag --disable-global-access-check-on-read.
  *
  * A trick to run this checker on a specific list of files (not simply by prefix) is to
  *   use "--config enable_type_check_filter_files=true" togehter with above arguments,
@@ -39,6 +39,48 @@ module Cls = Decl_provider.Class
 module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
 module GlobalAccessCheck = Error_codes.GlobalAccessCheck
+
+(* Raise a global access error if the corresponding write/read mode is enabled. *)
+let raise_global_access_error env pos fun_name data_type global_set error_code =
+  let tcopt = Tast_env.get_tcopt env in
+  let (error_message, error_enabled) =
+    match error_code with
+    | GlobalAccessCheck.DefiniteGlobalWrite ->
+      ( "definitely written.",
+        TypecheckerOptions.global_access_check_on_write tcopt )
+    | GlobalAccessCheck.PossibleGlobalWriteViaReference ->
+      ( "possibly written via reference.",
+        TypecheckerOptions.global_access_check_on_write tcopt )
+    | GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall ->
+      ( "possibly written via function call.",
+        TypecheckerOptions.global_access_check_on_write tcopt )
+    | GlobalAccessCheck.DefiniteGlobalRead ->
+      ("definitely read.", TypecheckerOptions.global_access_check_on_read tcopt)
+  in
+  if error_enabled then
+    let global_vars_str =
+      SSet.fold
+        (fun s cur_str ->
+          cur_str
+          ^ (if String.length cur_str > 0 then
+              ","
+            else
+              "")
+          ^ s)
+        global_set
+        ""
+    in
+    let message =
+      "["
+      ^ fun_name
+      ^ "]{"
+      ^ global_vars_str
+      ^ "}("
+      ^ data_type
+      ^ ") A global variable is "
+      ^ error_message
+    in
+    Errors.global_access_error error_code pos message
 
 (* The context maintains a hash table from each global variable to the
   corresponding references of static variables or memoized functions.
@@ -413,7 +455,8 @@ let visitor =
              get_global_and_mutable_from_expr env ctx e ~track_refs:true
            with
           | Some global_set ->
-            Errors.global_access_error
+            raise_global_access_error
+              env
               p
               fun_name
               (Tast_env.print_ty env ty)
@@ -435,7 +478,8 @@ let visitor =
         in
         (match re_direct_global_opt with
         | Some re_direct_global ->
-          Errors.global_access_error
+          raise_global_access_error
+            env
             p
             fun_name
             re_ty
@@ -444,7 +488,8 @@ let visitor =
         | None -> ());
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         if is_expr_static env le && Option.is_some le_global_opt then
-          Errors.global_access_error
+          raise_global_access_error
+            env
             p
             fun_name
             re_ty
@@ -459,7 +504,8 @@ let visitor =
           (match has_global_write_access le with
           | true ->
             if Option.is_some le_global_opt then
-              Errors.global_access_error
+              raise_global_access_error
+                env
                 p
                 fun_name
                 re_ty
@@ -492,14 +538,16 @@ let visitor =
           | Ast_defs.Updecr ->
             (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
             if is_expr_static env e then
-              Errors.global_access_error
+              raise_global_access_error
+                env
                 p
                 fun_name
                 e_ty
                 e_global
                 GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
-              Errors.global_access_error
+              raise_global_access_error
+                env
                 p
                 fun_name
                 e_ty
@@ -509,36 +557,29 @@ let visitor =
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
         List.iter tpl ~f:(fun (pk, ((ty, pos, _) as expr)) ->
-            match pk with
-            | Ast_defs.Pinout _ ->
-              let e_global_opt =
+            let e_global_opt =
+              match pk with
+              | Ast_defs.Pinout _ ->
                 get_globals_from_expr env ctx expr ~track_refs:true
-              in
-              if Option.is_some e_global_opt then
-                Errors.global_access_error
-                  pos
-                  fun_name
-                  (Tast_env.print_ty env ty)
-                  (Option.get e_global_opt)
-                  GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall
-            | Ast_defs.Pnormal ->
-              let e_global_opt =
+              | Ast_defs.Pnormal ->
                 get_global_and_mutable_from_expr env ctx expr ~track_refs:true
-              in
-              if Option.is_some e_global_opt then
-                Errors.global_access_error
-                  pos
-                  fun_name
-                  (Tast_env.print_ty env ty)
-                  (Option.get e_global_opt)
-                  GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
+            in
+            if Option.is_some e_global_opt then
+              raise_global_access_error
+                env
+                pos
+                fun_name
+                (Tast_env.print_ty env ty)
+                (Option.get e_global_opt)
+                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             let e_global_opt =
               get_global_and_mutable_from_expr env ctx expr ~track_refs:true
             in
             if Option.is_some e_global_opt then
-              Errors.global_access_error
+              raise_global_access_error
+                env
                 pos
                 fun_name
                 (Tast_env.print_ty env ty)
@@ -548,6 +589,7 @@ let visitor =
       super#on_expr (env, (ctx, fun_name)) te
   end
 
+(* Determine if a file is enabled for global access check *)
 let global_access_check_enabled_on_file tcopt file =
   let enabled_paths =
     TypecheckerOptions.global_access_check_files_enabled tcopt
@@ -556,15 +598,21 @@ let global_access_check_enabled_on_file tcopt file =
   List.exists enabled_paths ~f:(fun prefix ->
       String_utils.string_starts_with path prefix)
 
+(* Determine if a function is enabled for global access check *)
 let global_access_check_enabled_on_function tcopt function_name =
   let enabled_functions =
     TypecheckerOptions.global_access_check_functions_enabled tcopt
   in
   SSet.mem function_name enabled_functions
 
+(* The global access check is turned on if:
+ * the given file or function is enabled for global access check,
+ * and at least one of (global_write_check, global_read_check) is turned on. *)
 let global_access_check_enabled tcopt file function_name =
-  global_access_check_enabled_on_file tcopt file
-  || global_access_check_enabled_on_function tcopt function_name
+  (TypecheckerOptions.global_access_check_on_write tcopt
+  || TypecheckerOptions.global_access_check_on_read tcopt)
+  && (global_access_check_enabled_on_file tcopt file
+     || global_access_check_enabled_on_function tcopt function_name)
 
 let handler =
   object

@@ -190,49 +190,136 @@ impl HhServerProviderBackend {
     // ---
     // Deletion support
 
-    pub fn oldify_funs_batch(&self, _names: &[pos::FunName]) {}
-    pub fn remove_funs_batch(&self, _names: &[pos::FunName]) {}
-    pub fn remove_old_funs_batch(&self, _names: &[pos::FunName]) {}
+    pub fn oldify_funs_batch(&self, _names: &[pos::FunName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_funs_batch(&self, _names: &[pos::FunName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_funs_batch(&self, _names: &[pos::FunName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_shallow_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_shallow_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_shallow_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_folded_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_folded_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_folded_classes_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_typedefs_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_typedefs_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_typedefs_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_typedefs_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_typedefs_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_typedefs_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_gconsts_batch(&self, _names: &[pos::ConstName]) {}
-    pub fn remove_gconsts_batch(&self, _names: &[pos::ConstName]) {}
-    pub fn remove_old_gconsts_batch(&self, _names: &[pos::ConstName]) {}
+    pub fn oldify_gconsts_batch(&self, _names: &[pos::ConstName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_gconsts_batch(&self, _names: &[pos::ConstName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_gconsts_batch(&self, _names: &[pos::ConstName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_modules_batch(&self, _names: &[pos::ModuleName]) {}
-    pub fn remove_modules_batch(&self, _names: &[pos::ModuleName]) {}
-    pub fn remove_old_modules_batch(&self, _names: &[pos::ModuleName]) {}
+    pub fn oldify_modules_batch(&self, _names: &[pos::ModuleName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_modules_batch(&self, _names: &[pos::ModuleName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_modules_batch(&self, _names: &[pos::ModuleName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
-    pub fn remove_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
-    pub fn remove_old_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
+    pub fn oldify_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_static_props_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::PropName)],
+    ) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_static_props_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::PropName)],
+    ) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_static_props_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::PropName)],
+    ) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_methods_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::MethodName)],
+    ) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_static_methods_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::MethodName)],
+    ) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_static_methods_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::MethodName)],
+    ) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_static_methods_batch(
+        &self,
+        _names: &[(pos::TypeName, pos::MethodName)],
+    ) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_constructors_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_constructors_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_constructors_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_constructors_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_constructors_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_old_constructors_batch(&self, _names: &[pos::TypeName]) -> Result<()> {
+        Ok(())
+    }
 
     //
     // ---

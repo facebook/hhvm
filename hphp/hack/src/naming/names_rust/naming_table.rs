@@ -58,18 +58,19 @@ impl NamingTable {
                     if old_filename.path_str() == path.path_str() {
                         // we are dealing with the same symbol from the same file
                         // add it back to checksum
-                        self.checksum.addremove(symbol_hash, decl_hash);
+                        self.checksum.addremove(symbol_hash, decl_hash, path);
                     } else if old_filename.path_str() > path.path_str() {
                         // symbol changed is alphabetically first filename
                         changed_symbol_hashes.insert(symbol_hash);
                         self.path_cache.remove(&symbol_hash);
-                        self.checksum.addremove(symbol_hash, old_decl_hash);
-                        self.checksum.addremove(symbol_hash, decl_hash);
+                        self.checksum
+                            .addremove(symbol_hash, old_decl_hash, &old_filename);
+                        self.checksum.addremove(symbol_hash, decl_hash, path);
                     }
                 }
             } else {
                 // No collision
-                self.checksum.addremove(symbol_hash, decl_hash);
+                self.checksum.addremove(symbol_hash, decl_hash, path);
                 changed_symbol_hashes.insert(symbol_hash);
                 self.path_cache.remove(&symbol_hash);
             }
@@ -92,6 +93,7 @@ impl NamingTable {
             .copied()
             .collect();
         let mut changed_symbol_hashes = IntSet::default();
+        // combined_hashes is the forward naming table for this file BEFORE the change
         let combined_hashes = self.names.get_symbol_and_decl_hashes(path)?;
 
         // remove symbols from naming table
@@ -102,8 +104,9 @@ impl NamingTable {
 
             if new_filename != old_filename {
                 if let Some(decl_hash) = self.names.get_decl_hash(symbol_hash)? {
-                    // an inferior symbol has been promoted
-                    self.checksum.addremove(symbol_hash, decl_hash);
+                    // an inferior symbol has been promoted. We'll add this newly-promoted one.
+                    self.checksum
+                        .addremove(symbol_hash, decl_hash, new_filename.as_ref().unwrap());
                 }
             }
 
@@ -116,9 +119,9 @@ impl NamingTable {
 
         self.names.delete(path)?;
 
-        // Remove combined hashes from checksum
+        // Remove combined hashes from checksum (i.e. all symbols in the file before the change)
         for (symbol_hash, decl_hash, _file_info_id) in combined_hashes {
-            self.checksum.addremove(symbol_hash, decl_hash);
+            self.checksum.addremove(symbol_hash, decl_hash, path);
         }
 
         Ok(changed_symbol_hashes)

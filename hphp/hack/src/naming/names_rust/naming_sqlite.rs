@@ -100,16 +100,24 @@ impl Names {
         let select_statement = "
         SELECT
             NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH
-        FROM
-            NAMING_SYMBOLS
-        ";
+            NAMING_SYMBOLS.DECL_HASH,
+            NAMING_SYMBOLS.FILE_INFO_ID,
+            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
+            NAMING_FILE_INFO.PATH_SUFFIX
+        FROM NAMING_SYMBOLS
+        LEFT JOIN NAMING_FILE_INFO ON NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID";
+
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let mut rows = select_statement.query(params![])?;
         let mut checksum = hh24_types::Checksum(0);
 
         while let Some(row) = rows.next()? {
-            checksum.addremove(row.get(0)?, row.get(1)?);
+            let hash: ToplevelSymbolHash = row.get(0)?;
+            let decl_hash: DeclHash = row.get(1)?;
+            let prefix: crate::datatypes::SqlitePrefix = row.get(3)?;
+            let suffix: crate::datatypes::SqlitePathBuf = row.get(4)?;
+            let path = RelativePath::make(prefix.value, suffix.value);
+            checksum.addremove(hash, decl_hash, &path);
         }
 
         Ok(checksum)

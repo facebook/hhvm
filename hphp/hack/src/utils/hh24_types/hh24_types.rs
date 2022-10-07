@@ -74,8 +74,13 @@ impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
 pub struct Checksum(pub u64);
 
 impl Checksum {
-    pub fn addremove(&mut self, symbol_hash: ToplevelSymbolHash, decl_hash: DeclHash) {
-        self.0 ^= hh_hash::hash(&(symbol_hash, decl_hash));
+    pub fn addremove(
+        &mut self,
+        symbol_hash: ToplevelSymbolHash,
+        decl_hash: DeclHash,
+        path: &relative_path::RelativePath,
+    ) {
+        self.0 ^= hh_hash::hash(&(symbol_hash, decl_hash, path));
     }
 }
 

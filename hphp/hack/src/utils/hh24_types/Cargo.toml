@@ -12,6 +12,7 @@ anyhow = "1.0.65"
 derive_more = "0.99.17"
 hh_hash = { path = "../hh_hash" }
 nohash-hasher = "0.2"
+relative_path = { path = "../rust/relative_path" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }

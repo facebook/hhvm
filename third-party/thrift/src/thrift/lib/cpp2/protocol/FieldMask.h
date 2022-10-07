@@ -38,15 +38,17 @@ void clear(const Mask& mask, protocol::Object& t);
 // Throws a runtime exception if the mask and objects are incompatible.
 void copy(const Mask& mask, const protocol::Object& src, protocol::Object& dst);
 
-// Returns whether field mask is compatible with thrift type T.
-// If it is not a struct, it is only compatible when it is allMask or noneMask.
-// Otherwise, it is incompatible if the mask contains a field that doesn't exist
-// in the struct or that exists with a different type.
-template <typename T>
-bool is_compatible_with(const Mask& mask) {
-  detail::throwIfContainsMapMask(mask);
-  return detail::is_compatible_with<T>(mask);
-}
+// Returns whether field mask is compatible with thrift type tag.
+//
+// If it is a struct, it is incompatible if the mask contains a field that
+// doesn't exist in the struct or that exists with a different type.
+//
+// If it is a map, it is incompatible only if mask is not a map mask, or any
+// nested mask in the map mask is incompatible with mapped type.
+//
+// If it is not a struct or a map, it is only compatible when it is allMask or
+// noneMask.
+using detail::is_compatible_with;
 
 // Ensures that the masked fields have value in the thrift struct.
 // If it doesn't, it emplaces the field.
@@ -97,7 +99,7 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   static_assert(is_thrift_struct_v<Struct>);
   MaskBuilder() { data_ = Mask{}; }
   /* implicit */ MaskBuilder(Mask mask) {
-    detail::errorIfNotCompatible<Struct>(mask);
+    detail::errorIfNotCompatible<type::struct_t<Struct>>(mask);
     data_ = mask;
   }
 
@@ -122,14 +124,21 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& includes(const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<Struct, Id...>(mask);
+    data_ = data_ | detail::path<type::struct_t<Struct>, Id...>(mask);
     return *this;
+  }
+
+  template <typename... Id>
+  MaskBuilder& includes_map_element(int64_t key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return includes<Id...>(map);
   }
 
   MaskBuilder& includes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ | detail::path<Struct>(fieldNames, 0, mask);
+    data_ = data_ | detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
     return *this;
   }
 
@@ -139,14 +148,21 @@ struct MaskBuilder : type::detail::Wrap<Mask> {
   // Throws runtime exception if the field doesn't exist.
   template <typename... Id>
   MaskBuilder& excludes(const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<Struct, Id...>(mask);
+    data_ = data_ - detail::path<type::struct_t<Struct>, Id...>(mask);
     return *this;
+  }
+
+  template <typename... Id>
+  MaskBuilder& excludes_map_element(int64_t key, const Mask& mask = allMask()) {
+    Mask map;
+    map.includes_map_ref().emplace()[key] = mask;
+    return excludes<Id...>(map);
   }
 
   MaskBuilder& excludes(
       const std::vector<folly::StringPiece>& fieldNames,
       const Mask& mask = allMask()) {
-    data_ = data_ - detail::path<Struct>(fieldNames, 0, mask);
+    data_ = data_ - detail::path<type::struct_t<Struct>>(fieldNames, 0, mask);
     return *this;
   }
 

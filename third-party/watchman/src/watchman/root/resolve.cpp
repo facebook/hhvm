@@ -5,6 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+#include <fmt/core.h>
 #include <folly/String.h>
 #include "watchman/Errors.h"
 #include "watchman/InMemoryView.h"
@@ -49,7 +50,7 @@ bool root_check_restrict(const char* watch_path) {
       continue;
     }
 
-    auto restrict_path = folly::to<std::string>(watch_path, "/", restrict_file);
+    auto restrict_path = fmt::format("{}/{}", watch_path, restrict_file);
     bool rv = w_path_exists(restrict_path.c_str());
     if (rv)
       return true;

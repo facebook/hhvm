@@ -465,6 +465,7 @@ struct Service {
  *
  *     const {type} {attrs.name} = {value}
  */
+@hack.Name{name = "TConst"}
 struct Const {
   /** The definition attributes. */
   @thrift.Mixin

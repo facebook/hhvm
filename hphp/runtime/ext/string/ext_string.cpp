@@ -1307,7 +1307,7 @@ static bool is_valid_strrpos_args(
 TypedValue HHVM_FUNCTION(strchr,
                          const String& haystack,
                          const Variant& needle) {
-  return HHVM_FN(strstr)(haystack, needle);
+  return HHVM_FN(strstr)(haystack, needle, false);
 }
 
 TypedValue HHVM_FUNCTION(strrchr,

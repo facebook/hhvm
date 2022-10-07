@@ -17,6 +17,8 @@ open Hh_json_helpers
 type args = {
   from: string;
   config: (string * string) list;
+  ignore_hh_version: bool;
+  naming_table: string option;
   verbose: bool;
 }
 
@@ -1564,9 +1566,16 @@ let run_ide_service
     log_error "client doesn't support file-watching";
 
   let naming_table_load_info =
-    match initialize_params.initializationOptions.namingTableSavedStatePath with
-    | None -> None
-    | Some path ->
+    match
+      ( initialize_params.initializationOptions.namingTableSavedStatePath,
+        env.args.naming_table )
+    with
+    | (Some _, Some _) ->
+      log_error
+        "naming table path supplied from both LSP initialization param and command line";
+      exit_fail ()
+    | (Some path, _)
+    | (_, Some path) ->
       Some
         {
           ClientIdeMessage.Initialize_from_saved_state.path = Path.make path;
@@ -1574,6 +1583,7 @@ let run_ide_service
             initialize_params.initializationOptions
               .namingTableSavedStateTestDelay;
         }
+    | (None, None) -> None
   in
   let open_files =
     editor_open_files
@@ -1589,6 +1599,7 @@ let run_ide_service
       ~naming_table_load_info
       ~use_ranked_autocomplete:env.use_ranked_autocomplete
       ~config:env.args.config
+      ~ignore_hh_version:env.args.ignore_hh_version
       ~open_files
   in
   log_debug "initialize_from_saved_state.done";

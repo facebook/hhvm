@@ -38,7 +38,7 @@ void MyServiceAsyncProcessor::executeRequest_ping(apache::thrift::ServerRequest&
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_ping_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.ping", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.ping", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "ping", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -104,7 +104,7 @@ void MyServiceAsyncProcessor::executeRequest_getRandomData(apache::thrift::Serve
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::cpp2::MyService_getRandomData_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.getRandomData", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.getRandomData", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "getRandomData", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -174,7 +174,7 @@ void MyServiceAsyncProcessor::executeRequest_hasDataById(apache::thrift::ServerR
   ::cpp2::MyService_hasDataById_pargs args;
   ::std::int64_t uarg_id{0};
   args.get<0>().value = &uarg_id;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.hasDataById", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.hasDataById", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "hasDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -244,7 +244,7 @@ void MyServiceAsyncProcessor::executeRequest_getDataById(apache::thrift::ServerR
   ::cpp2::MyService_getDataById_pargs args;
   ::std::int64_t uarg_id{0};
   args.get<0>().value = &uarg_id;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.getDataById", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.getDataById", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "getDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -316,7 +316,7 @@ void MyServiceAsyncProcessor::executeRequest_putDataById(apache::thrift::ServerR
   args.get<0>().value = &uarg_id;
   auto uarg_data = std::make_unique<::std::string>();
   args.get<1>().value = uarg_data.get();
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.putDataById", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.putDataById", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "putDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -386,7 +386,7 @@ void MyServiceAsyncProcessor::executeRequest_lobDataById(apache::thrift::ServerR
   args.get<0>().value = &uarg_id;
   auto uarg_data = std::make_unique<::std::string>();
   args.get<1>().value = uarg_data.get();
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "MyService.lobDataById", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "MyService.lobDataById", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "lobDataById", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

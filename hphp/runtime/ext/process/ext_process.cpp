@@ -87,74 +87,7 @@ static struct ProcessExtension final : Extension {
   void loadDecls() override {
     loadDeclsFrom("process");
   }
-  void moduleInit() override {
-    HHVM_FE(pcntl_alarm);
-    HHVM_FE(pcntl_exec);
-    HHVM_FE(pcntl_fork);
-    HHVM_FE(pcntl_getpriority);
-    HHVM_FE(pcntl_setpriority);
-    HHVM_FE(pcntl_signal);
-    HHVM_FE(pcntl_sigprocmask);
-    HHVM_FE(pcntl_wait);
-    HHVM_FE(pcntl_waitpid);
-    HHVM_FE(pcntl_wexitstatus);
-    HHVM_FE(pcntl_signal_dispatch);
-    HHVM_FE(pcntl_wifexited);
-    HHVM_FE(pcntl_wifsignaled);
-    HHVM_FE(pcntl_wifstopped);
-    HHVM_FE(pcntl_wstopsig);
-    HHVM_FE(pcntl_wtermsig);
-
-    HHVM_RC_INT_SAME(SIGABRT);
-    HHVM_RC_INT_SAME(SIGALRM);
-    HHVM_RC_INT_SAME(SIGBUS);
-    HHVM_RC_INT_SAME(SIGCHLD);
-    HHVM_RC_INT_SAME(SIGCONT);
-    HHVM_RC_INT_SAME(SIGFPE);
-    HHVM_RC_INT_SAME(SIGHUP);
-    HHVM_RC_INT_SAME(SIGILL);
-    HHVM_RC_INT_SAME(SIGINT);
-    HHVM_RC_INT_SAME(SIGIO);
-    HHVM_RC_INT_SAME(SIGIOT);
-    HHVM_RC_INT_SAME(SIGKILL);
-    HHVM_RC_INT_SAME(SIGPIPE);
-    HHVM_RC_INT_SAME(SIGPROF);
-    HHVM_RC_INT_SAME(SIGQUIT);
-    HHVM_RC_INT_SAME(SIGSEGV);
-    HHVM_RC_INT_SAME(SIGSTOP);
-    HHVM_RC_INT_SAME(SIGSYS);
-    HHVM_RC_INT_SAME(SIGTERM);
-    HHVM_RC_INT_SAME(SIGTRAP);
-    HHVM_RC_INT_SAME(SIGTSTP);
-    HHVM_RC_INT_SAME(SIGTTIN);
-    HHVM_RC_INT_SAME(SIGTTOU);
-    HHVM_RC_INT_SAME(SIGURG);
-    HHVM_RC_INT_SAME(SIGUSR1);
-    HHVM_RC_INT_SAME(SIGUSR2);
-    HHVM_RC_INT_SAME(SIGVTALRM);
-    HHVM_RC_INT_SAME(SIGWINCH);
-    HHVM_RC_INT_SAME(SIGXCPU);
-    HHVM_RC_INT_SAME(SIGXFSZ);
-    HHVM_RC_INT_SAME(SIG_BLOCK);
-    HHVM_RC_INT_SAME(SIG_UNBLOCK);
-    HHVM_RC_INT_SAME(SIG_SETMASK);
-
-    HHVM_RC_INT(SIG_DFL, (int64_t)SIG_DFL);
-    HHVM_RC_INT(SIG_ERR, (int64_t)SIG_ERR);
-    HHVM_RC_INT(SIG_IGN, (int64_t)SIG_IGN);
-
-    // http://marc.info/?l=php-cvs&m=100289252314474&w=2
-    HHVM_RC_INT(SIGBABY, SIGSYS);
-    HHVM_RC_INT(SIGCLD, SIGCHLD);
-    HHVM_RC_INT(SIGPOLL, SIGIO);
-
-#ifdef __linux__
-    HHVM_RC_INT_SAME(SIGPWR);
-    HHVM_RC_INT_SAME(SIGSTKFLT);
-#endif
-
-    loadSystemlib("process");
-  }
+  void moduleInit() override;
 } s_process_extension;
 
 int64_t HHVM_FUNCTION(pcntl_alarm,
@@ -588,6 +521,75 @@ int64_t HHVM_FUNCTION(pcntl_wstopsig,
 int64_t HHVM_FUNCTION(pcntl_wtermsig,
                       int64_t status) {
   return WTERMSIG(status);
+}
+
+void ProcessExtension::moduleInit() {
+  HHVM_FE(pcntl_alarm);
+  HHVM_FE(pcntl_exec);
+  HHVM_FE(pcntl_fork);
+  HHVM_FE(pcntl_getpriority);
+  HHVM_FE(pcntl_setpriority);
+  HHVM_FE(pcntl_signal);
+  HHVM_FE(pcntl_sigprocmask);
+  HHVM_FE(pcntl_wait);
+  HHVM_FE(pcntl_waitpid);
+  HHVM_FE(pcntl_wexitstatus);
+  HHVM_FE(pcntl_signal_dispatch);
+  HHVM_FE(pcntl_wifexited);
+  HHVM_FE(pcntl_wifsignaled);
+  HHVM_FE(pcntl_wifstopped);
+  HHVM_FE(pcntl_wstopsig);
+  HHVM_FE(pcntl_wtermsig);
+
+  HHVM_RC_INT_SAME(SIGABRT);
+  HHVM_RC_INT_SAME(SIGALRM);
+  HHVM_RC_INT_SAME(SIGBUS);
+  HHVM_RC_INT_SAME(SIGCHLD);
+  HHVM_RC_INT_SAME(SIGCONT);
+  HHVM_RC_INT_SAME(SIGFPE);
+  HHVM_RC_INT_SAME(SIGHUP);
+  HHVM_RC_INT_SAME(SIGILL);
+  HHVM_RC_INT_SAME(SIGINT);
+  HHVM_RC_INT_SAME(SIGIO);
+  HHVM_RC_INT_SAME(SIGIOT);
+  HHVM_RC_INT_SAME(SIGKILL);
+  HHVM_RC_INT_SAME(SIGPIPE);
+  HHVM_RC_INT_SAME(SIGPROF);
+  HHVM_RC_INT_SAME(SIGQUIT);
+  HHVM_RC_INT_SAME(SIGSEGV);
+  HHVM_RC_INT_SAME(SIGSTOP);
+  HHVM_RC_INT_SAME(SIGSYS);
+  HHVM_RC_INT_SAME(SIGTERM);
+  HHVM_RC_INT_SAME(SIGTRAP);
+  HHVM_RC_INT_SAME(SIGTSTP);
+  HHVM_RC_INT_SAME(SIGTTIN);
+  HHVM_RC_INT_SAME(SIGTTOU);
+  HHVM_RC_INT_SAME(SIGURG);
+  HHVM_RC_INT_SAME(SIGUSR1);
+  HHVM_RC_INT_SAME(SIGUSR2);
+  HHVM_RC_INT_SAME(SIGVTALRM);
+  HHVM_RC_INT_SAME(SIGWINCH);
+  HHVM_RC_INT_SAME(SIGXCPU);
+  HHVM_RC_INT_SAME(SIGXFSZ);
+  HHVM_RC_INT_SAME(SIG_BLOCK);
+  HHVM_RC_INT_SAME(SIG_UNBLOCK);
+  HHVM_RC_INT_SAME(SIG_SETMASK);
+
+  HHVM_RC_INT(SIG_DFL, (int64_t)SIG_DFL);
+  HHVM_RC_INT(SIG_ERR, (int64_t)SIG_ERR);
+  HHVM_RC_INT(SIG_IGN, (int64_t)SIG_IGN);
+
+  // http://marc.info/?l=php-cvs&m=100289252314474&w=2
+  HHVM_RC_INT(SIGBABY, SIGSYS);
+  HHVM_RC_INT(SIGCLD, SIGCHLD);
+  HHVM_RC_INT(SIGPOLL, SIGIO);
+
+#ifdef __linux__
+  HHVM_RC_INT_SAME(SIGPWR);
+  HHVM_RC_INT_SAME(SIGSTKFLT);
+#endif
+
+  loadSystemlib("process");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

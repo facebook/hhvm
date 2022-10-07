@@ -758,10 +758,12 @@ void HQSession::GoawayUtils::sendGoaway(HQSession& session) {
   VLOG(3) << "generated GOAWAY maxStreamID=" << goawayStreamId
           << " sess=" << session;
 
+  auto totalStreamLength = *writeOffset + *writeBufferedBytes +
+                           connCtrlStream->writeBuf_.chainLength();
+  CHECK_GT(totalStreamLength, 0);
   auto res = session.sock_->registerDeliveryCallback(
       connCtrlStream->getEgressStreamId(),
-      *writeOffset + *writeBufferedBytes +
-          connCtrlStream->writeBuf_.chainLength(),
+      totalStreamLength - 1,
       connCtrlStream);
   if (res.hasError()) {
     // shortcut to shutdown
@@ -2869,6 +2871,7 @@ HQSession::HQStreamTransportBase::generateHeadersCommon(
   const uint64_t newOffset = streamWriteByteOffset();
   if (size) {
     VLOG(4) << "sending headers, size=" << size->compressed
+            << ", compressedBlock=" << size->compressedBlock
             << ", uncompressedSize=" << size->uncompressed << " txn=" << txn_;
   }
 
@@ -3266,7 +3269,7 @@ size_t HQSession::HQStreamTransportBase::sendBody(
   }
 
   if (body.length && !txn->testAndSetFirstByteSent()) {
-    byteEventTracker_.addFirstBodyByteEvent(offset + 1, txn);
+    byteEventTracker_.addFirstBodyByteEvent(offset, txn);
   }
 
   auto sock = session_.sock_;
@@ -3331,7 +3334,7 @@ size_t HQSession::HQStreamTransportBase::sendBody(
         offset, encodedSize, &byteEventTracker_, txn);
   }
   if (encodedSize > 0 && !txn->testAndSetFirstByteSent()) {
-    byteEventTracker_.addFirstBodyByteEvent(offset + 1, txn);
+    byteEventTracker_.addFirstBodyByteEvent(offset, txn);
   }
   auto sock = session_.sock_;
   auto streamId = getStreamId();

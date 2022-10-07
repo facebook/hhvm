@@ -21,6 +21,8 @@ include "thrift/lib/thrift/protocol_detail.thrift"
 include "thrift/lib/thrift/type.thrift"
 include "thrift/lib/thrift/standard.thrift"
 
+cpp_include "folly/container/F14Map.h"
+
 @thrift.v1alpha
 package "facebook.com/thrift/protocol"
 
@@ -46,8 +48,8 @@ struct Path {
 // Represents serialized data of unmasked fields.
 union MaskedData {
   1: id.ValueId full;
-  2: map<id.FieldId, MaskedData> fields;
-  3: map<id.ValueId, MaskedData> values;
+  2: map<id.FieldId, MaskedData> (cpp.template = "folly::F14VectorMap") fields;
+  3: map<id.ValueId, MaskedData> (cpp.template = "folly::F14VectorMap") values;
 }
 
 struct EncodedValue {

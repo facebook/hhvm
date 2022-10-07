@@ -6,6 +6,7 @@
  */
 
 #include "watchman/fs/ParallelWalk.h"
+#include <fmt/core.h>
 #include <folly/concurrency/UnboundedQueue.h>
 #include <folly/executors/CPUThreadPoolExecutor.h>
 #include <folly/system/HardwareConcurrency.h>
@@ -79,7 +80,7 @@ folly::fbstring pathJoin(
   if (baseName.empty()) {
     return dirName;
   }
-  return folly::to<folly::fbstring>(dirName, '/', baseName);
+  return fmt::format("{}/{}", dirName, baseName);
 }
 
 // Update readDirTaskCount. +1 on construction. -1 on destruction.

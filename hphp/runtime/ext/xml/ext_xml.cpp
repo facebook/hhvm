@@ -14,10 +14,10 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
 */
-#include "hphp/runtime/ext/xml/ext_xml.h"
 
 #include <folly/ScopeGuard.h>
 
+#include "hphp/runtime/ext/extension.h"
 #include "hphp/runtime/base/array-init.h"
 #include "hphp/runtime/base/builtin-functions.h"
 #include "hphp/runtime/base/comparisons.h"
@@ -44,64 +44,7 @@ enum php_xml_option {
 
 static struct XMLExtension final : Extension {
   XMLExtension() : Extension("xml", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_FE(xml_parser_create);
-    HHVM_FE(xml_parser_free);
-    HHVM_FE(xml_parse);
-    HHVM_FE(xml_parse_into_struct);
-    HHVM_FE(xml_parser_create_ns);
-    HHVM_FE(xml_parser_get_option);
-    HHVM_FE(xml_parser_set_option);
-    HHVM_FE(xml_set_character_data_handler);
-    HHVM_FE(xml_set_default_handler);
-    HHVM_FE(xml_set_element_handler);
-    HHVM_FE(xml_set_processing_instruction_handler);
-    HHVM_FE(xml_set_start_namespace_decl_handler);
-    HHVM_FE(xml_set_end_namespace_decl_handler);
-    HHVM_FE(xml_set_unparsed_entity_decl_handler);
-    HHVM_FE(xml_set_external_entity_ref_handler);
-    HHVM_FE(xml_set_notation_decl_handler);
-    HHVM_FE(xml_set_object);
-    HHVM_FE(xml_get_current_byte_index);
-    HHVM_FE(xml_get_current_column_number);
-    HHVM_FE(xml_get_current_line_number);
-    HHVM_FE(xml_get_error_code);
-    HHVM_FE(xml_error_string);
-    HHVM_FE(utf8_decode);
-    HHVM_FE(utf8_encode);
-
-    HHVM_RC_INT_SAME(XML_ERROR_ASYNC_ENTITY);
-    HHVM_RC_INT_SAME(XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_BAD_CHAR_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_BINARY_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_DUPLICATE_ATTRIBUTE);
-    HHVM_RC_INT_SAME(XML_ERROR_EXTERNAL_ENTITY_HANDLING);
-    HHVM_RC_INT_SAME(XML_ERROR_INCORRECT_ENCODING);
-    HHVM_RC_INT_SAME(XML_ERROR_INVALID_TOKEN);
-    HHVM_RC_INT_SAME(XML_ERROR_JUNK_AFTER_DOC_ELEMENT);
-    HHVM_RC_INT_SAME(XML_ERROR_MISPLACED_XML_PI);
-    HHVM_RC_INT_SAME(XML_ERROR_NONE);
-    HHVM_RC_INT_SAME(XML_ERROR_NO_ELEMENTS);
-    HHVM_RC_INT_SAME(XML_ERROR_NO_MEMORY);
-    HHVM_RC_INT_SAME(XML_ERROR_PARAM_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_PARTIAL_CHAR);
-    HHVM_RC_INT_SAME(XML_ERROR_RECURSIVE_ENTITY_REF);
-    HHVM_RC_INT_SAME(XML_ERROR_SYNTAX);
-    HHVM_RC_INT_SAME(XML_ERROR_TAG_MISMATCH);
-    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_CDATA_SECTION);
-    HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_TOKEN);
-    HHVM_RC_INT_SAME(XML_ERROR_UNDEFINED_ENTITY);
-    HHVM_RC_INT_SAME(XML_ERROR_UNKNOWN_ENCODING);
-
-    HHVM_RC_INT(XML_OPTION_CASE_FOLDING,    PHP_XML_OPTION_CASE_FOLDING);
-    HHVM_RC_INT(XML_OPTION_TARGET_ENCODING, PHP_XML_OPTION_TARGET_ENCODING);
-    HHVM_RC_INT(XML_OPTION_SKIP_TAGSTART,   PHP_XML_OPTION_SKIP_TAGSTART);
-    HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
-
-    HHVM_RC_STR(XML_SAX_IMPL, "expat");
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_xml_extension;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1031,6 +974,67 @@ String HHVM_FUNCTION(utf8_encode,
   assertx(newlen <= maxSize);
   str.shrink(newlen);
   return str;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+void XMLExtension::moduleInit() {
+  HHVM_FE(xml_parser_create);
+  HHVM_FE(xml_parser_free);
+  HHVM_FE(xml_parse);
+  HHVM_FE(xml_parse_into_struct);
+  HHVM_FE(xml_parser_create_ns);
+  HHVM_FE(xml_parser_get_option);
+  HHVM_FE(xml_parser_set_option);
+  HHVM_FE(xml_set_character_data_handler);
+  HHVM_FE(xml_set_default_handler);
+  HHVM_FE(xml_set_element_handler);
+  HHVM_FE(xml_set_processing_instruction_handler);
+  HHVM_FE(xml_set_start_namespace_decl_handler);
+  HHVM_FE(xml_set_end_namespace_decl_handler);
+  HHVM_FE(xml_set_unparsed_entity_decl_handler);
+  HHVM_FE(xml_set_external_entity_ref_handler);
+  HHVM_FE(xml_set_notation_decl_handler);
+  HHVM_FE(xml_set_object);
+  HHVM_FE(xml_get_current_byte_index);
+  HHVM_FE(xml_get_current_column_number);
+  HHVM_FE(xml_get_current_line_number);
+  HHVM_FE(xml_get_error_code);
+  HHVM_FE(xml_error_string);
+  HHVM_FE(utf8_decode);
+  HHVM_FE(utf8_encode);
+
+  HHVM_RC_INT_SAME(XML_ERROR_ASYNC_ENTITY);
+  HHVM_RC_INT_SAME(XML_ERROR_ATTRIBUTE_EXTERNAL_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_BAD_CHAR_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_BINARY_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_DUPLICATE_ATTRIBUTE);
+  HHVM_RC_INT_SAME(XML_ERROR_EXTERNAL_ENTITY_HANDLING);
+  HHVM_RC_INT_SAME(XML_ERROR_INCORRECT_ENCODING);
+  HHVM_RC_INT_SAME(XML_ERROR_INVALID_TOKEN);
+  HHVM_RC_INT_SAME(XML_ERROR_JUNK_AFTER_DOC_ELEMENT);
+  HHVM_RC_INT_SAME(XML_ERROR_MISPLACED_XML_PI);
+  HHVM_RC_INT_SAME(XML_ERROR_NONE);
+  HHVM_RC_INT_SAME(XML_ERROR_NO_ELEMENTS);
+  HHVM_RC_INT_SAME(XML_ERROR_NO_MEMORY);
+  HHVM_RC_INT_SAME(XML_ERROR_PARAM_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_PARTIAL_CHAR);
+  HHVM_RC_INT_SAME(XML_ERROR_RECURSIVE_ENTITY_REF);
+  HHVM_RC_INT_SAME(XML_ERROR_SYNTAX);
+  HHVM_RC_INT_SAME(XML_ERROR_TAG_MISMATCH);
+  HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_CDATA_SECTION);
+  HHVM_RC_INT_SAME(XML_ERROR_UNCLOSED_TOKEN);
+  HHVM_RC_INT_SAME(XML_ERROR_UNDEFINED_ENTITY);
+  HHVM_RC_INT_SAME(XML_ERROR_UNKNOWN_ENCODING);
+
+  HHVM_RC_INT(XML_OPTION_CASE_FOLDING,    PHP_XML_OPTION_CASE_FOLDING);
+  HHVM_RC_INT(XML_OPTION_TARGET_ENCODING, PHP_XML_OPTION_TARGET_ENCODING);
+  HHVM_RC_INT(XML_OPTION_SKIP_TAGSTART,   PHP_XML_OPTION_SKIP_TAGSTART);
+  HHVM_RC_INT(XML_OPTION_SKIP_WHITE,      PHP_XML_OPTION_SKIP_WHITE);
+
+  HHVM_RC_STR(XML_SAX_IMPL, "expat");
+
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

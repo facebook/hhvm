@@ -30,8 +30,6 @@ enum PageletStatusType {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-int64_t HHVM_FUNCTION(hphp_thread_type);
-bool HHVM_FUNCTION(pagelet_server_is_enabled);
 Resource HHVM_FUNCTION(pagelet_server_task_start,
                        const String& url,
                        const Array& headers = null_array,
@@ -45,9 +43,6 @@ String HHVM_FUNCTION(pagelet_server_task_result,
                      Array& headers,
                      int64_t& code,
                      int64_t timeout_ms);
-int64_t HHVM_FUNCTION(pagelet_server_tasks_started);
-void HHVM_FUNCTION(pagelet_server_flush);
-bool HHVM_FUNCTION(pagelet_server_is_done);
 Resource HHVM_FUNCTION(xbox_task_start,
                        const String& message);
 bool HHVM_FUNCTION(xbox_task_status,
@@ -56,13 +51,9 @@ int64_t HHVM_FUNCTION(xbox_task_result,
                       const Resource& task,
                       int64_t timeout_ms,
                       Variant& ret);
-Variant HHVM_FUNCTION(xbox_process_call_message,
-                      const String& msg);
 bool HHVM_FUNCTION(server_is_stopping);
 bool HHVM_FUNCTION(server_is_prepared_to_stop);
-int64_t HHVM_FUNCTION(server_health_level);
 int64_t HHVM_FUNCTION(server_uptime);
-int64_t HHVM_FUNCTION(server_process_start_time);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

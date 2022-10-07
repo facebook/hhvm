@@ -39,7 +39,7 @@ void service2AsyncProcessor::executeRequest_methodA(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service2_methodA_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodA", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodA", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodA", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -111,7 +111,7 @@ void service2AsyncProcessor::executeRequest_methodB(apache::thrift::ServerReques
   args.get<1>().value = uarg_y.get();
   double uarg_z{0};
   args.get<2>().value = &uarg_z;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodB", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodB", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodB", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -177,7 +177,7 @@ void service2AsyncProcessor::executeRequest_methodC(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service2_methodC_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodC", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodC", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodC", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -251,7 +251,7 @@ void service2AsyncProcessor::executeRequest_methodD(apache::thrift::ServerReques
   args.get<1>().value = uarg_j.get();
   double uarg_k{0};
   args.get<2>().value = &uarg_k;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodD", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodD", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodD", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -319,7 +319,7 @@ void service2AsyncProcessor::executeRequest_methodE(apache::thrift::ServerReques
   // so async calls don't accidentally use it
   iface_->setRequestContext(nullptr);
   ::test_cpp2::cpp_reflection::service2_methodE_pargs args;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodE", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodE", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodE", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }
@@ -393,7 +393,7 @@ void service2AsyncProcessor::executeRequest_methodF(apache::thrift::ServerReques
   args.get<1>().value = uarg_m.get();
   double uarg_n{0};
   args.get<2>().value = &uarg_n;
-  std::unique_ptr<apache::thrift::ContextStack> ctxStack(this->getContextStack(this->getServiceName(), "service2.methodF", serverRequest.requestContext()));
+  apache::thrift::ContextStack::UniquePtr ctxStack(this->getContextStack(this->getServiceName(), "service2.methodF", serverRequest.requestContext()));
   try {
     deserializeRequest<ProtocolIn_>(args, "methodF", apache::thrift::detail::ServerRequestHelper::compressedRequest(std::move(serverRequest)).uncompress(), ctxStack.get());
   }

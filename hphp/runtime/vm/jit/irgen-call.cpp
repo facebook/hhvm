@@ -1292,7 +1292,7 @@ void emitModuleBoundaryCheck(IRGS& env, SSATmp* symbol, bool func /* = true */) 
 }
 
 void emitFCallFuncD(IRGS& env, FCallArgs fca, const StringData* funcName) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), funcName);
+  auto const lookup = lookupImmutableFunc(funcName);
   auto const callerCtx = [&] {
     if (!fca.context) return curClass(env);
     auto const ret = lookupUniqueClass(env, fca.context, true /* trustUnit */);
@@ -1329,7 +1329,7 @@ void emitFCallFunc(IRGS& env, FCallArgs fca) {
 }
 
 void emitResolveFunc(IRGS& env, const StringData* name) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto const lookup = lookupImmutableFunc(name);
   if (!lookup.func) {
     auto const func =
       gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });
@@ -1345,7 +1345,7 @@ void emitResolveFunc(IRGS& env, const StringData* name) {
 }
 
 void emitResolveMethCaller(IRGS& env, const StringData* name) {
-  auto const lookup = lookupImmutableFunc(curUnit(env), name);
+  auto const lookup = lookupImmutableFunc(name);
   auto func = lookup.func;
 
   // We de-duplicate meth_caller across the repo which may lead to the resolved
@@ -1380,7 +1380,7 @@ void emitResolveRFunc(IRGS& env, const StringData* name) {
   auto const tsList = popC(env);
 
   auto const funcTmp = [&] () -> SSATmp* {
-    auto const lookup = lookupImmutableFunc(curUnit(env), name);
+    auto const lookup = lookupImmutableFunc(name);
     auto const func = lookup.func;
     if (!func) {
       return gen(env, LookupFuncCached, FuncNameData { name, curClass(env) });

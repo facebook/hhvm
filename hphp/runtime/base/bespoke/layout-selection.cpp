@@ -1001,7 +1001,7 @@ SinkLayouts layoutsForSink(const jit::TransIDSet& ids, SrcKey sk) {
   }
 
   // For <= 2 layouts just return them in sorted order
-  if (layoutFrequencies.size() <= 2) {
+  if (layoutFrequencies.size() <= 2 && !isIteratorOp(sk.op())) {
     std::vector<std::pair<uint16_t, double>>
       sortedFrequencies(layoutFrequencies.begin(), layoutFrequencies.end());
     std::sort(

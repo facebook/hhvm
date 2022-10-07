@@ -7,6 +7,7 @@
 
 #include "WatchmanClient.h"
 
+#include <fmt/core.h>
 #include <glog/logging.h>
 
 namespace watchman {
@@ -133,9 +134,8 @@ SemiFuture<SubscriptionPtr> WatchmanClient::subscribe(
     Executor* executor,
     SubscriptionCallback&& callback,
     std::string subscriptionName) {
-  auto name = subscriptionName.empty()
-      ? folly::to<std::string>("sub", (int)++nextSubID_)
-      : std::move(subscriptionName);
+  auto name = subscriptionName.empty() ? fmt::format("sub{}", (int)++nextSubID_)
+                                       : std::move(subscriptionName);
   auto subscription =
       std::make_shared<Subscription>(executor, std::move(callback), name, path);
   {

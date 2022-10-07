@@ -58,12 +58,6 @@ struct c_SleepWaitHandle final : c_WaitableWaitHandle {
   static const int8_t STATE_WAITING = 2;
 };
 
-void HHVM_STATIC_METHOD(SleepWaitHandle, setOnCreateCallback,
-                        const Variant& callback);
-void HHVM_STATIC_METHOD(SleepWaitHandle, setOnSuccessCallback,
-                        const Variant& callback);
-Object HHVM_STATIC_METHOD(SleepWaitHandle, create, int64_t usecs);
-
 inline c_SleepWaitHandle* c_Awaitable::asSleep() {
   assertx(getKind() == Kind::Sleep);
   return static_cast<c_SleepWaitHandle*>(this);

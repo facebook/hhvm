@@ -72,8 +72,6 @@ function xhprof_frame_begin(string $name);
 <<__PHPStdLib>>
 function xhprof_frame_end();
 <<__PHPStdLib>>
-function xhprof_run_trace($packedTrace, $flags);
-<<__PHPStdLib>>
 function xhprof_sample_enable();
 <<__PHPStdLib>>
 function xhprof_sample_disable();

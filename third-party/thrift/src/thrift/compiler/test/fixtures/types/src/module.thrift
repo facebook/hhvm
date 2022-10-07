@@ -15,6 +15,8 @@
  */
 
 include "include.thrift"
+include "thrift/annotation/cpp.thrift"
+include "thrift/annotation/thrift.thrift"
 
 namespace cpp apache.thrift.fixtures.types
 namespace cpp2 apache.thrift.fixtures.types
@@ -98,13 +100,25 @@ struct ComplexNestedWithDefault {
   2: ComplexString n = {'a': '3', 'b': {'a': 3}};
 }
 
+@cpp.MinimizePadding
 struct MinPadding {
   1: required byte small;
   2: required i64 big;
   3: required i16 medium;
   4: required i32 biggish;
   5: required byte tiny;
-} (cpp.minimize_padding)
+}
+
+@cpp.MinimizePadding
+@thrift.TerseWrite
+struct MinPaddingWithCustomType {
+  1: byte small;
+  2: i64 big;
+  @cpp.Adapter{name = "::my::Adapter"}
+  3: i16 medium;
+  4: i32 biggish;
+  5: byte tiny;
+}
 
 struct MyStruct {
   1: i64 MyIntField;

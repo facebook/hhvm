@@ -87,41 +87,6 @@ const int64_t k_ZLIB_ENCODING_ANY     = 0x2f;
 const int64_t k_FORCE_GZIP            = k_ZLIB_ENCODING_GZIP;
 const int64_t k_FORCE_DEFLATE         = k_ZLIB_ENCODING_DEFLATE;
 
-///////////////////////////////////////////////////////////////////////////////
-// zlib functions
-
-Variant HHVM_FUNCTION(readgzfile, const String& filename,
-                                  int64_t use_include_path /* = 0 */) {
-  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
-    return init_null();
-  }
-
-  Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
-  if (stream.isBoolean() && !stream.toBoolean()) {
-    return false;
-  }
-  return HHVM_FN(gzpassthru)(stream.toResource());
-}
-
-Variant HHVM_FUNCTION(gzfile, const String& filename,
-                              int64_t use_include_path /* = 0 */) {
-  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
-    return init_null();
-  }
-
-  Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
-  if (stream.isBoolean() && !stream.toBoolean()) {
-    return false;
-  }
-
-  Array ret = Array::CreateVec();
-  Variant line;
-  while (!same(line = HHVM_FN(gzgets)(stream.toResource()), false)) {
-    ret.append(line);
-  }
-  return ret.empty() ? init_null() : ret;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 inline size_t hhvm_zlib_buffer_size_guess(size_t inlen) {
@@ -371,6 +336,41 @@ Variant HHVM_FUNCTION(gzpassthru, const Resource& zp) {
 Variant HHVM_FUNCTION(gzwrite, const Resource& zp, const String& str,
                                int64_t length /* = 0 */) {
   return HHVM_FN(fwrite)(zp, str, length);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// zlib functions
+
+Variant HHVM_FUNCTION(readgzfile, const String& filename,
+                                  int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
+  Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
+  if (stream.isBoolean() && !stream.toBoolean()) {
+    return false;
+  }
+  return HHVM_FN(gzpassthru)(stream.toResource());
+}
+
+Variant HHVM_FUNCTION(gzfile, const String& filename,
+                              int64_t use_include_path /* = 0 */) {
+  if (!FileUtil::checkPathAndWarn(filename, __FUNCTION__ + 2, 1)) {
+    return init_null();
+  }
+
+  Variant stream = HHVM_FN(gzopen)(filename, "rb", use_include_path);
+  if (stream.isBoolean() && !stream.toBoolean()) {
+    return false;
+  }
+
+  Array ret = Array::CreateVec();
+  Variant line;
+  while (!same(line = HHVM_FN(gzgets)(stream.toResource(), 0), false)) {
+    ret.append(line);
+  }
+  return ret.empty() ? init_null() : ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

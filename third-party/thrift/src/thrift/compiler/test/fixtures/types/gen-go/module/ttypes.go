@@ -11,6 +11,8 @@ import (
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
 	include0 "include"
+	cpp1 "thrift/annotation/cpp"
+	thrift2 "thrift/annotation/thrift"
 
 )
 
@@ -22,6 +24,8 @@ var _ = bytes.Equal
 var _ = context.Background
 
 var _ = include0.GoUnusedProtection__
+var _ = cpp1.GoUnusedProtection__
+var _ = thrift2.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
 type HasBitwiseOps int64
@@ -564,13 +568,13 @@ func (p *ContainerStruct)  ReadField12(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldA =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem1 int32
+    var _elem3 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem1 = v
+      _elem3 = v
     }
-    p.FieldA = append(p.FieldA, _elem1)
+    p.FieldA = append(p.FieldA, _elem3)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -586,13 +590,13 @@ func (p *ContainerStruct)  ReadField2(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldB =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem2 int32
+    var _elem4 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem2 = v
+      _elem4 = v
     }
-    p.FieldB = append(p.FieldB, _elem2)
+    p.FieldB = append(p.FieldB, _elem4)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -608,13 +612,13 @@ func (p *ContainerStruct)  ReadField3(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldC =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem3 int32
+    var _elem5 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem3 = v
+      _elem5 = v
     }
-    p.FieldC = append(p.FieldC, _elem3)
+    p.FieldC = append(p.FieldC, _elem5)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -630,13 +634,13 @@ func (p *ContainerStruct)  ReadField4(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldD =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem4 int32
+    var _elem6 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem4 = v
+      _elem6 = v
     }
-    p.FieldD = append(p.FieldD, _elem4)
+    p.FieldD = append(p.FieldD, _elem6)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -652,13 +656,13 @@ func (p *ContainerStruct)  ReadField5(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldE =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem5 int32
+    var _elem7 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem5 = v
+      _elem7 = v
     }
-    p.FieldE = append(p.FieldE, _elem5)
+    p.FieldE = append(p.FieldE, _elem7)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -674,13 +678,13 @@ func (p *ContainerStruct)  ReadField6(iprot thrift.Protocol) error {
   tSet := make([]int32, 0, size)
   p.FieldF =  tSet
   for i := 0; i < size; i ++ {
-    var _elem6 int32
+    var _elem8 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem6 = v
+      _elem8 = v
     }
-    p.FieldF = append(p.FieldF, _elem6)
+    p.FieldF = append(p.FieldF, _elem8)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -696,19 +700,19 @@ func (p *ContainerStruct)  ReadField7(iprot thrift.Protocol) error {
   tMap := make(map[int32]string, size)
   p.FieldG =  tMap
   for i := 0; i < size; i ++ {
-    var _key7 int32
+    var _key9 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key7 = v
+      _key9 = v
     }
-    var _val8 string
+    var _val10 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val8 = v
+      _val10 = v
     }
-    p.FieldG[_key7] = _val8
+    p.FieldG[_key9] = _val10
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -724,19 +728,19 @@ func (p *ContainerStruct)  ReadField8(iprot thrift.Protocol) error {
   tMap := make(include0.SomeMap, size)
   p.FieldH =  tMap
   for i := 0; i < size; i ++ {
-    var _key9 int32
+    var _key11 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key9 = v
+      _key11 = v
     }
-    var _val10 string
+    var _val12 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val10 = v
+      _val12 = v
     }
-    p.FieldH[_key9] = _val10
+    p.FieldH[_key11] = _val12
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -1013,13 +1017,13 @@ func (p *CppTypeStruct)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.FieldA =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem11 int32
+    var _elem13 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem11 = v
+      _elem13 = v
     }
-    p.FieldA = append(p.FieldA, _elem11)
+    p.FieldA = append(p.FieldA, _elem13)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -1768,19 +1772,19 @@ func (p *ComplexString)  ReadField2(iprot thrift.Protocol) error {
   tMap := make(map[string]int32, size)
   p.B =  tMap
   for i := 0; i < size; i ++ {
-    var _key12 string
+    var _key14 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key12 = v
+      _key14 = v
     }
-    var _val13 int32
+    var _val15 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val13 = v
+      _val15 = v
     }
-    p.B[_key12] = _val13
+    p.B[_key14] = _val15
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -2317,6 +2321,287 @@ func (p *MinPadding) String() string {
   biggishVal := fmt.Sprintf("%v", p.Biggish)
   tinyVal := fmt.Sprintf("%v", p.Tiny)
   return fmt.Sprintf("MinPadding({Small:%s Big:%s Medium:%s Biggish:%s Tiny:%s})", smallVal, bigVal, mediumVal, biggishVal, tinyVal)
+}
+
+// Attributes:
+//  - Small
+//  - Big
+//  - Medium
+//  - Biggish
+//  - Tiny
+type MinPaddingWithCustomType struct {
+  Small int8 `thrift:"small,1" db:"small" json:"small"`
+  Big int64 `thrift:"big,2" db:"big" json:"big"`
+  Medium int16 `thrift:"medium,3" db:"medium" json:"medium"`
+  Biggish int32 `thrift:"biggish,4" db:"biggish" json:"biggish"`
+  Tiny int8 `thrift:"tiny,5" db:"tiny" json:"tiny"`
+}
+
+func NewMinPaddingWithCustomType() *MinPaddingWithCustomType {
+  return &MinPaddingWithCustomType{}
+}
+
+
+func (p *MinPaddingWithCustomType) GetSmall() int8 {
+  return p.Small
+}
+
+func (p *MinPaddingWithCustomType) GetBig() int64 {
+  return p.Big
+}
+
+func (p *MinPaddingWithCustomType) GetMedium() int16 {
+  return p.Medium
+}
+
+func (p *MinPaddingWithCustomType) GetBiggish() int32 {
+  return p.Biggish
+}
+
+func (p *MinPaddingWithCustomType) GetTiny() int8 {
+  return p.Tiny
+}
+type MinPaddingWithCustomTypeBuilder struct {
+  obj *MinPaddingWithCustomType
+}
+
+func NewMinPaddingWithCustomTypeBuilder() *MinPaddingWithCustomTypeBuilder{
+  return &MinPaddingWithCustomTypeBuilder{
+    obj: NewMinPaddingWithCustomType(),
+  }
+}
+
+func (p MinPaddingWithCustomTypeBuilder) Emit() *MinPaddingWithCustomType{
+  return &MinPaddingWithCustomType{
+    Small: p.obj.Small,
+    Big: p.obj.Big,
+    Medium: p.obj.Medium,
+    Biggish: p.obj.Biggish,
+    Tiny: p.obj.Tiny,
+  }
+}
+
+func (m *MinPaddingWithCustomTypeBuilder) Small(small int8) *MinPaddingWithCustomTypeBuilder {
+  m.obj.Small = small
+  return m
+}
+
+func (m *MinPaddingWithCustomTypeBuilder) Big(big int64) *MinPaddingWithCustomTypeBuilder {
+  m.obj.Big = big
+  return m
+}
+
+func (m *MinPaddingWithCustomTypeBuilder) Medium(medium int16) *MinPaddingWithCustomTypeBuilder {
+  m.obj.Medium = medium
+  return m
+}
+
+func (m *MinPaddingWithCustomTypeBuilder) Biggish(biggish int32) *MinPaddingWithCustomTypeBuilder {
+  m.obj.Biggish = biggish
+  return m
+}
+
+func (m *MinPaddingWithCustomTypeBuilder) Tiny(tiny int8) *MinPaddingWithCustomTypeBuilder {
+  m.obj.Tiny = tiny
+  return m
+}
+
+func (m *MinPaddingWithCustomType) SetSmall(small int8) *MinPaddingWithCustomType {
+  m.Small = small
+  return m
+}
+
+func (m *MinPaddingWithCustomType) SetBig(big int64) *MinPaddingWithCustomType {
+  m.Big = big
+  return m
+}
+
+func (m *MinPaddingWithCustomType) SetMedium(medium int16) *MinPaddingWithCustomType {
+  m.Medium = medium
+  return m
+}
+
+func (m *MinPaddingWithCustomType) SetBiggish(biggish int32) *MinPaddingWithCustomType {
+  m.Biggish = biggish
+  return m
+}
+
+func (m *MinPaddingWithCustomType) SetTiny(tiny int8) *MinPaddingWithCustomType {
+  m.Tiny = tiny
+  return m
+}
+
+func (p *MinPaddingWithCustomType) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
+        return err
+      }
+    case 4:
+      if err := p.ReadField4(iprot); err != nil {
+        return err
+      }
+    case 5:
+      if err := p.ReadField5(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadByte(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    temp := int8(v)
+    p.Small = temp
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI64(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Big = v
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType)  ReadField3(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI16(); err != nil {
+    return thrift.PrependError("error reading field 3: ", err)
+  } else {
+    p.Medium = v
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType)  ReadField4(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 4: ", err)
+  } else {
+    p.Biggish = v
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType)  ReadField5(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadByte(); err != nil {
+    return thrift.PrependError("error reading field 5: ", err)
+  } else {
+    temp := int8(v)
+    p.Tiny = temp
+  }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("MinPaddingWithCustomType"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
+  if err := p.writeField4(oprot); err != nil { return err }
+  if err := p.writeField5(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *MinPaddingWithCustomType) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("small", thrift.BYTE, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:small: ", p), err) }
+  if err := oprot.WriteByte(byte(p.Small)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.small (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:small: ", p), err) }
+  return err
+}
+
+func (p *MinPaddingWithCustomType) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("big", thrift.I64, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:big: ", p), err) }
+  if err := oprot.WriteI64(int64(p.Big)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.big (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:big: ", p), err) }
+  return err
+}
+
+func (p *MinPaddingWithCustomType) writeField3(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("medium", thrift.I16, 3); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:medium: ", p), err) }
+  if err := oprot.WriteI16(int16(p.Medium)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.medium (3) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 3:medium: ", p), err) }
+  return err
+}
+
+func (p *MinPaddingWithCustomType) writeField4(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("biggish", thrift.I32, 4); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:biggish: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Biggish)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.biggish (4) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 4:biggish: ", p), err) }
+  return err
+}
+
+func (p *MinPaddingWithCustomType) writeField5(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("tiny", thrift.BYTE, 5); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:tiny: ", p), err) }
+  if err := oprot.WriteByte(byte(p.Tiny)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.tiny (5) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 5:tiny: ", p), err) }
+  return err
+}
+
+func (p *MinPaddingWithCustomType) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  smallVal := fmt.Sprintf("%v", p.Small)
+  bigVal := fmt.Sprintf("%v", p.Big)
+  mediumVal := fmt.Sprintf("%v", p.Medium)
+  biggishVal := fmt.Sprintf("%v", p.Biggish)
+  tinyVal := fmt.Sprintf("%v", p.Tiny)
+  return fmt.Sprintf("MinPaddingWithCustomType({Small:%s Big:%s Medium:%s Biggish:%s Tiny:%s})", smallVal, bigVal, mediumVal, biggishVal, tinyVal)
 }
 
 // Attributes:
@@ -2862,26 +3147,26 @@ func (p *AnnotatedTypes)  ReadField2(iprot thrift.Protocol) error {
       return thrift.PrependError("error reading map begin: ", err)
     }
     tMap := make(include0.SomeMap, size)
-    _elem14 :=  tMap
+    _elem16 :=  tMap
     for i := 0; i < size; i ++ {
-      var _key15 int32
+      var _key17 int32
       if v, err := iprot.ReadI32(); err != nil {
         return thrift.PrependError("error reading field 0: ", err)
       } else {
-        _key15 = v
+        _key17 = v
       }
-      var _val16 string
+      var _val18 string
       if v, err := iprot.ReadString(); err != nil {
         return thrift.PrependError("error reading field 0: ", err)
       } else {
-        _val16 = v
+        _val18 = v
       }
-      _elem14[_key15] = _val16
+      _elem16[_key17] = _val18
     }
     if err := iprot.ReadMapEnd(); err != nil {
       return thrift.PrependError("error reading map end: ", err)
     }
-    p.ListField = append(p.ListField, _elem14)
+    p.ListField = append(p.ListField, _elem16)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -3884,13 +4169,13 @@ func (p *NoexceptMoveComplexStruct)  ReadField8(iprot thrift.Protocol) error {
   tSlice := make([][]byte, 0, size)
   p.MyBinaryListField4 =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem17 []byte
+    var _elem19 []byte
     if v, err := iprot.ReadBinary(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem17 = v
+      _elem19 = v
     }
-    p.MyBinaryListField4 = append(p.MyBinaryListField4, _elem17)
+    p.MyBinaryListField4 = append(p.MyBinaryListField4, _elem19)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -3906,20 +4191,20 @@ func (p *NoexceptMoveComplexStruct)  ReadField9(iprot thrift.Protocol) error {
   tMap := make(map[MyEnumA]string, size)
   p.MyMapEnumAndInt =  tMap
   for i := 0; i < size; i ++ {
-    var _key18 MyEnumA
+    var _key20 MyEnumA
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
       temp := MyEnumA(v)
-      _key18 = temp
+      _key20 = temp
     }
-    var _val19 string
+    var _val21 string
     if v, err := iprot.ReadString(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val19 = v
+      _val21 = v
     }
-    p.MyMapEnumAndInt[_key18] = _val19
+    p.MyMapEnumAndInt[_key20] = _val21
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)
@@ -4475,13 +4760,13 @@ func (p *AllocatorAware)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]int32, 0, size)
   p.AaList =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem20 int32
+    var _elem22 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem20 = v
+      _elem22 = v
     }
-    p.AaList = append(p.AaList, _elem20)
+    p.AaList = append(p.AaList, _elem22)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4497,13 +4782,13 @@ func (p *AllocatorAware)  ReadField2(iprot thrift.Protocol) error {
   tSet := make([]int32, 0, size)
   p.AaSet =  tSet
   for i := 0; i < size; i ++ {
-    var _elem21 int32
+    var _elem23 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem21 = v
+      _elem23 = v
     }
-    p.AaSet = append(p.AaSet, _elem21)
+    p.AaSet = append(p.AaSet, _elem23)
   }
   if err := iprot.ReadSetEnd(); err != nil {
     return thrift.PrependError("error reading set end: ", err)
@@ -4519,19 +4804,19 @@ func (p *AllocatorAware)  ReadField3(iprot thrift.Protocol) error {
   tMap := make(map[int32]int32, size)
   p.AaMap =  tMap
   for i := 0; i < size; i ++ {
-    var _key22 int32
+    var _key24 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _key22 = v
+      _key24 = v
     }
-    var _val23 int32
+    var _val25 int32
     if v, err := iprot.ReadI32(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _val23 = v
+      _val25 = v
     }
-    p.AaMap[_key22] = _val23
+    p.AaMap[_key24] = _val25
   }
   if err := iprot.ReadMapEnd(); err != nil {
     return thrift.PrependError("error reading map end: ", err)

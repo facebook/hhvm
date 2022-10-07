@@ -13,6 +13,8 @@ from thrift.protocol.TProtocol import TProtocolException
 
 
 import include.ttypes
+import thrift.annotation.cpp.ttypes
+import thrift.annotation.thrift.ttypes
 
 
 import pprint
@@ -30,7 +32,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'MyEnumA', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'NoexceptMoveEmpty', 'NoexceptMoveSimpleStruct', 'NoexceptMoveComplexStruct', 'NoExceptMoveUnion', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef']
+__all__ = ['UTF8STRINGS', 'has_bitwise_ops', 'is_unscoped', 'MyForwardRefEnum', 'MyEnumA', 'decorated_struct', 'ContainerStruct', 'CppTypeStruct', 'VirtualStruct', 'MyStructWithForwardRefEnum', 'TrivialNumeric', 'TrivialNestedWithDefault', 'ComplexString', 'ComplexNestedWithDefault', 'MinPadding', 'MinPaddingWithCustomType', 'MyStruct', 'MyDataItem', 'Renaming', 'AnnotatedTypes', 'ForwardUsageRoot', 'ForwardUsageStruct', 'ForwardUsageByRef', 'NoexceptMoveEmpty', 'NoexceptMoveSimpleStruct', 'NoexceptMoveComplexStruct', 'NoExceptMoveUnion', 'AllocatorAware', 'AllocatorAware2', 'TypedefStruct', 'StructWithDoubleUnderscores', 'TBinary', 'IntTypedef', 'UintTypedef']
 
 class has_bitwise_ops:
   none = 0
@@ -1397,6 +1399,158 @@ class MinPadding:
     import thrift.py3.converter
     py3_types = importlib.import_module("module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.MinPadding, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class MinPaddingWithCustomType:
+  """
+  Attributes:
+   - small
+   - big
+   - medium
+   - biggish
+   - tiny
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.BYTE:
+          self.small = iprot.readByte()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.big = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I16:
+          self.medium = iprot.readI16()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I32:
+          self.biggish = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.BYTE:
+          self.tiny = iprot.readByte()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('MinPaddingWithCustomType')
+    if self.small != None:
+      oprot.writeFieldBegin('small', TType.BYTE, 1)
+      oprot.writeByte(self.small)
+      oprot.writeFieldEnd()
+    if self.big != None:
+      oprot.writeFieldBegin('big', TType.I64, 2)
+      oprot.writeI64(self.big)
+      oprot.writeFieldEnd()
+    if self.medium != None:
+      oprot.writeFieldBegin('medium', TType.I16, 3)
+      oprot.writeI16(self.medium)
+      oprot.writeFieldEnd()
+    if self.biggish != None:
+      oprot.writeFieldBegin('biggish', TType.I32, 4)
+      oprot.writeI32(self.biggish)
+      oprot.writeFieldEnd()
+    if self.tiny != None:
+      oprot.writeFieldBegin('tiny', TType.BYTE, 5)
+      oprot.writeByte(self.tiny)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.small is not None:
+      value = pprint.pformat(self.small, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    small=%s' % (value))
+    if self.big is not None:
+      value = pprint.pformat(self.big, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    big=%s' % (value))
+    if self.medium is not None:
+      value = pprint.pformat(self.medium, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    medium=%s' % (value))
+    if self.biggish is not None:
+      value = pprint.pformat(self.biggish, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    biggish=%s' % (value))
+    if self.tiny is not None:
+      value = pprint.pformat(self.tiny, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    tiny=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'small',
+      'big',
+      'medium',
+      'biggish',
+      'tiny',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.MinPaddingWithCustomType, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.MinPaddingWithCustomType, self)
 
   def _to_py_deprecated(self):
     return self
@@ -3508,7 +3662,6 @@ MinPadding.thrift_spec = (
 )
 
 MinPadding.thrift_struct_annotations = {
-  "cpp.minimize_padding": "1",
 }
 MinPadding.thrift_field_annotations = {
 }
@@ -3532,6 +3685,41 @@ def MinPadding__setstate__(self, state):
 
 MinPadding.__getstate__ = lambda self: self.__dict__.copy()
 MinPadding.__setstate__ = MinPadding__setstate__
+
+all_structs.append(MinPaddingWithCustomType)
+MinPaddingWithCustomType.thrift_spec = (
+  None, # 0
+  (1, TType.BYTE, 'small', None, None, 3, ), # 1
+  (2, TType.I64, 'big', None, None, 3, ), # 2
+  (3, TType.I16, 'medium', None, None, 3, ), # 3
+  (4, TType.I32, 'biggish', None, None, 3, ), # 4
+  (5, TType.BYTE, 'tiny', None, None, 3, ), # 5
+)
+
+MinPaddingWithCustomType.thrift_struct_annotations = {
+}
+MinPaddingWithCustomType.thrift_field_annotations = {
+}
+
+def MinPaddingWithCustomType__init__(self, small=None, big=None, medium=None, biggish=None, tiny=None,):
+  self.small = small
+  self.big = big
+  self.medium = medium
+  self.biggish = biggish
+  self.tiny = tiny
+
+MinPaddingWithCustomType.__init__ = MinPaddingWithCustomType__init__
+
+def MinPaddingWithCustomType__setstate__(self, state):
+  state.setdefault('small', None)
+  state.setdefault('big', None)
+  state.setdefault('medium', None)
+  state.setdefault('biggish', None)
+  state.setdefault('tiny', None)
+  self.__dict__ = state
+
+MinPaddingWithCustomType.__getstate__ = lambda self: self.__dict__.copy()
+MinPaddingWithCustomType.__setstate__ = MinPaddingWithCustomType__setstate__
 
 all_structs.append(MyStruct)
 MyStruct.thrift_spec = (

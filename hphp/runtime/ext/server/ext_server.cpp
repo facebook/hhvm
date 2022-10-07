@@ -34,31 +34,7 @@ namespace HPHP {
 
 static struct ServerExtension final : Extension {
   ServerExtension() : Extension("server", NO_EXTENSION_VERSION_YET) {}
-  void moduleInit() override {
-    HHVM_RC_INT_SAME(PAGELET_NOT_READY);
-    HHVM_RC_INT_SAME(PAGELET_READY);
-    HHVM_RC_INT_SAME(PAGELET_DONE);
-
-    HHVM_FE(hphp_thread_type);
-    HHVM_FE(pagelet_server_is_enabled);
-    HHVM_FE(pagelet_server_task_start);
-    HHVM_FE(pagelet_server_task_status);
-    HHVM_FE(pagelet_server_task_result);
-    HHVM_FE(pagelet_server_tasks_started);
-    HHVM_FE(pagelet_server_flush);
-    HHVM_FE(pagelet_server_is_done);
-    HHVM_FE(xbox_task_start);
-    HHVM_FE(xbox_task_status);
-    HHVM_FE(xbox_task_result);
-    HHVM_FE(xbox_process_call_message);
-    HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
-    HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
-    HHVM_FALIAS(HH\\server_health_level, server_health_level);
-    HHVM_FALIAS(HH\\server_uptime, server_uptime);
-    HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
-
-    loadSystemlib();
-  }
+  void moduleInit() override;
 } s_server_extension;
 
 int64_t HHVM_FUNCTION(hphp_thread_type) {
@@ -240,6 +216,32 @@ int64_t HHVM_FUNCTION(server_uptime) {
 int64_t HHVM_FUNCTION(server_process_start_time) {
   // Returns 0 when not running in server mode.
   return BootStats::startTimestamp();
+}
+
+void ServerExtension::moduleInit() {
+  HHVM_RC_INT_SAME(PAGELET_NOT_READY);
+  HHVM_RC_INT_SAME(PAGELET_READY);
+  HHVM_RC_INT_SAME(PAGELET_DONE);
+
+  HHVM_FE(hphp_thread_type);
+  HHVM_FE(pagelet_server_is_enabled);
+  HHVM_FE(pagelet_server_task_start);
+  HHVM_FE(pagelet_server_task_status);
+  HHVM_FE(pagelet_server_task_result);
+  HHVM_FE(pagelet_server_tasks_started);
+  HHVM_FE(pagelet_server_flush);
+  HHVM_FE(pagelet_server_is_done);
+  HHVM_FE(xbox_task_start);
+  HHVM_FE(xbox_task_status);
+  HHVM_FE(xbox_task_result);
+  HHVM_FE(xbox_process_call_message);
+  HHVM_FALIAS(HH\\server_is_stopping, server_is_stopping);
+  HHVM_FALIAS(HH\\server_is_prepared_to_stop, server_is_prepared_to_stop);
+  HHVM_FALIAS(HH\\server_health_level, server_health_level);
+  HHVM_FALIAS(HH\\server_uptime, server_uptime);
+  HHVM_FALIAS(HH\\server_process_start_time, server_process_start_time);
+
+  loadSystemlib();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

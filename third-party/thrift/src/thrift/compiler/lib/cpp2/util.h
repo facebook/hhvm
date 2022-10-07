@@ -53,6 +53,7 @@ const std::string& get_name(const Node* node) {
   return gen::cpp::namespace_resolver::get_cpp_name(*node);
 }
 
+bool is_custom_type(const t_field& field);
 bool is_custom_type(const t_type& type);
 
 std::unordered_map<t_struct*, std::vector<t_struct*>>
@@ -70,6 +71,11 @@ gen_adapter_dependency_graph(
     const t_program* program,
     const std::vector<const t_type*>& objects,
     const std::vector</* const */ t_typedef*>& typedefs);
+
+// Combines previous two dependency graphs and repeats sort to keep order stable
+std::unordered_map<const t_type*, std::vector<const t_type*>>
+gen_dependency_graph(
+    const t_program* program, const std::vector<const t_type*>& objects);
 
 inline std::vector<std::string> get_gen_namespace_components(
     const t_program& program) {

@@ -53,6 +53,10 @@ import sys
 from collections.abc import Sequence, Set, Mapping, Iterable
 import weakref as __weakref
 import builtins as _builtins
+cimport facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+import facebook.thrift.annotation.cpp.types as _facebook_thrift_annotation_cpp_types
+cimport facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
+import facebook.thrift.annotation.thrift.types as _facebook_thrift_annotation_thrift_types
 cimport include.types as _include_types
 import include.types as _include_types
 
@@ -1638,6 +1642,152 @@ cdef class MinPadding(thrift.py3.types.Struct):
         import thrift.util.converter
         py_deprecated_types = importlib.import_module("module.ttypes")
         return thrift.util.converter.to_py_struct(py_deprecated_types.MinPadding, self)
+@__cython.auto_pickle(False)
+cdef class MinPaddingWithCustomType(thrift.py3.types.Struct):
+    def __init__(MinPaddingWithCustomType self, **kwargs):
+        self._cpp_obj = make_shared[cMinPaddingWithCustomType]()
+        self._fields_setter = _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter._fbthrift_create(self._cpp_obj.get())
+        super().__init__(**kwargs)
+
+    def __call__(MinPaddingWithCustomType self, **kwargs):
+        if not kwargs:
+            return self
+        cdef MinPaddingWithCustomType __fbthrift_inst = MinPaddingWithCustomType.__new__(MinPaddingWithCustomType)
+        __fbthrift_inst._cpp_obj = make_shared[cMinPaddingWithCustomType](deref(self._cpp_obj))
+        __fbthrift_inst._fields_setter = _fbthrift_types_fields.__MinPaddingWithCustomType_FieldsSetter._fbthrift_create(__fbthrift_inst._cpp_obj.get())
+        for __fbthrift_name, _fbthrift_value in kwargs.items():
+            __fbthrift_inst._fbthrift_set_field(__fbthrift_name, _fbthrift_value)
+        return __fbthrift_inst
+
+    cdef void _fbthrift_set_field(self, str name, object value) except *:
+        self._fields_setter.set_field(name.encode("utf-8"), value)
+
+    cdef object _fbthrift_isset(self):
+        return thrift.py3.types._IsSet("MinPaddingWithCustomType", {
+        })
+
+    @staticmethod
+    cdef _fbthrift_create(shared_ptr[cMinPaddingWithCustomType] cpp_obj):
+        __fbthrift_inst = <MinPaddingWithCustomType>MinPaddingWithCustomType.__new__(MinPaddingWithCustomType)
+        __fbthrift_inst._cpp_obj = cmove(cpp_obj)
+        return __fbthrift_inst
+
+    cdef inline small_impl(self):
+
+        return deref(self._cpp_obj).small_ref().value()
+
+    @property
+    def small(self):
+        return self.small_impl()
+
+    cdef inline big_impl(self):
+
+        return deref(self._cpp_obj).big_ref().value()
+
+    @property
+    def big(self):
+        return self.big_impl()
+
+    cdef inline medium_impl(self):
+
+        return deref(self._cpp_obj).medium_ref().value()
+
+    @property
+    def medium(self):
+        return self.medium_impl()
+
+    cdef inline biggish_impl(self):
+
+        return deref(self._cpp_obj).biggish_ref().value()
+
+    @property
+    def biggish(self):
+        return self.biggish_impl()
+
+    cdef inline tiny_impl(self):
+
+        return deref(self._cpp_obj).tiny_ref().value()
+
+    @property
+    def tiny(self):
+        return self.tiny_impl()
+
+
+    def __hash__(MinPaddingWithCustomType self):
+        return super().__hash__()
+
+    def __repr__(MinPaddingWithCustomType self):
+        return super().__repr__()
+
+    def __str__(MinPaddingWithCustomType self):
+        return super().__str__()
+
+
+    def __copy__(MinPaddingWithCustomType self):
+        cdef shared_ptr[cMinPaddingWithCustomType] cpp_obj = make_shared[cMinPaddingWithCustomType](
+            deref(self._cpp_obj)
+        )
+        return MinPaddingWithCustomType._fbthrift_create(cmove(cpp_obj))
+
+    def __richcmp__(self, other, int op):
+        r = self._fbthrift_cmp_sametype(other, op)
+        return __richcmp[cMinPaddingWithCustomType](
+            self._cpp_obj,
+            (<MinPaddingWithCustomType>other)._cpp_obj,
+            op,
+        ) if r is None else r
+
+    @staticmethod
+    def __get_reflection__():
+        return _types_reflection.get_reflection__MinPaddingWithCustomType()
+
+    @staticmethod
+    def __get_metadata__():
+        cdef __fbthrift_cThriftMetadata meta
+        StructMetadata[cMinPaddingWithCustomType].gen(meta)
+        return __MetadataBox.box(cmove(meta))
+
+    @staticmethod
+    def __get_thrift_name__():
+        return "module.MinPaddingWithCustomType"
+
+    @classmethod
+    def _fbthrift_get_field_name_by_index(cls, idx):
+        return __sv_to_str(__get_field_name_by_index[cMinPaddingWithCustomType](idx))
+
+    @classmethod
+    def _fbthrift_get_struct_size(cls):
+        return 5
+
+    cdef _fbthrift_iobuf.IOBuf _fbthrift_serialize(MinPaddingWithCustomType self, __Protocol proto):
+        cdef unique_ptr[_fbthrift_iobuf.cIOBuf] data
+        with nogil:
+            data = cmove(serializer.cserialize[cMinPaddingWithCustomType](self._cpp_obj.get(), proto))
+        return _fbthrift_iobuf.from_unique_ptr(cmove(data))
+
+    cdef cuint32_t _fbthrift_deserialize(MinPaddingWithCustomType self, const _fbthrift_iobuf.cIOBuf* buf, __Protocol proto) except? 0:
+        cdef cuint32_t needed
+        self._cpp_obj = make_shared[cMinPaddingWithCustomType]()
+        with nogil:
+            needed = serializer.cdeserialize[cMinPaddingWithCustomType](buf, self._cpp_obj.get(), proto)
+        return needed
+
+    def _to_python(self):
+        import importlib
+        import thrift.python.converter
+        python_types = importlib.import_module(
+            "module.thrift_types"
+        )
+        return thrift.python.converter.to_python_struct(python_types.MinPaddingWithCustomType, self)
+
+    def _to_py3(self):
+        return self
+
+    def _to_py_deprecated(self):
+        import importlib
+        import thrift.util.converter
+        py_deprecated_types = importlib.import_module("module.ttypes")
+        return thrift.util.converter.to_py_struct(py_deprecated_types.MinPaddingWithCustomType, self)
 @__cython.auto_pickle(False)
 cdef class MyStruct(thrift.py3.types.Struct):
     def __init__(MyStruct self, **kwargs):

@@ -260,10 +260,10 @@ type t = {
   (* Enable global write check on the specified list of path prefixes
      (a list containing the empty string would denote all files,
      an empty list denotes no files) *)
-  tco_global_write_check_enabled: string list;
+  tco_global_access_check_enabled: string list;
   (* Enable global write check on the spcified set of functions
      (Empty denotes no functions) *)
-  tco_global_write_check_functions_enabled: SSet.t;
+  tco_global_access_check_functions_enabled: SSet.t;
   (* Enables the enum supertyping extension *)
   po_enable_enum_supertyping: bool;
   (* <<__Soft>> T -> ~T *)
@@ -439,8 +439,8 @@ val make :
   ?po_disallow_inst_meth:bool ->
   ?tco_use_direct_decl_parser:bool ->
   ?tco_ifc_enabled:string list ->
-  ?tco_global_write_check_enabled:string list ->
-  ?tco_global_write_check_functions_enabled:SSet.t ->
+  ?tco_global_access_check_enabled:string list ->
+  ?tco_global_access_check_functions_enabled:SSet.t ->
   ?po_enable_enum_supertyping:bool ->
   ?po_interpret_soft_types_as_like_types:bool ->
   ?tco_enable_strict_string_concat_interp:bool ->

@@ -39,14 +39,14 @@ let visitor ctx =
   let skip_hierarchy_checks =
     TypecheckerOptions.skip_hierarchy_checks (Provider_context.get_tcopt ctx)
   in
-  let is_global_write_check_enabled =
+  let is_global_access_check_enabled =
     0
     <> List.length
-         (TypecheckerOptions.global_write_check_enabled
+         (TypecheckerOptions.global_access_check_enabled
             (Provider_context.get_tcopt ctx))
     || 0
        <> SSet.cardinal
-            (TypecheckerOptions.global_write_check_functions_enabled
+            (TypecheckerOptions.global_access_check_functions_enabled
                (Provider_context.get_tcopt ctx))
   in
   let handlers =
@@ -95,8 +95,8 @@ let visitor ctx =
           else
             Some Class_const_origin_check.handler);
           Some Enum_classes_check.handler;
-          (if is_global_write_check_enabled then
-            Some Global_write_check.handler
+          (if is_global_access_check_enabled then
+            Some Global_access_check.handler
           else
             None);
           (if skip_hierarchy_checks then

@@ -48,9 +48,9 @@ module type S = sig
 
   val enable_ifc : options -> string list
 
-  val enable_global_write_check : options -> string list
+  val enable_global_access_check : options -> string list
 
-  val enable_global_write_check_functions : options -> SSet.t
+  val enable_global_access_check_functions : options -> SSet.t
 
   val from : options -> string
 

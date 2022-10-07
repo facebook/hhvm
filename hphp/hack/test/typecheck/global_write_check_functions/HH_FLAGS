@@ -1,2 +1,0 @@
---enable-global-write-check-functions "./test_functions.json"
---allowed-fixme-codes-strict 11001,11002,11003

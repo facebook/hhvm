@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<54540867c465e9e095690f8ca897b356>>
+// @generated SignedSource<<7f2e8a77347250323dcd3eecaca58989>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -158,9 +158,9 @@ pub struct GlobalOptions<'a> {
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
     pub tco_ifc_enabled: &'a [&'a str],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_global_write_check_enabled: &'a [&'a str],
+    pub tco_global_access_check_enabled: &'a [&'a str],
     #[serde(deserialize_with = "arena_deserializer::arena", borrow)]
-    pub tco_global_write_check_functions_enabled: s_set::SSet<'a>,
+    pub tco_global_access_check_functions_enabled: s_set::SSet<'a>,
     pub po_enable_enum_supertyping: bool,
     pub po_interpret_soft_types_as_like_types: bool,
     pub tco_enable_strict_string_concat_interp: bool,

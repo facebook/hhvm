@@ -155,14 +155,14 @@ let enable_ifc t = GlobalOptions.{ t with tco_ifc_enabled = ["/"] }
 
 let ifc_enabled t = t.GlobalOptions.tco_ifc_enabled
 
-let enable_global_write_check t =
-  GlobalOptions.{ t with tco_global_write_check_enabled = ["/"] }
+let enable_global_access_check t =
+  GlobalOptions.{ t with tco_global_access_check_enabled = ["/"] }
 
-let global_write_check_enabled t =
-  t.GlobalOptions.tco_global_write_check_enabled
+let global_access_check_enabled t =
+  t.GlobalOptions.tco_global_access_check_enabled
 
-let global_write_check_functions_enabled t =
-  t.GlobalOptions.tco_global_write_check_functions_enabled
+let global_access_check_functions_enabled t =
+  t.GlobalOptions.tco_global_access_check_functions_enabled
 
 let like_type_hints t = t.GlobalOptions.tco_like_type_hints
 

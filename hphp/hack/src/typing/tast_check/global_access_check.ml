@@ -13,9 +13,9 @@
  *
  * By default, this checker is turned off.
  * To turn on this checker:
- * - use the argument --enable-global-write-check
+ * - use the argument --enable-global-access-check
  *   to specify the prefixes of files to be checked (e.g. "/" for all files).
- * - use the argument --enable-global-write-check-function
+ * - use the argument --enable-global-access-check-function
  *   to specify a JSON file of functions names to be checked.
  *   Together with --config enable_type_check_filter_files=true, this option
  *   checks specified functions within listed files.
@@ -538,15 +538,15 @@ let visitor =
       super#on_expr (env, (ctx, fun_name)) te
   end
 
-let global_write_check_enabled_on_file tcopt file =
-  let enabled_paths = TypecheckerOptions.global_write_check_enabled tcopt in
+let global_access_check_enabled_on_file tcopt file =
+  let enabled_paths = TypecheckerOptions.global_access_check_enabled tcopt in
   let path = "/" ^ Relative_path.suffix file in
   List.exists enabled_paths ~f:(fun prefix ->
       String_utils.string_starts_with path prefix)
 
-let global_write_check_enabled_on_function tcopt function_name =
+let global_access_check_enabled_on_function tcopt function_name =
   let enabled_functions =
-    TypecheckerOptions.global_write_check_functions_enabled tcopt
+    TypecheckerOptions.global_access_check_functions_enabled tcopt
   in
   SSet.mem function_name enabled_functions
 
@@ -567,10 +567,10 @@ let handler =
         String.sub full_name ~pos:1 ~len:(String.length full_name - 1)
       in
       if
-        global_write_check_enabled_on_file
+        global_access_check_enabled_on_file
           (Tast_env.get_tcopt env)
           (Tast_env.get_file env)
-        || global_write_check_enabled_on_function
+        || global_access_check_enabled_on_function
              (Tast_env.get_tcopt env)
              full_name
       then
@@ -583,10 +583,10 @@ let handler =
         String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
       in
       if
-        global_write_check_enabled_on_file
+        global_access_check_enabled_on_file
           (Tast_env.get_tcopt env)
           (Tast_env.get_file env)
-        || global_write_check_enabled_on_function
+        || global_access_check_enabled_on_function
              (Tast_env.get_tcopt env)
              function_name
       then

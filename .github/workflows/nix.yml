@@ -51,7 +51,7 @@ jobs:
     - if: matrix.package == 'hhvm_ccache'
       uses: actions/cache@v3
       with:
-        key: ${{github.run_id}}
+        key: ${{matrix.os}}
         path: /nix/var/cache/ccache
     - run: |
         # See https://nixos.wiki/wiki/CCache

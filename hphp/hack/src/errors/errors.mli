@@ -241,4 +241,4 @@ val method_is_not_dynamically_callable :
 val function_is_not_dynamically_callable : string -> error -> unit
 
 val global_access_error :
-  Pos.t -> string -> string -> SSet.t -> Error_codes.GlobalWriteCheck.t -> unit
+  Pos.t -> string -> string -> SSet.t -> Error_codes.GlobalAccessCheck.t -> unit

@@ -4,21 +4,31 @@
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  *
- * This checker raises an error when:
- * - a global variable is being written (e.g. $a = Foo::$bar; $a->prop = 1;)
- * - or a global variable is passed to (or returned from) a function call.
+ * This global access checker raises an error when:
+ * - a global variable is written:
+ *   - a global variable is directly written (e.g. (Foo::$bar)->prop = 1;)
+ *   - a global variable is written via references (e.g. $a = Foo::$bar; $a->prop = 1;)
+ *   - a global variable is passed to a function call, in which it may be written.
+ * - or a global variable is read.
  *
  * Notice that the return value of a memoized function (if it is mutable)
  * is treated as a global variable as well.
  *
  * By default, this checker is turned off.
- * To turn on this checker:
+ * To turn on this checker on certain files/functions:
  * - use the argument --enable-global-access-check-files
  *   to specify the prefixes of files to be checked (e.g. "/" for all files).
  * - use the argument --enable-global-access-check-functions
  *   to specify a JSON file of functions names to be checked.
- *   Together with --config enable_type_check_filter_files=true, this option
- *   checks specified functions within listed files.
+ *
+ * When the checker is turned on, both global writes and reads are checked by default.
+ * To check only global writes or global reads:
+ * - use the argument --disable-global-access-check-on-write;
+ * - use the argument --disable-global-access-check-on-read.
+ *
+ * A trick to run this checker on a specific list of files (not simply by prefix) is to
+ *   use "--config enable_type_check_filter_files=true" togehter with above arguments,
+ *   which runs typechecker only on files listed in ~/.hack_type_check_files_filter.
  *)
 
 open Hh_prelude
@@ -28,7 +38,7 @@ module Reason = Typing_reason
 module Cls = Decl_provider.Class
 module Hashtbl = Stdlib.Hashtbl
 module Option = Stdlib.Option
-module GlobalWriteCheck = Error_codes.GlobalWriteCheck
+module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 
 (* The context maintains a hash table from each global variable to the
   corresponding references of static variables or memoized functions.
@@ -130,7 +140,7 @@ let get_static_prop_elts env class_id get =
 let rec is_expr_static env (_, _, te) =
   match te with
   | Class_get (class_id, expr, Is_prop) ->
-    (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
+    (* Ignore static variables annotated with <<__SafeForGlobalAccessCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
     not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
   | Obj_get (e, _, _, Is_prop) -> is_expr_static env e
@@ -180,7 +190,7 @@ let rec get_globals_from_expr env ctx (_, _, te) ~track_refs =
   in
   match te with
   | Class_get (class_id, expr, Is_prop) ->
-    (* Ignore static variables annotated with <<__SafeForGlobalWriteCheck>> *)
+    (* Ignore static variables annotated with <<__SafeForGlobalAccessCheck>> *)
     let class_elts = get_static_prop_elts env class_id expr in
     if not (List.exists class_elts ~f:Typing_defs.get_ce_safe_global_variable)
     then
@@ -408,7 +418,7 @@ let visitor =
               fun_name
               (Tast_env.print_ty env ty)
               global_set
-              GlobalWriteCheck.GlobalVariableInFunctionCall
+              GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall
           | None -> ())
         | None -> ());
         super#on_stmt_ (env, (ctx, fun_name)) s
@@ -430,7 +440,7 @@ let visitor =
             fun_name
             re_ty
             re_direct_global
-            GlobalWriteCheck.GlobalVariableDirectRead
+            GlobalAccessCheck.DefiniteGlobalRead
         | None -> ());
         (* Distinguish directly writing to static variables from writing to a variable that has references to static variables. *)
         if is_expr_static env le && Option.is_some le_global_opt then
@@ -439,7 +449,7 @@ let visitor =
             fun_name
             re_ty
             (Option.get le_global_opt)
-            GlobalWriteCheck.StaticVariableDirectWrite
+            GlobalAccessCheck.DefiniteGlobalWrite
         else
           let re_global_and_mutable_opt =
             get_global_and_mutable_from_expr env ctx re ~track_refs:true
@@ -454,7 +464,7 @@ let visitor =
                 fun_name
                 re_ty
                 (Option.get le_global_opt)
-                GlobalWriteCheck.GlobalVariableWrite
+                GlobalAccessCheck.PossibleGlobalWriteViaReference
           | false ->
             if
               Option.is_some le_global_opt
@@ -487,14 +497,14 @@ let visitor =
                 fun_name
                 e_ty
                 e_global
-                GlobalWriteCheck.StaticVariableDirectWrite
+                GlobalAccessCheck.DefiniteGlobalWrite
             else if has_global_write_access e then
               Errors.global_access_error
                 p
                 fun_name
                 e_ty
                 e_global
-                GlobalWriteCheck.GlobalVariableWrite
+                GlobalAccessCheck.PossibleGlobalWriteViaReference
           | _ -> ())
       | Call (_, _, tpl, _) ->
         (* Check if a global variable is used as the parameter. *)
@@ -510,7 +520,7 @@ let visitor =
                   fun_name
                   (Tast_env.print_ty env ty)
                   (Option.get e_global_opt)
-                  GlobalWriteCheck.GlobalVariableInFunctionCall
+                  GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall
             | Ast_defs.Pnormal ->
               let e_global_opt =
                 get_global_and_mutable_from_expr env ctx expr ~track_refs:true
@@ -521,7 +531,7 @@ let visitor =
                   fun_name
                   (Tast_env.print_ty env ty)
                   (Option.get e_global_opt)
-                  GlobalWriteCheck.GlobalVariableInFunctionCall)
+                  GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
       | New (_, _, el, _, _) ->
         List.iter el ~f:(fun ((ty, pos, _) as expr) ->
             let e_global_opt =
@@ -533,7 +543,7 @@ let visitor =
                 fun_name
                 (Tast_env.print_ty env ty)
                 (Option.get e_global_opt)
-                GlobalWriteCheck.GlobalVariableInFunctionCall)
+                GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall)
       | _ -> ());
       super#on_expr (env, (ctx, fun_name)) te
   end
@@ -552,6 +562,10 @@ let global_access_check_enabled_on_function tcopt function_name =
   in
   SSet.mem function_name enabled_functions
 
+let global_access_check_enabled tcopt file function_name =
+  global_access_check_enabled_on_file tcopt file
+  || global_access_check_enabled_on_function tcopt function_name
+
 let handler =
   object
     inherit Tast_visitor.handler_base
@@ -568,14 +582,9 @@ let handler =
       let full_name =
         String.sub full_name ~pos:1 ~len:(String.length full_name - 1)
       in
-      if
-        global_access_check_enabled_on_file
-          (Tast_env.get_tcopt env)
-          (Tast_env.get_file env)
-        || global_access_check_enabled_on_function
-             (Tast_env.get_tcopt env)
-             full_name
-      then
+      let tcopt = Tast_env.get_tcopt env in
+      let file = Tast_env.get_file env in
+      if global_access_check_enabled tcopt file full_name then
         visitor#on_method_ (env, (current_ctx, full_name)) m
 
     method! at_fun_def env f =
@@ -584,13 +593,8 @@ let handler =
       let function_name =
         String.sub function_name ~pos:1 ~len:(String.length function_name - 1)
       in
-      if
-        global_access_check_enabled_on_file
-          (Tast_env.get_tcopt env)
-          (Tast_env.get_file env)
-        || global_access_check_enabled_on_function
-             (Tast_env.get_tcopt env)
-             function_name
-      then
+      let tcopt = Tast_env.get_tcopt env in
+      let file = Tast_env.get_file env in
+      if global_access_check_enabled tcopt file function_name then
         visitor#on_fun_def (env, (current_ctx, function_name)) f
   end

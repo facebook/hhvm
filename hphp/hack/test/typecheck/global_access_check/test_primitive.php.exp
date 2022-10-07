@@ -1,16 +1,16 @@
 File "test_primitive.php", line 12, characters 5-26:
-[Foo::set_int]{Foo::$static_int}(int) A static variable is directly written. (Other[11001])
+[Foo::set_int]{Foo::$static_int}(int) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 20, characters 5-29:
-[Foo::set_string]{Foo::$static_string}(string) A static variable is directly written. (Other[11001])
+[Foo::set_string]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 30, characters 5-24:
-[Test::test_method_call]{Foo::$static_int}(int) A static variable is directly written. (Other[11001])
+[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 31, characters 5-31:
-[Test::test_method_call]{Foo::$static_string}(string) A static variable is directly written. (Other[11001])
+[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 33, characters 5-25:
-[Test::test_method_call]{Foo::$static_int}(int) A global variable is directly read. (Other[11004])
+[Test::test_method_call]{Foo::$static_int}(int) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 36, characters 5-28:
-[Test::test_method_call]{Foo::$static_string}(string) A global variable is directly read. (Other[11004])
+[Test::test_method_call]{Foo::$static_string}(string) A global variable is definitely read. (Other[11004])
 File "test_primitive.php", line 42, characters 5-38:
-[Test::test_method_call]{Test::$static_int}(int) A static variable is directly written. (Other[11001])
+[Test::test_method_call]{Test::$static_int}(int) A global variable is definitely written. (Other[11001])
 File "test_primitive.php", line 43, characters 5-44:
-[Test::test_method_call]{Test::$static_string}(string) A static variable is directly written. (Other[11001])
+[Test::test_method_call]{Test::$static_string}(string) A global variable is definitely written. (Other[11001])

@@ -536,7 +536,7 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
-module GlobalWriteCheck = Error_codes.GlobalWriteCheck
+module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 
 (*****************************************************************************)
 (* Types *)
@@ -1113,16 +1113,17 @@ let global_access_error pos fun_name data_type global_set error_code =
   in
   let error_message =
     match error_code with
-    | GlobalWriteCheck.StaticVariableDirectWrite ->
-      "A static variable is directly written."
-    | GlobalWriteCheck.GlobalVariableWrite -> "A global variable is written."
-    | GlobalWriteCheck.GlobalVariableInFunctionCall ->
-      "A global variable is passed to (or returned from) a function call."
-    | GlobalWriteCheck.GlobalVariableDirectRead ->
-      "A global variable is directly read."
+    | GlobalAccessCheck.DefiniteGlobalWrite ->
+      "A global variable is definitely written."
+    | GlobalAccessCheck.PossibleGlobalWriteViaReference ->
+      "A global variable is possibly written via reference."
+    | GlobalAccessCheck.PossibleGlobalWriteViaFunctionCall ->
+      "A global variable is possibly written via function call."
+    | GlobalAccessCheck.DefiniteGlobalRead ->
+      "A global variable is definitely read."
   in
   add
-    (GlobalWriteCheck.err_code error_code)
+    (GlobalAccessCheck.err_code error_code)
     pos
     ("["
     ^ fun_name

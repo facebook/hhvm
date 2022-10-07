@@ -14,9 +14,9 @@
           sp_xhp_attr = None;
           sp_type = (Some (Rhint ([4:17-20]), (Tprim Tint)));
           sp_visibility = Public; sp_flags = (empty) };
-         { Shallow_decl_defs.sp_name = ([5:51-72], "$static_property_safe");
+         { Shallow_decl_defs.sp_name = ([5:52-73], "$static_property_safe");
            sp_xhp_attr = None;
-           sp_type = (Some (Rhint ([5:47-50]), (Tprim Tint)));
+           sp_type = (Some (Rhint ([5:48-51]), (Tprim Tint)));
            sp_visibility = Public; sp_flags = safe_global_variable }
          ];
        sc_constructor = None; sc_static_methods = []; sc_methods = [];
@@ -42,9 +42,9 @@
            sp_xhp_attr = None;
            sp_type = (Some (Rhint ([9:18-21]), (Tprim Tint)));
            sp_visibility = Private; sp_flags = (empty) };
-          { Shallow_decl_defs.sp_name = ([10:52-73], "$static_property_safe");
+          { Shallow_decl_defs.sp_name = ([10:53-74], "$static_property_safe");
             sp_xhp_attr = None;
-            sp_type = (Some (Rhint ([10:48-51]), (Tprim Tint)));
+            sp_type = (Some (Rhint ([10:49-52]), (Tprim Tint)));
             sp_visibility = Private; sp_flags = safe_global_variable }
           ];
         sc_constructor = None; sc_static_methods = [];

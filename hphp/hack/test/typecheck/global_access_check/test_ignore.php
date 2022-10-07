@@ -6,16 +6,16 @@ class Bar {
 
 class Foo {
   public static int $static_prop = 1;
-  <<__SafeForGlobalWriteCheck>> public static int $static_prop_ignored = 1;
+  <<__SafeForGlobalAccessCheck>> public static int $static_prop_ignored = 1;
   <<__LateInit>> public static Bar $bar;
-  <<__LateInit, __SafeForGlobalWriteCheck>> public static Bar $bar_ignored;
+  <<__LateInit, __SafeForGlobalAccessCheck>> public static Bar $bar_ignored;
 }
 
 function call_mixed(mixed $x): void {}
 
 class Test {
   private static int $static_prop = 0;
-  <<__SafeForGlobalWriteCheck>> private static int $static_prop_ignored = 0;
+  <<__SafeForGlobalAccessCheck>> private static int $static_prop_ignored = 0;
 
   public function test_method_call(): void {
     self::$static_prop = 1; // A global variable is written.

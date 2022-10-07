@@ -13,9 +13,9 @@
  *
  * By default, this checker is turned off.
  * To turn on this checker:
- * - use the argument --enable-global-access-check
+ * - use the argument --enable-global-access-check-files
  *   to specify the prefixes of files to be checked (e.g. "/" for all files).
- * - use the argument --enable-global-access-check-function
+ * - use the argument --enable-global-access-check-functions
  *   to specify a JSON file of functions names to be checked.
  *   Together with --config enable_type_check_filter_files=true, this option
  *   checks specified functions within listed files.
@@ -539,7 +539,9 @@ let visitor =
   end
 
 let global_access_check_enabled_on_file tcopt file =
-  let enabled_paths = TypecheckerOptions.global_access_check_enabled tcopt in
+  let enabled_paths =
+    TypecheckerOptions.global_access_check_files_enabled tcopt
+  in
   let path = "/" ^ Relative_path.suffix file in
   List.exists enabled_paths ~f:(fun prefix ->
       String_utils.string_starts_with path prefix)

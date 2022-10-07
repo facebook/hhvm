@@ -128,7 +128,7 @@ type t = {
   po_disallow_inst_meth: bool;
   tco_use_direct_decl_parser: bool;
   tco_ifc_enabled: string list;
-  tco_global_access_check_enabled: string list;
+  tco_global_access_check_files_enabled: string list;
   tco_global_access_check_functions_enabled: SSet.t;
   po_enable_enum_supertyping: bool;
   po_interpret_soft_types_as_like_types: bool;
@@ -268,7 +268,7 @@ let default =
     po_disallow_inst_meth = false;
     tco_use_direct_decl_parser = true;
     tco_ifc_enabled = [];
-    tco_global_access_check_enabled = [];
+    tco_global_access_check_files_enabled = [];
     tco_global_access_check_functions_enabled = SSet.empty;
     po_enable_enum_supertyping = true;
     po_interpret_soft_types_as_like_types = false;
@@ -419,7 +419,8 @@ let make
     ?(po_disallow_inst_meth = default.po_disallow_inst_meth)
     ?(tco_use_direct_decl_parser = default.tco_use_direct_decl_parser)
     ?(tco_ifc_enabled = default.tco_ifc_enabled)
-    ?(tco_global_access_check_enabled = default.tco_global_access_check_enabled)
+    ?(tco_global_access_check_files_enabled =
+      default.tco_global_access_check_files_enabled)
     ?(tco_global_access_check_functions_enabled =
       default.tco_global_access_check_functions_enabled)
     ?(po_enable_enum_supertyping = default.po_enable_enum_supertyping)
@@ -572,7 +573,7 @@ let make
     po_disallow_inst_meth;
     tco_use_direct_decl_parser;
     tco_ifc_enabled;
-    tco_global_access_check_enabled;
+    tco_global_access_check_files_enabled;
     tco_global_access_check_functions_enabled;
     po_enable_enum_supertyping;
     po_interpret_soft_types_as_like_types;

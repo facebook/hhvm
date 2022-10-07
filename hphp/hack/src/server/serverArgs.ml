@@ -28,7 +28,7 @@ type options = {
   gen_saved_ignore_type_errors: bool;
   ignore_hh_version: bool;
   enable_ifc: string list;
-  enable_global_access_check: string list;
+  enable_global_access_check_files: string list;
   enable_global_access_check_functions: SSet.t;
   saved_state_ignore_hhconfig: bool;
   json_mode: bool;
@@ -78,11 +78,11 @@ module Messages = struct
   let enable_ifc =
     " run IFC analysis on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
-  let enable_global_access_check =
-    " run global write checker on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
+  let enable_global_access_check_files =
+    " run global access checker on any file whose path is prefixed by the argument (format: comma separated list of path prefixes)"
 
   let enable_global_access_check_functions =
-    " run global write checker on functions listed in the JSON file"
+    " run global access checker on functions listed in the JSON file"
 
   let from = " so we know who's invoking - e.g. nuclide, vim, emacs, vscode"
 
@@ -159,7 +159,7 @@ let parse_options () : options =
   let custom_telemetry_data = ref [] in
   let dump_fanout = ref false in
   let enable_ifc = ref [] in
-  let enable_global_access_check = ref [] in
+  let enable_global_access_check_files = ref [] in
   let enable_global_access_check_functions = ref SSet.empty in
   let from = ref "" in
   let from_emacs = ref false in
@@ -195,8 +195,8 @@ let parse_options () : options =
   let set_with_saved_state s = with_saved_state := Some s in
   let set_write_symbol_info s = write_symbol_info := Some s in
   let set_enable_ifc s = enable_ifc := String_utils.split ',' s in
-  let set_enable_global_access_check s =
-    enable_global_access_check := String_utils.split ',' s
+  let set_enable_global_access_check_files s =
+    enable_global_access_check_files := String_utils.split ',' s
   in
   let set_enable_global_access_check_functions s =
     let json_obj = Hh_json.json_of_file s in
@@ -236,9 +236,9 @@ let parse_options () : options =
       ("--daemon", Arg.Set should_detach, Messages.daemon);
       ("--dump-fanout", Arg.Set dump_fanout, Messages.dump_fanout);
       ("--enable-ifc", Arg.String set_enable_ifc, Messages.enable_ifc);
-      ( "--enable-global-access-check",
-        Arg.String set_enable_global_access_check,
-        Messages.enable_global_access_check );
+      ( "--enable-global-access-check-files",
+        Arg.String set_enable_global_access_check_files,
+        Messages.enable_global_access_check_files );
       ( "--enable-global-access-check-functions",
         Arg.String set_enable_global_access_check_functions,
         Messages.enable_global_access_check_functions );
@@ -355,7 +355,7 @@ let parse_options () : options =
     custom_telemetry_data = !custom_telemetry_data;
     dump_fanout = !dump_fanout;
     enable_ifc = !enable_ifc;
-    enable_global_access_check = !enable_global_access_check;
+    enable_global_access_check_files = !enable_global_access_check_files;
     enable_global_access_check_functions = !enable_global_access_check_functions;
     from = !from;
     gen_saved_ignore_type_errors = !gen_saved_ignore_type_errors;
@@ -391,7 +391,7 @@ let default_options ~root =
     custom_telemetry_data = [];
     dump_fanout = false;
     enable_ifc = [];
-    enable_global_access_check = [];
+    enable_global_access_check_files = [];
     enable_global_access_check_functions = SSet.empty;
     from = "";
     gen_saved_ignore_type_errors = false;
@@ -441,7 +441,8 @@ let dump_fanout options = options.dump_fanout
 
 let enable_ifc options = options.enable_ifc
 
-let enable_global_access_check options = options.enable_global_access_check
+let enable_global_access_check_files options =
+  options.enable_global_access_check_files
 
 let enable_global_access_check_functions options =
   options.enable_global_access_check_functions
@@ -531,7 +532,7 @@ let to_string
       custom_telemetry_data;
       dump_fanout;
       enable_ifc;
-      enable_global_access_check;
+      enable_global_access_check_files;
       enable_global_access_check_functions;
       from;
       gen_saved_ignore_type_errors;
@@ -626,8 +627,10 @@ let to_string
   let enable_ifc_str =
     Printf.sprintf "[%s]" (String.concat ~sep:"," enable_ifc)
   in
-  let enable_global_access_check_str =
-    Printf.sprintf "[%s]" (String.concat ~sep:"," enable_global_access_check)
+  let enable_global_access_check_files_str =
+    Printf.sprintf
+      "[%s]"
+      (String.concat ~sep:"," enable_global_access_check_files)
   in
   let enable_global_access_check_functions_str =
     Printf.sprintf
@@ -663,8 +666,8 @@ let to_string
     "enable_ifc: ";
     enable_ifc_str;
     ", ";
-    "enable_global_access_check: ";
-    enable_global_access_check_str;
+    "enable_global_access_check_files: ";
+    enable_global_access_check_files_str;
     ", ";
     "enable_global_access_check_functions: ";
     enable_global_access_check_functions_str;

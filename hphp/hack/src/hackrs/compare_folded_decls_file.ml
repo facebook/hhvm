@@ -242,7 +242,7 @@ let () =
       (* The following options do not affect the direct decl parser and can be ignored
          (they are used by hh_single_type_check, and we run hh_single_decl over all of
          the typecheck test cases). *)
-      ignored_arg "--enable-global-access-check";
+      ignored_arg "--enable-global-access-check-files";
       ignored_arg "--enable-global-access-check-functions";
       ignored_flag "--abstract-static-props";
       ignored_arg "--allowed-decl-fixme-codes";

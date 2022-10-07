@@ -109,7 +109,7 @@ const DEFAULT: GlobalOptions<'_> = GlobalOptions {
     po_disallow_inst_meth: false,
     tco_use_direct_decl_parser: true,
     tco_ifc_enabled: &[],
-    tco_global_access_check_enabled: &[],
+    tco_global_access_check_files_enabled: &[],
     tco_global_access_check_functions_enabled: s_set::SSet::empty(),
     po_enable_enum_supertyping: true,
     po_interpret_soft_types_as_like_types: false,

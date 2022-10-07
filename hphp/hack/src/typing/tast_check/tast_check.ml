@@ -42,7 +42,7 @@ let visitor ctx =
   let is_global_access_check_enabled =
     0
     <> List.length
-         (TypecheckerOptions.global_access_check_enabled
+         (TypecheckerOptions.global_access_check_files_enabled
             (Provider_context.get_tcopt ctx))
     || 0
        <> SSet.cardinal

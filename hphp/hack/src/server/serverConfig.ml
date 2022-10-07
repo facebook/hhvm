@@ -442,8 +442,8 @@ let load ~silent config_filename options : t * ServerLocalConfig.t =
       ~tco_use_direct_decl_parser:
         local_config.ServerLocalConfig.use_direct_decl_parser
       ~tco_ifc_enabled:(ServerArgs.enable_ifc options)
-      ~tco_global_access_check_enabled:
-        (ServerArgs.enable_global_access_check options)
+      ~tco_global_access_check_files_enabled:
+        (ServerArgs.enable_global_access_check_files options)
       ~tco_global_access_check_functions_enabled:
         (ServerArgs.enable_global_access_check_functions options)
       ?po_enable_enum_classes:(bool_opt "enable_enum_classes" config)

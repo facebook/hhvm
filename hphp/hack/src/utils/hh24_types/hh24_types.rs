@@ -68,6 +68,9 @@ impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
     }
 }
 
+/// Checksum is used to characterize state of every decl in the repository:
+/// if a decl is added, removed, moved from one file, changed, then the overall
+/// checksum of the repository will change.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
@@ -80,6 +83,9 @@ impl Checksum {
         decl_hash: DeclHash,
         path: &relative_path::RelativePath,
     ) {
+        // CARE! This implementation must be identical to that in rust_decl_ffi.rs
+        // I wrote it out as a separate copy because I didn't want hh_server to take a dependency
+        // upon hh24_types
         self.0 ^= hh_hash::hash(&(symbol_hash, decl_hash, path));
     }
 }

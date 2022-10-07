@@ -2828,7 +2828,13 @@ fn emit_special_function<'a, 'arena, 'decl>(
             Ok(Some(emit_tag_provenance_here(e, env, pos, args)?))
         }
         ("HH\\embed_type_decl", _)
-            if args.is_empty() && targs.len() == 1 && e.decl_provider.is_some() =>
+            // `enable_intrinsics_extension` is roughly being used as a proxy here for "are we in
+            // a non-production environment?" `embed_type_decl` is *not* fit for production use.
+            // The typechecker doesn't understand it anyhow.
+            if e.options().hhbc.enable_intrinsics_extension
+                && args.is_empty()
+                && targs.len() == 1
+                && e.decl_provider.is_some() =>
         {
             match (targs[0].1).1.as_ref() {
                 aast_defs::Hint_::Happly(ast_defs::Id(_, id), _) => {

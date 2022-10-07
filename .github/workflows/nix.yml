@@ -40,7 +40,6 @@ jobs:
         pr: ${{ github.event.issue.number }}
     - uses: cachix/install-nix-action@v17
       with:
-        install_options: --no-daemon
         extra_nix_config: |
           extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
           extra-experimental-features = nix-command flakes

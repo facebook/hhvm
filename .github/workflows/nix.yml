@@ -38,17 +38,16 @@ jobs:
       uses: dawidd6/action-checkout-pr@v1
       with:
         pr: ${{ github.event.issue.number }}
-    - run: sh <(curl -L https://nixos.org/nix/install) --no-daemon
-    - run: |
-        cat > /etc/nix/nix.conf <<EOF
-        extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
-        extra-experimental-features = nix-command flakes
-        extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
-        extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
-        extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
-        extra-sandbox-paths = /nix/var/cache/ccache
-        sandbox = false
-        EOF
+    - uses: cachix/install-nix-action@v17
+      with:
+        extra_nix_config: |
+          extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+          extra-experimental-features = nix-command flakes
+          extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
+          extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
+          extra-sandbox-paths = /nix/var/cache/ccache
+          sandbox = false
     - if: matrix.package == 'hhvm_ccache'
       uses: actions/cache@v3
       with:

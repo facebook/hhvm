@@ -48,6 +48,9 @@ jobs:
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
           extra-sandbox-paths = /nix/var/cache/ccache
           sandbox = false
+    - name: Workaround for https://github.com/actions/toolkit/issues/946
+      if: matrix.package == 'hhvm_ccache'
+      run: sudo chmod u+s "$(command -v tar)"
     - if: matrix.package == 'hhvm_ccache'
       uses: actions/cache@v3
       with:

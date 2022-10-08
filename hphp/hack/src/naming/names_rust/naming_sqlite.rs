@@ -86,6 +86,16 @@ impl Names {
         )?
         .execute(params![])?;
 
+        tx.prepare_cached(
+            "
+            CREATE TABLE IF NOT EXISTS CHECKSUM (
+                ID INTEGER PRIMARY KEY,
+                CHECKSUM_VALUE INTEGER NOT NULL
+            );
+            ",
+        )?
+        .execute(params![])?;
+
         // TODO(ljw) - NAMING_FILE_INFO should be indexed on PATH_SUFFIX.
 
         tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
@@ -94,33 +104,18 @@ impl Names {
         Ok(tx.commit()?)
     }
 
-    /// Walks O(table) to derive checksum based on the decl_hash of each item.
-    /// TODO(ljw) - We should store checksum in the table directly.
-    pub fn derive_checksum(&self) -> anyhow::Result<Checksum> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH,
-            NAMING_SYMBOLS.FILE_INFO_ID,
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE,
-            NAMING_FILE_INFO.PATH_SUFFIX
-        FROM NAMING_SYMBOLS
-        LEFT JOIN NAMING_FILE_INFO ON NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID";
+    pub fn get_checksum(&self) -> anyhow::Result<Checksum> {
+        Ok(self
+            .conn
+            .prepare_cached("SELECT CHECKSUM_VALUE FROM CHECKSUM")?
+            .query_row(params![], |row| row.get(0))?)
+    }
 
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![])?;
-        let mut checksum = hh24_types::Checksum(0);
-
-        while let Some(row) = rows.next()? {
-            let hash: ToplevelSymbolHash = row.get(0)?;
-            let decl_hash: DeclHash = row.get(1)?;
-            let prefix: crate::datatypes::SqlitePrefix = row.get(3)?;
-            let suffix: crate::datatypes::SqlitePathBuf = row.get(4)?;
-            let path = RelativePath::make(prefix.value, suffix.value);
-            checksum.addremove(hash, decl_hash, &path);
-        }
-
-        Ok(checksum)
+    pub fn set_checksum(&self, checksum: Checksum) -> anyhow::Result<()> {
+        self.conn
+            .prepare_cached("REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);")?
+            .execute(params![checksum])?;
+        Ok(())
     }
 
     /// Removes a symbol definition from the reverse naming table (be it in
@@ -179,8 +174,8 @@ impl Names {
         Ok(())
     }
 
-    /// Adds all of a file's symbols into the reverse naming table,
-    /// into normal or overflow as appropriate.
+    /// Adds all of a file's symbols into the forward and reverse naming tables,
+    /// into normal or overflow reverse table as appropriate.
     pub fn save_file_summary(
         &self,
         path: &RelativePath,

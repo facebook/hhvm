@@ -21,10 +21,12 @@ pub struct NamingTable {
 }
 
 impl NamingTable {
-    pub fn new(path: impl AsRef<Path>, checksum: Checksum) -> Self {
+    pub fn new(path: impl AsRef<Path>) -> Self {
+        let names = crate::Names::from_file(path).unwrap();
+        let checksum = names.get_checksum().unwrap();
         Self {
             path_cache: IntMap::default(),
-            names: crate::Names::from_file(path).unwrap(),
+            names,
             rich_checksums: IntMap::default(),
             checksum,
         }
@@ -32,14 +34,6 @@ impl NamingTable {
 
     pub fn checksum(&self) -> Checksum {
         self.checksum
-    }
-
-    pub fn derive_checksum(&mut self) -> anyhow::Result<()> {
-        // This is a temporary workaround to the fact that we don't have checksums
-        // in our saved state. One day once we have this we can remove this
-        // machinery
-        self.checksum = self.names.derive_checksum()?;
-        Ok(())
     }
 
     pub fn process_changed_file(

@@ -2813,6 +2813,7 @@ void pre_compute_anticipated(PreEnv& penv) {
         if (!first) {
           s.antOut &= ss.antIn;
           s.pantOut |= ss.pantIn;
+          assertx(!ss.phiPropagate.any());
           return;
         }
         first = false;
@@ -2876,22 +2877,37 @@ bool pre_adjust_for_phis(PreEnv& penv) {
     auto newProp = s.phiPropagate;
     for (auto i = 0; i < front.numDsts(); i++) {
       if (i == s.phiPropagate.size()) break;
-      if (s.phiPropagate.test(i)) continue;
-      auto const did = lookup_aset(penv.env, front.dst(i));
-      if (!did || !s.antIn.test(*did) || s.pavlIn.test(*did)) continue;
+
+      auto const newVal = [&]{
+        auto const did = lookup_aset(penv.env, front.dst(i));
+        if (!did || !s.antIn.test(*did)) return false;
+        bool result = false;
+        blk->forEachPred(
+          [&] (Block* pred) {
+            auto const sid = lookup_aset(penv.env, pred->back().src(i));
+            if (!sid) return;
+            auto& ps = penv.state[pred];
+            if (ps.pavlOut.test(*sid)) result = true;
+          }
+        );
+        return result;
+      }();
+
+      if (s.phiPropagate.test(i) == newVal) continue;
+
+      FTRACE(3, "{}setting phiPropagate[{}] in blk({})\n",
+             newVal ? "" : "un", i, blk->id());
+
+      newProp.flip(i);
+
       blk->forEachPred(
         [&] (Block* pred) {
-          auto const sid = lookup_aset(penv.env, pred->back().src(i));
-          if (!sid) return;
           auto& ps = penv.state[pred];
-          if (ps.pavlOut.test(*sid)) {
-            penv.antQ.push(ps.rpoId);
-            newProp.set(i);
-            FTRACE(3, "setting phiPropagate[{}] in blk({})\n", i, blk->id());
-          }
+          penv.antQ.push(ps.rpoId);
         }
       );
     }
+
     if (s.phiPropagate != newProp) {
       s.phiPropagate = newProp;
       penv.avlQ.push(s.rpoId);

@@ -20,7 +20,7 @@ This is a template for creating compiled Enum and Flag pyx information
 
 }}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#struct:union?}}
 
 cdef __UnionTypeEnumData __{{struct:name}}_union_type_enum_data  = __UnionTypeEnumData._fbthrift_create(
@@ -57,4 +57,4 @@ cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
 __SetMetaClass(<PyTypeObject*> __{{struct:name}}Type, <PyTypeObject*> __{{struct:name}}_Union_TypeMeta)
 
 {{/struct:union?}}
-{{/program:structs}}
+{{/program:filtered_structs}}

@@ -42,10 +42,10 @@ from thrift.py3.reflection cimport (
     MapSpec as __MapSpec,
     FieldSpec as __FieldSpec,
 )
-{{#program:structs}}
+{{#program:filtered_structs}}
 
 cdef __StructSpec get_reflection__{{struct:name}}()
-{{/program:structs}}
+{{/program:filtered_structs}}
 {{#program:containerTypes}}
 
 cdef {{!

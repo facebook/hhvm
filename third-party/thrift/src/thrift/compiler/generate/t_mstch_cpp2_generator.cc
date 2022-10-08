@@ -311,6 +311,8 @@ class cpp_mstch_program : public mstch_program {
          {"program:fatal_services", &cpp_mstch_program::fatal_services},
          {"program:fatal_identifiers", &cpp_mstch_program::fatal_identifiers},
          {"program:fatal_data_member", &cpp_mstch_program::fatal_data_member},
+         {"program:split_structs", &cpp_mstch_program::split_structs},
+         {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
     register_has_option("program:tablebased?", "tablebased");
@@ -318,8 +320,6 @@ class cpp_mstch_program : public mstch_program {
     register_has_option(
         "program:enforce_required?", "deprecated_enforce_required");
     register_has_option("program:interning?", "interning");
-
-    init_objects_and_enums();
   }
   std::string get_program_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
@@ -602,39 +602,38 @@ class cpp_mstch_program : public mstch_program {
     return ret;
   }
 
+  mstch::node split_structs() {
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        split_id_ ? *split_structs_ : program_->objects(),
+        *context_.struct_factory,
+        context_.struct_cache,
+        id);
+  }
+
+  mstch::node split_enums() {
+    if (split_id_) {
+      if (!split_enums_) {
+        int split_count = std::max(get_split_count(context_.options), 1);
+        const size_t cnt = program_->enums().size();
+        split_enums_.emplace();
+        for (size_t i = *split_id_; i < cnt; i += split_count) {
+          split_enums_->push_back(program_->enums()[i]);
+        }
+      }
+    }
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        split_id_ ? *split_enums_ : program_->enums(),
+        *context_.enum_factory,
+        context_.enum_cache,
+        id);
+  }
+
  private:
-  std::vector<t_struct*> objects_;
-  std::vector<t_enum*> enums_;
   const boost::optional<int32_t> split_id_;
   const boost::optional<std::vector<t_struct*>> split_structs_;
-
-  const std::vector<t_enum*>& get_program_enums() override { return enums_; }
-
-  const std::vector<t_struct*>& get_program_objects() override {
-    return objects_;
-  }
-
-  void init_objects_and_enums() {
-    const auto& prog_objects = program_->objects();
-    const auto& prog_enums = program_->enums();
-
-    if (!split_id_) {
-      auto edges = cpp2::gen_struct_dependency_graph(program_, prog_objects);
-      objects_ = cpp2::topological_sort<t_struct*>(
-          prog_objects.begin(), prog_objects.end(), edges);
-      enums_ = prog_enums;
-      return;
-    }
-
-    int split_count = std::max(get_split_count(context_.options), 1);
-
-    objects_ = *split_structs_;
-
-    const size_t cnt = prog_enums.size();
-    for (size_t i = *split_id_; i < cnt; i += split_count) {
-      enums_.push_back(prog_enums[i]);
-    }
-  }
+  boost::optional<std::vector<t_enum*>> split_enums_;
 };
 
 class cpp_mstch_service : public mstch_service {

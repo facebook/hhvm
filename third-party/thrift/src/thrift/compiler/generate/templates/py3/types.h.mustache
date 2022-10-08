@@ -49,7 +49,7 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
 }
 
 {{/program:enums}}
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#struct:union?}}
 
 template<>
@@ -65,9 +65,9 @@ const std::vector<std::pair<std::string_view, std::string_view>>& PyEnumTraits<
   return *pairs;
 }
 {{/struct:union?}}
-{{/program:structs}}
+{{/program:filtered_structs}}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{^struct:union?}}
 
 template<>
@@ -87,8 +87,8 @@ void reset_field<{{#program:cppNamespaces}}::{{value}}{{/program:cppNamespaces}}
   }
 }
 {{/struct:union?}}
-{{/program:structs}}
-{{#program:structs}}
+{{/program:filtered_structs}}
+{{#program:filtered_structs}}
 
 template<>
 const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
@@ -102,6 +102,6 @@ const std::unordered_map<std::string_view, std::string_view>& PyStructTraits<
   };
   return *map;
 }
-{{/program:structs}}
+{{/program:filtered_structs}}
 } // namespace py3
 } // namespace thrift

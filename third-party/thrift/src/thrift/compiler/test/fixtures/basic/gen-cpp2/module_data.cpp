@@ -50,17 +50,6 @@ const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::basic
   "reserved_field",
 }};
 
-const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = {{
-}};
-const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = {{
-}};
-const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = {{
-}};
-const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = {{
-}};
-const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
-}};
-
 const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -115,6 +104,17 @@ const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::
   6,
   7,
   8,
+}};
+
+const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
 }};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{

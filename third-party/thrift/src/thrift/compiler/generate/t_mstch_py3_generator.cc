@@ -155,6 +155,7 @@ class py3_mstch_program : public mstch_program {
             {"program:cpp_gen_path", &py3_mstch_program::getCppGenPath},
             {"program:py_deprecated_module_path",
              &py3_mstch_program::py_deprecated_module_path},
+            {"program:filtered_structs", &py3_mstch_program::filtered_objects},
         });
     gather_included_program_namespaces();
     visit_types_for_services_and_interactions();
@@ -363,8 +364,10 @@ class py3_mstch_program : public mstch_program {
   std::string visit_type_with_typedef(
       const t_type* orig_type, TypeDef isTypedef);
 
-  const std::vector<t_struct*>& get_program_objects() override {
-    return objects_;
+  mstch::node filtered_objects() {
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        objects_, *context_.struct_factory, context_.struct_cache, id);
   }
 
   std::vector<const t_type*> containers_;

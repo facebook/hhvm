@@ -13,17 +13,17 @@
 namespace apache {
 namespace thrift {
 namespace ident {
-struct field;
 struct some_map;
+struct field;
 } // namespace ident
 namespace detail {
-#ifndef APACHE_THRIFT_ACCESSOR_field
-#define APACHE_THRIFT_ACCESSOR_field
-APACHE_THRIFT_DEFINE_ACCESSOR(field);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_some_map
 #define APACHE_THRIFT_ACCESSOR_some_map
 APACHE_THRIFT_DEFINE_ACCESSOR(some_map);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field
+#define APACHE_THRIFT_ACCESSOR_field
+APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #endif
 } // namespace detail
 } // namespace thrift
@@ -34,8 +34,8 @@ APACHE_THRIFT_DEFINE_ACCESSOR(some_map);
 // END declare_enums
 // BEGIN forward_declare
 namespace apache { namespace thrift { namespace test {
-class B;
 class A;
+class B;
 }}} // apache::thrift::test
 // END forward_declare
 // BEGIN hash_and_equal_to

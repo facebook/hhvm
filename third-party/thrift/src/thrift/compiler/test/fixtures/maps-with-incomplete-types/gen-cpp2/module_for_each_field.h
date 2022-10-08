@@ -14,18 +14,18 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::apache::thrift::test::B> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).field_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::apache::thrift::test::A> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).some_map_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::test::B> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
 } // namespace detail

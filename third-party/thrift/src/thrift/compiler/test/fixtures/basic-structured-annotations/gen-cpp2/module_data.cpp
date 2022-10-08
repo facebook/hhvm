@@ -67,22 +67,6 @@ const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-a
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{
-  "count",
-}};
-const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_ids = {{
-  1,
-}};
-const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_types = {{
-  TType::T_I64,
-}};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::storage_names = {{
-  "__fbthrift_field_count",
-}};
-const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::isset_indexes = {{
-  0,
-}};
-
 const std::array<folly::StringPiece, 3> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::fields_names = {{
   "name",
   "recurse",
@@ -107,6 +91,22 @@ const std::array<int, 3> TStructDataStorage<::test::fixtures::basic-structured-a
   0,
   1,
   2,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_names = {{
+  "count",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::fields_types = {{
+  TType::T_I64,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::storage_names = {{
+  "__fbthrift_field_count",
+}};
+const std::array<int, 1> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_nested>::fields_names = {{

@@ -54,9 +54,9 @@ struct data;
 struct bar;
 struct binary_field;
 struct list_field;
-struct foo;
 struct ForwardUsageStruct;
 struct ForwardUsageByRef;
+struct foo;
 struct foo;
 struct boolField;
 struct MyBoolField;
@@ -236,10 +236,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(binary_field);
 #define APACHE_THRIFT_ACCESSOR_list_field
 APACHE_THRIFT_DEFINE_ACCESSOR(list_field);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_foo
-#define APACHE_THRIFT_ACCESSOR_foo
-APACHE_THRIFT_DEFINE_ACCESSOR(foo);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_ForwardUsageStruct
 #define APACHE_THRIFT_ACCESSOR_ForwardUsageStruct
 APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageStruct);
@@ -247,6 +243,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageStruct);
 #ifndef APACHE_THRIFT_ACCESSOR_ForwardUsageByRef
 #define APACHE_THRIFT_ACCESSOR_ForwardUsageByRef
 APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageByRef);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_foo
+#define APACHE_THRIFT_ACCESSOR_foo
+APACHE_THRIFT_DEFINE_ACCESSOR(foo);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_foo
 #define APACHE_THRIFT_ACCESSOR_foo
@@ -594,12 +594,12 @@ class ComplexString;
 class ComplexNestedWithDefault;
 class MinPadding;
 class MinPaddingWithCustomType;
-class MyDataItem;
 class MyStruct;
+class MyDataItem;
 class Renamed;
 class AnnotatedTypes;
-class ForwardUsageStruct;
 class ForwardUsageRoot;
+class ForwardUsageStruct;
 class ForwardUsageByRef;
 class NoexceptMoveEmpty;
 class NoexceptMoveSimpleStruct;

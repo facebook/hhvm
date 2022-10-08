@@ -81,19 +81,6 @@ struct VisitByFieldId<::facebook::thrift::test::Baz> {
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::detail::DirectlyAdapted> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).field_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DirectlyAdapted");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::facebook::thrift::test::Bar> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -114,6 +101,19 @@ struct VisitByFieldId<::facebook::thrift::test::Bar> {
       return f(6, static_cast<T&&>(t).adaptedStructField_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::Bar");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::detail::DirectlyAdapted> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::DirectlyAdapted");
     }
   }
 };
@@ -157,17 +157,6 @@ struct VisitByFieldId<::facebook::thrift::test::TerseAdaptedFields> {
 };
 
 template <>
-struct VisitByFieldId<::facebook::thrift::test::A> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    default:
-      throwInvalidThriftId(fieldId, "::facebook::thrift::test::A");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::facebook::thrift::test::B> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -176,6 +165,17 @@ struct VisitByFieldId<::facebook::thrift::test::B> {
       return f(0, static_cast<T&&>(t).a_ref());
     default:
       throwInvalidThriftId(fieldId, "::facebook::thrift::test::B");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::facebook::thrift::test::A> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::A");
     }
   }
 };

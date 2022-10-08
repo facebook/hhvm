@@ -118,8 +118,8 @@ extern const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUE
 // END declare_enums
 // BEGIN forward_declare
 namespace cpp2 {
-class MyDataItem;
 class MyStruct;
+class MyDataItem;
 class MyUnion;
 } // cpp2
 // END forward_declare

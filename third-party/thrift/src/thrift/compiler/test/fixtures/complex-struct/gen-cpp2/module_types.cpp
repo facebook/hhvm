@@ -290,76 +290,6 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::cpp2::MyDataItem>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyDataItem>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace cpp2 {
-
-const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-
-MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
-
-
-void MyDataItem::__fbthrift_clear() {
-  // clear all fields
-}
-
-void MyDataItem::__fbthrift_clear_terse_fields() {
-}
-
-bool MyDataItem::__fbthrift_is_empty() const {
-  return true;
-}
-
-bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return true;
-}
-
-bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  return false;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
-  using ::std::swap;
-}
-
-template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-} // cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
 void TccStructTraits<::cpp2::MyStruct>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -1059,640 +989,6 @@ template uint32_t SimpleStruct::write<>(apache::thrift::CompactProtocolWriter*) 
 template uint32_t SimpleStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
 template uint32_t SimpleStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
-
-} // cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::ComplexNestedStruct>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::ComplexNestedStruct>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace cpp2 {
-
-const folly::StringPiece ComplexNestedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<ComplexNestedStruct>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-ComplexNestedStruct::ComplexNestedStruct(const ComplexNestedStruct&) = default;
-ComplexNestedStruct& ComplexNestedStruct::operator=(const ComplexNestedStruct&) = default;
-ComplexNestedStruct::ComplexNestedStruct() {
-}
-
-
-ComplexNestedStruct::~ComplexNestedStruct() {}
-
-ComplexNestedStruct::ComplexNestedStruct(FOLLY_MAYBE_UNUSED ComplexNestedStruct&& other) noexcept :
-    __fbthrift_field_setOfSetOfInt(std::move(other.__fbthrift_field_setOfSetOfInt)),
-    __fbthrift_field_listofListOfListOfListOfEnum(std::move(other.__fbthrift_field_listofListOfListOfListOfEnum)),
-    __fbthrift_field_listOfListOfMyStruct(std::move(other.__fbthrift_field_listOfListOfMyStruct)),
-    __fbthrift_field_setOfListOfListOfLong(std::move(other.__fbthrift_field_setOfListOfListOfLong)),
-    __fbthrift_field_setOfSetOfsetOfLong(std::move(other.__fbthrift_field_setOfSetOfsetOfLong)),
-    __fbthrift_field_mapStructListOfListOfLong(std::move(other.__fbthrift_field_mapStructListOfListOfLong)),
-    __fbthrift_field_mKeyStructValInt(std::move(other.__fbthrift_field_mKeyStructValInt)),
-    __fbthrift_field_listOfMapKeyIntValInt(std::move(other.__fbthrift_field_listOfMapKeyIntValInt)),
-    __fbthrift_field_listOfMapKeyStrValList(std::move(other.__fbthrift_field_listOfMapKeyStrValList)),
-    __fbthrift_field_mapKeySetValLong(std::move(other.__fbthrift_field_mapKeySetValLong)),
-    __fbthrift_field_mapKeyListValLong(std::move(other.__fbthrift_field_mapKeyListValLong)),
-    __fbthrift_field_mapKeyMapValMap(std::move(other.__fbthrift_field_mapKeyMapValMap)),
-    __fbthrift_field_mapKeySetValMap(std::move(other.__fbthrift_field_mapKeySetValMap)),
-    __fbthrift_field_NestedMaps(std::move(other.__fbthrift_field_NestedMaps)),
-    __fbthrift_field_mapKeyIntValList(std::move(other.__fbthrift_field_mapKeyIntValList)),
-    __fbthrift_field_mapKeyIntValSet(std::move(other.__fbthrift_field_mapKeyIntValSet)),
-    __fbthrift_field_mapKeySetValInt(std::move(other.__fbthrift_field_mapKeySetValInt)),
-    __fbthrift_field_mapKeyListValSet(std::move(other.__fbthrift_field_mapKeyListValSet)),
-    __isset(other.__isset) {
-}
-
-ComplexNestedStruct& ComplexNestedStruct::operator=(FOLLY_MAYBE_UNUSED ComplexNestedStruct&& other) noexcept {
-    this->__fbthrift_field_setOfSetOfInt = std::move(other.__fbthrift_field_setOfSetOfInt);
-    this->__fbthrift_field_listofListOfListOfListOfEnum = std::move(other.__fbthrift_field_listofListOfListOfListOfEnum);
-    this->__fbthrift_field_listOfListOfMyStruct = std::move(other.__fbthrift_field_listOfListOfMyStruct);
-    this->__fbthrift_field_setOfListOfListOfLong = std::move(other.__fbthrift_field_setOfListOfListOfLong);
-    this->__fbthrift_field_setOfSetOfsetOfLong = std::move(other.__fbthrift_field_setOfSetOfsetOfLong);
-    this->__fbthrift_field_mapStructListOfListOfLong = std::move(other.__fbthrift_field_mapStructListOfListOfLong);
-    this->__fbthrift_field_mKeyStructValInt = std::move(other.__fbthrift_field_mKeyStructValInt);
-    this->__fbthrift_field_listOfMapKeyIntValInt = std::move(other.__fbthrift_field_listOfMapKeyIntValInt);
-    this->__fbthrift_field_listOfMapKeyStrValList = std::move(other.__fbthrift_field_listOfMapKeyStrValList);
-    this->__fbthrift_field_mapKeySetValLong = std::move(other.__fbthrift_field_mapKeySetValLong);
-    this->__fbthrift_field_mapKeyListValLong = std::move(other.__fbthrift_field_mapKeyListValLong);
-    this->__fbthrift_field_mapKeyMapValMap = std::move(other.__fbthrift_field_mapKeyMapValMap);
-    this->__fbthrift_field_mapKeySetValMap = std::move(other.__fbthrift_field_mapKeySetValMap);
-    this->__fbthrift_field_NestedMaps = std::move(other.__fbthrift_field_NestedMaps);
-    this->__fbthrift_field_mapKeyIntValList = std::move(other.__fbthrift_field_mapKeyIntValList);
-    this->__fbthrift_field_mapKeyIntValSet = std::move(other.__fbthrift_field_mapKeyIntValSet);
-    this->__fbthrift_field_mapKeySetValInt = std::move(other.__fbthrift_field_mapKeySetValInt);
-    this->__fbthrift_field_mapKeyListValSet = std::move(other.__fbthrift_field_mapKeyListValSet);
-    __isset = other.__isset;
-    return *this;
-}
-
-
-ComplexNestedStruct::ComplexNestedStruct(apache::thrift::FragileConstructor, ::std::set<::std::set<::std::int32_t>> setOfSetOfInt__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>> listofListOfListOfListOfEnum__arg, ::std::vector<::std::vector<::cpp2::MyStruct>> listOfListOfMyStruct__arg, ::std::set<::std::vector<::std::vector<::std::int64_t>>> setOfListOfListOfLong__arg, ::std::set<::std::set<::std::set<::std::int64_t>>> setOfSetOfsetOfLong__arg, ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>> mapStructListOfListOfLong__arg, ::std::map<::cpp2::MyStruct, ::std::int32_t> mKeyStructValInt__arg, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>> listOfMapKeyIntValInt__arg, ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>> listOfMapKeyStrValList__arg, ::std::map<::std::set<::std::int32_t>, ::std::int64_t> mapKeySetValLong__arg, ::std::map<::std::vector<::std::string>, ::std::int32_t> mapKeyListValLong__arg, ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>> mapKeyMapValMap__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> mapKeySetValMap__arg, ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>> NestedMaps__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>> mapKeyIntValList__arg, ::std::map<::std::int32_t, ::std::set<bool>> mapKeyIntValSet__arg, ::std::map<::std::set<bool>, ::cpp2::MyEnum> mapKeySetValInt__arg, ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>> mapKeyListValSet__arg) :
-    __fbthrift_field_setOfSetOfInt(std::move(setOfSetOfInt__arg)),
-    __fbthrift_field_listofListOfListOfListOfEnum(std::move(listofListOfListOfListOfEnum__arg)),
-    __fbthrift_field_listOfListOfMyStruct(std::move(listOfListOfMyStruct__arg)),
-    __fbthrift_field_setOfListOfListOfLong(std::move(setOfListOfListOfLong__arg)),
-    __fbthrift_field_setOfSetOfsetOfLong(std::move(setOfSetOfsetOfLong__arg)),
-    __fbthrift_field_mapStructListOfListOfLong(std::move(mapStructListOfListOfLong__arg)),
-    __fbthrift_field_mKeyStructValInt(std::move(mKeyStructValInt__arg)),
-    __fbthrift_field_listOfMapKeyIntValInt(std::move(listOfMapKeyIntValInt__arg)),
-    __fbthrift_field_listOfMapKeyStrValList(std::move(listOfMapKeyStrValList__arg)),
-    __fbthrift_field_mapKeySetValLong(std::move(mapKeySetValLong__arg)),
-    __fbthrift_field_mapKeyListValLong(std::move(mapKeyListValLong__arg)),
-    __fbthrift_field_mapKeyMapValMap(std::move(mapKeyMapValMap__arg)),
-    __fbthrift_field_mapKeySetValMap(std::move(mapKeySetValMap__arg)),
-    __fbthrift_field_NestedMaps(std::move(NestedMaps__arg)),
-    __fbthrift_field_mapKeyIntValList(std::move(mapKeyIntValList__arg)),
-    __fbthrift_field_mapKeyIntValSet(std::move(mapKeyIntValSet__arg)),
-    __fbthrift_field_mapKeySetValInt(std::move(mapKeySetValInt__arg)),
-    __fbthrift_field_mapKeyListValSet(std::move(mapKeyListValSet__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
-  __isset.set(folly::index_constant<1>(), true);
-  __isset.set(folly::index_constant<2>(), true);
-  __isset.set(folly::index_constant<3>(), true);
-  __isset.set(folly::index_constant<4>(), true);
-  __isset.set(folly::index_constant<5>(), true);
-  __isset.set(folly::index_constant<6>(), true);
-  __isset.set(folly::index_constant<7>(), true);
-  __isset.set(folly::index_constant<8>(), true);
-  __isset.set(folly::index_constant<9>(), true);
-  __isset.set(folly::index_constant<10>(), true);
-  __isset.set(folly::index_constant<11>(), true);
-  __isset.set(folly::index_constant<12>(), true);
-  __isset.set(folly::index_constant<13>(), true);
-  __isset.set(folly::index_constant<14>(), true);
-  __isset.set(folly::index_constant<15>(), true);
-  __isset.set(folly::index_constant<16>(), true);
-  __isset.set(folly::index_constant<17>(), true);
-}
-
-
-void ComplexNestedStruct::__fbthrift_clear() {
-  // clear all fields
-  this->__fbthrift_field_setOfSetOfInt.clear();
-  this->__fbthrift_field_listofListOfListOfListOfEnum.clear();
-  this->__fbthrift_field_listOfListOfMyStruct.clear();
-  this->__fbthrift_field_setOfListOfListOfLong.clear();
-  this->__fbthrift_field_setOfSetOfsetOfLong.clear();
-  this->__fbthrift_field_mapStructListOfListOfLong.clear();
-  this->__fbthrift_field_mKeyStructValInt.clear();
-  this->__fbthrift_field_listOfMapKeyIntValInt.clear();
-  this->__fbthrift_field_listOfMapKeyStrValList.clear();
-  this->__fbthrift_field_mapKeySetValLong.clear();
-  this->__fbthrift_field_mapKeyListValLong.clear();
-  this->__fbthrift_field_mapKeyMapValMap.clear();
-  this->__fbthrift_field_mapKeySetValMap.clear();
-  this->__fbthrift_field_NestedMaps.clear();
-  this->__fbthrift_field_mapKeyIntValList.clear();
-  this->__fbthrift_field_mapKeyIntValSet.clear();
-  this->__fbthrift_field_mapKeySetValInt.clear();
-  this->__fbthrift_field_mapKeyListValSet.clear();
-  __isset = {};
-}
-
-void ComplexNestedStruct::__fbthrift_clear_terse_fields() {
-}
-
-bool ComplexNestedStruct::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool ComplexNestedStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexNestedStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.setOfSetOfInt_ref() == rhs.setOfSetOfInt_ref())) {
-    return false;
-  }
-  if (!(lhs.listofListOfListOfListOfEnum_ref() == rhs.listofListOfListOfListOfEnum_ref())) {
-    return false;
-  }
-  if (!(lhs.listOfListOfMyStruct_ref() == rhs.listOfListOfMyStruct_ref())) {
-    return false;
-  }
-  if (!(lhs.setOfListOfListOfLong_ref() == rhs.setOfListOfListOfLong_ref())) {
-    return false;
-  }
-  if (!(lhs.setOfSetOfsetOfLong_ref() == rhs.setOfSetOfsetOfLong_ref())) {
-    return false;
-  }
-  if (!(lhs.mapStructListOfListOfLong_ref() == rhs.mapStructListOfListOfLong_ref())) {
-    return false;
-  }
-  if (!(lhs.mKeyStructValInt_ref() == rhs.mKeyStructValInt_ref())) {
-    return false;
-  }
-  if (!(lhs.listOfMapKeyIntValInt_ref() == rhs.listOfMapKeyIntValInt_ref())) {
-    return false;
-  }
-  if (!(lhs.listOfMapKeyStrValList_ref() == rhs.listOfMapKeyStrValList_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeySetValLong_ref() == rhs.mapKeySetValLong_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeyListValLong_ref() == rhs.mapKeyListValLong_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeyMapValMap_ref() == rhs.mapKeyMapValMap_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeySetValMap_ref() == rhs.mapKeySetValMap_ref())) {
-    return false;
-  }
-  if (!(lhs.NestedMaps_ref() == rhs.NestedMaps_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeyIntValList_ref() == rhs.mapKeyIntValList_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeyIntValSet_ref() == rhs.mapKeyIntValSet_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeySetValInt_ref() == rhs.mapKeySetValInt_ref())) {
-    return false;
-  }
-  if (!(lhs.mapKeyListValSet_ref() == rhs.mapKeyListValSet_ref())) {
-    return false;
-  }
-  return true;
-}
-
-bool ComplexNestedStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexNestedStruct& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.setOfSetOfInt_ref() == rhs.setOfSetOfInt_ref())) {
-    return lhs.setOfSetOfInt_ref() < rhs.setOfSetOfInt_ref();
-  }
-  if (!(lhs.listofListOfListOfListOfEnum_ref() == rhs.listofListOfListOfListOfEnum_ref())) {
-    return lhs.listofListOfListOfListOfEnum_ref() < rhs.listofListOfListOfListOfEnum_ref();
-  }
-  if (!(lhs.listOfListOfMyStruct_ref() == rhs.listOfListOfMyStruct_ref())) {
-    return lhs.listOfListOfMyStruct_ref() < rhs.listOfListOfMyStruct_ref();
-  }
-  if (!(lhs.setOfListOfListOfLong_ref() == rhs.setOfListOfListOfLong_ref())) {
-    return lhs.setOfListOfListOfLong_ref() < rhs.setOfListOfListOfLong_ref();
-  }
-  if (!(lhs.setOfSetOfsetOfLong_ref() == rhs.setOfSetOfsetOfLong_ref())) {
-    return lhs.setOfSetOfsetOfLong_ref() < rhs.setOfSetOfsetOfLong_ref();
-  }
-  if (!(lhs.mapStructListOfListOfLong_ref() == rhs.mapStructListOfListOfLong_ref())) {
-    return lhs.mapStructListOfListOfLong_ref() < rhs.mapStructListOfListOfLong_ref();
-  }
-  if (!(lhs.mKeyStructValInt_ref() == rhs.mKeyStructValInt_ref())) {
-    return lhs.mKeyStructValInt_ref() < rhs.mKeyStructValInt_ref();
-  }
-  if (!(lhs.listOfMapKeyIntValInt_ref() == rhs.listOfMapKeyIntValInt_ref())) {
-    return lhs.listOfMapKeyIntValInt_ref() < rhs.listOfMapKeyIntValInt_ref();
-  }
-  if (!(lhs.listOfMapKeyStrValList_ref() == rhs.listOfMapKeyStrValList_ref())) {
-    return lhs.listOfMapKeyStrValList_ref() < rhs.listOfMapKeyStrValList_ref();
-  }
-  if (!(lhs.mapKeySetValLong_ref() == rhs.mapKeySetValLong_ref())) {
-    return lhs.mapKeySetValLong_ref() < rhs.mapKeySetValLong_ref();
-  }
-  if (!(lhs.mapKeyListValLong_ref() == rhs.mapKeyListValLong_ref())) {
-    return lhs.mapKeyListValLong_ref() < rhs.mapKeyListValLong_ref();
-  }
-  if (!(lhs.mapKeyMapValMap_ref() == rhs.mapKeyMapValMap_ref())) {
-    return lhs.mapKeyMapValMap_ref() < rhs.mapKeyMapValMap_ref();
-  }
-  if (!(lhs.mapKeySetValMap_ref() == rhs.mapKeySetValMap_ref())) {
-    return lhs.mapKeySetValMap_ref() < rhs.mapKeySetValMap_ref();
-  }
-  if (!(lhs.NestedMaps_ref() == rhs.NestedMaps_ref())) {
-    return lhs.NestedMaps_ref() < rhs.NestedMaps_ref();
-  }
-  if (!(lhs.mapKeyIntValList_ref() == rhs.mapKeyIntValList_ref())) {
-    return lhs.mapKeyIntValList_ref() < rhs.mapKeyIntValList_ref();
-  }
-  if (!(lhs.mapKeyIntValSet_ref() == rhs.mapKeyIntValSet_ref())) {
-    return lhs.mapKeyIntValSet_ref() < rhs.mapKeyIntValSet_ref();
-  }
-  if (!(lhs.mapKeySetValInt_ref() == rhs.mapKeySetValInt_ref())) {
-    return lhs.mapKeySetValInt_ref() < rhs.mapKeySetValInt_ref();
-  }
-  if (!(lhs.mapKeyListValSet_ref() == rhs.mapKeyListValSet_ref())) {
-    return lhs.mapKeyListValSet_ref() < rhs.mapKeyListValSet_ref();
-  }
-  return false;
-}
-
-const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetOfInt() const& {
-  return __fbthrift_field_setOfSetOfInt;
-}
-
-::std::set<::std::set<::std::int32_t>> ComplexNestedStruct::get_setOfSetOfInt() && {
-  return std::move(__fbthrift_field_setOfSetOfInt);
-}
-
-const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& ComplexNestedStruct::get_listofListOfListOfListOfEnum() const& {
-  return __fbthrift_field_listofListOfListOfListOfEnum;
-}
-
-::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>> ComplexNestedStruct::get_listofListOfListOfListOfEnum() && {
-  return std::move(__fbthrift_field_listofListOfListOfListOfEnum);
-}
-
-const ::std::vector<::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_listOfListOfMyStruct() const& {
-  return __fbthrift_field_listOfListOfMyStruct;
-}
-
-::std::vector<::std::vector<::cpp2::MyStruct>> ComplexNestedStruct::get_listOfListOfMyStruct() && {
-  return std::move(__fbthrift_field_listOfListOfMyStruct);
-}
-
-const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& ComplexNestedStruct::get_setOfListOfListOfLong() const& {
-  return __fbthrift_field_setOfListOfListOfLong;
-}
-
-::std::set<::std::vector<::std::vector<::std::int64_t>>> ComplexNestedStruct::get_setOfListOfListOfLong() && {
-  return std::move(__fbthrift_field_setOfListOfListOfLong);
-}
-
-const ::std::set<::std::set<::std::set<::std::int64_t>>>& ComplexNestedStruct::get_setOfSetOfsetOfLong() const& {
-  return __fbthrift_field_setOfSetOfsetOfLong;
-}
-
-::std::set<::std::set<::std::set<::std::int64_t>>> ComplexNestedStruct::get_setOfSetOfsetOfLong() && {
-  return std::move(__fbthrift_field_setOfSetOfsetOfLong);
-}
-
-const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_mapStructListOfListOfLong() const& {
-  return __fbthrift_field_mapStructListOfListOfLong;
-}
-
-::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>> ComplexNestedStruct::get_mapStructListOfListOfLong() && {
-  return std::move(__fbthrift_field_mapStructListOfListOfLong);
-}
-
-const ::std::map<::cpp2::MyStruct, ::std::int32_t>& ComplexNestedStruct::get_mKeyStructValInt() const& {
-  return __fbthrift_field_mKeyStructValInt;
-}
-
-::std::map<::cpp2::MyStruct, ::std::int32_t> ComplexNestedStruct::get_mKeyStructValInt() && {
-  return std::move(__fbthrift_field_mKeyStructValInt);
-}
-
-const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& ComplexNestedStruct::get_listOfMapKeyIntValInt() const& {
-  return __fbthrift_field_listOfMapKeyIntValInt;
-}
-
-::std::vector<::std::map<::std::int32_t, ::std::int32_t>> ComplexNestedStruct::get_listOfMapKeyIntValInt() && {
-  return std::move(__fbthrift_field_listOfMapKeyIntValInt);
-}
-
-const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_listOfMapKeyStrValList() const& {
-  return __fbthrift_field_listOfMapKeyStrValList;
-}
-
-::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>> ComplexNestedStruct::get_listOfMapKeyStrValList() && {
-  return std::move(__fbthrift_field_listOfMapKeyStrValList);
-}
-
-const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& ComplexNestedStruct::get_mapKeySetValLong() const& {
-  return __fbthrift_field_mapKeySetValLong;
-}
-
-::std::map<::std::set<::std::int32_t>, ::std::int64_t> ComplexNestedStruct::get_mapKeySetValLong() && {
-  return std::move(__fbthrift_field_mapKeySetValLong);
-}
-
-const ::std::map<::std::vector<::std::string>, ::std::int32_t>& ComplexNestedStruct::get_mapKeyListValLong() const& {
-  return __fbthrift_field_mapKeyListValLong;
-}
-
-::std::map<::std::vector<::std::string>, ::std::int32_t> ComplexNestedStruct::get_mapKeyListValLong() && {
-  return std::move(__fbthrift_field_mapKeyListValLong);
-}
-
-const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_mapKeyMapValMap() const& {
-  return __fbthrift_field_mapKeyMapValMap;
-}
-
-::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>> ComplexNestedStruct::get_mapKeyMapValMap() && {
-  return std::move(__fbthrift_field_mapKeyMapValMap);
-}
-
-const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ComplexNestedStruct::get_mapKeySetValMap() const& {
-  return __fbthrift_field_mapKeySetValMap;
-}
-
-::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> ComplexNestedStruct::get_mapKeySetValMap() && {
-  return std::move(__fbthrift_field_mapKeySetValMap);
-}
-
-const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_NestedMaps() const& {
-  return __fbthrift_field_NestedMaps;
-}
-
-::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>> ComplexNestedStruct::get_NestedMaps() && {
-  return std::move(__fbthrift_field_NestedMaps);
-}
-
-const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_mapKeyIntValList() const& {
-  return __fbthrift_field_mapKeyIntValList;
-}
-
-::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>> ComplexNestedStruct::get_mapKeyIntValList() && {
-  return std::move(__fbthrift_field_mapKeyIntValList);
-}
-
-const ::std::map<::std::int32_t, ::std::set<bool>>& ComplexNestedStruct::get_mapKeyIntValSet() const& {
-  return __fbthrift_field_mapKeyIntValSet;
-}
-
-::std::map<::std::int32_t, ::std::set<bool>> ComplexNestedStruct::get_mapKeyIntValSet() && {
-  return std::move(__fbthrift_field_mapKeyIntValSet);
-}
-
-const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& ComplexNestedStruct::get_mapKeySetValInt() const& {
-  return __fbthrift_field_mapKeySetValInt;
-}
-
-::std::map<::std::set<bool>, ::cpp2::MyEnum> ComplexNestedStruct::get_mapKeySetValInt() && {
-  return std::move(__fbthrift_field_mapKeySetValInt);
-}
-
-const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& ComplexNestedStruct::get_mapKeyListValSet() const& {
-  return __fbthrift_field_mapKeyListValSet;
-}
-
-::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>> ComplexNestedStruct::get_mapKeyListValSet() && {
-  return std::move(__fbthrift_field_mapKeyListValSet);
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED ComplexNestedStruct& a, FOLLY_MAYBE_UNUSED ComplexNestedStruct& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_setOfSetOfInt, b.__fbthrift_field_setOfSetOfInt);
-  swap(a.__fbthrift_field_listofListOfListOfListOfEnum, b.__fbthrift_field_listofListOfListOfListOfEnum);
-  swap(a.__fbthrift_field_listOfListOfMyStruct, b.__fbthrift_field_listOfListOfMyStruct);
-  swap(a.__fbthrift_field_setOfListOfListOfLong, b.__fbthrift_field_setOfListOfListOfLong);
-  swap(a.__fbthrift_field_setOfSetOfsetOfLong, b.__fbthrift_field_setOfSetOfsetOfLong);
-  swap(a.__fbthrift_field_mapStructListOfListOfLong, b.__fbthrift_field_mapStructListOfListOfLong);
-  swap(a.__fbthrift_field_mKeyStructValInt, b.__fbthrift_field_mKeyStructValInt);
-  swap(a.__fbthrift_field_listOfMapKeyIntValInt, b.__fbthrift_field_listOfMapKeyIntValInt);
-  swap(a.__fbthrift_field_listOfMapKeyStrValList, b.__fbthrift_field_listOfMapKeyStrValList);
-  swap(a.__fbthrift_field_mapKeySetValLong, b.__fbthrift_field_mapKeySetValLong);
-  swap(a.__fbthrift_field_mapKeyListValLong, b.__fbthrift_field_mapKeyListValLong);
-  swap(a.__fbthrift_field_mapKeyMapValMap, b.__fbthrift_field_mapKeyMapValMap);
-  swap(a.__fbthrift_field_mapKeySetValMap, b.__fbthrift_field_mapKeySetValMap);
-  swap(a.__fbthrift_field_NestedMaps, b.__fbthrift_field_NestedMaps);
-  swap(a.__fbthrift_field_mapKeyIntValList, b.__fbthrift_field_mapKeyIntValList);
-  swap(a.__fbthrift_field_mapKeyIntValSet, b.__fbthrift_field_mapKeyIntValSet);
-  swap(a.__fbthrift_field_mapKeySetValInt, b.__fbthrift_field_mapKeySetValInt);
-  swap(a.__fbthrift_field_mapKeyListValSet, b.__fbthrift_field_mapKeyListValSet);
-  swap(a.__isset, b.__isset);
-}
-
-template void ComplexNestedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t ComplexNestedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ComplexNestedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ComplexNestedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void ComplexNestedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t ComplexNestedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ComplexNestedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ComplexNestedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ComplexNestedStruct,
-        ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
-        ::std::vector<::std::vector<::cpp2::MyStruct>>>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ComplexNestedStruct,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>,
-        ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ComplexNestedStruct,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>,
-        ::std::map<::cpp2::MyStruct, ::std::int32_t>>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ComplexNestedStruct,
-        ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>,
-        ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        ComplexNestedStruct,
-        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
-        ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>,
-    "inconsistent use of json option");
-
-} // cpp2
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
-void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::cpp2::MyUnion>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace apache { namespace thrift {
-
-constexpr std::size_t const TEnumTraits<::cpp2::MyUnion::Type>::size;
-folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
-folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
-
-bool TEnumTraits<::cpp2::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_name(value, out);
-}
-
-bool TEnumTraits<::cpp2::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
-  return ::apache::thrift::detail::st::enum_find_value(name, out);
-}
-}} // apache::thrift
-namespace cpp2 {
-
-const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-void MyUnion::__fbthrift_clear() {
-  // clear all fields
-  if (getType() == Type::__EMPTY__) { return; }
-  switch(getType()) {
-    case Type::myEnum:
-      destruct(value_.myEnum);
-      break;
-    case Type::myStruct:
-      destruct(value_.myStruct);
-      break;
-    case Type::myDataItem:
-      destruct(value_.myDataItem);
-      break;
-    case Type::complexNestedStruct:
-      destruct(value_.complexNestedStruct);
-      break;
-    case Type::longValue:
-      destruct(value_.longValue);
-      break;
-    case Type::intValue:
-      destruct(value_.intValue);
-      break;
-    default:
-      assert(false);
-      break;
-  }
-  type_ = folly::to_underlying(Type::__EMPTY__);
-}
-
-bool MyUnion::__fbthrift_is_empty() const {
-  return getType() == Type::__EMPTY__;
-}
-
-bool MyUnion::operator==(const MyUnion& rhs) const {
-  if (getType() != rhs.getType()) { return false; }
-  switch(getType()) {
-    case Type::myEnum:
-      return value_.myEnum == rhs.value_.myEnum;
-    case Type::myStruct:
-      return value_.myStruct == rhs.value_.myStruct;
-    case Type::myDataItem:
-      return value_.myDataItem == rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return value_.complexNestedStruct == rhs.value_.complexNestedStruct;
-    case Type::longValue:
-      return value_.longValue == rhs.value_.longValue;
-    case Type::intValue:
-      return value_.intValue == rhs.value_.intValue;
-    default:
-      return true;
-  }
-}
-
-bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (lhs.getType() != rhs.getType()) {
-    return lhs.getType() < rhs.getType();
-  }
-  switch (lhs.getType()) {
-    case Type::myEnum:
-      return lhs.value_.myEnum < rhs.value_.myEnum;
-    case Type::myStruct:
-      return lhs.value_.myStruct < rhs.value_.myStruct;
-    case Type::myDataItem:
-      return lhs.value_.myDataItem < rhs.value_.myDataItem;
-    case Type::complexNestedStruct:
-      return lhs.value_.complexNestedStruct < rhs.value_.complexNestedStruct;
-    case Type::longValue:
-      return lhs.value_.longValue < rhs.value_.longValue;
-    case Type::intValue:
-      return lhs.value_.intValue < rhs.value_.intValue;
-    default:
-      return false;
-  }
-}
-
-void swap(MyUnion& a, MyUnion& b) {
-  MyUnion temp(std::move(a));
-  a = std::move(b);
-  b = std::move(temp);
-}
-
-template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyUnion,
-        ::apache::thrift::type_class::structure,
-        ::cpp2::MyStruct>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyUnion,
-        ::apache::thrift::type_class::structure,
-        ::cpp2::MyDataItem>,
-    "inconsistent use of json option");
-static_assert(
-    ::apache::thrift::detail::st::gen_check_json<
-        MyUnion,
-        ::apache::thrift::type_class::structure,
-        ::cpp2::ComplexNestedStruct>,
-    "inconsistent use of json option");
 
 } // cpp2
 
@@ -2445,6 +1741,230 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::cpp2::MyDataItem>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::MyDataItem>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+const folly::StringPiece MyDataItem::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyDataItem>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+MyDataItem::MyDataItem(apache::thrift::FragileConstructor) {}
+
+
+void MyDataItem::__fbthrift_clear() {
+  // clear all fields
+}
+
+void MyDataItem::__fbthrift_clear_terse_fields() {
+}
+
+bool MyDataItem::__fbthrift_is_empty() const {
+  return true;
+}
+
+bool MyDataItem::operator==(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return true;
+}
+
+bool MyDataItem::operator<(FOLLY_MAYBE_UNUSED const MyDataItem& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED MyDataItem& a, FOLLY_MAYBE_UNUSED MyDataItem& b) {
+  using ::std::swap;
+}
+
+template void MyDataItem::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyDataItem::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyDataItem::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyDataItem::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyDataItem::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::cpp2::MyUnion>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::MyUnion>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace apache { namespace thrift {
+
+constexpr std::size_t const TEnumTraits<::cpp2::MyUnion::Type>::size;
+folly::Range<::cpp2::MyUnion::Type const*> const TEnumTraits<::cpp2::MyUnion::Type>::values = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::values);
+folly::Range<folly::StringPiece const*> const TEnumTraits<::cpp2::MyUnion::Type>::names = folly::range(TEnumDataStorage<::cpp2::MyUnion::Type>::names);
+
+bool TEnumTraits<::cpp2::MyUnion::Type>::findName(type value, folly::StringPiece* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_name(value, out);
+}
+
+bool TEnumTraits<::cpp2::MyUnion::Type>::findValue(folly::StringPiece name, type* out) noexcept {
+  return ::apache::thrift::detail::st::enum_find_value(name, out);
+}
+}} // apache::thrift
+namespace cpp2 {
+
+const folly::StringPiece MyUnion::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<MyUnion>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+void MyUnion::__fbthrift_clear() {
+  // clear all fields
+  if (getType() == Type::__EMPTY__) { return; }
+  switch(getType()) {
+    case Type::myEnum:
+      destruct(value_.myEnum);
+      break;
+    case Type::myStruct:
+      destruct(value_.myStruct);
+      break;
+    case Type::myDataItem:
+      destruct(value_.myDataItem);
+      break;
+    case Type::complexNestedStruct:
+      destruct(value_.complexNestedStruct);
+      break;
+    case Type::longValue:
+      destruct(value_.longValue);
+      break;
+    case Type::intValue:
+      destruct(value_.intValue);
+      break;
+    default:
+      assert(false);
+      break;
+  }
+  type_ = folly::to_underlying(Type::__EMPTY__);
+}
+
+bool MyUnion::__fbthrift_is_empty() const {
+  return getType() == Type::__EMPTY__;
+}
+
+bool MyUnion::operator==(const MyUnion& rhs) const {
+  if (getType() != rhs.getType()) { return false; }
+  switch(getType()) {
+    case Type::myEnum:
+      return value_.myEnum == rhs.value_.myEnum;
+    case Type::myStruct:
+      return value_.myStruct == rhs.value_.myStruct;
+    case Type::myDataItem:
+      return value_.myDataItem == rhs.value_.myDataItem;
+    case Type::complexNestedStruct:
+      return value_.complexNestedStruct == rhs.value_.complexNestedStruct;
+    case Type::longValue:
+      return value_.longValue == rhs.value_.longValue;
+    case Type::intValue:
+      return value_.intValue == rhs.value_.intValue;
+    default:
+      return true;
+  }
+}
+
+bool MyUnion::operator<(FOLLY_MAYBE_UNUSED const MyUnion& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (lhs.getType() != rhs.getType()) {
+    return lhs.getType() < rhs.getType();
+  }
+  switch (lhs.getType()) {
+    case Type::myEnum:
+      return lhs.value_.myEnum < rhs.value_.myEnum;
+    case Type::myStruct:
+      return lhs.value_.myStruct < rhs.value_.myStruct;
+    case Type::myDataItem:
+      return lhs.value_.myDataItem < rhs.value_.myDataItem;
+    case Type::complexNestedStruct:
+      return lhs.value_.complexNestedStruct < rhs.value_.complexNestedStruct;
+    case Type::longValue:
+      return lhs.value_.longValue < rhs.value_.longValue;
+    case Type::intValue:
+      return lhs.value_.intValue < rhs.value_.intValue;
+    default:
+      return false;
+  }
+}
+
+void swap(MyUnion& a, MyUnion& b) {
+  MyUnion temp(std::move(a));
+  a = std::move(b);
+  b = std::move(temp);
+}
+
+template void MyUnion::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t MyUnion::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t MyUnion::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void MyUnion::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t MyUnion::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t MyUnion::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t MyUnion::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyUnion,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::MyStruct>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyUnion,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::MyDataItem>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        MyUnion,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::ComplexNestedStruct>,
+    "inconsistent use of json option");
+
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::cpp2::MyUnionFloatFieldThrowExp>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -2571,6 +2091,486 @@ static_assert(
         MyUnionFloatFieldThrowExp,
         ::apache::thrift::type_class::structure,
         ::cpp2::ComplexNestedStruct>,
+    "inconsistent use of json option");
+
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::cpp2::ComplexNestedStruct>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::ComplexNestedStruct>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+const folly::StringPiece ComplexNestedStruct::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<ComplexNestedStruct>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+ComplexNestedStruct::ComplexNestedStruct(const ComplexNestedStruct&) = default;
+ComplexNestedStruct& ComplexNestedStruct::operator=(const ComplexNestedStruct&) = default;
+ComplexNestedStruct::ComplexNestedStruct() {
+}
+
+
+ComplexNestedStruct::~ComplexNestedStruct() {}
+
+ComplexNestedStruct::ComplexNestedStruct(FOLLY_MAYBE_UNUSED ComplexNestedStruct&& other) noexcept :
+    __fbthrift_field_setOfSetOfInt(std::move(other.__fbthrift_field_setOfSetOfInt)),
+    __fbthrift_field_listofListOfListOfListOfEnum(std::move(other.__fbthrift_field_listofListOfListOfListOfEnum)),
+    __fbthrift_field_listOfListOfMyStruct(std::move(other.__fbthrift_field_listOfListOfMyStruct)),
+    __fbthrift_field_setOfListOfListOfLong(std::move(other.__fbthrift_field_setOfListOfListOfLong)),
+    __fbthrift_field_setOfSetOfsetOfLong(std::move(other.__fbthrift_field_setOfSetOfsetOfLong)),
+    __fbthrift_field_mapStructListOfListOfLong(std::move(other.__fbthrift_field_mapStructListOfListOfLong)),
+    __fbthrift_field_mKeyStructValInt(std::move(other.__fbthrift_field_mKeyStructValInt)),
+    __fbthrift_field_listOfMapKeyIntValInt(std::move(other.__fbthrift_field_listOfMapKeyIntValInt)),
+    __fbthrift_field_listOfMapKeyStrValList(std::move(other.__fbthrift_field_listOfMapKeyStrValList)),
+    __fbthrift_field_mapKeySetValLong(std::move(other.__fbthrift_field_mapKeySetValLong)),
+    __fbthrift_field_mapKeyListValLong(std::move(other.__fbthrift_field_mapKeyListValLong)),
+    __fbthrift_field_mapKeyMapValMap(std::move(other.__fbthrift_field_mapKeyMapValMap)),
+    __fbthrift_field_mapKeySetValMap(std::move(other.__fbthrift_field_mapKeySetValMap)),
+    __fbthrift_field_NestedMaps(std::move(other.__fbthrift_field_NestedMaps)),
+    __fbthrift_field_mapKeyIntValList(std::move(other.__fbthrift_field_mapKeyIntValList)),
+    __fbthrift_field_mapKeyIntValSet(std::move(other.__fbthrift_field_mapKeyIntValSet)),
+    __fbthrift_field_mapKeySetValInt(std::move(other.__fbthrift_field_mapKeySetValInt)),
+    __fbthrift_field_mapKeyListValSet(std::move(other.__fbthrift_field_mapKeyListValSet)),
+    __isset(other.__isset) {
+}
+
+ComplexNestedStruct& ComplexNestedStruct::operator=(FOLLY_MAYBE_UNUSED ComplexNestedStruct&& other) noexcept {
+    this->__fbthrift_field_setOfSetOfInt = std::move(other.__fbthrift_field_setOfSetOfInt);
+    this->__fbthrift_field_listofListOfListOfListOfEnum = std::move(other.__fbthrift_field_listofListOfListOfListOfEnum);
+    this->__fbthrift_field_listOfListOfMyStruct = std::move(other.__fbthrift_field_listOfListOfMyStruct);
+    this->__fbthrift_field_setOfListOfListOfLong = std::move(other.__fbthrift_field_setOfListOfListOfLong);
+    this->__fbthrift_field_setOfSetOfsetOfLong = std::move(other.__fbthrift_field_setOfSetOfsetOfLong);
+    this->__fbthrift_field_mapStructListOfListOfLong = std::move(other.__fbthrift_field_mapStructListOfListOfLong);
+    this->__fbthrift_field_mKeyStructValInt = std::move(other.__fbthrift_field_mKeyStructValInt);
+    this->__fbthrift_field_listOfMapKeyIntValInt = std::move(other.__fbthrift_field_listOfMapKeyIntValInt);
+    this->__fbthrift_field_listOfMapKeyStrValList = std::move(other.__fbthrift_field_listOfMapKeyStrValList);
+    this->__fbthrift_field_mapKeySetValLong = std::move(other.__fbthrift_field_mapKeySetValLong);
+    this->__fbthrift_field_mapKeyListValLong = std::move(other.__fbthrift_field_mapKeyListValLong);
+    this->__fbthrift_field_mapKeyMapValMap = std::move(other.__fbthrift_field_mapKeyMapValMap);
+    this->__fbthrift_field_mapKeySetValMap = std::move(other.__fbthrift_field_mapKeySetValMap);
+    this->__fbthrift_field_NestedMaps = std::move(other.__fbthrift_field_NestedMaps);
+    this->__fbthrift_field_mapKeyIntValList = std::move(other.__fbthrift_field_mapKeyIntValList);
+    this->__fbthrift_field_mapKeyIntValSet = std::move(other.__fbthrift_field_mapKeyIntValSet);
+    this->__fbthrift_field_mapKeySetValInt = std::move(other.__fbthrift_field_mapKeySetValInt);
+    this->__fbthrift_field_mapKeyListValSet = std::move(other.__fbthrift_field_mapKeyListValSet);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+ComplexNestedStruct::ComplexNestedStruct(apache::thrift::FragileConstructor, ::std::set<::std::set<::std::int32_t>> setOfSetOfInt__arg, ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>> listofListOfListOfListOfEnum__arg, ::std::vector<::std::vector<::cpp2::MyStruct>> listOfListOfMyStruct__arg, ::std::set<::std::vector<::std::vector<::std::int64_t>>> setOfListOfListOfLong__arg, ::std::set<::std::set<::std::set<::std::int64_t>>> setOfSetOfsetOfLong__arg, ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>> mapStructListOfListOfLong__arg, ::std::map<::cpp2::MyStruct, ::std::int32_t> mKeyStructValInt__arg, ::std::vector<::std::map<::std::int32_t, ::std::int32_t>> listOfMapKeyIntValInt__arg, ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>> listOfMapKeyStrValList__arg, ::std::map<::std::set<::std::int32_t>, ::std::int64_t> mapKeySetValLong__arg, ::std::map<::std::vector<::std::string>, ::std::int32_t> mapKeyListValLong__arg, ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>> mapKeyMapValMap__arg, ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> mapKeySetValMap__arg, ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>> NestedMaps__arg, ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>> mapKeyIntValList__arg, ::std::map<::std::int32_t, ::std::set<bool>> mapKeyIntValSet__arg, ::std::map<::std::set<bool>, ::cpp2::MyEnum> mapKeySetValInt__arg, ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>> mapKeyListValSet__arg) :
+    __fbthrift_field_setOfSetOfInt(std::move(setOfSetOfInt__arg)),
+    __fbthrift_field_listofListOfListOfListOfEnum(std::move(listofListOfListOfListOfEnum__arg)),
+    __fbthrift_field_listOfListOfMyStruct(std::move(listOfListOfMyStruct__arg)),
+    __fbthrift_field_setOfListOfListOfLong(std::move(setOfListOfListOfLong__arg)),
+    __fbthrift_field_setOfSetOfsetOfLong(std::move(setOfSetOfsetOfLong__arg)),
+    __fbthrift_field_mapStructListOfListOfLong(std::move(mapStructListOfListOfLong__arg)),
+    __fbthrift_field_mKeyStructValInt(std::move(mKeyStructValInt__arg)),
+    __fbthrift_field_listOfMapKeyIntValInt(std::move(listOfMapKeyIntValInt__arg)),
+    __fbthrift_field_listOfMapKeyStrValList(std::move(listOfMapKeyStrValList__arg)),
+    __fbthrift_field_mapKeySetValLong(std::move(mapKeySetValLong__arg)),
+    __fbthrift_field_mapKeyListValLong(std::move(mapKeyListValLong__arg)),
+    __fbthrift_field_mapKeyMapValMap(std::move(mapKeyMapValMap__arg)),
+    __fbthrift_field_mapKeySetValMap(std::move(mapKeySetValMap__arg)),
+    __fbthrift_field_NestedMaps(std::move(NestedMaps__arg)),
+    __fbthrift_field_mapKeyIntValList(std::move(mapKeyIntValList__arg)),
+    __fbthrift_field_mapKeyIntValSet(std::move(mapKeyIntValSet__arg)),
+    __fbthrift_field_mapKeySetValInt(std::move(mapKeySetValInt__arg)),
+    __fbthrift_field_mapKeyListValSet(std::move(mapKeyListValSet__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+  __isset.set(folly::index_constant<7>(), true);
+  __isset.set(folly::index_constant<8>(), true);
+  __isset.set(folly::index_constant<9>(), true);
+  __isset.set(folly::index_constant<10>(), true);
+  __isset.set(folly::index_constant<11>(), true);
+  __isset.set(folly::index_constant<12>(), true);
+  __isset.set(folly::index_constant<13>(), true);
+  __isset.set(folly::index_constant<14>(), true);
+  __isset.set(folly::index_constant<15>(), true);
+  __isset.set(folly::index_constant<16>(), true);
+  __isset.set(folly::index_constant<17>(), true);
+}
+
+
+void ComplexNestedStruct::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_setOfSetOfInt.clear();
+  this->__fbthrift_field_listofListOfListOfListOfEnum.clear();
+  this->__fbthrift_field_listOfListOfMyStruct.clear();
+  this->__fbthrift_field_setOfListOfListOfLong.clear();
+  this->__fbthrift_field_setOfSetOfsetOfLong.clear();
+  this->__fbthrift_field_mapStructListOfListOfLong.clear();
+  this->__fbthrift_field_mKeyStructValInt.clear();
+  this->__fbthrift_field_listOfMapKeyIntValInt.clear();
+  this->__fbthrift_field_listOfMapKeyStrValList.clear();
+  this->__fbthrift_field_mapKeySetValLong.clear();
+  this->__fbthrift_field_mapKeyListValLong.clear();
+  this->__fbthrift_field_mapKeyMapValMap.clear();
+  this->__fbthrift_field_mapKeySetValMap.clear();
+  this->__fbthrift_field_NestedMaps.clear();
+  this->__fbthrift_field_mapKeyIntValList.clear();
+  this->__fbthrift_field_mapKeyIntValSet.clear();
+  this->__fbthrift_field_mapKeySetValInt.clear();
+  this->__fbthrift_field_mapKeyListValSet.clear();
+  __isset = {};
+}
+
+void ComplexNestedStruct::__fbthrift_clear_terse_fields() {
+}
+
+bool ComplexNestedStruct::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool ComplexNestedStruct::operator==(FOLLY_MAYBE_UNUSED const ComplexNestedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.setOfSetOfInt_ref() == rhs.setOfSetOfInt_ref())) {
+    return false;
+  }
+  if (!(lhs.listofListOfListOfListOfEnum_ref() == rhs.listofListOfListOfListOfEnum_ref())) {
+    return false;
+  }
+  if (!(lhs.listOfListOfMyStruct_ref() == rhs.listOfListOfMyStruct_ref())) {
+    return false;
+  }
+  if (!(lhs.setOfListOfListOfLong_ref() == rhs.setOfListOfListOfLong_ref())) {
+    return false;
+  }
+  if (!(lhs.setOfSetOfsetOfLong_ref() == rhs.setOfSetOfsetOfLong_ref())) {
+    return false;
+  }
+  if (!(lhs.mapStructListOfListOfLong_ref() == rhs.mapStructListOfListOfLong_ref())) {
+    return false;
+  }
+  if (!(lhs.mKeyStructValInt_ref() == rhs.mKeyStructValInt_ref())) {
+    return false;
+  }
+  if (!(lhs.listOfMapKeyIntValInt_ref() == rhs.listOfMapKeyIntValInt_ref())) {
+    return false;
+  }
+  if (!(lhs.listOfMapKeyStrValList_ref() == rhs.listOfMapKeyStrValList_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeySetValLong_ref() == rhs.mapKeySetValLong_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeyListValLong_ref() == rhs.mapKeyListValLong_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeyMapValMap_ref() == rhs.mapKeyMapValMap_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeySetValMap_ref() == rhs.mapKeySetValMap_ref())) {
+    return false;
+  }
+  if (!(lhs.NestedMaps_ref() == rhs.NestedMaps_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeyIntValList_ref() == rhs.mapKeyIntValList_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeyIntValSet_ref() == rhs.mapKeyIntValSet_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeySetValInt_ref() == rhs.mapKeySetValInt_ref())) {
+    return false;
+  }
+  if (!(lhs.mapKeyListValSet_ref() == rhs.mapKeyListValSet_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool ComplexNestedStruct::operator<(FOLLY_MAYBE_UNUSED const ComplexNestedStruct& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.setOfSetOfInt_ref() == rhs.setOfSetOfInt_ref())) {
+    return lhs.setOfSetOfInt_ref() < rhs.setOfSetOfInt_ref();
+  }
+  if (!(lhs.listofListOfListOfListOfEnum_ref() == rhs.listofListOfListOfListOfEnum_ref())) {
+    return lhs.listofListOfListOfListOfEnum_ref() < rhs.listofListOfListOfListOfEnum_ref();
+  }
+  if (!(lhs.listOfListOfMyStruct_ref() == rhs.listOfListOfMyStruct_ref())) {
+    return lhs.listOfListOfMyStruct_ref() < rhs.listOfListOfMyStruct_ref();
+  }
+  if (!(lhs.setOfListOfListOfLong_ref() == rhs.setOfListOfListOfLong_ref())) {
+    return lhs.setOfListOfListOfLong_ref() < rhs.setOfListOfListOfLong_ref();
+  }
+  if (!(lhs.setOfSetOfsetOfLong_ref() == rhs.setOfSetOfsetOfLong_ref())) {
+    return lhs.setOfSetOfsetOfLong_ref() < rhs.setOfSetOfsetOfLong_ref();
+  }
+  if (!(lhs.mapStructListOfListOfLong_ref() == rhs.mapStructListOfListOfLong_ref())) {
+    return lhs.mapStructListOfListOfLong_ref() < rhs.mapStructListOfListOfLong_ref();
+  }
+  if (!(lhs.mKeyStructValInt_ref() == rhs.mKeyStructValInt_ref())) {
+    return lhs.mKeyStructValInt_ref() < rhs.mKeyStructValInt_ref();
+  }
+  if (!(lhs.listOfMapKeyIntValInt_ref() == rhs.listOfMapKeyIntValInt_ref())) {
+    return lhs.listOfMapKeyIntValInt_ref() < rhs.listOfMapKeyIntValInt_ref();
+  }
+  if (!(lhs.listOfMapKeyStrValList_ref() == rhs.listOfMapKeyStrValList_ref())) {
+    return lhs.listOfMapKeyStrValList_ref() < rhs.listOfMapKeyStrValList_ref();
+  }
+  if (!(lhs.mapKeySetValLong_ref() == rhs.mapKeySetValLong_ref())) {
+    return lhs.mapKeySetValLong_ref() < rhs.mapKeySetValLong_ref();
+  }
+  if (!(lhs.mapKeyListValLong_ref() == rhs.mapKeyListValLong_ref())) {
+    return lhs.mapKeyListValLong_ref() < rhs.mapKeyListValLong_ref();
+  }
+  if (!(lhs.mapKeyMapValMap_ref() == rhs.mapKeyMapValMap_ref())) {
+    return lhs.mapKeyMapValMap_ref() < rhs.mapKeyMapValMap_ref();
+  }
+  if (!(lhs.mapKeySetValMap_ref() == rhs.mapKeySetValMap_ref())) {
+    return lhs.mapKeySetValMap_ref() < rhs.mapKeySetValMap_ref();
+  }
+  if (!(lhs.NestedMaps_ref() == rhs.NestedMaps_ref())) {
+    return lhs.NestedMaps_ref() < rhs.NestedMaps_ref();
+  }
+  if (!(lhs.mapKeyIntValList_ref() == rhs.mapKeyIntValList_ref())) {
+    return lhs.mapKeyIntValList_ref() < rhs.mapKeyIntValList_ref();
+  }
+  if (!(lhs.mapKeyIntValSet_ref() == rhs.mapKeyIntValSet_ref())) {
+    return lhs.mapKeyIntValSet_ref() < rhs.mapKeyIntValSet_ref();
+  }
+  if (!(lhs.mapKeySetValInt_ref() == rhs.mapKeySetValInt_ref())) {
+    return lhs.mapKeySetValInt_ref() < rhs.mapKeySetValInt_ref();
+  }
+  if (!(lhs.mapKeyListValSet_ref() == rhs.mapKeyListValSet_ref())) {
+    return lhs.mapKeyListValSet_ref() < rhs.mapKeyListValSet_ref();
+  }
+  return false;
+}
+
+const ::std::set<::std::set<::std::int32_t>>& ComplexNestedStruct::get_setOfSetOfInt() const& {
+  return __fbthrift_field_setOfSetOfInt;
+}
+
+::std::set<::std::set<::std::int32_t>> ComplexNestedStruct::get_setOfSetOfInt() && {
+  return std::move(__fbthrift_field_setOfSetOfInt);
+}
+
+const ::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>>& ComplexNestedStruct::get_listofListOfListOfListOfEnum() const& {
+  return __fbthrift_field_listofListOfListOfListOfEnum;
+}
+
+::std::vector<::std::vector<::std::vector<::std::vector<::cpp2::MyEnum>>>> ComplexNestedStruct::get_listofListOfListOfListOfEnum() && {
+  return std::move(__fbthrift_field_listofListOfListOfListOfEnum);
+}
+
+const ::std::vector<::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_listOfListOfMyStruct() const& {
+  return __fbthrift_field_listOfListOfMyStruct;
+}
+
+::std::vector<::std::vector<::cpp2::MyStruct>> ComplexNestedStruct::get_listOfListOfMyStruct() && {
+  return std::move(__fbthrift_field_listOfListOfMyStruct);
+}
+
+const ::std::set<::std::vector<::std::vector<::std::int64_t>>>& ComplexNestedStruct::get_setOfListOfListOfLong() const& {
+  return __fbthrift_field_setOfListOfListOfLong;
+}
+
+::std::set<::std::vector<::std::vector<::std::int64_t>>> ComplexNestedStruct::get_setOfListOfListOfLong() && {
+  return std::move(__fbthrift_field_setOfListOfListOfLong);
+}
+
+const ::std::set<::std::set<::std::set<::std::int64_t>>>& ComplexNestedStruct::get_setOfSetOfsetOfLong() const& {
+  return __fbthrift_field_setOfSetOfsetOfLong;
+}
+
+::std::set<::std::set<::std::set<::std::int64_t>>> ComplexNestedStruct::get_setOfSetOfsetOfLong() && {
+  return std::move(__fbthrift_field_setOfSetOfsetOfLong);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_mapStructListOfListOfLong() const& {
+  return __fbthrift_field_mapStructListOfListOfLong;
+}
+
+::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>> ComplexNestedStruct::get_mapStructListOfListOfLong() && {
+  return std::move(__fbthrift_field_mapStructListOfListOfLong);
+}
+
+const ::std::map<::cpp2::MyStruct, ::std::int32_t>& ComplexNestedStruct::get_mKeyStructValInt() const& {
+  return __fbthrift_field_mKeyStructValInt;
+}
+
+::std::map<::cpp2::MyStruct, ::std::int32_t> ComplexNestedStruct::get_mKeyStructValInt() && {
+  return std::move(__fbthrift_field_mKeyStructValInt);
+}
+
+const ::std::vector<::std::map<::std::int32_t, ::std::int32_t>>& ComplexNestedStruct::get_listOfMapKeyIntValInt() const& {
+  return __fbthrift_field_listOfMapKeyIntValInt;
+}
+
+::std::vector<::std::map<::std::int32_t, ::std::int32_t>> ComplexNestedStruct::get_listOfMapKeyIntValInt() && {
+  return std::move(__fbthrift_field_listOfMapKeyIntValInt);
+}
+
+const ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>& ComplexNestedStruct::get_listOfMapKeyStrValList() const& {
+  return __fbthrift_field_listOfMapKeyStrValList;
+}
+
+::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>> ComplexNestedStruct::get_listOfMapKeyStrValList() && {
+  return std::move(__fbthrift_field_listOfMapKeyStrValList);
+}
+
+const ::std::map<::std::set<::std::int32_t>, ::std::int64_t>& ComplexNestedStruct::get_mapKeySetValLong() const& {
+  return __fbthrift_field_mapKeySetValLong;
+}
+
+::std::map<::std::set<::std::int32_t>, ::std::int64_t> ComplexNestedStruct::get_mapKeySetValLong() && {
+  return std::move(__fbthrift_field_mapKeySetValLong);
+}
+
+const ::std::map<::std::vector<::std::string>, ::std::int32_t>& ComplexNestedStruct::get_mapKeyListValLong() const& {
+  return __fbthrift_field_mapKeyListValLong;
+}
+
+::std::map<::std::vector<::std::string>, ::std::int32_t> ComplexNestedStruct::get_mapKeyListValLong() && {
+  return std::move(__fbthrift_field_mapKeyListValLong);
+}
+
+const ::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_mapKeyMapValMap() const& {
+  return __fbthrift_field_mapKeyMapValMap;
+}
+
+::std::map<::std::map<::std::int32_t, ::std::string>, ::std::map<::std::int32_t, ::std::string>> ComplexNestedStruct::get_mapKeyMapValMap() && {
+  return std::move(__fbthrift_field_mapKeyMapValMap);
+}
+
+const ::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>>& ComplexNestedStruct::get_mapKeySetValMap() const& {
+  return __fbthrift_field_mapKeySetValMap;
+}
+
+::std::map<::std::set<::std::vector<::std::int32_t>>, ::std::map<::std::vector<::std::set<::std::string>>, ::std::string>> ComplexNestedStruct::get_mapKeySetValMap() && {
+  return std::move(__fbthrift_field_mapKeySetValMap);
+}
+
+const ::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>>& ComplexNestedStruct::get_NestedMaps() const& {
+  return __fbthrift_field_NestedMaps;
+}
+
+::std::map<::std::map<::std::map<::std::int32_t, ::std::string>, ::std::string>, ::std::map<::std::int32_t, ::std::string>> ComplexNestedStruct::get_NestedMaps() && {
+  return std::move(__fbthrift_field_NestedMaps);
+}
+
+const ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>& ComplexNestedStruct::get_mapKeyIntValList() const& {
+  return __fbthrift_field_mapKeyIntValList;
+}
+
+::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>> ComplexNestedStruct::get_mapKeyIntValList() && {
+  return std::move(__fbthrift_field_mapKeyIntValList);
+}
+
+const ::std::map<::std::int32_t, ::std::set<bool>>& ComplexNestedStruct::get_mapKeyIntValSet() const& {
+  return __fbthrift_field_mapKeyIntValSet;
+}
+
+::std::map<::std::int32_t, ::std::set<bool>> ComplexNestedStruct::get_mapKeyIntValSet() && {
+  return std::move(__fbthrift_field_mapKeyIntValSet);
+}
+
+const ::std::map<::std::set<bool>, ::cpp2::MyEnum>& ComplexNestedStruct::get_mapKeySetValInt() const& {
+  return __fbthrift_field_mapKeySetValInt;
+}
+
+::std::map<::std::set<bool>, ::cpp2::MyEnum> ComplexNestedStruct::get_mapKeySetValInt() && {
+  return std::move(__fbthrift_field_mapKeySetValInt);
+}
+
+const ::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>>& ComplexNestedStruct::get_mapKeyListValSet() const& {
+  return __fbthrift_field_mapKeyListValSet;
+}
+
+::std::map<::std::vector<::std::int32_t>, ::std::set<::std::map<double, ::std::string>>> ComplexNestedStruct::get_mapKeyListValSet() && {
+  return std::move(__fbthrift_field_mapKeyListValSet);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED ComplexNestedStruct& a, FOLLY_MAYBE_UNUSED ComplexNestedStruct& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_setOfSetOfInt, b.__fbthrift_field_setOfSetOfInt);
+  swap(a.__fbthrift_field_listofListOfListOfListOfEnum, b.__fbthrift_field_listofListOfListOfListOfEnum);
+  swap(a.__fbthrift_field_listOfListOfMyStruct, b.__fbthrift_field_listOfListOfMyStruct);
+  swap(a.__fbthrift_field_setOfListOfListOfLong, b.__fbthrift_field_setOfListOfListOfLong);
+  swap(a.__fbthrift_field_setOfSetOfsetOfLong, b.__fbthrift_field_setOfSetOfsetOfLong);
+  swap(a.__fbthrift_field_mapStructListOfListOfLong, b.__fbthrift_field_mapStructListOfListOfLong);
+  swap(a.__fbthrift_field_mKeyStructValInt, b.__fbthrift_field_mKeyStructValInt);
+  swap(a.__fbthrift_field_listOfMapKeyIntValInt, b.__fbthrift_field_listOfMapKeyIntValInt);
+  swap(a.__fbthrift_field_listOfMapKeyStrValList, b.__fbthrift_field_listOfMapKeyStrValList);
+  swap(a.__fbthrift_field_mapKeySetValLong, b.__fbthrift_field_mapKeySetValLong);
+  swap(a.__fbthrift_field_mapKeyListValLong, b.__fbthrift_field_mapKeyListValLong);
+  swap(a.__fbthrift_field_mapKeyMapValMap, b.__fbthrift_field_mapKeyMapValMap);
+  swap(a.__fbthrift_field_mapKeySetValMap, b.__fbthrift_field_mapKeySetValMap);
+  swap(a.__fbthrift_field_NestedMaps, b.__fbthrift_field_NestedMaps);
+  swap(a.__fbthrift_field_mapKeyIntValList, b.__fbthrift_field_mapKeyIntValList);
+  swap(a.__fbthrift_field_mapKeyIntValSet, b.__fbthrift_field_mapKeyIntValSet);
+  swap(a.__fbthrift_field_mapKeySetValInt, b.__fbthrift_field_mapKeySetValInt);
+  swap(a.__fbthrift_field_mapKeyListValSet, b.__fbthrift_field_mapKeyListValSet);
+  swap(a.__isset, b.__isset);
+}
+
+template void ComplexNestedStruct::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t ComplexNestedStruct::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t ComplexNestedStruct::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ComplexNestedStruct::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void ComplexNestedStruct::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t ComplexNestedStruct::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t ComplexNestedStruct::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ComplexNestedStruct::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComplexNestedStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
+        ::std::vector<::std::vector<::cpp2::MyStruct>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComplexNestedStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>,
+        ::std::map<::std::int32_t, ::std::vector<::std::vector<::cpp2::MyStruct>>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComplexNestedStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::structure, ::apache::thrift::type_class::integral>,
+        ::std::map<::cpp2::MyStruct, ::std::int32_t>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComplexNestedStruct,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::map<::apache::thrift::type_class::string, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>>,
+        ::std::vector<::std::map<::std::string, ::std::vector<::cpp2::MyStruct>>>>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        ComplexNestedStruct,
+        ::apache::thrift::type_class::map<::apache::thrift::type_class::integral, ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>>,
+        ::std::map<::std::int32_t, ::std::vector<::cpp2::MyStruct>>>,
     "inconsistent use of json option");
 
 } // cpp2

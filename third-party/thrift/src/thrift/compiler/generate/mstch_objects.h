@@ -469,9 +469,6 @@ class mstch_program : public mstch_base {
 
  protected:
   const t_program* program_;
-
-  virtual const std::vector<t_struct*>& get_program_objects();
-  virtual const std::vector<t_enum*>& get_program_enums();
 };
 
 class mstch_service : public mstch_base {

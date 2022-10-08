@@ -46,12 +46,12 @@ mod fallback {
 #[cfg(not(feature = "fb"))]
 pub use self::fallback::*;
 
-pub enum Reporter {
+pub enum Stream {
     Child(FbReporter),
     Stdout(Stdout),
 }
 
-impl Reporter {
+impl Stream {
     /// Creates a printer that writes to stdout
     fn new_stdout() -> Self {
         Self::Stdout(std::io::stdout())
@@ -64,6 +64,15 @@ impl Reporter {
             Self::Child(reporter)
         } else {
             Self::new_stdout()
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn is_redirected(&self) -> bool {
+        if let Self::Child(_) = self {
+            true
+        } else {
+            atty::isnt(atty::Stream::Stdout)
         }
     }
 
@@ -82,7 +91,7 @@ impl Reporter {
     }
 }
 
-impl Write for Reporter {
+impl Write for Stream {
     fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.out().write(buf)
     }

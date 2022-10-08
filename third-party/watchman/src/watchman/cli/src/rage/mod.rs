@@ -31,9 +31,9 @@ use watchman_client::ResolvedRoot;
 
 #[cfg(feature = "fb")]
 mod facebook;
-mod reporter;
+mod stream;
 
-use self::reporter::Reporter;
+use self::stream::Stream;
 use crate::audit::AuditOption;
 
 // Wrapper type around [`duct::Expression`] to provide better error messages
@@ -76,7 +76,7 @@ fn getuid() -> nix::unistd::Uid {
 
 struct WatchmanRage {
     system: System,
-    reporter: Reporter,
+    stream: Stream,
 }
 
 impl WatchmanRage {
@@ -84,39 +84,43 @@ impl WatchmanRage {
         let mut system = System::new();
         system.refresh_system();
         let hostname = system.host_name();
-        let reporter = Reporter::new(hostname);
+        let stream = Stream::new(hostname);
 
-        Self { system, reporter }
+        Self { system, stream }
+    }
+
+    fn empty_line(&mut self) {
+        writeln!(self.stream);
     }
 
     async fn run(&mut self) {
         self.print_system_info();
-        writeln!(self.reporter);
+        self.empty_line();
         self.print_package_version().ok();
-        writeln!(self.reporter);
+        self.empty_line();
         self.print_cli_version().ok();
-        writeln!(self.reporter);
+        self.empty_line();
         self.print_watchman_env().ok();
-        writeln!(self.reporter);
+        self.empty_line();
         #[cfg(target_os = "linux")]
         {
             self.print_inotify().ok();
-            writeln!(self.reporter);
+            self.empty_line();
         }
         #[cfg(target_os = "macos")]
         {
             self.print_launchd_info().ok();
-            writeln!(self.reporter);
+            self.empty_line();
         }
         self.print_state_info().ok();
-        writeln!(self.reporter);
+        self.empty_line();
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         {
             self.print_running_watchman().ok();
-            writeln!(self.reporter);
+            self.empty_line();
         }
         self.print_watchman_service_info().await.ok();
-        writeln!(self.reporter);
+        self.empty_line();
     }
 
     fn print_system_info(&mut self) {
@@ -127,32 +131,28 @@ impl WatchmanRage {
         }
 
         // Note: OS & Arch here are set at compile time, which can be inaccurate in some cases (Apple Silicon)
-        writeln!(self.reporter, "Platform: {}", std::env::consts::OS);
+        writeln!(self.stream, "Platform: {}", std::env::consts::OS);
         writeln!(
-            self.reporter,
+            self.stream,
             "Arch (Compile Time): {}",
             std::env::consts::ARCH
         );
-        write_or_unknown!(self.reporter, "Hostname: {}", self.system.host_name());
-        write_or_unknown!(self.reporter, "Release: {}", self.system.name());
+        write_or_unknown!(self.stream, "Hostname: {}", self.system.host_name());
+        write_or_unknown!(self.stream, "Release: {}", self.system.name());
+        write_or_unknown!(self.stream, "System Version: {}", self.system.os_version());
         write_or_unknown!(
-            self.reporter,
-            "System Version: {}",
-            self.system.os_version()
-        );
-        write_or_unknown!(
-            self.reporter,
+            self.stream,
             "Kernel Version: {}",
             self.system.kernel_version()
         );
         #[cfg(unix)]
-        writeln!(self.reporter, "Running watchman-diag as UID: {}", getuid());
+        writeln!(self.stream, "Running watchman-diag as UID: {}", getuid());
     }
 
     #[cfg(unix)]
     fn print_package_version(&mut self) -> Result<()> {
         writeln!(
-            self.reporter,
+            self.stream,
             "RPM version (rpm -q fb-watchman): {}",
             cmd!("rpm", "-q", "fb-watchman").read()
         );
@@ -162,7 +162,7 @@ impl WatchmanRage {
     #[cfg(windows)]
     fn print_package_version(&mut self) -> Result<()> {
         writeln!(
-            self.reporter,
+            self.stream,
             "Chocolatey version (clist -lr fb.watchman): {}",
             cmd!("clist", "-lr", "fb.watchman").read()
         );
@@ -171,7 +171,7 @@ impl WatchmanRage {
 
     fn print_cli_version(&mut self) -> Result<()> {
         writeln!(
-            self.reporter,
+            self.stream,
             "CLI version (watchman -v): {}",
             cmd!("watchman", "--no-spawn", "-v").read()
         );
@@ -186,12 +186,12 @@ impl WatchmanRage {
 
         if !vars.is_empty() {
             writeln!(
-                self.reporter,
+                self.stream,
                 "WARNING: The following Watchman related environment variables are set (this is unusual and may cause problems):"
             );
 
             for (k, v) in vars.iter() {
-                writeln!(self.reporter, "{}={}", k, v);
+                writeln!(self.stream, "{}={}", k, v);
             }
         }
 
@@ -214,11 +214,7 @@ impl WatchmanRage {
         let procs = match std::fs::read_dir("/proc") {
             Ok(c) => c,
             Err(e) => {
-                writeln!(
-                    self.reporter,
-                    "Unable to crawl inotify information: {:?}",
-                    e
-                );
+                writeln!(self.stream, "Unable to crawl inotify information: {:?}", e);
                 return Ok(());
             }
         };
@@ -256,16 +252,16 @@ impl WatchmanRage {
             }
         }
 
-        writeln!(self.reporter, "Inotify watch information");
-        writeln!(self.reporter, "{}", table);
+        writeln!(self.stream, "Inotify watch information");
+        writeln!(self.stream, "{}", table);
         Ok(())
     }
 
     #[cfg(target_os = "macos")]
     fn print_launchd_info(&mut self) -> Result<()> {
-        writeln!(self.reporter, "Launchd info:");
+        writeln!(self.stream, "Launchd info:");
         writeln!(
-            self.reporter,
+            self.stream,
             "{}",
             cmd!("launchctl", "list", "com.github.facebook.watchman").read()
         );
@@ -308,7 +304,7 @@ impl WatchmanRage {
             }
         }
 
-        fn print_state_dir(out: &mut Reporter, state: &Path) {
+        fn print_state_dir(out: &mut Stream, state: &Path) {
             let state_file = state.join("state");
             writeln!(out, "State information from {}\n", state.display());
             writeln!(out, "State file: {}", state_file.display());
@@ -338,14 +334,14 @@ impl WatchmanRage {
         for root in roots.iter() {
             let dirs = get_state_dirs(root);
             for state in dirs {
-                print_state_dir(&mut self.reporter, &state.path());
+                print_state_dir(&mut self.stream, &state.path());
             }
         }
 
         #[cfg(windows)]
         if let Ok(path) = std::env::var("LOCALAPPDATA") {
             let windows_state = PathBuf::from(&path).join("watchman");
-            print_state_dir(&mut self.reporter, &windows_state);
+            print_state_dir(&mut self.stream, &windows_state);
         }
 
         Ok(())
@@ -355,10 +351,10 @@ impl WatchmanRage {
     fn print_running_watchman(&mut self) -> Result<()> {
         let lines = duct::cmd!("ps", "-ef").read()?;
 
-        writeln!(self.reporter, "Running Watchman Processes");
+        writeln!(self.stream, "Running Watchman Processes");
         for line in lines.lines() {
             if line.contains("watchman") {
-                writeln!(self.reporter, "{}", line);
+                writeln!(self.stream, "{}", line);
             }
         }
 
@@ -372,45 +368,44 @@ impl WatchmanRage {
             return;
         }
 
-        // TODO: connect timeself.reporter
+        // TODO: connect timeself.stream
         let client = Connector::new().connect().await?;
         let version = client.version().await?;
 
-        writeln!(self.reporter, "Watchman service information:");
-        writeln!(self.reporter, "{:?}", version);
-        writeln!(self.reporter, "Status:\n");
+        writeln!(self.stream, "Watchman service information:");
+        writeln!(self.stream, "{:?}", version);
+        writeln!(self.stream, "Status:\n");
 
         writeln!(
-            self.reporter,
+            self.stream,
             "{}",
             cmd!("watchman", "--pretty", "debug-status").read()
         );
 
         // TODO(zeyi): it's probably better if this can return `ResolvedRoot`
         let watches = client.watch_list().await?.roots;
-        writeln!(self.reporter, "Watches:");
+        writeln!(self.stream, "Watches:");
         for watch in watches.iter() {
-            writeln!(self.reporter, "- {}", watch.display());
+            writeln!(self.stream, "- {}", watch.display());
         }
 
         for watch in watches.iter() {
-            writeln!(self.reporter);
+            writeln!(self.stream);
 
             let option = AuditOption {
                 silent: true,
                 ..Default::default()
             };
-            if let Err(e) =
-                crate::audit::audit_repo(&mut self.reporter, &client, watch, option).await
+            if let Err(e) = crate::audit::audit_repo(&mut self.stream, &client, watch, option).await
             {
                 writeln!(
-                    self.reporter,
+                    self.stream,
                     "Failed to sanity check {}: {:?}",
                     watch.display(),
                     e
                 );
             }
-            writeln!(self.reporter);
+            writeln!(self.stream);
 
             self.collect_watch_info(&client, watch).await.ok();
         }
@@ -420,9 +415,9 @@ impl WatchmanRage {
 
     async fn check_watchman_config(&mut self, client: &Client, root: &ResolvedRoot) -> Result<()> {
         let repo_root = root.project_root();
-        // We don't use `client.get_config` because that is typed. We don't care
-        // abself.reporter the actual content in the configuration, but we just need to
-        // compare them.
+        // We are not using `client.get_config()` method to examine the
+        // configuration currently used in Watchman server because it is typed
+        // and we may need to compare fields that is not yet included in the struct definition.
         let repo_config: serde_json::Value = client
             .generic_request(GetConfigRequest("get-config", repo_root.into()))
             .await?;
@@ -433,19 +428,19 @@ impl WatchmanRage {
         if let Some(repo_config) = repo_config.get("config") {
             if repo_config != &watchmanconfig {
                 writeln!(
-                    self.reporter,
+                    self.stream,
                     "Watchman root {} is using this configuration:\n {}",
                     repo_root.display(),
                     repo_config
                 );
                 writeln!(
-                    self.reporter,
+                    self.stream,
                     "'{}' has this configuration:\n{}",
                     watchmanconfig_file.display(),
                     watchmanconfig
                 );
                 writeln!(
-                    self.reporter,
+                    self.stream,
                     "** You should run: `watchman watch-del {}; watchman watch {}` to reload .watchmanconfig **",
                     repo_root.display(),
                     repo_root.display()
@@ -453,7 +448,7 @@ impl WatchmanRage {
             }
         } else {
             writeln!(
-                self.reporter,
+                self.stream,
                 "Failed to retireve configuration from Watchman. Not checking if configuration matches on-disk setting"
             );
         }
@@ -469,7 +464,7 @@ impl WatchmanRage {
             Ok(root) => root,
             Err(e) => {
                 writeln!(
-                    self.reporter,
+                    self.stream,
                     "Failed to resolve repo root for '{}': {:?}\n",
                     repo.display(),
                     e
@@ -480,7 +475,7 @@ impl WatchmanRage {
 
         if let Err(e) = self.check_watchman_config(client, &root).await {
             writeln!(
-                self.reporter,
+                self.stream,
                 "Failed to check Watchman configuration for '{}': {:?}\n",
                 repo.display(),
                 e
@@ -488,9 +483,9 @@ impl WatchmanRage {
         }
 
         if root.watcher() != "eden" {
-            writeln!(self.reporter, "Sparse configuration for {}", repo.display());
+            writeln!(self.stream, "Sparse configuration for {}", repo.display());
             writeln!(
-                self.reporter,
+                self.stream,
                 "{}\n",
                 cmd!("hg", "sparse").config(|c| c.dir(repo)).read()
             );
@@ -498,38 +493,38 @@ impl WatchmanRage {
             // TODO(zeyi): we could migrate this into using the watchman connection,
             // but we need to define the struct first
             writeln!(
-                self.reporter,
+                self.stream,
                 "Content hash cache stats for {}",
                 repo.display()
             );
             writeln!(
-                self.reporter,
+                self.stream,
                 "{}\n",
                 cmd!("watchman", "debug-contenthash", repo).read()
             );
 
             writeln!(
-                self.reporter,
+                self.stream,
                 "Symlink target cache stats for {}",
                 repo.display()
             );
             writeln!(
-                self.reporter,
+                self.stream,
                 "{}\n",
                 cmd!("watchman", "debug-symlink-target-cache", repo).read()
             );
         }
 
-        writeln!(self.reporter, "Subscriptions for {}", repo.display());
+        writeln!(self.stream, "Subscriptions for {}", repo.display());
         writeln!(
-            self.reporter,
+            self.stream,
             "{}\n",
             cmd!("watchman", "debug-get-subscriptions", repo).read()
         );
 
-        writeln!(self.reporter, "Asserted states for {}", repo.display());
+        writeln!(self.stream, "Asserted states for {}", repo.display());
         writeln!(
-            self.reporter,
+            self.stream,
             "{}\n",
             cmd!("watchman", "debug-get-asserted-states", repo).read()
         );
@@ -538,7 +533,7 @@ impl WatchmanRage {
     }
 
     fn wait(self) {
-        self.reporter.wait();
+        self.stream.wait();
     }
 }
 

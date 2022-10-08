@@ -1,0 +1,2 @@
+File "trait_diamond_no_attribute.php", line 15, characters 1-30:
+Cannot use unstable feature: `method_trait_diamond` (Parsing[1002])

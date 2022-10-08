@@ -22,6 +22,10 @@ use sysinfo::SystemExt;
 use tabular::row;
 #[cfg(target_os = "linux")]
 use tabular::Table;
+use watchman_client::prelude::GetConfigRequest;
+use watchman_client::CanonicalPath;
+use watchman_client::Client;
+use watchman_client::Connector;
 
 #[cfg(unix)]
 fn getuid() -> nix::unistd::Uid {
@@ -247,11 +251,116 @@ fn print_running_watchman() -> Result<()> {
     Ok(())
 }
 
+async fn print_watchman_service_info() -> Result<()> {
+    // Do not run if we are in sudo
+    #[cfg(posix)]
+    if getuid == 0 && std::env::var("SUDO_UID").is_some() {
+        return;
+    }
+
+    // TODO: connect timeout
+    let client = Connector::new().connect().await?;
+    let version = client.version().await?;
+
+    println!("Watchman service information:");
+    println!("{:?}", version);
+    println!("Status:\n");
+
+    cmd!("watchman", "--pretty", "debug-status").run()?;
+
+    // TODO(zeyi): it's probably better if this can return `ResolvedRoot`
+    let watches = client.watch_list().await?.roots;
+    println!("Watches:");
+    for watch in watches.iter() {
+        println!("- {}", watch.display());
+    }
+
+    for watch in watches.iter() {
+        println!();
+
+        if let Err(e) = crate::audit::audit_repo(&client, watch, Default::default()).await {
+            println!("Failed to sanity check {}: {:?}", watch.display(), e);
+        }
+
+        collect_watch_info(&client, watch).await.ok();
+    }
+
+    Ok(())
+}
+
+async fn collect_watch_info(client: &Client, repo: &Path) -> Result<()> {
+    let root = client
+        .resolve_root(CanonicalPath::with_canonicalized_path(repo.into()))
+        .await?;
+    let repo_root = root.project_root();
+
+    // We don't use `client.get_config` because that is typed. We don't care
+    // about the actual content in the configuration, but we just need to
+    // compare them.
+    let repo_config: serde_json::Value = client
+        .generic_request(GetConfigRequest("get-config", repo_root.into()))
+        .await?;
+    let watchmanconfig_file = repo.join(".watchmanconfig");
+    let watchmanconfig = std::fs::read_to_string(&watchmanconfig_file)?;
+    let watchmanconfig: serde_json::Value = serde_json::from_str(&watchmanconfig)?;
+
+    if let Some(repo_config) = repo_config.get("config") {
+        if repo_config != &watchmanconfig {
+            println!(
+                "Watchman root {} is using this configuration:\n {}",
+                repo_root.display(),
+                repo_config
+            );
+            println!(
+                "'{}' has this configuration:\n{}",
+                watchmanconfig_file.display(),
+                watchmanconfig
+            );
+            println!(
+                "** You should run: `watchman watch-del {}; watchman watch {}` to reload .watchmanconfig **",
+                repo_root.display(),
+                repo_root.display()
+            );
+        }
+    } else {
+        println!(
+            "Failed to retireve configuration from Watchman. Not checking if configuration matches on-disk setting"
+        );
+    }
+
+    if root.watcher() != "eden" {
+        println!("Sparse configuration for {}", repo.display());
+        cmd!("hg", "sparse").dir(repo).run().ok();
+
+        // TODO(zeyi): we could migrate this into using the watchman connection,
+        // but we need to define the struct first
+        println!("Content hash cache stats for {}", repo.display());
+        cmd!("watchman", "debug-contenthash", repo).run().ok();
+
+        println!("Symlink target cache stats for {}", repo.display());
+        cmd!("watchman", "debug-symlink-target-cache", repo)
+            .run()
+            .ok();
+    }
+
+    println!("Subscriptions for {}", repo.display());
+    cmd!("watchman", "debug-get-subscriptions", repo).run().ok();
+
+    println!("Asserted states for {}", repo.display());
+    cmd!("watchman", "debug-get-asserted-states", repo)
+        .run()
+        .ok();
+
+    Ok(())
+}
+
 #[derive(StructOpt, Debug)]
 pub(crate) struct RageCmd {}
 
 impl RageCmd {
     pub(crate) async fn run(&self) -> Result<()> {
+        // TODO: redirect output to pastry if stdout is tty
+
         print_system_info();
         println!();
         print_package_version().ok();
@@ -277,6 +386,8 @@ impl RageCmd {
             print_running_watchman().ok();
             println!();
         }
+        print_watchman_service_info().await.ok();
+        println!();
 
         Ok(())
     }

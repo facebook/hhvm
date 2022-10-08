@@ -109,6 +109,11 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
         ));
     }
 
+    println!(
+        "Sanity checking the filesystem at {} against watchman; this may take a couple of minutes.",
+        repo.display(),
+    );
+
     let config = client.get_config(&resolved).await?;
     let mut ignore_dirs = config.ignore_dirs.unwrap_or_default().clone();
 

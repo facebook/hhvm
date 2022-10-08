@@ -81,7 +81,8 @@ impl Names {
                 CLASSES TEXT,
                 CONSTS TEXT,
                 FUNS TEXT,
-                TYPEDEFS TEXT
+                TYPEDEFS TEXT,
+                MODULES TEXT
             );",
         )?
         .execute(params![])?;
@@ -96,10 +97,17 @@ impl Names {
         )?
         .execute(params![])?;
 
-        // TODO(ljw) - NAMING_FILE_INFO should be indexed on PATH_SUFFIX.
+        tx.prepare_cached(
+            "CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX
+             ON NAMING_FILE_INFO (PATH_SUFFIX, PATH_PREFIX_TYPE);",
+        )?
+        .execute(params![])?;
 
-        tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
-            .execute(params![])?;
+        tx.prepare_cached(
+            "CREATE INDEX IF NOT EXISTS TYPES_CANON
+             ON NAMING_SYMBOLS (CANON_HASH);",
+        )?
+        .execute(params![])?;
 
         Ok(tx.commit()?)
     }
@@ -712,9 +720,10 @@ impl Names {
                 CLASSES,
                 CONSTS,
                 FUNS,
-                TYPEDEFS
+                TYPEDEFS,
+                MODULES
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             )?
             .execute(params![
                 prefix_type,
@@ -725,19 +734,18 @@ impl Names {
                 Self::join_with_pipe(file_summary.consts()),
                 Self::join_with_pipe(file_summary.funs()),
                 Self::join_with_pipe(file_summary.typedefs()),
+                Self::join_with_pipe(file_summary.modules()),
             ])?;
         let file_info_id = crate::FileInfoId::last_insert_rowid(&self.conn);
         Ok(file_info_id)
     }
 
-    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> String {
-        let mut s = String::new();
-        for (symbol, _) in symbols {
-            s.push_str(symbol);
-            s.push('|');
-        }
-        s.pop(); // Remove trailing pipe character
-        s
+    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> Option<String> {
+        let s = symbols
+            .map(|(symbol, _)| symbol)
+            .collect::<Vec<_>>()
+            .join("|");
+        if s.is_empty() { None } else { Some(s) }
     }
 
     /// This removes an entry from the forward naming table.
@@ -812,7 +820,7 @@ impl Names {
             .prepare_cached(
                 "
                 UPDATE NAMING_FILE_INFO
-                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?
+                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?, MODULES=?
                 WHERE FILE_INFO_ID=?
                 ",
             )?
@@ -823,6 +831,7 @@ impl Names {
                 join(decls_or_empty.consts(), "|"),
                 join(decls_or_empty.funs(), "|"),
                 join(decls_or_empty.typedefs(), "|"),
+                join(decls_or_empty.modules(), "|"),
                 file_info_id,
             ])?;
 

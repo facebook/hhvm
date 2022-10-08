@@ -6,6 +6,7 @@
  */
 
 use std::io::ErrorKind;
+use std::io::Write;
 #[cfg(unix)]
 use std::os::unix::fs::MetadataExt;
 #[cfg(unix)]
@@ -83,6 +84,7 @@ pub struct AuditOption {
     pub settle_period_ms: Option<u64>,
     pub settle_timeout_ms: Option<u64>,
     pub sync_timeout_secs: u64,
+    pub silent: bool,
 }
 
 impl Default for AuditOption {
@@ -91,11 +93,17 @@ impl Default for AuditOption {
             settle_period_ms: None,
             settle_timeout_ms: None,
             sync_timeout_secs: 120,
+            silent: false,
         }
     }
 }
 
-pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> anyhow::Result<()> {
+pub async fn audit_repo(
+    out: &mut (dyn Write + Send + Sync),
+    client: &Client,
+    repo: &Path,
+    option: AuditOption,
+) -> anyhow::Result<()> {
     let resolved = Arc::new(
         client
             .resolve_root(CanonicalPath::canonicalize(repo)?)
@@ -109,7 +117,8 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
         ));
     }
 
-    println!(
+    writeln!(
+        out,
         "Sanity checking the filesystem at {} against watchman; this may take a couple of minutes.",
         repo.display(),
     );
@@ -124,6 +133,7 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
 
     let filesystem_state_handle = {
         let resolved = resolved.clone();
+        let silent = option.silent;
         tokio::spawn(async move {
             let mut filesystem_state: AHashMap<PathBuf, std::fs::Metadata> = AHashMap::new();
 
@@ -158,7 +168,9 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
                 let entry = match entry {
                     Ok(entry) => entry,
                     Err(err) => {
-                        eprintln!("error while traversing directory: {}", err);
+                        if !silent {
+                            eprintln!("error while traversing directory: {}", err);
+                        }
                         continue;
                     }
                 };
@@ -167,12 +179,14 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
                 let relpath = match entry_path.strip_prefix(&*resolved_path) {
                     Ok(relpath) => relpath,
                     Err(err) => {
-                        eprintln!(
-                            "unable to form relative path from {} to {}: {}",
-                            resolved_path.display(),
-                            entry_path.display(),
-                            err
-                        );
+                        if !silent {
+                            eprintln!(
+                                "unable to form relative path from {} to {}: {}",
+                                resolved_path.display(),
+                                entry_path.display(),
+                                err
+                            );
+                        }
                         continue;
                     }
                 };
@@ -181,11 +195,13 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
                     Ok(metadata) => metadata,
                     Err(err) => {
                         if err.io_error().map(|e| e.kind() == ErrorKind::NotFound) != Some(true) {
-                            eprintln!(
-                                "error fetching metadata for {}: {}",
-                                entry_path.display(),
-                                err
-                            );
+                            if !silent {
+                                eprintln!(
+                                    "error fetching metadata for {}: {}",
+                                    entry_path.display(),
+                                    err
+                                );
+                            }
                         }
                         continue;
                     }
@@ -194,7 +210,9 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
             }
             // Watchman doesn't return information about the root, so remove it here.
             filesystem_state.remove(&PathBuf::new());
-            eprintln!("Crawled filesystem in {:?}", start_crawl.elapsed());
+            if !silent {
+                eprintln!("Crawled filesystem in {:?}", start_crawl.elapsed());
+            }
 
             filesystem_state
         })
@@ -258,13 +276,14 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
     let result = match result {
         Ok(result) => result,
         Err(err) => {
-            eprintln!("Error during Watchman query: {}", err);
+            writeln!(out, "Error during Watchman query: {}", err);
             // Use a different error code for Watchman query errors, including timeouts, so they can be differentiated by audit logging.
             std::process::exit(2);
         }
     };
 
-    eprintln!(
+    writeln!(
+        out,
         "Queried Watchman in {:?} (is_fresh_instance = {}, clock = {:?}, version = {})",
         start_query.elapsed(),
         result.is_fresh_instance,
@@ -273,7 +292,7 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
     );
     if let Some(debug) = result.debug {
         if let Some(cookie_files) = debug.cookie_files {
-            eprintln!("    cookie files: {:?}", cookie_files)
+            writeln!(out, "    cookie files: {:?}", cookie_files);
         }
     }
 
@@ -373,14 +392,15 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
         }
 
         if !diffs.is_empty() {
-            println!(
+            writeln!(
+                out,
                 "Conflicting information for {}:",
                 watchman_file.name.display()
             );
             for diff in diffs {
-                println!("  {}", diff);
+                writeln!(out, "  {}", diff);
             }
-            println!("  oclock is {:?}", *watchman_file.oclock);
+            writeln!(out, "  oclock is {:?}", *watchman_file.oclock);
             any_differences = true;
         }
     }
@@ -398,23 +418,25 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
     missing.sort_by(|x, y| x.0.cmp(y.0));
 
     if !phantoms.is_empty() {
-        println!(
+        writeln!(
+            out,
             "There are {} items reported by watchman not on the filesystem:",
             phantoms.len()
         );
         for phantom in &phantoms {
-            println!("  {}", phantom.name.display());
+            writeln!(out, "  {}", phantom.name.display());
         }
         any_differences = true;
     }
 
     if !missing.is_empty() {
-        println!(
+        writeln!(
+            out,
             "There are {} items on the filesystem not reported by watchman:",
             missing.len()
         );
         for (path, _) in &missing {
-            println!("  {}", path.display());
+            writeln!(out, "  {}", path.display());
         }
         any_differences = true;
     }
@@ -425,7 +447,7 @@ pub async fn audit_repo(client: &Client, repo: &Path, option: AuditOption) -> an
         std::process::exit(1);
     }
 
-    eprintln!("Diffed in {:#?}", diff_start.elapsed());
+    writeln!(out, "Diffed in {:#?}", diff_start.elapsed());
 
     Ok(())
 }
@@ -436,12 +458,14 @@ impl AuditCmd {
             settle_period_ms: self.settle_period_ms,
             settle_timeout_ms: self.settle_timeout_ms,
             sync_timeout_secs: self.sync_timeout_secs,
+            silent: false,
         }
     }
 
     pub async fn run(&self) -> anyhow::Result<()> {
         let client = Connector::new().connect().await?;
+        let mut out = std::io::stdout();
 
-        audit_repo(&client, &self.path, self.to_audit_option()).await
+        audit_repo(&mut out, &client, &self.path, self.to_audit_option()).await
     }
 }

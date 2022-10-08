@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 ahash = "0.3"
 anyhow = "1.0"
+atty = "0.2"
 duct = "0.13"
 jwalk = "0.6"
 serde = "1.0"
@@ -18,3 +19,6 @@ watchman_client = { path = "../rust/watchman_client" }
 
 [target.'cfg(unix)'.dependencies]
 nix = "0.23"
+
+[features]
+fb = []

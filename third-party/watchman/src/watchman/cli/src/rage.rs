@@ -10,11 +10,12 @@ use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::io::BufReader;
+use std::io::Write;
 use std::path::Path;
 use std::path::PathBuf;
 
 use anyhow::Result;
-use duct::cmd;
+use duct::Expression;
 use structopt::StructOpt;
 use sysinfo::System;
 use sysinfo::SystemExt;
@@ -26,66 +27,114 @@ use watchman_client::prelude::GetConfigRequest;
 use watchman_client::CanonicalPath;
 use watchman_client::Client;
 use watchman_client::Connector;
+use watchman_client::ResolvedRoot;
+
+#[cfg(feature = "fb")]
+mod facebook;
+mod reporter;
+
+use self::reporter::Reporter;
+use crate::audit::AuditOption;
+
+// Wrapper type around [`duct::Expression`] to provide better error messages
+struct RageExpression {
+    expr: Expression,
+    cmd: &'static str,
+}
+
+impl RageExpression {
+    fn new(expr: Expression, cmd: &'static str) -> Self {
+        Self {
+            expr: expr.stderr_to_stdout(),
+            cmd,
+        }
+    }
+
+    fn config<T: FnOnce(Expression) -> Expression>(mut self, fun: T) -> Self {
+        self.expr = fun(self.expr);
+        self
+    }
+
+    fn read(&self) -> String {
+        self.expr.read().map_or_else(
+            |e| format!("Failed to run '{}': {:?}", self.cmd, e),
+            |x| x.trim().to_string(),
+        )
+    }
+}
+
+macro_rules! cmd {
+    ($program:expr $(, $arg:expr )* $(,)? ) => {
+        RageExpression::new(duct::cmd!($program, $($arg),*), stringify!($program $($arg)*))
+    };
+}
 
 #[cfg(unix)]
 fn getuid() -> nix::unistd::Uid {
     nix::unistd::getuid()
 }
 
-fn print_system_info() {
-    macro_rules! print_or_unknown {
-        ($fmt: expr, $value: expr) => {
-            println!($fmt, $value.as_deref().unwrap_or("<unknown>"));
+fn print_system_info(out: &mut Reporter, system: &mut System) {
+    macro_rules! write_or_unknown {
+        ($out: expr, $fmt: expr, $value: expr) => {
+            writeln!($out, $fmt, $value.as_deref().unwrap_or("<unknown>"));
         };
     }
 
-    let mut system = System::new();
-    system.refresh_system();
-
     // Note: OS & Arch here are set at compile time, which can be inaccurate in some cases (Apple Silicon)
-    println!("Platform: {}", std::env::consts::OS);
-    println!("Arch: {}", std::env::consts::ARCH);
-    print_or_unknown!("Hostname: {}", system.host_name());
-    print_or_unknown!("Release: {}", system.name());
-    print_or_unknown!("System Version: {}", system.os_version());
-    print_or_unknown!("Kernel Version: {}", system.kernel_version());
+    writeln!(out, "Platform: {}", std::env::consts::OS);
+    writeln!(out, "Arch: {}", std::env::consts::ARCH);
+    write_or_unknown!(out, "Hostname: {}", system.host_name());
+    write_or_unknown!(out, "Release: {}", system.name());
+    write_or_unknown!(out, "System Version: {}", system.os_version());
+    write_or_unknown!(out, "Kernel Version: {}", system.kernel_version());
     #[cfg(unix)]
-    println!("Running watchman-diag as UID: {}", getuid());
+    writeln!(out, "Running watchman-diag as UID: {}", getuid());
 }
 
 #[cfg(unix)]
-fn print_package_version() -> Result<()> {
-    let version = cmd!("rpm", "-q", "fb-watchman").read()?;
-    println!("RPM version (rpm -q fb-watchman): {}", version);
+fn print_package_version(out: &mut Reporter) -> Result<()> {
+    writeln!(
+        out,
+        "RPM version (rpm -q fb-watchman): {}",
+        cmd!("rpm", "-q", "fb-watchman").read()
+    );
     Ok(())
 }
 
 #[cfg(windows)]
-fn print_package_version() -> Result<()> {
-    let version = cmd!("clist", "-lr", "fb.watchman").read()?;
-    println!("Chocolatey version (clist -lr fb.watchman): {}", version);
+fn print_package_version(out: &mut Reporter) -> Result<()> {
+    writeln!(
+        out,
+        "Chocolatey version (clist -lr fb.watchman): {}",
+        cmd!("clist", "-lr", "fb.watchman").read()
+    );
     Ok(())
 }
 
-fn print_cli_version() -> Result<()> {
-    let version = cmd!("watchman", "--no-spawn", "-v").read()?;
-    println!("CLI version (watchman -v): {}", version);
+fn print_cli_version(out: &mut Reporter) -> Result<()> {
+    writeln!(
+        out,
+        "CLI version (watchman -v): {}",
+        cmd!("watchman", "--no-spawn", "-v").read()
+    );
     Ok(())
 }
 
-fn print_watchman_env() -> Result<()> {
+fn print_watchman_env(out: &mut Reporter) -> Result<()> {
     let vars = std::env::vars()
         .into_iter()
         .filter(|(k, _)| k.starts_with("WATCHMAN_"))
         .collect::<Vec<_>>();
 
     if !vars.is_empty() {
-        println!(
+        writeln!(
+            out,
             "WARNING: The following Watchman related environment variables are set (this is unusual and may cause problems):"
         );
 
         for (k, v) in vars.iter() {
-            println!("{}={}", k, v);
+            writeln!(out, "{}={}", k, v);
         }
     }
 
@@ -93,7 +142,7 @@ fn print_watchman_env() -> Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-fn print_inotify() -> Result<()> {
+fn print_inotify(out: &mut Reporter) -> Result<()> {
     let mut table = Table::new("{:<} {:<} {:<} {:<}").with_row(row!("PID", "EXE", "FD", "WATCHES"));
 
     macro_rules! bail {
@@ -107,7 +156,7 @@ fn print_inotify() -> Result<()> {
     let procs = match std::fs::read_dir("/proc") {
         Ok(c) => c,
         Err(e) => {
-            println!("Unable to crawl inotify information: {:?}", e);
+            writeln!(out, "Unable to crawl inotify information: {:?}", e);
             return Ok(());
         }
     };
@@ -145,20 +194,23 @@ fn print_inotify() -> Result<()> {
         }
     }
 
-    println!("Inotify watch information");
-    println!("{}", table);
+    writeln!(out, "Inotify watch information");
+    writeln!(out, "{}", table);
     Ok(())
 }
 
 #[cfg(target_os = "macos")]
-fn print_launchd_info() -> Result<()> {
-    let result = cmd!("launchctl", "list", "com.github.facebook.watchman").read()?;
-    println!("Launchd info:");
-    println!("{}", result);
+fn print_launchd_info(out: &mut Reporter) -> Result<()> {
+    writeln!(out, "Launchd info:");
+    writeln!(
+        out,
+        "{}",
+        cmd!("launchctl", "list", "com.github.facebook.watchman").read()
+    );
     Ok(())
 }
 
-fn print_state_info() -> Result<()> {
+fn print_state_info(out: &mut Reporter) -> Result<()> {
     // construct all possible state directories
     let mut roots: Vec<PathBuf> = vec![
         "/var/facebook/watchman".into(),
@@ -194,13 +246,13 @@ fn print_state_info() -> Result<()> {
         }
     }
 
-    fn print_state_dir(state: &Path) {
+    fn print_state_dir(out: &mut Reporter, state: &Path) {
         let state_file = state.join("state");
-        println!("State information from {}\n", state.display());
-        println!("State file: {}", state_file.display());
+        writeln!(out, "State information from {}\n", state.display());
+        writeln!(out, "State file: {}", state_file.display());
 
         if let Ok(content) = std::fs::read_to_string(state_file) {
-            println!("{}", content);
+            writeln!(out, "{}", content);
         }
 
         let log_file = state.join("log");
@@ -213,10 +265,10 @@ fn print_state_info() -> Result<()> {
                     .collect::<io::Result<Vec<_>>>()
             })
         } {
-            println!("Log samples: {}", log_file.display());
+            writeln!(out, "Log samples: {}", log_file.display());
 
             for line in lines.into_iter().rev().take(300).rev() {
-                println!("{}", String::from_utf8_lossy(&line).trim())
+                writeln!(out, "{}", String::from_utf8_lossy(&line).trim());
             }
         }
     }
@@ -224,34 +276,34 @@ fn print_state_info() -> Result<()> {
     for root in roots.iter() {
         let dirs = get_state_dirs(root);
         for state in dirs {
-            print_state_dir(&state.path());
+            print_state_dir(out, &state.path());
         }
     }
 
     #[cfg(windows)]
     if let Ok(path) = std::env::var("LOCALAPPDATA") {
         let windows_state = PathBuf::from(&path).join("watchman");
-        print_state_dir(&windows_state);
+        print_state_dir(out, &windows_state);
     }
 
     Ok(())
 }
 
 #[cfg(any(target_os = "linux", target_os = "macos"))]
-fn print_running_watchman() -> Result<()> {
-    let lines = cmd!("ps", "-ef").read()?;
+fn print_running_watchman(out: &mut Reporter) -> Result<()> {
+    let lines = duct::cmd!("ps", "-ef").read()?;
 
-    println!("Running Watchman Processes");
+    writeln!(out, "Running Watchman Processes");
     for line in lines.lines() {
         if line.contains("watchman") {
-            println!("{}", line);
+            writeln!(out, "{}", line);
         }
     }
 
     Ok(())
 }
 
-async fn print_watchman_service_info() -> Result<()> {
+async fn print_watchman_service_info(out: &mut Reporter) -> Result<()> {
     // Do not run if we are in sudo
     #[cfg(posix)]
     if getuid == 0 && std::env::var("SUDO_UID").is_some() {
@@ -262,94 +314,152 @@ async fn print_watchman_service_info() -> Result<()> {
     let client = Connector::new().connect().await?;
     let version = client.version().await?;
 
-    println!("Watchman service information:");
-    println!("{:?}", version);
-    println!("Status:\n");
+    writeln!(out, "Watchman service information:");
+    writeln!(out, "{:?}", version);
+    writeln!(out, "Status:\n");
 
-    cmd!("watchman", "--pretty", "debug-status").run()?;
+    writeln!(
+        out,
+        "{}",
+        cmd!("watchman", "--pretty", "debug-status").read()
+    );
 
     // TODO(zeyi): it's probably better if this can return `ResolvedRoot`
     let watches = client.watch_list().await?.roots;
-    println!("Watches:");
+    writeln!(out, "Watches:");
     for watch in watches.iter() {
-        println!("- {}", watch.display());
+        writeln!(out, "- {}", watch.display());
     }
 
     for watch in watches.iter() {
-        println!();
+        writeln!(out);
 
-        if let Err(e) = crate::audit::audit_repo(&client, watch, Default::default()).await {
-            println!("Failed to sanity check {}: {:?}", watch.display(), e);
+        let option = AuditOption {
+            silent: true,
+            ..Default::default()
+        };
+        if let Err(e) = crate::audit::audit_repo(out, &client, watch, option).await {
+            writeln!(out, "Failed to sanity check {}: {:?}", watch.display(), e);
         }
+        writeln!(out);
 
-        collect_watch_info(&client, watch).await.ok();
+        collect_watch_info(out, &client, watch).await.ok();
     }
 
     Ok(())
 }
 
-async fn collect_watch_info(client: &Client, repo: &Path) -> Result<()> {
-    let root = client
-        .resolve_root(CanonicalPath::with_canonicalized_path(repo.into()))
-        .await?;
+async fn check_watchman_config(
+    out: &mut Reporter,
+    client: &Client,
+    root: &ResolvedRoot,
+) -> Result<()> {
     let repo_root = root.project_root();
-
     // We don't use `client.get_config` because that is typed. We don't care
     // about the actual content in the configuration, but we just need to
     // compare them.
     let repo_config: serde_json::Value = client
         .generic_request(GetConfigRequest("get-config", repo_root.into()))
         .await?;
-    let watchmanconfig_file = repo.join(".watchmanconfig");
+    let watchmanconfig_file = repo_root.join(".watchmanconfig");
     let watchmanconfig = std::fs::read_to_string(&watchmanconfig_file)?;
     let watchmanconfig: serde_json::Value = serde_json::from_str(&watchmanconfig)?;
 
     if let Some(repo_config) = repo_config.get("config") {
         if repo_config != &watchmanconfig {
-            println!(
+            writeln!(
+                out,
                 "Watchman root {} is using this configuration:\n {}",
                 repo_root.display(),
                 repo_config
             );
-            println!(
+            writeln!(
+                out,
                 "'{}' has this configuration:\n{}",
                 watchmanconfig_file.display(),
                 watchmanconfig
             );
-            println!(
+            writeln!(
+                out,
                 "** You should run: `watchman watch-del {}; watchman watch {}` to reload .watchmanconfig **",
                 repo_root.display(),
                 repo_root.display()
             );
         }
     } else {
-        println!(
+        writeln!(
+            out,
             "Failed to retireve configuration from Watchman. Not checking if configuration matches on-disk setting"
         );
     }
 
+    Ok(())
+}
+
+async fn collect_watch_info(out: &mut Reporter, client: &Client, repo: &Path) -> Result<()> {
+    let root = match client
+        .resolve_root(CanonicalPath::with_canonicalized_path(repo.into()))
+        .await
+    {
+        Ok(root) => root,
+        Err(e) => {
+            writeln!(
+                out,
+                "Failed to resolve repo root for '{}': {:?}\n",
+                repo.display(),
+                e
+            );
+            return Ok(());
+        }
+    };
+
+    if let Err(e) = check_watchman_config(out, client, &root).await {
+        writeln!(
+            out,
+            "Failed to check Watchman configuration for '{}': {:?}\n",
+            repo.display(),
+            e
+        );
+    }
+
     if root.watcher() != "eden" {
-        println!("Sparse configuration for {}", repo.display());
-        cmd!("hg", "sparse").dir(repo).run().ok();
+        writeln!(out, "Sparse configuration for {}", repo.display());
+        writeln!(
+            out,
+            "{}\n",
+            cmd!("hg", "sparse").config(|c| c.dir(repo)).read()
+        );
 
         // TODO(zeyi): we could migrate this into using the watchman connection,
         // but we need to define the struct first
-        println!("Content hash cache stats for {}", repo.display());
-        cmd!("watchman", "debug-contenthash", repo).run().ok();
+        writeln!(out, "Content hash cache stats for {}", repo.display());
+        writeln!(
+            out,
+            "{}\n",
+            cmd!("watchman", "debug-contenthash", repo).read()
+        );
 
-        println!("Symlink target cache stats for {}", repo.display());
-        cmd!("watchman", "debug-symlink-target-cache", repo)
-            .run()
-            .ok();
+        writeln!(out, "Symlink target cache stats for {}", repo.display());
+        writeln!(
+            out,
+            "{}\n",
+            cmd!("watchman", "debug-symlink-target-cache", repo).read()
+        );
     }
 
-    println!("Subscriptions for {}", repo.display());
-    cmd!("watchman", "debug-get-subscriptions", repo).run().ok();
+    writeln!(out, "Subscriptions for {}", repo.display());
+    writeln!(
+        out,
+        "{}\n",
+        cmd!("watchman", "debug-get-subscriptions", repo).read()
+    );
 
-    println!("Asserted states for {}", repo.display());
-    cmd!("watchman", "debug-get-asserted-states", repo)
-        .run()
-        .ok();
+    writeln!(out, "Asserted states for {}", repo.display());
+    writeln!(
+        out,
+        "{}\n",
+        cmd!("watchman", "debug-get-asserted-states", repo).read()
+    );
 
     Ok(())
 }
@@ -359,35 +469,41 @@ pub(crate) struct RageCmd {}
 
 impl RageCmd {
     pub(crate) async fn run(&self) -> Result<()> {
-        // TODO: redirect output to pastry if stdout is tty
+        let mut system = System::new();
+        system.refresh_system();
+        let hostname = system.host_name();
 
-        print_system_info();
-        println!();
-        print_package_version().ok();
-        println!();
-        print_cli_version().ok();
-        println!();
-        print_watchman_env().ok();
-        println!();
+        let mut out = Reporter::new(hostname);
+
+        print_system_info(&mut out, &mut system);
+        writeln!(out);
+        print_package_version(&mut out).ok();
+        writeln!(out);
+        print_cli_version(&mut out).ok();
+        writeln!(out);
+        print_watchman_env(&mut out).ok();
+        writeln!(out);
         #[cfg(target_os = "linux")]
         {
-            print_inotify().ok();
-            println!();
+            print_inotify(&mut out).ok();
+            writeln!(out);
         }
         #[cfg(target_os = "macos")]
         {
-            print_launchd_info().ok();
-            println!();
+            print_launchd_info(&mut out).ok();
+            writeln!(out);
         }
-        print_state_info().ok();
-        println!();
+        print_state_info(&mut out).ok();
+        writeln!(out);
         #[cfg(any(target_os = "linux", target_os = "macos"))]
         {
-            print_running_watchman().ok();
-            println!();
+            print_running_watchman(&mut out).ok();
+            writeln!(out);
         }
-        print_watchman_service_info().await.ok();
-        println!();
+        print_watchman_service_info(&mut out).await.ok();
+        writeln!(out);
+
+        out.wait();
 
         Ok(())
     }

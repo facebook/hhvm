@@ -36,12 +36,13 @@ impl NamingTable {
         self.checksum
     }
 
+    /// WARNING: this is currently a costly O(table) operation
     pub fn process_changed_file(
         &mut self,
         path: &RelativePath,
         file_summary: crate::FileSummary,
     ) -> anyhow::Result<(IntSet<ToplevelSymbolHash>, IntSet<ToplevelSymbolHash>)> {
-        let mut removed_symbol_hashes = self.names.get_symbol_hashes(path)?;
+        let mut removed_symbol_hashes = self.names.get_symbol_hashes_for_winners(path)?;
         let mut changed_symbol_hashes = IntSet::default();
 
         for (symbol_hash, decl_hash) in file_summary.decl_hashes() {
@@ -76,19 +77,20 @@ impl NamingTable {
         Ok((changed_symbol_hashes, removed_symbol_hashes))
     }
 
+    /// WARNING: this is currently a costly O(table) operation
     pub fn remove_file(
         &mut self,
         path: &RelativePath,
     ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let symbol_hashes = self.names.get_symbol_hashes(path)?;
-        let overflow_symbol_hashes = self.names.get_overflow_symbol_hashes(path)?;
+        let symbol_hashes = self.names.get_symbol_hashes_for_winners(path)?;
+        let overflow_symbol_hashes = self.names.get_symbol_hashes_for_losers(path)?;
         let affected_symbol_hashes: IntSet<_> = symbol_hashes
             .union(&overflow_symbol_hashes)
             .copied()
             .collect();
         let mut changed_symbol_hashes = IntSet::default();
         // combined_hashes is the forward naming table for this file BEFORE the change
-        let combined_hashes = self.names.get_symbol_and_decl_hashes(path)?;
+        let combined_hashes = self.names.get_symbol_and_decl_hashes_for_winners(path)?;
 
         // remove symbols from naming table
         for &symbol_hash in &affected_symbol_hashes {

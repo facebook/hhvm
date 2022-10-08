@@ -42,6 +42,7 @@ use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
 use statement_state::StatementState;
 
+use super::TypeRefinementInHint;
 use crate::emit_expression;
 use crate::emit_param;
 use crate::emit_statement;
@@ -489,6 +490,7 @@ pub fn emit_method_prolog<'a, 'arena, 'decl>(
                                         .collect::<Vec<_>>()
                                         .as_slice(),
                                     &IndexSet::new(),
+                                    TypeRefinementInHint::Allowed,
                                     &h,
                                 )?,
                                 instr::verify_param_type_ts(param_local),

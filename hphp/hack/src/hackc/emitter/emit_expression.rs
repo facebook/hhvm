@@ -76,6 +76,7 @@ use oxidized::pos::Pos;
 use regex::Regex;
 use serde_json::json;
 
+use super::TypeRefinementInHint;
 use crate::emit_adata;
 use crate::emit_fatal;
 use crate::emit_type_constant;
@@ -333,10 +334,11 @@ mod inout_locals {
     }
 } //mod inout_locals
 
-pub fn get_type_structure_for_hint<'arena, 'decl>(
+pub(crate) fn get_type_structure_for_hint<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     tparams: &[&str],
     targ_map: &IndexSet<&str>,
+    type_refinement_in_hint: TypeRefinementInHint,
     hint: &aast::Hint,
 ) -> Result<InstrSeq<'arena>> {
     let targ_map: BTreeMap<&str, i64> = targ_map
@@ -352,6 +354,7 @@ pub fn get_type_structure_for_hint<'arena, 'decl>(
         hint,
         false,
         false,
+        type_refinement_in_hint,
     )?;
     emit_adata::typed_value_into_instr(e, tv)
 }
@@ -3150,7 +3153,13 @@ fn emit_is<'a, 'arena, 'decl>(
                 instr::is_late_bound_cls()
             }
             _ => InstrSeq::gather(vec![
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
                 instr::is_type_struct_c_resolve(),
             ]),
         }
@@ -5187,7 +5196,13 @@ fn emit_as<'a, 'arena, 'decl>(
         };
         let i2 = if is_static {
             main_block(
-                get_type_structure_for_hint(e, &[], &IndexSet::new(), h)?,
+                get_type_structure_for_hint(
+                    e,
+                    &[],
+                    &IndexSet::new(),
+                    TypeRefinementInHint::Disallowed,
+                    h,
+                )?,
                 TypeStructResolveOp::Resolve,
             )
         } else {
@@ -6677,7 +6692,18 @@ pub fn emit_reified_arg<'b, 'arena, 'decl>(
             Ok((emit_reified_type(e, env, pos, name)?, false))
         }
         _ => {
-            let ts = get_type_structure_for_hint(e, &[], &collector.acc, &hint)?;
+            let type_refinement_in_hint = if isas {
+                TypeRefinementInHint::Disallowed
+            } else {
+                TypeRefinementInHint::Allowed
+            };
+            let ts = get_type_structure_for_hint(
+                e,
+                &[],
+                &collector.acc,
+                type_refinement_in_hint,
+                &hint,
+            )?;
             let ts_list = if collector.acc.is_empty() {
                 ts
             } else {

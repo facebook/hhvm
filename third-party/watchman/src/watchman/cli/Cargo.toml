@@ -4,10 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0"
-structopt = "0.3"
-watchman_client = { path = "../rust/watchman_client" }
 ahash = "0.3"
-serde = "1.0"
+anyhow = "1.0"
+duct = "0.13"
 jwalk = "0.6"
+serde = "1.0"
+structopt = "0.3"
+sysinfo = "0.20"
+tabular = "0.2.0"
 tokio = { version = "1.5", features = ["rt-multi-thread"] }
+watchman_client = { path = "../rust/watchman_client" }
+
+[target.'cfg(unix)'.dependencies]
+nix = "0.23"

@@ -100,7 +100,8 @@
           "thrift.Testing" : {
         "type" : {
   "type" : "struct",
-  "name" : "Testing"
+  "name" : "Testing",
+  "path" : "thrift/annotation/thrift.thrift"
 },
         "value" : {}
       }
@@ -202,7 +203,8 @@
             "lineno" : 63,
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "timeVal" : {
@@ -211,7 +213,8 @@
             "lineno" : 64,
             "type" : {
   "type" : "struct",
-  "name" : "TimeStruct"
+  "name" : "TimeStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "optBoolVal" : {
@@ -355,7 +358,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyDataFieldPatchStruct", "extraNamespace": ""}
       }
@@ -368,7 +372,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "StringPatch"
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "data2" : {
@@ -378,7 +383,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I32Patch"
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   }
         },
@@ -392,7 +398,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyDataPatchStruct", "extraNamespace": ""}
       }
@@ -461,7 +468,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "InnerUnionFieldPatchStruct", "extraNamespace": ""}
       }
@@ -474,7 +482,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BinaryPatch"
+  "name" : "BinaryPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   }
         },
@@ -488,7 +497,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter", "underlyingName": "InnerUnionPatchStruct", "extraNamespace": ""}
       }
@@ -557,7 +567,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyUnionFieldPatchStruct", "extraNamespace": ""}
       }
@@ -570,7 +581,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "StringPatch"
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "option2" : {
@@ -580,7 +592,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I32Patch"
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "option3" : {
@@ -604,7 +617,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::UnionPatchAdapter", "underlyingName": "MyUnionPatchStruct", "extraNamespace": ""}
       }
@@ -673,7 +687,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructFieldN10PatchStruct", "extraNamespace": ""}
       }
@@ -709,7 +724,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::AssignPatchAdapter", "underlyingName": "MyStructFieldN25PatchStruct", "extraNamespace": ""}
       }
@@ -745,7 +761,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::ListPatchAdapter", "underlyingName": "MyStructFieldN28PatchStruct", "extraNamespace": ""}
       }
@@ -781,7 +798,8 @@
   "key_type" : "i32",
   "value_type" : {
   "type" : "struct",
-  "name" : "I16Patch"
+  "name" : "I16Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
 }
                   },
@@ -829,7 +847,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::SetPatchAdapter", "underlyingName": "MyStructFieldN29PatchStruct", "extraNamespace": ""}
       }
@@ -887,7 +906,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::MapPatchAdapter", "underlyingName": "MyStructFieldN30PatchStruct", "extraNamespace": ""}
       }
@@ -959,7 +979,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "MyStructFieldPatchStruct", "extraNamespace": ""}
       }
@@ -1032,7 +1053,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BinaryPatch"
+  "name" : "BinaryPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optStringVal" : {
@@ -1042,7 +1064,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "StringPatch"
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optDoubleVal" : {
@@ -1052,7 +1075,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DoublePatch"
+  "name" : "DoublePatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optFloatVal" : {
@@ -1062,7 +1086,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "FloatPatch"
+  "name" : "FloatPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optI64Val" : {
@@ -1072,7 +1097,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I64Patch"
+  "name" : "I64Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optI32Val" : {
@@ -1082,7 +1108,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I32Patch"
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optI16Val" : {
@@ -1092,7 +1119,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I16Patch"
+  "name" : "I16Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optByteVal" : {
@@ -1102,7 +1130,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BytePatch"
+  "name" : "BytePatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "optBoolVal" : {
@@ -1112,7 +1141,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BoolPatch"
+  "name" : "BoolPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "timeVal" : {
@@ -1122,7 +1152,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "TimePatch"
+  "name" : "TimePatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "durationVal" : {
@@ -1132,7 +1163,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationPatch"
+  "name" : "DurationPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "lateStructVal" : {
@@ -1182,7 +1214,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BinaryPatch"
+  "name" : "BinaryPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "stringVal" : {
@@ -1192,7 +1225,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "StringPatch"
+  "name" : "StringPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "doubleVal" : {
@@ -1202,7 +1236,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DoublePatch"
+  "name" : "DoublePatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "floatVal" : {
@@ -1212,7 +1247,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "FloatPatch"
+  "name" : "FloatPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "i64Val" : {
@@ -1222,7 +1258,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I64Patch"
+  "name" : "I64Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "i32Val" : {
@@ -1232,7 +1269,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I32Patch"
+  "name" : "I32Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "i16Val" : {
@@ -1242,7 +1280,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "I16Patch"
+  "name" : "I16Patch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "byteVal" : {
@@ -1252,7 +1291,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BytePatch"
+  "name" : "BytePatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   },
           "boolVal" : {
@@ -1262,7 +1302,8 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "BoolPatch"
+  "name" : "BoolPatch",
+  "path" : "thrift/lib/thrift/patch.thrift"
 }
                   }
         },
@@ -1276,7 +1317,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "MyStructPatchStruct", "extraNamespace": ""}
       }
@@ -1345,7 +1387,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::FieldPatchAdapter", "underlyingName": "LateDefStructFieldPatchStruct", "extraNamespace": ""}
       }
@@ -1360,7 +1403,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"name": "::apache::thrift::op::detail::StructPatchAdapter", "underlyingName": "LateDefStructPatchStruct", "extraNamespace": ""}
       }

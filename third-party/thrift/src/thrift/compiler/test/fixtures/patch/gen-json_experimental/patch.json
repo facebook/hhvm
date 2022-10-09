@@ -93,14 +93,16 @@
           "scope.Program" : {
         "type" : {
   "type" : "struct",
-  "name" : "Program"
+  "name" : "Program",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -116,7 +118,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "BoolPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BoolPatchAdapter"}
       }
@@ -158,7 +161,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "BytePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -200,7 +204,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "I16PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -242,7 +247,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "I32PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -284,7 +290,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "I64PatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -326,7 +333,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "FloatPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -368,7 +376,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "DoublePatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::NumberPatchAdapter"}
       }
@@ -410,7 +419,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "StringPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::StringPatchAdapter"}
       }
@@ -460,7 +470,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "BinaryPatchStruct", "extraNamespace": "", "name": "::apache::thrift::op::detail::BinaryPatchAdapter"}
       }
@@ -510,7 +521,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "DurationStructPatch", "extraNamespace": "", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
       }
@@ -525,7 +537,8 @@
             "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "clear" : {
@@ -544,14 +557,16 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
             ,
             "structured_annotations": {
               "thrift.Testing" : {
             "type" : {
   "type" : "struct",
-  "name" : "Testing"
+  "name" : "Testing",
+  "path" : "thrift/annotation/thrift.thrift"
 },
             "value" : {}
           }
@@ -568,7 +583,8 @@
           "cpp.Adapter" : {
         "type" : {
   "type" : "struct",
-  "name" : "Adapter"
+  "name" : "Adapter",
+  "path" : "thrift/annotation/cpp.thrift"
 },
         "value" : {"underlyingName": "TimeStructPatch", "extraNamespace": "", "name": "::apache::thrift::op::detail::AssignPatchAdapter"}
       }
@@ -583,7 +599,8 @@
             "required" : "optional",
             "type" : {
   "type" : "struct",
-  "name" : "TimeStruct"
+  "name" : "TimeStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
                   },
           "clear" : {
@@ -602,14 +619,16 @@
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "struct",
-  "name" : "DurationStruct"
+  "name" : "DurationStruct",
+  "path" : "thrift/lib/thrift/standard.thrift"
 }
             ,
             "structured_annotations": {
               "thrift.Testing" : {
             "type" : {
   "type" : "struct",
-  "name" : "Testing"
+  "name" : "Testing",
+  "path" : "thrift/annotation/thrift.thrift"
 },
             "value" : {}
           }

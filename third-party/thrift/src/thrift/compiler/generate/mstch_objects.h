@@ -761,7 +761,6 @@ class mstch_type : public mstch_base {
             {"type:interaction?", &mstch_type::is_interaction},
         });
   }
-
   mstch::node name() { return type_->get_name(); }
   mstch::node is_void() { return resolved_type_->is_void(); }
   mstch::node is_string() { return resolved_type_->is_string(); }

@@ -18,7 +18,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -42,21 +43,24 @@
           "scope.Typedef" : {
         "type" : {
   "type" : "struct",
-  "name" : "Typedef"
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -95,14 +99,16 @@
           "scope.Typedef" : {
         "type" : {
   "type" : "struct",
-  "name" : "Typedef"
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -126,14 +132,16 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Function" : {
         "type" : {
   "type" : "struct",
-  "name" : "Function"
+  "name" : "Function",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -179,7 +187,8 @@
           "scope.Union" : {
         "type" : {
   "type" : "struct",
-  "name" : "Union"
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -206,21 +215,24 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Union" : {
         "type" : {
   "type" : "struct",
-  "name" : "Union"
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Exception" : {
         "type" : {
   "type" : "struct",
-  "name" : "Exception"
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -262,21 +274,24 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Union" : {
         "type" : {
   "type" : "struct",
-  "name" : "Union"
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Exception" : {
         "type" : {
   "type" : "struct",
-  "name" : "Exception"
+  "name" : "Exception",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }

@@ -44,8 +44,7 @@
             },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32"
-},
+  "inner_type" : "i32"},
             "lineno" : 23
           },
           "streamthrows" : {
@@ -61,8 +60,7 @@
             },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32"
-},
+  "inner_type" : "i32"},
             "lineno" : 24
           },
           "servicethrows" : {
@@ -88,8 +86,7 @@
             },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32"
-},
+  "inner_type" : "i32"},
             "lineno" : 25
           },
           "boththrows" : {
@@ -115,8 +112,7 @@
             },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32"
-},
+  "inner_type" : "i32"},
             "lineno" : 26
           },
           "responseandstreamstreamthrows" : {
@@ -213,8 +209,7 @@
             },
             "returnType" : {
   "type" : "streamresponse",
-  "inner_type" : "i32"
-},
+  "inner_type" : "i32"},
             "lineno" : 38
           }
         }

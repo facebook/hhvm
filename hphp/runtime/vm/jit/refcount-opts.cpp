@@ -1413,12 +1413,15 @@ void find_alias_sets(Env& env) {
       id = env.asetMap[canon];
     } else {
       auto const cinst = canon->inst();
-      if (cinst->is(DefLabel) && cinst->numDsts() == 1) {
+      if (cinst->is(DefLabel)) {
+        auto const idx = cinst->findDst(canon);
+        assertx(idx < cinst->numDsts());
+
         int pid = -2;
-        cinst->block()->forEachSrc(0, [&](IRInstruction*, SSATmp* src) {
+        cinst->block()->forEachSrc(idx, [&](IRInstruction*, SSATmp* src) {
           if (pid == -1) return;
           src = canonical(src);
-          if (src == cinst->dst(0)) return;
+          if (src == canon) return;
           auto const srcId = env.asetMap[src];
           if (srcId == -1) {
             pid = -1;

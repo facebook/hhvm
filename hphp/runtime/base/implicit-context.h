@@ -57,8 +57,6 @@ req::vector<const StringData*> m_blameFromSoftSet;
 
 static rds::Link<ObjectData*, rds::Mode::Normal> activeCtx;
 
-static Object setByValue(Object&&);
-
 static std::string stateToString(State);
 
 static bool isStateSoft(State);

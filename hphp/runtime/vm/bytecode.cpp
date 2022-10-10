@@ -5103,12 +5103,14 @@ OPTBLD_INLINE void iopSetImplicitContextByValue() {
     }
     return tv->m_data.pobj;
   }();
+  auto const prev = *ImplicitContext::activeCtx;
+  *ImplicitContext::activeCtx = obj;
   vmStack().discard(); // ref-count will be transferred
-  auto result = ImplicitContext::setByValue(Object::attach(obj));
-  if (result.isNull()) {
+
+  if (!prev) {
     vmStack().pushNull();
   } else {
-    vmStack().pushObjectNoRc(result.detach());
+    vmStack().pushObjectNoRc(prev);
   }
 }
 

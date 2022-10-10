@@ -16,7 +16,7 @@ find_utils = { path = "../../../utils/find_utils" }
 folded_decl_provider = { path = "../../folded_decl_provider/cargo/folded_decl_provider" }
 hackrs_test_utils = { path = "../../hackrs_test_utils/cargo/hackrs_test_utils" }
 hhi = { path = "../../../hhi/rust" }
-indicatif = { version = "0.16", features = ["with_rayon"] }
+indicatif = { version = "0.17.1", features = ["improved_unicode", "rayon", "tokio"] }
 jwalk = "0.6"
 pos = { path = "../../pos/cargo/pos" }
 procfs = "0.9"

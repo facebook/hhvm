@@ -64,7 +64,12 @@ class ClientPool {
   // the multiple pools do not share any resources. This also allows the
   // MultiPool to respect limits
   std::shared_ptr<TClient> getClient(const std::string& key) const {
-    return client_pool_[folly::Hash()(key) % client_pool_.size()];
+    return getClient(folly::Hash()(key));
+  }
+
+  // Using size_t key to index the client pool
+  std::shared_ptr<TClient> getClient(size_t key) const {
+    return client_pool_[key % client_pool_.size()];
   }
 
   static std::shared_ptr<TClient> getClientFromDefault() {

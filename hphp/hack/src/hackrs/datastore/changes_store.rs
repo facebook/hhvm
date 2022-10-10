@@ -61,6 +61,19 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
         self.stack.write().pop();
     }
 
+    pub fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        if let Some(store) = self.stack.read().last() {
+            for (old_key, new_key) in keys {
+                let val_opt: Option<V> = self.get(old_key)?;
+                store.insert(old_key, None);
+                store.insert(new_key, val_opt);
+            }
+        } else {
+            self.fallback.move_batch(keys)?;
+        }
+        Ok(())
+    }
+
     pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             for key in keys {
@@ -84,6 +97,10 @@ where
 
     fn insert(&self, key: K, val: V) -> Result<()> {
         ChangesStore::insert(self, key, val)
+    }
+
+    fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        ChangesStore::move_batch(self, keys)
     }
 
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {

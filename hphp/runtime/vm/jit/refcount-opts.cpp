@@ -619,7 +619,6 @@ struct MemRefAnalysis {
     ALocBits avail_in;
     ALocBits avail_out;
     ALocBits kill;
-    ALocBits gen;
   };
 
   explicit MemRefAnalysis(IRUnit& unit) : info(unit, BlockInfo{}) {}
@@ -995,11 +994,10 @@ struct PreAdder {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Kill, class Gen>
+template<class Kill>
 void mrinfo_step_impl(Env& env,
                       const IRInstruction& inst,
-                      Kill kill,
-                      Gen gen) {
+                      Kill kill) {
   auto do_store = [&] (AliasClass dst, SSATmp* value) {
     /*
      * Pure stores potentially (temporarily) break the heap's reference count
@@ -1013,11 +1011,16 @@ void mrinfo_step_impl(Env& env,
 
   auto const effects = memory_effects(inst);
   match<void>(
-    effects, [&](IrrelevantEffects) {}, [&](ExitEffects) {},
-    [&](ReturnEffects) {}, [&](GeneralEffects) {},
+    effects,
+    [&](IrrelevantEffects) {},
+    [&](ExitEffects) {},
+    [&](ReturnEffects) {},
+    [&](GeneralEffects) {},
+    [&](PureInlineCall) {},
+    [&](CallEffects) {},
+
     [&](UnknownEffects) { kill(ALocBits{}.set()); },
     [&](PureStore x) { do_store(x.dst, x.value); },
-    [&](PureInlineCall) {},
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1033,21 +1036,7 @@ void mrinfo_step_impl(Env& env,
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
      */
-    [&](PureLoad) {},
-
-    [&](CallEffects /*x*/) {
-      /*
-       * Because PHP callees can side-exit (or for that matter throw from their
-       * prologue), the program is ill-formed unless we have balanced reference
-       * counting for all memory locations.  Even if the call has the
-       * destroys_locals flag this is the case---after it destroys the locals
-       * the new value will have a fully synchronized reference count.
-       *
-       * This may need modifications after we allow php values to span calls in
-       * SSA registers.
-       */
-      gen(ALocBits{}.set());
-    });
+    [&](PureLoad) {});
 }
 
 // Helper for stepping after we've created a MemRefAnalysis.
@@ -1055,8 +1044,7 @@ void mrinfo_step(Env& env, const IRInstruction& inst, ALocBits& avail) {
   mrinfo_step_impl(
     env,
     inst,
-    [&] (ALocBits kill) { avail &= ~kill; },
-    [&] (ALocBits gen)  { avail |= gen; }
+    [&] (ALocBits kill) { avail &= ~kill; }
   );
 }
 
@@ -1089,11 +1077,6 @@ void populate_mrinfo(Env& env) {
         inst,
         [&] (ALocBits kill) {
           env.mrinfo.info[blk].kill |= kill;
-          env.mrinfo.info[blk].gen &= ~kill;
-        },
-        [&] (ALocBits gen) {
-          env.mrinfo.info[blk].gen |= gen;
-          env.mrinfo.info[blk].kill &= ~gen;
         }
       );
     }
@@ -1106,8 +1089,7 @@ void populate_mrinfo(Env& env) {
         folly::format(&ret, "  B{: <3}: {}\n"
                             "      : {}\n",
           blk->id(),
-          show(env.mrinfo.info[blk].kill),
-          show(env.mrinfo.info[blk].gen)
+          show(env.mrinfo.info[blk].kill)
         );
       }
       return ret;
@@ -1117,7 +1099,7 @@ void populate_mrinfo(Env& env) {
   /*
    * 2. Find fixed point of avail_in:
    *
-   *   avail_out = avail_in - kill + gen
+   *   avail_out = avail_in - kill
    *   avail_in  = isect(pred) avail_out
    *
    * Locations that are marked "avail" mean they imply a non-zero lower bound
@@ -1143,7 +1125,7 @@ void populate_mrinfo(Env& env) {
     });
 
     auto const old = binfo.avail_out;
-    binfo.avail_out = (binfo.avail_in & ~binfo.kill) | binfo.gen;
+    binfo.avail_out = binfo.avail_in & ~binfo.kill;
     if (binfo.avail_out != old) {
       if (auto const t = blk->taken()) {
         incompleteQ.push(env.mrinfo.info[t].rpoId);
@@ -1993,13 +1975,8 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
                  CallEffects e, PreAdder add_node) {
-  // We have to block all incref motion through a PHP call, by observing at the
-  // max.  This is fundamentally required because the callee can side-exit or
-  // throw an exception without a catch trace, so everything needs to be
-  // balanced.
-  observe_all(env, state, add_node);
-
   // The call can affect any unsupported_refs
+  observe_unbalanced_decrefs(env, state, add_node);
   kill_unsupported_refs(state);
 
   // Figure out locations the call may cause stores to, then remove any memory

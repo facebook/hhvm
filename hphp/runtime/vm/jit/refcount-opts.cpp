@@ -1536,15 +1536,18 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const dst_count = dst.memory_support.count();
   auto const src_count = src.memory_support.count();
   auto const new_count = new_memory_support.count();
-  auto const dst_delta = dst_count - new_count;
-  auto const src_delta = src_count - new_count;
+  auto const dst_delta = safe_cast<int32_t>(dst_count - new_count);
+  auto const src_delta = safe_cast<int32_t>(src_count - new_count);
 
-  const int dst_unsupported_refs = dst.unsupported_refs + dst_delta;
-  const int src_unsupported_refs = src.unsupported_refs + src_delta;
+  auto const dst_unsupported_refs = std::min(
+    dst.unsupported_refs + dst_delta, dst.lower_bound);
+  auto const src_unsupported_refs = std::min(
+    src.unsupported_refs + src_delta, src.lower_bound);
+  auto const dst_supported_refs = dst.lower_bound - dst_unsupported_refs;
+  auto const src_supported_refs = src.lower_bound - src_unsupported_refs;
 
-  auto const unsupported_refs =
-    std::min(std::max(dst_unsupported_refs, src_unsupported_refs),
-             lower_bound);
+  auto const supported_refs = std::min(dst_supported_refs, src_supported_refs);
+  auto const unsupported_refs = lower_bound - supported_refs;
 
   if (dst.lower_bound != lower_bound) {
     dst.lower_bound = lower_bound;

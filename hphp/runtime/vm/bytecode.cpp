@@ -5094,24 +5094,28 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  auto const tv = vmStack().topC();
+  auto const tv = *vmStack().topC();
   auto const obj = [&]() -> ObjectData* {
     if (tvIsNull(tv)) return nullptr;
     if (UNLIKELY(!tvIsObject(tv))) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Invalid input to SetImplicitContextByValue");
     }
-    return tv->m_data.pobj;
+    return tv.m_data.pobj;
   }();
   auto const prev = *ImplicitContext::activeCtx;
   *ImplicitContext::activeCtx = obj;
-  vmStack().discard(); // ref-count will be transferred
+  vmStack().discard();
 
   if (!prev) {
     vmStack().pushNull();
   } else {
-    vmStack().pushObjectNoRc(prev);
+    vmStack().pushObject(prev);
   }
+
+  // Decref after discarding so that if we are pushing the same object back,
+  // avoid refcount going to zero
+  tvDecRefGen(tv);
 }
 
 OPTBLD_INLINE void iopVerifyImplicitContextState() {

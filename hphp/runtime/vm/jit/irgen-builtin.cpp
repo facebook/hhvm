@@ -2483,7 +2483,10 @@ void emitSetImplicitContextByValue(IRGS& env) {
     }
   );
   popC(env);
-  push(env, prev_ctx);
+  pushIncRef(env, prev_ctx);
+  // Decref after discarding so that if we are pushing the same object back,
+  // avoid refcount going to zero
+  decRef(env, tv, DecRefProfileId::Default);
 }
 
 void verifyImplicitContextState(IRGS& env, const Func* func) {

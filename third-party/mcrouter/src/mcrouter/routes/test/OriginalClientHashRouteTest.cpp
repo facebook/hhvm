@@ -31,8 +31,7 @@ TEST(originalClientHashRouteTest, basic) {
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "a")),
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "b")),
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "c"))};
-  TestFiberManager testfm{
-      typename fiber_local<MemcacheRouterInfo>::ContextTypeTag()};
+  TestFiberManager<MemcacheRouterInfo> testfm;
   auto context = getTestContext();
 
   // No IP Address will return error

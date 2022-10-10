@@ -44,7 +44,7 @@ TEST(migrateRouteTest, migrate) {
   };
   auto route_handles = get_route_handles(test_handles);
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   const string key_get = "key_get";
   const string key_del = "key_del";
@@ -225,7 +225,7 @@ TEST(migrateRouteTest, leases) {
   };
   auto route_handles = get_route_handles(test_handles);
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
   fm.run([&]() {
     const char* const key = "key";
     const time_t start_time = 100;

@@ -46,7 +46,7 @@ class StagingRouteTest : public RouteHandleTestBase<HelloGoodbyeRouterInfo> {
 
     rh_ = std::make_shared<RouteHandle>(RouteHandle(warm_->rh, staging_->rh));
 
-    TestFiberManager fm;
+    TestFiberManager<MemcacheRouterInfo> fm;
     fm.runAll({[&]() {
       auto reply = rh_->route(req);
 

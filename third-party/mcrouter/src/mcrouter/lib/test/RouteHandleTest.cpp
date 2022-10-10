@@ -96,7 +96,7 @@ TEST(routeHandleTest, allSync) {
       make_shared<TestHandle>(
           GetRouteTestData(carbon::Result::REMOTE_ERROR, "c"))};
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<AllSyncRoute<TestRouteHandleIf>> rh(
       get_route_handles(test_handles));
@@ -121,7 +121,7 @@ TEST(routeHandleTest, allSyncTyped) {
       make_shared<TestHandle>(
           GetRouteTestData(carbon::Result::REMOTE_ERROR, "c"))};
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<AllSyncRoute<TestRouteHandleIf>> rh(
       get_route_handles(test_handles));
@@ -148,7 +148,7 @@ TEST(routeHandleTest, allAsync) {
       make_shared<TestHandle>(
           GetRouteTestData(carbon::Result::REMOTE_ERROR, "c"))};
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<AllAsyncRoute<TestRouteHandleIf>> rh(
       get_route_handles(test_handles));
@@ -174,7 +174,7 @@ TEST(routeHandleTest, allInitial) {
           GetRouteTestData(carbon::Result::REMOTE_ERROR, "c")),
   };
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
   auto routeHandles = get_route_handles(test_handles);
   TestRouteHandle<AllInitialRoute<TestRouteHandleIf>> rh(routeHandles);
 
@@ -200,7 +200,7 @@ TEST(routeHandleTest, allInitial) {
 }
 
 TEST(routeHandleTest, allMajority) {
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   vector<std::shared_ptr<TestHandle>> test_handles{
       make_shared<TestHandle>(
@@ -235,7 +235,7 @@ TEST(routeHandleTest, allMajority) {
 }
 
 TEST(routeHandleTest, allMajorityTie) {
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   vector<std::shared_ptr<TestHandle>> test_handles{
       make_shared<TestHandle>(
@@ -262,7 +262,7 @@ TEST(routeHandleTest, allMajorityTie) {
 }
 
 TEST(routeHandleTest, allFastest) {
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   vector<std::shared_ptr<TestHandle>> test_handles{
       make_shared<TestHandle>(
@@ -324,7 +324,7 @@ TEST(routeHandleTest, hashNoSalt) {
   };
   auto outOfRangeRh = createNullRoute<typename TestRouterInfo::RouteHandleIf>();
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<SelectionRoute<TestRouterInfo, HashSelector<HashFunc>>> rh(
       get_route_handles(test_handles),
@@ -355,7 +355,7 @@ TEST(routeHandleTest, hashSalt) {
   };
   auto outOfRangeRh = createNullRoute<typename TestRouterInfo::RouteHandleIf>();
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<SelectionRoute<TestRouterInfo, HashSelector<HashFunc>>> rh(
       get_route_handles(test_handles),
@@ -388,7 +388,7 @@ TEST(routeHandleTest, allSyncCollector) {
       make_shared<TestHandle>(
           GetRouteTestData(carbon::Result::REMOTE_ERROR, "c"))};
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   TestRouteHandle<AllSyncCollectionRoute<TestRouterInfo>> rh(
       get_route_handles(test_handles));

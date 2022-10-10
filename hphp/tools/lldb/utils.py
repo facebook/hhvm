@@ -1,6 +1,7 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
 import abc
+import argparse
 import collections
 import functools
 import lldb
@@ -8,22 +9,66 @@ import re
 import typing
 
 class Command(abc.ABC):
+        
+    def __init__(self, debugger: lldb.SBDebugger, _internal_dict):
+        self.parser = self.create_parser()
+        self.help_string = self.parser.format_help()
+
     @classmethod
-    def register_lldb_command(cls, debugger, module_name, top_module=""):
-        parser = cls.create_options()
+    def register_lldb_command(cls, debugger, module_name, top_module="") -> None:
+        parser = cls.create_parser()
         cls.__doc__ = parser.format_help()
         command = f"command script add -o -c {top_module + '.' if top_module else ''}{module_name}.{cls.__name__} {cls.command}"
         debugger.HandleCommand(command)
 
     @classmethod
+    def default_parser(cls) -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser(
+            description=cls.description,
+            prog=cls.command,
+            epilog=cls.epilog,
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+        )
+        return parser
+
+    def get_short_help(self) -> str:
+        return self.description
+
+    def get_long_help(self) -> str:
+        return self.help_string
+
+    @classmethod
     @abc.abstractmethod
-    def create_options(cls):
+    def create_parser(cls) -> argparse.ArgumentParser:
+        """ Create and return an ArgumentParser object.
+
+            Typical usage is to call .add_argument()
+            as needed on the parser that default_parser() returns,
+            and return that parser.
+        """
+        ...
+
+    @abc.abstractmethod
+    def __call__(self, debugger: lldb.SBDebugger, command: str, exe_ctx: lldb.SBExecutionContext, result: lldb.SBCommandReturnObject):
         ...
 
     @property
     @abc.abstractmethod
-    def command(self):
+    def command(self) -> str:
+        """ The name used to call the command """
         ...
+
+    @property
+    @abc.abstractmethod
+    def description(self) -> str:
+        """ A short, one-line description of the command """
+        ...
+
+    @property
+    def epilog(self) -> typing.Optional[str]:
+        """ Additional information to display after the usage """
+        return None
+
 
 #------------------------------------------------------------------------------
 # Memoization.

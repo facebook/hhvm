@@ -30,10 +30,10 @@ public class RpcEventLoopBenchmarks {
             .include(ReactiveRpcBenchmarks.class.getSimpleName())
             .mode(Mode.Throughput)
             .forks(1)
-            .warmupIterations(20)
+            .warmupIterations(5)
             .warmupTime(new TimeValue(1000, TimeUnit.MILLISECONDS))
-            .measurementIterations(20)
-            .measurementTime(new TimeValue(2000, TimeUnit.MILLISECONDS))
+            .measurementIterations(5)
+            .measurementTime(new TimeValue(1000, TimeUnit.MILLISECONDS))
             .addProfiler("gc")
             .jvmArgsAppend(
                 "-Xms4g",

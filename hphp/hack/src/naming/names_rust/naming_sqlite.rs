@@ -890,7 +890,7 @@ impl Names {
         &self,
         symbol_hash: ToplevelSymbolHash,
         winner: Option<&crate::SymbolRow>,
-        overflow: &[crate::SymbolRow],
+        overflow: &[&crate::SymbolRow],
     ) -> anyhow::Result<()> {
         self.conn
             .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?

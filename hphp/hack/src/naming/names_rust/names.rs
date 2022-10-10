@@ -20,7 +20,7 @@ pub use summary::DeclSummary;
 pub use summary::FileSummary;
 pub use summary::SymbolRow;
 
-fn hash_decl(decl: &oxidized_by_ref::shallow_decl_defs::Decl<'_>) -> DeclHash {
+pub fn hash_decl(decl: &oxidized_by_ref::shallow_decl_defs::Decl<'_>) -> DeclHash {
     use oxidized_by_ref::shallow_decl_defs::Decl;
     match *decl {
         Decl::Class(decl) => DeclHash::from_u64(hh_hash::hash(decl)),

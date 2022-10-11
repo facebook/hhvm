@@ -39,10 +39,9 @@
                 ];
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
-                  CMAKE_INIT_CACHE
-                  CCACHE_DIR
-                  CCACHE_UMASK
-                  CCACHE_MAXSIZE;
+                  CMAKE_INIT_CACHE;
+                ${if hhvm?RUSTC_WRAPPER then "RUSTC_WRAPPER" else null} =
+                  hhvm.RUSTC_WRAPPER;
               };
         in
         rec {
@@ -50,12 +49,16 @@
             lastModifiedDate = self.lastModifiedDate;
             isDefaultStdlib = true;
           };
-          packages.hhvm_ccache = (packages.hhvm.override {
-            stdenv = pkgs.ccacheStdenv;
-          }).overrideAttrs (finalAttrs: previousAttrs: {
-            CCACHE_MAXSIZE = "64G";
-            CCACHE_DIR = "/nix/var/cache/ccache";
-            CCACHE_UMASK = "007";
+          packages.hhvm_ccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
+            RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+            CMAKE_INIT_CACHE = pkgs.writeTextFile {
+              name = "init-cache.cmake";
+              text = ''
+                ${builtins.readFile packages.hhvm.CMAKE_INIT_CACHE}
+                set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler" FORCE)
+                set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler" FORCE)
+              '';
+            };
           });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;

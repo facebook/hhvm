@@ -1086,8 +1086,7 @@ void populate_mrinfo(Env& env) {
     [&] () -> std::string {
       auto ret = std::string{};
       for (auto& blk : env.rpoBlocks) {
-        folly::format(&ret, "  B{: <3}: {}\n"
-                            "      : {}\n",
+        folly::format(&ret, "  B{: <3}: {}\n",
           blk->id(),
           show(env.mrinfo.info[blk].kill)
         );
@@ -1989,6 +1988,7 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   bset |= env.ainfo.may_alias(e.actrec);
   bset |= env.ainfo.may_alias(e.outputs);
   bset |= env.ainfo.may_alias(AHeapAny);
+  bset |= env.ainfo.may_alias(ARdsAny);
   reduce_support_bits(env, state, bset, true, add_node);
 }
 

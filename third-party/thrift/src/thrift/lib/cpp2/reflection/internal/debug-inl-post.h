@@ -193,46 +193,18 @@ struct debug_equals_impl<type_class::list<ValueTypeClass>> {
   }
 };
 
-template <typename TypeClass, typename Type>
-struct debug_equals_impl_pretty {
-  static std::string go(const Type& v) { return pretty_string<TypeClass>(v); }
-};
-
-template <typename Type>
-struct debug_equals_impl_pretty<type_class::binary, Type> {
-  static std::string go(const Type& v) {
-    std::string out;
-    out.reserve(4 + v.size() * 2);
-
-    const auto to_hex_digit = [](std::uint8_t const c) {
-      return "0123456789ABCDEF"[c & 0xf];
-    };
-
-    out.append("\"0x");
-    for (auto c : v) {
-      out.push_back(to_hex_digit(c >> 4));
-      out.push_back(to_hex_digit(c));
-    }
-    out.push_back('"');
-
-    return out;
-  }
-};
-
 template <typename KeyTypeClass, typename MappedTypeClass>
 struct debug_equals_impl<type_class::map<KeyTypeClass, MappedTypeClass>> {
   template <typename T, typename Callback>
   static bool equals(
       std::string& path, T const& lhs, T const& rhs, Callback&& callback) {
-    using key_type = typename T::key_type;
-    using mapped_impl = debug_equals_impl<MappedTypeClass>;
-    using pretty_key = debug_equals_impl_pretty<KeyTypeClass, key_type>;
+    using impl = debug_equals_impl<MappedTypeClass>;
 
     bool result = true;
 
     for (const auto& l : lhs) {
       const auto& key = l.first;
-      auto guard = scoped_path::key(path, pretty_key::go(key));
+      auto guard = scoped_path::key(path, pretty_string<KeyTypeClass>(key));
       if (rhs.find(key) == rhs.end()) {
         debug_equals_missing()(
             MappedTypeClass{}, callback, &l.second, path, "missing map entry");
@@ -242,7 +214,7 @@ struct debug_equals_impl<type_class::map<KeyTypeClass, MappedTypeClass>> {
 
     for (const auto& r : rhs) {
       const auto& key = r.first;
-      auto guard = scoped_path::key(path, pretty_key::go(key));
+      auto guard = scoped_path::key(path, pretty_string<KeyTypeClass>(key));
       if (lhs.find(key) == lhs.end()) {
         debug_equals_extra()(
             MappedTypeClass{}, callback, &r.second, path, "extra map entry");
@@ -254,11 +226,11 @@ struct debug_equals_impl<type_class::map<KeyTypeClass, MappedTypeClass>> {
       const auto& key = l.first;
       const auto ri = rhs.find(key);
       if (ri != rhs.end()) {
-        auto guard = scoped_path::key(path, pretty_key::go(key));
+        auto guard = scoped_path::key(path, pretty_string<KeyTypeClass>(key));
         const auto& r = *ri;
         const auto& lv = l.second;
         const auto& rv = r.second;
-        result = mapped_impl::equals(path, lv, rv, callback) && result;
+        result = impl::equals(path, lv, rv, callback) && result;
       }
     }
     return result;
@@ -270,13 +242,10 @@ struct debug_equals_impl<type_class::set<ValueTypeClass>> {
   template <typename T, typename Callback>
   static bool equals(
       std::string& path, T const& lhs, T const& rhs, Callback&& callback) {
-    using value_type = typename T::value_type;
-    using pretty_value = debug_equals_impl_pretty<ValueTypeClass, value_type>;
-
     bool result = true;
 
     for (const auto& l : lhs) {
-      auto guard = scoped_path::key(path, pretty_value::go(l));
+      auto guard = scoped_path::key(path, pretty_string<ValueTypeClass>(l));
       if (rhs.find(l) == rhs.end()) {
         debug_equals_missing()(
             ValueTypeClass{}, callback, &l, path, "missing set entry");
@@ -285,7 +254,7 @@ struct debug_equals_impl<type_class::set<ValueTypeClass>> {
     }
 
     for (const auto& r : rhs) {
-      auto guard = scoped_path::key(path, pretty_value::go(r));
+      auto guard = scoped_path::key(path, pretty_string<ValueTypeClass>(r));
       if (lhs.find(r) == lhs.end()) {
         debug_equals_extra()(
             ValueTypeClass{}, callback, &r, path, "extra set entry");
@@ -564,10 +533,30 @@ struct debug_equals_impl<type_class::string> {
 
 template <>
 struct debug_equals_impl<type_class::binary> {
+  using B = folly::IOBuf;
+  using U = std::unique_ptr<B>;
   template <typename T, typename Callback>
   static bool equals(
       std::string& path, T const& lhs, T const& rhs, Callback&& callback) {
     if (lhs != rhs) {
+      callback(type_class::binary{}, &lhs, &rhs, path, "binary mismatch");
+      return false;
+    }
+    return true;
+  }
+  template <typename Callback>
+  static bool equals(
+      std::string& path, B const& lhs, B const& rhs, Callback&& callback) {
+    if (!folly::IOBufEqualTo{}(lhs, rhs)) {
+      callback(type_class::binary{}, &lhs, &rhs, path, "binary mismatch");
+      return false;
+    }
+    return true;
+  }
+  template <typename Callback>
+  static bool equals(
+      std::string& path, U const& lhs, U const& rhs, Callback&& callback) {
+    if (!folly::IOBufEqualTo{}(lhs, rhs)) {
       callback(type_class::binary{}, &lhs, &rhs, path, "binary mismatch");
       return false;
     }

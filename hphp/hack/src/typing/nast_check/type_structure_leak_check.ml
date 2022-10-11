@@ -54,4 +54,7 @@ let handler =
             in
             visitor#on_hint (env, ancestor) hint
           | _ -> ())
+
+    method! at_typedef env td =
+      visitor#on_hint (env, Some "a type alias") td.t_kind
   end

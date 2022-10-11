@@ -1,0 +1,8 @@
+File "type-alias.php", line 16, characters 46-50:
+Unbound name: `Covar` (Naming[2049])
+File "type-alias.php", line 9, characters 13-37:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-alias.php", line 12, characters 17-44:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
+File "type-alias.php", line 13, characters 22-47:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])

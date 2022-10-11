@@ -68,7 +68,7 @@
 , unzip
 , uwimap
 , which
-, writeTextDir
+, writeTextFile
 , zlib
 , zstd
 }:
@@ -214,28 +214,23 @@ stdenv.mkDerivation rec {
       "-Wno-error=unused-command-line-argument"
     ];
 
-  CMAKE_INIT_CACHE =
-    let
-      # Use writeTextDir instead of writeTextFile as a workaround of https://github.com/xtruder/nix-devcontainer/issues/9
-      dir = writeTextDir "init-cache.cmake"
+  CMAKE_TOOLCHAIN_FILE = writeTextFile {
+    name = "toolchain.cmake";
+    text = ''
+      set(ENABLE_SYSTEM_LOCALE_ARCHIVE ON CACHE BOOL "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc" FORCE)
+      set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
+      set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE PATH "The zoneinfo directory" FORCE)
+      set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
+      set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE FILEPATH "The MySQL unix socket" FORCE)
+      set(CARGO_EXECUTABLE "${rustNightly.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
+      set(RUSTC_EXECUTABLE "${rustNightly.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
+      ${
+        lib.optionalString hostPlatform.isMacOS ''
+          set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
         ''
-          set(ENABLE_SYSTEM_LOCALE_ARCHIVE ON CACHE BOOL "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc" FORCE)
-          set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
-          set(HAVE_SYSTEM_TZDATA_PREFIX "${tzdata}/share/zoneinfo" CACHE PATH "The zoneinfo directory" FORCE)
-          set(HAVE_SYSTEM_TZDATA ON CACHE BOOL "Use system zoneinfo" FORCE)
-          set(MYSQL_UNIX_SOCK_ADDR "/run/mysqld/mysqld.sock" CACHE FILEPATH "The MySQL unix socket" FORCE)
-          set(CARGO_EXECUTABLE "${rustNightly.cargo}/bin/cargo" CACHE FILEPATH "The nightly cargo" FORCE)
-          set(RUSTC_EXECUTABLE "${rustNightly.rust}/bin/rustc" CACHE FILEPATH "The nightly rustc" FORCE)
-          ${
-            lib.optionalString hostPlatform.isMacOS ''
-              set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Targeting macOS version" FORCE)
-            ''
-          }
-        '';
-    in
-    dir + "/init-cache.cmake";
-
-  cmakeFlags = [ "-C" CMAKE_INIT_CACHE ];
+      }
+    '';
+  };
 
   prePatch = ''
     patchShebangs .

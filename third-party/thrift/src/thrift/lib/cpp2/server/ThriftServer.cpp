@@ -468,6 +468,10 @@ void ThriftServer::setup() {
       setObserver(server::observerFactory_->getObserver());
     }
 
+    // This may be the second time this is called (if setupThreadManager
+    // was called directly by the service code)
+    runtimeResourcePoolsChecks();
+
     setupThreadManager();
 
     if (!serverChannel_) {
@@ -628,7 +632,8 @@ void ThriftServer::setupThreadManager() {
   if (!setupThreadManagerCalled_) {
     setupThreadManagerCalled_ = true;
 
-    // Do one time only setup operations
+    // Try the runtime checks - if it is too early to complete them we will
+    // retry on setup()
     runtimeResourcePoolsChecks();
 
     // Past this point no modification to the enablement of
@@ -860,9 +865,24 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
     // No need to check if we've already set this.
     return false;
   }
+  // This can be called multiple times - only run it to completion once
+  // but note below that it can exit early.
+  if (runtimeServerActions_.checkComplete) {
+    return !runtimeDisableResourcePoolsSet();
+  }
   // If this is called too early we can't run our other checks.
   if (!getProcessorFactory()) {
     runtimeServerActions_.setupThreadManagerBeforeHandler = true;
+    if (runtimeServerActions_.resourcePoolRuntimeRequested) {
+      // If this is called early - because the service calls
+      // setupThreadManager() directly before setInterface() and
+      // requireResourcePools() was called then do not disable resource pools
+      // yet. runtimeResourcePoolsChecks() will be called again later on in
+      // setup() and if it calls runtimeDisableResourcePoolsDeprecated() at that
+      // time that will become a fatal error which is what we want (that can
+      // only be triggered by a requireResourcePools() call in the server code).
+      return true;
+    }
     runtimeDisableResourcePoolsDeprecated();
   } else {
     // Need to set this up now to check.
@@ -926,7 +946,13 @@ bool ThriftServer::runtimeResourcePoolsChecks() {
     runtimeServerActions_.activeRequestTrackingDisabled = true;
   }
 
-  return !runtimeDisableResourcePoolsSet();
+  runtimeServerActions_.checkComplete = true;
+
+  if (runtimeDisableResourcePoolsSet()) {
+    return false;
+  }
+  LOG(INFO) << "Resource pools check complete - allowed";
+  return true;
 }
 
 void ThriftServer::ensureResourcePools() {

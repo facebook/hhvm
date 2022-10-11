@@ -601,6 +601,15 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            if let Some(rhs) = &p.expr {
+                let ro_rhs = rty_expr(&mut context, rhs);
+                self.subtype(
+                    &rhs.1,
+                    &ro_rhs,
+                    &ro_kind_to_rty(p.readonly),
+                    "this parameter is not marked readonly",
+                );
+            }
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter);
@@ -637,6 +646,15 @@ impl<'ast> VisitorMut<'ast> for Checker {
                 ast_defs::ParamKind::Pinout(_) => true,
                 _ => false,
             };
+            if let Some(rhs) = &p.expr {
+                let ro_rhs = rty_expr(&mut new_context, rhs);
+                self.subtype(
+                    &rhs.1,
+                    &ro_rhs,
+                    &ro_kind_to_rty(p.readonly),
+                    "this parameter is not marked readonly",
+                );
+            }
             if p.readonly.is_some() {
                 if is_inout {
                     self.add_error(&p.pos, syntax_error::inout_readonly_parameter)

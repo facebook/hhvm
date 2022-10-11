@@ -39,7 +39,7 @@
                 ];
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
-                  CMAKE_INIT_CACHE;
+                  CMAKE_TOOLCHAIN_FILE;
                 ${if hhvm?RUSTC_WRAPPER then "RUSTC_WRAPPER" else null} =
                   hhvm.RUSTC_WRAPPER;
               };
@@ -51,10 +51,10 @@
           };
           packages.hhvm_ccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
             RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
-            CMAKE_INIT_CACHE = pkgs.writeTextFile {
-              name = "init-cache.cmake";
+            CMAKE_TOOLCHAIN_FILE = pkgs.writeTextFile {
+              name = "toolchain.cmake";
               text = ''
-                ${builtins.readFile packages.hhvm.CMAKE_INIT_CACHE}
+                ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
                 set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler" FORCE)
                 set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler" FORCE)
               '';

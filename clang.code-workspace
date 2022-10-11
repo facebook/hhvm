@@ -23,10 +23,6 @@
         ]
       }
     },
-    "cmake.configureArgs": [
-      "-C",
-      "${env:CMAKE_INIT_CACHE}"
-    ],
   },
   "extensions": {
     "recommendations": [

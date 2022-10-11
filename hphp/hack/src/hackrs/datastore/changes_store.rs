@@ -27,7 +27,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     }
 
     pub fn get(&self, key: K) -> Result<Option<V>> {
-        for store in self.stack.read().iter() {
+        for store in self.stack.read().iter().rev() {
             if let Some(val_opt) = store.get(&key) {
                 return Ok(val_opt.clone());
             }
@@ -36,7 +36,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     }
 
     pub fn has_local_change(&self, key: K) -> bool {
-        for store in self.stack.read().iter() {
+        for store in self.stack.read().iter().rev() {
             if store.contains_key(&key) {
                 return true;
             }

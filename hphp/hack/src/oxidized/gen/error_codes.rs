@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a76551fd089cc0af9cc94c61ffa021d5>>
+// @generated SignedSource<<3d4463a3f7295e108c24b989e125434f>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -224,6 +224,7 @@ pub enum NastCheck {
     PrivateAndFinal = 3097,
     InternalMemberInsidePublicTrait = 3099,
     AttributeConflictingMemoize = 3100,
+    RefinementInTypeStruct = 3101,
 }
 impl TrivialDrop for NastCheck {}
 arena_deserializer::impl_deserialize_in_arena!(NastCheck);

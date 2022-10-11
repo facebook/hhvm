@@ -49,7 +49,7 @@
             lastModifiedDate = self.lastModifiedDate;
             isDefaultStdlib = true;
           };
-          packages.hhvm_ccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
+          packages.hhvm_sccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
             RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
             CMAKE_TOOLCHAIN_FILE = pkgs.writeTextFile {
               name = "toolchain.cmake";
@@ -66,7 +66,7 @@
           packages.default = packages.hhvm;
 
           devShells.clang = devShellForPackage packages.hhvm_clang;
-          devShells.default = devShellForPackage packages.hhvm_ccache;
+          devShells.default = devShellForPackage packages.hhvm_sccache;
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =
             let

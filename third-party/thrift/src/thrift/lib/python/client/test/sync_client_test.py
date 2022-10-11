@@ -18,6 +18,11 @@ from __future__ import annotations
 import time
 import unittest
 
+from thrift.lib.python.client.test.event_handler_helper import (
+    addEventHandler,
+    client_handler_that_throws,
+)
+
 from thrift.python.client import ClientType, get_sync_client
 from thrift.python.exceptions import (
     ApplicationError,
@@ -155,3 +160,17 @@ class SyncClientTests(unittest.TestCase):
 
         self.assertTrue(cb1.triggered)
         self.assertTrue(cb2.triggered)
+
+    def test_exception_in_client_event_handler(self) -> None:
+        with self.assertRaises(RuntimeError):
+            with client_handler_that_throws():
+                with server_in_another_process() as path:
+                    with get_sync_client(TestService, path=path) as client:
+                        self.assertEqual(3, client.add(1, 2))
+
+    def test_no_exception_when_clear_event_handler(self) -> None:
+        addEventHandler()
+        with server_in_another_process() as path:
+            with get_sync_client(TestService, path=path) as client:
+                client.clear_event_handlers()
+                self.assertEqual(3, client.add(1, 2))

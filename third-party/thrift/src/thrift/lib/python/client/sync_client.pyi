@@ -30,6 +30,7 @@ class SyncClient:
         value: Exception,
         traceback: types.TracebackType,
     ) -> None: ...
+    def clear_event_handlers(self: TSyncClient) -> None: ...
     def _send_request(
         self,
         service_name: str,

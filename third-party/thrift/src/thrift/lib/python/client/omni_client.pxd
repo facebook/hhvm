@@ -93,6 +93,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
         )
         shared_ptr[cRequestChannel] getChannelShared()
         uint16_t getChannelProtocolId()
+        void clearEventHandlers()
 
         void set_interaction_factory(cOmniClient *client)
 

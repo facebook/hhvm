@@ -46,20 +46,7 @@ jobs:
           extra-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
-          extra-sandbox-paths = /nix/var/cache/ccache
           sandbox = false
-    - name: Workaround for https://github.com/actions/toolkit/issues/946
-      if: matrix.package == 'hhvm_ccache'
-      run: sudo chmod u+s "$(command -v tar)"
-    - if: matrix.package == 'hhvm_ccache'
-      uses: actions/cache@v3
-      with:
-        key: ${{matrix.os}}
-        path: /nix/var/cache/ccache
-    - run: |
-        # See https://nixos.wiki/wiki/CCache
-        sudo mkdir -m0770 -p /nix/var/cache/ccache
-        sudo chown --reference=/nix/store /nix/var/cache/ccache
     - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version

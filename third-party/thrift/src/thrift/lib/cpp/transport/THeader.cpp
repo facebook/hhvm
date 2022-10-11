@@ -466,7 +466,7 @@ unique_ptr<IOBuf> THeader::readHeaderFormat(
   Cursor data(buf.get());
   data += headerSize;
   protoId_ = readVarint<uint16_t>(c);
-  int16_t numTransforms = readVarint<uint16_t>(c);
+  uint16_t numTransforms = readVarint<uint16_t>(c);
   readTrans_.reserve(numTransforms);
 
   uint16_t macSz = 0;

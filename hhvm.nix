@@ -30,7 +30,7 @@
 , lastModifiedDate
 , lib
 , libcap
-, libdwarf
+, libdwarf_20210528
 , libedit
 , libelf
 , libevent
@@ -168,7 +168,7 @@ stdenv.mkDerivation rec {
       (if isDefaultStdlib then icu else icu.override { inherit stdenv; })
       imagemagick6
       jemalloc
-      libdwarf
+      libdwarf_20210528
       libedit
       libelf
       libevent

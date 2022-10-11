@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_ccache' }}
+        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_sccache' }}
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
@@ -101,7 +101,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_ccache' }}
+        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_sccache' }}
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}

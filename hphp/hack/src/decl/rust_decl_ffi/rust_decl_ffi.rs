@@ -9,6 +9,7 @@ use bumpalo::Bump;
 use ocamlrep::bytes_from_ocamlrep;
 use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_caml_builtins::Int64;
+use ocamlrep_ocamlpool::ocaml_ffi;
 use ocamlrep_ocamlpool::ocaml_ffi_arena_result;
 use ocamlrep_ocamlpool::ocaml_ffi_with_arena;
 use oxidized::decl_parser_options::DeclParserOptions;
@@ -51,6 +52,22 @@ ocaml_ffi_arena_result! {
 ocaml_ffi_with_arena! {
     fn decls_hash<'a>(arena: &'a Bump, decls: Decls<'a>) -> Int64 {
         Int64(hh_hash::position_insensitive_hash(&decls) as i64)
+    }
+}
+
+ocaml_ffi! {
+    fn checksum_addremove_ffi(
+        checksum: Int64,
+        symbol: Int64,
+        decl_hash: Int64,
+        path: relative_path::RelativePath
+    ) -> Int64 {
+        // CARE! This implementation must be identical to the strongly-typed one in hh24_types.rs
+        // I wrote it out as a separate copy because I didn't want hh_server to take a dependency
+        // upon hh24_types
+        let checksum = checksum.0 as u64;
+        let checksum = checksum ^ hh_hash::hash(&(symbol, decl_hash, path));
+        Int64(checksum as i64)
     }
 }
 

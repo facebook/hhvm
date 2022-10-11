@@ -109,17 +109,6 @@ const std::array<int, 2> TStructDataStorage<::cpp2::MyStructMapFloatThrowExp>::i
   1,
 }};
 
-const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_names = {{
-}};
-const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = {{
-}};
-const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = {{
-}};
-const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = {{
-}};
-const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
-}};
-
 const std::array<folly::StringPiece, 28> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -290,148 +279,6 @@ const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::SimpleStruct>
 const std::array<int, 2> TStructDataStorage<::cpp2::SimpleStruct>::isset_indexes = {{
   0,
   1,
-}};
-
-const std::array<folly::StringPiece, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_names = {{
-  "setOfSetOfInt",
-  "listofListOfListOfListOfEnum",
-  "listOfListOfMyStruct",
-  "setOfListOfListOfLong",
-  "setOfSetOfsetOfLong",
-  "mapStructListOfListOfLong",
-  "mKeyStructValInt",
-  "listOfMapKeyIntValInt",
-  "listOfMapKeyStrValList",
-  "mapKeySetValLong",
-  "mapKeyListValLong",
-  "mapKeyMapValMap",
-  "mapKeySetValMap",
-  "NestedMaps",
-  "mapKeyIntValList",
-  "mapKeyIntValSet",
-  "mapKeySetValInt",
-  "mapKeyListValSet",
-}};
-const std::array<int16_t, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_ids = {{
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  13,
-  14,
-  15,
-  16,
-  17,
-  18,
-}};
-const std::array<protocol::TType, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_types = {{
-  TType::T_SET,
-  TType::T_LIST,
-  TType::T_LIST,
-  TType::T_SET,
-  TType::T_SET,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_LIST,
-  TType::T_LIST,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-  TType::T_MAP,
-}};
-const std::array<folly::StringPiece, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::storage_names = {{
-  "__fbthrift_field_setOfSetOfInt",
-  "__fbthrift_field_listofListOfListOfListOfEnum",
-  "__fbthrift_field_listOfListOfMyStruct",
-  "__fbthrift_field_setOfListOfListOfLong",
-  "__fbthrift_field_setOfSetOfsetOfLong",
-  "__fbthrift_field_mapStructListOfListOfLong",
-  "__fbthrift_field_mKeyStructValInt",
-  "__fbthrift_field_listOfMapKeyIntValInt",
-  "__fbthrift_field_listOfMapKeyStrValList",
-  "__fbthrift_field_mapKeySetValLong",
-  "__fbthrift_field_mapKeyListValLong",
-  "__fbthrift_field_mapKeyMapValMap",
-  "__fbthrift_field_mapKeySetValMap",
-  "__fbthrift_field_NestedMaps",
-  "__fbthrift_field_mapKeyIntValList",
-  "__fbthrift_field_mapKeyIntValSet",
-  "__fbthrift_field_mapKeySetValInt",
-  "__fbthrift_field_mapKeyListValSet",
-}};
-const std::array<int, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::isset_indexes = {{
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-  7,
-  8,
-  9,
-  10,
-  11,
-  12,
-  13,
-  14,
-  15,
-  16,
-  17,
-}};
-
-const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
-  "myEnum",
-  "myStruct",
-  "myDataItem",
-  "complexNestedStruct",
-  "longValue",
-  "intValue",
-}};
-const std::array<int16_t, 6> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {{
-  1,
-  2,
-  3,
-  4,
-  5,
-  6,
-}};
-const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
-  TType::T_I32,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_STRUCT,
-  TType::T_I64,
-  TType::T_I32,
-}};
-const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
-  "myEnum",
-  "myStruct",
-  "myDataItem",
-  "complexNestedStruct",
-  "longValue",
-  "intValue",
-}};
-const std::array<int, 6> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
-  0,
-  1,
-  2,
-  3,
-  4,
-  5,
 }};
 
 const std::array<folly::StringPiece, 22> TStructDataStorage<::cpp2::defaultStruct>::fields_names = {{
@@ -611,6 +458,58 @@ const std::array<int, 9> TStructDataStorage<::cpp2::MyStructTypeDef>::isset_inde
   8,
 }};
 
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
+}};
+
+const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{
+  "myEnum",
+  "myStruct",
+  "myDataItem",
+  "complexNestedStruct",
+  "longValue",
+  "intValue",
+}};
+const std::array<int16_t, 6> TStructDataStorage<::cpp2::MyUnion>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+}};
+const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::MyUnion>::fields_types = {{
+  TType::T_I32,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_I64,
+  TType::T_I32,
+}};
+const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::MyUnion>::storage_names = {{
+  "myEnum",
+  "myStruct",
+  "myDataItem",
+  "complexNestedStruct",
+  "longValue",
+  "intValue",
+}};
+const std::array<int, 6> TStructDataStorage<::cpp2::MyUnion>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+}};
+
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::fields_names = {{
   "myEnum",
   "setFloat",
@@ -640,6 +539,107 @@ const std::array<int, 4> TStructDataStorage<::cpp2::MyUnionFloatFieldThrowExp>::
   1,
   2,
   3,
+}};
+
+const std::array<folly::StringPiece, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_names = {{
+  "setOfSetOfInt",
+  "listofListOfListOfListOfEnum",
+  "listOfListOfMyStruct",
+  "setOfListOfListOfLong",
+  "setOfSetOfsetOfLong",
+  "mapStructListOfListOfLong",
+  "mKeyStructValInt",
+  "listOfMapKeyIntValInt",
+  "listOfMapKeyStrValList",
+  "mapKeySetValLong",
+  "mapKeyListValLong",
+  "mapKeyMapValMap",
+  "mapKeySetValMap",
+  "NestedMaps",
+  "mapKeyIntValList",
+  "mapKeyIntValSet",
+  "mapKeySetValInt",
+  "mapKeyListValSet",
+}};
+const std::array<int16_t, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+}};
+const std::array<protocol::TType, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::fields_types = {{
+  TType::T_SET,
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_SET,
+  TType::T_SET,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_LIST,
+  TType::T_LIST,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+  TType::T_MAP,
+}};
+const std::array<folly::StringPiece, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::storage_names = {{
+  "__fbthrift_field_setOfSetOfInt",
+  "__fbthrift_field_listofListOfListOfListOfEnum",
+  "__fbthrift_field_listOfListOfMyStruct",
+  "__fbthrift_field_setOfListOfListOfLong",
+  "__fbthrift_field_setOfSetOfsetOfLong",
+  "__fbthrift_field_mapStructListOfListOfLong",
+  "__fbthrift_field_mKeyStructValInt",
+  "__fbthrift_field_listOfMapKeyIntValInt",
+  "__fbthrift_field_listOfMapKeyStrValList",
+  "__fbthrift_field_mapKeySetValLong",
+  "__fbthrift_field_mapKeyListValLong",
+  "__fbthrift_field_mapKeyMapValMap",
+  "__fbthrift_field_mapKeySetValMap",
+  "__fbthrift_field_NestedMaps",
+  "__fbthrift_field_mapKeyIntValList",
+  "__fbthrift_field_mapKeyIntValSet",
+  "__fbthrift_field_mapKeySetValInt",
+  "__fbthrift_field_mapKeyListValSet",
+}};
+const std::array<int, 18> TStructDataStorage<::cpp2::ComplexNestedStruct>::isset_indexes = {{
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
 }};
 
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::TypeRemapped>::fields_names = {{

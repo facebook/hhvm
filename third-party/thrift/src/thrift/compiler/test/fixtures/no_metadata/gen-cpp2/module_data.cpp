@@ -32,17 +32,6 @@ const std::array<folly::StringPiece, 3> TEnumDataStorage<::cpp2::MyUnion::Type>:
   "myDataItem",
 }};
 
-const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_names = {{
-}};
-const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = {{
-}};
-const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = {{
-}};
-const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = {{
-}};
-const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
-}};
-
 const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -72,6 +61,17 @@ const std::array<int, 4> TStructDataStorage<::cpp2::MyStruct>::isset_indexes = {
   1,
   2,
   3,
+}};
+
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::cpp2::MyDataItem>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::cpp2::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::cpp2::MyDataItem>::isset_indexes = {{
 }};
 
 const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::MyUnion>::fields_names = {{

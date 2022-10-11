@@ -36,7 +36,7 @@ import {{#includeNamespace}}{{value}}.{{/includeNamespace}}builders as _{{#inclu
 import {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
 
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     {{#struct:py3_fields}}
     {{field:py_name}}: {{#field:type}}{{!
@@ -55,4 +55,4 @@ class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     def __iter__(self) -> _typing.Iterator[_typing.Tuple[str, _typing.Any]]: ...
 
 
-{{/program:structs}}
+{{/program:filtered_structs}}

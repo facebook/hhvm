@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-#include <memory>
 #include <thrift/lib/python/client/OmniClient.h>
 
 #include <fmt/format.h>
@@ -36,11 +35,11 @@ namespace thrift {
 namespace python {
 namespace client {
 
-using namespace apache::thrift;
-
 namespace {
 
-inline std::pair<
+using namespace apache::thrift;
+
+std::pair<
     apache::thrift::ContextStack::UniquePtr,
     std::shared_ptr<apache::thrift::transport::THeader>>
 makeOmniClientRequestContext(
@@ -158,7 +157,10 @@ std::unique_ptr<IOBufClientBufferedStream> extractClientStream(
 
 } // namespace
 
-OmniClient::OmniClient(RequestChannel_ptr channel)
+OmniClient::OmniClient(RequestChannelUnique channel)
+    : channel_(std::move(channel)) {}
+
+OmniClient::OmniClient(RequestChannelShared channel)
     : channel_(std::move(channel)) {}
 
 OmniClient::OmniClient(OmniClient&& other) noexcept
@@ -166,11 +168,13 @@ OmniClient::OmniClient(OmniClient&& other) noexcept
       factoryClient_(other.factoryClient_.load()) {}
 
 OmniClient::~OmniClient() {
-  if (channel_) {
-    auto eb = channel_->getEventBase();
-    if (eb) {
-      eb->runInEventBaseThread([channel = std::move(channel_)] {});
-    }
+  if (!channel_) {
+    return;
+  }
+
+  auto* eb = channel_->getEventBase();
+  if (eb != nullptr) {
+    eb->runInEventBaseThread([channel = std::move(channel_)] {});
   }
 }
 
@@ -179,7 +183,7 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
     const std::unordered_map<std::string, std::string>& headers) {
-  auto data = apache::thrift::MethodMetadata::Data(
+  apache::thrift::MethodMetadata::Data data(
       functionName, apache::thrift::FunctionQualifier::Unspecified);
   return folly::coro::blockingWait(semifuture_send(
       serviceName, functionName, std::move(args), std::move(data), headers));
@@ -198,7 +202,7 @@ void OmniClient::oneway_send(
     const std::string& serviceName,
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
-    ::apache::thrift::MethodMetadata::Data&& metadata,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers) {
   RpcOptions rpcOpts;
   for (const auto& entry : headers) {
@@ -221,7 +225,7 @@ void OmniClient::oneway_send(
     const std::string& serviceName,
     const std::string& functionName,
     const std::string& args,
-    ::apache::thrift::MethodMetadata::Data&& metadata,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers) {
   oneway_send(
       serviceName,
@@ -235,7 +239,7 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     const std::string& serviceName,
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
-    ::apache::thrift::MethodMetadata::Data&& metadata,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     const apache::thrift::RpcKind rpcKind) {
   RpcOptions rpcOpts;
@@ -323,7 +327,7 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     const std::string& serviceName,
     const std::string& functionName,
     const std::string& args,
-    ::apache::thrift::MethodMetadata::Data&& metadata,
+    apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
     const apache::thrift::RpcKind rpcKind) {
   return semifuture_send(
@@ -342,7 +346,7 @@ void OmniClient::sendImpl(
     const std::string& functionName,
     std::unique_ptr<RequestCallback> callback,
     const apache::thrift::RpcKind rpcKind,
-    ::apache::thrift::MethodMetadata::Data&& metadata) {
+    apache::thrift::MethodMetadata::Data&& metadata) {
   // Create the request context.
   auto [ctx, header] = makeOmniClientRequestContext(
       channel_->getProtocolId(),
@@ -380,7 +384,7 @@ void OmniClient::sendImpl(
     case RpcKind::SINK:
       channel_->sendRequestAsync<RpcKind::SINK>(
           std::move(rpcOptions),
-          ::apache::thrift::MethodMetadata(std::move(metadata)),
+          apache::thrift::MethodMetadata(std::move(metadata)),
           std::move(serializedRequest),
           std::move(header),
           createSinkClientCallback(toRequestClientCallbackPtr(
@@ -390,7 +394,7 @@ void OmniClient::sendImpl(
       callbackContext.oneWay = true;
       channel_->sendRequestAsync<RpcKind::SINGLE_REQUEST_NO_RESPONSE>(
           std::move(rpcOptions),
-          ::apache::thrift::MethodMetadata(std::move(metadata)),
+          apache::thrift::MethodMetadata(std::move(metadata)),
           std::move(serializedRequest),
           std::move(header),
           toRequestClientCallbackPtr(
@@ -399,7 +403,7 @@ void OmniClient::sendImpl(
     case RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE:
       channel_->sendRequestAsync<RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE>(
           std::move(rpcOptions),
-          ::apache::thrift::MethodMetadata(std::move(metadata)),
+          apache::thrift::MethodMetadata(std::move(metadata)),
           std::move(serializedRequest),
           std::move(header),
           toRequestClientCallbackPtr(
@@ -409,7 +413,7 @@ void OmniClient::sendImpl(
       BufferOptions bufferOptions = rpcOptions.getBufferOptions();
       channel_->sendRequestAsync<RpcKind::SINGLE_REQUEST_STREAMING_RESPONSE>(
           std::move(rpcOptions),
-          ::apache::thrift::MethodMetadata(std::move(metadata)),
+          apache::thrift::MethodMetadata(std::move(metadata)),
           std::move(serializedRequest),
           std::move(header),
           createStreamClientCallback(
@@ -420,8 +424,11 @@ void OmniClient::sendImpl(
   }
 }
 
-uint16_t OmniClient::getChannelProtocolId() {
-  return channel_->getProtocolId();
+void OmniClient::setInteraction(apache::thrift::RpcOptions& rpcOptions) {
+  auto* client = factoryClient_.load();
+  if (client != nullptr) {
+    client->setInteraction(rpcOptions);
+  }
 }
 
 OmniInteractionClient::OmniInteractionClient(
@@ -453,7 +460,7 @@ void OmniInteractionClient::terminate() {
     return;
   }
   auto* eb = channel_->getEventBase();
-  if (eb) {
+  if (eb != nullptr) {
     folly::getKeepAliveToken(eb).add(
         [channel = channel_, id = std::move(interactionId_)](auto&&) mutable {
           channel->terminateInteraction(std::move(id));

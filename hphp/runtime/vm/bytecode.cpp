@@ -5094,22 +5094,28 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  auto const tv = vmStack().topC();
+  auto const tv = *vmStack().topC();
   auto const obj = [&]() -> ObjectData* {
     if (tvIsNull(tv)) return nullptr;
     if (UNLIKELY(!tvIsObject(tv))) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Invalid input to SetImplicitContextByValue");
     }
-    return tv->m_data.pobj;
+    return tv.m_data.pobj;
   }();
-  vmStack().discard(); // ref-count will be transferred
-  auto result = ImplicitContext::setByValue(Object::attach(obj));
-  if (result.isNull()) {
+  auto const prev = *ImplicitContext::activeCtx;
+  *ImplicitContext::activeCtx = obj;
+  vmStack().discard();
+
+  if (!prev) {
     vmStack().pushNull();
   } else {
-    vmStack().pushObjectNoRc(result.detach());
+    vmStack().pushObject(prev);
   }
+
+  // Decref after discarding so that if we are pushing the same object back,
+  // avoid refcount going to zero
+  tvDecRefGen(tv);
 }
 
 OPTBLD_INLINE void iopVerifyImplicitContextState() {
@@ -5302,10 +5308,6 @@ void recordCodeCoverage(PC /*pc*/) {
   auto const func = vmfp()->func();
   Unit* unit = func->unit();
   assertx(unit != nullptr);
-  if (unit == SystemLib::s_hhas_unit) {
-    return;
-  }
-
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
     if (unit->isCoverageEnabled()) {
       unit->recordCoverage(func->getLineNumber(pcOff()));

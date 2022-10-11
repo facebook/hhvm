@@ -48,17 +48,6 @@ struct VisitByFieldId<::cpp2::MyStructMapFloatThrowExp> {
 };
 
 template <>
-struct VisitByFieldId<::cpp2::MyDataItem> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    default:
-      throwInvalidThriftId(fieldId, "::cpp2::MyDataItem");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::cpp2::MyStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -136,76 +125,6 @@ struct VisitByFieldId<::cpp2::SimpleStruct> {
       return f(1, static_cast<T&&>(t).name_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::SimpleStruct");
-    }
-  }
-};
-
-template <>
-struct VisitByFieldId<::cpp2::ComplexNestedStruct> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).setOfSetOfInt_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).listofListOfListOfListOfEnum_ref());
-    case 3:
-      return f(2, static_cast<T&&>(t).listOfListOfMyStruct_ref());
-    case 4:
-      return f(3, static_cast<T&&>(t).setOfListOfListOfLong_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).setOfSetOfsetOfLong_ref());
-    case 6:
-      return f(5, static_cast<T&&>(t).mapStructListOfListOfLong_ref());
-    case 7:
-      return f(6, static_cast<T&&>(t).mKeyStructValInt_ref());
-    case 8:
-      return f(7, static_cast<T&&>(t).listOfMapKeyIntValInt_ref());
-    case 9:
-      return f(8, static_cast<T&&>(t).listOfMapKeyStrValList_ref());
-    case 10:
-      return f(9, static_cast<T&&>(t).mapKeySetValLong_ref());
-    case 11:
-      return f(10, static_cast<T&&>(t).mapKeyListValLong_ref());
-    case 12:
-      return f(11, static_cast<T&&>(t).mapKeyMapValMap_ref());
-    case 13:
-      return f(12, static_cast<T&&>(t).mapKeySetValMap_ref());
-    case 14:
-      return f(13, static_cast<T&&>(t).NestedMaps_ref());
-    case 15:
-      return f(14, static_cast<T&&>(t).mapKeyIntValList_ref());
-    case 16:
-      return f(15, static_cast<T&&>(t).mapKeyIntValSet_ref());
-    case 17:
-      return f(16, static_cast<T&&>(t).mapKeySetValInt_ref());
-    case 18:
-      return f(17, static_cast<T&&>(t).mapKeyListValSet_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::cpp2::ComplexNestedStruct");
-    }
-  }
-};
-
-template <>
-struct VisitByFieldId<::cpp2::MyUnion> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).myEnum_ref());
-    case 2:
-      return f(1, static_cast<T&&>(t).myStruct_ref());
-    case 3:
-      return f(2, static_cast<T&&>(t).myDataItem_ref());
-    case 4:
-      return f(3, static_cast<T&&>(t).complexNestedStruct_ref());
-    case 5:
-      return f(4, static_cast<T&&>(t).longValue_ref());
-    case 6:
-      return f(5, static_cast<T&&>(t).intValue_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::cpp2::MyUnion");
     }
   }
 };
@@ -295,6 +214,40 @@ struct VisitByFieldId<::cpp2::MyStructTypeDef> {
 };
 
 template <>
+struct VisitByFieldId<::cpp2::MyDataItem> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::MyDataItem");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::cpp2::MyUnion> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).myEnum_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).myStruct_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).myDataItem_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).complexNestedStruct_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).longValue_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).intValue_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::MyUnion");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::cpp2::MyUnionFloatFieldThrowExp> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -309,6 +262,53 @@ struct VisitByFieldId<::cpp2::MyUnionFloatFieldThrowExp> {
       return f(3, static_cast<T&&>(t).complexNestedStruct_ref());
     default:
       throwInvalidThriftId(fieldId, "::cpp2::MyUnionFloatFieldThrowExp");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::cpp2::ComplexNestedStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).setOfSetOfInt_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).listofListOfListOfListOfEnum_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).listOfListOfMyStruct_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).setOfListOfListOfLong_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).setOfSetOfsetOfLong_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).mapStructListOfListOfLong_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).mKeyStructValInt_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).listOfMapKeyIntValInt_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).listOfMapKeyStrValList_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).mapKeySetValLong_ref());
+    case 11:
+      return f(10, static_cast<T&&>(t).mapKeyListValLong_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).mapKeyMapValMap_ref());
+    case 13:
+      return f(12, static_cast<T&&>(t).mapKeySetValMap_ref());
+    case 14:
+      return f(13, static_cast<T&&>(t).NestedMaps_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).mapKeyIntValList_ref());
+    case 16:
+      return f(15, static_cast<T&&>(t).mapKeyIntValSet_ref());
+    case 17:
+      return f(16, static_cast<T&&>(t).mapKeySetValInt_ref());
+    case 18:
+      return f(17, static_cast<T&&>(t).mapKeyListValSet_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::cpp2::ComplexNestedStruct");
     }
   }
 };

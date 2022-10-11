@@ -19,7 +19,6 @@ for i in $@; do
   BN=$(basename $i)
   BNPHP=$(basename $BN .php)
   BNNSPHP=$(basename $BN .ns.php)
-  BNHHAS=$(basename $BN .hhas)
   if [ "$BNPHP.php" = "$BN" ]; then
     # First, .php files are included with their open tags stripped.
     if head -1 $i | grep -qv '^<?\(php\|hh\)'; then
@@ -34,23 +33,7 @@ for i in $@; do
     if [ ! "$BNNSPHP.ns.php" = "$BN" ]; then
       echo "}" >> ${SYSTEMLIB}
     fi
-  else
-    if [ ! "$BNHHAS.hhas" = "$BN" ]; then
-      echo "File '$i' is neither PHP nor HHAS source" >&2
-      exit 1
-    fi
   fi
 done
 
 echo "" >> ${SYSTEMLIB}
-echo "<?hhas" >> ${SYSTEMLIB}
-
-# Then .hhas files are included en-masse.
-for i in $@; do
-  BN=$(basename $i)
-  BNHHAS=$(basename $BN .hhas)
-  if [ "$BNHHAS.hhas" = "$BN" ]; then
-    echo "" >> ${SYSTEMLIB}
-    cat $i >> ${SYSTEMLIB}
-  fi
-done

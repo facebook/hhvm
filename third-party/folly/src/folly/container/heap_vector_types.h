@@ -104,6 +104,14 @@
 #include <folly/small_vector.h>
 
 namespace folly {
+template <
+    typename Key,
+    typename Value,
+    typename Compare,
+    typename Allocator,
+    typename GrowthPolicy,
+    typename Container>
+class heap_vector_map;
 
 namespace detail {
 
@@ -716,11 +724,11 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
   struct heap_iterator {
     using iterator_category = std::random_access_iterator_tag;
     using size_type = typename Container::size_type;
-    using difference_type = typename Container::difference_type;
-    using value_type = typename Container::value_type;
-    using pointer = typename Container::pointer;
-    using reference = typename Container::reference;
-    using const_reference = typename Container::const_reference;
+    using difference_type =
+        typename std::iterator_traits<Iter>::difference_type;
+    using value_type = typename std::iterator_traits<Iter>::value_type;
+    using pointer = typename std::iterator_traits<Iter>::pointer;
+    using reference = typename std::iterator_traits<Iter>::reference;
 
     heap_iterator() = default;
     template <typename C>
@@ -835,14 +843,38 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
       return heap_vector_detail::distance(*cont_, offset1, offset0);
     }
 
-    reference operator*() { return const_cast<reference>(*ptr_); }
-    reference operator*() const { return const_cast<reference>(*ptr_); }
-    pointer operator->() { return &const_cast<reference>(*ptr_); }
-    pointer operator->() const { return &const_cast<reference>(*ptr_); }
+    reference operator*() const { return *ptr_; }
+    pointer operator->() const {
+      if constexpr (std::is_pointer_v<Iter>) {
+        return ptr_;
+      } else {
+        return ptr_.operator->();
+      }
+    }
 
    protected:
     template <typename I2>
     friend struct heap_iterator;
+
+    template <
+        typename T2,
+        typename Compare2,
+        typename Allocator2,
+        typename GrowthPolicy2,
+        typename Container2,
+        typename KeyT2,
+        typename ValueCompare2>
+    friend class heap_vector_container;
+
+    template <
+        typename Key2,
+        typename Value2,
+        typename Compare2,
+        typename Allocator2,
+        typename GrowthPolicy2,
+        typename Container2>
+    friend class ::folly::heap_vector_map;
+
     Iter ptr_;
     Container* cont_;
   };
@@ -1023,7 +1055,7 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
   std::pair<iterator, bool> insert(const value_type& value) {
     iterator it = lower_bound(m_.getKey(value));
     if (it == end() || value_comp()(value, *it)) {
-      auto offset = &*it - &*m_.cont_.begin();
+      auto offset = it.ptr_ - m_.cont_.begin();
       get_growth_policy().increase_capacity(*this, it);
       m_.cont_.push_back(value);
       offset = heap_vector_detail::insert(offset, m_.cont_);
@@ -1036,7 +1068,7 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
   std::pair<iterator, bool> insert(value_type&& value) {
     iterator it = lower_bound(m_.getKey(value));
     if (it == end() || value_comp()(value, *it)) {
-      auto offset = &*it - &*m_.cont_.begin();
+      auto offset = it.ptr_ - m_.cont_.begin();
       get_growth_policy().increase_capacity(*this, it);
       m_.cont_.push_back(std::move(value));
       offset = heap_vector_detail::insert(offset, m_.cont_);
@@ -1114,13 +1146,13 @@ class heap_vector_container : growth_policy_wrapper<GrowthPolicy> {
     if (it == end()) {
       return 0;
     }
-    heap_vector_detail::erase(&*it - &*m_.cont_.begin(), m_.cont_);
+    heap_vector_detail::erase(it.ptr_ - m_.cont_.begin(), m_.cont_);
     return 1;
   }
 
   iterator erase(const_iterator it) {
     auto offset =
-        heap_vector_detail::erase(&*it - &*m_.cont_.begin(), m_.cont_);
+        heap_vector_detail::erase(it.ptr_ - m_.cont_.begin(), m_.cont_);
     iterator ret = end();
     ret = m_.cont_.begin() + offset;
     return ret;
@@ -1501,7 +1533,7 @@ class heap_vector_map
   mapped_type& operator[](const key_type& key) {
     iterator it = lower_bound(key);
     if (it == end() || key_comp()(key, it->first)) {
-      auto offset = &*it - &*m_.cont_.begin();
+      auto offset = it.ptr_ - m_.cont_.begin();
       get_growth_policy().increase_capacity(*this, it);
       m_.cont_.emplace_back(key, mapped_type());
       offset = detail::heap_vector_detail::insert(offset, m_.cont_);

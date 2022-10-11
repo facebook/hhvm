@@ -120,7 +120,7 @@ bool HTTPSessionBase::onBodyImpl(std::unique_ptr<folly::IOBuf> chain,
     // notifyBodyProcessed() on it.
     VLOG(4) << *this << " Enqueued ingress. Ingress buffer uses "
             << pendingReadSize_ << " of " << readBufLimit_ << " bytes.";
-    if (pendingReadSize_ > readBufLimit_ && oldSize <= readBufLimit_) {
+    if (ingressLimitExceeded() && oldSize <= readBufLimit_) {
       if (infoCallback_) {
         infoCallback_->onIngressLimitExceeded(*this);
       }

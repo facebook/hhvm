@@ -103,12 +103,14 @@ class RocketServerConnection final
       MessageChannel::SendCallbackPtr cb = nullptr,
       StreamId streamId = StreamId());
 
-  RocketStreamClientCallback& createStreamClientCallback(
+  // does not create callback and returns nullptr if streamId is already in use
+  RocketStreamClientCallback* FOLLY_NULLABLE createStreamClientCallback(
       StreamId streamId,
       RocketServerConnection& connection,
       uint32_t initialRequestN);
 
-  RocketSinkClientCallback& createSinkClientCallback(
+  // does not create callback and returns nullptr if streamId is already in use
+  RocketSinkClientCallback* FOLLY_NULLABLE createSinkClientCallback(
       StreamId streamId, RocketServerConnection& connection);
 
   // Parser callbacks

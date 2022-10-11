@@ -49,12 +49,12 @@ class EnumMetadata<::test::fixtures::basic::HackEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic::MyDataItem> {
+class StructMetadata<::test::fixtures::basic::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::test::fixtures::basic::MyStruct> {
+class StructMetadata<::test::fixtures::basic::MyDataItem> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

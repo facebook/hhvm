@@ -393,17 +393,23 @@ inline std::vector<std::shared_ptr<RouteHandleIf>> get_route_handles(
   return r;
 }
 
+template <class RouterInfo = void, class = void>
+struct GetLocalType {
+  using type = typename folly::fibers::LocalType<void>;
+};
+
+template <class RouterInfo>
+struct GetLocalType<
+    RouterInfo,
+    std::void_t<typename RouterInfo::RouteHandleIf>> {
+  using type = typename mcrouter::fiber_local<RouterInfo>::ContextTypeTag;
+};
+
+template <class RouterInfo>
 class TestFiberManager {
  public:
   TestFiberManager(size_t recordFiberStackEvery = kRecordFiberStackEveryDefault)
-      : fm_(std::make_unique<folly::fibers::SimpleLoopController>(),
-            getFiberOptions(recordFiberStackEvery)) {}
-
-  template <class LocalType>
-  explicit TestFiberManager(
-      LocalType t,
-      size_t recordFiberStackEvery = kRecordFiberStackEveryDefault)
-      : fm_(t,
+      : fm_(typename GetLocalType<RouterInfo>::type(),
             std::make_unique<folly::fibers::SimpleLoopController>(),
             getFiberOptions(recordFiberStackEvery)) {}
 

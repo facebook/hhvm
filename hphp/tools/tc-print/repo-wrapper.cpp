@@ -66,8 +66,7 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
     RepoFile::globalData().load();
   }
 
-  std::string hhasLib;
-  auto const phpLib = get_systemlib(&hhasLib);
+  auto const phpLib = get_systemlib();
   if (!phpLib.empty()) {
     auto phpUnit = compile_string(phpLib.c_str(), phpLib.size(),
                                   "systemlib.php",
@@ -75,14 +74,6 @@ RepoWrapper::RepoWrapper(const char* repoSchema,
                                   nullptr,
                                   RepoOptions::defaults());
     addUnit(phpUnit);
-  }
-  if (!hhasLib.empty()) {
-    auto hhasUnit = compile_string(hhasLib.c_str(), hhasLib.size(),
-                                   "systemlib.hhas",
-                                   Native::s_systemNativeFuncs,
-                                   nullptr,
-                                   RepoOptions::defaults());
-    addUnit(hhasUnit);
   }
 
   SystemLib::s_inited = true;

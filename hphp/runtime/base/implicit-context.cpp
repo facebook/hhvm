@@ -26,12 +26,6 @@ namespace HPHP {
 
 rds::Link<ObjectData*, rds::Mode::Normal> ImplicitContext::activeCtx;
 
-Object ImplicitContext::setByValue(Object&& obj) {
-  auto const prev = *ImplicitContext::activeCtx;
-  *ImplicitContext::activeCtx = obj.detach();
-  return Object::attach(prev);
-}
-
 std::string ImplicitContext::stateToString(ImplicitContext::State state) {
   switch (state) {
     case ImplicitContext::State::Value:

@@ -21,7 +21,7 @@ using namespace facebook::memcache;
 using namespace facebook::memcache::mcrouter;
 
 TEST(RouteHandleFactoryTest, sanity) {
-  TestFiberManager fm;
+  TestFiberManager<MemcacheRouterInfo> fm;
 
   auto router = getTestRouter();
   auto proxy = router->getProxy(0);

@@ -17,21 +17,24 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Typedef" : {
         "type" : {
   "type" : "struct",
-  "name" : "Typedef"
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -62,7 +65,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }

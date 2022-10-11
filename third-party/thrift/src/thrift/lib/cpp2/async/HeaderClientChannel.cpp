@@ -653,6 +653,9 @@ void HeaderClientChannel::RocketUpgradeChannel::initUpgradeIfNeeded(
   auto client = std::make_unique<apache::thrift::RocketUpgradeAsyncClient>(
       std::shared_ptr<HeaderClientChannel>(
           headerChannel_.get(), [](HeaderClientChannel*) {}));
+
+  client->clearEventHandlers();
+
   client->upgradeToRocket(rpcOptions, std::move(callback));
 }
 

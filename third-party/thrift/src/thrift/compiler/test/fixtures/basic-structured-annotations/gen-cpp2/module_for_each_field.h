@@ -31,20 +31,20 @@ struct ForEachField<::test::fixtures::basic-structured-annotations::structured_a
 };
 
 template <>
-struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).count_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).name_ref()...);
     f(1, static_cast<T&&>(t).recurse_ref()...);
     f(2, static_cast<T&&>(t).forward_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).count_ref()...);
   }
 };
 

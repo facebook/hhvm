@@ -792,16 +792,19 @@ fn cmp_module(a: &Module<'_>, b: &Module<'_>) -> Result<()> {
         attributes: a_attributes,
         name: a_name,
         span: a_span,
+        doc_comment: a_doc_comment,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
+        doc_comment: b_doc_comment,
     } = b;
 
     cmp_eq(a_name, b_name).qualified("name")?;
     cmp_attributes(a_attributes, b_attributes).qualified("attributes")?;
     cmp_eq(a_span, b_span).qualified("span")?;
+    cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
     Ok(())
 }
 

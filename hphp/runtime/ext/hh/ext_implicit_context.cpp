@@ -136,8 +136,8 @@ String HHVM_FUNCTION(get_implicit_context_memo_key) {
   return String{context->m_memokey};
 }
 
-Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
-                                           TypedValue data) {
+Object HHVM_FUNCTION(create_implicit_context, StringArg keyarg,
+                                              TypedValue data) {
   auto const key = keyarg.get();
   // Reserve the underscore prefix for the time being in case we want to
   // emit keys from the compiler. This would allow us to avoid having
@@ -177,8 +177,7 @@ Object HHVM_FUNCTION(set_implicit_context, StringArg keyarg,
     serialize_memoize_tv(sb, 0, e.second);
   }
   context->m_memokey = sb.detach().detach();
-
-  return ImplicitContext::setByValue(std::move(obj));
+  return obj;
 }
 
 Object HHVM_FUNCTION(create_special_implicit_context,
@@ -247,7 +246,7 @@ Object HHVM_FUNCTION(create_special_implicit_context,
     }
     return sb.detach().detach();
   }();
-  return Object{obj};
+  return obj;
 }
 
 namespace {
@@ -293,8 +292,8 @@ static struct HHImplicitContext final : Extension {
                   HHVM_FN(get_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_whole_implicit_context,
                   HHVM_FN(get_whole_implicit_context));
-    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\set_implicit_context,
-                  HHVM_FN(set_implicit_context));
+    HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_implicit_context,
+                  HHVM_FN(create_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\create_special_implicit_context,
                   HHVM_FN(create_special_implicit_context));
     HHVM_NAMED_FE(HH\\ImplicitContext\\_Private\\get_implicit_context_memo_key,

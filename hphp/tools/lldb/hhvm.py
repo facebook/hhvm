@@ -6,6 +6,7 @@
 import lldb
 import sys
 
+import idx
 import pretty
 import stack
 
@@ -21,5 +22,6 @@ def __lldb_init_module(debugger, internal_dict):
         None
     """
     top = sys.modules[__name__].__name__
+    idx.__lldb_init_module(debugger, internal_dict, top)
     pretty.__lldb_init_module(debugger, internal_dict, top)
     stack.__lldb_init_module(debugger, internal_dict, top)

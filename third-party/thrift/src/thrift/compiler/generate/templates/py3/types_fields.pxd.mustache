@@ -60,7 +60,7 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}types as _{{#include
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as {{> types/current_module_types}}
 
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{^struct:union?}}
 
 ctypedef void (*__{{struct:name}}_FieldsSetterFunc)(__{{struct:name}}_FieldsSetter, object) except *
@@ -78,4 +78,4 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
     {{/struct:py3_fields}}
 
 {{/struct:union?}}
-{{/program:structs}}
+{{/program:filtered_structs}}

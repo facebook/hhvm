@@ -63,7 +63,7 @@ error_codes::Naming
 error_codes::NastCheck
 error_codes::Parsing
 error_codes::Typing
-error_codes::GlobalWriteCheck
+error_codes::GlobalAccessCheck
 errors::ErrorCode
 errors::Format
 errors::NameContext

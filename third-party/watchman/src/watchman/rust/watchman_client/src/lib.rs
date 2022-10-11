@@ -846,6 +846,14 @@ impl Client {
         Ok(response)
     }
 
+    pub async fn version(&self) -> Result<GetVersionResponse, Error> {
+        self.generic_request(&["version"]).await
+    }
+
+    pub async fn watch_list(&self) -> Result<WatchListResponse, Error> {
+        self.generic_request(&["watch-list"]).await
+    }
+
     /// This method will attempt to assert the state named `state_name`
     /// on the watchman server. This is used to facilitate advanced settling
     /// in subscriptions.

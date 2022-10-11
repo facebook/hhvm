@@ -48,6 +48,11 @@ cdef class SyncClient:
         finally:
             self._omni_client.reset()
 
+    def clear_event_handlers(SyncClient self):
+        if not self._omni_client:
+            raise RuntimeError("Connection already closed")
+        deref(self._omni_client).clearEventHandlers()
+
     def _send_request(
         SyncClient self,
         string service_name,

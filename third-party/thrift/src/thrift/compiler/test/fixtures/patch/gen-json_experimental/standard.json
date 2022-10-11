@@ -242,7 +242,8 @@
           "thrift.Experimental" : {
         "type" : {
   "type" : "struct",
-  "name" : "Experimental"
+  "name" : "Experimental",
+  "path" : "thrift/annotation/thrift.thrift"
 },
         "value" : {}
       }

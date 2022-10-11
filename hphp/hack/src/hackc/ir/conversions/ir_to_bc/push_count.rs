@@ -55,6 +55,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::ContCheck(..)
             | Hhbc::InitProp(..)
             | Hhbc::IterFree(..)
+            | Hhbc::RaiseClassStringConversionWarning(..)
             | Hhbc::Silence(..)
             | Hhbc::ThrowNonExhaustiveSwitch(_)
             | Hhbc::UnsetG(..)
@@ -131,6 +132,7 @@ impl<'a> PushCount<'a> for instr::Hhbc {
             | Hhbc::IssetS(..)
             | Hhbc::LateBoundCls(_)
             | Hhbc::LazyClass(..)
+            | Hhbc::LazyClassFromClass(..)
             | Hhbc::LockObj { .. }
             | Hhbc::MemoSet(..)
             | Hhbc::MemoSetEager(..)

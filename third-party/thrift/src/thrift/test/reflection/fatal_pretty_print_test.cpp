@@ -34,10 +34,14 @@ std::string adjust(std::string input) {
   return folly::rtrimWhitespace(folly::stripLeftMargin(std::move(input))).str();
 }
 
-#define TEST_IMPL(Expected, ...)                                 \
+#define TEST_IMPL_TC(TC, Expected, ...)                          \
   do {                                                           \
     std::ostringstream out;                                      \
-    apache::thrift::pretty_print(out, __VA_ARGS__);              \
+    if constexpr (std::is_void_v<TC>) {                          \
+      apache::thrift::pretty_print(out, __VA_ARGS__);            \
+    } else {                                                     \
+      apache::thrift::pretty_print<TC>(out, __VA_ARGS__);        \
+    }                                                            \
     const auto actual = out.str();                               \
                                                                  \
     if (output_result::value) {                                  \
@@ -47,6 +51,8 @@ std::string adjust(std::string input) {
                                                                  \
     EXPECT_EQ(Expected, actual);                                 \
   } while (false)
+
+#define TEST_IMPL(Expected, ...) TEST_IMPL_TC(void, Expected, __VA_ARGS__)
 
 TEST(fatal_pretty_print, pretty_print) {
   structA a1;
@@ -756,6 +762,22 @@ TEST(fatal_pretty_print, variant_ref_unique) {
       }
     })";
   TEST_IMPL(adjust(expectedStr2), v);
+}
+
+TEST(fatal_pretty_print, tc_binary_iobuf) {
+  using tc = apache::thrift::type_class::binary;
+  std::string x = "hello";
+  std::string y = "world";
+  auto xb = folly::IOBuf::wrapBuffer(x.data(), x.size());
+  auto yb = folly::IOBuf::wrapBuffer(y.data(), y.size());
+  xb->prependChain(std::move(yb));
+  const char* expectedStr = R"("0x68656c6c6f776f726c64")"; // hex("helloworld")
+  TEST_IMPL_TC(tc, expectedStr, xb->to<std::string>());
+  TEST_IMPL_TC(tc, expectedStr, xb->to<folly::fbstring>());
+  TEST_IMPL_TC(tc, expectedStr, xb);
+  TEST_IMPL_TC(tc, expectedStr, *xb);
+  TEST_IMPL_TC(tc, R"()", std::unique_ptr<folly::IOBuf>());
+  TEST_IMPL_TC(tc, R"("0x")", std::make_unique<folly::IOBuf>());
 }
 
 } // namespace cpp_reflection

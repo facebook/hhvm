@@ -9,6 +9,7 @@ use structopt::clap::AppSettings;
 use structopt::StructOpt;
 
 mod audit;
+mod rage;
 
 #[derive(StructOpt, Debug)]
 #[structopt(setting = AppSettings::DisableVersion,
@@ -21,6 +22,7 @@ struct MainCommand {
 #[derive(StructOpt, Debug)]
 enum TopLevelSubcommand {
     Audit(audit::AuditCmd),
+    Rage(rage::RageCmd),
 }
 
 impl TopLevelSubcommand {
@@ -28,6 +30,7 @@ impl TopLevelSubcommand {
         use TopLevelSubcommand::*;
         match self {
             Audit(cmd) => cmd.run().await,
+            Rage(cmd) => cmd.run().await,
         }
     }
 }

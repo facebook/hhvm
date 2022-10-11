@@ -867,6 +867,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
         Hhbc::LazyClass(clsid, _) => {
             write!(w, "lazy_class {}", FmtIdentifierId(clsid.id, ctx.strings))?;
         }
+        Hhbc::LazyClassFromClass(vid, _) => {
+            write!(w, "lazy_class_from_class {}", FmtVid(func, vid, verbose))?;
+        }
         Hhbc::LockObj(vid, _) => {
             write!(w, "lock_obj {}", FmtVid(func, vid, verbose))?;
         }
@@ -960,6 +963,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
             write!(w, "parent")?;
         }
         Hhbc::Print(vid, _) => write!(w, "print {}", FmtVid(func, vid, ctx.verbose))?,
+        Hhbc::RaiseClassStringConversionWarning(_) => {
+            write!(w, "raise_class_string_conversion_warning")?
+        }
         Hhbc::RecordReifiedGeneric(vid, _) => write!(
             w,
             "record_reified_generic {}",

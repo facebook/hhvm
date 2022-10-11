@@ -36,7 +36,6 @@ struct setField;
 struct mapField;
 struct binaryField;
 struct longField;
-struct field;
 struct structField;
 struct optionalStructField;
 struct structListField;
@@ -44,6 +43,7 @@ struct optionalStructListField;
 struct unionField;
 struct optionalUnionField;
 struct adaptedStructField;
+struct field;
 struct field;
 struct shared_field;
 struct opt_shared_field;
@@ -126,10 +126,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(binaryField);
 #define APACHE_THRIFT_ACCESSOR_longField
 APACHE_THRIFT_DEFINE_ACCESSOR(longField);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_field
-#define APACHE_THRIFT_ACCESSOR_field
-APACHE_THRIFT_DEFINE_ACCESSOR(field);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_structField
 #define APACHE_THRIFT_ACCESSOR_structField
 APACHE_THRIFT_DEFINE_ACCESSOR(structField);
@@ -157,6 +153,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(optionalUnionField);
 #ifndef APACHE_THRIFT_ACCESSOR_adaptedStructField
 #define APACHE_THRIFT_ACCESSOR_adaptedStructField
 APACHE_THRIFT_DEFINE_ACCESSOR(adaptedStructField);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field
+#define APACHE_THRIFT_ACCESSOR_field
+APACHE_THRIFT_DEFINE_ACCESSOR(field);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_field
 #define APACHE_THRIFT_ACCESSOR_field
@@ -218,14 +218,14 @@ namespace facebook { namespace thrift { namespace test {
 class MyAnnotation;
 class Foo;
 class Baz;
+class Bar;
 namespace detail {
 class DirectlyAdapted;
 } // namespace detail
-class Bar;
 class StructWithFieldAdapter;
 class TerseAdaptedFields;
-class A;
 class B;
+class A;
 class Config;
 class MyStruct;
 }}} // facebook::thrift::test

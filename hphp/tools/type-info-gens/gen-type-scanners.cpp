@@ -2198,13 +2198,38 @@ const Object& Generator::getObject(const ObjectType& type) const {
     not_reached();
   };
 
+  // Check if the object is a valid indexer. LLVM for clang 15/16 will sometimes
+  // produce a DW_TAG_structure_type for the same Indexer<...> type in a
+  // compile_unit without a corresponding DW_TAG_variable. This check will skip
+  // such cases and end up pick a different type.
+  const auto isValid = [&](const Object& obj) -> bool {
+    if (isIndexerName(type.name.name)) {
+      const auto index_iter = std::find_if(
+        obj.members.begin(),
+        obj.members.end(),
+        [](const Object::Member& m) { return m.name == "s_index"; }
+      );
+
+      if (index_iter == obj.members.end()) {
+        return false;
+      }
+
+      const auto& index_member = *index_iter;
+      if (!index_member.address && index_member.linkage_name.empty()) {
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   // No direct matches in our internal maps, so we need to retrieve it from the
   // type parser. If the type is complete we can just retrieve it and use it
   // directly. If this type has no linkage or pseudo-linkage, it matches nothing
   // else, so just retrieve it. Store it in our maps for later lookup.
-  if (!type.incomplete ||
+  if (isValid(m_parser->getObject(type.key)) && (!type.incomplete ||
       type.name.linkage == ObjectTypeName::Linkage::none ||
-      type.name.linkage == ObjectTypeName::Linkage::pseudo) {
+      type.name.linkage == ObjectTypeName::Linkage::pseudo)) {
     return insert(m_parser->getObject(type.key));
   }
 
@@ -2221,6 +2246,7 @@ const Object& Generator::getObject(const ObjectType& type) const {
       if (key.object_id == type.key.object_id) continue;
       if (key.compile_unit_id != type.key.compile_unit_id) continue;
       auto other = m_parser->getObject(key);
+      if (!isValid(other)) continue;
       if (other.incomplete) continue;
       return insert(std::move(other));
     }
@@ -2238,6 +2264,7 @@ const Object& Generator::getObject(const ObjectType& type) const {
     for (auto const& key : keys) {
       if (key.object_id == type.key.object_id) continue;
       auto other = m_parser->getObject(key);
+      if (!isValid(other)) continue;
       if (other.incomplete) continue;
       return insert(std::move(other));
     }

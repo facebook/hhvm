@@ -64,8 +64,8 @@ template <> struct TStructDataStorage<::facebook::thrift::test::Baz> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted> {
-  static constexpr const std::size_t fields_size = 1;
+template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
+  static constexpr const std::size_t fields_size = 7;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -79,8 +79,8 @@ template <> struct TStructDataStorage<::facebook::thrift::test::detail::Directly
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::Bar> {
-  static constexpr const std::size_t fields_size = 7;
+template <> struct TStructDataStorage<::facebook::thrift::test::detail::DirectlyAdapted> {
+  static constexpr const std::size_t fields_size = 1;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -124,8 +124,8 @@ template <> struct TStructDataStorage<::facebook::thrift::test::TerseAdaptedFiel
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::A> {
-  static constexpr const std::size_t fields_size = 0;
+template <> struct TStructDataStorage<::facebook::thrift::test::B> {
+  static constexpr const std::size_t fields_size = 1;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -139,8 +139,8 @@ template <> struct TStructDataStorage<::facebook::thrift::test::A> {
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::facebook::thrift::test::B> {
-  static constexpr const std::size_t fields_size = 1;
+template <> struct TStructDataStorage<::facebook::thrift::test::A> {
+  static constexpr const std::size_t fields_size = 0;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

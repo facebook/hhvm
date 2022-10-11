@@ -29,12 +29,12 @@ class EnumMetadata<::cpp2::MyEnum> {
   static void gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::cpp2::MyDataItem> {
+class StructMetadata<::cpp2::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::cpp2::MyStruct> {
+class StructMetadata<::cpp2::MyDataItem> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

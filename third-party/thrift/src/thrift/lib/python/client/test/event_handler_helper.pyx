@@ -18,6 +18,9 @@ cdef extern from "<thrift/lib/python/client/test/event_handler_helper.h>" namesp
     cdef void addHandler()
     cdef void removeHandler()
 
+def addEventHandler():
+    addHandler()
+
 @contextmanager
 def client_handler_that_throws():
     addHandler()

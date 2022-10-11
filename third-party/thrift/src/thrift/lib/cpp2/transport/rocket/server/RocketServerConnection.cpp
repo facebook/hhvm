@@ -117,24 +117,33 @@ std::unique_ptr<folly::IOBuf> RocketServerConnection::customAlloc(size_t size) {
   return nullptr;
 }
 
-RocketStreamClientCallback& RocketServerConnection::createStreamClientCallback(
+RocketStreamClientCallback* FOLLY_NULLABLE
+RocketServerConnection::createStreamClientCallback(
     StreamId streamId,
     RocketServerConnection& connection,
     uint32_t initialRequestN) {
-  auto callback = std::make_unique<RocketStreamClientCallback>(
+  auto [it, inserted] = streams_.try_emplace(streamId);
+  if (!inserted) {
+    return nullptr;
+  }
+  auto cb = std::make_unique<RocketStreamClientCallback>(
       streamId, connection, initialRequestN);
-  auto& callbackRef = *callback;
-  streams_.emplace(streamId, std::move(callback));
-  return callbackRef;
+  auto cbPtr = cb.get();
+  it->second = std::move(cb);
+  return cbPtr;
 }
 
-RocketSinkClientCallback& RocketServerConnection::createSinkClientCallback(
+RocketSinkClientCallback* FOLLY_NULLABLE
+RocketServerConnection::createSinkClientCallback(
     StreamId streamId, RocketServerConnection& connection) {
-  auto callback =
-      std::make_unique<RocketSinkClientCallback>(streamId, connection);
-  auto& callbackRef = *callback;
-  streams_.emplace(streamId, std::move(callback));
-  return callbackRef;
+  auto [it, inserted] = streams_.try_emplace(streamId);
+  if (!inserted) {
+    return nullptr;
+  }
+  auto cb = std::make_unique<RocketSinkClientCallback>(streamId, connection);
+  auto cbPtr = cb.get();
+  it->second = std::move(cb);
+  return cbPtr;
 }
 
 void RocketServerConnection::flushWrites(

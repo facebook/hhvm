@@ -616,6 +616,7 @@ fn print_module_def<'arena>(
     print_span(w, &module_def.span)?;
     w.write_all(b" {")?;
     newline(w)?;
+    print_doc_comment(ctx, w, module_def.doc_comment.as_ref())?;
     w.write_all(b"}")?;
     newline(w)
 }

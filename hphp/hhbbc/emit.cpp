@@ -1236,6 +1236,7 @@ void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
 void emit_module(UnitEmitter& ue, const php::Module& module) {
   Module m {
     module.name,
+    module.srcInfo.docComment,
     (int)std::get<0>(module.srcInfo.loc),
     (int)std::get<1>(module.srcInfo.loc),
     module.attrs,

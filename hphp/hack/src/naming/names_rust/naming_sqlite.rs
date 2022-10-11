@@ -81,38 +81,49 @@ impl Names {
                 CLASSES TEXT,
                 CONSTS TEXT,
                 FUNS TEXT,
-                TYPEDEFS TEXT
+                TYPEDEFS TEXT,
+                MODULES TEXT
             );",
         )?
         .execute(params![])?;
 
-        // TODO(ljw) - NAMING_FILE_INFO should be indexed on PATH_SUFFIX.
+        tx.prepare_cached(
+            "
+            CREATE TABLE IF NOT EXISTS CHECKSUM (
+                ID INTEGER PRIMARY KEY,
+                CHECKSUM_VALUE INTEGER NOT NULL
+            );
+            ",
+        )?
+        .execute(params![])?;
 
-        tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
-            .execute(params![])?;
+        tx.prepare_cached(
+            "CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX
+             ON NAMING_FILE_INFO (PATH_SUFFIX, PATH_PREFIX_TYPE);",
+        )?
+        .execute(params![])?;
+
+        tx.prepare_cached(
+            "CREATE INDEX IF NOT EXISTS TYPES_CANON
+             ON NAMING_SYMBOLS (CANON_HASH);",
+        )?
+        .execute(params![])?;
 
         Ok(tx.commit()?)
     }
 
-    /// Walks O(table) to derive checksum based on the decl_hash of each item.
-    /// TODO(ljw) - We should store checksum in the table directly.
-    pub fn derive_checksum(&self) -> anyhow::Result<Checksum> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH
-        FROM
-            NAMING_SYMBOLS
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![])?;
-        let mut checksum = hh24_types::Checksum(0);
+    pub fn get_checksum(&self) -> anyhow::Result<Checksum> {
+        Ok(self
+            .conn
+            .prepare_cached("SELECT CHECKSUM_VALUE FROM CHECKSUM")?
+            .query_row(params![], |row| row.get(0))?)
+    }
 
-        while let Some(row) = rows.next()? {
-            checksum.addremove(row.get(0)?, row.get(1)?);
-        }
-
-        Ok(checksum)
+    pub fn set_checksum(&self, checksum: Checksum) -> anyhow::Result<()> {
+        self.conn
+            .prepare_cached("REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);")?
+            .execute(params![checksum])?;
+        Ok(())
     }
 
     /// Removes a symbol definition from the reverse naming table (be it in
@@ -171,8 +182,8 @@ impl Names {
         Ok(())
     }
 
-    /// Adds all of a file's symbols into the reverse naming table,
-    /// into normal or overflow as appropriate.
+    /// Adds all of a file's symbols into the forward and reverse naming tables,
+    /// into normal or overflow reverse table as appropriate.
     pub fn save_file_summary(
         &self,
         path: &RelativePath,
@@ -594,7 +605,7 @@ impl Names {
     /// TODO(ljw) This function does a needless O(table) scan.
     /// It should get the same information more cheaply by lookup up the forward
     /// naming table directly.
-    pub fn get_symbol_hashes(
+    pub fn get_symbol_hashes_for_winners(
         &self,
         path: &RelativePath,
     ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
@@ -627,7 +638,7 @@ impl Names {
     /// TODO(ljw) This function does a needless O(table) scan.
     /// It should get the same information more cheaply by lookup up the forward
     /// naming table directly.
-    pub fn get_overflow_symbol_hashes(
+    pub fn get_symbol_hashes_for_losers(
         &self,
         path: &RelativePath,
     ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
@@ -655,37 +666,73 @@ impl Names {
         Ok(symbol_hashes)
     }
 
-    /// It scans O(table) for every entry in the reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_symbol_and_decl_hashes(
+    /// This function will return an empty list if the path doesn't exist in the forward naming table
+    pub fn get_symbol_hashes_for_winners_and_losers(
+        &self,
+        path: &RelativePath,
+    ) -> anyhow::Result<Vec<(ToplevelSymbolHash, crate::FileInfoId)>> {
+        // The NAMING_FILE_INFO table stores e.g. "Classname1|Classname2|Classname3". This
+        // helper turns it into a vec of (ToplevelSymbolHash,file_info_id) pairs
+        fn split(
+            s: Option<String>,
+            f: impl Fn(&str) -> ToplevelSymbolHash,
+            file_info_id: crate::FileInfoId,
+        ) -> Vec<(ToplevelSymbolHash, crate::FileInfoId)> {
+            match s {
+                None => vec![],
+                Some(s) => s
+                    .split_terminator('|')
+                    .map(|name| (f(name), file_info_id))
+                    .collect(),
+            }
+            // s.split_terminator yields an empty list for an empty string;
+            // s.split would have yielded a singleton list, which we don't want.
+        }
+
+        let mut results = vec![];
+        self.conn
+            .prepare_cached(
+                "SELECT CLASSES, CONSTS, FUNS, TYPEDEFS, MODULES, FILE_INFO_ID FROM NAMING_FILE_INFO
+                WHERE PATH_PREFIX_TYPE = ?
+                AND PATH_SUFFIX = ?",
+            )?
+            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
+                let file_info_id: crate::FileInfoId = row.get(5)?;
+                results.extend(split(row.get(0)?, ToplevelSymbolHash::from_type, file_info_id));
+                results.extend(split(row.get(1)?, ToplevelSymbolHash::from_const, file_info_id));
+                results.extend(split(row.get(2)?, ToplevelSymbolHash::from_fun, file_info_id));
+                results.extend(split(row.get(3)?, ToplevelSymbolHash::from_type, file_info_id));
+                results.extend(split(row.get(4)?, ToplevelSymbolHash::from_module, file_info_id));
+                Ok(())
+            })
+            .optional()?;
+        Ok(results)
+    }
+
+    /// It looks up the forward-naming-table to find which symbols are in a filename,
+    /// and for each it does a further lookup in the reverse-naming-table to find more about them.
+    /// It only returns information about winners that were found in that filename.
+    pub fn get_symbol_and_decl_hashes_for_winners(
         &self,
         path: &RelativePath,
     ) -> anyhow::Result<Vec<(ToplevelSymbolHash, DeclHash, crate::FileInfoId)>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH,
-            NAMING_SYMBOLS.FILE_INFO_ID
-        FROM
-            NAMING_SYMBOLS
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut result = vec![];
-        while let Some(row) = rows.next()? {
-            result.push((row.get(0)?, row.get(1)?, row.get(2)?));
+        // For each symbol_hash we get from the forward-naming-table, look it up in the reverse-naming-table
+        let mut results = vec![];
+        for (symbol_hash, fwd_file_id) in self.get_symbol_hashes_for_winners_and_losers(path)? {
+            self.conn
+                .prepare_cached(
+                    "SELECT DECL_HASH, FILE_INFO_ID FROM NAMING_SYMBOLS WHERE HASH = ?",
+                )?
+                .query_row(params![symbol_hash], |row| {
+                    let decl_hash: DeclHash = row.get(0)?;
+                    let winner_file_id: crate::FileInfoId = row.get(1)?;
+                    if winner_file_id == fwd_file_id {
+                        results.push((symbol_hash, decl_hash, winner_file_id));
+                    }
+                    Ok(())
+                })?;
         }
-        Ok(result)
+        Ok(results)
     }
 
     /// This inserts an item into the forward naming table.
@@ -709,9 +756,10 @@ impl Names {
                 CLASSES,
                 CONSTS,
                 FUNS,
-                TYPEDEFS
+                TYPEDEFS,
+                MODULES
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             )?
             .execute(params![
                 prefix_type,
@@ -722,19 +770,18 @@ impl Names {
                 Self::join_with_pipe(file_summary.consts()),
                 Self::join_with_pipe(file_summary.funs()),
                 Self::join_with_pipe(file_summary.typedefs()),
+                Self::join_with_pipe(file_summary.modules()),
             ])?;
         let file_info_id = crate::FileInfoId::last_insert_rowid(&self.conn);
         Ok(file_info_id)
     }
 
-    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> String {
-        let mut s = String::new();
-        for (symbol, _) in symbols {
-            s.push_str(symbol);
-            s.push('|');
-        }
-        s.pop(); // Remove trailing pipe character
-        s
+    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> Option<String> {
+        let s = symbols
+            .map(|(symbol, _)| symbol)
+            .collect::<Vec<_>>()
+            .join("|");
+        if s.is_empty() { None } else { Some(s) }
     }
 
     /// This removes an entry from the forward naming table.
@@ -809,7 +856,7 @@ impl Names {
             .prepare_cached(
                 "
                 UPDATE NAMING_FILE_INFO
-                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?
+                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?, MODULES=?
                 WHERE FILE_INFO_ID=?
                 ",
             )?
@@ -820,6 +867,7 @@ impl Names {
                 join(decls_or_empty.consts(), "|"),
                 join(decls_or_empty.funs(), "|"),
                 join(decls_or_empty.typedefs(), "|"),
+                join(decls_or_empty.modules(), "|"),
                 file_info_id,
             ])?;
 
@@ -842,7 +890,7 @@ impl Names {
         &self,
         symbol_hash: ToplevelSymbolHash,
         winner: Option<&crate::SymbolRow>,
-        overflow: &[crate::SymbolRow],
+        overflow: &[&crate::SymbolRow],
     ) -> anyhow::Result<()> {
         self.conn
             .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?

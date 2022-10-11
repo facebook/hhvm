@@ -110,19 +110,28 @@ struct test_callback {
   std::vector<std::string>& out_;
 };
 
-#define TEST_IMPL(LHS, RHS, ...)                                          \
-  do {                                                                    \
-    const std::vector<std::string> expected{__VA_ARGS__};                 \
-                                                                          \
-    std::vector<std::string> actual;                                      \
-    actual.reserve(expected.size());                                      \
-                                                                          \
-    EXPECT_EQ(                                                            \
-        expected.empty(),                                                 \
-        (apache::thrift::debug_equals(LHS, RHS, test_callback(actual)))); \
-                                                                          \
-    EXPECT_EQ(expected, actual);                                          \
+#define TEST_IMPL_TC(TC, LHS, RHS, ...)                                     \
+  do {                                                                      \
+    const std::vector<std::string> expected{__VA_ARGS__};                   \
+                                                                            \
+    std::vector<std::string> actual;                                        \
+    actual.reserve(expected.size());                                        \
+                                                                            \
+    if constexpr (std::is_void_v<TC>) {                                     \
+      EXPECT_EQ(                                                            \
+          expected.empty(),                                                 \
+          (apache::thrift::debug_equals(LHS, RHS, test_callback(actual)))); \
+    } else {                                                                \
+      EXPECT_EQ(                                                            \
+          expected.empty(),                                                 \
+          (apache::thrift::debug_equals<TC>(                                \
+              LHS, RHS, test_callback(actual))));                           \
+    }                                                                       \
+                                                                            \
+    EXPECT_EQ(expected, actual);                                            \
   } while (false)
+
+#define TEST_IMPL(LHS, RHS, ...) TEST_IMPL_TC(void, LHS, RHS, __VA_ARGS__)
 
 TEST(fatal_debug, equal) {
   TEST_IMPL(test_data(), test_data());
@@ -447,6 +456,24 @@ TEST(fatal_debug, variant_ref_unique) {
   allDefault.set_aStruct();
   TEST_IMPL(allNull, allDefault, "$.aStruct" /* extra */);
   TEST_IMPL(allDefault, allNull, "$.aStruct" /* missing */);
+}
+
+TEST(fatal_debug, tc_binary_iobuf) {
+  using tc = apache::thrift::type_class::binary;
+  std::string x = "hello";
+  std::string y = "world";
+  auto xb = folly::IOBuf::wrapBuffer(x.data(), x.size());
+  auto yb = folly::IOBuf::wrapBuffer(y.data(), y.size());
+  xb->prependChain(std::move(yb));
+  auto zb = xb->cloneCoalesced();
+  TEST_IMPL_TC(tc, xb->to<std::string>(), zb->to<std::string>());
+  TEST_IMPL_TC(tc, xb->to<std::string>(), std::string("blah"), "$");
+  TEST_IMPL_TC(tc, xb->to<folly::fbstring>(), zb->to<folly::fbstring>());
+  TEST_IMPL_TC(tc, xb->to<folly::fbstring>(), folly::fbstring("blah"), "$");
+  TEST_IMPL_TC(tc, *xb, *zb);
+  TEST_IMPL_TC(tc, xb, zb);
+  TEST_IMPL_TC(tc, xb, std::unique_ptr<folly::IOBuf>(), "$");
+  TEST_IMPL_TC(tc, xb, std::make_unique<folly::IOBuf>(), "$");
 }
 
 #undef TEST_IMPL

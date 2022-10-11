@@ -32,6 +32,7 @@
 #include <thrift/lib/cpp2/protocol/Serializer.h>
 #include <thrift/lib/cpp2/server/ThriftServer.h>
 #include <thrift/lib/python/client/OmniClient.h> // @manual=//thrift/lib/python/client:omni_client__cython-lib
+#include <thrift/lib/python/client/test/event_handler_helper.h>
 #include <thrift/lib/python/client/test/gen-cpp2/TestService.h>
 #include <thrift/lib/python/client/test/gen-cpp2/test_types.h>
 
@@ -205,8 +206,12 @@ class OmniClientTest : public ::testing::Test {
       const Request& req,
       const std::unordered_map<std::string, std::string>& headers,
       const Result& expected,
-      const RpcKind rpcKind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE) {
+      const RpcKind rpcKind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      const bool clearEventHandlers = false) {
     connectToServer<S>([=](OmniClient& client) -> folly::coro::Task<void> {
+      if (clearEventHandlers) {
+        client.clearEventHandlers();
+      }
       std::string args = S::template serialize<std::string>(req);
       auto data = apache::thrift::MethodMetadata::Data(
           function, apache::thrift::FunctionQualifier::Unspecified);
@@ -222,8 +227,10 @@ class OmniClientTest : public ::testing::Test {
       const std::string& function,
       const Request& req,
       const Result& expected,
-      const RpcKind rpcKind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE) {
-    testSendHeaders<S>(service, function, req, {}, expected, rpcKind);
+      const RpcKind rpcKind = RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      const bool clearEventHandlers = false) {
+    testSendHeaders<S>(
+        service, function, req, {}, expected, rpcKind, clearEventHandlers);
   }
 
   // Send a request and compare the results to the expected value.
@@ -279,6 +286,40 @@ class OmniClientTest : public ::testing::Test {
   std::shared_ptr<folly::IOExecutor> ioThread_{
       std::make_shared<folly::ScopedEventBaseThread>()};
 };
+
+TEST_F(OmniClientTest, AddTestFailsWithBadEventHandler) {
+  AddRequest request;
+  request.num1_ref() = 1;
+  request.num2_ref() = 41;
+  addHandler();
+  EXPECT_THROW(
+      {
+        testSend<CompactSerializer>("TestService", "add", request, 42);
+        testSend<BinarySerializer>("TestService", "add", request, 42);
+      },
+      folly::BadExpectedAccess<folly::exception_wrapper>);
+}
+
+TEST_F(OmniClientTest, AddTestPassesWhenBadEventHandlerIsCleared) {
+  AddRequest request;
+  request.num1_ref() = 1;
+  request.num2_ref() = 41;
+  addHandler();
+  testSend<CompactSerializer>(
+      "TestService",
+      "add",
+      request,
+      42,
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      true);
+  testSend<BinarySerializer>(
+      "TestService",
+      "add",
+      request,
+      42,
+      RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE,
+      true);
+}
 
 TEST_F(OmniClientTest, AddTest) {
   AddRequest request;

@@ -203,8 +203,8 @@ extern const _HackEnum_EnumMapFactory::NamesToValuesMapType _HackEnum_NAMES_TO_V
 // END declare_enums
 // BEGIN forward_declare
 namespace test { namespace fixtures { namespace basic {
-class MyDataItem;
 class MyStruct;
+class MyDataItem;
 class MyUnion;
 class ReservedKeyword;
 class UnionToBeRenamed;

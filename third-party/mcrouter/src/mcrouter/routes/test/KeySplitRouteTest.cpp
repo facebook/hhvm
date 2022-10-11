@@ -138,7 +138,7 @@ class KeySplitRouteTest : public RouteHandleTestBase<MemcacheRouterInfo> {
     }
 
     // all sync req will be done through fibers
-    TestFiberManager fm;
+    TestFiberManager<MemcacheRouterInfo> fm;
     fm.runAll({[&]() { auto reply = rh_->route(req); }});
 
     // verify
@@ -279,7 +279,7 @@ TEST_F(KeySplitRouteTest, FirstHitTest) {
         folly::to<std::string>(key, kMemcacheReplicaSeparator, i));
   }
 
-  TestFiberManager fm;
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() {
     auto reply = rh->route(req);
     EXPECT_EQ(*reply.result_ref(), carbon::Result::FOUND);
@@ -317,7 +317,7 @@ TEST_F(KeySplitRouteTest, FirstHitWorstCaseTest) {
         folly::to<std::string>(key, kMemcacheReplicaSeparator, i));
   }
 
-  TestFiberManager fm;
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.runAll({[&]() {
     auto reply = rh->route(req);
     EXPECT_EQ(*reply.result_ref(), carbon::Result::NOTFOUND);

@@ -1,0 +1,4 @@
+File "as-expr.php", line 10, characters 14-39:
+Type refinements cannot appear on the right-hand side of an as-expression. (NastCheck[3101])
+File "as-expr.php", line 11, characters 15-37:
+Type refinements cannot appear on the right-hand side of an as-expression. (NastCheck[3101])

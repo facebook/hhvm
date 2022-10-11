@@ -34,13 +34,6 @@ struct ForEachField<::cpp2::MyStructMapFloatThrowExp> {
 };
 
 template <>
-struct ForEachField<::cpp2::MyDataItem> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-  }
-};
-
-template <>
 struct ForEachField<::cpp2::MyStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -81,44 +74,6 @@ struct ForEachField<::cpp2::SimpleStruct> {
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).age_ref()...);
     f(1, static_cast<T&&>(t).name_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::cpp2::ComplexNestedStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).setOfSetOfInt_ref()...);
-    f(1, static_cast<T&&>(t).listofListOfListOfListOfEnum_ref()...);
-    f(2, static_cast<T&&>(t).listOfListOfMyStruct_ref()...);
-    f(3, static_cast<T&&>(t).setOfListOfListOfLong_ref()...);
-    f(4, static_cast<T&&>(t).setOfSetOfsetOfLong_ref()...);
-    f(5, static_cast<T&&>(t).mapStructListOfListOfLong_ref()...);
-    f(6, static_cast<T&&>(t).mKeyStructValInt_ref()...);
-    f(7, static_cast<T&&>(t).listOfMapKeyIntValInt_ref()...);
-    f(8, static_cast<T&&>(t).listOfMapKeyStrValList_ref()...);
-    f(9, static_cast<T&&>(t).mapKeySetValLong_ref()...);
-    f(10, static_cast<T&&>(t).mapKeyListValLong_ref()...);
-    f(11, static_cast<T&&>(t).mapKeyMapValMap_ref()...);
-    f(12, static_cast<T&&>(t).mapKeySetValMap_ref()...);
-    f(13, static_cast<T&&>(t).NestedMaps_ref()...);
-    f(14, static_cast<T&&>(t).mapKeyIntValList_ref()...);
-    f(15, static_cast<T&&>(t).mapKeyIntValSet_ref()...);
-    f(16, static_cast<T&&>(t).mapKeySetValInt_ref()...);
-    f(17, static_cast<T&&>(t).mapKeyListValSet_ref()...);
-  }
-};
-
-template <>
-struct ForEachField<::cpp2::MyUnion> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).myEnum_ref()...);
-    f(1, static_cast<T&&>(t).myStruct_ref()...);
-    f(2, static_cast<T&&>(t).myDataItem_ref()...);
-    f(3, static_cast<T&&>(t).complexNestedStruct_ref()...);
-    f(4, static_cast<T&&>(t).longValue_ref()...);
-    f(5, static_cast<T&&>(t).intValue_ref()...);
   }
 };
 
@@ -168,6 +123,26 @@ struct ForEachField<::cpp2::MyStructTypeDef> {
 };
 
 template <>
+struct ForEachField<::cpp2::MyDataItem> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::cpp2::MyUnion> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).myEnum_ref()...);
+    f(1, static_cast<T&&>(t).myStruct_ref()...);
+    f(2, static_cast<T&&>(t).myDataItem_ref()...);
+    f(3, static_cast<T&&>(t).complexNestedStruct_ref()...);
+    f(4, static_cast<T&&>(t).longValue_ref()...);
+    f(5, static_cast<T&&>(t).intValue_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::cpp2::MyUnionFloatFieldThrowExp> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -175,6 +150,31 @@ struct ForEachField<::cpp2::MyUnionFloatFieldThrowExp> {
     f(1, static_cast<T&&>(t).setFloat_ref()...);
     f(2, static_cast<T&&>(t).myDataItem_ref()...);
     f(3, static_cast<T&&>(t).complexNestedStruct_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::cpp2::ComplexNestedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).setOfSetOfInt_ref()...);
+    f(1, static_cast<T&&>(t).listofListOfListOfListOfEnum_ref()...);
+    f(2, static_cast<T&&>(t).listOfListOfMyStruct_ref()...);
+    f(3, static_cast<T&&>(t).setOfListOfListOfLong_ref()...);
+    f(4, static_cast<T&&>(t).setOfSetOfsetOfLong_ref()...);
+    f(5, static_cast<T&&>(t).mapStructListOfListOfLong_ref()...);
+    f(6, static_cast<T&&>(t).mKeyStructValInt_ref()...);
+    f(7, static_cast<T&&>(t).listOfMapKeyIntValInt_ref()...);
+    f(8, static_cast<T&&>(t).listOfMapKeyStrValList_ref()...);
+    f(9, static_cast<T&&>(t).mapKeySetValLong_ref()...);
+    f(10, static_cast<T&&>(t).mapKeyListValLong_ref()...);
+    f(11, static_cast<T&&>(t).mapKeyMapValMap_ref()...);
+    f(12, static_cast<T&&>(t).mapKeySetValMap_ref()...);
+    f(13, static_cast<T&&>(t).NestedMaps_ref()...);
+    f(14, static_cast<T&&>(t).mapKeyIntValList_ref()...);
+    f(15, static_cast<T&&>(t).mapKeyIntValSet_ref()...);
+    f(16, static_cast<T&&>(t).mapKeySetValInt_ref()...);
+    f(17, static_cast<T&&>(t).mapKeyListValSet_ref()...);
   }
 };
 

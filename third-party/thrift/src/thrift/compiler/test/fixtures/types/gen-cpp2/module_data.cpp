@@ -341,17 +341,6 @@ const std::array<int, 5> TStructDataStorage<::apache::thrift::fixtures::types::M
   -1,
 }};
 
-const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
-}};
-const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{
-}};
-const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = {{
-}};
-const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::storage_names = {{
-}};
-const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = {{
-}};
-
 const std::array<folly::StringPiece, 4> TStructDataStorage<::apache::thrift::fixtures::types::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
@@ -381,6 +370,17 @@ const std::array<int, 4> TStructDataStorage<::apache::thrift::fixtures::types::M
   1,
   2,
   3,
+}};
+
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_names = {{
+}};
+const std::array<int16_t, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_ids = {{
+}};
+const std::array<protocol::TType, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::fields_types = {{
+}};
+const std::array<folly::StringPiece, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::storage_names = {{
+}};
+const std::array<int, 0> TStructDataStorage<::apache::thrift::fixtures::types::MyDataItem>::isset_indexes = {{
 }};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::Renamed>::fields_names = {{
@@ -420,22 +420,6 @@ const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::A
   1,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = {{
-  "foo",
-}};
-const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = {{
-  1,
-}};
-const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = {{
-  TType::T_STRUCT,
-}};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::storage_names = {{
-  "__fbthrift_field_foo",
-}};
-const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = {{
-  0,
-}};
-
 const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::fields_names = {{
   "ForwardUsageStruct",
   "ForwardUsageByRef",
@@ -455,6 +439,22 @@ const std::array<folly::StringPiece, 2> TStructDataStorage<::apache::thrift::fix
 const std::array<int, 2> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageRoot>::isset_indexes = {{
   0,
   -1,
+}};
+
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_names = {{
+  "foo",
+}};
+const std::array<int16_t, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_ids = {{
+  1,
+}};
+const std::array<protocol::TType, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::fields_types = {{
+  TType::T_STRUCT,
+}};
+const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::storage_names = {{
+  "__fbthrift_field_foo",
+}};
+const std::array<int, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageStruct>::isset_indexes = {{
+  0,
 }};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::apache::thrift::fixtures::types::ForwardUsageByRef>::fields_names = {{

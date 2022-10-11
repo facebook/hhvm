@@ -31,7 +31,7 @@ from thrift.py3.types cimport (
 from thrift.py3.types cimport const_pointer_cast
 {{/program:structs?}}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{^struct:union?}}
 
 @__cython.auto_pickle(False)
@@ -87,4 +87,4 @@ cdef class __{{struct:name}}_FieldsSetter(__StructFieldsSetter):
     {{/struct:py3_fields}}
 
 {{/struct:union?}}
-{{/program:structs}}
+{{/program:filtered_structs}}

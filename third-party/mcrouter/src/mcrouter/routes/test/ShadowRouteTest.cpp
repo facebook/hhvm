@@ -37,7 +37,7 @@ TEST(shadowRouteTest, defaultPolicy) {
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "c")),
   };
 
-  TestFiberManager fm{fiber_local<McrouterRouterInfo>::ContextTypeTag()};
+  TestFiberManager<McrouterRouterInfo> fm;
 
   auto settings = ShadowSettings::create(
       folly::dynamic::object("index_range", folly::dynamic::array(0, 1)),

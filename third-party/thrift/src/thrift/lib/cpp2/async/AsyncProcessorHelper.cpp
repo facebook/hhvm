@@ -46,14 +46,14 @@ namespace apache::thrift {
   folly::RequestContextScopeGuard rctx(serverRequest.follyRequestContext());
   try {
     ap->executeRequest(std::move(serverRequest), metadata);
-  } catch (std::exception& ex) {
-    LOG(WARNING) << "exception in executeRequest:" << ex.what();
+  } catch (...) {
+    LOG(WARNING) << "exception in executeRequest: "
+                 << folly::exceptionStr(std::current_exception());
 
     auto eb = detail::ServerRequestHelper::eventBase(serverRequest);
     auto req = detail::ServerRequestHelper::request(std::move(serverRequest));
     // We can return an error if the request has not been consumed already
     if (eb && req) {
-      folly::exception_wrapper ew(std::current_exception(), ex);
       eb->runInEventBaseThread([request = std::move(req)]() {
         request->sendErrorWrapped(
             folly::make_exception_wrapper<TApplicationException>(
@@ -62,7 +62,6 @@ namespace apache::thrift {
             kUnknownErrorCode);
       });
     }
-    return;
   }
 }
 

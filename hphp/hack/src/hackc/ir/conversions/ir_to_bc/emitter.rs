@@ -556,6 +556,9 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::ParentCls(_) => Opcode::ParentCls,
             Hhbc::Pow(..) => Opcode::Pow,
             Hhbc::Print(..) => Opcode::Print,
+            Hhbc::RaiseClassStringConversionWarning(..) => {
+                Opcode::RaiseClassStringConversionWarning
+            }
             Hhbc::RecordReifiedGeneric(..) => Opcode::RecordReifiedGeneric,
             Hhbc::ResolveClass(clsid, _) => {
                 let class = self.strings.lookup_class_name(clsid);

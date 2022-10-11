@@ -2304,6 +2304,11 @@ fn assemble_instr<'arena>(
                         || hhbc::Opcode::LateBoundCls,
                         "LateBoundCls",
                     ),
+                    b"RaiseClassStringConversionWarning" => assemble_single_opcode_instr(
+                        &mut sl_lexer,
+                        || hhbc::Opcode::RaiseClassStringConversionWarning,
+                        "RaiseClassStringConversionWarning",
+                    ),
                     b"RecordReifiedGeneric" => assemble_single_opcode_instr(
                         &mut sl_lexer,
                         || hhbc::Opcode::RecordReifiedGeneric,

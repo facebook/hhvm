@@ -1071,7 +1071,8 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Pow => simple!(Hhbc::Pow),
         Opcode::Print => simple!(Hhbc::Print),
         Opcode::PushL => simple!(Hhbc::ConsumeL),
-        Opcode::RaiseClassStringConversionWarning => todo!(),
+        #[rustfmt::skip]
+        Opcode::RaiseClassStringConversionWarning => simple!(Hhbc::RaiseClassStringConversionWarning),
         Opcode::RecordReifiedGeneric => simple!(Hhbc::RecordReifiedGeneric),
         Opcode::ResolveClass => simple!(Hhbc::ResolveClass),
         Opcode::ResolveClsMethod => simple!(Hhbc::ResolveClsMethod),

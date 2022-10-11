@@ -19,11 +19,11 @@
 #include <utility>
 
 #include <fmt/core.h>
+#include <folly/base64.h>
 #include <proxygen/lib/http/HTTPCommonHeaders.h>
 #include <proxygen/lib/http/HTTPMethod.h>
 #include <proxygen/lib/http/codec/HTTP1xCodec.h>
 #include <proxygen/lib/http/codec/HTTP2Codec.h>
-#include <proxygen/lib/utils/Base64.h>
 #include <thrift/lib/cpp/protocol/TProtocolTypes.h>
 #include <thrift/lib/cpp2/async/ResponseChannel.h>
 #include <wangle/ssl/SSLContextConfig.h>
@@ -256,9 +256,8 @@ void HTTPClientChannel::setHeaders(
     const transport::THeader::StringToStringMap& srcHeaders) {
   for (const auto& header : srcHeaders) {
     if (header.first.find(":") != std::string::npos) {
-      auto name = proxygen::Base64::urlEncode(folly::StringPiece(header.first));
-      auto value =
-          proxygen::Base64::urlEncode(folly::StringPiece(header.second));
+      auto name = folly::base64URLEncode(header.first);
+      auto value = folly::base64URLEncode(header.second);
       dstHeaders.rawSet(
           folly::to<std::string>("encode_", name),
           folly::to<std::string>(name, "_", value));

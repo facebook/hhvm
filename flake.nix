@@ -55,8 +55,8 @@
               name = "toolchain.cmake";
               text = ''
                 ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
-                set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler" FORCE)
-                set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler" FORCE)
+                set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler launcher" FORCE)
+                set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler launcher" FORCE)
               '';
             };
           });

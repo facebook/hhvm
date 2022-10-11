@@ -7,12 +7,7 @@
  *
  *)
 
-[@@@warning "-33"]
-
 open Hh_prelude
-
-[@@@warning "+33"]
-
 open Aast
 
 let visitor =
@@ -44,4 +39,19 @@ let handler =
     inherit Nast_visitor.handler_base
 
     method! at_expr env = visitor#on_expr (env, None)
+
+    method! at_class_ env class_ =
+      List.iter class_.c_typeconsts ~f:(fun tc ->
+          match tc.c_tconst_kind with
+          | TCAbstract { c_atc_default = Some hint; _ }
+          | TCConcrete { c_tc_type = hint; _ } ->
+            let ancestor =
+              Some
+                (if tc.c_tconst_is_ctx then
+                  "a context constant"
+                else
+                  "a type constant")
+            in
+            visitor#on_hint (env, ancestor) hint
+          | _ -> ())
   end

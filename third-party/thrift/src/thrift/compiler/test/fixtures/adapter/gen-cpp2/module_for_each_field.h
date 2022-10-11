@@ -52,14 +52,6 @@ struct ForEachField<::facebook::thrift::test::Baz> {
 };
 
 template <>
-struct ForEachField<::facebook::thrift::test::detail::DirectlyAdapted> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).field_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::facebook::thrift::test::Bar> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -70,6 +62,14 @@ struct ForEachField<::facebook::thrift::test::Bar> {
     f(4, static_cast<T&&>(t).unionField_ref()...);
     f(5, static_cast<T&&>(t).optionalUnionField_ref()...);
     f(6, static_cast<T&&>(t).adaptedStructField_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::detail::DirectlyAdapted> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
   }
 };
 
@@ -96,17 +96,17 @@ struct ForEachField<::facebook::thrift::test::TerseAdaptedFields> {
 };
 
 template <>
-struct ForEachField<::facebook::thrift::test::A> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-  }
-};
-
-template <>
 struct ForEachField<::facebook::thrift::test::B> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).a_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::A> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
 };
 

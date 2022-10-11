@@ -266,11 +266,13 @@ fn assemble_module<'arena>(
     let name = assemble_class_name(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     token_iter.expect(Token::into_open_curly)?;
+    let doc_comment = assemble_doc_comment(alloc, token_iter)?;
     token_iter.expect(Token::into_close_curly)?;
     Ok(hhbc::Module {
         attributes,
         name,
         span,
+        doc_comment,
     })
 }
 

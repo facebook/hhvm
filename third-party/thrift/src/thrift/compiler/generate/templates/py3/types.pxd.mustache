@@ -106,7 +106,7 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
 
 {{> types/enum_defs }}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#first?}}
 cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:name}}_metadata.h" namespace "apache::thrift::detail::md":
     cdef cppclass ExceptionMetadata[T]:
@@ -184,9 +184,9 @@ cdef extern from "{{program:includePrefix}}{{program:cpp_gen_path}}/{{program:na
         {{/field:has_ref_api?}}
     {{/struct:py3_fields}}{{/struct:union?}}
 
-{{/program:structs}}
+{{/program:filtered_structs}}
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#struct:union?}}
 cdef class __{{struct:name}}Type(thrift.py3.types.CompiledEnum):
     pass
@@ -242,7 +242,7 @@ cdef class {{struct:name}}({{> types/python_struct_class}}):
     @staticmethod
     cdef _fbthrift_create(shared_ptr[c{{struct:name}}])
 
-{{/program:structs}}
+{{/program:filtered_structs}}
 
 {{#program:containerTypes}}
 cdef class {{> types/cython_python_type}}(thrift.py3.types.{{!

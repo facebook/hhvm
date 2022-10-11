@@ -43,10 +43,6 @@ if [ -z "${COMPILER_ID}" ]; then
   COMPILER_ID=$("${compiler[@]}")
 fi
 
-if [ -z "${USE_LOWPTR}" ]; then
-  USE_LOWPTR="0"
-fi
-
 ################################################################################
 
 # Compute a hash that can be used as a unique repo schema identifier.  The

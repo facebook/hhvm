@@ -33,9 +33,11 @@ namespace thrift {
 namespace python {
 namespace client {
 
-using RequestChannel_ptr = std::unique_ptr<
+using RequestChannelUnique = std::unique_ptr<
     apache::thrift::RequestChannel,
     folly::DelayedDestruction::Destructor>;
+
+using RequestChannelShared = std::shared_ptr<apache::thrift::RequestChannel>;
 
 using IOBufClientBufferedStream =
     apache::thrift::ClientBufferedStream<folly::IOBuf>;
@@ -52,11 +54,10 @@ struct OmniClientResponseWithHeaders {
  */
 class OmniClient : public apache::thrift::TClientBase {
  public:
-  explicit OmniClient(RequestChannel_ptr channel);
-  explicit OmniClient(std::shared_ptr<apache::thrift::RequestChannel> channel)
-      : channel_(std::move(channel)) {}
+  explicit OmniClient(RequestChannelUnique channel);
+  explicit OmniClient(RequestChannelShared channel);
   explicit OmniClient(OmniClient&&) noexcept;
-  ~OmniClient();
+  ~OmniClient() override;
 
   OmniClientResponseWithHeaders sync_send(
       const std::string& serviceName,
@@ -74,14 +75,14 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
-      ::apache::thrift::MethodMetadata::Data&& metadata,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {});
 
   void oneway_send(
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
-      ::apache::thrift::MethodMetadata::Data&& metadata,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {});
 
   /**
@@ -93,7 +94,7 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
-      ::apache::thrift::MethodMetadata::Data&& metadata,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {},
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
@@ -102,21 +103,25 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
-      ::apache::thrift::MethodMetadata::Data&& metadata,
+      apache::thrift::MethodMetadata::Data&& metadata,
       const std::unordered_map<std::string, std::string>& headers = {},
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
-  uint16_t getChannelProtocolId();
+  uint16_t getChannelProtocolId() const noexcept;
 
-  std::shared_ptr<apache::thrift::RequestChannel> getChannelShared()
-      const noexcept {
-    return channel_;
-  }
+  RequestChannelShared getChannelShared() const noexcept;
 
   // TODO(ffrancet): get rid of in favour of calling setInteraction once we've
   // implemented client RPCOptions
-  void set_interaction_factory(OmniClient* client) { factoryClient_ = client; }
+  void set_interaction_factory(OmniClient* client);
+
+ protected:
+  // RpcOptions unused in base OmniClient since no interaction support
+  virtual void setInteraction(apache::thrift::RpcOptions& rpcOptions);
+
+  RequestChannelShared channel_ = nullptr;
+  std::atomic<OmniClient*> factoryClient_ = nullptr;
 
  private:
   /**
@@ -129,29 +134,30 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& functionName,
       std::unique_ptr<apache::thrift::RequestCallback> callback,
       const apache::thrift::RpcKind rpcKind,
-      ::apache::thrift::MethodMetadata::Data&& metadata);
-
- protected:
-  // RpcOptions unused in base OmniClient since no interaction support
-  virtual void setInteraction(apache::thrift::RpcOptions& rpcOptions) {
-    auto client = factoryClient_.load();
-    if (client) {
-      client->setInteraction(rpcOptions);
-    }
-  }
-
-  std::shared_ptr<apache::thrift::RequestChannel> channel_;
-  std::atomic<OmniClient*> factoryClient_ = nullptr;
+      apache::thrift::MethodMetadata::Data&& metadata);
 };
+
+inline uint16_t OmniClient::getChannelProtocolId() const noexcept {
+  return channel_->getProtocolId();
+}
+
+inline RequestChannelShared OmniClient::getChannelShared() const noexcept {
+  return channel_;
+}
+
+inline void OmniClient::set_interaction_factory(OmniClient* client) {
+  // What happens if its nullptr
+  factoryClient_ = client;
+}
 
 class OmniInteractionClient : public OmniClient {
  public:
   OmniInteractionClient(
       std::shared_ptr<apache::thrift::RequestChannel> channel,
       const std::string& methodName);
-  ~OmniInteractionClient() override;
   OmniInteractionClient(OmniInteractionClient&&) noexcept = default;
   OmniInteractionClient& operator=(OmniInteractionClient&&);
+  ~OmniInteractionClient() override;
 
  protected:
   void setInteraction(apache::thrift::RpcOptions& rpcOptions) override;

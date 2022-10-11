@@ -522,6 +522,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 let clsid = self.strings.lookup_class_name(clsid);
                 Opcode::LazyClass(clsid)
             }
+            Hhbc::LazyClassFromClass(_, _) => Opcode::LazyClassFromClass,
             Hhbc::LockObj(..) => Opcode::LockObj,
             Hhbc::MemoSet(_, ref locals, _) => {
                 let locals = self.convert_local_range(locals);

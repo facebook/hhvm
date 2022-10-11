@@ -3,5 +3,10 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-rust_executable(watchmanctl)
+if (IS_FB_BUILD)
+    rust_executable(watchmanctl FEATURES fb)
+else()
+    rust_executable(watchmanctl)
+endif()
+
 install_rust_executable(watchmanctl)

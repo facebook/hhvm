@@ -2456,6 +2456,9 @@ HQSession::newTransaction(HTTPTransaction::Handler* handler) {
     // DestructorGuard dg(this);
     hqStream->txn_.setHandler(CHECK_NOTNULL(handler));
     sock_->setReadCallback(quicStreamId.value(), this);
+    if (ingressLimitExceeded()) {
+      sock_->pauseRead(quicStreamId.value());
+    }
     return &hqStream->txn_;
   } else {
     VLOG(3) << __func__ << "Failed to create new transaction on "

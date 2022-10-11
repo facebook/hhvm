@@ -122,13 +122,6 @@ struct ForEachField<::apache::thrift::fixtures::types::MinPaddingWithCustomType>
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::MyDataItem> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-  }
-};
-
-template <>
 struct ForEachField<::apache::thrift::fixtures::types::MyStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -136,6 +129,13 @@ struct ForEachField<::apache::thrift::fixtures::types::MyStruct> {
     f(1, static_cast<T&&>(t).MyStringField_ref()...);
     f(2, static_cast<T&&>(t).majorVer_ref()...);
     f(3, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::MyDataItem> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
 };
 
@@ -157,19 +157,19 @@ struct ForEachField<::apache::thrift::fixtures::types::AnnotatedTypes> {
 };
 
 template <>
-struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageStruct> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-    f(0, static_cast<T&&>(t).foo_ref()...);
-  }
-};
-
-template <>
 struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
     f(0, static_cast<T&&>(t).ForwardUsageStruct_ref()...);
     f(1, static_cast<T&&>(t).ForwardUsageByRef_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::apache::thrift::fixtures::types::ForwardUsageStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).foo_ref()...);
   }
 };
 

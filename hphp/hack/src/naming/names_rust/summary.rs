@@ -64,6 +64,10 @@ impl FileSummary {
     pub fn typedefs(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
         self.symbols_of_kind(NameType::Typedef)
     }
+
+    pub fn modules(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
+        self.symbols_of_kind(NameType::Module)
+    }
 }
 
 #[derive(Clone, Debug, Hash)]

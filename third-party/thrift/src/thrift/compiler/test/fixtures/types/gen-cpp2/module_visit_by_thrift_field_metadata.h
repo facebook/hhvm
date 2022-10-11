@@ -197,17 +197,6 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MinPaddingWithCustomTyp
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::MyDataItem> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::MyDataItem");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::MyStruct> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -222,6 +211,17 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::MyStruct> {
       return f(3, static_cast<T&&>(t).data_ref());
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::MyStruct");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::MyDataItem> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::MyDataItem");
     }
   }
 };
@@ -255,19 +255,6 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::AnnotatedTypes> {
 };
 
 template <>
-struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageStruct> {
-  template <typename F, typename T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-    switch (fieldId) {
-    case 1:
-      return f(0, static_cast<T&&>(t).foo_ref());
-    default:
-      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::ForwardUsageStruct");
-    }
-  }
-};
-
-template <>
 struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageRoot> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -278,6 +265,19 @@ struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageRoot> {
       return f(1, static_cast<T&&>(t).ForwardUsageByRef_ref());
     default:
       throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::ForwardUsageRoot");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::apache::thrift::fixtures::types::ForwardUsageStruct> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).foo_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::apache::thrift::fixtures::types::ForwardUsageStruct");
     }
   }
 };

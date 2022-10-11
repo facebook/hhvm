@@ -147,6 +147,12 @@ impl HhConfig {
                 b"expression_tree_virtualize_functions" => {
                     go.tco_expression_tree_virtualize_functions = parse_json(value);
                 }
+                b"tco_global_access_check_on_write" => {
+                    go.tco_global_access_check_on_write = parse_json(value);
+                }
+                b"tco_global_access_check_on_read" => {
+                    go.tco_global_access_check_on_read = parse_json(value);
+                }
                 _ => c.unknown.push(parse_string(line)),
             }
         }

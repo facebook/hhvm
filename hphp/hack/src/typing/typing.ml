@@ -8878,6 +8878,9 @@ and call
                     ft_params
                 in
                 Env.set_tyvar_variance env ft_ret.et_type ~flip:true
+              | Tnewtype (name, [ty], _)
+                when String.equal name SN.Classes.cSupportDyn ->
+                set_params_variance env ty
               | _ -> env
             in
             set_params_variance env param.fp_type.et_type

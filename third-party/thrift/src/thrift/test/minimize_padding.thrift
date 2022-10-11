@@ -16,6 +16,7 @@
 
 include "thrift/annotation/cpp.thrift"
 include "thrift/annotation/thrift.thrift"
+cpp_include "thrift/test/AdapterTest.h"
 
 namespace cpp2 apache.thrift.test
 
@@ -82,6 +83,14 @@ struct nonoptimal_struct {
 
 @cpp.MinimizePadding
 struct nonoptimal_struct_with_structured_annotation {
+  1: required byte small;
+  2: required big_align big;
+  3: required small_align medium;
+}
+
+@cpp.MinimizePadding
+struct nonoptimal_struct_with_custom_type {
+  @cpp.Adapter{name = "::apache::thrift::test::TemplatedTestAdapter"}
   1: required byte small;
   2: required big_align big;
   3: required small_align medium;

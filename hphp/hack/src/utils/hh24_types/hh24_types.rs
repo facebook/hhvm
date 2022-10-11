@@ -5,6 +5,51 @@
 
 //! Common types used in the HH24 Hack typechecker rearchitecture.
 
+// Common impls for types which wrap a hash value represented by u64.
+macro_rules! u64_hash_wrapper_impls {
+    ($name:ident) => {
+        impl $name {
+            #[inline]
+            pub fn from_u64(hash: u64) -> Self {
+                Self(hash)
+            }
+            #[inline]
+            pub fn as_u64(self) -> u64 {
+                self.0
+            }
+        }
+
+        impl std::fmt::Debug for $name {
+            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                write!(f, concat!(stringify!($name), "({:x})"), self.0)
+            }
+        }
+
+        impl std::str::FromStr for $name {
+            type Err = std::num::ParseIntError;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                Ok(Self(u64::from_str_radix(s, 16)?))
+            }
+        }
+
+        impl nohash_hasher::IsEnabled for $name {}
+
+        impl rusqlite::ToSql for $name {
+            fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
+                Ok(rusqlite::types::ToSqlOutput::from(self.0 as i64))
+            }
+        }
+
+        impl rusqlite::types::FromSql for $name {
+            fn column_result(
+                value: rusqlite::types::ValueRef<'_>,
+            ) -> rusqlite::types::FromSqlResult<Self> {
+                Ok(Self(value.as_i64()? as u64))
+            }
+        }
+    };
+}
+
 /// TODO(ljw): add backtraces to the three expected cases.
 /// But let's hold off until we've adopted thiserror 1.0.34 and rustc post backtrace stabilization
 #[derive(thiserror::Error, Debug)]
@@ -15,7 +60,7 @@ pub enum HhError {
     #[error("Disk changed: {0} - do hh_decl --update then restart the operation. [{1}]")]
     DiskChanged(std::path::PathBuf, String),
 
-    #[error("Decl-store changed its checksum: {0} - restart the operation. [{1}]")]
+    #[error("Decl-store changed its checksum: {0:?} - restart the operation. [{1}]")]
     ChecksumChanged(Checksum, String),
 
     #[error("Decl-store stopped - abandon the operation. [{0}]")]
@@ -68,41 +113,28 @@ impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
     }
 }
 
+/// Checksum is used to characterize state of every decl in the repository:
+/// if a decl is added, removed, moved from one file, changed, then the overall
+/// checksum of the repository will change.
 #[derive(Copy, Clone, Hash, PartialEq, Eq)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct Checksum(pub u64);
+u64_hash_wrapper_impls! { Checksum }
 
 impl Checksum {
-    fn xor(&mut self, combined_hash: (ToplevelSymbolHash, DeclHash)) {
-        self.0 ^= hh_hash::hash(&combined_hash);
-    }
-
-    pub fn addremove(&mut self, symbol_hash: ToplevelSymbolHash, decl_hash: DeclHash) {
-        self.xor((symbol_hash, decl_hash));
-    }
-}
-
-impl std::fmt::Debug for Checksum {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Checksum({:x})", self.0)
+    pub fn addremove(
+        &mut self,
+        symbol_hash: ToplevelSymbolHash,
+        decl_hash: DeclHash,
+        path: &relative_path::RelativePath,
+    ) {
+        // CARE! This implementation must be identical to that in rust_decl_ffi.rs
+        // I wrote it out as a separate copy because I didn't want hh_server to take a dependency
+        // upon hh24_types
+        self.0 ^= hh_hash::hash(&(symbol_hash, decl_hash, path));
     }
 }
-
-impl std::fmt::Display for Checksum {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:x}", self.0)
-    }
-}
-
-impl std::str::FromStr for Checksum {
-    type Err = std::num::ParseIntError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(Self(u64::from_str_radix(s, 16)?))
-    }
-}
-
-impl nohash_hasher::IsEnabled for Checksum {}
 
 #[derive(Clone, Debug)]
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -229,51 +261,6 @@ impl<'de> serde::Deserialize<'de> for Timestamp {
         }
         deserializer.deserialize_u64(Visitor)
     }
-}
-
-// Common impls for types which wrap a hash value represented by u64.
-macro_rules! u64_hash_wrapper_impls {
-    ($name:ident) => {
-        impl $name {
-            #[inline]
-            pub fn from_u64(hash: u64) -> Self {
-                Self(hash)
-            }
-            #[inline]
-            pub fn as_u64(self) -> u64 {
-                self.0
-            }
-        }
-
-        impl std::fmt::Debug for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, concat!(stringify!($name), "({:x})"), self.0)
-            }
-        }
-
-        impl std::str::FromStr for $name {
-            type Err = std::num::ParseIntError;
-            fn from_str(s: &str) -> Result<Self, Self::Err> {
-                Ok(Self(u64::from_str_radix(s, 16)?))
-            }
-        }
-
-        impl nohash_hasher::IsEnabled for $name {}
-
-        impl rusqlite::ToSql for $name {
-            fn to_sql(&self) -> rusqlite::Result<rusqlite::types::ToSqlOutput<'_>> {
-                Ok(rusqlite::types::ToSqlOutput::from(self.0 as i64))
-            }
-        }
-
-        impl rusqlite::types::FromSql for $name {
-            fn column_result(
-                value: rusqlite::types::ValueRef<'_>,
-            ) -> rusqlite::types::FromSqlResult<Self> {
-                Ok(Self(value.as_i64()? as u64))
-            }
-        }
-    };
 }
 
 /// The hash of a toplevel symbol name, as it appears in the 64bit dependency graph.

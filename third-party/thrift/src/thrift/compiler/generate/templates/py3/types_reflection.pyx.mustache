@@ -57,7 +57,7 @@ from thrift.py3.types cimport (
 )
 
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 cdef __StructSpec get_reflection__{{struct:name}}():
     {{^struct:union?}}
     {{! Wrap the defaults object so we can query its getters for the fields;
@@ -108,7 +108,7 @@ cdef __StructSpec get_reflection__{{struct:name}}():
     )
 {{/struct:py3_fields}}
     return spec
-{{/program:structs}}
+{{/program:filtered_structs}}
 {{#program:containerTypes}}
 {{#type:list?}}
 cdef __ListSpec get_reflection__{{type:flat_name}}():

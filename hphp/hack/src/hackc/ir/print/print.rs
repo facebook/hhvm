@@ -867,6 +867,9 @@ fn print_hhbc(w: &mut dyn Write, ctx: &FuncContext<'_>, func: &Func<'_>, hhbc: &
         Hhbc::LazyClass(clsid, _) => {
             write!(w, "lazy_class {}", FmtIdentifierId(clsid.id, ctx.strings))?;
         }
+        Hhbc::LazyClassFromClass(vid, _) => {
+            write!(w, "lazy_class_from_class {}", FmtVid(func, vid, verbose))?;
+        }
         Hhbc::LockObj(vid, _) => {
             write!(w, "lock_obj {}", FmtVid(func, vid, verbose))?;
         }

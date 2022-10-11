@@ -254,93 +254,6 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
-void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::translateFieldName(
-    folly::StringPiece _fname,
-    int16_t& fid,
-    apache::thrift::protocol::TType& _ftype) noexcept {
-  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>;
-  static const st::translate_field_name_table table{
-      data::fields_size,
-      data::fields_names.data(),
-      data::fields_ids.data(),
-      data::fields_types.data()};
-  st::translate_field_name(_fname, fid, _ftype, table);
-}
-
-} // namespace detail
-} // namespace thrift
-} // namespace apache
-
-namespace test { namespace fixtures { namespace basic-structured-annotations {
-
-const char* structured_annotation_forward::__fbthrift_thrift_uri() {
-  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_forward";
-}
-
-const folly::StringPiece structured_annotation_forward::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
-  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
-  return apache::thrift::TStructDataStorage<structured_annotation_forward>::fields_names[folly::to_underlying(ord) - 1];
-}
-
-
-structured_annotation_forward::structured_annotation_forward(apache::thrift::FragileConstructor, ::std::int64_t count__arg) :
-    __fbthrift_field_count(std::move(count__arg)) {
-  __isset.set(folly::index_constant<0>(), true);
-}
-
-
-void structured_annotation_forward::__fbthrift_clear() {
-  // clear all fields
-  this->__fbthrift_field_count = ::std::int64_t();
-  __isset = {};
-}
-
-void structured_annotation_forward::__fbthrift_clear_terse_fields() {
-}
-
-bool structured_annotation_forward::__fbthrift_is_empty() const {
-  return false;
-}
-
-bool structured_annotation_forward::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return false;
-  }
-  return true;
-}
-
-bool structured_annotation_forward::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
-  FOLLY_MAYBE_UNUSED auto& lhs = *this;
-  if (!(lhs.count_ref() == rhs.count_ref())) {
-    return lhs.count_ref() < rhs.count_ref();
-  }
-  return false;
-}
-
-
-void swap(FOLLY_MAYBE_UNUSED structured_annotation_forward& a, FOLLY_MAYBE_UNUSED structured_annotation_forward& b) {
-  using ::std::swap;
-  swap(a.__fbthrift_field_count, b.__fbthrift_field_count);
-  swap(a.__isset, b.__isset);
-}
-
-template void structured_annotation_forward::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
-template uint32_t structured_annotation_forward::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
-template void structured_annotation_forward::readNoXfer<>(apache::thrift::CompactProtocolReader*);
-template uint32_t structured_annotation_forward::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
-
-
-}}} // test::fixtures::basic-structured-annotations
-
-namespace apache {
-namespace thrift {
-namespace detail {
-
 void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_recursive>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -486,6 +399,93 @@ static_assert(
         ::apache::thrift::type_class::structure,
         ::test::fixtures::basic-structured-annotations::structured_annotation_forward>,
     "inconsistent use of json option");
+
+}}} // test::fixtures::basic-structured-annotations
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::test::fixtures::basic-structured-annotations::structured_annotation_forward>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace test { namespace fixtures { namespace basic-structured-annotations {
+
+const char* structured_annotation_forward::__fbthrift_thrift_uri() {
+  return "test.dev/fixtures/basic-structured-annotations/structured_annotation_forward";
+}
+
+const folly::StringPiece structured_annotation_forward::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<structured_annotation_forward>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+structured_annotation_forward::structured_annotation_forward(apache::thrift::FragileConstructor, ::std::int64_t count__arg) :
+    __fbthrift_field_count(std::move(count__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void structured_annotation_forward::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_count = ::std::int64_t();
+  __isset = {};
+}
+
+void structured_annotation_forward::__fbthrift_clear_terse_fields() {
+}
+
+bool structured_annotation_forward::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool structured_annotation_forward::operator==(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.count_ref() == rhs.count_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool structured_annotation_forward::operator<(FOLLY_MAYBE_UNUSED const structured_annotation_forward& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.count_ref() == rhs.count_ref())) {
+    return lhs.count_ref() < rhs.count_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED structured_annotation_forward& a, FOLLY_MAYBE_UNUSED structured_annotation_forward& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_count, b.__fbthrift_field_count);
+  swap(a.__isset, b.__isset);
+}
+
+template void structured_annotation_forward::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t structured_annotation_forward::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void structured_annotation_forward::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t structured_annotation_forward::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t structured_annotation_forward::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t structured_annotation_forward::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
 
 }}} // test::fixtures::basic-structured-annotations
 

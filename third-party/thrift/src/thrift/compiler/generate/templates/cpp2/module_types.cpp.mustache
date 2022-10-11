@@ -32,7 +32,7 @@
 //
 // To include in statically-linked libraries, link whole (e.g. --whole-archive)
 // `<%program:name%>_sinit.cpp`.
-<%#program:structs%>
+<%#program:split_structs%>
 <%#struct:any?%>
 void __fbthrift_static_init_<%struct:cpp_underlying_name%>() {
   FOLLY_MAYBE_UNUSED static bool init = (
@@ -46,7 +46,7 @@ void __fbthrift_static_init_<%struct:cpp_underlying_name%>() {
     false);
 }
 <%/struct:any?%>
-<%/program:structs%>
+<%/program:split_structs%>
 <% > common/namespace_cpp2_end%>
 
 <%/program:any?%>
@@ -57,7 +57,7 @@ namespace thrift {
 namespace detail {
 FOLLY_PUSH_WARNING
 FOLLY_GNU_DISABLE_WARNING("-Winvalid-offsetof")
-<%#program:structs%>
+<%#program:split_structs%>
 <%^struct:union?%>
 template<>
 constexpr ptrdiff_t fieldOffset<<%struct:cpp_fullname%>>(std::int16_t fieldIndex) {
@@ -87,11 +87,11 @@ constexpr ptrdiff_t unionTypeOffset<<%struct:cpp_fullname%>>() {
   return offsetof(<%struct:cpp_fullname%>, type_);
 }
 <%/struct:union?%>
-<%/program:structs%>
+<%/program:split_structs%>
 FOLLY_POP_WARNING
 }}} // apache::thrift::detail
 <%/program:tablebased?%>
-<%#program:structs%><%!
+<%#program:split_structs%><%!
 %><%^program:tablebased?%>
 <% > module_types_cpp/tcc_struct_traits%>
 <%/program:tablebased?%>
@@ -249,18 +249,18 @@ static_assert(
 <%/struct:extra_namespace%>
 <% > common/namespace_cpp2_end%>
 
-<%/program:structs%><%!
+<%/program:split_structs%><%!
 
 %><%! Validate adapters in typedefs and fields. %>
 
 <% > common/namespace_cpp2_begin%> namespace {
 FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
-<%#program:structs%><%#struct:fields%>
+<%#program:split_structs%><%#struct:fields%>
 <%#field:cpp_first_adapter%><%#field:type%>
   ::apache::thrift::adapt_detail::validateFieldAdapter<<%!
       %><%field:cpp_first_adapter%>, <%field:key%>, <%type:cpp_standard_type%>, <%struct:cpp_fullname%>>();
 <%/field:type%><%/field:cpp_first_adapter%>
-<%/struct:fields%><%/program:structs%>
+<%/struct:fields%><%/program:split_structs%>
 <%#program:typedefs%><%#typedef:type%>
 <%#type:cpp_adapter%>
   ::apache::thrift::adapt_detail::validateAdapter<<%type:cpp_adapter%>, <%type:cpp_standard_type%>>();
@@ -275,7 +275,7 @@ FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
 namespace apache {
 namespace thrift {
 namespace detail {
-<%#program:enums%>
+<%#program:split_enums%>
 const ::apache::thrift::detail::TypeInfo TypeToInfo<
     apache::thrift::type_class::enumeration,
     <% > common/namespace_cpp2%><%enum:cpp_name%>>::typeInfo = {
@@ -284,8 +284,8 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
   /* .set */ reinterpret_cast<VoidFuncPtr>(set<<% > common/namespace_cpp2%><%enum:cpp_name%>, std::int32_t>),
   /* .typeExt */ nullptr,
 };
-<%/program:enums%>
-<%#program:structs%>
+<%/program:split_enums%>
+<%#program:split_structs%>
 const ::apache::thrift::detail::TypeInfo TypeToInfo<
   ::apache::thrift::type_class::<%#struct:union?%>variant<%/struct:union?%><%^struct:union?%>structure<%/struct:union?%>,
   <%struct:cpp_fullname%>>::typeInfo = {
@@ -294,6 +294,6 @@ const ::apache::thrift::detail::TypeInfo TypeToInfo<
   /* .set */ nullptr,
   /* .typeExt */ &<% > common/namespace_cpp2 %>__fbthrift_struct_info_<%struct:cpp_underlying_name%>,
 };
-<%/program:structs%>
+<%/program:split_structs%>
 }}} // namespace apache::thrift::detail
 <%/program:tablebased?%>

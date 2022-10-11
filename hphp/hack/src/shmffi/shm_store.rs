@@ -128,6 +128,35 @@ where
         Ok(())
     }
 
+    fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        let mut cache = self.cache.lock();
+        for (old_key, new_key) in keys {
+            let old_hash = self.hash_key(old_key);
+            let new_hash = self.hash_key(new_key);
+            shmffi::with(|segment| {
+                let (header, data) = segment.table.inspect_and_remove(&old_hash, |value| {
+                    let value = value.unwrap();
+                    (value.header, <Box<[u8]>>::from(value.as_slice()))
+                });
+                cache.pop(&old_key);
+                segment.table.insert(
+                    new_hash,
+                    Some(Layout::from_size_align(data.len(), 1).unwrap()),
+                    header.is_evictable(),
+                    |buffer| {
+                        buffer.copy_from_slice(&data);
+                        ocaml_blob::HeapValue {
+                            header,
+                            data: std::ptr::NonNull::new(buffer.as_mut_ptr()).unwrap(),
+                        }
+                    },
+                );
+                // We choose not to `cache.put(new_key, ...)` here.
+            });
+        }
+        Ok(())
+    }
+
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         let mut cache = self.cache.lock();
         for key in keys {
@@ -368,6 +397,35 @@ where
                 |buffer| blob.to_heap_value_in(self.evictable, buffer),
             )
         });
+        Ok(())
+    }
+
+    fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        let mut cache = self.cache.lock();
+        for (old_key, new_key) in keys {
+            let old_hash = self.hash_key(old_key);
+            let new_hash = self.hash_key(new_key);
+            shmffi::with(|segment| {
+                let (header, data) = segment.table.inspect_and_remove(&old_hash, |value| {
+                    let value = value.unwrap();
+                    (value.header, <Box<[u8]>>::from(value.as_slice()))
+                });
+                cache.pop(&old_key);
+                segment.table.insert(
+                    new_hash,
+                    Some(Layout::from_size_align(data.len(), 1).unwrap()),
+                    header.is_evictable(),
+                    |buffer| {
+                        buffer.copy_from_slice(&data);
+                        ocaml_blob::HeapValue {
+                            header,
+                            data: std::ptr::NonNull::new(buffer.as_mut_ptr()).unwrap(),
+                        }
+                    },
+                );
+                // We choose not to `cache.put(new_key, ...)` here.
+            });
+        }
         Ok(())
     }
 

@@ -27,7 +27,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     }
 
     pub fn get(&self, key: K) -> Result<Option<V>> {
-        for store in self.stack.read().iter() {
+        for store in self.stack.read().iter().rev() {
             if let Some(val_opt) = store.get(&key) {
                 return Ok(val_opt.clone());
             }
@@ -36,7 +36,7 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     }
 
     pub fn has_local_change(&self, key: K) -> bool {
-        for store in self.stack.read().iter() {
+        for store in self.stack.read().iter().rev() {
             if store.contains_key(&key) {
                 return true;
             }
@@ -59,6 +59,19 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
 
     pub fn pop_local_changes(&self) {
         self.stack.write().pop();
+    }
+
+    pub fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        if let Some(store) = self.stack.read().last() {
+            for (old_key, new_key) in keys {
+                let val_opt: Option<V> = self.get(old_key)?;
+                store.insert(old_key, None);
+                store.insert(new_key, val_opt);
+            }
+        } else {
+            self.fallback.move_batch(keys)?;
+        }
+        Ok(())
     }
 
     pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
@@ -84,6 +97,10 @@ where
 
     fn insert(&self, key: K, val: V) -> Result<()> {
         ChangesStore::insert(self, key, val)
+    }
+
+    fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
+        ChangesStore::move_batch(self, keys)
     }
 
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {

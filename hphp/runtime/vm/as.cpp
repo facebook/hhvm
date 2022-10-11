@@ -2942,6 +2942,18 @@ void parse_class(AsmState& as) {
 }
 
 /*
+ * directive-doccomment : long-string-literal ';'
+ *                      ;
+ *
+ */
+StringData* parse_module_doccomment(AsmState& as) {
+  auto const doc = parse_long_string(as);
+  as.in.expectWs(';');
+
+  return makeDocComment(doc);
+}
+
+/*
  * directive-module : attribute-list identifier '{}'
  *                  ;
  */
@@ -2959,11 +2971,26 @@ void parse_module(AsmState& as) {
   int line0;
   int line1;
   parse_line_range(as, line0, line1);
+
   as.in.expectWs('{');
+
+  StringData* docComment = nullptr;
+  std::string directive;
+
+  while (as.in.readword(directive)) {
+    if (directive == ".doc") {
+      docComment = parse_module_doccomment(as);
+      continue;
+    }
+
+    as.error("unrecognized directive `" + directive + "' in module");
+  }
+
   as.in.expectWs('}');
 
   as.ue->addModule(std::move(Module{
     makeStaticString(name),
+    docComment,
     line0,
     line1,
     attrs,

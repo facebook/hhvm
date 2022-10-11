@@ -80,7 +80,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -107,7 +108,8 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -132,7 +134,8 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -147,28 +150,32 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Typedef" : {
         "type" : {
   "type" : "struct",
-  "name" : "Typedef"
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "scope.Const" : {
         "type" : {
   "type" : "struct",
-  "name" : "Const"
+  "name" : "Const",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -226,7 +233,8 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -251,7 +259,8 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -266,7 +275,8 @@
           "scope.Struct" : {
         "type" : {
   "type" : "struct",
-  "name" : "Struct"
+  "name" : "Struct",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -281,7 +291,8 @@
           "scope.Union" : {
         "type" : {
   "type" : "struct",
-  "name" : "Union"
+  "name" : "Union",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -296,14 +307,16 @@
           "thrift.Experimental" : {
         "type" : {
   "type" : "struct",
-  "name" : "Experimental"
+  "name" : "Experimental",
+  "path" : "thrift/annotation/thrift.thrift"
 },
         "value" : {}
       },
           "scope.Typedef" : {
         "type" : {
   "type" : "struct",
-  "name" : "Typedef"
+  "name" : "Typedef",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -319,14 +332,16 @@
           "scope.Field" : {
         "type" : {
   "type" : "struct",
-  "name" : "Field"
+  "name" : "Field",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       },
           "thrift.Experimental" : {
         "type" : {
   "type" : "struct",
-  "name" : "Experimental"
+  "name" : "Experimental",
+  "path" : "thrift/annotation/thrift.thrift"
 },
         "value" : {}
       }
@@ -360,7 +375,8 @@
           "scope.Structured" : {
         "type" : {
   "type" : "struct",
-  "name" : "Structured"
+  "name" : "Structured",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }
@@ -375,7 +391,8 @@
           "scope.FbthriftInternalEnum" : {
         "type" : {
   "type" : "struct",
-  "name" : "Enum"
+  "name" : "Enum",
+  "path" : "thrift/annotation/scope.thrift"
 },
         "value" : {}
       }

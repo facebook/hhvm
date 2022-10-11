@@ -23,18 +23,6 @@ using namespace facebook::memcache::mcrouter;
 using std::make_shared;
 using std::vector;
 
-namespace facebook {
-namespace memcache {
-namespace mcrouter {
-
-namespace {
-using FiberManagerContextTag =
-    typename fiber_local<MemcacheRouterInfo>::ContextTypeTag;
-} // namespace
-} // namespace mcrouter
-} // namespace memcache
-} // namespace facebook
-
 TEST(failoverWithExptimeRouteTest, success) {
   std::vector<std::shared_ptr<TestHandle>> normalHandle{
       make_shared<TestHandle>(GetRouteTestData(carbon::Result::FOUND, "a")),
@@ -51,7 +39,7 @@ TEST(failoverWithExptimeRouteTest, success) {
       FailoverErrorsSettings(),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = rh->route(McGetRequest("0"));
@@ -85,7 +73,7 @@ TEST(failoverWithExptimeRouteTest, once) {
       FailoverErrorsSettings(),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = rh->route(McGetRequest("0"));
@@ -124,7 +112,7 @@ TEST(failoverWithExptimeRouteTest, twice) {
       FailoverErrorsSettings(),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = rh->route(McGetRequest("0"));
@@ -163,7 +151,7 @@ TEST(failoverWithExptimeRouteTest, fail) {
       FailoverErrorsSettings(),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = rh->route(McGetRequest("0"));
@@ -195,7 +183,7 @@ void testFailoverGet(carbon::Result res) {
       FailoverErrorsSettings(std::vector<std::string>{}),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = rhNoFail->route(McGetRequest("0"));
@@ -233,7 +221,7 @@ void testFailoverUpdate(carbon::Result res) {
       FailoverErrorsSettings(std::vector<std::string>{}),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     McSetRequest req("0");
@@ -282,7 +270,7 @@ void testFailoverDelete(carbon::Result res) {
       FailoverErrorsSettings(std::vector<std::string>{}),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     McDeleteRequest req("0");
@@ -344,7 +332,7 @@ TEST(failoverWithExptimeRouteTest, noFailoverOnArithmetic) {
       FailoverErrorsSettings(),
       nullptr);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     McIncrRequest req("0");

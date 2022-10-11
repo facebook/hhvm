@@ -141,7 +141,7 @@ fn convert_body<'a>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         constants: Default::default(),
-        locs: Default::default(),
+        locs,
         num_iters,
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),

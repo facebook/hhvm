@@ -22,6 +22,7 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use oxidized::pos::Pos;
 
+use super::TypeRefinementInHint;
 use crate::emit_expression;
 use crate::emit_fatal;
 use crate::reified_generics_helpers as reified;
@@ -140,6 +141,7 @@ pub(super) fn emit_return<'a, 'arena, 'decl>(
                                 e,
                                 &[],
                                 &IndexSet::new(),
+                                TypeRefinementInHint::Allowed,
                                 &h,
                             )?,
                             instr::verify_ret_type_ts(),

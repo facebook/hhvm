@@ -11,11 +11,13 @@
 }}{{#type:float?}}"float"{{/type:float?}}{{!
 }}{{#type:struct?}}{
   "type" : "struct",
-  "name" : "{{type:name}}"
+  "name" : "{{type:name}}"{{#type:external?}},
+  "path" : "{{type:path}}"{{/type:external?}}
 }{{/type:struct?}}{{!
 }}{{#type:enum?}}{
   "type" : "enum",
-  "name" : "{{type:name}}"
+  "name" : "{{type:name}}"{{#type:external?}},
+  "path" : "{{type:path}}"{{/type:external?}}
 }{{/type:enum?}}{{!
 }}{{#type:sink?}}{
   "type" : "sink",
@@ -42,12 +44,12 @@
 {{/type:stream_first_response_type}}
 {{/type:stream_has_first_response?}}
 {{^type:stream_has_first_response?}}
-
 {{/type:stream_has_first_response?}}
 }{{/type:streamresponse?}}{{!
 }}{{#type:service?}}{
   "type" : "service",
-  "name" : "{{type:name}}"
+  "name" : "{{type:name}}"{{#type:external?}},
+  "path" : "{{type:file_name}}"{{/type:external?}}
 }{{/type:service?}}{{!
 }}{{#type:list?}}{
   "type" : "list",

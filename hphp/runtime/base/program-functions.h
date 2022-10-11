@@ -128,8 +128,7 @@ void hphp_memory_cleanup();
 void hphp_session_exit(Transport* transport = nullptr);
 void hphp_process_exit() noexcept;
 bool is_hphp_session_initialized();
-std::string get_systemlib(std::string* hhas = nullptr,
-                          const std::string &section = "systemlib",
+std::string get_systemlib(const std::string &section = "systemlib",
                           const std::string &filename = "");
 
 // Helper function for stats tracking with exceptions.

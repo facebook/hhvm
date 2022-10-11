@@ -65,13 +65,14 @@ std::string SyncConnectPoolOperation::createTimeoutErrorMessage(
   auto delta = std::chrono::duration_cast<std::chrono::milliseconds>(
       std::chrono::steady_clock::now() - start_time_);
 
+  const auto& key = getConnectionKey();
   return fmt::format(
       "[{}]({})Connection to {}:{} timed out in pool "
       "(open {}, opening {}, key limit {}) {}",
       static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
       kErrorPrefix,
-      host().c_str(),
-      port(),
+      key.host,
+      key.port,
       pool_key_stats.open_connections,
       pool_key_stats.pending_connections,
       per_key_limit,

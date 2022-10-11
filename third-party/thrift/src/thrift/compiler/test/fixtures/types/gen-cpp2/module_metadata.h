@@ -102,12 +102,12 @@ class StructMetadata<::apache::thrift::fixtures::types::MinPaddingWithCustomType
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::MyDataItem> {
+class StructMetadata<::apache::thrift::fixtures::types::MyStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::MyStruct> {
+class StructMetadata<::apache::thrift::fixtures::types::MyDataItem> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -122,12 +122,12 @@ class StructMetadata<::apache::thrift::fixtures::types::AnnotatedTypes> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct> {
+class StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::apache::thrift::fixtures::types::ForwardUsageRoot> {
+class StructMetadata<::apache::thrift::fixtures::types::ForwardUsageStruct> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

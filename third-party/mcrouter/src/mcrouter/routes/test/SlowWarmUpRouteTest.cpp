@@ -64,7 +64,7 @@ TEST(SlowWarmUpRoute, basic) {
       /* step */ 1.0,
       /* numReqs  */ 5);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<TestRouterInfo> fm;
 
   std::vector<std::shared_ptr<TestHandle>> targets{
       std::make_shared<TestHandle>(
@@ -140,7 +140,7 @@ TEST(SlowWarmUpRoute, minRequests) {
       /* step */ 1.0,
       /* numReqs  */ 100);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<TestRouterInfo> fm;
 
   std::vector<std::shared_ptr<TestHandle>> targets{
       std::make_shared<TestHandle>(

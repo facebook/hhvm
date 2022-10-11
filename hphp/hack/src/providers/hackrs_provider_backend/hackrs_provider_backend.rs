@@ -25,6 +25,11 @@ use ocamlrep::ptr::UnsafeOcamlPtr;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::ToOcamlRep;
 use oxidized::global_options::GlobalOptions;
+use pos::ConstName;
+use pos::FunName;
+use pos::MethodName;
+use pos::ModuleName;
+use pos::PropName;
 use pos::RelativePath;
 use pos::RelativePathCtx;
 use pos::TypeName;
@@ -190,49 +195,136 @@ impl HhServerProviderBackend {
     // ---
     // Deletion support
 
-    pub fn oldify_funs_batch(&self, _names: &[pos::FunName]) {}
-    pub fn remove_funs_batch(&self, _names: &[pos::FunName]) {}
-    pub fn remove_old_funs_batch(&self, _names: &[pos::FunName]) {}
+    pub fn oldify_funs_batch(&self, _names: &[FunName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_funs_batch(&self, names: &[FunName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .funs
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_funs_batch(&self, _names: &[FunName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_shallow_classes_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_shallow_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .classes
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_shallow_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_folded_classes_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_folded_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
+        self.folded_classes_store
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_folded_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_typedefs_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_typedefs_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_typedefs_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_typedefs_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .typedefs
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_typedefs_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_gconsts_batch(&self, _names: &[pos::ConstName]) {}
-    pub fn remove_gconsts_batch(&self, _names: &[pos::ConstName]) {}
-    pub fn remove_old_gconsts_batch(&self, _names: &[pos::ConstName]) {}
+    pub fn oldify_gconsts_batch(&self, _names: &[ConstName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .consts
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_gconsts_batch(&self, _names: &[ConstName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_modules_batch(&self, _names: &[pos::ModuleName]) {}
-    pub fn remove_modules_batch(&self, _names: &[pos::ModuleName]) {}
-    pub fn remove_old_modules_batch(&self, _names: &[pos::ModuleName]) {}
+    pub fn oldify_modules_batch(&self, _names: &[ModuleName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .modules
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_modules_batch(&self, _names: &[ModuleName]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
-    pub fn remove_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
-    pub fn remove_old_props_batch(&self, _names: &[(pos::TypeName, pos::PropName)]) {}
+    pub fn oldify_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .props
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_static_props_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_static_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .static_props
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_static_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .methods
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
-    pub fn remove_old_static_methods_batch(&self, _names: &[(pos::TypeName, pos::MethodName)]) {}
+    pub fn oldify_static_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .static_methods
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_static_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+        Ok(())
+    }
 
-    pub fn oldify_constructors_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_constructors_batch(&self, _names: &[pos::TypeName]) {}
-    pub fn remove_old_constructors_batch(&self, _names: &[pos::TypeName]) {}
+    pub fn oldify_constructors_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
+    pub fn remove_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
+        self.shallow_decl_changes_store
+            .constructors
+            .remove_batch(&mut names.iter().copied())
+    }
+    pub fn remove_old_constructors_batch(&self, _names: &[TypeName]) -> Result<()> {
+        Ok(())
+    }
 
     //
     // ---

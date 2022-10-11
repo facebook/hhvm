@@ -49,6 +49,7 @@ use oxidized::ast::ReifyKind;
 use oxidized::ast::RequireKind;
 use oxidized::namespace_env;
 
+use super::TypeRefinementInHint;
 use crate::emit_adata;
 use crate::emit_attribute;
 use crate::emit_body;
@@ -206,6 +207,7 @@ fn from_type_constant<'a, 'arena, 'decl>(
                 init,
                 false,
                 false,
+                TypeRefinementInHint::Disallowed,
             )?)
         }
     };

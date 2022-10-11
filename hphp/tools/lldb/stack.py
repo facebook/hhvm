@@ -1,29 +1,27 @@
 # Copyright 2022-present Facebook. All Rights Reserved
 
-import optparse
 import utils
 
 class WalkstkCommand(utils.Command):
     command = "walkstk"
-
-    @classmethod
-    def create_options(cls):
-        parser = optparse.OptionParser()
-        return parser
-
-    def __init__(self, debugger, internal_dict):
-        pass
-    def __call__(self, debugger, command, exe_ctx, result):
-        pass
-    def get_short_help(self):
-        return "Traverse the interleaved VM and native stacks"
-    def get_long_help(self):
-        return f"""\
+    description = "Traverse the interleaved VM and native stacks"
+    epilog = """\
 The output backtrace has the following format:
 
     #<bt frame> <fp> @ <rip>: <function> [at <filename>:<line>]
 
-{self.command} depends on the custom HHVM unwinder defined in unwind.py."""
+`walkstk` depends on the custom HHVM unwinder defined in unwind.py.
+"""
+
+    @classmethod
+    def create_parser(cls):
+        return cls.default_parser()
+
+    def __init__(self, debugger, internal_dict):
+        super().__init__(debugger, internal_dict)
+
+    def __call__(self, debugger, command, exe_ctx, result):
+        pass
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):

@@ -21,10 +21,12 @@ pub struct NamingTable {
 }
 
 impl NamingTable {
-    pub fn new(path: impl AsRef<Path>, checksum: Checksum) -> Self {
+    pub fn new(path: impl AsRef<Path>) -> Self {
+        let names = crate::Names::from_file(path).unwrap();
+        let checksum = names.get_checksum().unwrap();
         Self {
             path_cache: IntMap::default(),
-            names: crate::Names::from_file(path).unwrap(),
+            names,
             rich_checksums: IntMap::default(),
             checksum,
         }
@@ -34,20 +36,13 @@ impl NamingTable {
         self.checksum
     }
 
-    pub fn derive_checksum(&mut self) -> anyhow::Result<()> {
-        // This is a temporary workaround to the fact that we don't have checksums
-        // in our saved state. One day once we have this we can remove this
-        // machinery
-        self.checksum = self.names.derive_checksum()?;
-        Ok(())
-    }
-
+    /// WARNING: this is currently a costly O(table) operation
     pub fn process_changed_file(
         &mut self,
         path: &RelativePath,
         file_summary: crate::FileSummary,
     ) -> anyhow::Result<(IntSet<ToplevelSymbolHash>, IntSet<ToplevelSymbolHash>)> {
-        let mut removed_symbol_hashes = self.names.get_symbol_hashes(path)?;
+        let mut removed_symbol_hashes = self.names.get_symbol_hashes_for_winners(path)?;
         let mut changed_symbol_hashes = IntSet::default();
 
         for (symbol_hash, decl_hash) in file_summary.decl_hashes() {
@@ -58,18 +53,19 @@ impl NamingTable {
                     if old_filename.path_str() == path.path_str() {
                         // we are dealing with the same symbol from the same file
                         // add it back to checksum
-                        self.checksum.addremove(symbol_hash, decl_hash);
+                        self.checksum.addremove(symbol_hash, decl_hash, path);
                     } else if old_filename.path_str() > path.path_str() {
                         // symbol changed is alphabetically first filename
                         changed_symbol_hashes.insert(symbol_hash);
                         self.path_cache.remove(&symbol_hash);
-                        self.checksum.addremove(symbol_hash, old_decl_hash);
-                        self.checksum.addremove(symbol_hash, decl_hash);
+                        self.checksum
+                            .addremove(symbol_hash, old_decl_hash, &old_filename);
+                        self.checksum.addremove(symbol_hash, decl_hash, path);
                     }
                 }
             } else {
                 // No collision
-                self.checksum.addremove(symbol_hash, decl_hash);
+                self.checksum.addremove(symbol_hash, decl_hash, path);
                 changed_symbol_hashes.insert(symbol_hash);
                 self.path_cache.remove(&symbol_hash);
             }
@@ -81,18 +77,20 @@ impl NamingTable {
         Ok((changed_symbol_hashes, removed_symbol_hashes))
     }
 
+    /// WARNING: this is currently a costly O(table) operation
     pub fn remove_file(
         &mut self,
         path: &RelativePath,
     ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let symbol_hashes = self.names.get_symbol_hashes(path)?;
-        let overflow_symbol_hashes = self.names.get_overflow_symbol_hashes(path)?;
+        let symbol_hashes = self.names.get_symbol_hashes_for_winners(path)?;
+        let overflow_symbol_hashes = self.names.get_symbol_hashes_for_losers(path)?;
         let affected_symbol_hashes: IntSet<_> = symbol_hashes
             .union(&overflow_symbol_hashes)
             .copied()
             .collect();
         let mut changed_symbol_hashes = IntSet::default();
-        let combined_hashes = self.names.get_symbol_and_decl_hashes(path)?;
+        // combined_hashes is the forward naming table for this file BEFORE the change
+        let combined_hashes = self.names.get_symbol_and_decl_hashes_for_winners(path)?;
 
         // remove symbols from naming table
         for &symbol_hash in &affected_symbol_hashes {
@@ -102,8 +100,9 @@ impl NamingTable {
 
             if new_filename != old_filename {
                 if let Some(decl_hash) = self.names.get_decl_hash(symbol_hash)? {
-                    // an inferior symbol has been promoted
-                    self.checksum.addremove(symbol_hash, decl_hash);
+                    // an inferior symbol has been promoted. We'll add this newly-promoted one.
+                    self.checksum
+                        .addremove(symbol_hash, decl_hash, new_filename.as_ref().unwrap());
                 }
             }
 
@@ -116,9 +115,9 @@ impl NamingTable {
 
         self.names.delete(path)?;
 
-        // Remove combined hashes from checksum
+        // Remove combined hashes from checksum (i.e. all symbols in the file before the change)
         for (symbol_hash, decl_hash, _file_info_id) in combined_hashes {
-            self.checksum.addremove(symbol_hash, decl_hash);
+            self.checksum.addremove(symbol_hash, decl_hash, path);
         }
 
         Ok(changed_symbol_hashes)

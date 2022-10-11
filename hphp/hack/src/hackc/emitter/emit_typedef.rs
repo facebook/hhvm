@@ -15,6 +15,7 @@ use hhvm_types_ffi::ffi::Attr;
 use oxidized::aast_defs::Hint;
 use oxidized::ast;
 
+use super::TypeRefinementInHint;
 use crate::emit_attribute;
 use crate::emit_body;
 use crate::emit_type_constant;
@@ -94,5 +95,6 @@ fn kind_to_type_structure<'arena, 'decl>(
         &h,
         true,
         is_opaque,
+        TypeRefinementInHint::Disallowed, // Note: only called by `emit_typedef`
     )
 }

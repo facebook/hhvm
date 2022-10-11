@@ -98,7 +98,6 @@ bool s_inited = false;
 bool s_anyNonPersistentBuiltins = false;
 std::string s_source;
 Unit* s_unit = nullptr;
-Unit* s_hhas_unit = nullptr;
 Func* s_nullFunc = nullptr;
 Func* s_singleArgNullFunc = nullptr;
 Func* s_nullCtor = nullptr;

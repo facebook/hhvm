@@ -43,12 +43,12 @@ class StructMetadata<::facebook::thrift::test::Baz> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted> {
+class StructMetadata<::facebook::thrift::test::Bar> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::Bar> {
+class StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
@@ -63,12 +63,12 @@ class StructMetadata<::facebook::thrift::test::TerseAdaptedFields> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::A> {
+class StructMetadata<::facebook::thrift::test::B> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
-class StructMetadata<::facebook::thrift::test::B> {
+class StructMetadata<::facebook::thrift::test::A> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };

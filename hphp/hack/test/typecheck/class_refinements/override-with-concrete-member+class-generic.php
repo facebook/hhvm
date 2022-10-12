@@ -22,5 +22,5 @@ final class Child extends Base<ConcreteIntBox> {
   protected function mShady(int $_): void {} // NO ERROR
 
   <<__Override>>
-  protected function m(int $_): void {} // FIXME(type-refinements) must type-check
-} // but Hack gives error: expected `int` but got `T`
+  protected function m(int $_): void {} // NO ERROR
+}

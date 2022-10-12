@@ -238,6 +238,16 @@ let localize x = !localize_ref x
 (* Checking properties of types *)
 (*****************************************************************************)
 
+let is_class ty =
+  match get_node ty with
+  | Tclass _ -> true
+  | _ -> false
+
+let is_class_i ty =
+  match ty with
+  | ConstraintType _ -> false
+  | LoclType ty -> is_class ty
+
 let is_mixed_i env ty =
   let mixed = LoclType (MakeType.mixed Reason.Rnone) in
   is_sub_type_for_union_i env mixed ty

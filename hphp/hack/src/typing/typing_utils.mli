@@ -144,6 +144,10 @@ val localize :
   Typing_defs.decl_ty ->
   (Typing_env_types.env * Typing_error.t option) * Typing_defs.locl_ty
 
+val is_class_i : Typing_defs.internal_type -> bool
+
+val is_class : Typing_defs.locl_ty -> bool
+
 val is_mixed_i : Typing_env_types.env -> Typing_defs.internal_type -> bool
 
 val is_mixed : Typing_env_types.env -> Typing_defs.locl_ty -> bool

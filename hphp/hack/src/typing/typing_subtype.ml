@@ -2226,7 +2226,16 @@ and simplify_subtype_i
         | _ -> default_subtype env))
     | (r_super, Tclass (x_super, Nonexact cr_super, tyl_super))
       when (not (Class_refinement.is_empty cr_super))
-           && subtype_env.require_soundness ->
+           && (subtype_env.require_soundness
+              || (* To deal with refinements, the code below generates a
+                  * constraint type. That is currently not supported when
+                  * require_soundness is not set (see below in the function
+                  * decompose_subtype_add_prop). Consequently, if soundness
+                  * is not required, we treat the refinement information
+                  * only if we know for sure that we can discharge it on
+                  * the spot; e.g., when ety_sub is a class-ish. This
+                  * limits the information lost by skipping refinements. *)
+              TUtils.is_class_i ety_sub) ->
       (* We discharge class refinements before anything
        * else ... *)
       Class_refinement.fold_type_refs

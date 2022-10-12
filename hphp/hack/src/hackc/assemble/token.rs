@@ -5,6 +5,7 @@
 
 use std::fmt;
 
+use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
 
@@ -39,6 +40,38 @@ pub(crate) enum Token<'a> {
 }
 
 impl<'a> Token<'a> {
+    pub(crate) fn error(&self, err: impl std::fmt::Display) -> anyhow::Error {
+        anyhow!("Error [line {line}]: {err} ({self:?})", line = self.line())
+    }
+
+    pub(crate) fn line(&self) -> usize {
+        match self {
+            Token::Global(_, u)
+            | Token::Variable(_, u)
+            | Token::TripleStrLiteral(_, u)
+            | Token::Decl(_, u)
+            | Token::StrLiteral(_, u)
+            | Token::Number(_, u)
+            | Token::Identifier(_, u)
+            | Token::Error(_, u) => *u,
+            Token::Variadic(u)
+            | Token::Semicolon(u)
+            | Token::Dash(u)
+            | Token::OpenCurly(u)
+            | Token::OpenBracket(u)
+            | Token::OpenParen(u)
+            | Token::CloseParen(u)
+            | Token::CloseBracket(u)
+            | Token::CloseCurly(u)
+            | Token::Equal(u)
+            | Token::Newline(u)
+            | Token::Comma(u)
+            | Token::Lt(u)
+            | Token::Gt(u)
+            | Token::Colon(u) => *u,
+        }
+    }
+
     pub(crate) fn as_bytes(&self) -> &'a [u8] {
         match self {
             Token::Global(u, _)

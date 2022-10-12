@@ -70,7 +70,7 @@ fn assemble_from_toks<'arena>(
     let mut modules = Vec::new();
     // First token should be the filepath
     let fp = assemble_filepath(token_iter)?;
-    while token_iter.peek().is_some() {
+    while !token_iter.is_empty() {
         if token_iter.peek_if_str(Token::is_decl, ".fatal") {
             fatal = Some(assemble_fatal(alloc, token_iter)?);
         } else if token_iter.peek_if_str(Token::is_decl, ".adata") {
@@ -80,11 +80,9 @@ fn assemble_from_toks<'arena>(
         } else if token_iter.peek_if_str(Token::is_decl, ".class") {
             classes.push(assemble_class(alloc, token_iter)?);
         } else if token_iter.peek_if_str(Token::is_decl, ".function_refs") {
-            ensure!(
-                func_refs.is_none(),
-                "Func refs defined multiple times in file"
-            );
-
+            if func_refs.is_some() {
+                Err(token_iter.error("Func refs defined multiple times in file."))?;
+            }
             func_refs = Some(assemble_refs(
                 alloc,
                 token_iter,
@@ -92,10 +90,9 @@ fn assemble_from_toks<'arena>(
                 assemble_function_name,
             )?);
         } else if token_iter.peek_if_str(Token::is_decl, ".class_refs") {
-            ensure!(
-                class_refs.is_none(),
-                "Class refs defined multiple times in file"
-            );
+            if class_refs.is_some() {
+                Err(token_iter.error("Class refs defined multiple times in file"))?;
+            }
 
             class_refs = Some(assemble_refs(
                 alloc,
@@ -104,10 +101,9 @@ fn assemble_from_toks<'arena>(
                 assemble_class_name,
             )?);
         } else if token_iter.peek_if_str(Token::is_decl, ".constant_refs") {
-            ensure!(
-                constant_refs.is_none(),
-                "Constant refs defined multiple times in file"
-            );
+            if constant_refs.is_some() {
+                Err(token_iter.error("Constant refs defined multiple times in file"))?;
+            }
 
             constant_refs = Some(assemble_refs(
                 alloc,
@@ -116,10 +112,9 @@ fn assemble_from_toks<'arena>(
                 assemble_const_name,
             )?);
         } else if token_iter.peek_if_str(Token::is_decl, ".includes") {
-            ensure!(
-                include_refs.is_none(),
-                "Includes defined mulitple times in file"
-            );
+            if include_refs.is_some() {
+                Err(token_iter.error("Includes defined mulitple times in file"))?;
+            }
 
             include_refs = Some(assemble_refs(
                 alloc,
@@ -150,10 +145,8 @@ fn assemble_from_toks<'arena>(
         } else if token_iter.peek_if_str(Token::is_decl, ".module") {
             modules.push(assemble_module(alloc, token_iter)?);
         } else {
-            bail!(
-                "Unknown top level identifier: {}",
-                token_iter.next().unwrap()
-            )
+            let tok = token_iter.next().unwrap();
+            Err(tok.error("Unknown top level identifier"))?;
         }
     }
     let hcu = hhbc::Unit {
@@ -262,7 +255,7 @@ fn assemble_typedef<'arena>(
             attrs,
         })
     } else {
-        bail!("No type info provided to type def")
+        Err(token_iter.error("No type info provided to type def."))
     }
 }
 
@@ -288,7 +281,7 @@ fn assemble_class<'arena>(
     let mut methods = Vec::new();
     let mut constants = Vec::new();
     let mut type_constants = Vec::new();
-    while let Some(Token::Decl(txt, line)) = token_iter.peek() {
+    while let Some(tok @ Token::Decl(txt, _)) = token_iter.peek() {
         match *txt {
             b".require" => requirements.push(assemble_requirement(alloc, token_iter)?),
             b".ctx" => ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?),
@@ -300,7 +293,7 @@ fn assemble_class<'arena>(
                 &mut constants,
                 &mut type_constants,
             )?,
-            o => bail!("Unknown class-level identifier: {:?}. Line: {}", o, line),
+            _ => Err(tok.error("Unknown class-level identifier"))?,
         }
     }
     token_iter.expect(Token::into_close_curly)?;
@@ -375,11 +368,12 @@ fn assemble_requirement<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Requirement<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".require")?;
-    let kind = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let kind = match tok.into_identifier()? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
         b"class" => hhbc::TraitReqKind::MustBeClass,
-        trq => bail!("Expected TraitReqKind, saw: {:?}", trq),
+        _ => return Err(tok.error("Expected TraitReqKind")),
     };
     token_iter.expect(Token::into_lt)?;
     let name = assemble_class_name(alloc, token_iter)?;
@@ -440,6 +434,7 @@ fn assemble_method<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Method<'arena>> {
+    let method_tok = token_iter.peek().copied();
     token_iter.expect_is_str(Token::into_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
     let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
@@ -460,7 +455,8 @@ fn assemble_method<'arena>(
     };
     // the visibility is printed in the attrs
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
-    let visibility = determine_visibility(&attr)?;
+    let visibility =
+        determine_visibility(&attr).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
     let met = hhbc::Method {
         attributes,
         visibility,
@@ -493,12 +489,13 @@ fn assemble_shadowed_tparams<'arena>(
 fn assemble_method_flags(token_iter: &mut Lexer<'_>) -> Result<hhbc::MethodFlags> {
     let mut flag = hhbc::MethodFlags::empty();
     while token_iter.peek_if(Token::is_identifier) {
-        match token_iter.expect(Token::into_identifier)? {
+        let tok = token_iter.expect_token()?;
+        match tok.into_identifier()? {
             b"isPairGenerator" => flag |= hhbc::MethodFlags::IS_PAIR_GENERATOR,
             b"isAsync" => flag |= hhbc::MethodFlags::IS_ASYNC,
             b"isGenerator" => flag |= hhbc::MethodFlags::IS_GENERATOR,
             b"isClosureBody" => flag |= hhbc::MethodFlags::IS_CLOSURE_BODY,
-            f => bail!("Unknown function flag: {:?}", f),
+            _ => return Err(tok.error("Unknown function flag")),
         }
     }
     Ok(flag)
@@ -508,6 +505,7 @@ fn assemble_property<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Property<'arena>> {
+    let prop_tok = token_iter.peek().copied();
     token_iter.expect_is_str(Token::into_decl, ".property")?;
     let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     // A doc comment is just a triple string literal : """{}"""
@@ -521,13 +519,14 @@ fn assemble_property<'arena>(
     {
         ti
     } else {
-        bail!("No type_info for class property")
+        return Err(prop_tok.unwrap().error("No type_info for class property."));
     };
     let name = assemble_prop_name(alloc, token_iter)?;
     token_iter.expect(Token::into_equal)?;
     let initial_value = assemble_property_initial_value(alloc, token_iter)?;
     token_iter.expect(Token::into_semicolon)?;
-    let visibility = determine_visibility(&flags)?;
+    let visibility =
+        determine_visibility(&flags).map_err(|e| prop_tok.unwrap().error(e.to_string()))?;
     Ok(hhbc::Property {
         name,
         flags,
@@ -794,12 +793,13 @@ fn assemble_fatal<'arena>(
             token_iter.expect_and_get_number()?
         },
     };
-    let op = token_iter.expect(Token::into_identifier)?;
+    let tok = token_iter.expect_token()?;
+    let op = tok.into_identifier()?;
     let op = match op {
         b"Parse" => hhbc::FatalOp::Parse,
         b"Runtime" => hhbc::FatalOp::Runtime,
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
-        _ => bail!("Unknown fatal op: {:?}", op),
+        _ => return Err(tok.error("Unknown fatal op")),
     };
     let msg = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
         token_iter.expect(Token::into_str_literal)?,
@@ -834,7 +834,6 @@ fn assemble_triple_quoted_typed_value<'arena>(
     // Guaranteed st is encased by """ """
     let st = &st[3..st.len() - 3];
     let st = escaper::unescape_literal_bytes_into_vec_bytes(st)?;
-    // TvLexer expects an unescaped string.
     assemble_typed_value(alloc, &st, line)
 }
 
@@ -1162,11 +1161,12 @@ fn assemble_function_flags(
 ) -> Result<hhbc::FunctionFlags> {
     let mut flag = hhbc::FunctionFlags::empty();
     while token_iter.peek_if(Token::is_identifier) {
-        match token_iter.expect(Token::into_identifier)? {
+        let tok = token_iter.expect_token()?;
+        match tok.into_identifier()? {
             b"isPairGenerator" => flag |= hhbc::FunctionFlags::PAIR_GENERATOR,
             b"isAsync" => flag |= hhbc::FunctionFlags::ASYNC,
             b"isGenerator" => flag |= hhbc::FunctionFlags::GENERATOR,
-            f => bail!("Unknown function flag: {:?}", f),
+            _ => return Err(tok.error("Unknown function flag")),
         }
     }
     if name.as_bstr().ends_with(b"$memoize_impl") {
@@ -1234,7 +1234,7 @@ fn assemble_upper_bound<'arena>(
         {
             tis.push(ti);
         } else {
-            bail!("Unexpected \"N\" in upper bound type info");
+            return Err(token_iter.error("Unexpected \"N\" in upper bound type info."));
         }
         if !token_iter.peek_if(Token::is_close_paren) {
             token_iter.expect(Token::into_comma)?;
@@ -1265,7 +1265,7 @@ fn assemble_special_and_user_attrs<'arena>(
             } else if token_iter.peek_if(Token::is_identifier) {
                 tr.add(assemble_hhvm_attr(token_iter)?);
             } else {
-                bail!("Unknown token in special and user attrs");
+                return Err(token_iter.error("Unknown token in special and user attrs"));
             }
         }
         token_iter.expect(Token::into_close_bracket)?;
@@ -1277,7 +1277,8 @@ fn assemble_special_and_user_attrs<'arena>(
 
 fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi::Attr> {
     use hhvm_types_ffi::ffi::Attr;
-    let flag = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let flag = match tok.into_identifier()? {
         b"abstract" => Attr::AttrAbstract,
         b"bad_redeclare" => Attr::AttrNoBadRedeclare,
         b"builtin" => Attr::AttrBuiltin,
@@ -1323,7 +1324,7 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
         b"unique" => Attr::AttrUnique,
         b"unused_max_attr" => Attr::AttrUnusedMaxAttr,
         b"variadic_param" => Attr::AttrVariadicParam,
-        o => bail!("Unknown attr: {:?}", o),
+        _ => return Err(tok.error("Unknown attr")),
     };
     Ok(flag)
 }
@@ -1350,10 +1351,13 @@ fn assemble_user_attr_args<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
+    let tok = token_iter.peek().copied();
     if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(alloc, token_iter)? {
         Ok(sl)
     } else {
-        bail!("Malformed user_attr_args -- should be a vec")
+        Err(tok
+            .unwrap()
+            .error("Malformed user_attr_args -- should be a vec"))
     }
 }
 
@@ -1414,7 +1418,8 @@ fn assemble_type_constraint(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhvm_types_ffi::ffi::TypeConstraintFlags> {
     use hhvm_types_ffi::ffi::TypeConstraintFlags;
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"upper_bound" => Ok(TypeConstraintFlags::UpperBound),
         b"display_nullable" => Ok(TypeConstraintFlags::DisplayNullable),
         //no mock objects
@@ -1424,7 +1429,7 @@ fn assemble_type_constraint(
         b"type_var" => Ok(TypeConstraintFlags::TypeVar),
         b"extended_hint" => Ok(TypeConstraintFlags::ExtendedHint),
         b"nullable" => Ok(TypeConstraintFlags::Nullable),
-        f => bail!("Unknown type constraint flag: {:?}", f),
+        _ => Err(tok.error("Unknown type constraint flag")),
     }
 }
 
@@ -1529,17 +1534,17 @@ fn assemble_body<'arena>(
             token_iter.expect(Token::into_semicolon)?;
             is_memoize_wrapper = true;
         } else if token_iter.peek_if_str(Token::is_decl, ".numiters") {
-            ensure!(
-                num_iters == 0,
-                "Cannot have more than one .numiters per function body"
-            ); // Because only printed once in print.rs
+            if num_iters != 0 {
+                token_iter.error("Cannot have more than one .numiters per function body");
+            }
 
             num_iters = assemble_numiters(token_iter)?;
         } else if token_iter.peek_if_str(Token::is_decl, ".declvars") {
-            ensure!(
-                decl_vars.is_empty(),
-                "Cannot have more than one .declvars per function body"
-            );
+            if !decl_vars.is_empty() {
+                return Err(
+                    token_iter.error("Cannot have more than one .declvars per function body")
+                );
+            }
 
             decl_vars = assemble_decl_vars(alloc, token_iter, decl_map)?;
         } else if token_iter.peek_if_str_starts(Token::is_decl, ".coeffects") {
@@ -1797,628 +1802,543 @@ fn assemble_instr<'arena>(
                 Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::TryCatchEnd))
             }
         } else if sl_lexer.peek_if(Token::is_identifier) {
-            if let Some(tok) = sl_lexer.peek() {
-                match tok.as_bytes() {
-                    label if label_reg.is_match(label) => Ok(hhbc::Instruct::Pseudo(
-                        hhbc::Pseudo::Label(assemble_label(&mut sl_lexer, true)?),
-                    )),
-                    b"Add" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Add, "Add")
-                    }
-                    b"Sub" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Sub, "Sub")
-                    }
-                    b"Mul" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mul, "Mul")
-                    }
-                    b"Pow" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Pow, "Pow")
-                    }
-                    b"Not" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Not, "Not")
-                    }
-                    b"NSame" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::NSame, "NSame")
-                    }
-                    b"Eq" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eq, "Eq"),
-                    b"Neq" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Neq, "Neq")
-                    }
-                    b"Lte" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lte, "Lte")
-                    }
-                    b"Gt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gt, "Gt"),
-                    b"Gte" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gte, "Gte")
-                    }
-                    b"Cmp" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Cmp, "Cmp")
-                    }
-                    b"BitAnd" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::BitAnd,
-                        "BitAnd",
-                    ),
-                    b"BitOr" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitOr, "BitOr")
-                    }
-                    b"BitXor" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::BitXor,
-                        "BitXor",
-                    ),
-                    b"BitNot" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::BitNot,
-                        "BitNot",
-                    ),
-                    b"Shl" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shl, "Shl")
-                    }
-                    b"Shr" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shr, "Shr")
-                    }
-                    b"CastBool" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastBool,
-                        "CastBool",
-                    ),
-                    b"CastInt" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastInt,
-                        "CastInt",
-                    ),
-                    b"CastDouble" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastDouble,
-                        "CastDouble",
-                    ),
-                    b"CastString" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastString,
-                        "CastString",
-                    ),
-                    b"CastDict" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastDict,
-                        "CastDict",
-                    ),
-                    b"CastKeyset" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastKeyset,
-                        "CastKeyset",
-                    ),
-                    b"CastVec" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CastVec,
-                        "CastVec",
-                    ),
-                    b"DblAsBits" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::DblAsBits,
-                        "DblAsBits",
-                    ),
-                    b"InstanceOf" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::InstanceOf,
-                        "InstanceOf",
-                    ),
-
-                    b"Print" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Print, "Print")
-                    }
-                    b"Div" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Div, "Div")
-                    }
-                    b"Dir" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dir, "Dir")
-                    }
-                    b"PopC" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::PopC, "PopC")
-                    }
-                    b"Concat" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::Concat,
-                        "Concat",
-                    ),
-                    b"Null" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Null, "Null")
-                    }
-                    b"RetC" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::RetC, "RetC")
-                    }
-                    b"Lt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lt, "Lt"),
-                    b"Mod" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mod, "Mod")
-                    }
-                    b"Exit" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Exit, "Exit")
-                    }
-                    b"Same" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Same, "Same")
-                    }
-                    b"NullUninit" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NullUninit,
-                        "NullUninit",
-                    ),
-                    b"String" => assemble_string_opcode(alloc, &mut sl_lexer),
-                    b"Int" => assemble_int_opcode(&mut sl_lexer),
-                    b"Double" => assemble_double_opcode(&mut sl_lexer),
-                    b"False" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::False, "False")
-                    }
-                    b"Dict" => assemble_adata_id_carrying_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::Dict,
-                        "Dict",
-                    ),
-                    b"Vec" => assemble_adata_id_carrying_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::Vec,
-                        "Vec",
-                    ),
-                    b"Keyset" => assemble_adata_id_carrying_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::Keyset,
-                        "Keyset",
-                    ),
-                    b"True" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::True, "True")
-                    }
-                    b"LazyClass" => assemble_lazyclass_opcode(alloc, &mut sl_lexer),
-                    b"LazyClassFromClass" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::LazyClassFromClass,
-                        "LazyClassFromClass",
-                    ),
-                    b"VerifyOutType" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::VerifyOutType,
-                        "VerifyOutType",
-                    ),
-                    b"VerifyParamType" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::VerifyParamType,
-                        "VerifyParamType",
-                    ),
-                    b"VerifyParamTypeTS" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::VerifyParamTypeTS,
-                        "VerifyParamTypeTS",
-                    ),
-
-                    b"PopL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::PopL,
-                        "PopL",
-                    ),
-                    b"PushL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::PushL,
-                        "PushL",
-                    ),
-                    b"GetMemoKeyL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::GetMemoKeyL,
-                        "GetMemoKeyL",
-                    ),
-                    b"IssetL" => assemble_local_carrying_opcode_instr(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::IssetL,
-                        "IssetL",
-                    ),
-                    b"JmpZ" => {
-                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ")
-                    }
-                    b"Jmp" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Jmp, "Jmp"),
-                    b"JmpNZ" => {
-                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpNZ, "JmpNZ")
-                    }
-                    b"Enter" => {
-                        assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Enter, "Enter")
-                    }
-                    b"FCallFuncD" | b"FCallCtor" | b"FCallClsMethod" | b"FCallClsMethodM"
-                    | b"FCallClsMethodD" | b"FCallClsMethodS" | b"FCallClsMethodSD"
-                    | b"FCallFunc" | b"FCallObjMethod" | b"FCallObjMethodD" => {
-                        assemble_fcall(alloc, &mut sl_lexer)
-                    }
-                    b"IncDecL" => assemble_incdecl_opcode(&mut sl_lexer, decl_map),
-                    b"IncDecG" => {
-                        assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecG, "IncDecG")
-                    }
-                    b"IncDecS" => {
-                        assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecS, "IncDecS")
-                    }
-                    b"IsTypeStructC" => assemble_is_type_struct_c(&mut sl_lexer),
-                    b"IsTypeC" => assemble_is_type_c(&mut sl_lexer),
-                    b"IsTypeL" => assemble_is_type_l(&mut sl_lexer, decl_map),
-                    b"IterFree" => assemble_iter_free(&mut sl_lexer),
-                    b"IterInit" => assemble_iter_init_iter_next(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::IterInit,
-                        "IterInit",
-                    ),
-                    b"IterNext" => assemble_iter_init_iter_next(
-                        &mut sl_lexer,
-                        decl_map,
-                        hhbc::Opcode::IterNext,
-                        "IterNext",
-                    ),
-                    b"BaseGC" => {
-                        assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseGC, "BaseGC")
-                    }
-                    b"BaseGL" => assemble_base_gl(&mut sl_lexer, decl_map),
-                    b"BaseSC" => assemble_base_sc(&mut sl_lexer),
-                    b"BaseL" => assemble_base_l(&mut sl_lexer, decl_map),
-                    b"BaseC" => assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseC, "BaseC"),
-                    b"BaseH" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BaseH, "BaseH")
-                    }
-                    b"Dim" => assemble_dim(alloc, &mut sl_lexer, decl_map),
-                    b"QueryM" => assemble_query_m(alloc, &mut sl_lexer, decl_map),
-
-                    b"IncDecM" => assemble_inc_dec_m(alloc, &mut sl_lexer, decl_map),
-
-                    b"RetM" => assemble_retm_opcode_instr(&mut sl_lexer),
-                    b"NewObj" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NewObj,
-                        "NewObj",
-                    ),
-                    b"NewObjD" => assemble_obj_class_name_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::NewObjD,
-                        "NewObjD",
-                    ),
-                    b"NewObjS" => {
-                        sl_lexer.next();
-                        Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewObjS(
-                            assemble_special_class_ref(&mut sl_lexer)?,
-                        )))
-                    }
-                    b"LockObj" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::LockObj,
-                        "LockObj",
-                    ),
-                    b"Dup" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dup, "Dup")
-                    }
-                    b"Throw" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Throw, "Throw")
-                    }
-                    b"InstanceOfD" => assemble_obj_class_name_instr(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::InstanceOfD,
-                        "InstanceOfD",
-                    ),
-                    b"CreateCl" => assemble_create_cl(alloc, &mut sl_lexer),
-                    b"ResolveFunc" => assemble_resolve_func(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::ResolveFunc,
-                        "ResolveFunc",
-                    ),
-                    b"ResolveMethCaller" => assemble_resolve_func(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::ResolveMethCaller,
-                        "ResolveMethCaller",
-                    ),
-                    b"ResolveRFunc" => assemble_resolve_func(
-                        alloc,
-                        &mut sl_lexer,
-                        hhbc::Opcode::ResolveRFunc,
-                        "ResolveRFunc",
-                    ),
-                    b"ResolveClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveRClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveRClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveRClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"ResolveClass" => assemble_resolve_class(alloc, &mut sl_lexer),
-                    b"NewDictArray" => assemble_u32_carrying_opcode(
-                        &mut sl_lexer,
-                        hhbc::Opcode::NewDictArray,
-                        "NewDictArray",
-                    ),
-                    b"NewVec" => {
-                        assemble_u32_carrying_opcode(&mut sl_lexer, hhbc::Opcode::NewVec, "NewVec")
-                    }
-                    b"NewKeysetArray" => assemble_u32_carrying_opcode(
-                        &mut sl_lexer,
-                        hhbc::Opcode::NewKeysetArray,
-                        "NewKeysetArray",
-                    ),
-                    b"ConcatN" => assemble_u32_carrying_opcode(
-                        &mut sl_lexer,
-                        hhbc::Opcode::ConcatN,
-                        "ConcatN",
-                    ),
-                    b"CombineAndResolveTypeStruct" => assemble_u32_carrying_opcode(
-                        &mut sl_lexer,
-                        hhbc::Opcode::CombineAndResolveTypeStruct,
-                        "CombineAndResolveTypeStruct",
-                    ),
-                    b"SetL"
-                    | b"SetG"
-                    | b"SetS"
-                    | b"SetOpL"
-                    | b"SetOpG"
-                    | b"SetOpS"
-                    | b"SetImplicitContextByValue"
-                    | b"SetM"
-                    | b"SetRangeM"
-                    | b"SetOpM"
-                    | b"UnsetL"
-                    | b"IsUnsetL"
-                    | b"UnsetG"
-                    | b"UnsetM" => assemble_set_instruct(alloc, &mut sl_lexer, decl_map),
-                    b"CnsE" | b"ClsCns" | b"ClsCnsD" | b"ClsCnsL" => {
-                        assemble_cns(alloc, &mut sl_lexer, decl_map)
-                    }
-                    b"VerifyRetTypeC" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::VerifyRetTypeC,
-                        "VerifyRetTypeC",
-                    ),
-                    b"VerifyRetTypeTS" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::VerifyRetTypeTS,
-                        "VerifyRetTypeTS",
-                    ),
-                    b"VerifyRetNonNullC" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::VerifyRetNonNullC,
-                        "VerifyRetNonNullC",
-                    ),
-                    b"SelfCls" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::SelfCls,
-                        "SelfCls",
-                    ),
-                    b"ParentCls" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ParentCls,
-                        "ParentCls",
-                    ),
-                    b"LateBoundCls" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::LateBoundCls,
-                        "LateBoundCls",
-                    ),
-                    b"RaiseClassStringConversionWarning" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::RaiseClassStringConversionWarning,
-                        "RaiseClassStringConversionWarning",
-                    ),
-                    b"RecordReifiedGeneric" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::RecordReifiedGeneric,
-                        "RecordReifiedGeneric",
-                    ),
-                    b"CheckClsReifiedGenericMismatch" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CheckClsReifiedGenericMismatch,
-                        "CheckClsReifiedGenericMismatch",
-                    ),
-                    b"ClassHasReifiedGenerics" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ClassHasReifiedGenerics,
-                        "ClassHasReifiedGenerics",
-                    ),
-                    b"HasReifiedParent" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::HasReifiedParent,
-                        "HasReifiedParent",
-                    ),
-                    b"NativeImpl" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NativeImpl,
-                        "NativeImpl",
-                    ),
-                    b"CGetCUNop" | b"CUGetCUNop" | b"CGetL" | b"CGetQuietL" | b"CUGetL"
-                    | b"CGetL2" | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => {
-                        assemble_cget(&mut sl_lexer, decl_map)
-                    }
-                    b"Fatal" => assemble_fatal_opcode(&mut sl_lexer),
-                    b"CheckThis" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CheckThis,
-                        "CheckThis",
-                    ),
-                    b"This" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::This, "This")
-                    }
-                    b"CreateCont" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CreateCont,
-                        "CreateCont",
-                    ),
-                    b"Yield" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Yield, "Yield")
-                    }
-                    b"File" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::File, "File")
-                    }
-                    b"Incl" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Incl, "Incl")
-                    }
-                    b"AddElemC" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::AddElemC,
-                        "AddElemC",
-                    ),
-                    b"ClassName" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ClassName,
-                        "ClassName",
-                    ),
-                    b"Req" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Req, "Req")
-                    }
-                    b"ReqDoc" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ReqDoc,
-                        "ReqDoc",
-                    ),
-                    b"ReqOnce" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ReqOnce,
-                        "ReqOnce",
-                    ),
-                    b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
-                    b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
-                    b"NewCol" => assemble_new_col(&mut sl_lexer),
-                    b"NewStructDict" => assemble_new_struct_dict(alloc, &mut sl_lexer),
-                    b"IssetG" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::IssetG,
-                        "IssetG",
-                    ),
-                    b"IssetS" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::IssetS,
-                        "IssetS",
-                    ),
-                    b"NewPair" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::NewPair,
-                        "NewPair",
-                    ),
-                    b"Clone" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Clone, "Clone")
-                    }
-                    b"Idx" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Idx, "Idx")
-                    }
-                    b"YieldK" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::YieldK,
-                        "YieldK",
-                    ),
-                    b"ArrayUnmarkLegacy" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ArrayUnmarkLegacy,
-                        "ArrayUnmarkLegacy",
-                    ),
-                    b"ArrayMarkLegacy" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ArrayMarkLegacy,
-                        "ArrayMarkLegacy",
-                    ),
-                    b"AKExists" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::AKExists,
-                        "AKExists",
-                    ),
-                    b"Await" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Await, "Await")
-                    }
-                    b"InclOnce" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::InclOnce,
-                        "InclOnce",
-                    ),
-                    b"OODeclExists" => assemble_oodecl_exists(&mut sl_lexer),
-                    b"Silence" => assemble_silence(&mut sl_lexer, decl_map),
-                    b"ThrowNonExhaustiveSwitch" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ThrowNonExhaustiveSwitch,
-                        "ThrowNonExhaustiveSwitch",
-                    ),
-                    b"ArrayIdx" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ArrayIdx,
-                        "ArrayIdx",
-                    ),
-                    b"ChainFaults" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ChainFaults,
-                        "ChainFaults",
-                    ),
-                    b"CheckProp" => assemble_check_prop(alloc, &mut sl_lexer),
-                    b"InitProp" => assemble_init_prop(alloc, &mut sl_lexer),
-                    b"VerifyImplicitContextState" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::VerifyImplicitContextState,
-                        "VerifyImplicitContextState",
-                    ),
-                    b"MemoGet" => assemble_memo_get(&mut sl_lexer),
-                    b"MemoSet" => assemble_memo_set(&mut sl_lexer),
-                    b"Switch" => assemble_switch(alloc, &mut sl_lexer),
-                    b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
-                    b"Eval" => {
-                        assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eval, "Eval")
-                    }
-                    b"ThrowAsTypeStructException" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::ThrowAsTypeStructException,
-                        "ThrowAsTypeStructException",
-                    ),
-                    b"AwaitAll" => assemble_await_all(&mut sl_lexer),
-                    b"WHResult" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::WHResult,
-                        "WHResult",
-                    ),
-                    b"AddNewElemC" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::AddNewElemC,
-                        "AddNewElemC",
-                    ),
-                    b"IsLateBoundCls" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::IsLateBoundCls,
-                        "IsLateBoundCls",
-                    ),
-                    b"FuncCred" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::FuncCred,
-                        "FuncCred",
-                    ),
-                    b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
-                    b"MemoSetEager" => assemble_memo_set_eager(&mut sl_lexer),
-                    b"RetCSuspended" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::RetCSuspended,
-                        "RetCSuspended",
-                    ),
-                    b"CheckClsRGSoft" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::CheckClsRGSoft,
-                        "CheckClsRGSoft",
-                    ),
-                    b"GetClsRGProp" => assemble_single_opcode_instr(
-                        &mut sl_lexer,
-                        || hhbc::Opcode::GetClsRGProp,
-                        "GetClsRGProp",
-                    ),
-                    _ => todo!("assembling instrs: {}", tok),
+            let tok = sl_lexer.peek().unwrap();
+            match tok.as_bytes() {
+                label if label_reg.is_match(label) => Ok(hhbc::Instruct::Pseudo(
+                    hhbc::Pseudo::Label(assemble_label(&mut sl_lexer, true)?),
+                )),
+                b"Add" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Add, "Add"),
+                b"Sub" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Sub, "Sub"),
+                b"Mul" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mul, "Mul"),
+                b"Pow" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Pow, "Pow"),
+                b"Not" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Not, "Not"),
+                b"NSame" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::NSame, "NSame")
                 }
-            } else {
-                bail!("Something wrong in assemble_instr") // Shouldn't happen, we peek_if so there must be something
+                b"Eq" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eq, "Eq"),
+                b"Neq" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Neq, "Neq"),
+                b"Lte" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lte, "Lte"),
+                b"Gt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gt, "Gt"),
+                b"Gte" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Gte, "Gte"),
+                b"Cmp" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Cmp, "Cmp"),
+                b"BitAnd" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitAnd, "BitAnd")
+                }
+                b"BitOr" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitOr, "BitOr")
+                }
+                b"BitXor" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitXor, "BitXor")
+                }
+                b"BitNot" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BitNot, "BitNot")
+                }
+                b"Shl" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shl, "Shl"),
+                b"Shr" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Shr, "Shr"),
+                b"CastBool" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CastBool,
+                    "CastBool",
+                ),
+                b"CastInt" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::CastInt, "CastInt")
+                }
+                b"CastDouble" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CastDouble,
+                    "CastDouble",
+                ),
+                b"CastString" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CastString,
+                    "CastString",
+                ),
+                b"CastDict" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CastDict,
+                    "CastDict",
+                ),
+                b"CastKeyset" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CastKeyset,
+                    "CastKeyset",
+                ),
+                b"CastVec" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::CastVec, "CastVec")
+                }
+                b"DblAsBits" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::DblAsBits,
+                    "DblAsBits",
+                ),
+                b"InstanceOf" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::InstanceOf,
+                    "InstanceOf",
+                ),
+
+                b"Print" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Print, "Print")
+                }
+                b"Div" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Div, "Div"),
+                b"Dir" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dir, "Dir"),
+                b"PopC" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::PopC, "PopC")
+                }
+                b"Concat" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Concat, "Concat")
+                }
+                b"Null" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Null, "Null")
+                }
+                b"RetC" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::RetC, "RetC")
+                }
+                b"Lt" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Lt, "Lt"),
+                b"Mod" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mod, "Mod"),
+                b"Exit" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Exit, "Exit")
+                }
+                b"Same" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Same, "Same")
+                }
+                b"NullUninit" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::NullUninit,
+                    "NullUninit",
+                ),
+                b"String" => assemble_string_opcode(alloc, &mut sl_lexer),
+                b"Int" => assemble_int_opcode(&mut sl_lexer),
+                b"Double" => assemble_double_opcode(&mut sl_lexer),
+                b"False" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::False, "False")
+                }
+                b"Dict" => assemble_adata_id_carrying_instr(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::Dict,
+                    "Dict",
+                ),
+                b"Vec" => {
+                    assemble_adata_id_carrying_instr(alloc, &mut sl_lexer, hhbc::Opcode::Vec, "Vec")
+                }
+                b"Keyset" => assemble_adata_id_carrying_instr(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::Keyset,
+                    "Keyset",
+                ),
+                b"True" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::True, "True")
+                }
+                b"LazyClass" => assemble_lazyclass_opcode(alloc, &mut sl_lexer),
+                b"LazyClassFromClass" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::LazyClassFromClass,
+                    "LazyClassFromClass",
+                ),
+                b"VerifyOutType" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::VerifyOutType,
+                    "VerifyOutType",
+                ),
+                b"VerifyParamType" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::VerifyParamType,
+                    "VerifyParamType",
+                ),
+                b"VerifyParamTypeTS" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::VerifyParamTypeTS,
+                    "VerifyParamTypeTS",
+                ),
+
+                b"PopL" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::PopL,
+                    "PopL",
+                ),
+                b"PushL" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::PushL,
+                    "PushL",
+                ),
+                b"GetMemoKeyL" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::GetMemoKeyL,
+                    "GetMemoKeyL",
+                ),
+                b"IssetL" => assemble_local_carrying_opcode_instr(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::IssetL,
+                    "IssetL",
+                ),
+                b"JmpZ" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpZ, "JmpZ"),
+                b"Jmp" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Jmp, "Jmp"),
+                b"JmpNZ" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::JmpNZ, "JmpNZ"),
+                b"Enter" => assemble_jump_opcode_instr(&mut sl_lexer, hhbc::Opcode::Enter, "Enter"),
+                b"FCallFuncD" | b"FCallCtor" | b"FCallClsMethod" | b"FCallClsMethodM"
+                | b"FCallClsMethodD" | b"FCallClsMethodS" | b"FCallClsMethodSD" | b"FCallFunc"
+                | b"FCallObjMethod" | b"FCallObjMethodD" => assemble_fcall(alloc, &mut sl_lexer),
+                b"IncDecL" => assemble_incdecl_opcode(&mut sl_lexer, decl_map),
+                b"IncDecG" => {
+                    assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecG, "IncDecG")
+                }
+                b"IncDecS" => {
+                    assemble_incdec_opcode(&mut sl_lexer, hhbc::Opcode::IncDecS, "IncDecS")
+                }
+                b"IsTypeStructC" => assemble_is_type_struct_c(&mut sl_lexer),
+                b"IsTypeC" => assemble_is_type_c(&mut sl_lexer),
+                b"IsTypeL" => assemble_is_type_l(&mut sl_lexer, decl_map),
+                b"IterFree" => assemble_iter_free(&mut sl_lexer),
+                b"IterInit" => assemble_iter_init_iter_next(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::IterInit,
+                    "IterInit",
+                ),
+                b"IterNext" => assemble_iter_init_iter_next(
+                    &mut sl_lexer,
+                    decl_map,
+                    hhbc::Opcode::IterNext,
+                    "IterNext",
+                ),
+                b"BaseGC" => assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseGC, "BaseGC"),
+                b"BaseGL" => assemble_base_gl(&mut sl_lexer, decl_map),
+                b"BaseSC" => assemble_base_sc(&mut sl_lexer),
+                b"BaseL" => assemble_base_l(&mut sl_lexer, decl_map),
+                b"BaseC" => assemble_base_gc_or_c(&mut sl_lexer, hhbc::Opcode::BaseC, "BaseC"),
+                b"BaseH" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::BaseH, "BaseH")
+                }
+                b"Dim" => assemble_dim(alloc, &mut sl_lexer, decl_map),
+                b"QueryM" => assemble_query_m(alloc, &mut sl_lexer, decl_map),
+
+                b"IncDecM" => assemble_inc_dec_m(alloc, &mut sl_lexer, decl_map),
+
+                b"RetM" => assemble_retm_opcode_instr(&mut sl_lexer),
+                b"NewObj" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::NewObj, "NewObj")
+                }
+                b"NewObjD" => assemble_obj_class_name_instr(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::NewObjD,
+                    "NewObjD",
+                ),
+                b"NewObjS" => {
+                    sl_lexer.next();
+                    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewObjS(
+                        assemble_special_class_ref(&mut sl_lexer)?,
+                    )))
+                }
+                b"LockObj" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::LockObj, "LockObj")
+                }
+                b"Dup" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Dup, "Dup"),
+                b"Throw" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Throw, "Throw")
+                }
+                b"InstanceOfD" => assemble_obj_class_name_instr(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::InstanceOfD,
+                    "InstanceOfD",
+                ),
+                b"CreateCl" => assemble_create_cl(alloc, &mut sl_lexer),
+                b"ResolveFunc" => assemble_resolve_func(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::ResolveFunc,
+                    "ResolveFunc",
+                ),
+                b"ResolveMethCaller" => assemble_resolve_func(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::ResolveMethCaller,
+                    "ResolveMethCaller",
+                ),
+                b"ResolveRFunc" => assemble_resolve_func(
+                    alloc,
+                    &mut sl_lexer,
+                    hhbc::Opcode::ResolveRFunc,
+                    "ResolveRFunc",
+                ),
+                b"ResolveClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveRClsMethod" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveRClsMethodD" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveRClsMethodS" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"ResolveClass" => assemble_resolve_class(alloc, &mut sl_lexer),
+                b"NewDictArray" => assemble_u32_carrying_opcode(
+                    &mut sl_lexer,
+                    hhbc::Opcode::NewDictArray,
+                    "NewDictArray",
+                ),
+                b"NewVec" => {
+                    assemble_u32_carrying_opcode(&mut sl_lexer, hhbc::Opcode::NewVec, "NewVec")
+                }
+                b"NewKeysetArray" => assemble_u32_carrying_opcode(
+                    &mut sl_lexer,
+                    hhbc::Opcode::NewKeysetArray,
+                    "NewKeysetArray",
+                ),
+                b"ConcatN" => {
+                    assemble_u32_carrying_opcode(&mut sl_lexer, hhbc::Opcode::ConcatN, "ConcatN")
+                }
+                b"CombineAndResolveTypeStruct" => assemble_u32_carrying_opcode(
+                    &mut sl_lexer,
+                    hhbc::Opcode::CombineAndResolveTypeStruct,
+                    "CombineAndResolveTypeStruct",
+                ),
+                b"SetL"
+                | b"SetG"
+                | b"SetS"
+                | b"SetOpL"
+                | b"SetOpG"
+                | b"SetOpS"
+                | b"SetImplicitContextByValue"
+                | b"SetM"
+                | b"SetRangeM"
+                | b"SetOpM"
+                | b"UnsetL"
+                | b"IsUnsetL"
+                | b"UnsetG"
+                | b"UnsetM" => assemble_set_instruct(alloc, &mut sl_lexer, decl_map),
+                b"CnsE" | b"ClsCns" | b"ClsCnsD" | b"ClsCnsL" => {
+                    assemble_cns(alloc, &mut sl_lexer, decl_map)
+                }
+                b"VerifyRetTypeC" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::VerifyRetTypeC,
+                    "VerifyRetTypeC",
+                ),
+                b"VerifyRetTypeTS" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::VerifyRetTypeTS,
+                    "VerifyRetTypeTS",
+                ),
+                b"VerifyRetNonNullC" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::VerifyRetNonNullC,
+                    "VerifyRetNonNullC",
+                ),
+                b"SelfCls" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::SelfCls, "SelfCls")
+                }
+                b"ParentCls" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ParentCls,
+                    "ParentCls",
+                ),
+                b"LateBoundCls" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::LateBoundCls,
+                    "LateBoundCls",
+                ),
+                b"RecordReifiedGeneric" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::RecordReifiedGeneric,
+                    "RecordReifiedGeneric",
+                ),
+                b"CheckClsReifiedGenericMismatch" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CheckClsReifiedGenericMismatch,
+                    "CheckClsReifiedGenericMismatch",
+                ),
+                b"ClassHasReifiedGenerics" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ClassHasReifiedGenerics,
+                    "ClassHasReifiedGenerics",
+                ),
+                b"HasReifiedParent" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::HasReifiedParent,
+                    "HasReifiedParent",
+                ),
+                b"NativeImpl" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::NativeImpl,
+                    "NativeImpl",
+                ),
+                b"CGetCUNop" | b"CUGetCUNop" | b"CGetL" | b"CGetQuietL" | b"CUGetL" | b"CGetL2"
+                | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => {
+                    assemble_cget(&mut sl_lexer, decl_map)
+                }
+                b"Fatal" => assemble_fatal_opcode(&mut sl_lexer),
+                b"CheckThis" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CheckThis,
+                    "CheckThis",
+                ),
+                b"This" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::This, "This")
+                }
+                b"CreateCont" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CreateCont,
+                    "CreateCont",
+                ),
+                b"Yield" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Yield, "Yield")
+                }
+                b"File" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::File, "File")
+                }
+                b"Incl" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Incl, "Incl")
+                }
+                b"AddElemC" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::AddElemC,
+                    "AddElemC",
+                ),
+                b"ClassName" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ClassName,
+                    "ClassName",
+                ),
+                b"Req" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Req, "Req"),
+                b"ReqDoc" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::ReqDoc, "ReqDoc")
+                }
+                b"ReqOnce" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::ReqOnce, "ReqOnce")
+                }
+                b"BareThis" => assemble_bare_this_opcode(&mut sl_lexer),
+                b"ColFromArray" => assemble_col_from_array(&mut sl_lexer),
+                b"NewCol" => assemble_new_col(&mut sl_lexer),
+                b"NewStructDict" => assemble_new_struct_dict(alloc, &mut sl_lexer),
+                b"IssetG" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::IssetG, "IssetG")
+                }
+                b"IssetS" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::IssetS, "IssetS")
+                }
+                b"NewPair" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::NewPair, "NewPair")
+                }
+                b"Clone" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Clone, "Clone")
+                }
+                b"Idx" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Idx, "Idx"),
+                b"YieldK" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::YieldK, "YieldK")
+                }
+                b"ArrayUnmarkLegacy" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ArrayUnmarkLegacy,
+                    "ArrayUnmarkLegacy",
+                ),
+                b"ArrayMarkLegacy" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ArrayMarkLegacy,
+                    "ArrayMarkLegacy",
+                ),
+                b"AKExists" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::AKExists,
+                    "AKExists",
+                ),
+                b"Await" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Await, "Await")
+                }
+                b"InclOnce" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::InclOnce,
+                    "InclOnce",
+                ),
+                b"OODeclExists" => assemble_oodecl_exists(&mut sl_lexer),
+                b"Silence" => assemble_silence(&mut sl_lexer, decl_map),
+                b"ThrowNonExhaustiveSwitch" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ThrowNonExhaustiveSwitch,
+                    "ThrowNonExhaustiveSwitch",
+                ),
+                b"ArrayIdx" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ArrayIdx,
+                    "ArrayIdx",
+                ),
+                b"ChainFaults" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ChainFaults,
+                    "ChainFaults",
+                ),
+                b"CheckProp" => assemble_check_prop(alloc, &mut sl_lexer),
+                b"InitProp" => assemble_init_prop(alloc, &mut sl_lexer),
+                b"VerifyImplicitContextState" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::VerifyImplicitContextState,
+                    "VerifyImplicitContextState",
+                ),
+                b"MemoGet" => assemble_memo_get(&mut sl_lexer),
+                b"MemoSet" => assemble_memo_set(&mut sl_lexer),
+                b"Switch" => assemble_switch(alloc, &mut sl_lexer),
+                b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
+                b"Eval" => {
+                    assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Eval, "Eval")
+                }
+                b"ThrowAsTypeStructException" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::ThrowAsTypeStructException,
+                    "ThrowAsTypeStructException",
+                ),
+                b"AwaitAll" => assemble_await_all(&mut sl_lexer),
+                b"WHResult" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::WHResult,
+                    "WHResult",
+                ),
+                b"AddNewElemC" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::AddNewElemC,
+                    "AddNewElemC",
+                ),
+                b"IsLateBoundCls" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::IsLateBoundCls,
+                    "IsLateBoundCls",
+                ),
+                b"FuncCred" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::FuncCred,
+                    "FuncCred",
+                ),
+                b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
+                b"MemoSetEager" => assemble_memo_set_eager(&mut sl_lexer),
+                b"RetCSuspended" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::RetCSuspended,
+                    "RetCSuspended",
+                ),
+                b"CheckClsRGSoft" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::CheckClsRGSoft,
+                    "CheckClsRGSoft",
+                ),
+                b"GetClsRGProp" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::GetClsRGProp,
+                    "GetClsRGProp",
+                ),
+                b"RaiseClassStringConversionWarning" => assemble_single_opcode_instr(
+                    &mut sl_lexer,
+                    || hhbc::Opcode::RaiseClassStringConversionWarning,
+                    "RaiseClassStringConversionWarning",
+                ),
+                _ => todo!("assembling instrs: {}", tok),
             }
         } else {
-            bail!(
-                "Function body line that's neither decl or identifier: {}",
-                sl_lexer.next().unwrap() // Know there is something here because fetch_until_new_line won't return empty
-            );
+            Err(sl_lexer.error("Function body line that's neither decl or identifier."))
         }
     } else {
         bail!("Expected an additional instruction in body, reached EOF");
@@ -2453,8 +2373,8 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
     let mut flags = hhbc::FCallArgsFlags::FCANone;
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
-        let f = token_iter.expect(Token::into_identifier)?;
-        match f {
+        let tok = token_iter.expect_token()?;
+        match tok.into_identifier()? {
             b"Unpack" => flags.add(hhbc::FCallArgsFlags::HasUnpack),
             b"Generics" => flags.add(hhbc::FCallArgsFlags::HasGenerics),
             b"LockWhileUnwinding" => flags.add(hhbc::FCallArgsFlags::LockWhileUnwinding),
@@ -2468,7 +2388,7 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
             b"EnforceReadonly" => flags.add(hhbc::FCallArgsFlags::EnforceReadonly),
             b"HasAsyncEagerOffset" => flags.add(hhbc::FCallArgsFlags::HasAsyncEagerOffset),
             b"NumArgsStart" => flags.add(hhbc::FCallArgsFlags::NumArgsStart),
-            f => bail!("Unrecognized FCallArgsFlags: {:?}", f),
+            _ => return Err(tok.error("Unrecognized FCallArgsFlags")),
         }
     }
     token_iter.expect(Token::into_gt)?;
@@ -2480,18 +2400,15 @@ fn assemble_inouts_or_readonly<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, bool>> {
-    let literal = token_iter.expect(Token::into_str_literal)?; //
+    let tok = token_iter.expect_token()?;
+    let literal = tok.into_str_literal()?;
     debug_assert!(literal[0] == b'"' && literal[literal.len() - 1] == b'"');
     let tr: Result<Vec<bool>, _> = literal[1..literal.len() - 1] //trims the outer "", which are guaranteed b/c of str token
         .iter()
-        .map(|c| {
-            Ok(if *c == b'0' {
-                false
-            } else if *c == b'1' {
-                true
-            } else {
-                bail!("Non 0/1 character in inouts/readonlys")
-            })
+        .map(|c| match *c {
+            b'0' => Ok(false),
+            b'1' => Ok(true),
+            _ => Err(tok.error("Non 0/1 character in inouts/readonlys")),
         })
         .collect();
     Ok(Slice::from_vec(alloc, tr?))
@@ -2519,27 +2436,30 @@ fn assemble_fcall_context<'arena>(
 fn assemble_is_log_as_dynamic_call_op(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::IsLogAsDynamicCallOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"LogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::LogAsDynamicCall),
         b"DontLogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::DontLogAsDynamicCall),
-        b => bail!("Unknown IsLogAsDynamicCallOp: {:?}", b),
+        _ => Err(tok.error("Unknown IsLogAsDynamicCallOp")),
     }
 }
 
 fn assemble_special_class_ref(token_iter: &mut Lexer<'_>) -> Result<hhbc::SpecialClsRef> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"SelfCls" => Ok(hhbc::SpecialClsRef::SelfCls),
         b"ParentCls" => Ok(hhbc::SpecialClsRef::ParentCls),
         b"LateBoundCls" => Ok(hhbc::SpecialClsRef::LateBoundCls),
-        b => bail!("Unknown SpecialClassRef: {:?}", b),
+        _ => Err(tok.error("Unknown SpecialClassRef")),
     }
 }
 
 fn assemble_obj_method_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ObjMethodOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"NullThrows" => Ok(hhbc::ObjMethodOp::NullThrows),
         b"NullSafe" => Ok(hhbc::ObjMethodOp::NullSafe),
-        b => bail!("Unknown ObjMethodOp: {:?}", b),
+        _ => Err(tok.error("Unknown ObjMethodOp")),
     }
 }
 
@@ -2646,13 +2566,14 @@ fn assemble_fcall<'arena>(
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"FCallFunc" => Opcode::FCallFunc(args),
-        _ => bail!("Unknown fcall: {}", tok),
+        _ => return Err(tok.error("Unknown fcall")),
     };
     Ok(hhbc::Instruct::Opcode(fcall))
 }
 
 fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"Null" => Ok(hhbc::IsTypeOp::Null),
         b"Bool" => Ok(hhbc::IsTypeOp::Bool),
         b"Int" => Ok(hhbc::IsTypeOp::Int),
@@ -2669,7 +2590,7 @@ fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
         b"Func" => Ok(hhbc::IsTypeOp::Func),
         b"LegacyArrLike" => Ok(hhbc::IsTypeOp::LegacyArrLike),
         b"Class" => Ok(hhbc::IsTypeOp::Class),
-        ito => bail!("Unknown IsTypeOp: {:?}", ito),
+        _ => Err(tok.error("Unknown IsTypeOp")),
     }
 }
 
@@ -2723,13 +2644,14 @@ fn assemble_iter_args(
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::IterArgs> {
     let idx: u32 = token_iter.expect_and_get_number()?;
-    let key_id: hhbc::Local = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let key_id: hhbc::Local = match tok.into_identifier()? {
         b"NK" => hhbc::Local::INVALID,
         b"K" => {
             token_iter.expect(Token::into_colon)?;
             assemble_local(token_iter, decl_map)?
         }
-        o => bail!("Invalid key_id given as iter args to IterArg: {:?}", o),
+        _ => return Err(tok.error("Invalid key_id given as iter args to IterArg")),
     };
     token_iter.expect_is_str(Token::into_identifier, "V")?;
     token_iter.expect(Token::into_colon)?;
@@ -2761,27 +2683,24 @@ fn assemble_is_type_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instru
 /// IsTypeStructC (Resolve|DontResolve)
 fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeStructC")?;
-    let res_op = token_iter.expect(Token::into_identifier)?;
-    match res_op {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"Resolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
             hhbc::TypeStructResolveOp::Resolve,
         ))),
         b"DontResolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
             hhbc::TypeStructResolveOp::DontResolve,
         ))),
-        _ => bail!(
-            "Unknown TypeStructResolveOp passed to TypeStructC instr: {:?}",
-            res_op
-        ),
+        _ => Err(tok.error("Unknown TypeStructResolveOp passed to TypeStructC instr")),
     }
 }
 
 fn assemble_switch_kind(token_iter: &mut Lexer<'_>) -> Result<hhbc::SwitchKind> {
-    let sk = token_iter.expect(Token::into_identifier)?;
-    match sk {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"Unbounded" => Ok(hhbc::SwitchKind::Unbounded),
         b"Bounded" => Ok(hhbc::SwitchKind::Bounded),
-        sk => bail!("Unknown switch kind: {:?}", sk),
+        _ => Err(tok.error("Unknown switch kind")),
     }
 }
 
@@ -2907,26 +2826,26 @@ fn assemble_stack_index(token_iter: &mut Lexer<'_>) -> Result<hhbc::StackIndex> 
 }
 
 fn assemble_mop_mode(token_iter: &mut Lexer<'_>) -> Result<hhbc::MOpMode> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"None" => Ok(hhbc::MOpMode::None),
         b"Warn" => Ok(hhbc::MOpMode::Warn),
         b"Define" => Ok(hhbc::MOpMode::Define),
         b"Unset" => Ok(hhbc::MOpMode::Unset),
         b"InOut" => Ok(hhbc::MOpMode::InOut),
-        mop => bail!("Expected a MOpMode but got: {:?}", mop),
+        _ => Err(tok.error("Expected a MOpMode")),
     }
 }
 
 fn assemble_readonly_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ReadonlyOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"Any" => Ok(hhbc::ReadonlyOp::Any),
         b"Readonly" => Ok(hhbc::ReadonlyOp::Readonly),
         b"Mutable" => Ok(hhbc::ReadonlyOp::Mutable),
         b"CheckROCOW" => Ok(hhbc::ReadonlyOp::CheckROCOW),
         b"CheckMutROCOW" => Ok(hhbc::ReadonlyOp::CheckMutROCOW),
-        rop => {
-            bail!("Expected a ReadonlyOp but got: {:?}", rop)
-        }
+        _ => Err(tok.error("Expected a ReadonlyOp")),
     }
 }
 
@@ -2937,7 +2856,8 @@ fn assemble_member_key<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::MemberKey<'arena>> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"EC" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::EC(
@@ -3001,9 +2921,7 @@ fn assemble_member_key<'arena>(
             ))
         }
         b"W" => Ok(hhbc::MemberKey::W),
-        mk => {
-            bail!("Expected a MemberKey but got: {:?}", mk)
-        }
+        _ => Err(tok.error("Expected a MemberKey")),
     }
 }
 
@@ -3021,12 +2939,13 @@ fn assemble_dim<'arena>(
 }
 
 fn assemble_query_mop(token_iter: &mut Lexer<'_>) -> Result<hhbc::QueryMOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"CGet" => Ok(hhbc::QueryMOp::CGet),
         b"CGetQuiet" => Ok(hhbc::QueryMOp::CGetQuiet),
         b"Isset" => Ok(hhbc::QueryMOp::Isset),
         b"InOut" => Ok(hhbc::QueryMOp::InOut),
-        q => bail!("Unexpected QueryMOp: {:?}", q),
+        _ => Err(tok.error("Unexpected QueryMOp")),
     }
 }
 
@@ -3113,10 +3032,11 @@ fn assemble_base_gc_or_c<
 }
 
 fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp> {
-    let sro = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let sro = match tok.into_identifier()? {
         b"Forward" => hhbc::SetRangeOp::Forward,
         b"Reverse" => hhbc::SetRangeOp::Reverse,
-        sro => bail!("Unknown SetRangeOp: {:?}", sro),
+        _ => return Err(tok.error("Unknown SetRangeOp")),
     };
     Ok(sro)
 }
@@ -3128,7 +3048,8 @@ fn assemble_cns<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
-    let op = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let op = match tok.into_identifier()? {
         b"CnsE" => hhbc::Opcode::CnsE(assemble_const_name_from_str(alloc, token_iter)?),
         b"ClsCns" => hhbc::Opcode::ClsCns(assemble_const_name_from_str(alloc, token_iter)?),
         b"ClsCnsD" => hhbc::Opcode::ClsCnsD(
@@ -3136,7 +3057,7 @@ fn assemble_cns<'arena>(
             assemble_class_name_from_str(alloc, token_iter)?,
         ),
         b"ClsCnsL" => hhbc::Opcode::ClsCnsL(assemble_local(token_iter, decl_map)?),
-        cns => bail!("Unknown cns opcode: {:?}", cns),
+        _ => return Err(tok.error("Unknown cns opcode")),
     };
     Ok(hhbc::Instruct::Opcode(op))
 }
@@ -3154,7 +3075,8 @@ fn assemble_set_instruct<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
-    let op = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let op = match tok.into_identifier()? {
         b"SetL" => hhbc::Opcode::SetL(assemble_local(token_iter, decl_map)?),
         b"SetG" => hhbc::Opcode::SetG,
         b"SetS" => hhbc::Opcode::SetS(assemble_readonly_op(token_iter)?),
@@ -3186,13 +3108,14 @@ fn assemble_set_instruct<'arena>(
             assemble_stack_index(token_iter)?,
             assemble_member_key(alloc, token_iter, decl_map)?,
         ),
-        _ => todo!(),
+        _ => return Err(tok.error("Unknown set/unset instr")),
     };
     Ok(hhbc::Instruct::Opcode(op))
 }
 
 fn assemble_set_op_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetOpOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"PlusEqual" => Ok(hhbc::SetOpOp::PlusEqual),
         b"MinusEqual" => Ok(hhbc::SetOpOp::MinusEqual),
         b"MulEqual" => Ok(hhbc::SetOpOp::MulEqual),
@@ -3205,26 +3128,27 @@ fn assemble_set_op_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetOpOp> {
         b"XorEqual" => Ok(hhbc::SetOpOp::XorEqual),
         b"SlEqual" => Ok(hhbc::SetOpOp::SlEqual),
         b"SrEqual" => Ok(hhbc::SetOpOp::SrEqual),
-        sop => bail!("Expected a SetOpOp but got: {:?}", sop),
+        _ => Err(tok.error("Expected a SetOpOp")),
     }
 }
 
 fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
-    match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    match tok.into_identifier()? {
         b"PreInc" => Ok(hhbc::IncDecOp::PreInc),
         b"PostInc" => Ok(hhbc::IncDecOp::PostInc),
         b"PreDec" => Ok(hhbc::IncDecOp::PreDec),
         b"PostDec" => Ok(hhbc::IncDecOp::PostDec),
-
-        ido => bail!("Expected a IncDecOp but got: {:?}", ido),
+        _ => Err(tok.error("Expected a IncDecOp")),
     }
 }
 
 fn assemble_silence_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SilenceOp> {
-    let so = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let so = match tok.into_identifier()? {
         b"Start" => hhbc::SilenceOp::Start,
         b"End" => hhbc::SilenceOp::End,
-        so => bail!("Expected a SilenceOp but got: {:?}", so),
+        _ => return Err(tok.error("Expected a SilenceOp")),
     };
     Ok(so)
 }
@@ -3242,11 +3166,12 @@ fn assemble_silence<'arena>(
 }
 
 fn assemble_oodecl_exists_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::OODeclExistsOp> {
-    let oo = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let oo = match tok.into_identifier()? {
         b"Class" => hhbc::OODeclExistsOp::Class,
         b"Interface" => hhbc::OODeclExistsOp::Interface,
         b"Trait" => hhbc::OODeclExistsOp::Trait,
-        oo => bail!("Expected a OODeclExistsOp but got: {:?}", oo),
+        _ => return Err(tok.error("Expected a OODeclExistsOp")),
     };
     Ok(oo)
 }
@@ -3259,11 +3184,12 @@ fn assemble_oodecl_exists<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::In
 }
 
 fn assemble_fatal_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::FatalOp> {
-    let fop = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let fop = match tok.into_identifier()? {
         b"Runtime" => hhbc::FatalOp::Runtime,
         b"Parse" => hhbc::FatalOp::Parse,
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
-        f => bail!("Expected a FatalOp, got: {:?}", f),
+        _ => return Err(tok.error("Expected a FatalOp")),
     };
     Ok(fop)
 }
@@ -3276,11 +3202,12 @@ fn assemble_fatal_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Ins
 }
 
 fn assemble_bare_this_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::BareThisOp> {
-    let bop = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let bop = match tok.into_identifier()? {
         b"Notice" => hhbc::BareThisOp::Notice,
         b"NoNotice" => hhbc::BareThisOp::NoNotice,
         b"NeverNull" => hhbc::BareThisOp::NeverNull,
-        f => bail!("Expected a FatalOp, got: {:?}", f),
+        _ => return Err(tok.error("Expected a FatalOp")),
     };
     Ok(bop)
 }
@@ -3293,7 +3220,8 @@ fn assemble_bare_this_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc:
 }
 
 fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::CollectionType> {
-    let ct = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let ct = match tok.into_identifier()? {
         b"Vector" => hhbc::CollectionType::Vector,
         b"Map" => hhbc::CollectionType::Map,
         b"Set" => hhbc::CollectionType::Set,
@@ -3301,16 +3229,17 @@ fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::Collecti
         b"ImmVector" => hhbc::CollectionType::ImmVector,
         b"ImmMap" => hhbc::CollectionType::ImmMap,
         b"ImmSet" => hhbc::CollectionType::ImmSet,
-        f => bail!("Expected a FatalOp, got: {:?}", f),
+        _ => return Err(tok.error("Expected a FatalOp")),
     };
     Ok(ct)
 }
 
 fn assemble_init_prop_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::InitPropOp> {
-    let ipo = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let ipo = match tok.into_identifier()? {
         b"Static" => hhbc::InitPropOp::Static,
         b"NonStatic" => hhbc::InitPropOp::NonStatic,
-        ipo => bail!("Expected a InitPropOp, got: {:?}", ipo),
+        _ => return Err(tok.error("Expected a InitPropOp")),
     };
     Ok(ipo)
 }
@@ -3360,7 +3289,8 @@ fn assemble_cget<'arena>(
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
-    let cg = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let cg = match tok.into_identifier()? {
         b"CGetCUNop" => hhbc::Opcode::CGetCUNop,
         b"UGetCUNop" => hhbc::Opcode::UGetCUNop,
         b"CGetL" => hhbc::Opcode::CGetL(assemble_local(token_iter, decl_map)?),
@@ -3371,7 +3301,7 @@ fn assemble_cget<'arena>(
         b"CGetS" => hhbc::Opcode::CGetS(assemble_readonly_op(token_iter)?),
         b"ClassGetC" => hhbc::Opcode::ClassGetC,
         b"ClassGetTS" => hhbc::Opcode::ClassGetTS,
-        cg => bail!("Unknown cget: {:?}", cg),
+        _ => return Err(tok.error("Unknown cget")),
     };
     Ok(hhbc::Instruct::Opcode(cg))
 }
@@ -3382,7 +3312,8 @@ fn assemble_incdecl_opcode<'arena>(
     decl_map: &HashMap<Vec<u8>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecL")?;
-    let lcl = token_iter.expect(Token::into_variable)?;
+    let tok = token_iter.expect_token()?;
+    let lcl = tok.into_variable()?;
     if let Some(idx) = decl_map.get(lcl) {
         let ido = assemble_inc_dec_op(token_iter)?;
         token_iter.expect_end()?;
@@ -3391,7 +3322,7 @@ fn assemble_incdecl_opcode<'arena>(
             ido,
         )))
     } else {
-        bail!("Unknown local var given to IncDecL instr");
+        Err(tok.error("Unknown local var given to IncDecL instr"))
     }
 }
 
@@ -3425,7 +3356,8 @@ fn assemble_new_struct_dict<'arena>(
 
 /// L#: or DV#: if needs_colon else L# or DV#
 fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc::Label> {
-    let mut lcl = token_iter.expect(Token::into_identifier)?;
+    let tok = token_iter.expect_token()?;
+    let mut lcl = tok.into_identifier()?;
     if needs_colon {
         token_iter.expect(Token::into_colon)?;
     }
@@ -3439,7 +3371,7 @@ fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc:
         let lcl = std::str::from_utf8(lcl)?.parse::<u32>()?;
         Ok(hhbc::Label(lcl))
     } else {
-        bail!("Unknown label");
+        Err(tok.error("Unknown label"))
     }
 }
 
@@ -3461,7 +3393,8 @@ fn assemble_resolve_class<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Instruct<'arena>> {
-    let op = match token_iter.expect(Token::into_identifier)? {
+    let tok = token_iter.expect_token()?;
+    let op = match tok.into_identifier()? {
         b"ResolveClsMethod" => {
             hhbc::Opcode::ResolveClsMethod(assemble_method_name_from_str(alloc, token_iter)?)
         }
@@ -3487,7 +3420,7 @@ fn assemble_resolve_class<'arena>(
         b"ResolveClass" => {
             hhbc::Opcode::ResolveClass(assemble_class_name_from_str(alloc, token_iter)?)
         }
-        b => bail!("Unknown resolve class opcode: {:?}", b),
+        _ => return Err(tok.error("Unknown resolve class opcode")),
     };
     Ok(hhbc::Instruct::Opcode(op))
 }
@@ -3512,8 +3445,8 @@ fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'ar
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let lbl = assemble_label(token_iter, false)
-        .map_err(|_| anyhow!("Unknown label given to {} instr", op_str))?;
+    let lbl =
+        assemble_label(token_iter, false).with_context(|| format!("while processing {op_str}"))?;
     Ok(hhbc::Instruct::Opcode(op_con(lbl)))
 }
 
@@ -3540,8 +3473,8 @@ fn assemble_local(
                 idx: std::str::from_utf8(&i[1..i.len()])?.parse()?,
             })
         }
-        None => bail!("Expected local, found None"),
-        b => bail!("Unknown local: {}", b.unwrap()),
+        Some(tok) => Err(tok.error("Unknown local")),
+        None => Err(token_iter.error("Expected local")),
     }
 }
 

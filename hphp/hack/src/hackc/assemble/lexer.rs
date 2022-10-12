@@ -37,13 +37,11 @@ impl<'a> Iterator for Lexer<'a> {
 }
 
 impl<'a> Lexer<'a> {
-    /// Counts tokens in this `Lexer`, including newlines. Because of this it only makes sense to call
-    /// `size` on `Lexer`s spawned from `fetch_until_newline`
-    fn _size(&self) -> usize {
-        if self.pending.is_some() {
-            1 + self.tokens.len()
+    pub(crate) fn error(&mut self, err: impl std::fmt::Display) -> anyhow::Error {
+        if let Some(tok) = self.peek() {
+            tok.error(err)
         } else {
-            self.tokens.len()
+            anyhow!("Error [end of file]: {err}")
         }
     }
 
@@ -156,14 +154,18 @@ impl<'a> Lexer<'a> {
         tr
     }
 
+    pub(crate) fn expect_token(&mut self) -> Result<Token<'a>> {
+        self.next()
+            .ok_or_else(|| anyhow!("End of token stream sooner than expected"))
+    }
+
     /// Applies f to the top of token_iter. In the most likely use, f bails if token_iter is not the
     /// expected token (expected token specified by f)
     pub(crate) fn expect<T, F>(&mut self, f: F) -> Result<T>
     where
         F: FnOnce(Token<'a>) -> Result<T>,
     {
-        self.next()
-            .map_or_else(|| bail!("End of token stream sooner than expected"), f)
+        f(self.expect_token()?)
     }
 
     /// Like `expect` in that bails if incorrect token passed, and does return the `into` of the passed token
@@ -171,17 +173,13 @@ impl<'a> Lexer<'a> {
     where
         F: FnOnce(Token<'a>) -> Result<&[u8]>,
     {
-        self.next().map_or_else(
-            || bail!("End of token stream sooner than expected"),
-            |t| {
-                let tr = f(t)?;
-                if tr != s.as_bytes() {
-                    bail!("Expected {} got {}", s, t)
-                } else {
-                    Ok(tr)
-                }
-            },
-        )
+        let tok = self.expect_token()?;
+        let tr = f(tok)?;
+        if tr != s.as_bytes() {
+            Err(tok.error(format!("Expected {s:?} got {tr:?}")))
+        } else {
+            Ok(tr)
+        }
     }
 
     /// Similar to `expect_and_get_number` but puts identifier into a Str<'arena>

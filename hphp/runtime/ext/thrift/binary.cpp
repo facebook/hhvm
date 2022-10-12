@@ -440,6 +440,7 @@ Object binary_deserialize_struct(const String& clsName,
   SpecHolder specHolder;
   auto const& spec = specHolder.getSpec(cls);
   Object dest = spec.newObject(cls);
+  spec.clearTerseFields(cls, dest);
 
   auto const& fields = spec.fields;
   const size_t numFields = fields.size();

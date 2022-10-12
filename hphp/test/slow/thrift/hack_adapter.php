@@ -15,6 +15,7 @@ class ThriftStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class HackStruct {
@@ -93,6 +94,7 @@ class OuterStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 // This class is identical to OuterStruct but with all the adapters removed.
@@ -133,6 +135,7 @@ class OuterStructNoAdapter {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function getStruct() {

@@ -62,7 +62,8 @@ RuntimeCoeffects RuntimeCoeffects::globals_leak_safe() {
   X(zoned_with)        \
   X(zoned)             \
   X(leak_safe_shallow) \
-  X(write_this_props)
+  X(write_this_props)  \
+  X(write_props)
 
 #define X(x)                                                             \
 RuntimeCoeffects RuntimeCoeffects::x() {                                 \

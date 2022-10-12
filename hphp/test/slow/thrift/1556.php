@@ -68,6 +68,11 @@ class TestStruct {
       'type' => TType::I16,
       'is_terse' => true,
     ],
+    10 => darray[
+      'var' => 'anI64CustomDefault',
+      'type' => TType::I64,
+      'is_terse' => true,
+    ]
   ];
   public $aBool = false;
   public $anInt = 0;
@@ -79,9 +84,26 @@ class TestStruct {
   public $aSet = darray[];
   public $anByte = 0;
   public $anI16 = 0;
+  public $anI64CustomDefault = 7;
+
   public function __construct($vals=null)[] {}
+
   public static function withDefaultValues()[]: this {
     return new static();
+  }
+
+  public function clearTerseFields()[write_props]: void {
+    $this->aBool = false;
+    $this->anInt = 0;
+    $this->aString = '';
+    $this->aDouble = 0.0;
+    $this->anInt64 = 0;
+    $this->aList = varray[];
+    $this->aMap = darray[];
+    $this->aSet = darray[];
+    $this->anByte = 0;
+    $this->anI16 = 0;
+    $this->anI64CustomDefault = 0;
   }
 }
 
@@ -115,6 +137,7 @@ function test() {
   $v1->aSet = darray[];
   $v1->anByte = 0;
   $v1->anI16 = 0;
+  $v1->anI64CustomDefault = 0;
 
   echo "---- terse: compact ----\n";
   $p = new DummyProtocol();

@@ -147,6 +147,25 @@ const Func* lookupWithDefaultValuesFunc(const Class* cls) {
   return func;
 }
 
+const StaticString s_clearTerseFields("clearTerseFields");
+
+const Func* lookupClearTerseFieldsFunc(const Class* cls) {
+  auto const func = cls->lookupMethod(s_clearTerseFields.get());
+  if (func == nullptr) {
+    thrift_error(
+      folly::sformat("Method {}::clearTerseFields() not found", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  if (func->isStatic()) {
+    thrift_error(
+      folly::sformat("Method {}::clearTerseFields() is static", cls->name()),
+      ERR_INVALID_DATA
+    );
+  }
+  return func;
+}
+
 StructSpec compileSpec(const Array& spec, const Class* cls) {
   // A union field also writes to a property named __type. If one exists, we
   // need to also verify that it accepts integer values. We only need to do
@@ -197,10 +216,13 @@ StructSpec compileSpec(const Array& spec, const Class* cls) {
 
   // We can precompute the cls::withDefaultValues() func pointer only if the
   // underlying class cannot change.
-  auto const func = cls != nullptr && cls->isPersistent()
+  auto const withDefaultValuesFunc = cls != nullptr && cls->isPersistent()
     ? lookupWithDefaultValuesFunc(cls) : nullptr;
 
-  return StructSpec{HPHP::FixedVector(std::move(temp)), func};
+  auto const clearTerseFieldsFunc = cls != nullptr && cls->isPersistent()
+    ? lookupClearTerseFieldsFunc(cls) : nullptr;
+
+  return StructSpec{HPHP::FixedVector(std::move(temp)), withDefaultValuesFunc, clearTerseFieldsFunc};
 }
 
 } // namespace
@@ -303,7 +325,9 @@ Object StructSpec::newObject(Class* cls) const {
 
   auto obj = g_context->invokeFuncFew(
     func, cls, 0, nullptr, RuntimeCoeffects::pure(), false /* dynamic */);
-  if (tvIsObject(obj)) return Object::attach(obj.m_data.pobj);
+  if (tvIsObject(obj)) {
+    return Object::attach(obj.m_data.pobj);
+  }
 
   SCOPE_EXIT { tvDecRefGen(obj); };
   thrift_error(
@@ -313,6 +337,13 @@ Object StructSpec::newObject(Class* cls) const {
     ),
     ERR_INVALID_DATA
   );
+}
+
+void StructSpec::clearTerseFields(Class* cls, const Object& obj) const {
+  auto const func = clearTerseFieldsFunc != nullptr
+    ? clearTerseFieldsFunc : lookupClearTerseFieldsFunc(cls);
+  g_context->invokeFuncFew(
+    func, obj.get(), 0, nullptr, RuntimeCoeffects::write_props());
 }
 
 }

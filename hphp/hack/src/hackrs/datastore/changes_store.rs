@@ -26,6 +26,15 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
         }
     }
 
+    pub fn contains_key(&self, key: K) -> Result<bool> {
+        for store in self.stack.read().iter().rev() {
+            if let Some(opt) = store.get(&key) {
+                return Ok(opt.is_some());
+            }
+        }
+        self.fallback.contains_key(key)
+    }
+
     pub fn get(&self, key: K) -> Result<Option<V>> {
         for store in self.stack.read().iter().rev() {
             if let Some(val_opt) = store.get(&key) {
@@ -83,13 +92,10 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             for key in keys {
-                match self.get(key)? {
-                    Some(_) => {
-                        store.insert(key, None);
-                    }
-                    None => {
-                        anyhow::bail!("remove_batch: Trying to remove a non-existent value");
-                    }
+                if self.contains_key(key)? {
+                    store.insert(key, None);
+                } else {
+                    anyhow::bail!("remove_batch: Trying to remove a non-existent value");
                 }
             }
         } else {
@@ -104,6 +110,10 @@ where
     K: Copy + Hash + Eq + Send + Sync,
     V: Clone + Send + Sync,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        ChangesStore::contains_key(self, key)
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         ChangesStore::get(self, key)
     }

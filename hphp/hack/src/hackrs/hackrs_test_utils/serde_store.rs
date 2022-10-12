@@ -75,6 +75,13 @@ where
     K: Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        if self.cache.contains_key(&key) {
+            return Ok(true);
+        }
+        Ok(self.store.contains_key(&key))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         if let val @ Some(..) = self.cache.get(&key) {
             return Ok(val);

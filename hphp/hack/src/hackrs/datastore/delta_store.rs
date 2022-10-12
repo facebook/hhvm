@@ -25,6 +25,14 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
         Self { delta, fallback }
     }
 
+    pub fn contains_key(&self, key: K) -> Result<bool> {
+        if let Some(opt) = self.delta.get(key)? {
+            Ok(opt.is_some())
+        } else {
+            self.fallback.contains_key(key)
+        }
+    }
+
     pub fn get(&self, key: K) -> Result<Option<V>> {
         if let Some(val_opt) = self.delta.get(key)? {
             Ok(val_opt)
@@ -54,6 +62,10 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
 }
 
 impl<K: Copy + Hash + Eq, V> Store<K, V> for DeltaStore<K, V> {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        DeltaStore::contains_key(self, key)
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         DeltaStore::get(self, key)
     }

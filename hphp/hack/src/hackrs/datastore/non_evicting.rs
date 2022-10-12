@@ -34,6 +34,10 @@ where
     K: Copy + Send + Sync + Hash + Eq,
     V: Clone + Send + Sync,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        Ok(self.store.contains_key(&key))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         Ok(self.store.get(&key).map(|x| V::clone(&*x)))
     }

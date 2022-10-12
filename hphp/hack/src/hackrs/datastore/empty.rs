@@ -5,11 +5,15 @@
 
 use anyhow::Result;
 
-/// A zero-sized store which retains no data and returns `None` for every `get`.
+/// A zero-sized store which retains no data, returns `false` for any call to
+/// `contains_key` and returns `None` for every `get`.
 #[derive(Debug)]
 pub struct EmptyStore;
 
 impl<K: Copy, V> crate::Store<K, V> for EmptyStore {
+    fn contains_key(&self, _key: K) -> Result<bool> {
+        Ok(false)
+    }
     fn get(&self, _key: K) -> Result<Option<V>> {
         Ok(None)
     }

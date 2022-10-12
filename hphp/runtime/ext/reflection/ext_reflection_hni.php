@@ -1644,6 +1644,14 @@ class ReflectionClass implements Reflector {
   <<__Native>>
   public function isInternalToModule()[]: bool;
 
+  /*
+   * Returns the module associated with the given function.
+   *
+   * @return     ?string  Returns the module name if the class is part of a module, null otherwise.
+   */
+  <<__Native>>
+  public function getModule()[]: ?string;
+
   /**
    * ( excerpt from http://php.net/manual/en/reflectionclass.istrait.php )
    *

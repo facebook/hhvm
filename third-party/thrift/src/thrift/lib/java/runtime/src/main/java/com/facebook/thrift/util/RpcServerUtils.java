@@ -137,13 +137,8 @@ public class RpcServerUtils {
                 config.getEnableJdkSsl()
                     ? ApplicationProtocolConfig.SelectorFailureBehavior.FATAL_ALERT
                     : ApplicationProtocolConfig.SelectorFailureBehavior.CHOOSE_MY_LAST_PROTOCOL,
-                config.getEnableJdkSsl()
-                    ? ApplicationProtocolConfig.SelectedListenerFailureBehavior.FATAL_ALERT
-                    : ApplicationProtocolConfig.SelectedListenerFailureBehavior
-                        .CHOOSE_MY_LAST_PROTOCOL,
-                ThriftTransportType.RSOCKET.protocol(),
-                ThriftTransportType.HEADER.protocol(),
-                ThriftTransportType.FRAMED.protocol()));
+                ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                ThriftTransportType.RSOCKET.protocol()));
       }
 
       if (config.getClientAuth() != null) {

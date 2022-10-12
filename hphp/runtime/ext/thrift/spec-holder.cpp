@@ -47,7 +47,8 @@ const StaticString
   s_etype("etype"),
   s_format("format"),
   s_SPEC("SPEC"),
-  s_isWrapped("is_wrapped");
+  s_isWrapped("is_wrapped"),
+  s_isTerse("is_terse");
 
 Array get_tspec(const Class* cls) {
   auto lookup = cls->clsCnsGet(s_SPEC.get());
@@ -249,6 +250,8 @@ FieldSpec FieldSpec::compile(const Array& fieldSpec, bool topLevel) {
   field.adapter = getAdapter(fieldSpec);
   field.isWrapped = tvCastToBoolean(
       fieldSpec.lookup(s_isWrapped, AccessFlags::Key));
+  field.isTerse = tvCastToBoolean(
+      fieldSpec.lookup(s_isTerse, AccessFlags::Key));
   return field;
 }
 

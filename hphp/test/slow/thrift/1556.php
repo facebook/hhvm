@@ -69,16 +69,16 @@ class TestStruct {
       'is_terse' => true,
     ],
   ];
-  public $aBool = null;
-  public $anInt = null;
-  public $aString = null;
-  public $aDouble = null;
-  public $anInt64 = null;
-  public $aList = null;
-  public $aMap = null;
-  public $aSet = null;
-  public $anByte = null;
-  public $anI16 = null;
+  public $aBool = false;
+  public $anInt = 0;
+  public $aString = '';
+  public $aDouble = 0.0;
+  public $anInt64 = 0;
+  public $aList = varray[];
+  public $aMap = darray[];
+  public $aSet = darray[];
+  public $anByte = 0;
+  public $anI16 = 0;
   public function __construct($vals=null)[] {}
   public static function withDefaultValues()[]: this {
     return new static();

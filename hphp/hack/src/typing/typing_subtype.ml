@@ -2675,6 +2675,28 @@ and simplify_subtype_has_type_member
   match ety_sub with
   | ConstraintType _ -> invalid ~fail env
   | LoclType ty_sub ->
+    let concrete_rigid_tvar_access env ucckind bndtys =
+      (* First, we try to discharge the subtype query on the bound; if
+       * that fails, we mint a fresh rigid type variable to represent
+       * the concrete type constant and try to solve the query using it *)
+      let ( ||| ) = ( ||| ) ~fail in
+      let bndty = MakeType.intersection (get_reason ty_sub) bndtys in
+      simplify_subtype_i ~subtype_env ~this_ty (LoclType bndty) htmty env
+      ||| fun env ->
+      (* TODO(refinements): The treatment of `this_ty` below is
+       * no good; see below. *)
+      let (env, dtmemty) =
+        Typing_type_member.make_type_member
+          env
+          ~this_ty:(Option.value this_ty ~default:ty_sub)
+          ~on_error:subtype_env.on_error
+          ucckind
+          bndtys
+          (Reason.to_pos r, memid)
+      in
+      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
+      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+    in
     (match deref ty_sub with
     | (_r_sub, Tclass (x_sub, exact_sub, _tyl_sub)) ->
       let (env, type_member) =
@@ -2697,27 +2719,12 @@ and simplify_subtype_has_type_member
         simplify_subtype ~subtype_env ~this_ty ty memty env
         &&& simplify_subtype ~subtype_env ~this_ty memty ty
       | Typing_type_member.Abstract _ -> invalid ~fail env)
-    | (_r_sub, Tdependent (dtkind, bndty)) ->
-      (* First, we try to discharge the subtype query on the Tdependent
-       * bound; if that fails, we mint a fresh rigid type variable to
-       * represent the concrete type constant and try to solve the query
-       * using it *)
-      let ( ||| ) = ( ||| ) ~fail in
-      simplify_subtype_i ~subtype_env ~this_ty (LoclType bndty) htmty env
-      ||| fun env ->
-      (* TODO(refinements): The treatment of `this_ty` below is
-       * no good; see above. *)
-      let (env, dtmemty) =
-        Typing_type_member.make_dep_bound_type_member
-          env
-          ~this_ty:(Option.value this_ty ~default:ty_sub)
-          ~on_error:subtype_env.on_error
-          dtkind
-          bndty
-          (Reason.to_pos r, memid)
-      in
-      simplify_subtype ~subtype_env ~this_ty dtmemty memty env
-      &&& simplify_subtype ~subtype_env ~this_ty memty dtmemty
+    | (_r_sub, Tdependent (DTexpr eid, bndty)) ->
+      concrete_rigid_tvar_access env (Typing_type_member.EDT eid) [bndty]
+    | (_r_sub, Tgeneric (s, ty_args))
+      when String.equal s Naming_special_names.Typehints.this ->
+      let bnd_tys = Typing_set.elements (Env.get_upper_bounds env s ty_args) in
+      concrete_rigid_tvar_access env Typing_type_member.This bnd_tys
     | (_, (Tvar _ | Tgeneric _ | Tunion _ | Tintersection _ | Terr)) ->
       default_subtype env
     | _ -> invalid ~fail env)

@@ -25,8 +25,18 @@ type type_member =
       upper: locl_ty option;
     }
 
-(** Lookups a type member in a class definition, or in refinement
-    information (exact). *)
+(** Locl types are able to describe unknown concrete class types.
+    Either via expression-dependent types (those represent the
+    runtime class type of an object resulting from an expression
+    evaluation). Or via the this type in a possibly abstract class
+    (meant to represent the concrete class type of the object that
+    will be the receiver when the method is invoked). *)
+type unknown_concrete_class_kind =
+  | EDT of Ident.t
+  | This
+
+(** Lookups a type member in a class definition, or in the exact
+    refinement information available. *)
 val lookup_class_type_member :
   env ->
   on_error:Typing_error.Reasons_callback.t option ->
@@ -35,14 +45,14 @@ val lookup_class_type_member :
   pos_id ->
   env * type_member
 
-(** Given the bound on an expression-dependent type (Tdependent(_)),
-    creates a rigid type variable that stands for the type constant
-    found in the concrete class of the runtime object. *)
-val make_dep_bound_type_member :
+(** Given an unknown concrete class (Tdependent(_) or Tgeneric("this"))
+    and its bounds, creates a rigid type variable that stands for the
+    type constant found in the concrete class. *)
+val make_type_member :
   env ->
   on_error:Typing_error.Reasons_callback.t option ->
   this_ty:locl_ty ->
-  dependent_type ->
-  locl_ty ->
+  unknown_concrete_class_kind ->
+  locl_ty list ->
   pos_id ->
   env * locl_ty

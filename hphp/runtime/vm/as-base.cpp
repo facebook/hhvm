@@ -17,9 +17,34 @@
 
 #include "hphp/runtime/vm/as-base-hhas.h"
 
-#include <folly/gen/String.h>
+#if defined(FOLLY_PACKAGE_VERSION)
+// This file is included in the hackc binary build where we can't easily include
+// folly.
+#error Folly not allowed in this source file.
+#endif
 
 namespace HPHP {
+
+namespace {
+std::string join_with_spaces(const std::vector<std::string> &input) {
+  size_t len = 0;
+  for (const auto& piece: input) {
+    len += piece.length() + 1;
+  }
+
+  std::string result;
+  result.reserve(len);
+
+  for (const auto& piece: input) {
+    if (!result.empty()) {
+      result.push_back(' ');
+    }
+    result.append(piece);
+  }
+
+  return result;
+}
+} // anonymous namespace
 
 std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
   std::vector<std::string> vec;
@@ -33,8 +58,7 @@ std::vector<std::string> attrs_to_vec(AttrContext ctx, Attr attrs) {
 }
 
 std::string attrs_to_string(AttrContext ctx, Attr attrs) {
-  using namespace folly::gen;
-  return from(attrs_to_vec(ctx, attrs)) | unsplit<std::string>(" ");
+  return join_with_spaces(attrs_to_vec(ctx, attrs));
 }
 
 std::string type_flags_to_string(TypeConstraintFlags flags) {
@@ -45,8 +69,7 @@ std::string type_flags_to_string(TypeConstraintFlags flags) {
   HHAS_TYPE_FLAGS
 #undef X
 
-  using namespace folly::gen;
-  return from(vec) | unsplit<std::string>(" ");
+  return join_with_spaces(vec);
 }
 
 std::string fcall_flags_to_string(FCallArgsFlags flags) {
@@ -57,8 +80,7 @@ std::string fcall_flags_to_string(FCallArgsFlags flags) {
   HHAS_FCALL_FLAGS
 #undef X
 
-  using namespace folly::gen;
-  return from(vec) | unsplit<std::string>(" ");
+  return join_with_spaces(vec);
 }
 
 }

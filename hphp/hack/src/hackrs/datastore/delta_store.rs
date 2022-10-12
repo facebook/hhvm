@@ -43,7 +43,11 @@ impl<K: Copy + Hash + Eq, V> DeltaStore<K, V> {
 
     pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
-            self.remove(key)?;
+            if self.get(key)?.is_some() {
+                self.remove(key)?;
+            } else {
+                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
+            }
         }
         Ok(())
     }

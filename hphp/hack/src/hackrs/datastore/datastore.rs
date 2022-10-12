@@ -24,18 +24,21 @@ pub trait Store<K: Copy, V>: Debug + Send + Sync {
     fn get(&self, key: K) -> Result<Option<V>>;
     fn insert(&self, key: K, val: V) -> Result<()>;
 
-    /// Implementors should return an error if a key to be moved does not exist.
+    /// Implementors should return an error if a key to be removed does not
+    /// exist.
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()>;
 
     /// Implementors should return an error if a key to be moved does not exist
-    /// and behavior is unspecified if a key occurs in both an old and new
-    /// position.
+    /// and well defined behavior is not a requirement if a key occurs in both
+    /// an old and new position.
     fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
         for (old_key, new_key) in keys {
             if let Some(val) = self.get(old_key)? {
                 self.remove_batch(&mut std::iter::once(old_key))?;
                 self.insert(new_key, val)?;
-            };
+            } else {
+                anyhow::bail!("move_batch: Trying to remove a non-existent value");
+            }
         }
         Ok(())
     }

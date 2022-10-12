@@ -64,9 +64,15 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     pub fn move_batch(&self, keys: &mut dyn Iterator<Item = (K, K)>) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             for (old_key, new_key) in keys {
-                let val_opt: Option<V> = self.get(old_key)?;
-                store.insert(old_key, None);
-                store.insert(new_key, val_opt);
+                match self.get(old_key)? {
+                    val_opt @ Some(_) => {
+                        store.insert(old_key, None);
+                        store.insert(new_key, val_opt);
+                    }
+                    None => {
+                        anyhow::bail!("move_batch: Trying to remove a non-existent value");
+                    }
+                }
             }
         } else {
             self.fallback.move_batch(keys)?;
@@ -77,7 +83,14 @@ impl<K: Copy + Hash + Eq, V: Clone> ChangesStore<K, V> {
     pub fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         if let Some(store) = self.stack.read().last() {
             for key in keys {
-                store.insert(key, None);
+                match self.get(key)? {
+                    Some(_) => {
+                        store.insert(key, None);
+                    }
+                    None => {
+                        anyhow::bail!("remove_batch: Trying to remove a non-existent value");
+                    }
+                }
             }
         } else {
             self.fallback.remove_batch(keys)?;

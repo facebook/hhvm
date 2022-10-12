@@ -537,19 +537,23 @@ impl Names {
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let names_opt = select_statement
             .query_row(params![symbol_hash], |row| {
-                let classes: String = row.get(0)?;
-                let typedefs: String = row.get(1)?;
+                let classes: Option<String> = row.get(0)?;
+                let typedefs: Option<String> = row.get(1)?;
                 Ok((classes, typedefs))
             })
             .optional()?;
 
         if let Some((classes, typedefs)) = names_opt {
-            for class in classes.split('|') {
+            for class in classes.as_deref().unwrap_or_default().split_terminator('|') {
                 if symbol_hash == ToplevelCanonSymbolHash::from_type(class.to_owned()) {
                     return Ok(Some(class.to_owned()));
                 }
             }
-            for typedef in typedefs.split('|') {
+            for typedef in typedefs
+                .as_deref()
+                .unwrap_or_default()
+                .split_terminator('|')
+            {
                 if symbol_hash == ToplevelCanonSymbolHash::from_type(typedef.to_owned()) {
                     return Ok(Some(typedef.to_owned()));
                 }
@@ -585,13 +589,13 @@ impl Names {
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let names_opt = select_statement
             .query_row(params![symbol_hash], |row| {
-                let funs: String = row.get(0)?;
+                let funs: Option<String> = row.get(0)?;
                 Ok(funs)
             })
             .optional()?;
 
         if let Some(funs) = names_opt {
-            for fun in funs.split('|') {
+            for fun in funs.as_deref().unwrap_or_default().split_terminator('|') {
                 if symbol_hash == ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
                     return Ok(Some(fun.to_owned()));
                 }

@@ -111,8 +111,12 @@ where
 
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
-            self.store.remove(&key);
-            self.cache.invalidate(&key);
+            if self.get(key)?.is_some() {
+                self.store.remove(&key);
+                self.cache.invalidate(&key);
+            } else {
+                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
+            }
         }
         Ok(())
     }

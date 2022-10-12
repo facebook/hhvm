@@ -1437,12 +1437,6 @@ MemEffects memory_effects_impl(const IRInstruction& inst) {
       ARds { ImplicitContext::activeCtx.handle() }, inst.src(0), nullptr
     };
 
-  case StImplicitContextWH:
-    return may_load_store(
-      ARds { ImplicitContext::activeCtx.handle() },
-      AEmpty
-    );
-
   //////////////////////////////////////////////////////////////////////
   // Instructions that never read or write memory locations tracked by this
   // module.

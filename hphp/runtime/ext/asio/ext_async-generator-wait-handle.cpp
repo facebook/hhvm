@@ -68,6 +68,7 @@ c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
   gen->resumable()->setResumeAddr(resumeAddr, suspendOffset);
   gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
 
+  wh.get()->m_implicitContext = *ImplicitContext::activeCtx;
   return wh.detach();
 }
 

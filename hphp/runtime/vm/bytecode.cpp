@@ -4924,7 +4924,6 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
-    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
     EventHook::FunctionSuspendAwaitEF(
@@ -4951,8 +4950,6 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
-
-    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.

@@ -315,18 +315,6 @@ void cgStImplicitContext(IRLS& env, const IRInstruction* inst) {
   }
 }
 
-void cgStImplicitContextWH(IRLS& env, const IRInstruction* inst) {
-  auto& v = vmain(env);
-  auto const wh = srcLoc(env, inst, 0).reg();
-  markRDSAccess(v, ImplicitContext::activeCtx.handle());
-  auto const ctx = v.makeReg();
-  v << load{
-    rvmtl()[ImplicitContext::activeCtx.handle()],
-    ctx
-  };
-  v << store{ctx, wh[c_ResumableWaitHandle::implicitContextOff()]};
-}
-
 void cgDbgTrashMem(IRLS& env, const IRInstruction* inst) {
   auto const ptr    = inst->src(0);
   auto const ptrLoc = tmpLoc(env, ptr);

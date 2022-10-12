@@ -195,7 +195,20 @@ impl HhServerProviderBackend {
     // ---
     // Deletion support
 
-    pub fn oldify_funs_batch(&self, _names: &[FunName]) -> Result<()> {
+    pub fn oldify_funs_batch(&self, names: &[FunName]) -> Result<()> {
+        let funs: &ChangesStore<FunName, _> = &self.shallow_decl_changes_store.funs;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = FunName::new(format!("old${}", name));
+            if funs.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if funs.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        funs.move_batch(&mut moves.into_iter())?;
+        funs.remove_batch(&mut deletes.into_iter())?;
         Ok(())
     }
     pub fn remove_funs_batch(&self, names: &[FunName]) -> Result<()> {
@@ -207,7 +220,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_shallow_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+    pub fn oldify_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
+        let classes: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.classes;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            if classes.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if classes.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        classes.move_batch(&mut moves.into_iter())?;
+        classes.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_shallow_classes_batch(&self, names: &[TypeName]) -> Result<()> {
@@ -219,7 +245,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_folded_classes_batch(&self, _names: &[TypeName]) -> Result<()> {
+    pub fn oldify_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
+        let classes: &ChangesStore<TypeName, _> = &self.folded_classes_store;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            if classes.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if classes.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        classes.move_batch(&mut moves.into_iter())?;
+        classes.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_folded_classes_batch(&self, names: &[TypeName]) -> Result<()> {
@@ -230,7 +269,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_typedefs_batch(&self, _names: &[TypeName]) -> Result<()> {
+    pub fn oldify_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
+        let typedefs: &ChangesStore<TypeName, _> = &self.shallow_decl_changes_store.typedefs;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            if typedefs.contains_key(name)? {
+                moves.push((name, TypeName::new(format!("old${}", name))));
+            } else if typedefs.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        typedefs.move_batch(&mut moves.into_iter())?;
+        typedefs.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_typedefs_batch(&self, names: &[TypeName]) -> Result<()> {
@@ -242,7 +294,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_gconsts_batch(&self, _names: &[ConstName]) -> Result<()> {
+    pub fn oldify_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
+        let consts: &ChangesStore<ConstName, _> = &self.shallow_decl_changes_store.consts;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = ConstName::new(format!("old${}", name));
+            if consts.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if consts.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        consts.move_batch(&mut moves.into_iter())?;
+        consts.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_gconsts_batch(&self, names: &[ConstName]) -> Result<()> {
@@ -254,7 +319,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_modules_batch(&self, _names: &[ModuleName]) -> Result<()> {
+    pub fn oldify_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
+        let modules: &ChangesStore<ModuleName, _> = &self.shallow_decl_changes_store.modules;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = ModuleName::new(format!("old${}", name));
+            if modules.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if modules.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        modules.move_batch(&mut moves.into_iter())?;
+        modules.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_modules_batch(&self, names: &[ModuleName]) -> Result<()> {
@@ -266,7 +344,20 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+    pub fn oldify_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
+        let props: &ChangesStore<(TypeName, PropName), _> = &self.shallow_decl_changes_store.props;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            if props.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if props.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        props.move_batch(&mut moves.into_iter())?;
+        props.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
@@ -278,7 +369,21 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_static_props_batch(&self, _names: &[(TypeName, PropName)]) -> Result<()> {
+    pub fn oldify_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
+        let static_props: &ChangesStore<(TypeName, PropName), _> =
+            &self.shallow_decl_changes_store.static_props;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            if static_props.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if static_props.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        static_props.move_batch(&mut moves.into_iter())?;
+        static_props.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_static_props_batch(&self, names: &[(TypeName, PropName)]) -> Result<()> {
@@ -290,7 +395,21 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+    pub fn oldify_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
+        let methods: &ChangesStore<(TypeName, MethodName), _> =
+            &self.shallow_decl_changes_store.methods;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            if methods.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if methods.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        methods.move_batch(&mut moves.into_iter())?;
+        methods.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
@@ -302,7 +421,21 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_static_methods_batch(&self, _names: &[(TypeName, MethodName)]) -> Result<()> {
+    pub fn oldify_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
+        let static_methods: &ChangesStore<(TypeName, MethodName), _> =
+            &self.shallow_decl_changes_store.static_methods;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = (TypeName::new(format!("old${}", name.0)), name.1);
+            if static_methods.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if static_methods.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        static_methods.move_batch(&mut moves.into_iter())?;
+        static_methods.remove_batch(&mut deletes.iter().copied())?;
         Ok(())
     }
     pub fn remove_static_methods_batch(&self, names: &[(TypeName, MethodName)]) -> Result<()> {
@@ -314,7 +447,21 @@ impl HhServerProviderBackend {
         Ok(())
     }
 
-    pub fn oldify_constructors_batch(&self, _names: &[TypeName]) -> Result<()> {
+    pub fn oldify_constructors_batch(&self, names: &[TypeName]) -> Result<()> {
+        let constructors: &ChangesStore<TypeName, _> =
+            &self.shallow_decl_changes_store.constructors;
+        let mut moves = Vec::new();
+        let mut deletes = Vec::new();
+        for &name in names.iter() {
+            let old_name = TypeName::new(format!("old${}", name));
+            if constructors.contains_key(name)? {
+                moves.push((name, old_name));
+            } else if constructors.contains_key(old_name)? {
+                deletes.push(old_name);
+            }
+        }
+        constructors.move_batch(&mut moves.into_iter())?;
+        constructors.remove_batch(&mut deletes.into_iter())?;
         Ok(())
     }
     pub fn remove_constructors_batch(&self, names: &[TypeName]) -> Result<()> {

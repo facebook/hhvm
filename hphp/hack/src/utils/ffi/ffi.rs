@@ -420,6 +420,12 @@ impl<'a> Str<'a> {
     }
 }
 
+impl std::borrow::Borrow<[u8]> for Str<'_> {
+    fn borrow(&self) -> &[u8] {
+        self.as_ref()
+    }
+}
+
 impl<'a> write_bytes::DisplayBytes for Str<'a> {
     fn fmt(&self, f: &mut write_bytes::BytesFormatter<'_>) -> std::io::Result<()> {
         use std::io::Write;

@@ -28,6 +28,8 @@ use crate::lexer::Lexer;
 use crate::regex;
 use crate::token::Token;
 
+type DeclMap<'a> = HashMap<Str<'a>, u32>;
+
 /// Assembles the hhas within f to a hhbc::Unit
 pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
     let s: Vec<u8> = fs::read(f)?;
@@ -442,7 +444,7 @@ fn assemble_method<'arena>(
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
-    let mut decl_map: HashMap<Vec<u8>, u32> = HashMap::new();
+    let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
     let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
@@ -1129,7 +1131,8 @@ fn assemble_function<'arena>(
     // Assemble_name
 
     let name = assemble_function_name(alloc, token_iter)?;
-    let mut decl_map: HashMap<Vec<u8>, u32> = HashMap::new(); // Will store decls in this order: params, decl_vars, unnamed
+    // Will store decls in this order: params, decl_vars, unnamed
+    let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
     let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
@@ -1437,7 +1440,7 @@ fn assemble_type_constraint(
 fn assemble_params<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut DeclMap<'arena>,
 ) -> Result<Slice<'arena, hhbc::Param<'arena>>> {
     token_iter.expect(Token::into_open_paren)?;
     let mut params = Vec::new();
@@ -1455,7 +1458,7 @@ fn assemble_params<'arena>(
 fn assemble_param<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut DeclMap<'arena>,
 ) -> Result<hhbc::Param<'arena>> {
     let mut ua_vec = Vec::new();
     let user_attributes = {
@@ -1473,8 +1476,8 @@ fn assemble_param<'arena>(
     let is_variadic = token_iter.next_if(Token::is_variadic);
     let type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = token_iter.expect(Token::into_variable)?;
-    decl_map.insert(name.to_vec(), decl_map.len() as u32);
     let name = Str::new_slice(alloc, name);
+    decl_map.insert(name, decl_map.len() as u32);
     let default_value = assemble_default_value(alloc, token_iter)?;
     Ok(hhbc::Param {
         name,
@@ -1509,7 +1512,7 @@ fn assemble_default_value<'arena>(
 fn assemble_body<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut DeclMap<'arena>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
@@ -1755,13 +1758,14 @@ fn assemble_numiters(token_iter: &mut Lexer<'_>) -> Result<usize> {
 fn assemble_decl_vars<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut DeclMap<'arena>,
 ) -> Result<Slice<'arena, Str<'arena>>> {
     token_iter.expect_is_str(Token::into_decl, ".declvars")?;
     let mut var_names = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
         let var_nm = token_iter.expect_var()?;
-        var_names.push(Str::new_slice(alloc, &var_nm[..]));
+        let var_nm = Str::new_slice(alloc, &var_nm);
+        var_names.push(var_nm);
         decl_map.insert(var_nm, decl_map.len().try_into().unwrap());
     }
     token_iter.expect(Token::into_semicolon)?;
@@ -1772,7 +1776,7 @@ fn assemble_decl_vars<'arena>(
 fn assemble_instr<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut DeclMap<'arena>,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
     let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
@@ -2627,7 +2631,7 @@ fn assemble_iter_init_iter_next<
     F: FnOnce(hhbc::IterArgs, hhbc::Label) -> hhbc::Opcode<'arena>,
 >(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
     op_con: F,
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -2641,7 +2645,7 @@ fn assemble_iter_init_iter_next<
 /// Ex: 0 NK V:$v
 fn assemble_iter_args(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &DeclMap<'_>,
 ) -> Result<hhbc::IterArgs> {
     let idx: u32 = token_iter.expect_and_get_number()?;
     let tok = token_iter.expect_token()?;
@@ -2665,7 +2669,7 @@ fn assemble_iter_args(
 /// Ex: IsTypeL $a Obj
 fn assemble_is_type_l<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeL")?;
     let lcl = assemble_local(token_iter, decl_map)?;
@@ -2854,7 +2858,7 @@ fn assemble_readonly_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ReadonlyOp> 
 fn assemble_member_key<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &DeclMap<'_>,
 ) -> Result<hhbc::MemberKey<'arena>> {
     let tok = token_iter.expect_token()?;
     match tok.into_identifier()? {
@@ -2929,7 +2933,7 @@ fn assemble_member_key<'arena>(
 fn assemble_dim<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Dim")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Dim(
@@ -2954,7 +2958,7 @@ fn assemble_query_mop(token_iter: &mut Lexer<'_>) -> Result<hhbc::QueryMOp> {
 fn assemble_query_m<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "QueryM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::QueryM(
@@ -2968,7 +2972,7 @@ fn assemble_query_m<'arena>(
 fn assemble_inc_dec_m<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecM(
@@ -2981,7 +2985,7 @@ fn assemble_inc_dec_m<'arena>(
 /// BaseGL $var MOpMode
 fn assemble_base_gl<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseGL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseGL(
@@ -3004,7 +3008,7 @@ fn assemble_base_sc<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct
 /// BaseL $var MOpMode ReadOnlyOp
 fn assemble_base_l<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseL(
@@ -3046,7 +3050,7 @@ fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp>
 fn assemble_cns<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let tok = token_iter.expect_token()?;
     let op = match tok.into_identifier()? {
@@ -3073,7 +3077,7 @@ fn assemble_cns<'arena>(
 fn assemble_set_instruct<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let tok = token_iter.expect_token()?;
     let op = match tok.into_identifier()? {
@@ -3157,7 +3161,7 @@ fn assemble_silence_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SilenceOp> {
 /// Silence _2 End
 fn assemble_silence<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &mut HashMap<Vec<u8>, u32>,
+    decl_map: &mut HashMap<Str<'arena>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Silence")?;
     let lcl = assemble_local(token_iter, decl_map)?;
@@ -3287,7 +3291,7 @@ fn assemble_new_col<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct
 /// CGetS Mutable
 fn assemble_cget<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let tok = token_iter.expect_token()?;
     let cg = match tok.into_identifier()? {
@@ -3309,7 +3313,7 @@ fn assemble_cget<'arena>(
 /// IncDecL $var IncDecOp
 fn assemble_incdecl_opcode<'arena>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecL")?;
     let tok = token_iter.expect_token()?;
@@ -3455,10 +3459,7 @@ fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'ar
 /// or, if an unnamed, just the idx referenced (_1 -> idx 1)
 /// $a -> idx where $a is stored in hcu body
 /// _3 -> 3
-fn assemble_local(
-    token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
-) -> Result<hhbc::Local> {
+fn assemble_local(token_iter: &mut Lexer<'_>, decl_map: &DeclMap<'_>) -> Result<hhbc::Local> {
     match token_iter.next() {
         Some(Token::Variable(v, p)) => {
             if let Some(idx) = decl_map.get(v) {
@@ -3491,7 +3492,7 @@ fn assemble_retm_opcode_instr<'arena>(
 /// Assembles one of CGetL/Push/SetL/etc...
 fn assemble_local_carrying_opcode_instr<'arena, F: FnOnce(hhbc::Local) -> hhbc::Opcode<'arena>>(
     token_iter: &mut Lexer<'_>,
-    decl_map: &HashMap<Vec<u8>, u32>,
+    decl_map: &HashMap<Str<'_>, u32>,
     op_con: F,
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {

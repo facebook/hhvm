@@ -32,6 +32,9 @@ jobs:
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
     runs-on: ${{matrix.os}}
+    env:
+      SCCACHE_BUCKET: hhvm-sccache
+      SCCACHE_ENDPOINT: hhvm-sccache.s3-accelerate.amazonaws.com:80
     steps:
     - uses: actions/checkout@v2.4.0
     - if: github.event_name == 'issue_comment'
@@ -55,9 +58,6 @@ jobs:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
     - run: nix build --print-build-logs ${{matrix.package == 'hhvm_sccache' && '--impure' || ''}} "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
-      env:
-        SCCACHE_BUCKET: hhvm-sccache
-        SCCACHE_ENDPOINT: hhvm-sccache.s3-accelerate.amazonaws.com
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version
     - name: Build the deb package

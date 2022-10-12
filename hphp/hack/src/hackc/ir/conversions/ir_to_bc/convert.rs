@@ -5,7 +5,6 @@
 
 use ffi::Maybe;
 use ffi::Slice;
-use ffi::Str;
 use hhbc::Fatal;
 
 use crate::strings::StringCache;
@@ -115,7 +114,7 @@ impl<'a> UnitBuilder<'a> {
 
 fn convert_adata<'a>(
     _alloc: &'a bumpalo::Bump,
-    name: Str<'a>,
+    name: hhbc::AdataId<'a>,
     value: ir::TypedValue<'a>,
 ) -> hhbc::Adata<'a> {
     hhbc::Adata { id: name, value }

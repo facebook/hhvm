@@ -235,20 +235,20 @@ impl Display for FmtConstant<'_, '_> {
         match constant {
             Constant::Bool(false) => write!(f, "false")?,
             Constant::Bool(true) => write!(f, "true")?,
-            Constant::Dict(name) => write!(f, "dict({})", FmtQuotedStr(name))?,
+            Constant::Dict(name) => write!(f, "dict({})", FmtQuotedStr(&name.as_ffi_str()))?,
             Constant::Dir => write!(f, "dir")?,
             Constant::Double(value) => write!(f, "{}", value.0)?,
             Constant::File => write!(f, "file")?,
             Constant::FuncCred => write!(f, "func_cred")?,
             Constant::Int(value) => write!(f, "{}", value)?,
-            Constant::Keyset(name) => write!(f, "keyset({})", FmtQuotedStr(name))?,
+            Constant::Keyset(name) => write!(f, "keyset({})", FmtQuotedStr(&name.as_ffi_str()))?,
             Constant::Method => write!(f, "method")?,
             Constant::Named(name) => write!(f, "constant({})", FmtIdentifier(name.as_bytes()))?,
             Constant::NewCol(k) => write!(f, "new_col({:?})", k)?,
             Constant::Null => write!(f, "null")?,
             Constant::String(value) => FmtQuotedStr(value).fmt(f)?,
             Constant::Uninit => write!(f, "uninit")?,
-            Constant::Vec(name) => write!(f, "vec({})", FmtQuotedStr(name))?,
+            Constant::Vec(name) => write!(f, "vec({})", FmtQuotedStr(&name.as_ffi_str()))?,
         }
 
         Ok(())

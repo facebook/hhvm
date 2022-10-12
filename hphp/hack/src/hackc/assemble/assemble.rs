@@ -841,7 +841,7 @@ fn assemble_adata<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Adata<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".adata")?;
-    let id = token_iter.expect_identifier_into_ffi_str(alloc)?;
+    let id = hhbc::AdataId::new(token_iter.expect_identifier_into_ffi_str(alloc)?);
     token_iter.expect(Token::into_equal)?;
     // What's left here is tv
     let value = assemble_triple_quoted_typed_value(alloc, token_iter)?;
@@ -3622,7 +3622,7 @@ fn assemble_adata_id_carrying_instr<
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
     let adata_id = token_iter.expect(Token::into_global)?;
     debug_assert!(adata_id[0] == b'@');
-    let adata_id: hhbc::AdataId<'arena> = Str::new_slice(alloc, &adata_id[1..]);
+    let adata_id = hhbc::AdataId::new(Str::new_slice(alloc, &adata_id[1..]));
     Ok(hhbc::Instruct::Opcode(op_con(adata_id)))
 }
 

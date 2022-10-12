@@ -199,9 +199,6 @@ impl std::default::Default for IterArgs {
     }
 }
 
-/// Conventionally this is "A_" followed by an integer
-pub type AdataId<'arena> = Str<'arena>;
-
 #[derive(Clone, Copy, Debug, Hash, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub enum MemberKey<'arena> {

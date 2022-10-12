@@ -1864,7 +1864,12 @@ pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
     }
 
     for (k, v) in unit.adata.iter().sorted_by(|(k0, _), (k1, _)| k0.cmp(k1)) {
-        writeln!(w, ".adata {} = {};", FmtQuotedStr(k), FmtTypedValue(v))?;
+        writeln!(
+            w,
+            ".adata {} = {};",
+            FmtQuotedStr(&k.as_ffi_str()),
+            FmtTypedValue(v)
+        )?;
     }
 
     for v in &unit.symbol_refs.constants {

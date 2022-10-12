@@ -282,31 +282,26 @@ fn assemble_class<'arena>(
     let doc_comment = assemble_doc_comment(alloc, token_iter)?;
     let uses = assemble_uses(alloc, token_iter)?;
     let enum_type = assemble_enum_ty(alloc, token_iter)?;
-    // Prints content of class in this order: all requirements,
-    // all constants, all type_constants, all ctx_constants, all properties, all method_defs.
     let mut requirements = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".require") {
-        requirements.push(assemble_requirement(alloc, token_iter)?)
-    }
-    // Both constants and type_constants start with .const
-    // the differences is that type constants are printed as
-    // .constant {} isType = """tv""" and constants are just .constant {} = """tv"""
-    let (constants, type_constants) = if token_iter.peek_if_str(Token::is_decl, ".const") {
-        assemble_constants(alloc, token_iter)?
-    } else {
-        (Vec::new(), Vec::new())
-    };
     let mut ctx_constants = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".ctx") {
-        ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?);
-    }
     let mut properties = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".property") {
-        properties.push(assemble_property(alloc, token_iter)?);
-    }
     let mut methods = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".method") {
-        methods.push(assemble_method(alloc, token_iter)?);
+    let mut constants = Vec::new();
+    let mut type_constants = Vec::new();
+    while let Some(Token::Decl(txt, line)) = token_iter.peek() {
+        match *txt {
+            b".require" => requirements.push(assemble_requirement(alloc, token_iter)?),
+            b".ctx" => ctx_constants.push(assemble_ctx_constant(alloc, token_iter)?),
+            b".property" => properties.push(assemble_property(alloc, token_iter)?),
+            b".method" => methods.push(assemble_method(alloc, token_iter)?),
+            b".const" => assemble_const_or_type_const(
+                alloc,
+                token_iter,
+                &mut constants,
+                &mut type_constants,
+            )?,
+            o => bail!("Unknown class-level identifier: {:?}. Line: {}", o, line),
+        }
     }
     token_iter.expect(Token::into_close_curly)?;
 
@@ -390,21 +385,6 @@ fn assemble_requirement<'arena>(
     token_iter.expect(Token::into_gt)?;
     token_iter.expect(Token::into_semicolon)?;
     Ok(hhbc::Requirement { name, kind })
-}
-
-/// Ex:
-/// .const MYCONST = """s:10:\"B::MYCONST\";""";
-/// .const TType isType isAbstract;
-fn assemble_constants<'arena>(
-    alloc: &'arena Bump,
-    token_iter: &mut Lexer<'_>,
-) -> Result<(Vec<hhbc::Constant<'arena>>, Vec<hhbc::TypeConstant<'arena>>)> {
-    let mut consts = Vec::new();
-    let mut type_consts = Vec::new();
-    while token_iter.peek_if_str(Token::is_decl, ".const") {
-        assemble_const_or_type_const(alloc, token_iter, &mut consts, &mut type_consts)?;
-    }
-    Ok((consts, type_consts))
 }
 
 fn assemble_const_or_type_const<'arena>(

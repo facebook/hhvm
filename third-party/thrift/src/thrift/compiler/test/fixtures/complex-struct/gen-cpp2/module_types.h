@@ -3896,8 +3896,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -3940,8 +3943,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -3983,8 +3989,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -4028,8 +4037,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -6213,8 +6225,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp(MyUnionFloatFieldThrowExp&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -6247,8 +6262,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp(const MyUnionFloatFieldThrowExp& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -6280,8 +6298,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp& operator=(MyUnionFloatFieldThrowExp&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -6315,8 +6336,11 @@ class MyUnionFloatFieldThrowExp final  {
   MyUnionFloatFieldThrowExp& operator=(const MyUnionFloatFieldThrowExp& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);

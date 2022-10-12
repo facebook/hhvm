@@ -998,8 +998,11 @@ class InnerUnion final  {
   InnerUnion(InnerUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::innerOption:
       {
         set_innerOption(std::move(rhs.value_.innerOption));
@@ -1017,8 +1020,11 @@ class InnerUnion final  {
   InnerUnion(const InnerUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::innerOption:
       {
         set_innerOption(rhs.value_.innerOption);
@@ -1035,8 +1041,11 @@ class InnerUnion final  {
   InnerUnion& operator=(InnerUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::innerOption:
       {
         set_innerOption(std::move(rhs.value_.innerOption));
@@ -1055,8 +1064,11 @@ class InnerUnion final  {
   InnerUnion& operator=(const InnerUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::innerOption:
       {
         set_innerOption(rhs.value_.innerOption);
@@ -1270,8 +1282,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::option1:
       {
         set_option1(std::move(rhs.value_.option1));
@@ -1299,8 +1314,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::option1:
       {
         set_option1(rhs.value_.option1);
@@ -1327,8 +1345,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::option1:
       {
         set_option1(std::move(rhs.value_.option1));
@@ -1357,8 +1378,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::option1:
       {
         set_option1(rhs.value_.option1);

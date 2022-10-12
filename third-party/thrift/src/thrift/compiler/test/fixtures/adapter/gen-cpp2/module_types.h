@@ -1013,8 +1013,11 @@ class Baz final  {
   Baz(Baz&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intField:
       {
         set_intField(std::move(rhs.value_.intField));
@@ -1052,8 +1055,11 @@ class Baz final  {
   Baz(const Baz& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intField:
       {
         set_intField(rhs.value_.intField);
@@ -1090,8 +1096,11 @@ class Baz final  {
   Baz& operator=(Baz&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intField:
       {
         set_intField(std::move(rhs.value_.intField));
@@ -1130,8 +1139,11 @@ class Baz final  {
   Baz& operator=(const Baz& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intField:
       {
         set_intField(rhs.value_.intField);

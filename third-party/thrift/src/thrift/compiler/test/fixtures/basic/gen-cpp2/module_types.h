@@ -1077,8 +1077,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -1111,8 +1114,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -1144,8 +1150,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(std::move(rhs.value_.myEnum));
@@ -1179,8 +1188,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::myEnum:
       {
         set_myEnum(rhs.value_.myEnum);
@@ -1716,8 +1728,11 @@ class UnionToBeRenamed final  {
   UnionToBeRenamed(UnionToBeRenamed&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::reserved_field:
       {
         set_reserved_field(std::move(rhs.value_.reserved_field));
@@ -1735,8 +1750,11 @@ class UnionToBeRenamed final  {
   UnionToBeRenamed(const UnionToBeRenamed& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::reserved_field:
       {
         set_reserved_field(rhs.value_.reserved_field);
@@ -1753,8 +1771,11 @@ class UnionToBeRenamed final  {
   UnionToBeRenamed& operator=(UnionToBeRenamed&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::reserved_field:
       {
         set_reserved_field(std::move(rhs.value_.reserved_field));
@@ -1773,8 +1794,11 @@ class UnionToBeRenamed final  {
   UnionToBeRenamed& operator=(const UnionToBeRenamed& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::reserved_field:
       {
         set_reserved_field(rhs.value_.reserved_field);

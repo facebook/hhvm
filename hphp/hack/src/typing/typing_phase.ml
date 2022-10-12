@@ -184,6 +184,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
               ~ety_env
               env
               r_inst
+              (get_reason dty)
               id
               targs
               (Env.get_typedef env id)
@@ -236,6 +237,7 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
           ~ety_env
           env
           r
+          (get_reason dty)
           cid
           argl
           (Some typedef_info)
@@ -328,6 +330,40 @@ let rec localize ~(ety_env : expand_env) env (dty : decl_ty) =
         ~combine_ty_errs:Typing_error.multiple_opt
     in
     (env, mk (r, Tshape (shape_kind, tym)))
+  | Tnewtype (name, tyl, ty) ->
+    if Env.is_enum env name then
+      failwith "should not happen"
+    else
+      let td =
+        Utils.unsafe_opt
+        @@ Decl_provider.get_typedef (Typing_env.get_ctx env) name
+      in
+      let should_expand =
+        Typing_env.is_typedef_visible
+          env
+          ~expand_visible_newtype:ety_env.expand_visible_newtype
+          ~name
+          td
+      in
+      if should_expand then
+        Decl_typedef_expand.expand_typedef
+          ~force_expand:true
+          (Typing_env.get_ctx env)
+          (get_reason dty)
+          name
+          tyl
+        |> localize ~ety_env env
+      else
+        let ((env, e1), ty) = localize ~ety_env env ty in
+        let ((env, e2), tyl) =
+          List.map_env_ty_err_opt
+            env
+            tyl
+            ~f:(localize ~ety_env)
+            ~combine_ty_errs:Typing_error.multiple_opt
+        in
+        let ty_err_opt = Option.merge e1 e2 ~f:Typing_error.both in
+        ((env, ty_err_opt), mk (r, Tnewtype (name, tyl, ty)))
 
 (* Localize type arguments for something whose kinds is [kind] *)
 and localize_targs_by_kind
@@ -528,13 +564,14 @@ and localize_class_instantiation ~ety_env env r sid tyargs class_info =
         let cstr = MakeType.mixed new_r in
         ((env, err), mk (new_r, Tnewtype (name, [], cstr)))
 
-and localize_typedef_instantiation ~ety_env env r type_name tyargs typedef_info
-    =
+and localize_typedef_instantiation
+    ~ety_env env r decl_r type_name tyargs typedef_info =
   match typedef_info with
   | Some typedef_info ->
     if TypecheckerOptions.use_type_alias_heap (Env.get_tcopt env) then
       Decl_typedef_expand.expand_typedef
         (Typing_env.get_ctx env)
+        decl_r
         type_name
         tyargs
       |> localize ~ety_env env

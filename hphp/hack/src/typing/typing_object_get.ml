@@ -356,6 +356,21 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
  * (resp. contravariant, if contra=true) position in ty.
  *)
 let rec this_appears_covariantly ~contra env ty =
+  let rec this_appears_covariantly_params tparams tyl =
+    match (tparams, tyl) with
+    | (tp :: tparams, ty :: tyl) ->
+      begin
+        match tp.tp_variance with
+        | Ast_defs.Covariant -> this_appears_covariantly ~contra env ty
+        | Ast_defs.Contravariant ->
+          this_appears_covariantly ~contra:(not contra) env ty
+        | Ast_defs.Invariant ->
+          this_appears_covariantly ~contra env ty
+          || this_appears_covariantly ~contra:(not contra) env ty
+      end
+      || this_appears_covariantly_params tparams tyl
+    | _ -> false
+  in
   match get_node ty with
   | Tthis -> not contra
   | Ttuple tyl
@@ -379,21 +394,6 @@ let rec this_appears_covariantly ~contra env ty =
     this_appears_covariantly ~contra env ty1
     || this_appears_covariantly ~contra env ty2
   | Tapply (pos_name, tyl) ->
-    let rec this_appears_covariantly_params tparams tyl =
-      match (tparams, tyl) with
-      | (tp :: tparams, ty :: tyl) ->
-        begin
-          match tp.tp_variance with
-          | Ast_defs.Covariant -> this_appears_covariantly ~contra env ty
-          | Ast_defs.Contravariant ->
-            this_appears_covariantly ~contra:(not contra) env ty
-          | Ast_defs.Invariant ->
-            this_appears_covariantly ~contra env ty
-            || this_appears_covariantly ~contra:(not contra) env ty
-        end
-        || this_appears_covariantly_params tparams tyl
-      | _ -> false
-    in
     let tparams =
       match Typing_env.get_class_or_typedef env (snd pos_name) with
       | Some (Typing_env.TypedefResult { td_tparams; _ }) -> td_tparams
@@ -410,6 +410,13 @@ let rec this_appears_covariantly ~contra env ty =
   | Tvar _
   | Tgeneric _ ->
     false
+  | Tnewtype (name, tyl, _) ->
+    let tparams =
+      match Typing_env.get_typedef env name with
+      | Some { td_tparams; _ } -> td_tparams
+      | None -> []
+    in
+    this_appears_covariantly_params tparams tyl
 
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)

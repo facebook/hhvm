@@ -304,16 +304,7 @@ and _ ty_ =
       (** Tvec_or_dict (ty1, ty2) => "vec_or_dict<ty1, ty2>" *)
   | Taccess : 'phase taccess_type -> 'phase ty_
       (** Name of class, name of type const, remaining names of type consts *)
-  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
-  | Tunapplied_alias : string -> locl_phase ty_
-      (** This represents a type alias that lacks necessary type arguments. Given
-           type Foo<T1,T2> = ...
-         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
-         further type arguments. In particular, Tunappliedalias always stands for
-         a higher-kinded type. It is never used for an alias like
-           type Foo2 = ...
-         that simply doesn't require type arguments. *)
-  | Tnewtype : string * locl_ty list * locl_ty -> locl_phase ty_
+  | Tnewtype : string * 'phase ty list * 'phase ty -> 'phase ty_
       (** The type of an opaque type or enum. Outside their defining files or
        * when they represent enums, they are "opaque", which means that they
        * only unify with themselves. Within a file, uses of newtypes are
@@ -337,6 +328,15 @@ and _ ty_ =
        *
        * The second parameter is the list of type arguments to the type.
        *)
+  (*========== Below Are Types That Cannot Be Declared In User Code ==========*)
+  | Tunapplied_alias : string -> locl_phase ty_
+      (** This represents a type alias that lacks necessary type arguments. Given
+           type Foo<T1,T2> = ...
+         Tunappliedalias "Foo" stands for usages of plain Foo, without supplying
+         further type arguments. In particular, Tunappliedalias always stands for
+         a higher-kinded type. It is never used for an alias like
+           type Foo2 = ...
+         that simply doesn't require type arguments. *)
   | Tdependent : dependent_type * locl_ty -> locl_phase ty_
       (** see dependent_type *)
   | Tclass : pos_id * exact * locl_ty list -> locl_phase ty_

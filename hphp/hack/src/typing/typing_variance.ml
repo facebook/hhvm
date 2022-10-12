@@ -304,6 +304,19 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
   let get_typarams_union = get_typarams_union ~tracked tenv in
   let get_typarams = get_typarams ~tracked tenv in
   let single id pos = (SMap.singleton id [pos], SMap.empty) in
+  let rec get_typarams_variance_list acc variancel tyl =
+    match (variancel, tyl) with
+    | (variance :: variancel, ty :: tyl) ->
+      let param = get_typarams ty in
+      let param =
+        match variance with
+        | Vcovariant _ -> param
+        | Vcontravariant _ -> flip param
+        | _ -> union param (flip param)
+      in
+      get_typarams_variance_list (union acc param) variancel tyl
+    | _ -> acc
+  in
   match get_node ty with
   | Tgeneric (id, _tyargs) ->
     (* TODO(T69551141) handle type arguments *)
@@ -491,21 +504,18 @@ and get_typarams ~tracked tenv (ty : decl_ty) =
     in
     List.fold_left ft.ft_tparams ~init:result ~f:propagate_typarams_tparam
   | Tapply (pos_name, tyl) ->
-    let rec get_typarams_variance_list acc variancel tyl =
-      match (variancel, tyl) with
-      | (variance :: variancel, ty :: tyl) ->
-        let param = get_typarams ty in
-        let param =
-          match variance with
-          | Vcovariant _ -> param
-          | Vcontravariant _ -> flip param
-          | _ -> union param (flip param)
-        in
-        get_typarams_variance_list (union acc param) variancel tyl
-      | _ -> acc
-    in
     let variancel =
       get_class_variance tenv (Positioned.unsafe_to_raw_positioned pos_name)
+    in
+    get_typarams_variance_list empty variancel tyl
+  | Tnewtype (name, tyl, _) ->
+    let variancel =
+      let tparams =
+        match Typing_env.get_typedef tenv name with
+        | Some { td_tparams; _ } -> td_tparams
+        | None -> []
+      in
+      List.map tparams ~f:make_decl_tparam_variance
     in
     get_typarams_variance_list empty variancel tyl
   | Tvec_or_dict (ty1, ty2) -> union (get_typarams ty1) (get_typarams ty2)

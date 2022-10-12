@@ -1799,8 +1799,10 @@ dependencies = [
 name = "hdf"
 version = "0.0.0"
 dependencies = [
+ "cc",
  "cxx",
  "cxx-build",
+ "glob",
  "thiserror",
 ]
 

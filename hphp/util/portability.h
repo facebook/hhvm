@@ -15,9 +15,11 @@
 */
 #pragma once
 
+#if !defined(NO_FOLLY)
 #include <folly/Likely.h> // defining LIKELY/UNLIKELY is part of this header
 #include <folly/Portability.h>
 #include <folly/CPortability.h> // FOLLY_DISABLE_ADDRESS_SANITIZER, FOLLY_EXPORT
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +52,11 @@
 # undef ATTRIBUTE_PRINTF_STRING
 #endif
 
+#ifdef FOLLY_PRINTF_FORMAT
 #define ATTRIBUTE_PRINTF_STRING FOLLY_PRINTF_FORMAT
+#else
+#define ATTRIBUTE_PRINTF_STRING
+#endif
 
 #ifdef _MSC_VER
 #define ATTRIBUTE_PRINTF(a1, a2)
@@ -285,4 +291,3 @@
 #else
 #define ASM_LOCAL_LABEL(x) ".L" x
 #endif
-

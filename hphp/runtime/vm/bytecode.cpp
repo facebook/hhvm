@@ -4991,12 +4991,10 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
-    frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
-    gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
     gen->getWaitHandle()->await(std::move(child));
   }
 

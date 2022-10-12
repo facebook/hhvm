@@ -258,10 +258,9 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
         std::make_unique<SemiFutureCallback>(std::move(promise), channel_),
         rpcKind,
         std::move(metadata));
-  } catch (const std::exception& ex) {
+  } catch (...) {
     return folly::makeSemiFutureWith(
-        [ew =
-             folly::exception_wrapper(std::current_exception(), ex)]() mutable {
+        [ew = folly::exception_wrapper(std::current_exception())]() mutable {
           OmniClientResponseWithHeaders resp;
           resp.buf = folly::makeUnexpected(std::move(ew));
           return resp;

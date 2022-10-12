@@ -165,11 +165,13 @@ struct Process {
   static int GetNumThreads();
 
   /**
-   * Get system-wide memory usage information.  Returns false upon
-   * failure.  Note that previous value of `info` is reset, even upon
+   * Get system-wide memory usage information.  If `checkCgroup2' is true and
+   * HHVM is running inside a cgroup2, this function checks cgroup2's limits to
+   * potentially reduce the amount of total and available memory.  Returns false
+   * upon failure.  Note that previous value of `info` is reset, even upon
    * failure.
    */
-  static bool GetMemoryInfo(MemInfo& info);
+  static bool GetMemoryInfo(MemInfo& info, bool checkCgroup2);
 
   /**
    * Current thread's identifier.
@@ -322,4 +324,3 @@ struct Process {
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

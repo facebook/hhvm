@@ -1,0 +1,408 @@
+// Copyright (c) Facebook, Inc. and its affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::fmt;
+
+use anyhow::bail;
+use anyhow::Result;
+
+type Line = usize;
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+pub(crate) enum Token<'a> {
+    // See below in Lexer::from_slice for regex definitions
+    Global(&'a [u8], Line),
+    Variable(&'a [u8], Line),
+    TripleStrLiteral(&'a [u8], Line),
+    Decl(&'a [u8], Line),
+    StrLiteral(&'a [u8], Line),
+    Variadic(Line),
+    Semicolon(Line),
+    Dash(Line),
+    OpenCurly(Line),
+    OpenBracket(Line),
+    OpenParen(Line),
+    CloseParen(Line),
+    CloseBracket(Line),
+    CloseCurly(Line),
+    Equal(Line),
+    Number(&'a [u8], Line),
+    Comma(Line),
+    Lt(Line),
+    Gt(Line),
+    Colon(Line),
+    Identifier(&'a [u8], Line),
+    Newline(Line),
+    Error(&'a [u8], Line),
+}
+
+impl<'a> Token<'a> {
+    pub(crate) fn as_bytes(&self) -> &'a [u8] {
+        match self {
+            Token::Global(u, _)
+            | Token::Variable(u, _)
+            | Token::TripleStrLiteral(u, _)
+            | Token::Decl(u, _)
+            | Token::StrLiteral(u, _)
+            | Token::Number(u, _)
+            | Token::Identifier(u, _)
+            | Token::Error(u, _) => u,
+            Token::Semicolon(_) => b";",
+            Token::Dash(_) => b"-",
+            Token::OpenCurly(_) => b"{",
+            Token::OpenBracket(_) => b"[",
+            Token::OpenParen(_) => b"(",
+            Token::CloseParen(_) => b")",
+            Token::CloseBracket(_) => b"]",
+            Token::CloseCurly(_) => b"}",
+            Token::Equal(_) => b"=",
+            Token::Comma(_) => b",",
+            Token::Lt(_) => b"<",
+            Token::Gt(_) => b">",
+            Token::Colon(_) => b":",
+            Token::Variadic(_) => b"...",
+            Token::Newline(_) => b"\n",
+        }
+    }
+
+    /// Only str_literal and triple_str_literal can be parsed into a new tokenizer.
+    /// To create a new tokenizer that still has accurate error reporting, we want to pass the line
+    /// So `into_str_literal_and_line` and `into_triple_str_literal_and_line` return a Result of bytes rep and line # or bail
+    pub(crate) fn into_triple_str_literal_and_line(self) -> Result<(&'a [u8], usize)> {
+        match self {
+            Token::TripleStrLiteral(vec_u8, pos) => Ok((vec_u8, pos)),
+
+            _ => bail!("Expected a triple str literal, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    fn into_str_literal_and_line(self) -> Result<(&'a [u8], usize)> {
+        match self {
+            Token::StrLiteral(vec_u8, pos) => Ok((vec_u8, pos)),
+            _ => bail!("Expected a str literal, got: {}", self),
+        }
+    }
+
+    /// The "into" series of methods both check that [self] is the correct
+    /// variant of Token and return a Result of [self]'s string rep
+    #[allow(dead_code)]
+    fn into_newline(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Newline(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a newline, got: {}", self),
+        }
+    }
+    #[allow(dead_code)]
+    pub(crate) fn into_global(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Global(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a global, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_variable(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Variable(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a variable, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_triple_str_literal(self) -> Result<&'a [u8]> {
+        match self {
+            Token::TripleStrLiteral(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a triple str literal, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_decl(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Decl(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a decl, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_str_literal(self) -> Result<&'a [u8]> {
+        match self {
+            Token::StrLiteral(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a str literal, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_number(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Number(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected a number, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_identifier(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Identifier(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected an identifier, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    fn into_error(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Error(vec_u8, _) => Ok(vec_u8),
+            _ => bail!("Expected an error, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_semicolon(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Semicolon(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a semicolon, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_dash(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Dash(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a dash, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_open_curly(self) -> Result<&'a [u8]> {
+        match self {
+            Token::OpenCurly(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected an open curly, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_open_bracket(self) -> Result<&'a [u8]> {
+        match self {
+            Token::OpenBracket(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected an open bracket, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_open_paren(self) -> Result<&'a [u8]> {
+        match self {
+            Token::OpenParen(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected an open paren, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_close_paren(self) -> Result<&'a [u8]> {
+        match self {
+            Token::CloseParen(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a close paren, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_close_bracket(self) -> Result<&'a [u8]> {
+        match self {
+            Token::CloseBracket(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a close bracket, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_close_curly(self) -> Result<&'a [u8]> {
+        match self {
+            Token::CloseCurly(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a close curly, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_equal(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Equal(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected an equal, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_comma(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Comma(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a comma, got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_lt(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Lt(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a lt (<), got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_gt(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Gt(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a gt (>), got: {}", self),
+        }
+    }
+
+    pub(crate) fn into_colon(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Colon(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a colon, got: {}", self),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn into_variadic(self) -> Result<&'a [u8]> {
+        match self {
+            Token::Variadic(_) => Ok(self.as_bytes()),
+            _ => bail!("Expected a variadic, got: {}", self),
+        }
+    }
+
+    //is
+    #[allow(dead_code)]
+    pub(crate) fn is_newline(&self) -> bool {
+        matches!(self, Token::Newline(..))
+    }
+    #[allow(dead_code)]
+    fn is_global(&self) -> bool {
+        matches!(self, Token::Global(..))
+    }
+
+    #[allow(dead_code)]
+    fn is_variable(&self) -> bool {
+        matches!(self, Token::Variable(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_triple_str_literal(&self) -> bool {
+        matches!(self, Token::TripleStrLiteral(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_decl(&self) -> bool {
+        matches!(self, Token::Decl(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_str_literal(&self) -> bool {
+        matches!(self, Token::StrLiteral(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_number(&self) -> bool {
+        matches!(self, Token::Number(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_identifier(&self) -> bool {
+        matches!(self, Token::Identifier(..))
+    }
+
+    #[allow(dead_code)]
+    fn is_error(&self) -> bool {
+        matches!(self, Token::Error(..))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_semicolon(&self) -> bool {
+        matches!(self, Token::Semicolon(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_dash(&self) -> bool {
+        matches!(self, Token::Dash(_))
+    }
+
+    #[allow(dead_code)]
+    fn is_open_curly(&self) -> bool {
+        matches!(self, Token::OpenCurly(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_open_bracket(&self) -> bool {
+        matches!(self, Token::OpenBracket(_))
+    }
+
+    #[allow(dead_code)]
+    fn is_open_paren(&self) -> bool {
+        matches!(self, Token::OpenParen(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_close_paren(&self) -> bool {
+        matches!(self, Token::CloseParen(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_close_bracket(&self) -> bool {
+        matches!(self, Token::CloseBracket(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_close_curly(&self) -> bool {
+        matches!(self, Token::CloseCurly(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_equal(&self) -> bool {
+        matches!(self, Token::Equal(_))
+    }
+
+    #[allow(dead_code)]
+    fn is_comma(&self) -> bool {
+        matches!(self, Token::Comma(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_lt(&self) -> bool {
+        matches!(self, Token::Lt(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_gt(&self) -> bool {
+        matches!(self, Token::Gt(_))
+    }
+
+    #[allow(dead_code)]
+    fn is_colon(&self) -> bool {
+        matches!(self, Token::Colon(_))
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn is_variadic(&self) -> bool {
+        matches!(self, Token::Variadic(_))
+    }
+}
+
+impl<'a> fmt::Display for Token<'a> {
+    /// Purpose of this fmt: so that vec of u8 (internal str representation of each token) is printed as a string rather than bytes
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let text = std::str::from_utf8(self.as_bytes()).map_err(|_| fmt::Error)?;
+        match self {
+            Token::Global(_, pos) => write!(f, "Global(val: \"{text}\", line: {pos:?})"),
+            Token::Variable(_, pos) => write!(f, "Variable(val: \"{text}\", line: {pos:?})"),
+            Token::TripleStrLiteral(_, pos) => {
+                write!(f, "TripleStrLiteral(val: \"{text}\", line: {pos:?})")
+            }
+            Token::Decl(_, pos) => write!(f, "Decl(val: \"{text}\", line: {pos:?})"),
+            Token::StrLiteral(_, pos) => write!(f, "StrLiteral(val: \"{text}\", line: {pos:?})"),
+            Token::Number(_, pos) => write!(f, "Number(val: \"{text}\", line: {pos:?})"),
+            Token::Identifier(_, pos) => write!(f, "Identifier(val: \"{text}\", line: {pos:?})"),
+            Token::Error(_, pos) => write!(f, "Error(val: \"{text}\", line: {pos:?})"),
+            Token::Semicolon(pos) => write!(f, "Semicolon(val: \"{text}\", line: {pos:?})"),
+            Token::Dash(pos) => write!(f, "Dash(val: \"{text}\", line: {pos:?})"),
+            Token::OpenCurly(pos) => write!(f, "OpenCurly(val: \"{text}\", line: {pos:?})"),
+            Token::OpenBracket(pos) => write!(f, "OpenBracket(val: \"{text}\", line: {pos:?})"),
+            Token::OpenParen(pos) => write!(f, "OpenParen(val: \"{text}\", line: {pos:?})"),
+            Token::CloseParen(pos) => write!(f, "CloseParen(val: \"{text}\", line: {pos:?})"),
+            Token::CloseBracket(pos) => write!(f, "CloseBracket(val: \"{text}\", line: {pos:?})"),
+            Token::CloseCurly(pos) => write!(f, "CloseCurly(val: \"{text}\", line: {pos:?})"),
+            Token::Equal(pos) => write!(f, "Equal(val: \"{text}\", line: {pos:?})"),
+            Token::Comma(pos) => write!(f, "Comma(val: \"{text}\", line: {pos:?})"),
+            Token::Lt(pos) => write!(f, "Lt(val: \"{text}\", line: {pos:?})"),
+            Token::Gt(pos) => write!(f, "Gt(val: \"{text}\", line: {pos:?})"),
+            Token::Colon(pos) => write!(f, "Colon(val: \"{text}\", line: {pos:?})"),
+            Token::Variadic(pos) => write!(f, "Variadic(val: \"{text}\", line: {pos:?})"),
+            Token::Newline(pos) => write!(f, "Newline(val: \"{text}\", line: {pos:?})"),
+        }
+    }
+}

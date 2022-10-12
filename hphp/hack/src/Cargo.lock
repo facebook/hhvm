@@ -155,6 +155,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bbf56136a5198c7b01a49e3afcbef6cf84597273d298f54432926024107b0109"
 
 [[package]]
+name = "assemble"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "bstr",
+ "bumpalo",
+ "escaper",
+ "ffi",
+ "hhbc",
+ "hhvm_types_ffi",
+ "log",
+ "naming_special_names_rust",
+ "once_cell",
+ "regex",
+]
+
+[[package]]
 name = "ast_and_decl_parser"
 version = "0.0.0"
 dependencies = [
@@ -1667,8 +1684,8 @@ version = "0.0.0"
 dependencies = [
  "aast_parser",
  "anyhow",
+ "assemble",
  "bc_to_ir",
- "bstr",
  "bumpalo",
  "byte-unit",
  "bytecode_printer",
@@ -1678,7 +1695,6 @@ dependencies = [
  "decl_provider",
  "direct_decl_parser",
  "env_logger 0.7.1",
- "escaper",
  "facts_rust",
  "ffi",
  "file_provider",

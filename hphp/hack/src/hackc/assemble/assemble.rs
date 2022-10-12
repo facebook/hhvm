@@ -327,6 +327,7 @@ fn assemble_class<'arena>(
     Ok(hhas_class)
 }
 
+/// Defined in 'hack/src/naming/naming_special_names.rs`
 fn is_enforced_static_coeffect(d: &&[u8]) -> bool {
     match *d {
         b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
@@ -444,12 +445,7 @@ fn assemble_method<'arena>(
     let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
     let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
-    let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => {
-            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
-        }
-        _ => Maybe::Nothing,
-    };
+    let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
     let mut decl_map: HashMap<Vec<u8>, u32> = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
@@ -1130,12 +1126,7 @@ fn assemble_function<'arena>(
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
-    let return_type_info = match token_iter.peek() {
-        Some(Token::Lt(_)) => {
-            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
-        }
-        _ => Maybe::Nothing,
-    };
+    let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     // Assemble_name
 
     let name = assemble_function_name(alloc, token_iter)?;
@@ -1383,37 +1374,40 @@ fn assemble_type_info<'arena>(
     token_iter: &mut Lexer<'_>,
     tik: TypeInfoKind,
 ) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
-    token_iter.expect(Token::into_lt)?;
-    let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
-    let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
-    let type_cons_name = if tik == TypeInfoKind::TypeDef {
-        if first.is_empty() {
+    if token_iter.next_if(Token::is_lt) {
+        let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+        let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
+        let type_cons_name = if tik == TypeInfoKind::TypeDef {
+            if first.is_empty() {
+                Maybe::Nothing
+            } else {
+                Maybe::Just(Str::new_slice(alloc, &first))
+            }
+        } else if tik == TypeInfoKind::Enum || token_iter.next_if_str(Token::is_identifier, "N") {
             Maybe::Nothing
         } else {
+            Maybe::Just(Str::new_slice(
+                alloc,
+                &escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
+                    token_iter.expect(Token::into_str_literal)?,
+                ))?,
+            ))
+        };
+        let user_type = if tik != TypeInfoKind::TypeDef {
             Maybe::Just(Str::new_slice(alloc, &first))
+        } else {
+            Maybe::Nothing
+        };
+        let mut tcflags = hhvm_types_ffi::ffi::TypeConstraintFlags::NoFlags;
+        while !token_iter.peek_if(Token::is_gt) {
+            tcflags = tcflags | assemble_type_constraint(token_iter)?;
         }
-    } else if tik == TypeInfoKind::Enum || token_iter.next_if_str(Token::is_identifier, "N") {
-        Maybe::Nothing
+        token_iter.expect(Token::into_gt)?;
+        let cons = hhbc::Constraint::make(type_cons_name, tcflags);
+        Ok(Maybe::Just(hhbc::TypeInfo::make(user_type, cons)))
     } else {
-        Maybe::Just(Str::new_slice(
-            alloc,
-            &escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
-                token_iter.expect(Token::into_str_literal)?,
-            ))?,
-        ))
-    };
-    let user_type = if !(tik == TypeInfoKind::TypeDef) {
-        Maybe::Just(Str::new_slice(alloc, &first))
-    } else {
-        Maybe::Nothing
-    };
-    let mut tcflags = hhvm_types_ffi::ffi::TypeConstraintFlags::NoFlags;
-    while !token_iter.peek_if(Token::is_gt) {
-        tcflags = tcflags | assemble_type_constraint(token_iter)?;
+        Ok(Maybe::Nothing)
     }
-    token_iter.expect(Token::into_gt)?;
-    let cons = hhbc::Constraint::make(type_cons_name, tcflags);
-    Ok(Maybe::Just(hhbc::TypeInfo::make(user_type, cons)))
 }
 
 fn assemble_type_constraint(
@@ -1430,8 +1424,7 @@ fn assemble_type_constraint(
         b"type_var" => Ok(TypeConstraintFlags::TypeVar),
         b"extended_hint" => Ok(TypeConstraintFlags::ExtendedHint),
         b"nullable" => Ok(TypeConstraintFlags::Nullable),
-
-        _ => todo!(),
+        f => bail!("Unknown type constraint flag: {:?}", f),
     }
 }
 
@@ -1473,11 +1466,7 @@ fn assemble_param<'arena>(
     let is_inout = token_iter.next_if_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_if_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_if(Token::is_variadic);
-    let type_info = if token_iter.peek_if(Token::is_lt) {
-        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
-    } else {
-        Maybe::Nothing
-    };
+    let type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = token_iter.expect(Token::into_variable)?;
     decl_map.insert(name.to_vec(), decl_map.len() as u32);
     let name = Str::new_slice(alloc, name);

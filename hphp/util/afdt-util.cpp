@@ -114,6 +114,10 @@ void recv(int afdt_fd, std::vector<iovec>& iov) {
     if (skip_processed(msg, nread, npending_iovs)) return;
 
     nread = recvmsg(afdt_fd, &msg, MSG_WAITALL);
+    if (nread == 0 && !skip_processed(msg, nread, npending_iovs)) {
+      throw std::runtime_error("peer reset connection");
+    }
+
     if (nread < 0) {
       if (errno == EINTR) {
         nread = 0;

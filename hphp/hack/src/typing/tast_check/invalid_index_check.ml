@@ -18,15 +18,12 @@ open String.Replace_polymorphic_compare
 
 let should_enforce env = TCO.disallow_invalid_arraykey (Env.get_tcopt env)
 
-let equiv_ak_inter_dyn env t_env ty_expect =
+let equiv_ak_inter_dyn env ty_expect =
   let r = get_reason ty_expect in
   let ak_dyn =
     MakeType.intersection r [MakeType.arraykey r; MakeType.dynamic r]
   in
-  (not
-     Typing_env_types.(TypecheckerOptions.enable_sound_dynamic t_env.genv.tcopt))
-  && Env.can_subtype env ty_expect ak_dyn
-  && Env.can_subtype env ak_dyn ty_expect
+  Env.can_subtype env ty_expect ak_dyn && Env.can_subtype env ak_dyn ty_expect
 
 (* For new-inference, types of keys in collection types may not be resolved
  * until TAST check time. For this reason, we replicate some of the checks that
@@ -39,59 +36,73 @@ let equiv_ak_inter_dyn env t_env ty_expect =
 let rec array_get ~array_pos ~expr_pos ~index_pos env array_ty index_ty =
   let type_index ?(is_covariant_index = false) env ty_have ty_expect reason =
     let t_env = Env.tast_env_as_typing_env env in
-    match
-      Typing_coercion.try_coerce
-        ~coerce:(Some Typing_logic.CoerceToDynamic)
-        t_env
-        ty_have
-        (MakeType.unenforced ty_expect)
-    with
-    | Some _ -> Ok ()
-    | None ->
+    let got_error =
       if
-        (Env.can_subtype env ty_have (MakeType.dynamic (get_reason ty_have))
-        (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
-         * the key type of the array, just let it pass *)
-        || Env.can_subtype
-             env
-             ty_expect
-             (MakeType.nothing (get_reason ty_expect)))
-        (* If the key is not even an arraykey, we've already produced an error *)
-        || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
-           && should_enforce env
-        (* Keytype of arraykey&dynamic happens when you assign a dynamic into a dict,
-           but without sound dynamic, the try_coercion above doesn't work. *)
-        || equiv_ak_inter_dyn env t_env ty_expect
+        Typing_env_types.(
+          TypecheckerOptions.enable_sound_dynamic t_env.genv.tcopt)
       then
-        Ok ()
-      else
-        let reasons_opt =
-          Some
-            (lazy
-              (let (_, ty_have) = Env.expand_type env ty_have in
-               let (_, ty_expect) = Env.expand_type env ty_expect in
-               let ty_expect_str = Env.print_error_ty env ty_expect in
-               let ty_have_str = Env.print_error_ty env ty_have in
-
-               Typing_reason.to_string
-                 ("This is " ^ ty_expect_str)
-                 (get_reason ty_expect)
-               @ Typing_reason.to_string
-                   ("It is incompatible with " ^ ty_have_str)
-                   (get_reason ty_have)))
+        let (_env, ty_err_opt) =
+          Typing_coercion.coerce_type
+            ~coerce_for_op:true
+            index_pos
+            reason
+            t_env
+            ty_have
+            (MakeType.enforced ty_expect)
+            Typing_error.Callback.index_type_mismatch
         in
-        Errors.add_typing_error
-          Typing_error.(
-            primary
-            @@ Primary.Index_type_mismatch
-                 {
-                   pos = expr_pos;
-                   msg_opt = Some (Reason.string_of_ureason reason);
-                   reasons_opt;
-                   is_covariant_container = is_covariant_index;
-                 });
+        Option.is_some ty_err_opt
+      else
+        Option.is_none
+          (Typing_coercion.try_coerce
+             ~coerce:None
+             t_env
+             ty_have
+             (MakeType.enforced ty_expect))
+    in
+    if not got_error then
+      Ok ()
+    else if
+      (Env.can_subtype env ty_have (MakeType.dynamic (get_reason ty_have))
+      (* Terrible heuristic to agree with legacy: if we inferred `nothing` for
+       * the key type of the array, just let it pass *)
+      || Env.can_subtype env ty_expect (MakeType.nothing (get_reason ty_expect))
+      )
+      (* If the key is not even an arraykey, we've already produced an error *)
+      || (not (Env.can_subtype env ty_have (MakeType.arraykey Reason.Rnone)))
+         && should_enforce env
+      (* Keytype of arraykey&dynamic happens when you assign a dynamic into a dict,
+         but the above coercion doesn't work. *)
+      || equiv_ak_inter_dyn env ty_expect
+    then
+      Ok ()
+    else
+      let reasons_opt =
+        Some
+          (lazy
+            (let (_, ty_have) = Env.expand_type env ty_have in
+             let (_, ty_expect) = Env.expand_type env ty_expect in
+             let ty_expect_str = Env.print_error_ty env ty_expect in
+             let ty_have_str = Env.print_error_ty env ty_have in
 
-        Error ()
+             Typing_reason.to_string
+               ("This is " ^ ty_expect_str)
+               (get_reason ty_expect)
+             @ Typing_reason.to_string
+                 ("It is incompatible with " ^ ty_have_str)
+                 (get_reason ty_have)))
+      in
+      Errors.add_typing_error
+        Typing_error.(
+          primary
+          @@ Primary.Index_type_mismatch
+               {
+                 pos = expr_pos;
+                 msg_opt = Some (Reason.string_of_ureason reason);
+                 reasons_opt;
+                 is_covariant_container = is_covariant_index;
+               });
+      Error ()
   in
   let (_, ety) = Env.expand_type env array_ty in
   match get_node ety with

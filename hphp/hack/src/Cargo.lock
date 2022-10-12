@@ -1618,6 +1618,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "gen_hhi_contents_lib"
+version = "0.0.0"
+
+[[package]]
+name = "generate_hhi_lib"
+version = "0.0.0"
+dependencies = [
+ "anyhow",
+ "ocamlrep",
+ "parser_core_types",
+ "positioned_parser",
+ "relative_path",
+]
+
+[[package]]
 name = "generic-array"
 version = "0.14.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2025,6 +2040,8 @@ dependencies = [
 name = "hhi"
 version = "0.0.0"
 dependencies = [
+ "gen_hhi_contents_lib",
+ "generate_hhi_lib",
  "structopt",
  "walkdir",
 ]

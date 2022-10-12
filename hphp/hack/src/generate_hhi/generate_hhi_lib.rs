@@ -3,9 +3,8 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::io::Write;
 use std::ops::ControlFlow;
-use std::path::PathBuf;
+use std::path::Path;
 
 use ocamlrep::rc::RcOc;
 use parser_core_types::positioned_token::PositionedToken as Token;
@@ -18,19 +17,10 @@ use parser_core_types::token_kind::TokenKind;
 use relative_path::Prefix;
 use relative_path::RelativePath;
 
-/// Convert a Hack source file to an HHI interface definition file by removing
-/// all function and method bodies.
-#[derive(clap::Parser, Debug)]
-struct Opts {
-    /// The Hack source file to generate an HHI file for.
-    filename: PathBuf,
-}
-
-fn main() -> anyhow::Result<()> {
-    let opts = <Opts as clap::Parser>::from_args();
-    let text = std::fs::read(&opts.filename)?;
+pub fn run(out: &mut impl std::io::Write, filename: &Path) -> anyhow::Result<()> {
+    let text = std::fs::read(&filename)?;
     let source_text = SourceText::make(
-        RcOc::new(RelativePath::make(Prefix::Dummy, opts.filename)),
+        RcOc::new(RelativePath::make(Prefix::Dummy, filename.to_path_buf())),
         &text,
     );
     let (mut root, _, state) = positioned_parser::parse_script(&source_text, Default::default());
@@ -60,12 +50,11 @@ fn main() -> anyhow::Result<()> {
         }
     });
 
-    let mut stdout = std::io::BufWriter::new(std::io::stdout().lock());
-    stdout.write_all(b"<?hh\n// @")?;
-    stdout.write_all(b"generated from implementation\n\n")?;
-    root.write_text_from_edited_tree(&source_text, &mut stdout)?;
-    stdout.write_all(b"\n")?;
-    stdout.flush()?;
+    out.write_all(b"<?hh\n// @")?;
+    out.write_all(b"generated from implementation\n\n")?;
+    root.write_text_from_edited_tree(&source_text, out)?;
+    out.write_all(b"\n")?;
+    out.flush()?;
 
     Ok(())
 }

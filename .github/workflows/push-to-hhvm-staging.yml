@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   push-to-hhvm-staging:
-    concurrency: 
+    concurrency:
       group: push-to-hhvm-staging-${{github.ref_name}}
     runs-on: ubuntu-latest
     steps:

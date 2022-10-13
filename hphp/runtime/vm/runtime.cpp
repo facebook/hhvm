@@ -437,7 +437,8 @@ void moduleBoundaryViolationImpl(
   assertx(!symbol.empty());
 
   auto const errMsg = folly::sformat(
-    "Accessing internal {} in module {} from {} is not allowed",
+    "Accessing {}internal {} in module {} from {} is not allowed",
+    soft ? "soft " : "",
     symbol,
     symbolModule,
     fromModule

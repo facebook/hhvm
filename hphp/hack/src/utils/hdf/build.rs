@@ -19,6 +19,7 @@ fn main() {
         .include(&root_path)
         .warnings(false)
         .flag("-Wno-format")
+        .flag_if_supported("-Wno-format-security")
         .compile("neo_hdf");
 
     neo_files.iter().for_each(rerun_if_changed);

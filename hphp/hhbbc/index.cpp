@@ -93,6 +93,7 @@ const StaticString s_invoke("__invoke");
 const StaticString s_Closure("Closure");
 const StaticString s_AsyncGenerator("HH\\AsyncGenerator");
 const StaticString s_Generator("Generator");
+const StaticString s_Awaitable("HH\\Awaitable");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -223,17 +224,24 @@ struct MethTabEntry {
   explicit MethTabEntry(const php::Func& f)
     : MethTabEntry{f, f.attrs} {}
   MethTabEntry(const php::Func& f, Attr a)
-    : cls{f.cls->name}, clsIdx{f.clsIdx}, attrs{a} {}
+    : cls{f.cls->name}
+    , clsIdx{f.clsIdx}
+    , attrs{a}
+    , hasPrivateAncestor{false}
+    , topLevel{true}
+    , noOverrideRegular{false} {}
   SString cls;
   // Index in the class' methods table.
   uint32_t clsIdx;
   // A method could be imported from a trait, and its attributes changed
   Attr attrs;
-  bool hasPrivateAncestor = false;
+  uint32_t idx = 0;
+  bool hasPrivateAncestor : 1;
   // This method came from the ClassInfo that owns the MethTabEntry,
   // or one of its used traits.
-  bool topLevel = true;
-  uint32_t idx = 0;
+  bool topLevel : 1;
+  // This method isn't overridden by methods in any regular classes.
+  bool noOverrideRegular : 1;
 };
 
 }
@@ -335,6 +343,11 @@ struct res::Func::FuncInfo {
   std::bitset<64> unusedParams;
 
   /*
+   * If this function is a method on a regular class.
+   */
+  std::atomic<bool> regularClassMethod{false};
+
+  /*
    * List of all func families this function belongs to.
    */
   CompactVector<FuncFamily*> families;
@@ -381,25 +394,35 @@ using FuncInfo         = res::Func::FuncInfo;
  * class with all unique derived classes, we will resolve the function
  * to a FuncFamily that contains references to all the possible
  * overriding-functions.
+ *
+ * In general, a FuncFamily can contain functions which are used by a
+ * regular class or not. In some contexts, we only care about the
+ * subset which are used by a regular class, and in some contexts we
+ * care about them all. To save memory, we use a single FuncFamily for
+ * both cases. The users of the FuncFamily must skip over which funcs
+ * it does not care about.
+ *
+ * Since we cache information related to the func list, if the "all"
+ * case and the "regular-only" case are potentially different, we
+ * allocated space for both possibilities. If we determine they'll
+ * always be the same, we do not. For example, if the possible func
+ * list only contains methods on regular classes, the distinction is
+ * irrelevant.
  */
 struct res::Func::FuncFamily {
-  using PFuncVec = CompactVector<const MethTabEntryPair*>;
-
-  explicit FuncFamily(PFuncVec&& v) : m_v{std::move(v)} {}
-  FuncFamily(FuncFamily&& o) noexcept : m_v(std::move(o.m_v)) {}
-  FuncFamily& operator=(FuncFamily&& o) noexcept {
-    m_v = std::move(o.m_v);
-    return *this;
-  }
-  FuncFamily(const FuncFamily&) = delete;
-  FuncFamily& operator=(const FuncFamily&) = delete;
-
-  const PFuncVec& possibleFuncs() const {
-    return m_v;
+  // A PossibleFunc is a php::Func* with an additional bit that
+  // indicates whether that func is present on a regular class or
+  // not. This lets us skip over that func if we only care about the
+  // regular subset of the list.
+  struct PossibleFunc {
+    PossibleFunc(const php::Func* f, bool r) : m_func{r, f} {}
+    const php::Func* ptr() const { return m_func.ptr(); }
+    bool inRegular() const { return (bool)m_func.tag(); }
+    bool operator==(const PossibleFunc& o) const { return m_func == o.m_func; }
+  private:
+    CompactTaggedPtr<const php::Func, uint8_t> m_func;
   };
-
-  friend auto begin(const FuncFamily& ff) { return ff.m_v.begin(); }
-  friend auto end(const FuncFamily& ff) { return ff.m_v.end(); }
+  using PFuncVec = CompactVector<PossibleFunc>;
 
   // We have a lot of FuncFamilies, and most of them have the same
   // "static" information (doesn't change as a result of
@@ -423,9 +446,39 @@ struct res::Func::FuncFamily {
     size_t hash() const;
   };
 
-  LockFreeLazy<Type> m_returnTy;
+  // State in the FuncFamily which might vary depending on whether
+  // we're considering the regular subset or not.
+  struct Info {
+    LockFreeLazy<Type> m_returnTy;
+    const StaticInfo* m_static{nullptr};
+  };
+
+  FuncFamily(PFuncVec&& v, bool add) : m_v{std::move(v)}
+  { if (add) m_regular = std::make_unique<Info>(); }
+
+  FuncFamily(FuncFamily&&) = delete;
+  FuncFamily(const FuncFamily&) = delete;
+  FuncFamily& operator=(FuncFamily&&) = delete;
+  FuncFamily& operator=(const FuncFamily&) = delete;
+
+  const PFuncVec& possibleFuncs() const {
+    return m_v;
+  };
+
+  Info& infoFor(bool regularOnly) {
+    if (regularOnly && m_regular) return *m_regular;
+    return m_all;
+  }
+  const Info& infoFor(bool regularOnly) const {
+    if (regularOnly && m_regular) return *m_regular;
+    return m_all;
+  }
+
+  Info m_all;
+  // Only allocated if we determined the distinction is relevant. If
+  // this is nullptr, m_all can be used for both cases.
+  std::unique_ptr<Info> m_regular;
   PFuncVec m_v;
-  const StaticInfo* m_static;
 };
 
 bool FuncFamily::StaticInfo::operator==(const FuncFamily::StaticInfo& o) const {
@@ -480,7 +533,12 @@ struct PFuncVecHasher {
       v.begin(),
       v.end(),
       0,
-      pointer_hash<MethTabEntryPair>{}
+      [] (FuncFamily::PossibleFunc pf) {
+        return hash_int64_pair(
+          pointer_hash<const php::Func>{}(pf.ptr()),
+          pf.inRegular()
+        );
+      }
     );
   }
 };
@@ -525,6 +583,100 @@ struct FFStaticInfoPtrEquals {
     return a == *b;
   }
 };
+
+//////////////////////////////////////////////////////////////////////
+
+/*
+ * A method family table entry in a compact format. Can represent a
+ * FuncFamily, a single php::Func, or emptiness. This represents the
+ * possible resolutions of a call to a method with same name. It also
+ * stores whether the entry is "complete" or "incomplete". An
+ * incomplete entry means the possible resolutions includes the
+ * possibility of the method not existing. A complete entry guarantees
+ * it has to be one of the methods. This is (right now) irrelevant for
+ * FuncFamily, but matters for php::Func, as it determines whether you
+ * can fold away the call (if it's incomplete, the call might fatal).
+ *
+ * We create a lot of these, so we use some trickery to keep it
+ * pointer sized.
+ */
+struct FuncFamilyOrSingle {
+  FuncFamilyOrSingle() : m_ptr{Type::Empty, nullptr} {}
+  explicit FuncFamilyOrSingle(FuncFamily* ff, bool incomplete)
+    : m_ptr{incomplete ? Type::FuncFamilyIncomplete : Type::FuncFamily, ff} {}
+  FuncFamilyOrSingle(const php::Func* f, bool incomplete)
+    : m_ptr{incomplete ? Type::SingleIncomplete : Type::Single, (void*)f} {}
+
+  // If this represents a FuncFamily, return it (or nullptr
+  // otherwise).
+  FuncFamily* funcFamily() const {
+    return
+      (m_ptr.tag() == Type::FuncFamily ||
+       m_ptr.tag() == Type::FuncFamilyIncomplete)
+        ? (FuncFamily*)m_ptr.ptr()
+        : nullptr;
+  }
+
+  // If this represents a single php::Func, return it (or nullptr
+  // otherwise).
+  const php::Func* func() const {
+    return
+      (m_ptr.tag() == Type::Single || m_ptr.tag() == Type::SingleIncomplete)
+        ? (const php::Func*)m_ptr.ptr()
+        : nullptr;
+  }
+
+  // Return true if this entry represents nothing at all (for example,
+  // if the method is guaranteed to not exist).
+  bool isEmpty() const { return m_ptr.tag() == Type::Empty; }
+
+  // NB: empty entries are neither incomplete nor complete. Check
+  // isEmpty() first if that matters.
+
+  // Return true if this resolution includes the possibility of no
+  // method.
+  bool isIncomplete() const {
+    return
+      m_ptr.tag() == Type::FuncFamilyIncomplete ||
+      m_ptr.tag() == Type::SingleIncomplete;
+  }
+  // Return true if the method would resolve to exactly one of the
+  // possibilities.
+  bool isComplete() const {
+    return
+      m_ptr.tag() == Type::FuncFamily ||
+      m_ptr.tag() == Type::Single;
+  }
+
+private:
+  enum class Type : uint8_t {
+    Empty,
+    FuncFamily,
+    FuncFamilyIncomplete,
+    Single,
+    SingleIncomplete
+  };
+  CompactTaggedPtr<void, Type> m_ptr;
+};
+
+std::string show(const FuncFamilyOrSingle& fam) {
+  if (auto const ff = fam.funcFamily()) {
+    auto const f = ff->possibleFuncs().front().ptr();
+    return folly::sformat(
+      "func-family {}::{}{}",
+      f->cls->name, f->name,
+      fam.isIncomplete() ? " (incomplete)" : ""
+    );
+  }
+  if (auto const f = fam.func()) {
+    return folly::sformat(
+      "func {}::{}{}",
+      f->cls->name, f->name,
+      fam.isIncomplete() ? " (incomplete)" : ""
+    );
+  }
+  return "empty";
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -614,40 +766,63 @@ struct ClassInfo {
 
   /*
    * A (case-sensitive) map from class method names to associated
-   * FuncFamily objects that group the set of possibly-overriding
-   * methods.
+   * FuncFamilyOrSingle objects that represent the set of
+   * possibly-overriding methods.
    *
-   * Note that this does not currently encode anything for interface
-   * methods.
+   * In addition to the set of methods, a bit is also set indicating
+   * whether the set of "complete" or not. A complete set means the
+   * ultimate method will definitely be one in the set. An incomplete
+   * set means that the ultimate method will either be one in the set,
+   * or won't resolve to anything (a missing function).
    *
-   * Invariant: methods on this class with AttrNoOverride or
-   * AttrPrivate will not have an entry in this map.
+   * We do not encode "special" methods in these, as their semantics
+   * are special and it's not useful.
+   *
+   * For every method present in this ClassInfo's method table, there
+   * will be an entry in methodFamilies. For regular classes, this
+   * suffices for looking up information for both all subclasses and
+   * the regular subset. For non-regular classes, the results for
+   * "all" and the regular subset may differ. In that case, there is a
+   * separate "aux" table containing the results for the regular
+   * subset. If there is no associated entry in the aux table, the
+   * result is the same as the entry in the normal table (this is a
+   * common case and saves on memory). For regular classes the aux
+   * table is always empty.
+   *
+   * If a method is marked as AttrNoOverride, it will not have an
+   * entry in these maps. If a method is marked as noOverrideRegular,
+   * it will not have an entry in the aux map (if it would have
+   * otherwise). In either case, the resolved method is assumed to be
+   * the same method in this ClassInfo's method table.
+   *
+   * The above is true for all class types. For abstract classes and
+   * interfaces, however, there may be more entries here than present
+   * in the methods table. These correspond to methods implemented by
+   * *all* regular subclasses of the abstract class/interface. For
+   * that reason, they will only be present in the regular variant of
+   * the map. This is needed to preserve monotonicity (see
+   * expand_abstract_func_families).
    */
-  SStringToOneT<FuncFamily*> methodFamilies;
-  // Resolutions to single entries do not require a FuncFamily (this
-  // saves space).
-  SStringToOneT<const MethTabEntryPair*> singleMethodFamilies;
+  folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamilies;
+  folly::sorted_vector_map<SString, FuncFamilyOrSingle> methodFamiliesAux;
 
   /*
-   * Subclasses of this class, including this class itself.
+   * For classes (abstract and non-abstract), this is the subclasses
+   * of this class, including the class itself.
    *
-   * For interfaces, this is the list of instantiable classes that
-   * implement this interface.
+   * For interfaces, this is the list of classes that implement this
+   * interface, including the interface itself.
    *
    * For traits, this is the list of classes that use the trait where
    * the trait wasn't flattened into the class (including the trait
-   * itself).
+   * itself). Note that unlike the other cases, a class being on a
+   * trait's subclass list does *not* imply a "is-a" relationship at
+   * runtime. You usually want to avoid iterating the subclass list of
+   * a trait.
    *
    * The elements in this vector are sorted by their pointer value.
    */
   CompactVector<ClassInfo*> subclassList;
-
-  /*
-   * For interfaces, the list of non-instantiable classes that
-   * implement this interface. This is needed in a few places for
-   * interface canonicalization.
-   */
-  CompactVector<ClassInfo*> abstractSubclassList;
 
   /*
    * A vector of ClassInfo that encodes the inheritance hierarchy,
@@ -673,9 +848,14 @@ struct ClassInfo {
     // ClassInfo. If a non-interface is in this set, it or one of it's
     // base classes implements this ClassInfo. This set can
     // potentially be large and is needed rarely, so it is lazily
-    // calculated (on top of InterfaceInfo being lazily calculated).
+    // calculated (on top of InterfaceInfo being lazily
+    // calculated). We keep two variants. The first only includes
+    // information from the interface's implementations which are
+    // regular classes. The second uses all of the interface's
+    // implementations (and the interface itself).
     using CouldBeSet = hphp_fast_set<const ClassInfo*>;
     mutable LockFreeLazy<CouldBeSet> lazyCouldBe;
+    mutable LockFreeLazy<CouldBeSet> lazyCouldBeNonRegular;
 
     // The set of interfaces which this interface is a subtype
     // of. That is, every implementation of this interface also
@@ -686,20 +866,24 @@ struct ClassInfo {
     // Non-nullptr if there's a single class which is a super class of
     // all implementations of this interface, nullptr otherwise.
     const ClassInfo* commonBase;
-    // If two interfaces are equivalent (which means they are
-    // implemented by the exact same set of classes), this will point
-    // to the "canonical" one that should be used. Always not
-    // nullptr. If there's no equivalent, it will point to this
-    // ClassInfo.
-    const ClassInfo* equivalent;
   };
   // Don't access this directly, use interfaceInfo().
   LockFreeLazyPtr<InterfaceInfo> lazyInterfaceInfo;
+  LockFreeLazyPtrNoDelete<ClassInfo> lazyEquivalent;
 
   // Obtain the InterfaceInfo or CouldBeSet for this interface
   // (calculating it if necessary). This class must be an interface.
   const InterfaceInfo& interfaceInfo();
   const InterfaceInfo::CouldBeSet& couldBe();
+  const InterfaceInfo::CouldBeSet& couldBeNonRegular();
+
+  /*
+   * Obtain an equivalent ClassInfo for an interface or abstract class
+   * when ignoring all non-regular subclasses. This is used for
+   * canonicalizing types. The class must have at least one
+   * non-regular subclass (so check before calling).
+   */
+  const ClassInfo* withoutNonRegularEquivalent();
 
   /*
    * Property types for public static properties, declared on this exact class
@@ -756,17 +940,46 @@ struct ClassInfo {
   bool hasReifiedParent{false};
 
   /*
+   * True if there's at least one regular/non-regular class on
+   * subclassList (not including this class).
+   */
+  bool hasRegularSubclass{false};
+  bool hasNonRegularSubclass{false};
+
+  /*
    * Return true if this is derived from o.
    */
   bool derivedFrom(const ClassInfo& o) const {
     if (this == &o) return true;
     // If o is an interface, see if this declared it.
     if (o.cls->attrs & AttrInterface) return implInterfaces.count(o.cls->name);
+    // Nothing derives from traits, and we already known they're not
+    // the same.
+    if (o.cls->attrs & AttrTrait) return false;
     // Otherwise check for direct inheritance.
     if (baseList.size() >= o.baseList.size()) {
       return baseList[o.baseList.size() - 1] == &o;
     }
     return false;
+  }
+
+  /*
+   * Given two ClassInfos, return the most specific ancestor they have
+   * in common, or nullptr if they have no common ancestor.
+   */
+  static const ClassInfo* commonAncestor(const ClassInfo* c1,
+                                         const ClassInfo* c2) {
+    if (c1 == c2) return c1;
+    const ClassInfo* ancestor = nullptr;
+    auto it1 = c1->baseList.begin();
+    auto it2 = c2->baseList.begin();
+    while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
+      if (*it1 != *it2) break;
+      ancestor = *it1;
+      ++it1;
+      ++it2;
+    }
+    return ancestor;
   }
 
   /*
@@ -791,29 +1004,41 @@ const MagicMapInfo magicMethods[] {
   { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
 
+namespace {
+
+ClassInfo::InterfaceInfo::CouldBeSet couldBeSetBuilder(const ClassInfo* cinfo,
+                                                       bool nonRegular) {
+  assertx(cinfo->cls->attrs & AttrInterface);
+  // For every implementation of this interface, add all of the other
+  // interfaces this implementation implements, and also all of its
+  // parent classes.
+  ClassInfo::InterfaceInfo::CouldBeSet couldBe;
+  for (auto const sub : cinfo->subclassList) {
+    if (!nonRegular && !is_regular_class(*sub->cls)) continue;
+    for (auto const& [_, impl] : sub->implInterfaces) couldBe.emplace(impl);
+
+    auto c = sub;
+    do {
+      // If we already added it, all subsequent parents are also
+      // added, so we can stop.
+      if (!couldBe.emplace(c).second) break;
+      c = c->parent;
+    } while (c);
+  }
+  return couldBe;
+}
+
+}
+
 const ClassInfo::InterfaceInfo::CouldBeSet& ClassInfo::couldBe() {
   return interfaceInfo().lazyCouldBe.get(
-    [this] {
-      // For every implementation of this interface, add all of the
-      // interfaces it implements, and all of its parent classes.
-      InterfaceInfo::CouldBeSet couldBe;
-      auto const process = [&] (const ClassInfo* sub) {
-        for (auto const& [_, impl] : sub->implInterfaces) {
-          if (impl == this) continue;
-          couldBe.emplace(impl);
-        }
-        auto c = sub;
-        do {
-          // If we already added it, all subsequent parents are also
-          // added, so we can stop.
-          if (!couldBe.emplace(c).second) break;
-          c = c->parent;
-        } while (c);
-      };
-      for (auto const sub : subclassList)         process(sub);
-      for (auto const sub : abstractSubclassList) process(sub);
-      return couldBe;
-    }
+    [this] { return couldBeSetBuilder(this, false); }
+  );
+}
+
+const ClassInfo::InterfaceInfo::CouldBeSet& ClassInfo::couldBeNonRegular() {
+  return interfaceInfo().lazyCouldBeNonRegular.get(
+    [this] { return couldBeSetBuilder(this, true); }
   );
 }
 
@@ -823,99 +1048,63 @@ const ClassInfo::InterfaceInfo& ClassInfo::interfaceInfo() {
     [this] {
       auto info = std::make_unique<ClassInfo::InterfaceInfo>();
 
-      auto const commonAncestor = [] (const ClassInfo* c1,
-                                      const ClassInfo* c2) {
-        if (c1 == c2) return c1;
-        const ClassInfo* ancestor = nullptr;
-        auto it1 = c1->baseList.begin();
-        auto it2 = c2->baseList.begin();
-        while (it1 != c1->baseList.end() && it2 != c2->baseList.end()) {
-          if (*it1 != *it2) break;
-          ancestor = *it1;
-          ++it1;
-          ++it2;
-        }
-        return ancestor;
-      };
-
       // Start out with the info from the first implementation.
-      if (!subclassList.empty()) {
-        info->commonBase = subclassList[0];
-        for (auto const& [_, impl] : subclassList[0]->implInterfaces) {
-          if (impl == this) continue; // Skip ourself
-          info->subtypeOf.emplace(impl);
-        }
-      } else if (!abstractSubclassList.empty()) {
-        auto const sub = abstractSubclassList[0];
+      assertx(!subclassList.empty());
+      size_t idx = 0;
+      while (idx < subclassList.size()) {
+        auto const sub = subclassList[idx++];
+        if (!is_regular_class(*sub->cls)) continue;
         info->commonBase = sub;
         for (auto const& [_, impl] : sub->implInterfaces) {
-          if (impl == this) continue; // Skip ourself
           info->subtypeOf.emplace(impl);
         }
-      } else {
-        info->commonBase = nullptr;
+        break;
       }
 
       // Update the common base and subtypeOf list for every
       // implementation. We're only a subtype of an interface if
       // *every* implementation of us implements that interface, so
       // the set can only shrink.
-      auto const process = [&] (const ClassInfo* sub) {
+      while (idx < subclassList.size()) {
+        auto const sub = subclassList[idx++];
+        if (!is_regular_class(*sub->cls)) continue;
         if (info->commonBase) {
           info->commonBase = commonAncestor(info->commonBase, sub);
         }
-
         folly::erase_if(
           info->subtypeOf,
           [&] (const ClassInfo* i) {
             return !sub->implInterfaces.count(i->cls->name);
           }
         );
-
-        return info->commonBase || !info->subtypeOf.empty();
-      };
-
-      for (auto const sub : subclassList) {
-        if (!process(sub)) break;
-      }
-      for (auto const sub : abstractSubclassList) {
-        if (!process(sub)) break;
-      }
-
-      // Compute equivalency. Two interfaces are equivalent if one is
-      // a subtype of another, and their implementations all implement
-      // the other interface. We canonicalize to the interface with
-      // the name which compares less.
-      info->equivalent = this;
-      for (auto const maybeEquiv : info->subtypeOf) {
-        if (info->equivalent->cls->name->compare(maybeEquiv->cls->name) < 0) {
-          continue;
-        }
-        auto const isEquiv = [&] {
-          for (auto const sub : maybeEquiv->subclassList) {
-            if (!sub->implInterfaces.count(info->equivalent->cls->name)) {
-              return false;
-            }
-          }
-          for (auto const sub : maybeEquiv->abstractSubclassList) {
-            if (!sub->implInterfaces.count(info->equivalent->cls->name)) {
-              return false;
-            }
-          }
-          return true;
-        }();
-        if (isEquiv) info->equivalent = const_cast<ClassInfo*>(maybeEquiv);
-      }
-
-      // Special case: If this interface has a common base, and the
-      // common base implements the interface (which it may not), then
-      // it's the best "equivalent" for this interface.
-      if (info->commonBase &&
-          info->commonBase->implInterfaces.count(info->equivalent->cls->name)) {
-        info->equivalent = info->commonBase;
+        if (!info->commonBase && info->subtypeOf.empty()) break;
       }
 
       return info.release();
+    }
+  );
+}
+
+const ClassInfo* ClassInfo::withoutNonRegularEquivalent() {
+  assertx(cls->attrs & (AttrInterface | AttrAbstract));
+  assertx(hasRegularSubclass);
+  return &lazyEquivalent.get(
+    [this] {
+      // Remove the non-regular classes, which will automatically
+      // canonicalize this class to its "best" equivalent (which may
+      // be itself).
+      auto const without = res::Class::removeNonRegular(
+        std::array<res::Class, 1>{res::Class { this } }
+      );
+      // We shouldn't get anything other than one result back. It
+      // shouldn't be zero because we already checked it has at least
+      // one regular subclass, and we shouldn't get intersections
+      // because the common base class should be a subtype of any
+      // interfaces.
+      always_assert(without.size() == 1);
+      auto const w = without.front();
+      assertx(w.val.right());
+      return w.val.right();
     }
   );
 }
@@ -948,84 +1137,312 @@ bool Class::same(const Class& o) const {
   return val == o.val;
 }
 
-bool Class::exactSubtypeOf(const Class& o) const {
-  // An unresolved class is only a subtype of another if they're the
-  // same.
-  if (val.left() || o.val.left()) return same(o);
-  // If the lhs is an interface, it cannot be a subtype of
-  // anything. The interface class itself has no parents (and
-  // implements nothing), so cannot be a subtype of anything
-  // (including itself).
-  auto const c1 = val.right();
-  if (c1->cls->attrs & AttrInterface) return false;
-  // This does the correct check if the rhs is an interface.
-  return same(o) || c1->derivedFrom(*o.val.right());
-}
-
-bool Class::subSubtypeOf(const Class& o) const {
-  // Class with the same name is always a subtype.
-  if (same(o)) return true;
-  // We know they're not the same, so cannot be a subtype if any are
-  // not resolved.
-  if (val.left() || o.val.left()) return false;
+bool Class::exactSubtypeOfExact(const Class& o,
+                                bool nonRegularL,
+                                bool nonRegularR) const {
+  // Unresolved classes are never exact, so they shouldn't be passed.
+  assertx(!val.left());
+  assertx(!o.val.left());
+  // Otherwise two exact resolved classes are only subtypes of another
+  // if they're the same. One additional complication is if the class
+  // isn't regular and we're not considering non-regular classes. In
+  // that case, the class is actually Bottom, and we need to apply the
+  // rules of subtyping to Bottom (Bottom is a subtype of everything,
+  // but nothing is a subtype of it).
   auto const c1 = val.right();
   auto const c2 = o.val.right();
+  auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
+  auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
+  return bottomL || (!bottomR && c1 == c2);
+}
+
+bool Class::exactSubtypeOf(const Class& o,
+                           bool nonRegularL,
+                           bool nonRegularR) const {
+  // Unresolved classes are never exact, so it should not show up on
+  // the lhs.
+  assertx(!val.left());
+  // A resolved class can never be a subtype of an unresolved class.
+  if (o.val.left()) return false;
+  auto const c1 = val.right();
+  // If we want to exclude non-regular classes on either side, and the
+  // lhs is not regular, there's no subtype relation. If nonRegularL
+  // is false, then lhs is just a bottom (and bottom is a subtype of
+  // everything), and if nonRegularR is false, then the rhs doesn't
+  // contain any non-regular classes, so lhs cannot be part of it.
+  if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
+    return !nonRegularL;
+  }
+  // Otherwise just do an inheritance check.
+  return c1->derivedFrom(*o.val.right());
+}
+
+bool Class::subSubtypeOf(const Class& o,
+                         bool nonRegularL,
+                         bool nonRegularR) const {
+  // An unresolved class is only a subtype of another if they're both
+  // unresolved, have the same name, and the lhs doesn't contain
+  // non-regular classes if the rhs doesn't.
+  if (auto const lname = val.left()) {
+    if (auto const rname = o.val.left()) {
+      return (!nonRegularL || nonRegularR) && lname->isame(rname);
+    }
+    return false;
+  } else if (o.val.left()) {
+    return false;
+  }
+
+  auto const c1 = val.right();
+  auto const c2 = o.val.right();
+
+  // If the lhs might contain non-regular types, we'll just do a
+  // normal derivedFrom check (there's no distinguishing regular and
+  // non-regular classes here). However, if the rhs does not contain
+  // non-regular types (or if the lhs doesn't actually contain any),
+  // then lhs can't be a subtype of rhs (by definition the lhs has at
+  // least one class which can't be in the rhs).
+  if (nonRegularL) {
+    if (nonRegularR ||
+        (is_regular_class(*c1->cls) && !c1->hasNonRegularSubclass)) {
+      return c1->derivedFrom(*c2);
+    }
+    return false;
+  }
+
   if (c1->cls->attrs & AttrInterface) {
     // lhs is an interface. Since this is the "sub" variant, it means
     // any implementation of the interface (not the interface class
     // itself).
-    auto& info = c1->interfaceInfo();
+
+    // Ooops, the interface has no regular implementations. This means
+    // lhs is a bottom, and a bottom is a subtype of everything.
+    if (!c1->hasRegularSubclass) return true;
+
+    // An interface can never be a subtype of a trait.
+    if (c2->cls->attrs & AttrTrait) return false;
+
+    auto const& info = c1->interfaceInfo();
     if (c2->cls->attrs & AttrInterface) {
       // If both are interfaces, we can use the InterfaceInfo to see
       // if lhs is a subtype of the rhs.
       return info.subtypeOf.count(c2);
     }
+
     // lhs is an interface, but rhs is not. The interface can only be
     // a subtype of the non-interface if it has a common base which is
     // a subtype of the rhs.
     return info.commonBase && info.commonBase->derivedFrom(*c2);
   }
-  // lhs is not an interface. See if it derives from the rhs (which
-  // does the correct check if the rhs is an interface).
+  // Since this is the "sub" variant, and we're only considering
+  // regular classes, a Trait as the lhs is a bottom (since Traits
+  // never have subclasses).
+  if (c1->cls->attrs & AttrTrait) return true;
+
+  if (c1->cls->attrs & AttrAbstract) {
+    // No regular subclasses of the abstract class. This is a bottom.
+    if (!c1->hasRegularSubclass) return true;
+    // Do an inheritance check first. If it passes, we're gone. If
+    // not, we need to do a more expensive check.
+    if (c1->derivedFrom(*c2)) return true;
+    // For abstract classes, the inheritance check isn't absolute. To
+    // be precise we need to check every (regular) subclass of the
+    // abstract class.
+    for (auto const sub : c1->subclassList) {
+      if (!is_regular_class(*sub->cls)) continue;
+      if (!sub->derivedFrom(*c2)) return false;
+    }
+    return true;
+  }
+
+  // If lhs is a regular non-abstract class, we can just use the
+  // standard inheritance checks.
   return c1->derivedFrom(*c2);
 }
 
-bool Class::exactCouldBe(const Class& o) const {
-  // Two unresolved classes with different names cannot be a subtype
-  // of one, so in the exact case cannot match.
-  if (val.left()) return same(o);
-  // lhs is resolved, but if the rhs is not, cannot match for the same
-  // reason.
-  if (o.val.left()) return false;
-  // For the same reason as exactSubtypeOf(), an interface (for the
-  // exact case) cannot match.
+bool Class::exactCouldBeExact(const Class& o,
+                              bool nonRegularL,
+                              bool nonRegularR) const {
+  // Unresolved classes can never be exact, so they shouldn't show up
+  // on either side.
+  assertx(!val.left());
+  assertx(!o.val.left());
+  // Two resolved exact classes can only be each other if they're the
+  // same class. The only complication is if the class isn't regular
+  // and we're not considering non-regular classes. In that case, the
+  // class is actually Bottom, a Bottom can never could-be anything
+  // (not even itself).
   auto const c1 = val.right();
-  if (c1->cls->attrs & AttrInterface) return false;
-  // Otherwise equivalent to exactSubtypeOf().
-  return same(o) || c1->derivedFrom(*o.val.right());
+  auto const c2 = o.val.right();
+  if (c1 != c2) return false;
+  auto const bottomL = !nonRegularL && !is_regular_class(*c1->cls);
+  auto const bottomR = !nonRegularR && !is_regular_class(*c2->cls);
+  return !bottomL && !bottomR;
 }
 
-bool Class::subCouldBe(const Class& o) const {
-  // Classes with the same name always can be each other.
-  if (same(o)) return true;
-  // Two unresolved classes always can be each other.
-  if (val.left()) return o.val.left();
-  // But an unresolved and resolved class can never be each other.
+bool Class::exactCouldBe(const Class& o,
+                         bool nonRegularL,
+                         bool nonRegularR) const {
+  // Unresolved classes can never be exact, so they shouldn't show up
+  // on the lhs.
+  assertx(!val.left());
+  // Unresolved classes are disjoint from resolved classes, so they
+  // cannot be each other.
   if (o.val.left()) return false;
+  // Otherwise the check is very similar to exactSubtypeOf (except for
+  // the handling of bottoms).
+  auto const c1 = val.right();
+  if ((!nonRegularL || !nonRegularR) && !is_regular_class(*c1->cls)) {
+    return false;
+  }
+  return c1->derivedFrom(*o.val.right());
+}
+
+bool Class::subCouldBe(const Class& o,
+                       bool nonRegularL,
+                       bool nonRegularR) const {
+  // Unresolved and resolved classes are disjoint so never can be each
+  // other. Two unresolved classes always can possibly be each other.
+  if (val.left()) return o.val.left();
+  if (o.val.left()) return false;
+
+  // If we only want to consider regular classes on either side. If
+  // true, this means that any possible intersection between the
+  // classes can only include regular classes. If either side doesn't
+  // have any regular classes, then no intersection is possible.
+  auto const eitherRegOnly = !nonRegularL || !nonRegularR;
 
   auto const c1 = val.right();
   auto const c2 = o.val.right();
   if (c1->cls->attrs & AttrInterface) {
-    // If lhs is an interface, see if the rhs is in the CouldBeSet
-    // (this works if rhs is an interface or base class).
-    return c1->couldBe().count(c2);
-  } else if (c2->cls->attrs & AttrInterface) {
-    // Same situation, but reversed
-    return c2->couldBe().count(c1);
+    // Check if interface has any regular implementations if that's
+    // all we care about.
+    if (eitherRegOnly && !c1->hasRegularSubclass) return false;
+
+    if (c2->cls->attrs & AttrInterface) {
+      // Do similar implementation check for other side.
+      if (eitherRegOnly && !c2->hasRegularSubclass) return false;
+
+      // Both classes are interfaces. The appropriate could-be sets
+      // for the interfaces determine if there's any intersection
+      // between them. Since couldBe() is symmetric, we can use either
+      // interface's set. We arbitrarily use the interface with the
+      // smaller subclass list. By forcing any ordering like this, we
+      // should reduce the number of could-be sets we need to create.
+      auto const smaller = c1->subclassList.size() <= c2->subclassList.size()
+        ? c1 : c2;
+      auto const larger = c1->subclassList.size() <= c2->subclassList.size()
+        ? c2 : c1;
+
+      // First do the check *only* considering regular classes,
+      // regardless of what was requested. If this passes, it's always
+      // true, so we can skip creating the set which includes
+      // non-regular classes.
+      if (smaller->couldBe().count(larger)) return true;
+      // It didn't pass. If we're only considering regular classes,
+      // then there's nothing to check further.
+      if (eitherRegOnly) return false;
+      // Otherwise there could be non-regular classes in the
+      // intersection (but not any regular classes since we ruled that
+      // out already). If the interface has no non-regular
+      // implementations, the only possible candidate is the interface
+      // itself, so do an implements check.
+      if (!smaller->hasNonRegularSubclass) {
+        return smaller->implInterfaces.count(larger->cls->name);
+      }
+      // The smaller interface has non-regular implementations. Do the
+      // check against it's could-be set which includes non-regular
+      // classes.
+      return smaller->couldBeNonRegular().count(larger);
+    }
+    if (c2->cls->attrs & AttrTrait) {
+      // An interface and a trait can only intersect if the trait
+      // implements the interface, and we're including non-regular
+      // classes (since a trait is always a single non-regular class).
+      return !eitherRegOnly && c2->implInterfaces.count(c1->cls->name);
+    }
+
+    // c2 is either a normal class or an abstract class:
+
+    if (eitherRegOnly && !c2->hasRegularSubclass) {
+      // c2 doesn't have any regular subclasses and only regular class
+      // intersections have been requested. If c2 is abstract, no
+      // intersection is possible. Otherwise the only intersection is
+      // c2 itself, so do an implements check against that.
+      if (c2->cls->attrs & AttrAbstract) return false;
+      return c2->implInterfaces.count(c1->cls->name);
+    }
+    // First do the check *only* considering regular classes,
+    // regardless of what was requested. If this passes, it's always
+    // true, so we don't need to do any further checking.
+    if (c1->couldBe().count(c2)) return true;
+    // No intersection considering just regular classes. If the
+    // intersection can only contain regular classes, or if the
+    // interface has no regular implementations, we know there's no
+    // intersection at all.
+    if (eitherRegOnly || !c1->hasNonRegularSubclass) return false;
+    // Otherwise check against the interface's could-be set which
+    // includes non-regular classes.
+    return c1->couldBeNonRegular().count(c2);
+  }
+
+  if (c2->cls->attrs & AttrInterface) {
+    // Check if interface contains at least one regular subclass if
+    // that's all we care about.
+    if (eitherRegOnly && !c2->hasRegularSubclass) return false;
+
+    // c1 cannot be an interface because we already checked that
+    // above.
+
+    if (c1->cls->attrs & AttrTrait) {
+      // A trait only intersects an interface if the trait implements
+      // the interface. Traits are non-regular and have no subclasses,
+      // so if we only want regular classes in the intersection, there
+      // is no intersection.
+      return !eitherRegOnly && c1->implInterfaces.count(c2->cls->name);
+    }
+
+    // c1 is either a normal class or an abstract class:
+
+    if (!nonRegularL && !c1->hasRegularSubclass) {
+      // c1 doesn't have any regular subclasses and only regular class
+      // intersections have been requested. If c1 is abstract, no
+      // intersection is possible. Otherwise the only intersection is
+      // c1 itself, so do an implements check against that.
+      if (c1->cls->attrs & AttrAbstract) return false;
+      return c1->implInterfaces.count(c2->cls->name);
+    }
+    // First do the check *only* considering regular classes,
+    // regardless of what was requested. If this passes, it's always
+    // true, so we don't need to do any further checking.
+    if (c2->couldBe().count(c1)) return true;
+    // No intersection considering just regular classes. If the
+    // intersection can only contain regular classes, or if the
+    // interface has no regular implementations, we know there's no
+    // intersection at all.
+    if (eitherRegOnly || !c2->hasNonRegularSubclass) return false;
+    // Otherwise check against the interface's could-be set which
+    // includes non-regular classes.
+    return c2->couldBeNonRegular().count(c1);
+  }
+
+  // A trait can only intersect with itself, and only if we're
+  // including non-regular classes in the intersection.
+  if (c1->cls->attrs & AttrTrait) return !eitherRegOnly && c1 == c2;
+  if (c2->cls->attrs & AttrTrait) return false;
+
+  // Check if either class only contains non-regular subclasses and
+  // we're only looking for regular intersections.
+  if (eitherRegOnly) {
+    if ((c1->cls->attrs & AttrAbstract) && !c1->hasRegularSubclass) {
+      return false;
+    }
+    if ((c2->cls->attrs & AttrAbstract) && !c2->hasRegularSubclass) {
+      return false;
+    }
   }
 
   // Both types are non-interfaces so they "could be" if they are in
-  // an inheritance relationship
+  // an inheritance relationship.
   if (c1->baseList.size() >= c2->baseList.size()) {
     return c1->baseList[c2->baseList.size() - 1] == c2;
   } else {
@@ -1040,18 +1457,38 @@ SString Class::name() const {
   );
 }
 
-Optional<res::Class> Class::canonicalizeInterface() const {
+Optional<res::Class> Class::withoutNonRegular() const {
   return val.match(
     [&] (SString) -> Optional<res::Class> { return *this; },
     [&] (ClassInfo* cinfo) -> Optional<res::Class> {
-      if (!(cinfo->cls->attrs & AttrInterface)) return *this;
-      // No implementations is Bottom
-      if (cinfo->subclassList.empty() &&
-          cinfo->abstractSubclassList.empty()) return std::nullopt;
-      // Otherwise replace it with its equivalent (which may be
-      // itself).
-      return Class { const_cast<ClassInfo*>(cinfo->interfaceInfo().equivalent) };
+      // Regular classes are always unchanged
+      if (is_regular_class(*cinfo->cls)) return *this;
+      // Non-regular class with no regular subclasses just becomes Bottom
+      if (!cinfo->hasRegularSubclass) return std::nullopt;
+      // Traits can have things on their subclass list (any
+      // unflattened users), but still becomes Bottom.
+      if (cinfo->cls->attrs & AttrTrait) return std::nullopt;
+      if (!(cinfo->cls->attrs & (AttrInterface | AttrAbstract))) return *this;
+      // Interfaces or abstract classes need to be canonicalized to
+      // their equivalent (which may be themself).
+      return Class {
+        const_cast<ClassInfo*>(cinfo->withoutNonRegularEquivalent())
+      };
     }
+  );
+}
+
+bool Class::mightBeRegular() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) { return is_regular_class(*cinfo->cls); }
+  );
+}
+
+bool Class::mightBeNonRegular() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) { return !is_regular_class(*cinfo->cls); }
   );
 }
 
@@ -1059,7 +1496,26 @@ bool Class::couldBeOverridden() const {
   return val.match(
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
-      return !(cinfo->cls->attrs & AttrNoOverride);
+      return !(cinfo->cls->attrs & (AttrTrait|AttrNoOverride));
+    }
+  );
+}
+
+bool Class::couldBeOverriddenByRegular() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) {
+      return !(cinfo->cls->attrs & (AttrTrait|AttrNoOverrideRegular));
+    }
+  );
+}
+
+bool Class::mightContainNonRegular() const {
+  return val.match(
+    [] (SString) { return true; },
+    [] (ClassInfo* cinfo) {
+      return
+        !is_regular_class(*cinfo->cls) || cinfo->hasNonRegularSubclass;
     }
   );
 }
@@ -1201,11 +1657,11 @@ ClassInfo* Class::commonAncestor(ClassInfo* a, ClassInfo* b) {
 // Call the given callable for every class which is a subclass of
 // *all* the classes in the range. If a class is unresolved, it will
 // be passed, as is, to the callable. If the callable returns false,
-// iteration is stopped. If includeAbstract is true, non-instantiable
+// iteration is stopped. If includeNonRegular is true, non-regular
 // subclasses are visited (normally they are skipped).
 template <typename F>
 void Class::visitEverySub(folly::Range<const Class*> classes,
-                          bool includeAbstract,
+                          bool includeNonRegular,
                           const F& f) {
   assertx(!classes.empty());
 
@@ -1215,24 +1671,19 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
     auto const cinfo = classes.front().val.right();
     if (!cinfo) {
       f(classes.front());
+    } else if (cinfo->cls->attrs & AttrTrait) {
+      if (includeNonRegular) f(Class { cinfo });
     } else {
       for (auto const sub : cinfo->subclassList) {
-        if (!f(Class { sub })) {
-          includeAbstract = false;
-          break;
-        }
-      }
-      if (includeAbstract) {
-        for (auto const sub : cinfo->abstractSubclassList) {
-          if (!f(Class { sub })) break;
-        }
+        if (!includeNonRegular && !is_regular_class(*sub->cls)) continue;
+        if (!f(Class { sub })) break;
       }
     }
     return;
   }
 
   // Otherwise we need to find all of the classes in common:
-  std::vector<ClassInfo*> common;
+  CompactVector<ClassInfo*> common;
 
   // Find the first resolved class, and use that to initialize the
   // list of subclasses.
@@ -1240,15 +1691,18 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
   int idx = 0;
   while (idx < numClasses) {
     if (auto const cinfo = classes[idx].val.right()) {
-      std::set_union(
-        begin(cinfo->subclassList),
-        end(cinfo->subclassList),
-        includeAbstract
-          ? begin(cinfo->abstractSubclassList)
-          : end(cinfo->abstractSubclassList),
-        end(cinfo->abstractSubclassList),
-        std::back_inserter(common)
-      );
+      if (cinfo->cls->attrs & AttrTrait) {
+        if (includeNonRegular) common.emplace_back(cinfo);
+      } else if (includeNonRegular ||
+                 (!cinfo->hasNonRegularSubclass &&
+                  is_regular_class(*cinfo->cls))) {
+        common = cinfo->subclassList;
+      } else {
+        for (auto const sub : cinfo->subclassList) {
+          if (!is_regular_class(*sub->cls)) continue;
+          common.emplace_back(sub);
+        }
+      }
       ++idx;
       break;
     }
@@ -1258,46 +1712,24 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
 
   // Now process the result, removing any subclasses which aren't a
   // subclass of all of the classes.
-  std::vector<ClassInfo*> newCommon;
+  CompactVector<ClassInfo*> newCommon;
   while (idx < numClasses) {
     if (auto const cinfo = classes[idx].val.right()) {
-      newCommon.clear();
-      auto it1 = begin(common);
-      auto it2 = begin(cinfo->subclassList);
-      auto it3 = includeAbstract
-        ? begin(cinfo->abstractSubclassList)
-        : end(cinfo->abstractSubclassList);
-      auto const end1 = end(common);
-      auto const end2 = end(cinfo->subclassList);
-      auto const end3 = end(cinfo->abstractSubclassList);
-      while (it1 != end1 && (it2 != end2 || it3 != end3)) {
-        if (it2 != end2) {
-          if (*it1 == *it2) {
-            newCommon.emplace_back(*it1);
-            ++it1;
-            ++it2;
-            continue;
-          } else if (*it2 < *it1) {
-            ++it2;
-            continue;
-          }
-        }
-
-        if (it3 != end3) {
-          if (*it1 == *it3) {
-            newCommon.emplace_back(*it1);
-            ++it1;
-            ++it3;
-            continue;
-          } else if (*it3 < *it1) {
-            ++it3;
-            continue;
-          }
-        }
-
-        ++it1;
+      if (common.empty()) {
+        ++idx;
+        continue;
       }
-
+      newCommon.clear();
+      // NB: We don't need to check includeNonRegular here. If it's
+      // false, we won't have any non-regular classes in common
+      // initially, so none will be part of any intersection.
+      std::set_intersection(
+        begin(common),
+        end(common),
+        begin(cinfo->subclassList),
+        end(cinfo->subclassList),
+        std::back_inserter(newCommon)
+      );
       std::swap(common, newCommon);
       ++idx;
       continue;
@@ -1309,6 +1741,7 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
   // We have the final list. Iterate over these and report them to the
   // callable.
   for (auto const c : common) {
+    assertx(IMPLIES(!includeNonRegular, is_regular_class(*c->cls)));
     if (!f(Class { c })) break;
   }
 }
@@ -1316,7 +1749,8 @@ void Class::visitEverySub(folly::Range<const Class*> classes,
 // Given a list of classes, put them in canonical form for a
 // DCls::IsectSet. It is assumed that couldBe is true between all of
 // the classes in the list, but nothing is assumed otherwise.
-TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in) {
+TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in,
+                                               bool nonRegular) {
   auto const size = in.size();
   if (size == 0) return {};
   if (size < 2) return { in.front() };
@@ -1341,14 +1775,19 @@ TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in) {
     if (s1 < s2) return -1;
     if (s1 > s2) return 1;
 
-    // Non-interfaces should precede interfaces
-    if (c1->cls->attrs & AttrInterface) {
-      if (!(c2->cls->attrs & AttrInterface)) {
-        return 1;
-      }
-    } else if (c2->cls->attrs & AttrInterface) {
-      return -1;
-    }
+    // Regular classes come first, followed by abstract classes,
+    // interfaces, then traits.
+    auto const weight = [] (const ClassInfo* c) {
+      if (c->cls->attrs & AttrAbstract) return 1;
+      if (c->cls->attrs & AttrInterface) return 2;
+      if (c->cls->attrs & AttrTrait) return 3;
+      return 0;
+    };
+    auto const w1 = weight(c1);
+    auto const w2 = weight(c2);
+    if (w1 < w2) return -1;
+    if (w1 > w2) return 1;
+
     // All else being equal, compare the name.
     return c1->cls->name->compare(c2->cls->name);
   };
@@ -1365,10 +1804,10 @@ TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in) {
     auto const subtypeOf = [&] {
       for (int j = 0; j < size; ++j) {
         auto const c2 = in[j];
-        if (i == j || !c2.subSubtypeOf(c1)) continue;
+        if (i == j || !c2.subSubtypeOf(c1, nonRegular, nonRegular)) continue;
         // c2 is a subtype of c1. If c1 is not a subtype of c2, then
         // c2 is preferred and we return true to drop c1.
-        if (!c1.subSubtypeOf(c2)) return true;
+        if (!c1.subSubtypeOf(c2, nonRegular, nonRegular)) return true;
         // They're both subtypes of each other, so they're actually
         // equivalent. We only want to keep one, so use the sorting
         // order and keep the "lesser" one.
@@ -1392,7 +1831,9 @@ TinyVector<Class, 2> Class::canonicalizeIsects(const TinyVector<Class, 8>& in) {
 TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
                                     folly::Range<const Class*> classes2,
                                     bool isSub1,
-                                    bool isSub2) {
+                                    bool isSub2,
+                                    bool nonRegular1,
+                                    bool nonRegular2) {
   TinyVector<Class, 8> common;
   Optional<ClassInfo*> commonBase;
   Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
@@ -1403,8 +1844,10 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
   // classes, and the common base class amongst all of them. Build a
   // list of these classes and normalize them.
 
-  auto const processSub = [&] (ClassInfo* cinfo) {
-    assertx(!(cinfo->cls->attrs & AttrInterface));
+  auto const processNormal = [&] (ClassInfo* cinfo) {
+    // NB: isSub and nonRegular is irrelevant here... Everything that
+    // we look at in the base class here must also be true for all of
+    // its children.
 
     // Set commonBase, or update it depending on whether this is the
     // first class processed.
@@ -1431,9 +1874,16 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
     }
   };
 
+  // Process an interface's implementations (but not the interface
+  // itself).
   auto const processIface = [&] (ClassInfo* cinfo) {
     assertx(cinfo->cls->attrs & AttrInterface);
     auto& info = cinfo->interfaceInfo();
+
+    // We assume !nonRegular here since if it was true, we'd be
+    // processing the interface in processNormal(). info.subtypeOf and
+    // info.commonBase are calculated ignoring non-regular
+    // implementations.
 
     // The logic for processing an interface is similar to processSub,
     // except we use the interface's common base (if any).
@@ -1444,8 +1894,8 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       commonBase = commonAncestor(*commonBase, ifaceCommon);
     }
 
-    // Instead of implInterfaces (which isn't meaningful for an
-    // interface), we use the set of interfaces it is a subtype of.
+    // Instead of implInterfaces, we use the set of interfaces it is a
+    // subtype of.
     if (!commonInterfaces) {
       commonInterfaces.emplace();
       for (auto const i : info.subtypeOf) {
@@ -1460,43 +1910,62 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
     }
   };
 
-  auto const processList = [&] (folly::Range<const Class*> classes, bool isSub) {
+  auto const processList = [&] (folly::Range<const Class*> classes,
+                                bool isSub,
+                                bool nonRegular) {
     if (classes.size() == 1) {
       // If the list is just a single class, we can process things
       // more efficiently.
       auto const cinfo = classes[0].val.right();
       assertx(cinfo);
-      if (cinfo->cls->attrs & AttrInterface) {
-        // An "exact" interface is just the interface class (not the
-        // implementations). These classes have no parents and
-        // implement nothing, so any union with them is going to
-        // result in TObj/TCls. Return false to bail out and signal
-        // this.
-        if (!isSub) return false;
-        // A "sub" interface. We'll process it's implementations.
-        processIface(cinfo);
+      if (cinfo->cls->attrs & (AttrAbstract|AttrInterface)) {
+        // Are we including non-regular classes? If we are, we can
+        // process this like any other.
+        if (nonRegular) {
+          processNormal(cinfo);
+          return;
+        }
+        // We're non-regular. Do we care about sub-classes? If not,
+        // there's nothing more to do. We're not processing this
+        // class, nor its sub-classes.
+        if (!isSub) return;
+        // Otherwise we're not processing the base class, but we are
+        // its sub-classes. For interfaces we can deal with this
+        // specially.
+        if (cinfo->cls->attrs & AttrInterface) {
+          processIface(cinfo);
+          return;
+        }
+        // For abstract classes, however, we'll fall through and use
+        // visitEverySub.
+      } else if (cinfo->cls->attrs & AttrTrait) {
+        // Traits have no subclasses, so isSub doesn't matter. Process
+        // it if we're including non-regular classes.
+        if (nonRegular) processNormal(cinfo);
+        return;
       } else {
-        processSub(cinfo);
+        // A regular class. Always process it.
+        processNormal(cinfo);
+        return;
       }
-      return true;
     }
 
-    // The list has multiple classes. This is more expensive, we need
-    // to visit every subclass in the intersection of the classes on
-    // the list.
+    // The list has multiple classes or we have an abstract class and
+    // we only care about its subclasses. This is more expensive, we
+    // need to visit every subclass in the intersection of the classes
+    // on the list.
     visitEverySub(
       classes,
-      true,
+      nonRegular,
       [&] (res::Class c) {
         assertx(c.val.right());
-        // We'll only "visit" non-interface sub-classes, so only use
-        // processSub here.
-        processSub(c.val.right());
+        // We'll only "visit" exact sub-classes, so only use
+        // processNormal here.
+        processNormal(c.val.right());
         // No point in continuing if there's nothing in common left.
         return *commonBase || !commonInterfaces->empty();
       }
     );
-    return true;
   };
 
   assertx(!classes1.empty());
@@ -1530,7 +1999,7 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
       TinyVector<Class, 2> out;
       for (auto const c1 : classes1) {
         for (auto const c2 : classes2) {
-          if (c1.same(c2)) out.emplace_back(c1);
+          if (c1.val.left()->isame(c2.val.left())) out.emplace_back(c1);
         }
       }
       return out;
@@ -1541,8 +2010,8 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
   }
 
   // Otherwise process both lists and build the common sets.
-  if (!processList(classes1, isSub1)) return {};
-  if (!processList(classes2, isSub2)) return {};
+  processList(classes1, isSub1, nonRegular1);
+  processList(classes2, isSub2, nonRegular2);
   // Combine the common classes
   if (commonBase && *commonBase) {
     common.emplace_back(Class { *commonBase });
@@ -1554,68 +2023,36 @@ TinyVector<Class, 2> Class::combine(folly::Range<const Class*> classes1,
   }
 
   // And canonicalize
-  return canonicalizeIsects(common);
+  return canonicalizeIsects(common, nonRegular1 || nonRegular2);
 }
 
-TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
-                                      folly::Range<const Class*> classes2) {
+TinyVector<Class, 2>
+Class::removeNonRegular(folly::Range<const Class*> classes) {
   TinyVector<Class, 8> common;
   Optional<ClassInfo*> commonBase;
   Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
 
-  // The algorithm for intersecting two intersection lists is similar
-  // to unioning, except we only need to consider the classes which
-  // are subclasses of all the classes in *both* lists.
-
-  assertx(!classes1.empty());
-  assertx(!classes2.empty());
-
-  auto const unresolved1 = (bool)classes1[0].val.left();
-  auto const unresolved2 = (bool)classes2[0].val.left();
-  if (debug) {
-    if (unresolved1) {
-      for (auto const c : classes1) always_assert(c.val.left());
-    }
-    if (unresolved2) {
-      for (auto const c : classes2) always_assert(c.val.left());
-    }
-  }
-
-  // Intersection of a list of all resolved classes and a list of all
-  // unresolved classes (or vice versa) is always going to be the
-  // empty set (an unresolved class cannot be a resolved class
-  // ever). Otherwise if both are unresolved, just combine the lists
-  // and canonicalize them.
-  if (unresolved1) {
-    if (unresolved2) {
-      for (auto const c : classes1) common.emplace_back(c);
-      for (auto const c : classes2) common.emplace_back(c);
-      return canonicalizeIsects(common);
-    }
-    return {};
-  } else if (unresolved2) {
-    return {};
-  }
-
-  // Since we're calculating the intersection, we only have to visit
-  // one list, and check against the other.
+  // Iterate over every exact member of the class list, filtering out
+  // non-regular classes, and rebuild the common base and common
+  // interface.
   visitEverySub(
-    classes1,
-    true,
+    classes,
+    false,
     [&] (res::Class c) {
+      // Unresolved classes are always "regular" (we can't tell
+      // otherwise), so they remain as is. Due to invariants, the
+      // class list will always be all resolved or all unresolved
+      // (though we don't check that here).
+      if (c.val.left()) {
+        common.emplace_back(c);
+        return true;
+      }
+
       // Must have a cinfo because we checked above all the classes
       // were resolved.
       auto const cinfo = c.val.right();
       assertx(cinfo);
-
-      // Could this class be a class in the other list? If not, ignore
-      // it (it's not part of the intersection result).
-      for (auto const other : classes2) {
-        if (!c.exactCouldBe(other)) return true;
-      }
-
-      // Otherwise it is part of the intersection, and we need to
-      // update the common base and interfaces likewise.
+      assertx(is_regular_class(*cinfo->cls));
 
       if (!commonBase) {
         commonBase = cinfo;
@@ -1652,7 +2089,174 @@ TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
   }
 
   // Canonicalize the common base classes/interfaces.
-  return canonicalizeIsects(common);
+  return canonicalizeIsects(common, false);
+}
+
+TinyVector<Class, 2> Class::intersect(folly::Range<const Class*> classes1,
+                                      folly::Range<const Class*> classes2,
+                                      bool nonRegular1,
+                                      bool nonRegular2,
+                                      bool& nonRegularOut) {
+  TinyVector<Class, 8> common;
+  Optional<ClassInfo*> commonBase;
+  Optional<hphp_fast_set<ClassInfo*>> commonInterfaces;
+
+  // The algorithm for intersecting two intersection lists is similar
+  // to unioning, except we only need to consider the classes which
+  // are subclasses of all the classes in *both* lists.
+
+  assertx(!classes1.empty());
+  assertx(!classes2.empty());
+
+  // Class lists should either be all resolved, or all unresolved, but
+  // not a mix.
+  auto const unresolved1 = (bool)classes1[0].val.left();
+  auto const unresolved2 = (bool)classes2[0].val.left();
+  if (debug) {
+    if (unresolved1) {
+      for (auto const c : classes1) always_assert(c.val.left());
+    }
+    if (unresolved2) {
+      for (auto const c : classes2) always_assert(c.val.left());
+    }
+  }
+
+  auto const bothNonRegular = nonRegular1 && nonRegular2;
+  nonRegularOut = bothNonRegular;
+
+  // Intersection of a list of all resolved classes and a list of all
+  // unresolved classes (or vice versa) is always going to be the
+  // empty set (an unresolved class cannot be a resolved class
+  // ever). Otherwise if both are unresolved, just combine the lists
+  // and canonicalize them.
+  if (unresolved1) {
+    if (unresolved2) {
+      for (auto const c : classes1) common.emplace_back(c);
+      for (auto const c : classes2) common.emplace_back(c);
+      return canonicalizeIsects(common, bothNonRegular);
+    }
+    return {};
+  } else if (unresolved2) {
+    return {};
+  }
+
+  // Even if both the lhs and rhs contain non-regular classes, the
+  // intersection may not. We check if the intersection contains any
+  // non-regular classes so we can inform the caller to set up the
+  // type appropriately.
+  auto isectContainsNonRegular = false;
+
+  // Since we're calculating the intersection, we only have to visit
+  // one list, and check against the other.
+  visitEverySub(
+    classes1,
+    bothNonRegular,
+    [&] (res::Class c) {
+      // Must have a cinfo because we checked above all the classes
+      // were resolved.
+      auto const cinfo = c.val.right();
+      assertx(cinfo);
+      assertx(IMPLIES(!bothNonRegular, is_regular_class(*cinfo->cls)));
+
+      // Could this class be a class in the other list? If not, ignore
+      // it (it's not part of the intersection result).
+      for (auto const other : classes2) {
+        if (!c.exactCouldBe(other, bothNonRegular, bothNonRegular)) return true;
+      }
+
+      // Otherwise it is part of the intersection, and we need to
+      // update the common base and interfaces likewise.
+
+      if (!commonBase) {
+        commonBase = cinfo;
+      } else {
+        commonBase = commonAncestor(*commonBase, cinfo);
+      }
+
+      if (!commonInterfaces) {
+        commonInterfaces.emplace();
+        for (auto const i : cinfo->implInterfaces) {
+          commonInterfaces->emplace(const_cast<ClassInfo*>(i.second));
+        }
+      } else {
+        folly::erase_if(
+          *commonInterfaces,
+          [&] (ClassInfo* i) {
+            return !cinfo->implInterfaces.count(i->cls->name);
+          }
+        );
+      }
+
+      if (bothNonRegular &&
+          !isectContainsNonRegular &&
+          !is_regular_class(*cinfo->cls)) {
+        isectContainsNonRegular = true;
+      }
+
+      // Stop iterating if there's no longer anything in common.
+      return *commonBase || !commonInterfaces->empty();
+    }
+  );
+
+  if (commonBase && *commonBase) {
+    common.emplace_back(Class { *commonBase });
+  }
+  if (commonInterfaces) {
+    for (auto const i : *commonInterfaces) {
+      common.emplace_back(Class { i });
+    }
+  }
+
+  // Canonicalize the common base classes/interfaces.
+  assertx(IMPLIES(!bothNonRegular, !isectContainsNonRegular));
+  nonRegularOut = isectContainsNonRegular;
+  return canonicalizeIsects(common, isectContainsNonRegular);
+}
+
+bool Class::couldBeIsect(folly::Range<const Class*> classes1,
+                         folly::Range<const Class*> classes2,
+                         bool nonRegular1,
+                         bool nonRegular2) {
+  assertx(!classes1.empty());
+  assertx(!classes2.empty());
+
+  // Class lists should either be all resolved, or all unresolved, but
+  // not a mix.
+  auto const unresolved1 = (bool)classes1[0].val.left();
+  auto const unresolved2 = (bool)classes2[0].val.left();
+  if (debug) {
+    if (unresolved1) {
+      for (auto const c : classes1) always_assert(c.val.left());
+    }
+    if (unresolved2) {
+      for (auto const c : classes2) always_assert(c.val.left());
+    }
+  }
+
+  // Unresolved classes can always be each other, and resolved classes
+  // will never be unresolved classes.
+  if (unresolved1) return unresolved2;
+  if (unresolved2) return false;
+
+  auto const bothNonReg = nonRegular1 && nonRegular2;
+
+  // Otherwise decompose the first class list into each of it's exact
+  // subclasses, and do a could-be check against every class on the
+  // second list. This is precise since the lhs is always exact.
+  auto couldBe = false;
+  visitEverySub(
+    classes1,
+    bothNonReg,
+    [&] (res::Class c) {
+      assertx(!c.val.left());
+      for (auto const o : classes2) {
+        if (!c.exactCouldBe(o, bothNonReg, bothNonReg)) return true;
+      }
+      couldBe = true;
+      return false;
+    }
+  );
+  return couldBe;
 }
 
 Func::Func(Rep val)
@@ -1666,13 +2270,14 @@ SString Func::name() const {
     [&] (MethodName s) { return s.name; },
     [&] (FuncInfo* fi) { return fi->func->name; },
     [&] (Method m)     { return m.func->name; },
-    [&] (FuncFamily* fa) {
-      return fa->possibleFuncs().front()->first;
+    [&] (MethodFamily fam) {
+      return fam.family->possibleFuncs().front().ptr()->name;
     },
     [&] (MethodOrMissing m) { return m.func->name; },
-    [&] (const Isect& i) -> SString {
+    [&] (Missing m) { return m.name; },
+    [&] (const Isect& i) {
       assertx(i.families.size() > 1);
-      return i.families[0]->possibleFuncs().front()->first;
+      return i.families[0]->possibleFuncs().front().ptr()->name;
     }
   );
 }
@@ -1685,8 +2290,9 @@ const php::Func* Func::exactFunc() const {
     [&](MethodName)                  { return Ret{}; },
     [&](FuncInfo* fi)                { return fi->func; },
     [&](Method m)                    { return m.func; },
-    [&](FuncFamily*)                 { return Ret{}; },
+    [&](MethodFamily)                { return Ret{}; },
     [&](MethodOrMissing)             { return Ret{}; },
+    [&](Missing)                     { return Ret{}; },
     [&](const Isect&)                { return Ret{}; }
   );
 }
@@ -1700,8 +2306,9 @@ bool Func::isFoldable() const {
       return fi->func->attrs & AttrIsFoldable;
     },
     [&](Method m) { return m.func->attrs & AttrIsFoldable; },
-    [&](FuncFamily*)     { return false; },
+    [&](MethodFamily)    { return false; },
     [&](MethodOrMissing) { return false; },
+    [&](Missing)         { return false; },
     [&](const Isect&)    { return false; }
   );
 }
@@ -1713,11 +2320,14 @@ bool Func::couldHaveReifiedGenerics() const {
     [&](MethodName) { return true; },
     [&](FuncInfo* fi) { return fi->func->isReified; },
     [&](Method m) { return m.func->isReified; },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeReified; },
+    [&](MethodFamily fa) {
+      return fa.family->infoFor(fa.regularOnly).m_static->m_maybeReified;
+    },
     [&](MethodOrMissing m) { return m.func->isReified; },
+    [&](Missing) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_maybeReified) return false;
+        if (!ff->infoFor(i.regularOnly).m_static->m_maybeReified) return false;
       }
       return true;
     }
@@ -1745,11 +2355,17 @@ bool Func::mightCareAboutDynCalls() const {
       return dyn_call_error_level(fi->func) > 0;
     },
     [&](Method m) { return dyn_call_error_level(m.func) > 0; },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeCaresAboutDynCalls; },
+    [&](MethodFamily fa) {
+      return
+        fa.family->infoFor(fa.regularOnly).m_static->m_maybeCaresAboutDynCalls;
+    },
     [&](MethodOrMissing m) { return dyn_call_error_level(m.func) > 0; },
+    [&](Missing m) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_maybeCaresAboutDynCalls) return false;
+        if (!ff->infoFor(i.regularOnly).m_static->m_maybeCaresAboutDynCalls) {
+          return false;
+        }
       }
       return true;
     }
@@ -1765,11 +2381,14 @@ bool Func::mightBeBuiltin() const {
     [&](MethodName) { return true; },
     [&](FuncInfo* fi) { return fi->func->attrs & AttrBuiltin; },
     [&](Method m) { return m.func->attrs & AttrBuiltin; },
-    [&](FuncFamily* fa) { return fa->m_static->m_maybeBuiltin; },
+    [&](MethodFamily fa) {
+      return fa.family->infoFor(fa.regularOnly).m_static->m_maybeBuiltin;
+    },
     [&](MethodOrMissing m) { return m.func->attrs & AttrBuiltin; },
+    [&](Missing m) { return false; },
     [&](const Isect& i) {
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_maybeBuiltin) return false;
+        if (!ff->infoFor(i.regularOnly).m_static->m_maybeBuiltin) return false;
       }
       return true;
     }
@@ -1783,12 +2402,19 @@ uint32_t Func::minNonVariadicParams() const {
     [&] (MethodName) { return 0; },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (Method m) { return numNVArgs(*m.func); },
-    [&] (FuncFamily* fa) { return fa->m_static->m_minNonVariadicParams; },
+    [&] (MethodFamily fa) {
+      return
+        fa.family->infoFor(fa.regularOnly).m_static->m_minNonVariadicParams;
+    },
     [&] (MethodOrMissing m) { return numNVArgs(*m.func); },
+    [&] (Missing) { return 0; },
     [&] (const Isect& i) {
       uint32_t nv = 0;
       for (auto const ff : i.families) {
-        nv = std::max(nv, ff->m_static->m_minNonVariadicParams);
+        nv = std::max(
+          nv,
+          ff->infoFor(i.regularOnly).m_static->m_minNonVariadicParams
+        );
       }
       return nv;
     }
@@ -1802,12 +2428,19 @@ uint32_t Func::maxNonVariadicParams() const {
     [&] (MethodName) { return std::numeric_limits<uint32_t>::max(); },
     [&] (FuncInfo* fi) { return numNVArgs(*fi->func); },
     [&] (Method m) { return numNVArgs(*m.func); },
-    [&] (FuncFamily* fa) { return fa->m_static->m_maxNonVariadicParams; },
+    [&] (MethodFamily fa) {
+      return
+        fa.family->infoFor(fa.regularOnly).m_static->m_maxNonVariadicParams;
+    },
     [&] (MethodOrMissing m) { return numNVArgs(*m.func); },
+    [&] (Missing) { return 0; },
     [&] (const Isect& i) {
       auto nv = std::numeric_limits<uint32_t>::max();
       for (auto const ff : i.families) {
-        nv = std::min(nv, ff->m_static->m_maxNonVariadicParams);
+        nv = std::min(
+          nv,
+          ff->infoFor(i.regularOnly).m_static->m_maxNonVariadicParams
+        );
       }
       return nv;
     }
@@ -1821,23 +2454,19 @@ const RuntimeCoeffects* Func::requiredCoeffects() const {
     [&] (MethodName) { return nullptr; },
     [&] (FuncInfo* fi) { return &fi->func->requiredCoeffects; },
     [&] (Method m) { return &m.func->requiredCoeffects; },
-    [&] (FuncFamily* fa) {
-      return fa->m_static->m_requiredCoeffects.get_pointer();
+    [&] (MethodFamily fa) {
+      return fa.family->infoFor(fa.regularOnly)
+        .m_static->m_requiredCoeffects.get_pointer();
     },
     [&] (MethodOrMissing m) { return &m.func->requiredCoeffects; },
+    [&] (Missing) { return nullptr; },
     [&] (const Isect& i) {
       const RuntimeCoeffects* coeffects = nullptr;
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_requiredCoeffects) continue;
-        assertx(
-          IMPLIES(
-            coeffects,
-            *coeffects == *ff->m_static->m_requiredCoeffects
-          )
-        );
-        if (!coeffects) {
-          coeffects = ff->m_static->m_requiredCoeffects.get_pointer();
-        }
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_requiredCoeffects) continue;
+        assertx(IMPLIES(coeffects, *coeffects == *info.m_requiredCoeffects));
+        if (!coeffects) coeffects = info.m_requiredCoeffects.get_pointer();
       }
       return coeffects;
     }
@@ -1851,28 +2480,29 @@ const CompactVector<CoeffectRule>* Func::coeffectRules() const {
     [&] (MethodName) { return nullptr; },
     [&] (FuncInfo* fi) { return &fi->func->coeffectRules; },
     [&] (Method m) { return &m.func->coeffectRules; },
-    [&] (FuncFamily* fa) {
-      return fa->m_static->m_coeffectRules.get_pointer();
+    [&] (MethodFamily fa) {
+      return fa.family->infoFor(fa.regularOnly)
+        .m_static->m_coeffectRules.get_pointer();
     },
     [&] (MethodOrMissing m) { return &m.func->coeffectRules; },
+    [&] (Missing) { return nullptr; },
     [&] (const Isect& i) {
       const CompactVector<CoeffectRule>* coeffects = nullptr;
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_coeffectRules) continue;
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_coeffectRules) continue;
         assertx(
           IMPLIES(
             coeffects,
             std::is_permutation(
               begin(*coeffects),
               end(*coeffects),
-              begin(*ff->m_static->m_coeffectRules),
-              end(*ff->m_static->m_coeffectRules)
+              begin(*info.m_coeffectRules),
+              end(*info.m_coeffectRules)
             )
           )
         );
-        if (!coeffects) {
-          coeffects = ff->m_static->m_coeffectRules.get_pointer();
-        }
+        if (!coeffects) coeffects = info.m_coeffectRules.get_pointer();
       }
       return coeffects;
     }
@@ -1887,8 +2517,9 @@ std::string show(const Func& f) {
     [&](Func::MethodName)        {},
     [&](FuncInfo*)               { ret += "*"; },
     [&](Func::Method)            { ret += "*"; },
-    [&](FuncFamily*)             { ret += "+"; },
+    [&](Func::MethodFamily)      { ret += "+"; },
     [&](Func::MethodOrMissing)   { ret += "-"; },
+    [&](Func::Missing)           { ret += "!"; },
     [&](const Func::Isect&)      { ret += "&"; }
   );
   return ret;
@@ -1936,12 +2567,13 @@ struct Index::IndexData {
 
   /*
    * Func families representing methods with a particular name (across
-   * all classes). If only one method with a particular name exists,
-   * it will be present in singleMethodFamilies instead (which saves
-   * space by not requiring a FuncFamily).
+   * all classes).
    */
-  SStringToOneT<FuncFamily*>             methodFamilies;
-  SStringToOneT<const MethTabEntryPair*> singleMethodFamilies;
+  struct MethodFamilyEntry {
+    FuncFamilyOrSingle m_all;
+    FuncFamilyOrSingle m_regular;
+  };
+  SStringToOneT<MethodFamilyEntry> methodFamilies;
 
   // Map from each class to all the closures that are allocated in
   // functions of that class.
@@ -2087,6 +2719,11 @@ struct Index::IndexData {
    * that so we can return it again.
    */
   ContextRetTyMap contextualReturnTypes{};
+
+  /*
+   * Lazily calculate the class that should be used for wait-handles.
+   */
+  LockFreeLazy<res::Class> lazyWaitHandleCls;
 
   std::thread compute_iface_vtables;
 };
@@ -2772,7 +3409,22 @@ bool enable_method_trait_diamond(const ClassInfo* cinfo) {
 bool build_class_methods(const IndexData& index,
                          ClassInfo* cinfo,
                          ClsPreResolveUpdates& updates) {
-  if (cinfo->cls->attrs & AttrInterface) return true;
+  // Interface methods are just stubs which return null. They don't
+  // get inherited by their implementations.
+  if (cinfo->cls->attrs & AttrInterface) {
+    uint32_t idx = cinfo->methods.size();
+    assertx(!idx);
+    for (auto const& m : cinfo->cls->methods) {
+      auto const res = cinfo->methods.emplace(m->name, MethTabEntry { *m });
+      always_assert(res.second);
+      res.first->second.idx = idx++;
+      ITRACE(9,
+             "  {}: adding method {}::{}\n",
+             cinfo->cls->name,
+             cinfo->cls->name, m->name);
+    }
+    return true;
+  }
 
   auto const methodOverride = [&] (auto& existing,
                                    const php::Func* meth,
@@ -2810,6 +3462,7 @@ bool build_class_methods(const IndexData& index,
 
   // If there's a parent, start by copying its methods
   if (auto const rparent = cinfo->parent) {
+    assertx(!(cinfo->cls->attrs & AttrInterface));
     for (auto& mte : rparent->methods) {
       // don't inherit the 86* methods.
       if (HPHP::Func::isSpecial(mte.first)) continue;
@@ -2837,7 +3490,7 @@ bool build_class_methods(const IndexData& index,
              cinfo->cls->name, m->name);
       continue;
     }
-    if (m->attrs & AttrTrait && m->attrs & AttrAbstract) {
+    if ((m->attrs & AttrTrait) && (m->attrs & AttrAbstract)) {
       // abstract methods from traits never override anything.
       continue;
     }
@@ -2850,6 +3503,7 @@ bool build_class_methods(const IndexData& index,
   try {
     TMIData tmid;
     for (auto const t : cinfo->usedTraits) {
+      assertx(!(cinfo->cls->attrs & AttrInterface));
       std::vector<const MethTabEntryPair*> methods(t->methods.size());
       for (auto& m : t->methods) {
         if (HPHP::Func::isSpecial(m.first)) continue;
@@ -3068,6 +3722,7 @@ void add_unit_to_index(IndexData& index, php::Unit& unit) {
 
 void add_class_to_index(IndexData& index, php::Class& c) {
   assertx(!(c.attrs & AttrNoOverride));
+  assertx(!(c.attrs & AttrNoOverrideRegular));
 
   if (c.attrs & AttrEnum) {
     add_symbol_to_index(index.enums, &c, "enum");
@@ -3715,55 +4370,28 @@ void preresolve(IndexData& index,
   }
 }
 
-void compute_subclass_list_rec(IndexData& index,
-                               ClassInfo* cinfo,
+void compute_subclass_list_rec(ClassInfo* cinfo,
                                ClassInfo* csub) {
+  if (csub->cls->attrs & AttrNoExpandTrait) return;
   for (auto const ctrait : csub->usedTraits) {
     auto const ct = const_cast<ClassInfo*>(ctrait);
     ct->subclassList.push_back(cinfo);
-    compute_subclass_list_rec(index, cinfo, ct);
-  }
-}
-
-void compute_included_enums_list_rec(IndexData& index,
-                                     ClassInfo* cinfo,
-                                     ClassInfo* csub) {
-  for (auto const cincluded_enum : csub->includedEnums) {
-    auto const cie = const_cast<ClassInfo*>(cincluded_enum);
-    cie->subclassList.push_back(cinfo);
-    compute_included_enums_list_rec(index, cinfo, cie);
+    compute_subclass_list_rec(cinfo, ct);
   }
 }
 
 void compute_subclass_list(IndexData& index) {
   trace_time _("compute subclass list", index.sample);
-  auto fixupTraits = false;
-  auto fixupEnums = false;
-  auto const AnyEnum = AttrEnum | AttrEnumClass;
+
   for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->cls->attrs & AttrInterface) continue;
     for (auto& cparent : cinfo->baseList) {
       cparent->subclassList.push_back(cinfo.get());
     }
-    if (!(cinfo->cls->attrs & AttrNoExpandTrait) &&
-        cinfo->usedTraits.size()) {
-      fixupTraits = true;
-      compute_subclass_list_rec(index, cinfo.get(), cinfo.get());
-    }
-    // Add the included enum lists if cinfo is an enum
-    if ((cinfo->cls->attrs & AnyEnum) &&
-        cinfo->cls->includedEnumNames.size()) {
-      fixupEnums = true;
-      compute_included_enums_list_rec(index, cinfo.get(), cinfo.get());
-    }
+    compute_subclass_list_rec(cinfo.get(), cinfo.get());
     // Also add classes to their interface's subclassLists
     for (auto& ipair : cinfo->implInterfaces) {
       auto impl = const_cast<ClassInfo*>(ipair.second);
-      if (cinfo->cls->attrs & (AttrTrait | AnyEnum | AttrAbstract)) {
-        impl->abstractSubclassList.emplace_back(cinfo.get());
-      } else {
-        impl->subclassList.push_back(cinfo.get());
-      }
+      impl->subclassList.emplace_back(cinfo.get());
     }
   }
 
@@ -3771,257 +4399,509 @@ void compute_subclass_list(IndexData& index) {
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
       auto& sub = cinfo->subclassList;
-      auto& abstract = cinfo->abstractSubclassList;
       std::sort(begin(sub), end(sub));
-      std::sort(begin(abstract), end(abstract));
-
-      if ((fixupTraits && cinfo->cls->attrs & AttrTrait) ||
-          (fixupEnums && cinfo->cls->attrs & AnyEnum)) {
-        // traits and enums can be reached by multiple paths, so we need to
-        // uniquify their subclassLists.
-        sub.erase(std::unique(begin(sub), end(sub)), end(sub));
-      }
+      sub.erase(std::unique(begin(sub), end(sub)), end(sub));
       sub.shrink_to_fit();
-      abstract.shrink_to_fit();
+      assertx(!cinfo->hasRegularSubclass);
+      assertx(!cinfo->hasNonRegularSubclass);
+      for (auto const s : sub) {
+        if (s == cinfo.get()) continue;
+        if (is_regular_class(*s->cls)) {
+          cinfo->hasRegularSubclass = true;
+        } else {
+          cinfo->hasNonRegularSubclass = true;
+        }
+        if (cinfo->hasRegularSubclass && cinfo->hasNonRegularSubclass) break;
+      }
     }
   );
 }
 
-bool define_func_family(IndexData& index, ClassInfo* cinfo,
-                        SString name, const php::Func* func = nullptr) {
-  FuncFamily::PFuncVec funcs{};
-  // If cinfo was provided, we're calculating a func family with a set
-  // of methods off a class. Otherwise, we're calculating a func
-  // family for all methods with the given name.
-  if (cinfo) {
-    for (auto const cleaf : cinfo->subclassList) {
-      auto const leafFn = [&] () -> const MethTabEntryPair* {
-          auto const leafFnIt = cleaf->methods.find(name);
-          if (leafFnIt == end(cleaf->methods)) return nullptr;
-          return mteFromIt(leafFnIt);
-        }();
-      if (!leafFn) continue;
-      funcs.emplace_back(leafFn);
-    }
-  } else {
-    auto const range = index.methods.equal_range(name);
-    for (auto it = range.first; it != range.second; ++it) {
-      auto const func = it->second;
-      assertx(func->cls);
-      // Only include methods for classes which have a ClassInfo,
-      // which means they're instantiatable.
-      auto const cinfoIt = index.classInfo.find(func->cls->name);
-      if (cinfoIt == index.classInfo.end()) continue;
-      auto const cinfo = cinfoIt->second;
-      auto const methIt = cinfo->methods.find(name);
-      if (methIt == cinfo->methods.end()) continue;
-      funcs.emplace_back(mteFromIt(methIt));
-    }
-  }
+/*
+ * Given a func list, canonicalize it, and return the appropriate
+ * FuncFamilyOrSingle for both the entire list, and for the subset of
+ * funcs on regular classes. If 'complete' is true, then the func list
+ * is exhaustive list of possible resolutions for a lookup of
+ * `cinfo::name` (this is propagated into the FuncFamilyOrSingle
+ * entries). If `base` is nullptr, it's assumed we're building a
+ * name-only method table. This only affects the "completeness" of the
+ * regular subset result.
+ *
+ * The func list is assumed to only contain uniques (no multiple
+ * entries with the same func, even if their "inRegular" status
+ * differ).
+ */
+std::pair<FuncFamilyOrSingle, FuncFamilyOrSingle>
+make_method_family_entry(IndexData& index,
+                         FuncFamily::PFuncVec funcs,
+                         const ClassInfo* base,
+                         SString name,
+                         bool complete) {
+  // Name-only tables are never complete
+  assertx(IMPLIES(!base, !complete));
+  assertx(!funcs.empty());
 
-  if (funcs.empty()) return false;
-
+  // Canonicalize the func list by sorting it. We've already assumed
+  // the list only contains unique functions. We order functions which
+  // are "inRegular" before ones which are not (this simplifies the
+  // logic below). After that, we sort by class name.
   std::sort(
     begin(funcs), end(funcs),
-    [&] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
-      // We want a canonical order for the family. Putting the
-      // one corresponding to cinfo first makes sense, because
-      // the first one is used as the name for FCall*Method* hint,
-      // after that, sort by name so that different case spellings
-      // come in the same order.
-      if (a->second.cls->isame(b->second.cls) &&
-          a->second.clsIdx == b->second.clsIdx) return false;
-      if (func) {
-        if (func_from_mte(index, b->second) == func) return false;
-        if (func_from_mte(index, a->second) == func) return true;
-      }
-      if (auto d = a->first->compare(b->first)) {
-        if (!func) {
-          if (b->first == name) return false;
-          if (a->first == name) return true;
-        }
-        return d < 0;
-      }
-      auto const d = a->second.cls->compare(b->second.cls);
-      if (d != 0) return d < 0;
-      return a->second.clsIdx < b->second.clsIdx;
+    [] (FuncFamily::PossibleFunc a, const FuncFamily::PossibleFunc b) {
+      if (a.inRegular() && !b.inRegular()) return true;
+      if (!a.inRegular() && b.inRegular()) return false;
+      return string_data_lti{}(a.ptr()->cls->name, b.ptr()->cls->name);
     }
   );
-  funcs.erase(
-    std::unique(
-      begin(funcs), end(funcs),
-      [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
-        return
-          a->second.cls->isame(b->second.cls) &&
-          a->second.clsIdx == b->second.clsIdx;
-      }
-    ),
-    end(funcs)
-  );
-
   funcs.shrink_to_fit();
 
   if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
-    FTRACE(4, "define_func_family: {}::{}:\n",
-           cinfo ? cinfo->cls->name->data() : "*", name);
+    FTRACE(4, "func family: {}::{} (for {}::{}):\n",
+           funcs.front().ptr()->cls->name, name,
+           base ? base->cls->name->data() : "*", name);
     for (auto const DEBUG_ONLY func : funcs) {
-      FTRACE(4, "  {}::{}\n", func->second.cls, func->first);
+      FTRACE(
+        4, "  {}::{}{}\n",
+        func.ptr()->cls->name, func.ptr()->name,
+        func.inRegular() ? "" : " (not regular)"
+      );
     }
   }
 
-  // Single func resolutions are stored separately. They don't need a
-  // FuncFamily and this saves space.
-  if (funcs.size() == 1) {
-    if (cinfo) {
-      cinfo->singleMethodFamilies.emplace(name, funcs[0]);
-    } else {
-      auto it = index.singleMethodFamilies.find(name);
-      assertx(it != index.singleMethodFamilies.end());
-      assertx(!it->second);
-      it->second = funcs[0];
-    }
-    return true;
-  }
-
-  // Otherwise re-use an existing identical FuncFamily, or create a
-  // new one.
-  auto const ff = [&] {
+  // Create a func family for this func list, allocating space for the
+  // "extra" results for the regular subset. If the func family
+  // already exists, that's returned.
+  auto const ff = [&] (bool extra) {
+    assertx(funcs.size() > 1);
     auto it = index.funcFamilies.find(funcs);
     if (it != index.funcFamilies.end()) return it->first.get();
     return index.funcFamilies.insert(
-      std::make_unique<FuncFamily>(std::move(funcs)),
+      std::make_unique<FuncFamily>(std::move(funcs), extra),
       false
     ).first->first.get();
-  }();
+  };
 
-  if (cinfo) {
-    cinfo->methodFamilies.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(name),
-      std::forward_as_tuple(ff)
-    );
-  } else {
-    auto it = index.methodFamilies.find(name);
-    assertx(it != index.methodFamilies.end());
-    assertx(!it->second);
-    it->second = ff;
+  if (funcs.size() > 1) {
+    if (funcs.back().inRegular()) {
+      // The list is sorted so that all the "inRegular" funcs come
+      // first. If the last func is "inRegular", then every func on
+      // the list is like that. Therefore there's no need to allocate
+      // space to distinguish the regular subset.
+      auto const funcFamily = ff(false);
+      return std::make_pair(
+        FuncFamilyOrSingle{funcFamily, !complete},
+        FuncFamilyOrSingle{funcFamily, !base}
+      );
+    } else if (!funcs.front().inRegular()) {
+      // On the other hand, if the first func isn't "inRegular", then
+      // none of them are. Again, no need to allocate space to
+      // distinguish the regular subset since the "regular" result is
+      // empty.
+      return std::make_pair(
+        FuncFamilyOrSingle{ff(false), !complete},
+        FuncFamilyOrSingle{}
+      );
+    } else if (!funcs[1].inRegular()) {
+      // The first func is "inRegular", but the 2nd one isn't. This
+      // means only one func (the first one) is "inRegular", so the
+      // regular subset result is just that func. Since the regular
+      // result isn't using the func family, we don't need the extra
+      // space.
+      auto const f = funcs.front().ptr();
+      return std::make_pair(
+        FuncFamilyOrSingle{ff(false), !complete},
+        FuncFamilyOrSingle{f, !base}
+      );
+    } else {
+      // For the rest of the cases, we have a mix of "inRegular" and
+      // not "inRegular". Both get the func family, but we need to
+      // allocate extra space because walking the list may produce
+      // different results depending on whether you're filtering on
+      // the regular subset.
+      auto const funcFamily = ff(true);
+      return std::make_pair(
+        FuncFamilyOrSingle{funcFamily, !complete},
+        FuncFamilyOrSingle{funcFamily, !base}
+      );
+    }
   }
 
-  return true;
+  // There's only one func on the list, so no func family is
+  // necessary.
+  assertx(funcs.size() == 1);
+  auto const f = funcs.front();
+  if (f.inRegular()) {
+    // The single func is on a regular class, so it applies to both
+    // all and the regular subset.
+    return std::make_pair(
+      FuncFamilyOrSingle{f.ptr(), !complete},
+      FuncFamilyOrSingle{f.ptr(), !base}
+    );
+  } else {
+    // The single func isn't on any regular class, so it applies to
+    // only the all result. The regular subset is empty.
+    return std::make_pair(
+      FuncFamilyOrSingle{f.ptr(), !complete},
+      FuncFamilyOrSingle{}
+    );
+  }
 }
 
-void build_abstract_func_families(IndexData& data, ClassInfo* cinfo) {
-  std::vector<SString> extras;
+/*
+ * Iterate over the subclasses of `base` and construct
+ * FuncFamilyOrSingle entries for the set of methods with
+ * `name`. Entries for both all entries, and for just the subset on
+ * regular classes will be returned.  If `justRegular` is true, then
+ * the caller is only interested in the regular class subset (in which
+ * case both results will be the same).
+ */
+std::pair<FuncFamilyOrSingle, FuncFamilyOrSingle>
+define_func_family(IndexData& index,
+                   const ClassInfo& base,
+                   SString name,
+                   bool justRegular) {
+  hphp_fast_map<const php::Func*, bool> funcSet;
+  // Whether there's any sub-classes which don't have a method with
+  // the name.
+  auto complete = true;
 
-  // We start by collecting the list of methods shared across all
-  // subclasses of cinfo (including indirectly). And then add the
-  // public methods which are not constructors and have no private
-  // ancestors to the method families of cinfo. Note that this set
-  // may be larger than the methods declared on cinfo and may also
-  // be missing methods declared on cinfo. In practice this is the
-  // set of methods we can depend on having accessible given any
-  // object which is known to implement cinfo.
-  auto it = cinfo->subclassList.begin();
-  while (true) {
-    if (it == cinfo->subclassList.end()) return;
-    auto const sub = *it++;
-    assertx(!(sub->cls->attrs & AttrInterface));
-    if (sub == cinfo || (sub->cls->attrs & AttrAbstract)) continue;
-    for (auto& par : sub->methods) {
-      if (!par.second.hasPrivateAncestor &&
-          (par.second.attrs & AttrPublic) &&
-          !cinfo->methodFamilies.count(par.first) &&
-          !cinfo->singleMethodFamilies.count(par.first) &&
-          !cinfo->methods.count(par.first)) {
-        extras.push_back(par.first);
-      }
+  for (auto const sub : base.subclassList) {
+    // Ignore non-regular classes if we only want the regular subset.
+    if (justRegular && !is_regular_class(*sub->cls)) continue;
+    auto const it = sub->methods.find(name);
+    if (it == end(sub->methods)) {
+      // This subclass doesn't have the method. This can only happen
+      // if the base class is an interface.  They don't get inherited,
+      // nor does an interface inherit anything (this can also happen
+      // with special methods, but we explicitly don't handle
+      // those). Mark this list as being non-complete.
+      assertx(base.cls->attrs & AttrInterface);
+      complete = false;
+      continue;
     }
-    if (!extras.size()) return;
+    auto const mte = mteFromIt(it);
+    auto const f = func_from_mte(index, mte->second);
+    auto const isRegular = justRegular || is_regular_class(*sub->cls);
+    funcSet[f] |= isRegular;
+  }
+
+  if (funcSet.empty()) {
+    // If there wasn't any functions found, we should have encountered
+    // at least one subclass which didn't contain it. If not, it means
+    // the method should have been marked as not being overridden and
+    // we shouldn't be trying to construct a method family for it.
+    assertx(!complete);
+    return std::make_pair(
+      FuncFamilyOrSingle{},
+      FuncFamilyOrSingle{}
+    );
+  }
+
+  FuncFamily::PFuncVec funcs;
+  funcs.reserve(funcSet.size());
+  auto allRegular = true;
+  for (auto const& [func, inRegular] : funcSet) {
+    allRegular &= inRegular;
+    funcs.emplace_back(func, inRegular);
+  }
+  assertx(IMPLIES(justRegular, allRegular));
+
+  // Make FuncFamilyOrSingle entries for the entire list and the
+  // regular subset.
+  auto const [all, regular] = make_method_family_entry(
+    index,
+    std::move(funcs),
+    &base,
+    name,
+    complete
+  );
+
+  // We should have gotten at least something for "all" and it's
+  // incompleteness should reflect that was passed to
+  // make_method_family_entry.
+  assertx(!all.isEmpty());
+  assertx(all.isIncomplete() == !complete);
+
+  // "regular" is always complete (or empty which is neither complete
+  // nor incomplete).
+  assertx(regular.isEmpty() || regular.isComplete());
+
+  // "regular" is always a subset of "all". If "all" is a single func,
+  // "regular" must be a single func or empty.
+  assertx(IMPLIES(all.func(), !regular.funcFamily()));
+
+  // If "all" and "regular" both have func families, they must be the
+  // same func family.
+  assertx(IMPLIES(all.funcFamily() && regular.funcFamily(),
+                  all.funcFamily() == regular.funcFamily()));
+  // If "all" and "regular" both are single funcs, it must be the same
+  // single func.
+  assertx(IMPLIES(all.func() && regular.func(),
+                  all.func() == regular.func()));
+
+  // If "all" has a func family, but "regular" does not, then that
+  // func family should not have allocated space for regular results.
+  assertx(IMPLIES(all.funcFamily() && !regular.funcFamily(),
+                  !all.funcFamily()->m_regular));
+
+  // If we only saw regular classes, then "all" and "regular" should
+  // be the same.
+  assertx(IMPLIES(allRegular, all.funcFamily() == regular.funcFamily()));
+  assertx(IMPLIES(allRegular, all.func() == regular.func()));
+  // Likewise, if allRegular was specified, then the list contains
+  // nothing but methods on regular classes, so we shouldn't have
+  // allocated the extra space on the func family (there's no point,
+  // the results for regular/non-regular will always be identical).
+  assertx(
+    IMPLIES(
+      allRegular && regular.funcFamily(),
+      !regular.funcFamily()->m_regular
+    )
+  );
+
+  return std::make_pair(all, regular);
+}
+
+/*
+ * Calculate FuncFamilyOrSingle entries corresponding *all* methods in
+ * the program with the given name and insert them in the global
+ * name-only method family map.
+ */
+void define_name_only_func_family(IndexData& index, SString name) {
+  hphp_fast_map<const php::Func*, bool> funcSet;
+
+  auto const range = index.methods.equal_range(name);
+  for (auto it = range.first; it != range.second; ++it) {
+    auto const func = it->second;
+    assertx(func->cls);
+    // Only include methods for classes which have a ClassInfo,
+    // which means they're instantiatable.
+    auto const cinfoIt = index.classInfo.find(func->cls->name);
+    if (cinfoIt == index.classInfo.end()) continue;
+    auto const cinfo = cinfoIt->second;
+    if (!cinfo->methods.count(name)) continue;
+    // We need to know if the method is present *anywhere* on a
+    // regular class (not just the class which defines it). We already
+    // calculated this earlier when we built the normal method family
+    // data.
+    auto const inRegular = func_info(index, func)->regularClassMethod.load();
+    funcSet[func] |= inRegular;
+    // If we asserted that this method isn't used anywhere by a
+    // regular class, it's defining class shouldn't be regular.
+    assertx(IMPLIES(!inRegular, !is_regular_class(*func->cls)));
+  }
+  // The set can be empty if every class which defines a method with
+  // that name doesn't have a ClassInfo. If so, bail out.
+  if (funcSet.empty()) return;
+
+  FuncFamily::PFuncVec funcs;
+  funcs.reserve(funcSet.size());
+  auto allRegular = true;
+  for (auto const& [func, inRegular] : funcSet) {
+    allRegular &= inRegular;
+    funcs.emplace_back(func, inRegular);
+  }
+
+  // Create the entries
+  auto const [all, regular] = make_method_family_entry(
+    index,
+    std::move(funcs),
+    nullptr,
+    name,
+    false
+  );
+  FTRACE(
+    4,
+    "method family *::{}:\n"
+    "  all: {}\n"
+    "  regular: {}\n",
+    name, show(all), show(regular)
+  );
+
+  // Shouldn't have an empty entry because we know there's at least
+  // one method (we made sure the func list was non-empty above).
+  assertx(!all.isEmpty());
+  // Name-only tables are always incomplete
+  assertx(all.isIncomplete());
+  // "regular" is always incomplete (like "all"), except if it's empty
+  // (which is neither incomplete nor complete).
+  assertx(regular.isEmpty() || regular.isIncomplete());
+
+  // If both "all" and "regular" contain a func family, they must be
+  // the same func family.
+  assertx(IMPLIES(all.funcFamily() && regular.funcFamily(),
+                  all.funcFamily() == regular.funcFamily()));
+  // If both "all" and "regular" contain a single func, it must be the
+  // same func.
+  assertx(IMPLIES(all.func() && regular.func(), all.func() == regular.func()));
+
+  // "regular" is a subset of "all", so if "all" is a func, then
+  // "regular" must be a func or empty.
+  assertx(IMPLIES(all.func(), regular.func() || regular.isEmpty()));
+  // If "all" has a func family and "regular" does not, then the func
+  // family shouldn't have extra space allocated for the regular
+  // subset result.
+  assertx(IMPLIES(all.funcFamily() && !regular.funcFamily(),
+                  !all.funcFamily()->m_regular));
+
+  // If we observed that all of the methods are on regular classes,
+  // then "all" and "regular" should be the same. Moreover, if there's
+  // a func family, that func family should not have space allocated
+  // for the non-regular subset (there's no point since the results
+  // will always be the same).
+  assertx(IMPLIES(allRegular, all.funcFamily() == regular.funcFamily()));
+  assertx(IMPLIES(allRegular, all.func() == regular.func()));
+  assertx(
+    IMPLIES(
+      allRegular && regular.funcFamily(),
+      !regular.funcFamily()->m_regular
+    )
+  );
+
+  // No fancy logic here to avoid redundant entries. We don't have the
+  // AttrNoOverride or noOverrideRegular bits to help us, and there's
+  // not enough name-only entries for the space savings to matter.
+  auto const famIt = index.methodFamilies.find(name);
+  // An entry in the table should have been pre-created for us (this
+  // lets us avoid mutating the map from multiple threads), and
+  // shouldn't have had an entry already.
+  assertx(famIt != end(index.methodFamilies));
+  assertx(famIt->second.m_all.isEmpty());
+  assertx(famIt->second.m_regular.isEmpty());
+  famIt->second.m_all = all;
+  famIt->second.m_regular = regular;
+}
+
+void expand_abstract_func_families(IndexData& index, ClassInfo* cinfo) {
+  assertx(cinfo->cls->attrs & (AttrInterface|AttrAbstract));
+
+  /*
+   * Interfaces can cause monotonicity violations. Suppose we have two
+   * interfaces: I2 and I2. I1 declares a method named Foo. Every
+   * class which implements I2 also implements I1 (therefore I2
+   * implies I1). During analysis, a type is initially Obj<=I1 and we
+   * resolve a call to Foo using I1's func families. After further
+   * optimization, we narrow the type to Obj<=I2. Now when we go to
+   * resolve a call to Foo using I2's func families, we find
+   * nothing. Foo is declared in I1, not in I2, and interface methods
+   * are not inherited. We use the fall back name-only tables, which
+   * might give us a worse type than before. This is a monotonicity
+   * violation because refining the object type gave us worse
+   * analysis.
+   *
+   * To avoid this, we expand an interface's (and abstract class'
+   * which has similar issues) func families to include all methods
+   * defined by *all* of it's (regular) implementations. So, in the
+   * example above, we'd expand I2's func families to include Foo,
+   * since all of I2's implements should define a Foo method (since
+   * they also all implement I1).
+   */
+  hphp_fast_set<SString> extras;
+
+  // First find a regular subclass we can use to initialize our list.
+  auto it = begin(cinfo->subclassList);
+  while (true) {
+    if (it == end(cinfo->subclassList)) return;
+    auto const sub = *it++;
+    if (!is_regular_class(*sub->cls)) continue;
+    assertx(sub != cinfo);
+    for (auto const& elem : sub->methods) {
+      // Don't include ctors or special methods. Not useful.
+      if (elem.first == s_construct.get() ||
+          is_special_method_name(elem.first)) {
+        continue;
+      }
+      if (elem.second.hasPrivateAncestor) continue;
+      if (cinfo->methods.count(elem.first)) continue;
+      if (cinfo->methodFamilies.count(elem.first)) continue;
+      extras.emplace(elem.first);
+    }
+    if (extras.empty()) return;
     break;
   }
 
-  auto end = extras.end();
-  while (it != cinfo->subclassList.end()) {
+  // Then iterate over the rest and remove methods which aren't
+  // implemented in every subclass.
+  while (it != end(cinfo->subclassList)) {
     auto const sub = *it++;
-    assertx(!(sub->cls->attrs & AttrInterface));
-    if (sub == cinfo || (sub->cls->attrs & AttrAbstract)) continue;
-    for (auto nameIt = extras.begin(); nameIt != end;) {
-      auto const meth = sub->methods.find(*nameIt);
-      if (meth == sub->methods.end() ||
-          !(meth->second.attrs & AttrPublic) ||
-          meth->second.hasPrivateAncestor) {
-        *nameIt = *--end;
-        if (end == extras.begin()) return;
-      } else {
-        ++nameIt;
+    if (!is_regular_class(*sub->cls)) continue;
+    assertx(sub != cinfo);
+    folly::erase_if(
+      extras,
+      [&] (SString meth) {
+        auto const it = sub->methods.find(meth);
+        if (it == end(sub->methods)) return true;
+        return it->second.hasPrivateAncestor;
       }
-    }
-  }
-  extras.erase(end, extras.end());
-
-  // We can ignore abstract subclasses in most cases, except when it's
-  // a leaf. This is needed to preserve monotonicity when looking up
-  // FuncFamily results. Otherwise we could look up a type from an
-  // interface's FuncFamily, then later narrow the interface to the
-  // abstract class which implements it. If the abstract class doesn't
-  // implement the method, they'll be no FuncFamily, and we'll return
-  // InitCell (a potential monotonicity violation). This is an ugly
-  // workaround, but a true fix requires more work.
-  for (auto const sub : cinfo->abstractSubclassList) {
-    assertx(!(sub->cls->attrs & AttrInterface));
-    if (extras.empty()) break;
-    if (sub == cinfo || !(sub->cls->attrs & AttrAbstract)) continue;
-    if (sub->subclassList.size() > 1) continue;
-    extras.erase(
-      std::remove_if(
-        extras.begin(), extras.end(),
-        [&] (SString extra) {
-          auto const meth = sub->methods.find(extra);
-          if (meth == sub->methods.end()) return true;
-          if (!(meth->second.attrs & AttrPublic)) return true;
-          if (meth->second.hasPrivateAncestor) return true;
-          return false;
-        }
-      ),
-      extras.end()
     );
+    if (extras.empty()) return;
   }
 
-  if (Trace::moduleEnabled(Trace::hhbbc_index, 5)) {
-    FTRACE(5, "Adding extra methods to {}:\n", cinfo->cls->name);
+  if (Trace::moduleEnabled(Trace::hhbbc_index, 4)) {
+    FTRACE(4, "Adding extra func-families to {}:\n", cinfo->cls->name);
     for (auto const DEBUG_ONLY extra : extras) {
-      FTRACE(5, "  {}\n", extra);
+      FTRACE(4, "  {}\n", extra);
     }
   }
 
-  hphp_fast_set<SString> added;
-
-  for (auto name : extras) {
-    if (define_func_family(data, cinfo, name) &&
-        (cinfo->cls->attrs & AttrInterface)) {
-      added.emplace(name);
-    }
+  std::vector<std::pair<SString, FuncFamilyOrSingle>> expanded;
+  for (auto const name : extras) {
+    // We only care about methods on regular classes, so pass
+    // "justRegular" as true here. We should only get results for the
+    // regular subset.
+    auto const [a, r] = define_func_family(index, *cinfo, name, true);
+    // "all" and "regular" should be identical here, since we asked to
+    // only consider regular classes. We already know these methods
+    // are present on all regular subclasses.
+    assertx(!a.isEmpty());
+    assertx(!r.isEmpty());
+    assertx(a.isComplete());
+    assertx(r.isComplete());
+    assertx(a.funcFamily() == r.funcFamily());
+    assertx(a.func() == r.func());
+    FTRACE(
+      4,
+      "extra method family {}::{}: {}\n",
+      cinfo->cls->name, name, show(r)
+    );
+    assertx(!cinfo->methodFamilies.count(name));
+    expanded.emplace_back(name, r);
   }
 
-  if (!(cinfo->cls->attrs & AttrInterface)) return;
-  for (auto const& m : cinfo->cls->methods) {
-    if (!added.count(m->name)) continue;
-    cinfo->methods.emplace(m->name, MethTabEntry { *m });
-  }
+  // Sort the list so we can insert it into methodFamilies (which is a
+  // sorted_vector_map) in bulk.
+  assertx(!expanded.empty());
+  std::sort(
+    begin(expanded), end(expanded),
+    [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+  );
+  cinfo->methodFamilies.insert(
+    folly::sorted_unique, begin(expanded), end(expanded)
+  );
 }
 
 // Calculate the StaticInfo for the given FuncFamily, and assign it
-// the pointer to the unique allocation corresponding to it.
-void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
+// the pointer to the unique allocation corresponding to it. If `all`
+// is true, then all possible funcs should be considered. Otherwise,
+// only the regular subset will.
+void build_func_family_static_info(IndexData& index, FuncFamily* ff, bool all) {
   auto const& possible = ff->possibleFuncs();
-  assertx(!possible.empty());
+  assertx(possible.size() > 1);
 
   // Calculate the StaticInfo from all possible functions:
 
   auto info =  [&] {
     FuncFamily::StaticInfo info;
 
-    auto const func = func_from_mte(index, possible.front()->second);
+    // Find the first func, taking into account whether we care about
+    // non-regular funcs or not.
+    auto const func = [&] {
+      for (auto const pf : possible) {
+        if (all || pf.inRegular()) return pf.ptr();
+      }
+      always_assert(false);
+    }();
+
     info.m_numInOut = func_num_inout(func);
     info.m_isReadonlyReturn = yesOrNo(func->isReadonlyReturn);
     info.m_isReadonlyThis = yesOrNo(func->isReadonlyThis);
@@ -4032,14 +4912,10 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
       info.m_maxNonVariadicParams = numNVArgs(*func);
     info.m_requiredCoeffects = func->requiredCoeffects;
     info.m_coeffectRules = func->coeffectRules;
+    info.m_supportsAER = func_supports_AER(func);
 
     for (size_t i = 0; i < func->params.size(); ++i) {
       info.m_paramPreps.emplace_back(func_param_prep(func, i));
-    }
-    for (auto const pf : possible) {
-      if (pf->second.attrs & AttrAbstract) continue;
-      info.m_supportsAER = func_supports_AER(func_from_mte(index, pf->second));
-      break;
     }
     return info;
   }();
@@ -4058,9 +4934,10 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
     }
   };
 
-  for (auto const pf : possible) {
-    auto const func = func_from_mte(index, pf->second);
-
+  for (auto const& pf : possible) {
+    // Skip non-regular funcs if we don't care about those.
+    if (!all && !pf.inRegular()) continue;
+    auto const func = pf.ptr();
     if (info.m_numInOut && *info.m_numInOut != func_num_inout(func)) {
       info.m_numInOut.reset();
     }
@@ -4071,8 +4948,7 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
     info.m_maybeBuiltin |= (func->attrs & AttrBuiltin);
     addToParamPreps(func);
 
-    if (info.m_supportsAER != TriBool::Maybe &&
-        !(pf->second.attrs & AttrAbstract)) {
+    if (info.m_supportsAER != TriBool::Maybe) {
       info.m_supportsAER |= func_supports_AER(func);
     }
 
@@ -4116,7 +4992,7 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
 
   // See if the info already exists in the set. If it doesn't exist,
   // add it. Otherwise use the already created one.
-  ff->m_static = [&] {
+  auto const staticInfo = [&] {
     auto const it = index.funcFamilyStaticInfos.find(info);
     if (it != index.funcFamilyStaticInfos.end()) return it->first.get();
     return index.funcFamilyStaticInfos.insert(
@@ -4124,92 +5000,202 @@ void build_func_family_static_info(IndexData& index, FuncFamily* ff) {
       false
     ).first->first.get();
   }();
+
+  // Set the static info in the appropriate place. If we asked for the
+  // regular subset, we should have space allocated to put it there.
+  if (all) {
+    ff->m_all.m_static = staticInfo;
+  } else {
+    assertx(ff->m_regular);
+    ff->m_regular->m_static = staticInfo;
+  }
 }
 
 void define_func_families(IndexData& index) {
   trace_time tracer("define_func_families", index.sample);
 
-  // Calculate func families for classes:
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      if (cinfo->cls->attrs & AttrTrait) return;
-      FTRACE(4, "Defining func families for {}\n", cinfo->cls->name);
-      if (!(cinfo->cls->attrs & AttrInterface)) {
-        for (auto& kv : cinfo->methods) {
-          auto const mte = mteFromElm(kv);
+      std::vector<std::pair<SString, FuncFamilyOrSingle>> entries;
+      std::vector<std::pair<SString, FuncFamilyOrSingle>> aux;
 
-          if (mte->second.attrs & AttrNoOverride) continue;
-          if (is_special_method_name(mte->first)) continue;
+      assertx(cinfo->methodFamilies.empty());
+      assertx(cinfo->methodFamiliesAux.empty());
 
-          // We need function family for constructor even if it is private,
-          // as `new static()` may still call a non-private constructor from
-          // subclass.
-          if (mte->first != s_construct.get() &&
-              mte->second.attrs & AttrPrivate) {
-            continue;
+      for (auto const& elm : cinfo->methods) {
+        auto const mte = mteFromElm(elm);
+        auto const func = func_from_mte(index, mte->second);
+
+        // If this is a regular class, record that this func is used
+        // by a regular class. This will be used when building the
+        // name-only tables below.
+        if (is_regular_class(*cinfo->cls)) {
+          create_func_info(index, func)->regularClassMethod = true;
+        }
+
+        // Don't construct func families for special methods, as it's
+        // not particularly useful.
+        if (is_special_method_name(mte->first)) continue;
+        // If the method is known not to be overridden, we don't need
+        // a func family.
+        if (mte->second.attrs & AttrNoOverride) continue;
+
+        auto const [a, r] = define_func_family(
+          index, *cinfo, mte->first, false
+        );
+
+        if (is_regular_class(*cinfo->cls)) {
+          // We know that AttrNoOverride is false, therefore the
+          // method must be overridden in a subclass, so we have to
+          // get at least 2 funcs (so a FuncFamily).
+          assertx(a.funcFamily());
+          // Since this class is regular, this method should at least
+          // be on the regular subset results.
+          assertx(!r.isEmpty());
+          // We can only get incomplete results if this is an
+          // interface.
+          assertx(a.isComplete());
+          assertx(r.isComplete());
+
+          // If there's no override by a regular class, the only func
+          // on the regular subset should be the method on this
+          // class. Otherwise, we should have a func family, and "all"
+          // and "regular" should always have the same func family.
+          if (mte->second.noOverrideRegular) {
+            assertx(r.func() == func);
+          } else {
+            assertx(r.funcFamily() == a.funcFamily());
           }
 
-          define_func_family(
-            index,
-            cinfo.get(),
-            mte->first,
-            func_from_mte(index, mte->second)
+          FTRACE(4, "method family {}::{}: {}\n",
+                 cinfo->cls->name, mte->first, show(a));
+          entries.emplace_back(mte->first, a);
+        } else {
+          // The method is on this class, so the results for "all"
+          // should have at least have it (so cannot be empty).
+          assertx(!a.isEmpty());
+          // Result can be incomplete, but only if this is an
+          // interface.
+          assertx(IMPLIES(a.isIncomplete(), cinfo->cls->attrs & AttrInterface));
+          // If we got a single func, it should be the func on this
+          // class. The only way we'd get a single func is if the
+          // results are incomplete.
+          assertx(IMPLIES(a.func(), a.isIncomplete()));
+          assertx(IMPLIES(a.func(), a.func() == func));
+
+          // If there's no override by a regular class, we'll either
+          // have an empty set, or a single func the same as this
+          // class' func. If there's no regular subclasses, it will be
+          // empty. Otherwise it will be the single func (we know it's
+          // not overridden so all the existing regular subclasses
+          // must have the same func).
+          if (mte->second.noOverrideRegular) {
+            assertx(r.isEmpty() || r.func() == func);
+            assertx(r.isEmpty() == !cinfo->hasRegularSubclass);
+          } else {
+            // It's possible to get an empty or incomplete set for the
+            // regular subset if this class is an interface.
+            assertx(IMPLIES(r.isEmpty(), cinfo->cls->attrs & AttrInterface));
+            assertx(
+              IMPLIES(r.isIncomplete(), cinfo->cls->attrs & AttrInterface)
+            );
+            // Since it was overridden it's either incomplete, or if
+            // it's a single func, a different func than the one in
+            // this class.
+            assertx(r.isIncomplete() || r.func() != func);
+          }
+
+          // Only bother making an aux entry if it's different from
+          // the normal entry, and if we'll actually use it (if
+          // noOverrideRegular, we won't even check).
+          auto const addAux =
+            !mte->second.noOverrideRegular &&
+            (r.isIncomplete() ||
+             a.funcFamily() != r.funcFamily() ||
+             a.func() != r.func());
+
+          FTRACE(
+            4, "method family {}::{}:\n"
+            "  all: {}\n"
+            "{}",
+            cinfo->cls->name, mte->first,
+            show(a),
+            addAux ? folly::sformat("  aux: {}\n", show(r)) : ""
           );
+          entries.emplace_back(mte->first, a);
+          if (addAux) aux.emplace_back(mte->first, r);
         }
       }
-      if (cinfo->cls->attrs & (AttrInterface | AttrAbstract)) {
-        build_abstract_func_families(index, cinfo.get());
+
+      // Sort the lists of new entries, so we can insert them into the
+      // method family maps (which are sorted_vector_maps) in bulk.
+      std::sort(
+        begin(entries), end(entries),
+        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+      );
+      std::sort(
+        begin(aux), end(aux),
+        [] (auto const& p1, auto const& p2) { return p1.first < p2.first; }
+      );
+      if (!entries.empty()) {
+        cinfo->methodFamilies.insert(
+          folly::sorted_unique, begin(entries), end(entries)
+        );
       }
+      if (!aux.empty()) {
+        cinfo->methodFamiliesAux.insert(
+          folly::sorted_unique, begin(aux), end(aux)
+        );
+      }
+
+      // If this is an interface or abstract class, we may want to add
+      // additional entries to maintain monotonicity.
+      if (cinfo->cls->attrs & (AttrInterface|AttrAbstract)) {
+        expand_abstract_func_families(index, cinfo.get());
+      }
+
+      cinfo->methodFamilies.shrink_to_fit();
+      cinfo->methodFamiliesAux.shrink_to_fit();
     }
   );
 
-  // Then calculate func families for methods with particular names:
+  // Then calculate func families for methods with particular names
+  // across all classes:
   {
     // Build a list of all unique method names. Pre-allocate entries
-    // in methodFamilies and singleMethodFamilies for each one (we
-    // don't know which ones will be used). This lets us insert into
-    // the maps from multiple threads safely (we don't have to mutate
-    // the actual maps).
+    // in methodFamilies for each one. This lets us insert into the
+    // map from multiple threads safely (we don't have to mutate the
+    // actual map).
     std::vector<SString> allMethods;
     for (auto const& [name, _] : index.methods) {
+      // index.methods is a multi-map, so we might have multiple
+      // entries with the same name (but they'll be contiguous).
       if (!allMethods.empty() && allMethods.back() == name) continue;
+      // We don't bother with constructing name-only func families for
+      // constructors, or special methods because it's not
+      // particularly useful.
+      if (name == s_construct.get() || is_special_method_name(name)) continue;
       allMethods.emplace_back(name);
-      auto const DEBUG_ONLY inserted1 =
-        index.methodFamilies.emplace(name, nullptr);
-      assertx(inserted1.second);
-      auto const DEBUG_ONLY inserted2 =
-        index.singleMethodFamilies.emplace(name, nullptr);
-      assertx(inserted2.second);
+      always_assert(
+        index.methodFamilies.emplace(name, IndexData::MethodFamilyEntry{}).second
+      );
     }
 
     // Populate the maps
     parallel::for_each(
       allMethods,
-      [&] (SString method) {
-        define_func_family(index, nullptr, method, nullptr);
-      }
+      [&] (SString m) { define_name_only_func_family(index, m); }
     );
 
-    // Now clean any remaining nullptr entries out of the maps. These
-    // correspond to method names which got no func families.
-    for (auto it = index.methodFamilies.begin();
-         it != index.methodFamilies.end();) {
-      if (!it->second) {
-        it = index.methodFamilies.erase(it);
-      } else {
-        ++it;
+    // Now clean any empty entries out of the maps. These correspond
+    // to method names which didn't end up in any func families.
+    folly::erase_if(
+      index.methodFamilies,
+      [&] (const std::pair<SString, IndexData::MethodFamilyEntry>& p) {
+        return p.second.m_all.isEmpty() && p.second.m_regular.isEmpty();
       }
-    }
-
-    for (auto it = index.singleMethodFamilies.begin();
-         it != index.singleMethodFamilies.end();) {
-      if (!it->second) {
-        it = index.singleMethodFamilies.erase(it);
-      } else {
-        ++it;
-      }
-    }
+    );
   }
 
   // Now that all of the FuncFamilies have been created, generate the
@@ -4221,14 +5207,13 @@ void define_func_families(IndexData& index) {
   // Different threads can touch the same FuncInfo, so use sharded
   // locking scheme.
   std::array<std::mutex, 256> locks;
-
   parallel::for_each(
     work,
     [&] (FuncFamily* ff) {
-      build_func_family_static_info(index, ff);
-
+      build_func_family_static_info(index, ff, true);
+      if (ff->m_regular) build_func_family_static_info(index, ff, false);
       for (auto const pf : ff->possibleFuncs()) {
-        auto finfo = create_func_info(index, func_from_mte(index, pf->second));
+        auto finfo = create_func_info(index, pf.ptr());
         auto& lock = locks[pointer_hash<FuncInfo>{}(finfo) % locks.size()];
         std::lock_guard<std::mutex> _{lock};
         finfo->families.emplace_back(ff);
@@ -4569,83 +5554,101 @@ void mark_has_reified_parent(IndexData& index) {
 void mark_no_override_classes(IndexData& index) {
   trace_time tracer("mark no override classes", index.sample);
 
-  for (auto& cinfo : index.allClassInfos) {
-    // We cleared all the NoOverride flags while building the
-    // index. Set them as necessary.
-    if (!(cinfo->cls->attrs & AttrInterface) &&
-        cinfo->subclassList.size() == 1) {
-      attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
+  parallel::for_each(
+    index.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      // We cleared all the NoOverride flags while building the
+      // index. Set them as necessary.
+      assertx(!(cinfo->cls->attrs & AttrNoOverride));
+      assertx(!(cinfo->cls->attrs & AttrNoOverrideRegular));
+      assertx(!cinfo->subclassList.empty());
+
+      if (cinfo->subclassList.size() == 1) {
+        assertx(cinfo->subclassList[0] == cinfo.get());
+        attribute_setter(cinfo->cls->attrs, true, AttrNoOverride);
+        attribute_setter(cinfo->cls->attrs, true, AttrNoOverrideRegular);
+      } else if (!cinfo->hasRegularSubclass) {
+        attribute_setter(cinfo->cls->attrs, true, AttrNoOverrideRegular);
+      }
     }
-  }
+  );
 }
 
 void mark_no_override_methods(IndexData& index) {
   trace_time tracer("mark no override methods", index.sample);
 
-  // We removed any AttrNoOverride flags from all methods while adding
-  // the units to the index.  Now start by marking every
-  // (non-interface, non-special) method as AttrNoOverride.
+  // We reset the override flags from all methods when adding the
+  // units to the index. Set them to true now. We'll reset them below
+  // if we detect an override. We need to do this in a separate
+  // parallel pass to avoid race conditions with setting it to false
+  // below.
   parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      if (cinfo->cls->attrs & AttrInterface) return;
-
       for (auto& m : cinfo->methods) {
-        if (!(is_special_method_name(m.first))) {
-          FTRACE(9, "Pre-setting AttrNoOverride on {}::{}\n",
-                 m.second.cls, m.first);
-          attribute_setter(m.second.attrs, true, AttrNoOverride);
-          attribute_setter(
-            func_from_mte(index, m.second)->attrs,
-            true,
-            AttrNoOverride
-          );
-        }
+        assertx(!(m.second.attrs & AttrNoOverride));
+        assertx(!m.second.noOverrideRegular);
+        if (is_special_method_name(m.first)) continue;
+        attribute_setter(m.second.attrs, true, AttrNoOverride);
+        attribute_setter(
+          func_from_mte(index, m.second)->attrs,
+          true,
+          AttrNoOverride
+        );
+        m.second.noOverrideRegular = true;
       }
     }
   );
 
-  // Then run through every ClassInfo, and for each of its parent
-  // classes clear the AttrNoOverride flag if it has a different Func
-  // with the same name.
-  auto const updates = parallel::map(
+  parallel::for_each(
     index.allClassInfos,
     [&] (const std::unique_ptr<ClassInfo>& cinfo) {
-      hphp_fast_set<MethTabEntry*> changes;
+      for (auto& mte : cinfo->methods) {
+        auto const name = mte.first;
+        auto& meth = mte.second;
 
-      for (auto const& ancestor : cinfo->baseList) {
-        if (ancestor == cinfo.get()) continue;
+        if (!(meth.attrs & AttrNoOverride)) continue;
+        assertx(meth.noOverrideRegular);
 
-        for (auto const& derivedMethod : cinfo->methods) {
-          auto const it = ancestor->methods.find(derivedMethod.first);
-          if (it == end(ancestor->methods)) continue;
-          if (!it->second.cls->isame(derivedMethod.second.cls) ||
-              it->second.clsIdx != derivedMethod.second.clsIdx) {
-            FTRACE(2, "Removing AttrNoOverride on {}::{}\n",
-                   it->second.cls, it->first);
-            changes.emplace(&it->second);
+        auto& funcAttrs = func_from_mte(index, meth)->attrs;
+
+        // Look up method in every subclass. If there's a different
+        // method with the same name, there's an override so clear the
+        // bits.
+        for (auto const sub : cinfo->subclassList) {
+          if (sub == cinfo.get()) continue;
+
+          auto const clear = [&] {
+            auto const reg = is_regular_class(*sub->cls);
+            if (reg) meth.noOverrideRegular = false;
+            attribute_setter(meth.attrs, false, AttrNoOverride);
+            attribute_setter(funcAttrs, false, AttrNoOverride);
+            FTRACE(4, "Clearing AttrNoOverride{} on {}::{} because of {}\n",
+                   reg ? " and noOverrideRegular" : "",
+                   meth.cls, name, sub->cls->name);
+            return reg || !cinfo->hasRegularSubclass;
+          };
+
+          auto const it = sub->methods.find(name);
+          if (it == end(sub->methods)) {
+            // Method doesn't exist in subclass. This can happen with
+            // special functions or interface methods, for example.
+            assertx(is_special_method_name(name) ||
+                    !is_regular_class(*cinfo->cls));
+            if (clear()) break;
+            continue;
+          }
+
+          // Check if method in subclass is the same as in parent.
+          auto const& subMeth = it->second;
+          if (!subMeth.cls->isame(meth.cls) || subMeth.clsIdx != meth.clsIdx) {
+            if (clear()) break;
+            continue;
           }
         }
       }
-
-      return changes;
     }
   );
-
-  for (auto const& u : updates) {
-    for (auto& mte : u) {
-      assertx(mte->attrs & AttrNoOverride ||
-              !(func_from_mte(index, *mte)->attrs & AttrNoOverride));
-      if (mte->attrs & AttrNoOverride) {
-        attribute_setter(mte->attrs, false, AttrNoOverride);
-        attribute_setter(
-          func_from_mte(index, *mte)->attrs,
-          false,
-          AttrNoOverride
-        );
-      }
-    }
-  }
 }
 
 const StaticString s__Reified("__Reified");
@@ -4686,41 +5689,253 @@ void clean_86reifiedinit_methods(IndexData& index) {
 
 //////////////////////////////////////////////////////////////////////
 
-void check_invariants(const ClassInfo* cinfo) {
-  // All the following invariants only apply to classes
-  if (cinfo->cls->attrs & AttrInterface) return;
+void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
+  // AttrNoOverride is a superset of AttrNoOverrideRegular
+  always_assert(
+    IMPLIES(!(cinfo->cls->attrs & AttrNoOverrideRegular),
+            !(cinfo->cls->attrs & AttrNoOverride))
+  );
 
-  if (!(cinfo->cls->attrs & AttrTrait)) {
-    // For non-interface classes, each method in a php class has an
-    // entry in its ClassInfo method table, and if it's not special,
-    // AttrNoOverride, or private, an entry in the family table.
-    for (size_t idx = 0; idx < cinfo->cls->methods.size(); ++idx) {
-      auto const& m = cinfo->cls->methods[idx];
-      auto const it = cinfo->methods.find(m->name);
-      always_assert(it != cinfo->methods.end());
-      always_assert(it->second.cls->isame(cinfo->cls->name));
-      always_assert(it->second.clsIdx == idx);
-      if (it->second.attrs & (AttrNoOverride|AttrPrivate)) continue;
-      if (is_special_method_name(m->name)) continue;
+  // Override attrs and what we know about the subclasses should be in
+  // agreement.
+  if (cinfo->cls->attrs & AttrNoOverride) {
+    always_assert(!cinfo->hasRegularSubclass);
+    always_assert(!cinfo->hasNonRegularSubclass);
+  } else if (cinfo->cls->attrs & AttrNoOverrideRegular) {
+    always_assert(!cinfo->hasRegularSubclass);
+  }
+
+  for (size_t idx = 0; idx < cinfo->cls->methods.size(); ++idx) {
+    // Each method in a class has an entry in its ClassInfo method
+    // table.
+    auto const& m = cinfo->cls->methods[idx];
+    auto const it = cinfo->methods.find(m->name);
+    always_assert(it != cinfo->methods.end());
+    always_assert(it->second.cls->isame(cinfo->cls->name));
+    always_assert(it->second.clsIdx == idx);
+
+    // Every method (except for constructors and special methods
+    // should be in the global name-only tables.
+    auto const nameIt = index.methodFamilies.find(m->name);
+    if (m->name == s_construct.get() || is_special_method_name(m->name)) {
+      always_assert(nameIt == end(index.methodFamilies));
+      continue;
+    }
+    always_assert(nameIt != end(index.methodFamilies));
+
+    auto const& entry = nameIt->second;
+    // The global name-only tables are never complete.
+    always_assert(entry.m_all.isIncomplete());
+    always_assert(entry.m_regular.isEmpty() || entry.m_regular.isIncomplete());
+
+    // "all" should always be non-empty and contain this method.
+    always_assert(!entry.m_all.isEmpty());
+    if (auto const ff = entry.m_all.funcFamily()) {
+      always_assert(ff->possibleFuncs().size() > 1);
+      // The FuncFamily shouldn't have a section for regular results
+      // if "regular" isn't using it.
+      if (entry.m_regular.func() || entry.m_regular.isEmpty()) {
+        always_assert(!ff->m_regular);
+      } else {
+        // "all" and "regular" always share the same func family.
+        always_assert(entry.m_regular.funcFamily() == ff);
+      }
+    } else {
+      auto const func = entry.m_all.func();
+      always_assert(func);
+      always_assert(func == m.get());
+      // "regular" is always a subset of "all", so it can either be a
+      // single func (the same as "all"), or empty.
+      always_assert(entry.m_regular.func() || entry.m_regular.isEmpty());
+      if (auto const func2 = entry.m_regular.func()) {
+        always_assert(func == func2);
+      }
+    }
+
+    // If this is a regular class, "regular" should be non-empty and
+    // contain this method.
+    if (auto const ff = entry.m_regular.funcFamily()) {
+      always_assert(ff->possibleFuncs().size() > 1);
+    } else if (auto const func = entry.m_regular.func()) {
+      if (is_regular_class(*cinfo->cls)) {
+        always_assert(func == m.get());
+      }
+    } else {
+      always_assert(!is_regular_class(*cinfo->cls));
+    }
+  }
+
+  // Interface ClassInfo method table should only contain methods from
+  // the interface itself.
+  if (cinfo->cls->attrs & AttrInterface) {
+    always_assert(cinfo->cls->methods.size() == cinfo->methods.size());
+  }
+
+  // If a class isn't overridden, it shouldn't have any func families
+  // (because the method table is sufficient).
+  if (cinfo->cls->attrs & AttrNoOverride) {
+    always_assert(cinfo->methodFamilies.empty());
+    always_assert(cinfo->methodFamiliesAux.empty());
+  } else if (cinfo->cls->attrs & AttrNoOverrideRegular) {
+    always_assert(cinfo->methodFamiliesAux.empty());
+  }
+
+  // The auxiliary method families map is only used by non-regular
+  // classes.
+  if (is_regular_class(*cinfo->cls)) {
+    always_assert(cinfo->methodFamiliesAux.empty());
+  }
+
+  for (auto const& [name, mte] : cinfo->methods) {
+    // Interface method tables should only contain its own methods.
+    if (cinfo->cls->attrs & AttrInterface) {
+      always_assert(mte.cls->isame(cinfo->cls->name));
+    } else {
+      // Non-interface method tables should not contain any methods
+      // defined by an interface.
+      auto const func = func_from_mte(index, mte);
+      always_assert(!(func->cls->attrs & AttrInterface));
+    }
+
+    // AttrNoOverride implies noOverrideRegular
+    always_assert(IMPLIES(mte.attrs & AttrNoOverride, mte.noOverrideRegular));
+    if (!is_special_method_name(name)) {
+      // If the class isn't overridden, none of it's methods can be
+      // either.
+      always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverride,
+                            mte.attrs & AttrNoOverride));
+      always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverrideRegular,
+                            mte.noOverrideRegular));
+    }
+
+    auto const famIt = cinfo->methodFamilies.find(name);
+    // Don't store method families for special methods, or if there's
+    // no override.
+    if (is_special_method_name(name) || (mte.attrs & AttrNoOverride)) {
+      always_assert(famIt == end(cinfo->methodFamilies));
+      always_assert(!cinfo->methodFamiliesAux.count(name));
+      continue;
+    } else {
+      always_assert(famIt != end(cinfo->methodFamilies));
+    }
+    auto const& entry = famIt->second;
+
+    if (is_regular_class(*cinfo->cls)) {
+      // "all" should only be a func family. It can't be empty,
+      // because we know there's at least one method in it (the one in
+      // cinfo->methods). It can't be a single func, because one of
+      // the methods must be the cinfo->methods method, and we know it
+      // isn't AttrNoOverride, so there *must* be another method. So,
+      // it must be a func family.
+      always_assert(entry.funcFamily());
+      // This is a regular class, so we cannot have an incomplete
+      // entry (can only happen with interfaces).
+      always_assert(entry.isComplete());
+    } else {
+      // This class isn't AttrNoOverride, and since the method is on
+      // this class, it should at least contain that.
+      always_assert(!entry.isEmpty());
+      // Only interfaces can have incomplete entries.
       always_assert(
-        cinfo->methodFamilies.count(m->name) ||
-        cinfo->singleMethodFamilies.count(m->name)
+        IMPLIES(entry.isIncomplete(), cinfo->cls->attrs & AttrInterface)
       );
+      // If we got a single func, it should be the func on this
+      // class. Since this isn't AttrNoOverride, it implies the entry
+      // should be incomplete.
+      always_assert(IMPLIES(entry.func(), entry.isIncomplete()));
+      always_assert(
+        IMPLIES(entry.func(), entry.func() == func_from_mte(index, mte))
+      );
+
+      // The "aux" entry is optional. If it isn't present, it's the
+      // same as the normal table.
+      auto const auxIt = cinfo->methodFamiliesAux.find(name);
+      if (auxIt != end(cinfo->methodFamiliesAux)) {
+        auto const& aux = auxIt->second;
+
+        // We shouldn't store in the aux table if the entry is the
+        // same or if there's no override.
+        always_assert(!mte.noOverrideRegular);
+        always_assert(
+          aux.isIncomplete() ||
+          aux.func() != entry.func() ||
+          aux.funcFamily() != entry.funcFamily()
+        );
+
+        // Normally the aux should be non-empty and complete. However
+        // if this class is an interface, they could be.
+        always_assert(
+          IMPLIES(aux.isEmpty(), cinfo->cls->attrs & AttrInterface)
+        );
+        always_assert(
+          IMPLIES(aux.isIncomplete(), cinfo->cls->attrs & AttrInterface)
+        );
+
+        // Since we know this was overridden (it wouldn't be in the
+        // aux table otherwise), it must either be incomplete, or if
+        // it has a single func, it cannot be the same func as this
+        // class.
+        always_assert(
+          aux.isIncomplete() || aux.func() != func_from_mte(index, mte)
+        );
+
+        // Aux entry is a subset of the normal entry. If they both
+        // have a func family or func, they must be the same. If the
+        // normal entry has a func family, but aux doesn't, that func
+        // family shouldn't have extra space allocated.
+        always_assert(IMPLIES(entry.func(), !aux.funcFamily()));
+        always_assert(IMPLIES(entry.funcFamily() && aux.funcFamily(),
+                              entry.funcFamily() == aux.funcFamily()));
+        always_assert(IMPLIES(entry.func() && aux.func(),
+                              entry.func() == aux.func()));
+        always_assert(IMPLIES(entry.funcFamily() && !aux.funcFamily(),
+                              !entry.funcFamily()->m_regular));
+      }
+    }
+  }
+
+  // "Aux" entries should only exist for methods on this class, and
+  // with a corresponding methodFamilies entry.
+  for (auto const& [name, _] : cinfo->methodFamiliesAux) {
+    always_assert(cinfo->methods.count(name));
+    always_assert(cinfo->methodFamilies.count(name));
+  }
+
+  // We should only have func families for methods declared on this
+  // class (except for interfaces and abstract classes).
+  for (auto const& [name, entry] : cinfo->methodFamilies) {
+    if (cinfo->methods.count(name)) continue;
+    // Interfaces and abstract classes can have func families for
+    // methods not defined on this class.
+    always_assert(cinfo->cls->attrs & (AttrInterface|AttrAbstract));
+    // We don't expand func families for these.
+    always_assert(name != s_construct.get() && !is_special_method_name(name));
+
+    // We only expand entries for interfaces and abstract classes if
+    // it appears in every regular subclass. Therefore it cannot be
+    // empty and is complete.
+    always_assert(!entry.isEmpty());
+    always_assert(entry.isComplete());
+    if (auto const ff = entry.funcFamily()) {
+      always_assert(!ff->m_regular);
+    } else if (auto const func = entry.func()) {
+      always_assert(func->cls != cinfo->cls);
     }
   }
 
   // The subclassList is non-empty, contains this ClassInfo, and
   // contains only unique elements.
   always_assert(!cinfo->subclassList.empty());
-  always_assert(std::find(begin(cinfo->subclassList),
-                          end(cinfo->subclassList),
-                          cinfo) != end(cinfo->subclassList));
+  always_assert(
+    std::find(
+      begin(cinfo->subclassList),
+      end(cinfo->subclassList),
+      cinfo
+    ) != end(cinfo->subclassList)
+  );
   auto cpy = cinfo->subclassList;
   std::sort(begin(cpy), end(cpy));
-  cpy.erase(
-    std::unique(begin(cpy), end(cpy)),
-    end(cpy)
-  );
+  cpy.erase(std::unique(begin(cpy), end(cpy)), end(cpy));
   always_assert(cpy.size() == cinfo->subclassList.size());
 
   // The baseList is non-empty, and the last element is this class.
@@ -4737,29 +5952,71 @@ void check_invariants(const ClassInfo* cinfo) {
     // ones.
     always_assert(!info.thisHas || info.derivedHas);
   }
+}
 
-  // Every FuncFamily has more than function and contain functions
-  // with the same name (unless its a family of ctors). methodFamilies
-  // and singleMethodFamilies should have disjoint keys.
-  for (auto const& mfam: cinfo->methodFamilies) {
-    always_assert(mfam.second->possibleFuncs().size() > 1);
-    auto const name = mfam.second->possibleFuncs().front()->first;
-    for (auto const pf : mfam.second->possibleFuncs()) {
-      always_assert(pf->first->same(name));
+void check_invariants(const IndexData& data, const FuncFamily& ff) {
+  // FuncFamily should always have more than one func on it.
+  always_assert(ff.possibleFuncs().size() > 1);
+
+  SString name{nullptr};
+  FuncFamily::PossibleFunc last{nullptr, false};
+  for (auto const pf : ff.possibleFuncs()) {
+    // Should only contain methods
+    always_assert(pf.ptr()->cls);
+
+    // Every method on the list should have the same name.
+    if (!name) {
+      name = pf.ptr()->name;
+    } else {
+      always_assert(name == pf.ptr()->name);
     }
-    always_assert(!cinfo->singleMethodFamilies.count(mfam.first));
+
+    // Verify the list is sorted and doesn't contain any duplicates.
+    hphp_fast_set<const php::Func*> seen;
+    if (last.ptr()) {
+      always_assert(
+        [&] {
+          if (last.inRegular() && !pf.inRegular()) return true;
+          if (!last.inRegular() && pf.inRegular()) return false;
+          return string_data_lti{}(last.ptr()->cls->name, pf.ptr()->cls->name);
+        }()
+      );
+    }
+    always_assert(seen.emplace(pf.ptr()).second);
+    last = pf;
   }
-  for (auto const& mfam : cinfo->singleMethodFamilies) {
-    always_assert(!cinfo->methodFamilies.count(mfam.first));
+
+  if (!ff.possibleFuncs().front().inRegular() ||
+      ff.possibleFuncs().back().inRegular()) {
+    // If there's no funcs on a regular class, or if all functions are
+    // on a regular class, we don't need to keep separate information
+    // for the regular subset (it either doesn't exist, or it's equal to
+    // the entire list).
+    always_assert(!ff.m_regular);
   }
 }
 
-void check_invariants(IndexData& data) {
+void check_invariants(const IndexData& data) {
   if (!debug) return;
 
-  for (auto& cinfo : data.allClassInfos) {
-    check_invariants(cinfo.get());
+  trace_time timer{"check-invariants"};
+
+  parallel::for_each(
+    data.allClassInfos,
+    [&] (const std::unique_ptr<ClassInfo>& cinfo) {
+      check_invariants(data, cinfo.get());
+    }
+  );
+
+  std::vector<const FuncFamily*> funcFamilies;
+  funcFamilies.reserve(data.funcFamilies.size());
+  for (auto const& [ff, _] : data.funcFamilies) {
+    funcFamilies.emplace_back(ff.get());
   }
+  parallel::for_each(
+    funcFamilies,
+    [&] (const FuncFamily* ff) { check_invariants(data, *ff); }
+  );
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -5757,7 +7014,10 @@ Index::Index(Input input,
     preresolveTypes(*m_data, cid);
   }
 
-  m_data->funcInfo.resize(m_data->nextFuncId);
+  // This looks stupid, but using resize means FuncInfo needs to be
+  // copyable/movable but we have an std::atomic in it (which is
+  // not). This avoids that.
+  m_data->funcInfo = decltype(m_data->funcInfo)(m_data->nextFuncId);
 
   // Part of the index building routines happens before the various asserted
   // index invariants hold.  These each may depend on computations from
@@ -5780,10 +7040,8 @@ Index::Index(Input input,
   );
   define_func_families(*m_data);        // AttrNoOverride, iface_vtables,
                                         // subclass_list
-
-  check_invariants(*m_data);
-
   mark_no_override_classes(*m_data);
+  check_invariants(*m_data);
 
   trace_time tracer_2("initialize return types", sample);
   std::vector<const php::Func*> all_funcs;
@@ -6045,13 +7303,8 @@ void Index::rewrite_default_initial_values() const {
 
   // Start with all the leaf classes
   for (auto const& cinfo : m_data->allClassInfos) {
-    auto const isLeaf = [&] {
-      for (auto const& sub : cinfo->subclassList) {
-        if (sub != cinfo.get()) return false;
-      }
-      return true;
-    }();
-    if (isLeaf) enqueue(*cinfo);
+    if (!(cinfo->cls->attrs & AttrNoOverride)) continue;
+    enqueue(*cinfo);
   }
 
   WorkList oldWorkList;
@@ -6593,187 +7846,112 @@ res::Class Index::builtin_class(SString name) const {
   return *rcls;
 }
 
-res::Func Index::resolve_method(Context ctx,
-                                Type clsType,
-                                SString name) const {
-  auto const general = [&] {
-    // Even if we can't resolve to a FuncFamily from the class, we
-    // can still perhaps use a (less percise) func family derived
-    // from just the method name.
-    auto const singleMethIt = m_data->singleMethodFamilies.find(name);
-    if (singleMethIt != m_data->singleMethodFamilies.end()) {
-      return res::Func {
-        res::Func::MethodOrMissing{
-          func_from_mte(*m_data, singleMethIt->second->second)
-        }
-      };
+res::Class Index::wait_handle_class() const {
+  return m_data->lazyWaitHandleCls.get(
+    [&] {
+      auto const awaitable = builtin_class(s_Awaitable.get());
+      auto const without = awaitable.withoutNonRegular();
+      assertx(without.has_value());
+      return *without;
     }
-    auto const methIt = m_data->methodFamilies.find(name);
-    if (methIt != m_data->methodFamilies.end()) {
-      return res::Func { methIt->second };
-    }
-    return res::Func { res::Func::MethodName { name } };
-  };
+  );
+}
 
-  if (!is_specialized_cls(clsType)) return general();
-
-  // Return the appropriate res::Func for a given ClassInfo (either
-  // exact or sub).
-  auto const process = [&] (ClassInfo* cinfo, bool isExact) {
-    // Classes may have more method families than methods. Any such
-    // method families are guaranteed to all be public so we can do
-    // this lookup as a last gasp before resorting to general().
-    auto const find_extra_method = [&] {
-      auto singleMethIt = cinfo->singleMethodFamilies.find(name);
-      if (singleMethIt != cinfo->singleMethodFamilies.end()) {
-        return res::Func {
-          res::Func::Method {
-            func_from_mte(*m_data, singleMethIt->second->second)
-          }
-        };
-      }
-      auto methIt = cinfo->methodFamilies.find(name);
-      if (methIt == end(cinfo->methodFamilies)) return general();
-      // If there was a sole implementer we can resolve to a single method, even
-      // if the method was not declared on the interface itself.
-      assertx(methIt->second->possibleFuncs().size() > 1);
-      return res::Func { methIt->second };
-    };
-
-    // Interfaces *only* have the extra methods defined for all
-    // subclasses
-    if (cinfo->cls->attrs & AttrInterface) return find_extra_method();
-
-    /*
-     * Whether or not the context class has a private method with the
-     * same name as the method we're trying to call.
-     */
-    auto const contextMayHavePrivateWithSameName = folly::lazy([&]() -> bool {
-      if (!ctx.cls) return false;
-      auto const cls_it = m_data->classInfo.find(ctx.cls->name);
-      if (cls_it == end(m_data->classInfo)) {
-        // This class had no pre-resolved ClassInfos, which means it
-        // always fatals in any way it could be defined, so it doesn't
-        // matter what we return here (as all methods in the context
-        // class are unreachable code).
-        return true;
-      }
-      // Because of traits, each instantiation of the class could have
-      // different private methods; we need to check them all.
-      auto const iter = cls_it->second->methods.find(name);
-      if (iter != end(cls_it->second->methods) &&
-          iter->second.attrs & AttrPrivate &&
-          iter->second.topLevel) {
-        return true;
-      }
-      return false;
-    });
-
-    /*
-     * Look up the method in the target class.
-     */
-    auto const methIt = cinfo->methods.find(name);
-    if (methIt == end(cinfo->methods)) {
-      return isExact ? general() : find_extra_method();
-    }
-    auto const ftarget = func_from_mte(*m_data, methIt->second);
-
-    // Be conservative around unflattened trait methods, since their cls
-    // may change at runtime.
-    if (ftarget->cls && is_used_trait(*ftarget->cls)) {
-      return general();
-    }
-
-    // We need to revisit the hasPrivateAncestor code if we start being
-    // able to look up methods on interfaces (currently they have empty
-    // method tables).
-    assertx(!(cinfo->cls->attrs & AttrInterface));
-
-    /*
-     * If our candidate method has a private ancestor, unless it is
-     * defined on this class, we need to make sure we don't erroneously
-     * resolve the overriding method if the call is coming from the
-     * context the defines the private method.
-     *
-     * For now this just gives up if the context and the callee class
-     * could be related and the context defines a private of the same
-     * name.  (We should actually try to resolve that method, though.)
-     */
-    if (methIt->second.hasPrivateAncestor &&
-        ctx.cls &&
-        ctx.cls != ftarget->cls) {
-      if (could_be_related(ctx.cls, cinfo->cls)) {
-        if (contextMayHavePrivateWithSameName()) {
-          return general();
-        }
-      }
-    }
-
-    auto const resolve = [&] {
-      create_func_info(*m_data, ftarget);
-      return res::Func { res::Func::Method { ftarget } };
-    };
-
-    if (isExact) return resolve();
-    if (methIt->second.attrs & AttrNoOverride) {
-      return resolve();
-    }
-
-    auto const singleFamIt = cinfo->singleMethodFamilies.find(name);
-    if (singleFamIt != cinfo->singleMethodFamilies.end()) {
-      return res::Func {
-        res::Func::Method {
-          func_from_mte(*m_data, singleFamIt->second->second)
-        }
-      };
-    }
-    auto const famIt = cinfo->methodFamilies.find(name);
-    if (famIt == end(cinfo->methodFamilies)) return general();
-    assertx(famIt->second->possibleFuncs().size() > 1);
-    return res::Func { famIt->second };
-  };
-
-  auto const& dcls  = dcls_of(clsType);
+// Given a DCls, return the most specific res::Func for that DCls. For
+// intersections, this will call process/general on every component of
+// the intersection and combine the results. For non-intersections, it
+// will call process/general on the sole member of the DCls. process
+// is called to obtain a res::Func from a ClassInfo. If a ClassInfo
+// isn't available, general will be called instead.
+template <typename P, typename G>
+res::Func Index::rfunc_from_dcls(const DCls& dcls,
+                                 SString name,
+                                 const P& process,
+                                 const G& general) {
   if (!dcls.isIsect()) {
-    // If this isn't an intersection, we can just get the res::Func
-    // for this one ClassInfo and we're done.
+    // If this isn't an intersection, there's only one cinfo to
+    // process and we're done.
     auto const cinfo = dcls.cls().val.right();
-    if (!cinfo) return general();
-    return process(cinfo, dcls.isExact());
+    if (!cinfo) return general(dcls.containsNonRegular());
+    return process(cinfo, dcls.isExact(), dcls.containsNonRegular());
   }
+
+  /*
+   * Otherwise get a res::Func for all members of the intersection and
+   * combine them together. Since the DCls represents a class which is
+   * a subtype of every ClassInfo in the list, every res::Func we get
+   * is true.
+   *
+   * The relevant res::Func types in order from most general to more
+   * specific are:
+   *
+   * MethodName -> FuncFamily -> MethodOrMissing -> Method -> Missing
+   *
+   * Since every res::Func in the intersection is true, we take the
+   * res::Func which is most specific. Two different res::Funcs cannot
+   * be contradict. For example, we shouldn't get a Method and a
+   * Missing since one implies there's no func and the other implies
+   * one specific func. Or two different res::Funcs shouldn't resolve
+   * to two different MethTabEntryPairs.
+   */
 
   using Func = res::Func;
 
-  // Otherwise get a res::Func for all members of the intersection and
-  // combine them into a res::Func::Isect. Since the DCls represents a
-  // class which is a subtype of every ClassInfo in the list, every
-  // res::Func we get is true. This implies that it is invalid for two
-  // different members of the intersection to resolve to different
-  // MethTabEntryPairs, for example.
-
-  auto maybeMissing = true;
+  auto missing = TriBool::Maybe;
   Func::Isect isect;
   const php::Func* singleMethod = nullptr;
+
   for (auto const i : dcls.isect()) {
     auto const cinfo = i.val.right();
     if (!cinfo) continue;
 
-    auto const func = process(cinfo, false);
+    auto const func = process(cinfo, false, dcls.containsNonRegular());
     match<void>(
       func.val,
       [&] (Func::MethodName) {},
       [&] (Func::Method m) {
         assertx(IMPLIES(singleMethod, singleMethod == m.func));
-        if (!singleMethod) singleMethod = m.func;
-        maybeMissing = false;
+        assertx(IMPLIES(singleMethod, isect.families.empty()));
+        assertx(missing != TriBool::Yes);
+        if (!singleMethod) {
+          singleMethod = m.func;
+          isect.families.clear();
+        }
+        missing = TriBool::No;
       },
-      [&] (FuncFamily* ff) {
-        isect.families.emplace_back(ff);
-        maybeMissing = false;
+      [&] (Func::MethodFamily fam) {
+        if (missing == TriBool::Yes) {
+          assertx(!singleMethod);
+          assertx(isect.families.empty());
+          return;
+        }
+        if (singleMethod) {
+          assertx(missing != TriBool::Yes);
+          assertx(isect.families.empty());
+          return;
+        }
+        assertx(missing == TriBool::Maybe);
+        isect.families.emplace_back(fam.family);
+        isect.regularOnly |= fam.regularOnly;
       },
       [&] (Func::MethodOrMissing m) {
         assertx(IMPLIES(singleMethod, singleMethod == m.func));
-        if (!singleMethod) singleMethod = m.func;
+        assertx(IMPLIES(singleMethod, isect.families.empty()));
+        if (missing == TriBool::Yes) {
+          assertx(!singleMethod);
+          assertx(isect.families.empty());
+          return;
+        }
+        if (!singleMethod) {
+          singleMethod = m.func;
+          isect.families.clear();
+        }
+      },
+      [&] (Func::Missing) {
+        assertx(missing != TriBool::No);
+        singleMethod = nullptr;
+        isect.families.clear();
+        missing = TriBool::Yes;
       },
       [&] (Func::FuncName)     { always_assert(false); },
       [&] (FuncInfo*)          { always_assert(false); },
@@ -6785,14 +7963,24 @@ res::Func Index::resolve_method(Context ctx,
   // true, and method is more specific than a FuncFamily, so it is
   // preferred.
   if (singleMethod) {
-    // If maybeMissing is true, then *every* resolution was to a
+    assertx(missing != TriBool::Yes);
+    // If missing is Maybe, then *every* resolution was to a
     // MethodName or MethodOrMissing, so include that fact here by
     // using MethodOrMissing.
-    if (maybeMissing) return Func { Func::MethodOrMissing { singleMethod } };
+    if (missing == TriBool::Maybe) {
+      return Func { Func::MethodOrMissing { singleMethod } };
+    }
     return Func { Func::Method { singleMethod } };
   }
-  // We only got unresolved classes, so be pessimistic.
-  if (isect.families.empty()) return general();
+  // We only got unresolved classes. If missing is TriBool::Yes, the
+  // function doesn't exist. Otherwise be pessimistic.
+  if (isect.families.empty()) {
+    if (missing == TriBool::Yes) return Func { Func::Missing { name } };
+    assertx(missing == TriBool::Maybe);
+    return general(dcls.containsNonRegular());
+  }
+  // Isect case. Isects always might contain missing funcs.
+  assertx(missing == TriBool::Maybe);
 
   // We could add a FuncFamily multiple times, so remove duplicates.
   std::sort(begin(isect.families), end(isect.families));
@@ -6802,36 +7990,348 @@ res::Func Index::resolve_method(Context ctx,
   );
   // If everything simplifies down to a single FuncFamily, just use
   // that.
-  if (isect.families.size() == 1) return Func { isect.families[0] };
+  if (isect.families.size() == 1) {
+    return Func { Func::MethodFamily { isect.families[0], isect.regularOnly } };
+  }
   return Func { std::move(isect) };
 }
 
-Optional<res::Func>
-Index::resolve_ctor(Context /*ctx*/, res::Class rcls, bool exact) const {
-  auto const cinfo = rcls.val.right();
-  if (!cinfo) return std::nullopt;
-  if (cinfo->cls->attrs & (AttrInterface|AttrTrait)) return std::nullopt;
+res::Func Index::resolve_method(Context ctx,
+                                const Type& thisType,
+                                SString name) const {
+  assertx(thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj));
 
-  auto const cit = cinfo->methods.find(s_construct.get());
-  if (cit == end(cinfo->methods)) return std::nullopt;
+  using Func = res::Func;
 
-  auto const ctor = mteFromIt(cit);
-  if (exact || ctor->second.attrs & AttrNoOverride) {
-    auto const f = func_from_mte(*m_data, ctor->second);
-    create_func_info(*m_data, f);
-    return res::Func { res::Func::Method { f } };
+  /*
+   * Without using the class type, try to infer a set of methods
+   * using just the method name. This will, naturally, not produce
+   * as precise a set as when using the class type, but it's better
+   * than nothing. For all of these results, we need to include the
+   * possibility of the method not existing (we cannot rule that out
+   * for this situation).
+   */
+  auto const general = [&] (bool includeNonRegular) {
+    assertx(name != s_construct.get());
+
+    // We don't produce name-only global func families for special
+    // methods, so be conservative. We don't call special methods in a
+    // context where we'd expect to not know the class, so it's not
+    // worthwhile.
+    if (is_special_method_name(name)) {
+      return Func { Func::MethodName { name } };
+    }
+
+    // Lookup up the name-only global func families for this name. If
+    // we don't have one, the method cannot exist because it contains
+    // every method with that name in the program.
+    auto const famIt = m_data->methodFamilies.find(name);
+    if (famIt == end(m_data->methodFamilies)) {
+      return Func { Func::Missing { name } };
+    }
+
+    // The entry exists. Consult the correct data in it, depending on
+    // whether we're including non-regular classes or not.
+    auto const& entry = includeNonRegular
+      ? famIt->second.m_all
+      : famIt->second.m_regular;
+    assertx(entry.isEmpty() || entry.isIncomplete());
+
+    if (auto const ff = entry.funcFamily()) {
+      return Func { Func::MethodFamily { ff, !includeNonRegular } };
+    } else if (auto const f = entry.func()) {
+      return Func { Func::MethodOrMissing { f } };
+    } else {
+      return Func { Func::Missing { name } };
+    }
+  };
+
+  /*
+   * Whether or not the context class has a private method with the
+   * same name as the method we're trying to call.
+   */
+  auto const contextMayHavePrivateWithSameName = folly::lazy(
+    [&] {
+      if (!ctx.cls) return false;
+      auto const cls_it = m_data->classInfo.find(ctx.cls->name);
+      if (cls_it == end(m_data->classInfo)) {
+        // This class had no pre-resolved ClassInfos, which means it
+        // always fatals in any way it could be defined, so it doesn't
+        // matter what we return here (as all methods in the context
+        // class are unreachable code).
+        return true;
+      }
+      auto const iter = cls_it->second->methods.find(name);
+      if (iter != end(cls_it->second->methods) &&
+          iter->second.attrs & AttrPrivate &&
+          iter->second.topLevel) {
+        return true;
+      }
+      return false;
+    }
+  );
+
+  auto const process = [&] (ClassInfo* cinfo,
+                            bool isExact,
+                            bool includeNonRegular) {
+    assertx(name != s_construct.get());
+
+    auto const methIt = cinfo->methods.find(name);
+    if (methIt == end(cinfo->methods)) {
+      // We don't store metadata for special methods, so be
+      // pessimistic (the lack of a method entry does not mean the
+      // call might fail at runtme).
+      if (is_special_method_name(name)) {
+        return Func { Func::MethodName { name } };
+      }
+      // We're only considering this class, not it's subclasses. Since
+      // it doesn't exist here, the resolution will always fail.
+      if (isExact) return Func { Func::Missing { name } };
+      // The method isn't present on this class, but it might be in
+      // the subclasses. In most cases try a general lookup to get a
+      // slightly better type than nothing.
+      if (includeNonRegular ||
+          !(cinfo->cls->attrs & (AttrInterface|AttrAbstract))) {
+        return general(includeNonRegular);
+      }
+
+      // A special case is if we're only considering regular classes,
+      // and this is an interface or abstract class. For those, we
+      // "expand" the method families table to include any methods
+      // defined in *all* regular subclasses. This is needed to
+      // preserve monotonicity. Check this now.
+      auto const famIt = cinfo->methodFamilies.find(name);
+      // If no entry, treat it pessimistically like the rest of the
+      // cases.
+      if (famIt == end(cinfo->methodFamilies)) return general(false);
+
+      // We found an entry. This cannot be empty (remember the method
+      // is guaranteed to exist on *all* regular subclasses), and must
+      // be complete (for the same reason). Use it.
+      auto const& entry = famIt->second;
+      assertx(!entry.isEmpty());
+      assertx(entry.isComplete());
+      if (auto const ff = entry.funcFamily()) {
+        return Func { Func::MethodFamily { ff, true } };
+      } else if (auto const func = entry.func()) {
+        return Func { Func::Method { func } };
+      } else {
+        always_assert(false);
+      }
+    }
+    // The method on this class.
+    auto const ftarget = func_from_mte(*m_data, methIt->second);
+
+    /*
+     * If our candidate method has a private ancestor, unless it is
+     * defined on this class, we need to make sure we don't
+     * erroneously resolve the overriding method if the call is coming
+     * from the context the defines the private method.
+     *
+     * For now this just gives up if the context and the callee class
+     * could be related and the context defines a private of the same
+     * name. (We should actually try to resolve that method, though.)
+     */
+    if (methIt->second.hasPrivateAncestor &&
+        ctx.cls &&
+        ctx.cls != ftarget->cls &&
+        could_be_related(ctx.cls, cinfo->cls) &&
+        contextMayHavePrivateWithSameName()) {
+      return general(includeNonRegular);
+    }
+
+    // We don't store method family information about special methods
+    // and they have special inheritance semantics.
+    if (is_special_method_name(name)) {
+      // If we know the class exactly, we can use ftarget.
+      if (isExact) return Func { Func::Method { ftarget } };
+      // The method isn't overwritten, but they don't inherit, so it
+      // could be missing.
+      if (methIt->second.attrs & AttrNoOverride) {
+        return Func { Func::MethodOrMissing { ftarget } };
+      }
+      // Otherwise be pessimistic.
+      return Func { Func::MethodName { name } };
+    }
+
+    // If we're only including regular subclasses, and this class
+    // itself isn't regular, the result may not necessarily include
+    // ftarget.
+    if (!includeNonRegular && !is_regular_class(*cinfo->cls)) {
+      // We're not including this base class. If we're exactly this
+      // class, there's no method at all. It will always be missing.
+      if (isExact) return Func { Func::Missing { name } };
+      if (methIt->second.noOverrideRegular) {
+        // The method isn't overridden in a subclass, but we can't
+        // use the base class either. This leaves two cases. Either
+        // the method isn't overridden because there are no regular
+        // subclasses (in which case there's no resolution at all), or
+        // because there's regular subclasses, but they use the same
+        // method (in which case the result is just ftarget).
+        if (!cinfo->hasRegularSubclass) {
+          return Func { Func::Missing { name } };
+        }
+        return Func { Func::Method { ftarget } };
+      }
+      // We can't use the base class (because it's non-regular), but
+      // the method is overridden by a regular subclass.
+
+      // Since this is a non-regular class and we want the result for
+      // the regular subset, we need to consult the aux table first.
+      auto const auxIt = cinfo->methodFamiliesAux.find(name);
+      if (auxIt != end(cinfo->methodFamiliesAux)) {
+        // Found an entry in the aux table. Use whatever it provides.
+        auto const& aux = auxIt->second;
+        if (auto const ff = aux.funcFamily()) {
+          return Func { Func::MethodFamily { ff, true } };
+        } else if (auto const f = aux.func()) {
+          return aux.isComplete()
+            ? Func { Func::Method { f } }
+            : Func { Func::MethodOrMissing { f } };
+        } else {
+          return Func { Func::Missing { name } };
+        }
+      }
+      // No entry in the aux table. The result is the same as the
+      // normal table, so fall through and use that.
+    } else if (isExact ||
+               methIt->second.attrs & AttrNoOverride ||
+               (!includeNonRegular && methIt->second.noOverrideRegular)) {
+      // Either we want all classes, or the base class is regular. If
+      // the method isn't overridden we know it must be just ftarget
+      // (the override bits include it being missing in a subclass, so
+      // we know it cannot be missing either).
+      return Func { Func::Method { ftarget } };
+    }
+
+    // Look up the entry in the normal method family table and use
+    // whatever is there.
+    auto const famIt = cinfo->methodFamilies.find(name);
+    assertx(famIt != end(cinfo->methodFamilies));
+    auto const& fam = famIt->second;
+    assertx(!fam.isEmpty());
+
+    if (auto const ff = fam.funcFamily()) {
+      return Func { Func::MethodFamily { ff, !includeNonRegular } };
+    } else if (auto const f = fam.func()) {
+      return (!includeNonRegular || fam.isComplete())
+        ? Func { Func::Method { f } }
+        : Func { Func::MethodOrMissing { f } };
+    } else {
+      always_assert(false);
+    }
+  };
+
+  auto const isClass = thisType.subtypeOf(BCls);
+  if (name == s_construct.get()) {
+    if (isClass) return Func { Func::MethodName { s_construct.get() } };
+    return resolve_ctor(thisType);
   }
 
-  auto const singleFamIt = cinfo->singleMethodFamilies.find(s_construct.get());
-  if (singleFamIt != cinfo->singleMethodFamilies.end()) {
-    return res::Func {
-      res::Func::Method { func_from_mte(*m_data, singleFamIt->second->second) }
-    };
+  if (isClass) {
+    if (!is_specialized_cls(thisType)) return general(true);
+  } else if (!is_specialized_obj(thisType)) {
+    return general(false);
   }
-  auto const famIt = cinfo->methodFamilies.find(s_construct.get());
-  if (famIt == end(cinfo->methodFamilies)) return std::nullopt;
-  assertx(famIt->second->possibleFuncs().size() > 1);
-  return res::Func { famIt->second };
+  return rfunc_from_dcls(
+    isClass ? dcls_of(thisType) : dobj_of(thisType),
+    name,
+    process,
+    general
+  );
+}
+
+res::Func Index::resolve_ctor(const Type& obj) const {
+  assertx(obj.subtypeOf(BObj));
+
+  using Func = res::Func;
+
+  // Can't say anything useful if we don't know the object type.
+  if (!is_specialized_obj(obj)) {
+    return Func { Func::MethodName { s_construct.get() } };
+  }
+
+  return rfunc_from_dcls(
+    dobj_of(obj),
+    s_construct.get(),
+    [&] (ClassInfo* cinfo, bool isExact, bool includeNonRegular) {
+      // We're dealing with an object here, which never uses
+      // non-regular classes.
+      assertx(!includeNonRegular);
+
+      // See if this class has a ctor.
+      auto const methIt = cinfo->methods.find(s_construct.get());
+      if (methIt == end(cinfo->methods)) {
+        // There's no ctor on this class. This doesn't mean the ctor
+        // won't exist at runtime, it might get the default ctor, so
+        // we have to be conservative.
+        return Func { Func::MethodName { s_construct.get() } };
+      }
+
+      // We have a ctor, but it might be overridden in a subclass.
+      auto const ctor = mteFromIt(methIt);
+      assertx(!(ctor->second.attrs & AttrStatic));
+      auto const ftarget = func_from_mte(*m_data, ctor->second);
+      assertx(!(ftarget->attrs & AttrStatic));
+
+      // If this class is known exactly, or we know nothing overrides
+      // this ctor, we know this ctor is precisely it.
+      if (isExact || ctor->second.noOverrideRegular) {
+        // If this class isn't regular, and doesn't have any regular
+        // subclasses (or if it's exact), this resolution will always
+        // fail.
+        if (!is_regular_class(*cinfo->cls) &&
+            (isExact || !cinfo->hasRegularSubclass)) {
+          return Func { Func::Missing { s_construct.get() } };
+        }
+        return Func { Func::Method { ftarget } };
+      }
+
+      // If this isn't a regular class, we need to check the "aux"
+      // entry first (which always has priority when only looking at
+      // the regular subset).
+      if (!is_regular_class(*cinfo->cls)) {
+        auto const auxIt = cinfo->methodFamiliesAux.find(s_construct.get());
+        if (auxIt != end(cinfo->methodFamiliesAux)) {
+          auto const& aux = auxIt->second;
+          if (auto const ff = aux.funcFamily()) {
+            return Func { Func::MethodFamily { ff, true } };
+          } else if (auto const f = aux.func()) {
+            return aux.isComplete()
+              ? Func { Func::Method { f } }
+              : Func { Func::MethodOrMissing { f } };
+          } else {
+            // Ctor doesn't exist in any regular subclasses. This can
+            // happen with interfaces. The ctor might get the default
+            // ctor at runtime, so be conservative.
+            return Func { Func::MethodName { s_construct.get() } };
+          }
+        }
+      }
+      // Otherwise this class is regular (in which case there's just
+      // method families, or there's no entry in aux, which means the
+      // regular subset entry is the same as the full entry.
+
+      auto const famIt = cinfo->methodFamilies.find(s_construct.get());
+      assertx(famIt != cinfo->methodFamilies.end());
+      auto const& fam = famIt->second;
+      assertx(!fam.isEmpty());
+
+      if (auto const ff = fam.funcFamily()) {
+        return Func { Func::MethodFamily { ff, true } };
+      } else if (auto const f = fam.func()) {
+        // Since we're looking at the regular subset, we can assume
+        // the set is complete, regardless of the flag on fam.
+        return Func { Func::Method { f } };
+      } else {
+        always_assert(false);
+      }
+    },
+    [&] (bool includeNonRegular) {
+      assertx(!includeNonRegular);
+      return Func { Func::MethodName { s_construct.get() } };
+    }
+  );
 }
 
 res::Func
@@ -7095,18 +8595,18 @@ Index::supports_async_eager_return(res::Func rfunc) const {
     [&](res::Func::Method m) {
       return func_supports_AER(m.func);
     },
-    [&](FuncFamily* fam) { return fam->m_static->m_supportsAER; },
-    [&](res::Func::MethodOrMissing m) {
-      return func_supports_AER(m.func);
+    [&](res::Func::MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_supportsAER;
     },
+    [&](res::Func::MethodOrMissing m) { return func_supports_AER(m.func); },
+    [&](res::Func::Missing) { return TriBool::No; },
     [&](const res::Func::Isect& i) {
       auto aer = TriBool::Maybe;
       for (auto const ff : i.families) {
-        if (ff->m_static->m_supportsAER == TriBool::Maybe) continue;
-        assertx(
-          IMPLIES(aer != TriBool::Maybe, aer == ff->m_static->m_supportsAER)
-        );
-        if (aer == TriBool::Maybe) aer = ff->m_static->m_supportsAER;
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_supportsAER == TriBool::Maybe) continue;
+        assertx(IMPLIES(aer != TriBool::Maybe, aer == info.m_supportsAER));
+        if (aer == TriBool::Maybe) aer = info.m_supportsAER;
       }
       return aer;
     }
@@ -7123,9 +8623,10 @@ bool Index::is_effect_free(Context ctx, const php::Func* func) const {
 }
 
 bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
-  auto const processFF = [&] (FuncFamily* ff) {
-    for (auto const mte : ff->possibleFuncs()) {
-      auto const func = func_from_mte(*m_data, mte->second);
+  auto const processFF = [&] (FuncFamily* ff, bool regularOnly) {
+    for (auto const possible : ff->possibleFuncs()) {
+      if (regularOnly && !possible.inRegular()) continue;
+      auto const func = possible.ptr();
       add_dependency(*m_data, func, ctx, Dep::InlineDepthLimit);
       auto const effectFree = func_info(*m_data, func)->effectFree;
       if (!effectFree) return false;
@@ -7145,11 +8646,14 @@ bool Index::is_effect_free(Context ctx, res::Func rfunc) const {
       add_dependency(*m_data, m.func, ctx, Dep::InlineDepthLimit);
       return func_info(*m_data, m.func)->effectFree;
     },
-    [&](FuncFamily* fam) { return processFF(fam); },
+    [&] (res::Func::MethodFamily fam) {
+      return processFF(fam.family, fam.regularOnly);
+    },
     [&] (res::Func::MethodOrMissing m) { return false; },
+    [&] (res::Func::Missing) { return false; },
     [&] (const res::Func::Isect& i) {
       for (auto const ff : i.families) {
-        if (processFF(ff)) return true;
+        if (processFF(ff, i.regularOnly)) return true;
       }
       return false;
     }
@@ -7166,13 +8670,20 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
   if (dcls.isExact()) {
     auto const cinfo = dcls.cls().val.right();
     if (!cinfo) return false;
-    f(cinfo);
+    if (dcls.containsNonRegular() || is_regular_class(*cinfo->cls)) {
+      f(cinfo);
+    }
     return true;
   } else if (dcls.isSub()) {
     auto const cinfo = dcls.cls().val.right();
     if (!cinfo) return false;
-    for (auto const sub : cinfo->subclassList) {
-      if (!f(sub)) break;
+    if (cinfo->cls->attrs & AttrTrait) {
+      if (dcls.containsNonRegular()) f(cinfo);
+    } else {
+      for (auto const sub : cinfo->subclassList) {
+        if (!dcls.containsNonRegular() && !is_regular_class(*sub->cls)) continue;
+        if (!f(sub)) break;
+      }
     }
     return true;
   }
@@ -7182,7 +8693,7 @@ bool Index::visit_every_dcls_cls(const DCls& dcls, const F& f) const {
   auto unresolved = false;
   res::Class::visitEverySub(
     isect,
-    false,
+    dcls.containsNonRegular(),
     [&] (res::Class c) {
       if (auto const cinfo = c.val.right()) {
         return f(cinfo);
@@ -7561,14 +9072,14 @@ Type Index::lookup_return_type(Context ctx,
                                MethodsInfo* methods,
                                res::Func rfunc,
                                Dep dep) const {
-  auto const funcFamily = [&] (FuncFamily* fam) {
+  auto const funcFamily = [&] (FuncFamily* fam, bool regularOnly) {
     add_dependency(*m_data, fam, ctx, dep);
-    return fam->m_returnTy.get(
+    return fam->infoFor(regularOnly).m_returnTy.get(
       [&] {
         auto ret = TBottom;
         for (auto const pf : fam->possibleFuncs()) {
-          auto const finfo =
-            func_info(*m_data, func_from_mte(*m_data, pf->second));
+          if (regularOnly && !pf.inRegular()) continue;
+          auto const finfo = func_info(*m_data, pf.ptr());
           if (!finfo->func) return TInitCell;
           ret |= unctx(finfo->returnTy);
           if (!ret.strictSubtypeOf(BInitCell)) return ret;
@@ -7598,11 +9109,16 @@ Type Index::lookup_return_type(Context ctx,
       return unctx(finfo->returnTy);
     },
     [&] (res::Func::Method m)          { return meth(m.func); },
-    [&] (FuncFamily* fam)              { return funcFamily(fam); },
+    [&] (res::Func::MethodFamily fam)  {
+      return funcFamily(fam.family, fam.regularOnly);
+    },
     [&] (res::Func::MethodOrMissing m) { return meth(m.func); },
+    [&] (res::Func::Missing)           { return TBottom; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
-      for (auto const ff : i.families) ty &= funcFamily(ff);
+      for (auto const ff : i.families) {
+        ty &= funcFamily(ff, i.regularOnly);
+      }
       return ty;
     }
   );
@@ -7614,14 +9130,14 @@ Type Index::lookup_return_type(Context caller,
                                const Type& context,
                                res::Func rfunc,
                                Dep dep) const {
-  auto const funcFamily = [&] (FuncFamily* fam) {
+  auto const funcFamily = [&] (FuncFamily* fam, bool regularOnly) {
     add_dependency(*m_data, fam, caller, dep);
-    auto ret = fam->m_returnTy.get(
+    auto ret = fam->infoFor(regularOnly).m_returnTy.get(
       [&] {
         auto ty = TBottom;
         for (auto const pf : fam->possibleFuncs()) {
-          auto const finfo =
-            func_info(*m_data, func_from_mte(*m_data, pf->second));
+          if (regularOnly && !pf.inRegular()) continue;
+          auto const finfo = func_info(*m_data, pf.ptr());
           if (!finfo->func) return TInitCell;
           ty |= finfo->returnTy;
           if (!ty.strictSubtypeOf(BInitCell)) return ty;
@@ -7669,11 +9185,16 @@ Type Index::lookup_return_type(Context caller,
       );
     },
     [&] (res::Func::Method m)          { return meth(m.func); },
-    [&] (FuncFamily* fam)              { return funcFamily(fam); },
+    [&] (res::Func::MethodFamily fam)  {
+      return funcFamily(fam.family, fam.regularOnly);
+    },
     [&] (res::Func::MethodOrMissing m) { return meth(m.func); },
+    [&] (res::Func::Missing)           { return TBottom; },
     [&] (const res::Func::Isect& i) {
       auto ty = TInitCell;
-      for (auto const ff : i.families) ty &= funcFamily(ff);
+      for (auto const ff : i.families) {
+        ty &= funcFamily(ff, i.regularOnly);
+      }
       return ty;
     }
   );
@@ -7729,18 +9250,20 @@ Optional<uint32_t> Index::lookup_num_inout_params(
     [&] (res::Func::Method m) {
       return func_num_inout(m.func);
     },
-    [&] (FuncFamily* fam) -> Optional<uint32_t> {
-      return fam->m_static->m_numInOut;
+    [&] (res::Func::MethodFamily fam) -> Optional<uint32_t> {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_numInOut;
     },
     [&] (res::Func::MethodOrMissing m) {
       return func_num_inout(m.func);
     },
+    [&] (res::Func::Missing) { return 0; },
     [&] (const res::Func::Isect& i) {
       Optional<uint32_t> numInOut;
       for (auto const ff : i.families) {
-        if (!ff->m_static->m_numInOut) continue;
-        assertx(IMPLIES(numInOut, *numInOut == *ff->m_static->m_numInOut));
-        if (!numInOut) numInOut = ff->m_static->m_numInOut;
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (!info.m_numInOut) continue;
+        assertx(IMPLIES(numInOut, *numInOut == *info.m_numInOut));
+        if (!numInOut) numInOut = info.m_numInOut;
       }
       return numInOut;
     }
@@ -7750,11 +9273,12 @@ Optional<uint32_t> Index::lookup_num_inout_params(
 PrepKind Index::lookup_param_prep(Context,
                                   res::Func rfunc,
                                   uint32_t paramId) const {
-  auto const fromFuncFamily = [&] (FuncFamily* ff) {
-    if (paramId >= ff->m_static->m_paramPreps.size()) {
+  auto const fromFuncFamily = [&] (FuncFamily* ff, bool regularOnly) {
+    auto const& info = *ff->infoFor(regularOnly).m_static;
+    if (paramId >= info.m_paramPreps.size()) {
       return PrepKind{TriBool::No, TriBool::No};
     }
-    return ff->m_static->m_paramPreps[paramId];
+    return info.m_paramPreps[paramId];
   };
 
   return match<PrepKind>(
@@ -7775,16 +9299,21 @@ PrepKind Index::lookup_param_prep(Context,
     [&] (res::Func::Method m) {
       return func_param_prep(m.func, paramId);
     },
-    [&] (FuncFamily* fam) { return fromFuncFamily(fam); },
+    [&] (res::Func::MethodFamily fam) {
+      return fromFuncFamily(fam.family, fam.regularOnly);
+    },
     [&] (res::Func::MethodOrMissing m) {
       return func_param_prep(m.func, paramId);
+    },
+    [&] (res::Func::Missing) {
+      return PrepKind{TriBool::No, TriBool::Yes};
     },
     [&] (const res::Func::Isect& i) {
       auto inOut = TriBool::Maybe;
       auto readonly = TriBool::Maybe;
 
       for (auto const ff : i.families) {
-        auto const prepKind = fromFuncFamily(ff);
+        auto const prepKind = fromFuncFamily(ff, i.regularOnly);
         if (prepKind.inOut != TriBool::Maybe) {
           assertx(IMPLIES(inOut != TriBool::Maybe, inOut == prepKind.inOut));
           if (inOut == TriBool::Maybe) inOut = prepKind.inOut;
@@ -7823,25 +9352,21 @@ TriBool Index::lookup_return_readonly(
     [&] (res::Func::Method m) {
       return yesOrNo(m.func->isReadonlyReturn);
     },
-    [&] (FuncFamily* fam) {
-      return fam->m_static->m_isReadonlyReturn;
+    [&] (res::Func::MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyReturn;
     },
     [&] (res::Func::MethodOrMissing m) {
       return yesOrNo(m.func->isReadonlyReturn);
     },
+    [&] (res::Func::Missing) { return TriBool::No; },
     [&] (const res::Func::Isect& i) {
       auto readOnly = TriBool::Maybe;
       for (auto const ff : i.families) {
-        if (ff->m_static->m_isReadonlyReturn == TriBool::Maybe) continue;
-        assertx(
-          IMPLIES(
-            readOnly != TriBool::Maybe,
-            readOnly == ff->m_static->m_isReadonlyReturn
-          )
-        );
-        if (readOnly == TriBool::Maybe) {
-          readOnly = ff->m_static->m_isReadonlyReturn;
-        }
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyReturn == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyReturn));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyReturn;
       }
       return readOnly;
     }
@@ -7868,25 +9393,21 @@ TriBool Index::lookup_readonly_this(
     [&] (res::Func::Method m) {
       return yesOrNo(m.func->isReadonlyThis);
     },
-    [&] (FuncFamily* fam) {
-      return fam->m_static->m_isReadonlyThis;
+    [&] (res::Func::MethodFamily fam) {
+      return fam.family->infoFor(fam.regularOnly).m_static->m_isReadonlyThis;
     },
     [&] (res::Func::MethodOrMissing m) {
       return yesOrNo(m.func->isReadonlyThis);
     },
+    [&] (res::Func::Missing) { return TriBool::No; },
     [&] (const res::Func::Isect& i) {
       auto readOnly = TriBool::Maybe;
       for (auto const ff : i.families) {
-        if (ff->m_static->m_isReadonlyThis == TriBool::Maybe) continue;
-        assertx(
-          IMPLIES(
-            readOnly != TriBool::Maybe,
-            readOnly == ff->m_static->m_isReadonlyThis
-          )
-        );
-        if (readOnly == TriBool::Maybe) {
-          readOnly = ff->m_static->m_isReadonlyThis;
-        }
+        auto const& info = *ff->infoFor(i.regularOnly).m_static;
+        if (info.m_isReadonlyThis == TriBool::Maybe) continue;
+        assertx(IMPLIES(readOnly != TriBool::Maybe,
+                        readOnly == info.m_isReadonlyThis));
+        if (readOnly == TriBool::Maybe) readOnly = info.m_isReadonlyThis;
       }
       return readOnly;
     }
@@ -8047,15 +9568,15 @@ PropLookupResult<> Index::lookup_static(Context ctx,
   return *result;
 }
 
-Type Index::lookup_public_prop(const Type& cls, const Type& name) const {
-  if (!is_specialized_cls(cls)) return TCell;
+Type Index::lookup_public_prop(const Type& obj, const Type& name) const {
+  if (!is_specialized_obj(obj)) return TCell;
 
   if (!is_specialized_string(name)) return TCell;
   auto const sname = sval_of(name);
 
   auto ty = TBottom;
   auto const resolved = visit_every_dcls_cls(
-    dcls_of(cls),
+    dobj_of(obj),
     [&] (const ClassInfo* cinfo) {
       ty |= lookup_public_prop_impl(
         *m_data,
@@ -8195,7 +9716,8 @@ PropMergeResult<> Index::merge_static_type(
   };
 
   auto const& dcls = dcls_of(cls);
-  auto const start = dcls.cls();
+  Optional<res::Class> start;
+  if (!dcls.isIsect()) start = dcls.cls();
 
   Optional<R> result;
   auto const resolved = visit_every_dcls_cls(
@@ -8213,7 +9735,7 @@ PropMergeResult<> Index::merge_static_type(
         checkUB,
         ignoreConst,
         mustBeReadOnly,
-        dcls.isSub() && !sname && cinfo != start.val.right()
+        dcls.isSub() && !sname && cinfo != start->val.right()
       );
       ITRACE(4, "{} -> {}\n", cinfo->cls->name, show(r));
       if (!result) {
@@ -8528,10 +10050,20 @@ void Index::refine_return_info(const FuncAnalysisResult& fa,
     find_deps(*m_data, func, dep, deps);
     if (resetFuncFamilies) {
       assertx(has_dep(dep, Dep::ReturnTy));
+      auto const regular = finfo->regularClassMethod.load();
       for (auto const ff : finfo->families) {
+        // Reset the cached return type information for all the
+        // FuncFamilies this function is a part of. Always reset the
+        // "all" information, and if this function is on a regular
+        // class and there's regular subset information, reset that
+        // too.
+        if (!ff->m_all.m_returnTy.reset() &&
+            (!regular || !ff->m_regular ||
+             !ff->m_regular->m_returnTy.reset())) {
+          continue;
+        }
         // Only load the deps for this func family if we're the ones
         // who successfully reset. Only one thread needs to do it.
-        if (!ff->m_returnTy.reset()) continue;
         find_deps(*m_data, ff, Dep::ReturnTy, deps);
       }
     }
@@ -8847,30 +10379,7 @@ void Index::cleanup_for_final() {
 
 void Index::cleanup_post_emit() {
   trace_time _{"cleanup post emit", m_data->sample};
-  {
-    trace_time t{"reset allClassInfos"};
-    t.ignore_client_stats();
-    parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
-  }
-  {
-    trace_time t{"reset funcInfo"};
-    t.ignore_client_stats();
-    parallel::for_each(
-      m_data->funcInfo,
-      [] (auto& u) {
-        u.returnTy = TBottom;
-        u.families.clear();
-      }
-    );
-  }
-  {
-    trace_time t{"reset program"};
-    t.ignore_client_stats();
-    parallel::for_each(m_data->program->units, [] (auto& u) { u.reset(); });
-    parallel::for_each(m_data->program->classes, [] (auto& u) { u.reset(); });
-    parallel::for_each(m_data->program->funcs, [] (auto& f) { f.reset(); });
-    m_data->program.reset();
-  }
+
   std::vector<std::function<void()>> clearers;
   #define CLEAR_PARALLEL(x) clearers.push_back([&] CLEAR(x));
   CLEAR_PARALLEL(m_data->classes);
@@ -8884,9 +10393,7 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->classClosureMap);
   CLEAR_PARALLEL(m_data->classExtraMethodMap);
 
-  CLEAR_PARALLEL(m_data->allClassInfos);
   CLEAR_PARALLEL(m_data->classInfo);
-  CLEAR_PARALLEL(m_data->funcInfo);
 
   CLEAR_PARALLEL(m_data->privatePropInfo);
   CLEAR_PARALLEL(m_data->privateStaticPropInfo);
@@ -8895,7 +10402,6 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->closureUseVars);
 
   CLEAR_PARALLEL(m_data->methodFamilies);
-  CLEAR_PARALLEL(m_data->singleMethodFamilies);
 
   CLEAR_PARALLEL(m_data->funcFamilies);
   CLEAR_PARALLEL(m_data->funcFamilyStaticInfos);
@@ -8907,6 +10413,38 @@ void Index::cleanup_post_emit() {
   CLEAR_PARALLEL(m_data->contextualReturnTypes);
 
   parallel::for_each(clearers, [] (const std::function<void()>& f) { f(); });
+
+  {
+    trace_time t{"reset funcInfo"};
+    t.ignore_client_stats();
+    parallel::for_each(
+      m_data->funcInfo,
+      [] (auto& u) {
+        u.returnTy = TBottom;
+        u.families.clear();
+      }
+    );
+    m_data->funcInfo.clear();
+  }
+
+  // Class-infos and program need to be freed after all Type instances
+  // are destroyed, as Type::checkInvariants may try to access them.
+
+  {
+    trace_time t{"reset allClassInfos"};
+    t.ignore_client_stats();
+    parallel::for_each(m_data->allClassInfos, [] (auto& u) { u.reset(); });
+    m_data->allClassInfos.clear();
+  }
+
+  {
+    trace_time t{"reset program"};
+    t.ignore_client_stats();
+    parallel::for_each(m_data->program->units, [] (auto& u) { u.reset(); });
+    parallel::for_each(m_data->program->classes, [] (auto& u) { u.reset(); });
+    parallel::for_each(m_data->program->funcs, [] (auto& f) { f.reset(); });
+    m_data->program.reset();
+  }
 }
 
 void Index::thaw() {

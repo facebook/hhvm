@@ -343,8 +343,9 @@ void setThisAvailable(ISS& env) {
 }
 
 bool thisAvailable(ISS& env) {
-  assertx(!env.state.thisType.subtypeOf(BBottom));
-  return env.state.thisType.subtypeOf(BObj);
+  return
+    env.state.thisType.subtypeOf(BObj) &&
+    !env.state.thisType.is(BBottom);
 }
 
 // Returns the type $this would have if it's not null.  Generally
@@ -383,6 +384,17 @@ Optional<Type> parentCls(ISS& env) {
 Optional<Type> parentClsExact(ISS& env) {
   if (auto rcls = env.index.parentCls(env.ctx)) return clsExact(*rcls);
   return std::nullopt;
+}
+
+// Like selfClsExact, but if the func is non-static, use an object
+// type instead.
+inline Type selfExact(ISS& env) {
+  assertx(env.ctx.func);
+  auto ty = selfClsExact(env);
+  if (env.ctx.func->attrs & AttrStatic) {
+    return ty ? *ty : TCls;
+  }
+  return ty ? toobj(*ty) : TObj;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -445,7 +445,7 @@ inline Type Type::CountedKeyset(const RepoAuthType::Array* rat) {
 }
 
 inline Type Type::SubObj(const Class* cls) {
-  if (cls->attrs() & AttrNoOverride) return ExactObj(cls);
+  if (cls->attrs() & AttrNoOverrideRegular) return ExactObj(cls);
   return Type(TObj, ClassSpec(cls, ClassSpec::SubTag{}));
 }
 

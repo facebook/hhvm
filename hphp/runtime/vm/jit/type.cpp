@@ -828,9 +828,9 @@ Type typeFromTV(tv_rval tv, const Class* ctx) {
     assertx(cls);
 
     // We only allow specialization on classes that can't be overridden for
-    // now.  If this changes, then this will need to specialize on sub object
+    // now. If this changes, then this will need to specialize on sub object
     // types instead.
-    if (!(cls->attrs() & AttrNoOverride) ||
+    if (!(cls->attrs() & AttrNoOverrideRegular) ||
         (!(cls->attrs() & AttrUnique) && (!ctx || !ctx->classof(cls)))) {
       return TObj;
     }

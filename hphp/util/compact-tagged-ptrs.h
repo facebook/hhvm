@@ -81,6 +81,13 @@ struct CompactTaggedPtr {
     std::swap(m_data, o.m_data);
   }
 
+  bool operator==(const CompactTaggedPtr& o) const {
+    return m_data == o.m_data;
+  }
+  bool operator!=(const CompactTaggedPtr& o) const {
+    return m_data != o.m_data;
+  }
+
 private:
   uintptr_t m_data;
 
@@ -131,4 +138,3 @@ void swap(CompactSizedPtr<T>& p1, CompactSizedPtr<T>& p2) noexcept {
 //////////////////////////////////////////////////////////////////////
 
 }
-

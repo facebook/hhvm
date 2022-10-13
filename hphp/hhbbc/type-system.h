@@ -232,15 +232,21 @@ enum class DataTag : uint8_t {
 struct DCls {
   using IsectSet = std::vector<res::Class>;
 
-  static DCls MakeExact(res::Class cls) {
-    return DCls{PtrTag::Exact, (void*)cls.toOpaque()};
+  static DCls MakeExact(res::Class cls, bool nonReg) {
+    return DCls{
+      nonReg ? PtrTag::ExactNonReg : PtrTag::Exact,
+      (void*)cls.toOpaque()
+    };
   }
-  static DCls MakeSub(res::Class cls) {
-    return DCls{PtrTag::Sub, (void*)cls.toOpaque()};
+  static DCls MakeSub(res::Class cls, bool nonReg) {
+    return DCls{
+      nonReg ? PtrTag::SubNonReg : PtrTag::Sub,
+      (void*)cls.toOpaque()
+    };
   }
-  static DCls MakeIsect(IsectSet isect) {
+  static DCls MakeIsect(IsectSet isect, bool nonReg) {
     auto w = new IsectWrapper{std::move(isect)};
-    return DCls{PtrTag::Isect, (void*)w};
+    return DCls{nonReg ? PtrTag::IsectNonReg : PtrTag::Isect, (void*)w};
   }
 
   // Need to implement these manually so we do proper ref-counting on
@@ -265,19 +271,45 @@ struct DCls {
   bool isExact() const {
     return
       val.tag() == PtrTag::Exact ||
-      val.tag() == PtrTag::ExactCtx;
+      val.tag() == PtrTag::ExactCtx ||
+      val.tag() == PtrTag::ExactNonReg ||
+      val.tag() == PtrTag::ExactCtxNonReg;
   }
 
   bool isSub() const {
     return
       val.tag() == PtrTag::Sub ||
-      val.tag() == PtrTag::SubCtx;
+      val.tag() == PtrTag::SubCtx ||
+      val.tag() == PtrTag::SubNonReg ||
+      val.tag() == PtrTag::SubCtxNonReg;
   }
 
   bool isIsect() const {
     return
       val.tag() == PtrTag::Isect ||
-      val.tag() == PtrTag::IsectCtx;
+      val.tag() == PtrTag::IsectCtx ||
+      val.tag() == PtrTag::IsectNonReg ||
+      val.tag() == PtrTag::IsectCtxNonReg;
+  }
+
+  bool containsNonRegular() const {
+    switch (val.tag()) {
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
+        return false;
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return true;
+    }
+    not_reached();
   }
 
   // Obtain the res::Class this DCls represents. Only valid if
@@ -307,42 +339,43 @@ struct DCls {
       case PtrTag::ExactCtx:
       case PtrTag::SubCtx:
       case PtrTag::IsectCtx:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
         return true;
       case PtrTag::Exact:
       case PtrTag::Sub:
       case PtrTag::Isect:
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
         return false;
     }
     not_reached();
   }
 
   void setCtx(bool ctx) {
-    switch (val.tag()) {
-      case PtrTag::ExactCtx:
-        if (ctx) break;
-        val.set(PtrTag::Exact, val.ptr());
-        break;
-      case PtrTag::SubCtx:
-        if (ctx) break;
-        val.set(PtrTag::Sub, val.ptr());
-        break;
-      case PtrTag::IsectCtx:
-        if (ctx) break;
-        val.set(PtrTag::Isect, val.ptr());
-        break;
-      case PtrTag::Exact:
-        if (!ctx) break;
-        val.set(PtrTag::ExactCtx, val.ptr());
-        break;
-      case PtrTag::Sub:
-        if (!ctx) break;
-        val.set(PtrTag::SubCtx, val.ptr());
-        break;
-      case PtrTag::Isect:
-        if (!ctx) break;
-        val.set(PtrTag::IsectCtx, val.ptr());
-        break;
+    val.set(ctx ? addCtx(val.tag()) : removeCtx(val.tag()), val.ptr());
+  }
+
+  bool same(const DCls& o, bool checkCtx = true) const {
+    if (checkCtx) {
+      if (val.tag() != o.val.tag()) return false;
+    } else {
+      if (removeCtx(val.tag()) != removeCtx(o.val.tag())) return false;
     }
+
+    if (!isIsect()) return cls().same(o.cls());
+    auto const& isect1 = isect();
+    auto const& isect2 = o.isect();
+    if (&isect1 == &isect2) return true;
+    if (isect1.size() != isect2.size()) return false;
+
+    return std::equal(
+      begin(isect1), end(isect1),
+      begin(isect2), end(isect2),
+      [] (res::Class c1, res::Class c2) { return c1.same(c2); }
+    );
   }
 
 private:
@@ -353,14 +386,58 @@ private:
   enum class PtrTag : uint8_t {
     Exact,
     ExactCtx,
+    ExactNonReg,
+    ExactCtxNonReg,
     Sub,
     SubCtx,
+    SubNonReg,
+    SubCtxNonReg,
     Isect,
-    IsectCtx
+    IsectCtx,
+    IsectNonReg,
+    IsectCtxNonReg
   };
   CompactTaggedPtr<void, PtrTag> val;
 
   DCls(PtrTag t, void* p) : val{t, p} {}
+
+  static PtrTag addCtx(PtrTag t) {
+    switch (t) {
+      case PtrTag::Exact:       return PtrTag::ExactCtx;
+      case PtrTag::Sub:         return PtrTag::SubCtx;
+      case PtrTag::Isect:       return PtrTag::IsectCtx;
+      case PtrTag::ExactNonReg: return PtrTag::ExactCtxNonReg;
+      case PtrTag::SubNonReg:   return PtrTag::SubCtxNonReg;
+      case PtrTag::IsectNonReg: return PtrTag::IsectCtxNonReg;
+      case PtrTag::ExactCtx:
+      case PtrTag::SubCtx:
+      case PtrTag::IsectCtx:
+      case PtrTag::ExactCtxNonReg:
+      case PtrTag::SubCtxNonReg:
+      case PtrTag::IsectCtxNonReg:
+        return t;
+    }
+    not_reached();
+  }
+
+  static PtrTag removeCtx(PtrTag t) {
+    switch (t) {
+      case PtrTag::ExactCtx:       return PtrTag::Exact;
+      case PtrTag::SubCtx:         return PtrTag::Sub;
+      case PtrTag::IsectCtx:       return PtrTag::Isect;
+      case PtrTag::ExactCtxNonReg: return PtrTag::ExactNonReg;
+      case PtrTag::SubCtxNonReg:   return PtrTag::SubNonReg;
+      case PtrTag::IsectCtxNonReg: return PtrTag::IsectNonReg;
+      case PtrTag::Exact:
+      case PtrTag::Sub:
+      case PtrTag::Isect:
+      case PtrTag::ExactNonReg:
+      case PtrTag::SubNonReg:
+      case PtrTag::IsectNonReg:
+        return t;
+    }
+    not_reached();
+  }
 
   // We ref-count the IsectSet, so multiple copies of a DCls can share
   // it. This is basically copy_ptr, but we can't use that easily with
@@ -394,8 +471,8 @@ struct DWaitHandleT {
   // Strictly speaking, we know that cls is HH\\Awaitable, but keeping
   // it around lets us demote to a DCls without having the Index
   // available.
-  DWaitHandleT(res::Class cls, T inner)
-    : cls{DCls::MakeSub(cls)}
+  DWaitHandleT(DCls cls, T inner)
+    : cls{std::move(cls)}
     , inner{std::move(inner)} {}
   DCls cls;
   T inner;
@@ -536,7 +613,6 @@ struct Type {
   Type& operator=(Type&&) noexcept;
 
   ~Type() {
-    assertx(checkInvariants());
     if (LIKELY(m_dataTag == DataTag::None)) return;
     destroyData();
   }
@@ -643,8 +719,8 @@ private:
   friend Type lazyclsval(SString);
   friend Type subObj(res::Class);
   friend Type objExact(res::Class);
-  friend Type subCls(res::Class);
-  friend Type clsExact(res::Class);
+  friend Type subCls(res::Class, bool);
+  friend Type clsExact(res::Class, bool);
   friend Type packed_impl(trep, HAMSandwich, std::vector<Type>);
   friend Type packedn_impl(trep, HAMSandwich, Type);
   friend Type map_impl(trep, HAMSandwich, MapElems, Type, Type);
@@ -734,14 +810,14 @@ private:
 
   // These have to be defined here but are not meant to be used
   // outside of type-system.cpp
-  friend Type isectObj(DCls::IsectSet);
-  friend Type isectCls(DCls::IsectSet);
+  friend Type isectObjInternal(DCls::IsectSet);
+  friend Type isectClsInternal(DCls::IsectSet, bool);
 
   friend Type set_trep_for_testing(Type, trep);
   friend trep get_trep_for_testing(const Type&);
 
   friend Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
-  friend Type make_cls_for_testing(trep, res::Class, bool, bool, bool);
+  friend Type make_cls_for_testing(trep, res::Class, bool, bool, bool, bool);
   friend Type make_arrval_for_testing(trep, SArray);
   friend Type make_arrpacked_for_testing(trep, std::vector<Type>,
                                          Optional<LegacyMark>);
@@ -952,8 +1028,8 @@ Type some_keyset_empty();
  */
 Type subObj(res::Class);
 Type objExact(res::Class);
-Type subCls(res::Class);
-Type clsExact(res::Class);
+Type subCls(res::Class, bool nonReg = true);
+Type clsExact(res::Class, bool nonReg = true);
 
 /*
  * vec types with known size.

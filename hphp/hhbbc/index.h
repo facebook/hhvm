@@ -301,31 +301,36 @@ namespace res {
  */
 struct Class {
   /*
-   * Returns whether two classes are definitely same at runtime.  If
-   * this function returns false, they still *may* be the same at
-   * runtime.
+   * Returns whether two (exact) classes are definitely same at
+   * runtime. This ignores all complications due to non-regular
+   * classes and is usually not what you want to use.
    */
-  bool same(const Class&) const;
+  bool same(const Class& o) const;
 
   /*
    * Returns true if this class is a subtype of 'o'. That is, every
    * subclass of 'this' (including 'this' itself) is a subclass of
    * 'o'. For the exact variant, 'this' is considered to be exact
    * (that is, exactly that class). For the sub variant, 'this' could
-   * also be a subclass. This distinction only matters if 'this' is an
-   * interface. 'o' is always considered to be a subclass (otherwise
-   * you would use same()).
+   * also be a subclass. This distinction only matters for non-regular
+   * classes. 'o' is considered to be a subclass except for
+   * exactSubtypeOfExact. This is needed since two exact classes, even
+   * if the same, may not be a sub-type of one another if
+   * nonRegularL/nonRegularR differ.
    *
-   * If 'this' is an interface and the exact variant is used, then the
-   * interface class itself is tested. If the sub variant is used,
-   * then all the classes which implement the interface are tested
-   * (which does not include the interface class itself).
+   * Classes can have implementations/subclasses which aren't
+   * "regular" classes (interfaces/traits/abstract/etc). Whether these
+   * will be considered as part of the check (on either side) is
+   * context dependent and specified by nonRegularL and nonRegularR.
    *
    * Note: unresolved classes are not subtypes of anything except
    * themself.
    */
-  bool exactSubtypeOf(const Class& o) const;
-  bool subSubtypeOf(const Class& o) const;
+  bool exactSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
+  bool exactSubtypeOfExact(
+      const Class& o, bool nonRegularL, bool nonRegularR
+  ) const;
+  bool subSubtypeOf(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
    * Returns false if this class has no subclasses in common with
@@ -335,14 +340,23 @@ struct Class {
    * that class, or any subclass of that class.
    *
    * Since couldBe is symmetric, this covers all of the cases. 'o' is
-   * always considered to be a subclass. (Both being exact is covered
-   * by same()).
+   * considered to be a subclass, except for exactCouldBeExact. This
+   * is needed since two exact classes, even if the same, may not have
+   * anything in common if nonRegularL/nonRegularR differ.
+   *
+   * Classes can have implementations/subclasses which aren't
+   * "regular" classes (interfaces/traits/abstract/etc). Whether these
+   * will be considered as part of the check (on either side) is
+   * context dependent and specified by nonRegularL and nonRegularR.
    *
    * Note: unresolved classes always can be another unresolved class,
    * and never a resolved class.
    */
-  bool exactCouldBe(const Class& o) const;
-  bool subCouldBe(const Class& o) const;
+  bool exactCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
+  bool exactCouldBeExact(
+      const Class& o, bool nonRegularL, bool nonRegularR
+  ) const;
+  bool subCouldBe(const Class& o, bool nonRegularL, bool nonRegularR) const;
 
   /*
    * Returns the name of this class.  Non-null guarantee.
@@ -350,25 +364,52 @@ struct Class {
   SString name() const;
 
   /*
-   * If this class is an interface, return the "canonical" interface
-   * among the set of equivalent interfaces. If this interface has no
-   * implementations, it's equivalent to Bottom, and std::nullopt is
-   * returned. If this class is not an interface, itself is
-   * returned. This should be called when wrapping a class within a
-   * Type to ensure that every Type has an unique canonical
-   * representation.
-   */
-  Optional<res::Class> canonicalizeInterface() const;
-
-  /*
-   * Returns whether this type has the no override attribute, that is, if it
-   * is a final class (explicitly marked by the user or known by the static
-   * analysis).
+   * Returns whether this class is a final class as determined by
+   * static analysis. The first variant considers all classes, while
+   * the second variant only considers potentially overriding regular
+   * classes (this distinction is important if you already have an
+   * instance of the class, as abstract classes cannot be
+   * instantiated).
    *
-   * When returning false the class is guaranteed to be final.  When returning
-   * true the system cannot tell though the class may still be final.
+   * NB: Traits never can be overridden and will always return false
+   * (their subclass list reflects users which the trait will be
+   * flattened into at runtime).
+   *
+   * When returning false the class is guaranteed to be final. When
+   * returning true the system cannot tell though the class may still
+   * be final.
    */
   bool couldBeOverridden() const;
+  bool couldBeOverriddenByRegular() const;
+
+  /*
+   * Returns whether this class might be a regular/non-regular class
+   * at runtime. For resolved classes this check is precise, but for
+   * unresolved classes this will always conservatively return
+   * true. This only checks the class itself and says nothing about
+   * any potential subclasses of this.
+   */
+  bool mightBeRegular() const;
+  bool mightBeNonRegular() const;
+
+  /*
+   * Whether this class (or its subtypes) might be a non-regular
+   * class. For resolved classes this check is precise, but for
+   * unresolved classes this will always conservatively return true.
+   */
+  bool mightContainNonRegular() const;
+
+  /*
+   * Return the best class equivalent to this, but with any
+   * non-regular classes removed. By equivalent, we mean the most
+   * specific representable class which contains all of the same
+   * regular subclasses that the original did. If std::nullopt is
+   * returned, this class contains no regular classes (and therefore
+   * the result is a Bottom). The returned classes may be the original
+   * class, and for interfaces and abstract classes, the result may
+   * not be an interface or abstract class.
+   */
+  Optional<res::Class> withoutNonRegular() const;
 
   /*
    * Whether this class (or its subtypes) could possibly have have
@@ -456,7 +497,9 @@ struct Class {
   static TinyVector<Class, 2> combine(folly::Range<const Class*> classes1,
                                       folly::Range<const Class*> classes2,
                                       bool isSub1,
-                                      bool isSub2);
+                                      bool isSub2,
+                                      bool nonRegular1,
+                                      bool nonRegular2);
   /*
    * Given two lists of classes, calculate the intersection between
    * them (in canonical form). A list of size 1 represents a single
@@ -467,8 +510,29 @@ struct Class {
    * detail of intersection_of() and not a general purpose interface.
    */
   static TinyVector<Class, 2> intersect(folly::Range<const Class*> classes1,
-                                        folly::Range<const Class*> classes2);
+                                        folly::Range<const Class*> classes2,
+                                        bool nonRegular1,
+                                        bool nonRegular2,
+                                        bool& nonRegularOut);
 
+  /*
+   * Given a list of classes, return a new list of classes
+   * representing all of the non-regular classes removed (and
+   * canonicalized). If the output list is empty, there are no regular
+   * classes.
+   */
+  static TinyVector<Class, 2>
+  removeNonRegular(folly::Range<const Class*> classes);
+
+  /*
+   * Given two lists of classes, calculate whether their intersection
+   * is non-empty. This is equivalent to calling intersect and
+   * checking the result, but more efficient.
+   */
+  static bool couldBeIsect(folly::Range<const Class*> classes1,
+                           folly::Range<const Class*> classes2,
+                           bool nonRegular1,
+                           bool nonRegular2);
   /*
    * Convert this class to/from an opaque integer. The integer is
    * "pointerish" (has upper bits cleared), so can be used in
@@ -481,7 +545,6 @@ struct Class {
   }
 
   size_t hash() const { return val.toOpaque(); }
-  bool operator==(const Class& o) const { return toOpaque() == o.toOpaque(); }
 
 private:
   explicit Class(Either<SString,ClassInfo*> val) : val{val} {}
@@ -489,11 +552,12 @@ private:
   template <typename F>
   static void visitEverySub(folly::Range<const Class*>, bool, const F&);
   static ClassInfo* commonAncestor(ClassInfo*, ClassInfo*);
-  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&);
+  static TinyVector<Class, 2> canonicalizeIsects(const TinyVector<Class, 8>&, bool);
 private:
   friend std::string show(const Class&);
   friend struct ::HPHP::HHBBC::Index;
   friend struct ::HPHP::HHBBC::PublicSPropMutations;
+  friend struct ::HPHP::HHBBC::ClassInfo;
   Either<SString,ClassInfo*> val;
 };
 
@@ -575,18 +639,29 @@ private:
   struct MethodOrMissing {
     const php::Func* func;
   };
+  // Method/Func is known to not exist
+  struct Missing {
+    SString name;
+  };
+  // Group of methods (a wrapper around a FuncFamily).
+  struct MethodFamily {
+    FuncFamily* family;
+    bool regularOnly;
+  };
   // Simultaneously a group of func families. Any data must be
   // intersected across all of the func families in the list. Used for
   // method resolution on a DCls where isIsect() is true.
   struct Isect {
     CompactVector<FuncFamily*> families;
+    bool regularOnly{false};
   };
   using Rep = boost::variant< FuncName
                             , MethodName
                             , FuncInfo*
                             , Method
-                            , FuncFamily*
+                            , MethodFamily
                             , MethodOrMissing
+                            , Missing
                             , Isect
                             >;
 
@@ -836,21 +911,29 @@ struct Index {
   res::Func resolve_func(Context, SString name) const;
 
   /*
-   * Try to resolve a class method named `name' with a given Context
-   * and class type.
+   * Try to resolve a method named `name' with a this type of
+   * `thisType' within a given Context.
    *
-   * Pre: clsType.subtypeOf(BCls)
+   * The type of `thisType' determines if the method is meant to be
+   * static or not. A this type of BCls is a static method and a BObj
+   * is for an instance method.
+   *
+   * Pre: thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj)
    */
-  res::Func resolve_method(Context, Type clsType, SString name) const;
+  res::Func resolve_method(Context, const Type& thisType, SString name) const;
 
   /*
-   * Try to resolve a class constructor for the supplied class type.
+   * Resolve a class constructor for the supplied object type.
    *
-   * Returns: std::nullopt if it can't at least figure out a func
-   * family for the call.
+   * Pre: obj.subtypeOf(BObj)
    */
-  Optional<res::Func>
-  resolve_ctor(Context, res::Class rcls, bool exact) const;
+  res::Func resolve_ctor(const Type& obj) const;
+
+  /*
+   * Return a resolved class representing the base class of a wait
+   * handle (this will be a sub-class of Awaitable).
+   */
+  res::Class wait_handle_class() const;
 
   /*
    * Give the Type in our type system that matches an hhvm
@@ -1096,7 +1179,7 @@ struct Index {
    * don't do analysis on public properties, this just inferred from the
    * property's type-hint (if enforced).
    */
-  Type lookup_public_prop(const Type& cls, const Type& name) const;
+  Type lookup_public_prop(const Type& obj, const Type& name) const;
   Type lookup_public_prop(const php::Class* cls, SString name) const;
 
   /*
@@ -1373,6 +1456,9 @@ private:
 
   template <typename F>
   bool visit_every_dcls_cls(const DCls&, const F&) const;
+
+  template <typename P, typename G>
+  static res::Func rfunc_from_dcls(const DCls&, SString, const P&, const G&);
 
 private:
   std::unique_ptr<IndexData> const m_data;

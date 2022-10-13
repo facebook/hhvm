@@ -121,7 +121,7 @@ State entry_state(const Index& index, CollectedInfo& collect,
     // Because we throw a non-recoverable error for having fewer than the
     // required number of args, all function parameters must be initialized.
 
-    auto [ ty, effectFree] =
+    auto [ty, effectFree] =
       index.verify_param_type(ctx, locId, TInitCell);
     ret.unreachable |= ty.subtypeOf(BBottom);
     ret.locals[locId] = std::move(ty);

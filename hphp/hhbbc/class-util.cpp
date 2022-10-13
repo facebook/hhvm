@@ -88,6 +88,13 @@ bool is_used_trait(const php::Class& c) {
     (c.attrs & (AttrTrait | AttrNoOverride)) == AttrTrait;
 }
 
+bool is_regular_class(const php::Class& c) {
+  return
+    !(c.attrs & (AttrInterface | AttrTrait |
+                 AttrAbstract | AttrEnum |
+                 AttrEnumClass));
+}
+
 bool prop_might_have_bad_initial_value(const Index& index,
                                        const php::Class& cls,
                                        const php::Prop& prop) {

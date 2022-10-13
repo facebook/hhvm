@@ -603,15 +603,26 @@ std::string show(const Type& t) {
       return std::make_pair(ret, specMatches + restMatches);
     };
 
-    auto const showDCls = [&] (const DCls& dcls) {
+    auto const showDCls = [&] (const DCls& dcls, bool isObj) {
+      auto const lt = [&] {
+        assertx(!dcls.isExact());
+        if (!isObj && !dcls.containsNonRegular()) {
+          if (dcls.isIsect()) return "<!";
+          if (!dcls.cls().mightBeRegular()) return "<";
+          if (dcls.cls().mightContainNonRegular()) return "<!";
+        }
+        return "<=";
+      };
+
       std::string ret;
       if (dcls.isExact()) {
         folly::toAppend("=", show(dcls.cls()), &ret);
       } else if (dcls.isSub()) {
-        folly::toAppend("<=", show(dcls.cls()), &ret);
+        folly::toAppend(lt(), show(dcls.cls()), &ret);
       } else {
         folly::toAppend(
-          "<={",
+          lt(),
+          "{",
           [&] {
             using namespace folly::gen;
             return from(dcls.isect())
@@ -628,14 +639,14 @@ std::string show(const Type& t) {
 
     switch (t.m_dataTag) {
     case DataTag::Obj:
-      return impl(BObj, showDCls(t.m_data.dobj));
+      return impl(BObj, showDCls(t.m_data.dobj, true));
     case DataTag::WaitHandle:
       return impl(
         BObj,
         folly::sformat("=WaitH<{}>", show(t.m_data.dwh->inner))
       );
     case DataTag::Cls:
-      return impl(BCls, showDCls(t.m_data.dcls));
+      return impl(BCls, showDCls(t.m_data.dcls, false));
     case DataTag::ArrLikePacked:
       return impl(
         BArrLikeN,

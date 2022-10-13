@@ -1792,10 +1792,9 @@ std::pair<Type, bool> memoizeImplRetType(ISS& env) {
   // function but we don't rely on it.
   auto const memo_impl_func = [&] {
     if (env.ctx.func->cls) {
-      auto const clsTy = selfClsExact(env);
       return env.index.resolve_method(
         env.ctx,
-        clsTy ? *clsTy : TCls,
+        selfExact(env),
         memoize_impl_name(env.ctx.func)
       );
     }
@@ -2402,8 +2401,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
     func ? func->name->data() : "");
   always_assert(func->isMemoizeWrapper);
 
-  auto const rclsIMemoizeParam = env.index.builtin_class(s_IMemoizeParam.get());
-  auto const tyIMemoizeParam = subObj(rclsIMemoizeParam);
+  auto const tyIMemoizeParam =
+    subObj(env.index.builtin_class(s_IMemoizeParam.get()));
 
   auto const inTy = locAsCell(env, op.nloc1.id);
 
@@ -2420,7 +2419,7 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
   // memo key is a parameter, then we can possibly using the type constraint to
   // infer a more efficient memo key mode.
   using MK = MemoKeyConstraint;
-  Optional<res::Class> resolvedCls;
+  Optional<Type> resolvedClsTy;
   auto const mkc = [&] {
     if (op.nloc1.id >= env.ctx.func->params.size()) return MK::None;
     auto tc = env.ctx.func->params[op.nloc1.id].typeConstraint;
@@ -2433,7 +2432,9 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       }
     }
     if (tc.isObject()) {
-      resolvedCls = env.index.resolve_class(env.ctx, tc.clsName());
+      if (auto const rcls = env.index.resolve_class(env.ctx, tc.clsName())) {
+        resolvedClsTy = subObj(*rcls);
+      }
     }
     return memoKeyConstraintFromTC(tc);
   }();
@@ -2527,8 +2528,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // a string (which is what the generic mode does). If not, it will use the
       // generic mode, which can handle collections or classes which don't
       // implement getInstanceKey.
-      if (resolvedCls &&
-          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
+      if (resolvedClsTy &&
+          resolvedClsTy->subtypeOf(tyIMemoizeParam) &&
           inTy.subtypeOf(tyIMemoizeParam)) {
         return reduce(
           env,
@@ -2549,8 +2550,8 @@ void in(ISS& env, const bc::GetMemoKeyL& op) {
       // when invoking getInstanceKey and then select from the result of that,
       // or the integer 0. This might seem wasteful, but the JIT does a good job
       // inlining away the call in the null case.
-      if (resolvedCls &&
-          resolvedCls->subSubtypeOf(rclsIMemoizeParam) &&
+      if (resolvedClsTy &&
+          resolvedClsTy->subtypeOf(tyIMemoizeParam) &&
           inTy.subtypeOf(opt(tyIMemoizeParam))) {
         return reduce(
           env,
@@ -4063,8 +4064,7 @@ void fcallObjMethodImpl(ISS& env, const FCallArgs& fca, SString methName,
   auto const ctxTy = input.couldBe(BObj)
     ? intersection_of(input, TObj)
     : TObj;
-  auto const clsTy = objcls(ctxTy);
-  auto const rfunc = env.index.resolve_method(ctx, clsTy, methName);
+  auto const rfunc = env.index.resolve_method(ctx, ctxTy, methName);
 
   auto const numInOut = fca.enforceInOut()
     ? env.index.lookup_num_inout_params(env.ctx, rfunc)
@@ -4275,10 +4275,10 @@ void in(ISS& env, const bc::FCallObjMethodD& op) {
     }
 
     auto const input = topC(env, op.fca.numInputs() + 1);
-    auto const clsTy = input.couldBe(BObj)
-      ? objcls(intersection_of(input, TObj))
-      : TCls;
-    auto const rfunc = env.index.resolve_method(env.ctx, clsTy, op.str4);
+    auto const ctxTy = input.couldBe(BObj)
+      ? intersection_of(input, TObj)
+      : TObj;
+    auto const rfunc = env.index.resolve_method(env.ctx, ctxTy, op.str4);
     if (!rfunc.couldHaveReifiedGenerics()) {
       return reduce(
         env,
@@ -4310,10 +4310,10 @@ void in(ISS& env, const bc::FCallObjMethod& op) {
   }
 
   auto const input = topC(env, op.fca.numInputs() + 2);
-  auto const clsTy = input.couldBe(BObj)
-    ? objcls(intersection_of(input, TObj))
-    : TCls;
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  auto const ctxTy = input.couldBe(BObj)
+    ? intersection_of(input, TObj)
+    : TObj;
+  auto const rfunc = env.index.resolve_method(env.ctx, ctxTy, methName);
   if (!rfunc.mightCareAboutDynCalls()) {
     return reduce(
       env,
@@ -4416,7 +4416,10 @@ void in(ISS& env, const bc::FCallClsMethod& op) {
   }
 
   auto const clsTy = topC(env);
-  auto const rfunc = env.index.resolve_method(env.ctx, clsTy, methName);
+  auto const ctxTy = clsTy.couldBe(BCls)
+    ? intersection_of(clsTy, TCls)
+    : TCls;
+  auto const rfunc = env.index.resolve_method(env.ctx, ctxTy, methName);
   auto const skipLogAsDynamicCall =
     !RuntimeOption::EvalLogKnownMethodsAsDynamicCalls &&
       op.subop3 == IsLogAsDynamicCallOp::DontLogAsDynamicCall;
@@ -4614,10 +4617,20 @@ void newObjDImpl(ISS& env, const StringData* className, bool rflavor) {
   if (rflavor && !rcls->couldHaveReifiedGenerics()) {
     return reduce(env, bc::PopC {}, bc::NewObjD { className });
   }
-  auto const isCtx = !rcls->couldBeOverridden() && env.ctx.cls &&
-    rcls->same(env.index.resolve_class(env.ctx.cls));
+
   if (rflavor) popC(env);
-  push(env, setctx(objExact(*rcls), isCtx));
+
+  auto obj = objExact(*rcls);
+  if (obj.subtypeOf(BBottom)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+
+  auto const isCtx =
+    !rcls->couldBeOverriddenByRegular() &&
+    env.ctx.cls &&
+    obj == objExact(env.index.resolve_class(env.ctx.cls));
+  push(env, setctx(std::move(obj), isCtx));
 }
 
 } // namespace
@@ -4639,7 +4652,9 @@ void in(ISS& env, const bc::NewObjS& op) {
     return reduce(env, bc::NewObjD { dcls.cls().name() });
   }
 
-  push(env, toobj(cls));
+  auto obj = toobj(cls);
+  if (obj.subtypeOf(BBottom)) unreachable(env);
+  push(env, std::move(obj));
 }
 
 void in(ISS& env, const bc::NewObj& op) {
@@ -4661,14 +4676,16 @@ void in(ISS& env, const bc::NewObj& op) {
   }
 
   popC(env);
-  push(env, toobj(cls));
+  auto obj = toobj(cls);
+  if (obj.subtypeOf(BBottom)) unreachable(env);
+  push(env, std::move(obj));
 }
 
 namespace {
 
 bool objMightHaveConstProps(const Type& t) {
   assertx(t.subtypeOf(BObj));
-  assertx(is_specialized_obj(t));
+  if (!is_specialized_obj(t)) return true;
   auto const& dobj = dobj_of(t);
   if (dobj.isExact()) return dobj.cls().couldHaveConstProp();
   if (dobj.isSub()) return dobj.cls().subCouldHaveConstProp();
@@ -4684,9 +4701,7 @@ void in(ISS& env, const bc::FCallCtor& op) {
   auto const obj = topC(env, op.fca.numInputs() + 1);
   assertx(op.fca.numRets() == 1);
 
-  if (!is_specialized_obj(obj)) {
-    return fcallUnknownImpl(env, op.fca);
-  }
+  if (!obj.subtypeOf(BObj)) return fcallUnknownImpl(env, op.fca);
 
   if (op.fca.lockWhileUnwinding() && !objMightHaveConstProps(obj)) {
     return reduce(
@@ -4694,33 +4709,29 @@ void in(ISS& env, const bc::FCallCtor& op) {
     );
   }
 
-  auto const& dobj = dobj_of(obj);
-  auto const rfunc = env.index.resolve_ctor(env.ctx, dobj.cls(), dobj.isExact());
-  if (!rfunc) {
-    return fcallUnknownImpl(env, op.fca);
-  }
+  auto const rfunc = env.index.resolve_ctor(obj);
 
   auto const updateFCA = [&] (FCallArgs&& fca) {
     return bc::FCallCtor { std::move(fca), op.str2 };
   };
 
   auto const numInOut = op.fca.enforceInOut()
-    ? env.index.lookup_num_inout_params(env.ctx, *rfunc)
+    ? env.index.lookup_num_inout_params(env.ctx, rfunc)
     : std::nullopt;
 
   auto const canFold = obj.subtypeOf(BObj);
-  if (fcallOptimizeChecks(env, op.fca, *rfunc, updateFCA, numInOut, false, 0) ||
-      (canFold && fcallTryFold(env, op.fca, *rfunc,
+  if (fcallOptimizeChecks(env, op.fca, rfunc, updateFCA, numInOut, false, 0) ||
+      (canFold && fcallTryFold(env, op.fca, rfunc,
                                obj, false /* dynamic */, 0))) {
     return;
   }
 
-  if (rfunc->exactFunc() && op.str2->empty()) {
+  if (rfunc.exactFunc() && op.str2->empty()) {
     // We've found the exact func that will be called, set the hint.
-    return reduce(env, bc::FCallCtor { op.fca, rfunc->exactFunc()->cls->name });
+    return reduce(env, bc::FCallCtor { op.fca, rfunc.exactFunc()->cls->name });
   }
 
-  fcallKnownImpl(env, op.fca, *rfunc, obj, false /* nullsafe */, 0,
+  fcallKnownImpl(env, op.fca, rfunc, obj, false /* nullsafe */, 0,
                  updateFCA, numInOut);
 }
 
@@ -4950,6 +4961,11 @@ void in(ISS& env, const bc::BareThis& op) {
   }
 
   auto const ty = thisType(env);
+  if (ty.subtypeOf(BBottom)) {
+    unreachable(env);
+    return push(env, TBottom);
+  }
+
   switch (op.subop1) {
     case BareThisOp::Notice:
       break;

@@ -32,7 +32,7 @@ jobs:
         run: |
           if git fetch --depth=1 origin nix-flake-update/${{github.ref_name}}
           then
-            git merge --no-edit allow-unrelated-histories --strategy ours FETCH_HEAD
+            git merge --no-edit --allow-unrelated-histories --strategy ours FETCH_HEAD
           fi
       - name: Assume the AWS role
         continue-on-error: true

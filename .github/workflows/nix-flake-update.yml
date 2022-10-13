@@ -7,8 +7,12 @@ permissions:
 jobs:
   nix-flake-update:
     permissions:
-      contents: write  # for peter-evans/create-pull-request to create branch
-      pull-requests: write  # for peter-evans/create-pull-request to create a PR
+      # for aws-actions/configure-aws-credentials to assume an AWS role
+      id-token: write
+      # for peter-evans/create-pull-request to create branch
+      contents: write
+      # for peter-evans/create-pull-request to create a PR
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.4.0

@@ -116,7 +116,7 @@ impl<T> HhErrorContext<T> for Result<T, anyhow::Error> {
 /// Checksum is used to characterize state of every decl in the repository:
 /// if a decl is added, removed, moved from one file, changed, then the overall
 /// checksum of the repository will change.
-#[derive(Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Copy, Clone, Hash, PartialEq, Eq, Default)]
 #[derive(serde::Deserialize, serde::Serialize)]
 #[derive(derive_more::UpperHex, derive_more::LowerHex)]
 pub struct Checksum(pub u64);

@@ -25,6 +25,7 @@ rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"
 rust_to_ocaml_attr = { path = "../rust_to_ocaml/rust_to_ocaml_attr" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 static_assertions = "1.1.0"
+typing_deps_hash = { path = "../deps/cargo/typing_deps_hash" }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

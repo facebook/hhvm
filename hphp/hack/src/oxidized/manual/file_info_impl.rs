@@ -59,6 +59,18 @@ impl From<KindOfType> for NameType {
     }
 }
 
+impl From<NameType> for typing_deps_hash::DepType {
+    fn from(name_type: NameType) -> Self {
+        match name_type {
+            NameType::Fun => Self::Fun,
+            NameType::Class => Self::Type,
+            NameType::Typedef => Self::Type,
+            NameType::Const => Self::GConst,
+            NameType::Module => Self::Module,
+        }
+    }
+}
+
 impl FromSql for NameType {
     fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
         match value {

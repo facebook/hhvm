@@ -3,14 +3,40 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 use std::path::PathBuf;
 
 use oxidized::file_info::Mode;
+use oxidized::file_info::NameType;
 use relative_path::Prefix;
+use relative_path::RelativePath;
 use rusqlite::types::FromSql;
 use rusqlite::types::FromSqlError;
 use rusqlite::types::FromSqlResult;
 use rusqlite::types::ValueRef;
+
+#[derive(Debug, Default)]
+pub struct SaveResult {
+    pub files_added: usize,
+    pub symbols_added: usize,
+    pub collisions: BTreeMap<(NameType, String), BTreeSet<RelativePath>>,
+    pub checksum: hh24_types::Checksum,
+}
+
+impl SaveResult {
+    pub fn add_collision(
+        &mut self,
+        kind: NameType,
+        name: String,
+        path1: &RelativePath,
+        path2: &RelativePath,
+    ) {
+        let paths = self.collisions.entry((kind, name)).or_default();
+        paths.insert(path1.clone());
+        paths.insert(path2.clone());
+    }
+}
 
 pub(crate) struct SqlitePrefix {
     pub value: Prefix,

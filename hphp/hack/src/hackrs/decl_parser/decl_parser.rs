@@ -6,17 +6,11 @@
 use std::marker::PhantomData;
 use std::sync::Arc;
 
-use arena_collections::list::List;
 use file_provider::FileProvider;
 use names::FileSummary;
-use obr::direct_decl_parser::Decls;
-use obr::shallow_decl_defs::Decl;
-use obr::shallow_decl_defs::ShallowClass;
 use oxidized::decl_parser_options::DeclParserOptions;
 use oxidized::parser_options::ParserOptions;
-use oxidized_by_ref as obr;
 use pos::RelativePath;
-use pos::TypeName;
 use ty::decl::shallow;
 use ty::reason::Reason;
 
@@ -78,76 +72,10 @@ impl<R: Reason> DeclParser<R> {
         // them. Reverse them again to match the syntactic order.
         let deregister_std_lib = path.is_hhi() && self.opts.po_deregister_php_stdlib;
         if deregister_std_lib {
-            parsed_file.decls = Decls(List::rev_from_iter_in(
-                (parsed_file.decls.iter()).filter_map(|d| remove_php_stdlib_decls(arena, d)),
-                arena,
-            ));
+            parsed_file.decls.remove_php_stdlib_decls_and_rev(arena);
         } else {
             parsed_file.decls.rev(arena);
         }
         parsed_file
-    }
-}
-
-// note(sf, 2022-04-12, c.f.
-// `hphp/hack/src/providers/direct_decl_utils.ml`)
-fn remove_php_stdlib_decls<'a>(
-    arena: &'a bumpalo::Bump,
-    (name, decl): &(&'a str, Decl<'a>),
-) -> Option<(&'a str, Decl<'a>)> {
-    match *decl {
-        Decl::Fun(fun) if fun.php_std_lib => None,
-        Decl::Class(class)
-            if (class.user_attributes.iter()).any(|ua| {
-                TypeName::new(ua.name.1) == *special_names::user_attributes::uaPHPStdLib
-            }) =>
-        {
-            None
-        }
-        Decl::Class(class) => {
-            let props = bumpalo::collections::Vec::from_iter_in(
-                (class.props.iter())
-                    .filter(|p| !p.flags.contains(obr::prop_flags::PropFlags::PHP_STD_LIB))
-                    .copied(),
-                arena,
-            )
-            .into_bump_slice();
-            let sprops = bumpalo::collections::Vec::from_iter_in(
-                (class.sprops.iter())
-                    .filter(|p| !p.flags.contains(obr::prop_flags::PropFlags::PHP_STD_LIB))
-                    .copied(),
-                arena,
-            )
-            .into_bump_slice();
-            let methods = bumpalo::collections::Vec::from_iter_in(
-                (class.methods.iter())
-                    .filter(|m| {
-                        !m.flags
-                            .contains(obr::method_flags::MethodFlags::PHP_STD_LIB)
-                    })
-                    .copied(),
-                arena,
-            )
-            .into_bump_slice();
-            let static_methods = bumpalo::collections::Vec::from_iter_in(
-                (class.static_methods.iter())
-                    .filter(|m| {
-                        !m.flags
-                            .contains(obr::method_flags::MethodFlags::PHP_STD_LIB)
-                    })
-                    .copied(),
-                arena,
-            )
-            .into_bump_slice();
-            let masked = arena.alloc(ShallowClass {
-                props,
-                sprops,
-                methods,
-                static_methods,
-                ..*class
-            });
-            Some((*name, Decl::Class(masked)))
-        }
-        _ => Some((*name, *decl)),
     }
 }

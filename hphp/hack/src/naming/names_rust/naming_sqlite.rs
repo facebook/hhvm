@@ -5,6 +5,7 @@
 
 use std::path::Path;
 
+use anyhow::Context;
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::ToplevelCanonSymbolHash;
@@ -25,17 +26,20 @@ impl Names {
         let path = path.as_ref();
         let mut conn = Connection::open(path)?;
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
     pub fn new_in_memory() -> anyhow::Result<Self> {
         let mut conn = Connection::open_in_memory()?;
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
     pub fn from_connection(mut conn: Connection) -> anyhow::Result<Self> {
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
@@ -45,8 +49,7 @@ impl Names {
     }
 
     fn create_tables(conn: &mut Connection) -> anyhow::Result<()> {
-        let tx = conn.transaction()?;
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS (
                 HASH INTEGER PRIMARY KEY NOT NULL,
@@ -55,10 +58,10 @@ impl Names {
                 FLAGS INTEGER NOT NULL,
                 FILE_INFO_ID INTEGER NOT NULL
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS_OVERFLOW (
                 HASH INTEGER KEY NOT NULL,
@@ -67,10 +70,10 @@ impl Names {
                 FLAGS INTEGER NOT NULL,
                 FILE_INFO_ID INTEGER NOT NULL
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
                 FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,32 +87,41 @@ impl Names {
                 TYPEDEFS TEXT,
                 MODULES TEXT
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS CHECKSUM (
                 ID INTEGER PRIMARY KEY,
                 CHECKSUM_VALUE INTEGER NOT NULL
             );
             ",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
+            "INSERT OR IGNORE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, 0);",
+            params![],
+        )?;
+
+        Ok(())
+    }
+
+    pub fn create_indices(conn: &mut Connection) -> anyhow::Result<()> {
+        conn.execute(
             "CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX
              ON NAMING_FILE_INFO (PATH_SUFFIX, PATH_PREFIX_TYPE);",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "CREATE INDEX IF NOT EXISTS TYPES_CANON
              ON NAMING_SYMBOLS (CANON_HASH);",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        Ok(tx.commit()?)
+        Ok(())
     }
 
     pub fn get_checksum(&self) -> anyhow::Result<Checksum> {
@@ -184,147 +196,135 @@ impl Names {
 
     /// Adds all of a file's symbols into the forward and reverse naming tables,
     /// into normal or overflow reverse table as appropriate.
-    pub fn save_file_summary(
+    pub(crate) fn save_file_summary(
         &self,
         path: &RelativePath,
-        file_summary: &crate::FileSummary,
+        summary: &crate::FileSummary,
     ) -> anyhow::Result<()> {
-        let file_info_id = self.insert_file_info_and_get_file_id(path, file_summary)?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Fun,
-            file_summary
-                .funs()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Fun,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::GConst,
-            file_summary
-                .consts()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Const,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Type,
-            file_summary
-                .classes()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Class,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Type,
-            file_summary
-                .typedefs()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Typedef,
-                    hash: decl_hash,
-                }),
-        )?;
+        let mut save_result = crate::SaveResult {
+            checksum: self.get_checksum()?,
+            ..Default::default()
+        };
+        self.insert_file_summary(path, summary, &mut save_result)?;
+        self.set_checksum(save_result.checksum)?;
         Ok(())
     }
 
-    /// private helper for saved_file_summary
+    // private helper for `save_file_summary`/`build`
     fn insert_file_summary(
         &self,
         path: &RelativePath,
-        file_info_id: crate::FileInfoId,
-        dep_type: typing_deps_hash::DepType,
-        items: impl Iterator<Item = crate::DeclSummary>,
+        summary: &crate::FileSummary,
+        save_result: &mut crate::SaveResult,
     ) -> anyhow::Result<()> {
-        let insert_statement = "
-        INSERT INTO NAMING_SYMBOLS (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
-        let insert_overflow_statement = "
-        INSERT INTO NAMING_SYMBOLS_OVERFLOW (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
+        let file_info_id = self.insert_file_info_and_get_file_id(path, summary)?;
+        save_result.files_added += 1;
+        self.insert_symbols(path, file_info_id, summary.funs(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.consts(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.classes(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.typedefs(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.modules(), save_result)?;
+        Ok(())
+    }
 
-        let mut insert_statement = self.conn.prepare(insert_statement)?;
-        let mut insert_overflow_statement = self.conn.prepare(insert_overflow_statement)?;
+    // private helper for insert_file_summary
+    fn insert_symbols<'a>(
+        &self,
+        path: &RelativePath,
+        file_id: crate::FileInfoId,
+        items: impl Iterator<Item = &'a crate::DeclSummary>,
+        save_result: &mut crate::SaveResult,
+    ) -> anyhow::Result<()> {
+        for item in items {
+            self.try_insert_symbol(path, file_id, item.clone(), save_result)
+                .with_context(|| {
+                    format!(
+                        "Failed to insert {:?} {} (defined in {path})",
+                        item.name_type, item.symbol
+                    )
+                })?
+        }
+        Ok(())
+    }
 
-        for mut item in items {
-            let decl_hash = item.hash;
-            let hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
-            item.symbol.make_ascii_lowercase();
-            let canon_hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
-            let kind = item.name_type;
+    // private helper for insert_symbols
+    fn try_insert_symbol(
+        &self,
+        path: &RelativePath,
+        file_info_id: crate::FileInfoId,
+        item: crate::DeclSummary,
+        save_result: &mut crate::SaveResult,
+    ) -> anyhow::Result<()> {
+        let mut insert_statement = self.conn.prepare_cached(
+            "INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            VALUES (?, ?, ?, ?, ?);",
+        )?;
+        let mut insert_overflow_statement = self.conn.prepare_cached(
+            "INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            VALUES (?, ?, ?, ?, ?);",
+        )?;
+        let mut delete_statement = self.conn.prepare_cached(
+            "DELETE FROM NAMING_SYMBOLS
+            WHERE HASH = ? AND FILE_INFO_ID = ?",
+        )?;
+        let symbol_hash = crate::hash_name(&item.symbol, item.name_type);
+        let canon_hash = crate::hash_canon_name(item.symbol.clone(), item.name_type);
+        let decl_hash = item.hash;
+        let kind = item.name_type;
 
-            if let Some(symbol) = self.get_row(ToplevelSymbolHash::from_u64(hash as u64))? {
-                // check if new entry appears first alphabetically
-                if path.path_str() < symbol.path.path_str() {
-                    // delete symbol from symbols
-                    self.conn
-                        .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ? AND FILE_INFO_ID = ?")?
-                        .execute(params![symbol.hash, symbol.file_info_id])?;
+        if let Some(old) = self.get_row(symbol_hash)? {
+            assert_eq!(symbol_hash, old.hash);
+            assert_eq!(canon_hash, old.canon_hash);
+            // check if new entry appears first alphabetically
+            if path < &old.path {
+                // delete old row from naming_symbols table
+                delete_statement.execute(params![symbol_hash, old.file_info_id])?;
 
-                    // insert old row into overflow
-                    insert_overflow_statement.execute(params![
-                        symbol.hash,
-                        symbol.canon_hash,
-                        symbol.decl_hash,
-                        symbol.kind,
-                        symbol.file_info_id
-                    ])?;
+                // insert old row into overflow table
+                insert_overflow_statement.execute(params![
+                    symbol_hash,
+                    canon_hash,
+                    old.decl_hash,
+                    old.kind,
+                    old.file_info_id
+                ])?;
 
-                    // insert new row into main table
-                    insert_statement.execute(params![
-                        hash,
-                        canon_hash,
-                        decl_hash,
-                        kind,
-                        file_info_id
-                    ])?;
-                } else {
-                    // insert new row into overflow table
-                    insert_overflow_statement.execute(params![
-                        hash,
-                        canon_hash,
-                        decl_hash,
-                        kind,
-                        file_info_id
-                    ])?;
-                }
-            } else {
-                // No collision. Insert as you normally would
+                // insert new row into naming_symbols table
                 insert_statement.execute(params![
-                    hash,
+                    symbol_hash,
                     canon_hash,
                     decl_hash,
                     kind,
                     file_info_id
                 ])?;
+
+                save_result
+                    .checksum
+                    .addremove(symbol_hash, old.decl_hash, &old.path); // remove old
+                save_result.checksum.addremove(symbol_hash, decl_hash, path); // add new
+                save_result.add_collision(kind, item.symbol, &old.path, path);
+            } else {
+                // insert new row into overflow table
+                insert_overflow_statement.execute(params![
+                    symbol_hash,
+                    canon_hash,
+                    decl_hash,
+                    kind,
+                    file_info_id
+                ])?;
+                save_result.add_collision(kind, item.symbol, &old.path, path);
             }
+        } else {
+            // No collision. Insert as you normally would
+            insert_statement.execute(params![
+                symbol_hash,
+                canon_hash,
+                decl_hash,
+                kind,
+                file_info_id
+            ])?;
+            save_result.checksum.addremove(symbol_hash, decl_hash, path);
+            save_result.symbols_added += 1;
         }
         Ok(())
     }
@@ -780,9 +780,9 @@ impl Names {
         Ok(file_info_id)
     }
 
-    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> Option<String> {
+    fn join_with_pipe<'a>(symbols: impl Iterator<Item = &'a crate::DeclSummary>) -> Option<String> {
         let s = symbols
-            .map(|(symbol, _)| symbol)
+            .map(|summary| summary.symbol.as_str())
             .collect::<Vec<_>>()
             .join("|");
         if s.is_empty() { None } else { Some(s) }
@@ -924,5 +924,71 @@ impl Names {
         }
 
         Ok(())
+    }
+
+    pub fn build_at_path(
+        path: impl AsRef<Path>,
+        file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
+    ) -> anyhow::Result<Self> {
+        let path = path.as_ref();
+        let conn = Connection::open(path)?;
+        let log = slog::Logger::root(slog::Discard, slog::o!());
+        let (conn, _save_result) = Self::build(&log, conn, |tx| {
+            file_summaries.into_iter().try_for_each(|x| Ok(tx.send(x)?))
+        })?;
+        Ok(Self { conn })
+    }
+
+    /// Build a naming table using the information provided in
+    /// `collect_file_summaries` and writing to `conn`. The naming table will be
+    /// built on a background thread while `collect_file_summaries` is run. Once
+    /// all file summaries have been sent on the `Sender`, drop it (usually by
+    /// letting it go out of scope as `collect_file_summaries` terminates) to
+    /// allow building to continue.
+    pub fn build(
+        log: &slog::Logger,
+        mut conn: rusqlite::Connection,
+        collect_file_summaries: impl FnOnce(
+            crossbeam::channel::Sender<(RelativePath, crate::FileSummary)>,
+        ) -> anyhow::Result<()>,
+    ) -> anyhow::Result<(rusqlite::Connection, crate::SaveResult)> {
+        // We can't use rusqlite::Transaction for now because a lot of methods
+        // we want to use are on Self, and Self wants ownership of the
+        // Connection. Sqlite will automatically perform a rollback when the
+        // connection is closed, which will happen (via impl Drop for
+        // Connection) if we return Err here.
+        conn.execute("BEGIN TRANSACTION", params![])?;
+        Self::create_tables(&mut conn)?;
+
+        let mut names = Self { conn };
+        let save_result = crossbeam::thread::scope(|scope| -> anyhow::Result<_> {
+            let (tx, rx) = crossbeam::channel::unbounded();
+
+            // Write to the db serially, but concurrently with parsing
+            let names = &mut names;
+            let db_thread = scope.spawn(move |_| -> anyhow::Result<_> {
+                let mut save_result = crate::SaveResult::default();
+                while let Ok((path, summary)) = rx.recv() {
+                    names.insert_file_summary(&path, &summary, &mut save_result)?;
+                }
+                Ok(save_result)
+            });
+
+            // Parse files (in parallel, if the caller chooses)
+            collect_file_summaries(tx)?;
+
+            db_thread.join().unwrap()
+        })
+        .unwrap()?;
+        names.set_checksum(save_result.checksum)?;
+        let mut conn = names.conn;
+
+        slog::info!(log, "Creating indices...");
+        Self::create_indices(&mut conn)?;
+
+        slog::info!(log, "Closing DB transaction...");
+        conn.execute("END TRANSACTION", params![])?;
+
+        Ok((conn, save_result))
     }
 }

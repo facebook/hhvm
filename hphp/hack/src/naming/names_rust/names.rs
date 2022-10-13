@@ -14,6 +14,7 @@ mod naming_table;
 mod summary;
 
 pub use datatypes::FileInfoId;
+pub use datatypes::SaveResult;
 pub use naming_sqlite::Names;
 pub use naming_table::NamingTable;
 pub use summary::DeclSummary;
@@ -21,18 +22,11 @@ pub use summary::FileSummary;
 pub use summary::SymbolRow;
 
 pub fn hash_decl(decl: &oxidized_by_ref::shallow_decl_defs::Decl<'_>) -> DeclHash {
-    use oxidized_by_ref::shallow_decl_defs::Decl;
-    match *decl {
-        Decl::Class(decl) => DeclHash::from_u64(hh_hash::hash(decl)),
-        Decl::Const(decl) => DeclHash::from_u64(hh_hash::hash(decl)),
-        Decl::Fun(decl) => DeclHash::from_u64(hh_hash::hash(decl)),
-        Decl::Typedef(decl) => DeclHash::from_u64(hh_hash::hash(decl)),
-        Decl::Module(decl) => DeclHash::from_u64(hh_hash::hash(decl)),
-    }
+    DeclHash::from_u64(hh_hash::hash(decl))
 }
 
 fn hash_decls(decls: &oxidized_by_ref::direct_decl_parser::Decls<'_>) -> FileDeclsHash {
-    FileDeclsHash::from_u64(hh_hash::hash(&decls))
+    FileDeclsHash::from_u64(hh_hash::position_insensitive_hash(&decls))
 }
 
 pub fn hash_name(name: &str, name_type: oxidized::file_info::NameType) -> ToplevelSymbolHash {

@@ -508,10 +508,27 @@ static UntypedResponse cmd_subscribe(Client* clientbase, const json_ref& args) {
   const std::vector<json_ref>* drop_array =
       drop_list ? &drop_list->array() : nullptr;
 
+  UntypedResponse resp;
+
+  auto sub_name = json_to_w_string(jname);
+
+  // Check for duplicate subscription names. We do this early because
+  // constructing a ClientSubscription with a duplicate name isn't safe.
+  if (mapContainsAny(client->subscriptions, sub_name)) {
+    if (root->config.getBool("enforce_unique_subscription_names", false)) {
+      throw ErrorResponse("subscription name '{}' is not unique", sub_name);
+    }
+    log(ERR, "clobbering existing subscription '", sub_name, "'\n");
+    resp.set(
+        "warning",
+        w_string_to_json(w_string::format(
+            "subscription name '{}' is not unique", sub_name)));
+  }
+
   auto sub =
       std::make_shared<ClientSubscription>(root, client->shared_from_this());
 
-  sub->name = json_to_w_string(jname);
+  sub->name = std::move(sub_name);
   sub->query = query;
 
   auto defer = query_spec.get_default("defer_vcs", json_true());
@@ -573,7 +590,6 @@ static UntypedResponse cmd_subscribe(Client* clientbase, const json_ref& args) {
 
   client->subscriptions[sub->name] = sub;
 
-  UntypedResponse resp;
   resp.set("subscribe", json_ref(jname));
 
   add_root_warnings_to_response(resp, root);

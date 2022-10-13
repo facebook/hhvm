@@ -30,7 +30,7 @@ jobs:
       - run: git commit --all '--message=Update flake lock file'
       - name: Merge existing commits to avoid force push
         run: |
-          if git fetch --depth=1 origin nix-flake-update/${{github.ref_name}}
+          if git fetch --depth=1 origin refs/heads/nix-flake-update/${{github.ref_name}}
           then
             git merge --no-edit --allow-unrelated-histories --strategy ours FETCH_HEAD
           fi
@@ -48,7 +48,7 @@ jobs:
           set -o pipefail
           eval "$(ssh-agent)"
           aws kms decrypt --ciphertext-blob "fileb://$PWD/main-repo-push-key.kms-ciphertext" --query Plaintext --output text | base64 --decode | ssh-add -
-          git push git@github.com:${{github.repository}}.git nix-flake-update/${{github.ref_name}}
+          git push git@github.com:${{github.repository}}.git refs/heads/nix-flake-update/${{github.ref_name}}
       - uses: peter-evans/create-pull-request@v4
         with:
           branch: nix-flake-update/${{github.ref_name}}

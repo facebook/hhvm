@@ -48,7 +48,7 @@ jobs:
           set -o pipefail
           eval "$(ssh-agent)"
           aws kms decrypt --ciphertext-blob "fileb://$PWD/main-repo-push-key.kms-ciphertext" --query Plaintext --output text | base64 --decode | ssh-add -
-          git push git@github.com:${{github.repository}}.git refs/heads/nix-flake-update/${{github.ref_name}}
+          git push git@github.com:${{github.repository}}.git HEAD:refs/heads/nix-flake-update/${{github.ref_name}}
       - uses: peter-evans/create-pull-request@v4
         with:
           branch: nix-flake-update/${{github.ref_name}}

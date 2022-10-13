@@ -18,10 +18,15 @@
 
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
-
-const {fbContent} = require('docusaurus-plugin-internaldocs-fb/internal');
-
+const {
+  fbContent
+} = require('docusaurus-plugin-internaldocs-fb/internal');
 /** @type {import('@docusaurus/types').Config} */
+
+const {
+  fbInternalOnly
+} = require('internaldocs-fb-helpers');
+
 const config = {
   title: 'Facebook Thrift',
   tagline: 'A serialization and RPC framework',
@@ -30,129 +35,103 @@ const config = {
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
-
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'facebook',
   projectName: 'fbthrift',
-
-  presets: [
-    [
-      require.resolve('docusaurus-plugin-internaldocs-fb/docusaurus-preset'),
-      {
-        docs: {
-          path: '../doc',
-          sidebarPath: require.resolve('./sidebars.js'),
-          editUrl: fbContent({
-            internal:
-              'https://www.internalfb.com/intern/diffusion/FBS/browse/master/fbcode/thrift/website/',
-            external: 'https://github.com/facebook/fbthrift/blob/main/thrift/website',
-          }),
-        },
-        staticDocsProject: 'thrift',
-        trackingFile: 'xplat/staticdocs/WATCHED_FILES',
-        'remark-code-snippets': {
-          baseDir: '..',
-        },
-        enableEditor: true,
-      },
-    ],
-  ],
+  presets: [[require.resolve('docusaurus-plugin-internaldocs-fb/docusaurus-preset'), {
+    docs: {
+      path: '../doc',
+      sidebarPath: require.resolve('./sidebars.js'),
+      editUrl: fbContent({
+        internal: 'https://www.internalfb.com/intern/diffusion/FBS/browse/master/fbcode/thrift/website/',
+        external: 'https://github.com/facebook/fbthrift/blob/main/thrift/website'
+      })
+    },
+    staticDocsProject: 'thrift',
+    trackingFile: 'xplat/staticdocs/WATCHED_FILES',
+    'remark-code-snippets': {
+      baseDir: '..'
+    },
+    enableEditor: true
+  }]],
   customFields: {
     fbRepoName: 'fbsource',
-    ossRepoPath: 'fbcode/thrift',
+    ossRepoPath: 'fbcode/thrift'
   },
-
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
-    ({
-      navbar: {
-        title: 'Facebook Thrift',
-        logo: {
-          alt: 'Facebook Thrift Logo',
-          src: 'img/logo.svg',
-        },
-        items: [
-          {
-            type: 'doc',
-            docId: 'intro',
-            position: 'left',
-            label: 'Docs',
-          },
-          // Please keep GitHub link to the right for consistency.
-          {
-            href: 'https://github.com/facebook/fbthrift',
-            label: 'GitHub',
-            position: 'right',
-          },
-        ],
+  /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+  {
+    navbar: {
+      title: 'Facebook Thrift',
+      logo: {
+        alt: 'Facebook Thrift Logo',
+        src: 'img/logo.svg'
       },
-      footer: {
-        style: 'dark',
-        links: [
-          {
-            title: 'Learn',
-            items: [
-              {
-                label: 'Docs',
-                to: 'docs/',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/thrift',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'Blog',
-                href: 'https://engineering.fb.com/2014/02/20/open-source/under-the-hood-building-and-open-sourcing-fbthrift/',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/facebook/fbthrift',
-              },
-            ],
-          },
-          {
-            title: 'Legal',
-            // Please do not remove the privacy and terms, it's a legal requirement.
-            items: [
-              {
-                label: 'Privacy',
-                href: 'https://opensource.facebook.com/legal/privacy/',
-              },
-              {
-                label: 'Terms',
-                href: 'https://opensource.facebook.com/legal/terms/',
-              },
-              {
-                label: 'Data Policy',
-                href: 'https://opensource.facebook.com/legal/data-policy/',
-              },
-              {
-                label: 'Cookie Policy',
-                href: 'https://opensource.facebook.com/legal/cookie-policy/',
-              },
-            ],
-          },
-        ],
-        logo: {
-          alt: 'Facebook Open Source Logo',
-          src: 'img/oss_logo.png',
-          href: 'https://opensource.facebook.com',
-        },
-        // Please do not remove the credits, help to publicize Docusaurus :)
-        copyright: `Copyright © ${new Date().getFullYear()} Facebook, Inc. Built with Docusaurus.`,
+      items: [{
+        type: 'doc',
+        docId: 'intro',
+        position: 'left',
+        label: 'Docs'
+      }, // Please keep GitHub link to the right for consistency.
+      {
+        href: 'https://github.com/facebook/fbthrift',
+        label: 'GitHub',
+        position: 'right'
+      }, ...fbInternalOnly([{
+        "to": "docs/fb/index",
+        "label": "FB Internal",
+        "position": "left"
+      }])]
+    },
+    footer: {
+      style: 'dark',
+      links: [{
+        title: 'Learn',
+        items: [{
+          label: 'Docs',
+          to: 'docs/'
+        }]
+      }, {
+        title: 'Community',
+        items: [{
+          label: 'Stack Overflow',
+          href: 'https://stackoverflow.com/questions/tagged/thrift'
+        }]
+      }, {
+        title: 'More',
+        items: [{
+          label: 'Blog',
+          href: 'https://engineering.fb.com/2014/02/20/open-source/under-the-hood-building-and-open-sourcing-fbthrift/'
+        }, {
+          label: 'GitHub',
+          href: 'https://github.com/facebook/fbthrift'
+        }]
+      }, {
+        title: 'Legal',
+        // Please do not remove the privacy and terms, it's a legal requirement.
+        items: [{
+          label: 'Privacy',
+          href: 'https://opensource.facebook.com/legal/privacy/'
+        }, {
+          label: 'Terms',
+          href: 'https://opensource.facebook.com/legal/terms/'
+        }, {
+          label: 'Data Policy',
+          href: 'https://opensource.facebook.com/legal/data-policy/'
+        }, {
+          label: 'Cookie Policy',
+          href: 'https://opensource.facebook.com/legal/cookie-policy/'
+        }]
+      }],
+      logo: {
+        alt: 'Facebook Open Source Logo',
+        src: 'img/oss_logo.png',
+        href: 'https://opensource.facebook.com'
       },
-    }),
+      // Please do not remove the credits, help to publicize Docusaurus :)
+      copyright: `Copyright © ${new Date().getFullYear()} Facebook, Inc. Built with Docusaurus.`
+    }
+  }
 };
-
 module.exports = config;

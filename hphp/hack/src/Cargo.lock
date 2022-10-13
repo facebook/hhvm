@@ -2917,11 +2917,11 @@ dependencies = [
  "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
+ "rc_pos",
  "relative_path",
  "rusqlite",
  "rust_to_ocaml_attr",
  "serde",
- "static_assertions",
  "typing_deps_hash",
 ]
 
@@ -3467,6 +3467,23 @@ dependencies = [
  "crossbeam-utils 0.8.7",
  "lazy_static",
  "num_cpus",
+]
+
+[[package]]
+name = "rc_pos"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "parser_core_types",
+ "pretty_assertions",
+ "relative_path",
+ "serde",
+ "static_assertions",
 ]
 
 [[package]]

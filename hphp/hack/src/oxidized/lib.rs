@@ -6,6 +6,13 @@
 #[macro_use]
 extern crate rust_to_ocaml_attr;
 
+pub use pos::file_pos;
+pub use pos::file_pos_large;
+pub use pos::file_pos_small;
+pub use pos::pos_span_raw;
+pub use pos::pos_span_tiny;
+pub use rc_pos as pos;
+
 mod manual;
 
 pub use manual::aast;
@@ -15,9 +22,6 @@ pub use manual::ast;
 pub use manual::ast_defs_impl;
 pub use manual::doc_comment;
 pub use manual::file_info_impl;
-pub use manual::file_pos;
-pub use manual::file_pos_large;
-pub use manual::file_pos_small;
 pub use manual::global_options_impl;
 pub use manual::i_map;
 pub use manual::i_set;
@@ -28,9 +32,6 @@ pub use manual::local_id;
 pub use manual::local_id_map::LocalIdMap;
 pub use manual::namespace_env_impl;
 pub use manual::phase_map;
-pub use manual::pos;
-pub use manual::pos_span_raw;
-pub use manual::pos_span_tiny;
 pub use manual::s_map;
 pub use manual::s_set;
 pub use manual::scoured_comments_impl;

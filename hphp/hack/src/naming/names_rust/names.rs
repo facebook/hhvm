@@ -5,8 +5,6 @@
 
 use hh24_types::DeclHash;
 use hh24_types::FileDeclsHash;
-use hh24_types::ToplevelCanonSymbolHash;
-use hh24_types::ToplevelSymbolHash;
 
 mod datatypes;
 mod naming_sqlite;
@@ -27,27 +25,4 @@ pub fn hash_decl(decl: &oxidized_by_ref::shallow_decl_defs::Decl<'_>) -> DeclHas
 
 fn hash_decls(decls: &oxidized_by_ref::direct_decl_parser::Decls<'_>) -> FileDeclsHash {
     FileDeclsHash::from_u64(hh_hash::position_insensitive_hash(&decls))
-}
-
-pub fn hash_name(name: &str, name_type: oxidized::file_info::NameType) -> ToplevelSymbolHash {
-    use oxidized::file_info::NameType;
-    match name_type {
-        NameType::Fun => ToplevelSymbolHash::from_fun(name),
-        NameType::Const => ToplevelSymbolHash::from_const(name),
-        NameType::Class | NameType::Typedef => ToplevelSymbolHash::from_type(name),
-        NameType::Module => ToplevelSymbolHash::from_module(name),
-    }
-}
-
-pub fn hash_canon_name(
-    name: String,
-    name_type: oxidized::file_info::NameType,
-) -> ToplevelCanonSymbolHash {
-    use oxidized::file_info::NameType;
-    match name_type {
-        NameType::Fun => ToplevelCanonSymbolHash::from_fun(name),
-        NameType::Const => ToplevelCanonSymbolHash::from_const(name),
-        NameType::Class | NameType::Typedef => ToplevelCanonSymbolHash::from_type(name),
-        NameType::Module => ToplevelCanonSymbolHash::from_module(name),
-    }
 }

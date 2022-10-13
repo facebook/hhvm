@@ -1935,6 +1935,7 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "derive_more",
+ "file_info",
  "hh_hash",
  "nohash-hasher",
  "relative_path",

@@ -267,8 +267,8 @@ impl Names {
             "DELETE FROM NAMING_SYMBOLS
             WHERE HASH = ? AND FILE_INFO_ID = ?",
         )?;
-        let symbol_hash = crate::hash_name(&item.symbol, item.name_type);
-        let canon_hash = crate::hash_canon_name(item.symbol.clone(), item.name_type);
+        let symbol_hash = ToplevelSymbolHash::new(item.name_type, &item.symbol);
+        let canon_hash = ToplevelCanonSymbolHash::new(item.name_type, item.symbol.clone());
         let decl_hash = item.hash;
         let kind = item.name_type;
 

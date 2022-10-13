@@ -271,24 +271,26 @@ pub struct ToplevelSymbolHash(u64);
 u64_hash_wrapper_impls! { ToplevelSymbolHash }
 
 impl ToplevelSymbolHash {
-    fn new(deptype: typing_deps_hash::DepType, symbol: &str) -> Self {
-        Self(typing_deps_hash::hash1(deptype, symbol.as_bytes()))
+    pub fn new(kind: file_info::NameType, symbol: &str) -> Self {
+        Self(typing_deps_hash::hash1(kind.into(), symbol.as_bytes()))
     }
 
     pub fn from_type(symbol: &str) -> Self {
-        Self::new(typing_deps_hash::DepType::Type, symbol)
+        // Could also be a NameType::Typedef, but both Class and Typedef are
+        // represented with DepType::Type. See test_dep_type_from_name_type below.
+        Self::new(file_info::NameType::Class, symbol)
     }
 
     pub fn from_fun(symbol: &str) -> Self {
-        Self::new(typing_deps_hash::DepType::Fun, symbol)
+        Self::new(file_info::NameType::Fun, symbol)
     }
 
     pub fn from_const(symbol: &str) -> Self {
-        Self::new(typing_deps_hash::DepType::GConst, symbol)
+        Self::new(file_info::NameType::Const, symbol)
     }
 
     pub fn from_module(symbol: &str) -> Self {
-        Self::new(typing_deps_hash::DepType::Module, symbol)
+        Self::new(file_info::NameType::Module, symbol)
     }
 
     #[inline(always)]
@@ -317,25 +319,27 @@ pub struct ToplevelCanonSymbolHash(u64);
 u64_hash_wrapper_impls! { ToplevelCanonSymbolHash }
 
 impl ToplevelCanonSymbolHash {
-    fn new(dep_type: typing_deps_hash::DepType, mut symbol: String) -> Self {
+    pub fn new(kind: file_info::NameType, mut symbol: String) -> Self {
         symbol.make_ascii_lowercase();
-        Self(typing_deps_hash::hash1(dep_type, symbol.as_bytes()))
+        Self(typing_deps_hash::hash1(kind.into(), symbol.as_bytes()))
     }
 
     pub fn from_type(symbol: String) -> Self {
-        Self::new(typing_deps_hash::DepType::Type, symbol)
+        // Could also be a NameType::Typedef, but both Class and Typedef are
+        // represented with DepType::Type. See test_dep_type_from_name_type below.
+        Self::new(file_info::NameType::Class, symbol)
     }
 
     pub fn from_fun(symbol: String) -> Self {
-        Self::new(typing_deps_hash::DepType::Fun, symbol)
+        Self::new(file_info::NameType::Fun, symbol)
     }
 
     pub fn from_const(symbol: String) -> Self {
-        Self::new(typing_deps_hash::DepType::GConst, symbol)
+        Self::new(file_info::NameType::Const, symbol)
     }
 
     pub fn from_module(symbol: String) -> Self {
-        Self::new(typing_deps_hash::DepType::Module, symbol)
+        Self::new(file_info::NameType::Module, symbol)
     }
 }
 
@@ -539,5 +543,13 @@ mod tests {
                 assert!(debug.contains("1: oops"));
             }
         }
+    }
+
+    #[test]
+    fn test_dep_type_from_name_type() {
+        assert_eq!(
+            typing_deps_hash::DepType::from(file_info::NameType::Class),
+            typing_deps_hash::DepType::from(file_info::NameType::Typedef)
+        );
     }
 }

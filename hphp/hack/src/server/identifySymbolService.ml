@@ -521,6 +521,21 @@ let visitor =
       in
       self#plus acc (super#on_Haccess env root ids)
 
+    method! on_Hrefinement env root refs =
+      let process_refinement acc r =
+        let id =
+          match r with
+          | Aast.Rctx (id, _)
+          | Aast.Rtype (id, _) ->
+            id
+        in
+        Tast_env.referenced_typeconsts env root [id]
+        |> List.map ~f:process_typeconst
+        |> List.fold ~init:acc ~f:self#plus
+      in
+      let acc = List.fold ~init:self#zero ~f:process_refinement refs in
+      self#plus acc (super#on_Hrefinement env root refs)
+
     method! on_tparam env tp =
       let (pos, name) = tp.Aast.tp_name in
       let acc =

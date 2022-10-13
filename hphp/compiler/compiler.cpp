@@ -19,6 +19,8 @@
 #include "hphp/compiler/option.h"
 #include "hphp/compiler/package.h"
 
+#include "hphp/hack/src/hackc/ffi_bridge/compiler_ffi.rs.h"
+
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/options.h"
@@ -31,6 +33,7 @@
 #include "hphp/runtime/base/variable-serializer.h"
 #include "hphp/runtime/version.h"
 
+#include "hphp/runtime/vm/builtin-symbol-map.h"
 #include "hphp/runtime/vm/disas.h"
 #include "hphp/runtime/vm/preclass-emitter.h"
 #include "hphp/runtime/vm/repo-autoload-map-builder.h"
@@ -816,6 +819,38 @@ void logPhaseStats(const std::string& phase, const Package& package,
   sample.setStr(phase + "_fellback", client.fellback() ? "true" : "false");
 }
 
+namespace {
+  // Upload all builtin decls, and pass their IndexMeta summary and
+  // Ref<UnitDecls> to callback() to include in the overall UnitIndex. This
+  // makes systemlib decls visible to files being compiled as part of the
+  // full repo build, but does not make repo decls available to systemlib.
+  coro::Task<bool> indexBuiltinSymbolDecls(
+    const Package::IndexCallback& callback,
+    coro::TicketExecutor& executor,
+    extern_worker::Client& client
+  ) {
+    std::vector<coro::TaskWithExecutor<void>> tasks;
+    auto const declCallback = [&](auto const* d) -> coro::Task<void> {
+      auto const facts = hackc::decls_to_facts_cpp_ffi(*d, "");
+      auto summary = summary_of_facts(facts);
+      callback(
+        "",
+        summary,
+        HPHP_CORO_AWAIT(client.store(Package::UnitDecls{
+          summary,
+          std::string{d->serialized.begin(), d->serialized.end()}
+        }))
+      );
+      HPHP_CORO_RETURN_VOID;
+    };
+    for (auto const& d: Native::getAllBuiltinDecls()) {
+      tasks.emplace_back(declCallback(d).scheduleOn(executor.sticky()));
+    }
+    HPHP_CORO_AWAIT(coro::collectRange(std::move(tasks)));
+    HPHP_CORO_RETURN(true);
+  }
+}
+
 // Compute a UnitIndex by parsing decls for all autoload-eligible files.
 // If no Autoload.Query is specified by RepoOptions, this just indexes
 // the input files.
@@ -862,8 +897,25 @@ std::unique_ptr<UnitIndex> computeIndex(
     // index just the input files
     addInputsToPackage(indexPackage, po);
   }
+  // Here, we are doing the following in parallel:
+  // * Indexing the build package
+  // * Indexing builtin decls to be used by decl driven bytecode compilation
+  // If DDB is not enabled, we will return early from the second task.
+  auto const [indexingRepoOK, indexingSystemlibDeclsOK] = coro::wait(
+    coro::collect(
+      indexPackage.index(indexUnit),
+      coro::invoke([&]() -> coro::Task<bool> {
+        if (RO::EvalEnableDecl) {
+          HPHP_CORO_RETURN(HPHP_CORO_AWAIT(
+            indexBuiltinSymbolDecls(indexUnit, executor, client)
+          ));
+        }
+        HPHP_CORO_RETURN(true);
+      })
+    )
+  );
 
-  if (!coro::wait(indexPackage.index(indexUnit))) return nullptr;
+  if (!indexingRepoOK || !indexingSystemlibDeclsOK) return nullptr;
 
   logPhaseStats("index", indexPackage, client, sample,
                 indexTimer.getMicroSeconds());

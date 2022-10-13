@@ -123,4 +123,22 @@ Optional<hackc::ExternalDeclProviderResult> getBuiltinDecls(
   not_reached();
 }
 
+hphp_fast_set<const hackc::DeclResult*> getAllBuiltinDecls() {
+  assertx(RuntimeOption::EvalEnableDecl);
+  hphp_fast_set<const hackc::DeclResult*> res;
+  for (const auto& it: s_types) {
+    res.emplace(it.second.get());
+  }
+  for (const auto& it: s_functions) {
+    res.emplace(it.second.get());
+  }
+  for (const auto& it: s_constants) {
+    res.emplace(it.second.get());
+  }
+  for (const auto& it: s_modules) {
+    res.emplace(it.second.get());
+  }
+  return res;
+}
+
 } // namespace HPHP::Native

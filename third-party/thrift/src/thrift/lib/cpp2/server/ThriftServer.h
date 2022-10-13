@@ -269,6 +269,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   void ensureDecoratedProcessorFactoryInitialized();
 
+  bool serverRanWithDCHECK();
+
 #if FOLLY_HAS_COROUTINES
   std::unique_ptr<folly::coro::CancellableAsyncScope> asyncScope_;
 #endif

@@ -626,6 +626,14 @@ void ThriftServer::setup() {
   }
 
   THRIFT_SERVER_EVENT(serve).log(*this);
+  // This gives us an event in thrift server events when a server is run with
+  // DCHECK enabled.
+  DCHECK(serverRanWithDCHECK());
+}
+
+bool ThriftServer::serverRanWithDCHECK() {
+  THRIFT_SERVER_EVENT(dcheck).log(*this);
+  return true;
 }
 
 void ThriftServer::setupThreadManager() {

@@ -42,6 +42,7 @@ using apache::thrift::instrumentation::ServerTracker;
 
 constexpr std::string_view kServe = "serve";
 constexpr std::string_view kResourcePoolsEnabled = "resourcepoolsenabled";
+constexpr std::string_view kDcheck = "dcheck";
 // Note not setting a ssl config is seen as a manual override
 constexpr std::string_view kNonTls = "non_tls.manual_policy";
 constexpr std::string_view kNewConnection = "new_connection";
@@ -78,6 +79,7 @@ class TestEventRegistry : public LoggingEventRegistry {
     serverEventMap_[kServe] = makeHandler<TestServerEventHandler>();
     serverEventMap_[kResourcePoolsEnabled] =
         makeHandler<TestServerEventHandler>();
+    serverEventMap_[kDcheck] = makeHandler<TestServerEventHandler>();
     connectionEventMap_[kNonTls] = makeHandler<TestConnectionEventHandler>();
     connectionEventMap_[kNewConnection] =
         makeHandler<TestConnectionEventHandler>();

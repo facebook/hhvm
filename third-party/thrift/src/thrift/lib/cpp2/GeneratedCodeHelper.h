@@ -62,80 +62,6 @@ namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     bool, includeInRecentRequestsCount, const std::string_view /*methodName*/);
 
-template <class Tuple, class F, size_t... Index>
-uint32_t forEach(Tuple& tuple, F& f, std::index_sequence<Index...>) {
-  return (f(std::get<Index>(tuple), Index) + ... + 0);
-}
-template <class Tuple, class F>
-uint32_t forEach(Tuple& tuple, F f) {
-  return forEach(
-      tuple,
-      f,
-      std::make_index_sequence<std::tuple_size<
-          typename std::remove_reference<Tuple>::type>::value>());
-}
-
-template <class Tuple, class F, size_t... Index>
-void forEachVoid(Tuple& tuple, F& f, std::index_sequence<Index...>) {
-  (f(std::get<Index>(tuple), Index), ...);
-}
-template <class Tuple, class F>
-void forEachVoid(Tuple& tuple, F f) {
-  forEachVoid(
-      tuple,
-      f,
-      std::make_index_sequence<std::tuple_size<
-          typename std::remove_reference<Tuple>::type>::value>());
-}
-
-template <typename Protocol, typename IsSet>
-struct Writer {
-  Writer(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
-  template <typename FieldData>
-  uint32_t operator()(const FieldData& fieldData, int index) {
-    if (!isset_.getIsSet(index)) {
-      return 0;
-    }
-    return fieldData.write(prot_);
-  }
-
- private:
-  Protocol* prot_;
-  const IsSet& isset_;
-};
-
-template <typename Protocol, typename IsSet>
-struct Sizer {
-  Sizer(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
-  template <typename FieldData>
-  uint32_t operator()(const FieldData& fieldData, int index) {
-    if (!isset_.getIsSet(index)) {
-      return 0;
-    }
-    return fieldData.size(prot_);
-  }
-
- private:
-  Protocol* prot_;
-  const IsSet& isset_;
-};
-
-template <typename Protocol, typename IsSet>
-struct SizerZC {
-  SizerZC(Protocol* prot, const IsSet& isset) : prot_(prot), isset_(isset) {}
-  template <typename FieldData>
-  uint32_t operator()(const FieldData& fieldData, int index) {
-    if (!isset_.getIsSet(index)) {
-      return 0;
-    }
-    return fieldData.sizeZC(prot_);
-  }
-
- private:
-  Protocol* prot_;
-  const IsSet& isset_;
-};
-
 template <typename Protocol, typename IsSet>
 struct Reader {
   Reader(
@@ -315,10 +241,8 @@ class ThriftPresult
         break;
       }
       bool readSomething = false;
-      apache::thrift::detail::forEachVoid(
-          fields(),
-          apache::thrift::detail::Reader(
-              prot, isSet(), fid, ftype, readSomething));
+      detail::foreach_tuple(
+          detail::Reader(prot, isSet(), fid, ftype, readSomething), fields());
       if (!readSomething) {
         prot->skip(ftype);
       }
@@ -333,8 +257,14 @@ class ThriftPresult
   uint32_t serializedSize(Protocol* prot) const {
     uint32_t xfer = 0;
     xfer += prot->serializedStructSize("");
-    xfer += apache::thrift::detail::forEach(
-        fields(), apache::thrift::detail::Sizer(prot, isSet()));
+    detail::foreach_tuple(
+        [&xfer, prot, isset = isSet()](const auto& fieldData, auto index) {
+          if (!isset.getIsSet(index)) {
+            return;
+          }
+          xfer += fieldData.size(prot);
+        },
+        fields());
     xfer += prot->serializedSizeStop();
     return xfer;
   }
@@ -343,8 +273,14 @@ class ThriftPresult
   uint32_t serializedSizeZC(Protocol* prot) const {
     uint32_t xfer = 0;
     xfer += prot->serializedStructSize("");
-    xfer += apache::thrift::detail::forEach(
-        fields(), apache::thrift::detail::SizerZC(prot, isSet()));
+    detail::foreach_tuple(
+        [&xfer, prot, isset = isSet()](const auto& fieldData, auto index) {
+          if (!isset.getIsSet(index)) {
+            return;
+          }
+          xfer += fieldData.sizeZC(prot);
+        },
+        fields());
     xfer += prot->serializedSizeStop();
     return xfer;
   }
@@ -353,8 +289,14 @@ class ThriftPresult
   uint32_t write(Protocol* prot) const {
     uint32_t xfer = 0;
     xfer += prot->writeStructBegin("");
-    xfer += apache::thrift::detail::forEach(
-        fields(), apache::thrift::detail::Writer(prot, isSet()));
+    detail::foreach_tuple(
+        [&xfer, prot, isset = isSet()](const auto& fieldData, auto index) {
+          if (!isset.getIsSet(index)) {
+            return;
+          }
+          xfer += fieldData.write(prot);
+        },
+        fields());
     xfer += prot->writeFieldStop();
     xfer += prot->writeStructEnd();
     return xfer;

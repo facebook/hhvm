@@ -538,6 +538,12 @@ let mk_issubtype_prop ~coerce env ty1 ty2 =
     TL.IsSubtype (coerce, ty1, LoclType ty2)
   | _ -> TL.IsSubtype (coerce, ty1, ty2)
 
+let strip_supportdyn ty =
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+    (true, tyarg)
+  | _ -> (false, ty)
+
 (** Given types ty_sub and ty_super, attempt to
  *  reduce the subtyping proposition ty_sub <: ty_super to
  *  a logical proposition whose primitive assertions are of the form v <: t or t <: v
@@ -555,12 +561,16 @@ let rec simplify_subtype
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
     ?(super_like = false)
+    ?(sub_supportdyn = false)
+    ?(super_supportdyn = false)
     ty_sub
     ty_super =
   simplify_subtype_i
     ~subtype_env
     ~this_ty
     ~super_like
+    ~sub_supportdyn
+    ~super_supportdyn
     (LoclType ty_sub)
     (LoclType ty_super)
 
@@ -842,6 +852,8 @@ and simplify_subtype_i
     ~(subtype_env : subtype_env)
     ?(this_ty : locl_ty option = None)
     ?(super_like : bool = false)
+    ?(sub_supportdyn : bool = false)
+    ?(super_supportdyn : bool = false)
     (ty_sub : internal_type)
     (ty_super : internal_type)
     env : env * TL.subtype_prop =
@@ -2054,6 +2066,7 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
+        let (sub_supportdyn', lty) = strip_supportdyn lty in
         (match deref lty with
         | (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
           simplify_subtype_shape
@@ -2061,8 +2074,8 @@ and simplify_subtype_i
             ~env
             ~this_ty
             ~super_like
-            (r_sub, shape_kind_sub, fdm_sub)
-            (r_super, shape_kind_super, fdm_super)
+            (sub_supportdyn || sub_supportdyn', r_sub, shape_kind_sub, fdm_sub)
+            (super_supportdyn, r_super, shape_kind_super, fdm_super)
         | _ -> default_subtype env))
     | (_, Tvec_or_dict _) ->
       (match ety_sub with
@@ -2109,6 +2122,8 @@ and simplify_subtype_i
                ~subtype_env
                ~this_ty
                ~super_like
+               ~super_supportdyn:true
+               ~sub_supportdyn:true
                tyarg_sub
                tyarg_super
         | (_, (Tgeneric _ | Tvar _)) -> default_subtype env
@@ -2119,6 +2134,7 @@ and simplify_subtype_i
                ~subtype_env
                ~this_ty
                ~super_like
+               ~super_supportdyn:true
                lty_sub
                tyarg_super
           &&& simplify_dynamic_aware_subtype
@@ -2476,8 +2492,8 @@ and simplify_subtype_shape
     ~(env : env)
     ~(this_ty : locl_ty option)
     ?(super_like = false)
-    (r_sub, shape_kind_sub, fdm_sub)
-    (r_super, shape_kind_super, fdm_super) =
+    (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+    (supportdyn_super, r_super, shape_kind_super, fdm_super) =
   (*
     Shape projection for shape type `s` and field `f` (`s |_ f`) is defined as:
       - if `f` appears in `s` as `f => ty` then `s |_ f` = `Required ty`
@@ -2489,15 +2505,27 @@ and simplify_subtype_shape
       - `?f => nothing` should be ignored, and treated as `Absent`.
         Such a field cannot be given a value, and so is effectively not present.
   *)
-  let shape_projection field_name shape_kind shape_map r =
+  let shape_projection ~supportdyn field_name shape_kind shape_map r =
+    let make_supportdyn ty =
+      if
+        supportdyn
+        && not
+             (is_sub_type_for_union_i
+                env
+                (LoclType ty)
+                (LoclType (MakeType.supportdyn r (MakeType.mixed r))))
+      then
+        MakeType.supportdyn r ty
+      else
+        ty
+    in
+
     match TShapeMap.find_opt field_name shape_map with
     | Some { sft_ty; sft_optional } ->
-      begin
-        match (deref sft_ty, sft_optional) with
-        | ((_, Tunion []), true) -> `Absent
-        | (_, true) -> `Optional sft_ty
-        | (_, false) -> `Required sft_ty
-      end
+      (match (deref sft_ty, sft_optional) with
+      | ((_, Tunion []), true) -> `Absent
+      | (_, true) -> `Optional (make_supportdyn sft_ty)
+      | (_, false) -> `Required (make_supportdyn sft_ty))
     | None ->
       begin
         match shape_kind with
@@ -2509,7 +2537,7 @@ and simplify_subtype_shape
             MakeType.mixed
               (Reason.Rmissing_optional_field (Reason.to_pos r, printable_name))
           in
-          `Optional mixed_ty
+          `Optional (make_supportdyn mixed_ty)
         | Closed_shape -> `Absent
       end
   in
@@ -2590,15 +2618,25 @@ and simplify_subtype_shape
   in
   (* Helper function to project out a field and then simplify subtype *)
   let shape_project_and_simplify_subtype
-      (r_sub, shape_kind_sub, shape_map_sub)
-      (r_super, shape_kind_super, shape_map_super)
+      (supportdyn_sub, r_sub, shape_kind_sub, shape_map_sub)
+      (supportdyn_super, r_super, shape_kind_super, shape_map_super)
       field_name
       res =
     let proj_sub =
-      shape_projection field_name shape_kind_sub shape_map_sub r_sub
+      shape_projection
+        ~supportdyn:supportdyn_sub
+        field_name
+        shape_kind_sub
+        shape_map_sub
+        r_sub
     in
     let proj_super =
-      shape_projection field_name shape_kind_super shape_map_super r_super
+      shape_projection
+        ~supportdyn:supportdyn_super
+        field_name
+        shape_kind_super
+        shape_map_super
+        r_super
     in
     simplify_subtype_shape_projection
       (r_sub, proj_sub)
@@ -2627,8 +2665,8 @@ and simplify_subtype_shape
   | _ ->
     TShapeSet.fold
       (shape_project_and_simplify_subtype
-         (r_sub, shape_kind_sub, fdm_sub)
-         (r_super, shape_kind_super, fdm_super))
+         (supportdyn_sub, r_sub, shape_kind_sub, fdm_sub)
+         (supportdyn_super, r_super, shape_kind_super, fdm_super))
       (TShapeSet.of_list (TShapeMap.keys fdm_sub @ TShapeMap.keys fdm_super))
       (env, TL.valid)
 

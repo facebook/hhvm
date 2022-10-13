@@ -39,7 +39,13 @@ jobs:
           set -o pipefail
           eval "$(ssh-agent)"
           aws kms decrypt --ciphertext-blob "fileb://$PWD/main-repo-push-key.kms-ciphertext" --query Plaintext --output text | base64 --decode | ssh-add -
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
           git commit --all '--message=Update flake lock file'
+          if git fetch --depth=1 origin nix-flake-update/${{github.ref_name}}
+          then
+            git merge --strategy ours FETCH_HEAD
+          fi
           git push git@github.com:${{github.repository}}.git nix-flake-update/${{github.ref_name}}
       - uses: peter-evans/create-pull-request@v4
         with:

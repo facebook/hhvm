@@ -25,8 +25,8 @@ jobs:
             extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
             extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
       - run: nix flake update
-      - run: git config user.name 'github-actions[bot]'
-      - run: git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - run: git config user.name 'HHVM/Hack Open Source'
+      - run: git config user.email 'hhvm-oss@meta.com'
       - run: git commit --all '--message=Update flake lock file'
       - name: Merge existing commits to avoid force push
         run: |

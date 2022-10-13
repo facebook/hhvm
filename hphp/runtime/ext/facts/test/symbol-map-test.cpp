@@ -1378,6 +1378,35 @@ TEST_F(SymbolMapTest, DeriveKinds) {
   update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
 }
 
+TEST_F(SymbolMapTest, DeriveKindsRequireClass) {
+  auto& m1 = make("/var/www1");
+
+  fs::path path = {"some/path.php"};
+  FileFacts ff{
+      .m_types = {
+          TypeDetails{.m_name = "BaseClass", .m_kind = TypeKind::Class},
+          TypeDetails{
+              .m_name = "SomeTrait",
+              .m_kind = TypeKind::Trait,
+              .m_requireClass = {"BaseClass"}}}};
+
+  update(m1, "", "1:2:3", {path}, {}, {ff});
+  EXPECT_EQ(m1.getClock().m_clock, "1:2:3");
+  EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::Extends).empty());
+  EXPECT_TRUE(m1.getBaseTypes("SomeTrait", DeriveKind::RequireExtends).empty());
+  EXPECT_THAT(
+      m1.getBaseTypes("SomeTrait", DeriveKind::RequireClass),
+      ElementsAre("BaseClass"));
+  EXPECT_THAT(
+      m1.getDerivedTypes("BaseClass", DeriveKind::RequireClass),
+      ElementsAre("SomeTrait"));
+
+  auto& someTraitFacts = ff.m_types[1];
+  ASSERT_EQ(someTraitFacts.m_name, "SomeTrait");
+  someTraitFacts.m_requireClass = {};
+  update(m1, "1:2:3", "1:2:4", {path}, {}, {ff});
+}
+
 TEST_F(SymbolMapTest, MultipleRoots) {
   auto& m1 = make("/var/www1");
 

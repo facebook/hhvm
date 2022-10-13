@@ -77,17 +77,21 @@ enum class TypeFlag {
 //
 // `trait T { require extends B; }` means that, while T does not extend B
 // itself, any class using T must also extend B in order to be sound.
+// `trait T { require class B; }` means that trait T can only be used
+// by class T
 using DeriveKindMask = int;
 enum class DeriveKind {
   Extends = 1 << 0,
   RequireExtends = 1 << 1,
   // This should be merged into RequireExtends.
   RequireImplements = 1 << 2,
+  RequireClass = 1 << 3,
 };
 constexpr DeriveKindMask kDeriveKindAll =
     static_cast<int>(DeriveKind::Extends) |
     static_cast<int>(DeriveKind::RequireExtends) |
-    static_cast<int>(DeriveKind::RequireImplements);
+    static_cast<int>(DeriveKind::RequireImplements) |
+    static_cast<int>(DeriveKind::RequireClass);
 
 // Represents `<<IAmAnAttribute(0, 'Hello', null)>>` as
 // `{"IAmAnAttribute", vec[0, "Hello", null]}`
@@ -112,6 +116,9 @@ struct TypeDetails {
 
   // List of attributes and their arguments
   std::vector<Attribute> m_attributes;
+
+  // List of classes which this `require class`
+  std::vector<std::string> m_requireClass;
 
   // List of classes or interfaces which this `require extends`
   std::vector<std::string> m_requireExtends;
@@ -229,6 +236,8 @@ template <> struct hash<HPHP::Facts::TypeDetails> {
             type.m_baseTypes.begin(), type.m_baseTypes.end()),
         folly::hash::hash_range(
             type.m_attributes.begin(), type.m_attributes.end()),
+        folly::hash::hash_range(
+            type.m_requireClass.begin(), type.m_requireClass.end()),
         folly::hash::hash_range(
             type.m_requireExtends.begin(), type.m_requireExtends.end()),
         folly::hash::hash_range(

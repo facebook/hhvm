@@ -279,6 +279,7 @@ struct DeriveKindFilterData {
       mask &= ~static_cast<int>(DeriveKind::Extends);
     }
     if (m_removeRequires) {
+      mask &= ~static_cast<int>(DeriveKind::RequireClass);
       mask &= ~static_cast<int>(DeriveKind::RequireExtends);
       mask &= ~static_cast<int>(DeriveKind::RequireImplements);
     }
@@ -1152,6 +1153,7 @@ struct FactsStoreImpl final
       addBaseTypes(DeriveKind::Extends);
     }
     if (!filters.m_deriveKindFilters.m_removeRequires) {
+      addBaseTypes(DeriveKind::RequireClass);
       addBaseTypes(DeriveKind::RequireExtends);
       addBaseTypes(DeriveKind::RequireImplements);
     }
@@ -1179,6 +1181,7 @@ struct FactsStoreImpl final
       addDerivedTypes(DeriveKind::Extends);
     }
     if (!filters.m_deriveKindFilters.m_removeRequires) {
+      addDerivedTypes(DeriveKind::RequireClass);
       addDerivedTypes(DeriveKind::RequireExtends);
       addDerivedTypes(DeriveKind::RequireImplements);
     }

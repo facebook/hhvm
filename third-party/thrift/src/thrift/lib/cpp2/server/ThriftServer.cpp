@@ -655,7 +655,9 @@ void ThriftServer::setupThreadManager() {
       // We always need a threadmanager for cpp2.
       LOG(INFO) << "Using thread manager (resource pools not enabled) "
                 << runtimeServerActions_.explain() << " on address/port "
-                << getAddressAsString();
+                << getAddressAsString() << " enable gflag:"
+                << FLAGS_thrift_experimental_use_resource_pools
+                << " disable gflag:" << FLAGS_thrift_disable_resource_pools;
       if (!threadManager_) {
         std::shared_ptr<apache::thrift::concurrency::ThreadManager>
             threadManager;
@@ -747,7 +749,10 @@ void ThriftServer::setupThreadManager() {
       }
     } else {
       LOG(INFO) << "Using resource pools on address/port "
-                << getAddressAsString();
+                << getAddressAsString() << " thrift flag:"
+                << THRIFT_FLAG(experimental_use_resource_pools)
+                << " enable gflag:"
+                << FLAGS_thrift_experimental_use_resource_pools;
       DCHECK(!threadManager_);
 
       ensureResourcePools();

@@ -1,6 +1,9 @@
 on:
   schedule:
     - cron: "0 3 * * *"
+  push:
+    branches:
+      - test-nix-flake-update
 permissions:
   contents: read
 

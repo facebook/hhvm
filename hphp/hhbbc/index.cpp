@@ -115,7 +115,7 @@ static_assert(CheckSize<RepoAuthType, 8>(), "");
 //////////////////////////////////////////////////////////////////////
 
 /*
- * One-to-many case insensitive map, where the keys are static strings
+ * One-to-many case sensitive map, where the keys are static strings
  * and the values are some kind of pointer.
  */
 template<class T> using SStringToMany =
@@ -150,17 +150,6 @@ template<class T> using ISStringToOneT =
  * pointer hashing/comparison is sufficient.
  */
 template<class T> using SStringToOneT = hphp_fast_map<SString, T>;
-
-/*
- * One-to-one case sensitive map, where the keys are static strings
- * and the values are some T.
- *
- * Elements are stable under insert/erase.
- *
- * Static strings are always uniquely defined by their pointer, so
- * pointer hashing/comparison is sufficient.
- */
-template<class T> using SStringToOneNodeT = hphp_hash_map<SString, T>;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -247,23 +236,6 @@ struct MethTabEntry {
 }
 
 namespace {
-
-struct MethTabEntryPair : SStringToOneNodeT<MethTabEntry>::value_type {};
-
-inline MethTabEntryPair* mteFromElm(
-  SStringToOneNodeT<MethTabEntry>::value_type& elm) {
-  return static_cast<MethTabEntryPair*>(&elm);
-}
-
-inline const MethTabEntryPair* mteFromElm(
-  const SStringToOneNodeT<MethTabEntry>::value_type& elm) {
-  return static_cast<const MethTabEntryPair*>(&elm);
-}
-
-inline MethTabEntryPair*
-mteFromIt(SStringToOneNodeT<MethTabEntry>::iterator it) {
-  return static_cast<MethTabEntryPair*>(&*it);
-}
 
 using ContextRetTyMap = tbb::concurrent_hash_map<
   CallContext,
@@ -759,10 +731,11 @@ struct ClassInfo {
 
   /*
    * A (case-sensitive) map from class method names to the php::Func
-   * associated with it.  This map is flattened across the inheritance
-   * hierarchy.
+   * associated with it. This map is flattened across the inheritance
+   * hierarchy. There's a lot of these, so we use a sorted_vector_map
+   * to minimize wasted space.
    */
-  SStringToOneNodeT<MethTabEntry> methods;
+  folly::sorted_vector_map<SString, MethTabEntry> methods;
 
   /*
    * A (case-sensitive) map from class method names to associated
@@ -3504,20 +3477,21 @@ bool build_class_methods(const IndexData& index,
     TMIData tmid;
     for (auto const t : cinfo->usedTraits) {
       assertx(!(cinfo->cls->attrs & AttrInterface));
-      std::vector<const MethTabEntryPair*> methods(t->methods.size());
-      for (auto& m : t->methods) {
-        if (HPHP::Func::isSpecial(m.first)) continue;
-        assertx(!methods[m.second.idx]);
-        methods[m.second.idx] = mteFromElm(m);
+      std::vector<std::pair<SString, const MethTabEntry*>>
+        methods(t->methods.size());
+      for (auto const& [name, mte] : t->methods) {
+        if (HPHP::Func::isSpecial(name)) continue;
+        assertx(!methods[mte.idx].first);
+        methods[mte.idx] = std::make_pair(name, &mte);
       }
-      for (auto const m : methods) {
-        if (!m) continue;
+      for (auto const& [name, mte] : methods) {
+        if (!name) continue;
         TraitMethod traitMethod {
           t,
-          func_from_mte(index, m->second),
-          m->second.attrs
+          func_from_mte(index, *mte),
+          mte->attrs
         };
-        tmid.add(traitMethod, m->first);
+        tmid.add(traitMethod, name);
       }
       if (auto const it = index.classClosureMap.find(t->cls);
           it != index.classClosureMap.end()) {
@@ -4076,13 +4050,13 @@ void flatten_traits(IndexData& index,
   }
   auto const cls = const_cast<php::Class*>(cinfo->cls);
   if (hasConstProp) cls->hasConstProp = true;
-  std::vector<MethTabEntryPair*> methodsToAdd;
-  for (auto& ent : cinfo->methods) {
-    if (!ent.second.topLevel || ent.second.cls->isame(cinfo->cls->name)) {
+  std::vector<std::pair<SString, MethTabEntry*>> methodsToAdd;
+  for (auto& [name, mte] : cinfo->methods) {
+    if (!mte.topLevel || mte.cls->isame(cinfo->cls->name)) {
       continue;
     }
-    always_assert(index.classes.at(ent.second.cls)->attrs & AttrTrait);
-    methodsToAdd.push_back(mteFromElm(ent));
+    always_assert(index.classes.at(mte.cls)->attrs & AttrTrait);
+    methodsToAdd.emplace_back(name, &mte);
   }
 
   auto const it = updates.extraMethods.find(cinfo->cls);
@@ -4091,8 +4065,8 @@ void flatten_traits(IndexData& index,
     assertx(it != updates.extraMethods.end());
     std::sort(
       begin(methodsToAdd), end(methodsToAdd),
-      [] (const MethTabEntryPair* a, const MethTabEntryPair* b) {
-        return a->second.idx < b->second.idx;
+      [] (auto const& a, auto const& b) {
+        return a.second->idx < b.second->idx;
       }
     );
   } else if (debug && it != updates.extraMethods.end()) {
@@ -4111,24 +4085,24 @@ void flatten_traits(IndexData& index,
   std::vector<std::unique_ptr<php::Func>> clones;
   ClonedClosureMap clonedClosures;
 
-  for (auto const ent : methodsToAdd) {
+  for (auto const& [name, mte] : methodsToAdd) {
     auto clone = clone_meth(
       index,
       cls,
-      func_from_mte(index, ent->second),
-      ent->first,
-      ent->second.attrs,
+      func_from_mte(index, *mte),
+      name,
+      mte->attrs,
       updates,
       clonedClosures
     );
     if (!clone) {
       ITRACE(5, "Not flattening {} because {}::{} could not be cloned\n",
-             cls->name, ent->second.cls, ent->first);
+             cls->name, mte->cls, name);
       return;
     }
 
     clone->attrs |= AttrTrait;
-    ent->second.attrs |= AttrTrait;
+    mte->attrs |= AttrTrait;
     clones.push_back(std::move(clone));
   }
 
@@ -4367,6 +4341,8 @@ void preresolve(IndexData& index,
       Trace::Indent indent;
       flatten_traits(index, resolved, updates);
     }
+
+    resolved->methods.shrink_to_fit();
   }
 }
 
@@ -4579,8 +4555,7 @@ define_func_family(IndexData& index,
       complete = false;
       continue;
     }
-    auto const mte = mteFromIt(it);
-    auto const f = func_from_mte(index, mte->second);
+    auto const f = func_from_mte(index, it->second);
     auto const isRegular = justRegular || is_regular_class(*sub->cls);
     funcSet[f] |= isRegular;
   }
@@ -5023,9 +4998,8 @@ void define_func_families(IndexData& index) {
       assertx(cinfo->methodFamilies.empty());
       assertx(cinfo->methodFamiliesAux.empty());
 
-      for (auto const& elm : cinfo->methods) {
-        auto const mte = mteFromElm(elm);
-        auto const func = func_from_mte(index, mte->second);
+      for (auto const& [name, mte] : cinfo->methods) {
+        auto const func = func_from_mte(index, mte);
 
         // If this is a regular class, record that this func is used
         // by a regular class. This will be used when building the
@@ -5036,13 +5010,13 @@ void define_func_families(IndexData& index) {
 
         // Don't construct func families for special methods, as it's
         // not particularly useful.
-        if (is_special_method_name(mte->first)) continue;
+        if (is_special_method_name(name)) continue;
         // If the method is known not to be overridden, we don't need
         // a func family.
-        if (mte->second.attrs & AttrNoOverride) continue;
+        if (mte.attrs & AttrNoOverride) continue;
 
         auto const [a, r] = define_func_family(
-          index, *cinfo, mte->first, false
+          index, *cinfo, name, false
         );
 
         if (is_regular_class(*cinfo->cls)) {
@@ -5062,15 +5036,15 @@ void define_func_families(IndexData& index) {
           // on the regular subset should be the method on this
           // class. Otherwise, we should have a func family, and "all"
           // and "regular" should always have the same func family.
-          if (mte->second.noOverrideRegular) {
+          if (mte.noOverrideRegular) {
             assertx(r.func() == func);
           } else {
             assertx(r.funcFamily() == a.funcFamily());
           }
 
           FTRACE(4, "method family {}::{}: {}\n",
-                 cinfo->cls->name, mte->first, show(a));
-          entries.emplace_back(mte->first, a);
+                 cinfo->cls->name, name, show(a));
+          entries.emplace_back(name, a);
         } else {
           // The method is on this class, so the results for "all"
           // should have at least have it (so cannot be empty).
@@ -5090,7 +5064,7 @@ void define_func_families(IndexData& index) {
           // empty. Otherwise it will be the single func (we know it's
           // not overridden so all the existing regular subclasses
           // must have the same func).
-          if (mte->second.noOverrideRegular) {
+          if (mte.noOverrideRegular) {
             assertx(r.isEmpty() || r.func() == func);
             assertx(r.isEmpty() == !cinfo->hasRegularSubclass);
           } else {
@@ -5110,7 +5084,7 @@ void define_func_families(IndexData& index) {
           // the normal entry, and if we'll actually use it (if
           // noOverrideRegular, we won't even check).
           auto const addAux =
-            !mte->second.noOverrideRegular &&
+            !mte.noOverrideRegular &&
             (r.isIncomplete() ||
              a.funcFamily() != r.funcFamily() ||
              a.func() != r.func());
@@ -5119,12 +5093,12 @@ void define_func_families(IndexData& index) {
             4, "method family {}::{}:\n"
             "  all: {}\n"
             "{}",
-            cinfo->cls->name, mte->first,
+            cinfo->cls->name, name,
             show(a),
             addAux ? folly::sformat("  aux: {}\n", show(r)) : ""
           );
-          entries.emplace_back(mte->first, a);
-          if (addAux) aux.emplace_back(mte->first, r);
+          entries.emplace_back(name, a);
+          if (addAux) aux.emplace_back(name, r);
         }
       }
 
@@ -7892,7 +7866,7 @@ res::Func Index::rfunc_from_dcls(const DCls& dcls,
    * be contradict. For example, we shouldn't get a Method and a
    * Missing since one implies there's no func and the other implies
    * one specific func. Or two different res::Funcs shouldn't resolve
-   * to two different MethTabEntryPairs.
+   * to two different methods.
    */
 
   using Func = res::Func;
@@ -8269,14 +8243,14 @@ res::Func Index::resolve_ctor(const Type& obj) const {
       }
 
       // We have a ctor, but it might be overridden in a subclass.
-      auto const ctor = mteFromIt(methIt);
-      assertx(!(ctor->second.attrs & AttrStatic));
-      auto const ftarget = func_from_mte(*m_data, ctor->second);
+      auto const& mte = methIt->second;
+      assertx(!(mte.attrs & AttrStatic));
+      auto const ftarget = func_from_mte(*m_data, mte);
       assertx(!(ftarget->attrs & AttrStatic));
 
       // If this class is known exactly, or we know nothing overrides
       // this ctor, we know this ctor is precisely it.
-      if (isExact || ctor->second.noOverrideRegular) {
+      if (isExact || mte.noOverrideRegular) {
         // If this class isn't regular, and doesn't have any regular
         // subclasses (or if it's exact), this resolution will always
         // fail.

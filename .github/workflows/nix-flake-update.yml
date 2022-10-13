@@ -28,10 +28,11 @@ jobs:
       - run: git config user.name 'github-actions[bot]'
       - run: git config user.email 'github-actions[bot]@users.noreply.github.com'
       - run: git commit --all '--message=Update flake lock file'
-      - run: |
+      - name: Merge existing commits to avoid force push
+        run: |
           if git fetch --depth=1 origin nix-flake-update/${{github.ref_name}}
           then
-            git merge --no-edit --strategy ours FETCH_HEAD
+            git merge --no-edit allow-unrelated-histories --strategy ours FETCH_HEAD
           fi
       - name: Assume the AWS role
         continue-on-error: true

@@ -21,6 +21,22 @@ jobs:
             extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
             extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
       - run: nix flake update
+      - name: Assume the AWS role
+        continue-on-error: true
+        id: configure-aws-credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
+          aws-region: us-west-2
+      - if: steps.configure-aws-credentials.outcome == 'success'
+        name: Push changes via ssh protocol
+        run: |
+          set -ex
+          set -o pipefail
+          eval "$(ssh-agent)"
+          aws kms decrypt --ciphertext-blob "fileb://$PWD/main-repo-push-key.kms-ciphertext" --query Plaintext --output text | base64 --decode | ssh-add -
+          git commit --all '--message=Update flake lock file'
+          git push git@github.com:${{github.repository}}.git nix-flake-update/${{github.ref_name}}
       - uses: peter-evans/create-pull-request@v4
         with:
           branch: nix-flake-update/${{github.ref_name}}

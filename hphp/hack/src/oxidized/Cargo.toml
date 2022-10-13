@@ -14,18 +14,18 @@ bitflags = "1.3"
 bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../utils/eq_modulo_pos" }
+file_info = { path = "../deps/rust/file_info" }
 hh_autoimport_rust = { path = "../parser/cargo/hh_autoimport" }
 itertools = "0.10.3"
+naming_types = { path = "../naming/rust/naming_types" }
 no_pos_hash = { path = "../utils/no_pos_hash" }
 ocamlrep = { path = "../ocamlrep" }
 ocamlrep_derive = { path = "../ocamlrep_derive" }
 parser_core_types = { path = "../parser/cargo/core_types" }
 rc_pos = { path = "../utils/rust/pos" }
 relative_path = { path = "../utils/rust/relative_path" }
-rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
 rust_to_ocaml_attr = { path = "../rust_to_ocaml/rust_to_ocaml_attr" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
-typing_deps_hash = { path = "../deps/cargo/typing_deps_hash" }
 
 [dev-dependencies]
 pretty_assertions = { version = "1.2", features = ["alloc"], default-features = false }

@@ -3,11 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<6d530c529c70f32c1fae6e01ac75597d>>
+// @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
-
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
@@ -31,7 +30,7 @@ use crate::*;
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]

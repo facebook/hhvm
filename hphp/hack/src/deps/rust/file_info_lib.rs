@@ -3,16 +3,24 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+pub(crate) use rc_pos as pos;
+
+mod file_info;
+pub use file_info::*;
+
+pub mod prim_defs;
+pub use prim_defs::*;
+
+mod s_set {
+    pub type SSet = std::collections::BTreeSet<String>;
+}
+
+use naming_types::KindOfType;
 use relative_path::RelativePath;
 use rusqlite::types::FromSql;
 use rusqlite::types::FromSqlError;
 use rusqlite::types::FromSqlResult;
 use rusqlite::types::ValueRef;
-
-use crate::gen::file_info::Mode;
-use crate::gen::file_info::NameType;
-use crate::gen::file_info::Pos;
-use crate::gen::naming_types::KindOfType;
 
 impl From<Mode> for parser_core_types::FileMode {
     fn from(mode: Mode) -> Self {

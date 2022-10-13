@@ -3,23 +3,23 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<fccb2818da62f7deb7af996e4c3cc4ee>>
+// @generated <<SignedSource::*O*zOeWoEQle#+L!plEphiEmie@IsG>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
-
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
 use ocamlrep_derive::FromOcamlRep;
 use ocamlrep_derive::FromOcamlRepIn;
 use ocamlrep_derive::ToOcamlRep;
-pub use prim_defs::*;
 use serde::Deserialize;
 use serde::Serialize;
 
 #[allow(unused_imports)]
 use crate::*;
+
+pub use prim_defs::*;
 
 #[derive(
     Clone,
@@ -36,7 +36,7 @@ use crate::*;
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show, enum, ord)")]
 #[repr(u8)]
@@ -63,7 +63,7 @@ arena_deserializer::impl_deserialize_in_arena!(Mode);
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show, enum, ord)")]
 #[repr(u8)]
@@ -93,7 +93,7 @@ arena_deserializer::impl_deserialize_in_arena!(NameType);
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(attr = "deriving (eq, show)")]
 #[repr(C, u8)]
@@ -115,7 +115,7 @@ pub enum Pos {
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(prefix = "n_")]
 #[repr(C)]
@@ -140,7 +140,7 @@ pub struct Names {
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[rust_to_ocaml(prefix = "sn_")]
 #[repr(C)]
@@ -164,7 +164,7 @@ pub struct SavedNames {
     PartialEq,
     PartialOrd,
     Serialize,
-    ToOcamlRep
+    ToOcamlRep,
 )]
 #[repr(C)]
 pub struct Diff {

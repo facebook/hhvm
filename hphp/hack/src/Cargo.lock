@@ -1487,6 +1487,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "file_info"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "naming_types",
+ "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "parser_core_types",
+ "rc_pos",
+ "relative_path",
+ "rusqlite",
+ "serde",
+ "typing_deps_hash",
+]
+
+[[package]]
 name = "file_provider"
 version = "0.0.0"
 dependencies = [
@@ -2637,6 +2656,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "naming_types"
+version = "0.0.0"
+dependencies = [
+ "arena_deserializer",
+ "arena_trait",
+ "eq_modulo_pos",
+ "no_pos_hash",
+ "ocamlrep",
+ "ocamlrep_derive",
+ "serde",
+]
+
+[[package]]
 name = "nb"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2910,8 +2942,10 @@ dependencies = [
  "bstr",
  "bumpalo",
  "eq_modulo_pos",
+ "file_info",
  "hh_autoimport_rust",
  "itertools 0.10.3",
+ "naming_types",
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_derive",
@@ -2919,10 +2953,8 @@ dependencies = [
  "pretty_assertions",
  "rc_pos",
  "relative_path",
- "rusqlite",
  "rust_to_ocaml_attr",
  "serde",
- "typing_deps_hash",
 ]
 
 [[package]]

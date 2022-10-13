@@ -11,7 +11,6 @@ pub mod ast;
 pub mod ast_defs_impl;
 pub mod doc_comment;
 pub mod errors_impl;
-pub mod file_info_impl;
 pub mod global_options_impl;
 pub mod i_map;
 pub mod i_set;

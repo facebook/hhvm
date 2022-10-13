@@ -1326,7 +1326,7 @@ struct RuntimeOption {
    * 1 - Warn                                                           \
    * 2 - Throw exception                                                \
    */                                                                   \
-  F(uint32_t, EnforceModules, 0)                                        \
+  F(uint32_t, EnforceModules, 1)                                        \
   /*                                                                    \
    * Controls behavior on reflection to default value expressions       \
    * that throw during evaluation                                       \

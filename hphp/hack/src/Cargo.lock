@@ -168,8 +168,6 @@ dependencies = [
  "log",
  "naming_special_names_rust",
  "newtype",
- "once_cell",
- "regex",
  "stack_depth",
  "strum_macros",
 ]

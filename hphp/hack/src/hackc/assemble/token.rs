@@ -281,7 +281,6 @@ impl<'a> Token<'a> {
         matches!(self, Token::Semicolon(_))
     }
 
-    #[cfg(test)]
     pub(crate) fn is_colon(&self) -> bool {
         matches!(self, Token::Colon(_))
     }

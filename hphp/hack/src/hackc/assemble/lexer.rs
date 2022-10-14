@@ -19,6 +19,7 @@ use crate::token::Token;
 // We chose not to use Logos because it doesn't support all regexes -- for instance, it can't
 // tokenize based on the regex "\"\"\".*\"\"\"". Here's the git issue:
 // https://github.com/maciejhirsz/logos/issues/246
+#[derive(Clone)]
 pub(crate) struct Lexer<'a> {
     line: Line,
     pending: Option<Token<'a>>, // Cached next (non-newline)
@@ -114,6 +115,15 @@ impl<'a> Lexer<'a> {
     pub(crate) fn peek(&mut self) -> Option<&Token<'a>> {
         self.fill();
         self.pending.as_ref()
+    }
+
+    /// Peeks at the next token past the current one. Unlike peek() won't skip
+    /// newlines. Doesn't cache the token so this call can be (relatively)
+    /// expensive if used often.
+    pub(crate) fn peek1(&mut self) -> Option<Token<'a>> {
+        self.fill();
+        let (peek1, _) = parse_token(self.source, self.line);
+        peek1
     }
 
     /// Returns f applied to the top of the iterator, but does not advance iterator (unlike next_if)

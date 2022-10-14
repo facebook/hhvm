@@ -21,11 +21,9 @@ use ffi::Slice;
 use ffi::Str;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
-use regex::bytes::Regex;
 
 use crate::assemble_imm::AssembleImm;
 use crate::lexer::Lexer;
-use crate::regex;
 use crate::token::Line;
 use crate::token::Token;
 
@@ -1767,7 +1765,6 @@ fn assemble_instr<'arena>(
     decl_map: &mut DeclMap<'arena>,
     tcb_count: &mut usize, // Increase this when get TryCatchBegin, decrease when TryCatchEnd
 ) -> Result<hhbc::Instruct<'arena>> {
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
     if let Some(mut sl_lexer) = token_iter.fetch_until_newline() {
         if sl_lexer.peek_if(Token::is_decl) {
             // Not all pseudos are decls, but all instruction decls are pseudos
@@ -1794,14 +1791,17 @@ fn assemble_instr<'arena>(
                 Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::TryCatchEnd))
             }
         } else if sl_lexer.peek_if(Token::is_identifier) {
-            let tok = sl_lexer.peek().unwrap();
-            let tb = tok.as_bytes();
-            if label_reg.is_match(tb) {
+            let tb = sl_lexer.peek().unwrap().as_bytes();
+
+            if sl_lexer.peek1().map_or(false, |tok| tok.is_colon()) {
+                // It's actually a label.
+                // DV123: or L123:
                 return Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::Label(assemble_label(
                     &mut sl_lexer,
                     NeedsColon::Yes,
                 )?)));
             }
+
             match tb {
                 b"MemoGetEager" => assemble_memo_get_eager(&mut sl_lexer),
                 b"SSwitch" => assemble_sswitch(alloc, &mut sl_lexer),
@@ -1997,19 +1997,22 @@ pub(crate) fn assemble_label(
     needs_colon: NeedsColon,
 ) -> Result<hhbc::Label> {
     let tok = token_iter.expect_token()?;
-    let mut lcl = tok.into_identifier()?;
+    let lcl = tok.into_identifier()?;
     if needs_colon == NeedsColon::Yes {
         token_iter.expect(Token::into_colon)?;
     }
-    let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
-    if label_reg.is_match(lcl) {
-        if lcl[0] == b'D' {
-            lcl = &lcl[2..];
-        } else {
-            lcl = &lcl[1..];
-        }
-        let lcl = std::str::from_utf8(lcl)?.parse::<u32>()?;
-        Ok(hhbc::Label(lcl))
+
+    let rest = if lcl.starts_with(b"DV") {
+        Some(&lcl[2..])
+    } else if lcl.starts_with(b"L") {
+        Some(&lcl[1..])
+    } else {
+        None
+    };
+
+    if let Some(rest) = rest {
+        let value = std::str::from_utf8(rest)?.parse::<u32>()?;
+        Ok(hhbc::Label(value))
     } else {
         Err(tok.error("Unknown label"))
     }

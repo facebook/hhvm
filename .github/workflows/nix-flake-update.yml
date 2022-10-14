@@ -6,6 +6,7 @@ permissions:
 
 jobs:
   nix-flake-update:
+    if: github.repository != 'hhvm/hhvm-staging'
     permissions:
       # for aws-actions/configure-aws-credentials to assume an AWS role
       id-token: write

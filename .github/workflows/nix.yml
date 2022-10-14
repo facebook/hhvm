@@ -10,6 +10,10 @@ permissions:
 
 jobs:
   build-and-run-quick-tests:
+    if: |
+      github.repository != 'hhvm/hhvm-staging' ||
+      github.event_name == 'pull_request' ||
+      startsWith(github.ref_name, 'HHVM-')
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false

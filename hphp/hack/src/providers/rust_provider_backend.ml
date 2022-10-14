@@ -33,6 +33,8 @@ module Decl = struct
 
     val get : t -> key -> value option
 
+    val remove_local_batch : key list -> unit
+
     val remove_batch : t -> key list -> unit
 
     val clear_cache : unit -> unit
@@ -65,8 +67,10 @@ module Decl = struct
         | None -> ());
         value_opt
 
+    let remove_local_batch (keys : Key.t list) = List.iter ~f:Cache.remove keys
+
     let remove_batch backend (keys : Key.t list) =
-      List.iter ~f:Cache.remove keys;
+      remove_local_batch keys;
       Ffi.remove_batch backend keys
 
     let clear_cache = Cache.clear
@@ -356,51 +360,137 @@ module Decl = struct
     set_decl_store t;
     FoldedClasses.get t
 
-  (* Deletion support *)
+  external oldify_funs_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_funs_batch"
+
+  external oldify_classes_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_shallow_classes_batch"
+
+  external oldify_folded_classes_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_folded_classes_batch"
+
+  external oldify_typedefs_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_typedefs_batch"
+
+  external oldify_gconsts_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_gconsts_batch"
+
+  external oldify_modules_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_modules_batch"
+
+  external oldify_props_batch_ffi : t -> (string * string) list -> unit
+    = "hh_rust_provider_backend_oldify_props_batch"
+
+  external oldify_static_props_batch_ffi : t -> (string * string) list -> unit
+    = "hh_rust_provider_backend_oldify_static_props_batch"
+
+  external oldify_methods_batch_ffi : t -> (string * string) list -> unit
+    = "hh_rust_provider_backend_oldify_methods_batch"
+
+  external oldify_static_methods_batch_ffi : t -> (string * string) list -> unit
+    = "hh_rust_provider_backend_oldify_static_methods_batch"
+
+  external oldify_constructors_batch_ffi : t -> string list -> unit
+    = "hh_rust_provider_backend_oldify_constructors_batch"
 
   let remove_funs_batch t keys =
     set_decl_store t;
     Funs.remove_batch t keys
 
+  let oldify_funs_batch t keys =
+    set_decl_store t;
+    Funs.remove_local_batch keys;
+    oldify_funs_batch_ffi t keys
+
   let remove_shallow_classes_batch t keys =
     set_decl_store t;
     ShallowClasses.remove_batch t keys
+
+  let oldify_classes_batch t keys =
+    set_decl_store t;
+    ShallowClasses.remove_local_batch keys;
+    oldify_classes_batch_ffi t keys
 
   let remove_folded_classes_batch t keys =
     set_decl_store t;
     FoldedClasses.remove_batch t keys
 
+  let oldify_folded_classes_batch t keys =
+    set_decl_store t;
+    FoldedClasses.remove_local_batch keys;
+    oldify_folded_classes_batch_ffi t keys
+
   let remove_typedefs_batch t keys =
     set_decl_store t;
     Typedefs.remove_batch t keys
+
+  let oldify_typedefs_batch t keys =
+    set_decl_store t;
+    Typedefs.remove_local_batch keys;
+    oldify_typedefs_batch_ffi t keys
 
   let remove_gconsts_batch t keys =
     set_decl_store t;
     GConsts.remove_batch t keys
 
+  let oldify_gconsts_batch t keys =
+    set_decl_store t;
+    GConsts.remove_local_batch keys;
+    oldify_gconsts_batch_ffi t keys
+
   let remove_modules_batch t keys =
     set_decl_store t;
     Modules.remove_batch t keys
+
+  let oldify_modules_batch t keys =
+    set_decl_store t;
+    Modules.remove_local_batch keys;
+    oldify_modules_batch_ffi t keys
 
   let remove_props_batch t keys =
     set_decl_store t;
     Props.remove_batch t keys
 
+  let oldify_props_batch t keys =
+    set_decl_store t;
+    Props.remove_local_batch keys;
+    oldify_props_batch_ffi t keys
+
   let remove_static_props_batch t keys =
     set_decl_store t;
     StaticProps.remove_batch t keys
+
+  let oldify_static_props_batch t keys =
+    set_decl_store t;
+    StaticProps.remove_local_batch keys;
+    oldify_static_props_batch_ffi t keys
 
   let remove_methods_batch t keys =
     set_decl_store t;
     Methods.remove_batch t keys
 
+  let oldify_methods_batch t keys =
+    set_decl_store t;
+    Methods.remove_local_batch keys;
+    oldify_methods_batch_ffi t keys
+
   let remove_static_methods_batch t keys =
     set_decl_store t;
     StaticMethods.remove_batch t keys
 
+  let oldify_static_methods_batch t keys =
+    set_decl_store t;
+    StaticMethods.remove_local_batch keys;
+    oldify_static_methods_batch_ffi t keys
+
   let remove_constructors_batch t keys =
     set_decl_store t;
     Constructors.remove_batch t keys
+
+  let oldify_constructors_batch t keys =
+    set_decl_store t;
+    Constructors.remove_local_batch keys;
+    oldify_constructors_batch_ffi t keys
 
   external declare_folded_class : t -> string -> unit
     = "hh_rust_provider_backend_declare_folded_class"

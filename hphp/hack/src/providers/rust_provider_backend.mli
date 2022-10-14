@@ -83,6 +83,28 @@ module Decl : sig
   val oldify_static_methods_batch : t -> (string * string) list -> unit
 
   val oldify_constructors_batch : t -> string list -> unit
+
+  val remove_old_funs_batch : t -> string list -> unit
+
+  val remove_old_shallow_classes_batch : t -> string list -> unit
+
+  val remove_old_folded_classes_batch : t -> string list -> unit
+
+  val remove_old_typedefs_batch : t -> string list -> unit
+
+  val remove_old_gconsts_batch : t -> string list -> unit
+
+  val remove_old_modules_batch : t -> string list -> unit
+
+  val remove_old_props_batch : t -> (string * string) list -> unit
+
+  val remove_old_static_props_batch : t -> (string * string) list -> unit
+
+  val remove_old_methods_batch : t -> (string * string) list -> unit
+
+  val remove_old_static_methods_batch : t -> (string * string) list -> unit
+
+  val remove_old_constructors_batch : t -> string list -> unit
 end
 
 module File : sig

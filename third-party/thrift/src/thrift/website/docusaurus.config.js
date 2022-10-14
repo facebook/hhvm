@@ -19,13 +19,10 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 const {
-  fbContent
+  fbContent,
+  fbInternalOnly
 } = require('docusaurus-plugin-internaldocs-fb/internal');
 /** @type {import('@docusaurus/types').Config} */
-
-const {
-  fbInternalOnly
-} = require('internaldocs-fb-helpers');
 
 const config = {
   title: 'Facebook Thrift',
@@ -73,16 +70,18 @@ const config = {
         docId: 'intro',
         position: 'left',
         label: 'Docs'
-      }, // Please keep GitHub link to the right for consistency.
+      },
+      ...fbInternalOnly([{
+        "to": "docs/fb/",
+        "label": "Meta Internal",
+        "position": "left"
+      }]),
+      // Please keep GitHub link to the right for consistency.
       {
         href: 'https://github.com/facebook/fbthrift',
         label: 'GitHub',
         position: 'right'
-      }, ...fbInternalOnly([{
-        "to": "docs/fb/index",
-        "label": "FB Internal",
-        "position": "left"
-      }])]
+      }]
     },
     footer: {
       style: 'dark',

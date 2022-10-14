@@ -266,7 +266,7 @@
         fn {{function:rust_name}}(
             &self,
         ) -> ::std::result::Result<{{!
-        }}::std::sync::Arc<dyn {{function:interaction_name}} + ::std::marker::Send + 'static>, {{!
+        }}{{function:interaction_name}}Client, {{!
         }}::anyhow::Error>;
         {{/function:starts_interaction?}}{{/service:rustFunctions}}
     }
@@ -353,7 +353,7 @@
         fn {{function:name}}(
             &self,
         ) -> ::std::result::Result<{{!
-        }}::std::sync::Arc<dyn {{function:interaction_name}} + ::std::marker::Send + 'static>, {{!
+        }}{{function:interaction_name}}Client, {{!
         }}::anyhow::Error> {
             use ::const_cstr::const_cstr;
             const_cstr! {
@@ -429,7 +429,7 @@
         fn {{function:rust_name}}(
             &self,
         ) -> ::std::result::Result<{{!
-        }}::std::sync::Arc<dyn {{function:interaction_name}} + ::std::marker::Send + 'static>, {{!
+        }}{{function:interaction_name}}Client, {{!
         }}::anyhow::Error> {
             self.as_ref().{{function:rust_name}}()
         }
@@ -494,7 +494,7 @@
         pub fn new<P, T>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -508,7 +508,7 @@
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl {{service:name}} + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -528,7 +528,7 @@
         pub fn new<P>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -541,7 +541,7 @@
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl {{service:name}}Ext<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -564,7 +564,7 @@
         fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
         where
             P: ::fbthrift::Protocol<Frame = T>,
-            T: ::fbthrift::Transport + ::std::marker::Sync,
+            T: ::fbthrift::Transport,
             P::Deserializer: ::std::marker::Send,
             S: ::fbthrift::help::Spawner,
         {

@@ -1962,7 +1962,7 @@ pub mod client {
         pub fn new<P, T>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -1976,7 +1976,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyInteraction + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -1996,7 +1996,7 @@ pub mod client {
         pub fn new<P>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -2009,7 +2009,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyInteractionExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -2032,7 +2032,7 @@ pub mod client {
         fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
         where
             P: ::fbthrift::Protocol<Frame = T>,
-            T: ::fbthrift::Transport + ::std::marker::Sync,
+            T: ::fbthrift::Transport,
             P::Deserializer: ::std::marker::Send,
             S: ::fbthrift::help::Spawner,
         {
@@ -2580,7 +2580,7 @@ pub mod client {
 
         fn createMyInteraction(
             &self,
-        ) -> ::std::result::Result<::std::sync::Arc<dyn MyInteraction + ::std::marker::Send + 'static>, ::anyhow::Error>;
+        ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error>;
     }
 
     pub trait MyServiceExt<T>: MyService
@@ -2898,7 +2898,7 @@ pub mod client {
 
         fn createMyInteraction(
             &self,
-        ) -> ::std::result::Result<::std::sync::Arc<dyn MyInteraction + ::std::marker::Send + 'static>, ::anyhow::Error> {
+        ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
             use ::const_cstr::const_cstr;
             const_cstr! {
                 INTERACTION_NAME = "MyInteraction";
@@ -3093,7 +3093,7 @@ pub mod client {
         }
         fn createMyInteraction(
             &self,
-        ) -> ::std::result::Result<::std::sync::Arc<dyn MyInteraction + ::std::marker::Send + 'static>, ::anyhow::Error> {
+        ) -> ::std::result::Result<MyInteractionClient, ::anyhow::Error> {
             self.as_ref().createMyInteraction()
         }
     }
@@ -3218,7 +3218,7 @@ pub mod client {
         pub fn new<P, T>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl MyService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -3232,7 +3232,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl MyService + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyService + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             T: ::fbthrift::Transport,
@@ -3252,7 +3252,7 @@ pub mod client {
         pub fn new<P>(
             protocol: P,
             transport: T,
-        ) -> ::std::sync::Arc<impl MyServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -3265,7 +3265,7 @@ pub mod client {
             protocol: P,
             transport: T,
             spawner: S,
-        ) -> ::std::sync::Arc<impl MyServiceExt<T> + ::std::marker::Send + 'static>
+        ) -> ::std::sync::Arc<impl MyServiceExt<T> + ::std::marker::Send + ::std::marker::Sync + 'static>
         where
             P: ::fbthrift::Protocol<Frame = T>,
             P::Deserializer: ::std::marker::Send,
@@ -3288,7 +3288,7 @@ pub mod client {
         fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> ::std::sync::Arc<Self::Api>
         where
             P: ::fbthrift::Protocol<Frame = T>,
-            T: ::fbthrift::Transport + ::std::marker::Sync,
+            T: ::fbthrift::Transport,
             P::Deserializer: ::std::marker::Send,
             S: ::fbthrift::help::Spawner,
         {
@@ -5331,7 +5331,7 @@ pub mod mock {
 
         fn createMyInteraction(
             &self,
-        ) -> ::std::result::Result<::std::sync::Arc<dyn crate::client::MyInteraction + ::std::marker::Send + 'static>, ::anyhow::Error> {
+        ) -> ::std::result::Result<crate::client::MyInteractionClient, ::anyhow::Error> {
             unimplemented!("Mocking interactions is not yet implemented");
         }
     }

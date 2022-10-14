@@ -78,7 +78,7 @@
         fn {{function:rust_name}}(
             &self,
         ) -> ::std::result::Result<{{!
-        }}::std::sync::Arc<dyn {{service:package}}::client::{{function:interaction_name}} + ::std::marker::Send + 'static>, {{!
+        }}{{service:package}}::client::{{function:interaction_name}}Client, {{!
         }}::anyhow::Error> {
             unimplemented!("Mocking interactions is not yet implemented");
         }{{!

@@ -147,6 +147,10 @@ impl<'a> Token<'a> {
         }
     }
 
+    pub(crate) fn into_unquoted_str_literal(self) -> Result<&'a [u8]> {
+        Ok(escaper::unquote_slice(self.into_str_literal()?))
+    }
+
     pub(crate) fn into_number(self) -> Result<&'a [u8]> {
         match self {
             Token::Number(vec_u8, _) => Ok(vec_u8),

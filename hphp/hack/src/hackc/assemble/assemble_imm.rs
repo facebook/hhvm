@@ -12,7 +12,6 @@ use ffi::Str;
 
 use crate::assemble;
 use crate::assemble::DeclMap;
-use crate::assemble::NeedsColon;
 use crate::lexer::Lexer;
 use crate::token::Token;
 
@@ -306,7 +305,7 @@ impl AssembleImm<'_, hhbc::IterId> for Lexer<'_> {
 
 impl AssembleImm<'_, hhbc::Label> for Lexer<'_> {
     fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::Label> {
-        assemble::assemble_label(self, NeedsColon::No)
+        assemble::assemble_label(self)
     }
 }
 
@@ -461,7 +460,7 @@ impl<'arena> AssembleImm<'arena, Slice<'arena, hhbc::Label>> for Lexer<'_> {
         let mut labels = Vec::new();
         self.expect(Token::into_lt)?;
         while !self.peek_if(Token::is_gt) {
-            labels.push(assemble::assemble_label(self, NeedsColon::No)?)
+            labels.push(assemble::assemble_label(self)?)
         }
         self.expect(Token::into_gt)?;
         Ok(Slice::from_vec(alloc, labels))

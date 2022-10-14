@@ -4,9 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::collections::HashMap;
-use std::ffi::OsString;
+use std::ffi::OsStr;
 use std::fs;
-use std::os::unix::ffi::OsStringExt;
+use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -55,125 +55,165 @@ fn assemble_from_toks<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
-    let mut funcs = Vec::new();
-    let mut classes = Vec::new();
-    let mut adatas = Vec::new();
-    let mut func_refs = None;
-    let mut class_refs = None;
-    let mut constant_refs = None;
-    let mut include_refs = None;
-    let mut typedefs = Vec::new();
-    let mut constants = Vec::new();
-    let mut type_constants = Vec::new();
-    let mut fatal = None;
-    let mut file_attributes = Vec::new();
-    let mut module_use = Maybe::Nothing;
-    let mut modules = Vec::new();
     // First token should be the filepath
     let fp = assemble_filepath(token_iter)?;
+
+    let mut unit = UnitBuilder::default();
     while !token_iter.is_empty() {
-        if token_iter.peek_if_str(Token::is_decl, ".fatal") {
-            fatal = Some(assemble_fatal(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".adata") {
-            adatas.push(assemble_adata(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".function") {
-            funcs.push(assemble_function(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".class") {
-            classes.push(assemble_class(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".function_refs") {
-            if func_refs.is_some() {
-                Err(token_iter.error("Func refs defined multiple times in file."))?;
-            }
-            func_refs = Some(assemble_refs(
-                alloc,
-                token_iter,
-                ".function_refs",
-                assemble_function_name,
-            )?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".class_refs") {
-            if class_refs.is_some() {
-                Err(token_iter.error("Class refs defined multiple times in file"))?;
-            }
+        unit.assemble_decl(alloc, token_iter)?;
+    }
 
-            class_refs = Some(assemble_refs(
-                alloc,
-                token_iter,
-                ".class_refs",
-                assemble_class_name,
-            )?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".constant_refs") {
-            if constant_refs.is_some() {
-                Err(token_iter.error("Constant refs defined multiple times in file"))?;
-            }
+    Ok((unit.into_unit(alloc), fp))
+}
 
-            constant_refs = Some(assemble_refs(
-                alloc,
-                token_iter,
-                ".constant_refs",
-                assemble_const_name,
-            )?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".includes") {
-            if include_refs.is_some() {
-                Err(token_iter.error("Includes defined mulitple times in file"))?;
-            }
+#[derive(Default)]
+struct UnitBuilder<'a> {
+    adatas: Vec<hhbc::Adata<'a>>,
+    class_refs: Option<Slice<'a, hhbc::ClassName<'a>>>,
+    classes: Vec<hhbc::Class<'a>>,
+    constant_refs: Option<Slice<'a, hhbc::ConstName<'a>>>,
+    constants: Vec<hhbc::Constant<'a>>,
+    fatal: Option<hhbc::Fatal<'a>>,
+    file_attributes: Vec<hhbc::Attribute<'a>>,
+    func_refs: Option<Slice<'a, hhbc::FunctionName<'a>>>,
+    funcs: Vec<hhbc::Function<'a>>,
+    include_refs: Option<Slice<'a, hhbc::IncludePath<'a>>>,
+    module_use: Option<Str<'a>>,
+    modules: Vec<hhbc::Module<'a>>,
+    type_constants: Vec<hhbc::TypeConstant<'a>>,
+    typedefs: Vec<hhbc::Typedef<'a>>,
+}
 
-            include_refs = Some(assemble_refs(
-                alloc,
-                token_iter,
-                ".includes",
-                |alloc, t| {
-                    let path_str = if t.peek_if(Token::is_decl) {
-                        t.expect_decl_into_ffi_str(alloc)?
-                    } else {
-                        t.expect_identifier_into_ffi_str(alloc)?
-                    };
-                    Ok(hhbc::IncludePath::Absolute(path_str))
-                },
-            )?)
-        } else if token_iter.peek_if_str(Token::is_decl, ".alias") {
-            typedefs.push(assemble_typedef(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".const") {
-            assemble_const_or_type_const(alloc, token_iter, &mut constants, &mut type_constants)?;
-
-            ensure!(
-                type_constants.is_empty(),
-                "Type constants defined outside of a class"
-            );
-        } else if token_iter.peek_if_str(Token::is_decl, ".file_attributes") {
-            assemble_file_attributes(alloc, token_iter, &mut file_attributes)?;
-        } else if token_iter.peek_if_str(Token::is_decl, ".module_use") {
-            module_use = Maybe::Just(assemble_module_use(alloc, token_iter)?);
-        } else if token_iter.peek_if_str(Token::is_decl, ".module") {
-            modules.push(assemble_module(alloc, token_iter)?);
-        } else {
-            let tok = token_iter.next().unwrap();
-            Err(tok.error("Unknown top level identifier"))?;
+impl<'a> UnitBuilder<'a> {
+    fn into_unit(self, alloc: &'a Bump) -> hhbc::Unit<'a> {
+        hhbc::Unit {
+            adata: Slice::fill_iter(alloc, self.adatas.into_iter()),
+            functions: Slice::fill_iter(alloc, self.funcs.into_iter()),
+            classes: Slice::fill_iter(alloc, self.classes.into_iter()),
+            typedefs: Slice::fill_iter(alloc, self.typedefs.into_iter()),
+            file_attributes: Slice::fill_iter(alloc, self.file_attributes.into_iter()),
+            modules: Slice::from_vec(alloc, self.modules),
+            module_use: self.module_use.into(),
+            symbol_refs: hhbc::SymbolRefs {
+                functions: self.func_refs.unwrap_or_default(),
+                classes: self.class_refs.unwrap_or_default(),
+                constants: self.constant_refs.unwrap_or_default(),
+                includes: self.include_refs.unwrap_or_default(),
+            },
+            constants: Slice::fill_iter(alloc, self.constants.into_iter()),
+            fatal: self.fatal.into(),
         }
     }
-    let hcu = hhbc::Unit {
-        adata: Slice::fill_iter(alloc, adatas.into_iter()),
-        functions: Slice::fill_iter(alloc, funcs.into_iter()),
-        classes: Slice::fill_iter(alloc, classes.into_iter()),
-        typedefs: Slice::fill_iter(alloc, typedefs.into_iter()),
-        file_attributes: Slice::fill_iter(alloc, file_attributes.into_iter()),
-        modules: Slice::from_vec(alloc, modules),
-        module_use,
-        symbol_refs: hhbc::SymbolRefs {
-            functions: func_refs.unwrap_or_default(),
-            classes: class_refs.unwrap_or_default(),
-            constants: constant_refs.unwrap_or_default(),
-            includes: include_refs.unwrap_or_default(),
-        },
-        constants: Slice::fill_iter(alloc, constants.into_iter()),
-        fatal: fatal.into(),
-    };
 
-    Ok((hcu, fp))
+    fn assemble_decl(&mut self, alloc: &'a Bump, token_iter: &mut Lexer<'_>) -> Result<()> {
+        let tok = token_iter.peek().unwrap();
+
+        if !tok.is_decl() {
+            return Err(tok.error("Declaration expected"))?;
+        }
+
+        match tok.as_bytes() {
+            b".fatal" => {
+                self.fatal = Some(assemble_fatal(alloc, token_iter)?);
+            }
+            b".adata" => {
+                self.adatas.push(assemble_adata(alloc, token_iter)?);
+            }
+            b".function" => {
+                self.funcs.push(assemble_function(alloc, token_iter)?);
+            }
+            b".class" => {
+                self.classes.push(assemble_class(alloc, token_iter)?);
+            }
+            b".function_refs" => {
+                ensure_single_defn(&self.func_refs, tok)?;
+                self.func_refs = Some(assemble_refs(
+                    alloc,
+                    token_iter,
+                    ".function_refs",
+                    assemble_function_name,
+                )?);
+            }
+            b".class_refs" => {
+                ensure_single_defn(&self.class_refs, tok)?;
+                self.class_refs = Some(assemble_refs(
+                    alloc,
+                    token_iter,
+                    ".class_refs",
+                    assemble_class_name,
+                )?);
+            }
+            b".constant_refs" => {
+                ensure_single_defn(&self.constant_refs, tok)?;
+                self.constant_refs = Some(assemble_refs(
+                    alloc,
+                    token_iter,
+                    ".constant_refs",
+                    assemble_const_name,
+                )?);
+            }
+            b".includes" => {
+                ensure_single_defn(&self.include_refs, tok)?;
+                self.include_refs = Some(assemble_refs(
+                    alloc,
+                    token_iter,
+                    ".includes",
+                    |alloc, t| {
+                        let path_str = if t.peek_if(Token::is_decl) {
+                            t.expect_decl_into_ffi_str(alloc)?
+                        } else {
+                            t.expect_identifier_into_ffi_str(alloc)?
+                        };
+                        Ok(hhbc::IncludePath::Absolute(path_str))
+                    },
+                )?)
+            }
+            b".alias" => {
+                self.typedefs.push(assemble_typedef(alloc, token_iter)?);
+            }
+            b".const" => {
+                assemble_const_or_type_const(
+                    alloc,
+                    token_iter,
+                    &mut self.constants,
+                    &mut self.type_constants,
+                )?;
+
+                ensure!(
+                    self.type_constants.is_empty(),
+                    "Type constants defined outside of a class"
+                );
+            }
+            b".file_attributes" => {
+                assemble_file_attributes(alloc, token_iter, &mut self.file_attributes)?;
+            }
+            b".module_use" => {
+                self.module_use = Some(assemble_module_use(alloc, token_iter)?);
+            }
+            b".module" => {
+                self.modules.push(assemble_module(alloc, token_iter)?);
+            }
+            _ => {
+                return Err(tok.error("Unknown top level declarationr"))?;
+            }
+        }
+
+        Ok(())
+    }
+}
+
+fn ensure_single_defn<T>(v: &Option<T>, tok: &Token<'_>) -> Result<()> {
+    if v.is_none() {
+        Ok(())
+    } else {
+        let what = std::str::from_utf8(tok.as_bytes()).unwrap();
+        Err(tok.error(format!("'{what} defined multiple times")))
+    }
 }
 
 /// Ex:
 /// .module m0 (64, 64) {
-///}
+/// }
 fn assemble_module<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
@@ -206,10 +246,7 @@ fn assemble_module_use<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
     token_iter.expect_is_str(Token::into_decl, ".module_use")?;
-    let st = Str::new_slice(
-        alloc,
-        escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?),
-    );
+    let st = Str::new_slice(alloc, token_iter.expect(Token::into_unquoted_str_literal)?);
     token_iter.expect(Token::into_semicolon)?;
     Ok(st)
 }
@@ -322,8 +359,8 @@ fn assemble_class<'arena>(
 }
 
 /// Defined in 'hack/src/naming/naming_special_names.rs`
-fn is_enforced_static_coeffect(d: &&[u8]) -> bool {
-    match *d {
+fn is_enforced_static_coeffect(d: &Slice<'_, u8>) -> bool {
+    match d.as_ref() {
         b"pure" | b"defaults" | b"rx" | b"zoned" | b"write_props" | b"rx_local" | b"zoned_with"
         | b"zoned_local" | b"zoned_shallow" | b"leak_safe_local" | b"leak_safe_shallow"
         | b"leak_safe" | b"read_globals" | b"globals" | b"write_this_props" | b"rx_shallow" => true,
@@ -345,14 +382,12 @@ fn assemble_ctx_constant<'arena>(
     // .ctx has slice of recognized and unrecognized constants.
     // Making an assumption that recognized ~~ static coeffects and
     // unrecognized ~~ unenforced static coeffects
-    let mut tokens: Vec<&[u8]> = Vec::new();
+    let mut tokens = Vec::new();
     while !token_iter.peek_if(Token::is_semicolon) {
-        tokens.push(token_iter.expect(Token::into_identifier)?);
+        let tok = token_iter.expect(Token::into_identifier)?;
+        tokens.push(Str::new_slice(alloc, tok));
     }
-    let (r, u): (Vec<&[u8]>, Vec<&[u8]>) =
-        tokens.into_iter().partition(is_enforced_static_coeffect);
-    let r = r.iter().map(|s| Str::new_slice(alloc, s)).collect();
-    let u = u.iter().map(|s| Str::new_slice(alloc, s)).collect();
+    let (r, u) = tokens.into_iter().partition(is_enforced_static_coeffect);
     token_iter.expect(Token::into_semicolon)?;
     Ok(hhbc::CtxConstant {
         name,
@@ -439,7 +474,7 @@ fn assemble_method<'arena>(
     token_iter.expect_is_str(Token::into_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
     let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
-    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     let span = assemble_span(token_iter)?;
     let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
@@ -458,7 +493,7 @@ fn assemble_method<'arena>(
     // the visibility is printed in the attrs
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
     let visibility =
-        determine_visibility(&attr).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
+        determine_visibility(&attrs).map_err(|e| method_tok.unwrap().error(e.to_string()))?;
     let met = hhbc::Method {
         attributes,
         visibility,
@@ -467,7 +502,7 @@ fn assemble_method<'arena>(
         span,
         coeffects,
         flags,
-        attrs: attr,
+        attrs,
     };
     Ok(met)
 }
@@ -570,8 +605,8 @@ fn assemble_property_initial_value<'arena>(
             token_iter.expect_is_str(Token::into_identifier, "uninit")?;
             Maybe::Just(hhbc::TypedValue::Uninit)
         }
-        b"\"\"\"N;\"\"\"" => {
-            token_iter.expect_is_str(Token::into_triple_str_literal, "\"\"\"N;\"\"\"")?;
+        br#""""N;""""# => {
+            token_iter.expect_is_str(Token::into_triple_str_literal, r#""""N;""""#)?;
             Maybe::Nothing
         }
         _ => Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?),
@@ -767,9 +802,9 @@ fn assemble_fatal<'arena>(
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
         _ => return Err(tok.error("Unknown fatal op")),
     };
-    let msg = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
-        token_iter.expect(Token::into_str_literal)?,
-    ))?;
+    let msg = escaper::unescape_literal_bytes_into_vec_bytes(
+        token_iter.expect(Token::into_unquoted_str_literal)?,
+    )?;
     token_iter.expect(Token::into_semicolon)?;
     let message = Str::new_slice(alloc, &msg);
     Ok(hhbc::Fatal { op, loc, message })
@@ -1150,11 +1185,10 @@ fn assemble_function_flags(
 fn assemble_filepath(token_iter: &mut Lexer<'_>) -> Result<PathBuf> {
     // Filepath is .filepath strliteral and semicolon
     token_iter.expect_is_str(Token::into_decl, ".filepath")?;
-    let fp = token_iter.expect(Token::into_str_literal)?;
-    let fp = escaper::unquote_slice(fp);
-    let fp = PathBuf::from(OsString::from_vec(fp.to_vec()));
+    let fp = token_iter.expect(Token::into_unquoted_str_literal)?;
+    let fp = Path::new(OsStr::from_bytes(fp));
     token_iter.expect(Token::into_semicolon)?;
-    Ok(fp)
+    Ok(fp.to_path_buf())
 }
 
 /// Span ex: (2, 4)
@@ -1304,9 +1338,9 @@ fn assemble_user_attr<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Attribute<'arena>> {
-    let nm = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
-        token_iter.expect(Token::into_str_literal)?,
-    ))?;
+    let nm = escaper::unescape_literal_bytes_into_vec_bytes(
+        token_iter.expect(Token::into_unquoted_str_literal)?,
+    )?;
     let name = Str::new_slice(alloc, &nm);
     token_iter.expect(Token::into_open_paren)?;
     let arguments = assemble_user_attr_args(alloc, token_iter)?;
@@ -1348,7 +1382,7 @@ fn assemble_type_info<'arena>(
     tik: TypeInfoKind,
 ) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
     if token_iter.next_if(Token::is_lt) {
-        let first = escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?);
+        let first = token_iter.expect(Token::into_unquoted_str_literal)?;
         let first = escaper::unescape_literal_bytes_into_vec_bytes(first)?;
         let type_cons_name = if tik == TypeInfoKind::TypeDef {
             if first.is_empty() {
@@ -1361,9 +1395,9 @@ fn assemble_type_info<'arena>(
         } else {
             Maybe::Just(Str::new_slice(
                 alloc,
-                &escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
-                    token_iter.expect(Token::into_str_literal)?,
-                ))?,
+                &escaper::unescape_literal_bytes_into_vec_bytes(
+                    token_iter.expect(Token::into_unquoted_str_literal)?,
+                )?,
             ))
         };
         let user_type = if tik != TypeInfoKind::TypeDef {
@@ -1463,7 +1497,7 @@ fn assemble_default_value<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::DefaultValue<'arena>>> {
     let tr = if token_iter.next_if(Token::is_equal) {
-        let label = assemble_label(token_iter, NeedsColon::No)?;
+        let label = assemble_label(token_iter)?;
         token_iter.expect(Token::into_open_paren)?;
         let expr = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
         token_iter.expect(Token::into_close_paren)?;
@@ -1796,10 +1830,9 @@ fn assemble_instr<'arena>(
             if sl_lexer.peek1().map_or(false, |tok| tok.is_colon()) {
                 // It's actually a label.
                 // DV123: or L123:
-                return Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::Label(assemble_label(
-                    &mut sl_lexer,
-                    NeedsColon::Yes,
-                )?)));
+                let label = assemble_label(&mut sl_lexer)?;
+                sl_lexer.expect(Token::into_colon)?;
+                return Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::Label(label)));
             }
 
             match tb {
@@ -1891,7 +1924,7 @@ pub(crate) fn assemble_async_eager_target(
     if token_iter.next_if(Token::is_dash) {
         Ok(None)
     } else {
-        Ok(Some(assemble_label(token_iter, NeedsColon::No)?))
+        Ok(Some(assemble_label(token_iter)?))
     }
 }
 
@@ -1909,9 +1942,9 @@ pub(crate) fn assemble_unescaped_unquoted_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
-    let st = escaper::unescape_literal_bytes_into_vec_bytes(escaper::unquote_slice(
-        token_iter.expect(Token::into_str_literal)?,
-    ))?;
+    let st = escaper::unescape_literal_bytes_into_vec_bytes(
+        token_iter.expect(Token::into_unquoted_str_literal)?,
+    )?;
     Ok(Str::new_slice(alloc, &st))
 }
 
@@ -1946,7 +1979,7 @@ fn assemble_sswitch<'arena>(
             cases.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
         }
         token_iter.expect(Token::into_colon)?;
-        targets.push(assemble_label(token_iter, NeedsColon::No)?);
+        targets.push(assemble_label(token_iter)?);
     }
     token_iter.expect(Token::into_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
@@ -1960,10 +1993,7 @@ fn assemble_sswitch<'arena>(
 /// MemoGetEager L0 L1 l:0+0
 fn assemble_memo_get_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "MemoGetEager")?;
-    let lbl_slice = [
-        assemble_label(token_iter, NeedsColon::No)?,
-        assemble_label(token_iter, NeedsColon::No)?,
-    ];
+    let lbl_slice = [assemble_label(token_iter)?, assemble_label(token_iter)?];
     let dum = hhbc::Dummy::DEFAULT;
     let lcl_range = assemble_local_range(token_iter)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoGetEager(
@@ -1985,22 +2015,10 @@ fn assemble_local_range(token_iter: &mut Lexer<'_>) -> Result<hhbc::LocalRange> 
     Ok(hhbc::LocalRange { start, len })
 }
 
-#[derive(Eq, PartialEq)]
-pub enum NeedsColon {
-    Yes,
-    No,
-}
-
-/// L#: or DV#: if needs_colon else L# or DV#
-pub(crate) fn assemble_label(
-    token_iter: &mut Lexer<'_>,
-    needs_colon: NeedsColon,
-) -> Result<hhbc::Label> {
+/// L# or DV#
+pub(crate) fn assemble_label(token_iter: &mut Lexer<'_>) -> Result<hhbc::Label> {
     let tok = token_iter.expect_token()?;
     let lcl = tok.into_identifier()?;
-    if needs_colon == NeedsColon::Yes {
-        token_iter.expect(Token::into_colon)?;
-    }
 
     let rest = if lcl.starts_with(b"DV") {
         Some(&lcl[2..])

@@ -723,6 +723,12 @@ let maybe_poison_ancestors
           let ty_str =
             Typing_print.full_decl (Env.get_tcopt env) enforced_parent_ty
           in
+          (* Hack to remove "\\" if XHP type is rendered as "\\:X" *)
+          (* TODO: fix Typing_print so that it renders XHP correctly *)
+          let ty_str =
+            let re = Str.regexp "\\\\:" in
+            Str.global_replace re ":" ty_str
+          in
           Typing_log.log_pessimise_return env child_pos (Some ty_str)
         else
           Cls.all_ancestor_names child_class

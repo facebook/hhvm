@@ -190,6 +190,9 @@ class BaseThriftServer : public apache::thrift::concurrency::Runnable,
     bool resourcePoolRuntimeDisabled{false};
     bool resourcePoolEnabled{false};
 
+    bool resourcePoolEnabledGflag{false};
+    bool resourcePoolDisabledGflag{false};
+
     bool checkComplete{false};
 
     std::string explain() const;

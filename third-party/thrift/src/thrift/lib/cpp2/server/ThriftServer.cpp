@@ -874,6 +874,10 @@ void ThriftServer::ensureResourcePoolsDefaultPrioritySetup(
 
 // Return true if the runtime checks pass and using resource pools is an option.
 bool ThriftServer::runtimeResourcePoolsChecks() {
+  runtimeServerActions_.resourcePoolEnabledGflag =
+      FLAGS_thrift_experimental_use_resource_pools;
+  runtimeServerActions_.resourcePoolDisabledGflag =
+      FLAGS_thrift_disable_resource_pools;
   if (runtimeDisableResourcePoolsSet()) {
     // No need to check if we've already set this.
     return false;

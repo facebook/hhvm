@@ -97,7 +97,6 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 #[proc_macro]
 pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::TokenStream {
     use quote::ToTokens;
-    
     use syn::Path;
     use syn::Token;
     use syn::Type;
@@ -155,10 +154,11 @@ pub fn assemble_imm_for_enum(tokens: proc_macro::TokenStream) -> proc_macro::Tok
         impl AssembleImm<'_, #ret_ty> for Lexer<'_> {
             fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<#ret_ty> {
                 use #ret_ty;
-                let id = self.expect(Token::into_identifier)?;
+                let tok = self.expect_token()?;
+                let id = tok.into_identifier()?;
                 Ok(match id {
                     #(#body),*,
-                    f => anyhow::bail!(#msg, f, self.cur_line()),
+                    f => return Err(tok.error(#msg)),
                 })
             }
         }

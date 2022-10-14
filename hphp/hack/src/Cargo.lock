@@ -159,6 +159,7 @@ name = "assemble"
 version = "0.0.0"
 dependencies = [
  "anyhow",
+ "assemble_opcode_macro",
  "bstr",
  "bumpalo",
  "escaper",
@@ -170,6 +171,17 @@ dependencies = [
  "once_cell",
  "regex",
  "stack_depth",
+]
+
+[[package]]
+name = "assemble_opcode_macro"
+version = "0.0.0"
+dependencies = [
+ "hhbc-gen",
+ "itertools 0.10.3",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

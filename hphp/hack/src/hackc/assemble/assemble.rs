@@ -24,11 +24,12 @@ use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
 use regex::bytes::Regex;
 
+use crate::assemble_imm::AssembleImm;
 use crate::lexer::Lexer;
 use crate::regex;
 use crate::token::Token;
 
-type DeclMap<'a> = HashMap<Str<'a>, u32>;
+pub(crate) type DeclMap<'a> = HashMap<Str<'a>, u32>;
 
 /// Assembles the hhas within f to a hhbc::Unit
 pub fn assemble<'arena>(alloc: &'arena Bump, f: &Path) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
@@ -598,7 +599,7 @@ fn assemble_class_name<'arena>(
     ))
 }
 
-fn assemble_prop_name_from_str<'arena>(
+pub(crate) fn assemble_prop_name_from_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::PropName<'arena>> {
@@ -1907,13 +1908,25 @@ fn assemble_opcode<'arena>(
         b"Enter" => assemble_jump_opcode_instr(token_iter, hhbc::Opcode::Enter, "Enter"),
         b"FCallFuncD" | b"FCallCtor" | b"FCallClsMethod" | b"FCallClsMethodM"
         | b"FCallClsMethodD" | b"FCallClsMethodS" | b"FCallClsMethodSD" | b"FCallFunc"
-        | b"FCallObjMethod" | b"FCallObjMethodD" => assemble_fcall(alloc, token_iter),
-        b"IncDecL" => assemble_incdecl_opcode(token_iter, decl_map),
-        b"IncDecG" => assemble_incdec_opcode(token_iter, hhbc::Opcode::IncDecG, "IncDecG"),
-        b"IncDecS" => assemble_incdec_opcode(token_iter, hhbc::Opcode::IncDecS, "IncDecS"),
-        b"IsTypeStructC" => assemble_is_type_struct_c(token_iter),
-        b"IsTypeC" => assemble_is_type_c(token_iter),
-        b"IsTypeL" => assemble_is_type_l(token_iter, decl_map),
+        | b"FCallObjMethod" | b"FCallObjMethodD" => assemble_fcall(alloc, token_iter, decl_map),
+        b"IncDecL" => assemble_incdecl_opcode(alloc, token_iter, decl_map),
+        b"IncDecG" => assemble_incdec_opcode(
+            alloc,
+            token_iter,
+            hhbc::Opcode::IncDecG,
+            "IncDecG",
+            decl_map,
+        ),
+        b"IncDecS" => assemble_incdec_opcode(
+            alloc,
+            token_iter,
+            hhbc::Opcode::IncDecS,
+            "IncDecS",
+            decl_map,
+        ),
+        b"IsTypeStructC" => assemble_is_type_struct_c(alloc, token_iter, decl_map),
+        b"IsTypeC" => assemble_is_type_c(alloc, token_iter, decl_map),
+        b"IsTypeL" => assemble_is_type_l(alloc, token_iter, decl_map),
         b"IterFree" => assemble_iter_free(token_iter),
         b"IterInit" => {
             assemble_iter_init_iter_next(token_iter, decl_map, hhbc::Opcode::IterInit, "IterInit")
@@ -1921,11 +1934,15 @@ fn assemble_opcode<'arena>(
         b"IterNext" => {
             assemble_iter_init_iter_next(token_iter, decl_map, hhbc::Opcode::IterNext, "IterNext")
         }
-        b"BaseGC" => assemble_base_gc_or_c(token_iter, hhbc::Opcode::BaseGC, "BaseGC"),
-        b"BaseGL" => assemble_base_gl(token_iter, decl_map),
-        b"BaseSC" => assemble_base_sc(token_iter),
-        b"BaseL" => assemble_base_l(token_iter, decl_map),
-        b"BaseC" => assemble_base_gc_or_c(token_iter, hhbc::Opcode::BaseC, "BaseC"),
+        b"BaseGC" => {
+            assemble_base_gc_or_c(alloc, token_iter, hhbc::Opcode::BaseGC, "BaseGC", decl_map)
+        }
+        b"BaseGL" => assemble_base_gl(alloc, token_iter, decl_map),
+        b"BaseSC" => assemble_base_sc(alloc, token_iter, decl_map),
+        b"BaseL" => assemble_base_l(alloc, token_iter, decl_map),
+        b"BaseC" => {
+            assemble_base_gc_or_c(alloc, token_iter, hhbc::Opcode::BaseC, "BaseC", decl_map)
+        }
         b"BaseH" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::BaseH, "BaseH"),
         b"Dim" => assemble_dim(alloc, token_iter, decl_map),
         b"QueryM" => assemble_query_m(alloc, token_iter, decl_map),
@@ -1940,7 +1957,7 @@ fn assemble_opcode<'arena>(
         b"NewObjS" => {
             token_iter.next();
             Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewObjS(
-                assemble_special_class_ref(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             )))
         }
         b"LockObj" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::LockObj, "LockObj"),
@@ -1968,13 +1985,13 @@ fn assemble_opcode<'arena>(
             hhbc::Opcode::ResolveRFunc,
             "ResolveRFunc",
         ),
-        b"ResolveClsMethod" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveClsMethodD" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveClsMethodS" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveRClsMethod" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveRClsMethodD" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveRClsMethodS" => assemble_resolve_class(alloc, token_iter),
-        b"ResolveClass" => assemble_resolve_class(alloc, token_iter),
+        b"ResolveClsMethod" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveClsMethodD" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveClsMethodS" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveRClsMethod" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveRClsMethodD" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveRClsMethodS" => assemble_resolve_class(alloc, token_iter, decl_map),
+        b"ResolveClass" => assemble_resolve_class(alloc, token_iter, decl_map),
         b"NewDictArray" => {
             assemble_u32_carrying_opcode(token_iter, hhbc::Opcode::NewDictArray, "NewDictArray")
         }
@@ -2049,7 +2066,9 @@ fn assemble_opcode<'arena>(
             assemble_single_opcode_instr(token_iter, || hhbc::Opcode::NativeImpl, "NativeImpl")
         }
         b"CGetCUNop" | b"CUGetCUNop" | b"CGetL" | b"CGetQuietL" | b"CUGetL" | b"CGetL2"
-        | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => assemble_cget(token_iter, decl_map),
+        | b"CGetG" | b"CGetS" | b"ClassGetC" | b"ClassGetTS" => {
+            assemble_cget(alloc, token_iter, decl_map)
+        }
         b"Fatal" => assemble_fatal_opcode(token_iter),
         b"CheckThis" => {
             assemble_single_opcode_instr(token_iter, || hhbc::Opcode::CheckThis, "CheckThis")
@@ -2070,9 +2089,9 @@ fn assemble_opcode<'arena>(
         b"Req" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::Req, "Req"),
         b"ReqDoc" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::ReqDoc, "ReqDoc"),
         b"ReqOnce" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::ReqOnce, "ReqOnce"),
-        b"BareThis" => assemble_bare_this_opcode(token_iter),
-        b"ColFromArray" => assemble_col_from_array(token_iter),
-        b"NewCol" => assemble_new_col(token_iter),
+        b"BareThis" => assemble_bare_this_opcode(alloc, token_iter, decl_map),
+        b"ColFromArray" => assemble_col_from_array(alloc, token_iter, decl_map),
+        b"NewCol" => assemble_new_col(alloc, token_iter, decl_map),
         b"NewStructDict" => assemble_new_struct_dict(alloc, token_iter),
         b"IssetG" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::IssetG, "IssetG"),
         b"IssetS" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::IssetS, "IssetS"),
@@ -2097,8 +2116,8 @@ fn assemble_opcode<'arena>(
         b"InclOnce" => {
             assemble_single_opcode_instr(token_iter, || hhbc::Opcode::InclOnce, "InclOnce")
         }
-        b"OODeclExists" => assemble_oodecl_exists(token_iter),
-        b"Silence" => assemble_silence(token_iter, decl_map),
+        b"OODeclExists" => assemble_oodecl_exists(alloc, token_iter, decl_map),
+        b"Silence" => assemble_silence(alloc, token_iter, decl_map),
         b"ThrowNonExhaustiveSwitch" => assemble_single_opcode_instr(
             token_iter,
             || hhbc::Opcode::ThrowNonExhaustiveSwitch,
@@ -2111,7 +2130,7 @@ fn assemble_opcode<'arena>(
             assemble_single_opcode_instr(token_iter, || hhbc::Opcode::ChainFaults, "ChainFaults")
         }
         b"CheckProp" => assemble_check_prop(alloc, token_iter),
-        b"InitProp" => assemble_init_prop(alloc, token_iter),
+        b"InitProp" => assemble_init_prop(alloc, token_iter, decl_map),
         b"VerifyImplicitContextState" => assemble_single_opcode_instr(
             token_iter,
             || hhbc::Opcode::VerifyImplicitContextState,
@@ -2119,7 +2138,7 @@ fn assemble_opcode<'arena>(
         ),
         b"MemoGet" => assemble_memo_get(token_iter),
         b"MemoSet" => assemble_memo_set(token_iter),
-        b"Switch" => assemble_switch(alloc, token_iter),
+        b"Switch" => assemble_switch(alloc, token_iter, decl_map),
         b"SSwitch" => assemble_sswitch(alloc, token_iter),
         b"Eval" => assemble_single_opcode_instr(token_iter, || hhbc::Opcode::Eval, "Eval"),
         b"ThrowAsTypeStructException" => assemble_single_opcode_instr(
@@ -2245,7 +2264,7 @@ fn assemble_srcloc(token_iter: &mut Lexer<'_>) -> Result<hhbc::SrcLoc> {
 }
 
 /// <(fcallargflag)*>
-fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgsFlags> {
+pub(crate) fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgsFlags> {
     let mut flags = hhbc::FCallArgsFlags::FCANone;
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
@@ -2272,7 +2291,7 @@ fn assemble_fcallargsflags(token_iter: &mut Lexer<'_>) -> Result<hhbc::FCallArgs
 }
 
 /// "(0|1)*"
-fn assemble_inouts_or_readonly<'arena>(
+pub(crate) fn assemble_inouts_or_readonly<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, bool>> {
@@ -2291,7 +2310,9 @@ fn assemble_inouts_or_readonly<'arena>(
 }
 
 /// - or a label
-fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc::Label>> {
+pub(crate) fn assemble_async_eager_target(
+    token_iter: &mut Lexer<'_>,
+) -> Result<Option<hhbc::Label>> {
     if token_iter.next_if(Token::is_dash) {
         Ok(None)
     } else {
@@ -2300,43 +2321,13 @@ fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc
 }
 
 /// Just a string literal
-fn assemble_fcall_context<'arena>(
+pub(crate) fn assemble_fcall_context<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
     let st = token_iter.expect(Token::into_str_literal)?;
     debug_assert!(st[0] == b'"' && st[st.len() - 1] == b'"');
     Ok(Str::new_slice(alloc, &st[1..st.len() - 1])) // if not hugged by "", won't pass into_str_literal
-}
-
-fn assemble_is_log_as_dynamic_call_op(
-    token_iter: &mut Lexer<'_>,
-) -> Result<hhbc::IsLogAsDynamicCallOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"LogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::LogAsDynamicCall),
-        b"DontLogAsDynamicCall" => Ok(hhbc::IsLogAsDynamicCallOp::DontLogAsDynamicCall),
-        _ => Err(tok.error("Unknown IsLogAsDynamicCallOp")),
-    }
-}
-
-fn assemble_special_class_ref(token_iter: &mut Lexer<'_>) -> Result<hhbc::SpecialClsRef> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"SelfCls" => Ok(hhbc::SpecialClsRef::SelfCls),
-        b"ParentCls" => Ok(hhbc::SpecialClsRef::ParentCls),
-        b"LateBoundCls" => Ok(hhbc::SpecialClsRef::LateBoundCls),
-        _ => Err(tok.error("Unknown SpecialClassRef")),
-    }
-}
-
-fn assemble_obj_method_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ObjMethodOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"NullThrows" => Ok(hhbc::ObjMethodOp::NullThrows),
-        b"NullSafe" => Ok(hhbc::ObjMethodOp::NullSafe),
-        _ => Err(tok.error("Unknown ObjMethodOp")),
-    }
 }
 
 /// <(fcargflags)*> numargs numrets inouts readonly async_eager_target context
@@ -2363,7 +2354,7 @@ fn assemble_fcall_args<'arena>(
     Ok(hhbc::FCallArgs { context, ..fcargs })
 }
 
-fn assemble_unescaped_unquoted_str<'arena>(
+pub(crate) fn assemble_unescaped_unquoted_str<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
@@ -2390,6 +2381,7 @@ fn assemble_unescaped_unquoted_triple_str<'arena>(
 fn assemble_fcall<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     use hhbc::Opcode;
     let tok = token_iter
@@ -2406,35 +2398,35 @@ fn assemble_fcall<'arena>(
         b"FCallClsMethodM" => Opcode::FCallClsMethodM(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_is_log_as_dynamic_call_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"FCallClsMethodSD" => Opcode::FCallClsMethodSD(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_special_class_ref(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"FCallObjMethodD" => Opcode::FCallObjMethodD(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_obj_method_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"FCallClsMethod" => Opcode::FCallClsMethod(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_is_log_as_dynamic_call_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
         ),
         b"FCallClsMethodS" => Opcode::FCallClsMethodS(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_special_class_ref(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
         ),
         b"FCallObjMethod" => Opcode::FCallObjMethod(
             args,
             assemble_unescaped_unquoted_str(alloc, token_iter)?,
-            assemble_obj_method_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
         ),
         b"FCallClsMethodD" => Opcode::FCallClsMethodD(
             args,
@@ -2445,29 +2437,6 @@ fn assemble_fcall<'arena>(
         _ => return Err(tok.error("Unknown fcall")),
     };
     Ok(hhbc::Instruct::Opcode(fcall))
-}
-
-fn assemble_is_type_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IsTypeOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"Null" => Ok(hhbc::IsTypeOp::Null),
-        b"Bool" => Ok(hhbc::IsTypeOp::Bool),
-        b"Int" => Ok(hhbc::IsTypeOp::Int),
-        b"Dbl" => Ok(hhbc::IsTypeOp::Dbl),
-        b"Str" => Ok(hhbc::IsTypeOp::Str),
-        b"Obj" => Ok(hhbc::IsTypeOp::Obj),
-        b"Res" => Ok(hhbc::IsTypeOp::Res),
-        b"Scalar" => Ok(hhbc::IsTypeOp::Scalar),
-        b"Keyset" => Ok(hhbc::IsTypeOp::Keyset),
-        b"Dict" => Ok(hhbc::IsTypeOp::Dict),
-        b"Vec" => Ok(hhbc::IsTypeOp::Vec),
-        b"ArrLike" => Ok(hhbc::IsTypeOp::ArrLike),
-        b"ClsMeth" => Ok(hhbc::IsTypeOp::ClsMeth),
-        b"Func" => Ok(hhbc::IsTypeOp::Func),
-        b"LegacyArrLike" => Ok(hhbc::IsTypeOp::LegacyArrLike),
-        b"Class" => Ok(hhbc::IsTypeOp::Class),
-        _ => Err(tok.error("Unknown IsTypeOp")),
-    }
 }
 
 /// NewObjD "Foo"
@@ -2540,44 +2509,37 @@ fn assemble_iter_args(
 
 /// Ex: IsTypeL $a Obj
 fn assemble_is_type_l<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeL")?;
     let lcl = assemble_local(token_iter, decl_map)?;
-    let type_op = assemble_is_type_op(token_iter)?;
+    let type_op = token_iter.assemble_imm(alloc, decl_map)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeL(lcl, type_op)))
 }
 
 /// Ex: IsTypeC Obj
-fn assemble_is_type_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_is_type_c<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeC")?;
-    let type_op = assemble_is_type_op(token_iter)?;
+    let type_op = token_iter.assemble_imm(alloc, decl_map)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeC(type_op)))
 }
 
 /// IsTypeStructC (Resolve|DontResolve)
-fn assemble_is_type_struct_c<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_is_type_struct_c<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IsTypeStructC")?;
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"Resolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
-            hhbc::TypeStructResolveOp::Resolve,
-        ))),
-        b"DontResolve" => Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
-            hhbc::TypeStructResolveOp::DontResolve,
-        ))),
-        _ => Err(tok.error("Unknown TypeStructResolveOp passed to TypeStructC instr")),
-    }
-}
-
-fn assemble_switch_kind(token_iter: &mut Lexer<'_>) -> Result<hhbc::SwitchKind> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"Unbounded" => Ok(hhbc::SwitchKind::Unbounded),
-        b"Bounded" => Ok(hhbc::SwitchKind::Bounded),
-        _ => Err(tok.error("Unknown switch kind")),
-    }
+    Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IsTypeStructC(
+        token_iter.assemble_imm(alloc, decl_map)?,
+    )))
 }
 
 /// Switch(SwitchKind, i64, BumpSliceMut<'arena, Label>),
@@ -2585,9 +2547,10 @@ fn assemble_switch_kind(token_iter: &mut Lexer<'_>) -> Result<hhbc::SwitchKind> 
 fn assemble_switch<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Switch")?;
-    let sk = assemble_switch_kind(token_iter)?;
+    let sk = token_iter.assemble_imm(alloc, decl_map)?;
     let int = token_iter.expect_and_get_number()?;
     let mut labels = Vec::new();
     token_iter.expect(Token::into_lt)?;
@@ -2696,35 +2659,6 @@ fn assemble_local_range(token_iter: &mut Lexer<'_>) -> Result<hhbc::LocalRange> 
     Ok(hhbc::LocalRange { start, len })
 }
 
-/// StackIndex : u32
-fn assemble_stack_index(token_iter: &mut Lexer<'_>) -> Result<hhbc::StackIndex> {
-    token_iter.expect_and_get_number()
-}
-
-fn assemble_mop_mode(token_iter: &mut Lexer<'_>) -> Result<hhbc::MOpMode> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"None" => Ok(hhbc::MOpMode::None),
-        b"Warn" => Ok(hhbc::MOpMode::Warn),
-        b"Define" => Ok(hhbc::MOpMode::Define),
-        b"Unset" => Ok(hhbc::MOpMode::Unset),
-        b"InOut" => Ok(hhbc::MOpMode::InOut),
-        _ => Err(tok.error("Expected a MOpMode")),
-    }
-}
-
-fn assemble_readonly_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::ReadonlyOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"Any" => Ok(hhbc::ReadonlyOp::Any),
-        b"Readonly" => Ok(hhbc::ReadonlyOp::Readonly),
-        b"Mutable" => Ok(hhbc::ReadonlyOp::Mutable),
-        b"CheckROCOW" => Ok(hhbc::ReadonlyOp::CheckROCOW),
-        b"CheckMutROCOW" => Ok(hhbc::ReadonlyOp::CheckMutROCOW),
-        _ => Err(tok.error("Expected a ReadonlyOp")),
-    }
-}
-
 /// EC: stackIndex readOnlyOp | EL: local readOnlyOp | ET: string readOnlyOp | EI: int readOnlyOp
 /// PC: stackIndex readOnlyOp | PL: local readOnlyOp | PT: propName readOnlyOp | QT: propName readOnlyOp
 fn assemble_member_key<'arena>(
@@ -2737,15 +2671,15 @@ fn assemble_member_key<'arena>(
         b"EC" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::EC(
-                assemble_stack_index(token_iter)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"EL" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::EL(
                 assemble_local(token_iter, decl_map)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"ET" => {
@@ -2758,42 +2692,42 @@ fn assemble_member_key<'arena>(
                         escaper::unquote_slice(token_iter.expect(Token::into_str_literal)?),
                     )?,
                 ),
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"EI" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::EI(
                 token_iter.expect_and_get_number()?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"PC" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PC(
-                assemble_stack_index(token_iter)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"PL" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PL(
                 assemble_local(token_iter, decl_map)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"PT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::PT(
                 assemble_prop_name_from_str(alloc, token_iter)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"QT" => {
             token_iter.expect(Token::into_colon)?;
             Ok(hhbc::MemberKey::QT(
                 assemble_prop_name_from_str(alloc, token_iter)?,
-                assemble_readonly_op(token_iter)?,
+                token_iter.assemble_imm(alloc, decl_map)?,
             ))
         }
         b"W" => Ok(hhbc::MemberKey::W),
@@ -2809,20 +2743,9 @@ fn assemble_dim<'arena>(
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Dim")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Dim(
-        assemble_mop_mode(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
         assemble_member_key(alloc, token_iter, decl_map)?,
     )))
-}
-
-fn assemble_query_mop(token_iter: &mut Lexer<'_>) -> Result<hhbc::QueryMOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"CGet" => Ok(hhbc::QueryMOp::CGet),
-        b"CGetQuiet" => Ok(hhbc::QueryMOp::CGetQuiet),
-        b"Isset" => Ok(hhbc::QueryMOp::Isset),
-        b"InOut" => Ok(hhbc::QueryMOp::InOut),
-        _ => Err(tok.error("Unexpected QueryMOp")),
-    }
 }
 
 /// Ex: QueryM 1 CGet EI:1 Any
@@ -2834,8 +2757,8 @@ fn assemble_query_m<'arena>(
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "QueryM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::QueryM(
-        assemble_stack_index(token_iter)?,
-        assemble_query_mop(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
         assemble_member_key(alloc, token_iter, decl_map)?,
     )))
 }
@@ -2848,45 +2771,51 @@ fn assemble_inc_dec_m<'arena>(
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "IncDecM")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecM(
-        assemble_stack_index(token_iter)?,
-        assemble_inc_dec_op(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
         assemble_member_key(alloc, token_iter, decl_map)?,
     )))
 }
 
 /// BaseGL $var MOpMode
 fn assemble_base_gl<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseGL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseGL(
         assemble_local(token_iter, decl_map)?,
-        assemble_mop_mode(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
 /// BaseSC stackIndex stackIndex MOpMode ReadOnlyOp
-fn assemble_base_sc<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_base_sc<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseSC")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseSC(
-        assemble_stack_index(token_iter)?,
-        assemble_stack_index(token_iter)?,
-        assemble_mop_mode(token_iter)?,
-        assemble_readonly_op(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
 /// BaseL $var MOpMode ReadOnlyOp
 fn assemble_base_l<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BaseL")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BaseL(
         assemble_local(token_iter, decl_map)?,
-        assemble_mop_mode(token_iter)?,
-        assemble_readonly_op(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
@@ -2896,25 +2825,17 @@ fn assemble_base_gc_or_c<
     'arena,
     F: FnOnce(hhbc::StackIndex, hhbc::MOpMode) -> hhbc::Opcode<'arena>,
 >(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     op_con: F,
     op_str: &str,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
     Ok(hhbc::Instruct::Opcode(op_con(
-        assemble_stack_index(token_iter)?,
-        assemble_mop_mode(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
-}
-
-fn assemble_set_range_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetRangeOp> {
-    let tok = token_iter.expect_token()?;
-    let sro = match tok.into_identifier()? {
-        b"Forward" => hhbc::SetRangeOp::Forward,
-        b"Reverse" => hhbc::SetRangeOp::Reverse,
-        _ => return Err(tok.error("Unknown SetRangeOp")),
-    };
-    Ok(sro)
 }
 
 /// Ex:
@@ -2955,33 +2876,33 @@ fn assemble_set_instruct<'arena>(
     let op = match tok.into_identifier()? {
         b"SetL" => hhbc::Opcode::SetL(assemble_local(token_iter, decl_map)?),
         b"SetG" => hhbc::Opcode::SetG,
-        b"SetS" => hhbc::Opcode::SetS(assemble_readonly_op(token_iter)?),
+        b"SetS" => hhbc::Opcode::SetS(token_iter.assemble_imm(alloc, decl_map)?),
         b"SetOpL" => hhbc::Opcode::SetOpL(
             assemble_local(token_iter, decl_map)?,
-            assemble_set_op_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
         ),
-        b"SetOpG" => hhbc::Opcode::SetOpG(assemble_set_op_op(token_iter)?),
-        b"SetOpS" => hhbc::Opcode::SetOpS(assemble_set_op_op(token_iter)?),
+        b"SetOpG" => hhbc::Opcode::SetOpG(token_iter.assemble_imm(alloc, decl_map)?),
+        b"SetOpS" => hhbc::Opcode::SetOpS(token_iter.assemble_imm(alloc, decl_map)?),
         b"SetImplicitContextByValue" => hhbc::Opcode::SetImplicitContextByValue,
         b"SetM" => hhbc::Opcode::SetM(
-            assemble_stack_index(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_member_key(alloc, token_iter, decl_map)?,
         ),
         b"SetRangeM" => hhbc::Opcode::SetRangeM(
-            assemble_stack_index(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             token_iter.expect_and_get_number()?,
-            assemble_set_range_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
         ),
         b"SetOpM" => hhbc::Opcode::SetOpM(
-            assemble_stack_index(token_iter)?,
-            assemble_set_op_op(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_member_key(alloc, token_iter, decl_map)?,
         ),
         b"UnsetL" => hhbc::Opcode::UnsetL(assemble_local(token_iter, decl_map)?),
         b"IsUnsetL" => hhbc::Opcode::IsUnsetL(assemble_local(token_iter, decl_map)?),
         b"UnsetG" => hhbc::Opcode::UnsetG,
         b"UnsetM" => hhbc::Opcode::UnsetM(
-            assemble_stack_index(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_member_key(alloc, token_iter, decl_map)?,
         ),
         _ => return Err(tok.error("Unknown set/unset instr")),
@@ -2989,73 +2910,27 @@ fn assemble_set_instruct<'arena>(
     Ok(hhbc::Instruct::Opcode(op))
 }
 
-fn assemble_set_op_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SetOpOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"PlusEqual" => Ok(hhbc::SetOpOp::PlusEqual),
-        b"MinusEqual" => Ok(hhbc::SetOpOp::MinusEqual),
-        b"MulEqual" => Ok(hhbc::SetOpOp::MulEqual),
-        b"ConcatEqual" => Ok(hhbc::SetOpOp::ConcatEqual),
-        b"DivEqual" => Ok(hhbc::SetOpOp::DivEqual),
-        b"PowEqual" => Ok(hhbc::SetOpOp::PowEqual),
-        b"ModEqual" => Ok(hhbc::SetOpOp::ModEqual),
-        b"AndEqual" => Ok(hhbc::SetOpOp::AndEqual),
-        b"OrEqual" => Ok(hhbc::SetOpOp::OrEqual),
-        b"XorEqual" => Ok(hhbc::SetOpOp::XorEqual),
-        b"SlEqual" => Ok(hhbc::SetOpOp::SlEqual),
-        b"SrEqual" => Ok(hhbc::SetOpOp::SrEqual),
-        _ => Err(tok.error("Expected a SetOpOp")),
-    }
-}
-
-fn assemble_inc_dec_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::IncDecOp> {
-    let tok = token_iter.expect_token()?;
-    match tok.into_identifier()? {
-        b"PreInc" => Ok(hhbc::IncDecOp::PreInc),
-        b"PostInc" => Ok(hhbc::IncDecOp::PostInc),
-        b"PreDec" => Ok(hhbc::IncDecOp::PreDec),
-        b"PostDec" => Ok(hhbc::IncDecOp::PostDec),
-        _ => Err(tok.error("Expected a IncDecOp")),
-    }
-}
-
-fn assemble_silence_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::SilenceOp> {
-    let tok = token_iter.expect_token()?;
-    let so = match tok.into_identifier()? {
-        b"Start" => hhbc::SilenceOp::Start,
-        b"End" => hhbc::SilenceOp::End,
-        _ => return Err(tok.error("Expected a SilenceOp")),
-    };
-    Ok(so)
-}
-
 /// Ex:
 /// Silence _2 End
 fn assemble_silence<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut HashMap<Str<'arena>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "Silence")?;
     let lcl = assemble_local(token_iter, decl_map)?;
-    let sop = assemble_silence_op(token_iter)?;
+    let sop = token_iter.assemble_imm(alloc, decl_map)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Silence(lcl, sop)))
 }
 
-fn assemble_oodecl_exists_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::OODeclExistsOp> {
-    let tok = token_iter.expect_token()?;
-    let oo = match tok.into_identifier()? {
-        b"Class" => hhbc::OODeclExistsOp::Class,
-        b"Interface" => hhbc::OODeclExistsOp::Interface,
-        b"Trait" => hhbc::OODeclExistsOp::Trait,
-        _ => return Err(tok.error("Expected a OODeclExistsOp")),
-    };
-    Ok(oo)
-}
-
-fn assemble_oodecl_exists<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_oodecl_exists<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "OODeclExists")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::OODeclExists(
-        assemble_oodecl_exists_op(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
@@ -3077,47 +2952,15 @@ fn assemble_fatal_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Ins
     )))
 }
 
-fn assemble_bare_this_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::BareThisOp> {
-    let tok = token_iter.expect_token()?;
-    let bop = match tok.into_identifier()? {
-        b"Notice" => hhbc::BareThisOp::Notice,
-        b"NoNotice" => hhbc::BareThisOp::NoNotice,
-        b"NeverNull" => hhbc::BareThisOp::NeverNull,
-        _ => return Err(tok.error("Expected a FatalOp")),
-    };
-    Ok(bop)
-}
-
-fn assemble_bare_this_opcode<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_bare_this_opcode<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "BareThis")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::BareThis(
-        assemble_bare_this_op(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
-}
-
-fn assemble_collection_type(token_iter: &mut Lexer<'_>) -> Result<hhbc::CollectionType> {
-    let tok = token_iter.expect_token()?;
-    let ct = match tok.into_identifier()? {
-        b"Vector" => hhbc::CollectionType::Vector,
-        b"Map" => hhbc::CollectionType::Map,
-        b"Set" => hhbc::CollectionType::Set,
-        b"Pair" => hhbc::CollectionType::Pair,
-        b"ImmVector" => hhbc::CollectionType::ImmVector,
-        b"ImmMap" => hhbc::CollectionType::ImmMap,
-        b"ImmSet" => hhbc::CollectionType::ImmSet,
-        _ => return Err(tok.error("Expected a FatalOp")),
-    };
-    Ok(ct)
-}
-
-fn assemble_init_prop_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::InitPropOp> {
-    let tok = token_iter.expect_token()?;
-    let ipo = match tok.into_identifier()? {
-        b"Static" => hhbc::InitPropOp::Static,
-        b"NonStatic" => hhbc::InitPropOp::NonStatic,
-        _ => return Err(tok.error("Expected a InitPropOp")),
-    };
-    Ok(ipo)
 }
 
 /// Ex:
@@ -3125,10 +2968,11 @@ fn assemble_init_prop_op(token_iter: &mut Lexer<'_>) -> Result<hhbc::InitPropOp>
 fn assemble_init_prop<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "InitProp")?;
     let pn = assemble_prop_name_from_str(alloc, token_iter)?;
-    let ipo = assemble_init_prop_op(token_iter)?;
+    let ipo = token_iter.assemble_imm(alloc, decl_map)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::InitProp(pn, ipo)))
 }
 
@@ -3144,17 +2988,25 @@ fn assemble_check_prop<'arena>(
     )))
 }
 
-fn assemble_col_from_array<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_col_from_array<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "ColFromArray")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::ColFromArray(
-        assemble_collection_type(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
-fn assemble_new_col<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
+fn assemble_new_col<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
+) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "NewCol")?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::NewCol(
-        assemble_collection_type(token_iter)?,
+        token_iter.assemble_imm(alloc, decl_map)?,
     )))
 }
 
@@ -3162,6 +3014,7 @@ fn assemble_new_col<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct
 /// CUGetL $v
 /// CGetS Mutable
 fn assemble_cget<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -3174,7 +3027,7 @@ fn assemble_cget<'arena>(
         b"CUGetL" => hhbc::Opcode::CUGetL(assemble_local(token_iter, decl_map)?),
         b"CGetL2" => hhbc::Opcode::CGetL2(assemble_local(token_iter, decl_map)?),
         b"CGetG" => hhbc::Opcode::CGetG,
-        b"CGetS" => hhbc::Opcode::CGetS(assemble_readonly_op(token_iter)?),
+        b"CGetS" => hhbc::Opcode::CGetS(token_iter.assemble_imm(alloc, decl_map)?),
         b"ClassGetC" => hhbc::Opcode::ClassGetC,
         b"ClassGetTS" => hhbc::Opcode::ClassGetTS,
         _ => return Err(tok.error("Unknown cget")),
@@ -3184,6 +3037,7 @@ fn assemble_cget<'arena>(
 
 /// IncDecL $var IncDecOp
 fn assemble_incdecl_opcode<'arena>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &HashMap<Str<'_>, u32>,
 ) -> Result<hhbc::Instruct<'arena>> {
@@ -3191,7 +3045,7 @@ fn assemble_incdecl_opcode<'arena>(
     let tok = token_iter.expect_token()?;
     let lcl = tok.into_variable()?;
     if let Some(idx) = decl_map.get(lcl) {
-        let ido = assemble_inc_dec_op(token_iter)?;
+        let ido = token_iter.assemble_imm(alloc, decl_map)?;
         token_iter.expect_end()?;
         Ok(hhbc::Instruct::Opcode(hhbc::Opcode::IncDecL(
             hhbc::Local { idx: *idx },
@@ -3204,12 +3058,14 @@ fn assemble_incdecl_opcode<'arena>(
 
 /// IncDecS IncDecOp
 fn assemble_incdec_opcode<'arena, F: FnOnce(hhbc::IncDecOp) -> hhbc::Opcode<'arena>>(
+    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     op_con: F,
     op_str: &str,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let ido = assemble_inc_dec_op(token_iter)?;
+    let ido = token_iter.assemble_imm(alloc, decl_map)?;
     Ok(hhbc::Instruct::Opcode(op_con(ido)))
 }
 /// Ex:
@@ -3237,7 +3093,10 @@ pub enum NeedsColon {
 }
 
 /// L#: or DV#: if needs_colon else L# or DV#
-fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: NeedsColon) -> Result<hhbc::Label> {
+pub(crate) fn assemble_label(
+    token_iter: &mut Lexer<'_>,
+    needs_colon: NeedsColon,
+) -> Result<hhbc::Label> {
     let tok = token_iter.expect_token()?;
     let mut lcl = tok.into_identifier()?;
     if needs_colon == NeedsColon::Yes {
@@ -3274,6 +3133,7 @@ fn assemble_resolve_func<'arena, F: FnOnce(hhbc::FunctionName<'arena>) -> hhbc::
 fn assemble_resolve_class<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    decl_map: &DeclMap<'arena>,
 ) -> Result<hhbc::Instruct<'arena>> {
     let tok = token_iter.expect_token()?;
     let op = match tok.into_identifier()? {
@@ -3285,7 +3145,7 @@ fn assemble_resolve_class<'arena>(
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"ResolveClsMethodS" => hhbc::Opcode::ResolveClsMethodS(
-            assemble_special_class_ref(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"ResolveRClsMethod" => {
@@ -3296,7 +3156,7 @@ fn assemble_resolve_class<'arena>(
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"ResolveRClsMethodS" => hhbc::Opcode::ResolveRClsMethodS(
-            assemble_special_class_ref(token_iter)?,
+            token_iter.assemble_imm(alloc, decl_map)?,
             assemble_method_name_from_str(alloc, token_iter)?,
         ),
         b"ResolveClass" => {

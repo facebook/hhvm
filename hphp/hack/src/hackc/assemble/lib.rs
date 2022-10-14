@@ -1,4 +1,5 @@
 mod assemble;
+mod assemble_imm;
 mod lexer;
 mod token;
 mod util;

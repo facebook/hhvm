@@ -252,10 +252,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    pub(crate) fn is_newline(&self) -> bool {
-        matches!(self, Token::Newline(..))
-    }
-
     pub(crate) fn is_triple_str_literal(&self) -> bool {
         matches!(self, Token::TripleStrLiteral(..))
     }
@@ -276,8 +272,18 @@ impl<'a> Token<'a> {
         matches!(self, Token::Identifier(..))
     }
 
+    #[cfg(test)]
+    pub(crate) fn is_comma(&self) -> bool {
+        matches!(self, Token::Comma(_))
+    }
+
     pub(crate) fn is_semicolon(&self) -> bool {
         matches!(self, Token::Semicolon(_))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn is_colon(&self) -> bool {
+        matches!(self, Token::Colon(_))
     }
 
     pub(crate) fn is_dash(&self) -> bool {
@@ -288,12 +294,22 @@ impl<'a> Token<'a> {
         matches!(self, Token::OpenBracket(_))
     }
 
+    #[cfg(test)]
+    pub(crate) fn is_open_paren(&self) -> bool {
+        matches!(self, Token::OpenParen(_))
+    }
+
     pub(crate) fn is_close_paren(&self) -> bool {
         matches!(self, Token::CloseParen(_))
     }
 
     pub(crate) fn is_close_bracket(&self) -> bool {
         matches!(self, Token::CloseBracket(_))
+    }
+
+    #[cfg(test)]
+    pub(crate) fn is_open_curly(&self) -> bool {
+        matches!(self, Token::OpenCurly(_))
     }
 
     pub(crate) fn is_close_curly(&self) -> bool {

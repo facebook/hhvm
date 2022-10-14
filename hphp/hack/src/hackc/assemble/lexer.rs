@@ -3,7 +3,6 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use std::collections::VecDeque;
 use std::str::FromStr;
 
 use anyhow::anyhow;
@@ -12,8 +11,6 @@ use anyhow::ensure;
 use anyhow::Result;
 use bumpalo::Bump;
 use ffi::Str;
-use once_cell::sync::OnceCell;
-use regex::bytes::Regex;
 
 use crate::token::Line;
 use crate::token::Token;
@@ -23,8 +20,9 @@ use crate::token::Token;
 // tokenize based on the regex "\"\"\".*\"\"\"". Here's the git issue:
 // https://github.com/maciejhirsz/logos/issues/246
 pub(crate) struct Lexer<'a> {
+    line: Line,
     pending: Option<Token<'a>>, // Cached next (non-newline)
-    tokens: VecDeque<Token<'a>>,
+    source: &'a [u8],
 }
 
 impl<'a> Iterator for Lexer<'a> {
@@ -49,49 +47,61 @@ impl<'a> Lexer<'a> {
     /// If `pending` is none, fills with the next non-newline token, or None of one does not exist.
     fn fill(&mut self) {
         if self.pending.is_none() {
-            self.pending = self.get_next_no_newlines();
-        }
-    }
-
-    /// Returns the next non-newline token (or None), advancing the lexer past any leading newlines.
-    fn get_next_no_newlines(&mut self) -> Option<Token<'a>> {
-        while let Some(t) = self.tokens.pop_front() {
-            if !t.is_newline() {
-                return Some(t);
+            loop {
+                (self.pending, self.source) = parse_token(self.source, self.line);
+                match self.pending {
+                    None => {
+                        // Either a whitespace or EOF
+                        if self.source.is_empty() {
+                            return;
+                        }
+                    }
+                    Some(Token::Newline(_)) => {
+                        self.line.0 += 1;
+                    }
+                    Some(_) => break,
+                }
             }
         }
-        None
     }
 
     pub(crate) fn is_empty(&mut self) -> bool {
         self.fill();
-        if self.pending.is_none() {
-            debug_assert!(self.tokens.is_empty()); // VD should never have \n \n \n and empty pending
-            true
-        } else {
-            false
-        }
+        self.pending.is_none()
     }
 
-    /// Advances the lexer passed its first non-leading newline, returning a mini-lexer of the tokens up until that newline.
+    fn find_next_newline(&self) -> Option<usize> {
+        // Find the next newline - but ignore it if it's in quotes. We handle
+        // triple quotes as a trick - '"""' is no different than '""' followed
+        // by '"'.
+        let mut in_quotes = false;
+        let mut escape = false;
+        self.source.iter().copied().position(|ch| {
+            if escape {
+                escape = false;
+            } else if !in_quotes && ch == b'\n' {
+                return true;
+            } else if ch == b'\"' {
+                in_quotes = !in_quotes;
+            } else if ch == b'\\' {
+                escape = true;
+            }
+
+            false
+        })
+    }
+
+    /// Advances the lexer past its first non-leading newline, returning a mini-lexer of the tokens up until that newline.
     pub(crate) fn fetch_until_newline(&mut self) -> Option<Lexer<'a>> {
         self.fill();
-        if let Some(t) = self.pending {
-            let mut first_toks = VecDeque::new();
-            // Add what was in `pending`
-            first_toks.push_back(t);
-            // While we haven't reached the new line
-            while let Some(to_push) = self.tokens.pop_front() {
-                if to_push.is_newline() {
-                    break;
-                }
-                // Add token
-                first_toks.push_back(to_push);
-            }
-            self.pending = None;
+        if let Some(pending) = self.pending.take() {
+            let idx = self.find_next_newline().unwrap_or(self.source.len());
+            let source;
+            (source, self.source) = self.source.split_at(idx);
             Some(Lexer {
-                tokens: first_toks,
-                pending: None,
+                line: self.line,
+                pending: Some(pending),
+                source,
             })
         } else {
             None
@@ -253,153 +263,293 @@ impl<'a> Lexer<'a> {
         Ok(())
     }
 
-    fn make_regex() -> Regex {
-        // First create the regex that matches any token. Done this way for
-        // readability
-        let v = [
-            r#""""([^"\\]|\\.)*?""""#, // Triple str literal
-            "#.*",                     // Comment
-            r"(?-u)[\.@][_a-z/A-Z\x80-\xff][_/a-zA-Z/0-9\x80-\xff\-\.]*", // Decl, global. (?-u) turns off utf8 check
-            r"(?-u)\$[_a-zA-Z0-9$\x80-\xff][_/a-zA-Z0-9$\x80-\xff]*",     // Var.
-            r#""((\\.)|[^\\"])*""#,                                       // Str literal
-            r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?",           // Number
-            r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#\-]|::)*", // Identifier
-            ";",
-            "-",
-            "=",
-            r"\{",
-            r"\[",
-            r"\(",
-            r"\)",
-            r"\]",
-            r"\}",
-            ",",
-            "<",
-            ">",
-            ":",
-            r"\.\.\.", // Variadic
-            "\n",
-            r"[ \t\r\f]+",
-        ];
-        let big_regex = format!("^(({}))", v.join(")|("));
-        Regex::new(&big_regex).unwrap()
-    }
-
-    pub(crate) fn from_slice(s: &'a [u8], start_line: Line) -> Self {
-        // According to
-        // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
-        // directly observed) Regex keeps mutable internal state which needs to
-        // be synchronized - so using it from multiple threads will be a big
-        // performance regression.
-        static REGEX: OnceCell<Regex> = OnceCell::new();
-        let big_regex = REGEX.get_or_init(Self::make_regex).clone();
-
-        let mut cur_line = start_line;
-        let mut tokens = VecDeque::new();
-        let mut source = s;
-        while !source.is_empty() {
-            source = build_tokens_helper(source, &mut cur_line, &mut tokens, &big_regex);
-        }
+    pub(crate) fn from_slice(source: &'a [u8], start_line: Line) -> Self {
         Lexer {
+            line: start_line,
+            source,
             pending: None,
-            tokens,
         }
     }
 }
 
-fn build_tokens_helper<'a>(
-    s: &'a [u8],
-    cur_line: &mut Line,
-    tokens: &mut VecDeque<Token<'a>>,
-    big_regex: &Regex,
-) -> &'a [u8] {
-    if let Some(mat) = big_regex.find(s) {
-        let mut chars = s.iter(); // Implicit assumption: matched to the start (^), so we iter from the start
-        debug_assert!(mat.start() == 0);
-        match chars.next().unwrap() {
-            // Get first character
-            // Note these don't match what prints out on a printer, but not sure how to generalize
-            b'\x0C' => {
-                // form feed
+fn is_identifier_lead(ch: u8) -> bool {
+    ch.is_ascii_alphabetic() || (ch >= 0x80) || (ch == b'_') || (ch == b'/')
+}
 
-                &s[mat.end()..]
+fn is_identifier_tail(ch: u8) -> bool {
+    // r"(?-u)[_/a-zA-Z\x80-\xff]([_/\\a-zA-Z0-9\x80-\xff\.\$#\-]|::)*"
+    //
+    // NOTE: identifiers can include "::" but this won't match that because it's
+    // a multi-byte sequence.
+    ch.is_ascii_alphanumeric()
+        || (ch >= 0x80)
+        || (ch == b'.')
+        || (ch == b'$')
+        || (ch == b'#')
+        || (ch == b'-')
+        || (ch == b'_')
+        || (ch == b'/')
+        || (ch == b'\\')
+}
+
+fn gather_identifier(source: &[u8]) -> (&[u8], &[u8]) {
+    // This can't be easy because ':' isn't part of an identifier, but '::'
+    // is...
+    let mut len = 1;
+    loop {
+        len += source[len..]
+            .iter()
+            .copied()
+            .take_while(|&c| is_identifier_tail(c))
+            .count();
+        if !source[len..].starts_with(b"::") {
+            break;
+        }
+        len += 2;
+    }
+    source.split_at(len)
+}
+
+fn is_number_lead(ch: u8) -> bool {
+    ch.is_ascii_digit()
+}
+
+fn is_number_tail(ch: u8) -> bool {
+    // r"[-+]?[0-9]+\.?[0-9]*([eE][-+]?[0-9]+\.?[0-9]*)?"
+    ch.is_ascii_digit() || (ch == b'.')
+}
+
+fn gather_number(source: &[u8]) -> (&[u8], &[u8]) {
+    // The plus location (only after 'e') makes this tricky.
+    let mut last_e = false;
+    let len = source[1..]
+        .iter()
+        .copied()
+        .take_while(|&c| {
+            if is_number_tail(c) {
+                last_e = false;
+            } else if c == b'e' || c == b'E' {
+                last_e = true;
+            } else if (c == b'+' || c == b'-') && last_e {
+                last_e = false;
+            } else {
+                return false;
             }
-            b'\r' => &s[mat.end()..],
-            b'\t' => &s[mat.end()..],
+            true
+        })
+        .count();
+    source.split_at(1 + len)
+}
+
+fn is_global_tail(ch: u8) -> bool {
+    // r"(?-u)[\.@][_a-z/A-Z\x80-\xff][_/a-zA-Z/0-9\x80-\xff\-\.]*"
+    ch.is_ascii_alphanumeric() || (ch >= 0x80) || (ch == b'.') || (ch == b'-') || (ch == b'_')
+}
+
+fn is_var_tail(ch: u8) -> bool {
+    // r"(?-u)\$[_a-zA-Z0-9$\x80-\xff][_/a-zA-Z0-9$\x80-\xff]*"
+    ch.is_ascii_alphanumeric() || (ch >= 0x80) || (ch == b'$') || (ch == b'_')
+}
+
+fn is_decl_tail(ch: u8) -> bool {
+    // r"(?-u)[\.@][_a-z/A-Z\x80-\xff][_/a-zA-Z/0-9\x80-\xff\-\.]*", // Decl, global. (?-u) turns off utf8 check
+    ch.is_ascii_alphanumeric() || (ch >= 0x80) || (ch == b'-') || (ch == b'.') || (ch == b'_')
+}
+
+fn is_non_newline_whitespace(ch: u8) -> bool {
+    ch == b' ' || ch == b'\t' || ch == b'\r'
+}
+
+fn gather_tail<F>(source: &[u8], f: F) -> (&[u8], &[u8])
+where
+    F: Fn(u8) -> bool,
+{
+    let len = source[1..].iter().copied().take_while(|c| f(*c)).count();
+    source.split_at(1 + len)
+}
+
+fn gather_quoted(source: &[u8], count: usize) -> (&[u8], &[u8]) {
+    let mut quotes = 0;
+    let mut escaped = false;
+    let len = source[count..]
+        .iter()
+        .copied()
+        .take_while(|&c| {
+            if quotes == count {
+                return false;
+            } else if c == b'"' && !escaped {
+                quotes += 1;
+            } else if c == b'\\' && !escaped {
+                escaped = true;
+                quotes = 0;
+            } else {
+                escaped = false;
+                quotes = 0;
+            }
+            true
+        })
+        .count();
+    source.split_at(count + len)
+}
+
+fn parse_token(mut source: &[u8], line: Line) -> (Option<Token<'_>>, &[u8]) {
+    let tok = if let Some(lead) = source.first() {
+        match *lead {
+            ch if is_identifier_lead(ch) => {
+                // Identifier
+                let tok;
+                (tok, source) = gather_identifier(source);
+                Some(Token::Identifier(tok, line))
+            }
+            ch if is_number_lead(ch) => {
+                // Number
+                let tok;
+                (tok, source) = gather_number(source);
+                Some(Token::Number(tok, line))
+            }
+            ch if is_non_newline_whitespace(ch) => {
+                (_, source) = gather_tail(source, is_non_newline_whitespace);
+                None
+            }
             b'#' => {
-                &s[mat.end()..] // Don't advance the line; the newline at the end of the comment will advance the line
+                // Don't consume the newline.
+                let len = source[1..]
+                    .iter()
+                    .copied()
+                    .take_while(|&c| c != b'\n')
+                    .count();
+                (_, source) = source.split_at(1 + len);
+                None
             }
-            b' ' => &s[mat.end()..], // Don't add whitespace as tokens, just increase line and col
-            o => {
-                let end = mat.end();
-                let tok = match o {
-                    b'\n' => {
-                        let old_pos = *cur_line;
-                        cur_line.0 += 1;
-
-                        Token::Newline(old_pos)
-                    }
-                    b'@' => Token::Global(&s[..end], *cur_line), // Global
-                    b'$' => Token::Variable(&s[..end], *cur_line), // Var
-                    b'.' => {
-                        if *(chars.next().unwrap()) == b'.' && *(chars.next().unwrap()) == b'.' {
-                            // Variadic
-                            Token::Variadic(*cur_line)
-                        } else {
-                            Token::Decl(&s[..end], *cur_line) // Decl
-                        }
-                    }
-                    b';' => Token::Semicolon(*cur_line), // Semicolon
-                    b'{' => Token::OpenCurly(*cur_line), // Opencurly
-                    b'[' => Token::OpenBracket(*cur_line),
-                    b'(' => Token::OpenParen(*cur_line),
-                    b')' => Token::CloseParen(*cur_line),
-                    b']' => Token::CloseBracket(*cur_line),
-                    b'}' => Token::CloseCurly(*cur_line),
-                    b',' => Token::Comma(*cur_line),
-                    b'<' => Token::Lt(*cur_line),    //<
-                    b'>' => Token::Gt(*cur_line),    //>
-                    b'=' => Token::Equal(*cur_line), //=
-                    b'-' => {
-                        if chars.next().unwrap().is_ascii_digit() {
-                            // Negative number
-                            Token::Number(&s[..end], *cur_line)
-                        } else {
-                            Token::Dash(*cur_line)
-                        }
-                    }
-                    b':' => Token::Colon(*cur_line),
-                    b'"' => {
-                        if *(chars.next().unwrap()) == b'"' && *(chars.next().unwrap()) == b'"' {
-                            // Triple string literal
-                            Token::TripleStrLiteral(&s[..end], *cur_line)
-                        } else {
-                            // Single string literal
-                            Token::StrLiteral(&s[..end], *cur_line)
-                        }
-                    }
-                    dig_or_id => {
-                        if dig_or_id.is_ascii_digit()
-                            || (*dig_or_id as char == '+'
-                                && (chars.next().unwrap()).is_ascii_digit())
-                        // Positive numbers denoted with +
-                        {
-                            Token::Number(&s[..end], *cur_line)
-                        } else {
-                            Token::Identifier(&s[..end], *cur_line)
-                        }
-                    }
-                };
-                tokens.push_back(tok);
-                &s[end..]
+            b'\n' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Newline(line))
             }
+            b'@' => {
+                if source.len() > 1 {
+                    // Global
+                    let tok;
+                    (tok, source) = gather_tail(source, is_global_tail);
+                    Some(Token::Global(tok, line))
+                } else {
+                    // Error
+                    let tok = std::mem::take(&mut source);
+                    Some(Token::Error(tok, line))
+                }
+            }
+            b'$' => {
+                if source.len() > 1 {
+                    // Var
+                    let tok;
+                    (tok, source) = gather_tail(source, is_var_tail);
+                    Some(Token::Variable(tok, line))
+                } else {
+                    // Error
+                    let tok = std::mem::take(&mut source);
+                    Some(Token::Error(tok, line))
+                }
+            }
+            b'"' => {
+                if source.starts_with(b"\"\"\"") {
+                    // Triple string literal
+                    let tok;
+                    (tok, source) = gather_quoted(source, 3);
+                    Some(Token::TripleStrLiteral(tok, line))
+                } else {
+                    // Single string literal
+                    let tok;
+                    (tok, source) = gather_quoted(source, 1);
+                    Some(Token::StrLiteral(tok, line))
+                }
+            }
+            b'.' => {
+                if source.starts_with(b"...") {
+                    // Variadic
+                    (_, source) = source.split_at(3);
+                    Some(Token::Variadic(line))
+                } else if source.len() > 1 {
+                    // Decl
+                    let tok;
+                    (tok, source) = gather_tail(source, is_decl_tail);
+                    Some(Token::Decl(tok, line))
+                } else {
+                    // Error
+                    let tok = std::mem::take(&mut source);
+                    Some(Token::Error(tok, line))
+                }
+            }
+            b'-' => {
+                if source.get(1).copied().map_or(false, is_number_lead) {
+                    // Negative number
+                    let tok;
+                    (tok, source) = gather_number(source);
+                    Some(Token::Number(tok, line))
+                } else {
+                    // Dash
+                    (_, source) = source.split_at(1);
+                    Some(Token::Dash(line))
+                }
+            }
+            b'+' => {
+                // Positive number
+                let tok;
+                (tok, source) = gather_number(source);
+                Some(Token::Number(tok, line))
+            }
+            b';' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Semicolon(line))
+            }
+            b'{' => {
+                (_, source) = source.split_at(1);
+                Some(Token::OpenCurly(line))
+            }
+            b'[' => {
+                (_, source) = source.split_at(1);
+                Some(Token::OpenBracket(line))
+            }
+            b'(' => {
+                (_, source) = source.split_at(1);
+                Some(Token::OpenParen(line))
+            }
+            b')' => {
+                (_, source) = source.split_at(1);
+                Some(Token::CloseParen(line))
+            }
+            b']' => {
+                (_, source) = source.split_at(1);
+                Some(Token::CloseBracket(line))
+            }
+            b'}' => {
+                (_, source) = source.split_at(1);
+                Some(Token::CloseCurly(line))
+            }
+            b',' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Comma(line))
+            }
+            b'<' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Lt(line))
+            }
+            b'>' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Gt(line))
+            }
+            b'=' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Equal(line))
+            }
+            b':' => {
+                (_, source) = source.split_at(1);
+                Some(Token::Colon(line))
+            }
+            _ => todo!("CH: {lead:?} ({})", *lead as char),
         }
     } else {
-        // Couldn't tokenize the string, so add the rest of it as an error
-        tokens.push_back(Token::Error(s, *cur_line));
-        // Done advancing col and line cuz at end
-        &[]
-    }
+        None
+    };
+    (tok, source)
 }
 
 #[cfg(test)]
@@ -411,8 +561,7 @@ mod test {
     fn str_into_test() -> Result<()> {
         // Want to test that only tokens surrounded by "" are str_literals
         // Want to confirm the assumption that after any token_iter.expect(Token::into_str_literal) call, you can safely remove the first and last element in slice
-        let s = r#"abc "abc" """abc""""#;
-        let s = s.as_bytes();
+        let s = br#"abc "abc" """abc""""#;
         let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.next_if(Token::is_identifier));
         let sl = lex.expect(Token::into_str_literal)?;
@@ -426,8 +575,7 @@ mod test {
 
     #[test]
     fn just_nl_is_empty() {
-        let s = "\n \n \n";
-        let s = s.as_bytes();
+        let s = b"\n \n \n";
         let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.fetch_until_newline().is_none());
         assert!(lex.is_empty());
@@ -436,44 +584,100 @@ mod test {
     #[test]
     fn splits_mult_newlines_go_away() {
         // Point of this test: want to make sure that 3 mini-lexers are spawned (multiple new lines don't do anything)
-        let s = "\n \n a \n \n \n b \n \n c \n";
-        let s = s.as_bytes();
+        let s = b"\n \n a \n \n \n b \n \n c \n";
         let mut lex = Lexer::from_slice(s, Line(1));
-        let vc_of_lexers = vec![
-            lex.fetch_until_newline(),
-            lex.fetch_until_newline(),
-            lex.fetch_until_newline(),
-        ];
-        assert!(lex.is_empty());
-        assert!(lex.next().is_none());
-        assert_eq!(vc_of_lexers.len(), 3);
+        let mut a = lex.fetch_until_newline().unwrap();
+        let mut b = lex.fetch_until_newline().unwrap();
+        let mut c = lex.fetch_until_newline().unwrap();
+
+        assert_eq!(lex.next(), None);
+
+        assert_eq!(a.next().unwrap().into_identifier().unwrap(), b"a");
+        assert_eq!(a.next(), None);
+
+        assert_eq!(b.next().unwrap().into_identifier().unwrap(), b"b");
+        assert_eq!(b.next(), None);
+
+        assert_eq!(c.next().unwrap().into_identifier().unwrap(), b"c");
+        assert_eq!(c.next(), None);
     }
 
     #[test]
     fn no_trailing_newlines() {
-        let s = "a \n \n \n";
-        let s = s.as_bytes();
+        let s = b"a \n \n \n";
         let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.next().is_some());
         assert!(lex.is_empty());
     }
 
     #[test]
+    #[allow(unused)]
     fn splitting_multiple_lines() {
-        let s = ".try { \n .srloc 3:7, 3:22 \n String \"I'm in the try\n\" \n Print \n PopC \n } .catch { \n Dup \n L1: \n Throw \n }";
-        let s = s.as_bytes();
+        let s = b".try { \n .srcloc 3:7, 3:22 \n String \"I'm i\\\"n the try\n\" \n Print \n PopC \n } .catch { \n Dup \n L1: \n Throw \n }";
         let mut lex = Lexer::from_slice(s, Line(1));
-        let mut vc_of_lexers = Vec::new();
-        while !lex.is_empty() {
-            vc_of_lexers.push(lex.fetch_until_newline());
-        }
-        assert_eq!(vc_of_lexers.len(), 10)
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".try");
+        assert!(sub.next().unwrap().is_open_curly());
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".srcloc");
+        assert_eq!(sub.next().unwrap().into_number().unwrap(), b"3");
+        assert!(sub.next().unwrap().is_colon());
+        assert_eq!(sub.next().unwrap().into_number().unwrap(), b"7");
+        assert!(sub.next().unwrap().is_comma());
+        assert_eq!(sub.next().unwrap().into_number().unwrap(), b"3");
+        assert!(sub.next().unwrap().is_colon());
+        assert_eq!(sub.next().unwrap().into_number().unwrap(), b"22");
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"String");
+        assert_eq!(
+            sub.next().unwrap().into_str_literal().unwrap(),
+            b"\"I'm i\\\"n the try\n\""
+        );
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Print");
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"PopC");
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert!(sub.next().unwrap().is_close_curly());
+        assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".catch");
+        assert!(sub.next().unwrap().is_open_curly());
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Dup");
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"L1");
+        assert!(sub.next().unwrap().is_colon());
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Throw");
+        assert_eq!(sub.next(), None);
+
+        let mut sub = lex.fetch_until_newline().unwrap();
+        assert!(sub.next().unwrap().is_close_curly());
+        assert_eq!(sub.next(), None);
+
+        assert_eq!(lex.next(), None);
     }
 
     #[test]
     fn peek_next_on_newlines() {
-        let s = "\n\na\n\n";
-        let mut lex = Lexer::from_slice(s.as_bytes(), Line(1));
+        let s = b"\n\na\n\n";
+        let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.peek().is_some());
         assert!(lex.next().is_some());
         assert!(lex.fetch_until_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
@@ -483,8 +687,7 @@ mod test {
     #[should_panic]
     fn no_top_level_shouldnt_parse() {
         // Is there a better way, maybe to verify the string in the bail?
-        let s = ".srloc 3:7,3:22";
-        let s = s.as_bytes();
+        let s = b".srloc 3:7,3:22";
         let alloc = Bump::default();
         assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
     }
@@ -492,8 +695,7 @@ mod test {
     #[test]
     #[should_panic]
     fn no_fpath_semicolon_shouldnt_parse() {
-        let s = r#".filepath "aaaa""#;
-        let s = s.as_bytes();
+        let s = br#".filepath "aaaa""#;
         let alloc = Bump::default();
         assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
     }
@@ -501,19 +703,17 @@ mod test {
     #[test]
     #[should_panic]
     fn fpath_wo_file_shouldnt_parse() {
-        let s = r#".filepath aaa"#;
-        let s = s.as_bytes();
+        let s = br#".filepath aaa"#;
         let alloc = Bump::default();
         assert!(matches!(assemble::assemble_from_bytes(&alloc, s), Ok(_)))
     }
 
     #[test]
     fn difficult_strings() {
-        let s = r#""\"0\""
+        let s = br#""\"0\""
         "12345\\:2\\"
         "class_meth() expects a literal class name or ::class constant, followed by a constant string that refers to a static method on that class";
         "#;
-        let s = s.as_bytes();
         let mut l: Lexer<'_> = Lexer::from_slice(s, Line(1));
         // Expecting 3 string tokens
         let _st1 = l.next().unwrap();
@@ -548,119 +748,52 @@ mod test {
 
     #[test]
     fn every_token_test() {
-        let s = r#"@_global $0Var """tripleStrLiteral:)""" #hashtagComment
+        let s = br#"@_global $0Var """tripleStrLiteral:)""" #hashtagComment
         .Decl "str!Literal" ...
-        ;-{[( )]} =98 -98 +101. 43.2 , < > : _/identifier/ /filepath ."#;
+        ;-{[( )]} =98 -98 +101. 43.2 , < > : _/identifier/ /filepath id$di aa:bb aa::bb ."#;
         // Expect glob var tsl decl strlit semicolon dash open_curly open_brack open_paren close_paren close_bracket
         // close_curly equal number number number number , < > : identifier identifier ERROR on the last .
-        let s = s.as_bytes();
         let mut l: Lexer<'_> = Lexer::from_slice(s, Line(1));
-        let glob = l.next().unwrap();
-        assert!(
-            matches!(glob, Token::Global(..)),
-            "failed to match {}",
-            glob
+        assert_eq!(l.next().unwrap().into_global().unwrap(), b"@_global");
+        assert_eq!(l.next().unwrap().into_variable().unwrap(), b"$0Var");
+        assert_eq!(
+            l.next().unwrap().into_triple_str_literal().unwrap(),
+            br#""""tripleStrLiteral:)""""#
         );
-        let var = l.next().unwrap();
-        assert!(
-            matches!(var, Token::Variable(..)),
-            "failed to match {}",
-            var
+        assert_eq!(l.next().unwrap().into_decl().unwrap(), b".Decl");
+        assert_eq!(
+            l.next().unwrap().into_str_literal().unwrap(),
+            br#""str!Literal""#
         );
-        let tsl = l.next().unwrap();
-        assert!(
-            matches!(tsl, Token::TripleStrLiteral(..)),
-            "failed to match {}",
-            tsl
+        assert!(l.next().unwrap().is_variadic());
+        assert!(l.next().unwrap().is_semicolon());
+        assert!(l.next().unwrap().is_dash());
+        assert!(l.next().unwrap().is_open_curly());
+        assert!(l.next().unwrap().is_open_bracket());
+        assert!(l.next().unwrap().is_open_paren());
+        assert!(l.next().unwrap().is_close_paren());
+        assert!(l.next().unwrap().is_close_bracket());
+        assert!(l.next().unwrap().is_close_curly());
+        assert!(l.next().unwrap().is_equal());
+        assert_eq!(l.next().unwrap().into_number().unwrap(), b"98");
+        assert_eq!(l.next().unwrap().into_number().unwrap(), b"-98");
+        assert_eq!(l.next().unwrap().into_number().unwrap(), b"+101.");
+        assert_eq!(l.next().unwrap().into_number().unwrap(), b"43.2");
+        assert!(l.next().unwrap().is_comma());
+        assert!(l.next().unwrap().is_lt());
+        assert!(l.next().unwrap().is_gt());
+        assert!(l.next().unwrap().is_colon());
+        assert_eq!(
+            l.next().unwrap().into_identifier().unwrap(),
+            b"_/identifier/"
         );
-        let decl = l.next().unwrap();
-        assert!(matches!(decl, Token::Decl(..)), "failed to match {}", decl);
-        let strlit = l.next().unwrap();
-        assert!(
-            matches!(strlit, Token::StrLiteral(..)),
-            "failed to match {}",
-            strlit
-        );
-        let variadic = l.next().unwrap();
-        assert!(
-            matches!(variadic, Token::Variadic(..)),
-            "failed to match {}",
-            variadic
-        );
-        let semicolon = l.next().unwrap();
-        assert!(
-            matches!(semicolon, Token::Semicolon(..)),
-            "failed to match {}",
-            semicolon
-        );
-        let dash = l.next().unwrap();
-        assert!(matches!(dash, Token::Dash(..)), "failed to match {}", dash);
-        let oc = l.next().unwrap();
-        assert!(matches!(oc, Token::OpenCurly(..)), "failed to match {}", oc);
-        let ob = l.next().unwrap();
-        assert!(
-            matches!(ob, Token::OpenBracket(..)),
-            "failed to match {}",
-            ob
-        );
-        let op = l.next().unwrap();
-        assert!(matches!(op, Token::OpenParen(..)), "failed to match {}", op);
-        let cp = l.next().unwrap();
-        assert!(
-            matches!(cp, Token::CloseParen(..)),
-            "failed to match {}",
-            cp
-        );
-        let cb = l.next().unwrap();
-        assert!(
-            matches!(cb, Token::CloseBracket(..)),
-            "failed to match {}",
-            cb
-        );
-        let cc = l.next().unwrap();
-        assert!(
-            matches!(cc, Token::CloseCurly(..)),
-            "failed to match {}",
-            cc
-        );
-        let eq = l.next().unwrap();
-        assert!(matches!(eq, Token::Equal(..)), "failed to match {}", eq);
-        let num = l.next().unwrap();
-        assert!(matches!(num, Token::Number(..)), "failed to match {}", num);
-        let num = l.next().unwrap();
-        assert!(matches!(num, Token::Number(..)), "failed to match {}", num);
-        let num = l.next().unwrap();
-        assert!(matches!(num, Token::Number(..)), "failed to match {}", num);
-        let num = l.next().unwrap();
-        assert!(matches!(num, Token::Number(..)), "failed to match {}", num);
-        let comma = l.next().unwrap();
-        assert!(
-            matches!(comma, Token::Comma(..)),
-            "failed to match {}",
-            comma
-        );
-        let lt = l.next().unwrap();
-        assert!(matches!(lt, Token::Lt(..)), "failed to match {}", lt);
-        let gt = l.next().unwrap();
-        assert!(matches!(gt, Token::Gt(..)), "failed to match {}", gt);
-        let colon = l.next().unwrap();
-        assert!(
-            matches!(colon, Token::Colon(..)),
-            "failed to match {}",
-            colon
-        );
-        let iden = l.next().unwrap();
-        assert!(
-            matches!(iden, Token::Identifier(..)),
-            "failed to match {}",
-            iden
-        );
-        let iden = l.next().unwrap();
-        assert!(
-            matches!(iden, Token::Identifier(..)),
-            "failed to match {}",
-            iden
-        );
+        assert_eq!(l.next().unwrap().into_identifier().unwrap(), b"/filepath");
+        assert_eq!(l.next().unwrap().into_identifier().unwrap(), b"id$di");
+        assert_eq!(l.next().unwrap().into_identifier().unwrap(), b"aa");
+        assert!(l.next().unwrap().is_colon());
+        assert_eq!(l.next().unwrap().into_identifier().unwrap(), b"bb");
+        assert_eq!(l.next().unwrap().into_identifier().unwrap(), b"aa::bb");
+
         let err = l.next().unwrap();
         assert!(matches!(err, Token::Error(..)), "failed to match {}", err);
     }

@@ -1360,19 +1360,10 @@ let obj_get_with_mismatches
           (Pos_or_decl.of_raw_pos obj_pos)
           env
           [Log_head ("obj_get", [Log_type ("receiver_ty", receiver_ty)])]));
-  (* If we're checking an SDT method or function under dynamic assumptions,
-   * then attempt to solve to dynamic if we're left with a type variable *)
-  let default =
-    if env.Typing_env_types.in_support_dynamic_type_method_check then
-      Some (MakeType.dynamic (Reason.Rwitness obj_pos))
-    else
-      None
-  in
   let ((env, e1), receiver_ty) =
     if is_method then
       Typing_solver.expand_type_and_solve
         env
-        ?default
         ~description_of_expected:"an object"
         obj_pos
         receiver_ty
@@ -1380,7 +1371,6 @@ let obj_get_with_mismatches
       Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
-        ?default
         (widen_class_for_obj_get ~is_method ~nullsafe (snd member_id))
         obj_pos
         receiver_ty

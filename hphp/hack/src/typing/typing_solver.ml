@@ -656,6 +656,16 @@ let solve_all_unsolved_tyvars_gi env =
  *)
 let expand_type_and_solve
     env ?default ?(freshen = true) ~description_of_expected p ty =
+  (* If we're checking an SDT method or function under dynamic assumptions,
+   * then attempt to solve to dynamic if we're left with a type variable *)
+  let default =
+    if Option.is_some default then
+      default
+    else if env.Typing_env_types.in_support_dynamic_type_method_check then
+      Some (MakeType.dynamic (Reason.Rwitness p))
+    else
+      None
+  in
   (* TODO: rather than writing to a ref cell from inside the `on_tyvar`
      function, modify `simplify_unions` to return the accumulated result
      from this function, if it is provided *)
@@ -795,6 +805,16 @@ let expand_type_and_narrow
     widen_concrete_type
     p
     ty =
+  (* If we're checking an SDT method or function under dynamic assumptions,
+   * then attempt to solve to dynamic if we're left with a type variable *)
+  let default =
+    if Option.is_some default then
+      default
+    else if env.Typing_env_types.in_support_dynamic_type_method_check then
+      Some (MakeType.dynamic (Reason.Rwitness p))
+    else
+      None
+  in
   let ((env, ty_err_opt), ty) =
     let ((env, ty_err_opt1), ty) = expand_type_and_solve_eq env ty in
     (* Deconstruct the type into union elements (if it's a union). For variables,

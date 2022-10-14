@@ -513,8 +513,7 @@ mod test {
         "class_meth() expects a literal class name or ::class constant, followed by a constant string that refers to a static method on that class";
         "#;
         let s = s.as_bytes();
-        let l: Lexer<'_> = Lexer::from_slice(s, 1);
-        let mut l = l.into_iter();
+        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
         // Expecting 3 string tokens
         let _st1 = l.next().unwrap();
         let _by1 = str::as_bytes(r#""\"0\"""#);
@@ -532,9 +531,8 @@ mod test {
     #[test]
     fn odd_unicode_test() {
         let s: &[u8] = b".\xA9\xEF\xB8\x8E $0\xC5\xA3\xB1\xC3 \xE2\x98\xBA\xE2\x98\xBA\xE2\x98\xBA @\xE2\x99\xA1\xE2\x99\xA4$";
-        let l: Lexer<'_> = Lexer::from_slice(s, 1);
+        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
         // We are expecting an decl, a var, an identifier a global, and an error on the last empty variable
-        let mut l = l.into_iter();
         let decl = l.next().unwrap();
         assert!(matches!(decl, Token::Decl(..)));
         let var = l.next().unwrap();
@@ -555,8 +553,7 @@ mod test {
         // Expect glob var tsl decl strlit semicolon dash open_curly open_brack open_paren close_paren close_bracket
         // close_curly equal number number number number , < > : identifier identifier ERROR on the last .
         let s = s.as_bytes();
-        let l: Lexer<'_> = Lexer::from_slice(s, 1);
-        let mut l = l.into_iter();
+        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
         let glob = l.next().unwrap();
         assert!(
             matches!(glob, Token::Global(..)),

@@ -3,6 +3,7 @@
 import abc
 import argparse
 import collections
+import collections.abc
 import functools
 import lldb
 import re
@@ -85,7 +86,7 @@ def memoized(func):
 
     @functools.wraps(func)
     def memoizer(*args):
-        if not isinstance(args, collections.Hashable):
+        if not isinstance(args, collections.abc.Hashable):
             return func(*args)
         if args not in cache:
             cache[args] = func(*args)

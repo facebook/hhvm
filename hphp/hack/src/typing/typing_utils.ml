@@ -829,3 +829,9 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn r (MakeType.mixed Reason.Rnone))
+
+let strip_supportdyn ty =
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+    (true, tyarg)
+  | _ -> (false, ty)

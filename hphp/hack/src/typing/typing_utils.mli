@@ -512,3 +512,5 @@ val supports_dynamic :
 
 (* Return true if type definitely is a subtype of supportdyn<mixed> *)
 val is_supportdyn : Typing_env_types.env -> Typing_defs.locl_ty -> bool
+
+val strip_supportdyn : Typing_defs.locl_ty -> bool * Typing_defs.locl_ty

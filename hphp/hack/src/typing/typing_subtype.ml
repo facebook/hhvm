@@ -538,12 +538,6 @@ let mk_issubtype_prop ~coerce env ty1 ty2 =
     TL.IsSubtype (coerce, ty1, LoclType ty2)
   | _ -> TL.IsSubtype (coerce, ty1, ty2)
 
-let strip_supportdyn ty =
-  match get_node ty with
-  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
-    (true, tyarg)
-  | _ -> (false, ty)
-
 (** Given types ty_sub and ty_super, attempt to
  *  reduce the subtyping proposition ty_sub <: ty_super to
  *  a logical proposition whose primitive assertions are of the form v <: t or t <: v
@@ -2066,7 +2060,7 @@ and simplify_subtype_i
       (match ety_sub with
       | ConstraintType _ -> default_subtype env
       | LoclType lty ->
-        let (sub_supportdyn', lty) = strip_supportdyn lty in
+        let (sub_supportdyn', lty) = TUtils.strip_supportdyn lty in
         (match deref lty with
         | (r_sub, Tshape (shape_kind_sub, fdm_sub)) ->
           simplify_subtype_shape

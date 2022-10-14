@@ -26,6 +26,7 @@ use regex::bytes::Regex;
 use crate::assemble_imm::AssembleImm;
 use crate::lexer::Lexer;
 use crate::regex;
+use crate::token::Line;
 use crate::token::Token;
 
 pub(crate) type DeclMap<'a> = HashMap<Str<'a>, u32>;
@@ -41,7 +42,7 @@ pub fn assemble_from_bytes<'arena>(
     alloc: &'arena Bump,
     s: &[u8],
 ) -> Result<(hhbc::Unit<'arena>, PathBuf)> {
-    let mut lex = Lexer::from_slice(s, 1);
+    let mut lex = Lexer::from_slice(s, Line(1));
     let unit = assemble_from_toks(alloc, &mut lex)?;
     trace!("ASM UNIT: {unit:?}");
     Ok(unit)
@@ -810,12 +811,12 @@ fn assemble_triple_quoted_typed_value<'arena>(
 fn assemble_typed_value<'arena>(
     alloc: &'arena Bump,
     src: &[u8],
-    line: usize,
+    line: Line,
 ) -> Result<hhbc::TypedValue<'arena>> {
     fn deserialize<'arena, 'a>(
         alloc: &'arena Bump,
         src: &'a [u8],
-        line: usize,
+        line: Line,
     ) -> Result<hhbc::TypedValue<'arena>> {
         /// Returns s after ch if ch is the first character in s, else bails.
         fn expect<'a>(s: &'a [u8], ch: &'_ [u8]) -> Result<&'a [u8]> {

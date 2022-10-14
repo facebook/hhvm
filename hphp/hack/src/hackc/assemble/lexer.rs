@@ -15,6 +15,7 @@ use ffi::Str;
 use once_cell::sync::OnceCell;
 use regex::bytes::Regex;
 
+use crate::token::Line;
 use crate::token::Token;
 
 // We initially planned on using Logos, a crate for tokenizing really fast.
@@ -284,7 +285,7 @@ impl<'a> Lexer<'a> {
         Regex::new(&big_regex).unwrap()
     }
 
-    pub(crate) fn from_slice(s: &'a [u8], start_line: usize) -> Self {
+    pub(crate) fn from_slice(s: &'a [u8], start_line: Line) -> Self {
         // According to
         // https://github.com/rust-lang/regex/blob/master/PERFORMANCE.md (and
         // directly observed) Regex keeps mutable internal state which needs to
@@ -308,7 +309,7 @@ impl<'a> Lexer<'a> {
 
 fn build_tokens_helper<'a>(
     s: &'a [u8],
-    cur_line: &mut usize,
+    cur_line: &mut Line,
     tokens: &mut VecDeque<Token<'a>>,
     big_regex: &Regex,
 ) -> &'a [u8] {
@@ -334,7 +335,7 @@ fn build_tokens_helper<'a>(
                 let tok = match o {
                     b'\n' => {
                         let old_pos = *cur_line;
-                        *cur_line += 1;
+                        cur_line.0 += 1;
 
                         Token::Newline(old_pos)
                     }
@@ -412,7 +413,7 @@ mod test {
         // Want to confirm the assumption that after any token_iter.expect(Token::into_str_literal) call, you can safely remove the first and last element in slice
         let s = r#"abc "abc" """abc""""#;
         let s = s.as_bytes();
-        let mut lex = Lexer::from_slice(s, 1);
+        let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.next_if(Token::is_identifier));
         let sl = lex.expect(Token::into_str_literal)?;
         assert!(sl[0] == b'"' && sl[sl.len() - 1] == b'"');
@@ -427,7 +428,7 @@ mod test {
     fn just_nl_is_empty() {
         let s = "\n \n \n";
         let s = s.as_bytes();
-        let mut lex = Lexer::from_slice(s, 1);
+        let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.fetch_until_newline().is_none());
         assert!(lex.is_empty());
     }
@@ -437,7 +438,7 @@ mod test {
         // Point of this test: want to make sure that 3 mini-lexers are spawned (multiple new lines don't do anything)
         let s = "\n \n a \n \n \n b \n \n c \n";
         let s = s.as_bytes();
-        let mut lex = Lexer::from_slice(s, 1);
+        let mut lex = Lexer::from_slice(s, Line(1));
         let vc_of_lexers = vec![
             lex.fetch_until_newline(),
             lex.fetch_until_newline(),
@@ -452,7 +453,7 @@ mod test {
     fn no_trailing_newlines() {
         let s = "a \n \n \n";
         let s = s.as_bytes();
-        let mut lex = Lexer::from_slice(s, 1);
+        let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.next().is_some());
         assert!(lex.is_empty());
     }
@@ -461,7 +462,7 @@ mod test {
     fn splitting_multiple_lines() {
         let s = ".try { \n .srloc 3:7, 3:22 \n String \"I'm in the try\n\" \n Print \n PopC \n } .catch { \n Dup \n L1: \n Throw \n }";
         let s = s.as_bytes();
-        let mut lex = Lexer::from_slice(s, 1);
+        let mut lex = Lexer::from_slice(s, Line(1));
         let mut vc_of_lexers = Vec::new();
         while !lex.is_empty() {
             vc_of_lexers.push(lex.fetch_until_newline());
@@ -472,7 +473,7 @@ mod test {
     #[test]
     fn peek_next_on_newlines() {
         let s = "\n\na\n\n";
-        let mut lex = Lexer::from_slice(s.as_bytes(), 1);
+        let mut lex = Lexer::from_slice(s.as_bytes(), Line(1));
         assert!(lex.peek().is_some());
         assert!(lex.next().is_some());
         assert!(lex.fetch_until_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
@@ -513,7 +514,7 @@ mod test {
         "class_meth() expects a literal class name or ::class constant, followed by a constant string that refers to a static method on that class";
         "#;
         let s = s.as_bytes();
-        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
+        let mut l: Lexer<'_> = Lexer::from_slice(s, Line(1));
         // Expecting 3 string tokens
         let _st1 = l.next().unwrap();
         let _by1 = str::as_bytes(r#""\"0\"""#);
@@ -531,7 +532,7 @@ mod test {
     #[test]
     fn odd_unicode_test() {
         let s: &[u8] = b".\xA9\xEF\xB8\x8E $0\xC5\xA3\xB1\xC3 \xE2\x98\xBA\xE2\x98\xBA\xE2\x98\xBA @\xE2\x99\xA1\xE2\x99\xA4$";
-        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
+        let mut l: Lexer<'_> = Lexer::from_slice(s, Line(1));
         // We are expecting an decl, a var, an identifier a global, and an error on the last empty variable
         let decl = l.next().unwrap();
         assert!(matches!(decl, Token::Decl(..)));
@@ -553,7 +554,7 @@ mod test {
         // Expect glob var tsl decl strlit semicolon dash open_curly open_brack open_paren close_paren close_bracket
         // close_curly equal number number number number , < > : identifier identifier ERROR on the last .
         let s = s.as_bytes();
-        let mut l: Lexer<'_> = Lexer::from_slice(s, 1);
+        let mut l: Lexer<'_> = Lexer::from_slice(s, Line(1));
         let glob = l.next().unwrap();
         assert!(
             matches!(glob, Token::Global(..)),

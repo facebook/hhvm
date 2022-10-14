@@ -8,12 +8,14 @@ use std::fmt;
 use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::Result;
+use newtype::newtype_int;
 
-type Line = usize;
+// 1-based line number.
+newtype_int!(Line, u32, LineMap, LineSet);
 
-#[derive(Debug, PartialEq, Eq, Copy, Clone)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone, strum_macros::IntoStaticStr)]
 pub(crate) enum Token<'a> {
-    // See below in Lexer::from_slice for regex definitions
+    // See Lexer::from_slice for regex definitions
     Global(&'a [u8], Line),
     Variable(&'a [u8], Line),
     TripleStrLiteral(&'a [u8], Line),
@@ -44,31 +46,31 @@ impl<'a> Token<'a> {
         anyhow!("Error [line {line}]: {err} ({self:?})", line = self.line())
     }
 
-    pub(crate) fn line(&self) -> usize {
+    pub(crate) fn line(&self) -> Line {
         match self {
-            Token::Global(_, u)
-            | Token::Variable(_, u)
-            | Token::TripleStrLiteral(_, u)
-            | Token::Decl(_, u)
-            | Token::StrLiteral(_, u)
-            | Token::Number(_, u)
-            | Token::Identifier(_, u)
-            | Token::Error(_, u) => *u,
-            Token::Variadic(u)
-            | Token::Semicolon(u)
-            | Token::Dash(u)
-            | Token::OpenCurly(u)
-            | Token::OpenBracket(u)
-            | Token::OpenParen(u)
-            | Token::CloseParen(u)
-            | Token::CloseBracket(u)
+            Token::CloseBracket(u)
             | Token::CloseCurly(u)
-            | Token::Equal(u)
-            | Token::Newline(u)
+            | Token::CloseParen(u)
+            | Token::Colon(u)
             | Token::Comma(u)
-            | Token::Lt(u)
+            | Token::Dash(u)
+            | Token::Decl(_, u)
+            | Token::Equal(u)
+            | Token::Error(_, u)
+            | Token::Global(_, u)
             | Token::Gt(u)
-            | Token::Colon(u) => *u,
+            | Token::Identifier(_, u)
+            | Token::Lt(u)
+            | Token::Newline(u)
+            | Token::Number(_, u)
+            | Token::OpenBracket(u)
+            | Token::OpenCurly(u)
+            | Token::OpenParen(u)
+            | Token::Semicolon(u)
+            | Token::StrLiteral(_, u)
+            | Token::TripleStrLiteral(_, u)
+            | Token::Variable(_, u)
+            | Token::Variadic(u) => *u,
         }
     }
 
@@ -103,10 +105,9 @@ impl<'a> Token<'a> {
     /// Only str_literal and triple_str_literal can be parsed into a new tokenizer.
     /// To create a new tokenizer that still has accurate error reporting, we want to pass the line
     /// So `into_str_literal_and_line` and `into_triple_str_literal_and_line` return a Result of bytes rep and line # or bail
-    pub(crate) fn into_triple_str_literal_and_line(self) -> Result<(&'a [u8], usize)> {
+    pub(crate) fn into_triple_str_literal_and_line(self) -> Result<(&'a [u8], Line)> {
         match self {
             Token::TripleStrLiteral(vec_u8, pos) => Ok((vec_u8, pos)),
-
             _ => bail!("Expected a triple str literal, got: {}", self),
         }
     }
@@ -316,36 +317,12 @@ impl<'a> Token<'a> {
     }
 }
 
-impl<'a> fmt::Display for Token<'a> {
+impl fmt::Display for Token<'_> {
     /// Purpose of this fmt: so that vec of u8 (internal str representation of each token) is printed as a string rather than bytes
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let text = std::str::from_utf8(self.as_bytes()).map_err(|_| fmt::Error)?;
-        match self {
-            Token::Global(_, pos) => write!(f, "Global(val: \"{text}\", line: {pos:?})"),
-            Token::Variable(_, pos) => write!(f, "Variable(val: \"{text}\", line: {pos:?})"),
-            Token::TripleStrLiteral(_, pos) => {
-                write!(f, "TripleStrLiteral(val: \"{text}\", line: {pos:?})")
-            }
-            Token::Decl(_, pos) => write!(f, "Decl(val: \"{text}\", line: {pos:?})"),
-            Token::StrLiteral(_, pos) => write!(f, "StrLiteral(val: \"{text}\", line: {pos:?})"),
-            Token::Number(_, pos) => write!(f, "Number(val: \"{text}\", line: {pos:?})"),
-            Token::Identifier(_, pos) => write!(f, "Identifier(val: \"{text}\", line: {pos:?})"),
-            Token::Error(_, pos) => write!(f, "Error(val: \"{text}\", line: {pos:?})"),
-            Token::Semicolon(pos) => write!(f, "Semicolon(val: \"{text}\", line: {pos:?})"),
-            Token::Dash(pos) => write!(f, "Dash(val: \"{text}\", line: {pos:?})"),
-            Token::OpenCurly(pos) => write!(f, "OpenCurly(val: \"{text}\", line: {pos:?})"),
-            Token::OpenBracket(pos) => write!(f, "OpenBracket(val: \"{text}\", line: {pos:?})"),
-            Token::OpenParen(pos) => write!(f, "OpenParen(val: \"{text}\", line: {pos:?})"),
-            Token::CloseParen(pos) => write!(f, "CloseParen(val: \"{text}\", line: {pos:?})"),
-            Token::CloseBracket(pos) => write!(f, "CloseBracket(val: \"{text}\", line: {pos:?})"),
-            Token::CloseCurly(pos) => write!(f, "CloseCurly(val: \"{text}\", line: {pos:?})"),
-            Token::Equal(pos) => write!(f, "Equal(val: \"{text}\", line: {pos:?})"),
-            Token::Comma(pos) => write!(f, "Comma(val: \"{text}\", line: {pos:?})"),
-            Token::Lt(pos) => write!(f, "Lt(val: \"{text}\", line: {pos:?})"),
-            Token::Gt(pos) => write!(f, "Gt(val: \"{text}\", line: {pos:?})"),
-            Token::Colon(pos) => write!(f, "Colon(val: \"{text}\", line: {pos:?})"),
-            Token::Variadic(pos) => write!(f, "Variadic(val: \"{text}\", line: {pos:?})"),
-            Token::Newline(pos) => write!(f, "Newline(val: \"{text}\", line: {pos:?})"),
-        }
+        let variant: &str = (*self).into();
+        let line = self.line();
+        write!(f, r#"{variant}("{text}", line: {line})"#)
     }
 }

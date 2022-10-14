@@ -111,24 +111,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
-    fn into_str_literal_and_line(self) -> Result<(&'a [u8], usize)> {
-        match self {
-            Token::StrLiteral(vec_u8, pos) => Ok((vec_u8, pos)),
-            _ => bail!("Expected a str literal, got: {}", self),
-        }
-    }
-
-    /// The "into" series of methods both check that [self] is the correct
-    /// variant of Token and return a Result of [self]'s string rep
-    #[allow(dead_code)]
-    fn into_newline(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Newline(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a newline, got: {}", self),
-        }
-    }
-    #[allow(dead_code)]
     pub(crate) fn into_global(self) -> Result<&'a [u8]> {
         match self {
             Token::Global(vec_u8, _) => Ok(vec_u8),
@@ -136,7 +118,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn into_variable(self) -> Result<&'a [u8]> {
         match self {
             Token::Variable(vec_u8, _) => Ok(vec_u8),
@@ -144,7 +125,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn into_triple_str_literal(self) -> Result<&'a [u8]> {
         match self {
             Token::TripleStrLiteral(vec_u8, _) => Ok(vec_u8),
@@ -180,14 +160,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
-    fn into_error(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Error(vec_u8, _) => Ok(vec_u8),
-            _ => bail!("Expected an error, got: {}", self),
-        }
-    }
-
     pub(crate) fn into_semicolon(self) -> Result<&'a [u8]> {
         match self {
             Token::Semicolon(_) => Ok(self.as_bytes()),
@@ -195,7 +167,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn into_dash(self) -> Result<&'a [u8]> {
         match self {
             Token::Dash(_) => Ok(self.as_bytes()),
@@ -210,7 +181,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn into_open_bracket(self) -> Result<&'a [u8]> {
         match self {
             Token::OpenBracket(_) => Ok(self.as_bytes()),
@@ -246,7 +216,6 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
     pub(crate) fn into_equal(self) -> Result<&'a [u8]> {
         match self {
             Token::Equal(_) => Ok(self.as_bytes()),
@@ -282,125 +251,66 @@ impl<'a> Token<'a> {
         }
     }
 
-    #[allow(dead_code)]
-    pub(crate) fn into_variadic(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Variadic(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a variadic, got: {}", self),
-        }
-    }
-
-    //is
-    #[allow(dead_code)]
     pub(crate) fn is_newline(&self) -> bool {
         matches!(self, Token::Newline(..))
     }
-    #[allow(dead_code)]
-    fn is_global(&self) -> bool {
-        matches!(self, Token::Global(..))
-    }
 
-    #[allow(dead_code)]
-    fn is_variable(&self) -> bool {
-        matches!(self, Token::Variable(..))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_triple_str_literal(&self) -> bool {
         matches!(self, Token::TripleStrLiteral(..))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_decl(&self) -> bool {
         matches!(self, Token::Decl(..))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_str_literal(&self) -> bool {
         matches!(self, Token::StrLiteral(..))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_number(&self) -> bool {
         matches!(self, Token::Number(..))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_identifier(&self) -> bool {
         matches!(self, Token::Identifier(..))
     }
 
-    #[allow(dead_code)]
-    fn is_error(&self) -> bool {
-        matches!(self, Token::Error(..))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_semicolon(&self) -> bool {
         matches!(self, Token::Semicolon(_))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_dash(&self) -> bool {
         matches!(self, Token::Dash(_))
     }
 
-    #[allow(dead_code)]
-    fn is_open_curly(&self) -> bool {
-        matches!(self, Token::OpenCurly(_))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_open_bracket(&self) -> bool {
         matches!(self, Token::OpenBracket(_))
     }
 
-    #[allow(dead_code)]
-    fn is_open_paren(&self) -> bool {
-        matches!(self, Token::OpenParen(_))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_close_paren(&self) -> bool {
         matches!(self, Token::CloseParen(_))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_close_bracket(&self) -> bool {
         matches!(self, Token::CloseBracket(_))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_close_curly(&self) -> bool {
         matches!(self, Token::CloseCurly(_))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_equal(&self) -> bool {
         matches!(self, Token::Equal(_))
     }
 
-    #[allow(dead_code)]
-    fn is_comma(&self) -> bool {
-        matches!(self, Token::Comma(_))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_lt(&self) -> bool {
         matches!(self, Token::Lt(_))
     }
 
-    #[allow(dead_code)]
     pub(crate) fn is_gt(&self) -> bool {
         matches!(self, Token::Gt(_))
     }
 
-    #[allow(dead_code)]
-    fn is_colon(&self) -> bool {
-        matches!(self, Token::Colon(_))
-    }
-
-    #[allow(dead_code)]
     pub(crate) fn is_variadic(&self) -> bool {
         matches!(self, Token::Variadic(_))
     }

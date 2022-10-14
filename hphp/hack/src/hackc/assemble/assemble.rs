@@ -1500,7 +1500,7 @@ fn assemble_default_value<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Maybe<hhbc::DefaultValue<'arena>>> {
     let tr = if token_iter.next_if(Token::is_equal) {
-        let label = assemble_label(token_iter, false)?; // false: not expecting colon
+        let label = assemble_label(token_iter, NeedsColon::No)?;
         token_iter.expect(Token::into_open_paren)?;
         let expr = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
         token_iter.expect(Token::into_close_paren)?;
@@ -1820,10 +1820,14 @@ fn assemble_instr<'arena>(
             }
         } else if sl_lexer.peek_if(Token::is_identifier) {
             let tok = sl_lexer.peek().unwrap();
-            match tok.as_bytes() {
-                label if label_reg.is_match(label) => Ok(hhbc::Instruct::Pseudo(
-                    hhbc::Pseudo::Label(assemble_label(&mut sl_lexer, true)?),
-                )),
+            let tb = tok.as_bytes();
+            if label_reg.is_match(tb) {
+                return Ok(hhbc::Instruct::Pseudo(hhbc::Pseudo::Label(assemble_label(
+                    &mut sl_lexer,
+                    NeedsColon::Yes,
+                )?)));
+            }
+            match tb {
                 b"Add" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Add, "Add"),
                 b"Sub" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Sub, "Sub"),
                 b"Mul" => assemble_single_opcode_instr(&mut sl_lexer, || hhbc::Opcode::Mul, "Mul"),
@@ -2436,7 +2440,7 @@ fn assemble_async_eager_target(token_iter: &mut Lexer<'_>) -> Result<Option<hhbc
     if token_iter.next_if(Token::is_dash) {
         Ok(None)
     } else {
-        Ok(Some(assemble_label(token_iter, false)?))
+        Ok(Some(assemble_label(token_iter, NeedsColon::No)?))
     }
 }
 
@@ -2650,7 +2654,7 @@ fn assemble_iter_init_iter_next<
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
     let iter_args = assemble_iter_args(token_iter, decl_map)?;
-    let lbl = assemble_label(token_iter, false)?;
+    let lbl = assemble_label(token_iter, NeedsColon::No)?;
     Ok(hhbc::Instruct::Opcode(op_con(iter_args, lbl)))
 }
 
@@ -2733,7 +2737,7 @@ fn assemble_switch<'arena>(
     let mut labels = Vec::new();
     token_iter.expect(Token::into_lt)?;
     while !token_iter.peek_if(Token::is_gt) {
-        labels.push(assemble_label(token_iter, false)?)
+        labels.push(assemble_label(token_iter, NeedsColon::No)?)
     }
     token_iter.expect(Token::into_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::Switch(
@@ -2763,7 +2767,7 @@ fn assemble_sswitch<'arena>(
             cases.push(assemble_unescaped_unquoted_str(alloc, token_iter)?);
         }
         token_iter.expect(Token::into_colon)?;
-        targets.push(assemble_label(token_iter, false)?);
+        targets.push(assemble_label(token_iter, NeedsColon::No)?);
     }
     token_iter.expect(Token::into_gt)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::SSwitch {
@@ -2784,8 +2788,8 @@ fn assemble_await_all<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instru
 fn assemble_memo_get_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "MemoGetEager")?;
     let lbl_slice = [
-        assemble_label(token_iter, false)?,
-        assemble_label(token_iter, false)?,
+        assemble_label(token_iter, NeedsColon::No)?,
+        assemble_label(token_iter, NeedsColon::No)?,
     ];
     let dum = hhbc::Dummy::DEFAULT;
     let lcl_range = assemble_local_range(token_iter)?;
@@ -2808,7 +2812,7 @@ fn assemble_memo_set_eager<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::I
 /// MemoGet L0 L:0+0
 fn assemble_memo_get<'arena>(token_iter: &mut Lexer<'_>) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, "MemoGet")?;
-    let lbl = assemble_label(token_iter, false)?;
+    let lbl = assemble_label(token_iter, NeedsColon::No)?;
     let lcl_range = assemble_local_range(token_iter)?;
     Ok(hhbc::Instruct::Opcode(hhbc::Opcode::MemoGet(
         lbl, lcl_range,
@@ -3371,11 +3375,17 @@ fn assemble_new_struct_dict<'arena>(
     )))
 }
 
+#[derive(Eq, PartialEq)]
+pub enum NeedsColon {
+    Yes,
+    No,
+}
+
 /// L#: or DV#: if needs_colon else L# or DV#
-fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: bool) -> Result<hhbc::Label> {
+fn assemble_label(token_iter: &mut Lexer<'_>, needs_colon: NeedsColon) -> Result<hhbc::Label> {
     let tok = token_iter.expect_token()?;
     let mut lcl = tok.into_identifier()?;
-    if needs_colon {
+    if needs_colon == NeedsColon::Yes {
         token_iter.expect(Token::into_colon)?;
     }
     let label_reg = regex!(r"^((DV|L)[0-9]+)$").clone();
@@ -3462,8 +3472,8 @@ fn assemble_jump_opcode_instr<'arena, F: FnOnce(hhbc::Label) -> hhbc::Opcode<'ar
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let lbl =
-        assemble_label(token_iter, false).with_context(|| format!("while processing {op_str}"))?;
+    let lbl = assemble_label(token_iter, NeedsColon::No)
+        .with_context(|| format!("while processing {op_str}"))?;
     Ok(hhbc::Instruct::Opcode(op_con(lbl)))
 }
 
@@ -3524,6 +3534,15 @@ fn assemble_single_opcode_instr<'arena, F: FnOnce() -> hhbc::Opcode<'arena>>(
     Ok(hhbc::Instruct::Opcode(op_con()))
 }
 
+fn assemble_adata_id<'arena>(
+    alloc: &'arena Bump,
+    token_iter: &mut Lexer<'_>,
+) -> Result<hhbc::AdataId<'arena>> {
+    let adata_id = token_iter.expect(Token::into_global)?;
+    debug_assert!(adata_id[0] == b'@');
+    Ok(hhbc::AdataId::new(Str::new_slice(alloc, &adata_id[1..])))
+}
+
 /// Assembles one of Dict/Keyset/Vec opcodes. Note that
 /// when printing, the printer adds a `@` at the front of the AdataId; it's not part of the name
 fn assemble_adata_id_carrying_instr<
@@ -3536,9 +3555,7 @@ fn assemble_adata_id_carrying_instr<
     op_str: &str,
 ) -> Result<hhbc::Instruct<'arena>> {
     token_iter.expect_is_str(Token::into_identifier, op_str)?;
-    let adata_id = token_iter.expect(Token::into_global)?;
-    debug_assert!(adata_id[0] == b'@');
-    let adata_id = hhbc::AdataId::new(Str::new_slice(alloc, &adata_id[1..]));
+    let adata_id = assemble_adata_id(alloc, token_iter)?;
     Ok(hhbc::Instruct::Opcode(op_con(adata_id)))
 }
 

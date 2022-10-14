@@ -188,7 +188,7 @@ impl IrOpts {
             ..Default::default()
         });
 
-        result.map_err(|err| VerifyError::SemanticUnitMismatchError(err.to_string()))
+        result.map_err(|err| VerifyError::SemanticUnitMismatchError(format!("{err:?}")))
     }
 }
 

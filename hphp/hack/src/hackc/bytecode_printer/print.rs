@@ -1014,7 +1014,7 @@ pub(crate) fn print_label(
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     let prefix = if dv_labels.contains(label) { "DV" } else { "L" };
-    write!(w, "{}{}", prefix, label)
+    write!(w, "{}{}", prefix, label.0)
 }
 
 pub(crate) fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result<()> {

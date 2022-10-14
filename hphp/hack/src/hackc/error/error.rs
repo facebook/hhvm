@@ -43,6 +43,10 @@ impl Error {
     pub fn into_kind(self) -> ErrorKind {
         *self.0
     }
+
+    pub fn from_error(e: impl std::error::Error) -> Self {
+        Self::unrecoverable(e.to_string())
+    }
 }
 
 #[derive(Error, Debug)]

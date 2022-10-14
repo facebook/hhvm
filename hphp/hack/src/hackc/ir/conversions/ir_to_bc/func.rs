@@ -116,8 +116,12 @@ pub(crate) fn convert_func<'a>(
             .map(|name| strings.lookup_class_name(*name).as_ffi_str()),
     );
 
+    let body_instrs = body_instrs.compact(alloc);
+    let stack_depth =
+        stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref()).unwrap();
+
     hhbc::Body {
-        body_instrs: body_instrs.compact(alloc),
+        body_instrs,
         decl_vars,
         doc_comment,
         is_memoize_wrapper: func.is_memoize_wrapper,
@@ -127,6 +131,7 @@ pub(crate) fn convert_func<'a>(
         return_type_info,
         shadowed_tparams,
         upper_bounds,
+        stack_depth,
     }
 }
 

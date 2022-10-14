@@ -793,12 +793,6 @@ impl<'arena, 'a> State<'arena, 'a> {
     ) -> Result<()> {
         let data = crate::body::lookup_data_for_opcode(opcode);
 
-        let inputs = self
-            .stack_pop_n(opcode.num_inputs())?
-            .into_iter()
-            .map(|v| self.reffy(v))
-            .collect_vec();
-
         fn sanitize_fca<'arena>(
             FCallArgs {
                 flags,
@@ -867,7 +861,14 @@ impl<'arena, 'a> State<'arena, 'a> {
             _ => unreachable!(),
         };
 
-        self.stack_pop_n(fca.inouts.iter().filter(|&&inout| inout).count())?;
+        let num_inouts = fca.num_inouts();
+        let num_inputs = opcode.num_inputs();
+        let inputs = self
+            .stack_pop_n(num_inputs)?
+            .into_iter()
+            .take(num_inputs - num_inouts)
+            .map(|v| self.reffy(v))
+            .collect_vec();
 
         let instr = NodeInstr::Opcode(opcode);
 

@@ -424,8 +424,13 @@ pub fn make_body<'a, 'arena, 'decl>(
     // Now that we're done with this function, clear the named_local table.
     emitter.clear_named_locals();
 
+    let params = Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p));
+    let body_instrs = body_instrs.compact(alloc);
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())
+        .map_err(error::Error::from_error)?;
+
     Ok(Body {
-        body_instrs: body_instrs.compact(alloc),
+        body_instrs,
         decl_vars: Slice::fill_iter(alloc, decl_vars.into_iter()),
         num_iters,
         is_memoize_wrapper,
@@ -437,9 +442,10 @@ pub fn make_body<'a, 'arena, 'decl>(
                 .into_iter()
                 .map(|s| Str::new_str(alloc, &s)),
         ),
-        params: Slice::fill_iter(alloc, params.into_iter().map(|(p, _)| p)),
+        params,
         return_type_info: return_type_info.into(),
         doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
+        stack_depth,
     })
 }
 

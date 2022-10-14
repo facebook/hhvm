@@ -447,14 +447,15 @@ fn assemble_method<'arena>(
     let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_method_flags(token_iter)?;
-    let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
-    let body = hhbc::Body {
+    let (body, coeffects) = assemble_body(
+        alloc,
+        token_iter,
+        &mut decl_map,
         params,
         return_type_info,
-        upper_bounds,
         shadowed_tparams,
-        ..partial_body
-    };
+        upper_bounds,
+    )?;
     // the visibility is printed in the attrs
     // confusion: Visibility::Internal is a mix of AttrInternal and AttrPublic?
     let visibility =
@@ -1135,14 +1136,16 @@ fn assemble_function<'arena>(
     let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
     let flags = assemble_function_flags(name, token_iter)?;
-    let (partial_body, coeffects) = assemble_body(alloc, token_iter, &mut decl_map)?;
-    // Fill partial_body in with params, return_type_info, and bd_upper_bounds
-    let body = hhbc::Body {
+    let shadowed_tparams = Default::default();
+    let (body, coeffects) = assemble_body(
+        alloc,
+        token_iter,
+        &mut decl_map,
         params,
         return_type_info,
+        shadowed_tparams,
         upper_bounds,
-        ..partial_body
-    };
+    )?;
     let hhas_func = hhbc::Function {
         attributes,
         name,
@@ -1513,6 +1516,10 @@ fn assemble_body<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
     decl_map: &mut DeclMap<'arena>,
+    params: Slice<'arena, hhbc::Param<'arena>>,
+    return_type_info: Maybe<hhbc::TypeInfo<'arena>>,
+    shadowed_tparams: Slice<'arena, Str<'arena>>,
+    upper_bounds: Slice<'arena, hhbc::UpperBound<'arena>>,
 ) -> Result<(hhbc::Body<'arena>, hhbc::Coeffects<'arena>)> {
     let mut doc_comment = Maybe::Nothing;
     let mut instrs = Vec::new();
@@ -1563,14 +1570,20 @@ fn assemble_body<'arena>(
         instrs.push(assemble_instr(alloc, token_iter, decl_map, &mut tcb_count)?);
     }
     token_iter.expect(Token::into_close_curly)?;
+    let body_instrs = Slice::from_vec(alloc, instrs);
+    let stack_depth = stack_depth::compute_stack_depth(params.as_ref(), body_instrs.as_ref())?;
     let tr = hhbc::Body {
-        body_instrs: Slice::from_vec(alloc, instrs),
+        body_instrs,
         decl_vars,
         num_iters,
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         doc_comment,
-        ..Default::default()
+        params,
+        return_type_info,
+        shadowed_tparams,
+        stack_depth,
+        upper_bounds,
     };
     Ok((tr, coeff))
 }

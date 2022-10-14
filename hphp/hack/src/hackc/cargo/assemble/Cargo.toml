@@ -19,3 +19,4 @@ log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { path = "../../../naming" }
 once_cell = "1.12"
 regex = "1.5.4"
+stack_depth = { path = "../../utils/cargo/stack_depth" }

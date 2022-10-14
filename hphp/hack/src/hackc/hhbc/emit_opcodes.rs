@@ -68,11 +68,12 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
 
     let (impl_generics, impl_types, impl_where) = enum_def.generics.split_for_impl();
 
-    let variant_name_impl = {
+    let enum_impl = {
         let enum_name = &enum_def.ident;
         let mut variant_names_matches = Vec::new();
+        let mut variant_index_matches = Vec::new();
         let mut num_inputs_matches = Vec::new();
-        for opcode in opcodes {
+        for (idx, opcode) in opcodes.iter().enumerate() {
             let name = Ident::new(opcode.name, Span::call_site());
             let name_str = &opcode.name;
             let is_struct = opcode.flags.contains(InstrFlags::AS_STRUCT);
@@ -84,6 +85,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                 quote!((..))
             };
             variant_names_matches.push(quote!(#enum_name :: #name #ignore_args => #name_str,));
+            variant_index_matches.push(quote!(#enum_name :: #name #ignore_args => #idx,));
 
             let num_inputs = match opcode.inputs {
                 Inputs::NOV => quote!(#enum_name :: #name #ignore_args => 0),
@@ -92,7 +94,7 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                     quote!(#enum_name :: #name #ignore_args => #n)
                 }
                 Inputs::FCall { inp, .. } => {
-                    quote!(#enum_name :: #name (fca, ..) => NUM_ACT_REC_CELLS + fca.num_inputs() + #inp as usize)
+                    quote!(#enum_name :: #name (fca, ..) => NUM_ACT_REC_CELLS + fca.num_inputs() + fca.num_inouts() + #inp as usize)
                 }
                 Inputs::CMany | Inputs::CUMany => {
                     quote!(#enum_name :: #name (n, ..) => *n as usize)
@@ -117,6 +119,12 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
                     }
                 }
 
+                pub fn variant_index(&self) -> usize {
+                    match self {
+                        #(#variant_index_matches)*
+                    }
+                }
+
                 pub fn num_inputs(&self) -> usize {
                     match self {
                         #(#num_inputs_matches),*,
@@ -126,7 +134,10 @@ pub fn emit_opcodes(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenS
         )
     };
 
-    Ok(quote!(#enum_def #variant_name_impl))
+    Ok(quote!(
+        #enum_def
+        #enum_impl
+    ))
 }
 
 pub fn emit_impl_targets(input: TokenStream, opcodes: &[OpcodeData]) -> Result<TokenStream> {
@@ -620,6 +631,37 @@ mod tests {
                             MyOps::TestSA(..) => "TestSA",
                             MyOps::TestSLA(..) => "TestSLA",
                             MyOps::TestVSA(..) => "TestVSA",
+                        }
+                    }
+                    pub fn variant_index(&self) -> usize {
+                        match self {
+                            MyOps::TestZeroImm => 0usize,
+                            MyOps::TestOneImm(..) => 1usize,
+                            MyOps::TestTwoImm(..) => 2usize,
+                            MyOps::TestThreeImm(..) => 3usize,
+                            MyOps::TestAsStruct { .. } => 4usize,
+                            MyOps::TestAA(..) => 5usize,
+                            MyOps::TestARR(..) => 6usize,
+                            MyOps::TestBA(..) => 7usize,
+                            MyOps::TestBA2(..) => 8usize,
+                            MyOps::TestBLA(..) => 9usize,
+                            MyOps::TestDA(..) => 10usize,
+                            MyOps::TestFCA(..) => 11usize,
+                            MyOps::TestI64A(..) => 12usize,
+                            MyOps::TestIA(..) => 13usize,
+                            MyOps::TestILA(..) => 14usize,
+                            MyOps::TestITA(..) => 15usize,
+                            MyOps::TestIVA(..) => 16usize,
+                            MyOps::TestKA(..) => 17usize,
+                            MyOps::TestLA(..) => 18usize,
+                            MyOps::TestLAR(..) => 19usize,
+                            MyOps::TestNLA(..) => 20usize,
+                            MyOps::TestOA(..) => 21usize,
+                            MyOps::TestOAL(..) => 22usize,
+                            MyOps::TestRATA(..) => 23usize,
+                            MyOps::TestSA(..) => 24usize,
+                            MyOps::TestSLA(..) => 25usize,
+                            MyOps::TestVSA(..) => 26usize,
                         }
                     }
                     pub fn num_inputs(&self) -> usize {

@@ -169,6 +169,7 @@ dependencies = [
  "naming_special_names_rust",
  "once_cell",
  "regex",
+ "stack_depth",
 ]
 
 [[package]]
@@ -1312,6 +1313,7 @@ dependencies = [
  "regex",
  "scope",
  "serde_json",
+ "stack_depth",
  "stack_limit",
  "statement_state",
 ]
@@ -2274,6 +2276,7 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "smallvec",
+ "stack_depth",
 ]
 
 [[package]]
@@ -3834,7 +3837,6 @@ dependencies = [
  "itertools 0.10.3",
  "log",
  "newtype",
- "once_cell",
 ]
 
 [[package]]
@@ -4054,6 +4056,18 @@ name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
+
+[[package]]
+name = "stack_depth"
+version = "0.0.0"
+dependencies = [
+ "ffi",
+ "hhbc",
+ "hhbc-gen",
+ "log",
+ "newtype",
+ "thiserror",
+]
 
 [[package]]
 name = "stack_limit"

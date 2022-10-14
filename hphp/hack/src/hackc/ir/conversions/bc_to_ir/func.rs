@@ -107,6 +107,7 @@ fn convert_body<'a>(
         ref return_type_info,
         ref shadowed_tparams,
         ref upper_bounds,
+        stack_depth: _,
     } = *body;
 
     let tparams: ClassIdMap<_> = upper_bounds

@@ -80,13 +80,13 @@ class AnyRegistry:
         )
 
     def load(self, obj: Any) -> StructOrUnion:
-        if obj.typeHashPrefixSha2_256:
+        if obj.type:
+            cls = self._uri_to_type[obj.type]
+        elif obj.typeHashPrefixSha2_256:
             cls = find_by_universal_hash(
                 self._alg_to_hash_to_type[UniversalHashAlgorithm.Sha2_256],
                 obj.typeHashPrefixSha2_256,
             )
-        elif obj.type:
-            cls = self._uri_to_type[obj.type]
         else:
             raise ValueError("No type information found")
         serializer_protocol = _to_serializer_protocol(obj.protocol)

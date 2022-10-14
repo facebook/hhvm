@@ -52,7 +52,7 @@ fn assemble_opcode_impl(_input: TokenStream, opcodes: &[OpcodeData]) -> Result<T
 
         body.push(quote!(
             #name_bstr => {
-                token_iter.expect_is_str(Token::into_identifier, #name)?;
+                token_iter.expect_str(Token::is_identifier, #name)?;
                 Ok(hhbc::Instruct::Opcode(hhbc::Opcode::#variant_name #imms))
             }
         ));

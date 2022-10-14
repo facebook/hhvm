@@ -9,8 +9,6 @@ use anyhow::anyhow;
 use anyhow::bail;
 use anyhow::ensure;
 use anyhow::Result;
-use bumpalo::Bump;
-use ffi::Str;
 
 use crate::token::Line;
 use crate::token::Token;
@@ -93,7 +91,7 @@ impl<'a> Lexer<'a> {
     }
 
     /// Advances the lexer past its first non-leading newline, returning a mini-lexer of the tokens up until that newline.
-    pub(crate) fn fetch_until_newline(&mut self) -> Option<Lexer<'a>> {
+    pub(crate) fn split_at_newline(&mut self) -> Option<Lexer<'a>> {
         self.fill();
         if let Some(pending) = self.pending.take() {
             let idx = self.find_next_newline().unwrap_or(self.source.len());
@@ -126,115 +124,111 @@ impl<'a> Lexer<'a> {
         peek1
     }
 
-    /// Returns f applied to the top of the iterator, but does not advance iterator (unlike next_if)
-    pub(crate) fn peek_if<F>(&mut self, f: F) -> bool
+    pub(crate) fn expect_token(&mut self) -> Result<Token<'a>> {
+        self.next()
+            .ok_or_else(|| anyhow!("End of token stream sooner than expected"))
+    }
+
+    /// Returns f() applied to the next token without consuming the next token.
+    pub(crate) fn peek_is<F>(&mut self, f: F) -> bool
     where
         F: Fn(&Token<'a>) -> bool,
     {
         self.peek().map_or(false, f)
     }
 
-    /// Applies f to top of iterator, and if true advances iterator and returns true else doesn't advance and returns false
-    pub(crate) fn next_if<F>(&mut self, f: F) -> bool
+    /// Applies f() to the next token and then compares the result with the
+    /// passed-in string.
+    pub(crate) fn peek_is_str<F>(&mut self, f: F, s: &str) -> bool
     where
         F: Fn(&Token<'a>) -> bool,
     {
-        let tr = self.peek_if(f);
+        self.peek_is(|t| f(t) && t.as_bytes() == s.as_bytes())
+    }
+
+    /// Applies f() to the next token and consumes it if the predicate passes.
+    /// Returns Some(token) if the predicate passed.
+    pub(crate) fn next_if<F>(&mut self, f: F) -> Option<Token<'a>>
+    where
+        F: Fn(&Token<'a>) -> bool,
+    {
+        let tr = self.peek_is(f);
+        if tr { self.next() } else { None }
+    }
+
+    /// Applies f() to the next token and consumes it if the predicate
+    /// passes. Returns true if the predicate passed.
+    pub(crate) fn next_is<F>(&mut self, f: F) -> bool
+    where
+        F: Fn(&Token<'a>) -> bool,
+    {
+        self.next_if(f).is_some()
+    }
+
+    /// Applies f() to the next token and consumes it if the predicate passes
+    /// and matches the given string.
+    pub(crate) fn next_is_str<F>(&mut self, f: F, s: &str) -> bool
+    where
+        F: Fn(&Token<'a>) -> bool,
+    {
+        let tr = self.peek_is_str(f, s);
         if tr {
             self.next();
         }
         tr
     }
 
-    /// Applies f to top of iterator. If true, compares inner rep to passed &str and returns result. Else just false
-    pub(crate) fn peek_if_str<F>(&mut self, f: F, s: &str) -> bool
+    /// Applies f() to the next token and consumes it if the predicate
+    /// passes. Returns Ok(Token) if the predicate passed or Err() if the
+    /// predicate failed.
+    pub(crate) fn expect<F>(&mut self, f: F) -> Result<Token<'a>>
     where
         F: Fn(&Token<'a>) -> bool,
     {
-        self.peek_if(|t| f(t) && t.as_bytes() == s.as_bytes())
-    }
-
-    /// Applies f to top of iterator. If true, checks if starts with passed &str and returns result. Else just false
-    /// Ex use: peek_if_str_starts(Token::is_decl, ".coeffects")
-    pub(crate) fn peek_if_str_starts<F>(&mut self, f: F, s: &str) -> bool
-    where
-        F: Fn(&Token<'a>) -> bool,
-    {
-        self.peek_if(|t| f(t) && t.as_bytes().starts_with(s.as_bytes()))
-    }
-
-    /// Applies f to top of iterator. If true, compares inner representation to passed &str and if true consumes. Else doesn't modify iterator and returns false.
-    pub(crate) fn next_if_str<F>(&mut self, f: F, s: &str) -> bool
-    where
-        F: Fn(&Token<'a>) -> bool,
-    {
-        let tr = self.peek_if_str(f, s);
-        if tr {
-            self.next();
+        let tok = self.expect_token()?;
+        if f(&tok) {
+            Ok(tok)
+        } else {
+            Err(tok.error("Unexpected token"))
         }
-        tr
     }
 
-    pub(crate) fn expect_token(&mut self) -> Result<Token<'a>> {
-        self.next()
-            .ok_or_else(|| anyhow!("End of token stream sooner than expected"))
-    }
-
-    /// Applies f to the top of token_iter. In the most likely use, f bails if token_iter is not the
+    /// Applies f() to the next token and returns the result.
     /// expected token (expected token specified by f)
-    pub(crate) fn expect<T, F>(&mut self, f: F) -> Result<T>
+    pub(crate) fn expect_with<T, F>(&mut self, f: F) -> Result<T>
     where
         F: FnOnce(Token<'a>) -> Result<T>,
     {
         f(self.expect_token()?)
     }
 
-    /// Like `expect` in that bails if incorrect token passed, and does return the `into` of the passed token
-    pub(crate) fn expect_is_str<F>(&mut self, f: F, s: &str) -> Result<&[u8]>
+    /// Checks both the f() predicate and that the str matches.
+    pub(crate) fn expect_str<F>(&mut self, f: F, s: &str) -> Result<Token<'a>>
     where
-        F: FnOnce(Token<'a>) -> Result<&[u8]>,
+        F: FnOnce(&Token<'a>) -> bool,
     {
         let tok = self.expect_token()?;
-        let tr = f(tok)?;
-        if tr != s.as_bytes() {
-            Err(tok.error(format!("Expected {s:?} got {tr:?}")))
+        if f(&tok) && tok.as_bytes() == s.as_bytes() {
+            Ok(tok)
         } else {
-            Ok(tr)
+            Err(tok.error(format!("Expected {s:?} got {:?}", tok.as_bytes())))
         }
-    }
-
-    /// Similar to `expect_and_get_number` but puts identifier into a Str<'arena>
-    pub(crate) fn expect_identifier_into_ffi_str<'arena>(
-        &mut self,
-        alloc: &'arena Bump,
-    ) -> Result<Str<'arena>> {
-        let st = self.expect(Token::into_identifier)?;
-        Ok(Str::new_slice(alloc, st))
-    }
-
-    /// Similar to `expect_and_get_number` but puts decl into a Str<'arena>
-    pub(crate) fn expect_decl_into_ffi_str<'arena>(
-        &mut self,
-        alloc: &'arena Bump,
-    ) -> Result<Str<'arena>> {
-        let st = self.expect(Token::into_decl)?;
-        Ok(Str::new_slice(alloc, st))
     }
 
     /// Similar to `expect` but instead of returning a Result that usually contains a slice of u8,
     /// applies f to the `from_utf8 str` of the top token, bailing if the top token is not a number.
     pub(crate) fn expect_and_get_number<T: FromStr>(&mut self) -> Result<T> {
-        let num = if self.peek_if(Token::is_dash) {
-            self.expect(Token::into_dash)? // -INF
-        } else if self.peek_if(Token::is_identifier) {
-            self.expect(Token::into_identifier)? // NAN, INF, etc will parse as float constants
+        let num = if self.peek_is(Token::is_dash) {
+            self.expect_with(Token::into_dash)? // -INF
+        } else if self.peek_is(Token::is_identifier) {
+            self.expect_with(Token::into_identifier)? // NAN, INF, etc will parse as float constants
         } else {
-            self.expect(Token::into_number)?
+            self.expect_with(Token::into_number)?
         };
         // If num is a dash we expect an identifier to follow
         if num == b"-" {
             let mut num = num.to_vec();
-            num.extend_from_slice(self.expect(Token::into_identifier)?);
+            num.extend_from_slice(self.expect_with(Token::into_identifier)?);
             FromStr::from_str(std::str::from_utf8(&num)?).map_err(|_| {
                 anyhow!("Number-looking token in tokenizer that cannot be parsed into number")
             })
@@ -247,8 +241,8 @@ impl<'a> Lexer<'a> {
 
     /// A var can be written in HHAS as $abc or "$abc". Only valid if a $ preceeds
     pub(crate) fn expect_var(&mut self) -> Result<Vec<u8>> {
-        if self.peek_if(Token::is_str_literal) {
-            let s = self.expect(Token::into_str_literal)?;
+        if self.peek_is(Token::is_str_literal) {
+            let s = self.expect_with(Token::into_str_literal)?;
             if s.starts_with(b"\"$") {
                 // Remove the "" b/c that's not part of the var name
                 // also unescape ("$\340\260" etc is literal bytes)
@@ -259,7 +253,7 @@ impl<'a> Lexer<'a> {
                 bail!("Var does not start with $: {:?}", s)
             }
         } else {
-            Ok(self.expect(Token::into_variable)?.to_vec())
+            Ok(self.expect_with(Token::into_variable)?.to_vec())
         }
     }
 
@@ -564,19 +558,21 @@ fn parse_token(mut source: &[u8], line: Line) -> (Option<Token<'_>>, &[u8]) {
 
 #[cfg(test)]
 mod test {
+    use bumpalo::Bump;
+
     use super::*;
     use crate::assemble;
 
     #[test]
     fn str_into_test() -> Result<()> {
         // Want to test that only tokens surrounded by "" are str_literals
-        // Want to confirm the assumption that after any token_iter.expect(Token::into_str_literal) call, you can safely remove the first and last element in slice
+        // Want to confirm the assumption that after any token_iter.expect_with(Token::into_str_literal) call, you can safely remove the first and last element in slice
         let s = br#"abc "abc" """abc""""#;
         let mut lex = Lexer::from_slice(s, Line(1));
-        assert!(lex.next_if(Token::is_identifier));
-        let sl = lex.expect(Token::into_str_literal)?;
+        assert!(lex.next_is(Token::is_identifier));
+        let sl = lex.expect_with(Token::into_str_literal)?;
         assert!(sl[0] == b'"' && sl[sl.len() - 1] == b'"');
-        let tsl = lex.expect(Token::into_triple_str_literal)?;
+        let tsl = lex.expect_with(Token::into_triple_str_literal)?;
         assert!(
             tsl[0..3] == [b'"', b'"', b'"'] && tsl[tsl.len() - 3..tsl.len()] == [b'"', b'"', b'"']
         );
@@ -587,7 +583,7 @@ mod test {
     fn just_nl_is_empty() {
         let s = b"\n \n \n";
         let mut lex = Lexer::from_slice(s, Line(1));
-        assert!(lex.fetch_until_newline().is_none());
+        assert!(lex.split_at_newline().is_none());
         assert!(lex.is_empty());
     }
 
@@ -596,9 +592,9 @@ mod test {
         // Point of this test: want to make sure that 3 mini-lexers are spawned (multiple new lines don't do anything)
         let s = b"\n \n a \n \n \n b \n \n c \n";
         let mut lex = Lexer::from_slice(s, Line(1));
-        let mut a = lex.fetch_until_newline().unwrap();
-        let mut b = lex.fetch_until_newline().unwrap();
-        let mut c = lex.fetch_until_newline().unwrap();
+        let mut a = lex.split_at_newline().unwrap();
+        let mut b = lex.split_at_newline().unwrap();
+        let mut c = lex.split_at_newline().unwrap();
 
         assert_eq!(lex.next(), None);
 
@@ -626,12 +622,12 @@ mod test {
         let s = b".try { \n .srcloc 3:7, 3:22 \n String \"I'm i\\\"n the try\n\" \n Print \n PopC \n } .catch { \n Dup \n L1: \n Throw \n }";
         let mut lex = Lexer::from_slice(s, Line(1));
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".try");
         assert!(sub.next().unwrap().is_open_curly());
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".srcloc");
         assert_eq!(sub.next().unwrap().into_number().unwrap(), b"3");
         assert!(sub.next().unwrap().is_colon());
@@ -642,7 +638,7 @@ mod test {
         assert_eq!(sub.next().unwrap().into_number().unwrap(), b"22");
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"String");
         assert_eq!(
             sub.next().unwrap().into_str_literal().unwrap(),
@@ -650,34 +646,34 @@ mod test {
         );
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Print");
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"PopC");
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert!(sub.next().unwrap().is_close_curly());
         assert_eq!(sub.next().unwrap().into_decl().unwrap(), b".catch");
         assert!(sub.next().unwrap().is_open_curly());
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Dup");
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"L1");
         assert!(sub.next().unwrap().is_colon());
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert_eq!(sub.next().unwrap().into_identifier().unwrap(), b"Throw");
         assert_eq!(sub.next(), None);
 
-        let mut sub = lex.fetch_until_newline().unwrap();
+        let mut sub = lex.split_at_newline().unwrap();
         assert!(sub.next().unwrap().is_close_curly());
         assert_eq!(sub.next(), None);
 
@@ -690,7 +686,7 @@ mod test {
         let mut lex = Lexer::from_slice(s, Line(1));
         assert!(lex.peek().is_some());
         assert!(lex.next().is_some());
-        assert!(lex.fetch_until_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
+        assert!(lex.split_at_newline().is_none()); // Have consumed the a here -- "\n\n" was left and that's been consumed.
     }
 
     #[test]

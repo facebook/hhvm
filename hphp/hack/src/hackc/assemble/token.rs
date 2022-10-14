@@ -102,6 +102,10 @@ impl<'a> Token<'a> {
         }
     }
 
+    pub(crate) fn into_ffi_str<'arena>(&self, alloc: &'arena bumpalo::Bump) -> ffi::Str<'arena> {
+        ffi::Str::new_slice(alloc, self.as_bytes())
+    }
+
     /// Only str_literal and triple_str_literal can be parsed into a new tokenizer.
     /// To create a new tokenizer that still has accurate error reporting, we want to pass the line
     /// So `into_str_literal_and_line` and `into_triple_str_literal_and_line` return a Result of bytes rep and line # or bail
@@ -133,6 +137,7 @@ impl<'a> Token<'a> {
         }
     }
 
+    #[cfg(test)]
     pub(crate) fn into_decl(self) -> Result<&'a [u8]> {
         match self {
             Token::Decl(vec_u8, _) => Ok(vec_u8),
@@ -165,94 +170,10 @@ impl<'a> Token<'a> {
         }
     }
 
-    pub(crate) fn into_semicolon(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Semicolon(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a semicolon, got: {}", self),
-        }
-    }
-
     pub(crate) fn into_dash(self) -> Result<&'a [u8]> {
         match self {
             Token::Dash(_) => Ok(self.as_bytes()),
             _ => bail!("Expected a dash, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_open_curly(self) -> Result<&'a [u8]> {
-        match self {
-            Token::OpenCurly(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected an open curly, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_open_bracket(self) -> Result<&'a [u8]> {
-        match self {
-            Token::OpenBracket(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected an open bracket, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_open_paren(self) -> Result<&'a [u8]> {
-        match self {
-            Token::OpenParen(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected an open paren, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_close_paren(self) -> Result<&'a [u8]> {
-        match self {
-            Token::CloseParen(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a close paren, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_close_bracket(self) -> Result<&'a [u8]> {
-        match self {
-            Token::CloseBracket(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a close bracket, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_close_curly(self) -> Result<&'a [u8]> {
-        match self {
-            Token::CloseCurly(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a close curly, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_equal(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Equal(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected an equal, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_comma(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Comma(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a comma, got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_lt(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Lt(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a lt (<), got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_gt(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Gt(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a gt (>), got: {}", self),
-        }
-    }
-
-    pub(crate) fn into_colon(self) -> Result<&'a [u8]> {
-        match self {
-            Token::Colon(_) => Ok(self.as_bytes()),
-            _ => bail!("Expected a colon, got: {}", self),
         }
     }
 
@@ -276,7 +197,6 @@ impl<'a> Token<'a> {
         matches!(self, Token::Identifier(..))
     }
 
-    #[cfg(test)]
     pub(crate) fn is_comma(&self) -> bool {
         matches!(self, Token::Comma(_))
     }
@@ -297,7 +217,6 @@ impl<'a> Token<'a> {
         matches!(self, Token::OpenBracket(_))
     }
 
-    #[cfg(test)]
     pub(crate) fn is_open_paren(&self) -> bool {
         matches!(self, Token::OpenParen(_))
     }
@@ -310,7 +229,6 @@ impl<'a> Token<'a> {
         matches!(self, Token::CloseBracket(_))
     }
 
-    #[cfg(test)]
     pub(crate) fn is_open_curly(&self) -> bool {
         matches!(self, Token::OpenCurly(_))
     }

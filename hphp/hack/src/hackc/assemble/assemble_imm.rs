@@ -188,7 +188,7 @@ impl<'arena> AssembleImm<'arena, hhbc::AdataId<'arena>> for Lexer<'_> {
         alloc: &'arena Bump,
         _: &DeclMap<'arena>,
     ) -> Result<hhbc::AdataId<'arena>> {
-        let adata_id = self.expect(Token::into_global)?;
+        let adata_id = self.expect_with(Token::into_global)?;
         debug_assert!(adata_id[0] == b'@');
         Ok(hhbc::AdataId::new(Str::new_slice(alloc, &adata_id[1..])))
     }
@@ -278,13 +278,13 @@ impl AssembleImm<'_, hhbc::IterArgs> for Lexer<'_> {
         let key_id: hhbc::Local = match tok.into_identifier()? {
             b"NK" => hhbc::Local::INVALID,
             b"K" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 self.assemble_imm(alloc, decl_map)?
             }
             _ => return Err(tok.error("Invalid key_id given as iter args to IterArg")),
         };
-        self.expect_is_str(Token::into_identifier, "V")?;
-        self.expect(Token::into_colon)?;
+        self.expect_str(Token::is_identifier, "V")?;
+        self.expect(Token::is_colon)?;
         let iter_id = hhbc::IterId { idx };
         let val_id = self.assemble_imm(alloc, decl_map)?;
         Ok(hhbc::IterArgs {
@@ -338,12 +338,12 @@ impl AssembleImm<'_, hhbc::Local> for Lexer<'_> {
 
 impl AssembleImm<'_, hhbc::LocalRange> for Lexer<'_> {
     fn assemble_imm(&mut self, _: &'_ Bump, _: &DeclMap<'_>) -> Result<hhbc::LocalRange> {
-        self.expect_is_str(Token::into_identifier, "L")?;
-        self.expect(Token::into_colon)?;
+        self.expect_str(Token::is_identifier, "L")?;
+        self.expect(Token::is_colon)?;
         let start = hhbc::Local {
             idx: self.expect_and_get_number()?,
         };
-        //self.expect(Token::into_plus)?; // Not sure if this exists yet
+        //self.expect(Token::is_plus)?; // Not sure if this exists yet
         let len = self.expect_and_get_number()?;
         Ok(hhbc::LocalRange { start, len })
     }
@@ -360,62 +360,62 @@ impl<'arena> AssembleImm<'arena, hhbc::MemberKey<'arena>> for Lexer<'_> {
         let tok = self.expect_token()?;
         match tok.into_identifier()? {
             b"EC" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::EC(
                     self.assemble_imm(alloc, decl_map)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"EL" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::EL(
                     self.assemble_imm(alloc, decl_map)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"ET" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::ET(
                     Str::new_slice(
                         alloc,
                         &escaper::unescape_literal_bytes_into_vec_bytes(
                             // In bp, print_quoted_str also escapes the string
-                            escaper::unquote_slice(self.expect(Token::into_str_literal)?),
+                            escaper::unquote_slice(self.expect_with(Token::into_str_literal)?),
                         )?,
                     ),
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"EI" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::EI(
                     self.expect_and_get_number()?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"PC" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::PC(
                     self.assemble_imm(alloc, decl_map)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"PL" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::PL(
                     self.assemble_imm(alloc, decl_map)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"PT" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::PT(
                     assemble::assemble_prop_name_from_str(alloc, self)?,
                     self.assemble_imm(alloc, decl_map)?,
                 ))
             }
             b"QT" => {
-                self.expect(Token::into_colon)?;
+                self.expect(Token::is_colon)?;
                 Ok(hhbc::MemberKey::QT(
                     assemble::assemble_prop_name_from_str(alloc, self)?,
                     self.assemble_imm(alloc, decl_map)?,
@@ -458,11 +458,11 @@ impl<'arena> AssembleImm<'arena, Slice<'arena, hhbc::Label>> for Lexer<'_> {
         _: &DeclMap<'arena>,
     ) -> Result<Slice<'arena, hhbc::Label>> {
         let mut labels = Vec::new();
-        self.expect(Token::into_lt)?;
-        while !self.peek_if(Token::is_gt) {
+        self.expect(Token::is_lt)?;
+        while !self.peek_is(Token::is_gt) {
             labels.push(assemble::assemble_label(self)?)
         }
-        self.expect(Token::into_gt)?;
+        self.expect(Token::is_gt)?;
         Ok(Slice::from_vec(alloc, labels))
     }
 }
@@ -473,12 +473,12 @@ impl<'arena> AssembleImm<'arena, Slice<'arena, Str<'arena>>> for Lexer<'_> {
         alloc: &'arena Bump,
         _: &DeclMap<'arena>,
     ) -> Result<Slice<'arena, Str<'arena>>> {
-        self.expect(Token::into_lt)?;
+        self.expect(Token::is_lt)?;
         let mut d = Vec::new();
-        while !self.peek_if(Token::is_gt) {
+        while !self.peek_is(Token::is_gt) {
             d.push(assemble::assemble_unescaped_unquoted_str(alloc, self)?);
         }
-        self.expect(Token::into_gt)?;
+        self.expect(Token::is_gt)?;
         Ok(Slice::from_vec(alloc, d))
     }
 }

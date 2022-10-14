@@ -27,11 +27,6 @@ NAMESPACES = {
 }
 ENUM_SIZES = [
     1000,
-    1500,
-    1600,
-    1700,
-    1800,
-    1900,
     2000,
     3000,
     5000,
@@ -57,7 +52,8 @@ def benchmark_import():
     table = [
         benchmark(
             f"{enum_size}",
-            stmt=f"from thrift.benchmark.enum_{enum_size}.{{namespace}} import Number",
+            stmt="importlib.reload(mm)",
+            setup=f"import thrift.benchmark.enum_{enum_size}.{{namespace}} as mm; import importlib",
         )
         for enum_size in ENUM_SIZES
     ]

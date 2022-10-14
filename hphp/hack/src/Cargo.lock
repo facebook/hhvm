@@ -160,7 +160,6 @@ version = "0.0.0"
 dependencies = [
  "anyhow",
  "assemble_opcode_macro",
- "bstr",
  "bumpalo",
  "escaper",
  "ffi",

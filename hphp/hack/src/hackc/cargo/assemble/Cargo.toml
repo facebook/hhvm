@@ -10,7 +10,6 @@ path = "../../assemble/lib.rs"
 [dependencies]
 anyhow = "1.0.65"
 assemble_opcode_macro = { path = "../assemble_opcode_macro" }
-bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 escaper = { path = "../../../utils/escaper" }
 ffi = { path = "../../../utils/ffi" }

@@ -63,6 +63,7 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       bool boolv;
       return prot.readBool(boolv);
     }
+    // case T_I08: // same numeric value as T_BYTE
     case T_BYTE: {
       int8_t bytev = 0;
       return prot.readByte(bytev);
@@ -75,6 +76,7 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       int32_t i32;
       return prot.readI32(i32);
     }
+    case T_U64:
     case T_I64: {
       int64_t i64;
       return prot.readI64(i64);
@@ -87,6 +89,9 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       float flt;
       return prot.readFloat(flt);
     }
+    // case T_UTF7: // same numeric value as T_STRING
+    case T_UTF8:
+    case T_UTF16:
     case T_STRING: {
       std::string str;
       return prot.readBinary(str);
@@ -165,6 +170,10 @@ uint32_t skip(Protocol_& prot, TType arg_type) {
       result += prot.readListEnd();
       return result;
     }
+    case T_STOP:
+    case T_VOID:
+    case T_STREAM:
+      // Unimplemented, fallback to default
     default: {
       TProtocolException::throwInvalidSkipType(arg_type);
     }

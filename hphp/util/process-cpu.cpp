@@ -16,6 +16,7 @@
 
 #include "hphp/util/process-cpu.h"
 
+#include <sys/utsname.h>
 #include <assert.h>
 #include <cstring>
 

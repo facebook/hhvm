@@ -66,7 +66,8 @@ impl<R: Reason> DeclParser<R> {
         arena: &'a bumpalo::Bump,
     ) -> oxidized_by_ref::direct_decl_parser::ParsedFile<'a> {
         let opts = DeclParserOptions::from_parser_options(&self.opts);
-        let mut parsed_file = direct_decl_parser::parse_decls(&opts, path.into(), text, arena);
+        let mut parsed_file =
+            direct_decl_parser::parse_decls_for_typechecking(&opts, path.into(), text, arena);
         // TODO: The direct decl parser should return decls in the same
         // order as they are declared in the file. At the moment it reverses
         // them. Reverse them again to match the syntactic order.

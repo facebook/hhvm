@@ -35,8 +35,7 @@ namespace HPHP {
 
 //////////////////////////////////////////////////////////////////////
 
-#if !(defined(__x86_64__) || defined(_M_X64) || defined(__powerpc64__) || \
-      defined(__aarch64__))
+#if !(defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__))
 #error CompactTaggedPtr is not supported on your architecture.
 #endif
 

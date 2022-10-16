@@ -102,15 +102,6 @@ void ResourcePoolSet::setResourcePool(
     throw std::logic_error("Cannot setResourcePool() after lock()");
   }
 
-  if (executor && concurrencyController) {
-    try {
-      // dummy check whether executor support priority
-      executor->addWithPriority([] {}, 1);
-    } catch (...) {
-      concurrencyController->setExecutorSupportPriority(false);
-    }
-  }
-
   resourcePools_.resize(std::max(resourcePools_.size(), handle.index() + 1));
   if (resourcePools_.at(handle.index())) {
     LOG(ERROR) << "Cannot overwrite resourcePool:" << handle.name();
@@ -136,15 +127,6 @@ ResourcePoolHandle ResourcePoolSet::addResourcePool(
   std::lock_guard<std::mutex> lock(mutex_);
   if (locked_) {
     throw std::logic_error("Cannot addResourcePool() after lock()");
-  }
-
-  if (executor && concurrencyController) {
-    try {
-      // dummy check whether executor support priority
-      executor->addWithPriority([] {}, 1);
-    } catch (...) {
-      concurrencyController->setExecutorSupportPriority(false);
-    }
   }
 
   std::unique_ptr<ResourcePool> pool{new ResourcePool{

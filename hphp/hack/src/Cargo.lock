@@ -602,6 +602,7 @@ dependencies = [
  "aast_parser",
  "anyhow",
  "bc_to_ir",
+ "bstr",
  "bumpalo",
  "bytecode_printer",
  "clap 3.2.17",

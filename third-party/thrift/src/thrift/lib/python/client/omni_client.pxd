@@ -22,6 +22,7 @@ from libcpp.string cimport string
 from libcpp.unordered_map cimport unordered_map
 from libcpp.pair cimport pair
 from thrift.python.client.request_channel cimport cRequestChannel_ptr, cRequestChannel
+from thrift.py3.common cimport cRpcOptions
 
 
 cdef extern from "thrift/lib/thrift/gen-cpp2/RpcMetadata_types.h" namespace "::apache::thrift":
@@ -75,6 +76,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             const string& methodName,
             unique_ptr[cIOBuf] args,
             const unordered_map[string, string] headers,
+            cRpcOptions&& options,
         ) except+
         void oneway_send(
             const string& serviceName,
@@ -82,6 +84,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             unique_ptr[cIOBuf] args,
             cData&& metadata,
             const unordered_map[string, string] headers,
+            cRpcOptions&& options,
         ) except+
         cFollySemiFuture[cOmniClientResponseWithHeaders] semifuture_send(
             const string& serviceName,
@@ -89,6 +92,7 @@ cdef extern from "thrift/lib/python/client/OmniClient.h" namespace "::thrift::py
             unique_ptr[cIOBuf] args,
             cData&& metadata,
             const unordered_map[string, string] headers,
+            cRpcOptions&& options,
             const RpcKind rpcKind,
         )
         shared_ptr[cRequestChannel] getChannelShared()

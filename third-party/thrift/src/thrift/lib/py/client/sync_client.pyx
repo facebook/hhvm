@@ -28,6 +28,7 @@ from thrift.py.client.exceptions cimport create_py_exception
 from thrift.python.client.request_channel cimport RequestChannel
 from thrift.util.Serializer import serialize, deserialize
 from thrift.Thrift import TApplicationException
+from thrift.py3.common cimport cRpcOptions, RpcOptions
 
 
 cdef class SyncClient:
@@ -48,6 +49,7 @@ cdef class SyncClient:
         string function_name,
         args,
         response_cls,
+        RpcOptions rpc_options = None,
     ):
         if not self._omni_client:
             raise RuntimeError("Connection already closed")
@@ -67,6 +69,9 @@ cdef class SyncClient:
             headers[k] = v
         self._onetime_headers.clear()
 
+        # Providing default RpcOptions because user RpcOptions is not supported
+        cdef cRpcOptions c_rpc_options
+
         if response_cls is None:
             deref(self._omni_client).oneway_send(
                 service_name,
@@ -74,6 +79,7 @@ cdef class SyncClient:
                 args_iobuf.c_clone(),
                 cmove(cData(function_name, FunctionQualifier.OneWay, "".encode('ascii'), InteractionMethodPosition.None, "".encode('ascii'))),
                 headers,
+                cmove(c_rpc_options),
             )
         else:
             resp = deref(self._omni_client).sync_send(
@@ -81,6 +87,7 @@ cdef class SyncClient:
                 function_name,
                 args_iobuf.c_clone(),
                 headers,
+                cmove(c_rpc_options),
             )
             if resp.buf.hasValue():
                 response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))

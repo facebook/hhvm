@@ -25,6 +25,7 @@ from thrift.python.client.request_channel cimport RequestChannel
 from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
+from thrift.py3.common cimport cRpcOptions, RpcOptions
 
 cdef string blank_interaction = "".encode('ascii')
 
@@ -59,6 +60,7 @@ cdef class SyncClient:
         string function_name,
         args,
         response_cls,
+        RpcOptions rpc_options = None,
     ):
         if not self._omni_client:
             raise RuntimeError("Connection already closed")
@@ -66,6 +68,10 @@ cdef class SyncClient:
         protocol = deref(self._omni_client).getChannelProtocolId()
         cdef IOBuf args_iobuf = serialize_iobuf(args, protocol=protocol)
         cdef unique_ptr[cIOBuf] args_ciobuf = cmove(args_iobuf.c_clone())
+        cdef cRpcOptions c_rpc_options
+        if rpc_options is not None:
+            c_rpc_options = rpc_options._cpp_obj
+
         if response_cls is None:
             with nogil:
                 deref(self._omni_client).oneway_send(
@@ -74,6 +80,7 @@ cdef class SyncClient:
                     cmove(args_ciobuf),
                     cmove(cData(function_name, FunctionQualifier.OneWay, blank_interaction, InteractionMethodPosition.None, blank_interaction)),
                     self._persistent_headers,
+                    cmove(c_rpc_options),
                 )
         else:
             with nogil:
@@ -82,6 +89,7 @@ cdef class SyncClient:
                     function_name,
                     cmove(args_ciobuf),
                     self._persistent_headers,
+                    cmove(c_rpc_options),
                 )
             if resp.buf.hasValue():
                 response_iobuf = folly.iobuf.from_unique_ptr(cmove(resp.buf.value()))

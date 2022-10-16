@@ -182,20 +182,31 @@ OmniClientResponseWithHeaders OmniClient::sync_send(
     const std::string& serviceName,
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
-    const std::unordered_map<std::string, std::string>& headers) {
+    const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions) {
   apache::thrift::MethodMetadata::Data data(
       functionName, apache::thrift::FunctionQualifier::Unspecified);
   return folly::coro::blockingWait(semifuture_send(
-      serviceName, functionName, std::move(args), std::move(data), headers));
+      serviceName,
+      functionName,
+      std::move(args),
+      std::move(data),
+      headers,
+      std::move(rpcOptions)));
 }
 
 OmniClientResponseWithHeaders OmniClient::sync_send(
     const std::string& serviceName,
     const std::string& functionName,
     const std::string& args,
-    const std::unordered_map<std::string, std::string>& headers) {
+    const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions) {
   return sync_send(
-      serviceName, functionName, folly::IOBuf::copyBuffer(args), headers);
+      serviceName,
+      functionName,
+      folly::IOBuf::copyBuffer(args),
+      headers,
+      std::move(rpcOptions));
 }
 
 void OmniClient::oneway_send(
@@ -203,16 +214,16 @@ void OmniClient::oneway_send(
     const std::string& functionName,
     std::unique_ptr<folly::IOBuf> args,
     apache::thrift::MethodMetadata::Data&& metadata,
-    const std::unordered_map<std::string, std::string>& headers) {
-  RpcOptions rpcOpts;
+    const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions) {
   for (const auto& entry : headers) {
-    rpcOpts.setWriteHeader(entry.first, entry.second);
+    rpcOptions.setWriteHeader(entry.first, entry.second);
   }
 
   auto callbackAndFuture = makeOneWaySemiFutureCallback(channel_);
   auto callback = std::move(callbackAndFuture.first);
   sendImpl(
-      rpcOpts,
+      std::move(rpcOptions),
       std::move(args),
       serviceName,
       functionName,
@@ -226,13 +237,15 @@ void OmniClient::oneway_send(
     const std::string& functionName,
     const std::string& args,
     apache::thrift::MethodMetadata::Data&& metadata,
-    const std::unordered_map<std::string, std::string>& headers) {
+    const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions) {
   oneway_send(
       serviceName,
       functionName,
       folly::IOBuf::copyBuffer(args),
       std::move(metadata),
-      headers);
+      headers,
+      std::move(rpcOptions));
 }
 
 folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
@@ -241,17 +254,17 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     std::unique_ptr<folly::IOBuf> args,
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions,
     const apache::thrift::RpcKind rpcKind) {
-  RpcOptions rpcOpts;
   for (const auto& entry : headers) {
-    rpcOpts.setWriteHeader(entry.first, entry.second);
+    rpcOptions.setWriteHeader(entry.first, entry.second);
   }
 
   folly::Promise<ClientReceiveState> promise;
   auto future = promise.getSemiFuture();
   try {
     sendImpl(
-        rpcOpts,
+        std::move(rpcOptions),
         std::move(args),
         serviceName,
         functionName,
@@ -328,6 +341,7 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
     const std::string& args,
     apache::thrift::MethodMetadata::Data&& metadata,
     const std::unordered_map<std::string, std::string>& headers,
+    apache::thrift::RpcOptions&& rpcOptions,
     const apache::thrift::RpcKind rpcKind) {
   return semifuture_send(
       serviceName,
@@ -335,11 +349,12 @@ folly::SemiFuture<OmniClientResponseWithHeaders> OmniClient::semifuture_send(
       folly::IOBuf::copyBuffer(args),
       std::move(metadata),
       headers,
+      std::move(rpcOptions),
       rpcKind);
 }
 
 void OmniClient::sendImpl(
-    RpcOptions rpcOptions,
+    apache::thrift::RpcOptions&& rpcOptions,
     std::unique_ptr<folly::IOBuf> args,
     const std::string& serviceName,
     const std::string& functionName,

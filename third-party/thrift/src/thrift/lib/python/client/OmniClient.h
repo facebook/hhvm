@@ -63,27 +63,31 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
-      const std::unordered_map<std::string, std::string>& headers = {});
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions);
 
   OmniClientResponseWithHeaders sync_send(
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
-      const std::unordered_map<std::string, std::string>& headers = {});
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions);
 
   void oneway_send(
       const std::string& serviceName,
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
       apache::thrift::MethodMetadata::Data&& metadata,
-      const std::unordered_map<std::string, std::string>& headers = {});
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions);
 
   void oneway_send(
       const std::string& serviceName,
       const std::string& functionName,
       const std::string& args,
       apache::thrift::MethodMetadata::Data&& metadata,
-      const std::unordered_map<std::string, std::string>& headers = {});
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions);
 
   /**
    * The semifuture_send function takes in a function name and its arguments
@@ -95,7 +99,8 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& functionName,
       std::unique_ptr<folly::IOBuf> args,
       apache::thrift::MethodMetadata::Data&& metadata,
-      const std::unordered_map<std::string, std::string>& headers = {},
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions,
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
@@ -104,7 +109,8 @@ class OmniClient : public apache::thrift::TClientBase {
       const std::string& functionName,
       const std::string& args,
       apache::thrift::MethodMetadata::Data&& metadata,
-      const std::unordered_map<std::string, std::string>& headers = {},
+      const std::unordered_map<std::string, std::string>& headers,
+      apache::thrift::RpcOptions&& rpcOptions,
       const apache::thrift::RpcKind rpcKind =
           apache::thrift::RpcKind::SINGLE_REQUEST_SINGLE_RESPONSE);
 
@@ -128,7 +134,7 @@ class OmniClient : public apache::thrift::TClientBase {
    * Sends the request to the Thrift service through the RequestChannel.
    */
   void sendImpl(
-      apache::thrift::RpcOptions rpcOptions,
+      apache::thrift::RpcOptions&& rpcOptions,
       std::unique_ptr<folly::IOBuf> args,
       const std::string& serviceName,
       const std::string& functionName,

@@ -1618,6 +1618,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_ref_shared?", &cpp_mstch_field::cpp_ref_shared},
             {"field:cpp_ref_shared_const?",
              &cpp_mstch_field::cpp_ref_shared_const},
+            {"field:cpp_ref_not_boxed?", &cpp_mstch_field::cpp_ref_not_boxed},
             {"field:cpp_adapter", &cpp_mstch_field::cpp_adapter},
             {"field:cpp_first_adapter", &cpp_mstch_field::cpp_first_adapter},
             {"field:cpp_exactly_one_adapter?",
@@ -1778,6 +1779,11 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_ref_shared_const() {
     return gen::cpp::find_ref_type(*field_) ==
         gen::cpp::reference_type::shared_const;
+  }
+  mstch::node cpp_ref_not_boxed() {
+    auto ref_type = gen::cpp::find_ref_type(*field_);
+    return ref_type != gen::cpp::reference_type::none &&
+        ref_type != gen::cpp::reference_type::boxed;
   }
   mstch::node cpp_first_adapter() {
     if (const std::string* adapter =

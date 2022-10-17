@@ -139,6 +139,8 @@ module type LocalServerApi = sig
   *)
   val update_state : state_filename:string -> check_id:string option -> unit
 
+  val upload_naming_table : nonce:string -> unit
+
   (* Tells the server to save the naming table state to a given
      destination path.
   *)

@@ -38,6 +38,31 @@ let make_local_server_api
       in
       ()
 
+    let upload_naming_table ~(nonce : string) : unit =
+      Hh_logger.log "Uploading the naming table...";
+      let cmd = "manifold mkdirs hulk/tree/naming/" ^ nonce in
+      Hh_logger.log "Running %s" cmd;
+      ignore (Sys.command cmd);
+
+      let blob_dir =
+        Tempfile.mkdtemp_with_dir (Path.make GlobalConfig.tmp_dir)
+      in
+      let blob_path = Path.(to_string (concat blob_dir "naming.bin")) in
+      let chan = Stdlib.open_out_bin blob_path in
+      Marshal.to_channel chan naming_table [];
+      Stdlib.close_out chan;
+
+      let cmd =
+        Printf.sprintf
+          "manifold putr --overwrite %s hulk/tree/naming/%s"
+          (Path.to_string blob_dir)
+          nonce
+      in
+      Hh_logger.log "Executing %s" cmd;
+      ignore (Sys.command cmd);
+      Hh_logger.log "Uploaded the naming table";
+      ()
+
     let snapshot_naming_table_base ~destination_path : unit Future.t =
       send_progress "Snapshotting the naming table for delegated type checking";
       let start_t = Unix.gettimeofday () in
@@ -396,18 +421,55 @@ let make_remote_server_api
                ());
         Ok ()
 
+    let rec download_naming ~(naming_table_base : Path.t) ~(nonce : Int64.t) :
+        naming_table =
+      let naming_table_manifold_path =
+        Printf.sprintf "hulk/tree/naming/%s/naming.bin" (Int64.to_string nonce)
+      in
+      let check_manifold_path_exists_cmd =
+        Printf.sprintf "manifold exists %s" naming_table_manifold_path
+      in
+      match Sys_utils.exec_try_read check_manifold_path_exists_cmd with
+      | Some output when Str.(string_match (regexp ".*EXISTS") output 0) ->
+        Hh_logger.log "Downloading the naming table...";
+
+        let cmd =
+          Printf.sprintf
+            "manifold get %s %s"
+            naming_table_manifold_path
+            (Path.to_string naming_table_base)
+        in
+        Hh_logger.log "Executing %s" cmd;
+        ignore (Sys.command cmd);
+
+        let naming_table_path = Path.to_string naming_table_base in
+        let chan = In_channel.create ~binary:true naming_table_path in
+        let naming_table = Marshal.from_channel chan in
+        let sqlite_naming_table_base =
+          Path.(concat (dirname naming_table_base) "naming.sql")
+        in
+        ignore
+        @@ Naming_table.save
+             naming_table
+             (Path.to_string sqlite_naming_table_base);
+        (match
+           load_naming_table_base
+             ~naming_table_base:(Some sqlite_naming_table_base)
+         with
+        | Ok naming_table -> naming_table
+        | _ -> None)
+      | _ ->
+        Unix.sleep 5;
+        download_naming ~naming_table_base ~nonce
+
     let download_and_update_naming_table
         ~(manifold_api_key : string option)
         ~(use_manifold_cython_client : bool)
         (saved_state_manifold_path : string option)
-        (changed_files : Relative_path.t list option) : string option =
-      match saved_state_manifold_path with
-      | None ->
-        Hh_logger.log
-          "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
-        build_naming_table ();
-        None
-      | Some path ->
+        (changed_files : Relative_path.t list option)
+        (naming_table : naming_table) : string option =
+      match (naming_table, saved_state_manifold_path) with
+      | (_, Some path) ->
         let dep_table_path_result =
           download_naming_and_dep_table
             manifold_api_key
@@ -424,6 +486,14 @@ let make_remote_server_api
           Hh_logger.log "Falling back to generating naming table";
           build_naming_table ();
           None)
+      | (None, _) ->
+        Hh_logger.log
+          "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
+        build_naming_table ();
+        None
+      | (Some naming_table, _) ->
+        ignore @@ update_naming_table naming_table changed_files;
+        None
 
     let load_shallow_decls_saved_state
         (saved_state_main_artifacts :

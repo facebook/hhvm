@@ -31,6 +31,7 @@ module type RemoteServerApi = sig
     use_manifold_cython_client:bool ->
     string option ->
     Relative_path.t list option ->
+    naming_table ->
     string option
 
   (* Downloads the naming table via saved state.
@@ -44,6 +45,11 @@ module type RemoteServerApi = sig
   (* Updates the naming table with changed files. *)
   val update_naming_table :
     Naming_table.t -> Relative_path.t list option -> (unit, string) result
+
+  (* In full init scenarios, download a naming table from manifold, indexed by `nonce`,
+     and store it inside `naming_tabae_base` to be used by the remote workers. *)
+  val download_naming :
+    naming_table_base:Path.t -> nonce:Int64.t -> naming_table
 
   val fetch_and_cache_remote_decls :
     ctx:Provider_context.t ->

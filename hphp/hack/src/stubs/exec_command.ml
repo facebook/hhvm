@@ -19,6 +19,7 @@ type t =
   | Pstack
   | Strobeclient
   | Watchman
+  | Watchman_diag
 
 let to_string = function
   | Hg -> "hg"
@@ -33,3 +34,4 @@ let to_string = function
   | Pstack -> "pstack"
   | Strobeclient -> "strobeclient"
   | Watchman -> "watchman"
+  | Watchman_diag -> "watchman-diag"

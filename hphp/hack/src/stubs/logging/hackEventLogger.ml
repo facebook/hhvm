@@ -574,6 +574,8 @@ end
 module Rage = struct
   let rage_start ~rageid:_ ~desc:_ ~root:_ ~from:_ ~disk_config:_ = ()
 
+  let rage_watchman ~rageid:_ ~items:_ = ()
+
   let rage
       ~rageid:_
       ~desc:_

@@ -1,0 +1,88 @@
+Program hphp/test/slow/debugger/modules.php loaded. Type '[r]un' or '[c]ontinue' to go.
+include "hphp/test/slow/debugger/modules.php.inc";
+include "hphp/test/slow/debugger/modules.php.inc2";
+=new Foo();
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=fooFun();
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal function fooFun in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+$x = new Foo();
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+$x = getFoo();
+=$x->foo();
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal method Foo::foo in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=$x->fooProp;
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal property Foo::$fooProp in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=$x::$fooStaticProp;
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal static property Foo::$fooStaticProp in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=Foo::$fooStaticProp;
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=Foo::$fooStatic();
+Hit a php exception : exception 'UndefinedVariableException' with message 'Undefined variable: fooStatic' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+=$cls="foo";
+"foo"
+=$cls::fooStatic();
+Hit a php exception : exception 'ModuleBoundaryViolationException' with message 'Accessing internal class Foo in module foo from outside of a module is not allowed' in :1
+Stack trace:
+#0 (1): include()
+#1 (): include()
+#2 {main}
+set bac on
+BypassAccessCheck(bac) set to on.
+All code executed from debugger is bypassing access check!
+=new Foo();
+Foo Object
+(
+    [fooProp] => 0
+)
+
+=fooFun();
+5
+$x = new Foo();
+=$x->foo();
+5
+=Foo::fooStatic();
+2
+=$x->fooProp;
+0
+$x->fooProp = 5;
+=$x->fooProp;
+5
+Foo::$fooStaticProp = 6;
+$x::$fooStaticProp = 7;
+=Foo::$fooStaticProp;
+7
+=$x::$fooStaticProp;
+7
+quit

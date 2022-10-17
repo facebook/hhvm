@@ -1,0 +1,26 @@
+include "hphp/test/slow/debugger/modules.php.inc";
+include "hphp/test/slow/debugger/modules.php.inc2";
+=new Foo();
+=fooFun();
+$x = new Foo();
+$x = getFoo();
+=$x->foo();
+=$x->fooProp;
+=$x::$fooStaticProp;
+=Foo::$fooStaticProp;
+=Foo::$fooStatic();
+=$cls="foo";
+=$cls::fooStatic();
+set bac on
+=new Foo();
+=fooFun();
+$x = new Foo();
+=$x->foo();
+=Foo::fooStatic();
+=$x->fooProp;
+$x->fooProp = 5;
+=$x->fooProp;
+Foo::$fooStaticProp = 6;
+$x::$fooStaticProp = 7;
+=Foo::$fooStaticProp;
+=$x::$fooStaticProp;

@@ -435,7 +435,8 @@ void moduleBoundaryViolationImpl(
   assertx(symbolModule != nullptr);
   assertx(symbolModule != fromModule);
   assertx(!symbol.empty());
-
+  // Don't throw error in debugger when bypassCheck is on
+  if (!g_context.isNull() && g_context->debuggerSettings.bypassCheck) return;
   auto const errMsg = folly::sformat(
     "Accessing {}internal {} in module {} from {} is not allowed",
     soft ? "soft " : "",

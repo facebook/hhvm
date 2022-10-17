@@ -114,6 +114,9 @@ zend/good/ext/intl/tests/locale_lookup_variant2.php
 zend/good/ext/intl/tests/msgfmt_millisecond_dates.php
 zend/good/ext/mbstring/tests/mb_ereg_replace_variation1.php
 
+# TODO(atry) the CAA record for google.com is flaky (maybe network issue?)
+slow/ext_network/dns_get_record_caa.php
+
 # TODO(alexeyt) failures not yet categorized
 slow/coeffects/apc_pure.php
 slow/dom_document/clone.php

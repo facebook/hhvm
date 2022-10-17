@@ -9,7 +9,7 @@ redirect_from: docs/casefolding/
 
 Watchman is currently completely unaware of case-insensitivity in file systems,
 and does not attempt to do any case-folding of file names. On a case-insensitive
-file system like Mac macOS's [HFS+](https://en.wikipedia.org/wiki/HFS_Plus), this
+file system like macOS's [HFS+](https://en.wikipedia.org/wiki/HFS_Plus), this
 can manifest itself in different ways:
 
 * If a file `foo.txt` is renamed to `FOO.txt`, Watchman will report `FOO.txt` as

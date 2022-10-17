@@ -10,7 +10,7 @@ Then load http://localhost:4000/watchman/
 
 First time setup:
 
-* You'll need ruby 2 or higher (available by default on Mac)
+* You'll need ruby 2 or higher (available by default on macOS)
 
 Then:
 

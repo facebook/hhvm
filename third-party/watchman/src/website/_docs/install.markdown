@@ -196,7 +196,7 @@ This means that if an overflow does occur, you won't miss a legitimate change
 notification, but instead will get spurious notifications for files that
 haven't actually changed.
 
-### Mac OS File Descriptor Limits
+### macOS File Descriptor Limits
 
 *Only applicable on macOS 10.6 and earlier*
 

@@ -35,6 +35,8 @@ jobs:
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
           sandbox = false
+          cores = ${{ matrix.os == 'ubuntu-latest' && '1' || '0' }}
+          max-jobs = 1
     - run: nix build --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
     - run: hhvm --version

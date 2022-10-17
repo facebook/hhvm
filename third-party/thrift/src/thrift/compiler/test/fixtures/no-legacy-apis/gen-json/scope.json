@@ -3,16 +3,16 @@
   "thrift_module" : "scope",
   "typedefs" : {
     "Enum" : {
-      "lineno" : 69,
+      "lineno" : 71,
       "type_enum" : "STRUCT",
       "spec_args" : "FbthriftInternalEnum",
       "source_range" : {
         "begin" : {
-          "line" : 69,
+          "line" : 71,
           "column" : 1
         },
         "end" : {
-          "line" : 69,
+          "line" : 71,
           "column" : 52
         }
       }
@@ -20,24 +20,6 @@
   },
   "structs" : {
     "Program" : {
-      "lineno" : 39,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 39,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 39,
-          "column" : 74
-        }
-      }
-    },
-    "Struct" : {
       "lineno" : 40,
       "is_exception" : false,
       "is_union" : false,
@@ -51,11 +33,11 @@
         },
         "end" : {
           "line" : 40,
-          "column" : 72
+          "column" : 74
         }
       }
     },
-    "Union" : {
+    "Struct" : {
       "lineno" : 41,
       "is_exception" : false,
       "is_union" : false,
@@ -69,11 +51,11 @@
         },
         "end" : {
           "line" : 41,
-          "column" : 70
+          "column" : 72
         }
       }
     },
-    "Exception" : {
+    "Union" : {
       "lineno" : 42,
       "is_exception" : false,
       "is_union" : false,
@@ -87,11 +69,11 @@
         },
         "end" : {
           "line" : 42,
-          "column" : 78
+          "column" : 70
         }
       }
     },
-    "Field" : {
+    "Exception" : {
       "lineno" : 43,
       "is_exception" : false,
       "is_union" : false,
@@ -105,11 +87,11 @@
         },
         "end" : {
           "line" : 43,
-          "column" : 70
+          "column" : 78
         }
       }
     },
-    "Typedef" : {
+    "Field" : {
       "lineno" : 44,
       "is_exception" : false,
       "is_union" : false,
@@ -123,11 +105,11 @@
         },
         "end" : {
           "line" : 44,
-          "column" : 74
+          "column" : 70
         }
       }
     },
-    "Service" : {
+    "Typedef" : {
       "lineno" : 45,
       "is_exception" : false,
       "is_union" : false,
@@ -145,7 +127,7 @@
         }
       }
     },
-    "Interaction" : {
+    "Service" : {
       "lineno" : 46,
       "is_exception" : false,
       "is_union" : false,
@@ -158,13 +140,31 @@
           "column" : 1
         },
         "end" : {
-          "line" : 48,
+          "line" : 46,
+          "column" : 74
+        }
+      }
+    },
+    "Interaction" : {
+      "lineno" : 47,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 47,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 49,
           "column" : 2
         }
       }
     },
     "Function" : {
-      "lineno" : 49,
+      "lineno" : 50,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -172,17 +172,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 49,
+          "line" : 50,
           "column" : 1
         },
         "end" : {
-          "line" : 52,
+          "line" : 54,
           "column" : 2
         }
       }
     },
     "EnumValue" : {
-      "lineno" : 53,
+      "lineno" : 55,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -190,17 +190,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 53,
+          "line" : 55,
           "column" : 1
         },
         "end" : {
-          "line" : 53,
+          "line" : 55,
           "column" : 78
         }
       }
     },
     "Const" : {
-      "lineno" : 54,
+      "lineno" : 56,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -208,17 +208,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 54,
+          "line" : 56,
           "column" : 1
         },
         "end" : {
-          "line" : 57,
+          "line" : 59,
           "column" : 2
         }
       }
     },
     "Schema" : {
-      "lineno" : 62,
+      "lineno" : 64,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -226,17 +226,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 62,
+          "line" : 64,
           "column" : 1
         },
         "end" : {
-          "line" : 62,
+          "line" : 64,
           "column" : 72
         }
       }
     },
     "FbthriftInternalEnum" : {
-      "lineno" : 66,
+      "lineno" : 68,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -244,34 +244,16 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 66,
+          "line" : 68,
           "column" : 1
         },
         "end" : {
-          "line" : 68,
+          "line" : 70,
           "column" : 2
         }
       }
     },
     "Transitive" : {
-      "lineno" : 94,
-      "is_exception" : false,
-      "is_union" : false,
-      "fields" : {
-
-      },
-      "source_range" : {
-        "begin" : {
-          "line" : 94,
-          "column" : 1
-        },
-        "end" : {
-          "line" : 94,
-          "column" : 80
-        }
-      }
-    },
-    "Structured" : {
       "lineno" : 96,
       "is_exception" : false,
       "is_union" : false,
@@ -284,13 +266,31 @@
           "column" : 1
         },
         "end" : {
-          "line" : 100,
+          "line" : 96,
+          "column" : 80
+        }
+      }
+    },
+    "Structured" : {
+      "lineno" : 98,
+      "is_exception" : false,
+      "is_union" : false,
+      "fields" : {
+
+      },
+      "source_range" : {
+        "begin" : {
+          "line" : 98,
+          "column" : 1
+        },
+        "end" : {
+          "line" : 102,
           "column" : 21
         }
       }
     },
     "Interface" : {
-      "lineno" : 102,
+      "lineno" : 104,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -298,17 +298,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 102,
+          "line" : 104,
           "column" : 1
         },
         "end" : {
-          "line" : 105,
+          "line" : 107,
           "column" : 47
         }
       }
     },
     "RootDefinition" : {
-      "lineno" : 107,
+      "lineno" : 109,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -316,17 +316,17 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 107,
+          "line" : 109,
           "column" : 1
         },
         "end" : {
-          "line" : 113,
+          "line" : 115,
           "column" : 25
         }
       }
     },
     "Definition" : {
-      "lineno" : 115,
+      "lineno" : 117,
       "is_exception" : false,
       "is_union" : false,
       "fields" : {
@@ -334,11 +334,11 @@
       },
       "source_range" : {
         "begin" : {
-          "line" : 115,
+          "line" : 117,
           "column" : 1
         },
         "end" : {
-          "line" : 120,
+          "line" : 122,
           "column" : 21
         }
       }

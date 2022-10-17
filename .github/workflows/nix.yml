@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency: 
+  group: ${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
+
 permissions:
   id-token: write
   contents: read

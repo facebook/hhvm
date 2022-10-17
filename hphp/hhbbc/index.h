@@ -918,6 +918,10 @@ struct Index {
    * static or not. A this type of BCls is a static method and a BObj
    * is for an instance method.
    *
+   * Note: a resolved method does not imply the function is actually
+   * callable at runtime. You still need to apply visibility checks,
+   * etc.
+   *
    * Pre: thisType.subtypeOf(BCls) || thisType.subtypeOf(BObj)
    */
   res::Func resolve_method(Context, const Type& thisType, SString name) const;
@@ -1432,8 +1436,6 @@ private:
 
   res::Func resolve_func_helper(const php::Func*, SString) const;
   res::Func do_resolve(const php::Func*) const;
-  bool could_be_related(const php::Class*,
-                        const php::Class*) const;
 
   template<bool getSuperType>
   Type get_type_for_constraint(Context,

@@ -4555,8 +4555,14 @@ define_func_family(IndexData& index,
       complete = false;
       continue;
     }
-    auto const f = func_from_mte(index, it->second);
-    auto const isRegular = justRegular || is_regular_class(*sub->cls);
+    auto const& mte = it->second;
+    auto const f = func_from_mte(index, mte);
+    auto const isRegular =
+      justRegular ||
+      /* A private method on a non-regular class might still be
+       * callable in a "regular only" context. */
+      ((mte.attrs & AttrPrivate) && mte.topLevel) ||
+      is_regular_class(*sub->cls);
     funcSet[f] |= isRegular;
   }
 
@@ -5003,8 +5009,11 @@ void define_func_families(IndexData& index) {
 
         // If this is a regular class, record that this func is used
         // by a regular class. This will be used when building the
-        // name-only tables below.
-        if (is_regular_class(*cinfo->cls)) {
+        // name-only tables below. Private methods on non-regular
+        // classes can be called even from regular contexts, to
+        // include those as well.
+        if (is_regular_class(*cinfo->cls) ||
+            ((mte.attrs & AttrPrivate) && mte.topLevel)) {
           create_func_info(index, func)->regularClassMethod = true;
         }
 
@@ -5066,7 +5075,7 @@ void define_func_families(IndexData& index) {
           // must have the same func).
           if (mte.noOverrideRegular) {
             assertx(r.isEmpty() || r.func() == func);
-            assertx(r.isEmpty() == !cinfo->hasRegularSubclass);
+            assertx(IMPLIES(r.isEmpty(), !cinfo->hasRegularSubclass));
           } else {
             // It's possible to get an empty or incomplete set for the
             // regular subset if this class is an interface.
@@ -5077,7 +5086,11 @@ void define_func_families(IndexData& index) {
             // Since it was overridden it's either incomplete, or if
             // it's a single func, a different func than the one in
             // this class.
-            assertx(r.isIncomplete() || r.func() != func);
+            assertx(
+              r.isIncomplete() ||
+              ((mte.attrs & AttrPrivate) && mte.topLevel) ||
+              r.func() != func
+            );
           }
 
           // Only bother making an aux entry if it's different from
@@ -5592,15 +5605,19 @@ void mark_no_override_methods(IndexData& index) {
         for (auto const sub : cinfo->subclassList) {
           if (sub == cinfo.get()) continue;
 
-          auto const clear = [&] {
-            auto const reg = is_regular_class(*sub->cls);
+          auto const clear = [&] (const MethTabEntry* subMeth) {
+            // A private method on a non-regular class can be called
+            // even from regular contexts.
+            auto const reg =
+              is_regular_class(*sub->cls) ||
+              (subMeth && (subMeth->attrs & AttrPrivate) && subMeth->topLevel);
             if (reg) meth.noOverrideRegular = false;
             attribute_setter(meth.attrs, false, AttrNoOverride);
             attribute_setter(funcAttrs, false, AttrNoOverride);
             FTRACE(4, "Clearing AttrNoOverride{} on {}::{} because of {}\n",
                    reg ? " and noOverrideRegular" : "",
                    meth.cls, name, sub->cls->name);
-            return reg || !cinfo->hasRegularSubclass;
+            return reg;
           };
 
           auto const it = sub->methods.find(name);
@@ -5609,14 +5626,14 @@ void mark_no_override_methods(IndexData& index) {
             // special functions or interface methods, for example.
             assertx(is_special_method_name(name) ||
                     !is_regular_class(*cinfo->cls));
-            if (clear()) break;
+            if (clear(nullptr)) break;
             continue;
           }
 
           // Check if method in subclass is the same as in parent.
           auto const& subMeth = it->second;
           if (!subMeth.cls->isame(meth.cls) || subMeth.clsIdx != meth.clsIdx) {
-            if (clear()) break;
+            if (clear(&subMeth)) break;
             continue;
           }
         }
@@ -5750,8 +5767,6 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
   if (cinfo->cls->attrs & AttrNoOverride) {
     always_assert(cinfo->methodFamilies.empty());
     always_assert(cinfo->methodFamiliesAux.empty());
-  } else if (cinfo->cls->attrs & AttrNoOverrideRegular) {
-    always_assert(cinfo->methodFamiliesAux.empty());
   }
 
   // The auxiliary method families map is only used by non-regular
@@ -5778,8 +5793,6 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
       // either.
       always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverride,
                             mte.attrs & AttrNoOverride));
-      always_assert(IMPLIES(cinfo->cls->attrs & AttrNoOverrideRegular,
-                            mte.noOverrideRegular));
     }
 
     auto const famIt = cinfo->methodFamilies.find(name);
@@ -5850,7 +5863,9 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
         // it has a single func, it cannot be the same func as this
         // class.
         always_assert(
-          aux.isIncomplete() || aux.func() != func_from_mte(index, mte)
+          aux.isIncomplete() ||
+          ((mte.attrs & AttrPrivate) && mte.topLevel) ||
+          aux.func() != func_from_mte(index, mte)
         );
 
         // Aux entry is a subset of the normal entry. If they both
@@ -8020,31 +8035,6 @@ res::Func Index::resolve_method(Context ctx,
     }
   };
 
-  /*
-   * Whether or not the context class has a private method with the
-   * same name as the method we're trying to call.
-   */
-  auto const contextMayHavePrivateWithSameName = folly::lazy(
-    [&] {
-      if (!ctx.cls) return false;
-      auto const cls_it = m_data->classInfo.find(ctx.cls->name);
-      if (cls_it == end(m_data->classInfo)) {
-        // This class had no pre-resolved ClassInfos, which means it
-        // always fatals in any way it could be defined, so it doesn't
-        // matter what we return here (as all methods in the context
-        // class are unreachable code).
-        return true;
-      }
-      auto const iter = cls_it->second->methods.find(name);
-      if (iter != end(cls_it->second->methods) &&
-          iter->second.attrs & AttrPrivate &&
-          iter->second.topLevel) {
-        return true;
-      }
-      return false;
-    }
-  );
-
   auto const process = [&] (ClassInfo* cinfo,
                             bool isExact,
                             bool includeNonRegular) {
@@ -8094,25 +8084,8 @@ res::Func Index::resolve_method(Context ctx,
       }
     }
     // The method on this class.
-    auto const ftarget = func_from_mte(*m_data, methIt->second);
-
-    /*
-     * If our candidate method has a private ancestor, unless it is
-     * defined on this class, we need to make sure we don't
-     * erroneously resolve the overriding method if the call is coming
-     * from the context the defines the private method.
-     *
-     * For now this just gives up if the context and the callee class
-     * could be related and the context defines a private of the same
-     * name. (We should actually try to resolve that method, though.)
-     */
-    if (methIt->second.hasPrivateAncestor &&
-        ctx.cls &&
-        ctx.cls != ftarget->cls &&
-        could_be_related(ctx.cls, cinfo->cls) &&
-        contextMayHavePrivateWithSameName()) {
-      return general(includeNonRegular);
-    }
+    auto const& meth = methIt->second;
+    auto const ftarget = func_from_mte(*m_data, meth);
 
     // We don't store method family information about special methods
     // and they have special inheritance semantics.
@@ -8121,12 +8094,56 @@ res::Func Index::resolve_method(Context ctx,
       if (isExact) return Func { Func::Method { ftarget } };
       // The method isn't overwritten, but they don't inherit, so it
       // could be missing.
-      if (methIt->second.attrs & AttrNoOverride) {
+      if (meth.attrs & AttrNoOverride) {
         return Func { Func::MethodOrMissing { ftarget } };
       }
       // Otherwise be pessimistic.
       return Func { Func::MethodName { name } };
     }
+
+    // Private method handling: Private methods have special lookup
+    // rules. If we're in the context of a particular class, and that
+    // class defines a private method, an instance of the class will
+    // always call that private method (even if overridden) in that
+    // context.
+    assertx(cinfo->cls);
+    if (ctx.cls == cinfo->cls) {
+      // The context matches the current class. If we've looked up a
+      // private method (defined on this class), then that's what
+      // we'll call.
+      if ((meth.attrs & AttrPrivate) && meth.topLevel) {
+        return Func { Func::Method { ftarget } };
+      }
+    } else if ((meth.attrs & AttrPrivate) || meth.hasPrivateAncestor) {
+      // Otherwise the context doesn't match the current class. If the
+      // looked up method is private, or has a private ancestor,
+      // there's a chance we'll call that method (or
+      // ancestor). Otherwise there's no private method in the
+      // inheritance tree we'll call.
+      auto const ancestor = [&] () -> const php::Func* {
+        if (!ctx.cls) return nullptr;
+        // Look up the ClassInfo corresponding to the context:
+        auto const it = m_data->classInfo.find(ctx.cls->name);
+        if (it == end(m_data->classInfo)) return nullptr;
+        auto const ctxCInfo = it->second;
+        // Is this context a parent of our class?
+        if (!cinfo->derivedFrom(*ctxCInfo)) return nullptr;
+        // It is. See if it defines a private method.
+        auto const it2 = ctxCInfo->methods.find(name);
+        if (it2 == end(ctxCInfo->methods)) return nullptr;
+        auto const& mte = it2->second;
+        // If it defines a private method, use it.
+        if ((mte.attrs & AttrPrivate) && mte.topLevel) {
+          return func_from_mte(*m_data, mte);
+        }
+        // Otherwise do normal lookup.
+        return nullptr;
+      }();
+      if (ancestor) return Func { Func::Method { ancestor } };
+    }
+    // If none of the above cases trigger, we still might call a
+    // private method (in a child class), but the func-family logic
+    // below will handle that.
 
     // If we're only including regular subclasses, and this class
     // itself isn't regular, the result may not necessarily include
@@ -8135,7 +8152,7 @@ res::Func Index::resolve_method(Context ctx,
       // We're not including this base class. If we're exactly this
       // class, there's no method at all. It will always be missing.
       if (isExact) return Func { Func::Missing { name } };
-      if (methIt->second.noOverrideRegular) {
+      if (meth.noOverrideRegular) {
         // The method isn't overridden in a subclass, but we can't
         // use the base class either. This leaves two cases. Either
         // the method isn't overridden because there are no regular
@@ -8169,8 +8186,8 @@ res::Func Index::resolve_method(Context ctx,
       // No entry in the aux table. The result is the same as the
       // normal table, so fall through and use that.
     } else if (isExact ||
-               methIt->second.attrs & AttrNoOverride ||
-               (!includeNonRegular && methIt->second.noOverrideRegular)) {
+               meth.attrs & AttrNoOverride ||
+               (!includeNonRegular && meth.noOverrideRegular)) {
       // Either we want all classes, or the base class is regular. If
       // the method isn't overridden we know it must be just ftarget
       // (the override bits include it being missing in a subclass, so
@@ -10443,21 +10460,6 @@ bool Index::must_be_derived_from(const php::Class* cls,
     return false;
   }
   return clsIt->second->derivedFrom(*parentIt->second);
-}
-
-// Return true if any possible definition of one php::Class could
-// derive from another at runtime, or vice versa.
-bool Index::could_be_related(const php::Class* cls,
-                             const php::Class* parent) const {
-  if (cls == parent) return true;
-  auto const clsIt = m_data->classInfo.find(cls->name);
-  auto const parentIt = m_data->classInfo.find(parent->name);
-  if (clsIt == end(m_data->classInfo) || parentIt == end(m_data->classInfo)) {
-    return true;
-  }
-  return
-    clsIt->second->derivedFrom(*parentIt->second) ||
-    parentIt->second->derivedFrom(*clsIt->second);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -10,3 +10,11 @@ class C implements IDisposable {
 function testit(vec<int> $_): C {
   return new C();
 }
+
+<<__SupportDynamicType>>
+class D {
+  <<__ReturnDisposable>>
+  public static function foo(vec<int> $_): C {
+    return new C();
+  }
+}

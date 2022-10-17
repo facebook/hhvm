@@ -31,6 +31,7 @@
 
 #ifdef __APPLE__
 #include <crt_externs.h>
+#include <sys/utsname.h>
 #endif
 
 namespace HPHP {

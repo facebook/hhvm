@@ -37,6 +37,9 @@ let shapes_key_exists env shape field_name =
         else
           `Unknown
   in
+  let tenv = Tast_env.tast_env_as_typing_env env in
+  let shape = Typing_utils.strip_dynamic tenv shape in
+  let (_, shape) = Typing_utils.strip_supportdyn shape in
   let (_, shape) = Tast_env.expand_type env shape in
   match get_node shape with
   | Tshape (shape_kind, fields) ->
@@ -47,16 +50,6 @@ let shapes_key_exists env shape field_name =
     | Tshape (shape_kind, fields) ->
       (check (get_pos shape) shape_kind fields, true)
     | _ -> (`Unknown, true))
-  | Tunion [ty1; ty2] ->
-    (* This implements ad-hoc support for ~shape(...) types; *)
-    (* the general union type case returns (`Unknown, false) *)
-    let (_, ty1) = Tast_env.expand_type env ty1 in
-    let (_, ty2) = Tast_env.expand_type env ty2 in
-    (match (get_node ty1, get_node ty2) with
-    | (Tdynamic, Tshape (shape_kind, fields))
-    | (Tshape (shape_kind, fields), Tdynamic) ->
-      (check (get_pos shape) shape_kind fields, false)
-    | _ -> (`Unknown, false))
   | _ -> (`Unknown, false)
 
 let trivial_shapes_key_exists_check pos1 env (shape, _, _) field_name =

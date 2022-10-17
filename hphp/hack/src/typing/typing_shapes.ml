@@ -92,6 +92,15 @@ let rec shrink_shape pos field_name env shape =
       pos
       shape
   in
+  let (supportdyn, shape) = TUtils.strip_supportdyn shape in
+  (fun (env, ty) ->
+    ( env,
+      if supportdyn then
+        let r = get_reason ty in
+        MakeType.supportdyn r ty
+      else
+        ty ))
+  @@
   match get_node shape with
   | Tshape (shape_kind, fields) ->
     let fields =

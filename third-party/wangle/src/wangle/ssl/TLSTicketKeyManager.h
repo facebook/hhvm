@@ -189,6 +189,9 @@ class TLSTicketKeyManager : public folly::OpenSSLTicketHandler {
   std::string encryptionKeyName_;
   std::unordered_map<std::string, std::unique_ptr<TLSTicketKey>> ticketKeyMap_;
   SSLStats* stats_{nullptr};
+  // A ticket key to use to generate new session tickets when no seeds have been
+  // configured.
+  TLSTicketKey fallbackTicketKey_;
 };
 using TicketSeedHandler = TLSTicketKeyManager;
 } // namespace wangle

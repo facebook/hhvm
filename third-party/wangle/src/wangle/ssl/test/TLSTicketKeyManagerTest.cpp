@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+#include <folly/io/async/AsyncSSLSocket.h>
+#include <folly/io/async/EventBase.h>
+#include <folly/io/async/SSLContext.h>
+#include <folly/io/async/test/AsyncSSLSocketTest.h>
 #include <folly/portability/GMock.h>
 #include <folly/portability/GTest.h>
 #include <wangle/ssl/SSLStats.h>
@@ -112,4 +116,96 @@ TEST(TLSTicketKeyManager, TestValidateTicketSeedsSubsetPass) {
   manager.setStats(&stats);
   manager.setTLSTicketKeySeeds(origOld, origCurr, origNext);
   manager.setTLSTicketKeySeeds(newOld, newCurr, newNext);
+}
+
+class TestConnectCallback : public folly::AsyncSSLSocket::ConnectCallback {
+ public:
+  void connectSuccess() noexcept override {}
+  void connectErr(const folly::AsyncSocketException& ex) noexcept override {
+    FAIL() << "Expected success but got: " << ex.what();
+  }
+};
+
+/**
+ * Simple ReadCallback implementation used by AsyncSSLSocket to read
+ * NewSessionTickets. Should not deliver any application data (shouldn't be any
+ * anyway).
+ */
+class NewSessionTicketCb : public folly::AsyncTransport::ReadCallback {
+ public:
+  void getReadBuffer(void** bufReturn, size_t* lenReturn) override {
+    *bufReturn = buffer_;
+    *lenReturn = sizeof(buffer_);
+  }
+
+  void readDataAvailable(size_t) noexcept override {
+    FAIL();
+  }
+  void readEOF() noexcept override {
+    // this will fire when the connection closes
+  }
+  void readErr(const folly::AsyncSocketException&) noexcept override {
+    FAIL();
+  }
+
+ private:
+  char buffer_[1024];
+};
+
+/**
+ * Meant to verify our approach to bypassing the bug reported in
+ * https://github.com/openssl/openssl/issues/18977, which is not backported to
+ * OpenSSL 1.1.1.
+ *
+ * Performs a TLS handshake, confirms that the ticket key manager doesn't crash,
+ * retrieves the session and attempts to resume it in a new connection. That
+ * should fail as the ticket is non-resumable.
+ */
+TEST(
+    TLSTicketKeyManager,
+    TestNewSessionTicketGeneratedCorrectlyButNotResumable) {
+  auto serverCtx = std::make_shared<folly::SSLContext>();
+  // the OpenSSL bug occurs with TLS 1.3 PSKs only
+  serverCtx->enableTLS13();
+  serverCtx->loadCertificate("folly/io/async/test/certs/tests-cert.pem");
+  serverCtx->loadPrivateKey("folly/io/async/test/certs/tests-key.pem");
+
+  // don't configure any seeds
+  auto ticketHandler = std::make_unique<wangle::TLSTicketKeyManager>();
+  serverCtx->setTicketHandler(std::move(ticketHandler));
+
+  // start listening on a local port
+  folly::ReadCallback readCallback(nullptr);
+  readCallback.state = folly::STATE_SUCCEEDED;
+  folly::HandshakeCallback handshakeCallback(&readCallback);
+  folly::SSLServerAcceptCallback acceptCallback(&handshakeCallback);
+  folly::TestSSLServer server(&acceptCallback, std::move(serverCtx));
+
+  folly::EventBase evb;
+  auto clientCtx = std::make_shared<folly::SSLContext>();
+  clientCtx->enableTLS13();
+  clientCtx->setVerificationOption(
+      folly::SSLContext::VerifyServerCertificate::IF_PRESENTED);
+  clientCtx->loadTrustedCertificates("folly/io/async/test/certs/ca-cert.pem");
+
+  TestConnectCallback connectCallback;
+  // connect and grab the session (ticket)
+  auto client = folly::AsyncSSLSocket::newSocket(clientCtx, &evb);
+  client->connect(&connectCallback, server.getAddress());
+  evb.loop();
+
+  NewSessionTicketCb newSessionTicketCb;
+  client->setReadCB(&newSessionTicketCb);
+  // should be sufficient to read the NewSessionTicket(s)
+  evb.loopOnce();
+
+  auto sslSession = client->getSSLSession();
+  ASSERT_TRUE(sslSession != nullptr);
+
+  client = folly::AsyncSSLSocket::newSocket(clientCtx, &evb);
+  client->setSSLSession(std::move(sslSession));
+  client->connect(&connectCallback, server.getAddress());
+  evb.loop();
+
+  EXPECT_FALSE(client->getSSLSessionReused());
 }

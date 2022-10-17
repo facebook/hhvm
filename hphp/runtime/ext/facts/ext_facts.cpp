@@ -674,8 +674,8 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     return maps;
   }();
 
-  // Final references to shared_ptr<Facts> fall out of scope
-  // while `m_mutex` lock is not held
+  // Final references to shared_ptr<Facts> fall out of scope on the Treadmill
+  Treadmill::enqueue([_destroyed = std::move(mapsToRemove)]() {});
 }
 
 FactsStore& getFactsOrThrow() {

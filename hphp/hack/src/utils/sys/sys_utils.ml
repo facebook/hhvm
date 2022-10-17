@@ -158,6 +158,14 @@ let exec_read cmd =
   assert (Poly.(Unix.close_process_in ic = Unix.WEXITED 0));
   result
 
+let exec_try_read cmd =
+  let ic = Unix.open_process_in cmd in
+  let out = In_channel.input_line ic in
+  let status = Unix.close_process_in ic in
+  match (out, status) with
+  | (Some _, Unix.WEXITED 0) -> out
+  | _ -> None
+
 let exec_read_lines ?(reverse = false) cmd =
   let ic = Unix.open_process_in cmd in
   let result = ref [] in
@@ -211,16 +219,6 @@ let logname_impl () =
   match getenv_user () with
   | Some user -> user
   | None ->
-    (* If this function is generally useful, it can be lifted to toplevel
-         in this file, but this is the only place we need it for now. *)
-    let exec_try_read cmd =
-      let ic = Unix.open_process_in cmd in
-      let out = In_channel.input_line ic in
-      let status = Unix.close_process_in ic in
-      match (out, status) with
-      | (Some _, Unix.WEXITED 0) -> out
-      | _ -> None
-    in
     (try Utils.unsafe_opt (exec_try_read "logname") with
     | Invalid_argument _ ->
       (try Utils.unsafe_opt (exec_try_read "id -un") with

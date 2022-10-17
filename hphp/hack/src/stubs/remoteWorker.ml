@@ -41,13 +41,9 @@ module type RemoteServerApi = sig
     use_manifold_cython_client:bool ->
     (Naming_table.t * Path.t, string) result
 
-  (* Updates the naming table with changed files.
-     Returns the path to the dep table downloaded. *)
+  (* Updates the naming table with changed files. *)
   val update_naming_table :
-    Naming_table.t ->
-    Path.t ->
-    Relative_path.t list option ->
-    (string, string) result
+    Naming_table.t -> Relative_path.t list option -> (unit, string) result
 
   val fetch_and_cache_remote_decls :
     ctx:Provider_context.t ->

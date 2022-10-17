@@ -337,9 +337,7 @@ let make_remote_server_api
 
     let update_naming_table
         (naming_table : Naming_table.t)
-        (dep_table_path : Path.t)
-        (changed_files : Relative_path.t list option) : (string, string) result
-        =
+        (changed_files : Relative_path.t list option) : (unit, string) result =
       match changed_files with
       | None -> Error "No changed files uploaded for remote worker's payload"
       | Some changed_files ->
@@ -350,8 +348,8 @@ let make_remote_server_api
              naming_table
              changed_files
              ~t:(Unix.gettimeofday ()));
-        Ok (naming_table, changed_files, dep_table_path)
-        >>= fun (naming_table, changed_files, dep_table_path) ->
+        Ok (naming_table, changed_files)
+        >>= fun (naming_table, changed_files) ->
         let changed_hack_files =
           List.filter_map changed_files ~f:(fun file ->
               if FindUtils.is_hack (Relative_path.suffix file) then
@@ -381,16 +379,14 @@ let make_remote_server_api
               ~ide_files:Relative_path.Set.empty
               ~get_next
               ~trace:false
-              ~cache_decls:true,
-            dep_table_path )
-        >>= fun (naming_table, fast_parsed, dep_table_path) ->
+              ~cache_decls:true )
+        >>= fun (naming_table, fast_parsed) ->
         Hh_logger.log "Built updated decls for naming table";
         Hh_logger.log "Clearing old decls from naming table";
         remove_decls naming_table fast_parsed;
         Hh_logger.log "Updating naming table";
         ignore (Naming_table.update_many naming_table fast_parsed);
-        Ok (fast_parsed, dep_table_path)
-        >>= fun (fast_parsed, dep_table_path) ->
+        Ok fast_parsed >>= fun fast_parsed ->
         Hh_logger.log "Updating naming global";
         Naming_table.create fast_parsed
         |> Naming_table.iter ~f:(fun k v ->
@@ -398,7 +394,7 @@ let make_remote_server_api
                  Naming_global.ndecl_file_error_if_already_bound ctx k v
                in
                ());
-        Ok (Path.to_string dep_table_path)
+        Ok ()
 
     let download_and_update_naming_table
         ~(manifold_api_key : string option)
@@ -418,10 +414,11 @@ let make_remote_server_api
             path
             ~use_manifold_cython_client
           >>= fun (naming_table, dep_table_path) ->
-          update_naming_table naming_table dep_table_path changed_files
+          update_naming_table naming_table changed_files >>= fun () ->
+          Ok dep_table_path
         in
         (match dep_table_path_result with
-        | Ok dep_table_path -> Some dep_table_path
+        | Ok dep_table_path -> Some (Path.to_string dep_table_path)
         | Error err ->
           Hh_logger.log "Could not build naming table from saved state: %s" err;
           Hh_logger.log "Falling back to generating naming table";

@@ -131,6 +131,7 @@
   (pps visitors.ppx ppx_deriving.std))
  (libraries
   ast
+  direct_decl_parser
   fixme_provider
   full_fidelity
   heap_shared_mem

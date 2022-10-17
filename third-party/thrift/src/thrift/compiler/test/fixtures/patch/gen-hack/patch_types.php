@@ -356,7 +356,6 @@ class BoolPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::BoolPatchAdapter",
             "underlyingName" => "BoolPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -548,7 +547,6 @@ class BytePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "BytePatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -750,7 +748,6 @@ class I16Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I16PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -952,7 +949,6 @@ class I32Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I32PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1154,7 +1150,6 @@ class I64Patch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "I64PatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1346,7 +1341,6 @@ class FloatPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "FloatPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1538,7 +1532,6 @@ class DoublePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::NumberPatchAdapter",
             "underlyingName" => "DoublePatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -1757,7 +1750,6 @@ class StringPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::StringPatchAdapter",
             "underlyingName" => "StringPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2011,7 +2003,6 @@ class BinaryPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::BinaryPatchAdapter",
             "underlyingName" => "BinaryPatchStruct",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2251,7 +2242,6 @@ class DurationPatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
             "underlyingName" => "DurationStructPatch",
-            "extraNamespace" => "",
           )
         ),
       ],
@@ -2468,7 +2458,6 @@ class TimePatch implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
           shape(
             "name" => "::apache::thrift::op::detail::AssignPatchAdapter",
             "underlyingName" => "TimeStructPatch",
-            "extraNamespace" => "",
           )
         ),
       ],

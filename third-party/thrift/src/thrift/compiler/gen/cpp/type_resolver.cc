@@ -146,14 +146,18 @@ const std::string& type_resolver::get_underlying_name(const t_type& node) {
 
 const std::string* type_resolver::get_extra_namespace(const t_type& node) {
   if (const t_const* annotation = find_nontransitive_adapter(node)) {
-    if (const t_const_value* value =
-            annotation->get_value_from_structured_annotation_or_null(
-                "extraNamespace")) {
-      return value->get_string().empty() ? nullptr : &value->get_string();
+    const auto* ns = annotation->get_value_from_structured_annotation_or_null(
+        "extraNamespace");
+    if (ns != nullptr && !ns->get_string().empty()) {
+      return &ns->get_string();
     }
-    // Default isn't propagated from IDL.
-    static const std::string kDefault = "detail";
-    return &kDefault;
+    // If there is also no underlying name, use "detail".
+    const auto* name = annotation->get_value_from_structured_annotation_or_null(
+        "underlyingName");
+    if (name == nullptr || name->get_string().empty()) {
+      static const std::string kDefault = "detail";
+      return &kDefault;
+    }
   }
   return nullptr;
 }

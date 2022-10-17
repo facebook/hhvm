@@ -41,36 +41,36 @@
           "I8" : {
             "name" : "I8",
             "docstring" : "::std::int8_t\n",
-            "lineno" : 197,
+            "lineno" : 201,
             "value" : 0
           },
           "U8" : {
             "name" : "U8",
             "docstring" : "::std::uint8_t\n",
-            "lineno" : 199,
+            "lineno" : 203,
             "value" : 1
           },
           "I16" : {
             "name" : "I16",
             "docstring" : "::std::int16_t\n",
-            "lineno" : 201,
+            "lineno" : 205,
             "value" : 2
           },
           "U16" : {
             "name" : "U16",
             "docstring" : "::std::uint16_t\n",
-            "lineno" : 203,
+            "lineno" : 207,
             "value" : 3
           },
           "U32" : {
             "name" : "U32",
             "docstring" : "::std::uint32_t\n",
-            "lineno" : 205,
+            "lineno" : 209,
             "value" : 4
           }
         },
         "docstring" : "Enum in C++ by default uses signed 32 bit integer. There is no need to specify\nunderlying type for signed 32 bit integer.\n",
-        "lineno" : 195
+        "lineno" : 199
       }
       },
   "structs" :
@@ -201,17 +201,16 @@
                   },
           "underlyingName" : {
             "name" : "underlyingName",
-            "docstring" : "When applied directly to a type (as opposed to on a typedef) the IDL name of the\ntype will refer to the adapted type in C++ and the underlying thrift struct will be\ngenerated in a nested namespace and/or with a different name. By default the struct\nwill be generated in a nested 'detail' namespace with the same name,\nbut both of these can be changed by setting these fields.\nEmpty string disables the nested namespace and uses the IDL name for the struct.\n",
+            "docstring" : "The name and/or extra namespace to use when directly adapting a type\n(as opposed a typedef).\n\nIn this case, the IDL name of the type will refer to the adapted type in\nC++ and the underlying thrift type will be generated in a nested\nnamespace and/or with a different name.\n\nIf neither `underlyingName` or `extraNamespace` is provided, the\nunderlying type will be generated in a nested 'detail' namespace with\nthe same name.\n",
             "key" : 3,
-            "lineno" : 109,
+            "lineno" : 113,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
           "extraNamespace" : {
             "name" : "extraNamespace",
-            "default_value" : "detail",
             "key" : 4,
-            "lineno" : 110,
+            "lineno" : 114,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -219,7 +218,7 @@
             "name" : "moveOnly",
             "docstring" : "Must set to true when adapted type is not copyable.\n",
             "key" : 5,
-            "lineno" : 113,
+            "lineno" : 117,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
@@ -245,14 +244,14 @@
             "name" : "atomic",
             "default_value" : 1,
             "key" : 1,
-            "lineno" : 118,
+            "lineno" : 122,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 116
+        "lineno" : 120
       },
       "MinimizePadding" : {
         "name" : "MinimizePadding",
@@ -268,7 +267,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 121
+        "lineno" : 125
       },
       "TriviallyRelocatable" : {
         "name" : "TriviallyRelocatable",
@@ -284,7 +283,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 124
+        "lineno" : 128
       },
       "ScopedEnumAsUnionType" : {
         "name" : "ScopedEnumAsUnionType",
@@ -300,7 +299,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 127
+        "lineno" : 131
       },
       "StrongType" : {
         "name" : "StrongType",
@@ -325,7 +324,7 @@
         "docstring" : "Indicates a typedef should be 'strong', and require an explicit cast to\nthe underlying type.\n\nCurrently only works for integer typedefs, for example:\n\n    @cpp.StrongType\n    typedef i32 MyId;\n\nWill cause an enum class to be used instead of a typedef in the genearte code, for example:\n\n    enum class MyId : ::std::int32_t {};\n\n",
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 144
+        "lineno" : 148
       },
       "FieldInterceptor" : {
         "name" : "FieldInterceptor",
@@ -353,7 +352,7 @@
             "name" : "name",
             "docstring" : "The name of a field interceptor.\n\nThe field interceptor provides the following API:\n\n    struct ThriftFieldInterceptor {\n      template <typename T, typename Struct, int16_t FieldId>\n      static void interceptThriftFieldAccess(T&& field,\n                                             apache::thrift::FieldContext<Struct, FieldId>&& ctx);\n    };\n\nThe field interceptor intercepts with the field value and the field context.\nIt enforces an easily searchable function name `interceptThriftFieldAccess`.\n",
             "key" : 1,
-            "lineno" : 179,
+            "lineno" : 183,
             "required" : "opt-in-req-out",
             "type" : "string"
                   },
@@ -361,14 +360,14 @@
             "name" : "noinline",
             "docstring" : "Setting to true makes compiler not inline and erase function signature for\nthe intercepting field accessor.\n",
             "key" : 2,
-            "lineno" : 185,
+            "lineno" : 189,
             "required" : "opt-in-req-out",
             "type" : "bool"
                   }
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 162
+        "lineno" : 166
       },
       "UseOpEncode" : {
         "name" : "UseOpEncode",
@@ -384,7 +383,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 188
+        "lineno" : 192
       },
       "EnumType" : {
         "name" : "EnumType",
@@ -403,7 +402,7 @@
           "type" : {
             "name" : "type",
             "key" : 1,
-            "lineno" : 227,
+            "lineno" : 231,
             "required" : "opt-in-req-out",
             "type" : {
   "type" : "enum",
@@ -413,7 +412,7 @@
         },
         "is_exception" : false,
         "is_union" : false,
-        "lineno" : 225
+        "lineno" : 229
       }
       },
   "source_path" : "thrift/annotation/cpp",

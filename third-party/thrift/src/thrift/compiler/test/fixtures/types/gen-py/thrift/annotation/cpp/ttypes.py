@@ -376,12 +376,16 @@ class Adapter:
       };
    - adaptedType: It is sometimes necessary to specify AdaptedType here (in case the codegen would
   have a circular depdenceny, which will cause the C++ build to fail).
-   - underlyingName: When applied directly to a type (as opposed to on a typedef) the IDL name of the
-  type will refer to the adapted type in C++ and the underlying thrift struct will be
-  generated in a nested namespace and/or with a different name. By default the struct
-  will be generated in a nested 'detail' namespace with the same name,
-  but both of these can be changed by setting these fields.
-  Empty string disables the nested namespace and uses the IDL name for the struct.
+   - underlyingName: The name and/or extra namespace to use when directly adapting a type
+  (as opposed a typedef).
+  
+  In this case, the IDL name of the type will refer to the adapted type in
+  C++ and the underlying thrift type will be generated in a nested
+  namespace and/or with a different name.
+  
+  If neither `underlyingName` or `extraNamespace` is provided, the
+  underlying type will be generated in a nested 'detail' namespace with
+  the same name.
    - extraNamespace
    - moveOnly: Must set to true when adapted type is not copyable.
   """
@@ -1300,7 +1304,7 @@ Adapter.thrift_spec = (
   (1, TType.STRING, 'name', True, None, 2, ), # 1
   (2, TType.STRING, 'adaptedType', True, None, 2, ), # 2
   (3, TType.STRING, 'underlyingName', True, None, 2, ), # 3
-  (4, TType.STRING, 'extraNamespace', True, "detail", 2, ), # 4
+  (4, TType.STRING, 'extraNamespace', True, None, 2, ), # 4
   (5, TType.BOOL, 'moveOnly', None, None, 2, ), # 5
 )
 
@@ -1309,7 +1313,7 @@ Adapter.thrift_struct_annotations = {
 Adapter.thrift_field_annotations = {
 }
 
-def Adapter__init__(self, name=None, adaptedType=None, underlyingName=None, extraNamespace=Adapter.thrift_spec[4][4], moveOnly=None,):
+def Adapter__init__(self, name=None, adaptedType=None, underlyingName=None, extraNamespace=None, moveOnly=None,):
   self.name = name
   self.adaptedType = adaptedType
   self.underlyingName = underlyingName
@@ -1322,7 +1326,7 @@ def Adapter__setstate__(self, state):
   state.setdefault('name', None)
   state.setdefault('adaptedType', None)
   state.setdefault('underlyingName', None)
-  state.setdefault('extraNamespace', "detail")
+  state.setdefault('extraNamespace', None)
   state.setdefault('moveOnly', None)
   self.__dict__ = state
 

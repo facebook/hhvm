@@ -208,9 +208,8 @@ class cpp2_generator_context {
   cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
 
   bool is_orderable(const t_type& type) {
-    std::unordered_set<const t_type*> seen;
     auto& memo = is_orderable_memo_;
-    return cpp2::is_orderable(seen, memo, type);
+    return cpp2::is_orderable(memo, type);
   }
 
   gen::cpp::type_resolver& resolver() { return resolver_; }

@@ -237,75 +237,127 @@ gen_dependency_graph(
   return deps;
 }
 
-bool is_orderable(
-    std::unordered_set<t_type const*>& seen,
+namespace {
+
+struct is_orderable_walk_context {
+  std::unordered_set<t_type const*> pending_back_propagation;
+  std::unordered_set<t_type const*> seen;
+  std::unordered_map<t_type const*, std::unordered_set<t_type const*>>
+      inv_graph;
+};
+
+bool is_orderable_walk(
     std::unordered_map<t_type const*, bool>& memo,
-    t_type const& type) {
+    t_type const& type,
+    t_type const* prev,
+    is_orderable_walk_context& context) {
   const bool has_disqualifying_annotation = is_custom_type(type);
   auto memo_it = memo.find(&type);
   if (memo_it != memo.end()) {
     return memo_it->second;
   }
-  if (!seen.insert(&type).second) {
-    return true;
+  if (prev != nullptr) {
+    context.inv_graph[&type].insert(prev);
+  }
+  if (!context.seen.insert(&type).second) {
+    return true; // Recursive type, speculate success.
   }
   auto make_scope_guard = [](auto f) {
     auto deleter = [=](void*) { f(); };
     return std::unique_ptr<void, decltype(deleter)>(&f, deleter);
   };
-  auto g = make_scope_guard([&] { seen.erase(&type); });
-  // TODO: Consider why typedef is not resolved in this method
-  if (type.is_base_type()) {
-    return true;
-  }
-  if (type.is_enum()) {
+  auto g = make_scope_guard([&] { context.seen.erase(&type); });
+  if (type.is_base_type() || type.is_enum()) {
     return true;
   }
   bool result = false;
-  auto g2 = make_scope_guard([&] { memo[&type] = result; });
+  auto g2 = make_scope_guard([&] {
+    memo[&type] = result;
+    if (!result) {
+      context.pending_back_propagation.insert(&type);
+    }
+  });
   if (type.is_typedef()) {
     auto const& real = [&]() -> auto&& { return *type.get_true_type(); };
     auto const& next = *(dynamic_cast<t_typedef const&>(type).get_type());
-    return result = is_orderable(seen, memo, next) &&
+    return result = is_orderable_walk(memo, next, &type, context) &&
         (!(real().is_set() || real().is_map()) ||
          !has_disqualifying_annotation);
-  }
-  if (type.is_struct() || type.is_xception()) {
-    const auto& as_sturct = static_cast<t_struct const&>(type);
+  } else if (type.is_struct() || type.is_xception()) {
+    const auto& as_struct = static_cast<t_struct const&>(type);
     return result = std::all_of(
-               as_sturct.fields().begin(),
-               as_sturct.fields().end(),
+               as_struct.fields().begin(),
+               as_struct.fields().end(),
                [&](const auto& f) {
-                 return is_orderable(seen, memo, f.type().deref());
+                 return is_orderable_walk(
+                     memo, f.type().deref(), &type, context);
                });
-  }
-  if (type.is_list()) {
-    return result = is_orderable(
-               seen,
+  } else if (type.is_list()) {
+    return result = is_orderable_walk(
                memo,
-               *(dynamic_cast<t_list const&>(type).get_elem_type()));
-  }
-  if (type.is_set()) {
+               *(dynamic_cast<t_list const&>(type).get_elem_type()),
+               &type,
+               context);
+  } else if (type.is_set()) {
     return result = !has_disqualifying_annotation &&
-        is_orderable(
-               seen, memo, *(dynamic_cast<t_set const&>(type).get_elem_type()));
-  }
-  if (type.is_map()) {
-    return result = !has_disqualifying_annotation &&
-        is_orderable(
-               seen,
+        is_orderable_walk(
                memo,
-               *(dynamic_cast<t_map const&>(type).get_key_type())) &&
-        is_orderable(
-               seen, memo, *(dynamic_cast<t_map const&>(type).get_val_type()));
+               *(dynamic_cast<t_set const&>(type).get_elem_type()),
+               &type,
+               context);
+  } else if (type.is_map()) {
+    return result = !has_disqualifying_annotation &&
+        is_orderable_walk(
+               memo,
+               *(dynamic_cast<t_map const&>(type).get_key_type()),
+               &type,
+               context) &&
+        is_orderable_walk(
+               memo,
+               *(dynamic_cast<t_map const&>(type).get_val_type()),
+               &type,
+               context);
   }
   return false;
 }
 
+void is_orderable_back_propagate(
+    std::unordered_map<t_type const*, bool>& memo,
+    is_orderable_walk_context& context) {
+  while (!context.pending_back_propagation.empty()) {
+    auto type = *context.pending_back_propagation.begin();
+    context.pending_back_propagation.erase(
+        context.pending_back_propagation.begin());
+    auto edges = context.inv_graph.find(type);
+    if (edges == context.inv_graph.end()) {
+      continue;
+    }
+    for (t_type const* prev : edges->second) {
+      if (std::exchange(memo[prev], false)) {
+        context.pending_back_propagation.insert(prev);
+      }
+    }
+    context.inv_graph.erase(edges);
+  }
+}
+
+} // namespace
+
+bool is_orderable(
+    std::unordered_map<t_type const*, bool>& memo, t_type const& type) {
+  // Thrift struct could self-reference, so have to perform a two-stage walk:
+  // first all self-references are speculated, then negative classification is
+  // back-propagated through the traversed dependencies.
+  is_orderable_walk_context context;
+  is_orderable_walk(memo, type, nullptr, context);
+  is_orderable_back_propagate(memo, context);
+  auto it = memo.find(&type);
+  return it == memo.end() || it->second;
+}
+
 bool is_orderable(t_type const& type) {
-  std::unordered_set<t_type const*> seen;
   std::unordered_map<t_type const*, bool> memo;
-  return is_orderable(seen, memo, type);
+  return is_orderable(memo, type);
 }
 
 fmt::string_view get_type(const t_type* type) {

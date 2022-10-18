@@ -149,7 +149,7 @@ func (p *MyStruct) GetMyDataField() *MyDataItem {
   if !p.IsSetMyDataField() {
     return MyStruct_MyDataField_DEFAULT
   }
-return p.MyDataField
+  return p.MyDataField
 }
 
 func (p *MyStruct) GetMyEnum() MyEnum {
@@ -684,21 +684,21 @@ func (p *MyUnion) GetMyEnum() MyEnum {
   if !p.IsSetMyEnum() {
     return MyUnion_MyEnum_DEFAULT
   }
-return *p.MyEnum
+  return *p.MyEnum
 }
 var MyUnion_MyStruct_DEFAULT *MyStruct
 func (p *MyUnion) GetMyStruct() *MyStruct {
   if !p.IsSetMyStruct() {
     return MyUnion_MyStruct_DEFAULT
   }
-return p.MyStruct
+  return p.MyStruct
 }
 var MyUnion_MyDataItem_DEFAULT *MyDataItem
 func (p *MyUnion) GetMyDataItem() *MyDataItem {
   if !p.IsSetMyDataItem() {
     return MyUnion_MyDataItem_DEFAULT
   }
-return p.MyDataItem
+  return p.MyDataItem
 }
 var MyUnion_FloatSet_DEFAULT []float32
 
@@ -1125,7 +1125,7 @@ func (p *UnionToBeRenamed) GetReservedField() int32 {
   if !p.IsSetReservedField() {
     return UnionToBeRenamed_ReservedField_DEFAULT
   }
-return *p.ReservedField
+  return *p.ReservedField
 }
 func (p *UnionToBeRenamed) CountSetFieldsUnionToBeRenamed() int {
   count := 0

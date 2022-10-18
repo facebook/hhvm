@@ -637,7 +637,7 @@ func (p *FinderByPlateResult) GetSuccess() *Automobile {
   if !p.IsSetSuccess() {
     return FinderByPlateResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *FinderByPlateResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -876,7 +876,7 @@ func (p *FinderAliasByPlateResult) GetSuccess() *Car {
   if !p.IsSetSuccess() {
     return FinderAliasByPlateResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *FinderAliasByPlateResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -1115,7 +1115,7 @@ func (p *FinderPreviousPlateResult) GetSuccess() Plate {
   if !p.IsSetSuccess() {
     return FinderPreviousPlateResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *FinderPreviousPlateResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

@@ -91,7 +91,7 @@ func (p *Automobile) GetPreviousPlate() Plate {
   if !p.IsSetPreviousPlate() {
     return Automobile_PreviousPlate_DEFAULT
   }
-return *p.PreviousPlate
+  return *p.PreviousPlate
 }
 var Automobile_FirstPlate_DEFAULT Plate = "0000"
 
@@ -829,14 +829,14 @@ func (p *Pair) GetAutomobile() *Automobile {
   if !p.IsSetAutomobile() {
     return Pair_Automobile_DEFAULT
   }
-return p.Automobile
+  return p.Automobile
 }
 var Pair_Car_DEFAULT *Car
 func (p *Pair) GetCar() *Car {
   if !p.IsSetCar() {
     return Pair_Car_DEFAULT
   }
-return p.Car
+  return p.Car
 }
 func (p *Pair) IsSetAutomobile() bool {
   return p != nil && p.Automobile != nil

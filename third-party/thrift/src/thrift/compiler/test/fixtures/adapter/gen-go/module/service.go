@@ -326,7 +326,7 @@ func (p *ServiceFuncArgs) GetArg3() *Foo {
   if !p.IsSetArg3() {
     return ServiceFuncArgs_Arg3_DEFAULT
   }
-return p.Arg3
+  return p.Arg3
 }
 func (p *ServiceFuncArgs) IsSetArg3() bool {
   return p != nil && p.Arg3 != nil
@@ -523,7 +523,7 @@ func (p *ServiceFuncResult) GetSuccess() MyI32 {
   if !p.IsSetSuccess() {
     return ServiceFuncResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *ServiceFuncResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

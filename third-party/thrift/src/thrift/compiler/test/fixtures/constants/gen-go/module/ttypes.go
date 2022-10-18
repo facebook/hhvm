@@ -204,21 +204,21 @@ func (p *Internship) GetEmployer() Company {
   if !p.IsSetEmployer() {
     return Internship_Employer_DEFAULT
   }
-return *p.Employer
+  return *p.Employer
 }
 var Internship_Compensation_DEFAULT float64
 func (p *Internship) GetCompensation() float64 {
   if !p.IsSetCompensation() {
     return Internship_Compensation_DEFAULT
   }
-return *p.Compensation
+  return *p.Compensation
 }
 var Internship_School_DEFAULT string
 func (p *Internship) GetSchool() string {
   if !p.IsSetSchool() {
     return Internship_School_DEFAULT
   }
-return *p.School
+  return *p.School
 }
 func (p *Internship) IsSetEmployer() bool {
   return p != nil && p.Employer != nil
@@ -850,7 +850,7 @@ func (p *Struct2) GetC() *Struct1 {
   if !p.IsSetC() {
     return Struct2_C_DEFAULT
   }
-return p.C
+  return p.C
 }
 
 func (p *Struct2) GetD() []int32 {
@@ -1120,7 +1120,7 @@ func (p *Struct3) GetC() *Struct2 {
   if !p.IsSetC() {
     return Struct3_C_DEFAULT
   }
-return p.C
+  return p.C
 }
 func (p *Struct3) IsSetC() bool {
   return p != nil && p.C != nil
@@ -1323,14 +1323,14 @@ func (p *Struct4) GetB() float64 {
   if !p.IsSetB() {
     return Struct4_B_DEFAULT
   }
-return *p.B
+  return *p.B
 }
 var Struct4_C_DEFAULT int8
 func (p *Struct4) GetC() int8 {
   if !p.IsSetC() {
     return Struct4_C_DEFAULT
   }
-return *p.C
+  return *p.C
 }
 func (p *Struct4) IsSetB() bool {
   return p != nil && p.B != nil
@@ -1541,14 +1541,14 @@ func (p *Union1) GetI() int32 {
   if !p.IsSetI() {
     return Union1_I_DEFAULT
   }
-return *p.I
+  return *p.I
 }
 var Union1_D_DEFAULT float64
 func (p *Union1) GetD() float64 {
   if !p.IsSetD() {
     return Union1_D_DEFAULT
   }
-return *p.D
+  return *p.D
 }
 func (p *Union1) CountSetFieldsUnion1() int {
   count := 0
@@ -1741,28 +1741,28 @@ func (p *Union2) GetI() int32 {
   if !p.IsSetI() {
     return Union2_I_DEFAULT
   }
-return *p.I
+  return *p.I
 }
 var Union2_D_DEFAULT float64
 func (p *Union2) GetD() float64 {
   if !p.IsSetD() {
     return Union2_D_DEFAULT
   }
-return *p.D
+  return *p.D
 }
 var Union2_S_DEFAULT *Struct1
 func (p *Union2) GetS() *Struct1 {
   if !p.IsSetS() {
     return Union2_S_DEFAULT
   }
-return p.S
+  return p.S
 }
 var Union2_U_DEFAULT *Union1
 func (p *Union2) GetU() *Union1 {
   if !p.IsSetU() {
     return Union2_U_DEFAULT
   }
-return p.U
+  return p.U
 }
 func (p *Union2) CountSetFieldsUnion2() int {
   count := 0

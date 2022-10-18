@@ -1543,7 +1543,7 @@ func (p *GetEntityGetEntityArgs) GetR() *GetEntityRequest {
   if !p.IsSetR() {
     return GetEntityGetEntityArgs_R_DEFAULT
   }
-return p.R
+  return p.R
 }
 func (p *GetEntityGetEntityArgs) IsSetR() bool {
   return p != nil && p.R != nil
@@ -1667,7 +1667,7 @@ func (p *GetEntityGetEntityResult) GetSuccess() *GetEntityResponse {
   if !p.IsSetSuccess() {
     return GetEntityGetEntityResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *GetEntityGetEntityResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -1859,7 +1859,7 @@ func (p *GetEntityGetBoolResult) GetSuccess() bool {
   if !p.IsSetSuccess() {
     return GetEntityGetBoolResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetBoolResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2051,7 +2051,7 @@ func (p *GetEntityGetByteResult) GetSuccess() int8 {
   if !p.IsSetSuccess() {
     return GetEntityGetByteResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetByteResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2244,7 +2244,7 @@ func (p *GetEntityGetI16Result) GetSuccess() int16 {
   if !p.IsSetSuccess() {
     return GetEntityGetI16Result_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetI16Result) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2436,7 +2436,7 @@ func (p *GetEntityGetI32Result) GetSuccess() int32 {
   if !p.IsSetSuccess() {
     return GetEntityGetI32Result_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetI32Result) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2628,7 +2628,7 @@ func (p *GetEntityGetI64Result) GetSuccess() int64 {
   if !p.IsSetSuccess() {
     return GetEntityGetI64Result_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetI64Result) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2820,7 +2820,7 @@ func (p *GetEntityGetDoubleResult) GetSuccess() float64 {
   if !p.IsSetSuccess() {
     return GetEntityGetDoubleResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetDoubleResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -3012,7 +3012,7 @@ func (p *GetEntityGetStringResult) GetSuccess() string {
   if !p.IsSetSuccess() {
     return GetEntityGetStringResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetStringResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -4152,7 +4152,7 @@ func (p *GetEntityGetLegacyStuffResult) GetSuccess() int32 {
   if !p.IsSetSuccess() {
     return GetEntityGetLegacyStuffResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *GetEntityGetLegacyStuffResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

@@ -334,28 +334,28 @@ func (p *Vehicle) GetColor() *Color {
   if !p.IsSetColor() {
     return Vehicle_Color_DEFAULT
   }
-return p.Color
+  return p.Color
 }
 var Vehicle_LicensePlate_DEFAULT string
 func (p *Vehicle) GetLicensePlate() string {
   if !p.IsSetLicensePlate() {
     return Vehicle_LicensePlate_DEFAULT
   }
-return *p.LicensePlate
+  return *p.LicensePlate
 }
 var Vehicle_Description_DEFAULT string
 func (p *Vehicle) GetDescription() string {
   if !p.IsSetDescription() {
     return Vehicle_Description_DEFAULT
   }
-return *p.Description
+  return *p.Description
 }
 var Vehicle_Name_DEFAULT string
 func (p *Vehicle) GetName() string {
   if !p.IsSetName() {
     return Vehicle_Name_DEFAULT
   }
-return *p.Name
+  return *p.Name
 }
 var Vehicle_HasAC_DEFAULT bool = false
 
@@ -692,21 +692,21 @@ func (p *Person) GetAge() int16 {
   if !p.IsSetAge() {
     return Person_Age_DEFAULT
   }
-return *p.Age
+  return *p.Age
 }
 var Person_Address_DEFAULT string
 func (p *Person) GetAddress() string {
   if !p.IsSetAddress() {
     return Person_Address_DEFAULT
   }
-return *p.Address
+  return *p.Address
 }
 var Person_FavoriteColor_DEFAULT *Color
 func (p *Person) GetFavoriteColor() *Color {
   if !p.IsSetFavoriteColor() {
     return Person_FavoriteColor_DEFAULT
   }
-return p.FavoriteColor
+  return p.FavoriteColor
 }
 var Person_Friends_DEFAULT []PersonID
 
@@ -718,7 +718,7 @@ func (p *Person) GetBestFriend() PersonID {
   if !p.IsSetBestFriend() {
     return Person_BestFriend_DEFAULT
   }
-return *p.BestFriend
+  return *p.BestFriend
 }
 var Person_PetNames_DEFAULT map[Animal]string
 
@@ -730,7 +730,7 @@ func (p *Person) GetAfraidOfAnimal() Animal {
   if !p.IsSetAfraidOfAnimal() {
     return Person_AfraidOfAnimal_DEFAULT
   }
-return *p.AfraidOfAnimal
+  return *p.AfraidOfAnimal
 }
 var Person_Vehicles_DEFAULT []*Vehicle
 

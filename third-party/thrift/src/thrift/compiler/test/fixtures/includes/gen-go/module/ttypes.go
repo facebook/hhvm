@@ -52,14 +52,14 @@ func (p *MyStruct) GetMyIncludedField() *includes0.Included {
   if !p.IsSetMyIncludedField() {
     return MyStruct_MyIncludedField_DEFAULT
   }
-return p.MyIncludedField
+  return p.MyIncludedField
 }
 var MyStruct_MyOtherIncludedField_DEFAULT *includes0.Included
 func (p *MyStruct) GetMyOtherIncludedField() *includes0.Included {
   if !p.IsSetMyOtherIncludedField() {
     return MyStruct_MyOtherIncludedField_DEFAULT
   }
-return p.MyOtherIncludedField
+  return p.MyOtherIncludedField
 }
 
 func (p *MyStruct) GetMyIncludedInt() includes0.IncludedInt64 {

@@ -464,7 +464,7 @@ func (p *AdapterServiceCountResult) GetSuccess() *CountingStruct {
   if !p.IsSetSuccess() {
     return AdapterServiceCountResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *AdapterServiceCountResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -592,7 +592,7 @@ func (p *AdapterServiceAdaptedTypesArgs) GetArg() *HeapAllocated {
   if !p.IsSetArg() {
     return AdapterServiceAdaptedTypesArgs_Arg_DEFAULT
   }
-return p.Arg
+  return p.Arg
 }
 func (p *AdapterServiceAdaptedTypesArgs) IsSetArg() bool {
   return p != nil && p.Arg != nil
@@ -716,7 +716,7 @@ func (p *AdapterServiceAdaptedTypesResult) GetSuccess() *HeapAllocated {
   if !p.IsSetSuccess() {
     return AdapterServiceAdaptedTypesResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *AdapterServiceAdaptedTypesResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

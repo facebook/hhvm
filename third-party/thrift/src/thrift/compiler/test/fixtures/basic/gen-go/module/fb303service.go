@@ -400,7 +400,7 @@ func (p *FB303ServiceSimpleRpcResult) GetSuccess() *ReservedKeyword {
   if !p.IsSetSuccess() {
     return FB303ServiceSimpleRpcResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *FB303ServiceSimpleRpcResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

@@ -1080,7 +1080,7 @@ func (p *TypeUri) GetUri() Uri {
   if !p.IsSetUri() {
     return TypeUri_Uri_DEFAULT
   }
-return *p.Uri
+  return *p.Uri
 }
 var TypeUri_TypeHashPrefixSha2_256_DEFAULT ByteString
 
@@ -1301,119 +1301,119 @@ func (p *TypeName) GetBoolType() Void {
   if !p.IsSetBoolType() {
     return TypeName_BoolType_DEFAULT
   }
-return *p.BoolType
+  return *p.BoolType
 }
 var TypeName_ByteType_DEFAULT Void
 func (p *TypeName) GetByteType() Void {
   if !p.IsSetByteType() {
     return TypeName_ByteType_DEFAULT
   }
-return *p.ByteType
+  return *p.ByteType
 }
 var TypeName_I16Type_DEFAULT Void
 func (p *TypeName) GetI16Type() Void {
   if !p.IsSetI16Type() {
     return TypeName_I16Type_DEFAULT
   }
-return *p.I16Type
+  return *p.I16Type
 }
 var TypeName_I32Type_DEFAULT Void
 func (p *TypeName) GetI32Type() Void {
   if !p.IsSetI32Type() {
     return TypeName_I32Type_DEFAULT
   }
-return *p.I32Type
+  return *p.I32Type
 }
 var TypeName_I64Type_DEFAULT Void
 func (p *TypeName) GetI64Type() Void {
   if !p.IsSetI64Type() {
     return TypeName_I64Type_DEFAULT
   }
-return *p.I64Type
+  return *p.I64Type
 }
 var TypeName_FloatType_DEFAULT Void
 func (p *TypeName) GetFloatType() Void {
   if !p.IsSetFloatType() {
     return TypeName_FloatType_DEFAULT
   }
-return *p.FloatType
+  return *p.FloatType
 }
 var TypeName_DoubleType_DEFAULT Void
 func (p *TypeName) GetDoubleType() Void {
   if !p.IsSetDoubleType() {
     return TypeName_DoubleType_DEFAULT
   }
-return *p.DoubleType
+  return *p.DoubleType
 }
 var TypeName_StringType_DEFAULT Void
 func (p *TypeName) GetStringType() Void {
   if !p.IsSetStringType() {
     return TypeName_StringType_DEFAULT
   }
-return *p.StringType
+  return *p.StringType
 }
 var TypeName_BinaryType_DEFAULT Void
 func (p *TypeName) GetBinaryType() Void {
   if !p.IsSetBinaryType() {
     return TypeName_BinaryType_DEFAULT
   }
-return *p.BinaryType
+  return *p.BinaryType
 }
 var TypeName_EnumType_DEFAULT *TypeUri
 func (p *TypeName) GetEnumType() *TypeUri {
   if !p.IsSetEnumType() {
     return TypeName_EnumType_DEFAULT
   }
-return p.EnumType
+  return p.EnumType
 }
 var TypeName_TypedefType_DEFAULT *TypeUri
 func (p *TypeName) GetTypedefType() *TypeUri {
   if !p.IsSetTypedefType() {
     return TypeName_TypedefType_DEFAULT
   }
-return p.TypedefType
+  return p.TypedefType
 }
 var TypeName_StructType_DEFAULT *TypeUri
 func (p *TypeName) GetStructType() *TypeUri {
   if !p.IsSetStructType() {
     return TypeName_StructType_DEFAULT
   }
-return p.StructType
+  return p.StructType
 }
 var TypeName_UnionType_DEFAULT *TypeUri
 func (p *TypeName) GetUnionType() *TypeUri {
   if !p.IsSetUnionType() {
     return TypeName_UnionType_DEFAULT
   }
-return p.UnionType
+  return p.UnionType
 }
 var TypeName_ExceptionType_DEFAULT *TypeUri
 func (p *TypeName) GetExceptionType() *TypeUri {
   if !p.IsSetExceptionType() {
     return TypeName_ExceptionType_DEFAULT
   }
-return p.ExceptionType
+  return p.ExceptionType
 }
 var TypeName_ListType_DEFAULT Void
 func (p *TypeName) GetListType() Void {
   if !p.IsSetListType() {
     return TypeName_ListType_DEFAULT
   }
-return *p.ListType
+  return *p.ListType
 }
 var TypeName_SetType_DEFAULT Void
 func (p *TypeName) GetSetType() Void {
   if !p.IsSetSetType() {
     return TypeName_SetType_DEFAULT
   }
-return *p.SetType
+  return *p.SetType
 }
 var TypeName_MapType_DEFAULT Void
 func (p *TypeName) GetMapType() Void {
   if !p.IsSetMapType() {
     return TypeName_MapType_DEFAULT
   }
-return *p.MapType
+  return *p.MapType
 }
 func (p *TypeName) CountSetFieldsTypeName() int {
   count := 0

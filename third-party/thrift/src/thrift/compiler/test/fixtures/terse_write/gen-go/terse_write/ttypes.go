@@ -347,7 +347,7 @@ func (p *StructLevelTerseStruct) GetStructField() *MyStruct {
   if !p.IsSetStructField() {
     return StructLevelTerseStruct_StructField_DEFAULT
   }
-return p.StructField
+  return p.StructField
 }
 func (p *StructLevelTerseStruct) IsSetStructField() bool {
   return p != nil && p.StructField != nil
@@ -1127,7 +1127,7 @@ func (p *FieldLevelTerseStruct) GetTerseStructField() *MyStruct {
   if !p.IsSetTerseStructField() {
     return FieldLevelTerseStruct_TerseStructField_DEFAULT
   }
-return p.TerseStructField
+  return p.TerseStructField
 }
 
 func (p *FieldLevelTerseStruct) GetBoolField() bool {
@@ -1186,7 +1186,7 @@ func (p *FieldLevelTerseStruct) GetStructField() *MyStruct {
   if !p.IsSetStructField() {
     return FieldLevelTerseStruct_StructField_DEFAULT
   }
-return p.StructField
+  return p.StructField
 }
 func (p *FieldLevelTerseStruct) IsSetTerseStructField() bool {
   return p != nil && p.TerseStructField != nil
@@ -2548,7 +2548,7 @@ func (p *TerseStructWithCustomDefault) GetStructField() *MyStructWithCustomDefau
   if !p.IsSetStructField() {
     return TerseStructWithCustomDefault_StructField_DEFAULT
   }
-return p.StructField
+  return p.StructField
 }
 func (p *TerseStructWithCustomDefault) IsSetStructField() bool {
   return p != nil && p.StructField != nil

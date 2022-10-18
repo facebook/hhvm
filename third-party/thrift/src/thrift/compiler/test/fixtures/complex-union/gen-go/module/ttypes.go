@@ -53,14 +53,14 @@ func (p *ComplexUnion) GetIntValue() int64 {
   if !p.IsSetIntValue() {
     return ComplexUnion_IntValue_DEFAULT
   }
-return *p.IntValue
+  return *p.IntValue
 }
 var ComplexUnion_StringValue_DEFAULT string
 func (p *ComplexUnion) GetStringValue() string {
   if !p.IsSetStringValue() {
     return ComplexUnion_StringValue_DEFAULT
   }
-return *p.StringValue
+  return *p.StringValue
 }
 var ComplexUnion_IntListValue_DEFAULT []int64
 
@@ -82,7 +82,7 @@ func (p *ComplexUnion) GetStringRef() string {
   if !p.IsSetStringRef() {
     return ComplexUnion_StringRef_DEFAULT
   }
-return *p.StringRef
+  return *p.StringRef
 }
 func (p *ComplexUnion) CountSetFieldsComplexUnion() int {
   count := 0
@@ -742,7 +742,7 @@ func (p *DataUnion) GetStringData() string {
   if !p.IsSetStringData() {
     return DataUnion_StringData_DEFAULT
   }
-return *p.StringData
+  return *p.StringData
 }
 func (p *DataUnion) CountSetFieldsDataUnion() int {
   count := 0
@@ -1151,14 +1151,14 @@ func (p *ValUnion) GetV1() *Val {
   if !p.IsSetV1() {
     return ValUnion_V1_DEFAULT
   }
-return p.V1
+  return p.V1
 }
 var ValUnion_V2_DEFAULT *Val
 func (p *ValUnion) GetV2() *Val {
   if !p.IsSetV2() {
     return ValUnion_V2_DEFAULT
   }
-return p.V2
+  return p.V2
 }
 func (p *ValUnion) CountSetFieldsValUnion() int {
   count := 0
@@ -1347,14 +1347,14 @@ func (p *VirtualComplexUnion) GetThingOne() string {
   if !p.IsSetThingOne() {
     return VirtualComplexUnion_ThingOne_DEFAULT
   }
-return *p.ThingOne
+  return *p.ThingOne
 }
 var VirtualComplexUnion_ThingTwo_DEFAULT string
 func (p *VirtualComplexUnion) GetThingTwo() string {
   if !p.IsSetThingTwo() {
     return VirtualComplexUnion_ThingTwo_DEFAULT
   }
-return *p.ThingTwo
+  return *p.ThingTwo
 }
 func (p *VirtualComplexUnion) CountSetFieldsVirtualComplexUnion() int {
   count := 0
@@ -1652,7 +1652,7 @@ func (p *NonCopyableUnion) GetS() *NonCopyableStruct {
   if !p.IsSetS() {
     return NonCopyableUnion_S_DEFAULT
   }
-return p.S
+  return p.S
 }
 func (p *NonCopyableUnion) CountSetFieldsNonCopyableUnion() int {
   count := 0

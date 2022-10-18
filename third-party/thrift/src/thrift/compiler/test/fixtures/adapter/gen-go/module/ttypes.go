@@ -348,7 +348,7 @@ func (p *Foo) GetOptionalIntField() int32 {
   if !p.IsSetOptionalIntField() {
     return Foo_OptionalIntField_DEFAULT
   }
-return *p.OptionalIntField
+  return *p.OptionalIntField
 }
 
 func (p *Foo) GetIntFieldWithDefault() int32 {
@@ -1053,7 +1053,7 @@ func (p *Baz) GetIntField() int32 {
   if !p.IsSetIntField() {
     return Baz_IntField_DEFAULT
   }
-return *p.IntField
+  return *p.IntField
 }
 var Baz_SetField_DEFAULT SetWithAdapter
 
@@ -1075,7 +1075,7 @@ func (p *Baz) GetLongField() MyI64 {
   if !p.IsSetLongField() {
     return Baz_LongField_DEFAULT
   }
-return *p.LongField
+  return *p.LongField
 }
 func (p *Baz) CountSetFieldsBaz() int {
   count := 0
@@ -1491,14 +1491,14 @@ func (p *Bar) GetStructField() *Foo {
   if !p.IsSetStructField() {
     return Bar_StructField_DEFAULT
   }
-return p.StructField
+  return p.StructField
 }
 var Bar_OptionalStructField_DEFAULT *Foo
 func (p *Bar) GetOptionalStructField() *Foo {
   if !p.IsSetOptionalStructField() {
     return Bar_OptionalStructField_DEFAULT
   }
-return p.OptionalStructField
+  return p.OptionalStructField
 }
 
 func (p *Bar) GetStructListField() []*FooWithAdapter {
@@ -1514,21 +1514,21 @@ func (p *Bar) GetUnionField() *Baz {
   if !p.IsSetUnionField() {
     return Bar_UnionField_DEFAULT
   }
-return p.UnionField
+  return p.UnionField
 }
 var Bar_OptionalUnionField_DEFAULT *Baz
 func (p *Bar) GetOptionalUnionField() *Baz {
   if !p.IsSetOptionalUnionField() {
     return Bar_OptionalUnionField_DEFAULT
   }
-return p.OptionalUnionField
+  return p.OptionalUnionField
 }
 var Bar_AdaptedStructField_DEFAULT *DirectlyAdapted
 func (p *Bar) GetAdaptedStructField() *DirectlyAdapted {
   if !p.IsSetAdaptedStructField() {
     return Bar_AdaptedStructField_DEFAULT
   }
-return p.AdaptedStructField
+  return p.AdaptedStructField
 }
 func (p *Bar) IsSetStructField() bool {
   return p != nil && p.StructField != nil
@@ -2080,14 +2080,14 @@ func (p *StructWithFieldAdapter) GetOptSharedField() int32 {
   if !p.IsSetOptSharedField() {
     return StructWithFieldAdapter_OptSharedField_DEFAULT
   }
-return *p.OptSharedField
+  return *p.OptSharedField
 }
 var StructWithFieldAdapter_OptBoxedField_DEFAULT int32
 func (p *StructWithFieldAdapter) GetOptBoxedField() int32 {
   if !p.IsSetOptBoxedField() {
     return StructWithFieldAdapter_OptBoxedField_DEFAULT
   }
-return *p.OptBoxedField
+  return *p.OptBoxedField
 }
 
 func (p *StructWithFieldAdapter) GetBoxedField() int32 {
@@ -2596,7 +2596,7 @@ func (p *B) GetA() *A {
   if !p.IsSetA() {
     return B_A_DEFAULT
   }
-return p.A
+  return p.A
 }
 func (p *B) IsSetA() bool {
   return p != nil && p.A != nil
@@ -4754,7 +4754,7 @@ func (p *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestS
   if !p.IsSetAdaptedStruct() {
     return AdaptTemplatedNestedTestStruct_AdaptedStruct_DEFAULT
   }
-return p.AdaptedStruct
+  return p.AdaptedStruct
 }
 func (p *AdaptTemplatedNestedTestStruct) IsSetAdaptedStruct() bool {
   return p != nil && p.AdaptedStruct != nil
@@ -4879,7 +4879,7 @@ func (p *AdaptTestUnion) GetDelay() DurationMs {
   if !p.IsSetDelay() {
     return AdaptTestUnion_Delay_DEFAULT
   }
-return *p.Delay
+  return *p.Delay
 }
 var AdaptTestUnion_Custom_DEFAULT CustomProtocolType
 
@@ -5301,28 +5301,28 @@ func (p *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
   if !p.IsSetAdaptedStruct() {
     return StructFieldAdaptedStruct_AdaptedStruct_DEFAULT
   }
-return p.AdaptedStruct
+  return p.AdaptedStruct
 }
 var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT *AdaptedTypedef
 func (p *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
   if !p.IsSetAdaptedTypedef() {
     return StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT
   }
-return p.AdaptedTypedef
+  return p.AdaptedTypedef
 }
 var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT *DirectlyAdaptedStruct
 func (p *StructFieldAdaptedStruct) GetDirectlyAdapted() *DirectlyAdaptedStruct {
   if !p.IsSetDirectlyAdapted() {
     return StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT
   }
-return p.DirectlyAdapted
+  return p.DirectlyAdapted
 }
 var StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT *TypedefOfDirect
 func (p *StructFieldAdaptedStruct) GetTypedefOfAdapted() *TypedefOfDirect {
   if !p.IsSetTypedefOfAdapted() {
     return StructFieldAdaptedStruct_TypedefOfAdapted_DEFAULT
   }
-return p.TypedefOfAdapted
+  return p.TypedefOfAdapted
 }
 func (p *StructFieldAdaptedStruct) IsSetAdaptedStruct() bool {
   return p != nil && p.AdaptedStruct != nil
@@ -5582,7 +5582,7 @@ func (p *CircularAdaptee) GetField() *CircularStruct {
   if !p.IsSetField() {
     return CircularAdaptee_Field_DEFAULT
   }
-return p.Field
+  return p.Field
 }
 func (p *CircularAdaptee) IsSetField() bool {
   return p != nil && p.Field != nil
@@ -5705,7 +5705,7 @@ func (p *CircularStruct) GetField() *CircularAdaptee {
   if !p.IsSetField() {
     return CircularStruct_Field_DEFAULT
   }
-return p.Field
+  return p.Field
 }
 func (p *CircularStruct) IsSetField() bool {
   return p != nil && p.Field != nil
@@ -6119,7 +6119,7 @@ func (p *MoveOnly) GetPtr() *HeapAllocated {
   if !p.IsSetPtr() {
     return MoveOnly_Ptr_DEFAULT
   }
-return p.Ptr
+  return p.Ptr
 }
 func (p *MoveOnly) IsSetPtr() bool {
   return p != nil && p.Ptr != nil
@@ -6487,21 +6487,21 @@ func (p *CountingStruct) GetRegularInt() int64 {
   if !p.IsSetRegularInt() {
     return CountingStruct_RegularInt_DEFAULT
   }
-return *p.RegularInt
+  return *p.RegularInt
 }
 var CountingStruct_CountingInt_DEFAULT CountingInt
 func (p *CountingStruct) GetCountingInt() CountingInt {
   if !p.IsSetCountingInt() {
     return CountingStruct_CountingInt_DEFAULT
   }
-return *p.CountingInt
+  return *p.CountingInt
 }
 var CountingStruct_RegularString_DEFAULT string
 func (p *CountingStruct) GetRegularString() string {
   if !p.IsSetRegularString() {
     return CountingStruct_RegularString_DEFAULT
   }
-return *p.RegularString
+  return *p.RegularString
 }
 func (p *CountingStruct) IsSetRegularInt() bool {
   return p != nil && p.RegularInt != nil

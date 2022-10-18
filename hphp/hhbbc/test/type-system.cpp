@@ -29,6 +29,7 @@
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/index.h"
@@ -612,6 +613,9 @@ Index make_index() {
 
   Logger::LogLevel = Logger::LogNone;
 
+  HHBBC::parallel::num_threads = 1;
+  HHBBC::parallel::final_threads = 1;
+
   std::unique_ptr<UnitEmitter> ue{assemble_string(
     hhas.c_str(), hhas.size(),
     "ignore.php",
@@ -650,7 +654,12 @@ Index make_index() {
   if (parse.unit) {
     auto const name = parse.unit->filename;
     auto stored = coro::wait(client->store(std::move(parse.unit)));
-    indexInput.units.emplace_back(name, std::move(stored));
+    indexInput.units.emplace_back(
+      Index::Input::UnitMeta{
+        std::move(stored),
+        name
+      }
+    );
   }
   for (auto& c : parse.classes) {
     auto const name = c->name;
@@ -660,18 +669,26 @@ Index make_index() {
       Index::Input::ClassMeta{
         std::move(stored),
         name,
-        std::move(deps)
+        std::move(deps),
+        nullptr
       }
     );
   }
   for (auto& f : parse.funcs) {
     auto const name = f->name;
     auto stored = coro::wait(client->store(std::move(f)));
-    indexInput.funcs.emplace_back(name, std::move(stored));
+    indexInput.funcs.emplace_back(
+      Index::Input::FuncMeta{
+        std::move(stored),
+        name,
+        nullptr
+      }
+    );
   }
 
   return Index{
     std::move(indexInput),
+    HHBBC::Config::get(RepoGlobalData{}),
     std::move(executor),
     std::move(client),
     [] (std::unique_ptr<coro::TicketExecutor>,

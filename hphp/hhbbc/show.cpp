@@ -403,6 +403,20 @@ std::string show(const Unit& unit, const Index& index) {
     unit,
     [&] (const php::Func& f) { funcs.emplace_back(&f); }
   );
+
+  std::sort(
+    begin(classes), end(classes),
+    [] (const php::Class* a, const php::Class* b) {
+      return string_data_lti{}(a->name, b->name);
+    }
+  );
+  std::sort(
+    begin(funcs), end(funcs),
+    [] (const php::Func* a, const php::Func* b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+
   return show(unit, classes, funcs);
 }
 

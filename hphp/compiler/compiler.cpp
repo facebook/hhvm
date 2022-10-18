@@ -1484,6 +1484,7 @@ bool process(const CompilerOptions &po) {
 
   HHBBC::whole_program(
     std::move(*hhbbcInputs),
+    HHBBC::Config::get(getGlobalData()),
     std::move(executor),
     std::move(client),
     emitUnit,

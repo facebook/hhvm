@@ -696,20 +696,36 @@ std::string show(const Class&);
  * "update" step in between whole program analysis rounds).
  */
 struct Index {
+  // The input used to build the Index is largely the extern-worker
+  // refs representing the program components. However, some
+  // additional metadata is needed locally to know what the refs
+  // represent (and schedule some initial jobs).
   struct Input {
     template <typename T> using R = extern_worker::Ref<std::unique_ptr<T>>;
 
     struct ClassMeta {
       R<php::Class> cls;
-      SString name;
+      LSString name;
       std::vector<SString> dependencies;
+      LSString closureContext;
+    };
+
+    struct FuncMeta {
+      R<php::Func> func;
+      LSString name;
+      LSString methCallerUnit; // nullptr if not MethCaller
+    };
+
+    struct UnitMeta {
+      R<php::Unit> unit;
+      LSString name;
     };
 
     static std::vector<SString> makeDeps(const php::Class&);
 
     std::vector<ClassMeta> classes;
-    std::vector<std::pair<SString, R<php::Unit>>> units;
-    std::vector<std::pair<SString, R<php::Func>>> funcs;
+    std::vector<UnitMeta> units;
+    std::vector<FuncMeta> funcs;
   };
 
   /*
@@ -717,6 +733,7 @@ struct Index {
    * analysis of the program.
    */
   Index(Input,
+        Config,
         std::unique_ptr<coro::TicketExecutor>,
         std::unique_ptr<extern_worker::Client>,
         DisposeCallback,

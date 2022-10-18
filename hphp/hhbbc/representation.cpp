@@ -17,20 +17,13 @@
 
 #include "hphp/hhbbc/wide-func.h"
 
+#include "hphp/zend/zend-string.h"
+
 namespace HPHP::HHBBC::php {
 
 //////////////////////////////////////////////////////////////////////
 
-// Can't form non-const refs to bitfields, so use this to serde them
-// instead.
-#define SD_BITFIELD(X)                      \
-  if constexpr (SerDe::deserializing) {     \
-    decltype(X) v;                          \
-    sd(v);                                  \
-    X = v;                                  \
-  } else {                                  \
-    sd(X);                                  \
-  }
+Func::BytecodeReuser* Func::s_reuser = nullptr;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -69,21 +62,20 @@ template <typename SerDe> void Param::serde(SerDe& sd) {
     (userAttributes)
     (phpCode)
     (builtinType);
-  SD_BITFIELD(inout);
-  SD_BITFIELD(readonly);
-  SD_BITFIELD(isVariadic);
+  SERDE_BITFIELD(inout, sd);
+  SERDE_BITFIELD(readonly, sd);
+  SERDE_BITFIELD(isVariadic, sd);
 }
 
 template <typename SerDe> void Local::serde(SerDe& sd) {
   sd(name);
-  SD_BITFIELD(id);
-  SD_BITFIELD(killed);
-  SD_BITFIELD(nameId);
-  SD_BITFIELD(unusedName);
+  SERDE_BITFIELD(id, sd);
+  SERDE_BITFIELD(killed, sd);
+  SERDE_BITFIELD(nameId, sd);
+  SERDE_BITFIELD(unusedName, sd);
 }
 
-template <typename SerDe> void Func::serde(SerDe& sd,
-                                           Class* parentClass) {
+template <typename SerDe> void Func::serde(SerDe& sd, Class* parentClass) {
   if constexpr (SerDe::deserializing) {
     cls = parentClass;
   } else {
@@ -115,25 +107,40 @@ template <typename SerDe> void Func::serde(SerDe& sd,
     (exnNodes)
     (isNative);
 
-  SD_BITFIELD(isClosureBody);
-  SD_BITFIELD(isAsync);
-  SD_BITFIELD(isGenerator);
-  SD_BITFIELD(isPairGenerator);
-  SD_BITFIELD(isMemoizeWrapper);
-  SD_BITFIELD(isMemoizeWrapperLSB);
-  SD_BITFIELD(isMemoizeImpl);
-  SD_BITFIELD(isReified);
-  SD_BITFIELD(noContextSensitiveAnalysis);
-  SD_BITFIELD(hasInOutArgs);
-  SD_BITFIELD(sampleDynamicCalls);
-  SD_BITFIELD(hasCreateCl);
-  SD_BITFIELD(isReadonlyReturn);
-  SD_BITFIELD(isReadonlyThis);
-  SD_BITFIELD(hasParamsWithMultiUBs);
-  SD_BITFIELD(hasReturnWithMultiUBs);
+  SERDE_BITFIELD(isClosureBody, sd);
+  SERDE_BITFIELD(isAsync, sd);
+  SERDE_BITFIELD(isGenerator, sd);
+  SERDE_BITFIELD(isPairGenerator, sd);
+  SERDE_BITFIELD(isMemoizeWrapper, sd);
+  SERDE_BITFIELD(isMemoizeWrapperLSB, sd);
+  SERDE_BITFIELD(isMemoizeImpl, sd);
+  SERDE_BITFIELD(isReified, sd);
+  SERDE_BITFIELD(noContextSensitiveAnalysis, sd);
+  SERDE_BITFIELD(hasInOutArgs, sd);
+  SERDE_BITFIELD(sampleDynamicCalls, sd);
+  SERDE_BITFIELD(hasCreateCl, sd);
+  SERDE_BITFIELD(isReadonlyReturn, sd);
+  SERDE_BITFIELD(isReadonlyThis, sd);
+  SERDE_BITFIELD(hasParamsWithMultiUBs, sd);
+  SERDE_BITFIELD(hasReturnWithMultiUBs, sd);
 
   if constexpr (SerDe::deserializing) {
     sd(WideFunc::mut(this).blocks());
+    if (s_reuser) {
+      // The above call to WideFunc deserialized the bytecode and
+      // compressed it into rawBlocks. This is always a new copy. If a
+      // reuser is provided, we can try to find an existing identical
+      // bytecode block and share that. Hash the compressed bytecode
+      // and look it up in the table. We use SHA1, so we can use
+      // equality of the hash as a proxy for equality of the bytecode.
+      SHA1 sha1{string_sha1(
+        folly::StringPiece{rawBlocks->data(), rawBlocks->size()}
+      )};
+      // Insert it. If one already exists, we'll get that back
+      // instead. In either case, assign it back to this func.
+      auto reused = s_reuser->emplace(sha1, std::move(rawBlocks)).first->second;
+      rawBlocks = std::move(reused);
+    }
   } else {
     sd(WideFunc::cns(this).blocks());
   }
@@ -157,9 +164,9 @@ template <typename SerDe> void Const::serde(SerDe& sd) {
     (coeffects)
     (resolvedTypeStructure)
     (kind);
-  SD_BITFIELD(invariance);
-  SD_BITFIELD(isAbstract);
-  SD_BITFIELD(isFromTrait);
+  SERDE_BITFIELD(invariance, sd);
+  SERDE_BITFIELD(isAbstract, sd);
+  SERDE_BITFIELD(isFromTrait, sd);
 }
 
 template <typename SerDe> void Class::serde(SerDe& sd) {
@@ -179,9 +186,9 @@ template <typename SerDe> void Class::serde(SerDe& sd) {
     (enumBaseTy)
     (methods, this);
 
-  SD_BITFIELD(hasReifiedGenerics);
-  SD_BITFIELD(hasConstProp);
-  SD_BITFIELD(sampleDynamicConstruct);
+  SERDE_BITFIELD(hasReifiedGenerics, sd);
+  SERDE_BITFIELD(hasConstProp, sd);
+  SERDE_BITFIELD(sampleDynamicConstruct, sd);
 }
 
 template <typename SerDe> void Constant::serde(SerDe& sd) {
@@ -228,10 +235,6 @@ template <typename SerDe> void Unit::serde(SerDe& sd) {
     (fileAttributes)
     (moduleName);
 }
-
-//////////////////////////////////////////////////////////////////////
-
-#undef SD_BITFIELD
 
 //////////////////////////////////////////////////////////////////////
 

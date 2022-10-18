@@ -117,6 +117,23 @@ constexpr int kStatsBump = 50;
 
 //////////////////////////////////////////////////////////////////////
 
+// "Bucketize" a vector of strings into N buckets, using consistent
+// hashing.
+std::vector<std::vector<SString>>
+consistently_bucketize(const std::vector<SString>&, size_t bucketSize);
+
+//////////////////////////////////////////////////////////////////////
+
+// Helper functions to produce a std::vector<T> from a single T
+// without boilerplate.
+template <typename T> std::vector<T> singleton_vec(T t) {
+  std::vector<T> out;
+  out.emplace_back(std::move(t));
+  return out;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void profile_memory(const char* what, const char* when, const std::string&);
 void summarize_memory(StructuredLogEntry*);
 

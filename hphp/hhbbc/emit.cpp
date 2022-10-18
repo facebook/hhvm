@@ -126,6 +126,7 @@ void recordClass(EmitUnitState& euState,
 
 php::SrcLoc srcLoc(const php::Unit& unit, const php::Func& func, int32_t ix) {
   if (ix < 0) return php::SrcLoc{};
+  assertx(ix < unit.srcLocs.size());
   return unit.srcLocs[ix];
 }
 

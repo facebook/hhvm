@@ -2621,7 +2621,6 @@ dependencies = [
  "crossbeam",
  "hh24_types",
  "hh_hash",
- "nohash-hasher",
  "oxidized",
  "oxidized_by_ref",
  "relative_path",

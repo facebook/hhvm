@@ -73,8 +73,6 @@ impl FromSql for SqlitePathBuf {
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct FileInfoId(std::num::NonZeroU64);
 
-impl nohash_hasher::IsEnabled for FileInfoId {}
-
 impl FileInfoId {
     pub fn last_insert_rowid(conn: &rusqlite::Connection) -> Self {
         Self::from_i64(conn.last_insert_rowid())

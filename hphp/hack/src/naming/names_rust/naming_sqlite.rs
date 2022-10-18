@@ -10,7 +10,6 @@ use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
-use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
 use relative_path::RelativePath;
 use rusqlite::params;
@@ -135,78 +134,6 @@ impl Names {
         self.conn
             .prepare_cached("REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);")?
             .execute(params![checksum])?;
-        Ok(())
-    }
-
-    /// Removes a symbol definition from the reverse naming table (be it in
-    /// a winner or in the overflow table), and fixes the remaining candidates.
-    /// TODO(ljw): this crashes in the case where you delete an overflow symbol
-    /// and it tries to move the remaining overflow symbol into the main table.
-    pub fn remove_symbol(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-        path: &RelativePath,
-    ) -> anyhow::Result<()> {
-        let file_info_id: crate::FileInfoId = self
-            .conn
-            .prepare(
-                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
-            )?
-            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
-                row.get(0)
-            })?;
-
-        self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ? AND FILE_INFO_ID = ?")?
-            .execute(params![symbol_hash, file_info_id])?;
-        self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
-            .execute(params![symbol_hash, file_info_id])?;
-
-        let mut overflow_symbols = self.get_overflow_rows_unordered(symbol_hash)?;
-        overflow_symbols.sort_by_key(|symbol| symbol.path.clone());
-        if let Some(symbol) = overflow_symbols.into_iter().next() {
-            // Move row from overflow to main symbol table
-            self.conn
-                .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
-                .execute(params![symbol_hash, symbol.file_info_id])?;
-            let insert_statement = "
-        INSERT INTO NAMING_SYMBOLS (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
-            self.conn.prepare(insert_statement)?.execute(params![
-                symbol.hash,
-                symbol.canon_hash,
-                symbol.decl_hash,
-                symbol.kind,
-                symbol.file_info_id
-            ])?;
-        }
-
-        Ok(())
-    }
-
-    /// Adds all of a file's symbols into the forward and reverse naming tables,
-    /// into normal or overflow reverse table as appropriate.
-    pub(crate) fn save_file_summary(
-        &self,
-        path: &RelativePath,
-        summary: &crate::FileSummary,
-    ) -> anyhow::Result<()> {
-        let mut save_result = crate::SaveResult {
-            checksum: self.get_checksum()?,
-            ..Default::default()
-        };
-        self.insert_file_summary(path, summary, &mut save_result)?;
-        self.set_checksum(save_result.checksum)?;
         Ok(())
     }
 
@@ -604,72 +531,6 @@ impl Names {
         Ok(None)
     }
 
-    /// It scans O(table) for every entry in the reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_symbol_hashes_for_winners(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH
-        FROM
-            NAMING_SYMBOLS
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut symbol_hashes = IntSet::default();
-
-        while let Some(row) = rows.next()? {
-            symbol_hashes.insert(row.get(0)?);
-        }
-
-        Ok(symbol_hashes)
-    }
-
-    /// It scans O(table) for every entry in the overflow reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_symbol_hashes_for_losers(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS_OVERFLOW.HASH
-        FROM
-            NAMING_SYMBOLS_OVERFLOW
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS_OVERFLOW.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut symbol_hashes = IntSet::default();
-
-        while let Some(row) = rows.next()? {
-            symbol_hashes.insert(row.get(0)?);
-        }
-
-        Ok(symbol_hashes)
-    }
-
     /// This function will return an empty list if the path doesn't exist in the forward naming table
     pub fn get_symbol_hashes_for_winners_and_losers(
         &self,
@@ -710,32 +571,6 @@ impl Names {
                 Ok(())
             })
             .optional()?;
-        Ok(results)
-    }
-
-    /// It looks up the forward-naming-table to find which symbols are in a filename,
-    /// and for each it does a further lookup in the reverse-naming-table to find more about them.
-    /// It only returns information about winners that were found in that filename.
-    pub fn get_symbol_and_decl_hashes_for_winners(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<Vec<(ToplevelSymbolHash, DeclHash, crate::FileInfoId)>> {
-        // For each symbol_hash we get from the forward-naming-table, look it up in the reverse-naming-table
-        let mut results = vec![];
-        for (symbol_hash, fwd_file_id) in self.get_symbol_hashes_for_winners_and_losers(path)? {
-            self.conn
-                .prepare_cached(
-                    "SELECT DECL_HASH, FILE_INFO_ID FROM NAMING_SYMBOLS WHERE HASH = ?",
-                )?
-                .query_row(params![symbol_hash], |row| {
-                    let decl_hash: DeclHash = row.get(0)?;
-                    let winner_file_id: crate::FileInfoId = row.get(1)?;
-                    if winner_file_id == fwd_file_id {
-                        results.push((symbol_hash, decl_hash, winner_file_id));
-                    }
-                    Ok(())
-                })?;
-        }
         Ok(results)
     }
 
@@ -786,29 +621,6 @@ impl Names {
             .collect::<Vec<_>>()
             .join("|");
         if s.is_empty() { None } else { Some(s) }
-    }
-
-    /// This removes an entry from the forward naming table.
-    pub fn delete(&self, path: &RelativePath) -> anyhow::Result<()> {
-        let file_info_id: Option<crate::FileInfoId> = self
-            .conn
-            .prepare_cached(
-                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
-            )?
-            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
-                row.get(0)
-            })
-            .optional()?;
-        let file_info_id = match file_info_id {
-            Some(id) => id,
-            None => return Ok(()),
-        };
-        self.conn
-            .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
-            .execute(params![file_info_id])?;
-        Ok(())
     }
 
     /// This updates the forward naming table.
@@ -889,7 +701,7 @@ impl Names {
 
     /// This updates the reverse naming-table NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW
     /// by removing all old entries, then inserting the new entries.
-    /// TODO(ljw): remove previous implementations remove_symbol and insert_file_summary.
+    /// TODO(ljw): remove previous implementations of insert_file_summary.
     pub fn rev_update(
         &self,
         symbol_hash: ToplevelSymbolHash,

@@ -104,7 +104,7 @@ where
                     let start = t.start_offset();
                     let start = start + if text[start] == b'#' { 1 } else { 2 };
                     let end = t.end_offset();
-                    let len = end - start + 1;
+                    let len = end + 1 - start;
                     let p = self.pos_of_offset(start, end);
                     let mut text = self.source_text().sub_as_str(start, len).to_string();
                     text.push('\n');

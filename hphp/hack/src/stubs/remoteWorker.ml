@@ -22,8 +22,11 @@ module type RemoteServerApi = sig
 
   val build_naming_table : unit -> unit
 
-  (* A combination of `download_naming_and_dep_table` and `update_naming_table` below.
-     Downloads the naming table via saved state and adds updates from changed_files.
+  (* A combination of `download_naming_and_dep_table_from_saved_state` and `update_naming_table` below.
+     1. Downloads the naming table via saved state
+        If no saved state manifold path is present, check if a naming table for full init has been provided.
+        And failing that, build a naming table from scratch.
+     2. Adds updates to the naming table from changed_files.
      Returns the path to the dep table downloaded.
   *)
   val download_and_update_naming_table :
@@ -36,20 +39,20 @@ module type RemoteServerApi = sig
 
   (* Downloads the naming table via saved state.
      Returns the naming table along with the path to the dep table. *)
-  val download_naming_and_dep_table :
+  val download_naming_and_dep_table_from_saved_state :
     string option ->
     string ->
     use_manifold_cython_client:bool ->
     (Naming_table.t * Path.t, string) result
 
+  (* In full init scenarios, download a naming table from manifold, indexed by `nonce`,
+     and store it inside `naming_table_base` to be used by the remote workers. *)
+  val download_naming_table_for_full_init :
+    naming_table_base:Path.t -> nonce:Int64.t -> naming_table
+
   (* Updates the naming table with changed files. *)
   val update_naming_table :
     Naming_table.t -> Relative_path.t list option -> (unit, string) result
-
-  (* In full init scenarios, download a naming table from manifold, indexed by `nonce`,
-     and store it inside `naming_tabae_base` to be used by the remote workers. *)
-  val download_naming :
-    naming_table_base:Path.t -> nonce:Int64.t -> naming_table
 
   val fetch_and_cache_remote_decls :
     ctx:Provider_context.t ->

@@ -286,7 +286,7 @@ let make_remote_server_api
         in
         Ok (naming_table, dep_table_path)
 
-    let download_naming_and_dep_table
+    let download_naming_and_dep_table_from_saved_state
         (manifold_api_key : string option)
         (manifold_path : string)
         ~(use_manifold_cython_client : bool) :
@@ -421,8 +421,8 @@ let make_remote_server_api
                ());
         Ok ()
 
-    let rec download_naming ~(naming_table_base : Path.t) ~(nonce : Int64.t) :
-        naming_table =
+    let rec download_naming_table_for_full_init
+        ~(naming_table_base : Path.t) ~(nonce : Int64.t) : naming_table =
       let naming_table_manifold_path =
         Printf.sprintf "hulk/tree/naming/%s/naming.bin" (Int64.to_string nonce)
       in
@@ -459,19 +459,21 @@ let make_remote_server_api
         | Ok naming_table -> naming_table
         | _ -> None)
       | _ ->
+        (* If the naming table hasn't been uploaded yet,
+           sleep for 5 seconds and try again *)
         Unix.sleep 5;
-        download_naming ~naming_table_base ~nonce
+        download_naming_table_for_full_init ~naming_table_base ~nonce
 
     let download_and_update_naming_table
         ~(manifold_api_key : string option)
         ~(use_manifold_cython_client : bool)
         (saved_state_manifold_path : string option)
         (changed_files : Relative_path.t list option)
-        (naming_table : naming_table) : string option =
-      match (naming_table, saved_state_manifold_path) with
-      | (_, Some path) ->
+        (full_init_naming_table : naming_table) : string option =
+      match saved_state_manifold_path with
+      | Some path ->
         let dep_table_path_result =
-          download_naming_and_dep_table
+          download_naming_and_dep_table_from_saved_state
             manifold_api_key
             path
             ~use_manifold_cython_client
@@ -486,14 +488,16 @@ let make_remote_server_api
           Hh_logger.log "Falling back to generating naming table";
           build_naming_table ();
           None)
-      | (None, _) ->
-        Hh_logger.log
-          "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
-        build_naming_table ();
-        None
-      | (Some naming_table, _) ->
-        ignore @@ update_naming_table naming_table changed_files;
-        None
+      | None ->
+        (match full_init_naming_table with
+        | None ->
+          Hh_logger.log
+            "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
+          build_naming_table ();
+          None
+        | Some naming_table ->
+          ignore @@ update_naming_table naming_table changed_files;
+          None)
 
     let load_shallow_decls_saved_state
         (saved_state_main_artifacts :

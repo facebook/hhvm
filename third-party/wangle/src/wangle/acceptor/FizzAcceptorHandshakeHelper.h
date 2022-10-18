@@ -219,7 +219,8 @@ class FizzAcceptorHandshakeHelper
       const folly::SocketAddress& clientAddr,
       std::chrono::steady_clock::time_point acceptTime,
       wangle::TransportInfo& tinfo,
-      FizzHandshakeOptions&& options)
+      FizzHandshakeOptions&& options,
+      fizz::AsyncFizzBase::TransportOptions transportOptions)
       : context_(context),
         tokenBindingContext_(std::move(options.tokenBindingCtx_)),
         clientAddr_(clientAddr),
@@ -227,7 +228,8 @@ class FizzAcceptorHandshakeHelper
         tinfo_(tinfo),
         loggingCallback_(options.loggingCallback_),
         handshakeRecordAlignedReads_(options.handshakeRecordAlignedReads_),
-        preferIoUringSocket_(options.preferIoUringSocket_) {}
+        preferIoUringSocket_(options.preferIoUringSocket_),
+        transportOptions_(transportOptions) {}
 
   void start(
       folly::AsyncSSLSocket::UniquePtr sock,
@@ -256,7 +258,8 @@ class FizzAcceptorHandshakeHelper
   fizz::server::AsyncFizzServer::UniquePtr createFizzServer(
       folly::AsyncSSLSocket::UniquePtr sslSock,
       const std::shared_ptr<const fizz::server::FizzServerContext>& fizzContext,
-      const std::shared_ptr<fizz::ServerExtensions>& extensions);
+      const std::shared_ptr<fizz::ServerExtensions>& extensions,
+      fizz::AsyncFizzBase::TransportOptions options);
   folly::AsyncSSLSocket::UniquePtr createSSLSocket(
       const std::shared_ptr<folly::SSLContext>& sslContext,
       folly::AsyncTransport::UniquePtr transport);
@@ -291,6 +294,7 @@ class FizzAcceptorHandshakeHelper
   FizzLoggingCallback* loggingCallback_;
   bool handshakeRecordAlignedReads_{false};
   bool preferIoUringSocket_{false};
+  fizz::AsyncFizzBase::TransportOptions transportOptions_;
 };
 
 class DefaultToFizzPeekingCallback
@@ -306,6 +310,11 @@ class DefaultToFizzPeekingCallback
   void setContext(
       std::shared_ptr<const fizz::server::FizzServerContext> context) {
     context_ = std::move(context);
+  }
+
+  void setTransportOptions(
+      fizz::AsyncFizzBase::TransportOptions transportOptions) {
+    transportOptions_ = transportOptions;
   }
 
   /**
@@ -329,11 +338,17 @@ class DefaultToFizzPeekingCallback
     auto optionsCopy = options_;
     return wangle::AcceptorHandshakeHelper::UniquePtr(
         new FizzAcceptorHandshakeHelper(
-            context_, clientAddr, acceptTime, tinfo, std::move(optionsCopy)));
+            context_,
+            clientAddr,
+            acceptTime,
+            tinfo,
+            std::move(optionsCopy),
+            transportOptions_));
   }
 
  protected:
   std::shared_ptr<const fizz::server::FizzServerContext> context_;
   FizzHandshakeOptions options_;
+  fizz::AsyncFizzBase::TransportOptions transportOptions_;
 };
 } // namespace wangle

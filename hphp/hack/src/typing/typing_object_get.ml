@@ -1109,8 +1109,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   log_obj_get env `inner id_pos receiver_ty args.this_ty;
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
-  let dflt_lval_mismatch = Ok receiver_ty
-  and dflt_rval_mismatch =
+  let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   in
   let ((env, expand_ty_err_opt), ety1) =
@@ -1209,10 +1208,12 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       let ty_err_opt =
         Option.merge expand_ty_err_opt (Some ty_err) ~f:Typing_error.both
       in
+      let ty_nothing = MakeType.nothing Reason.none in
+      let lval_mismatch = Error (receiver_ty, ty_nothing) in
       ( env,
         ty_err_opt,
         (err_witness env id_pos, []),
-        dflt_lval_mismatch,
+        lval_mismatch,
         dflt_rval_mismatch )
     | (env, tyl) ->
       let (env, ty) = Typing_intersection.intersect_list env r tyl in

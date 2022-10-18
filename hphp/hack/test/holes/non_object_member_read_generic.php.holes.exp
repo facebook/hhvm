@@ -1,0 +1,42 @@
+[(Class
+    { c_span = [3:1-8:2]; c_annotation = (); c_mode = Mstrict; c_final = false; 
+      c_is_xhp = false; c_has_xhp_keyword = false; c_kind = (Cclass Concrete); 
+      c_name = ([3:7-8], "\\C"); c_tparams = [{ tp_variance = Invariant; tp_name = ([3:9-10], "T"); tp_parameters = []; tp_constraints = []; tp_reified = Erased; tp_user_attributes = [] }];
+      c_extends = []; c_uses = []; c_xhp_attr_uses = []; c_xhp_category = None; 
+      c_reqs = []; c_implements = []; c_where_constraints = []; c_consts = []; 
+      c_typeconsts = []; c_vars = [];
+      c_methods =
+      [{ m_span = [4:3-7:4]; m_annotation = (); m_final = false; m_abstract = false; 
+         m_static = false; m_readonly_this = false; m_visibility = Public; 
+         m_name = ([4:19-49], "non_object_member_read_generic"); m_tparams = []; 
+         m_where_constraints = [];
+         m_params =
+         [{ param_annotation = (T); param_type_hint = ((T), (Some ([4:50-51], (Habstr ("T", []))))); 
+            param_is_variadic = false; param_pos = [4:52-54]; param_name = "$x"; 
+            param_expr = None; param_readonly = None; param_callconv = Pnormal; 
+            param_user_attributes = []; param_visibility = None }
+           ];
+         m_ctxs = None; m_unsafe_ctxs = None;
+         m_body =
+         { fb_ast =
+           [([6:5-15],
+             (Expr
+                ((_), [6:5-14],
+                 (Call (
+                    ((_), [6:5-12],
+                     (Obj_get (((T), [6:5-7], (Hole (((T), [6:5-7], (Lvar ([6:5-7], $x))), (T), (nothing), Typing))), ((_), [6:9-12], (Id ([6:9-12], "bar"))), OG_nullthrows, Is_method))),
+                    [], [], None)))))
+             ]
+           };
+         m_fun_kind = FSync; m_user_attributes = []; m_readonly_ret = None; 
+         m_ret = ((void), (Some ([4:57-61], (Hprim Tvoid)))); m_external = false; 
+         m_doc_comment = None }
+        ];
+      c_xhp_children = []; c_xhp_attrs = [];
+      c_namespace =
+      { Namespace_env.ns_ns_uses = <opaque>; ns_class_uses = <opaque>; 
+        ns_fun_uses = <opaque>; ns_const_uses = <opaque>; ns_name = None; 
+        ns_auto_ns_map = []; ns_is_codegen = false; ns_disable_xhp_element_mangling = false };
+      c_user_attributes = []; c_file_attributes = []; c_docs_url = None; 
+      c_enum = None; c_doc_comment = None; c_emit_id = None; c_internal = false; 
+      c_module = None })

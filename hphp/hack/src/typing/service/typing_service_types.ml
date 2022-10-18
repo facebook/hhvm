@@ -24,7 +24,7 @@ type remote_computation_payload = {
   nonce: string;
   payload: workitem BigList.t;
   changed_files: Relative_path.t list option; [@opaque]
-  dirty_files: (Relative_path.t * string option) list;
+  dirty_files: (Relative_path.t * string option) list; [@opaque]
 }
 [@@deriving show]
 

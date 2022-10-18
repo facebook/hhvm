@@ -33,8 +33,11 @@ jobs:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
     runs-on: ${{matrix.os}}
     env:
+      SCCACHE_S3_USE_SSL: true
       SCCACHE_BUCKET: hhvm-sccache
-      SCCACHE_ENDPOINT: hhvm-sccache.s3-accelerate.amazonaws.com:80
+      SCCACHE_ENDPOINT: hhvm-sccache.s3-accelerate.amazonaws.com:443
+      SCCACHE_ERROR_LOG: /dev/stderr
+      SCCACHE_LOG: info
     steps:
     - uses: actions/checkout@v2.4.0
     - if: github.event_name == 'issue_comment'

@@ -184,6 +184,17 @@ class FizzHandshakeOptions {
     return *this;
   }
 
+  /**
+   * `setPreferIoUringSocket` controls whether the accepted client connection
+   * should be handled with an io_uring based transport.
+   *
+   * io_uring based transports are more efficient than traditional libevent
+   * based transports, where kernel support exists.
+   *
+   * This flag is a hint -- if the host does not support io_uring, a normal
+   * libevent based transport will be created (the default behavior, if this
+   * option was not specified).
+   */
   FizzHandshakeOptions& setPreferIoUringSocket(bool flag) {
     preferIoUringSocket_ = flag;
     return *this;

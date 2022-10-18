@@ -35,7 +35,7 @@ from testing.services import (
 )
 from testing.types import Color, easy, HardError
 from thrift.py3.client import ClientType, get_client
-from thrift.py3.common import Protocol, RpcOptions
+from thrift.py3.common import Priority, Protocol, RpcOptions
 from thrift.py3.exceptions import ApplicationError
 from thrift.py3.server import get_context, ServiceInterface, SocketAddress, ThriftServer
 from thrift.py3.test.cpp_handler import CppHandler
@@ -64,6 +64,10 @@ class Handler(TestingServiceInterface):
     async def getRequestTimeout(self) -> float:
         ctx = get_context()
         return ctx.request_timeout
+
+    async def getPriority(self) -> int:
+        ctx = get_context()
+        return ctx.priority.value
 
     async def shutdown(self) -> None:
         pass
@@ -447,6 +451,39 @@ class ClientServerTests(unittest.TestCase):
                         ex.exception.message,
                         f"Application was cancelled on the server with message: {cancelledMessage}",
                     )
+
+        loop.run_until_complete(inner_test())
+
+    def test_request_with_default_rpc_options(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    timeout = await client.getRequestTimeout()
+                    self.assertEqual(timeout, 0.0)
+                    priority = await client.getPriority()
+                    self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
+
+        loop.run_until_complete(inner_test())
+
+    def test_request_with_specified_rpc_options(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    options = RpcOptions()
+                    options.timeout = 15.0
+                    options.priority = Priority.BEST_EFFORT
+                    timeout = await client.getRequestTimeout(rpc_options=options)
+                    self.assertEqual(timeout, 15.0)
+                    priority = await client.getPriority(rpc_options=options)
+                    self.assertEqual(Priority(priority), Priority.BEST_EFFORT)
 
         loop.run_until_complete(inner_test())
 

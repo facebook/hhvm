@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from thrift.py3.common import RpcOptions
+from thrift.py3.common import RpcOptions, Priority

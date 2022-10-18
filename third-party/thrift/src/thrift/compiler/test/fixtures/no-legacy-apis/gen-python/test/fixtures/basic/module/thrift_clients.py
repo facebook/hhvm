@@ -18,6 +18,7 @@ from thrift.python.client import (
     Client as _fbthrift_python_Client,
 )
 from thrift.python.client.omni_client import InteractionMethodPosition as _fbthrift_InteractionMethodPosition, FunctionQualifier as _fbthrift_FunctionQualifier
+from thrift.python.common import RpcOptions
 import thrift.python.exceptions as _fbthrift_python_exceptions
 import thrift.python.types as _fbthrift_python_types
 import test.fixtures.basic.module.thrift_types
@@ -44,7 +45,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         async def query(
             self,
-            u: test.fixtures.basic.module.thrift_types.MyUnion
+            u: test.fixtures.basic.module.thrift_types.MyUnion,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> test.fixtures.basic.module.thrift_types.MyStruct:
             _fbthrift_resp = await self._send_request(
                 "MyService",
@@ -53,6 +56,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
                 qualifier = _fbthrift_FunctionQualifier.Unspecified,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:
@@ -73,7 +77,9 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
     
         def query(
             self,
-            u: test.fixtures.basic.module.thrift_types.MyUnion
+            u: test.fixtures.basic.module.thrift_types.MyUnion,
+            *,
+            rpc_options: _typing.Optional[RpcOptions] = None,
         ) -> test.fixtures.basic.module.thrift_types.MyStruct:
             _fbthrift_resp = self._send_request(
                 "MyService",
@@ -81,6 +87,7 @@ class MyService(_fbthrift_python_Client["MyService.Async", "MyService.Sync"]):
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_args(
                     u=u,),
                 test.fixtures.basic.module.thrift_types._fbthrift_MyService_query_result,
+                rpc_options=rpc_options,
             )
             # shortcut to success path for non-void returns
             if _fbthrift_resp.success is not None:

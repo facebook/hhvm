@@ -33,6 +33,7 @@ from testing.thrift_services import TestingServiceInterface
 from testing.thrift_types import Color, easy, SimpleError
 from thrift.py3.server import get_context, SocketAddress
 from thrift.python.client import get_client
+from thrift.python.common import Priority, RpcOptions
 from thrift.python.exceptions import ApplicationError
 from thrift.python.server import ServiceInterface, ThriftServer
 
@@ -86,6 +87,10 @@ class Handler(TestingServiceInterface):
 
     async def renamed_func(self, ret: bool) -> bool:
         return ret
+
+    async def getPriority(self) -> int:
+        ctx = get_context()
+        return ctx.priority.value
 
 
 class DerivedHandler(Handler, DerivedTestingServiceInterface):
@@ -318,6 +323,39 @@ class ClientServerTests(unittest.TestCase):
                         ex.exception.message,
                         f"Exception('{errMessage}')",
                     )
+
+        loop.run_until_complete(inner_test())
+
+    def test_request_with_default_rpc_options(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    timeout = await client.getRequestTimeout()
+                    self.assertEqual(timeout, 0.0)
+                    priority = await client.getPriority()
+                    self.assertEqual(Priority(priority), Priority.N_PRIORITIES)
+
+        loop.run_until_complete(inner_test())
+
+    def test_request_with_specified_rpc_options(self) -> None:
+        loop = asyncio.get_event_loop()
+
+        async def inner_test() -> None:
+            async with TestServer(ip="::1") as sa:
+                ip, port = sa.ip, sa.port
+                assert ip and port
+                async with get_client(TestingService, host=ip, port=port) as client:
+                    options = RpcOptions()
+                    options.timeout = 15.0
+                    options.priority = Priority.BEST_EFFORT
+                    timeout = await client.getRequestTimeout(rpc_options=options)
+                    self.assertEqual(timeout, 15.0)
+                    priority = await client.getPriority(rpc_options=options)
+                    self.assertEqual(Priority(priority), Priority.BEST_EFFORT)
 
         loop.run_until_complete(inner_test())
 

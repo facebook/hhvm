@@ -16,7 +16,6 @@ import types
 import typing
 
 from thrift.python.client.request_channel import RequestChannel
-
 from thrift.python.common import RpcOptions
 from thrift.python.types import Struct, Union
 

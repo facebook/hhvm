@@ -1719,7 +1719,7 @@ service EdenService extends fb303_core.BaseService {
    * Returns information about the running process, including pid and command
    * line.
    */
-  DaemonInfo getDaemonInfo() throws (1: EdenError ex);
+  DaemonInfo getDaemonInfo() throws (1: EdenError ex) (priority = 'IMPORTANT');
 
   /**
   * Returns information about the privhelper process, including accesibility.

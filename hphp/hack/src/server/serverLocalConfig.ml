@@ -1724,4 +1724,5 @@ let to_rollout_flags (options : t) : HackEventLogger.rollout_flags =
       disable_naming_table_fallback_loading =
         options.disable_naming_table_fallback_loading;
       use_type_alias_heap = options.use_type_alias_heap;
+      load_state_natively_v4 = options.load_state_natively;
     }

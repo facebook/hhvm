@@ -47,6 +47,29 @@ impl Names {
         Ok(())
     }
 
+    /// These pragmas make things faster at the expense of write safety...
+    /// * journal_mode=OFF -- no rollback possible: the ROLLBACK TRANSACTION command won't work
+    /// * synchronous=OFF -- sqlite will return immediately after handing off writes to the OS, so data will be lost upon power-loss
+    /// * temp_store=MEMORY -- temporary tables and indices kept in memory
+    pub fn pragma_fast_but_not_durable(&self) -> anyhow::Result<()> {
+        self.conn.execute_batch(
+            "PRAGMA journal_mode = OFF;
+            PRAGMA synchronous = OFF;
+            PRAGMA temp_store = MEMORY;",
+        )?;
+        Ok(())
+    }
+
+    /// This does a sql "BEGIN EXCLUSIVE TRANSACTION".
+    /// (an 'exclusive' transaction is one that acquires a write lock immediately rather than lazily).
+    /// Then, once you call transaction.end() or drop it, "END TRANSACTION".
+    /// The main reason to use transactions is for speed.
+    /// (Note: if you opened naming-sqlite with "from_file_non_durable" then it
+    /// doesn't support ROLLBACK TRANSACTION).
+    pub fn transaction(&self) -> anyhow::Result<Transaction<'_>> {
+        Transaction::new(&self.conn)
+    }
+
     fn create_tables(conn: &mut Connection) -> anyhow::Result<()> {
         conn.execute(
             "
@@ -802,5 +825,37 @@ impl Names {
         conn.execute("END TRANSACTION", params![])?;
 
         Ok((conn, save_result))
+    }
+}
+
+/// This token is for a transaction. When you construct it,
+/// it does sql command "BEGIN EXCLUSIVE TRANSACTION".
+/// When you call end() or drop it, it does sql command "END TRANSACTION".
+/// (There's also a similar rusqlite::Transaction, but it takes &mut
+/// ownership of the connection, which makes it awkward to work with
+/// all our methods.)
+pub struct Transaction<'a> {
+    conn: Option<&'a rusqlite::Connection>,
+}
+
+impl<'a> Transaction<'a> {
+    fn new(conn: &'a rusqlite::Connection) -> anyhow::Result<Self> {
+        conn.execute_batch("BEGIN EXCLUSIVE TRANSACTION;")?;
+        Ok(Self { conn: Some(conn) })
+    }
+
+    pub fn end(mut self) -> anyhow::Result<()> {
+        if let Some(conn) = self.conn.take() {
+            conn.execute_batch("END TRANSACTION;")?;
+        }
+        Ok(())
+    }
+}
+
+impl<'a> Drop for Transaction<'a> {
+    fn drop(&mut self) {
+        if let Some(conn) = self.conn.take() {
+            let _ignore = conn.execute_batch("END TRANSACTION;");
+        }
     }
 }

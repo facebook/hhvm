@@ -31,6 +31,16 @@ namespace apache::thrift::protocol::detail {
 // Runtime and compile time representations for a map id.
 enum class MapId : int64_t {};
 
+// Returns mask == allMask() but faster
+inline bool isAllMask(const Mask& mask) {
+  return mask.excludes_ref() && mask.excludes_ref()->empty();
+}
+
+// Returns mask == noneMask() but faster
+inline bool isNoneMask(const Mask& mask) {
+  return mask.includes_ref() && mask.includes_ref()->empty();
+}
+
 // If mask is a field mask, return it, otherwise return nullptr
 [[nodiscard]] const FieldIdToMask* FOLLY_NULLABLE
 getFieldMask(const Mask& mask);
@@ -185,8 +195,7 @@ bool is_compatible_with_impl(type::map<Key, Value>, const Mask& mask) {
 
 template <typename Tag>
 bool is_compatible_with(const Mask& mask) {
-  if (mask == field_mask_constants::allMask() ||
-      mask == field_mask_constants::noneMask()) {
+  if (isAllMask(mask) || isNoneMask(mask)) {
     return true;
   }
   return is_compatible_with_impl(Tag{}, mask);

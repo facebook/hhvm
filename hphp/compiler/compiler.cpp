@@ -756,7 +756,7 @@ int prepareOptions(CompilerOptions &po, int argc, char **argv) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Options makeExternWorkerOptions() {
+Options makeExternWorkerOptions(const CompilerOptions& po) {
   Options options;
   options
     .setUseCase(Option::ExternWorkerUseCase)
@@ -775,6 +775,8 @@ Options makeExternWorkerOptions() {
   }
   if (!Option::ExternWorkerWorkingDir.empty()) {
     options.setWorkingDir(Option::ExternWorkerWorkingDir);
+  } else {
+    options.setWorkingDir(po.outputDir);
   }
   if (Option::ExternWorkerThrottleRetries >= 0) {
     options.setThrottleRetries(Option::ExternWorkerThrottleRetries);
@@ -1078,7 +1080,7 @@ bool process(const CompilerOptions &po) {
     std::chrono::minutes{15}
   );
   auto client =
-    std::make_unique<Client>(executor->sticky(), makeExternWorkerOptions());
+    std::make_unique<Client>(executor->sticky(), makeExternWorkerOptions(po));
 
   sample.setStr("extern_worker_impl", client->implName());
   sample.setStr("extern_worker_session", client->session());

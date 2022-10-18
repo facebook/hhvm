@@ -16,7 +16,7 @@ import sys
 if sys.version_info[0] >= 3:
   long = int
 
-from .ttypes import UTF8STRINGS, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, StructWithAdapter, UnionWithAdapter, AdaptedA
+from .ttypes import UTF8STRINGS, ThriftAdaptedEnum, MyAnnotation, Foo, Baz, Bar, DirectlyAdapted, StructWithFieldAdapter, TerseAdaptedFields, B, A, Config, MyStruct, AdaptTestStruct, AdaptTemplatedTestStruct, AdaptTemplatedNestedTestStruct, AdaptTestUnion, AdaptedStruct, DirectlyAdaptedStruct, StructFieldAdaptedStruct, CircularAdaptee, CircularStruct, RenamedStruct, SameNamespaceStruct, HeapAllocated, MoveOnly, AlsoMoveOnly, ApplyAdapter, TransitiveAdapted, CountingStruct, Person, Person2, SetWithAdapter, StringWithAdapter, ListWithElemAdapter, ListWithElemAdapter_withAdapter, MyI64, DoubleTypedefI64, MyI32, FooWithAdapter, StructWithAdapter, UnionWithAdapter, AdaptedA, DurationMs, AdaptedBool, AdaptedByte, AdaptedShort, AdaptedInteger, AdaptedLong, AdaptedDouble, AdaptedString, DoubleTypedefBool, CustomProtocolType, IndirectionString, AdaptedEnum, AdaptedTypedef, TypedefOfDirect, AdaptedCircularAdaptee, CountingInt
 import thrift.annotation.cpp.ttypes
 import thrift.annotation.python.ttypes
 import thrift.annotation.thrift.ttypes

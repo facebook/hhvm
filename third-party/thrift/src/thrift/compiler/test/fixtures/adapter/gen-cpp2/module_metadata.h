@@ -21,12 +21,22 @@ namespace thrift {
 namespace test {
 class Service;
 }}} // namespace facebook::thrift::test
+namespace facebook {
+namespace thrift {
+namespace test {
+class AdapterService;
+}}} // namespace facebook::thrift::test
 
 namespace apache {
 namespace thrift {
 namespace detail {
 namespace md {
 
+template <>
+class EnumMetadata<::facebook::thrift::test::ThriftAdaptedEnum> {
+ public:
+  static void gen(ThriftMetadata& metadata);
+};
 template <>
 class StructMetadata<::facebook::thrift::test::MyAnnotation> {
  public:
@@ -83,6 +93,101 @@ class StructMetadata<::facebook::thrift::test::MyStruct> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::facebook::thrift::test::AdaptTestStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::ThriftAdaptTestUnion> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::ThriftAdaptedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::StructFieldAdaptedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::CircularAdaptee> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::CircularStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::UnderlyingRenamedStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::detail::HeapAllocated> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::MoveOnly> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::AlsoMoveOnly> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::ApplyAdapter> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::detail::TransitiveAdapted> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::CountingStruct> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::Person> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
+class StructMetadata<::facebook::thrift::test::Person2> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::Service>> {
  public:
   static void gen(ThriftServiceMetadataResponse& response);
@@ -93,6 +198,19 @@ class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test:
   friend class ServiceMetadata;
 
   static void gen_func(ThriftMetadata& metadata, ThriftService& context);
+};
+template <>
+class ServiceMetadata<::apache::thrift::ServiceHandler<::facebook::thrift::test::AdapterService>> {
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+
+  template <typename T>
+  friend class ServiceMetadata;
+
+  static void gen_count(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_adaptedTypes(ThriftMetadata& metadata, ThriftService& context);
 };
 } // namespace md
 } // namespace detail

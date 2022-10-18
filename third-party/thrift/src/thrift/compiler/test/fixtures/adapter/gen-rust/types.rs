@@ -28,6 +28,38 @@ pub type UnionWithAdapter = crate::types::Baz;
 
 pub type AdaptedA = crate::types::A;
 
+pub type DurationMs = ::std::primitive::i64;
+
+pub type AdaptedBool = ::std::primitive::bool;
+
+pub type AdaptedByte = ::std::primitive::i8;
+
+pub type AdaptedShort = ::std::primitive::i16;
+
+pub type AdaptedInteger = ::std::primitive::i32;
+
+pub type AdaptedLong = ::std::primitive::i64;
+
+pub type AdaptedDouble = ::std::primitive::f64;
+
+pub type AdaptedString = ::std::string::String;
+
+pub type DoubleTypedefBool = crate::types::AdaptedBool;
+
+pub type CustomProtocolType = ::std::vec::Vec<::std::primitive::u8>;
+
+pub type IndirectionString = ::std::string::String;
+
+pub type AdaptedEnum = crate::types::ThriftAdaptedEnum;
+
+pub type AdaptedTypedef = crate::types::AdaptedStruct;
+
+pub type TypedefOfDirect = crate::types::DirectlyAdaptedStruct;
+
+pub type AdaptedCircularAdaptee = crate::types::CircularAdaptee;
+
+pub type CountingInt = ::std::primitive::i64;
+
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct MyAnnotation {
     pub signature: ::std::string::String,
@@ -169,6 +201,369 @@ pub struct MyStruct {
     #[doc(hidden)]
     pub _dot_dot_Default_default: self::dot_dot::OtherFields,
 }
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct AdaptTestStruct {
+    pub delay: crate::types::DurationMs,
+    pub custom: crate::types::CustomProtocolType,
+    pub timeout: ::std::primitive::i64,
+    pub data: ::std::primitive::i64,
+    pub meta: ::std::string::String,
+    pub indirectionString: crate::types::IndirectionString,
+    pub string_data: ::std::string::String,
+    pub double_wrapped_bool: crate::types::AdaptedBool,
+    pub double_wrapped_integer: crate::types::AdaptedInteger,
+    pub binary_data: ::std::vec::Vec<::std::primitive::u8>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdaptTemplatedTestStruct {
+    pub adaptedBool: crate::types::AdaptedBool,
+    pub adaptedByte: crate::types::AdaptedByte,
+    pub adaptedShort: crate::types::AdaptedShort,
+    pub adaptedInteger: crate::types::AdaptedInteger,
+    pub adaptedLong: crate::types::AdaptedLong,
+    pub adaptedDouble: crate::types::AdaptedDouble,
+    pub adaptedString: crate::types::AdaptedString,
+    pub adaptedList: ::std::vec::Vec<::std::primitive::i64>,
+    pub adaptedSet: ::std::collections::BTreeSet<::std::primitive::i64>,
+    pub adaptedMap: ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>,
+    pub adaptedBoolDefault: crate::types::AdaptedBool,
+    pub adaptedByteDefault: crate::types::AdaptedByte,
+    pub adaptedShortDefault: crate::types::AdaptedShort,
+    pub adaptedIntegerDefault: crate::types::AdaptedInteger,
+    pub adaptedLongDefault: crate::types::AdaptedLong,
+    pub adaptedDoubleDefault: crate::types::AdaptedDouble,
+    pub adaptedStringDefault: crate::types::AdaptedString,
+    pub adaptedEnum: crate::types::AdaptedEnum,
+    pub adaptedListDefault: ::std::vec::Vec<::std::primitive::i64>,
+    pub adaptedSetDefault: ::std::collections::BTreeSet<::std::primitive::i64>,
+    pub adaptedMapDefault: ::std::collections::BTreeMap<::std::primitive::i64, ::std::primitive::i64>,
+    pub doubleTypedefBool: crate::types::DoubleTypedefBool,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct AdaptTemplatedNestedTestStruct {
+    pub adaptedStruct: crate::types::AdaptTemplatedTestStruct,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Debug)]
+pub enum AdaptTestUnion {
+    delay(crate::types::DurationMs),
+    custom(crate::types::CustomProtocolType),
+    UnknownField(::std::primitive::i32),
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct AdaptedStruct {
+    pub data: ::std::primitive::i64,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct DirectlyAdaptedStruct {
+    pub data: ::std::primitive::i64,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct StructFieldAdaptedStruct {
+    pub adaptedStruct: crate::types::AdaptedStruct,
+    pub adaptedTypedef: crate::types::AdaptedTypedef,
+    pub directlyAdapted: crate::types::DirectlyAdaptedStruct,
+    pub typedefOfAdapted: crate::types::TypedefOfDirect,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct CircularAdaptee {
+    pub field: crate::types::CircularStruct,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct CircularStruct {
+    pub field: ::std::option::Option<crate::types::AdaptedCircularAdaptee>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct RenamedStruct {
+    pub data: ::std::primitive::i64,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct SameNamespaceStruct {
+    pub data: ::std::primitive::i64,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct HeapAllocated {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
+pub struct MoveOnly {
+    pub ptr: crate::types::HeapAllocated,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct AlsoMoveOnly {
+    pub ptr: ::std::primitive::i64,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct ApplyAdapter {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct TransitiveAdapted {
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct CountingStruct {
+    pub regularInt: ::std::option::Option<::std::primitive::i64>,
+    pub countingInt: ::std::option::Option<crate::types::CountingInt>,
+    pub regularString: ::std::option::Option<::std::string::String>,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Person {
+    pub name: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Person2 {
+    pub name: ::std::string::String,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ThriftAdaptedEnum(pub ::std::primitive::i32);
+
+impl ThriftAdaptedEnum {
+    pub const Zero: Self = ThriftAdaptedEnum(0i32);
+    pub const One: Self = ThriftAdaptedEnum(1i32);
+}
+
+impl ::fbthrift::ThriftEnum for ThriftAdaptedEnum {
+    fn enumerate() -> &'static [(Self, &'static str)] {
+        &[
+            (Self::Zero, "Zero"),
+            (Self::One, "One"),
+        ]
+    }
+
+    fn variants() -> &'static [&'static str] {
+        &[
+            "Zero",
+            "One",
+        ]
+    }
+
+    fn variant_values() -> &'static [Self] {
+        &[
+            Self::Zero,
+            Self::One,
+        ]
+    }
+}
+
+impl ::std::default::Default for ThriftAdaptedEnum {
+    fn default() -> Self {
+        Self(::fbthrift::__UNKNOWN_ID)
+    }
+}
+
+impl<'a> ::std::convert::From<&'a ThriftAdaptedEnum> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: &'a ThriftAdaptedEnum) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<ThriftAdaptedEnum> for ::std::primitive::i32 {
+    #[inline]
+    fn from(x: ThriftAdaptedEnum) -> Self {
+        x.0
+    }
+}
+
+impl ::std::convert::From<::std::primitive::i32> for ThriftAdaptedEnum {
+    #[inline]
+    fn from(x: ::std::primitive::i32) -> Self {
+        Self(x)
+    }
+}
+
+impl ::std::fmt::Display for ThriftAdaptedEnum {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        static VARIANTS_BY_NUMBER: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("Zero", 0),
+            ("One", 1),
+        ];
+        ::fbthrift::help::enum_display(VARIANTS_BY_NUMBER, fmt, self.0)
+    }
+}
+
+impl ::std::fmt::Debug for ThriftAdaptedEnum {
+    fn fmt(&self, fmt: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        write!(fmt, "ThriftAdaptedEnum::{}", self)
+    }
+}
+
+impl ::std::str::FromStr for ThriftAdaptedEnum {
+    type Err = ::anyhow::Error;
+
+    fn from_str(string: &::std::primitive::str) -> ::std::result::Result<Self, Self::Err> {
+        static VARIANTS_BY_NAME: &[(&::std::primitive::str, ::std::primitive::i32)] = &[
+            ("One", 1),
+            ("Zero", 0),
+        ];
+        ::fbthrift::help::enum_from_str(VARIANTS_BY_NAME, string, "ThriftAdaptedEnum").map(Self)
+    }
+}
+
+impl ::fbthrift::GetTType for ThriftAdaptedEnum {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::I32;
+}
+
+impl<P> ::fbthrift::Serialize<P> for ThriftAdaptedEnum
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    #[inline]
+    fn write(&self, p: &mut P) {
+        p.write_i32(self.into())
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for ThriftAdaptedEnum
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    #[inline]
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        ::std::result::Result::Ok(Self::from(p.read_i32()?))
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1242,6 +1637,1737 @@ where
         ::std::result::Result::Ok(Self {
             field: field_field.unwrap_or_default(),
             set_string: field_set_string.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptTestStruct {
+    fn default() -> Self {
+        Self {
+            delay: ::std::default::Default::default(),
+            custom: ::std::default::Default::default(),
+            timeout: ::std::default::Default::default(),
+            data: ::std::default::Default::default(),
+            meta: ::std::default::Default::default(),
+            indirectionString: ::std::default::Default::default(),
+            string_data: ::std::default::Default::default(),
+            double_wrapped_bool: ::std::default::Default::default(),
+            double_wrapped_integer: ::std::default::Default::default(),
+            binary_data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptTestStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptTestStruct")
+            .field("delay", &self.delay)
+            .field("custom", &self.custom)
+            .field("timeout", &self.timeout)
+            .field("data", &self.data)
+            .field("meta", &self.meta)
+            .field("indirectionString", &self.indirectionString)
+            .field("string_data", &self.string_data)
+            .field("double_wrapped_bool", &self.double_wrapped_bool)
+            .field("double_wrapped_integer", &self.double_wrapped_integer)
+            .field("binary_data", &self.binary_data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptTestStruct {}
+unsafe impl ::std::marker::Sync for self::AdaptTestStruct {}
+
+impl ::fbthrift::GetTType for self::AdaptTestStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptTestStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AdaptTestStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptTestStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptTestStruct");
+        p.write_field_begin("delay", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.delay, p);
+        p.write_field_end();
+        p.write_field_begin("custom", ::fbthrift::TType::String, 2);
+        ::fbthrift::Serialize::write(&self.custom, p);
+        p.write_field_end();
+        p.write_field_begin("timeout", ::fbthrift::TType::I64, 3);
+        ::fbthrift::Serialize::write(&self.timeout, p);
+        p.write_field_end();
+        p.write_field_begin("data", ::fbthrift::TType::I64, 4);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_begin("meta", ::fbthrift::TType::String, 5);
+        ::fbthrift::Serialize::write(&self.meta, p);
+        p.write_field_end();
+        p.write_field_begin("indirectionString", ::fbthrift::TType::String, 6);
+        ::fbthrift::Serialize::write(&self.indirectionString, p);
+        p.write_field_end();
+        p.write_field_begin("string_data", ::fbthrift::TType::String, 7);
+        ::fbthrift::Serialize::write(&self.string_data, p);
+        p.write_field_end();
+        p.write_field_begin("double_wrapped_bool", ::fbthrift::TType::Bool, 8);
+        ::fbthrift::Serialize::write(&self.double_wrapped_bool, p);
+        p.write_field_end();
+        p.write_field_begin("double_wrapped_integer", ::fbthrift::TType::I32, 9);
+        ::fbthrift::Serialize::write(&self.double_wrapped_integer, p);
+        p.write_field_end();
+        p.write_field_begin("binary_data", ::fbthrift::TType::String, 10);
+        ::fbthrift::Serialize::write(&self.binary_data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptTestStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("binary_data", ::fbthrift::TType::String, 10),
+            ::fbthrift::Field::new("custom", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 4),
+            ::fbthrift::Field::new("delay", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("double_wrapped_bool", ::fbthrift::TType::Bool, 8),
+            ::fbthrift::Field::new("double_wrapped_integer", ::fbthrift::TType::I32, 9),
+            ::fbthrift::Field::new("indirectionString", ::fbthrift::TType::String, 6),
+            ::fbthrift::Field::new("meta", ::fbthrift::TType::String, 5),
+            ::fbthrift::Field::new("string_data", ::fbthrift::TType::String, 7),
+            ::fbthrift::Field::new("timeout", ::fbthrift::TType::I64, 3),
+        ];
+        let mut field_delay = ::std::option::Option::None;
+        let mut field_custom = ::std::option::Option::None;
+        let mut field_timeout = ::std::option::Option::None;
+        let mut field_data = ::std::option::Option::None;
+        let mut field_meta = ::std::option::Option::None;
+        let mut field_indirectionString = ::std::option::Option::None;
+        let mut field_string_data = ::std::option::Option::None;
+        let mut field_double_wrapped_bool = ::std::option::Option::None;
+        let mut field_double_wrapped_integer = ::std::option::Option::None;
+        let mut field_binary_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_delay = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 2) => field_custom = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 3) => field_timeout = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 4) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 5) => field_meta = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 6) => field_indirectionString = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 7) => field_string_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 8) => field_double_wrapped_bool = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 9) => field_double_wrapped_integer = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 10) => field_binary_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            delay: field_delay.unwrap_or_default(),
+            custom: field_custom.unwrap_or_default(),
+            timeout: field_timeout.unwrap_or_default(),
+            data: field_data.unwrap_or_default(),
+            meta: field_meta.unwrap_or_default(),
+            indirectionString: field_indirectionString.unwrap_or_default(),
+            string_data: field_string_data.unwrap_or_default(),
+            double_wrapped_bool: field_double_wrapped_bool.unwrap_or_default(),
+            double_wrapped_integer: field_double_wrapped_integer.unwrap_or_default(),
+            binary_data: field_binary_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptTemplatedTestStruct {
+    fn default() -> Self {
+        Self {
+            adaptedBool: ::std::default::Default::default(),
+            adaptedByte: ::std::default::Default::default(),
+            adaptedShort: ::std::default::Default::default(),
+            adaptedInteger: ::std::default::Default::default(),
+            adaptedLong: ::std::default::Default::default(),
+            adaptedDouble: ::std::default::Default::default(),
+            adaptedString: ::std::default::Default::default(),
+            adaptedList: ::std::default::Default::default(),
+            adaptedSet: ::std::default::Default::default(),
+            adaptedMap: ::std::default::Default::default(),
+            adaptedBoolDefault: true,
+            adaptedByteDefault: 1,
+            adaptedShortDefault: 2,
+            adaptedIntegerDefault: 3,
+            adaptedLongDefault: 4,
+            adaptedDoubleDefault: 0.0,
+            adaptedStringDefault: "6".to_owned(),
+            adaptedEnum: crate::types::ThriftAdaptedEnum::One,
+            adaptedListDefault: vec![
+                    1,
+                ],
+            adaptedSetDefault: {
+                    let mut set = ::std::collections::BTreeSet::new();
+                    set.insert(1);
+                    set
+                },
+            adaptedMapDefault: {
+                    let mut map = ::std::collections::BTreeMap::new();
+                    map.insert(1, 1);
+                    map
+                },
+            doubleTypedefBool: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptTemplatedTestStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptTemplatedTestStruct")
+            .field("adaptedBool", &self.adaptedBool)
+            .field("adaptedByte", &self.adaptedByte)
+            .field("adaptedShort", &self.adaptedShort)
+            .field("adaptedInteger", &self.adaptedInteger)
+            .field("adaptedLong", &self.adaptedLong)
+            .field("adaptedDouble", &self.adaptedDouble)
+            .field("adaptedString", &self.adaptedString)
+            .field("adaptedList", &self.adaptedList)
+            .field("adaptedSet", &self.adaptedSet)
+            .field("adaptedMap", &self.adaptedMap)
+            .field("adaptedBoolDefault", &self.adaptedBoolDefault)
+            .field("adaptedByteDefault", &self.adaptedByteDefault)
+            .field("adaptedShortDefault", &self.adaptedShortDefault)
+            .field("adaptedIntegerDefault", &self.adaptedIntegerDefault)
+            .field("adaptedLongDefault", &self.adaptedLongDefault)
+            .field("adaptedDoubleDefault", &self.adaptedDoubleDefault)
+            .field("adaptedStringDefault", &self.adaptedStringDefault)
+            .field("adaptedEnum", &self.adaptedEnum)
+            .field("adaptedListDefault", &self.adaptedListDefault)
+            .field("adaptedSetDefault", &self.adaptedSetDefault)
+            .field("adaptedMapDefault", &self.adaptedMapDefault)
+            .field("doubleTypedefBool", &self.doubleTypedefBool)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptTemplatedTestStruct {}
+unsafe impl ::std::marker::Sync for self::AdaptTemplatedTestStruct {}
+
+impl ::fbthrift::GetTType for self::AdaptTemplatedTestStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptTemplatedTestStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AdaptTemplatedTestStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptTemplatedTestStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptTemplatedTestStruct");
+        p.write_field_begin("adaptedBool", ::fbthrift::TType::Bool, 1);
+        ::fbthrift::Serialize::write(&self.adaptedBool, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedByte", ::fbthrift::TType::Byte, 2);
+        ::fbthrift::Serialize::write(&self.adaptedByte, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedShort", ::fbthrift::TType::I16, 3);
+        ::fbthrift::Serialize::write(&self.adaptedShort, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedInteger", ::fbthrift::TType::I32, 4);
+        ::fbthrift::Serialize::write(&self.adaptedInteger, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedLong", ::fbthrift::TType::I64, 5);
+        ::fbthrift::Serialize::write(&self.adaptedLong, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedDouble", ::fbthrift::TType::Double, 6);
+        ::fbthrift::Serialize::write(&self.adaptedDouble, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedString", ::fbthrift::TType::String, 7);
+        ::fbthrift::Serialize::write(&self.adaptedString, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedList", ::fbthrift::TType::List, 8);
+        ::fbthrift::Serialize::write(&self.adaptedList, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedSet", ::fbthrift::TType::Set, 9);
+        ::fbthrift::Serialize::write(&self.adaptedSet, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedMap", ::fbthrift::TType::Map, 10);
+        ::fbthrift::Serialize::write(&self.adaptedMap, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedBoolDefault", ::fbthrift::TType::Bool, 11);
+        ::fbthrift::Serialize::write(&self.adaptedBoolDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedByteDefault", ::fbthrift::TType::Byte, 12);
+        ::fbthrift::Serialize::write(&self.adaptedByteDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedShortDefault", ::fbthrift::TType::I16, 13);
+        ::fbthrift::Serialize::write(&self.adaptedShortDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedIntegerDefault", ::fbthrift::TType::I32, 14);
+        ::fbthrift::Serialize::write(&self.adaptedIntegerDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedLongDefault", ::fbthrift::TType::I64, 15);
+        ::fbthrift::Serialize::write(&self.adaptedLongDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedDoubleDefault", ::fbthrift::TType::Double, 16);
+        ::fbthrift::Serialize::write(&self.adaptedDoubleDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedStringDefault", ::fbthrift::TType::String, 17);
+        ::fbthrift::Serialize::write(&self.adaptedStringDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedEnum", ::fbthrift::TType::I32, 18);
+        ::fbthrift::Serialize::write(&self.adaptedEnum, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedListDefault", ::fbthrift::TType::List, 19);
+        ::fbthrift::Serialize::write(&self.adaptedListDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedSetDefault", ::fbthrift::TType::Set, 20);
+        ::fbthrift::Serialize::write(&self.adaptedSetDefault, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedMapDefault", ::fbthrift::TType::Map, 21);
+        ::fbthrift::Serialize::write(&self.adaptedMapDefault, p);
+        p.write_field_end();
+        p.write_field_begin("doubleTypedefBool", ::fbthrift::TType::Bool, 22);
+        ::fbthrift::Serialize::write(&self.doubleTypedefBool, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptTemplatedTestStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("adaptedBool", ::fbthrift::TType::Bool, 1),
+            ::fbthrift::Field::new("adaptedBoolDefault", ::fbthrift::TType::Bool, 11),
+            ::fbthrift::Field::new("adaptedByte", ::fbthrift::TType::Byte, 2),
+            ::fbthrift::Field::new("adaptedByteDefault", ::fbthrift::TType::Byte, 12),
+            ::fbthrift::Field::new("adaptedDouble", ::fbthrift::TType::Double, 6),
+            ::fbthrift::Field::new("adaptedDoubleDefault", ::fbthrift::TType::Double, 16),
+            ::fbthrift::Field::new("adaptedEnum", ::fbthrift::TType::I32, 18),
+            ::fbthrift::Field::new("adaptedInteger", ::fbthrift::TType::I32, 4),
+            ::fbthrift::Field::new("adaptedIntegerDefault", ::fbthrift::TType::I32, 14),
+            ::fbthrift::Field::new("adaptedList", ::fbthrift::TType::List, 8),
+            ::fbthrift::Field::new("adaptedListDefault", ::fbthrift::TType::List, 19),
+            ::fbthrift::Field::new("adaptedLong", ::fbthrift::TType::I64, 5),
+            ::fbthrift::Field::new("adaptedLongDefault", ::fbthrift::TType::I64, 15),
+            ::fbthrift::Field::new("adaptedMap", ::fbthrift::TType::Map, 10),
+            ::fbthrift::Field::new("adaptedMapDefault", ::fbthrift::TType::Map, 21),
+            ::fbthrift::Field::new("adaptedSet", ::fbthrift::TType::Set, 9),
+            ::fbthrift::Field::new("adaptedSetDefault", ::fbthrift::TType::Set, 20),
+            ::fbthrift::Field::new("adaptedShort", ::fbthrift::TType::I16, 3),
+            ::fbthrift::Field::new("adaptedShortDefault", ::fbthrift::TType::I16, 13),
+            ::fbthrift::Field::new("adaptedString", ::fbthrift::TType::String, 7),
+            ::fbthrift::Field::new("adaptedStringDefault", ::fbthrift::TType::String, 17),
+            ::fbthrift::Field::new("doubleTypedefBool", ::fbthrift::TType::Bool, 22),
+        ];
+        let mut field_adaptedBool = ::std::option::Option::None;
+        let mut field_adaptedByte = ::std::option::Option::None;
+        let mut field_adaptedShort = ::std::option::Option::None;
+        let mut field_adaptedInteger = ::std::option::Option::None;
+        let mut field_adaptedLong = ::std::option::Option::None;
+        let mut field_adaptedDouble = ::std::option::Option::None;
+        let mut field_adaptedString = ::std::option::Option::None;
+        let mut field_adaptedList = ::std::option::Option::None;
+        let mut field_adaptedSet = ::std::option::Option::None;
+        let mut field_adaptedMap = ::std::option::Option::None;
+        let mut field_adaptedBoolDefault = ::std::option::Option::None;
+        let mut field_adaptedByteDefault = ::std::option::Option::None;
+        let mut field_adaptedShortDefault = ::std::option::Option::None;
+        let mut field_adaptedIntegerDefault = ::std::option::Option::None;
+        let mut field_adaptedLongDefault = ::std::option::Option::None;
+        let mut field_adaptedDoubleDefault = ::std::option::Option::None;
+        let mut field_adaptedStringDefault = ::std::option::Option::None;
+        let mut field_adaptedEnum = ::std::option::Option::None;
+        let mut field_adaptedListDefault = ::std::option::Option::None;
+        let mut field_adaptedSetDefault = ::std::option::Option::None;
+        let mut field_adaptedMapDefault = ::std::option::Option::None;
+        let mut field_doubleTypedefBool = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Bool, 1) => field_adaptedBool = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 2) => field_adaptedByte = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 3) => field_adaptedShort = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 4) => field_adaptedInteger = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 5) => field_adaptedLong = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, 6) => field_adaptedDouble = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 7) => field_adaptedString = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 8) => field_adaptedList = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 9) => field_adaptedSet = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 10) => field_adaptedMap = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 11) => field_adaptedBoolDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Byte, 12) => field_adaptedByteDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I16, 13) => field_adaptedShortDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 14) => field_adaptedIntegerDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 15) => field_adaptedLongDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Double, 16) => field_adaptedDoubleDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 17) => field_adaptedStringDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I32, 18) => field_adaptedEnum = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::List, 19) => field_adaptedListDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Set, 20) => field_adaptedSetDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Map, 21) => field_adaptedMapDefault = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Bool, 22) => field_doubleTypedefBool = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            adaptedBool: field_adaptedBool.unwrap_or_default(),
+            adaptedByte: field_adaptedByte.unwrap_or_default(),
+            adaptedShort: field_adaptedShort.unwrap_or_default(),
+            adaptedInteger: field_adaptedInteger.unwrap_or_default(),
+            adaptedLong: field_adaptedLong.unwrap_or_default(),
+            adaptedDouble: field_adaptedDouble.unwrap_or_default(),
+            adaptedString: field_adaptedString.unwrap_or_default(),
+            adaptedList: field_adaptedList.unwrap_or_default(),
+            adaptedSet: field_adaptedSet.unwrap_or_default(),
+            adaptedMap: field_adaptedMap.unwrap_or_default(),
+            adaptedBoolDefault: field_adaptedBoolDefault.unwrap_or(true),
+            adaptedByteDefault: field_adaptedByteDefault.unwrap_or_else(|| 1),
+            adaptedShortDefault: field_adaptedShortDefault.unwrap_or(2),
+            adaptedIntegerDefault: field_adaptedIntegerDefault.unwrap_or(3),
+            adaptedLongDefault: field_adaptedLongDefault.unwrap_or(4),
+            adaptedDoubleDefault: field_adaptedDoubleDefault.unwrap_or(0.0),
+            adaptedStringDefault: field_adaptedStringDefault.unwrap_or_else(|| "6".to_owned()),
+            adaptedEnum: field_adaptedEnum.unwrap_or(crate::types::ThriftAdaptedEnum::One),
+            adaptedListDefault: field_adaptedListDefault.unwrap_or_else(|| vec![
+                    1,
+                ]),
+            adaptedSetDefault: field_adaptedSetDefault.unwrap_or_else(|| {
+                    let mut set = ::std::collections::BTreeSet::new();
+                    set.insert(1);
+                    set
+                }),
+            adaptedMapDefault: field_adaptedMapDefault.unwrap_or_else(|| {
+                    let mut map = ::std::collections::BTreeMap::new();
+                    map.insert(1, 1);
+                    map
+                }),
+            doubleTypedefBool: field_doubleTypedefBool.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptTemplatedNestedTestStruct {
+    fn default() -> Self {
+        Self {
+            adaptedStruct: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptTemplatedNestedTestStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptTemplatedNestedTestStruct")
+            .field("adaptedStruct", &self.adaptedStruct)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptTemplatedNestedTestStruct {}
+unsafe impl ::std::marker::Sync for self::AdaptTemplatedNestedTestStruct {}
+
+impl ::fbthrift::GetTType for self::AdaptTemplatedNestedTestStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptTemplatedNestedTestStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AdaptTemplatedNestedTestStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptTemplatedNestedTestStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptTemplatedNestedTestStruct");
+        p.write_field_begin("adaptedStruct", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.adaptedStruct, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptTemplatedNestedTestStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("adaptedStruct", ::fbthrift::TType::Struct, 1),
+        ];
+        let mut field_adaptedStruct = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_adaptedStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            adaptedStruct: field_adaptedStruct.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+
+impl ::std::default::Default for AdaptTestUnion {
+    fn default() -> Self {
+        Self::UnknownField(-1)
+    }
+}
+
+impl ::fbthrift::GetTType for AdaptTestUnion {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptTestUnion {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AdaptTestUnion"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for AdaptTestUnion
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptTestUnion");
+        match self {
+            Self::delay(inner) => {
+                p.write_field_begin("delay", ::fbthrift::TType::I64, 1);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::custom(inner) => {
+                p.write_field_begin("custom", ::fbthrift::TType::String, 2);
+                ::fbthrift::Serialize::write(inner, p);
+                p.write_field_end();
+            }
+            Self::UnknownField(_) => {}
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for AdaptTestUnion
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("custom", ::fbthrift::TType::String, 2),
+            ::fbthrift::Field::new("delay", ::fbthrift::TType::I64, 1),
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        let mut once = false;
+        let mut alt = ::std::option::Option::None;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32, once) {
+                (::fbthrift::TType::Stop, _, _) => break,
+                (::fbthrift::TType::I64, 1, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::delay(::fbthrift::Deserialize::read(p)?));
+                }
+                (::fbthrift::TType::String, 2, false) => {
+                    once = true;
+                    alt = ::std::option::Option::Some(Self::custom(::fbthrift::Deserialize::read(p)?));
+                }
+                (fty, _, false) => p.skip(fty)?,
+                (badty, badid, true) => return ::std::result::Result::Err(::std::convert::From::from(::fbthrift::ApplicationException::new(
+                    ::fbthrift::ApplicationExceptionErrorCode::ProtocolError,
+                    format!(
+                        "unwanted extra union {} field ty {:?} id {}",
+                        "AdaptTestUnion",
+                        badty,
+                        badid,
+                    ),
+                ))),
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(alt.unwrap_or_default())
+    }
+}
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AdaptedStruct {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AdaptedStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AdaptedStruct")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AdaptedStruct {}
+unsafe impl ::std::marker::Sync for self::AdaptedStruct {}
+
+impl ::fbthrift::GetTType for self::AdaptedStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AdaptedStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AdaptedStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AdaptedStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AdaptedStruct");
+        p.write_field_begin("data", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AdaptedStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::DirectlyAdaptedStruct {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::DirectlyAdaptedStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("DirectlyAdaptedStruct")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::DirectlyAdaptedStruct {}
+unsafe impl ::std::marker::Sync for self::DirectlyAdaptedStruct {}
+
+impl ::fbthrift::GetTType for self::DirectlyAdaptedStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::DirectlyAdaptedStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/DirectlyAdaptedStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::DirectlyAdaptedStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("DirectlyAdaptedStruct");
+        p.write_field_begin("data", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::DirectlyAdaptedStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructFieldAdaptedStruct {
+    fn default() -> Self {
+        Self {
+            adaptedStruct: ::std::default::Default::default(),
+            adaptedTypedef: ::std::default::Default::default(),
+            directlyAdapted: ::std::default::Default::default(),
+            typedefOfAdapted: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructFieldAdaptedStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructFieldAdaptedStruct")
+            .field("adaptedStruct", &self.adaptedStruct)
+            .field("adaptedTypedef", &self.adaptedTypedef)
+            .field("directlyAdapted", &self.directlyAdapted)
+            .field("typedefOfAdapted", &self.typedefOfAdapted)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructFieldAdaptedStruct {}
+unsafe impl ::std::marker::Sync for self::StructFieldAdaptedStruct {}
+
+impl ::fbthrift::GetTType for self::StructFieldAdaptedStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::StructFieldAdaptedStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/StructFieldAdaptedStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructFieldAdaptedStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("StructFieldAdaptedStruct");
+        p.write_field_begin("adaptedStruct", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.adaptedStruct, p);
+        p.write_field_end();
+        p.write_field_begin("adaptedTypedef", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::write(&self.adaptedTypedef, p);
+        p.write_field_end();
+        p.write_field_begin("directlyAdapted", ::fbthrift::TType::Struct, 3);
+        ::fbthrift::Serialize::write(&self.directlyAdapted, p);
+        p.write_field_end();
+        p.write_field_begin("typedefOfAdapted", ::fbthrift::TType::Struct, 4);
+        ::fbthrift::Serialize::write(&self.typedefOfAdapted, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructFieldAdaptedStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("adaptedStruct", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("adaptedTypedef", ::fbthrift::TType::Struct, 2),
+            ::fbthrift::Field::new("directlyAdapted", ::fbthrift::TType::Struct, 3),
+            ::fbthrift::Field::new("typedefOfAdapted", ::fbthrift::TType::Struct, 4),
+        ];
+        let mut field_adaptedStruct = ::std::option::Option::None;
+        let mut field_adaptedTypedef = ::std::option::Option::None;
+        let mut field_directlyAdapted = ::std::option::Option::None;
+        let mut field_typedefOfAdapted = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_adaptedStruct = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 2) => field_adaptedTypedef = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 3) => field_directlyAdapted = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 4) => field_typedefOfAdapted = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            adaptedStruct: field_adaptedStruct.unwrap_or_default(),
+            adaptedTypedef: field_adaptedTypedef.unwrap_or_default(),
+            directlyAdapted: field_directlyAdapted.unwrap_or_default(),
+            typedefOfAdapted: field_typedefOfAdapted.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::CircularAdaptee {
+    fn default() -> Self {
+        Self {
+            field: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::CircularAdaptee {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("CircularAdaptee")
+            .field("field", &self.field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::CircularAdaptee {}
+unsafe impl ::std::marker::Sync for self::CircularAdaptee {}
+
+impl ::fbthrift::GetTType for self::CircularAdaptee {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::CircularAdaptee {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/CircularAdaptee"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::CircularAdaptee
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("CircularAdaptee");
+        p.write_field_begin("field", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.field, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::CircularAdaptee
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field", ::fbthrift::TType::Struct, 1),
+        ];
+        let mut field_field = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field: field_field.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::CircularStruct {
+    fn default() -> Self {
+        Self {
+            field: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::CircularStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("CircularStruct")
+            .field("field", &self.field)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::CircularStruct {}
+unsafe impl ::std::marker::Sync for self::CircularStruct {}
+
+impl ::fbthrift::GetTType for self::CircularStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::CircularStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/CircularStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::CircularStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("CircularStruct");
+        if let ::std::option::Option::Some(some) = &self.field {
+            p.write_field_begin("field", ::fbthrift::TType::Struct, 1);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::CircularStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field", ::fbthrift::TType::Struct, 1),
+        ];
+        let mut field_field = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_field = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field: field_field,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::RenamedStruct {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::RenamedStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("RenamedStruct")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::RenamedStruct {}
+unsafe impl ::std::marker::Sync for self::RenamedStruct {}
+
+impl ::fbthrift::GetTType for self::RenamedStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::RenamedStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/RenamedStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::RenamedStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("RenamedStruct");
+        p.write_field_begin("data", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::RenamedStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::SameNamespaceStruct {
+    fn default() -> Self {
+        Self {
+            data: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::SameNamespaceStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("SameNamespaceStruct")
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::SameNamespaceStruct {}
+unsafe impl ::std::marker::Sync for self::SameNamespaceStruct {}
+
+impl ::fbthrift::GetTType for self::SameNamespaceStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::SameNamespaceStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/SameNamespaceStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::SameNamespaceStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("SameNamespaceStruct");
+        p.write_field_begin("data", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.data, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::SameNamespaceStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("data", ::fbthrift::TType::I64, 1),
+        ];
+        let mut field_data = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_data = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            data: field_data.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::HeapAllocated {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::HeapAllocated {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("HeapAllocated")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::HeapAllocated {}
+unsafe impl ::std::marker::Sync for self::HeapAllocated {}
+
+impl ::fbthrift::GetTType for self::HeapAllocated {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::HeapAllocated {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/HeapAllocated"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::HeapAllocated
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("HeapAllocated");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::HeapAllocated
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::MoveOnly {
+    fn default() -> Self {
+        Self {
+            ptr: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::MoveOnly {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("MoveOnly")
+            .field("ptr", &self.ptr)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::MoveOnly {}
+unsafe impl ::std::marker::Sync for self::MoveOnly {}
+
+impl ::fbthrift::GetTType for self::MoveOnly {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::MoveOnly {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/MoveOnly"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::MoveOnly
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("MoveOnly");
+        p.write_field_begin("ptr", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.ptr, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::MoveOnly
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("ptr", ::fbthrift::TType::Struct, 1),
+        ];
+        let mut field_ptr = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_ptr = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            ptr: field_ptr.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::AlsoMoveOnly {
+    fn default() -> Self {
+        Self {
+            ptr: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::AlsoMoveOnly {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("AlsoMoveOnly")
+            .field("ptr", &self.ptr)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::AlsoMoveOnly {}
+unsafe impl ::std::marker::Sync for self::AlsoMoveOnly {}
+
+impl ::fbthrift::GetTType for self::AlsoMoveOnly {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::AlsoMoveOnly {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/AlsoMoveOnly"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::AlsoMoveOnly
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("AlsoMoveOnly");
+        p.write_field_begin("ptr", ::fbthrift::TType::I64, 1);
+        ::fbthrift::Serialize::write(&self.ptr, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::AlsoMoveOnly
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("ptr", ::fbthrift::TType::I64, 1),
+        ];
+        let mut field_ptr = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_ptr = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            ptr: field_ptr.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::ApplyAdapter {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::ApplyAdapter {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("ApplyAdapter")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::ApplyAdapter {}
+unsafe impl ::std::marker::Sync for self::ApplyAdapter {}
+
+impl ::fbthrift::GetTType for self::ApplyAdapter {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::ApplyAdapter {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/ApplyAdapter"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::ApplyAdapter
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("ApplyAdapter");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::ApplyAdapter
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::TransitiveAdapted {
+    fn default() -> Self {
+        Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::TransitiveAdapted {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("TransitiveAdapted")
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::TransitiveAdapted {}
+unsafe impl ::std::marker::Sync for self::TransitiveAdapted {}
+
+impl ::fbthrift::GetTType for self::TransitiveAdapted {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::TransitiveAdapted {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/TransitiveAdapted"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::TransitiveAdapted
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("TransitiveAdapted");
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::TransitiveAdapted
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+        ];
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::CountingStruct {
+    fn default() -> Self {
+        Self {
+            regularInt: ::std::option::Option::None,
+            countingInt: ::std::option::Option::None,
+            regularString: ::std::option::Option::None,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::CountingStruct {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("CountingStruct")
+            .field("regularInt", &self.regularInt)
+            .field("countingInt", &self.countingInt)
+            .field("regularString", &self.regularString)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::CountingStruct {}
+unsafe impl ::std::marker::Sync for self::CountingStruct {}
+
+impl ::fbthrift::GetTType for self::CountingStruct {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::CountingStruct {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/CountingStruct"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::CountingStruct
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("CountingStruct");
+        if let ::std::option::Option::Some(some) = &self.regularInt {
+            p.write_field_begin("regularInt", ::fbthrift::TType::I64, 1);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
+        if let ::std::option::Option::Some(some) = &self.countingInt {
+            p.write_field_begin("countingInt", ::fbthrift::TType::I64, 2);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
+        if let ::std::option::Option::Some(some) = &self.regularString {
+            p.write_field_begin("regularString", ::fbthrift::TType::String, 3);
+            ::fbthrift::Serialize::write(some, p);
+            p.write_field_end();
+        }
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::CountingStruct
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("countingInt", ::fbthrift::TType::I64, 2),
+            ::fbthrift::Field::new("regularInt", ::fbthrift::TType::I64, 1),
+            ::fbthrift::Field::new("regularString", ::fbthrift::TType::String, 3),
+        ];
+        let mut field_regularInt = ::std::option::Option::None;
+        let mut field_countingInt = ::std::option::Option::None;
+        let mut field_regularString = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::I64, 1) => field_regularInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::I64, 2) => field_countingInt = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::String, 3) => field_regularString = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            regularInt: field_regularInt,
+            countingInt: field_countingInt,
+            regularString: field_regularString,
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::Person {
+    fn default() -> Self {
+        Self {
+            name: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::Person {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Person")
+            .field("name", &self.name)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::Person {}
+unsafe impl ::std::marker::Sync for self::Person {}
+
+impl ::fbthrift::GetTType for self::Person {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::Person {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/Person"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::Person
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("Person");
+        p.write_field_begin("name", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::write(&self.name, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::Person
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 1),
+        ];
+        let mut field_name = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::String, 1) => field_name = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            name: field_name.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::Person2 {
+    fn default() -> Self {
+        Self {
+            name: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::Person2 {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("Person2")
+            .field("name", &self.name)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::Person2 {}
+unsafe impl ::std::marker::Sync for self::Person2 {}
+
+impl ::fbthrift::GetTType for self::Person2 {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl ::fbthrift::GetUri for self::Person2 {
+    fn uri() -> &'static str {
+        "facebook.com/thrift/test/Person2"
+    }
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::Person2
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("Person2");
+        p.write_field_begin("name", ::fbthrift::TType::String, 1);
+        ::fbthrift::Serialize::write(&self.name, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::Person2
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("name", ::fbthrift::TType::String, 1),
+        ];
+        let mut field_name = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::String, 1) => field_name = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            name: field_name.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

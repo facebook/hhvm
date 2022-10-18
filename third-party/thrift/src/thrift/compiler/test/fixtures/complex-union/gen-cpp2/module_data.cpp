@@ -9,10 +9,24 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::cpp2::ComplexUnion::Type, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::ComplexUnion::Type, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::values = {{
   type::intValue,
   type::stringValue,
   type::intListValue,
@@ -20,7 +34,7 @@ const std::array<::cpp2::ComplexUnion::Type, 6> TEnumDataStorage<::cpp2::Complex
   type::typedefValue,
   type::stringRef,
 }};
-const std::array<folly::StringPiece, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TEnumDataStorage<::cpp2::ComplexUnion::Type>::names = {{
   "intValue",
   "stringValue",
   "intListValue",
@@ -29,50 +43,50 @@ const std::array<folly::StringPiece, 6> TEnumDataStorage<::cpp2::ComplexUnion::T
   "stringRef",
 }};
 
-const std::array<::cpp2::ListUnion::Type, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::ListUnion::Type, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::values = {{
   type::intListValue,
   type::stringListValue,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ListUnion::Type>::names = {{
   "intListValue",
   "stringListValue",
 }};
 
-const std::array<::cpp2::DataUnion::Type, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::DataUnion::Type, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::values = {{
   type::binaryData,
   type::stringData,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::DataUnion::Type>::names = {{
   "binaryData",
   "stringData",
 }};
 
-const std::array<::cpp2::ValUnion::Type, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::ValUnion::Type, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::values = {{
   type::v1,
   type::v2,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::ValUnion::Type>::names = {{
   "v1",
   "v2",
 }};
 
-const std::array<::cpp2::VirtualComplexUnion::Type, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::VirtualComplexUnion::Type, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::values = {{
   type::thingOne,
   type::thingTwo,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::cpp2::VirtualComplexUnion::Type>::names = {{
   "thingOne",
   "thingTwo",
 }};
 
-const std::array<::cpp2::NonCopyableUnion::Type, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::NonCopyableUnion::Type, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::values = {{
   type::s,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::cpp2::NonCopyableUnion::Type>::names = {{
   "s",
 }};
 
-const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_names = {{
   "intValue",
   "stringValue",
   "intListValue",
@@ -80,7 +94,7 @@ const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>
   "typedefValue",
   "stringRef",
 }};
-const std::array<int16_t, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_ids = {{
   1,
   5,
   2,
@@ -88,7 +102,7 @@ const std::array<int16_t, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_id
   9,
   14,
 }};
-const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::ComplexUnion>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_LIST,
@@ -96,7 +110,7 @@ const std::array<protocol::TType, 6> TStructDataStorage<::cpp2::ComplexUnion>::f
   TType::T_MAP,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>::storage_names = {{
   "intValue",
   "stringValue",
   "intListValue",
@@ -104,7 +118,7 @@ const std::array<folly::StringPiece, 6> TStructDataStorage<::cpp2::ComplexUnion>
   "typedefValue",
   "stringRef",
 }};
-const std::array<int, 6> TStructDataStorage<::cpp2::ComplexUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 6> TStructDataStorage<::cpp2::ComplexUnion>::isset_indexes = {{
   0,
   1,
   2,
@@ -113,145 +127,145 @@ const std::array<int, 6> TStructDataStorage<::cpp2::ComplexUnion>::isset_indexes
   -1,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ListUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ListUnion>::fields_names = {{
   "intListValue",
   "stringListValue",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::cpp2::ListUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::cpp2::ListUnion>::fields_ids = {{
   2,
   3,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ListUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ListUnion>::fields_types = {{
   TType::T_LIST,
   TType::T_LIST,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ListUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ListUnion>::storage_names = {{
   "intListValue",
   "stringListValue",
 }};
-const std::array<int, 2> TStructDataStorage<::cpp2::ListUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::cpp2::ListUnion>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::DataUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::DataUnion>::fields_names = {{
   "binaryData",
   "stringData",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::cpp2::DataUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::cpp2::DataUnion>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::DataUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::DataUnion>::fields_types = {{
   TType::T_STRING,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::DataUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::DataUnion>::storage_names = {{
   "binaryData",
   "stringData",
 }};
-const std::array<int, 2> TStructDataStorage<::cpp2::DataUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::cpp2::DataUnion>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Val>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Val>::fields_names = {{
   "strVal",
   "intVal",
   "typedefValue",
 }};
-const std::array<int16_t, 3> TStructDataStorage<::cpp2::Val>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 3> TStructDataStorage<::cpp2::Val>::fields_ids = {{
   1,
   2,
   9,
 }};
-const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::Val>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 3> TStructDataStorage<::cpp2::Val>::fields_types = {{
   TType::T_STRING,
   TType::T_I32,
   TType::T_MAP,
 }};
-const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Val>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::cpp2::Val>::storage_names = {{
   "__fbthrift_field_strVal",
   "__fbthrift_field_intVal",
   "__fbthrift_field_typedefValue",
 }};
-const std::array<int, 3> TStructDataStorage<::cpp2::Val>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::cpp2::Val>::isset_indexes = {{
   0,
   1,
   2,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ValUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ValUnion>::fields_names = {{
   "v1",
   "v2",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::cpp2::ValUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::cpp2::ValUnion>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ValUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::ValUnion>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ValUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::ValUnion>::storage_names = {{
   "v1",
   "v2",
 }};
-const std::array<int, 2> TStructDataStorage<::cpp2::ValUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::cpp2::ValUnion>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_names = {{
   "thingOne",
   "thingTwo",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::fields_types = {{
   TType::T_STRING,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::storage_names = {{
   "thingOne",
   "thingTwo",
 }};
-const std::array<int, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::cpp2::VirtualComplexUnion>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_names = {{
   "num",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::fields_types = {{
   TType::T_I64,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::storage_names = {{
   "__fbthrift_field_num",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyableStruct>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_names = {{
   "s",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::fields_types = {{
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::storage_names = {{
   "s",
 }};
-const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::cpp2::NonCopyableUnion>::isset_indexes = {{
   0,
 }};
 

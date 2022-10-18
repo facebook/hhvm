@@ -20,16 +20,30 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 <%#program:enums%>
 
-const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
+THRIFT_DATA_SECTION const std::array<<% > common/namespace_cpp2%><%enum:cpp_name%>, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::values = {{
 <%#enum:values%><%!
 %>  type::<%enum_value:cpp_name%>,
 <%/enum:values%>
 }};
-const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common/namespace_cpp2%><%enum:cpp_name%>>::names = {{
 <%#enum:values%><%!
 %>  "<%enum_value:name%>",
 <%/enum:values%>
@@ -38,12 +52,12 @@ const std::array<folly::StringPiece, <%enum:size%>> TEnumDataStorage<<% > common
 <%#program:structs%>
 <%#struct:union?%>
 
-const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<<%struct:cpp_fullname%>::Type, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::values = {{
 <%#struct:fields%><%!
 %>  type::<%field:cpp_name%>,
 <%/struct:fields%>
 }};
-const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStorage<<%struct:cpp_fullname%>::Type>::names = {{
 <%#struct:fields%><%!
 %>  "<%field:name%>",
 <%/struct:fields%>
@@ -52,27 +66,27 @@ const std::array<folly::StringPiece, <%struct:num_union_members%>> TEnumDataStor
 <%/program:structs%>
 <%#program:structs%>
 
-const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_names = {{
   <%#struct:fields%>
   "<%field:name%>",
   <%/struct:fields%>
 }};
-const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_ids = {{
   <%#struct:fields%>
   <%field:key%>,
   <%/struct:fields%>
 }};
-const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::fields_types = {{
   <%#struct:fields%><%#field:type%>
   TType::<% > module_types_tcc/struct_type%>,
   <%/field:type%><%/struct:fields%>
 }};
-const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::storage_names = {{
   <%#struct:fields%>
   "<%field:cpp_storage_name%>",
   <%/struct:fields%>
 }};
-const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, <%struct:fields_size%>> TStructDataStorage<<%struct:cpp_fullname%>>::isset_indexes = {{
   <%#struct:fields%>
   <%#field:has_isset?%><%field:isset_index%><%/field:has_isset?%><%^field:has_isset?%>-1<%/field:has_isset?%>,
   <%/struct:fields%>

@@ -9,59 +9,73 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::facebook::ns::qwerty::AnEnumA, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::values = {{
+THRIFT_DATA_SECTION const std::array<::facebook::ns::qwerty::AnEnumA, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::values = {{
   type::FIELDA,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumA>::names = {{
   "FIELDA",
 }};
 
-const std::array<::facebook::ns::qwerty::AnEnumB, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::values = {{
+THRIFT_DATA_SECTION const std::array<::facebook::ns::qwerty::AnEnumB, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::values = {{
   type::FIELDA,
   type::FIELDB,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::facebook::ns::qwerty::AnEnumB>::names = {{
   "FIELDA",
   "FIELDB",
 }};
 
-const std::array<::facebook::ns::qwerty::AnEnumC, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::values = {{
+THRIFT_DATA_SECTION const std::array<::facebook::ns::qwerty::AnEnumC, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::values = {{
   type::FIELDC,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumC>::names = {{
   "FIELDC",
 }};
 
-const std::array<::facebook::ns::qwerty::AnEnumD, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::values = {{
+THRIFT_DATA_SECTION const std::array<::facebook::ns::qwerty::AnEnumD, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::values = {{
   type::FIELDD,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumD>::names = {{
   "FIELDD",
 }};
 
-const std::array<::facebook::ns::qwerty::AnEnumE, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::values = {{
+THRIFT_DATA_SECTION const std::array<::facebook::ns::qwerty::AnEnumE, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::values = {{
   type::FIELDA,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::facebook::ns::qwerty::AnEnumE>::names = {{
   "FIELDA",
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_names = {{
   "fieldA",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::fields_types = {{
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::storage_names = {{
   "__fbthrift_field_fieldA",
 }};
-const std::array<int, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::facebook::ns::qwerty::SomeStruct>::isset_indexes = {{
   0,
 }};
 

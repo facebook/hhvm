@@ -9,80 +9,94 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::cpp2::Animal, 3> TEnumDataStorage<::cpp2::Animal>::values = {{
+THRIFT_DATA_SECTION const std::array<::cpp2::Animal, 3> TEnumDataStorage<::cpp2::Animal>::values = {{
   type::DOG,
   type::CAT,
   type::TARANTULA,
 }};
-const std::array<folly::StringPiece, 3> TEnumDataStorage<::cpp2::Animal>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TEnumDataStorage<::cpp2::Animal>::names = {{
   "DOG",
   "CAT",
   "TARANTULA",
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Color>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Color>::fields_names = {{
   "red",
   "green",
   "blue",
   "alpha",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::cpp2::Color>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::cpp2::Color>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Color>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::cpp2::Color>::fields_types = {{
   TType::T_DOUBLE,
   TType::T_DOUBLE,
   TType::T_DOUBLE,
   TType::T_DOUBLE,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Color>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::cpp2::Color>::storage_names = {{
   "__fbthrift_field_red",
   "__fbthrift_field_green",
   "__fbthrift_field_blue",
   "__fbthrift_field_alpha",
 }};
-const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::cpp2::Color>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::fields_names = {{
   "color",
   "licensePlate",
   "description",
   "name",
   "hasAC",
 }};
-const std::array<int16_t, 5> TStructDataStorage<::cpp2::Vehicle>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::cpp2::Vehicle>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::Vehicle>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::cpp2::Vehicle>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_STRING,
   TType::T_BOOL,
 }};
-const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::cpp2::Vehicle>::storage_names = {{
   "__fbthrift_field_color",
   "__fbthrift_field_licensePlate",
   "__fbthrift_field_description",
   "__fbthrift_field_name",
   "__fbthrift_field_hasAC",
 }};
-const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = {{
   0,
   1,
   2,
@@ -90,7 +104,7 @@ const std::array<int, 5> TStructDataStorage<::cpp2::Vehicle>::isset_indexes = {{
   4,
 }};
 
-const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::fields_names = {{
   "id",
   "name",
   "age",
@@ -102,7 +116,7 @@ const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::fie
   "afraidOfAnimal",
   "vehicles",
 }};
-const std::array<int16_t, 10> TStructDataStorage<::cpp2::Person>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 10> TStructDataStorage<::cpp2::Person>::fields_ids = {{
   1,
   2,
   3,
@@ -114,7 +128,7 @@ const std::array<int16_t, 10> TStructDataStorage<::cpp2::Person>::fields_ids = {
   9,
   10,
 }};
-const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_I16,
@@ -126,7 +140,7 @@ const std::array<protocol::TType, 10> TStructDataStorage<::cpp2::Person>::fields
   TType::T_I32,
   TType::T_LIST,
 }};
-const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::storage_names = {{
   "__fbthrift_field_id",
   "__fbthrift_field_name",
   "__fbthrift_field_age",
@@ -138,7 +152,7 @@ const std::array<folly::StringPiece, 10> TStructDataStorage<::cpp2::Person>::sto
   "__fbthrift_field_afraidOfAnimal",
   "__fbthrift_field_vehicles",
 }};
-const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 10> TStructDataStorage<::cpp2::Person>::isset_indexes = {{
   0,
   1,
   2,

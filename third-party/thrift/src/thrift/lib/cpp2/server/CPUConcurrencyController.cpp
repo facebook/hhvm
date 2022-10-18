@@ -30,7 +30,7 @@ THRIFT_PLUGGABLE_FUNC_REGISTER(
 }
 
 THRIFT_PLUGGABLE_FUNC_REGISTER(
-    int64_t, getCPULoadCounter, std::chrono::milliseconds, bool) {
+    int64_t, getCPULoadCounter, std::chrono::milliseconds, CPULoadSource) {
   return -1;
 }
 } // namespace detail

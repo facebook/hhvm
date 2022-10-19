@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -689,7 +687,7 @@ class TimePatch(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.op.patch.thrift_metadata
 
-class PatchOp(_fbthrift_python_types.Enum, enum.IntEnum):
+class PatchOp(_fbthrift_python_types.Enum, int):
     Assign = 1
     Clear = 2
     PatchPrior = 3

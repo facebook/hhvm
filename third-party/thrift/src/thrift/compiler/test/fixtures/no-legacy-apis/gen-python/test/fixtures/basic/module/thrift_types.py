@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -87,7 +85,7 @@ class MyUnion(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.basic.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue1 = 0
     MyValue2 = 1
     @staticmethod

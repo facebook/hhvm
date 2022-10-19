@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import enum
 
 from thrift.py3.types cimport Struct as py3_Struct, Union as py3_Union
 from thrift.py3.types import Enum as py3_Enum
 import thrift.py3.reflection as py3_reflection
 cimport thrift.python.types as python_types
 from thrift.Thrift import TType
+from thrift.python.types import Enum
 from thrift.util import parse_struct_spec
 
 
@@ -99,7 +99,6 @@ cdef object _to_py_field(object field_type, object type_args, object obj):
             )
             for k, v in obj.items()
         }
-    # thrift-python Enums are subclasses of enum.Enum
-    if isinstance(obj, py3_Enum) or isinstance(obj, enum.Enum):
+    if isinstance(obj, py3_Enum) or isinstance(obj, Enum):
         return obj.value
     return obj

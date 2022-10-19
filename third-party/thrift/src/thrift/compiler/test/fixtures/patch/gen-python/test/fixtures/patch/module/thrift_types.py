@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -1591,7 +1589,7 @@ class LateDefStructPatch(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import test.fixtures.patch.module.thrift_metadata
 
-class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue0 = 0
     @staticmethod
     def __get_thrift_name__() -> str:

@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -473,7 +471,7 @@ class union2(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
-class EmptyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
+class EmptyEnum(_fbthrift_python_types.Enum, int):
     @staticmethod
     def __get_thrift_name__() -> str:
         return "module.EmptyEnum"
@@ -492,7 +490,7 @@ class EmptyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class City(_fbthrift_python_types.Enum, enum.IntEnum):
+class City(_fbthrift_python_types.Enum, int):
     NYC = 0
     MPK = 1
     SEA = 2
@@ -515,7 +513,7 @@ class City(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class Company(_fbthrift_python_types.Enum, enum.IntEnum):
+class Company(_fbthrift_python_types.Enum, int):
     FACEBOOK = 0
     WHATSAPP = 1
     OCULUS = 2

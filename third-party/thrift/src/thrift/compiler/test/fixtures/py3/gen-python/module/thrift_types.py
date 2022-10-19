@@ -9,8 +9,6 @@ from __future__ import annotations
 
 import __static__
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import fbcode.thrift.python.types as _fbthrift_python_types
 import fbcode.thrift.python.exceptions as _fbthrift_python_exceptions
@@ -379,7 +377,7 @@ class BinaryUnionStruct(metaclass=_fbthrift_python_types.StructMeta):
 # This unfortunately has to be down here to prevent circular imports
 import module.thrift_metadata
 
-class AnEnum(_fbthrift_python_types.Enum, enum.IntEnum):
+class AnEnum(_fbthrift_python_types.Enum, int):
     NOTSET = 0
     ONE = 1
     TWO = 2
@@ -403,7 +401,7 @@ class AnEnum(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class AnEnumRenamed(_fbthrift_python_types.Enum, enum.IntEnum):
+class AnEnumRenamed(_fbthrift_python_types.Enum, int):
     name_ = 0
     value_ = 1
     renamed_ = 2
@@ -425,7 +423,7 @@ class AnEnumRenamed(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class Flags(_fbthrift_python_types.Enum, enum.Flag):
+class Flags(_fbthrift_python_types.Flag):
     flag_A = 1
     flag_B = 2
     flag_C = 4

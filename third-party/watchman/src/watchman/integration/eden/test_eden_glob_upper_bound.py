@@ -347,7 +347,7 @@ class TestEdenGlobUpperBound(WatchmanEdenTestCase.WatchmanEdenTestCase):
                 "acc/_/_/_.txt",
             ],
         )
-        self.assertGlobUpperBound({"[[:alpha:]]?[^z]/*/**/*.tx[t]"})
+        self.assertGlobUpperBound({"[[:alpha:]]?[^z]/*/**"})
 
     def assertGlobUpperBound(self, expected_patterns) -> None:
         if expected_patterns is None:

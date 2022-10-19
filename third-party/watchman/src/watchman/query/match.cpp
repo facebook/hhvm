@@ -18,6 +18,46 @@
 
 namespace watchman {
 
+namespace {
+/// Trims the given \param pattern after the first occurrence of the `**`
+/// token, if any.
+w_string_piece trimGlobAfterDoubleStar(w_string_piece pattern) {
+  bool inClass = false;
+  const char* pos = pattern.data();
+  const char* end = pattern.data() + pattern.size();
+  while (pos < end) {
+    if (inClass) {
+      switch (*pos) {
+        case ']':
+          inClass = false;
+          break;
+        case '\\':
+          // skip the escaped character
+          ++pos;
+          break;
+      }
+    } else {
+      switch (*pos) {
+        case '[':
+          inClass = true;
+          break;
+        case '\\':
+          // skip the escaped character
+          ++pos;
+          break;
+        case '*':
+          // Look ahead to see if this is a `**` token.
+          if ((pos + 1 < end) && pos[1] == '*') {
+            return w_string_piece{pattern.data(), pos + 2};
+          }
+          break;
+      }
+    }
+    ++pos;
+  }
+  return pattern;
+}
+} // namespace
 class WildMatchExpr : public QueryExpr {
   std::string pattern;
   CaseSensitivity caseSensitive;
@@ -165,8 +205,8 @@ class WildMatchExpr : public QueryExpr {
     if (noescape) {
       outputPattern = convertNoEscapeGlobToGlob(outputPattern);
     }
-    // TODO: Consider trimming the pattern after the first occurrence of **.
-    return std::vector<std::string>{outputPattern.string()};
+    return std::vector<std::string>{
+        trimGlobAfterDoubleStar(outputPattern).string()};
   }
 };
 W_TERM_PARSER(match, WildMatchExpr::parseMatch);

@@ -204,8 +204,38 @@ TEST_P(CaseInvariantGlobUpperBoundTest, term_match_basename) {
 TEST_P(CaseInvariantGlobUpperBoundTest, term_match_wholename) {
   EXPECT_THAT(
       expr_to_upper_bound(
+          R"( ["match", "foo/*/bar", "wholename"] )", caseSensitivity_),
+      Optional(UnorderedElementsAre("foo/*/bar")));
+}
+
+TEST_P(CaseInvariantGlobUpperBoundTest, term_match_trim_doublestar) {
+  EXPECT_THAT(
+      expr_to_upper_bound(
           R"( ["match", "foo/**/bar", "wholename"] )", caseSensitivity_),
-      Optional(UnorderedElementsAre("foo/**/bar")));
+      Optional(UnorderedElementsAre("foo/**")));
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"( ["match", "foo/**/bar/**/baz", "wholename"] )", caseSensitivity_),
+      Optional(UnorderedElementsAre("foo/**")));
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"( ["match", "**/foo", "wholename"] )", caseSensitivity_),
+      Eq(std::nullopt));
+}
+
+TEST_P(CaseInvariantGlobUpperBoundTest, term_match_escaped_doublestar) {
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"( ["match", "foo/\\**/bar", "wholename"] )", caseSensitivity_),
+      Optional(UnorderedElementsAre(R"(foo/\**/bar)")));
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"( ["match", "foo/*\\*/bar", "wholename"] )", caseSensitivity_),
+      Optional(UnorderedElementsAre(R"(foo/*\*/bar)")));
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"( ["match", "foo/[**]/bar", "wholename"] )", caseSensitivity_),
+      Optional(UnorderedElementsAre("foo/[**]/bar")));
 }
 
 TEST_P(CaseInvariantGlobUpperBoundTest, term_match_dotfiles) {
@@ -243,19 +273,19 @@ TEST(GlobUpperBoundTest, term_imatch_wholename) {
   // imatch can be bounded with a case-insensitive glob
   EXPECT_THAT(
       expr_to_upper_bound(
-          R"( ["imatch", "Foo/**/Bar", "wholename"] )",
+          R"( ["imatch", "Foo/*/Bar", "wholename"] )",
           CaseSensitivity::CaseInSensitive),
-      Optional(UnorderedElementsAre("foo/**/bar")));
+      Optional(UnorderedElementsAre("foo/*/bar")));
 
   // imatch cannot be bounded with a case-sensitive glob
   EXPECT_THAT(
       expr_to_upper_bound(
-          R"( ["imatch", "foo/**/bar", "wholename"] )",
+          R"( ["imatch", "foo/*/bar", "wholename"] )",
           CaseSensitivity::CaseSensitive),
       Eq(std::nullopt));
   EXPECT_THAT(
       expr_to_upper_bound(
-          R"( ["imatch", "foo/**/bar", "wholename"] )",
+          R"( ["imatch", "foo/*/bar", "wholename"] )",
           CaseSensitivity::Unknown),
       Eq(std::nullopt));
 }
@@ -470,6 +500,19 @@ TEST(GlobUpperBoundTest, term_anyof_dedupes) {
           ])",
           CaseSensitivity::CaseInSensitive),
       Optional(UnorderedElementsAre("foo/**", "bar/**")));
+}
+
+TEST_P(CaseInvariantGlobUpperBoundTest, term_anyof_dedupes_expensive_globs) {
+  EXPECT_THAT(
+      expr_to_upper_bound(
+          R"([
+            "anyof",
+            ["match", "foo/**/bar", "wholename"],
+            ["match", "foo/**/baz/quux", "wholename"],
+            ["match", "foo/**/more/*", "wholename"]
+          ])",
+          caseSensitivity_),
+      Optional(UnorderedElementsAre("foo/**")));
 }
 
 INSTANTIATE_TEST_CASE_P(

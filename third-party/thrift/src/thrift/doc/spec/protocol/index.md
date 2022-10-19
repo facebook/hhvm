@@ -4,7 +4,7 @@ state: draft
 
 # Protocols
 
-How thrift implementations communicate.
+How Thrift implementations communicate.
 
 - [Data Protocols](data.md)
 - [Interface Protocols](interface/index.md)

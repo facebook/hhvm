@@ -159,19 +159,20 @@ std::optional<ServerRequestRejection> RoundRobinRequestPile::enqueue(
   return std::nullopt;
 }
 
-std::optional<ServerRequest> RoundRobinRequestPile::dequeue() {
+std::pair<std::optional<ServerRequest>, std::optional<intptr_t>>
+RoundRobinRequestPile::dequeue() {
   for (unsigned i = 0; i < opts_.numBucketsPerPriority.size(); ++i) {
     if (!retrievalIndexQueues_[i]) {
       if (auto req = singleBucketRequestQueues_[i].try_dequeue()) {
-        return std::move(*req);
+        return std::make_pair(std::move(*req), std::nullopt);
       }
     } else {
       if (auto bucket = retrievalIndexQueues_[i]->try_dequeue()) {
-        return dequeueImpl(i, *bucket);
+        return std::make_pair(dequeueImpl(i, *bucket), std::nullopt);
       }
     }
   }
-  return std::nullopt;
+  return {std::nullopt, std::nullopt};
 }
 
 uint64_t RoundRobinRequestPile::requestCount() const {

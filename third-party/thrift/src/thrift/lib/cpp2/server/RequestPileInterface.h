@@ -63,7 +63,8 @@ class RequestPileInterface {
   // If a RequestPile returns a UserData value then it will
   // receive a callback to its onRequestFinished method when request processing
   // is finished.
-  virtual std::optional<ServerRequest> dequeue() = 0;
+  virtual std::pair<std::optional<ServerRequest>, std::optional<intptr_t>>
+  dequeue() = 0;
 
   // If a callback was requested this will be called when the request processing
   // has finished.

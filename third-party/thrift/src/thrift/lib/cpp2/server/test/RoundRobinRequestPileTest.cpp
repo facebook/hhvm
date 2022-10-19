@@ -105,7 +105,7 @@ getScopeFunc() {
 }
 
 void checkResult(RoundRobinRequestPile& pile, int pri, int bucket) {
-  auto req = pile.dequeue();
+  auto [req, _] = pile.dequeue();
   auto ctx = req->requestContext();
 
   auto headers = ctx->getHeaders();
@@ -154,7 +154,7 @@ TEST(RoundRobinRequestPileTest, NormalCases) {
   check(0, 1);
   check(0, 0);
 
-  auto req1 = pile.dequeue();
+  auto [req1, _1] = pile.dequeue();
   EXPECT_EQ(req1, std::nullopt);
 
   pile.enqueue(getRequest(0, 0));
@@ -175,7 +175,7 @@ TEST(RoundRobinRequestPileTest, NormalCases) {
   check(2, 1);
   check(2, 0);
 
-  auto req2 = pile.dequeue();
+  auto [req2, _2] = pile.dequeue();
   EXPECT_EQ(req2, std::nullopt);
 
   EXPECT_EQ(pile.requestCount(), 0);
@@ -230,7 +230,7 @@ TEST(RoundRobinRequestPileTest, SingleBucket) {
   check(0, 0);
   check(0, 0);
 
-  auto req1 = pile.dequeue();
+  auto [req1, _] = pile.dequeue();
   EXPECT_EQ(req1, std::nullopt);
 }
 
@@ -317,7 +317,7 @@ BENCHMARK(DefaultPerf) {
 
   auto consumerFunc = [&]() {
     while (counter.load() != numThreads * numRoundEachWorker) {
-      auto req = pile.dequeue();
+      auto [req, _] = pile.dequeue();
       if (req) {
         ++counter;
       }
@@ -380,7 +380,7 @@ BENCHMARK(RoundRobinBehavior) {
 
   auto consumerFunc = [&]() {
     while (counter.load() != sum) {
-      auto req = pile.dequeue();
+      auto [req, _] = pile.dequeue();
       if (req) {
         ++counter;
       }

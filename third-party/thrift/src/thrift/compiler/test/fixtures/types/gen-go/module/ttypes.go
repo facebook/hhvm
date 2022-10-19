@@ -1520,6 +1520,12 @@ func (p *TrivialNestedWithDefault) GetN() *TrivialNumeric {
   }
   return p.N
 }
+func (p *TrivialNestedWithDefault) DefaultGetN() *TrivialNumeric {
+  if !p.IsSetN() {
+    return NewTrivialNumeric()
+  }
+  return p.N
+}
 func (p *TrivialNestedWithDefault) IsSetN() bool {
   return p != nil && p.N != nil
 }
@@ -1872,6 +1878,12 @@ var ComplexNestedWithDefault_N_DEFAULT *ComplexString = &ComplexString{
 func (p *ComplexNestedWithDefault) GetN() *ComplexString {
   if !p.IsSetN() {
     return ComplexNestedWithDefault_N_DEFAULT
+  }
+  return p.N
+}
+func (p *ComplexNestedWithDefault) DefaultGetN() *ComplexString {
+  if !p.IsSetN() {
+    return NewComplexString()
   }
   return p.N
 }
@@ -3432,6 +3444,12 @@ func (p *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
   }
   return p.Foo
 }
+func (p *ForwardUsageStruct) DefaultGetFoo() *ForwardUsageRoot {
+  if !p.IsSetFoo() {
+    return NewForwardUsageRoot()
+  }
+  return p.Foo
+}
 func (p *ForwardUsageStruct) IsSetFoo() bool {
   return p != nil && p.Foo != nil
 }
@@ -3554,6 +3572,12 @@ var ForwardUsageByRef_Foo_DEFAULT *ForwardUsageRoot
 func (p *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
   if !p.IsSetFoo() {
     return ForwardUsageByRef_Foo_DEFAULT
+  }
+  return p.Foo
+}
+func (p *ForwardUsageByRef) DefaultGetFoo() *ForwardUsageRoot {
+  if !p.IsSetFoo() {
+    return NewForwardUsageRoot()
   }
   return p.Foo
 }

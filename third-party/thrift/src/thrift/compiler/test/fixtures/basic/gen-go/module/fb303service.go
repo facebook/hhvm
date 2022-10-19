@@ -402,6 +402,12 @@ func (p *FB303ServiceSimpleRpcResult) GetSuccess() *ReservedKeyword {
   }
   return p.Success
 }
+func (p *FB303ServiceSimpleRpcResult) DefaultGetSuccess() *ReservedKeyword {
+  if !p.IsSetSuccess() {
+    return NewReservedKeyword()
+  }
+  return p.Success
+}
 func (p *FB303ServiceSimpleRpcResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
 }

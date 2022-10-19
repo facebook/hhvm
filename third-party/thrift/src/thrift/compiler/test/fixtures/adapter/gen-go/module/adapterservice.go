@@ -466,6 +466,12 @@ func (p *AdapterServiceCountResult) GetSuccess() *CountingStruct {
   }
   return p.Success
 }
+func (p *AdapterServiceCountResult) DefaultGetSuccess() *CountingStruct {
+  if !p.IsSetSuccess() {
+    return NewCountingStruct()
+  }
+  return p.Success
+}
 func (p *AdapterServiceCountResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
 }
@@ -594,6 +600,12 @@ func (p *AdapterServiceAdaptedTypesArgs) GetArg() *HeapAllocated {
   }
   return p.Arg
 }
+func (p *AdapterServiceAdaptedTypesArgs) DefaultGetArg() *HeapAllocated {
+  if !p.IsSetArg() {
+    return NewHeapAllocated()
+  }
+  return p.Arg
+}
 func (p *AdapterServiceAdaptedTypesArgs) IsSetArg() bool {
   return p != nil && p.Arg != nil
 }
@@ -715,6 +727,12 @@ var AdapterServiceAdaptedTypesResult_Success_DEFAULT *HeapAllocated
 func (p *AdapterServiceAdaptedTypesResult) GetSuccess() *HeapAllocated {
   if !p.IsSetSuccess() {
     return AdapterServiceAdaptedTypesResult_Success_DEFAULT
+  }
+  return p.Success
+}
+func (p *AdapterServiceAdaptedTypesResult) DefaultGetSuccess() *HeapAllocated {
+  if !p.IsSetSuccess() {
+    return NewHeapAllocated()
   }
   return p.Success
 }

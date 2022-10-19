@@ -852,6 +852,12 @@ func (p *Struct2) GetC() *Struct1 {
   }
   return p.C
 }
+func (p *Struct2) DefaultGetC() *Struct1 {
+  if !p.IsSetC() {
+    return NewStruct1()
+  }
+  return p.C
+}
 
 func (p *Struct2) GetD() []int32 {
   return p.D
@@ -1119,6 +1125,12 @@ var Struct3_C_DEFAULT *Struct2
 func (p *Struct3) GetC() *Struct2 {
   if !p.IsSetC() {
     return Struct3_C_DEFAULT
+  }
+  return p.C
+}
+func (p *Struct3) DefaultGetC() *Struct2 {
+  if !p.IsSetC() {
+    return NewStruct2()
   }
   return p.C
 }
@@ -1757,10 +1769,22 @@ func (p *Union2) GetS() *Struct1 {
   }
   return p.S
 }
+func (p *Union2) DefaultGetS() *Struct1 {
+  if !p.IsSetS() {
+    return NewStruct1()
+  }
+  return p.S
+}
 var Union2_U_DEFAULT *Union1
 func (p *Union2) GetU() *Union1 {
   if !p.IsSetU() {
     return Union2_U_DEFAULT
+  }
+  return p.U
+}
+func (p *Union2) DefaultGetU() *Union1 {
+  if !p.IsSetU() {
+    return NewUnion1()
   }
   return p.U
 }

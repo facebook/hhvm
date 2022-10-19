@@ -2220,6 +2220,12 @@ func (p *DurationPatch) GetAssign() *standard3.DurationStruct {
   }
   return p.Assign
 }
+func (p *DurationPatch) DefaultGetAssign() *standard3.DurationStruct {
+  if !p.IsSetAssign() {
+    return standard3.NewDurationStruct()
+  }
+  return p.Assign
+}
 
 func (p *DurationPatch) GetClear() bool {
   return p.Clear
@@ -2228,6 +2234,12 @@ var DurationPatch_Add_DEFAULT *standard3.DurationStruct
 func (p *DurationPatch) GetAdd() *standard3.DurationStruct {
   if !p.IsSetAdd() {
     return DurationPatch_Add_DEFAULT
+  }
+  return p.Add
+}
+func (p *DurationPatch) DefaultGetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return standard3.NewDurationStruct()
   }
   return p.Add
 }
@@ -2448,6 +2460,12 @@ func (p *TimePatch) GetAssign() *standard3.TimeStruct {
   }
   return p.Assign
 }
+func (p *TimePatch) DefaultGetAssign() *standard3.TimeStruct {
+  if !p.IsSetAssign() {
+    return standard3.NewTimeStruct()
+  }
+  return p.Assign
+}
 
 func (p *TimePatch) GetClear() bool {
   return p.Clear
@@ -2456,6 +2474,12 @@ var TimePatch_Add_DEFAULT *standard3.DurationStruct
 func (p *TimePatch) GetAdd() *standard3.DurationStruct {
   if !p.IsSetAdd() {
     return TimePatch_Add_DEFAULT
+  }
+  return p.Add
+}
+func (p *TimePatch) DefaultGetAdd() *standard3.DurationStruct {
+  if !p.IsSetAdd() {
+    return standard3.NewDurationStruct()
   }
   return p.Add
 }

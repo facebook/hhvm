@@ -693,10 +693,22 @@ func (p *MyUnion) GetMyStruct() *MyStruct {
   }
   return p.MyStruct
 }
+func (p *MyUnion) DefaultGetMyStruct() *MyStruct {
+  if !p.IsSetMyStruct() {
+    return NewMyStruct()
+  }
+  return p.MyStruct
+}
 var MyUnion_MyDataItem_DEFAULT *MyDataItem
 func (p *MyUnion) GetMyDataItem() *MyDataItem {
   if !p.IsSetMyDataItem() {
     return MyUnion_MyDataItem_DEFAULT
+  }
+  return p.MyDataItem
+}
+func (p *MyUnion) DefaultGetMyDataItem() *MyDataItem {
+  if !p.IsSetMyDataItem() {
+    return NewMyDataItem()
   }
   return p.MyDataItem
 }

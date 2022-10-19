@@ -328,6 +328,12 @@ func (p *ServiceFuncArgs) GetArg3() *Foo {
   }
   return p.Arg3
 }
+func (p *ServiceFuncArgs) DefaultGetArg3() *Foo {
+  if !p.IsSetArg3() {
+    return NewFoo()
+  }
+  return p.Arg3
+}
 func (p *ServiceFuncArgs) IsSetArg3() bool {
   return p != nil && p.Arg3 != nil
 }

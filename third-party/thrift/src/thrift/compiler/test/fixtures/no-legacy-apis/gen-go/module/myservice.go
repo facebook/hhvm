@@ -290,6 +290,12 @@ func (p *MyServiceQueryArgs) GetU() *MyUnion {
   }
   return p.U
 }
+func (p *MyServiceQueryArgs) DefaultGetU() *MyUnion {
+  if !p.IsSetU() {
+    return NewMyUnion()
+  }
+  return p.U
+}
 func (p *MyServiceQueryArgs) IsSetU() bool {
   return p != nil && p.U != nil
 }
@@ -411,6 +417,12 @@ var MyServiceQueryResult_Success_DEFAULT *MyStruct
 func (p *MyServiceQueryResult) GetSuccess() *MyStruct {
   if !p.IsSetSuccess() {
     return MyServiceQueryResult_Success_DEFAULT
+  }
+  return p.Success
+}
+func (p *MyServiceQueryResult) DefaultGetSuccess() *MyStruct {
+  if !p.IsSetSuccess() {
+    return NewMyStruct()
   }
   return p.Success
 }

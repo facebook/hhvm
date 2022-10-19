@@ -1366,10 +1366,22 @@ func (p *TypeName) GetEnumType() *TypeUri {
   }
   return p.EnumType
 }
+func (p *TypeName) DefaultGetEnumType() *TypeUri {
+  if !p.IsSetEnumType() {
+    return NewTypeUri()
+  }
+  return p.EnumType
+}
 var TypeName_TypedefType_DEFAULT *TypeUri
 func (p *TypeName) GetTypedefType() *TypeUri {
   if !p.IsSetTypedefType() {
     return TypeName_TypedefType_DEFAULT
+  }
+  return p.TypedefType
+}
+func (p *TypeName) DefaultGetTypedefType() *TypeUri {
+  if !p.IsSetTypedefType() {
+    return NewTypeUri()
   }
   return p.TypedefType
 }
@@ -1380,6 +1392,12 @@ func (p *TypeName) GetStructType() *TypeUri {
   }
   return p.StructType
 }
+func (p *TypeName) DefaultGetStructType() *TypeUri {
+  if !p.IsSetStructType() {
+    return NewTypeUri()
+  }
+  return p.StructType
+}
 var TypeName_UnionType_DEFAULT *TypeUri
 func (p *TypeName) GetUnionType() *TypeUri {
   if !p.IsSetUnionType() {
@@ -1387,10 +1405,22 @@ func (p *TypeName) GetUnionType() *TypeUri {
   }
   return p.UnionType
 }
+func (p *TypeName) DefaultGetUnionType() *TypeUri {
+  if !p.IsSetUnionType() {
+    return NewTypeUri()
+  }
+  return p.UnionType
+}
 var TypeName_ExceptionType_DEFAULT *TypeUri
 func (p *TypeName) GetExceptionType() *TypeUri {
   if !p.IsSetExceptionType() {
     return TypeName_ExceptionType_DEFAULT
+  }
+  return p.ExceptionType
+}
+func (p *TypeName) DefaultGetExceptionType() *TypeUri {
+  if !p.IsSetExceptionType() {
+    return NewTypeUri()
   }
   return p.ExceptionType
 }

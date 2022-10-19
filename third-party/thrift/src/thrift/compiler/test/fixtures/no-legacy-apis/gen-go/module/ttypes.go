@@ -245,6 +245,12 @@ func (p *MyUnion) GetMyDataItem() *MyStruct {
   }
   return p.MyDataItem
 }
+func (p *MyUnion) DefaultGetMyDataItem() *MyStruct {
+  if !p.IsSetMyDataItem() {
+    return NewMyStruct()
+  }
+  return p.MyDataItem
+}
 func (p *MyUnion) CountSetFieldsMyUnion() int {
   count := 0
   if (p.IsSetMyEnum()) {

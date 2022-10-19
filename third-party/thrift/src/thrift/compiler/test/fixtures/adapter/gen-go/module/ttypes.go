@@ -4756,6 +4756,12 @@ func (p *AdaptTemplatedNestedTestStruct) GetAdaptedStruct() *AdaptTemplatedTestS
   }
   return p.AdaptedStruct
 }
+func (p *AdaptTemplatedNestedTestStruct) DefaultGetAdaptedStruct() *AdaptTemplatedTestStruct {
+  if !p.IsSetAdaptedStruct() {
+    return NewAdaptTemplatedTestStruct()
+  }
+  return p.AdaptedStruct
+}
 func (p *AdaptTemplatedNestedTestStruct) IsSetAdaptedStruct() bool {
   return p != nil && p.AdaptedStruct != nil
 }
@@ -5303,6 +5309,12 @@ func (p *StructFieldAdaptedStruct) GetAdaptedStruct() *AdaptedStruct {
   }
   return p.AdaptedStruct
 }
+func (p *StructFieldAdaptedStruct) DefaultGetAdaptedStruct() *AdaptedStruct {
+  if !p.IsSetAdaptedStruct() {
+    return NewAdaptedStruct()
+  }
+  return p.AdaptedStruct
+}
 var StructFieldAdaptedStruct_AdaptedTypedef_DEFAULT *AdaptedTypedef
 func (p *StructFieldAdaptedStruct) GetAdaptedTypedef() *AdaptedTypedef {
   if !p.IsSetAdaptedTypedef() {
@@ -5314,6 +5326,12 @@ var StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT *DirectlyAdaptedStruct
 func (p *StructFieldAdaptedStruct) GetDirectlyAdapted() *DirectlyAdaptedStruct {
   if !p.IsSetDirectlyAdapted() {
     return StructFieldAdaptedStruct_DirectlyAdapted_DEFAULT
+  }
+  return p.DirectlyAdapted
+}
+func (p *StructFieldAdaptedStruct) DefaultGetDirectlyAdapted() *DirectlyAdaptedStruct {
+  if !p.IsSetDirectlyAdapted() {
+    return NewDirectlyAdaptedStruct()
   }
   return p.DirectlyAdapted
 }
@@ -6118,6 +6136,12 @@ var MoveOnly_Ptr_DEFAULT *HeapAllocated
 func (p *MoveOnly) GetPtr() *HeapAllocated {
   if !p.IsSetPtr() {
     return MoveOnly_Ptr_DEFAULT
+  }
+  return p.Ptr
+}
+func (p *MoveOnly) DefaultGetPtr() *HeapAllocated {
+  if !p.IsSetPtr() {
+    return NewHeapAllocated()
   }
   return p.Ptr
 }

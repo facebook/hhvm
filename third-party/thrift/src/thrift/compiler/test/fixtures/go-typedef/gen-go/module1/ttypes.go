@@ -831,6 +831,12 @@ func (p *Pair) GetAutomobile() *Automobile {
   }
   return p.Automobile
 }
+func (p *Pair) DefaultGetAutomobile() *Automobile {
+  if !p.IsSetAutomobile() {
+    return NewAutomobile()
+  }
+  return p.Automobile
+}
 var Pair_Car_DEFAULT *Car
 func (p *Pair) GetCar() *Car {
   if !p.IsSetCar() {

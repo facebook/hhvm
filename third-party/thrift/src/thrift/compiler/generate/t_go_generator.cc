@@ -1543,6 +1543,24 @@ void t_go_generator::generate_go_struct_definition(
       out << indent() << "  return " << maybepointer << "p." << publicized_name
           << endl;
       out << indent() << "}" << endl;
+      if (fieldType->is_struct()) {
+        // Create "default" getter for structs
+        string module;
+        if (auto&& program = fieldType->program()) {
+          if (program != program_) {
+            module = package_identifiers[get_real_go_module(program)] + ".";
+          }
+        }
+        out << indent() << "func (p *" << tstruct_name << ") DefaultGet"
+            << publicized_name << "() " << goType << " {" << endl;
+        out << indent() << "  if !p.IsSet" << publicized_name << "() {" << endl;
+        out << indent() << "    return " << module << "New"
+            << publicize(fieldType->get_name()) << "()" << endl;
+        out << indent() << "  }" << endl;
+        out << indent() << "  return " << maybepointer << "p."
+            << publicized_name << endl;
+        out << indent() << "}" << endl;
+      }
       num_setable += 1;
     } else {
       out << endl;

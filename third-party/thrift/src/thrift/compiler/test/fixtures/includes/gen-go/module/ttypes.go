@@ -54,10 +54,22 @@ func (p *MyStruct) GetMyIncludedField() *includes0.Included {
   }
   return p.MyIncludedField
 }
+func (p *MyStruct) DefaultGetMyIncludedField() *includes0.Included {
+  if !p.IsSetMyIncludedField() {
+    return includes0.NewIncluded()
+  }
+  return p.MyIncludedField
+}
 var MyStruct_MyOtherIncludedField_DEFAULT *includes0.Included
 func (p *MyStruct) GetMyOtherIncludedField() *includes0.Included {
   if !p.IsSetMyOtherIncludedField() {
     return MyStruct_MyOtherIncludedField_DEFAULT
+  }
+  return p.MyOtherIncludedField
+}
+func (p *MyStruct) DefaultGetMyOtherIncludedField() *includes0.Included {
+  if !p.IsSetMyOtherIncludedField() {
+    return includes0.NewIncluded()
   }
   return p.MyOtherIncludedField
 }

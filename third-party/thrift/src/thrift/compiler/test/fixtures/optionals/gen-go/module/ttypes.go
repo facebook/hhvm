@@ -336,6 +336,12 @@ func (p *Vehicle) GetColor() *Color {
   }
   return p.Color
 }
+func (p *Vehicle) DefaultGetColor() *Color {
+  if !p.IsSetColor() {
+    return NewColor()
+  }
+  return p.Color
+}
 var Vehicle_LicensePlate_DEFAULT string
 func (p *Vehicle) GetLicensePlate() string {
   if !p.IsSetLicensePlate() {
@@ -705,6 +711,12 @@ var Person_FavoriteColor_DEFAULT *Color
 func (p *Person) GetFavoriteColor() *Color {
   if !p.IsSetFavoriteColor() {
     return Person_FavoriteColor_DEFAULT
+  }
+  return p.FavoriteColor
+}
+func (p *Person) DefaultGetFavoriteColor() *Color {
+  if !p.IsSetFavoriteColor() {
+    return NewColor()
   }
   return p.FavoriteColor
 }

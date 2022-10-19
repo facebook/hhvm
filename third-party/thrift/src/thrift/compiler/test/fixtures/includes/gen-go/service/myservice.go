@@ -429,10 +429,22 @@ func (p *MyServiceQueryArgs) GetS() *module0.MyStruct {
   }
   return p.S
 }
+func (p *MyServiceQueryArgs) DefaultGetS() *module0.MyStruct {
+  if !p.IsSetS() {
+    return module0.NewMyStruct()
+  }
+  return p.S
+}
 var MyServiceQueryArgs_I_DEFAULT *includes1.Included
 func (p *MyServiceQueryArgs) GetI() *includes1.Included {
   if !p.IsSetI() {
     return MyServiceQueryArgs_I_DEFAULT
+  }
+  return p.I
+}
+func (p *MyServiceQueryArgs) DefaultGetI() *includes1.Included {
+  if !p.IsSetI() {
+    return includes1.NewIncluded()
   }
   return p.I
 }
@@ -676,10 +688,22 @@ func (p *MyServiceHasArgDocsArgs) GetS() *module0.MyStruct {
   }
   return p.S
 }
+func (p *MyServiceHasArgDocsArgs) DefaultGetS() *module0.MyStruct {
+  if !p.IsSetS() {
+    return module0.NewMyStruct()
+  }
+  return p.S
+}
 var MyServiceHasArgDocsArgs_I_DEFAULT *includes1.Included
 func (p *MyServiceHasArgDocsArgs) GetI() *includes1.Included {
   if !p.IsSetI() {
     return MyServiceHasArgDocsArgs_I_DEFAULT
+  }
+  return p.I
+}
+func (p *MyServiceHasArgDocsArgs) DefaultGetI() *includes1.Included {
+  if !p.IsSetI() {
+    return includes1.NewIncluded()
   }
   return p.I
 }

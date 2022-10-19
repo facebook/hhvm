@@ -639,6 +639,12 @@ func (p *FinderByPlateResult) GetSuccess() *Automobile {
   }
   return p.Success
 }
+func (p *FinderByPlateResult) DefaultGetSuccess() *Automobile {
+  if !p.IsSetSuccess() {
+    return NewAutomobile()
+  }
+  return p.Success
+}
 func (p *FinderByPlateResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
 }

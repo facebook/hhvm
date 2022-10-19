@@ -1153,10 +1153,22 @@ func (p *ValUnion) GetV1() *Val {
   }
   return p.V1
 }
+func (p *ValUnion) DefaultGetV1() *Val {
+  if !p.IsSetV1() {
+    return NewVal()
+  }
+  return p.V1
+}
 var ValUnion_V2_DEFAULT *Val
 func (p *ValUnion) GetV2() *Val {
   if !p.IsSetV2() {
     return ValUnion_V2_DEFAULT
+  }
+  return p.V2
+}
+func (p *ValUnion) DefaultGetV2() *Val {
+  if !p.IsSetV2() {
+    return NewVal()
   }
   return p.V2
 }
@@ -1651,6 +1663,12 @@ var NonCopyableUnion_S_DEFAULT *NonCopyableStruct
 func (p *NonCopyableUnion) GetS() *NonCopyableStruct {
   if !p.IsSetS() {
     return NonCopyableUnion_S_DEFAULT
+  }
+  return p.S
+}
+func (p *NonCopyableUnion) DefaultGetS() *NonCopyableStruct {
+  if !p.IsSetS() {
+    return NewNonCopyableStruct()
   }
   return p.S
 }

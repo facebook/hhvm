@@ -1545,6 +1545,12 @@ func (p *GetEntityGetEntityArgs) GetR() *GetEntityRequest {
   }
   return p.R
 }
+func (p *GetEntityGetEntityArgs) DefaultGetR() *GetEntityRequest {
+  if !p.IsSetR() {
+    return NewGetEntityRequest()
+  }
+  return p.R
+}
 func (p *GetEntityGetEntityArgs) IsSetR() bool {
   return p != nil && p.R != nil
 }
@@ -1666,6 +1672,12 @@ var GetEntityGetEntityResult_Success_DEFAULT *GetEntityResponse
 func (p *GetEntityGetEntityResult) GetSuccess() *GetEntityResponse {
   if !p.IsSetSuccess() {
     return GetEntityGetEntityResult_Success_DEFAULT
+  }
+  return p.Success
+}
+func (p *GetEntityGetEntityResult) DefaultGetSuccess() *GetEntityResponse {
+  if !p.IsSetSuccess() {
+    return NewGetEntityResponse()
   }
   return p.Success
 }

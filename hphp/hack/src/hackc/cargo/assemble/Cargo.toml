@@ -18,5 +18,6 @@ hhvm_types_ffi = { path = "../../hhvm_cxx/hhvm_types" }
 log = { version = "0.4.17", features = ["kv_unstable", "kv_unstable_std"] }
 naming_special_names_rust = { path = "../../../naming" }
 newtype = { path = "../../../utils/newtype" }
+parse_macro = { path = "../parse_macro" }
 stack_depth = { path = "../../utils/cargo/stack_depth" }
 strum_macros = "0.21"

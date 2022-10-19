@@ -274,6 +274,38 @@ impl<'a> Lexer<'a> {
             pending: None,
         }
     }
+
+    pub(crate) fn parse_list<T, F>(&mut self, mut callback: F) -> Result<Vec<T>>
+    where
+        F: FnMut(&mut Self) -> Result<Option<T>>,
+    {
+        // a b c
+        let mut result = Vec::new();
+        while let Some(t) = callback(self)? {
+            result.push(t);
+        }
+        Ok(result)
+    }
+
+    pub(crate) fn parse_comma_list<T, F>(
+        &mut self,
+        expect_comma: bool,
+        mut callback: F,
+    ) -> Result<Vec<T>>
+    where
+        F: FnMut(&mut Self) -> Result<T>,
+    {
+        // a, b, c
+        let mut result = Vec::new();
+        if !expect_comma {
+            result.push(callback(self)?);
+        }
+        while self.next_is(Token::is_comma) {
+            result.push(callback(self)?);
+        }
+
+        Ok(result)
+    }
 }
 
 fn is_identifier_lead(ch: u8) -> bool {

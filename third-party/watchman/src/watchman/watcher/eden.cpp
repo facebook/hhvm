@@ -818,12 +818,11 @@ class EdenView final : public QueryableView {
 
   void executeGlobBasedQuery(
       const std::vector<std::string>& globStrings,
-      const Query* query,
       QueryContext* ctx,
+      bool includeDotfiles,
       bool includeDir = true) const {
     auto client = getEdenClient(thriftChannel_);
 
-    auto includeDotfiles = (query->glob_flags & WM_PERIOD) == 0;
     auto fileInfo = globNameAndDType(
         client.get(),
         mountPoint_,
@@ -894,7 +893,7 @@ class EdenView final : public QueryableView {
           w_string::pathCat({rel, escapeGlobSpecialChars(path.name), glob})
               .view()});
     }
-    executeGlobBasedQuery(globStrings, query, ctx);
+    executeGlobBasedQuery(globStrings, ctx, /*includeDotfiles=*/true);
 
     // We send another round of glob queries to query about the information
     // about the path themselves since we want to include the paths if they are
@@ -906,7 +905,8 @@ class EdenView final : public QueryableView {
           w_string::pathCat({rel, escapeGlobSpecialChars(path.name)}).view()});
     }
 
-    executeGlobBasedQuery(globStrings, query, ctx, false);
+    executeGlobBasedQuery(
+        globStrings, ctx, /*includeDotfiles=*/true, /*includeDir=*/false);
   }
 
   void globGenerator(const Query* query, QueryContext* ctx) const override {
@@ -934,10 +934,11 @@ class EdenView final : public QueryableView {
       throw QueryExecError(
           "glob_noescape is not supported for the eden watcher");
     }
-    executeGlobBasedQuery(globStrings, query, ctx);
+    bool includeDotfiles = (query->glob_flags & WM_PERIOD) == 0;
+    executeGlobBasedQuery(globStrings, ctx, includeDotfiles);
   }
 
-  void allFilesGenerator(const Query* query, QueryContext* ctx) const override {
+  void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
     // If the query is anchored to a relative_root, use that that
     // avoid sucking down a massive list of files from eden
@@ -948,7 +949,10 @@ class EdenView final : public QueryableView {
       globPattern.append("/");
     }
     globPattern.append("**");
-    executeGlobBasedQuery(std::vector<std::string>{globPattern}, query, ctx);
+    executeGlobBasedQuery(
+        std::vector<std::string>{globPattern},
+        ctx,
+        /*includeDotfiles=*/true);
   }
 
   ClockPosition getMostRecentRootNumberAndTickValue() const override {
@@ -1119,14 +1123,12 @@ class EdenView final : public QueryableView {
     }
     globPattern.append("**");
 
-    auto includeDotfiles = (ctx->query->glob_flags & WM_PERIOD) == 0;
-
     auto client = getEdenClient(thriftChannel_);
     return globNameAndDType(
         client.get(),
         mountPoint_,
         std::vector<std::string>{std::move(globPattern)},
-        includeDotfiles);
+        /*includeDotfiles=*/true);
   }
 
   struct GetAllChangesSinceResult {

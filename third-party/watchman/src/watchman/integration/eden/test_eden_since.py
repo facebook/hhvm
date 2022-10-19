@@ -8,12 +8,14 @@
 import json
 import os
 import shutil
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from watchman.integration.lib import WatchmanEdenTestCase
 
 
-def populate(repo, threshold: Optional[int] = None) -> None:
+def populate(
+    repo, threshold: Optional[int] = None, extra_files: Optional[List[str]] = None
+) -> None:
     # We ignore ".hg" here just so some of the tests that list files don't have to
     # explicitly filter out the contents of this directory.  However, in most situations
     # the .hg directory normally should not be ignored.
@@ -27,6 +29,9 @@ def populate(repo, threshold: Optional[int] = None) -> None:
     repo.write_file("bdir/test.sh", "#!/bin/bash\necho test\n", mode=0o755)
     repo.write_file("bdir/noexec.sh", "#!/bin/bash\necho test\n")
     repo.symlink("slink", "hello")
+    if extra_files:
+        for extra_file in extra_files:
+            repo.write_file(extra_file, "")
     repo.commit("initial commit.")
 
 
@@ -337,3 +342,60 @@ class TestEdenSince(WatchmanEdenTestCase.WatchmanEdenTestCase):
         res = do_query(clock)
         self.assertFalse(res["is_fresh_instance"])
         self.assertQueryRepsonseEqual(["hello"], res["files"])
+
+    def test_eden_since_dotfiles_change(self) -> None:
+        root = self.makeEdenMount(
+            lambda repo: populate(
+                repo, extra_files=["dotfiles/.file1", "dotfiles/.file2"]
+            )
+        )
+        res = self.watchmanCommand("watch", root)
+        self.assertEqual("eden", res["watcher"])
+
+        res = self.watchmanCommand(
+            "query",
+            root,
+            {"expression": ["type", "f"], "fields": ["name"], "since": "c:0:0"},
+        )
+        self.assertTrue(res["is_fresh_instance"])
+        self.assertFileListContains(
+            res["files"],
+            ["dotfiles/.file1", "dotfiles/.file2"],
+        )
+
+        clock = res["clock"]
+
+        self.touchRelative(root, "dotfiles/.file1")
+        res = self.watchmanCommand(
+            "query",
+            root,
+            {"expression": ["type", "f"], "fields": ["name"], "since": clock},
+        )
+        self.assertFileListsEqual(res["files"], ["dotfiles/.file1"])
+
+    def test_eden_since_fresh_instance_dotfiles(self) -> None:
+        root = self.makeEdenMount(
+            lambda repo: populate(
+                repo, extra_files=["dotfiles/.file1", "dotfiles/.file2"]
+            )
+        )
+        res = self.watchmanCommand("watch", root)
+        self.assertEqual("eden", res["watcher"])
+
+        res = self.watchmanCommand(
+            "query",
+            root,
+            {
+                "fields": ["name"],
+                "since": "c:0:0",
+                # Edge case: in the `since` generator, dotfiles are included
+                # even if the `glob` generator is explicitly configured to omit
+                # them.
+                "glob_includedotfiles": False,
+            },
+        )
+        self.assertTrue(res["is_fresh_instance"])
+        self.assertFileListContains(
+            res["files"],
+            ["dotfiles/.file1", "dotfiles/.file2"],
+        )

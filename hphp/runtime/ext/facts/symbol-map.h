@@ -22,6 +22,7 @@
 #include <mutex>
 #include <queue>
 #include <string>
+#include <thread>
 #include <vector>
 
 #include <folly/Executor.h>
@@ -58,6 +59,28 @@ struct UpdateDBWorkItem {
   std::vector<std::filesystem::path> m_alteredPaths;
   std::vector<std::filesystem::path> m_deletedPaths;
   std::vector<FileFacts> m_alteredPathFacts;
+};
+
+/**
+ * Stores a map from thread to AutoloadDB.
+ */
+struct AutoloadDBVault {
+
+  AutoloadDBVault(AutoloadDB::Handle handle);
+
+  /**
+   * Get the AutoloadDB associated with the thread that calls this method.
+   *
+   * Logically this is `const`, but it creates an AutoloadDB on first access.
+   */
+  std::shared_ptr<AutoloadDB> get() const;
+
+private:
+  AutoloadDB::Handle m_dbHandle;
+  // Holds one AutoloadDB per thread. Creates an AutoloadDB on the first access.
+  mutable folly::Synchronized<
+      hphp_hash_map<std::thread::id, std::shared_ptr<AutoloadDB>>>
+      m_dbs;
 };
 
 /**
@@ -595,7 +618,7 @@ private:
   /**
    * Return a thread-local connection to the DB associated with this map.
    */
-  AutoloadDB& getDB() const;
+  std::shared_ptr<AutoloadDB> getDB() const;
 
   /**
    * Return the type's kind (class/interface/enum) along with an
@@ -614,7 +637,7 @@ private:
 
   const std::filesystem::path m_root;
   const std::string m_schemaHash;
-  AutoloadDB::Handle m_dbHandle;
+  AutoloadDBVault m_dbVault;
   const hphp_hash_set<std::string> m_indexedMethodAttrs;
 };
 

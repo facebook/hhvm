@@ -128,6 +128,22 @@ getAllSymbolsFromDB(AutoloadDB& db) {
 
 } // namespace
 
+AutoloadDBVault::AutoloadDBVault(AutoloadDB::Handle dbHandle)
+    : m_dbHandle{std::move(dbHandle)} {
+}
+
+std::shared_ptr<AutoloadDB> AutoloadDBVault::get() const {
+  return m_dbs.withULockPtr([this](auto ulock) {
+    auto it = ulock->find(std::this_thread::get_id());
+    if (it != ulock->end()) {
+      return it->second;
+    }
+    auto wlock = ulock.moveFromUpgradeToWrite();
+    return wlock->insert({std::this_thread::get_id(), m_dbHandle()})
+        .first->second;
+  });
+}
+
 SymbolMap::SymbolMap(
     fs::path root,
     AutoloadDB::Handle dbHandle,
@@ -135,7 +151,7 @@ SymbolMap::SymbolMap(
     : m_exec{std::make_shared<folly::CPUThreadPoolExecutor>(
           1, std::make_shared<folly::NamedThreadFactory>("Autoload DB update"))}
     , m_root{std::move(root)}
-    , m_dbHandle{std::move(dbHandle)}
+    , m_dbVault{std::move(dbHandle)}
     , m_indexedMethodAttrs{std::move(indexedMethodAttrs)} {
   assertx(m_root.is_absolute());
 }
@@ -367,8 +383,8 @@ SymbolMap::getBaseTypes(Symbol<SymKind::Type> derivedType, DeriveKind kind) {
         }
         return makeVec(*baseTypes);
       },
-      [&](AutoloadDB& db) -> std::vector<SubtypeQuery> {
-        auto const symbolStrs = db.getBaseTypes(
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<SubtypeQuery> {
+        auto const symbolStrs = db->getBaseTypes(
             fs::path{std::string{derivedTypePath.slice()}},
             derivedType.slice(),
             kind);
@@ -418,8 +434,8 @@ SymbolMap::getDerivedTypes(Symbol<SymKind::Type> baseType, DeriveKind kind) {
         }
         return makeVec(*derivedTypes);
       },
-      [&](AutoloadDB& db) -> std::vector<EdgeToSupertype> {
-        auto const typeDefStrs = db.getDerivedTypes(baseType.slice(), kind);
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<EdgeToSupertype> {
+        auto const typeDefStrs = db->getDerivedTypes(baseType.slice(), kind);
         std::vector<EdgeToSupertype> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& typeDefStr : typeDefStrs) {
@@ -516,15 +532,16 @@ SymbolMap::getAttributesOfType(Symbol<SymKind::Type> type) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
         // If `type` is actually a type alias in `path`, and we don't do this
         // check, we'll pollute our in-memory map
-        auto [kind, _] = db.getKindAndFlags(type.slice(), path.native());
+        auto [kind, _] = db->getKindAndFlags(type.slice(), path.native());
         if (kind == TypeKind::TypeAlias) {
           return {};
         }
         auto const attrStrs =
-            db.getAttributesOfType(type.slice(), path.native());
+            db->getAttributesOfType(type.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -567,15 +584,16 @@ SymbolMap::getAttributesOfTypeAlias(Symbol<SymKind::Type> typeAlias) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
         // If `typeAlias` is actually a type in `path`, and we don't do this
         // check, we'll pollute our in-memory map
-        auto [kind, _] = db.getKindAndFlags(typeAlias.slice(), path.native());
+        auto [kind, _] = db->getKindAndFlags(typeAlias.slice(), path.native());
         if (kind != TypeKind::TypeAlias) {
           return {};
         }
         auto const attrStrs =
-            db.getAttributesOfType(typeAlias.slice(), path.native());
+            db->getAttributesOfType(typeAlias.slice(), path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -614,8 +632,8 @@ SymbolMap::getTypesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<TypeDecl> {
-        auto const typeDefStrs = db.getTypesWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<TypeDecl> {
+        auto const typeDefStrs = db->getTypesWithAttribute(attr.slice());
         std::vector<TypeDecl> typeDefs;
         typeDefs.reserve(typeDefStrs.size());
         for (auto const& [type, path] : typeDefStrs) {
@@ -654,9 +672,9 @@ SymbolMap::getTypeAliasesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<TypeDecl> {
+      [&](std::shared_ptr<AutoloadDB> db) -> std::vector<TypeDecl> {
         auto const typeAliasDefStrs =
-            db.getTypeAliasesWithAttribute(attr.slice());
+            db->getTypeAliasesWithAttribute(attr.slice());
         std::vector<TypeDecl> typeAliasDefs;
         typeAliasDefs.reserve(typeAliasDefStrs.size());
         for (auto const& [type, path] : typeAliasDefStrs) {
@@ -699,8 +717,9 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfMethod(
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
-        auto const attrStrs = db.getAttributesOfMethod(
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
+        auto const attrStrs = db->getAttributesOfMethod(
             type.slice(), method.slice(), fs::path{std::string{path.slice()}});
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
@@ -741,8 +760,8 @@ SymbolMap::getMethodsWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> MethodVec {
-        auto const dbMethodDecls = db.getMethodsWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> MethodVec {
+        auto const dbMethodDecls = db->getMethodsWithAttribute(attr.slice());
         MethodVec methodDecls;
         methodDecls.reserve(dbMethodDecls.size());
         for (auto const& [type, method, path] : dbMethodDecls) {
@@ -788,8 +807,9 @@ std::vector<Symbol<SymKind::Type>> SymbolMap::getAttributesOfFile(Path path) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> std::vector<Symbol<SymKind::Type>> {
-        auto const attrStrs = db.getAttributesOfFile(path.native());
+      [&](std::shared_ptr<AutoloadDB> db)
+          -> std::vector<Symbol<SymKind::Type>> {
+        auto const attrStrs = db->getAttributesOfFile(path.native());
         std::vector<Symbol<SymKind::Type>> attrs;
         attrs.reserve(attrStrs.size());
         for (auto const& attrStr : attrStrs) {
@@ -822,8 +842,8 @@ std::vector<Path> SymbolMap::getFilesWithAttribute(Symbol<SymKind::Type> attr) {
         }
         return makeVec(*attrs);
       },
-      [&](AutoloadDB& db) -> PathVec {
-        auto dbPathDecls = db.getFilesWithAttribute(attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> PathVec {
+        auto dbPathDecls = db->getFilesWithAttribute(attr.slice());
         PathVec pathDecls;
         pathDecls.reserve(dbPathDecls.size());
         for (auto const& path : dbPathDecls) {
@@ -858,8 +878,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getTypeAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getTypeAttributeArgs(
             type.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -890,8 +910,8 @@ std::vector<folly::dynamic> SymbolMap::getTypeAliasAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getTypeAliasAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getTypeAliasAttributeArgs(
             typeAlias.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -924,8 +944,8 @@ std::vector<folly::dynamic> SymbolMap::getMethodAttributeArgs(
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getMethodAttributeArgs(
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getMethodAttributeArgs(
             type.slice(), method.slice(), path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
@@ -958,8 +978,8 @@ SymbolMap::getFileAttributeArgs(Path path, Symbol<SymKind::Type> attr) {
         }
         return *args;
       },
-      [&](AutoloadDB& db) -> ArgVec {
-        return db.getFileAttributeArgs(path.slice(), attr.slice());
+      [&](std::shared_ptr<AutoloadDB> db) -> ArgVec {
+        return db->getFileAttributeArgs(path.slice(), attr.slice());
       },
       [&](Data& data, std::vector<folly::dynamic> argsFromDB) -> ArgVec {
         return data.m_fileAttrs.getAttributeArgs(
@@ -1020,8 +1040,8 @@ SymbolMap::getKindAndFlags(Symbol<SymKind::Type> type, Path path) {
       [&](const Data& data) -> Optional<std::pair<TypeKind, int>> {
         return data.m_typeKind.getKindAndFlags(type, path);
       },
-      [&](AutoloadDB& db) {
-        return db.getKindAndFlags(
+      [&](std::shared_ptr<AutoloadDB> db) {
+        return db->getKindAndFlags(
             type.slice(), fs::path{std::string{path.slice()}});
       },
       [&](Data& data, AutoloadDB::KindAndFlags kindAndFlags)
@@ -1070,12 +1090,12 @@ void SymbolMap::update(
 
   auto wlock = m_syncedData.wlock();
 
-  auto& db = getDB();
+  auto db = getDB();
 
   // If we have no clock (meaning this is the map's first update since
   // it was constructed), fill our clock from the DB.
   if (wlock->m_clock.isInitial()) {
-    wlock->m_clock = db.getClock();
+    wlock->m_clock = db->getClock();
   }
 
   if (since != wlock->m_clock) {
@@ -1103,7 +1123,7 @@ void SymbolMap::update(
 
   wlock->m_clock = clock;
 
-  if (!db.isReadOnly()) {
+  if (!db->isReadOnly()) {
     // Any individual DB update may fail spuriously, but we can't
     // drop updates on failure. So add a work item to the queue
     // and drain the queue as we complete work items successfully.
@@ -1176,17 +1196,16 @@ Clock SymbolMap::getClock() const noexcept {
 }
 
 Clock SymbolMap::dbClock() const {
-  auto& db = getDB();
-  return db.getClock();
+  return getDB()->getClock();
 }
 
 hphp_hash_set<Path> SymbolMap::getAllPaths() const {
   auto rlock = m_syncedData.rlock();
 
   hphp_hash_set<Path> allPaths;
-  auto& db = getDB();
+  auto db = getDB();
 
-  for (auto&& [path, _] : db.getAllPathsAndHashes()) {
+  for (auto&& [path, _] : db->getAllPathsAndHashes()) {
     assertx(path.is_relative());
     allPaths.insert(Path{path});
   }
@@ -1205,10 +1224,10 @@ hphp_hash_set<Path> SymbolMap::getAllPaths() const {
 
 hphp_hash_map<Path, SHA1> SymbolMap::getAllPathsWithHashes() const {
   auto rlock = m_syncedData.rlock();
-  auto& db = getDB();
+  auto db = getDB();
 
   hphp_hash_map<Path, SHA1> allPaths;
-  for (auto&& [path, hash] : db.getAllPathsAndHashes()) {
+  for (auto&& [path, hash] : db->getAllPathsAndHashes()) {
     assertx(path.is_relative());
     allPaths.insert({Path{path}, SHA1{hash}});
   }
@@ -1237,13 +1256,13 @@ void SymbolMap::updateDB(
     return;
   }
 
-  auto& db = getDB();
+  auto db = getDB();
 
   // Only update the DB if its clock matches the clock we thought it had.
   //
   // If the clocks don't match, someone updated the DB in the meantime
   // and proceeding might overwrite newer data.
-  auto const dbClock = db.getClock();
+  auto const dbClock = db->getClock();
   if (dbClock != since) {
     throw UpdateExc{folly::sformat(
         "Told to update the DB with information from {}, but DB is currently "
@@ -1255,20 +1274,20 @@ void SymbolMap::updateDB(
   for (auto i = 0; i < alteredPaths.size(); ++i) {
     auto const& absPath = alteredPaths.at(i);
     auto const& pathFacts = alteredPathFacts.at(i);
-    updateDBPath(db, absPath, pathFacts);
+    updateDBPath(*db, absPath, pathFacts);
   }
 
   for (auto const& path : deletedPaths) {
-    db.erasePath(path);
+    db->erasePath(path);
   }
 
   // ANALYZE after initially building the DB
   if (since.isInitial()) {
-    db.runPostBuildOptimizations();
+    db->runPostBuildOptimizations();
   }
 
-  db.insertClock(clock);
-  db.commit();
+  db->insertClock(clock);
+  db->commit();
 }
 
 void SymbolMap::updateDBPath(
@@ -1378,7 +1397,8 @@ template <SymKind k>
 std::vector<std::pair<Symbol<k>, Path>> SymbolMap::getAllSymbols() {
   hphp_hash_map<Path, std::vector<Symbol<k>>> pathToSymbols;
 
-  for (auto&& [symbol, path] : getAllSymbolsFromDB<k>(getDB())) {
+  auto db = getDB();
+  for (auto&& [symbol, path] : getAllSymbolsFromDB<k>(*db)) {
     pathToSymbols[Path{path}].push_back(Symbol<k>{symbol});
   }
 
@@ -1416,10 +1436,7 @@ Ret SymbolMap::readOrUpdate(
       return *readOnlyData;
     }
   }
-  auto dataFromDB = [&]() {
-    auto& db = getDB();
-    return getFromDBFn(db);
-  }();
+  auto dataFromDB = [&]() { return getFromDBFn(getDB()); }();
   return m_syncedData.withULockPtr([&](auto ulock) {
     // Try reading once again, in case someone else wrote the value before we
     // took out the upgrade lock.
@@ -1452,17 +1469,17 @@ template <SymKind k> Path SymbolMap::getSymbolPath(Symbol<k> symbol) {
           return std::nullopt;
         }
       },
-      [&](AutoloadDB& db) {
+      [&](std::shared_ptr<AutoloadDB> db) {
         auto pathStrs = [&]() -> std::vector<fs::path> {
           switch (k) {
             case SymKind::Type:
-              return db.getTypePath(symbol.slice());
+              return db->getTypePath(symbol.slice());
             case SymKind::Function:
-              return db.getFunctionPath(symbol.slice());
+              return db->getFunctionPath(symbol.slice());
             case SymKind::Constant:
-              return db.getConstantPath(symbol.slice());
+              return db->getConstantPath(symbol.slice());
             case SymKind::Module:
-              return db.getModulePath(symbol.slice());
+              return db->getModulePath(symbol.slice());
           }
         }();
 
@@ -1499,19 +1516,19 @@ SymbolMap::getPathSymbols(Path path) {
           return std::nullopt;
         }
       },
-      [&](AutoloadDB& db) {
+      [&](std::shared_ptr<AutoloadDB> db) {
         auto symbolStrs =
             [&](const fs::path& path) -> std::vector<std::string> {
           assertx(path.is_relative());
           switch (k) {
             case SymKind::Type:
-              return db.getPathTypes(path);
+              return db->getPathTypes(path);
             case SymKind::Function:
-              return db.getPathFunctions(path);
+              return db->getPathFunctions(path);
             case SymKind::Constant:
-              return db.getPathConstants(path);
+              return db->getPathConstants(path);
             case SymKind::Module:
-              return db.getPathModules(path);
+              return db->getPathModules(path);
           }
         }(fs::path{std::string{path.slice()}});
 
@@ -1650,14 +1667,14 @@ void SymbolMap::waitForDBUpdate() {
   }
   // Refresh the DB transaction
   try {
-    getDB().commit();
+    getDB()->commit();
   } catch (const std::runtime_error& e) {
     XLOG(ERR) << e.what();
   }
 }
 
-AutoloadDB& SymbolMap::getDB() const {
-  return m_dbHandle();
+std::shared_ptr<AutoloadDB> SymbolMap::getDB() const {
+  return m_dbVault.get();
 }
 
 } // namespace Facts

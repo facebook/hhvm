@@ -587,12 +587,9 @@ protected:
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
-            [dbPath]() -> AutoloadDB& {
-              return SQLiteAutoloadDB::getThreadLocal(
-                  SQLiteKey::readWriteCreate(
-                      fs::path{dbPath.native()},
-                      static_cast<::gid_t>(-1),
-                      0644));
+            [dbPath]() -> std::shared_ptr<AutoloadDB> {
+              return SQLiteAutoloadDB::get(SQLiteKey::readWriteCreate(
+                  fs::path{dbPath.native()}, static_cast<::gid_t>(-1), 0644));
             },
             std::move(indexedMethodAttributes)),
         std::move(exec)});
@@ -601,14 +598,14 @@ protected:
 
   SymbolMap& make(
       std::string root,
-      MockAutoloadDB& db,
+      std::shared_ptr<MockAutoloadDB> db,
       std::shared_ptr<folly::ManualExecutor> exec = nullptr,
       hphp_hash_set<std::string> indexedMethodAttributes = {}) {
 
     m_wrappers.push_back(SymbolMapWrapper{
         std::make_unique<SymbolMap>(
             std::move(root),
-            [&db]() -> AutoloadDB& { return db; },
+            [&db]() -> std::shared_ptr<AutoloadDB> { return db; },
             std::move(indexedMethodAttributes)),
         std::move(exec)});
     return *m_wrappers.back().m_map;
@@ -621,8 +618,8 @@ protected:
 };
 
 TEST_F(SymbolMapTest, NewModules) {
-  MockAutoloadDB db;
-  db.DelegateToFake();
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
 
   auto& m = make("/var/www", db);
   fs::path path1 = {"some/path1.php"};
@@ -631,8 +628,8 @@ TEST_F(SymbolMapTest, NewModules) {
       .m_modules = {
           {.m_name = "some_module"}, {.m_name = "some_other_module"}}};
 
-  EXPECT_CALL(db, insertModule("some_module", path1));
-  EXPECT_CALL(db, insertModule("some_other_module", path1));
+  EXPECT_CALL(*db, insertModule("some_module", path1));
+  EXPECT_CALL(*db, insertModule("some_other_module", path1));
   update(m, "", "1:2:3", {path1}, {}, {ff});
 
   // We didn't actually write to any database, so if the symbol map is working,
@@ -647,26 +644,26 @@ TEST_F(SymbolMapTest, NewModules) {
 }
 
 TEST_F(SymbolMapTest, ModulesFromDB) {
-  MockAutoloadDB db;
-  db.DelegateToFake();
+  auto db = std::make_shared<MockAutoloadDB>();
+  db->DelegateToFake();
 
   auto& m = make("/var/www", db);
   fs::path path1 = {"some/path1.php"};
   fs::path path2 = {"some/path2.php"};
 
-  EXPECT_CALL(db, insertPath(_)).Times(0);
+  EXPECT_CALL(*db, insertPath(_)).Times(0);
 
-  EXPECT_CALL(db, getModulePath("some_new_module"))
+  EXPECT_CALL(*db, getModulePath("some_new_module"))
       .WillOnce(Return(std::vector<fs::path>{path1}));
-  EXPECT_CALL(db, getModulePath("some_other_new_module"))
+  EXPECT_CALL(*db, getModulePath("some_other_new_module"))
       .WillOnce(Return(std::vector<fs::path>{path1}));
-  EXPECT_CALL(db, getModulePath("some_new_third_module"))
+  EXPECT_CALL(*db, getModulePath("some_new_third_module"))
       .WillOnce(Return(std::vector<fs::path>{path2}));
 
-  EXPECT_CALL(db, getPathModules(path1))
+  EXPECT_CALL(*db, getPathModules(path1))
       .WillOnce(Return(std::vector<std::string>{
           "some_new_module", "some_other_new_module"}));
-  EXPECT_CALL(db, getPathModules(path2))
+  EXPECT_CALL(*db, getPathModules(path2))
       .WillOnce(Return(std::vector<std::string>{"some_new_third_module"}));
 
   EXPECT_THAT(m.getModuleFile("some_new_module"), Eq(path1));
@@ -689,8 +686,8 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
   const char* kSecondPath2 = "k-2-2";
   const char* kSecondPath3 = "k-2-3";
 
-  NiceMock<MockAutoloadDB> db;
-  db.DelegateToFake();
+  auto db = std::make_shared<NiceMock<MockAutoloadDB>>();
+  db->DelegateToFake();
 
   auto& m = make("/var/www", db);
   fs::path path1 = {"some/path1.php"};
@@ -698,16 +695,16 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
 
   // These paths won't be in memory, so the symbol map will try to get
   // them from the database.
-  EXPECT_CALL(db, getModulePath(kFirstPath1))
+  EXPECT_CALL(*db, getModulePath(kFirstPath1))
       .WillOnce(Return(std::vector<fs::path>{path1}));
-  EXPECT_CALL(db, getModulePath(kFirstPath2))
+  EXPECT_CALL(*db, getModulePath(kFirstPath2))
       .WillOnce(Return(std::vector<fs::path>{path1}));
-  EXPECT_CALL(db, getModulePath(kFirstPath3))
+  EXPECT_CALL(*db, getModulePath(kFirstPath3))
       .WillOnce(Return(std::vector<fs::path>{path2}));
 
-  EXPECT_CALL(db, getPathModules(path1))
+  EXPECT_CALL(*db, getPathModules(path1))
       .WillOnce(Return(std::vector<std::string>{kFirstPath1, kFirstPath2}));
-  EXPECT_CALL(db, getPathModules(path2))
+  EXPECT_CALL(*db, getPathModules(path2))
       .WillOnce(Return(std::vector<std::string>{kFirstPath3}));
 
   // Everything should be read from the database.
@@ -724,11 +721,11 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
   FileFacts ff2{
       .m_modules = {{.m_name = kSecondPath2}, {.m_name = kSecondPath3}}};
 
-  EXPECT_CALL(db, erasePath(path1));
-  EXPECT_CALL(db, erasePath(path2));
-  EXPECT_CALL(db, insertModule(kSecondPath1, path1));
-  EXPECT_CALL(db, insertModule(kSecondPath2, path2));
-  EXPECT_CALL(db, insertModule(kSecondPath3, path2));
+  EXPECT_CALL(*db, erasePath(path1));
+  EXPECT_CALL(*db, erasePath(path2));
+  EXPECT_CALL(*db, insertModule(kSecondPath1, path1));
+  EXPECT_CALL(*db, insertModule(kSecondPath2, path2));
+  EXPECT_CALL(*db, insertModule(kSecondPath3, path2));
 
   update(m, "", "1:2:3", {path1, path2}, {}, {ff1, ff2});
 
@@ -745,22 +742,22 @@ TEST_F(SymbolMapTest, OverwriteExistingDbModules) {
 
   // The in memory map should already know these were blown away.
   Path empty_path{nullptr};
-  EXPECT_CALL(db, getModulePath(kFirstPath1)).Times(0);
-  EXPECT_CALL(db, getModulePath(kFirstPath2)).Times(0);
-  EXPECT_CALL(db, getModulePath(kFirstPath3)).Times(0);
+  EXPECT_CALL(*db, getModulePath(kFirstPath1)).Times(0);
+  EXPECT_CALL(*db, getModulePath(kFirstPath2)).Times(0);
+  EXPECT_CALL(*db, getModulePath(kFirstPath3)).Times(0);
   EXPECT_THAT(m.getModuleFile(kFirstPath1), Eq(empty_path));
   EXPECT_THAT(m.getModuleFile(kFirstPath2), Eq(empty_path));
   EXPECT_THAT(m.getModuleFile(kFirstPath3), Eq(empty_path));
 
   std::vector<fs::path> empty_path_list{};
-  EXPECT_CALL(db, getModulePath(kSecondPath1))
+  EXPECT_CALL(*db, getModulePath(kSecondPath1))
       .WillOnce(Return(empty_path_list));
-  EXPECT_CALL(db, getModulePath(kSecondPath2))
+  EXPECT_CALL(*db, getModulePath(kSecondPath2))
       .WillOnce(Return(empty_path_list));
-  EXPECT_CALL(db, getModulePath(kSecondPath3))
+  EXPECT_CALL(*db, getModulePath(kSecondPath3))
       .WillOnce(Return(empty_path_list));
-  EXPECT_CALL(db, getPathModules(path1)).Times(0);
-  EXPECT_CALL(db, getPathModules(path2)).Times(0);
+  EXPECT_CALL(*db, getPathModules(path1)).Times(0);
+  EXPECT_CALL(*db, getPathModules(path2)).Times(0);
   EXPECT_THAT(m.getModuleFile(kSecondPath1), Eq(path1));
   EXPECT_THAT(m.getModuleFile(kSecondPath2), Eq(path2));
   EXPECT_THAT(m.getModuleFile(kSecondPath3), Eq(path2));

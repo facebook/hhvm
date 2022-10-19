@@ -611,8 +611,9 @@ WatchmanAutoloadMapFactory::getForOptions(const RepoOptions& options) {
   Treadmill::enqueue(
       [this] { garbageCollectUnusedAutoloadMaps(s_ext.getExpirationTime()); });
 
-  auto dbHandle = [dbKey = mapKey->m_dbKey]() -> AutoloadDB& {
-    return SQLiteAutoloadDB::getThreadLocal(dbKey);
+  AutoloadDB::Handle dbHandle =
+      [dbKey = mapKey->m_dbKey]() -> std::shared_ptr<AutoloadDB> {
+    return SQLiteAutoloadDB::get(dbKey);
   };
 
   if (mapKey->m_dbKey.m_writable == SQLite::OpenMode::ReadOnly) {

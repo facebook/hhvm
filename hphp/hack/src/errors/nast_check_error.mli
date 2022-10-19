@@ -126,6 +126,7 @@ type t =
       pos: Pos.t;
       second_pos: Pos.t;
     }
+  | Soft_internal_without_internal of Pos.t
 
 include
   Phase_error.S with type t := t and module Error_code = Error_codes.NastCheck

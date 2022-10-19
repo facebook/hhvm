@@ -268,6 +268,7 @@ module NastCheck = struct
     | InternalMemberInsidePublicTrait [@value 3099]
     | AttributeConflictingMemoize [@value 3100]
     | RefinementInTypeStruct [@value 3101]
+    | Soft_internal_without_internal [@value 3102]
   (* Add new NastCheck codes here! Comment out when deprecating. *)
   [@@deriving enum, show { with_path = false }]
 

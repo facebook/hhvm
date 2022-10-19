@@ -348,7 +348,8 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
       fizz_secret_available,
       secret.secret.secret.size(),
       secret.secret.secret.data(),
-      secret.secret.type,
+      KeyLogWriter::secretToNSSLabel(secret.secret.type)
+          .value_or(std::numeric_limits<KeyLogWriter::Label>::max()),
       server_.getClientRandom()->data());
   server_.secretAvailable(secret.secret);
 }

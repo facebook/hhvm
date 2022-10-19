@@ -29,12 +29,20 @@ final class Runner<TBox as Box> {
   public function run(): void {
     $inv_t = new Space(); // Note: T is inferred
     $this->helperShady($inv_t); // OK
-    $this->helper($inv_t); // FIXME(type-refinements) must type-check
-  } // but Hack gives error `expected an object with `type T = _` but got `TBox as Box`
+
+    // The call below is an error because we do
+    // not know that TBox defines a type constant
+    // T; indeed TBox is free to be instantiated
+    // with Box.
+    $this->helper($inv_t); // ERROR
+  }
 
   public function runWorkaround<T>(): void
   where TBox as Box with { type T = T } {
     $inv_t = new Space(); // Note: T is inferred
+
+    // We constrained TBox enough that we can
+    // call the helper() function.
     $this->helper($inv_t); // OK
   }
 }

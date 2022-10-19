@@ -301,10 +301,23 @@ template <typename T> struct Tag { using Type = T; };
 // for each type in that tuple. The callable is called with the tuple
 // index as the first parameter, and Tag<T> as the second (where T is
 // the type at that tuple index).
-template <typename Tuple, typename F, size_t... Is>
+template <typename Tuple, typename F, typename... Args>
 auto typesToValuesImpl(F&& f,
-                       std::index_sequence<Is...>) {
-  return std::make_tuple(f(Is, Tag<std::tuple_element_t<Is, Tuple>>{})...);
+                       std::index_sequence<>,
+                       Args&&... args) {
+  return std::make_tuple(std::forward<Args>(args)...);
+}
+
+template <typename Tuple, typename F, typename... Args, size_t I, size_t... Is>
+auto typesToValuesImpl(F&& f,
+                       std::index_sequence<I, Is...>,
+                       Args&&... args) {
+  return typesToValuesImpl<Tuple>(
+    std::forward<F>(f),
+    std::index_sequence<Is...>{},
+    std::forward<Args>(args)...,
+    f(I, Tag<std::tuple_element_t<I, Tuple>>{})
+  );
 }
 
 template <typename Tuple, typename F>

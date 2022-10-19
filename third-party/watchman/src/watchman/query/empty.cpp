@@ -24,6 +24,12 @@ class ExistsExpr : public QueryExpr {
   static std::unique_ptr<QueryExpr> parse(Query*, const json_ref&) {
     return std::make_unique<ExistsExpr>();
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // `exists` doesn't constrain the path.
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(exists, ExistsExpr::parse);
 
@@ -58,6 +64,12 @@ class EmptyExpr : public QueryExpr {
 
   static std::unique_ptr<QueryExpr> parse(Query*, const json_ref&) {
     return std::make_unique<EmptyExpr>();
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // `empty` doesn't constrain the path.
+    return std::nullopt;
   }
 };
 W_TERM_PARSER(empty, EmptyExpr::parse);

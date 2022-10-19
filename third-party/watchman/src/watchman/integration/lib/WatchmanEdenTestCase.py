@@ -7,6 +7,7 @@
 # no unicode literals
 
 import os
+import sys
 from typing import Optional
 
 from . import WatchmanTestCase
@@ -138,3 +139,8 @@ else:
 
         def setDefaultConfiguration(self):
             self.setConfiguration("local", "bser", False)
+
+        def isCaseSensitiveMount(self, path) -> bool:
+            # Ideally we'd ask Eden somehow, but this is close enough for use in
+            # tests. See eden/fs/cli/main.py.
+            return sys.platform == "linux"

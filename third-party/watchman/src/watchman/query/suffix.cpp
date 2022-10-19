@@ -88,6 +88,14 @@ class SuffixExpr : public QueryExpr {
     suffixSet.insert(suffixSet_.begin(), suffixSet_.end());
     return std::make_unique<SuffixExpr>(std::move(suffixSet));
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // We mostly care about prefix bounds that help us skip fetching information
+    // about entire subtrees of the root. `suffix` doesn't help there so treat
+    // it as unbounded.
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(suffix, SuffixExpr::parse);
 W_CAP_REG("suffix-set")

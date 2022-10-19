@@ -23,6 +23,7 @@ def populate(
     config["eden_use_streaming_since"] = True
     if threshold:
         config["eden_file_count_threshold_for_fresh_instance"] = threshold
+    config["eden_enable_glob_upper_bounds"] = True
     repo.write_file(".watchmanconfig", json.dumps(config))
     repo.write_file("hello", "hola\n")
     repo.write_file("adir/file", "foo!\n")

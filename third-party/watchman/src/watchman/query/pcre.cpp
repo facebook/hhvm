@@ -140,6 +140,19 @@ class PcreExpr : public QueryExpr {
       const json_ref& term) {
     return parse(query, term, CaseSensitivity::CaseInSensitive);
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // We could, in principle, try to reverse-engineer the expression into a
+    // prefix glob (if it's wholename-scoped and has the same case-sensitivity
+    // as the one passed here).
+    //
+    // In practice, it's better to treat all `pcre` terms as unbounded, and ask
+    // clients who care about bounding their queries to add a `match` or
+    // `dirname` term explicitly.
+
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(pcre, PcreExpr::parsePcre);
 W_TERM_PARSER(ipcre, PcreExpr::parseIPcre);

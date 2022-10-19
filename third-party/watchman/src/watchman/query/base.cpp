@@ -10,6 +10,8 @@
 #include "watchman/query/TermRegistry.h"
 
 #include <memory>
+#include <queue>
+#include <unordered_set>
 #include <vector>
 
 using namespace watchman;
@@ -41,6 +43,13 @@ class NotExpr : public QueryExpr {
     auto other_expr = parseQueryExpr(query, other);
     return std::make_unique<NotExpr>(std::move(other_expr));
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // We can't negate globs, so return an unbounded result regardless of what
+    // the inner expression is.
+    return std::nullopt;
+  }
 };
 
 W_TERM_PARSER(not, NotExpr::parse);
@@ -54,6 +63,12 @@ class TrueExpr : public QueryExpr {
   static std::unique_ptr<QueryExpr> parse(Query*, const json_ref&) {
     return std::make_unique<TrueExpr>();
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // We will match every path --> unbounded.
+    return std::nullopt;
+  }
 };
 
 W_TERM_PARSER(true, TrueExpr::parse);
@@ -66,6 +81,12 @@ class FalseExpr : public QueryExpr {
 
   static std::unique_ptr<QueryExpr> parse(Query*, const json_ref&) {
     return std::make_unique<FalseExpr>();
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // We will not match any path --> bounded by an empty list of globs.
+    return std::vector<std::string>{};
   }
 };
 
@@ -158,6 +179,63 @@ class ListExpr : public QueryExpr {
       Query* query,
       const json_ref& term) {
     return parse(query, term, false);
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity caseSensitive) const override {
+    if (allof) {
+      // Heuristic: The fewer patterns needed to describe the upper bound, the
+      // tighter we assume the bound will be. This is suboptimal, as it doesn't
+      // consider the tree structure.
+      //
+      // The success case for this heuristic is eliminating dead "anyof"
+      // branches:
+      // {"foo/**"} vs {"foo/**", "bar/**"}
+      //   --> selects {"foo/**"}, which is narrower
+      //
+      // The failure cases include:
+      // {"foo/**"} vs {"foo/bar/**", "foo/baz/**"}
+      //   --> selects {"foo/**"} despite the alternative being narrower
+      // {"foo/**"} vs {"foo/bar/**"}
+      //   --> selects {"foo/**"} despite the alternative being narrower
+      // {"foo/**"} vs {"bar/**"}
+      //   --> selects {"foo/**"} despite the optimal result being {}
+      std::optional<std::vector<std::string>> minUpperBound;
+      for (auto& expr : exprs) {
+        auto elemUpperBound = expr->computeGlobUpperBound(caseSensitive);
+        if (!elemUpperBound.has_value()) {
+          continue;
+        }
+        if (!minUpperBound.has_value() ||
+            minUpperBound->size() > elemUpperBound->size()) {
+          minUpperBound = std::move(elemUpperBound);
+        }
+        if (minUpperBound.has_value() && minUpperBound->size() <= 1) {
+          break;
+        }
+      }
+      return minUpperBound;
+    }
+
+    /* anyof */
+
+    // If all expressions in the list are bounded, return the union of all
+    // upper bounds. If any expression is unbounded, return an unbounded
+    // result.
+    //
+    // TODO: Consider the tree structure here as well, e.g. the union
+    // of {"foo/**"} and {"foo/bar/**"} would just be {"foo/**"}.
+    std::unordered_set<std::string> unionOfUpperBounds;
+    for (auto& expr : exprs) {
+      auto elemUpperBound = expr->computeGlobUpperBound(caseSensitive);
+      if (!elemUpperBound.has_value()) {
+        return std::nullopt;
+      }
+      unionOfUpperBounds.insert(elemUpperBound->begin(), elemUpperBound->end());
+    }
+
+    return std::vector<std::string>(
+        unionOfUpperBounds.begin(), unionOfUpperBounds.end());
   }
 };
 

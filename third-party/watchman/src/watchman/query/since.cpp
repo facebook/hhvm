@@ -160,6 +160,12 @@ class SinceExpr : public QueryExpr {
 
     return std::make_unique<SinceExpr>(std::move(spec), selected_field);
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // `since` doesn't constrain the path.
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(since, SinceExpr::parse);
 

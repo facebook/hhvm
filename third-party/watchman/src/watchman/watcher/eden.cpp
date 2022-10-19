@@ -719,7 +719,9 @@ class EdenView final : public QueryableView {
         splitGlobPattern_(config.getBool("eden_split_glob_pattern", false)),
         thresholdForFreshInstance_(config.getInt(
             "eden_file_count_threshold_for_fresh_instance",
-            10000)) {}
+            10000)),
+        enableGlobUpperBounds_(
+            config.getBool("eden_enable_glob_upper_bounds", false)) {}
 
   void timeGenerator(const Query* /*query*/, QueryContext* ctx) const override {
     ctx->generationStarted();
@@ -940,19 +942,8 @@ class EdenView final : public QueryableView {
 
   void allFilesGenerator(const Query*, QueryContext* ctx) const override {
     ctx->generationStarted();
-    // If the query is anchored to a relative_root, use that that
-    // avoid sucking down a massive list of files from eden
-    std::string globPattern;
-    auto rel = computeRelativePathPiece(ctx);
-    if (rel.size() > 0) {
-      globPattern.append(rel.data(), rel.size());
-      globPattern.append("/");
-    }
-    globPattern.append("**");
-    executeGlobBasedQuery(
-        std::vector<std::string>{globPattern},
-        ctx,
-        /*includeDotfiles=*/true);
+    auto globPatterns = getGlobPatternsForAllFiles(ctx);
+    executeGlobBasedQuery(globPatterns, ctx, /*includeDotfiles=*/true);
   }
 
   ClockPosition getMostRecentRootNumberAndTickValue() const override {
@@ -1102,6 +1093,50 @@ class EdenView final : public QueryableView {
 
  private:
   /**
+   * Returns glob patterns (relative to the project root) that describe an upper
+   * bound on the result set, for use by queries that would otherwise need to
+   * scan the entire repo.
+   */
+  std::vector<std::string> getGlobPatternsForAllFiles(QueryContext* ctx) const {
+    std::vector<std::string> globPatterns;
+    std::optional<std::vector<std::string>> globUpperBound;
+    if (enableGlobUpperBounds_ && ctx->query->expr) {
+      globUpperBound =
+          ctx->query->expr->computeGlobUpperBound(ctx->root->case_sensitive);
+    }
+    bool didFindUpperBound = globUpperBound.has_value();
+    if (enableGlobUpperBounds_) {
+      if (didFindUpperBound) {
+        log(DBG,
+            "Found ",
+            globUpperBound->size(),
+            " glob pattern(s) as upper bound on query.",
+            "\n");
+      } else {
+        log(DBG, "Did not find a glob upper bound on query.", "\n");
+      }
+    }
+    if (!didFindUpperBound) {
+      globUpperBound = std::vector<std::string>{"**"};
+    }
+    for (auto& pattern : *globUpperBound) {
+      if (didFindUpperBound) {
+        log(DBG, "  Glob upper bound pattern: ", pattern, "\n");
+      }
+      std::string globPattern;
+      if (ctx->query->relative_root) {
+        w_string_piece rel(*ctx->query->relative_root);
+        rel.advance(ctx->root->root_path.size() + 1);
+        globPattern.append(rel.data(), rel.size());
+        globPattern.append("/");
+      }
+      globPattern.append(pattern);
+      globPatterns.emplace_back(std::move(globPattern));
+    }
+    return globPatterns;
+  }
+
+  /**
    * Returns all the files in the watched directory for a fresh instance.
    *
    * In the case where the query specifically ask for an empty file list on a
@@ -1114,21 +1149,15 @@ class EdenView final : public QueryableView {
       return std::vector<NameAndDType>();
     }
 
-    std::string globPattern;
-    if (ctx->query->relative_root) {
-      w_string_piece rel(*ctx->query->relative_root);
-      rel.advance(ctx->root->root_path.size() + 1);
-      globPattern.append(rel.data(), rel.size());
-      globPattern.append("/");
-    }
-    globPattern.append("**");
+    auto globPatterns = getGlobPatternsForAllFiles(ctx);
 
     auto client = getEdenClient(thriftChannel_);
     return globNameAndDType(
         client.get(),
         mountPoint_,
-        std::vector<std::string>{std::move(globPattern)},
-        /*includeDotfiles=*/true);
+        std::move(globPatterns),
+        /*includeDotfiles=*/true,
+        splitGlobPattern_);
   }
 
   struct GetAllChangesSinceResult {
@@ -1297,6 +1326,7 @@ class EdenView final : public QueryableView {
   folly::SharedPromise<folly::Unit> subscribeReadyPromise_;
   bool splitGlobPattern_;
   unsigned int thresholdForFreshInstance_;
+  bool enableGlobUpperBounds_;
 };
 
 #ifdef _WIN32

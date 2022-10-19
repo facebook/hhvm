@@ -8,7 +8,7 @@
   "namespaces": {
     "go": "thrift.annotation.cpp",
     "java": "com.facebook.thrift.annotation.cpp_deprecated",
-    "js": "apache.thrift.annotation.cpp",
+    "js": "thrift.annotation.cpp",
     "py": "thrift.annotation.cpp",
     "py.asyncio": "facebook_thrift_asyncio.annotation.cpp"
   },

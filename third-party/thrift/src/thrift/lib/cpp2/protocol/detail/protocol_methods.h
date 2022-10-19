@@ -89,13 +89,13 @@ class Wrap;
 namespace detail {
 namespace pm {
 
-template <typename T>
-auto reserve_if_possible(T* t, std::uint32_t size)
+template <typename Container, typename Size>
+auto reserve_if_possible(Container* t, Size size)
     -> decltype(t->reserve(size), std::true_type{}) {
   // Workaround for libstdc++ < 7, resize to `size + 1` to avoid an extra
   // rehash: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=71181.
   // TODO: Remove once libstdc++ < 7 is not supported any longer.
-  std::uint32_t extra = folly::kIsGlibcxx && folly::kGlibcxxVer < 7 ? 1 : 0;
+  Size extra = folly::kIsGlibcxx && folly::kGlibcxxVer < 7 ? 1 : 0;
   t->reserve(size + extra);
   return {};
 }

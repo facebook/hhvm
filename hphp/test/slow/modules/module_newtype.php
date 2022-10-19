@@ -1,5 +1,5 @@
 <?hh
-<<file:__EnableUnstableFeatures("modules")>>
+
 module foo;
 module newtype Foo = FooInternal; // ok
 internal class FooInternal {

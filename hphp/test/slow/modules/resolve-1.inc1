@@ -1,6 +1,6 @@
 <?hh
 
-<<file:__EnableUnstableFeatures("modules")>>
+
 module a;
 
 internal function foo() { echo "in f\n"; }

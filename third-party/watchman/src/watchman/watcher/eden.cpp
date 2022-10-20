@@ -672,7 +672,27 @@ std::vector<NameAndDType> globNameAndDType(
     params.sync() = getSyncBehavior();
 
     Glob glob;
-    client->sync_globFiles(glob, params);
+    try {
+      client->sync_globFiles(glob, params);
+    } catch (const apache::thrift::transport::TTransportException& ex) {
+      logf(
+          ERR,
+          "Thrift exception raised from EdenFS when globbing files: {} (errno {}, type {})\n",
+          ex.what(),
+          ex.getErrno(),
+          ex.getType());
+      throw;
+    } catch (const std::exception& ex) {
+      logf(
+          ERR,
+          "Exception raised from EdenFS when globbing files: {}\n",
+          ex.what());
+      throw;
+    }
+    logf(
+        DBG,
+        "Glob finished. Received {} files.\n",
+        glob.matchingFiles_ref()->size());
     std::vector<NameAndDType> result;
     appendGlobResultToNameAndDTypeVec(result, std::move(glob));
     return result;
@@ -697,9 +717,13 @@ std::shared_ptr<apache::thrift::RequestChannel> makeThriftChannel(
             numRetries,
             apache::thrift::ReconnectingRequestChannel::newChannel(
                 eb, [rootPath](folly::EventBase& eb) {
-                  return apache::thrift::RocketClientChannel::newChannel(
-                      AsyncSocket::newSocket(
-                          &eb, getEdenSocketAddress(rootPath)));
+                  auto channel =
+                      apache::thrift::RocketClientChannel::newChannel(
+                          AsyncSocket::newSocket(
+                              &eb, getEdenSocketAddress(rootPath)));
+                  // set maximum timeout to 15 minutes.
+                  channel->setTimeout(900000);
+                  return channel;
                 }));
       });
   return channel;

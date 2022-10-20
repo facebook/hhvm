@@ -161,6 +161,33 @@ where
     }
 }
 
+pub(crate) fn sem_diff_iter<'a, V: 'a, F>(
+    path: &CodePath<'_>,
+    mut a: impl Iterator<Item = V>,
+    mut b: impl Iterator<Item = V>,
+    f_eq: F,
+) -> Result<()>
+where
+    F: Fn(&CodePath<'_>, V, V) -> Result<()>,
+{
+    let mut idx = 0;
+    loop {
+        let ai = a.next();
+        let bi = b.next();
+        match (ai, bi) {
+            (None, None) => return Ok(()),
+            (Some(av), Some(bv)) => f_eq(&path.index(idx), av, bv)?,
+            (Some(_), None) => {
+                bail!("Mismatch in {}: A side is longer.", path);
+            }
+            (None, Some(_)) => {
+                bail!("Mismatch in {}: B side is longer.", path);
+            }
+        }
+        idx += 1;
+    }
+}
+
 pub(crate) fn sem_diff_slice<'a, V, F>(
     path: &CodePath<'_>,
     a: &'a [V],
@@ -170,14 +197,5 @@ pub(crate) fn sem_diff_slice<'a, V, F>(
 where
     F: Fn(&CodePath<'_>, &'a V, &'a V) -> Result<()>,
 {
-    if a.len() > b.len() {
-        bail!("Mismatch in {}: A side is longer.", path);
-    }
-    if b.len() > a.len() {
-        bail!("Mismatch in {}: B side is longer.", path);
-    }
-    for (i, (av, bv)) in a.iter().zip(b.iter()).enumerate() {
-        f_eq(&path.index(i as i64), av, bv)?;
-    }
-    Ok(())
+    sem_diff_iter(path, a.iter(), b.iter(), f_eq)
 }

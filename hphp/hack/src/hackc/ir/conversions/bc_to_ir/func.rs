@@ -40,7 +40,7 @@ pub(crate) fn convert_function<'a>(
         .attributes
         .as_ref()
         .iter()
-        .map(convert::convert_attribute)
+        .map(|a| convert::convert_attribute(a, &mut unit.strings))
         .collect();
 
     let function = ir::Function {
@@ -75,7 +75,11 @@ pub(crate) fn convert_method<'a>(
         .iter()
         .map(|attr| ir::Attribute {
             name: attr.name,
-            arguments: attr.arguments.as_ref().to_vec(),
+            arguments: attr
+                .arguments
+                .iter()
+                .map(|tv| convert::convert_typed_value(tv, &mut unit.strings))
+                .collect(),
         })
         .collect();
 
@@ -233,7 +237,7 @@ fn convert_param<'a, 'b>(ctx: &mut Context<'a, 'b>, param: &Param<'a>) -> ir::Pa
     let user_attributes = param
         .user_attributes
         .iter()
-        .map(convert::convert_attribute)
+        .map(|a| convert::convert_attribute(a, &mut ctx.unit.strings))
         .collect();
 
     ir::Param {

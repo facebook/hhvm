@@ -17,6 +17,7 @@ use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
 use hhbc::SymbolRefs;
+use hhbc::TypeConstant;
 use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
@@ -371,7 +372,7 @@ fn sem_diff_class<'arena, 'a>(
         &path.qualified("type_constants"),
         a_type_constants,
         b_type_constants,
-        sem_diff_eq,
+        sem_diff_type_constant,
     )?;
     sem_diff_map_t(
         &path.qualified("ctx_constants"),
@@ -424,6 +425,76 @@ fn sem_diff_constant(path: &CodePath<'_>, a: &Constant<'_>, b: &Constant<'_>) ->
     )?;
     sem_diff_eq(&path.qualified("is_abstract"), a_is_abstract, b_is_abstract)?;
     Ok(())
+}
+
+fn sem_diff_type_constant(
+    path: &CodePath<'_>,
+    a: &TypeConstant<'_>,
+    b: &TypeConstant<'_>,
+) -> Result<()> {
+    let TypeConstant {
+        name: a_name,
+        initializer: a_initializer,
+        is_abstract: a_is_abstract,
+    } = a;
+    let TypeConstant {
+        name: b_name,
+        initializer: b_initializer,
+        is_abstract: b_is_abstract,
+    } = b;
+    sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
+    sem_diff_option(
+        &path.qualified("initializer"),
+        a_initializer.as_ref().into_option(),
+        b_initializer.as_ref().into_option(),
+        sem_diff_typed_value,
+    )?;
+    sem_diff_eq(&path.qualified("is_abstract"), a_is_abstract, b_is_abstract)?;
+    Ok(())
+}
+
+fn sem_diff_typed_value(path: &CodePath<'_>, a: &TypedValue<'_>, b: &TypedValue<'_>) -> Result<()> {
+    match (a, b) {
+        (TypedValue::Vec(av), TypedValue::Vec(bv)) => {
+            sem_diff_iter(path, av.iter(), bv.iter(), sem_diff_typed_value)
+        }
+        (TypedValue::Keyset(ak), TypedValue::Keyset(bk)) => {
+            // Because Keyset is represented as a Vec we
+            // need to actually remove duplicate keys while we compare. The
+            // order is based on the first occurance. The value is based on the
+            // last occurance - this matches IndexSet::insert() (and thus
+            // collect()).
+            let ad: hash::IndexSet<&TypedValue<'_>> = ak.iter().collect();
+            let bd: hash::IndexSet<&TypedValue<'_>> = bk.iter().collect();
+            sem_diff_iter(
+                path,
+                ad.iter().copied(),
+                bd.iter().copied(),
+                sem_diff_typed_value,
+            )
+        }
+        (TypedValue::Dict(ad), TypedValue::Dict(bd)) => {
+            // Because Dict is represented as a Vec of (key, value) pairs we
+            // need to actually remove duplicate keys while we compare. The
+            // order is based on the first occurance. The value is based on the
+            // last occurance - this matches IndexMap::insert() (and thus
+            // collect()).
+            let ad: hash::IndexMap<&TypedValue<'_>, &TypedValue<'_>> = ad
+                .iter()
+                .map(|hhbc::Entry { key, value }| (key, value))
+                .collect();
+            let bd: hash::IndexMap<&TypedValue<'_>, &TypedValue<'_>> = bd
+                .iter()
+                .map(|hhbc::Entry { key, value }| (key, value))
+                .collect();
+            sem_diff_iter(path, ad.iter(), bd.iter(), |path, a, b| {
+                sem_diff_typed_value(path, a.0, b.0)?;
+                sem_diff_typed_value(path, a.1, b.1)?;
+                Ok(())
+            })
+        }
+        _ => sem_diff_eq(path, a, b),
+    }
 }
 
 fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal<'_>, b: &Fatal<'_>) -> Result<()> {

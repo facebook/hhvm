@@ -5,6 +5,7 @@
 
 use std::collections::VecDeque;
 use std::fmt::Display;
+use std::sync::Arc;
 
 use ffi::Slice;
 use ffi::Str;
@@ -34,7 +35,6 @@ use crate::ex_frame::ExFrame;
 use crate::strings::StringCache;
 
 pub(crate) fn emit_func<'a>(
-    alloc: &'a bumpalo::Bump,
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
     strings: &StringCache<'a, '_>,
@@ -48,13 +48,13 @@ pub(crate) fn emit_func<'a>(
             let cid = ir::ConstantId::from_usize(idx);
             match constant {
                 ir::Constant::Array(tv) => {
+                    let id = adata_cache.intern(Arc::clone(tv), strings);
                     let kind = match **tv {
-                        hhbc::TypedValue::Dict(_) => AdataKind::Dict,
-                        hhbc::TypedValue::Keyset(_) => AdataKind::Keyset,
-                        hhbc::TypedValue::Vec(_) => AdataKind::Vec,
+                        ir::TypedValue::Dict(_) => AdataKind::Dict,
+                        ir::TypedValue::Keyset(_) => AdataKind::Keyset,
+                        ir::TypedValue::Vec(_) => AdataKind::Vec,
                         _ => unreachable!(),
                     };
-                    let id = adata_cache.intern(tv);
                     Some((cid, (id, kind)))
                 }
                 _ => None,
@@ -62,7 +62,7 @@ pub(crate) fn emit_func<'a>(
         })
         .collect();
 
-    let mut ctx = InstrEmitter::new(alloc, func, labeler, strings, &adata_id_map);
+    let mut ctx = InstrEmitter::new(func, labeler, strings, &adata_id_map);
 
     // Collect the Blocks, grouping them into TryCatch sections.
     let root = crate::ex_frame::collect_tc_sections(func);
@@ -181,7 +181,6 @@ fn compute_block_entry_edges(func: &ir::Func<'_>) -> BlockIdMap<usize> {
 }
 
 pub(crate) struct InstrEmitter<'a, 'b> {
-    alloc: &'a bumpalo::Bump,
     // How many blocks jump to this one?
     block_entry_edges: BlockIdMap<usize>,
     func: &'b ir::Func<'a>,
@@ -212,7 +211,6 @@ fn convert_indexes_to_bools<'a>(
 
 impl<'a, 'b> InstrEmitter<'a, 'b> {
     fn new(
-        alloc: &'a bumpalo::Bump,
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
         strings: &'b StringCache<'a, '_>,
@@ -221,7 +219,6 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         let locals = Self::prealloc_locals(func);
 
         Self {
-            alloc,
             block_entry_edges: compute_block_entry_edges(func),
             func,
             instrs: Vec::new(),
@@ -308,10 +305,16 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             num_args -= call.flags.contains(FCallArgsFlags::HasGenerics) as u32;
 
             let num_rets = call.num_rets;
-            let inouts =
-                convert_indexes_to_bools(self.alloc, num_args as usize, call.inouts.as_deref());
-            let readonly =
-                convert_indexes_to_bools(self.alloc, num_args as usize, call.readonly.as_deref());
+            let inouts = convert_indexes_to_bools(
+                self.strings.alloc,
+                num_args as usize,
+                call.inouts.as_deref(),
+            );
+            let readonly = convert_indexes_to_bools(
+                self.strings.alloc,
+                num_args as usize,
+                call.readonly.as_deref(),
+            );
 
             let context = self.strings.lookup_ffi_str(call.context);
 
@@ -586,7 +589,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             Hhbc::NewPair(..) => Opcode::NewPair,
             Hhbc::NewStructDict(ref keys, _, _) => {
                 let keys = Slice::fill_iter(
-                    self.alloc,
+                    self.strings.alloc,
                     keys.iter().map(|key| self.strings.lookup_ffi_str(*key)),
                 );
                 Opcode::NewStructDict(keys)
@@ -1067,7 +1070,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 ..
             } => {
                 let targets = Slice::fill_iter(
-                    self.alloc,
+                    self.strings.alloc,
                     targets
                         .iter()
                         .copied()
@@ -1082,12 +1085,12 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 ..
             } => {
                 let cases = Slice::fill_iter(
-                    self.alloc,
+                    self.strings.alloc,
                     cases.iter().map(|case| self.strings.lookup_ffi_str(*case)),
                 );
 
                 let targets = Slice::fill_iter(
-                    self.alloc,
+                    self.strings.alloc,
                     targets
                         .iter()
                         .copied()

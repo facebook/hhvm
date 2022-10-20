@@ -70,7 +70,7 @@ pub struct Property<'arena> {
     pub flags: Attr,
     pub attributes: Vec<Attribute<'arena>>,
     pub visibility: hhbc::Visibility,
-    pub initial_value: Option<TypedValue<'arena>>,
+    pub initial_value: Option<TypedValue>,
     pub type_info: hhbc::TypeInfo<'arena>,
     pub doc_comment: ffi::Maybe<Str<'arena>>,
 }

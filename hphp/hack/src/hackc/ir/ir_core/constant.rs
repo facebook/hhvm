@@ -14,7 +14,7 @@ use crate::ValueId;
 /// A constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Constant<'a> {
-    Array(Arc<TypedValue<'a>>),
+    Array(Arc<TypedValue>),
     Bool(bool),
     Dir,
     Double(FloatBits),
@@ -44,6 +44,6 @@ impl HasOperands for Constant<'_> {
 #[derive(Debug)]
 pub struct HackConstant<'a> {
     pub name: ConstName<'a>,
-    pub value: Option<TypedValue<'a>>,
+    pub value: Option<TypedValue>,
     pub is_abstract: bool,
 }

@@ -26,24 +26,24 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     }
 
     for function in ir_unit.functions.into_iter() {
-        crate::func::convert_function(alloc, &mut unit, function, &strings);
+        crate::func::convert_function(&mut unit, function, &strings);
     }
 
     let mut unit = unit.finish();
 
-    unit.file_attributes = convert_attributes(alloc, ir_unit.file_attributes);
+    unit.file_attributes = convert_attributes(ir_unit.file_attributes, &strings);
     unit.typedefs = Slice::fill_iter(alloc, ir_unit.typedefs.into_iter());
     unit.constants = Slice::fill_iter(
         alloc,
         ir_unit
             .constants
             .into_iter()
-            .map(crate::constant::convert_hack_constant),
+            .map(|c| crate::constant::convert_hack_constant(c, &strings)),
     );
     unit.modules = Slice::fill_iter(
         alloc,
         ir_unit.modules.into_iter().map(|module| hhbc::Module {
-            attributes: convert_attributes(alloc, module.attributes),
+            attributes: convert_attributes(module.attributes, &strings),
             name: strings.lookup_class_name(module.name),
             span: module.src_loc.to_span(),
             doc_comment: module.doc_comment.into(),
@@ -123,14 +123,64 @@ fn convert_symbol_refs<'a>(
 }
 
 pub(crate) fn convert_attributes<'a>(
-    alloc: &'a bumpalo::Bump,
     attrs: Vec<ir::Attribute<'a>>,
+    strings: &StringCache<'a, '_>,
 ) -> Slice<'a, hhbc::Attribute<'a>> {
     Slice::fill_iter(
-        alloc,
-        attrs.into_iter().map(|attr| hhbc::Attribute {
-            name: attr.name,
-            arguments: Slice::fill_iter(alloc, attr.arguments.into_iter()),
+        strings.alloc,
+        attrs.into_iter().map(|attr| {
+            let arguments = Slice::fill_iter(
+                strings.alloc,
+                attr.arguments
+                    .into_iter()
+                    .map(|arg| convert_typed_value(&arg, strings)),
+            );
+            hhbc::Attribute {
+                name: attr.name,
+                arguments,
+            }
         }),
     )
+}
+
+pub(crate) fn convert_typed_value<'a>(
+    tv: &ir::TypedValue,
+    strings: &StringCache<'a, '_>,
+) -> hhbc::TypedValue<'a> {
+    match *tv {
+        ir::TypedValue::Uninit => hhbc::TypedValue::Uninit,
+        ir::TypedValue::Int(v) => hhbc::TypedValue::Int(v),
+        ir::TypedValue::Bool(v) => hhbc::TypedValue::Bool(v),
+        ir::TypedValue::Float(v) => hhbc::TypedValue::Float(v),
+        ir::TypedValue::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
+        ir::TypedValue::LazyClass(v) => hhbc::TypedValue::LazyClass(strings.lookup_ffi_str(v)),
+        ir::TypedValue::Null => hhbc::TypedValue::Null,
+        ir::TypedValue::Vec(ref vs) => hhbc::TypedValue::Vec(Slice::fill_iter(
+            strings.alloc,
+            vs.iter().map(|v| convert_typed_value(v, strings)),
+        )),
+        ir::TypedValue::Keyset(ref vs) => hhbc::TypedValue::Keyset(Slice::fill_iter(
+            strings.alloc,
+            vs.iter().map(|v| convert_array_key(v, strings)),
+        )),
+        ir::TypedValue::Dict(ref vs) => hhbc::TypedValue::Dict(Slice::fill_iter(
+            strings.alloc,
+            vs.iter().map(|(k, v)| {
+                let key = convert_array_key(k, strings);
+                let value = convert_typed_value(v, strings);
+                hhbc::Entry { key, value }
+            }),
+        )),
+    }
+}
+
+pub(crate) fn convert_array_key<'a>(
+    tv: &ir::ArrayKey,
+    strings: &StringCache<'a, '_>,
+) -> hhbc::TypedValue<'a> {
+    match *tv {
+        ir::ArrayKey::Int(v) => hhbc::TypedValue::Int(v),
+        ir::ArrayKey::LazyClass(v) => hhbc::TypedValue::LazyClass(strings.lookup_ffi_str(v)),
+        ir::ArrayKey::String(v) => hhbc::TypedValue::String(strings.lookup_ffi_str(v)),
+    }
 }

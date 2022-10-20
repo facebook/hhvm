@@ -61,10 +61,15 @@ pub(crate) fn convert_class<'a>(
 
     let enum_type: Maybe<_> = enum_type
         .as_ref()
-        .map(|et| types::convert(alloc, et, strings).unwrap())
+        .map(|et| types::convert(et, strings).unwrap())
         .into();
 
-    let type_constants = Slice::fill_iter(alloc, type_constants.iter().map(convert_type_constant));
+    let type_constants = Slice::fill_iter(
+        alloc,
+        type_constants
+            .into_iter()
+            .map(|tc| convert_type_constant(tc, strings)),
+    );
 
     let upper_bounds = Slice::fill_iter(
         alloc,
@@ -72,8 +77,7 @@ pub(crate) fn convert_class<'a>(
             name: *name,
             bounds: Slice::fill_iter(
                 alloc,
-                tys.iter()
-                    .map(|ty| types::convert(alloc, ty, strings).unwrap()),
+                tys.iter().map(|ty| types::convert(ty, strings).unwrap()),
             ),
         }),
     );
@@ -96,19 +100,19 @@ pub(crate) fn convert_class<'a>(
 
     let methods = Slice::fill_iter(
         alloc,
-        methods.into_iter().map(|method| {
-            crate::func::convert_method(alloc, method, strings, &mut unit.adata_cache)
-        }),
+        methods
+            .into_iter()
+            .map(|method| crate::func::convert_method(method, strings, &mut unit.adata_cache)),
     );
 
     let class = hhbc::Class {
-        attributes: convert::convert_attributes(alloc, attributes),
+        attributes: convert::convert_attributes(attributes, strings),
         base,
         constants: Slice::fill_iter(
             alloc,
             constants
                 .into_iter()
-                .map(crate::constant::convert_hack_constant),
+                .map(|c| crate::constant::convert_hack_constant(c, strings)),
         ),
         ctx_constants,
         doc_comment: doc_comment.into(),
@@ -122,7 +126,7 @@ pub(crate) fn convert_class<'a>(
             alloc,
             properties
                 .into_iter()
-                .map(|prop| convert_property(alloc, prop)),
+                .map(|prop| convert_property(prop, strings)),
         ),
         requirements,
         span: src_loc.to_span(),
@@ -133,13 +137,19 @@ pub(crate) fn convert_class<'a>(
     unit.classes.push(class);
 }
 
-fn convert_property<'a>(alloc: &'a bumpalo::Bump, src: ir::Property<'a>) -> hhbc::Property<'a> {
+fn convert_property<'a>(
+    src: ir::Property<'a>,
+    strings: &StringCache<'a, '_>,
+) -> hhbc::Property<'a> {
     hhbc::Property {
         name: src.name,
         flags: src.flags,
-        attributes: convert::convert_attributes(alloc, src.attributes),
+        attributes: convert::convert_attributes(src.attributes, strings),
         visibility: src.visibility,
-        initial_value: src.initial_value.clone().into(),
+        initial_value: src
+            .initial_value
+            .map(|tv| convert::convert_typed_value(&tv, strings))
+            .into(),
         type_info: src.type_info.clone(),
         doc_comment: src.doc_comment,
     }
@@ -157,10 +167,16 @@ fn convert_ctx_constant<'a>(
     }
 }
 
-fn convert_type_constant<'a>(tc: &ir::TypeConstant<'a>) -> hhbc::TypeConstant<'a> {
+fn convert_type_constant<'a>(
+    tc: ir::TypeConstant<'a>,
+    strings: &StringCache<'a, '_>,
+) -> hhbc::TypeConstant<'a> {
     hhbc::TypeConstant {
         name: tc.name,
-        initializer: tc.initializer.clone().into(),
+        initializer: tc
+            .initializer
+            .map(|init| convert::convert_typed_value(&init, strings))
+            .into(),
         is_abstract: tc.is_abstract,
     }
 }

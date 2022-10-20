@@ -949,17 +949,17 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
 
         Opcode::Dict(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, hhbc::TypedValue::Dict(_)));
+            debug_assert!(matches!(*tv, ir::TypedValue::Dict(_)));
             Action::Constant(Constant::Array(tv))
         }
         Opcode::Keyset(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, hhbc::TypedValue::Keyset(_)));
+            debug_assert!(matches!(*tv, ir::TypedValue::Keyset(_)));
             Action::Constant(Constant::Array(tv))
         }
         Opcode::Vec(name) => {
             let tv = Arc::clone(&ctx.adata_lookup[&name]);
-            debug_assert!(matches!(*tv, hhbc::TypedValue::Vec(_)));
+            debug_assert!(matches!(*tv, ir::TypedValue::Vec(_)));
             Action::Constant(Constant::Array(tv))
         }
 

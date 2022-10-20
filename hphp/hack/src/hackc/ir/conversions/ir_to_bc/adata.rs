@@ -3,11 +3,13 @@ use std::sync::Arc;
 use ffi::Slice;
 use hash::HashMap;
 
+use crate::strings::StringCache;
+
 /// Builder for hhbc::Unit.adata.
 pub(crate) struct AdataCache<'a> {
     alloc: &'a bumpalo::Bump,
     adata: Vec<hhbc::Adata<'a>>,
-    lookup: HashMap<Arc<hhbc::TypedValue<'a>>, usize>,
+    lookup: HashMap<Arc<ir::TypedValue>, usize>,
 }
 
 impl<'a> AdataCache<'a> {
@@ -19,12 +21,15 @@ impl<'a> AdataCache<'a> {
         }
     }
 
-    pub(crate) fn intern(&mut self, tv: &Arc<hhbc::TypedValue<'a>>) -> hhbc::AdataId<'a> {
-        let tv = Arc::clone(tv);
-        let idx = self.lookup.entry(tv).or_insert_with_key(|value| {
+    pub(crate) fn intern(
+        &mut self,
+        tv: Arc<ir::TypedValue>,
+        strings: &StringCache<'a, '_>,
+    ) -> hhbc::AdataId<'a> {
+        let idx = self.lookup.entry(tv).or_insert_with_key(|tv| {
             let idx = self.adata.len();
             let id = hhbc::AdataId::new(ffi::Str::new_str(self.alloc, &format!("A_{}", idx)));
-            let value = value.as_ref().clone();
+            let value = crate::convert::convert_typed_value(tv, strings);
             self.adata.push(hhbc::Adata { id, value });
             idx
         });

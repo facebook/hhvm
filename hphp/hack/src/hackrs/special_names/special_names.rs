@@ -6,6 +6,7 @@
 // These use the same casing as naming_special_names.ml for now.
 #![allow(non_upper_case_globals)]
 
+use hash::HashSet;
 use naming_special_names_rust as sn;
 use once_cell::sync::Lazy;
 use pos::ClassConstName;
@@ -16,7 +17,6 @@ use pos::PropName;
 use pos::Symbol;
 use pos::TypeConstName;
 use pos::TypeName;
-use pos::TypeNameSet;
 
 macro_rules! lazy {
     ($value:expr) => {
@@ -296,7 +296,7 @@ pub mod typehints {
     pub static hh_sypportdyn: Lazy<TypeName> = lazy!(sn::typehints::HH_SUPPORTDYN);
     pub static wildcard: Lazy<TypeName> = lazy!(sn::typehints::WILDCARD);
 
-    pub static reserved_typehints: Lazy<TypeNameSet> = Lazy::new(|| {
+    pub static reserved_typehints: Lazy<HashSet<TypeName>> = Lazy::new(|| {
         [
             *null,
             *void,

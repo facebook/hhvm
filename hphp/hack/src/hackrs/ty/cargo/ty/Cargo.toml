@@ -11,6 +11,7 @@ path = "../../ty.rs"
 arena_collections = { path = "../../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
+hash = { path = "../../../../utils/hash" }
 hcons = { path = "../../../../hcons" }
 im = { version = "15.1", features = ["rayon", "serde"] }
 ocamlrep = { path = "../../../../ocamlrep" }

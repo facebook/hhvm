@@ -21,12 +21,6 @@ use serde::Serialize;
 
 use crate::ToOxidized;
 
-pub type BuildSymbolHasher = hash::BuildHasher;
-pub type SymbolMap<V> = hash::HashMap<Symbol, V>;
-pub type SymbolSet = hash::HashSet<Symbol>;
-pub type SymbolIndexMap<V> = hash::IndexMap<Symbol, V>;
-pub type SymbolIndexSet = hash::IndexSet<Symbol>;
-
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct Symbol(pub StringId);
@@ -328,11 +322,6 @@ macro_rules! common_impls {
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeName(pub Symbol);
-pub type BuildTypeNameHasher = hash::BuildHasher;
-pub type TypeNameMap<V> = hash::HashMap<TypeName, V>;
-pub type TypeNameSet = hash::HashSet<TypeName>;
-pub type TypeNameIndexMap<V> = hash::IndexMap<TypeName, V>;
-pub type TypeNameIndexSet = hash::IndexSet<TypeName>;
 common_impls!(TypeName);
 
 impl From<TypeName> for ToplevelSymbolHash {
@@ -353,11 +342,6 @@ impl From<TypeName> for ToplevelCanonSymbolHash {
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct ModuleName(pub Symbol);
-pub type BuildModuleNameHasher = hash::BuildHasher;
-pub type ModuleNameMap<V> = hash::HashMap<ModuleName, V>;
-pub type ModuleNameSet = hash::HashSet<ModuleName>;
-pub type ModuleNameIndexMap<V> = hash::IndexMap<ModuleName, V>;
-pub type ModuleNameIndexSet = hash::IndexSet<ModuleName>;
 common_impls!(ModuleName);
 
 impl From<ModuleName> for ToplevelSymbolHash {
@@ -370,11 +354,6 @@ impl From<ModuleName> for ToplevelSymbolHash {
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct ConstName(pub Symbol);
-pub type BuildConstNameHasher = hash::BuildHasher;
-pub type ConstNameMap<V> = hash::HashMap<ConstName, V>;
-pub type ConstNameSet = hash::HashSet<ConstName>;
-pub type ConstNameIndexMap<V> = hash::IndexMap<ConstName, V>;
-pub type ConstNameIndexSet = hash::IndexSet<ConstName>;
 common_impls!(ConstName);
 
 impl From<ConstName> for ToplevelSymbolHash {
@@ -387,11 +366,6 @@ impl From<ConstName> for ToplevelSymbolHash {
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct FunName(pub Symbol);
-pub type BuildFunNameHasher = hash::BuildHasher;
-pub type FunNameMap<V> = hash::HashMap<FunName, V>;
-pub type FunNameSet = hash::HashSet<FunName>;
-pub type FunNameIndexMap<V> = hash::IndexMap<FunName, V>;
-pub type FunNameIndexSet = hash::IndexSet<FunName>;
 common_impls!(FunName);
 
 impl From<FunName> for ToplevelSymbolHash {
@@ -411,39 +385,19 @@ impl From<FunName> for ToplevelCanonSymbolHash {
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct ClassConstName(pub Symbol);
-pub type BuildClassConstNameHasher = hash::BuildHasher;
-pub type ClassConstNameMap<V> = hash::HashMap<ClassConstName, V>;
-pub type ClassConstNameSet = hash::HashSet<ClassConstName>;
-pub type ClassConstNameIndexMap<V> = hash::IndexMap<ClassConstName, V>;
-pub type ClassConstNameIndexSet = hash::IndexSet<ClassConstName>;
 common_impls!(ClassConstName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct TypeConstName(pub Symbol);
-pub type BuildTypeConstNameHasher = hash::BuildHasher;
-pub type TypeConstNameMap<V> = hash::HashMap<TypeConstName, V>;
-pub type TypeConstNameSet = hash::HashSet<TypeConstName>;
-pub type TypeConstNameIndexMap<V> = hash::IndexMap<TypeConstName, V>;
-pub type TypeConstNameIndexSet = hash::IndexSet<TypeConstName>;
 common_impls!(TypeConstName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct MethodName(pub Symbol);
-pub type BuildMethodNameHasher = hash::BuildHasher;
-pub type MethodNameMap<V> = hash::HashMap<MethodName, V>;
-pub type MethodNameSet = hash::HashSet<MethodName>;
-pub type MethodNameIndexMap<V> = hash::IndexMap<MethodName, V>;
-pub type MethodNameIndexSet = hash::IndexSet<MethodName>;
 common_impls!(MethodName);
 
 #[derive(Eq, PartialEq, EqModuloPos, Clone, Copy, Hash, Ord, PartialOrd)]
 #[derive(Serialize, Deserialize)]
 pub struct PropName(pub Symbol);
-pub type BuildPropNameHasher = hash::BuildHasher;
-pub type PropNameMap<V> = hash::HashMap<PropName, V>;
-pub type PropNameSet = hash::HashSet<PropName>;
-pub type PropNameIndexMap<V> = hash::IndexMap<PropName, V>;
-pub type PropNameIndexSet = hash::IndexSet<PropName>;
 common_impls!(PropName);

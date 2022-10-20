@@ -8,6 +8,8 @@ use std::sync::Arc;
 use datastore::Store;
 use depgraph_api::DepGraphWriter;
 use depgraph_api::DependencyName;
+use hash::IndexMap;
+use hash::IndexSet;
 use oxidized::global_options::GlobalOptions;
 use oxidized::naming_types::KindOfType;
 use pos::ConstName;
@@ -17,8 +19,6 @@ use pos::ModuleName;
 use pos::Positioned;
 use pos::PropName;
 use pos::TypeName;
-use pos::TypeNameIndexMap;
-use pos::TypeNameIndexSet;
 use shallow_decl_provider::ShallowDeclProvider;
 use ty::decl::ConstDecl;
 use ty::decl::FoldedClass;
@@ -179,7 +179,7 @@ impl<R: Reason> super::FoldedDeclProvider<R> for LazyFoldedDeclProvider<R> {
 impl<R: Reason> LazyFoldedDeclProvider<R> {
     fn detect_cycle(
         &self,
-        stack: &mut TypeNameIndexSet,
+        stack: &mut IndexSet<TypeName>,
         errors: &mut Vec<DeclError<R::Pos>>,
         pos_id: &Positioned<TypeName, R::Pos>,
     ) -> bool {
@@ -196,7 +196,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn decl_class_type(
         &self,
-        stack: &mut TypeNameIndexSet,
+        stack: &mut IndexSet<TypeName>,
         errors: &mut Vec<DeclError<R::Pos>>,
         ty: &Ty<R>,
     ) -> Result<Option<(TypeName, Arc<FoldedClass<R>>)>> {
@@ -265,10 +265,10 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
     // note(sf, 2022-03-02): c.f. Decl_folded_class.class_parents_decl
     fn decl_class_parents(
         &self,
-        stack: &mut TypeNameIndexSet,
+        stack: &mut IndexSet<TypeName>,
         errors: &mut Vec<DeclError<R::Pos>>,
         sc: &ShallowClass<R>,
-    ) -> Result<TypeNameIndexMap<Arc<FoldedClass<R>>>> {
+    ) -> Result<IndexMap<TypeName, Arc<FoldedClass<R>>>> {
         Self::parents_to_fold(sc)
             .chain(DeclFolder::stringish_object_parent(sc).iter())
             .map(|ty| {
@@ -282,7 +282,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn decl_class(
         &self,
-        stack: &mut TypeNameIndexSet,
+        stack: &mut IndexSet<TypeName>,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
         let mut errors = vec![];
@@ -304,7 +304,7 @@ impl<R: Reason> LazyFoldedDeclProvider<R> {
 
     fn get_folded_class_impl(
         &self,
-        stack: &mut TypeNameIndexSet,
+        stack: &mut IndexSet<TypeName>,
         name: TypeName,
     ) -> Result<Option<Arc<FoldedClass<R>>>> {
         match self.store.get(name).map_err(Error::Store)? {

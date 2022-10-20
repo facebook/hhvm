@@ -1594,6 +1594,7 @@ dependencies = [
  "datastore",
  "depgraph_api",
  "eq_modulo_pos",
+ "hash",
  "indexmap",
  "itertools 0.10.3",
  "oxidized",
@@ -1845,6 +1846,7 @@ dependencies = [
 name = "hash"
 version = "0.0.0"
 dependencies = [
+ "dashmap",
  "indexmap",
  "rustc-hash",
 ]
@@ -3195,7 +3197,6 @@ dependencies = [
  "bstr 1.0.1",
  "bumpalo",
  "eq_modulo_pos",
- "hash",
  "hh24_types",
  "im",
  "indexmap",
@@ -4066,6 +4067,7 @@ dependencies = [
 name = "special_names"
 version = "0.0.0"
 dependencies = [
+ "hash",
  "naming_special_names_rust",
  "once_cell",
  "pos",
@@ -4403,6 +4405,7 @@ dependencies = [
  "arena_collections",
  "bumpalo",
  "eq_modulo_pos",
+ "hash",
  "hcons",
  "im",
  "ocamlrep",

@@ -47,7 +47,6 @@
         rec {
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
-            isDefaultStdlib = true;
           };
           packages.hhvm_ccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
             RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";

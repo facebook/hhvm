@@ -27,7 +27,7 @@
 , icu
 # TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx to
 # detect C++ runtime once it is available
-, isDefaultStdlib
+, isDefaultStdlib ? true
 , imagemagick6
 , jemalloc
 , lastModifiedDate

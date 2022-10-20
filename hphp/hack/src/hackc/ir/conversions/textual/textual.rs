@@ -198,7 +198,7 @@ impl Expr {
         Expr::Const(Const::HackInt(i))
     }
 
-    pub(crate) fn hack_string<'a>(s: impl Into<Vec<u8>>) -> Expr {
+    pub(crate) fn hack_string(s: impl Into<Vec<u8>>) -> Expr {
         Expr::Const(Const::HackString(s.into()))
     }
 

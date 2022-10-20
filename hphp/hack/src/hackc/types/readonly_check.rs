@@ -147,7 +147,7 @@ fn ro_kind_to_rty(ro: Option<oxidized::ast_defs::ReadonlyKind>) -> Rty {
 }
 
 fn rty_expr(context: &mut Context, expr: &Expr) -> Rty {
-    let aast::Expr(_, _, exp) = &*expr;
+    let aast::Expr(_, _, exp) = expr;
     use aast::Expr_::*;
     match exp {
         ReadonlyExpr(_) => Rty::Readonly,

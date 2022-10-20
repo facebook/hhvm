@@ -102,8 +102,27 @@ let
     date = "2022-08-11";
     channel = "nightly";
   };
+  inheritedEnvironmentVariables =
+    lib.attrsets.filterAttrs
+      (name: value: value != "")
+      (
+        lib.attrsets.genAttrs
+          [
+            "CMAKE_C_COMPILER_LAUNCHER"
+            "CMAKE_CXX_COMPILER_LAUNCHER"
+            "RUSTC_WRAPPER"
+            "AWS_ACCESS_KEY_ID"
+            "AWS_SECRET_ACCESS_KEY"
+            "AWS_SESSION_TOKEN"
+            "SCCACHE_BUCKET"
+            "SCCACHE_ENDPOINT"
+            "SCCACHE_REGION"
+            "SCCACHE_S3_NO_CREDENTIALS"
+          ]
+          builtins.getEnv
+      );
 in
-stdenv.mkDerivation rec {
+stdenv.mkDerivation (inheritedEnvironmentVariables // rec {
   pname = "hhvm";
   version = builtins.foldl' lib.trivial.id makeVersion versionParts;
   src = ./.;
@@ -241,6 +260,11 @@ stdenv.mkDerivation rec {
   preBuild =
     ''
       set -e
+
+      env
+
+      false
+
       make \
         -f third-party/proxygen/CMakeFiles/bundled_proxygen.dir/build.make \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch
@@ -282,3 +306,4 @@ stdenv.mkDerivation rec {
     }];
   };
 }
+)

@@ -8,5 +8,5 @@ edition = "2021"
 path = "../lib.rs"
 
 [dependencies]
-bstr = { version = "0.2", features = ["serde1"] }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 write_bytes-macro = { path = "../write_bytes-macro" }

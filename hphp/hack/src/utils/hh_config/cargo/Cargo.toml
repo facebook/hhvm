@@ -8,7 +8,7 @@ edition = "2021"
 path = "../hh_config.rs"
 
 [dependencies]
-bstr = { version = "0.2", features = ["serde1"] }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 oxidized = { path = "../../../oxidized" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }
 serde_json = { version = "1.0.79", features = ["float_roundtrip", "unbounded_depth"] }

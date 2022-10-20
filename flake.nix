@@ -66,18 +66,21 @@
               name = "toolchain.cmake";
               text = ''
                 ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
-                set(CMAKE_C_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE STRING "C compiler launcher" FORCE)
-                set(CMAKE_CXX_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE STRING "C++ compiler launcher" FORCE)
+                set(CMAKE_C_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE FILEPATH "C compiler launcher" FORCE)
+                set(CMAKE_CXX_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE FILEPATH "C++ compiler launcher" FORCE)
               '';
             };
           });
           packages.hhvm_clang = packages.hhvm.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
           };
+          packages.hhvm_sccache_clang = packages.hhvm_sccache.override {
+            stdenv = pkgs.llvmPackages_14.stdenv;
+          };
           packages.default = packages.hhvm;
 
           devShells.clang = devShellForPackage packages.hhvm_clang;
-          devShells.default = devShellForPackage packages.hhvm_sccache;
+          devShells.default = devShellForPackage packages.hhvm;
 
           ${if pkgs.hostPlatform.isLinux then "bundlers" else null} =
             let

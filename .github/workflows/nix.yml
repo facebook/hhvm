@@ -32,16 +32,10 @@ jobs:
       matrix:
         package:
         - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_sccache' }}
-        - hhvm_clang
+        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm_clang' || 'hhvm_sccache_clang' }}
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
     runs-on: ${{matrix.os}}
-    env:
-      SCCACHE_S3_USE_SSL: true
-      SCCACHE_BUCKET: hhvm-sccache
-      SCCACHE_ENDPOINT: hhvm-sccache.s3-accelerate.amazonaws.com:443
-      SCCACHE_ERROR_LOG: /dev/stderr
-      SCCACHE_LOG: info
     steps:
     - uses: actions/checkout@v2.4.0
     - uses: cachix/install-nix-action@v17
@@ -60,8 +54,19 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
-    - run: nix build --print-build-logs ${{matrix.package == 'hhvm_sccache' && '--impure' || ''}} "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+    - name: Start sccache server
+      if: matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang'
+      run: |
+        # In pull requests triggered jobs, set SCCACHE_S3_NO_CREDENTIALS=1 to use read-only compilation cache, where the github token does not permit to assume the AWS role
+        ${{ steps.configure-aws-credentials.outcome != 'success' && 'SCCACHE_S3_NO_CREDENTIALS="1"' || '' }} \
+        nix shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --start-server
+      env:
+        SCCACHE_BUCKET: hhvm-sccache
+        SCCACHE_ENDPOINT: https://hhvm-sccache.s3-accelerate.amazonaws.com
+        SCCACHE_REGION: us-west-2
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+    - if: matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang'
+      run: nix shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --stop-server
     - run: hhvm --version
     - name: Build the deb package
       if: runner.os == 'Linux'

@@ -214,8 +214,8 @@ stdenv.mkDerivation rec {
       "-Wno-error=unused-command-line-argument"
     ];
 
-  CMAKE_TOOLCHAIN_FILE = writeTextFile {
-    name = "toolchain.cmake";
+  CMAKE_INIT_CACHE = writeTextFile {
+    name = "init-cache.cmake";
     text = ''
       set(ENABLE_SYSTEM_LOCALE_ARCHIVE ON CACHE BOOL "Use system locale archive as the default LOCALE_ARCHIVE for nix patched glibc" FORCE)
       set(CAN_USE_SYSTEM_ZSTD ON CACHE BOOL "Use system zstd" FORCE)
@@ -231,6 +231,8 @@ stdenv.mkDerivation rec {
       }
     '';
   };
+
+  cmakeFlags = [ "-C" CMAKE_INIT_CACHE ];
 
   prePatch = ''
     patchShebangs .

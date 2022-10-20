@@ -17,6 +17,10 @@
         "path": "nix-shell"
       }
     },
+    "cmake.configureArgs": [
+      "-C",
+      "${env:CMAKE_INIT_CACHE}"
+    ],
     "cmake.buildDirectory": "${workspaceFolder}/_build"
   },
   "extensions": {

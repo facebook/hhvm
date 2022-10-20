@@ -50,7 +50,7 @@ jobs:
     - name: Build sccache
       run: |
         set -ex
-        SCCACHE_INSTALL_PATH="$(nix eval --raw "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086")"
+        SCCACHE_INSTALL_PATH="$(nix build --print-out-paths --no-link "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086")"
         echo "CMAKE_C_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
         echo "CMAKE_CXX_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
         echo "RUSTC_WRAPPER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"

@@ -38,7 +38,7 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
     - uses: actions/checkout@v2.4.0
-    - uses: cachix/install-nix-action@v17
+    - uses: cachix/install-nix-action@v15
       with:
         extra_nix_config: |
           extra-access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}

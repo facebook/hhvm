@@ -536,7 +536,7 @@ module Parsing = Error_codes.Parsing
 module Naming = Error_codes.Naming
 module NastCheck = Error_codes.NastCheck
 module Typing = Error_codes.Typing
-module GlobalWriteCheck = Error_codes.GlobalWriteCheck
+module GlobalAccessCheck = Error_codes.GlobalAccessCheck
 
 (*****************************************************************************)
 (* Types *)
@@ -1101,37 +1101,8 @@ let method_is_not_dynamically_callable
     (parent_class_reason @ attribute_reason @ nested_error_reason)
 
 (* Raise different types of error for accessing global variables. *)
-let global_access_error pos fun_name data_type global_set error_code =
-  let global_vars_str =
-    SSet.fold global_set ~init:"" ~f:(fun s cur_str ->
-        cur_str
-        ^ (if String.length cur_str > 0 then
-            ","
-          else
-            "")
-        ^ s)
-  in
-  let error_message =
-    match error_code with
-    | GlobalWriteCheck.StaticVariableDirectWrite ->
-      "A static variable is directly written."
-    | GlobalWriteCheck.GlobalVariableWrite -> "A global variable is written."
-    | GlobalWriteCheck.GlobalVariableInFunctionCall ->
-      "A global variable is passed to (or returned from) a function call."
-    | GlobalWriteCheck.GlobalVariableDirectRead ->
-      "A global variable is directly read."
-  in
-  add
-    (GlobalWriteCheck.err_code error_code)
-    pos
-    ("["
-    ^ fun_name
-    ^ "]{"
-    ^ global_vars_str
-    ^ "}("
-    ^ data_type
-    ^ ") "
-    ^ error_message)
+let global_access_error error_code pos message =
+  add (GlobalAccessCheck.err_code error_code) pos message
 
 (*****************************************************************************)
 (* Printing *)

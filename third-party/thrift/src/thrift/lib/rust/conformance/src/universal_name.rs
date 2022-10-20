@@ -38,6 +38,11 @@ pub fn get_universal_hash_prefix(universal_hash: &[u8], hash_bytes: i8) -> Vec<u
         .to_vec()
 }
 
+pub fn get_universal_hash_prefix_sha_256(uri: &str, hash_bytes: i8) -> Result<Vec<u8>> {
+    let hash = get_universal_hash(UniversalHashAlgorithm::Sha2_256, uri)?;
+    Ok(get_universal_hash_prefix(&hash, hash_bytes))
+}
+
 pub fn ensure_registered(
     universal_hash_registry: &HashSet<Vec<u8>>,
     hash_prefix: &[u8],

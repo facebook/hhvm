@@ -116,7 +116,10 @@ Unit* lookupSyslibUnit(StringData* path, const Native::FuncTable&);
   R(PHP7_Builtins)                              \
   R(PHP7_Substr)                                \
   R(EvalEnableDecl)                             \
-  /**/
+  /* This is used by HackC to turn on / off     \
+   * magic decl driven bytecode functions like  \
+   * `HH\embed_type_decl`  */                   \
+  R(EnableIntrinsicsExtension)                  \
 
 std::string mangleUnitSha1(const folly::StringPiece fileSha1,
                            const folly::StringPiece fileName,

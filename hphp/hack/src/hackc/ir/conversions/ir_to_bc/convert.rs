@@ -5,7 +5,6 @@
 
 use ffi::Maybe;
 use ffi::Slice;
-use ffi::Str;
 use hhbc::Fatal;
 
 use crate::strings::StringCache;
@@ -54,6 +53,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
             attributes: convert_attributes(alloc, module.attributes),
             name: strings.lookup_class_name(module.name),
             span: module.src_loc.to_span(),
+            doc_comment: module.doc_comment.into(),
         }),
     );
     unit.module_use = ir_unit.module_use.into();
@@ -114,7 +114,7 @@ impl<'a> UnitBuilder<'a> {
 
 fn convert_adata<'a>(
     _alloc: &'a bumpalo::Bump,
-    name: Str<'a>,
+    name: hhbc::AdataId<'a>,
     value: ir::TypedValue<'a>,
 ) -> hhbc::Adata<'a> {
     hhbc::Adata { id: name, value }

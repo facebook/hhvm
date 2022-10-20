@@ -2,7 +2,7 @@
 
 function foo()[]: int { return 4; }
 
-function default_param(int $v = readonly(foo()))[]: void {
+function default_param(readonly int $v = readonly(foo()))[]: void {
   $v = 5;
 }
 

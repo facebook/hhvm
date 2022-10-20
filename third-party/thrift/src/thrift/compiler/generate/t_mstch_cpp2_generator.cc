@@ -208,9 +208,8 @@ class cpp2_generator_context {
   cpp2_generator_context& operator=(cpp2_generator_context&&) = default;
 
   bool is_orderable(const t_type& type) {
-    std::unordered_set<const t_type*> seen;
     auto& memo = is_orderable_memo_;
-    return cpp2::is_orderable(seen, memo, type);
+    return cpp2::is_orderable(memo, type);
   }
 
   gen::cpp::type_resolver& resolver() { return resolver_; }
@@ -311,6 +310,8 @@ class cpp_mstch_program : public mstch_program {
          {"program:fatal_services", &cpp_mstch_program::fatal_services},
          {"program:fatal_identifiers", &cpp_mstch_program::fatal_identifiers},
          {"program:fatal_data_member", &cpp_mstch_program::fatal_data_member},
+         {"program:split_structs", &cpp_mstch_program::split_structs},
+         {"program:split_enums", &cpp_mstch_program::split_enums},
          {"program:structs_and_typedefs",
           &cpp_mstch_program::structs_and_typedefs}});
     register_has_option("program:tablebased?", "tablebased");
@@ -318,8 +319,6 @@ class cpp_mstch_program : public mstch_program {
     register_has_option(
         "program:enforce_required?", "deprecated_enforce_required");
     register_has_option("program:interning?", "interning");
-
-    init_objects_and_enums();
   }
   std::string get_program_namespace(const t_program* program) override {
     return t_mstch_cpp2_generator::get_cpp2_namespace(program);
@@ -602,39 +601,38 @@ class cpp_mstch_program : public mstch_program {
     return ret;
   }
 
+  mstch::node split_structs() {
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        split_id_ ? *split_structs_ : program_->objects(),
+        *context_.struct_factory,
+        context_.struct_cache,
+        id);
+  }
+
+  mstch::node split_enums() {
+    if (split_id_) {
+      if (!split_enums_) {
+        int split_count = std::max(get_split_count(context_.options), 1);
+        const size_t cnt = program_->enums().size();
+        split_enums_.emplace();
+        for (size_t i = *split_id_; i < cnt; i += split_count) {
+          split_enums_->push_back(program_->enums()[i]);
+        }
+      }
+    }
+    std::string id = program_->name() + get_program_namespace(program_);
+    return make_mstch_array_cached(
+        split_id_ ? *split_enums_ : program_->enums(),
+        *context_.enum_factory,
+        context_.enum_cache,
+        id);
+  }
+
  private:
-  std::vector<t_struct*> objects_;
-  std::vector<t_enum*> enums_;
   const boost::optional<int32_t> split_id_;
   const boost::optional<std::vector<t_struct*>> split_structs_;
-
-  const std::vector<t_enum*>& get_program_enums() override { return enums_; }
-
-  const std::vector<t_struct*>& get_program_objects() override {
-    return objects_;
-  }
-
-  void init_objects_and_enums() {
-    const auto& prog_objects = program_->objects();
-    const auto& prog_enums = program_->enums();
-
-    if (!split_id_) {
-      auto edges = cpp2::gen_struct_dependency_graph(program_, prog_objects);
-      objects_ = cpp2::topological_sort<t_struct*>(
-          prog_objects.begin(), prog_objects.end(), edges);
-      enums_ = prog_enums;
-      return;
-    }
-
-    int split_count = std::max(get_split_count(context_.options), 1);
-
-    objects_ = *split_structs_;
-
-    const size_t cnt = prog_enums.size();
-    for (size_t i = *split_id_; i < cnt; i += split_count) {
-      enums_.push_back(prog_enums[i]);
-    }
-  }
+  boost::optional<std::vector<t_enum*>> split_enums_;
 };
 
 class cpp_mstch_service : public mstch_service {
@@ -1437,9 +1435,10 @@ class cpp_mstch_struct : public mstch_struct {
 
  protected:
   // Computes the alignment of field on the target platform.
-  // Returns 0 if cannot compute the alignment.
+  // Returns max alignment if cannot compute the alignment.
   static size_t compute_alignment(
       const t_field* field, std::unordered_map<const t_field*, size_t>& memo) {
+    const size_t kMaxAlign = alignof(std::max_align_t);
     auto find = memo.emplace(field, 0);
     auto& ret = find.first->second;
     if (!find.second) {
@@ -1449,7 +1448,7 @@ class cpp_mstch_struct : public mstch_struct {
       return ret = 8;
     }
     if (cpp2::is_custom_type(*field)) {
-      return ret = 0;
+      return ret = kMaxAlign;
     }
 
     const t_type* type = field->get_type();
@@ -1475,16 +1474,11 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = 8;
       case t_type::type::t_struct: {
         size_t align = 1;
-        const size_t kMaxAlign = 8;
         const t_struct* strct =
             dynamic_cast<const t_struct*>(type->get_true_type());
         assert(strct);
         for (const auto& field : strct->fields()) {
           size_t field_align = compute_alignment(&field, memo);
-          if (field_align == 0) {
-            // Unknown alignment, bail out.
-            return ret = 0;
-          }
           align = std::max(align, field_align);
           if (align == kMaxAlign) {
             // No need to continue because the struct already has the maximum
@@ -1498,7 +1492,7 @@ class cpp_mstch_struct : public mstch_struct {
         return ret = align;
       }
       default:
-        return ret = 0;
+        return ret = kMaxAlign;
     }
   }
 
@@ -1523,7 +1517,7 @@ class cpp_mstch_struct : public mstch_struct {
   }
 
   // Returns the struct members reordered to minimize padding if the
-  // cpp.minimize_padding annotation is specified.
+  // @cpp.MinimizePadding annotation is specified.
   const std::vector<const t_field*>& get_members_in_layout_order() {
     if (struct_->fields().size() == fields_in_layout_order_.size()) {
       // Already reordered.
@@ -1544,11 +1538,8 @@ class cpp_mstch_struct : public mstch_struct {
     field_alignments.reserve(struct_->fields().size());
     std::unordered_map<const t_field*, size_t> memo;
     for (const auto& field : struct_->fields()) {
-      auto align = compute_alignment(&field, memo);
-      if (align == 0) {
-        // Unknown alignment, don't reorder anything.
-        return fields_in_layout_order_ = struct_->fields().copy();
-      }
+      size_t align = compute_alignment(&field, memo);
+      assert(align);
       field_alignments.push_back(FieldAlign{&field, align});
     }
 
@@ -1627,6 +1618,7 @@ class cpp_mstch_field : public mstch_field {
             {"field:cpp_ref_shared?", &cpp_mstch_field::cpp_ref_shared},
             {"field:cpp_ref_shared_const?",
              &cpp_mstch_field::cpp_ref_shared_const},
+            {"field:cpp_ref_not_boxed?", &cpp_mstch_field::cpp_ref_not_boxed},
             {"field:cpp_adapter", &cpp_mstch_field::cpp_adapter},
             {"field:cpp_first_adapter", &cpp_mstch_field::cpp_first_adapter},
             {"field:cpp_exactly_one_adapter?",
@@ -1787,6 +1779,11 @@ class cpp_mstch_field : public mstch_field {
   mstch::node cpp_ref_shared_const() {
     return gen::cpp::find_ref_type(*field_) ==
         gen::cpp::reference_type::shared_const;
+  }
+  mstch::node cpp_ref_not_boxed() {
+    auto ref_type = gen::cpp::find_ref_type(*field_);
+    return ref_type != gen::cpp::reference_type::none &&
+        ref_type != gen::cpp::reference_type::boxed;
   }
   mstch::node cpp_first_adapter() {
     if (const std::string* adapter =

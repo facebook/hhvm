@@ -43,7 +43,7 @@ TEST(warmUpRouteTest, warmUp) {
   };
   auto route_handles = get_route_handles(test_handles);
 
-  TestFiberManager fm;
+  TestFiberManager<TestRouterInfo> fm;
 
   fm.run([&]() {
     TestRouteHandle<WarmUpRoute<TestRouteHandleIf>> rh(

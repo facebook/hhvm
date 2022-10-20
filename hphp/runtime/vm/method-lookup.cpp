@@ -229,7 +229,7 @@ lookupImmutableObjMethod(const Class* cls,
     nullptr
   };
   if (!cls) return notFound;
-  exactClass |= cls->attrs() & AttrNoOverride;
+  exactClass |= cls->attrs() & AttrNoOverrideRegular;
 
   if (isInterface(cls)) {
     if (auto const func = lookupIfaceMethod(cls, name)) {

@@ -25,7 +25,6 @@
 #include <folly/io/async/EventBaseManager.h>
 #include <proxygen/lib/http/HTTPHeaders.h>
 #include <proxygen/lib/http/HTTPMethod.h>
-#include <proxygen/lib/utils/Base64.h>
 #include <proxygen/lib/utils/Logging.h>
 #include <thrift/lib/cpp/TApplicationException.h>
 #include <thrift/lib/cpp/protocol/TProtocolException.h>

@@ -6199,6 +6199,11 @@ internal-slot@^1.0.3:
     has "^1.0.3"
     side-channel "^1.0.4"
 
+internaldocs-fb-helpers@^1.7.1:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/internaldocs-fb-helpers/-/internaldocs-fb-helpers-1.7.1.tgz#ab337a74fc2701927305e402e423000e93fa9f66"
+  integrity sha512-QKxEzY2lz/uATPBjCNTsP38jtC2q0IIxPWzFWhPL+lsitn8d5a5PGwKCwVYAK4ddkvLmFvYyehCNT7h/jXvwuA==
+
 "internmap@1 - 2":
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/internmap/-/internmap-2.0.3.tgz#6685f23755e43c524e251d29cbc97248e3061009"

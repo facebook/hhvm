@@ -86,6 +86,13 @@ macro_rules! impl_add_suffix {
     };
 }
 
+/// Conventionally this is "A_" followed by an integer
+#[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
+#[repr(C)]
+pub struct AdataId<'arena>(Str<'arena>);
+
+impl_id!(AdataId);
+
 #[derive(Copy, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, Serialize)]
 #[repr(C)]
 pub struct ClassName<'arena>(Str<'arena>);

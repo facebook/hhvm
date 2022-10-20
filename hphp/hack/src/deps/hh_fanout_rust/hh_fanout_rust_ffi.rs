@@ -10,7 +10,7 @@ use ocamlrep_custom::Custom;
 use rpds::HashTrieSet;
 
 #[cfg(fbcode_build)]
-pub struct HhFanoutRustFfi(hh_fanout_lib::HhFanoutInproc);
+pub struct HhFanoutRustFfi(hh_fanout_lib::HhFanoutImpl);
 #[cfg(not(fbcode_build))]
 pub struct HhFanoutRustFfi;
 

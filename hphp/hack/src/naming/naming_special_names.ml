@@ -349,11 +349,11 @@ module UserAttributes = struct
 
   let uaNoFlatten = "__NoFlatten"
 
-  (* <<__SafeForGlobalWriteCheck>> marks global variables as safe from mutations.
-     This attribute merely ensures that the global_write_check does NOT raise
+  (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
+     This attribute merely ensures that the global_access_check does NOT raise
      errors/warnings from writing to the annotated global variable, and it
      has NO runtime/semantic implication. *)
-  let uaSafeGlobalVariable = "__SafeForGlobalWriteCheck"
+  let uaSafeGlobalVariable = "__SafeForGlobalAccessCheck"
 
   type attr_info = {
     contexts: string list;
@@ -698,7 +698,7 @@ module UserAttributes = struct
               autocomplete = false;
               doc =
                 "Marks this global variable as safe from mutation."
-                ^ " This ensures the global_write_check does NOT raise errors/warnings from writing to this global variable.";
+                ^ " This ensures the global_access_check does NOT raise errors/warnings from writing to this global variable.";
             } );
         ])
 

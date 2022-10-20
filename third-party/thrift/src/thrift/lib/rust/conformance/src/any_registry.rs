@@ -30,8 +30,10 @@ use protocol::StandardProtocol;
 
 use crate::universal_name::ensure_registered;
 use crate::universal_name::get_universal_hash;
-use crate::universal_name::get_universal_hash_prefix;
+use crate::universal_name::get_universal_hash_prefix_sha_256;
 use crate::universal_name::UniversalHashAlgorithm;
+
+const UNIVERSAL_HASH_PREFIX_SHA_256_LEN: i8 = 16;
 
 pub struct AnyRegistry {
     uri_to_typeid: HashMap<&'static str, TypeId>,
@@ -73,6 +75,19 @@ impl AnyRegistry {
         Ok(true)
     }
 
+    pub fn has_type<T: 'static + GetUri>(&self, obj: &any::Any) -> Result<bool> {
+        let type_uri = T::uri();
+        let type_hash_prefix_sha2_256 =
+            get_universal_hash_prefix_sha_256(type_uri, UNIVERSAL_HASH_PREFIX_SHA_256_LEN)?;
+        if let Some(obj_hash_prefix_sha2_256) = &obj.typeHashPrefixSha2_256 {
+            Ok(type_hash_prefix_sha2_256 == *obj_hash_prefix_sha2_256)
+        } else if let Some(obj_uri) = obj.r#type.as_ref() {
+            Ok(type_uri == obj_uri)
+        } else {
+            bail!("No type information found");
+        }
+    }
+
     pub fn store<T: 'static + SerializeRef>(
         &mut self,
         obj: &T,
@@ -83,8 +98,8 @@ impl AnyRegistry {
             .typeid_to_uri
             .get(&type_id)
             .ok_or_else(|| anyhow!("Type {:?} not registered", type_id))?;
-        let hash = get_universal_hash(UniversalHashAlgorithm::Sha2_256, uri)?;
-        let hash_prefix = get_universal_hash_prefix(&hash, 16);
+        let hash_prefix =
+            get_universal_hash_prefix_sha_256(uri, UNIVERSAL_HASH_PREFIX_SHA_256_LEN)?;
         Ok(any::Any {
             r#type: Some(uri.to_string()),
             typeHashPrefixSha2_256: Some(hash_prefix),

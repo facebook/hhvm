@@ -4924,7 +4924,6 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     auto waitHandle = c_AsyncFunctionWaitHandle::Create(
       fp, func->numSlotsInFrame(), nullptr, suspendOffset, child);
 
-    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
     EventHook::FunctionSuspendAwaitEF(
@@ -4951,8 +4950,6 @@ OPTBLD_INLINE void asyncSuspendE(PC origpc, PC& pc) {
     // Create new AsyncGeneratorWaitHandle.
     auto waitHandle = c_AsyncGeneratorWaitHandle::Create(
       fp, nullptr, suspendOffset, child);
-
-    waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
 
     // Call the suspend hook. It will decref the newly allocated waitHandle
     // if it throws.
@@ -4991,12 +4988,10 @@ OPTBLD_INLINE void asyncSuspendR(PC origpc, PC& pc) {
 
   // Await child and suspend the async function/generator. May throw.
   if (!func->isGenerator()) {  // Async function.
-    frame_afwh(fp)->m_implicitContext = *ImplicitContext::activeCtx;
     frame_afwh(fp)->await(suspendOffset, std::move(child));
   } else {  // Async generator.
     auto const gen = frame_async_generator(fp);
     gen->resumable()->setResumeAddr(nullptr, suspendOffset);
-    gen->getWaitHandle()->m_implicitContext = *ImplicitContext::activeCtx;
     gen->getWaitHandle()->await(std::move(child));
   }
 
@@ -5094,22 +5089,28 @@ OPTBLD_INLINE void iopWHResult() {
 }
 
 OPTBLD_INLINE void iopSetImplicitContextByValue() {
-  auto const tv = vmStack().topC();
+  auto const tv = *vmStack().topC();
   auto const obj = [&]() -> ObjectData* {
     if (tvIsNull(tv)) return nullptr;
     if (UNLIKELY(!tvIsObject(tv))) {
       SystemLib::throwInvalidArgumentExceptionObject(
         "Invalid input to SetImplicitContextByValue");
     }
-    return tv->m_data.pobj;
+    return tv.m_data.pobj;
   }();
-  vmStack().discard(); // ref-count will be transferred
-  auto result = ImplicitContext::setByValue(Object::attach(obj));
-  if (result.isNull()) {
+  auto const prev = *ImplicitContext::activeCtx;
+  *ImplicitContext::activeCtx = obj;
+  vmStack().discard();
+
+  if (!prev) {
     vmStack().pushNull();
   } else {
-    vmStack().pushObjectNoRc(result.detach());
+    vmStack().pushObject(prev);
   }
+
+  // Decref after discarding so that if we are pushing the same object back,
+  // avoid refcount going to zero
+  tvDecRefGen(tv);
 }
 
 OPTBLD_INLINE void iopVerifyImplicitContextState() {
@@ -5302,10 +5303,6 @@ void recordCodeCoverage(PC /*pc*/) {
   auto const func = vmfp()->func();
   Unit* unit = func->unit();
   assertx(unit != nullptr);
-  if (unit == SystemLib::s_hhas_unit) {
-    return;
-  }
-
   if (!RO::RepoAuthoritative && RO::EvalEnablePerFileCoverage) {
     if (unit->isCoverageEnabled()) {
       unit->recordCoverage(func->getLineNumber(pcOff()));

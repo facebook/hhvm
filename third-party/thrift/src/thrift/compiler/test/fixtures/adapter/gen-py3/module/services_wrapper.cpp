@@ -67,6 +67,74 @@ folly::SemiFuture<folly::Unit> ServiceWrapper::semifuture_onStopRequested() {
   );
   return std::move(future);
 }
+
+
+AdapterServiceWrapper::AdapterServiceWrapper(PyObject *obj, folly::Executor* exc)
+  : if_object(obj), executor(exc)
+  {
+    import_facebook__thrift__test__module__services();
+  }
+
+
+void AdapterServiceWrapper::async_tm_count(
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::CountingStruct>>> callback) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::CountingStruct>>();
+        call_cy_AdapterService_count(
+            this->if_object,
+            ctx,
+            std::move(promise)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::CountingStruct>>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+void AdapterServiceWrapper::async_tm_adaptedTypes(
+  std::unique_ptr<apache::thrift::HandlerCallback<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>> callback
+    , std::unique_ptr<::facebook::thrift::test::HeapAllocated> arg
+) {
+  auto ctx = callback->getRequestContext();
+  folly::via(
+    this->executor,
+    [this, ctx,
+     callback = std::move(callback),
+arg = std::move(arg)    ]() mutable {
+        auto [promise, future] = folly::makePromiseContract<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>();
+        call_cy_AdapterService_adaptedTypes(
+            this->if_object,
+            ctx,
+            std::move(promise),
+            std::move(arg)        );
+        std::move(future).via(this->executor).thenTry([callback = std::move(callback)](folly::Try<std::unique_ptr<::facebook::thrift::test::HeapAllocated>>&& t) {
+          (void)t;
+          callback->complete(std::move(t));
+        });
+    });
+}
+std::shared_ptr<apache::thrift::ServerInterface> AdapterServiceInterface(PyObject *if_object, folly::Executor *exc) {
+  return std::make_shared<AdapterServiceWrapper>(if_object, exc);
+}
+folly::SemiFuture<folly::Unit> AdapterServiceWrapper::semifuture_onStartServing() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_AdapterService_onStartServing(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
+folly::SemiFuture<folly::Unit> AdapterServiceWrapper::semifuture_onStopRequested() {
+  auto [promise, future] = folly::makePromiseContract<folly::Unit>();
+  call_cy_AdapterService_onStopRequested(
+      this->if_object,
+      std::move(promise)
+  );
+  return std::move(future);
+}
 } // namespace facebook
 } // namespace thrift
 } // namespace test

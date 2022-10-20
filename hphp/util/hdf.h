@@ -22,14 +22,9 @@
 #include <vector>
 #include <unordered_map>
 
-#include <boost/container/flat_set.hpp>
-
 #include "hphp/neo/neo_hdf.h"
 
 #include "hphp/util/exception.h"
-#include "hphp/util/functional.h"
-#include "hphp/util/hash-map.h"
-#include "hphp/util/hash-set.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,15 +140,8 @@ struct Hdf {
   void configGet(std::vector<uint32_t> &values) const;
   void configGet(std::vector<std::string> &values) const;
   void configGet(std::set<std::string> &values) const;
-  void configGet(std::set<std::string, stdltistr> &values) const;
-  void configGet(boost::container::flat_set<std::string> &values) const;
   void configGet(std::unordered_map<std::string, int> &values) const;
   void configGet(std::map<std::string, std::string> &values) const;
-  void configGet(std::map<std::string, std::string, stdltistr> &values) const;
-  void configGet(hphp_string_imap<std::string> &values) const;
-  void configGet(hphp_fast_string_map<std::string> &values) const;
-  void configGet(hphp_fast_string_imap<std::string> &values) const;
-  void configGet(hphp_fast_string_set& values) const;
 
   /**
    * Helper function to convert a config string value to bool.

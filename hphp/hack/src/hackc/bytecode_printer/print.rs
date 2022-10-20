@@ -616,6 +616,7 @@ fn print_module_def<'arena>(
     print_span(w, &module_def.span)?;
     w.write_all(b" {")?;
     newline(w)?;
+    print_doc_comment(ctx, w, module_def.doc_comment.as_ref())?;
     w.write_all(b"}")?;
     newline(w)
 }
@@ -1013,7 +1014,7 @@ pub(crate) fn print_label(
     dv_labels: &HashSet<Label>,
 ) -> Result<()> {
     let prefix = if dv_labels.contains(label) { "DV" } else { "L" };
-    write!(w, "{}{}", prefix, label)
+    write!(w, "{}{}", prefix, label.0)
 }
 
 pub(crate) fn print_int<T: std::fmt::Display>(w: &mut dyn Write, i: T) -> Result<()> {

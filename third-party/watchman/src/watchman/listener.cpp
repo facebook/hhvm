@@ -550,8 +550,6 @@ bool w_start_listener() {
     }
   }
 
-  w_state_shutdown();
-
   return true;
 }
 

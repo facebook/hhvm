@@ -75,6 +75,13 @@ where
     K: Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        if self.cache.contains_key(&key) {
+            return Ok(true);
+        }
+        Ok(self.store.contains_key(&key))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         if let val @ Some(..) = self.cache.get(&key) {
             return Ok(val);
@@ -111,8 +118,12 @@ where
 
     fn remove_batch(&self, keys: &mut dyn Iterator<Item = K>) -> Result<()> {
         for key in keys {
-            self.store.remove(&key);
-            self.cache.invalidate(&key);
+            if self.get(key)?.is_some() {
+                self.store.remove(&key);
+                self.cache.invalidate(&key);
+            } else {
+                anyhow::bail!("remove_batch: Trying to remove a non-existent value");
+            }
         }
         Ok(())
     }

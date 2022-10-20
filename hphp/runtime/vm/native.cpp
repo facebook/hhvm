@@ -113,12 +113,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     regs.GP_regs[regs.GP_count++] = val(tv).num;
     regs.GP_regs[regs.GP_count++] = dataType;
   } else {
-#if defined(__powerpc64__)
-    // We don't have room to spill two 64-bit values in PowerPC. If it becomes
-    // an issue, we can always up kMaxBuiltinArgs later. (We have room to pass
-    // 15 TypedValue arguments on PowerPC already, which should be plenty.)
-    always_assert(false);
-#else
     assertx(regs.spilled_count + 1 < kMaxBuiltinArgs - kNumGPRegs);
     regs.spilled_args[regs.spilled_count++] = val(tv).num;
     regs.spilled_args[regs.spilled_count++] = dataType;
@@ -127,7 +121,6 @@ void pushTypedValue(Registers& regs, TypedValue tv) {
     #ifdef __aarch64__
       regs.GP_count = kNumGPRegs;
     #endif
-#endif
   }
 }
 

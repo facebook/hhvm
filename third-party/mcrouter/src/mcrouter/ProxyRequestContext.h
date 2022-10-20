@@ -63,6 +63,10 @@ class ProxyRequestContext {
     return recording_;
   }
 
+  bool recordingBucketData() const noexcept {
+    return recording_ && recordingState_->bucketizationCallback;
+  }
+
   void recordDestination(const PoolContext& poolContext, const AccessPoint& ap)
       const {
     if (recording_ && recordingState_->clientCallback) {

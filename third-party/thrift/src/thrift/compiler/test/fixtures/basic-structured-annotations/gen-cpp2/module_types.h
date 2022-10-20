@@ -18,10 +18,10 @@ namespace ident {
 struct count;
 struct name;
 struct name;
-struct count;
 struct name;
 struct recurse;
 struct forward;
+struct count;
 struct name;
 struct nest;
 struct annotated_field;
@@ -45,10 +45,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(name);
 #define APACHE_THRIFT_ACCESSOR_name
 APACHE_THRIFT_DEFINE_ACCESSOR(name);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_count
-#define APACHE_THRIFT_ACCESSOR_count
-APACHE_THRIFT_DEFINE_ACCESSOR(count);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_name
 #define APACHE_THRIFT_ACCESSOR_name
 APACHE_THRIFT_DEFINE_ACCESSOR(name);
@@ -60,6 +56,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(recurse);
 #ifndef APACHE_THRIFT_ACCESSOR_forward
 #define APACHE_THRIFT_ACCESSOR_forward
 APACHE_THRIFT_DEFINE_ACCESSOR(forward);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_count
+#define APACHE_THRIFT_ACCESSOR_count
+APACHE_THRIFT_DEFINE_ACCESSOR(count);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_name
 #define APACHE_THRIFT_ACCESSOR_name
@@ -167,8 +167,8 @@ extern const _MyEnum_EnumMapFactory::NamesToValuesMapType _MyEnum_NAMES_TO_VALUE
 namespace test { namespace fixtures { namespace basic-structured-annotations {
 class structured_annotation_inline;
 class structured_annotation_with_default;
-class structured_annotation_forward;
 class structured_annotation_recursive;
+class structured_annotation_forward;
 class structured_annotation_nested;
 class MyStruct;
 class MyException;
@@ -1884,8 +1884,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::first:
       {
         set_first(std::move(rhs.value_.first));
@@ -1908,8 +1911,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::first:
       {
         set_first(rhs.value_.first);
@@ -1931,8 +1937,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::first:
       {
         set_first(std::move(rhs.value_.first));
@@ -1956,8 +1965,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::first:
       {
         set_first(rhs.value_.first);

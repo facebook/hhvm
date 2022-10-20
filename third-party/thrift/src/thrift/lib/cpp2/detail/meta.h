@@ -17,6 +17,7 @@
 #pragma once
 
 #include <cstddef>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 #include <folly/CPortability.h>
@@ -57,6 +58,11 @@ FOLLY_ERASE void foreach_index(F&& f) {
   foreach_index_([&](auto _, auto) { f(_); }, seq{});
 }
 
+template <typename F, typename Tuple>
+FOLLY_ERASE void foreach_tuple(F&& f, Tuple&& t) {
+  foreach_index<std::tuple_size_v<std::remove_reference_t<Tuple>>>(
+      [&f, &t](auto i) { f(std::get<i>(t), i); });
+}
 } // namespace detail
 } // namespace thrift
 } // namespace apache

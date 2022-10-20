@@ -876,6 +876,11 @@ void print_module(Output& out, const Module& m) {
             m.name,
             m.line0,
             m.line1);
+  if (RuntimeOption::EvalDisassemblerDocComments) {
+    if (m.docComment() && !m.docComment()->empty()) {
+      out.fmtln(".doc {};", escaped_long(m.docComment()));
+    }
+  }
   out.fmtln("}}");
   out.nl();
 }

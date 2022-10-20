@@ -78,8 +78,7 @@ let container_defn ctx source_text clss decl_id member_decls prog =
         ("typeParams", JSON_Array tparams);
       ]
   in
-  (* TODO T112092175: export require class requirements to Facts *)
-  let (req_extends_hints, req_implements_hints, _) =
+  let (req_extends_hints, req_implements_hints, req_class_hints) =
     Aast.partition_map_require_kind ~f:(fun x -> x) clss.c_reqs
   in
   let (req_extends, prog) =
@@ -94,6 +93,13 @@ let container_defn ctx source_text clss decl_id member_decls prog =
       ctx
       (List.map req_implements_hints ~f:fst)
       Predicate.(Hack InterfaceDeclaration)
+      prog
+  in
+  let (req_class, prog) =
+    parent_decls
+      ctx
+      (List.map req_class_hints ~f:fst)
+      Predicate.(Hack ClassDeclaration)
       prog
   in
   let (defn_pred, json_fields, prog) =
@@ -132,6 +138,7 @@ let container_defn ctx source_text clss decl_id member_decls prog =
             ("uses", JSON_Array uses);
             ("requireExtends", JSON_Array req_extends);
             ("requireImplements", JSON_Array req_implements);
+            ("requireClass", JSON_Array req_class);
           ]
       in
       (Predicate.(Hack TraitDefinition), req_fields, prog)

@@ -1039,7 +1039,7 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::LIterNext => todo!(),
         Opcode::LateBoundCls => simple!(Hhbc::LateBoundCls),
         Opcode::LazyClass => simple!(Hhbc::LazyClass),
-        Opcode::LazyClassFromClass => todo!(),
+        Opcode::LazyClassFromClass => simple!(Hhbc::LazyClassFromClass),
         Opcode::LockObj => simple!(Hhbc::LockObj),
         Opcode::Lt => simple!(Hhbc::CmpOp, CmpOp::Lt),
         Opcode::Lte => simple!(Hhbc::CmpOp, CmpOp::Lte),
@@ -1071,7 +1071,8 @@ fn convert_opcode<'a, 'b>(ctx: &mut Context<'a, 'b>, opcode: &Opcode<'a>) -> boo
         Opcode::Pow => simple!(Hhbc::Pow),
         Opcode::Print => simple!(Hhbc::Print),
         Opcode::PushL => simple!(Hhbc::ConsumeL),
-        Opcode::RaiseClassStringConversionWarning => todo!(),
+        #[rustfmt::skip]
+        Opcode::RaiseClassStringConversionWarning => simple!(Hhbc::RaiseClassStringConversionWarning),
         Opcode::RecordReifiedGeneric => simple!(Hhbc::RecordReifiedGeneric),
         Opcode::ResolveClass => simple!(Hhbc::ResolveClass),
         Opcode::ResolveClsMethod => simple!(Hhbc::ResolveClsMethod),

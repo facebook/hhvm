@@ -16,21 +16,24 @@
 
 package com.facebook.thrift.client;
 
+import com.facebook.thrift.util.MonoTimeoutTransformer;
 import com.facebook.thrift.util.resources.RpcResources;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import reactor.core.publisher.Mono;
 
 public class SimpleLoadBalancingRpcClientFactory implements RpcClientFactory {
   private final RpcClientFactory delegate;
+
+  private final long connectionTimeout;
   private final int poolSize;
 
-  public SimpleLoadBalancingRpcClientFactory(RpcClientFactory delegate) {
-    this(delegate, RpcResources.getNumEventLoopThreads());
-  }
-
-  public SimpleLoadBalancingRpcClientFactory(RpcClientFactory delegate, int poolSize) {
+  public SimpleLoadBalancingRpcClientFactory(
+      RpcClientFactory delegate, int poolSize, ThriftClientConfig config) {
     this.delegate = delegate;
     this.poolSize = poolSize;
+    this.connectionTimeout = config.getConnectTimeout().toMillis();
   }
 
   @Override
@@ -38,7 +41,17 @@ public class SimpleLoadBalancingRpcClientFactory implements RpcClientFactory {
   public Mono<RpcClient> createRpcClient(SocketAddress socketAddress) {
     Mono<RpcClient>[] clients = new Mono[poolSize];
     for (int i = 0; i < poolSize; i++) {
-      clients[i] = delegate.createRpcClient(socketAddress);
+      clients[i] =
+          delegate
+              .createRpcClient(socketAddress)
+              .transform(
+                  new MonoTimeoutTransformer<>(
+                      RpcResources.getClientOffLoopScheduler(),
+                      connectionTimeout,
+                      TimeUnit.MILLISECONDS))
+              .onErrorMap(
+                  TimeoutException.class,
+                  e -> new TimeoutException(e.getMessage() + " for 'client_connection'"));
     }
 
     return new SimpleLoadBalancingRpcClientMono(clients);

@@ -399,6 +399,10 @@ Variant HHVM_FUNCTION(create_clsmeth_pointer, StringArg cls, StringArg meth) {
   return Variant{ClsMethDataRef::create(c, m)};
 }
 
+bool HHVM_FUNCTION(is_lazy_class, TypedValue val) {
+  return tvIsLazyClass(val);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 bool HHVM_FUNCTION(is_unit_loaded, StringArg path) {
@@ -522,6 +526,7 @@ void StandardExtension::initIntrinsics() {
   HHVM_FALIAS(__hhvm_intrinsics\\create_class_pointer, create_class_pointer);
   HHVM_FALIAS(__hhvm_intrinsics\\create_clsmeth_pointer,
               create_clsmeth_pointer);
+  HHVM_FALIAS(__hhvm_intrinsics\\is_lazy_class, is_lazy_class);
 
   HHVM_FALIAS(__hhvm_intrinsics\\is_unit_loaded, is_unit_loaded);
   HHVM_FALIAS(__hhvm_intrinsics\\drain_unit_prefetcher, drain_unit_prefetcher);

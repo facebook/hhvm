@@ -7,3 +7,4 @@
 #pragma once
 
 #include "thrift/compiler/test/fixtures/adapter/gen-cpp2/Service.h"
+#include "thrift/compiler/test/fixtures/adapter/gen-cpp2/AdapterService.h"

@@ -37,7 +37,7 @@ void testDirectOp(ShardSplitter splitter) {
   McrouterRouteHandle<ShardSplitRoute<McrouterRouterInfo>> splitRoute(
       rh, splitter);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = splitRoute.route(Request("test:123zz:"));
@@ -88,7 +88,7 @@ TEST(shardSplitRoute, simpleSplit_deleteFanout) {
   McrouterRouteHandle<ShardSplitRoute<McrouterRouterInfo>> splitRoute(
       rh, splitter);
 
-  TestFiberManager fm{FiberManagerContextTag()};
+  TestFiberManager<MemcacheRouterInfo> fm;
   fm.run([&] {
     mockFiberContext();
     auto reply = splitRoute.route(McDeleteRequest("test:123:"));

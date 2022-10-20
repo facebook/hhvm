@@ -356,6 +356,21 @@ let rec make_nullable_member_type env ~is_method id_pos pos ty =
  * (resp. contravariant, if contra=true) position in ty.
  *)
 let rec this_appears_covariantly ~contra env ty =
+  let rec this_appears_covariantly_params tparams tyl =
+    match (tparams, tyl) with
+    | (tp :: tparams, ty :: tyl) ->
+      begin
+        match tp.tp_variance with
+        | Ast_defs.Covariant -> this_appears_covariantly ~contra env ty
+        | Ast_defs.Contravariant ->
+          this_appears_covariantly ~contra:(not contra) env ty
+        | Ast_defs.Invariant ->
+          this_appears_covariantly ~contra env ty
+          || this_appears_covariantly ~contra:(not contra) env ty
+      end
+      || this_appears_covariantly_params tparams tyl
+    | _ -> false
+  in
   match get_node ty with
   | Tthis -> not contra
   | Ttuple tyl
@@ -379,21 +394,6 @@ let rec this_appears_covariantly ~contra env ty =
     this_appears_covariantly ~contra env ty1
     || this_appears_covariantly ~contra env ty2
   | Tapply (pos_name, tyl) ->
-    let rec this_appears_covariantly_params tparams tyl =
-      match (tparams, tyl) with
-      | (tp :: tparams, ty :: tyl) ->
-        begin
-          match tp.tp_variance with
-          | Ast_defs.Covariant -> this_appears_covariantly ~contra env ty
-          | Ast_defs.Contravariant ->
-            this_appears_covariantly ~contra:(not contra) env ty
-          | Ast_defs.Invariant ->
-            this_appears_covariantly ~contra env ty
-            || this_appears_covariantly ~contra:(not contra) env ty
-        end
-        || this_appears_covariantly_params tparams tyl
-      | _ -> false
-    in
     let tparams =
       match Typing_env.get_class_or_typedef env (snd pos_name) with
       | Some (Typing_env.TypedefResult { td_tparams; _ }) -> td_tparams
@@ -410,6 +410,13 @@ let rec this_appears_covariantly ~contra env ty =
   | Tvar _
   | Tgeneric _ ->
     false
+  | Tnewtype (name, tyl, _) ->
+    let tparams =
+      match Typing_env.get_typedef env name with
+      | Some { td_tparams; _ } -> td_tparams
+      | None -> []
+    in
+    this_appears_covariantly_params tparams tyl
 
 (** We know that the receiver is a concrete class, not a generic with
     bounds, or a Tunion. *)
@@ -1102,8 +1109,7 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
   log_obj_get env `inner id_pos receiver_ty args.this_ty;
   let (env, ety1') = Env.expand_type env receiver_ty in
   let was_var = is_tyvar ety1' in
-  let dflt_lval_mismatch = Ok receiver_ty
-  and dflt_rval_mismatch =
+  let dflt_rval_mismatch =
     Option.map ~f:(fun (_, _, ty) -> Ok ty) args.coerce_from_ty
   in
   let ((env, expand_ty_err_opt), ety1) =
@@ -1202,10 +1208,12 @@ and obj_get_inner args env receiver_ty ((id_pos, id_str) as id) on_error :
       let ty_err_opt =
         Option.merge expand_ty_err_opt (Some ty_err) ~f:Typing_error.both
       in
+      let ty_nothing = MakeType.nothing Reason.none in
+      let lval_mismatch = Error (receiver_ty, ty_nothing) in
       ( env,
         ty_err_opt,
         (err_witness env id_pos, []),
-        dflt_lval_mismatch,
+        lval_mismatch,
         dflt_rval_mismatch )
     | (env, tyl) ->
       let (env, ty) = Typing_intersection.intersect_list env r tyl in
@@ -1353,19 +1361,10 @@ let obj_get_with_mismatches
           (Pos_or_decl.of_raw_pos obj_pos)
           env
           [Log_head ("obj_get", [Log_type ("receiver_ty", receiver_ty)])]));
-  (* If we're checking an SDT method or function under dynamic assumptions,
-   * then attempt to solve to dynamic if we're left with a type variable *)
-  let default =
-    if env.Typing_env_types.in_support_dynamic_type_method_check then
-      Some (MakeType.dynamic (Reason.Rwitness obj_pos))
-    else
-      None
-  in
   let ((env, e1), receiver_ty) =
     if is_method then
       Typing_solver.expand_type_and_solve
         env
-        ?default
         ~description_of_expected:"an object"
         obj_pos
         receiver_ty
@@ -1373,7 +1372,6 @@ let obj_get_with_mismatches
       Typing_solver.expand_type_and_narrow
         env
         ~description_of_expected:"an object"
-        ?default
         (widen_class_for_obj_get ~is_method ~nullsafe (snd member_id))
         obj_pos
         receiver_ty

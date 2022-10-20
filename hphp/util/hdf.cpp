@@ -17,10 +17,8 @@
 #include "hphp/util/hdf.h"
 
 #include <mutex>
-
-#include <folly/portability/String.h>
-
-#include <boost/algorithm/string/predicate.hpp>
+#include <cstring>
+#include <assert.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -135,10 +133,25 @@ void Hdf::open(const char *filename) {
   append(filename);
 }
 
+namespace {
+
+bool str_contains(const char* haystack, const char* needle) {
+  return strstr(haystack, needle) != nullptr;
+}
+
+bool str_ends_with(const char* haystack, const char* needle) {
+  size_t hs_len = strlen(haystack);
+  size_t n_len = strlen(needle);
+  return (hs_len >= n_len) && (memcmp(&haystack[hs_len - n_len], needle, n_len) == 0);
+}
+
+}
+
+
 void Hdf::append(const char *filename) {
   assert(filename && *filename);
-  if (!(boost::contains(filename, ".hdf")
-    || boost::ends_with(filename, ".hphp"))) {
+  if (!(str_contains(filename, ".hdf")
+    || str_ends_with(filename, ".hphp"))) {
     return;
   }
   CheckNeoError(hdf_read_file(getRaw(), (char*)filename));
@@ -352,13 +365,6 @@ void Hdf::configGet(std::set<std::string> &values) const {
   }
 }
 
-void Hdf::configGet(boost::container::flat_set<std::string> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.configGetString(""));
-  }
-}
-
 void Hdf::configGet(std::unordered_map<std::string, int> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
@@ -366,53 +372,10 @@ void Hdf::configGet(std::unordered_map<std::string, int> &values) const {
   }
 }
 
-void Hdf::configGet(std::set<std::string, stdltistr> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.configGetString(""));
-  }
-}
-
 void Hdf::configGet(std::map<std::string, std::string> &values) const {
   values.clear();
   for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
     values[hdf.getName()] = hdf.configGetString("");
-  }
-}
-
-void Hdf::configGet(std::map<std::string, std::string,
-                    stdltistr> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.configGetString("");
-  }
-}
-
-void Hdf::configGet(hphp_string_imap<std::string> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.configGetString("");
-  }
-}
-
-void Hdf::configGet(hphp_fast_string_map<std::string> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.configGetString("");
-  }
-}
-
-void Hdf::configGet(hphp_fast_string_imap<std::string> &values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values[hdf.getName()] = hdf.configGetString("");
-  }
-}
-
-void Hdf::configGet(hphp_fast_string_set& values) const {
-  values.clear();
-  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
-    values.insert(hdf.configGetString(""));
   }
 }
 

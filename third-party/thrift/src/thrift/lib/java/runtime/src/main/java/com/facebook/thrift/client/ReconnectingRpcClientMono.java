@@ -30,22 +30,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.CoreSubscriber;
 import reactor.core.Disposable;
+import reactor.core.Fuseable;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
 import reactor.core.publisher.Operators;
 import reactor.util.concurrent.Queues;
 
-final class ReconnectingRpcClientMono extends Mono<RpcClient> {
+final class ReconnectingRpcClientMono extends Mono<RpcClient>
+    implements Fuseable.ScalarCallable<RpcClient>, Fuseable {
   private static final Logger LOGGER = LoggerFactory.getLogger(ReconnectingRpcClientMono.class);
 
   private static final AtomicIntegerFieldUpdater<ReconnectingRpcClientMono> WIP =
       AtomicIntegerFieldUpdater.newUpdater(ReconnectingRpcClientMono.class, "wip");
 
-  private static final long RETRY_TIMEOUT_MS = 180_000;
-
   private static final long MAX_TIMEOUT_MS = 30_000;
-
-  private static final long BASE_TIMEOUT_MS = 100;
 
   private enum State {
     DISCONNECTED,
@@ -80,7 +78,22 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
 
   @Override
   public void subscribe(CoreSubscriber<? super RpcClient> actual) {
-    Objects.requireNonNull(actual).onSubscribe(new InnerSubscription(actual));
+    RpcClient c = this.rpcClient;
+    State s = this.state;
+
+    // if the RpcClient isn't null and the state is connection emit the valid rpcClient using a
+    // scalar subscription
+    // bypassing the slower InnerSubscription.
+    if (c != null && s == State.CONNECTED) {
+      actual.onSubscribe(Operators.scalarSubscription(actual, rpcClient));
+    } else {
+      Objects.requireNonNull(actual).onSubscribe(new InnerSubscription(actual));
+    }
+  }
+
+  @Override
+  public RpcClient call() throws Exception {
+    return this.state == State.CONNECTED ? rpcClient : null;
   }
 
   private void changeState(State state) {
@@ -154,9 +167,10 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
       }
       subscriber.onNext(rpcClient);
       subscriber.onComplete();
-      subscribers.poll();
     } catch (Throwable t) {
       LOGGER.error("uncaught error when emitting rpc client to subscriber");
+    } finally {
+      subscribers.poll();
     }
   }
 
@@ -214,7 +228,7 @@ final class ReconnectingRpcClientMono extends Mono<RpcClient> {
 
     if (duration.isPresent()) {
       connectionMono =
-          Mono.delay(duration.get(), RpcResources.getOffLoopScheduler()).then(connectionMono);
+          Mono.delay(duration.get(), RpcResources.getClientOffLoopScheduler()).then(connectionMono);
     }
 
     connectionMono.subscribe(this::handleIncomingRpcClient, this::handleConnectionError);

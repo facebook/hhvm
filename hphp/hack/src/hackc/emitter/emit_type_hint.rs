@@ -116,6 +116,11 @@ pub fn fmt_hint<'arena>(
                 format!("?{}", fmt_hint(alloc, tparams, false, hint)?)
             }
         }
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            fmt_hint(alloc, tparams, strip_tparams, hint)?
+        }
         // No guarantee that this is in the correct order when using map instead of list
         //  TODO: Check whether shape fields need to retain order *)
         Hshape(NastShapeInfo { field_map, .. }) => {
@@ -286,6 +291,11 @@ fn hint_to_type_constraint<'arena>(
             type_application_helper(alloc, tparams, kind, s)?
         }
         Habstr(s, _hs) => type_application_helper(alloc, tparams, kind, s)?,
+        Hrefinement(hint, _) => {
+            // NOTE: refinements are already banned in type structures
+            // and in other cases they should be invisible to the HHVM, so unpack hint
+            hint_to_type_constraint(alloc, kind, tparams, skipawaitable, hint)?
+        }
         h => type_application_helper(alloc, tparams, kind, hint_to_string(h))?,
     })
 }

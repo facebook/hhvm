@@ -88,6 +88,13 @@ bool is_unused_trait(const php::Class& cls);
 bool is_used_trait(const php::Class& cls);
 
 /*
+ * Returns true if the given class is "regular". That is, not an
+ * interface, enum, trait, or abstract class. Those types of classes
+ * cannot be instantiated (but can be interacted with statically).
+ */
+bool is_regular_class(const php::Class&);
+
+/*
  * Returns true if the property has an initial value which might
  * possibly violate its type-hint. If it returns false, it is
  * guaranteed to not violate the type-hint.

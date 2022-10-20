@@ -8,6 +8,38 @@
 
 namespace thrift\test;
 
+/**
+ * Original thrift enum:-
+ * ThriftAdaptedEnum
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ThriftAdaptedEnum'))>>
+enum ThriftAdaptedEnum: int {
+  Zero = 0;
+  One = 1;
+}
+
+class ThriftAdaptedEnum_TEnumStaticMetadata implements \IThriftEnumStaticMetadata {
+  public static function getEnumMetadata()[]: \tmeta_ThriftEnum {
+    return \tmeta_ThriftEnum::fromShape(
+      shape(
+        "name" => "module.ThriftAdaptedEnum",
+        "elements" => dict[
+          0 => "Zero",
+          1 => "One",
+        ],
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TEnumAnnotations {
+    return shape(
+      'enum' => dict[],
+      'constants' => dict[
+      ],
+    );
+  }
+}
+
 type SetWithAdapter = \Adapter2::THackType;
 type StringWithAdapter = \Adapter1::THackType;
 type ListWithElemAdapter = Vector<\thrift\test\StringWithAdapter>;
@@ -19,6 +51,22 @@ type FooWithAdapter = \Adapter1::THackType;
 type StructWithAdapter = \Adapter2::THackType;
 type UnionWithAdapter = \Adapter2::THackType;
 type AdaptedA = \thrift\test\A;
+type DurationMs = int;
+type AdaptedBool = bool;
+type AdaptedByte = int;
+type AdaptedShort = int;
+type AdaptedInteger = int;
+type AdaptedLong = int;
+type AdaptedDouble = float;
+type AdaptedString = string;
+type DoubleTypedefBool = \thrift\test\AdaptedBool;
+type CustomProtocolType = string;
+type IndirectionString = string;
+type AdaptedEnum = \thrift\test\ThriftAdaptedEnum;
+type AdaptedTypedef = \thrift\test\AdaptedStruct;
+type TypedefOfDirect = \thrift\test\DirectlyAdaptedStruct;
+type AdaptedCircularAdaptee = \thrift\test\CircularAdaptee;
+type CountingInt = int;
 /**
  * Original thrift struct:-
  * MyAnnotation
@@ -3492,6 +3540,4204 @@ class MyStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
 
   private static function __hackAdapterTypeChecks()[]: void {
     \ThriftUtil::requireSameType<\Adapter2::TThriftType, \thrift\test\SetWithAdapter>();
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptTestStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestStruct'))>>
+class AdaptTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'delay',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'custom',
+      'type' => \TType::STRING,
+      'is_binary' => true,
+    ),
+    3 => shape(
+      'var' => 'timeout',
+      'type' => \TType::I64,
+    ),
+    4 => shape(
+      'var' => 'data',
+      'type' => \TType::I64,
+    ),
+    5 => shape(
+      'var' => 'meta',
+      'type' => \TType::STRING,
+    ),
+    6 => shape(
+      'var' => 'indirectionString',
+      'type' => \TType::STRING,
+    ),
+    7 => shape(
+      'var' => 'string_data',
+      'type' => \TType::STRING,
+    ),
+    8 => shape(
+      'var' => 'double_wrapped_bool',
+      'type' => \TType::BOOL,
+    ),
+    9 => shape(
+      'var' => 'double_wrapped_integer',
+      'type' => \TType::I32,
+    ),
+    10 => shape(
+      'var' => 'binary_data',
+      'type' => \TType::STRING,
+      'is_binary' => true,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'delay' => 1,
+    'custom' => 2,
+    'timeout' => 3,
+    'data' => 4,
+    'meta' => 5,
+    'indirectionString' => 6,
+    'string_data' => 7,
+    'double_wrapped_bool' => 8,
+    'double_wrapped_integer' => 9,
+    'binary_data' => 10,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'delay' => ?\thrift\test\DurationMs,
+    ?'custom' => ?\thrift\test\CustomProtocolType,
+    ?'timeout' => ?int,
+    ?'data' => ?int,
+    ?'meta' => ?string,
+    ?'indirectionString' => ?\thrift\test\IndirectionString,
+    ?'string_data' => ?string,
+    ?'double_wrapped_bool' => ?\thrift\test\AdaptedBool,
+    ?'double_wrapped_integer' => ?\thrift\test\AdaptedInteger,
+    ?'binary_data' => ?string,
+  );
+
+  const type TShape = shape(
+    'delay' => \thrift\test\DurationMs,
+    'custom' => \thrift\test\CustomProtocolType,
+    'timeout' => int,
+    'data' => int,
+    'meta' => string,
+    'indirectionString' => \thrift\test\IndirectionString,
+    'string_data' => string,
+    'double_wrapped_bool' => \thrift\test\AdaptedBool,
+    'double_wrapped_integer' => \thrift\test\AdaptedInteger,
+    'binary_data' => string,
+  );
+  const int STRUCTURAL_ID = 9217156058896773800;
+  /**
+   * Original thrift field:-
+   * 1: i64 delay
+   */
+  public \thrift\test\DurationMs $delay;
+  /**
+   * Original thrift field:-
+   * 2: binary custom
+   */
+  public \thrift\test\CustomProtocolType $custom;
+  /**
+   * Original thrift field:-
+   * 3: i64 timeout
+   */
+  public int $timeout;
+  /**
+   * Original thrift field:-
+   * 4: i64 data
+   */
+  public int $data;
+  /**
+   * Original thrift field:-
+   * 5: string meta
+   */
+  public string $meta;
+  /**
+   * Original thrift field:-
+   * 6: string indirectionString
+   */
+  public \thrift\test\IndirectionString $indirectionString;
+  /**
+   * Original thrift field:-
+   * 7: string string_data
+   */
+  public string $string_data;
+  /**
+   * Original thrift field:-
+   * 8: bool double_wrapped_bool
+   */
+  public \thrift\test\AdaptedBool $double_wrapped_bool;
+  /**
+   * Original thrift field:-
+   * 9: i32 double_wrapped_integer
+   */
+  public \thrift\test\AdaptedInteger $double_wrapped_integer;
+  /**
+   * Original thrift field:-
+   * 10: binary binary_data
+   */
+  public string $binary_data;
+
+  public function __construct(?\thrift\test\DurationMs $delay = null, ?\thrift\test\CustomProtocolType $custom = null, ?int $timeout = null, ?int $data = null, ?string $meta = null, ?\thrift\test\IndirectionString $indirectionString = null, ?string $string_data = null, ?\thrift\test\AdaptedBool $double_wrapped_bool = null, ?\thrift\test\AdaptedInteger $double_wrapped_integer = null, ?string $binary_data = null)[] {
+    $this->delay = $delay ?? 0;
+    $this->custom = $custom ?? '';
+    $this->timeout = $timeout ?? 0;
+    $this->data = $data ?? 0;
+    $this->meta = $meta ?? '';
+    $this->indirectionString = $indirectionString ?? '';
+    $this->string_data = $string_data ?? '';
+    $this->double_wrapped_bool = $double_wrapped_bool ?? false;
+    $this->double_wrapped_integer = $double_wrapped_integer ?? 0;
+    $this->binary_data = $binary_data ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'delay'),
+      Shapes::idx($shape, 'custom'),
+      Shapes::idx($shape, 'timeout'),
+      Shapes::idx($shape, 'data'),
+      Shapes::idx($shape, 'meta'),
+      Shapes::idx($shape, 'indirectionString'),
+      Shapes::idx($shape, 'string_data'),
+      Shapes::idx($shape, 'double_wrapped_bool'),
+      Shapes::idx($shape, 'double_wrapped_integer'),
+      Shapes::idx($shape, 'binary_data'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptTestStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptTestStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.DurationMs",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "delay",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.CustomProtocolType",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "custom",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "timeout",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "data",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "meta",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.IndirectionString",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "indirectionString",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "string_data",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedBool",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "double_wrapped_bool",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedInteger",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "double_wrapped_integer",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 10,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                )
+              ),
+              "name" => "binary_data",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'delay' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdaptTestMsAdapter",
+              )
+            ),
+          ],
+        ),
+        'custom' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::CustomProtocolAdapter",
+              )
+            ),
+          ],
+        ),
+        'timeout' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdaptTestMsAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'data' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdapterWithContext",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'indirectionString' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::IndirectionAdapter<::apache::thrift::test::IndirectionString>",
+              )
+            ),
+          ],
+        ),
+        'string_data' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdapterWithContext",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'double_wrapped_bool' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'double_wrapped_integer' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdapterWithContext",
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'binary_data' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdapterWithContext",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['delay'],
+      $shape['custom'],
+      $shape['timeout'],
+      $shape['data'],
+      $shape['meta'],
+      $shape['indirectionString'],
+      $shape['string_data'],
+      $shape['double_wrapped_bool'],
+      $shape['double_wrapped_integer'],
+      $shape['binary_data'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'delay' => $this->delay,
+      'custom' => $this->custom,
+      'timeout' => $this->timeout,
+      'data' => $this->data,
+      'meta' => $this->meta,
+      'indirectionString' => $this->indirectionString,
+      'string_data' => $this->string_data,
+      'double_wrapped_bool' => $this->double_wrapped_bool,
+      'double_wrapped_integer' => $this->double_wrapped_integer,
+      'binary_data' => $this->binary_data,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'delay') !== null) {
+      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DurationMs>($parsed['delay']);
+    }
+    if (idx($parsed, 'custom') !== null) {
+      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CustomProtocolType>($parsed['custom']);
+    }
+    if (idx($parsed, 'timeout') !== null) {
+      $this->timeout = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['timeout']);
+    }
+    if (idx($parsed, 'data') !== null) {
+      $this->data = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['data']);
+    }
+    if (idx($parsed, 'meta') !== null) {
+      $this->meta = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['meta']);
+    }
+    if (idx($parsed, 'indirectionString') !== null) {
+      $this->indirectionString = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\IndirectionString>($parsed['indirectionString']);
+    }
+    if (idx($parsed, 'string_data') !== null) {
+      $this->string_data = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['string_data']);
+    }
+    if (idx($parsed, 'double_wrapped_bool') !== null) {
+      $this->double_wrapped_bool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['double_wrapped_bool']);
+    }
+    if (idx($parsed, 'double_wrapped_integer') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['double_wrapped_integer']);
+      if ($_tmp0 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->double_wrapped_integer = (int)$_tmp0;
+      }
+    }
+    if (idx($parsed, 'binary_data') !== null) {
+      $this->binary_data = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['binary_data']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptTemplatedTestStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTemplatedTestStruct'))>>
+class AdaptTemplatedTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'adaptedBool',
+      'type' => \TType::BOOL,
+    ),
+    2 => shape(
+      'var' => 'adaptedByte',
+      'type' => \TType::BYTE,
+    ),
+    3 => shape(
+      'var' => 'adaptedShort',
+      'type' => \TType::I16,
+    ),
+    4 => shape(
+      'var' => 'adaptedInteger',
+      'type' => \TType::I32,
+    ),
+    5 => shape(
+      'var' => 'adaptedLong',
+      'type' => \TType::I64,
+    ),
+    6 => shape(
+      'var' => 'adaptedDouble',
+      'type' => \TType::DOUBLE,
+    ),
+    7 => shape(
+      'var' => 'adaptedString',
+      'type' => \TType::STRING,
+    ),
+    8 => shape(
+      'var' => 'adaptedList',
+      'type' => \TType::LST,
+      'etype' => \TType::I64,
+      'elem' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    9 => shape(
+      'var' => 'adaptedSet',
+      'type' => \TType::SET,
+      'etype' => \TType::I64,
+      'elem' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    10 => shape(
+      'var' => 'adaptedMap',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I64,
+      'vtype' => \TType::I64,
+      'key' => shape(
+        'type' => \TType::I64,
+      ),
+      'val' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    11 => shape(
+      'var' => 'adaptedBoolDefault',
+      'type' => \TType::BOOL,
+    ),
+    12 => shape(
+      'var' => 'adaptedByteDefault',
+      'type' => \TType::BYTE,
+    ),
+    13 => shape(
+      'var' => 'adaptedShortDefault',
+      'type' => \TType::I16,
+    ),
+    14 => shape(
+      'var' => 'adaptedIntegerDefault',
+      'type' => \TType::I32,
+    ),
+    15 => shape(
+      'var' => 'adaptedLongDefault',
+      'type' => \TType::I64,
+    ),
+    16 => shape(
+      'var' => 'adaptedDoubleDefault',
+      'type' => \TType::DOUBLE,
+    ),
+    17 => shape(
+      'var' => 'adaptedStringDefault',
+      'type' => \TType::STRING,
+    ),
+    18 => shape(
+      'var' => 'adaptedEnum',
+      'type' => \TType::I32,
+      'enum' => \thrift\test\ThriftAdaptedEnum::class,
+    ),
+    19 => shape(
+      'var' => 'adaptedListDefault',
+      'type' => \TType::LST,
+      'etype' => \TType::I64,
+      'elem' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    20 => shape(
+      'var' => 'adaptedSetDefault',
+      'type' => \TType::SET,
+      'etype' => \TType::I64,
+      'elem' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    21 => shape(
+      'var' => 'adaptedMapDefault',
+      'type' => \TType::MAP,
+      'ktype' => \TType::I64,
+      'vtype' => \TType::I64,
+      'key' => shape(
+        'type' => \TType::I64,
+      ),
+      'val' => shape(
+        'type' => \TType::I64,
+      ),
+      'format' => 'collection',
+    ),
+    22 => shape(
+      'var' => 'doubleTypedefBool',
+      'type' => \TType::BOOL,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'adaptedBool' => 1,
+    'adaptedByte' => 2,
+    'adaptedShort' => 3,
+    'adaptedInteger' => 4,
+    'adaptedLong' => 5,
+    'adaptedDouble' => 6,
+    'adaptedString' => 7,
+    'adaptedList' => 8,
+    'adaptedSet' => 9,
+    'adaptedMap' => 10,
+    'adaptedBoolDefault' => 11,
+    'adaptedByteDefault' => 12,
+    'adaptedShortDefault' => 13,
+    'adaptedIntegerDefault' => 14,
+    'adaptedLongDefault' => 15,
+    'adaptedDoubleDefault' => 16,
+    'adaptedStringDefault' => 17,
+    'adaptedEnum' => 18,
+    'adaptedListDefault' => 19,
+    'adaptedSetDefault' => 20,
+    'adaptedMapDefault' => 21,
+    'doubleTypedefBool' => 22,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'adaptedBool' => ?\thrift\test\AdaptedBool,
+    ?'adaptedByte' => ?\thrift\test\AdaptedByte,
+    ?'adaptedShort' => ?\thrift\test\AdaptedShort,
+    ?'adaptedInteger' => ?\thrift\test\AdaptedInteger,
+    ?'adaptedLong' => ?\thrift\test\AdaptedLong,
+    ?'adaptedDouble' => ?\thrift\test\AdaptedDouble,
+    ?'adaptedString' => ?\thrift\test\AdaptedString,
+    ?'adaptedList' => ?Vector<int>,
+    ?'adaptedSet' => ?Set<int>,
+    ?'adaptedMap' => ?Map<int, int>,
+    ?'adaptedBoolDefault' => ?\thrift\test\AdaptedBool,
+    ?'adaptedByteDefault' => ?\thrift\test\AdaptedByte,
+    ?'adaptedShortDefault' => ?\thrift\test\AdaptedShort,
+    ?'adaptedIntegerDefault' => ?\thrift\test\AdaptedInteger,
+    ?'adaptedLongDefault' => ?\thrift\test\AdaptedLong,
+    ?'adaptedDoubleDefault' => ?\thrift\test\AdaptedDouble,
+    ?'adaptedStringDefault' => ?\thrift\test\AdaptedString,
+    ?'adaptedEnum' => ?\thrift\test\AdaptedEnum,
+    ?'adaptedListDefault' => ?Vector<int>,
+    ?'adaptedSetDefault' => ?Set<int>,
+    ?'adaptedMapDefault' => ?Map<int, int>,
+    ?'doubleTypedefBool' => ?\thrift\test\DoubleTypedefBool,
+  );
+
+  const type TShape = shape(
+    'adaptedBool' => \thrift\test\AdaptedBool,
+    'adaptedByte' => \thrift\test\AdaptedByte,
+    'adaptedShort' => \thrift\test\AdaptedShort,
+    'adaptedInteger' => \thrift\test\AdaptedInteger,
+    'adaptedLong' => \thrift\test\AdaptedLong,
+    'adaptedDouble' => \thrift\test\AdaptedDouble,
+    'adaptedString' => \thrift\test\AdaptedString,
+    'adaptedList' => vec<int>,
+    'adaptedSet' => dict<int, bool>,
+    'adaptedMap' => dict<int, int>,
+    'adaptedBoolDefault' => \thrift\test\AdaptedBool,
+    'adaptedByteDefault' => \thrift\test\AdaptedByte,
+    'adaptedShortDefault' => \thrift\test\AdaptedShort,
+    'adaptedIntegerDefault' => \thrift\test\AdaptedInteger,
+    'adaptedLongDefault' => \thrift\test\AdaptedLong,
+    'adaptedDoubleDefault' => \thrift\test\AdaptedDouble,
+    'adaptedStringDefault' => \thrift\test\AdaptedString,
+    ?'adaptedEnum' => ?\thrift\test\AdaptedEnum,
+    'adaptedListDefault' => vec<int>,
+    'adaptedSetDefault' => dict<int, bool>,
+    'adaptedMapDefault' => dict<int, int>,
+    'doubleTypedefBool' => \thrift\test\DoubleTypedefBool,
+  );
+  const int STRUCTURAL_ID = 1552800196824590900;
+  /**
+   * Original thrift field:-
+   * 1: bool adaptedBool
+   */
+  public \thrift\test\AdaptedBool $adaptedBool;
+  /**
+   * Original thrift field:-
+   * 2: byte adaptedByte
+   */
+  public \thrift\test\AdaptedByte $adaptedByte;
+  /**
+   * Original thrift field:-
+   * 3: i16 adaptedShort
+   */
+  public \thrift\test\AdaptedShort $adaptedShort;
+  /**
+   * Original thrift field:-
+   * 4: i32 adaptedInteger
+   */
+  public \thrift\test\AdaptedInteger $adaptedInteger;
+  /**
+   * Original thrift field:-
+   * 5: i64 adaptedLong
+   */
+  public \thrift\test\AdaptedLong $adaptedLong;
+  /**
+   * Original thrift field:-
+   * 6: double adaptedDouble
+   */
+  public \thrift\test\AdaptedDouble $adaptedDouble;
+  /**
+   * Original thrift field:-
+   * 7: string adaptedString
+   */
+  public \thrift\test\AdaptedString $adaptedString;
+  /**
+   * Original thrift field:-
+   * 8: list<i64> adaptedList
+   */
+  public Vector<int> $adaptedList;
+  /**
+   * Original thrift field:-
+   * 9: set<i64> adaptedSet
+   */
+  public Set<int> $adaptedSet;
+  /**
+   * Original thrift field:-
+   * 10: map<i64, i64> adaptedMap
+   */
+  public Map<int, int> $adaptedMap;
+  /**
+   * Original thrift field:-
+   * 11: bool adaptedBoolDefault
+   */
+  public \thrift\test\AdaptedBool $adaptedBoolDefault;
+  /**
+   * Original thrift field:-
+   * 12: byte adaptedByteDefault
+   */
+  public \thrift\test\AdaptedByte $adaptedByteDefault;
+  /**
+   * Original thrift field:-
+   * 13: i16 adaptedShortDefault
+   */
+  public \thrift\test\AdaptedShort $adaptedShortDefault;
+  /**
+   * Original thrift field:-
+   * 14: i32 adaptedIntegerDefault
+   */
+  public \thrift\test\AdaptedInteger $adaptedIntegerDefault;
+  /**
+   * Original thrift field:-
+   * 15: i64 adaptedLongDefault
+   */
+  public \thrift\test\AdaptedLong $adaptedLongDefault;
+  /**
+   * Original thrift field:-
+   * 16: double adaptedDoubleDefault
+   */
+  public \thrift\test\AdaptedDouble $adaptedDoubleDefault;
+  /**
+   * Original thrift field:-
+   * 17: string adaptedStringDefault
+   */
+  public \thrift\test\AdaptedString $adaptedStringDefault;
+  /**
+   * Original thrift field:-
+   * 18: enum module.ThriftAdaptedEnum adaptedEnum
+   */
+  public ?\thrift\test\AdaptedEnum $adaptedEnum;
+  /**
+   * Original thrift field:-
+   * 19: list<i64> adaptedListDefault
+   */
+  public Vector<int> $adaptedListDefault;
+  /**
+   * Original thrift field:-
+   * 20: set<i64> adaptedSetDefault
+   */
+  public Set<int> $adaptedSetDefault;
+  /**
+   * Original thrift field:-
+   * 21: map<i64, i64> adaptedMapDefault
+   */
+  public Map<int, int> $adaptedMapDefault;
+  /**
+   * Original thrift field:-
+   * 22: bool doubleTypedefBool
+   */
+  public \thrift\test\DoubleTypedefBool $doubleTypedefBool;
+
+  public function __construct(?\thrift\test\AdaptedBool $adaptedBool = null, ?\thrift\test\AdaptedByte $adaptedByte = null, ?\thrift\test\AdaptedShort $adaptedShort = null, ?\thrift\test\AdaptedInteger $adaptedInteger = null, ?\thrift\test\AdaptedLong $adaptedLong = null, ?\thrift\test\AdaptedDouble $adaptedDouble = null, ?\thrift\test\AdaptedString $adaptedString = null, ?Vector<int> $adaptedList = null, ?Set<int> $adaptedSet = null, ?Map<int, int> $adaptedMap = null, ?\thrift\test\AdaptedBool $adaptedBoolDefault = null, ?\thrift\test\AdaptedByte $adaptedByteDefault = null, ?\thrift\test\AdaptedShort $adaptedShortDefault = null, ?\thrift\test\AdaptedInteger $adaptedIntegerDefault = null, ?\thrift\test\AdaptedLong $adaptedLongDefault = null, ?\thrift\test\AdaptedDouble $adaptedDoubleDefault = null, ?\thrift\test\AdaptedString $adaptedStringDefault = null, ?\thrift\test\AdaptedEnum $adaptedEnum = null, ?Vector<int> $adaptedListDefault = null, ?Set<int> $adaptedSetDefault = null, ?Map<int, int> $adaptedMapDefault = null, ?\thrift\test\DoubleTypedefBool $doubleTypedefBool = null)[] {
+    $this->adaptedBool = $adaptedBool ?? false;
+    $this->adaptedByte = $adaptedByte ?? 0;
+    $this->adaptedShort = $adaptedShort ?? 0;
+    $this->adaptedInteger = $adaptedInteger ?? 0;
+    $this->adaptedLong = $adaptedLong ?? 0;
+    $this->adaptedDouble = $adaptedDouble ?? 0.0;
+    $this->adaptedString = $adaptedString ?? '';
+    $this->adaptedList = $adaptedList ?? Vector {};
+    $this->adaptedSet = $adaptedSet ?? Set {};
+    $this->adaptedMap = $adaptedMap ?? Map {};
+    $this->adaptedBoolDefault = $adaptedBoolDefault ?? true;
+    $this->adaptedByteDefault = $adaptedByteDefault ?? 1;
+    $this->adaptedShortDefault = $adaptedShortDefault ?? 2;
+    $this->adaptedIntegerDefault = $adaptedIntegerDefault ?? 3;
+    $this->adaptedLongDefault = $adaptedLongDefault ?? 4;
+    $this->adaptedDoubleDefault = $adaptedDoubleDefault ?? 5.0;
+    $this->adaptedStringDefault = $adaptedStringDefault ?? "6";
+    $this->adaptedEnum = $adaptedEnum ?? \thrift\test\ThriftAdaptedEnum::One;
+    $this->adaptedListDefault = $adaptedListDefault ?? Vector {
+      1,
+    };
+    $this->adaptedSetDefault = $adaptedSetDefault ?? Set {
+      1,
+    };
+    $this->adaptedMapDefault = $adaptedMapDefault ?? Map {
+      1 => 1,
+    };
+    $this->doubleTypedefBool = $doubleTypedefBool ?? false;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'adaptedBool'),
+      Shapes::idx($shape, 'adaptedByte'),
+      Shapes::idx($shape, 'adaptedShort'),
+      Shapes::idx($shape, 'adaptedInteger'),
+      Shapes::idx($shape, 'adaptedLong'),
+      Shapes::idx($shape, 'adaptedDouble'),
+      Shapes::idx($shape, 'adaptedString'),
+      Shapes::idx($shape, 'adaptedList'),
+      Shapes::idx($shape, 'adaptedSet'),
+      Shapes::idx($shape, 'adaptedMap'),
+      Shapes::idx($shape, 'adaptedBoolDefault'),
+      Shapes::idx($shape, 'adaptedByteDefault'),
+      Shapes::idx($shape, 'adaptedShortDefault'),
+      Shapes::idx($shape, 'adaptedIntegerDefault'),
+      Shapes::idx($shape, 'adaptedLongDefault'),
+      Shapes::idx($shape, 'adaptedDoubleDefault'),
+      Shapes::idx($shape, 'adaptedStringDefault'),
+      Shapes::idx($shape, 'adaptedEnum'),
+      Shapes::idx($shape, 'adaptedListDefault'),
+      Shapes::idx($shape, 'adaptedSetDefault'),
+      Shapes::idx($shape, 'adaptedMapDefault'),
+      Shapes::idx($shape, 'doubleTypedefBool'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptTemplatedTestStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptTemplatedTestStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedBool",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedBool",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedByte",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedByte",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedShort",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedShort",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedInteger",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedInteger",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 5,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedLong",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedLong",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 6,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedDouble",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedDouble",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 7,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedString",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedString",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 8,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedList",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 9,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedSet",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 10,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedMap",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 11,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedBool",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedBoolDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 12,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedByte",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BYTE_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedByteDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 13,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedShort",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I16_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedShortDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 14,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedInteger",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I32_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedIntegerDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 15,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedLong",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedLongDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 16,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedDouble",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_DOUBLE_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedDoubleDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 17,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedString",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedStringDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 18,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedEnum",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_enum" => \tmeta_ThriftEnumType::fromShape(
+                            shape(
+                              "name" => "module.ThriftAdaptedEnum",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedEnum",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 19,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_list" => \tmeta_ThriftListType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedListDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 20,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_set" => \tmeta_ThriftSetType::fromShape(
+                    shape(
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedSetDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 21,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_map" => \tmeta_ThriftMapType::fromShape(
+                    shape(
+                      "keyType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                      "valueType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedMapDefault",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 22,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.DoubleTypedefBool",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.AdaptedBool",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BOOL_TYPE,
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "doubleTypedefBool",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'adaptedBool' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedByte' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedShort' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedInteger' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedLong' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedDouble' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedString' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedList' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedSet' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedMap' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedBoolDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedByteDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedShortDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedIntegerDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedLongDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedDoubleDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedStringDefault' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'adaptedEnum' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::StaticCastAdapter<::apache::thrift::test::basic::AdaptedEnum, ::apache::thrift::test::basic::ThriftAdaptedEnum>",
+              )
+            ),
+          ],
+        ),
+        'adaptedListDefault' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedSetDefault' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedMapDefault' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['adaptedBool'],
+      $shape['adaptedByte'],
+      $shape['adaptedShort'],
+      $shape['adaptedInteger'],
+      $shape['adaptedLong'],
+      $shape['adaptedDouble'],
+      $shape['adaptedString'],
+      (new Vector($shape['adaptedList'])),
+      new Set(Keyset\keys($shape['adaptedSet'])),
+      (new Map($shape['adaptedMap'])),
+      $shape['adaptedBoolDefault'],
+      $shape['adaptedByteDefault'],
+      $shape['adaptedShortDefault'],
+      $shape['adaptedIntegerDefault'],
+      $shape['adaptedLongDefault'],
+      $shape['adaptedDoubleDefault'],
+      $shape['adaptedStringDefault'],
+      Shapes::idx($shape, 'adaptedEnum'),
+      (new Vector($shape['adaptedListDefault'])),
+      new Set(Keyset\keys($shape['adaptedSetDefault'])),
+      (new Map($shape['adaptedMapDefault'])),
+      $shape['doubleTypedefBool'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'adaptedBool' => $this->adaptedBool,
+      'adaptedByte' => $this->adaptedByte,
+      'adaptedShort' => $this->adaptedShort,
+      'adaptedInteger' => $this->adaptedInteger,
+      'adaptedLong' => $this->adaptedLong,
+      'adaptedDouble' => $this->adaptedDouble,
+      'adaptedString' => $this->adaptedString,
+      'adaptedList' => vec($this->adaptedList),
+      'adaptedSet' => ThriftUtil::toDArray(Dict\fill_keys($this->adaptedSet->toValuesArray(), true), static::class),
+      'adaptedMap' => dict($this->adaptedMap),
+      'adaptedBoolDefault' => $this->adaptedBoolDefault,
+      'adaptedByteDefault' => $this->adaptedByteDefault,
+      'adaptedShortDefault' => $this->adaptedShortDefault,
+      'adaptedIntegerDefault' => $this->adaptedIntegerDefault,
+      'adaptedLongDefault' => $this->adaptedLongDefault,
+      'adaptedDoubleDefault' => $this->adaptedDoubleDefault,
+      'adaptedStringDefault' => $this->adaptedStringDefault,
+      'adaptedEnum' => $this->adaptedEnum,
+      'adaptedListDefault' => vec($this->adaptedListDefault),
+      'adaptedSetDefault' => ThriftUtil::toDArray(Dict\fill_keys($this->adaptedSetDefault->toValuesArray(), true), static::class),
+      'adaptedMapDefault' => dict($this->adaptedMapDefault),
+      'doubleTypedefBool' => $this->doubleTypedefBool,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'adaptedBool') !== null) {
+      $this->adaptedBool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['adaptedBool']);
+    }
+    if (idx($parsed, 'adaptedByte') !== null) {
+      $_tmp0 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedByte>($parsed['adaptedByte']);
+      if ($_tmp0 > 0x7f) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedByte = (int)$_tmp0;
+      }
+    }
+    if (idx($parsed, 'adaptedShort') !== null) {
+      $_tmp1 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedShort>($parsed['adaptedShort']);
+      if ($_tmp1 > 0x7fff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedShort = (int)$_tmp1;
+      }
+    }
+    if (idx($parsed, 'adaptedInteger') !== null) {
+      $_tmp2 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['adaptedInteger']);
+      if ($_tmp2 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedInteger = (int)$_tmp2;
+      }
+    }
+    if (idx($parsed, 'adaptedLong') !== null) {
+      $this->adaptedLong = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedLong>($parsed['adaptedLong']);
+    }
+    if (idx($parsed, 'adaptedDouble') !== null) {
+      $this->adaptedDouble = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedDouble>($parsed['adaptedDouble']);
+    }
+    if (idx($parsed, 'adaptedString') !== null) {
+      $this->adaptedString = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedString>($parsed['adaptedString']);
+    }
+    if (idx($parsed, 'adaptedList') !== null) {
+      $_json6 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['adaptedList']);
+      $_container7 = Vector {};
+      foreach($_json6 as $_key4 => $_value5) {
+        $_elem8 = 0;
+        $_elem8 = $_value5;
+        $_container7 []= $_elem8;
+      }
+      $this->adaptedList = $_container7;
+    }
+    if (idx($parsed, 'adaptedSet') !== null) {
+      $_json12 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['adaptedSet']);
+      $_container13 = Set {};
+      foreach($_json12 as $_key10 => $_value11) {
+        $_elem14 = 0;
+        $_elem14 = $_value11;
+        $_container13->add($_elem14);
+      }
+      $this->adaptedSet = $_container13;
+    }
+    if (idx($parsed, 'adaptedMap') !== null) {
+      $_json18 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, int>>($parsed['adaptedMap']);
+      $_container19 = Map {};
+      foreach($_json18 as $_key16 => $_value17) {
+        $_value20 = 0;
+        $_value20 = $_value17;
+        $_container19[$_key16] = $_value20;
+      }
+      $this->adaptedMap = $_container19;
+    }
+    if (idx($parsed, 'adaptedBoolDefault') !== null) {
+      $this->adaptedBoolDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedBool>($parsed['adaptedBoolDefault']);
+    }
+    if (idx($parsed, 'adaptedByteDefault') !== null) {
+      $_tmp21 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedByte>($parsed['adaptedByteDefault']);
+      if ($_tmp21 > 0x7f) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedByteDefault = (int)$_tmp21;
+      }
+    }
+    if (idx($parsed, 'adaptedShortDefault') !== null) {
+      $_tmp22 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedShort>($parsed['adaptedShortDefault']);
+      if ($_tmp22 > 0x7fff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedShortDefault = (int)$_tmp22;
+      }
+    }
+    if (idx($parsed, 'adaptedIntegerDefault') !== null) {
+      $_tmp23 = (int)HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedInteger>($parsed['adaptedIntegerDefault']);
+      if ($_tmp23 > 0x7fffffff) {
+        throw new \TProtocolException("number exceeds limit in field");
+      } else {
+        $this->adaptedIntegerDefault = (int)$_tmp23;
+      }
+    }
+    if (idx($parsed, 'adaptedLongDefault') !== null) {
+      $this->adaptedLongDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedLong>($parsed['adaptedLongDefault']);
+    }
+    if (idx($parsed, 'adaptedDoubleDefault') !== null) {
+      $this->adaptedDoubleDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedDouble>($parsed['adaptedDoubleDefault']);
+    }
+    if (idx($parsed, 'adaptedStringDefault') !== null) {
+      $this->adaptedStringDefault = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedString>($parsed['adaptedStringDefault']);
+    }
+    if (idx($parsed, 'adaptedEnum') !== null) {
+      $this->adaptedEnum = \thrift\test\ThriftAdaptedEnum::coerce(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedEnum>($parsed['adaptedEnum']));
+    }
+    if (idx($parsed, 'adaptedListDefault') !== null) {
+      $_json27 = HH\FIXME\UNSAFE_CAST<mixed, Vector<int>>($parsed['adaptedListDefault']);
+      $_container28 = Vector {};
+      foreach($_json27 as $_key25 => $_value26) {
+        $_elem29 = 0;
+        $_elem29 = $_value26;
+        $_container28 []= $_elem29;
+      }
+      $this->adaptedListDefault = $_container28;
+    }
+    if (idx($parsed, 'adaptedSetDefault') !== null) {
+      $_json33 = HH\FIXME\UNSAFE_CAST<mixed, Set<int>>($parsed['adaptedSetDefault']);
+      $_container34 = Set {};
+      foreach($_json33 as $_key31 => $_value32) {
+        $_elem35 = 0;
+        $_elem35 = $_value32;
+        $_container34->add($_elem35);
+      }
+      $this->adaptedSetDefault = $_container34;
+    }
+    if (idx($parsed, 'adaptedMapDefault') !== null) {
+      $_json39 = HH\FIXME\UNSAFE_CAST<mixed, Map<int, int>>($parsed['adaptedMapDefault']);
+      $_container40 = Map {};
+      foreach($_json39 as $_key37 => $_value38) {
+        $_value41 = 0;
+        $_value41 = $_value38;
+        $_container40[$_key37] = $_value41;
+      }
+      $this->adaptedMapDefault = $_container40;
+    }
+    if (idx($parsed, 'doubleTypedefBool') !== null) {
+      $this->doubleTypedefBool = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DoubleTypedefBool>($parsed['doubleTypedefBool']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptTemplatedNestedTestStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTemplatedNestedTestStruct'))>>
+class AdaptTemplatedNestedTestStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'adaptedStruct',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\AdaptTemplatedTestStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'adaptedStruct' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'adaptedStruct' => ?\thrift\test\AdaptTemplatedTestStruct,
+  );
+
+  const type TShape = shape(
+    ?'adaptedStruct' => ?\thrift\test\AdaptTemplatedTestStruct::TShape,
+  );
+  const int STRUCTURAL_ID = 7684145159661226586;
+  /**
+   * Original thrift field:-
+   * 1: struct module.AdaptTemplatedTestStruct adaptedStruct
+   */
+  public ?\thrift\test\AdaptTemplatedTestStruct $adaptedStruct;
+
+  public function __construct(?\thrift\test\AdaptTemplatedTestStruct $adaptedStruct = null)[] {
+    $this->adaptedStruct = $adaptedStruct;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'adaptedStruct'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptTemplatedNestedTestStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptTemplatedNestedTestStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.AdaptTemplatedTestStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedStruct",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\thrift\test\AdaptTemplatedTestStruct::__fromShape($shape['adaptedStruct'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'adaptedStruct' => $this->adaptedStruct?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'adaptedStruct') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptTemplatedTestStruct>($parsed['adaptedStruct']));
+      $_tmp1 = \thrift\test\AdaptTemplatedTestStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->adaptedStruct = $_tmp1;
+    }
+  }
+
+}
+
+enum AdaptTestUnionEnum: int {
+  _EMPTY_ = 0;
+  delay = 1;
+  custom = 2;
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptTestUnion
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptTestUnion'))>>
+class AdaptTestUnion implements \IThriftSyncStruct, \IThriftUnion<\thrift\test\AdaptTestUnionEnum>, \IThriftShapishSyncStruct {
+  use \ThriftUnionSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'delay',
+      'union' => true,
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'custom',
+      'union' => true,
+      'type' => \TType::STRING,
+      'is_binary' => true,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'delay' => 1,
+    'custom' => 2,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'delay' => ?\thrift\test\DurationMs,
+    ?'custom' => ?\thrift\test\CustomProtocolType,
+  );
+
+  const type TShape = shape(
+    ?'delay' => ?\thrift\test\DurationMs,
+    ?'custom' => ?\thrift\test\CustomProtocolType,
+  );
+  const int STRUCTURAL_ID = 7327808847999377042;
+  /**
+   * Original thrift field:-
+   * 1: i64 delay
+   */
+  public ?\thrift\test\DurationMs $delay;
+  /**
+   * Original thrift field:-
+   * 2: binary custom
+   */
+  public ?\thrift\test\CustomProtocolType $custom;
+  protected \thrift\test\AdaptTestUnionEnum $_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+
+  public function __construct(?\thrift\test\DurationMs $delay = null, ?\thrift\test\CustomProtocolType $custom = null)[] {
+    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+    if ($delay !== null) {
+      $this->delay = $delay;
+      $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+    }
+    if ($custom !== null) {
+      $this->custom = $custom;
+      $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+    }
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'delay'),
+      Shapes::idx($shape, 'custom'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptTestUnion';
+  }
+
+  public function getType()[]: \thrift\test\AdaptTestUnionEnum {
+    return $this->_type;
+  }
+
+  public function reset()[write_props]: void {
+    switch ($this->_type) {
+      case \thrift\test\AdaptTestUnionEnum::delay:
+        $this->delay = null;
+        break;
+      case \thrift\test\AdaptTestUnionEnum::custom:
+        $this->custom = null;
+        break;
+      case \thrift\test\AdaptTestUnionEnum::_EMPTY_:
+        break;
+    }
+    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+  }
+
+  public function set_delay(\thrift\test\DurationMs $delay)[write_props]: this {
+    $this->reset();
+    $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+    $this->delay = $delay;
+    return $this;
+  }
+
+  public function get_delay()[]: ?\thrift\test\DurationMs {
+    return $this->delay;
+  }
+
+  public function getx_delay()[]: \thrift\test\DurationMs {
+    invariant(
+      $this->_type === \thrift\test\AdaptTestUnionEnum::delay,
+      'get_delay called on an instance of AdaptTestUnion whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->delay as nonnull;
+  }
+
+  public function set_custom(\thrift\test\CustomProtocolType $custom)[write_props]: this {
+    $this->reset();
+    $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+    $this->custom = $custom;
+    return $this;
+  }
+
+  public function get_custom()[]: ?\thrift\test\CustomProtocolType {
+    return $this->custom;
+  }
+
+  public function getx_custom()[]: \thrift\test\CustomProtocolType {
+    invariant(
+      $this->_type === \thrift\test\AdaptTestUnionEnum::custom,
+      'get_custom called on an instance of AdaptTestUnion whose current type is %s',
+      (string)$this->_type,
+    );
+    return $this->custom as nonnull;
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptTestUnion",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.DurationMs",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "delay",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.CustomProtocolType",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_BINARY_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "custom",
+            )
+          ),
+        ],
+        "is_union" => true,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'delay' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::AdaptTestMsAdapter",
+              )
+            ),
+          ],
+        ),
+        'custom' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::CustomProtocolAdapter",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'delay'),
+      Shapes::idx($shape, 'custom'),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'delay' => $this->delay,
+      'custom' => $this->custom,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $this->_type = \thrift\test\AdaptTestUnionEnum::_EMPTY_;
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'delay') !== null) {
+      $this->delay = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DurationMs>($parsed['delay']);
+      $this->_type = \thrift\test\AdaptTestUnionEnum::delay;
+    }
+    if (idx($parsed, 'custom') !== null) {
+      $this->custom = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CustomProtocolType>($parsed['custom']);
+      $this->_type = \thrift\test\AdaptTestUnionEnum::custom;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AdaptedStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AdaptedStruct'))>>
+class AdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'data',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'data' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'data' => ?int,
+  );
+
+  const type TShape = shape(
+    'data' => int,
+  );
+  const int STRUCTURAL_ID = 3905817191290553362;
+  /**
+   * Original thrift field:-
+   * 1: i64 data
+   */
+  public int $data;
+
+  public function __construct(?int $data = null)[] {
+    $this->data = $data ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'data'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AdaptedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AdaptedStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "data",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['data'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'data' => $this->data,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'data') !== null) {
+      $this->data = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['data']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * DirectlyAdaptedStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/DirectlyAdaptedStruct'))>>
+class DirectlyAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'data',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'data' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'data' => ?int,
+  );
+
+  const type TShape = shape(
+    'data' => int,
+  );
+  const int STRUCTURAL_ID = 3905817191290553362;
+  /**
+   * Original thrift field:-
+   * 1: i64 data
+   */
+  public int $data;
+
+  public function __construct(?int $data = null)[] {
+    $this->data = $data ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'data'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'DirectlyAdaptedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.DirectlyAdaptedStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "data",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::TemplatedTestAdapter",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['data'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'data' => $this->data,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'data') !== null) {
+      $this->data = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['data']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * StructFieldAdaptedStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/StructFieldAdaptedStruct'))>>
+class StructFieldAdaptedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'adaptedStruct',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\AdaptedStruct::class,
+    ),
+    2 => shape(
+      'var' => 'adaptedTypedef',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\AdaptedStruct::class,
+    ),
+    3 => shape(
+      'var' => 'directlyAdapted',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\DirectlyAdaptedStruct::class,
+    ),
+    4 => shape(
+      'var' => 'typedefOfAdapted',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\DirectlyAdaptedStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'adaptedStruct' => 1,
+    'adaptedTypedef' => 2,
+    'directlyAdapted' => 3,
+    'typedefOfAdapted' => 4,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'adaptedStruct' => ?\thrift\test\AdaptedStruct,
+    ?'adaptedTypedef' => ?\thrift\test\AdaptedTypedef,
+    ?'directlyAdapted' => ?\thrift\test\DirectlyAdaptedStruct,
+    ?'typedefOfAdapted' => ?\thrift\test\TypedefOfDirect,
+  );
+
+  const type TShape = shape(
+    ?'adaptedStruct' => ?\thrift\test\AdaptedStruct::TShape,
+    ?'adaptedTypedef' => ?\thrift\test\AdaptedTypedef,
+    ?'directlyAdapted' => ?\thrift\test\DirectlyAdaptedStruct::TShape,
+    ?'typedefOfAdapted' => ?\thrift\test\TypedefOfDirect,
+  );
+  const int STRUCTURAL_ID = 3653783318222631819;
+  /**
+   * Original thrift field:-
+   * 1: struct module.AdaptedStruct adaptedStruct
+   */
+  public ?\thrift\test\AdaptedStruct $adaptedStruct;
+  /**
+   * Original thrift field:-
+   * 2: struct module.AdaptedStruct adaptedTypedef
+   */
+  public ?\thrift\test\AdaptedTypedef $adaptedTypedef;
+  /**
+   * Original thrift field:-
+   * 3: struct module.DirectlyAdaptedStruct directlyAdapted
+   */
+  public ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted;
+  /**
+   * Original thrift field:-
+   * 4: struct module.DirectlyAdaptedStruct typedefOfAdapted
+   */
+  public ?\thrift\test\TypedefOfDirect $typedefOfAdapted;
+
+  public function __construct(?\thrift\test\AdaptedStruct $adaptedStruct = null, ?\thrift\test\AdaptedTypedef $adaptedTypedef = null, ?\thrift\test\DirectlyAdaptedStruct $directlyAdapted = null, ?\thrift\test\TypedefOfDirect $typedefOfAdapted = null)[] {
+    $this->adaptedStruct = $adaptedStruct;
+    $this->adaptedTypedef = $adaptedTypedef;
+    $this->directlyAdapted = $directlyAdapted;
+    $this->typedefOfAdapted = $typedefOfAdapted;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'adaptedStruct'),
+      Shapes::idx($shape, 'adaptedTypedef'),
+      Shapes::idx($shape, 'directlyAdapted'),
+      Shapes::idx($shape, 'typedefOfAdapted'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'StructFieldAdaptedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.StructFieldAdaptedStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedStruct",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedTypedef",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.AdaptedStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "adaptedTypedef",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.DirectlyAdaptedStruct",
+                    )
+                  ),
+                )
+              ),
+              "name" => "directlyAdapted",
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 4,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.TypedefOfDirect",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.DirectlyAdaptedStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "typedefOfAdapted",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'adaptedStruct' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'adaptedTypedef' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+        'directlyAdapted' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::TemplatedTestAdapter",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'adaptedStruct') === null ? null : (\thrift\test\AdaptedStruct::__fromShape($shape['adaptedStruct'])),
+      Shapes::idx($shape, 'adaptedTypedef') === null ? null : (\thrift\test\AdaptedStruct::__fromShape($shape['adaptedTypedef'])),
+      Shapes::idx($shape, 'directlyAdapted') === null ? null : (\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['directlyAdapted'])),
+      Shapes::idx($shape, 'typedefOfAdapted') === null ? null : (\thrift\test\DirectlyAdaptedStruct::__fromShape($shape['typedefOfAdapted'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'adaptedStruct' => $this->adaptedStruct?->__toShape(),
+      'adaptedTypedef' => $this->adaptedTypedef?->__toShape(),
+      'directlyAdapted' => $this->directlyAdapted?->__toShape(),
+      'typedefOfAdapted' => $this->typedefOfAdapted?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'adaptedStruct') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedStruct>($parsed['adaptedStruct']));
+      $_tmp1 = \thrift\test\AdaptedStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->adaptedStruct = $_tmp1;
+    }
+    if (idx($parsed, 'adaptedTypedef') !== null) {
+      $_tmp2 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\AdaptedTypedef>($parsed['adaptedTypedef']));
+      $_tmp3 = \thrift\test\AdaptedStruct::withDefaultValues();
+      $_tmp3->readFromJson($_tmp2);
+      $this->adaptedTypedef = $_tmp3;
+    }
+    if (idx($parsed, 'directlyAdapted') !== null) {
+      $_tmp4 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\DirectlyAdaptedStruct>($parsed['directlyAdapted']));
+      $_tmp5 = \thrift\test\DirectlyAdaptedStruct::withDefaultValues();
+      $_tmp5->readFromJson($_tmp4);
+      $this->directlyAdapted = $_tmp5;
+    }
+    if (idx($parsed, 'typedefOfAdapted') !== null) {
+      $_tmp6 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\TypedefOfDirect>($parsed['typedefOfAdapted']));
+      $_tmp7 = \thrift\test\DirectlyAdaptedStruct::withDefaultValues();
+      $_tmp7->readFromJson($_tmp6);
+      $this->typedefOfAdapted = $_tmp7;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * CircularAdaptee
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CircularAdaptee'))>>
+class CircularAdaptee implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\CircularStruct::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?\thrift\test\CircularStruct,
+  );
+
+  const type TShape = shape(
+    ?'field' => ?\thrift\test\CircularStruct::TShape,
+  );
+  const int STRUCTURAL_ID = 6453901709117171539;
+  /**
+   * Original thrift field:-
+   * 1: struct module.CircularStruct field
+   */
+  public ?\thrift\test\CircularStruct $field;
+
+  public function __construct(?\thrift\test\CircularStruct $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'CircularAdaptee';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.CircularAdaptee",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.CircularStruct",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_struct" => \tmeta_ThriftStructType::fromShape(
+                            shape(
+                              "name" => "module.CircularStruct",
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field') === null ? null : (\thrift\test\CircularStruct::__fromShape($shape['field'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'field' => $this->field?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CircularStruct>($parsed['field']));
+      $_tmp1 = \thrift\test\CircularStruct::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->field = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * CircularStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CircularStruct'))>>
+class CircularStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'field',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\CircularAdaptee::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'field' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'field' => ?\thrift\test\CircularAdaptee,
+  );
+
+  const type TShape = shape(
+    ?'field' => ?\thrift\test\CircularAdaptee::TShape,
+  );
+  const int STRUCTURAL_ID = 7977518433842367675;
+  /**
+   * Original thrift field:-
+   * 1: struct module.CircularAdaptee field
+   */
+  public ?\thrift\test\CircularAdaptee $field;
+
+  public function __construct(?\thrift\test\CircularAdaptee $field = null)[] {
+    $this->field = $field;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'CircularStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.CircularStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.AdaptedCircularAdaptee",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                            shape(
+                              "name" => "module.AdaptedCircularAdaptee",
+                              "underlyingType" => \tmeta_ThriftType::fromShape(
+                                shape(
+                                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                                    shape(
+                                      "name" => "module.CircularAdaptee",
+                                    )
+                                  ),
+                                )
+                              ),
+                            )
+                          ),
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "field",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'field' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Ref' => \thrift\annotation\cpp\Ref::fromShape(
+              shape(
+                "type" => \thrift\annotation\cpp\RefType::Unique,
+              )
+            ),
+          ],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::MemberAccessAdapter",
+                "adaptedType" => "::apache::thrift::test::TaggedWrapper<CircularAdaptee, CircularStruct>",
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'field') === null ? null : (\thrift\test\CircularAdaptee::__fromShape($shape['field'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'field' => $this->field?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'field') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CircularAdaptee>($parsed['field']));
+      $_tmp1 = \thrift\test\CircularAdaptee::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->field = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * RenamedStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/RenamedStruct'))>>
+class RenamedStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'data',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'data' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'data' => ?int,
+  );
+
+  const type TShape = shape(
+    'data' => int,
+  );
+  const int STRUCTURAL_ID = 3905817191290553362;
+  /**
+   * Original thrift field:-
+   * 1: i64 data
+   */
+  public int $data;
+
+  public function __construct(?int $data = null)[] {
+    $this->data = $data ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'data'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'RenamedStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.RenamedStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "data",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::TemplatedTestAdapter",
+            "underlyingName" => "UnderlyingRenamedStruct",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['data'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'data' => $this->data,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'data') !== null) {
+      $this->data = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['data']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * SameNamespaceStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/SameNamespaceStruct'))>>
+class SameNamespaceStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'data',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'data' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'data' => ?int,
+  );
+
+  const type TShape = shape(
+    'data' => int,
+  );
+  const int STRUCTURAL_ID = 3905817191290553362;
+  /**
+   * Original thrift field:-
+   * 1: i64 data
+   */
+  public int $data;
+
+  public function __construct(?int $data = null)[] {
+    $this->data = $data ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'data'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'SameNamespaceStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.SameNamespaceStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "data",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::TemplatedTestAdapter",
+            "underlyingName" => "UnderlyingSameNamespaceStruct",
+            "extraNamespace" => "",
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['data'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'data' => $this->data,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'data') !== null) {
+      $this->data = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['data']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * HeapAllocated
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/HeapAllocated'))>>
+class HeapAllocated implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'HeapAllocated';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.HeapAllocated",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::MoveOnlyAdapter",
+            "moveOnly" => true,
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * MoveOnly
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/MoveOnly'))>>
+class MoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'ptr',
+      'type' => \TType::STRUCT,
+      'class' => \thrift\test\HeapAllocated::class,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'ptr' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'ptr' => ?\thrift\test\HeapAllocated,
+  );
+
+  const type TShape = shape(
+    ?'ptr' => ?\thrift\test\HeapAllocated::TShape,
+  );
+  const int STRUCTURAL_ID = 1105592653371346642;
+  /**
+   * Original thrift field:-
+   * 1: struct module.HeapAllocated ptr
+   */
+  public ?\thrift\test\HeapAllocated $ptr;
+
+  public function __construct(?\thrift\test\HeapAllocated $ptr = null)[] {
+    $this->ptr = $ptr;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'ptr'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'MoveOnly';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.MoveOnly",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_struct" => \tmeta_ThriftStructType::fromShape(
+                    shape(
+                      "name" => "module.HeapAllocated",
+                    )
+                  ),
+                )
+              ),
+              "name" => "ptr",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'ptr' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::MoveOnlyAdapter",
+                "moveOnly" => true,
+              )
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'ptr') === null ? null : (\thrift\test\HeapAllocated::__fromShape($shape['ptr'])),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'ptr' => $this->ptr?->__toShape(),
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'ptr') !== null) {
+      $_tmp0 = \json_encode(HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\HeapAllocated>($parsed['ptr']));
+      $_tmp1 = \thrift\test\HeapAllocated::withDefaultValues();
+      $_tmp1->readFromJson($_tmp0);
+      $this->ptr = $_tmp1;
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * AlsoMoveOnly
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/AlsoMoveOnly'))>>
+class AlsoMoveOnly implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'ptr',
+      'type' => \TType::I64,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'ptr' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'ptr' => ?int,
+  );
+
+  const type TShape = shape(
+    'ptr' => int,
+  );
+  const int STRUCTURAL_ID = 6708492965690058109;
+  /**
+   * Original thrift field:-
+   * 1: i64 ptr
+   */
+  public int $ptr;
+
+  public function __construct(?int $ptr = null)[] {
+    $this->ptr = $ptr ?? 0;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'ptr'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'AlsoMoveOnly';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.AlsoMoveOnly",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "ptr",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'ptr' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::MoveOnlyAdapter",
+                "moveOnly" => true,
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['ptr'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'ptr' => $this->ptr,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'ptr') !== null) {
+      $this->ptr = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['ptr']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * ApplyAdapter
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/ApplyAdapter'))>>
+class ApplyAdapter implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'ApplyAdapter';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.ApplyAdapter",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::TemplatedTestAdapter",
+          )
+        ),
+        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * TransitiveAdapted
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/TransitiveAdapted'))>>
+class TransitiveAdapted implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+  ];
+  const dict<string, int> FIELDMAP = dict[
+  ];
+
+  const type TConstructorShape = shape(
+  );
+
+  const type TShape = shape(
+  );
+  const int STRUCTURAL_ID = 957977401221134810;
+
+  public function __construct()[] {
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function getName()[]: string {
+    return 'TransitiveAdapted';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.TransitiveAdapted",
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\test\ApplyAdapter' => \thrift\test\ApplyAdapter::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * CountingStruct
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/CountingStruct'))>>
+class CountingStruct implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'regularInt',
+      'type' => \TType::I64,
+    ),
+    2 => shape(
+      'var' => 'countingInt',
+      'type' => \TType::I64,
+    ),
+    3 => shape(
+      'var' => 'regularString',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'regularInt' => 1,
+    'countingInt' => 2,
+    'regularString' => 3,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'regularInt' => ?int,
+    ?'countingInt' => ?\thrift\test\CountingInt,
+    ?'regularString' => ?string,
+  );
+
+  const type TShape = shape(
+    ?'regularInt' => ?int,
+    ?'countingInt' => ?\thrift\test\CountingInt,
+    ?'regularString' => ?string,
+  );
+  const int STRUCTURAL_ID = 1297891124769241261;
+  /**
+   * Original thrift field:-
+   * 1: i64 regularInt
+   */
+  public ?int $regularInt;
+  /**
+   * Original thrift field:-
+   * 2: i64 countingInt
+   */
+  public ?\thrift\test\CountingInt $countingInt;
+  /**
+   * Original thrift field:-
+   * 3: string regularString
+   */
+  public ?string $regularString;
+
+  public function __construct(?int $regularInt = null, ?\thrift\test\CountingInt $countingInt = null, ?string $regularString = null)[] {
+    $this->regularInt = $regularInt;
+    $this->countingInt = $countingInt;
+    $this->regularString = $regularString;
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'regularInt'),
+      Shapes::idx($shape, 'countingInt'),
+      Shapes::idx($shape, 'regularString'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'CountingStruct';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.CountingStruct",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                )
+              ),
+              "name" => "regularInt",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 2,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_typedef" => \tmeta_ThriftTypedefType::fromShape(
+                    shape(
+                      "name" => "module.CountingInt",
+                      "underlyingType" => \tmeta_ThriftType::fromShape(
+                        shape(
+                          "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_I64_TYPE,
+                        )
+                      ),
+                    )
+                  ),
+                )
+              ),
+              "name" => "countingInt",
+              "is_optional" => true,
+            )
+          ),
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 3,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "regularString",
+              "is_optional" => true,
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+        'regularInt' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::CountingAdapter<false, int>",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+        'countingInt' => shape(
+          'field' => dict[],
+          'type' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::CountingAdapter<true, int>",
+              )
+            ),
+          ],
+        ),
+        'regularString' => shape(
+          'field' => dict[
+            '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+              shape(
+                "name" => "::apache::thrift::test::CountingAdapter<false, std::string>",
+              )
+            ),
+          ],
+          'type' => dict[],
+        ),
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'regularInt'),
+      Shapes::idx($shape, 'countingInt'),
+      Shapes::idx($shape, 'regularString'),
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'regularInt' => $this->regularInt,
+      'countingInt' => $this->countingInt,
+      'regularString' => $this->regularString,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'regularInt') !== null) {
+      $this->regularInt = HH\FIXME\UNSAFE_CAST<mixed, int>($parsed['regularInt']);
+    }
+    if (idx($parsed, 'countingInt') !== null) {
+      $this->countingInt = HH\FIXME\UNSAFE_CAST<mixed, \thrift\test\CountingInt>($parsed['countingInt']);
+    }
+    if (idx($parsed, 'regularString') !== null) {
+      $this->regularString = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['regularString']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * Person
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Person'))>>
+class Person implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'name',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'name' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'name' => ?string,
+  );
+
+  const type TShape = shape(
+    'name' => string,
+  );
+  const int STRUCTURAL_ID = 2593878277785201336;
+  /**
+   * Original thrift field:-
+   * 1: string name
+   */
+  public string $name;
+
+  public function __construct(?string $name = null)[] {
+    $this->name = $name ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'name'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Person';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Person",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "name",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::VariableAdapter",
+          )
+        ),
+        '\thrift\annotation\Transitive' => \thrift\annotation\Transitive::fromShape(
+          shape(
+          )
+        ),
+      ],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['name'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'name' => $this->name,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'name') !== null) {
+      $this->name = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['name']);
+    }
+  }
+
+}
+
+/**
+ * Original thrift struct:-
+ * Person2
+ */
+<<\ThriftTypeInfo(shape('uri' => 'facebook.com/thrift/test/Person2'))>>
+class Person2 implements \IThriftSyncStruct, \IThriftShapishSyncStruct {
+  use \ThriftSerializationTrait;
+
+  const dict<int, this::TFieldSpec> SPEC = dict[
+    1 => shape(
+      'var' => 'name',
+      'type' => \TType::STRING,
+    ),
+  ];
+  const dict<string, int> FIELDMAP = dict[
+    'name' => 1,
+  ];
+
+  const type TConstructorShape = shape(
+    ?'name' => ?string,
+  );
+
+  const type TShape = shape(
+    'name' => string,
+  );
+  const int STRUCTURAL_ID = 2593878277785201336;
+  /**
+   * Original thrift field:-
+   * 1: string name
+   */
+  public string $name;
+
+  public function __construct(?string $name = null)[] {
+    $this->name = $name ?? '';
+  }
+
+  public static function withDefaultValues()[]: this {
+    return new static();
+  }
+
+  public static function fromShape(self::TConstructorShape $shape)[]: this {
+    return new static(
+      Shapes::idx($shape, 'name'),
+    );
+  }
+
+  public function getName()[]: string {
+    return 'Person2';
+  }
+
+  public function clearTerseFields()[write_props]: void {
+  }
+
+  public static function getStructMetadata()[]: \tmeta_ThriftStruct {
+    return \tmeta_ThriftStruct::fromShape(
+      shape(
+        "name" => "module.Person2",
+        "fields" => vec[
+          \tmeta_ThriftField::fromShape(
+            shape(
+              "id" => 1,
+              "type" => \tmeta_ThriftType::fromShape(
+                shape(
+                  "t_primitive" => \tmeta_ThriftPrimitiveType::THRIFT_STRING_TYPE,
+                )
+              ),
+              "name" => "name",
+            )
+          ),
+        ],
+        "is_union" => false,
+      )
+    );
+  }
+
+  public static function getAllStructuredAnnotations()[write_props]: \TStructAnnotations {
+    return shape(
+      'struct' => dict[],
+      'fields' => dict[
+      ],
+    );
+  }
+
+  public static function __fromShape(self::TShape $shape)[]: this {
+    return new static(
+      $shape['name'],
+    );
+  }
+
+  public function __toShape()[]: self::TShape {
+    return shape(
+      'name' => $this->name,
+    );
+  }
+  public function getInstanceKey()[write_props]: string {
+    return \TCompactSerializer::serialize($this);
+  }
+
+  public function readFromJson(string $jsonText): void {
+    $parsed = json_decode($jsonText, true);
+
+    if ($parsed === null || !($parsed is KeyedContainer<_, _>)) {
+      throw new \TProtocolException("Cannot parse the given json string.");
+    }
+
+    if (idx($parsed, 'name') !== null) {
+      $this->name = HH\FIXME\UNSAFE_CAST<mixed, string>($parsed['name']);
+    }
   }
 
 }

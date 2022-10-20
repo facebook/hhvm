@@ -30,6 +30,7 @@ let visitor ctx =
       List_rvalue_check.handler;
       Private_final_check.handler;
       Well_formed_internal_trait.handler;
+      Type_structure_leak_check.handler;
     ]
   in
   let handlers =

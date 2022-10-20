@@ -126,6 +126,7 @@ void recordClass(EmitUnitState& euState,
 
 php::SrcLoc srcLoc(const php::Unit& unit, const php::Func& func, int32_t ix) {
   if (ix < 0) return php::SrcLoc{};
+  assertx(ix < unit.srcLocs.size());
   return unit.srcLocs[ix];
 }
 
@@ -1236,6 +1237,7 @@ void emit_constant(UnitEmitter& ue, const php::Constant& constant) {
 void emit_module(UnitEmitter& ue, const php::Module& module) {
   Module m {
     module.name,
+    module.srcInfo.docComment,
     (int)std::get<0>(module.srcInfo.loc),
     (int)std::get<1>(module.srcInfo.loc),
     module.attrs,

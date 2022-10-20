@@ -56,8 +56,8 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
-  static constexpr const std::size_t fields_size = 1;
+template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
+  static constexpr const std::size_t fields_size = 3;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;
@@ -71,8 +71,8 @@ template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotat
   static const std::array<int, fields_size> isset_indexes;
 };
 
-template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_recursive> {
-  static constexpr const std::size_t fields_size = 3;
+template <> struct TStructDataStorage<::test::fixtures::basic-structured-annotations::structured_annotation_forward> {
+  static constexpr const std::size_t fields_size = 1;
   static const std::array<folly::StringPiece, fields_size> fields_names;
   static const std::array<int16_t, fields_size> fields_ids;
   static const std::array<protocol::TType, fields_size> fields_types;

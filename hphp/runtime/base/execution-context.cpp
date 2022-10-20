@@ -1418,14 +1418,13 @@ void ExecutionContext::requestInit() {
   if (UNLIKELY(SystemLib::s_anyNonPersistentBuiltins)) {
     SystemLib::s_unit->merge();
     SystemLib::mergePersistentUnits();
-    if (SystemLib::s_hhas_unit) SystemLib::s_hhas_unit->merge();
   } else {
     // System units are merge only, and everything is persistent.
     assertx(SystemLib::s_unit->isEmpty());
-    assertx(!SystemLib::s_hhas_unit || SystemLib::s_hhas_unit->isEmpty());
   }
 
-  *ImplicitContext::activeCtx = nullptr;
+  assertx(!ImplicitContext::activeCtx.isInit());
+  ImplicitContext::activeCtx.initWith(nullptr);
 
   profileRequestStart();
 

@@ -129,6 +129,14 @@ void logf(LogLevel level, fmt::string_view format_str, Args&&... args) {
   getLog().logf(level, format_str, std::forward<Args>(args)...);
 }
 
+// Log only to stderr. This bypasses Logging / folly::Synchronized which
+// might deadlock during exit.
+template <typename... Args>
+void logf_stderr(fmt::string_view format_str, Args&&... args) {
+  auto msg = fmt::format(fmt::runtime(format_str), std::forward<Args>(args)...);
+  ignore_result(write(STDERR_FILENO, msg.data(), msg.size()));
+}
+
 #ifdef _WIN32
 LONG WINAPI exception_filter(LPEXCEPTION_POINTERS excep);
 #endif

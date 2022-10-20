@@ -35,6 +35,9 @@
 #include <pthread.h>
 #include <signal.h>
 
+#include "process-cpu.h"
+#include "process-host.h"
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -103,223 +106,213 @@ struct ProcStatus {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-struct Process {
-  // The maximum supported signal number is kNSig - 1.
-  static constexpr unsigned kNSig =
+namespace Process {
+// The maximum supported signal number is kNSig - 1.
+constexpr unsigned kNSig =
 #if defined(NSIG)
-    NSIG
+  NSIG
 #elif defined(_NSIG)
-    _NSIG
+  _NSIG
 #else
-    64
+  64
 #endif
-    ;
+  ;
 
-  // Cached process statics
-  static std::string HostName;
-  static std::string CurrentWorkingDirectory;
-  static char** Argv;
+// Cached process statics
+extern std::string HostName;
+extern std::string CurrentWorkingDirectory;
+extern char** Argv;
 
-  static void InitProcessStatics();
-  static void RecordArgv(char** argv) { // only call this in main()
-    Argv = argv;
-  }
+void InitProcessStatics();
+inline void RecordArgv(char** argv) { // only call this in main()
+  Argv = argv;
+}
 
-  /**
-   * Current executable's name.
-   */
-  static std::string GetAppName();
+/**
+ * Current executable's name.
+ */
+std::string GetAppName();
 
-  /**
-   * This machine's name.
-   */
-  static std::string GetHostName();
+/**
+ * Get command line with a process ID.
+ */
+std::string GetCommandLine(pid_t pid);
 
-  /**
-   * Get command line with a process ID.
-   */
-  static std::string GetCommandLine(pid_t pid);
+/**
+ * Check if the current process is being run under GDB.  Will return false if
+ * we're unable to read /proc/{getpid()}/status.
+ */
+bool IsUnderGDB();
 
-  /**
-   * Check if the current process is being run under GDB.  Will return false if
-   * we're unable to read /proc/{getpid()}/status.
-   */
-  static bool IsUnderGDB();
+/**
+ * Get memory usage in MB by a process.
+ */
+int64_t GetMemUsageMb();
 
-  /**
-   * Get memory usage in MB by a process.
-   */
-  static int64_t GetMemUsageMb();
+/**
+ * Get the total systems cpu delay in milliseconds.
+ *
+ * The cpu delay measure the total amount of time that a processes were
+ * runnable, but not running because the CPUs were busy.
+ */
+int64_t GetSystemCPUDelayMS();
 
-  /**
-   * Get the total systems cpu delay in milliseconds.
-   *
-   * The cpu delay measure the total amount of time that a processes were
-   * runnable, but not running because the CPUs were busy.
-   */
-  static int64_t GetSystemCPUDelayMS();
+/**
+ * Get the number of threads running in the current process.
+ */
+int GetNumThreads();
 
-  /**
-   * Get the number of threads running in the current process.
-   */
-  static int GetNumThreads();
+/**
+ * Get system-wide memory usage information.  If `checkCgroup2' is true and
+ * HHVM is running inside a cgroup2, this function checks cgroup2's limits to
+ * potentially reduce the amount of total and available memory.  Returns false
+ * upon failure.  Note that previous value of `info` is reset, even upon
+ * failure.
+ */
+bool GetMemoryInfo(MemInfo& info, bool checkCgroup2);
 
-  /**
-   * Get system-wide memory usage information.  Returns false upon
-   * failure.  Note that previous value of `info` is reset, even upon
-   * failure.
-   */
-  static bool GetMemoryInfo(MemInfo& info);
+/**
+ * Current thread's identifier.
+ */
+inline pthread_t GetThreadId() {
+  return pthread_self();
+}
 
-  /**
-   * Current thread's identifier.
-   */
-  static pthread_t GetThreadId() {
-    return pthread_self();
-  }
-
-  /**
-   * Current thread's identifier.
-   */
-  static uint64_t GetThreadIdForTrace() {
-    // For tracing purposes this just needs to be unique, pthread_t is not
-    // portable but even if it's a pointer to a struct like on OSX this will
-    // produce a unique value. If we support platforms where this isn't the
-    // case we will need to revisit this.
+/**
+ * Current thread's identifier.
+ */
+inline uint64_t GetThreadIdForTrace() {
+  // For tracing purposes this just needs to be unique, pthread_t is not
+  // portable but even if it's a pointer to a struct like on OSX this will
+  // produce a unique value. If we support platforms where this isn't the
+  // case we will need to revisit this.
 #ifdef __linux__
-    return pthread_self();
+  return pthread_self();
 #else
-    return (uint64_t)pthread_self();
+  return (uint64_t)pthread_self();
 #endif
-  }
+}
 
-  /*
-   * Thread's process identifier.
-   */
-  static pid_t GetThreadPid() {
+/*
+ * Thread's process identifier.
+ */
+inline pid_t GetThreadPid() {
 #ifdef __FreeBSD__
 # if __FreeBSD__version > 900030
-    return pthread_getthreadid_np();
+  return pthread_getthreadid_np();
 # else
-    long tid;
-    syscall(SYS_thr_self, &tid);
-    return (pid_t) tid;
+  long tid;
+  syscall(SYS_thr_self, &tid);
+  return (pid_t) tid;
 # endif
 #elif defined(_MSC_VER)
-    return GetCurrentThreadId();
+  return GetCurrentThreadId();
 #else
-    return syscall(SYS_gettid);
+  return syscall(SYS_gettid);
 #endif
-  }
+}
 
-  /**
-   * Are we in the main thread still?
-   */
-  static bool IsInMainThread() {
-    return Process::GetThreadPid() == getpid();
-  }
+/**
+ * Are we in the main thread still?
+ */
+inline bool IsInMainThread() {
+  return Process::GetThreadPid() == getpid();
+}
 
-  /**
-   * Get CPU information.
-   */
-  static int GetCPUCount();
-  static std::string GetCPUModel();
+/**
+ * Get current working directory.
+ */
+std::string GetCurrentDirectory();
 
-  /**
-   * Get current working directory.
-   */
-  static std::string GetCurrentDirectory();
+/**
+ * Get current user's name.
+ */
+std::string GetCurrentUser();
 
-  /**
-   * Get current user's name.
-   */
-  static std::string GetCurrentUser();
+/**
+ * Get current user's home directory.
+ */
+std::string GetHomeDirectory();
 
-  /**
-   * Get current user's home directory.
-   */
-  static std::string GetHomeDirectory();
+/**
+ * Set core dump filters to make sure hugetlb pages are included in coredumps.
+ */
+void SetCoreDumpHugePages();
 
-  /**
-   * Set core dump filters to make sure hugetlb pages are included in coredumps.
-   */
-  static void SetCoreDumpHugePages();
+/*
+ * Write to /proc/self/oom_score_adj (for Linux only).  This affects the OOM
+ * killer when it decides which process to kill.  Valid values are between
+ * -1000 and 1000.  Lower values makes it less likely for the process to be
+ * killed.  In particular, -1000 disables the OOM killer completely for the
+ * current process.  Returns whether adjustment was successful.
+ */
+bool OOMScoreAdj(int adj = 1000);
+/*
+ * Sometimes we want to relaunch under modified environment.  It won't return
+ * upon success, and returns -1 when an error occurs (similar to exec()).
+ */
+int Relaunch();
 
-  /*
-   * Write to /proc/self/oom_score_adj (for Linux only).  This affects the OOM
-   * killer when it decides which process to kill.  Valid values are between
-   * -1000 and 1000.  Lower values makes it less likely for the process to be
-   * killed.  In particular, -1000 disables the OOM killer completely for the
-   * current process.  Returns whether adjustment was successful.
-   */
-  static bool OOMScoreAdj(int adj = 1000);
-  /*
-   * Sometimes we want to relaunch under modified environment.  It won't return
-   * upon success, and returns -1 when an error occurs (similar to exec()).
-   */
-  static int Relaunch();
+/** Replace the FDs, ensuring a clean STDIO, and avoiding conflicts.
+ *
+ * `fds` is a map where:
+ * - keys are the target FD in the new process
+ * - values are the FD in the current process
+ *
+ * Any FDs not specified (including STDIO) will be closed.
+ *
+ * If the TARGET is negative, it will be given any FD that does not conflict
+ * with the other input.
+ *
+ * createDelegate() closes stdin/stdout/stderr, so some of our
+ * received handles may be FD 0/1/2 - that doesn't mean they're
+ * stdin/out/err though, but we need to make sure we don't accidentally
+ * close them. Copy everything out of the 'unsafe' space, close everything
+ * else, then move back.
+ *
+ * Returns a map of negative targets (if any) to their new actual FD.
+ */
+std::map<int, int> RemapFDsPreExec(const std::map<int, int>& fds);
 
-  /** Replace the FDs, ensuring a clean STDIO, and avoiding conflicts.
-   *
-   * `fds` is a map where:
-   * - keys are the target FD in the new process
-   * - values are the FD in the current process
-   *
-   * Any FDs not specified (including STDIO) will be closed.
-   *
-   * If the TARGET is negative, it will be given any FD that does not conflict
-   * with the other input.
-   *
-   * createDelegate() closes stdin/stdout/stderr, so some of our
-   * received handles may be FD 0/1/2 - that doesn't mean they're
-   * stdin/out/err though, but we need to make sure we don't accidentally
-   * close them. Copy everything out of the 'unsafe' space, close everything
-   * else, then move back.
-   *
-   * Returns a map of negative targets (if any) to their new actual FD.
-   */
-  static std::map<int, int> RemapFDsPreExec(const std::map<int, int>& fds);
+const int FORK_AND_EXECVE_FLAG_NONE    = 0;
+const int FORK_AND_EXECVE_FLAG_SETPGID = 1 << 0;
+const int FORK_AND_EXECVE_FLAG_SETSID  = 1 << 1;
+const int FORK_AND_EXECVE_FLAG_EXECVPE = 1 << 2;
 
-  static const int FORK_AND_EXECVE_FLAG_NONE    = 0;
-  static const int FORK_AND_EXECVE_FLAG_SETPGID = 1 << 0;
-  static const int FORK_AND_EXECVE_FLAG_SETSID  = 1 << 1;
-  static const int FORK_AND_EXECVE_FLAG_EXECVPE = 1 << 2;
+/** Opens a process with the given arguments, environment, working directory,
+ * and file descriptors.
+ *
+ * This *does not* use the shell; to use the shell, consider executing
+ * `/bin/sh` with args `['-c', 'command'].
+ *
+ * `pgid` is ignored unless `FORK_AND_EXECVE_FLAG_SETPGID` is in `flags`.
+ *
+ * `FORK_AND_EXECVE_FLAG_SETPGID` and `FORK_AND_EXECVE_FLAG_SETSID` are
+ * mutually exclusive.
+ *
+ * `fds` is a map where:
+ * - keys are the target FD in the new process
+ * - values are the FD in the current process
+ *
+ * Any FDs not specified (including STDIO) will be closed.
+ *
+ * On error, `errno` will be set.
+ * - if fork() fails, -1 will be returned
+ * - if chdir() fails, -2 will be returned
+ * - if setsid() fails, -3 will be returned
+ * - if setpgid() fails, -4 will be returned
+ * - if execve() fails, -5 will be returned
+ */
+pid_t ForkAndExecve(
+  const std::string& path,
+  const std::vector<std::string>& argv,
+  const std::vector<std::string>& envp,
+  const std::string& cwd,
+  const std::map<int, int>& fds,
+  int flags = FORK_AND_EXECVE_FLAG_NONE,
+  pid_t pgid = 0);
 
-  /** Opens a process with the given arguments, environment, working directory,
-   * and file descriptors.
-   *
-   * This *does not* use the shell; to use the shell, consider executing
-   * `/bin/sh` with args `['-c', 'command'].
-   *
-   * `pgid` is ignored unless `FORK_AND_EXECVE_FLAG_SETPGID` is in `flags`.
-   *
-   * `FORK_AND_EXECVE_FLAG_SETPGID` and `FORK_AND_EXECVE_FLAG_SETSID` are
-   * mutually exclusive.
-   *
-   * `fds` is a map where:
-   * - keys are the target FD in the new process
-   * - values are the FD in the current process
-   *
-   * Any FDs not specified (including STDIO) will be closed.
-   *
-   * On error, `errno` will be set.
-   * - if fork() fails, -1 will be returned
-   * - if chdir() fails, -2 will be returned
-   * - if setsid() fails, -3 will be returned
-   * - if setpgid() fails, -4 will be returned
-   * - if execve() fails, -5 will be returned
-   */
-  static pid_t ForkAndExecve(
-    const std::string& path,
-    const std::vector<std::string>& argv,
-    const std::vector<std::string>& envp,
-    const std::string& cwd,
-    const std::map<int, int>& fds,
-    int flags = FORK_AND_EXECVE_FLAG_NONE,
-    pid_t pgid = 0
-  );
-};
+} // namespace Process
 
 ///////////////////////////////////////////////////////////////////////////////
 }
-

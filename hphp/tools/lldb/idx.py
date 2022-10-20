@@ -1,7 +1,6 @@
 # Copyright 2022-present Facebook. All Rights Reserved.
 
 import lldb
-import optparse
 import shlex
 import utils
 
@@ -40,9 +39,8 @@ def idx(container: lldb.SBValue, index, hasher=None):
 
 class IdxCommand(utils.Command):
     command = "idx"
-    usage = "usage: %prog [options] container key"
-    short_help = "Index into an arbitrary container"
-    description = """\
+    description = "Index into an arbitrary container"
+    epilog = """\
 LLDB `print` is called on the address of the value, and then the value itself is
 printed.
 
@@ -56,44 +54,53 @@ hash, if valid, will be used instead of the default hash for the key type.
 """
 
     @classmethod
-    def create_options(cls):
-        parser = optparse.OptionParser(description=cls.description, prog=cls.command, usage=cls.usage)
-        parser.add_option(
-            "--hasher",
+    def create_parser(cls):
+        parser = cls.default_parser()
+        parser.add_argument(
+            "container",
+            help="A container to index into"
+        )
+        parser.add_argument(
+            "key",
+            help="The index or data member to access"
+        )
+        parser.add_argument(
+            "hasher",
             default=id,
-            dest="hasher",
-            help="An optional hasher specification (a bare word string, such as \"id\" sans quotes)."
-                 "If valid, it will be used instead of the default hash for the key type."
+            nargs="?",
+            help="An optional hasher specification (a bare word string, such as \"id\" sans quotes)"
         )
         return parser
 
     def __init__(self, debugger, internal_dict):
-        self.parser = self.create_options()
-        self.help_string = self.parser.format_help()
+        super().__init__(debugger, internal_dict)
 
     def __call__(self, debugger, command, exe_ctx, result):
         command_args = shlex.split(command)
         try:
-            (options, args) = self.parser.parse_args(command_args)
-        except Exception:
-            # If you don't handle exceptions, passing an incorrect argument to
-            # the OptionParser will cause LLDB to exit (courtesy of OptParse
-            # dealing with argument errors by throwing SystemExit)
+            options = self.parser.parse_args(command_args)
+        except SystemExit:
             result.SetError("option parsing failed")
             return
-        if len(args) != 2:
+
+        container = exe_ctx.frame.EvaluateExpression(options.container)
+        if options.hasher is not id:
+            # TODO handle hasher option
             result.SetError("invalid number of arguments")
             return
+        try:
+            # TODO Handle non-int keys
+            index = int(options.key)
+        except ValueError:
+            result.SetError("invalid key (only int currently supported)")
+            return
 
-        container = exe_ctx.frame.EvaluateExpression(args[0])
-        index = int(args[1])
-        result.write(str(idx(container, index)))
+        res = idx(container, index)
+        if res is None:
+            result.SetError(f"cannot access {index} in {container}")
+            return
 
-    def get_short_help(self):
-        return self.short_help
-
-    def get_long_help(self):
-        return self.help_string
+        result.write(str(res))
 
 
 def __lldb_init_module(debugger, _internal_dict, top_module=""):

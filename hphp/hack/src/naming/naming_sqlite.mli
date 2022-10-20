@@ -22,10 +22,9 @@ type save_result = {
   files_added: int;
   symbols_added: int;
   errors: insertion_error list;
+  checksum: Int64.t;
 }
 [@@deriving show]
-
-val empty_save_result : save_result
 
 type 'a forward_naming_table_delta =
   | Modified of 'a

@@ -11,6 +11,7 @@ use oxidized::file_info;
 use oxidized::file_info::NameType;
 use oxidized_by_ref::direct_decl_parser::Decl;
 use oxidized_by_ref::direct_decl_parser::ParsedFile;
+use oxidized_by_ref::direct_decl_parser::ParsedFileWithHashes;
 use relative_path::RelativePath;
 
 /// Similar to `oxidized::file_info::FileInfo`, but containing only the
@@ -24,6 +25,36 @@ pub struct FileSummary {
 }
 
 impl FileSummary {
+    pub fn from_hashed_decls<'a>(
+        mut file: ParsedFileWithHashes<'a>,
+        remove_php_stdlib: bool,
+        arena: &'a bumpalo::Bump,
+    ) -> Self {
+        let hash = crate::FileDeclsHash::from_u64(file.hash.0 as u64);
+        // TODO: The direct decl parser should return decls in the same
+        // order as they are declared in the file. At the moment it reverses
+        // them. Reverse them again to match the syntactic order.
+        if remove_php_stdlib {
+            file.remove_php_stdlib_decls_and_rev(arena);
+        } else {
+            file.rev();
+        }
+        Self {
+            mode: file.mode,
+            hash,
+            decls: file
+                .decls
+                .iter()
+                .map(|&(symbol, decl, hash)| DeclSummary {
+                    name_type: decl.kind(),
+                    symbol: symbol.to_owned(),
+                    hash: DeclHash::from_u64(hash.0 as u64),
+                })
+                .collect(),
+        }
+    }
+
+    /// DEPRECATED: behaves differently from the OCaml
     pub fn from_decls(file: ParsedFile<'_>) -> Self {
         Self {
             mode: file.mode,
@@ -42,27 +73,28 @@ impl FileSummary {
             .map(|decl| (decl.symbol_hash(), decl.hash))
     }
 
-    pub fn symbols_of_kind(&self, kind: NameType) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
-        self.decls
-            .iter()
-            .filter(move |decl| decl.name_type == kind)
-            .map(|decl| (decl.symbol.as_str(), decl.hash))
+    pub fn symbols_of_kind(&self, kind: NameType) -> impl Iterator<Item = &DeclSummary> + '_ {
+        self.decls.iter().filter(move |decl| decl.name_type == kind)
     }
 
-    pub fn classes(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
+    pub fn classes(&self) -> impl Iterator<Item = &DeclSummary> + '_ {
         self.symbols_of_kind(NameType::Class)
     }
 
-    pub fn funs(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
+    pub fn funs(&self) -> impl Iterator<Item = &DeclSummary> + '_ {
         self.symbols_of_kind(NameType::Fun)
     }
 
-    pub fn consts(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
+    pub fn consts(&self) -> impl Iterator<Item = &DeclSummary> + '_ {
         self.symbols_of_kind(NameType::Const)
     }
 
-    pub fn typedefs(&self) -> impl Iterator<Item = (&str, DeclHash)> + '_ {
+    pub fn typedefs(&self) -> impl Iterator<Item = &DeclSummary> + '_ {
         self.symbols_of_kind(NameType::Typedef)
+    }
+
+    pub fn modules(&self) -> impl Iterator<Item = &DeclSummary> + '_ {
+        self.symbols_of_kind(NameType::Module)
     }
 }
 
@@ -83,7 +115,7 @@ impl DeclSummary {
     }
 
     pub fn symbol_hash(&self) -> ToplevelSymbolHash {
-        crate::hash_name(&self.symbol, self.name_type)
+        ToplevelSymbolHash::new(self.name_type, &self.symbol)
     }
 }
 
@@ -122,8 +154,8 @@ impl SymbolRow {
     ) -> Self {
         let kind = decl.kind();
         Self {
-            hash: crate::hash_name(name, kind),
-            canon_hash: crate::hash_canon_name(name.to_owned(), kind),
+            hash: ToplevelSymbolHash::new(kind, name),
+            canon_hash: ToplevelCanonSymbolHash::new(kind, name.to_owned()),
             kind,
             decl_hash: crate::hash_decl(decl),
             file_info_id,

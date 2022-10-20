@@ -44,6 +44,7 @@ struct RuntimeCoeffects {
   static RuntimeCoeffects zoned_with();
   static RuntimeCoeffects zoned();
   static RuntimeCoeffects write_this_props();
+  static RuntimeCoeffects write_props();
   static RuntimeCoeffects globals_leak_safe();
   static RuntimeCoeffects leak_safe_shallow();
 

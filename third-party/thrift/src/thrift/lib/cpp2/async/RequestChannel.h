@@ -331,10 +331,10 @@ SerializedRequest preprocessSendT(
         ctx->postWrite(folly::to_narrow(queue.chainLength()));
         ctx->resetClientRequestContextHeader();
       }
-    } catch (const apache::thrift::TException& ex) {
+    } catch (const apache::thrift::TException&) {
       if (ctx) {
         ctx->handlerErrorWrapped(
-            folly::exception_wrapper(std::current_exception(), ex));
+            folly::exception_wrapper(std::current_exception()));
       }
       throw;
     }

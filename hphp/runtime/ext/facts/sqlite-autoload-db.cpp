@@ -106,6 +106,7 @@ bool createFileWithPerms(const fs::path& path, ::gid_t gid, ::mode_t perms) {
 const int kDeriveKindExtends = 0;
 const int kDeriveKindRequireExtends = 1;
 const int kDeriveKindRequireImplements = 2;
+const int kDeriveKindRequireClass = 3;
 
 constexpr int toDBEnum(DeriveKind kind) {
   switch (kind) {
@@ -115,6 +116,8 @@ constexpr int toDBEnum(DeriveKind kind) {
       return kDeriveKindRequireExtends;
     case DeriveKind::RequireImplements:
       return kDeriveKindRequireImplements;
+    case DeriveKind::RequireClass:
+      return kDeriveKindRequireClass;
   }
   return -1;
 }

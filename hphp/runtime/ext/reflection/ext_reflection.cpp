@@ -1151,6 +1151,19 @@ static Array HHVM_METHOD(ReflectionModule, getAttributesNamespaced) {
   return ai.toArray();
 }
 
+static TypedValue HHVM_METHOD(ReflectionModule, getDocComment) {
+  auto const module = ReflectionModuleHandle::GetModuleFor(this_);
+  assertx(module);
+
+  auto const comment = module->docComment();
+  if (comment == nullptr || comment->empty()) {
+    return make_tv<KindOfBoolean>(false);
+  } else {
+    assertx(!comment->isRefCounted());
+    return make_tv<KindOfPersistentString>(const_cast<StringData*>(comment));
+  }
+}
+
 // ------------------------- class ReflectionFunction
 
 // helper for __construct
@@ -1249,6 +1262,13 @@ static bool HHVM_METHOD(ReflectionClass, isFinal) {
 static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->isInternal();
+}
+
+static Variant HHVM_METHOD(ReflectionClass, getModule) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  auto const name = cls->moduleName();
+  if (!name) return init_null_variant;
+  return String::attach(const_cast<StringData*>(name));
 }
 
 static bool HHVM_METHOD(ReflectionClass, isAbstract) {
@@ -2291,6 +2311,7 @@ struct ReflectionExtension final : Extension {
 
     HHVM_ME(ReflectionModule, __init);
     HHVM_ME(ReflectionModule, getAttributesNamespaced);
+    HHVM_ME(ReflectionModule, getDocComment);
 
     HHVM_ME(ReflectionTypeConstant, __init);
     HHVM_ME(ReflectionTypeConstant, getName);
@@ -2340,6 +2361,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getInterfaceNames);
     HHVM_ME(ReflectionClass, getRequirementNames);
     HHVM_ME(ReflectionClass, getTraitNames);
+    HHVM_ME(ReflectionClass, getModule);
 
     HHVM_ME(ReflectionClass, hasMethod);
     HHVM_STATIC_ME(ReflectionClass, getMethodOrder);

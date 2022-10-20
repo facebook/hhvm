@@ -35,6 +35,22 @@ struct VisitUnion<::facebook::thrift::test::Baz> {
     }
   }
 };
+template <>
+struct VisitUnion<::facebook::thrift::test::ThriftAdaptTestUnion> {
+
+  template <typename F, typename T>
+  decltype(auto) operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::delay:
+      return f(0, *static_cast<T&&>(t).delay_ref());
+    case Union::Type::custom:
+      return f(1, *static_cast<T&&>(t).custom_ref());
+    case Union::Type::__EMPTY__:
+      return decltype(f(0, *static_cast<T&&>(t).delay_ref()))();
+    }
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

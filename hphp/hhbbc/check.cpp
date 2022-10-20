@@ -166,6 +166,8 @@ bool check(const php::Class& c) {
     assertx(check(*m));
   }
 
+  assertx(IMPLIES(c.attrs & AttrNoOverride, c.attrs & AttrNoOverrideRegular));
+
   // Some invariants about Closure classes.
   auto const isClo = is_closure(c);
   assertx(IMPLIES(c.closureContextCls, isClo));

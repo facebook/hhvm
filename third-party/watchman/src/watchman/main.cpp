@@ -169,16 +169,22 @@ void detect_low_process_priority() {
   }
 #endif
 
-  watchman::getThreadPool().start(
-      cfg_get_int("thread_pool_worker_threads", 16),
-      cfg_get_int("thread_pool_max_items", 1024 * 1024));
+  bool res = false;
+  {
+    watchman::getThreadPool().start(
+        cfg_get_int("thread_pool_worker_threads", 16),
+        cfg_get_int("thread_pool_max_items", 1024 * 1024));
 
-  ClockSpec::init();
-  w_state_load();
-  bool res = w_start_listener();
-  w_root_free_watched_roots();
-  perf_shutdown();
-  cfg_shutdown();
+    ClockSpec::init();
+    w_state_load();
+    SCOPE_EXIT {
+      w_state_shutdown();
+    };
+    res = w_start_listener();
+    w_root_free_watched_roots();
+    perf_shutdown();
+    cfg_shutdown();
+  }
 
   log(ERR, "Exiting from service with res=", res, "\n");
 
@@ -1100,13 +1106,11 @@ int main(int argc, char** argv) {
   try {
     return inner_main(argc, argv);
   } catch (const std::exception& e) {
-    log(ERR,
-        "Uncaught C++ exception: ",
-        folly::exceptionStr(e).toStdString(),
-        "\n");
+    logf_stderr(
+        "Uncaught C++ exception: {}\n", folly::exceptionStr(e).toStdString());
     return 1;
   } catch (...) {
-    log(ERR, "Uncaught C++ exception: ...\n");
+    logf_stderr("Uncaught C++ exception: ...\n");
     return 1;
   }
 }

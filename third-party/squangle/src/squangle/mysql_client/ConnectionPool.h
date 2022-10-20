@@ -270,6 +270,10 @@ class ConnectionPoolBase {
     return counters_.rlock()->num_pending_connections;
   }
 
+  static constexpr bool implementsPooling() {
+    return true;
+  }
+
  protected:
   virtual bool isShuttingDown() const = 0;
 

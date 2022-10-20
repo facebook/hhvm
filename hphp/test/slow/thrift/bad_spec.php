@@ -51,6 +51,8 @@ class NodeObject {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public function getName() {
     return 'NodeObject';
   }
@@ -147,6 +149,8 @@ class EdgeObject {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public function getName() {
     return 'EdgeObject';
   }
@@ -167,6 +171,8 @@ class EdgeObjectWithBadSpec1 extends EdgeObject {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class EdgeObjectWithBadSpec2 extends EdgeObject {
@@ -175,6 +181,8 @@ class EdgeObjectWithBadSpec2 extends EdgeObject {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class EdgeObjectWithBadSpec3 extends EdgeObject {
@@ -183,6 +191,8 @@ class EdgeObjectWithBadSpec3 extends EdgeObject {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class EdgeObjectWithBadSpec4 extends EdgeObject {
@@ -193,6 +203,8 @@ class EdgeObjectWithBadSpec4 extends EdgeObject {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function testBadSpec($bad) {

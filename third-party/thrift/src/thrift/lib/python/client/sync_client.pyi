@@ -16,6 +16,7 @@ import types
 import typing
 
 from thrift.python.client.request_channel import RequestChannel
+from thrift.python.common import RpcOptions
 from thrift.python.types import Struct, Union
 
 TSyncClient = typing.TypeVar("TSyncClient", bound="SyncClient")
@@ -30,12 +31,14 @@ class SyncClient:
         value: Exception,
         traceback: types.TracebackType,
     ) -> None: ...
+    def clear_event_handlers(self: TSyncClient) -> None: ...
     def _send_request(
         self,
-        service_name: str,
-        function_name: str,
-        args: Struct,
-        response_cls: typing.Optional[typing.Type[StructOrUnion]],
+        service_name: str = ...,
+        function_name: str = ...,
+        args: Struct = ...,
+        response_cls: typing.Optional[typing.Type[StructOrUnion]] = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> StructOrUnion: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

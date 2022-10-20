@@ -228,7 +228,9 @@ let connect_persistent () =
         { ClientProvider.client; m2s_sequence_number = _ } ->
       client
     | ClientProvider.Select_persistent
-    | ClientProvider.Select_nothing ->
+    | ClientProvider.Select_nothing
+    | ClientProvider.Select_exception _
+    | ClientProvider.Not_selecting_hg_updating ->
       assert false
   in
   Ide_info_store.new_ client;

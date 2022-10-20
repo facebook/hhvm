@@ -13,7 +13,6 @@ use hhbc::Pseudo;
 use hhbc::SrcLoc;
 use hhbc_gen::OpcodeData;
 use newtype::IdVec;
-use once_cell::sync::OnceCell;
 
 use crate::code_path::CodePath;
 use crate::instr_ptr::InstrPtr;
@@ -194,12 +193,5 @@ fn body_instrs<'arena>(
 }
 
 pub(crate) fn lookup_data_for_opcode(opcode: &Opcode<'_>) -> &'static OpcodeData {
-    static LOOKUP: OnceCell<HashMap<&'static str, &'static OpcodeData>> = OnceCell::new();
-    let lookup = LOOKUP.get_or_init(|| {
-        hhbc_gen::opcode_data()
-            .iter()
-            .map(|opcode| (opcode.name, opcode))
-            .collect()
-    });
-    lookup[opcode.variant_name()]
+    hhbc_gen::opcode_data().get(opcode.variant_index()).unwrap()
 }

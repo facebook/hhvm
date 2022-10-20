@@ -404,15 +404,20 @@ void validate_field_names_uniqueness(
 void validate_union_field_attributes(
     diagnostic_context& ctx, const t_union& node) {
   for (const auto& field : node.fields()) {
-    if (field.qualifier() != t_field_qualifier::none) {
-      auto qual = field.qualifier() == t_field_qualifier::required ? "required"
-                                                                   : "optional";
+    if (field.qualifier() == t_field_qualifier::optional ||
+        field.qualifier() == t_field_qualifier::required) {
       ctx.error(
           field,
           "Unions cannot contain qualified fields. Remove `{}` qualifier from "
           "field `{}`.",
-          qual,
+          field.qualifier() == t_field_qualifier::required ? "required"
+                                                           : "optional",
           field.name());
+    } else if (field.qualifier() == t_field_qualifier::terse) {
+      ctx.error(
+          field,
+          "`@thrift.TerseWrite` cannot be applied to union fields (in `{}`).",
+          node.name());
     }
   }
 }

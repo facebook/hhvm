@@ -134,9 +134,9 @@ public class Service {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void func(String arg1, String arg2, Foo arg3, AsyncMethodCallback resultHandler61) throws TException {
+    public void func(String arg1, String arg2, Foo arg3, AsyncMethodCallback resultHandler88) throws TException {
       checkReady();
-      func_call method_call = new func_call(arg1, arg2, arg3, resultHandler61, this, ___protocolFactory, ___transport);
+      func_call method_call = new func_call(arg1, arg2, arg3, resultHandler88, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
@@ -145,8 +145,8 @@ public class Service {
       private String arg1;
       private String arg2;
       private Foo arg3;
-      public func_call(String arg1, String arg2, Foo arg3, AsyncMethodCallback resultHandler62, TAsyncClient client58, TProtocolFactory protocolFactory59, TNonblockingTransport transport60) throws TException {
-        super(client58, protocolFactory59, transport60, resultHandler62, false);
+      public func_call(String arg1, String arg2, Foo arg3, AsyncMethodCallback resultHandler89, TAsyncClient client85, TProtocolFactory protocolFactory86, TNonblockingTransport transport87) throws TException {
+        super(client85, protocolFactory86, transport87, resultHandler89, false);
         this.arg1 = arg1;
         this.arg2 = arg2;
         this.arg3 = arg3;

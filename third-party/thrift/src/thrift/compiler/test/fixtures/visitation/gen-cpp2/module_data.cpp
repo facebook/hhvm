@@ -9,41 +9,55 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::test_cpp2::cpp_reflection::enum1, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::enum1, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::values = {{
   type::field0,
   type::field1,
   type::field2,
 }};
-const std::array<folly::StringPiece, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum1>::names = {{
   "field0",
   "field1",
   "field2",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::enum2, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::enum2, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::values = {{
   type::field0_2,
   type::field1_2,
   type::field2_2,
 }};
-const std::array<folly::StringPiece, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TEnumDataStorage<::test_cpp2::cpp_reflection::enum2>::names = {{
   "field0_2",
   "field1_2",
   "field2_2",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::enum3, 2> TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::enum3, 2> TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::values = {{
   type::field0_3,
   type::field1_3,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test_cpp2::cpp_reflection::enum3>::names = {{
   "field0_3",
   "field1_3",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::enum_with_special_names, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::enum_with_special_names, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::values = {{
   type::get,
   type::getter,
   type::lists,
@@ -73,7 +87,7 @@ const std::array<::test_cpp2::cpp_reflection::enum_with_special_names, 28> TEnum
   type::field,
   type::fields,
 }};
-const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::enum_with_special_names>::names = {{
   "get",
   "getter",
   "lists",
@@ -104,53 +118,53 @@ const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_refle
   "fields",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::union1::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::union1::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::values = {{
   type::ui,
   type::ud,
   type::us,
   type::ue,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union1::Type>::names = {{
   "ui",
   "ud",
   "us",
   "ue",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::union2::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::union2::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::values = {{
   type::ui_2,
   type::ud_2,
   type::us_2,
   type::ue_2,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union2::Type>::names = {{
   "ui_2",
   "ud_2",
   "us_2",
   "ue_2",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::union3::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::union3::Type, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::values = {{
   type::ui_3,
   type::ud_3,
   type::us_3,
   type::ue_3,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test_cpp2::cpp_reflection::union3::Type>::names = {{
   "ui_3",
   "ud_3",
   "us_3",
   "ue_3",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::unionA::Type, 5> TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::unionA::Type, 5> TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::values = {{
   type::i,
   type::d,
   type::s,
   type::e,
   type::a,
 }};
-const std::array<folly::StringPiece, 5> TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::test_cpp2::cpp_reflection::unionA::Type>::names = {{
   "i",
   "d",
   "s",
@@ -158,7 +172,7 @@ const std::array<folly::StringPiece, 5> TEnumDataStorage<::test_cpp2::cpp_reflec
   "a",
 }};
 
-const std::array<::test_cpp2::cpp_reflection::union_with_special_names::Type, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test_cpp2::cpp_reflection::union_with_special_names::Type, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::values = {{
   type::get,
   type::getter,
   type::lists,
@@ -188,7 +202,7 @@ const std::array<::test_cpp2::cpp_reflection::union_with_special_names::Type, 28
   type::field,
   type::fields,
 }};
-const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_reflection::union_with_special_names::Type>::names = {{
   "get",
   "getter",
   "lists",
@@ -219,149 +233,149 @@ const std::array<folly::StringPiece, 28> TEnumDataStorage<::test_cpp2::cpp_refle
   "fields",
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_names = {{
   "ui",
   "ud",
   "us",
   "ue",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::fields_types = {{
   TType::T_I32,
   TType::T_DOUBLE,
   TType::T_STRING,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::storage_names = {{
   "ui",
   "ud",
   "us",
   "ue",
 }};
-const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union1>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_names = {{
   "ui_2",
   "ud_2",
   "us_2",
   "ue_2",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::fields_types = {{
   TType::T_I32,
   TType::T_DOUBLE,
   TType::T_STRING,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::storage_names = {{
   "ui_2",
   "ud_2",
   "us_2",
   "ue_2",
 }};
-const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union2>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_names = {{
   "ui_3",
   "ud_3",
   "us_3",
   "ue_3",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::fields_types = {{
   TType::T_I32,
   TType::T_DOUBLE,
   TType::T_STRING,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::storage_names = {{
   "ui_3",
   "ud_3",
   "us_3",
   "ue_3",
 }};
-const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::union3>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_names = {{
   "a",
   "b",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::storage_names = {{
   "__fbthrift_field_a",
   "__fbthrift_field_b",
 }};
-const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structA>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_names = {{
   "i",
   "d",
   "s",
   "e",
   "a",
 }};
-const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::fields_types = {{
   TType::T_I32,
   TType::T_DOUBLE,
   TType::T_STRING,
   TType::T_I32,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::storage_names = {{
   "i",
   "d",
   "s",
   "e",
   "a",
 }};
-const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>::isset_indexes = {{
   0,
   1,
   2,
@@ -369,28 +383,28 @@ const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::unionA>
   4,
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_names = {{
   "c",
   "d",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::fields_types = {{
   TType::T_DOUBLE,
   TType::T_BOOL,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::storage_names = {{
   "__fbthrift_field_c",
   "__fbthrift_field_d",
 }};
-const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test_cpp2::cpp_reflection::structB>::isset_indexes = {{
   0,
   1,
 }};
 
-const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_names = {{
   "a",
   "b",
   "c",
@@ -422,7 +436,7 @@ const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_ref
   "o2",
   "o3",
 }};
-const std::array<int16_t, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_ids = {{
   1,
   2,
   3,
@@ -454,7 +468,7 @@ const std::array<int16_t, 30> TStructDataStorage<::test_cpp2::cpp_reflection::st
   29,
   30,
 }};
-const std::array<protocol::TType, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_DOUBLE,
@@ -486,7 +500,7 @@ const std::array<protocol::TType, 30> TStructDataStorage<::test_cpp2::cpp_reflec
   TType::T_MAP,
   TType::T_MAP,
 }};
-const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::storage_names = {{
   "__fbthrift_field_a",
   "__fbthrift_field_b",
   "__fbthrift_field_c",
@@ -518,7 +532,7 @@ const std::array<folly::StringPiece, 30> TStructDataStorage<::test_cpp2::cpp_ref
   "__fbthrift_field_o2",
   "__fbthrift_field_o3",
 }};
-const std::array<int, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 30> TStructDataStorage<::test_cpp2::cpp_reflection::structC>::isset_indexes = {{
   0,
   1,
   2,
@@ -551,7 +565,7 @@ const std::array<int, 30> TStructDataStorage<::test_cpp2::cpp_reflection::struct
   29,
 }};
 
-const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_names = {{
   "field0",
   "field1",
   "field2",
@@ -559,7 +573,7 @@ const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_refl
   "field4",
   "field5",
 }};
-const std::array<int16_t, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_ids = {{
   1,
   2,
   3,
@@ -567,7 +581,7 @@ const std::array<int16_t, 6> TStructDataStorage<::test_cpp2::cpp_reflection::str
   5,
   6,
 }};
-const std::array<protocol::TType, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_I32,
@@ -575,7 +589,7 @@ const std::array<protocol::TType, 6> TStructDataStorage<::test_cpp2::cpp_reflect
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::storage_names = {{
   "__fbthrift_field_field0",
   "__fbthrift_field_field1",
   "__fbthrift_field_field2",
@@ -583,7 +597,7 @@ const std::array<folly::StringPiece, 6> TStructDataStorage<::test_cpp2::cpp_refl
   "__fbthrift_field_field4",
   "__fbthrift_field_field5",
 }};
-const std::array<int, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1>::isset_indexes = {{
   -1,
   0,
   1,
@@ -592,7 +606,7 @@ const std::array<int, 6> TStructDataStorage<::test_cpp2::cpp_reflection::struct1
   3,
 }};
 
-const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_names = {{
   "fieldA",
   "fieldB",
   "fieldC",
@@ -601,7 +615,7 @@ const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_refl
   "fieldF",
   "fieldG",
 }};
-const std::array<int16_t, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_ids = {{
   1,
   2,
   3,
@@ -610,7 +624,7 @@ const std::array<int16_t, 7> TStructDataStorage<::test_cpp2::cpp_reflection::str
   6,
   7,
 }};
-const std::array<protocol::TType, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_I32,
@@ -619,7 +633,7 @@ const std::array<protocol::TType, 7> TStructDataStorage<::test_cpp2::cpp_reflect
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
@@ -628,7 +642,7 @@ const std::array<folly::StringPiece, 7> TStructDataStorage<::test_cpp2::cpp_refl
   "__fbthrift_field_fieldF",
   "__fbthrift_field_fieldG",
 }};
-const std::array<int, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2>::isset_indexes = {{
   0,
   1,
   2,
@@ -638,7 +652,7 @@ const std::array<int, 7> TStructDataStorage<::test_cpp2::cpp_reflection::struct2
   6,
 }};
 
-const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_names = {{
   "fieldA",
   "fieldB",
   "fieldC",
@@ -658,7 +672,7 @@ const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_ref
   "fieldQ",
   "fieldR",
 }};
-const std::array<int16_t, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_ids = {{
   1,
   2,
   3,
@@ -678,7 +692,7 @@ const std::array<int16_t, 18> TStructDataStorage<::test_cpp2::cpp_reflection::st
   17,
   18,
 }};
-const std::array<protocol::TType, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_I32,
@@ -698,7 +712,7 @@ const std::array<protocol::TType, 18> TStructDataStorage<::test_cpp2::cpp_reflec
   TType::T_MAP,
   TType::T_MAP,
 }};
-const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::storage_names = {{
   "__fbthrift_field_fieldA",
   "__fbthrift_field_fieldB",
   "__fbthrift_field_fieldC",
@@ -718,7 +732,7 @@ const std::array<folly::StringPiece, 18> TStructDataStorage<::test_cpp2::cpp_ref
   "__fbthrift_field_fieldQ",
   "__fbthrift_field_fieldR",
 }};
-const std::array<int, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct3>::isset_indexes = {{
   0,
   1,
   2,
@@ -739,66 +753,66 @@ const std::array<int, 18> TStructDataStorage<::test_cpp2::cpp_reflection::struct
   17,
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_names = {{
   "field0",
   "field1",
   "field2",
   "field3",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_ids = {{
   1,
   2,
   3,
   6,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_I32,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::storage_names = {{
   "__fbthrift_field_field0",
   "__fbthrift_field_field1",
   "__fbthrift_field_field2",
   "__fbthrift_field_field3",
 }};
-const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test_cpp2::cpp_reflection::struct4>::isset_indexes = {{
   -1,
   0,
   1,
   -1,
 }};
 
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_names = {{
   "field0",
   "field1",
   "field2",
   "field3",
   "field4",
 }};
-const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::fields_types = {{
   TType::T_I32,
   TType::T_STRING,
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::storage_names = {{
   "__fbthrift_field_field0",
   "__fbthrift_field_field1",
   "__fbthrift_field_field2",
   "__fbthrift_field_field3",
   "__fbthrift_field_field4",
 }};
-const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5>::isset_indexes = {{
   -1,
   0,
   1,
@@ -806,91 +820,91 @@ const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct5
   3,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_names = {{
   "bi",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::storage_names = {{
   "__fbthrift_field_bi",
 }};
-const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_reflection::struct_binary>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_names = {{
   "b",
   "c",
   "i_a",
 }};
-const std::array<int16_t, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_ids = {{
   1,
   2,
   3,
 }};
-const std::array<protocol::TType, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::storage_names = {{
   "__fbthrift_field_b",
   "__fbthrift_field_c",
   "__fbthrift_field_i_a",
 }};
-const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_A_struct>::isset_indexes = {{
   0,
   1,
   2,
 }};
 
-const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_names = {{
   "b",
   "c",
   "i_a",
 }};
-const std::array<int16_t, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_ids = {{
   1,
   2,
   3,
 }};
-const std::array<protocol::TType, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::storage_names = {{
   "__fbthrift_field_b",
   "__fbthrift_field_c",
   "__fbthrift_field_i_a",
 }};
-const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 3> TStructDataStorage<::test_cpp2::cpp_reflection::dep_B_struct>::isset_indexes = {{
   0,
   1,
   2,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_names = {{
   "a",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::fields_types = {{
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::storage_names = {{
   "__fbthrift_field_a",
 }};
-const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test_cpp2::cpp_reflection::annotated>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_names = {{
   "get",
   "getter",
   "lists",
@@ -920,7 +934,7 @@ const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_ref
   "field",
   "fields",
 }};
-const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_ids = {{
   1,
   2,
   3,
@@ -950,7 +964,7 @@ const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::un
   27,
   28,
 }};
-const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -980,7 +994,7 @@ const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflec
   TType::T_I32,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::storage_names = {{
   "get",
   "getter",
   "lists",
@@ -1010,7 +1024,7 @@ const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_ref
   "field",
   "fields",
 }};
-const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_with_special_names>::isset_indexes = {{
   0,
   1,
   2,
@@ -1041,7 +1055,7 @@ const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::union_
   27,
 }};
 
-const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_names = {{
   "get",
   "getter",
   "lists",
@@ -1071,7 +1085,7 @@ const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_ref
   "field",
   "fields",
 }};
-const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_ids = {{
   1,
   2,
   3,
@@ -1101,7 +1115,7 @@ const std::array<int16_t, 28> TStructDataStorage<::test_cpp2::cpp_reflection::st
   27,
   28,
 }};
-const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
@@ -1131,7 +1145,7 @@ const std::array<protocol::TType, 28> TStructDataStorage<::test_cpp2::cpp_reflec
   TType::T_I32,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::storage_names = {{
   "__fbthrift_field_get",
   "__fbthrift_field_getter",
   "__fbthrift_field_lists",
@@ -1161,7 +1175,7 @@ const std::array<folly::StringPiece, 28> TStructDataStorage<::test_cpp2::cpp_ref
   "__fbthrift_field_field",
   "__fbthrift_field_fields",
 }};
-const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_special_names>::isset_indexes = {{
   0,
   1,
   2,
@@ -1192,35 +1206,35 @@ const std::array<int, 28> TStructDataStorage<::test_cpp2::cpp_reflection::struct
   27,
 }};
 
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_names = {{
   "real",
   "fake",
   "number",
   "result",
   "phrase",
 }};
-const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_ids = {{
   1,
   2,
   3,
   4,
   5,
 }};
-const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_I32,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::storage_names = {{
   "__fbthrift_field_real",
   "__fbthrift_field_fake",
   "__fbthrift_field_number",
   "__fbthrift_field_result",
   "__fbthrift_field_phrase",
 }};
-const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 5> TStructDataStorage<::test_cpp2::cpp_reflection::struct_with_indirections>::isset_indexes = {{
   0,
   1,
   2,

@@ -64,7 +64,7 @@ template <class Map, class Key>
 void insertIfNotNoneMask(Map& map, Key key, const Mask& mask) {
   // This doesn't use isNoneMask() as we just want to remove includes{} mask
   // rather than masks that logically contain no fields.
-  if (mask != noneMask()) {
+  if (!detail::isNoneMask(mask)) {
     map[key] = mask;
   }
 }
@@ -155,7 +155,7 @@ const MapIdToMask& toMapMask(const Mask& mask) {
     return *mapMask;
   }
 
-  if (mask == allMask() || mask == noneMask()) {
+  if (detail::isAllMask(mask) || detail::isNoneMask(mask)) {
     static const MapIdToMask map;
     return map;
   }

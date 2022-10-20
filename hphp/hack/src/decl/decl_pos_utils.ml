@@ -157,6 +157,10 @@ struct
       Trefinement (ty root_ty, rs)
     | Tshape (shape_kind, fdm) ->
       Tshape (shape_kind, ShapeFieldMap.map_and_rekey fdm shape_field_name ty)
+    | Tnewtype (name, tyl, bound) ->
+      let tyl = List.map tyl ~f:ty in
+      let bound = ty bound in
+      Tnewtype (name, tyl, bound)
 
   and ty_opt x = Option.map x ~f:ty
 

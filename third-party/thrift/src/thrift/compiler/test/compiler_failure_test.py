@@ -1793,6 +1793,11 @@ class CompilerFailureTest(unittest.TestCase):
                     @thrift.TerseWrite
                     3: required i64 field3;
                 }
+
+                union TerseUnion {
+                    @thrift.TerseWrite
+                    1: i64 field1;
+                }
                 """
             ),
         )
@@ -1805,7 +1810,8 @@ class CompilerFailureTest(unittest.TestCase):
             "[ERROR:foo.thrift:6] `@thrift.TerseWrite` cannot be used with qualified fields. "
             "Remove `optional` qualifier from field `field2`.\n"
             "[ERROR:foo.thrift:8] `@thrift.TerseWrite` cannot be used with qualified fields. "
-            "Remove `required` qualifier from field `field3`.\n",
+            "Remove `required` qualifier from field `field3`.\n"
+            "[ERROR:foo.thrift:13] `@thrift.TerseWrite` cannot be applied to union fields (in `TerseUnion`).\n",
         )
 
     def test_interaction_nesting(self):

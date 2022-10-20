@@ -54,6 +54,8 @@ namespace HHBBC {
 
 TRACE_SET_MOD(hhbbc);
 
+bool g_crash{false};
+
 //////////////////////////////////////////////////////////////////////
 
 namespace {
@@ -511,8 +513,6 @@ void final_pass(Index& index,
 
 //////////////////////////////////////////////////////////////////////
 
-// Right now Key is nothing, and Value is the UnitEmitter.
-
 struct WholeProgramInput::Key::Impl {
   enum class Type {
     Fail,
@@ -522,10 +522,21 @@ struct WholeProgramInput::Key::Impl {
   };
   Type type;
   LSString name;
+  LSString context;
   std::vector<SString> dependencies;
 
-  Impl(Type type, SString name, std::vector<SString> dependencies)
-    : type{type}, name{name}, dependencies{std::move(dependencies)} {}
+  Impl(Type type,
+       SString name,
+       SString context,
+       std::vector<SString> dependencies)
+    : type{type}
+    , name{name}
+    , context{context}
+    , dependencies{std::move(dependencies)}
+  {
+    assertx(IMPLIES(!dependencies.empty(), type == Type::Class));
+    assertx(IMPLIES(context, type == Type::Func || type == Type::Class));
+  }
 };
 struct WholeProgramInput::Value::Impl {
   std::unique_ptr<php::Func> func;
@@ -558,11 +569,14 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 
   auto const add = [&] (Key::Impl::Type type,
                         SString name,
-                        auto v,
-                        std::vector<SString> deps = {}) {
+                        SString context,
+                        std::vector<SString> deps,
+                        auto v) {
     Key key;
     Value value;
-    key.m_impl.reset(new Key::Impl{type, name, std::move(deps)});
+    key.m_impl.reset(
+      new Key::Impl{type, name, context, std::move(deps)}
+    );
     value.m_impl.reset(new Value::Impl{std::move(v)});
     out.emplace_back(std::move(key), std::move(value));
   };
@@ -570,26 +584,48 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
   if (parsed.unit) {
     if (auto const& fi = parsed.unit->fatalInfo) {
       if (!fi->fatalLoc) {
-        add(Key::Impl::Type::Fail, makeStaticString(fi->fatalMsg), nullptr);
+        add(
+          Key::Impl::Type::Fail,
+          makeStaticString(fi->fatalMsg),
+          nullptr,
+          {},
+          nullptr
+        );
         return out;
       }
     }
     auto const name = parsed.unit->filename;
-    add(Key::Impl::Type::Unit, name, std::move(parsed.unit));
+    add(
+      Key::Impl::Type::Unit,
+      name,
+      nullptr,
+      {},
+      std::move(parsed.unit)
+    );
   }
   for (auto& c : parsed.classes) {
     auto const name = c->name;
+    auto const context = c->closureContextCls;
     auto deps = Index::Input::makeDeps(*c);
     add(
       Key::Impl::Type::Class,
       name,
-      std::move(c),
-      std::move(deps)
+      context,
+      std::move(deps),
+      std::move(c)
     );
   }
   for (auto& f : parsed.funcs) {
     auto const name = f->name;
-    add(Key::Impl::Type::Func, name, std::move(f));
+    auto const context =
+      (f->attrs & AttrIsMethCaller) ? f->unit : nullptr;
+    add(
+      Key::Impl::Type::Func,
+      name,
+      context,
+      {},
+      std::move(f)
+    );
   }
   return out;
 }
@@ -597,15 +633,33 @@ WholeProgramInput::make(std::unique_ptr<UnitEmitter> ue) {
 void WholeProgramInput::Key::serde(BlobEncoder& sd) const {
   assertx(m_impl);
   sd(m_impl->type)(m_impl->name);
-  if (m_impl->type == Impl::Type::Class) sd(m_impl->dependencies);
+  if (m_impl->type == Impl::Type::Class) {
+    sd(m_impl->context);
+    sd(m_impl->dependencies);
+  } else if (m_impl->type == Impl::Type::Func) {
+    sd(m_impl->context);
+  }
 }
 void WholeProgramInput::Key::serde(BlobDecoder& sd) {
   Key::Impl::Type type;
   SString name;
+  SString context{nullptr};
   std::vector<SString> dependencies;
   sd(type)(name);
-  if (type == Impl::Type::Class) sd(dependencies);
-  m_impl.reset(new Impl{type, name, std::move(dependencies)});
+  if (type == Impl::Type::Class) {
+    sd(context);
+    sd(dependencies);
+  } else if (type == Impl::Type::Func) {
+    sd(context);
+  }
+  m_impl.reset(
+    new Impl{
+      type,
+      name,
+      context,
+      std::move(dependencies)
+    }
+  );
 }
 
 void WholeProgramInput::Value::serde(BlobEncoder& sd) const {
@@ -656,20 +710,26 @@ Index::Input make_index_input(WholeProgramInput input) {
              Index::Input::ClassMeta{
                p.second.cast<std::unique_ptr<php::Class>>(),
                p.first.m_impl->name,
-               std::move(p.first.m_impl->dependencies)
+               std::move(p.first.m_impl->dependencies),
+               p.first.m_impl->context
              }
            );
            break;
          case Key::Type::Func:
            out.funcs.emplace_back(
-             p.first.m_impl->name,
-             p.second.cast<std::unique_ptr<php::Func>>()
+             Index::Input::FuncMeta{
+               p.second.cast<std::unique_ptr<php::Func>>(),
+               p.first.m_impl->name,
+               p.first.m_impl->context
+             }
            );
            break;
          case Key::Type::Unit:
            out.units.emplace_back(
-             p.first.m_impl->name,
-             p.second.cast<std::unique_ptr<php::Unit>>()
+             Index::Input::UnitMeta{
+               p.second.cast<std::unique_ptr<php::Unit>>(),
+               p.first.m_impl->name,
+             }
            );
            break;
       }
@@ -684,6 +744,7 @@ Index::Input make_index_input(WholeProgramInput input) {
 //////////////////////////////////////////////////////////////////////
 
 void whole_program(WholeProgramInput inputs,
+                   Config config,
                    std::unique_ptr<coro::TicketExecutor> executor,
                    std::unique_ptr<Client> client,
                    const EmitCallback& callback,
@@ -691,6 +752,10 @@ void whole_program(WholeProgramInput inputs,
                    StructuredLogEntry* sample,
                    int num_threads) {
   trace_time tracer("whole program", sample);
+
+  if (sample) {
+    sample->setInt("hhbbc_thread_count", executor->numThreads());
+  }
 
   if (num_threads > 0) {
     parallel::num_threads = num_threads;
@@ -700,6 +765,7 @@ void whole_program(WholeProgramInput inputs,
 
   Index index{
     make_index_input(std::move(inputs)),
+    std::move(config),
     std::move(executor),
     std::move(client),
     std::move(dispose),

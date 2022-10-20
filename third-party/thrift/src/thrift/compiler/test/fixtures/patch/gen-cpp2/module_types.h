@@ -92,11 +92,6 @@ struct clear;
 struct add;
 struct remove;
 struct put;
-struct assign;
-struct clear;
-struct patchPrior;
-struct ensure;
-struct patch;
 struct optMapVal;
 struct optSetVal;
 struct optListVal;
@@ -127,6 +122,11 @@ struct i32Val;
 struct i16Val;
 struct byteVal;
 struct boolVal;
+struct assign;
+struct clear;
+struct patchPrior;
+struct ensure;
+struct patch;
 struct assign;
 struct clear;
 struct patchPrior;
@@ -438,26 +438,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(remove);
 #define APACHE_THRIFT_ACCESSOR_put
 APACHE_THRIFT_DEFINE_ACCESSOR(put);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_assign
-#define APACHE_THRIFT_ACCESSOR_assign
-APACHE_THRIFT_DEFINE_ACCESSOR(assign);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_clear
-#define APACHE_THRIFT_ACCESSOR_clear
-APACHE_THRIFT_DEFINE_ACCESSOR(clear);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_patchPrior
-#define APACHE_THRIFT_ACCESSOR_patchPrior
-APACHE_THRIFT_DEFINE_ACCESSOR(patchPrior);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_ensure
-#define APACHE_THRIFT_ACCESSOR_ensure
-APACHE_THRIFT_DEFINE_ACCESSOR(ensure);
-#endif
-#ifndef APACHE_THRIFT_ACCESSOR_patch
-#define APACHE_THRIFT_ACCESSOR_patch
-APACHE_THRIFT_DEFINE_ACCESSOR(patch);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_optMapVal
 #define APACHE_THRIFT_ACCESSOR_optMapVal
 APACHE_THRIFT_DEFINE_ACCESSOR(optMapVal);
@@ -598,6 +578,26 @@ APACHE_THRIFT_DEFINE_ACCESSOR(ensure);
 #define APACHE_THRIFT_ACCESSOR_patch
 APACHE_THRIFT_DEFINE_ACCESSOR(patch);
 #endif
+#ifndef APACHE_THRIFT_ACCESSOR_assign
+#define APACHE_THRIFT_ACCESSOR_assign
+APACHE_THRIFT_DEFINE_ACCESSOR(assign);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_clear
+#define APACHE_THRIFT_ACCESSOR_clear
+APACHE_THRIFT_DEFINE_ACCESSOR(clear);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_patchPrior
+#define APACHE_THRIFT_ACCESSOR_patchPrior
+APACHE_THRIFT_DEFINE_ACCESSOR(patchPrior);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_ensure
+#define APACHE_THRIFT_ACCESSOR_ensure
+APACHE_THRIFT_DEFINE_ACCESSOR(ensure);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_patch
+#define APACHE_THRIFT_ACCESSOR_patch
+APACHE_THRIFT_DEFINE_ACCESSOR(patch);
+#endif
 } // namespace detail
 } // namespace thrift
 } // namespace apache
@@ -668,8 +668,8 @@ namespace test { namespace fixtures { namespace patch {
 class MyData;
 class InnerUnion;
 class MyUnion;
-class LateDefStruct;
 class MyStruct;
+class LateDefStruct;
 class MyDataFieldPatchStruct;
 class MyDataPatchStruct;
 class InnerUnionFieldPatchStruct;
@@ -681,10 +681,10 @@ class MyStructFieldN25PatchStruct;
 class MyStructFieldN28PatchStruct;
 class MyStructFieldN29PatchStruct;
 class MyStructFieldN30PatchStruct;
-class LateDefStructFieldPatchStruct;
-class LateDefStructPatchStruct;
 class MyStructFieldPatchStruct;
 class MyStructPatchStruct;
+class LateDefStructFieldPatchStruct;
+class LateDefStructPatchStruct;
 }}} // test::fixtures::patch
 // END forward_declare
 // BEGIN hash_and_equal_to
@@ -998,8 +998,11 @@ class InnerUnion final  {
   InnerUnion(InnerUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::innerOption:
       {
         set_innerOption(std::move(rhs.value_.innerOption));
@@ -1017,8 +1020,11 @@ class InnerUnion final  {
   InnerUnion(const InnerUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::innerOption:
       {
         set_innerOption(rhs.value_.innerOption);
@@ -1035,8 +1041,11 @@ class InnerUnion final  {
   InnerUnion& operator=(InnerUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::innerOption:
       {
         set_innerOption(std::move(rhs.value_.innerOption));
@@ -1055,8 +1064,11 @@ class InnerUnion final  {
   InnerUnion& operator=(const InnerUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::innerOption:
       {
         set_innerOption(rhs.value_.innerOption);
@@ -1270,8 +1282,11 @@ class MyUnion final  {
   MyUnion(MyUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::option1:
       {
         set_option1(std::move(rhs.value_.option1));
@@ -1299,8 +1314,11 @@ class MyUnion final  {
   MyUnion(const MyUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::option1:
       {
         set_option1(rhs.value_.option1);
@@ -1327,8 +1345,11 @@ class MyUnion final  {
   MyUnion& operator=(MyUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::option1:
       {
         set_option1(std::move(rhs.value_.option1));
@@ -1357,8 +1378,11 @@ class MyUnion final  {
   MyUnion& operator=(const MyUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::option1:
       {
         set_option1(rhs.value_.option1);

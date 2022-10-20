@@ -456,7 +456,6 @@ bool canDCE(const IRInstruction& inst) {
   case GenericRetDecRefs:
   case StClsInitElem:
   case StImplicitContext:
-  case StImplicitContextWH:
   case StMem:
   case StMemMeta:
   case StIterBase:

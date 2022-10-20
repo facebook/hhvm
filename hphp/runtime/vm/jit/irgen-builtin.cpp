@@ -2462,28 +2462,37 @@ void emitSilence(IRGS& env, Id localId, SilenceOp subop) {
 
 void emitSetImplicitContextByValue(IRGS& env) {
   auto const tv = topC(env);
-  auto const prev_ctx = cond(
+  ifThenElse(
     env,
-    [&] (Block* taken) { return gen(env, CheckType, TInitNull, taken, tv); },
-    [&] (SSATmp* null) {
+    [&] (Block* taken) { gen(env, CheckType, TInitNull, taken, tv); },
+    [&] {
       auto const prev = gen(env, LdImplicitContext);
-      gen(env, StImplicitContext, null);
-      return prev;
-    },
-    [&] (Block* taken) { return gen(env, CheckType, TObj, taken, tv); },
-    [&] (SSATmp* obj) {
-      auto const prev = gen(env, LdImplicitContext);
-      gen(env, StImplicitContext, obj);
-      return prev;
+      gen(env, StImplicitContext, cns(env, TInitNull));
+      popC(env);
+      pushIncRef(env, prev);
     },
     [&] {
-      hint(env, Block::Hint::Unlikely);
-      interpOne(env);
-      return cns(env, TBottom);
+      ifThenElse(
+        env,
+        [&] (Block* taken) { gen(env, CheckType, TObj, taken, tv); },
+        [&] {
+          auto const obj = gen(env, AssertType, TObj, tv);
+          auto const prev = gen(env, LdImplicitContext);
+          gen(env, StImplicitContext, obj);
+          popC(env);
+          pushIncRef(env, prev);
+          // Decref after discarding so that if we are pushing the same object back,
+          // avoid refcount going to zero
+          decRef(env, obj, DecRefProfileId::Default);
+        },
+        [&] {
+          hint(env, Block::Hint::Unlikely);
+          gen(env, AssertType, tv->type() - TObj - TInitNull, tv);
+          interpOne(env);
+        }
+      );
     }
   );
-  popC(env);
-  push(env, prev_ctx);
 }
 
 void verifyImplicitContextState(IRGS& env, const Func* func) {

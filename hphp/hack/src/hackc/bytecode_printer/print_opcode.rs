@@ -195,7 +195,7 @@ print_with_debug!(print_type_struct_resolve_op, TypeStructResolveOp);
 
 fn print_adata_id(w: &mut dyn Write, id: &AdataId<'_>) -> Result<()> {
     w.write_all(b"@")?;
-    print_str(w, id)
+    print_str(w, &id.as_ffi_str())
 }
 
 fn print_class_name(w: &mut dyn Write, id: &ClassName<'_>) -> Result<()> {

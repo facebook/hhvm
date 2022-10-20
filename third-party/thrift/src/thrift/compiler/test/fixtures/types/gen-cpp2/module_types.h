@@ -54,9 +54,9 @@ struct data;
 struct bar;
 struct binary_field;
 struct list_field;
-struct foo;
 struct ForwardUsageStruct;
 struct ForwardUsageByRef;
+struct foo;
 struct foo;
 struct boolField;
 struct MyBoolField;
@@ -236,10 +236,6 @@ APACHE_THRIFT_DEFINE_ACCESSOR(binary_field);
 #define APACHE_THRIFT_ACCESSOR_list_field
 APACHE_THRIFT_DEFINE_ACCESSOR(list_field);
 #endif
-#ifndef APACHE_THRIFT_ACCESSOR_foo
-#define APACHE_THRIFT_ACCESSOR_foo
-APACHE_THRIFT_DEFINE_ACCESSOR(foo);
-#endif
 #ifndef APACHE_THRIFT_ACCESSOR_ForwardUsageStruct
 #define APACHE_THRIFT_ACCESSOR_ForwardUsageStruct
 APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageStruct);
@@ -247,6 +243,10 @@ APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageStruct);
 #ifndef APACHE_THRIFT_ACCESSOR_ForwardUsageByRef
 #define APACHE_THRIFT_ACCESSOR_ForwardUsageByRef
 APACHE_THRIFT_DEFINE_ACCESSOR(ForwardUsageByRef);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_foo
+#define APACHE_THRIFT_ACCESSOR_foo
+APACHE_THRIFT_DEFINE_ACCESSOR(foo);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_foo
 #define APACHE_THRIFT_ACCESSOR_foo
@@ -594,12 +594,12 @@ class ComplexString;
 class ComplexNestedWithDefault;
 class MinPadding;
 class MinPaddingWithCustomType;
-class MyDataItem;
 class MyStruct;
+class MyDataItem;
 class Renamed;
 class AnnotatedTypes;
-class ForwardUsageStruct;
 class ForwardUsageRoot;
+class ForwardUsageStruct;
 class ForwardUsageByRef;
 class NoexceptMoveEmpty;
 class NoexceptMoveSimpleStruct;
@@ -2699,10 +2699,10 @@ class MinPaddingWithCustomType final  {
  public:
 
   MinPaddingWithCustomType() :
-      __fbthrift_field_small(),
-      __fbthrift_field_big(),
       __fbthrift_field_medium(),
+      __fbthrift_field_big(),
       __fbthrift_field_biggish(),
+      __fbthrift_field_small(),
       __fbthrift_field_tiny() {
     ::apache::thrift::adapt_detail::construct<::my::Adapter, 3>(__fbthrift_field_medium, *this);
   }
@@ -2717,13 +2717,13 @@ class MinPaddingWithCustomType final  {
   MinPaddingWithCustomType& operator=(MinPaddingWithCustomType&&) noexcept;
   MinPaddingWithCustomType& operator=(const MinPaddingWithCustomType& src);
  private:
-  ::std::int8_t __fbthrift_field_small;
+  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> __fbthrift_field_medium;
  private:
   ::std::int64_t __fbthrift_field_big;
  private:
-  ::apache::thrift::adapt_detail::adapted_field_t<::my::Adapter, 3, ::std::int16_t, MinPaddingWithCustomType> __fbthrift_field_medium;
- private:
   ::std::int32_t __fbthrift_field_biggish;
+ private:
+  ::std::int8_t __fbthrift_field_small;
  private:
   ::std::int8_t __fbthrift_field_tiny;
 
@@ -4812,8 +4812,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion(NoExceptMoveUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::string_field:
       {
         set_string_field(std::move(rhs.value_.string_field));
@@ -4836,8 +4839,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion(const NoExceptMoveUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::string_field:
       {
         set_string_field(rhs.value_.string_field);
@@ -4859,8 +4865,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion& operator=(NoExceptMoveUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::string_field:
       {
         set_string_field(std::move(rhs.value_.string_field));
@@ -4884,8 +4893,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion& operator=(const NoExceptMoveUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::string_field:
       {
         set_string_field(rhs.value_.string_field);

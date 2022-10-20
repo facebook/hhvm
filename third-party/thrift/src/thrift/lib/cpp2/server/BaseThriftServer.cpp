@@ -180,7 +180,7 @@ std::string BaseThriftServer::RuntimeServerActions::explain() const {
       (codelEnabled ? "codelEnabled, " : "") +
       (setupThreadManagerBeforeHandler ? "setupThreadManagerBeforeHandler, "
                                        : "") +
-      (!resourcePoolFlagSet ? "flagsNotSet, " : "");
+      (!resourcePoolFlagSet ? "thriftFlagNotSet, " : "");
   return result;
 }
 

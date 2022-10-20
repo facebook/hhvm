@@ -1641,8 +1641,11 @@ class BinaryUnion final  {
   BinaryUnion(BinaryUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::iobuf_val:
       {
         set_iobuf_val(std::move(rhs.value_.iobuf_val));
@@ -1660,8 +1663,11 @@ class BinaryUnion final  {
   BinaryUnion(const BinaryUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::iobuf_val:
       {
         set_iobuf_val(rhs.value_.iobuf_val);
@@ -1678,8 +1684,11 @@ class BinaryUnion final  {
   BinaryUnion& operator=(BinaryUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::iobuf_val:
       {
         set_iobuf_val(std::move(rhs.value_.iobuf_val));
@@ -1698,8 +1707,11 @@ class BinaryUnion final  {
   BinaryUnion& operator=(const BinaryUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::iobuf_val:
       {
         set_iobuf_val(rhs.value_.iobuf_val);

@@ -90,13 +90,13 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
       ++counters.requestInExecution;
       --counters.pendingDequeCalls;
 
+      // If the swap succeeded we schedule the task on the executor
       if (!counters_.compare_exchange_weak(countersOld, counters)) {
         continue;
       }
 
-      if (executorSupportPriority) {
-        // If the swap succeeded we schedule the task on the executor
-        // and by default we have 2 prios, external requests should go to
+      if (executor_.getNumPriorities() > 1) {
+        // By default we have 2 prios, external requests should go to
         // lower priority queue to yield to the internal ones
         executor_.addWithPriority(
             [this]() { executeRequest(); }, folly::Executor::LO_PRI);

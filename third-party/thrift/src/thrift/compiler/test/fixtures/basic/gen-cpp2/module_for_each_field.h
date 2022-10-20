@@ -14,13 +14,6 @@ namespace thrift {
 namespace detail {
 
 template <>
-struct ForEachField<::test::fixtures::basic::MyDataItem> {
-  template <typename F, typename... T>
-  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-  }
-};
-
-template <>
 struct ForEachField<::test::fixtures::basic::MyStruct> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -33,6 +26,13 @@ struct ForEachField<::test::fixtures::basic::MyStruct> {
     f(6, static_cast<T&&>(t).idempotent_ref()...);
     f(7, static_cast<T&&>(t).floatSet_ref()...);
     f(8, static_cast<T&&>(t).no_hack_codegen_field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::test::fixtures::basic::MyDataItem> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
   }
 };
 

@@ -44,9 +44,7 @@ Extension::Extension(const char* name, const char* version /* = "" */)
   ExtensionRegistry::registerExtension(this);
 }
 
-const static std::string
-  s_systemlibPhpName("systemlib.php"),
-  s_systemlibHhasName("systemlib.hhas.");
+const static std::string s_systemlibPhpName("systemlib.php");
 
 bool Extension::IsSystemlibPath(const std::string& name) {
   return !name.compare(0, 2, "/:");
@@ -79,7 +77,6 @@ void Extension::CompileSystemlib(const std::string &slib,
 namespace {
   std::string get_section(
     std::string_view name,
-    std::string* hhas_out,
     const std::string& dsoName
   ) {
     assertx(!name.empty());
@@ -89,7 +86,7 @@ namespace {
     std::string section("ext.");
 #endif
     section += HHVM_FN(md5)(std::string(name), false).substr(0, 12).data();
-    return get_systemlib(hhas_out, section, dsoName);
+    return get_systemlib(section, dsoName);
   }
 }
 
@@ -100,15 +97,10 @@ namespace {
  * If {name} is not passed, then {m_name} is assumed.
  */
 void Extension::loadSystemlib(const std::string& name) {
-  std::string hhas;
-  auto const slib = get_section(name, &hhas, m_dsoName);
+  auto const slib = get_section(name, m_dsoName);
   if (!slib.empty()) {
     std::string phpname = s_systemlibPhpName + name;
     CompileSystemlib(slib, phpname, m_nativeFuncs);
-  }
-  if (!hhas.empty()) {
-    std::string hhasname = s_systemlibHhasName + name;
-    CompileSystemlib(hhas, hhasname, m_nativeFuncs);
   }
 }
 
@@ -165,8 +157,7 @@ void Extension::loadDecls() {
 }
 
 void Extension::loadDeclsFrom(std::string_view name) {
-  std::string hhas;
-  auto const slib = get_section(name, &hhas, m_dsoName);
+  auto const slib = get_section(name, m_dsoName);
   // We *really* ought to assert that `slib` is non-empty here, but there are
   // some extensions that don't have any source code, such as the ones created by
   // `IMPLEMENT_DEFAULT_EXTENSION_VERSION`

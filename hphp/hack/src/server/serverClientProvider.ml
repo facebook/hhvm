@@ -55,6 +55,8 @@ type select_outcome =
   | Select_persistent
   | Select_new of handoff
   | Select_nothing
+  | Select_exception of Exception.t
+  | Not_selecting_hg_updating
 
 let provider_from_file_descriptors
     (default_in_fd, priority_in_fd, force_dormant_start_only_in_fd) =
@@ -198,7 +200,7 @@ let sleep_and_check
       "GET_CLIENT_CHANNELS_EXCEPTION(%s). Ignoring."
       (Exception.get_ctor_string e);
     Unix.sleepf 0.5;
-    Select_nothing
+    Select_exception e
 
 let has_persistent_connection_request = function
   | Persistent_client { fd; _ } ->

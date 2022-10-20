@@ -206,9 +206,12 @@ template<typename T> bool LockFreeLazy<T>::reset() {
  * case where you're wrapping a pointer (to a heap allocated
  * value). Nullptr is used to indicate "not present", so that must not
  * be a valid value.
+ *
+ * If Delete is true, the pointer will be freed (via delete) when the
+ * value is cleared. If false, it will not be.
  */
 
-template <typename T>
+template <typename T, bool Delete = true>
 struct LockFreeLazyPtr {
   LockFreeLazyPtr() : m_ptr{nullptr} {}
 
@@ -257,14 +260,17 @@ private:
   LockFreePtrWrapper<const T*> m_ptr;
 };
 
+template <typename T> using LockFreeLazyPtrNoDelete = LockFreeLazyPtr<T, false>;
+
 //////////////////////////////////////////////////////////////////////
 
-template<typename T> LockFreeLazyPtr<T>::~LockFreeLazyPtr() {
+template<typename T, bool D> LockFreeLazyPtr<T, D>::~LockFreeLazyPtr() {
+  if (!D) return;
   if (auto const p = m_ptr.copy()) delete p;
 }
 
-template<typename T> template<typename F>
-const T& LockFreeLazyPtr<T>::get(const F& f) {
+template<typename T, bool D> template<typename F>
+const T& LockFreeLazyPtr<T, D>::get(const F& f) {
   if (auto const p = m_ptr.copy()) return *p;
   auto lock = m_ptr.lock_for_update();
   if (auto const p = m_ptr.copy()) return *p;
@@ -274,16 +280,16 @@ const T& LockFreeLazyPtr<T>::get(const F& f) {
   return *m_ptr.copy();
 }
 
-template<typename T> bool LockFreeLazyPtr<T>::present() const {
+template<typename T, bool D> bool LockFreeLazyPtr<T, D>::present() const {
   return m_ptr.copy() != nullptr;
 }
 
-template<typename T> bool LockFreeLazyPtr<T>::reset() {
+template<typename T, bool D> bool LockFreeLazyPtr<T, D>::reset() {
   if (auto const p = m_ptr.copy(); !p) return false;
   auto lock = m_ptr.lock_for_update();
   auto const p = m_ptr.copy();
   if (!p) return false;
-  delete p;
+  if (D) delete p;
   lock.update(nullptr);
   return true;
 }

@@ -400,9 +400,11 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
         # pyre-fixme[16]: `WatchmanTestCase` has no attribute `last_root_list`.
         self.assertFileListContains(self.last_root_list, roots, message)
 
-    def waitForSub(self, name, root, accept=None, timeout=None, remove: bool = True):
+    def waitForSub(
+        self, name, root, accept=None, timeout=None, remove: bool = True, client=None
+    ):
         timeout = self.getTimeout(timeout)
-        client = self.getClient()
+        client = client or self.getClient()
 
         def default_accept(dat):
             return True
@@ -413,11 +415,13 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
         deadline = time.time() + timeout
         while time.time() < deadline:
             Interrupt.checkInterrupt()
-            sub = self.getSubscription(name, root=root, remove=False)
+            sub = self.getSubscription(name, root=root, remove=False, client=client)
             if sub is not None:
                 res = accept(sub)
                 if res:
-                    return self.getSubscription(name, root=root, remove=remove)
+                    return self.getSubscription(
+                        name, root=root, remove=remove, client=client
+                    )
             # wait for more data
             client.setTimeout(deadline - time.time())
             client.receive()
@@ -439,8 +443,11 @@ class WatchmanTestCase(TempDirPerTestMixin, unittest.TestCase):
 
         return self.waitForSub(name, root, accept=accept, timeout=timeout)
 
-    def getSubscription(self, name, root, remove: bool = True, normalize: bool = True):
-        data = self.getClient().getSubscription(name, root=root, remove=remove)
+    def getSubscription(
+        self, name, root, remove: bool = True, normalize: bool = True, client=None
+    ):
+        client = client or self.getClient()
+        data = client.getSubscription(name, root=root, remove=remove)
 
         if data is None or not normalize:
             return data

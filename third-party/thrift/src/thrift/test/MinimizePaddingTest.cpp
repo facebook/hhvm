@@ -58,6 +58,10 @@ TEST(minimize_padding_test, reorder_nonoptimal) {
   EXPECT_EQ(sizeof(nonoptimal_struct), 12);
   EXPECT_EQ(sizeof(nonoptimal_struct_with_structured_annotation), 12);
   EXPECT_EQ(thrift_member_offset(&nonoptimal_struct::big_ref<>), 0);
+  // The 'small' field will be the first field, since it has a custom type.
+  EXPECT_EQ(
+      thrift_member_offset(&nonoptimal_struct_with_custom_type::small_ref<>),
+      0);
 }
 
 TEST(minimize_padding_test, preserve_order_if_same_sizes) {

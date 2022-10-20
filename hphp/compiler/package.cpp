@@ -1115,19 +1115,7 @@ Package::UnitDecls IndexJob::run(
 
   // Get Facts from Decls, then populate IndexMeta.
   auto facts = hackc::decls_to_facts_cpp_ffi(decls, "");
-  Package::IndexMeta summary;
-  for (auto& e : facts.facts.types) {
-    summary.types.emplace_back(makeStaticString(std::string(e.name)));
-  }
-  for (auto& e : facts.facts.functions) {
-    summary.funcs.emplace_back(makeStaticString(std::string(e)));
-  }
-  for (auto& e : facts.facts.constants) {
-    summary.constants.emplace_back(makeStaticString(std::string(e)));
-  }
-  for (auto& e : facts.facts.modules) {
-    summary.modules.emplace_back(makeStaticString(std::string(e.name)));
-  }
+  auto summary = summary_of_facts(facts);
   s_indexMetas.emplace_back(summary);
   if (!RO::EvalEnableDecl) {
     // If decl-directed bytecode is disabled, parseRun() will not need
@@ -1517,4 +1505,21 @@ coro::Task<Package::FileAndSizeVec> Package::emitGroup(
   }
 
   HPHP_CORO_RETURN(FileAndSizeVec{});
+}
+
+Package::IndexMeta HPHP::summary_of_facts(const hackc::FactsResult& facts) {
+  Package::IndexMeta summary;
+  for (auto& e : facts.facts.types) {
+    summary.types.emplace_back(makeStaticString(std::string(e.name)));
+  }
+  for (auto& e : facts.facts.functions) {
+    summary.funcs.emplace_back(makeStaticString(std::string(e)));
+  }
+  for (auto& e : facts.facts.constants) {
+    summary.constants.emplace_back(makeStaticString(std::string(e)));
+  }
+  for (auto& e : facts.facts.modules) {
+    summary.modules.emplace_back(makeStaticString(std::string(e.name)));
+  }
+  return summary;
 }

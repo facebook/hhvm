@@ -13,7 +13,7 @@ bstr = { version = "0.2", features = ["serde1"] }
 bumpalo = { version = "3.8", features = ["collections"] }
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 hh24_types = { path = "../../../../utils/hh24_types" }
-im = { version = "14.2", features = ["rayon", "serde"] }
+im = { version = "15.1", features = ["rayon", "serde"] }
 indexmap = { version = "1.9.1", features = ["rayon", "serde-1"] }
 intern = { path = "../../../../utils/intern" }
 ocamlrep = { path = "../../../../ocamlrep" }

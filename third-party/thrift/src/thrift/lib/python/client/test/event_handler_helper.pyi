@@ -15,5 +15,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 
+def addEventHandler() -> None: ...
 @contextmanager
 def client_handler_that_throws() -> Generator[None, None, None]: ...

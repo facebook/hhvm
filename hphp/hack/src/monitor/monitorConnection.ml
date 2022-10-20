@@ -41,7 +41,7 @@ let wait_on_server_restart ic =
    *)
   try
     while true do
-      let _ = Timeout.input_char ic in
+      let (_ : char) = Timeout.input_char ic in
       ()
     done
   with
@@ -290,7 +290,7 @@ let connect_to_monitor ?(log_on_slow_connect = false) ~tracker ~timeout config =
                    failure_reason = Connect_timeout;
                  }))
       with
-      | exn ->
+      | Unix.Unix_error _ as exn ->
         let e = Exception.wrap exn in
         Error
           (Connect_to_monitor_failure

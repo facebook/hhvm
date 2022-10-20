@@ -35,7 +35,7 @@ cimport {{#includeNamespace}}{{value}}.{{/includeNamespace}}builders as _{{#incl
 
 cimport {{#program:py3Namespaces}}{{value}}.{{/program:py3Namespaces}}{{program:name}}.types as _{{#program:py3Namespaces}}{{value}}_{{/program:py3Namespaces}}{{program:name}}_types
 
-{{#program:structs}}
+{{#program:filtered_structs}}
 cdef class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     {{^struct:py3_fields?}}
     pass
@@ -55,4 +55,4 @@ cdef class {{struct:name}}_Builder(thrift.py3.builder.StructBuilder):
     {{/struct:py3_fields}}
 
 
-{{/program:structs}}
+{{/program:filtered_structs}}

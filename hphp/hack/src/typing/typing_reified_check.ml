@@ -69,4 +69,6 @@ let validator =
 
     method! on_tthis acc r =
       this#invalid acc r "the late static bound this type"
+
+    method! on_trefinement acc r _ty _ = this#invalid acc r "type refinement"
   end

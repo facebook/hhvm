@@ -14,4 +14,5 @@ function main() {
   var_dump((new ReflectionFunction('f'))->getModule());
   var_dump((new ReflectionFunction('g'))->getModule());
   var_dump((new ReflectionMethod('C', 'f'))->getModule());
+  var_dump((new ReflectionClass('C'))->getModule());
 }

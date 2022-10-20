@@ -20,38 +20,20 @@ module type RemoteServerApi = sig
     naming_table_diff:Naming_table.changes_since_baseline ->
     (naming_table, string) result
 
-  val build_naming_table : unit -> unit
-
-  (* A combination of `download_naming_and_dep_table` and `update_naming_table` below.
-     Downloads the naming table via saved state and adds updates from changed_files.
-     Returns the path to the dep table downloaded.
-  *)
-  val download_and_update_naming_table :
+  val download_naming_and_dep_table :
     manifold_api_key:string option ->
     use_manifold_cython_client:bool ->
+    nonce:Int64.t ->
     string option ->
-    Relative_path.t list option ->
-    string option
+    naming_table * string option
 
-  (* Downloads the naming table via saved state.
-     Returns the naming table along with the path to the dep table. *)
-  val download_naming_and_dep_table :
-    string option ->
-    string ->
-    use_manifold_cython_client:bool ->
-    (Naming_table.t * Path.t, string) result
-
-  (* Updates the naming table with changed files.
-     Returns the path to the dep table downloaded. *)
+  (* Updates the naming table with changed files. *)
   val update_naming_table :
-    Naming_table.t ->
-    Path.t ->
-    Relative_path.t list option ->
-    (string, string) result
+    naming_table -> Relative_path.t list option -> (unit, string) result
 
   val fetch_and_cache_remote_decls :
     ctx:Provider_context.t ->
-    Naming_table.t ->
+    naming_table ->
     from_saved_state:bool ->
     string option ->
     string ->

@@ -323,9 +323,8 @@ void HeaderClientChannel::sendRequestResponse(
   recvCallbacks_[sendSeqId_] = twcb;
   try {
     setBaseReceivedCallback(); // Cpp2Channel->setReceiveCallback can throw
-  } catch (const TTransportException& ex) {
-    twcb->messageSendError(
-        folly::exception_wrapper(std::current_exception(), ex));
+  } catch (const TTransportException&) {
+    twcb->messageSendError(folly::exception_wrapper(std::current_exception()));
     return;
   }
 
@@ -653,6 +652,9 @@ void HeaderClientChannel::RocketUpgradeChannel::initUpgradeIfNeeded(
   auto client = std::make_unique<apache::thrift::RocketUpgradeAsyncClient>(
       std::shared_ptr<HeaderClientChannel>(
           headerChannel_.get(), [](HeaderClientChannel*) {}));
+
+  client->clearEventHandlers();
+
   client->upgradeToRocket(rpcOptions, std::move(callback));
 }
 

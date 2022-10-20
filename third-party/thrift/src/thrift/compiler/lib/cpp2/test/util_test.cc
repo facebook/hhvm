@@ -64,6 +64,32 @@ TEST_F(UtilTest, is_orderable_struct) {
   EXPECT_TRUE(cpp2::is_orderable(s));
 }
 
+TEST_F(UtilTest, is_orderable_struct_self_reference) {
+  t_program p("path/to/program.thrift");
+
+  t_set t(&t_base_type::t_double());
+  t.set_annotation("cpp2.template", "blah");
+
+  t_struct c(&p, "C");
+  c.append(std::make_unique<t_field>(&t, "set_field", 1));
+  EXPECT_FALSE(cpp2::is_orderable(c));
+
+  t_struct b(&p, "B");
+  t_struct a(&p, "A");
+
+  b.append(std::make_unique<t_field>(&a, "a", 1));
+  a.append(std::make_unique<t_field>(&b, "b", 1));
+  a.append(std::make_unique<t_field>(&c, "c", 2));
+
+  EXPECT_FALSE(cpp2::is_orderable(a));
+  EXPECT_FALSE(cpp2::is_orderable(b));
+
+  std::unordered_map<t_type const*, bool> memo;
+  EXPECT_FALSE(cpp2::is_orderable(memo, a));
+  EXPECT_FALSE(cpp2::is_orderable(memo, b));
+  EXPECT_FALSE(cpp2::is_orderable(memo, c));
+}
+
 TEST_F(UtilTest, is_eligible_for_constexpr) {
   auto is_eligible_for_constexpr = [](const t_type* t) {
     return cpp2::is_eligible_for_constexpr()(t);

@@ -21,6 +21,7 @@
 #include <fatal/type/search.h>
 #include <fatal/type/variant_traits.h>
 #include <folly/String.h>
+#include <folly/io/IOBuf.h>
 
 namespace apache {
 namespace thrift {
@@ -233,6 +234,25 @@ struct pretty_print_impl<type_class::string> {
   template <typename OutputStream, typename T>
   static void print(OutputStream& out, T const& what) {
     out << '"' << folly::cEscape<T>(what) << '"';
+  }
+};
+
+template <>
+struct pretty_print_impl<type_class::binary> {
+  template <typename OutputStream, typename T>
+  static void print(OutputStream& out, T const& what) {
+    out << R"("0x)" << folly::hexlify(what) << R"(")";
+  }
+  template <typename OutputStream>
+  static void print(OutputStream& out, folly::IOBuf const& what) {
+    return print(out, what.to<std::string>());
+  }
+  template <typename OutputStream>
+  static void print(
+      OutputStream& out, std::unique_ptr<folly::IOBuf> const& what) {
+    if (what) {
+      return print(out, what->to<std::string>());
+    }
   }
 };
 

@@ -1,0 +1,20 @@
+// Copyright (c) Meta Platforms, Inc. and affiliates.
+//
+// This source code is licensed under the MIT license found in the
+// LICENSE file in the "hack" directory of this source tree.
+
+use std::path::PathBuf;
+
+/// Convert a Hack source file to an HHI interface definition file by removing
+/// all function and method bodies.
+#[derive(clap::Parser, Debug)]
+struct Opts {
+    /// The Hack source file to generate an HHI file for.
+    filename: PathBuf,
+}
+
+fn main() -> anyhow::Result<()> {
+    let opts = <Opts as clap::Parser>::from_args();
+    let mut stdout = std::io::BufWriter::new(std::io::stdout().lock());
+    generate_hhi_lib::run(&mut stdout, &opts.filename)
+}

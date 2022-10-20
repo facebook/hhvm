@@ -99,7 +99,9 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
             TShapeMap.add field { sft_optional = false; sft_ty } shape
           in
           let (env, sft_ty) = Env.expand_type env sft_ty in
-          match (field, deref sft_ty, deref (TUtils.get_base_type env ty)) with
+          let (supportdyn, ty) = TUtils.strip_supportdyn ty in
+          let base_type = TUtils.get_base_type env ty in
+          match (field, deref sft_ty, deref base_type) with
           | (TSFlit_str (_, "nullable"), (_, Toption fty), _) when nullable ->
             (env, acc_field_with_type fty)
           | (TSFlit_str (_, "nullable"), (_, Toption fty), (_, Toption _)) ->
@@ -131,7 +133,14 @@ let rec transform_shapemap ?(nullable = false) env pos ty shape =
             (env, acc_field_with_type (mk (r, Ttuple [ty])))
           | (TSFlit_str (_, "fields"), _, (r, Tshape (shape_kind, fields))) ->
             let (env, fields) = ShapeFieldMap.map_env make_ts env fields in
-            (env, acc_field_with_type (mk (r, Tshape (shape_kind, fields))))
+            let ty = mk (r, Tshape (shape_kind, fields)) in
+            let ty =
+              if supportdyn then
+                MakeType.supportdyn r ty
+              else
+                ty
+            in
+            (env, acc_field_with_type ty)
           (* For generics we cannot specialize the generic_types field. Consider:
            *
            *  class C<T> {}

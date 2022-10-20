@@ -171,6 +171,7 @@ fn sem_diff_body<'arena>(
         params: a_params,
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
+        stack_depth: _,
     } = a;
     let Body {
         body_instrs: _,
@@ -183,6 +184,7 @@ fn sem_diff_body<'arena>(
         params: b_params,
         return_type_info: b_return_type_info,
         doc_comment: b_doc_comment,
+        stack_depth: _,
     } = b;
 
     sem_diff_eq(&path.qualified("num_iters"), a_num_iters, b_num_iters)?;
@@ -222,6 +224,9 @@ fn sem_diff_body<'arena>(
     // Don't bother comparing decl_vars - when we use named vars later we'll
     // compare the names to ensure we're using the same ones.
     // sem_diff_set_t(&path.qualified("decl_vars"), a_decl_vars, b_decl_vars)?;
+
+    // Don't bother comparing stack_depth - for a semantic compare it's fine for
+    // them to be different.
 
     // This compares the instrs themselves.
     crate::body::compare_bodies(path, a, b)
@@ -491,16 +496,19 @@ fn sem_diff_module<'arena>(
         attributes: a_attributes,
         name: a_name,
         span: a_span,
+        doc_comment: a_doc_comment,
     } = a;
     let Module {
         attributes: b_attributes,
         name: b_name,
         span: b_span,
+        doc_comment: b_doc_comment,
     } = b;
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
+    sem_diff_eq(&path.qualified("doc_comment"), a_doc_comment, b_doc_comment)?;
     Ok(())
 }
 

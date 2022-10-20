@@ -1130,6 +1130,46 @@ TEST_P(HQUpstreamSessionTestHQ, TestGreaseFramePerSession) {
   hqSession_->closeWhenIdle();
 }
 
+TEST_P(HQUpstreamSessionTestHQ, TestIngressLimitedSessionWithNewRequests) {
+  auto infoCb = std::make_unique<
+      testing::NiceMock<proxygen::MockHTTPSessionInfoCallback>>();
+  hqSession_->setInfoCallback(infoCb.get());
+
+  // set limit to 5,000 for this test
+  hqSession_->setReadBufferLimit(5000);
+
+  // create first stream and generate large response exceeding ingress limit
+  EXPECT_CALL(*infoCb, onIngressLimitExceeded(_)).Times(1);
+  auto handler1 = openTransaction();
+  auto streamId1 = handler1->txn_->getID();
+  handler1->txn_->sendHeaders(getGetRequest());
+  handler1->txn_->sendEOM();
+  // pause ingress so we don't invoke notifyIngressBodyProcessed and decrement
+  // the session's pendingBodySize_
+  handler1->txn_->pauseIngress();
+  handler1->expectHeaders();
+  handler1->expectBody();
+
+  auto resp1 = makeResponse(200, 6000);
+  sendResponse(
+      streamId1, *std::get<0>(resp1), std::move(std::get<1>(resp1)), true);
+  flushAndLoop();
+
+  EXPECT_CALL(*socketDriver_->getSocket(), pauseRead(_));
+  auto handler2 = openTransaction();
+  handler2->expectDetachTransaction();
+  handler2->txn_->sendAbort();
+
+  // resume first txn and expect callbacks
+  handler1->expectEOM();
+  handler1->expectDetachTransaction();
+  handler1->txn_->resumeIngress();
+
+  flushAndLoop();
+  hqSession_->setInfoCallback(nullptr);
+  hqSession_->closeWhenIdle();
+}
+
 // This test is checking two different scenarios for different protocol
 //   - in HQ we already have sent SETTINGS in SetUp, so tests that multiple
 //     setting frames are not allowed

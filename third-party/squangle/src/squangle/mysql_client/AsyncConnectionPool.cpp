@@ -210,12 +210,13 @@ std::string AsyncConnectPoolOperation::createTimeoutErrorMessage(
   bool stalled = (cbDelayUs >= kCallbackDelayStallThresholdUs);
 
   std::vector<std::string> parts;
+  const auto& key = getConnectionKey();
   parts.push_back(fmt::format(
       "[{}]({})Connection to {}:{} timed out in pool",
       static_cast<uint16_t>(SquangleErrno::SQ_ERRNO_POOL_CONN_TIMEOUT),
       kErrorPrefix,
-      host().c_str(),
-      port()));
+      key.host,
+      key.port));
   parts.push_back(fmt::format(
       "(open {}, opening {}, key limit {})",
       pool_key_stats.open_connections,

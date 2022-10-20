@@ -27,12 +27,18 @@
 
 namespace apache::thrift {
 
+enum class CPULoadSource {
+  CONTAINER_AND_HOST,
+  CONTAINER_ONLY,
+  HOST_ONLY,
+};
+
 namespace detail {
 THRIFT_PLUGGABLE_FUNC_DECLARE(
     int64_t,
     getCPULoadCounter,
     std::chrono::milliseconds refreshPeriodMs,
-    bool useHostLevelMetrics);
+    CPULoadSource cpuLoadSource);
 } // namespace detail
 
 class CPUConcurrencyController {
@@ -46,8 +52,9 @@ class CPUConcurrencyController {
     Mode mode = Mode::DISABLED;
     // CPU target in the range [0, 100]
     uint8_t cpuTarget = 90;
-    // Whether or not we will use host level metrics versus container metrics.
-    bool useHostLevelMetrics = false;
+    // Source of CPU load metrics (container-only, host-only, or
+    // container_and_host = max(conatiner, host))
+    CPULoadSource cpuLoadSource = CPULoadSource::CONTAINER_ONLY;
 
     // How often to cycle the algorithm and update the current
     // concurrency limit.
@@ -103,7 +110,7 @@ class CPUConcurrencyController {
   int64_t getLoad() const {
     return std::clamp<int64_t>(
         detail::getCPULoadCounter(
-            config().refreshPeriodMs, config().useHostLevelMetrics),
+            config().refreshPeriodMs, config().cpuLoadSource),
         0,
         100);
   }

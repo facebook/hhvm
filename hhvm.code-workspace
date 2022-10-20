@@ -17,6 +17,7 @@
         "path": "nix-shell"
       }
     },
+    "cmake.buildDirectory": "${workspaceFolder}/_build"
   },
   "extensions": {
     "recommendations": [

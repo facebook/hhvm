@@ -124,12 +124,10 @@ python/CompatibilityTest/testset.double/ExceptionToUnion/NaN.Compact
 #
 #
 # Python RPC conformance client tests
-python/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
 python/ThriftRPCClientTest/SinkBasic/Success.SinkBasicTest
 python/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 python/ThriftRPCClientTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
 python/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
-python/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 # Python RPC conformance server tests
 python/ThriftRPCServerTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 python/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest

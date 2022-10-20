@@ -80,8 +80,8 @@ void ProcessInitNoSystemLib() {
   Stack::ValidateStackSize();
 }
 
-std::string get_and_check_systemlib(std::string* hhas) {
-  auto const slib = get_systemlib(hhas);
+std::string get_and_check_systemlib() {
+  auto const slib = get_systemlib();
 
   if (slib.empty()) {
     // Die a horrible death.
@@ -112,8 +112,9 @@ void ProcessInit() {
   StringData::markSymbolsLoaded();
 
   rds::requestInit();
-  std::string hhas;
-  auto const slib = get_and_check_systemlib(&hhas);
+  auto const slib = get_and_check_systemlib();
+
+  // Save this in case the debugger needs it. Once we know if this
   // process does not have debugger support, we'll clear it.
   SystemLib::s_source = slib;
 
@@ -130,26 +131,8 @@ void ProcessInit() {
     _exit(1);
   }
 
-  if (!hhas.empty()) {
-    SystemLib::s_hhas_unit = compile_systemlib_string(
-      hhas.c_str(), hhas.size(), "/:systemlib.hhas",
-      Native::s_systemNativeFuncs);
-    if (auto const info = SystemLib::s_hhas_unit->getFatalInfo()) {
-      Logger::Error("An error has been introduced in the hhas portion of "
-                    "systemlib.");
-      Logger::Error("Check all of your changes to hhas files in "
-                    "hphp/system/php");
-      Logger::Error("HipHop Parse Error: %s", info->m_fatalMsg.c_str());
-      _exit(1);
-    }
-  }
-
   // Load the systemlib unit to build the Class objects
   SystemLib::s_unit->merge();
-  if (SystemLib::s_hhas_unit) {
-    SystemLib::s_hhas_unit->merge();
-  }
-
   SystemLib::s_nullFunc =
     Func::lookup(makeStaticString("__SystemLib\\__86null"));
 

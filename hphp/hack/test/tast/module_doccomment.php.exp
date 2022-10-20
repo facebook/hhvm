@@ -1,0 +1,4 @@
+[(Module
+    { md_annotation = (); md_name = ([6:12-15], "a.b"); md_user_attributes = []; 
+      md_span = [6:1-7:2]; md_mode = Mstrict; md_doc_comment = (Some ([5:1-29], "/** this is a doc comment */")); 
+      md_exports = None; md_imports = None })

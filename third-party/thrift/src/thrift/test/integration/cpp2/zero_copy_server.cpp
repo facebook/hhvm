@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Facebook, Inc. and its affiliates.
+ * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,9 @@
 DEFINE_int32(port, 7878, "Port for the thrift server");
 DEFINE_int32(threshold, 32 * 1024, "Zerocopy threshold");
 DEFINE_bool(debug_logs, false, "Debug logs");
+
+DEFINE_int32(read_buffer_allocation_size, -1, "readBufferAllocationSize");
+DEFINE_int32(read_buffer_min_read_size, -1, "readBufferMinReadSize");
 
 using namespace thrift::zerocopy::cpp2;
 
@@ -83,6 +86,21 @@ int main(int argc, char* argv[]) {
   facebook::services::TLSConfig::applyDefaultsToThriftServer(*server);
 
   server->setSSLPolicy(apache::thrift::SSLPolicy::PERMITTED);
+
+  fizz::AsyncFizzBase::TransportOptions transportOptions;
+
+  if (FLAGS_read_buffer_allocation_size > 0) {
+    transportOptions.readBufferAllocationSize =
+        FLAGS_read_buffer_allocation_size;
+  }
+
+  if (FLAGS_read_buffer_min_read_size > 0) {
+    transportOptions.readBufferMinReadSize = FLAGS_read_buffer_min_read_size;
+  }
+
+  auto config = server->getFizzConfig();
+  config.transportOptions = transportOptions;
+  server->setFizzConfig(config);
 
   if (FLAGS_threshold > 0) {
     LOG(INFO) << "Adding zerocopy enable func with threshold = "

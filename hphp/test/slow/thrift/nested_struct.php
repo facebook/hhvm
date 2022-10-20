@@ -12,6 +12,7 @@ class InnerStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class OuterStruct {
@@ -46,6 +47,7 @@ class OuterStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function getStruct() {

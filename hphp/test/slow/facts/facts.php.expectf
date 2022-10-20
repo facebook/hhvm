@@ -34,6 +34,14 @@ Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"d
 Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
 Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
 Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+Supertypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: []
+Subtypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: ["FinalClassUsesTRequireClass","FinalClassUsesTRequireClassB"]
+Transitive subtypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: [["FinalClassUsesTRequireClass","derived-class.inc","class",false],["FinalClassUsesTRequireClassB","derived-class.inc","class",false]]
+Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: ["TRequireClassFinalCLass"]
+Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: []
+Transitive subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: []
+Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["extends"]}: []
+Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["extends"]}: []
 
 Excluding `extends` relations
 Subtypes of IBase with filters {"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
@@ -47,6 +55,14 @@ Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require ext
 Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
 Subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
 Transitive subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClass"]
+Subtypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: []
+Transitive subtypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: []
+Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: []
+Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClass"]
+Transitive subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: [["TRequireClassFinalClass","derived-class.inc","trait",true]]
+Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
+Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
 Filtering by attribute
 Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
@@ -139,6 +155,12 @@ DontIndexThisMethodAttr => attribute-classes.inc
 E1 => types-with-kinds.inc
   Abstract? false
   Final? false
+FinalClassUsesTRequireClass => derived-class.inc
+  Abstract? false
+  Final? true
+FinalClassUsesTRequireClassB => derived-class.inc
+  Abstract? false
+  Final? true
 I1 => types-with-kinds.inc
   Abstract? true
   Final? false
@@ -170,6 +192,12 @@ T1 => types-with-kinds.inc
   Abstract? true
   Final? false
 TImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireClassFinalClass => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireClassFinalClassB => derived-class.inc
   Abstract? true
   Final? false
 TRequireExtendsBaseClass => derived-class.inc
@@ -233,6 +261,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["apple","banana"]}]
@@ -241,6 +270,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["apple","carrot"]}]
@@ -249,6 +279,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["banana","apple"]}]
@@ -257,6 +288,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["IBaseForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -265,6 +297,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -273,6 +306,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]},{"name":"TwoArgAttr","args":["abc","def"]}]
@@ -281,6 +315,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -289,6 +324,7 @@ Facts in attribute-classes.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -297,6 +333,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\ClassAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -305,6 +342,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\FileAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -313,6 +351,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -321,6 +360,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\ClassAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -329,6 +369,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\FileAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -337,6 +378,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -352,6 +394,7 @@ Facts in attribute-namespace.inc:
       kind: class
       flags: 2
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]}]
@@ -367,6 +410,7 @@ Facts in base-class.inc:
       kind: class
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -375,6 +419,7 @@ Facts in base-class.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -383,6 +428,7 @@ Facts in base-class.inc:
       kind: enum
       flags: 0
       baseTypes: ["HH\\BuiltinEnum"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -405,6 +451,7 @@ Facts in derived-class.inc:
       kind: class
       flags: 3
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -413,6 +460,25 @@ Facts in derived-class.inc:
       kind: class
       flags: 2
       baseTypes: ["BaseClass","IBase","TImplementsIBase"]
+      requireClass: []
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: FinalClassUsesTRequireClass
+      kind: class
+      flags: 6
+      baseTypes: ["TRequireClassFinalCLass"]
+      requireClass: []
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: FinalClassUsesTRequireClassB
+      kind: class
+      flags: 2
+      baseTypes: ["SuperClassOfFinalClassB","TRequireClassFinalCLass"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -421,6 +487,7 @@ Facts in derived-class.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: []
       attributes: []
@@ -429,6 +496,7 @@ Facts in derived-class.inc:
       kind: interface
       flags: 1
       baseTypes: ["IRequireExtendsBaseClass"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -437,7 +505,26 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: ["IBase"]
+      requireClass: []
       requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: TRequireClassFinalClass
+      kind: trait
+      flags: 5
+      baseTypes: []
+      requireClass: ["FinalClassUsesTRequireClass"]
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: TRequireClassFinalClassB
+      kind: trait
+      flags: 1
+      baseTypes: []
+      requireClass: ["FinalClassUsesTRequireClassB"]
+      requireExtends: ["SuperClassOfFinalClassB"]
       requireImplements: []
       attributes: []
       methods: []
@@ -445,6 +532,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: []
       attributes: []
@@ -453,6 +541,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: ["IBase"]
       attributes: []
@@ -461,6 +550,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: ["IBase"]
+      requireClass: []
       requireExtends: []
       requireImplements: ["IBase"]
       attributes: []
@@ -469,6 +559,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: ["IBase"]
       attributes: []
@@ -477,6 +568,7 @@ Facts in derived-class.inc:
       kind: class
       flags: 0
       baseTypes: ["IBase","TRequireImplementsIBase"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -484,7 +576,7 @@ Facts in derived-class.inc:
   functions: []
   constants: []
   attributes: []
-  sha1sum: 4caa71dcecf49e17116eb04c3dd4f4288aa7d47d
+  sha1sum: f3b87ec31e3c7ecaea8cf9fb1dea900cc75a8560
 Facts in type_aliases.inc:
   modules:
   types:
@@ -492,6 +584,7 @@ Facts in type_aliases.inc:
       kind: typeAlias
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -500,6 +593,7 @@ Facts in type_aliases.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\TypeAliasAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -508,6 +602,7 @@ Facts in type_aliases.inc:
       kind: typeAlias
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TypeAliasAttr","args":["42","a"]}]
@@ -525,6 +620,7 @@ Facts in types-with-kinds.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -533,6 +629,7 @@ Facts in types-with-kinds.inc:
       kind: enum
       flags: 0
       baseTypes: ["HH\\BuiltinEnum"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -541,6 +638,7 @@ Facts in types-with-kinds.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -549,6 +647,7 @@ Facts in types-with-kinds.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -594,6 +693,14 @@ Supertypes of TRequireExtendsBaseClassAndRequireImplementsIBase with filters {"d
 Supertypes of TRequireImplementsAndImplementsIBase with filters {"derive_kind":["extends"]}: ["IBase"]
 Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
 Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["extends"]}: []
+Supertypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: []
+Subtypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: ["FinalClassUsesTRequireClass","FinalClassUsesTRequireClassB"]
+Transitive subtypes of TRequireClassFinalClass with filters {"derive_kind":["extends"]}: [["FinalClassUsesTRequireClass","derived-class.inc","class",false],["FinalClassUsesTRequireClassB","derived-class.inc","class",false]]
+Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: ["TRequireClassFinalCLass"]
+Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: []
+Transitive subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["extends"]}: []
+Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["extends"]}: []
+Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["extends"]}: []
 
 Excluding `extends` relations
 Subtypes of IBase with filters {"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
@@ -607,6 +714,14 @@ Subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require ext
 Transitive subtypes of IBase with filters {"kind":["interface"],"derive_kind":["require extends"]}: []
 Subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: ["TRequireExtendsBaseClassAndRequireImplementsIBase","TRequireImplementsAndImplementsIBase","TRequireImplementsIBase"]
 Transitive subtypes of IBase with filters {"kind":["trait"],"derive_kind":["require extends"]}: [["TRequireExtendsBaseClassAndRequireImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsAndImplementsIBase","derived-class.inc","trait",true],["TRequireImplementsIBase","derived-class.inc","trait",true]]
+Supertypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClass"]
+Subtypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: []
+Transitive subtypes of TRequireClassFinalClass with filters {"derive_kind":["require extends"]}: []
+Supertypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: []
+Subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClass"]
+Transitive subtypes of FinalClassUsesTRequireClass with filters {"derive_kind":["require extends"]}: [["TRequireClassFinalClass","derived-class.inc","trait",true]]
+Supertypes of TRequireClassFinalClassB with filters {"derive_kind":["require extends"]}: ["FinalClassUsesTRequireClassB","SuperClassOfFinalClassB"]
+Subtypes of FinalClassUsesTRequireClassB with filters {"derive_kind":["require extends"]}: ["TRequireClassFinalClassB"]
 
 Filtering by attribute
 Subtypes of BaseClassForAttributeFiltering with filters {"attributes":[{"name":"TwoArgAttr","parameters":{"0":"banana"}}]}: ["BananaThenApple"]
@@ -699,6 +814,12 @@ DontIndexThisMethodAttr => attribute-classes.inc
 E1 => types-with-kinds.inc
   Abstract? false
   Final? false
+FinalClassUsesTRequireClass => derived-class.inc
+  Abstract? false
+  Final? true
+FinalClassUsesTRequireClassB => derived-class.inc
+  Abstract? false
+  Final? true
 I1 => types-with-kinds.inc
   Abstract? true
   Final? false
@@ -730,6 +851,12 @@ T1 => types-with-kinds.inc
   Abstract? true
   Final? false
 TImplementsIBase => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireClassFinalClass => derived-class.inc
+  Abstract? true
+  Final? false
+TRequireClassFinalClassB => derived-class.inc
   Abstract? true
   Final? false
 TRequireExtendsBaseClass => derived-class.inc
@@ -793,6 +920,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["apple","banana"]}]
@@ -801,6 +929,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["apple","carrot"]}]
@@ -809,6 +938,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["BaseClassForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TwoArgAttr","args":["banana","apple"]}]
@@ -817,6 +947,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["IBaseForAttributeFiltering"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -825,6 +956,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -833,6 +965,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]},{"name":"TwoArgAttr","args":["abc","def"]}]
@@ -841,6 +974,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -849,6 +983,7 @@ Facts in attribute-classes.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -857,6 +992,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\ClassAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -865,6 +1001,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\FileAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -873,6 +1010,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -881,6 +1019,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\ClassAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -889,6 +1028,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\FileAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -897,6 +1037,7 @@ Facts in attribute-classes.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\MethodAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -912,6 +1053,7 @@ Facts in attribute-namespace.inc:
       kind: class
       flags: 2
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"NoArgAttr","args":[]}]
@@ -927,6 +1069,7 @@ Facts in base-class.inc:
       kind: class
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -935,6 +1078,7 @@ Facts in base-class.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -943,6 +1087,7 @@ Facts in base-class.inc:
       kind: enum
       flags: 0
       baseTypes: ["HH\\BuiltinEnum"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -965,6 +1110,7 @@ Facts in derived-class.inc:
       kind: class
       flags: 3
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -973,6 +1119,25 @@ Facts in derived-class.inc:
       kind: class
       flags: 2
       baseTypes: ["BaseClass","IBase","TImplementsIBase"]
+      requireClass: []
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: FinalClassUsesTRequireClass
+      kind: class
+      flags: 6
+      baseTypes: ["TRequireClassFinalCLass"]
+      requireClass: []
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: FinalClassUsesTRequireClassB
+      kind: class
+      flags: 2
+      baseTypes: ["SuperClassOfFinalClassB","TRequireClassFinalCLass"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -981,6 +1146,7 @@ Facts in derived-class.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: []
       attributes: []
@@ -989,6 +1155,7 @@ Facts in derived-class.inc:
       kind: interface
       flags: 1
       baseTypes: ["IRequireExtendsBaseClass"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -997,7 +1164,26 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: ["IBase"]
+      requireClass: []
       requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: TRequireClassFinalClass
+      kind: trait
+      flags: 5
+      baseTypes: []
+      requireClass: ["FinalClassUsesTRequireClass"]
+      requireExtends: []
+      requireImplements: []
+      attributes: []
+      methods: []
+    name: TRequireClassFinalClassB
+      kind: trait
+      flags: 1
+      baseTypes: []
+      requireClass: ["FinalClassUsesTRequireClassB"]
+      requireExtends: ["SuperClassOfFinalClassB"]
       requireImplements: []
       attributes: []
       methods: []
@@ -1005,6 +1191,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: []
       attributes: []
@@ -1013,6 +1200,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: ["BaseClass"]
       requireImplements: ["IBase"]
       attributes: []
@@ -1021,6 +1209,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: ["IBase"]
+      requireClass: []
       requireExtends: []
       requireImplements: ["IBase"]
       attributes: []
@@ -1029,6 +1218,7 @@ Facts in derived-class.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: ["IBase"]
       attributes: []
@@ -1037,6 +1227,7 @@ Facts in derived-class.inc:
       kind: class
       flags: 0
       baseTypes: ["IBase","TRequireImplementsIBase"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1044,7 +1235,7 @@ Facts in derived-class.inc:
   functions: []
   constants: []
   attributes: []
-  sha1sum: 4caa71dcecf49e17116eb04c3dd4f4288aa7d47d
+  sha1sum: f3b87ec31e3c7ecaea8cf9fb1dea900cc75a8560
 Facts in type_aliases.inc:
   modules:
   types:
@@ -1052,6 +1243,7 @@ Facts in type_aliases.inc:
       kind: typeAlias
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1060,6 +1252,7 @@ Facts in type_aliases.inc:
       kind: class
       flags: 0
       baseTypes: ["HH\\TypeAliasAttribute"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1068,6 +1261,7 @@ Facts in type_aliases.inc:
       kind: typeAlias
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: [{"name":"TypeAliasAttr","args":["42","a"]}]
@@ -1085,6 +1279,7 @@ Facts in types-with-kinds.inc:
       kind: class
       flags: 0
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1093,6 +1288,7 @@ Facts in types-with-kinds.inc:
       kind: enum
       flags: 0
       baseTypes: ["HH\\BuiltinEnum"]
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1101,6 +1297,7 @@ Facts in types-with-kinds.inc:
       kind: interface
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []
@@ -1109,6 +1306,7 @@ Facts in types-with-kinds.inc:
       kind: trait
       flags: 1
       baseTypes: []
+      requireClass: []
       requireExtends: []
       requireImplements: []
       attributes: []

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+#include <thrift/lib/cpp2/protocol/detail/protocol_methods.h>
+
 namespace apache {
 namespace thrift {
 namespace frozen {
@@ -29,10 +31,14 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
   typedef SortedTableLayout LayoutSelf;
 
   void thaw(ViewPosition self, T& out) const {
-    out.clear();
     auto v = view(self);
+    out.clear();
+    // The below `static_cast` is strictly necessary for the correct overload of
+    // `reserve_if_possible` to be selected
+    apache::thrift::detail::pm::reserve_if_possible(
+        &out, static_cast<std::uint32_t>(v.size()));
     for (auto it = v.begin(); it != v.end(); ++it) {
-      out.insert(it.thaw());
+      out.insert(out.end(), it.thaw());
     }
   }
 

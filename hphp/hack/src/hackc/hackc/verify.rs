@@ -116,13 +116,8 @@ impl AssembleOpts {
             .map_err(|err| VerifyError::PrintError(err.to_string()))?;
 
         let post_alloc = bumpalo::Bump::default();
-        let (asm_result, assemble_t) = Timing::time(path, || {
-            crate::assemble::assemble_from_bytes(
-                &post_alloc,
-                &output,
-                /* print tokens */ false,
-            )
-        });
+        let (asm_result, assemble_t) =
+            Timing::time(path, || assemble::assemble_from_bytes(&post_alloc, &output));
         let (post_unit, _) = asm_result
             .map_err(|err| VerifyError::AssembleError(truncate_pos_err(err.to_string())))?;
 
@@ -193,7 +188,7 @@ impl IrOpts {
             ..Default::default()
         });
 
-        result.map_err(|err| VerifyError::SemanticUnitMismatchError(err.to_string()))
+        result.map_err(|err| VerifyError::SemanticUnitMismatchError(format!("{err:?}")))
     }
 }
 

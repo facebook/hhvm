@@ -135,7 +135,7 @@ ContextStack::UniquePtr ContextStack::createWithClientContextCopyNames(
   snprintf(
       methodNameStorage,
       methodNameBytes,
-      "%s:%s",
+      "%s.%s",
       serviceName.c_str(),
       methodName.c_str());
 

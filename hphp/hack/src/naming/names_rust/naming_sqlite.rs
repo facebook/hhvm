@@ -5,11 +5,11 @@
 
 use std::path::Path;
 
+use anyhow::Context;
 use hh24_types::Checksum;
 use hh24_types::DeclHash;
 use hh24_types::ToplevelCanonSymbolHash;
 use hh24_types::ToplevelSymbolHash;
-use nohash_hasher::IntSet;
 use oxidized::file_info::NameType;
 use relative_path::RelativePath;
 use rusqlite::params;
@@ -25,17 +25,20 @@ impl Names {
         let path = path.as_ref();
         let mut conn = Connection::open(path)?;
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
     pub fn new_in_memory() -> anyhow::Result<Self> {
         let mut conn = Connection::open_in_memory()?;
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
     pub fn from_connection(mut conn: Connection) -> anyhow::Result<Self> {
         Self::create_tables(&mut conn)?;
+        Self::create_indices(&mut conn)?;
         Ok(Self { conn })
     }
 
@@ -44,9 +47,31 @@ impl Names {
         Ok(())
     }
 
+    /// These pragmas make things faster at the expense of write safety...
+    /// * journal_mode=OFF -- no rollback possible: the ROLLBACK TRANSACTION command won't work
+    /// * synchronous=OFF -- sqlite will return immediately after handing off writes to the OS, so data will be lost upon power-loss
+    /// * temp_store=MEMORY -- temporary tables and indices kept in memory
+    pub fn pragma_fast_but_not_durable(&self) -> anyhow::Result<()> {
+        self.conn.execute_batch(
+            "PRAGMA journal_mode = OFF;
+            PRAGMA synchronous = OFF;
+            PRAGMA temp_store = MEMORY;",
+        )?;
+        Ok(())
+    }
+
+    /// This does a sql "BEGIN EXCLUSIVE TRANSACTION".
+    /// (an 'exclusive' transaction is one that acquires a write lock immediately rather than lazily).
+    /// Then, once you call transaction.end() or drop it, "END TRANSACTION".
+    /// The main reason to use transactions is for speed.
+    /// (Note: if you opened naming-sqlite with "from_file_non_durable" then it
+    /// doesn't support ROLLBACK TRANSACTION).
+    pub fn transaction(&self) -> anyhow::Result<Transaction<'_>> {
+        Transaction::new(&self.conn)
+    }
+
     fn create_tables(conn: &mut Connection) -> anyhow::Result<()> {
-        let tx = conn.transaction()?;
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS (
                 HASH INTEGER PRIMARY KEY NOT NULL,
@@ -55,10 +80,10 @@ impl Names {
                 FLAGS INTEGER NOT NULL,
                 FILE_INFO_ID INTEGER NOT NULL
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_SYMBOLS_OVERFLOW (
                 HASH INTEGER KEY NOT NULL,
@@ -67,10 +92,10 @@ impl Names {
                 FLAGS INTEGER NOT NULL,
                 FILE_INFO_ID INTEGER NOT NULL
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        tx.prepare_cached(
+        conn.execute(
             "
             CREATE TABLE IF NOT EXISTS NAMING_FILE_INFO (
                 FILE_INFO_ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,239 +106,175 @@ impl Names {
                 CLASSES TEXT,
                 CONSTS TEXT,
                 FUNS TEXT,
-                TYPEDEFS TEXT
+                TYPEDEFS TEXT,
+                MODULES TEXT
             );",
-        )?
-        .execute(params![])?;
+            params![],
+        )?;
 
-        // TODO(ljw) - NAMING_FILE_INFO should be indexed on PATH_SUFFIX.
+        conn.execute(
+            "
+            CREATE TABLE IF NOT EXISTS CHECKSUM (
+                ID INTEGER PRIMARY KEY,
+                CHECKSUM_VALUE INTEGER NOT NULL
+            );
+            ",
+            params![],
+        )?;
 
-        tx.prepare_cached("CREATE INDEX IF NOT EXISTS FUNS_CANON ON NAMING_SYMBOLS (CANON_HASH);")?
-            .execute(params![])?;
+        conn.execute(
+            "INSERT OR IGNORE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, 0);",
+            params![],
+        )?;
 
-        Ok(tx.commit()?)
+        Ok(())
     }
 
-    /// Walks O(table) to derive checksum based on the decl_hash of each item.
-    /// TODO(ljw) - We should store checksum in the table directly.
-    pub fn derive_checksum(&self) -> anyhow::Result<Checksum> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH
-        FROM
-            NAMING_SYMBOLS
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![])?;
-        let mut checksum = hh24_types::Checksum(0);
+    pub fn create_indices(conn: &mut Connection) -> anyhow::Result<()> {
+        conn.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS FILE_INFO_PATH_IDX
+             ON NAMING_FILE_INFO (PATH_SUFFIX, PATH_PREFIX_TYPE);",
+            params![],
+        )?;
 
-        while let Some(row) = rows.next()? {
-            checksum.addremove(row.get(0)?, row.get(1)?);
-        }
+        conn.execute(
+            "CREATE INDEX IF NOT EXISTS TYPES_CANON
+             ON NAMING_SYMBOLS (CANON_HASH);",
+            params![],
+        )?;
 
-        Ok(checksum)
+        Ok(())
     }
 
-    /// Removes a symbol definition from the reverse naming table (be it in
-    /// a winner or in the overflow table), and fixes the remaining candidates.
-    /// TODO(ljw): this crashes in the case where you delete an overflow symbol
-    /// and it tries to move the remaining overflow symbol into the main table.
-    pub fn remove_symbol(
-        &self,
-        symbol_hash: ToplevelSymbolHash,
-        path: &RelativePath,
-    ) -> anyhow::Result<()> {
-        let file_info_id: crate::FileInfoId = self
+    pub fn get_checksum(&self) -> anyhow::Result<Checksum> {
+        Ok(self
             .conn
-            .prepare(
-                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
-            )?
-            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
-                row.get(0)
-            })?;
+            .prepare_cached("SELECT CHECKSUM_VALUE FROM CHECKSUM")?
+            .query_row(params![], |row| row.get(0))?)
+    }
 
+    pub fn set_checksum(&self, checksum: Checksum) -> anyhow::Result<()> {
         self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ? AND FILE_INFO_ID = ?")?
-            .execute(params![symbol_hash, file_info_id])?;
-        self.conn
-            .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
-            .execute(params![symbol_hash, file_info_id])?;
-
-        let mut overflow_symbols = self.get_overflow_rows_unordered(symbol_hash)?;
-        overflow_symbols.sort_by_key(|symbol| symbol.path.clone());
-        if let Some(symbol) = overflow_symbols.into_iter().next() {
-            // Move row from overflow to main symbol table
-            self.conn
-                .prepare("DELETE FROM NAMING_SYMBOLS_OVERFLOW WHERE HASH = ? AND FILE_INFO_ID = ?")?
-                .execute(params![symbol_hash, symbol.file_info_id])?;
-            let insert_statement = "
-        INSERT INTO NAMING_SYMBOLS (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
-            self.conn.prepare(insert_statement)?.execute(params![
-                symbol.hash,
-                symbol.canon_hash,
-                symbol.decl_hash,
-                symbol.kind,
-                symbol.file_info_id
-            ])?;
-        }
-
+            .prepare_cached("REPLACE INTO CHECKSUM (ID, CHECKSUM_VALUE) VALUES (0, ?);")?
+            .execute(params![checksum])?;
         Ok(())
     }
 
-    /// Adds all of a file's symbols into the reverse naming table,
-    /// into normal or overflow as appropriate.
-    pub fn save_file_summary(
-        &self,
-        path: &RelativePath,
-        file_summary: &crate::FileSummary,
-    ) -> anyhow::Result<()> {
-        let file_info_id = self.insert_file_info_and_get_file_id(path, file_summary)?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Fun,
-            file_summary
-                .funs()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Fun,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::GConst,
-            file_summary
-                .consts()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Const,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Type,
-            file_summary
-                .classes()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Class,
-                    hash: decl_hash,
-                }),
-        )?;
-        self.insert_file_summary(
-            path,
-            file_info_id,
-            typing_deps_hash::DepType::Type,
-            file_summary
-                .typedefs()
-                .map(|(name, decl_hash)| crate::DeclSummary {
-                    symbol: name.to_owned(),
-                    name_type: NameType::Typedef,
-                    hash: decl_hash,
-                }),
-        )?;
-        Ok(())
-    }
-
-    /// private helper for saved_file_summary
+    // private helper for `save_file_summary`/`build`
     fn insert_file_summary(
         &self,
         path: &RelativePath,
-        file_info_id: crate::FileInfoId,
-        dep_type: typing_deps_hash::DepType,
-        items: impl Iterator<Item = crate::DeclSummary>,
+        summary: &crate::FileSummary,
+        save_result: &mut crate::SaveResult,
     ) -> anyhow::Result<()> {
-        let insert_statement = "
-        INSERT INTO NAMING_SYMBOLS (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
-        let insert_overflow_statement = "
-        INSERT INTO NAMING_SYMBOLS_OVERFLOW (
-            HASH,
-            CANON_HASH,
-            DECL_HASH,
-            FLAGS,
-            FILE_INFO_ID
-        ) VALUES (
-            ?, ?, ?, ?, ?
-        );";
+        let file_info_id = self.insert_file_info_and_get_file_id(path, summary)?;
+        save_result.files_added += 1;
+        self.insert_symbols(path, file_info_id, summary.funs(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.consts(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.classes(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.typedefs(), save_result)?;
+        self.insert_symbols(path, file_info_id, summary.modules(), save_result)?;
+        Ok(())
+    }
 
-        let mut insert_statement = self.conn.prepare(insert_statement)?;
-        let mut insert_overflow_statement = self.conn.prepare(insert_overflow_statement)?;
+    // private helper for insert_file_summary
+    fn insert_symbols<'a>(
+        &self,
+        path: &RelativePath,
+        file_id: crate::FileInfoId,
+        items: impl Iterator<Item = &'a crate::DeclSummary>,
+        save_result: &mut crate::SaveResult,
+    ) -> anyhow::Result<()> {
+        for item in items {
+            self.try_insert_symbol(path, file_id, item.clone(), save_result)
+                .with_context(|| {
+                    format!(
+                        "Failed to insert {:?} {} (defined in {path})",
+                        item.name_type, item.symbol
+                    )
+                })?
+        }
+        Ok(())
+    }
 
-        for mut item in items {
-            let decl_hash = item.hash;
-            let hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
-            item.symbol.make_ascii_lowercase();
-            let canon_hash = crate::datatypes::convert::name_to_hash(dep_type, &item.symbol);
-            let kind = item.name_type;
+    // private helper for insert_symbols
+    fn try_insert_symbol(
+        &self,
+        path: &RelativePath,
+        file_info_id: crate::FileInfoId,
+        item: crate::DeclSummary,
+        save_result: &mut crate::SaveResult,
+    ) -> anyhow::Result<()> {
+        let mut insert_statement = self.conn.prepare_cached(
+            "INSERT INTO NAMING_SYMBOLS (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            VALUES (?, ?, ?, ?, ?);",
+        )?;
+        let mut insert_overflow_statement = self.conn.prepare_cached(
+            "INSERT INTO NAMING_SYMBOLS_OVERFLOW (HASH, CANON_HASH, DECL_HASH, FLAGS, FILE_INFO_ID)
+            VALUES (?, ?, ?, ?, ?);",
+        )?;
+        let mut delete_statement = self.conn.prepare_cached(
+            "DELETE FROM NAMING_SYMBOLS
+            WHERE HASH = ? AND FILE_INFO_ID = ?",
+        )?;
+        let symbol_hash = ToplevelSymbolHash::new(item.name_type, &item.symbol);
+        let canon_hash = ToplevelCanonSymbolHash::new(item.name_type, item.symbol.clone());
+        let decl_hash = item.hash;
+        let kind = item.name_type;
 
-            if let Some(symbol) = self.get_row(ToplevelSymbolHash::from_u64(hash as u64))? {
-                // check if new entry appears first alphabetically
-                if path.path_str() < symbol.path.path_str() {
-                    // delete symbol from symbols
-                    self.conn
-                        .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ? AND FILE_INFO_ID = ?")?
-                        .execute(params![symbol.hash, symbol.file_info_id])?;
+        if let Some(old) = self.get_row(symbol_hash)? {
+            assert_eq!(symbol_hash, old.hash);
+            assert_eq!(canon_hash, old.canon_hash);
+            // check if new entry appears first alphabetically
+            if path < &old.path {
+                // delete old row from naming_symbols table
+                delete_statement.execute(params![symbol_hash, old.file_info_id])?;
 
-                    // insert old row into overflow
-                    insert_overflow_statement.execute(params![
-                        symbol.hash,
-                        symbol.canon_hash,
-                        symbol.decl_hash,
-                        symbol.kind,
-                        symbol.file_info_id
-                    ])?;
+                // insert old row into overflow table
+                insert_overflow_statement.execute(params![
+                    symbol_hash,
+                    canon_hash,
+                    old.decl_hash,
+                    old.kind,
+                    old.file_info_id
+                ])?;
 
-                    // insert new row into main table
-                    insert_statement.execute(params![
-                        hash,
-                        canon_hash,
-                        decl_hash,
-                        kind,
-                        file_info_id
-                    ])?;
-                } else {
-                    // insert new row into overflow table
-                    insert_overflow_statement.execute(params![
-                        hash,
-                        canon_hash,
-                        decl_hash,
-                        kind,
-                        file_info_id
-                    ])?;
-                }
-            } else {
-                // No collision. Insert as you normally would
+                // insert new row into naming_symbols table
                 insert_statement.execute(params![
-                    hash,
+                    symbol_hash,
                     canon_hash,
                     decl_hash,
                     kind,
                     file_info_id
                 ])?;
+
+                save_result
+                    .checksum
+                    .addremove(symbol_hash, old.decl_hash, &old.path); // remove old
+                save_result.checksum.addremove(symbol_hash, decl_hash, path); // add new
+                save_result.add_collision(kind, item.symbol, &old.path, path);
+            } else {
+                // insert new row into overflow table
+                insert_overflow_statement.execute(params![
+                    symbol_hash,
+                    canon_hash,
+                    decl_hash,
+                    kind,
+                    file_info_id
+                ])?;
+                save_result.add_collision(kind, item.symbol, &old.path, path);
             }
+        } else {
+            // No collision. Insert as you normally would
+            insert_statement.execute(params![
+                symbol_hash,
+                canon_hash,
+                decl_hash,
+                kind,
+                file_info_id
+            ])?;
+            save_result.checksum.addremove(symbol_hash, decl_hash, path);
+            save_result.symbols_added += 1;
         }
         Ok(())
     }
@@ -526,19 +487,23 @@ impl Names {
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let names_opt = select_statement
             .query_row(params![symbol_hash], |row| {
-                let classes: String = row.get(0)?;
-                let typedefs: String = row.get(1)?;
+                let classes: Option<String> = row.get(0)?;
+                let typedefs: Option<String> = row.get(1)?;
                 Ok((classes, typedefs))
             })
             .optional()?;
 
         if let Some((classes, typedefs)) = names_opt {
-            for class in classes.split('|') {
+            for class in classes.as_deref().unwrap_or_default().split_terminator('|') {
                 if symbol_hash == ToplevelCanonSymbolHash::from_type(class.to_owned()) {
                     return Ok(Some(class.to_owned()));
                 }
             }
-            for typedef in typedefs.split('|') {
+            for typedef in typedefs
+                .as_deref()
+                .unwrap_or_default()
+                .split_terminator('|')
+            {
                 if symbol_hash == ToplevelCanonSymbolHash::from_type(typedef.to_owned()) {
                     return Ok(Some(typedef.to_owned()));
                 }
@@ -574,13 +539,13 @@ impl Names {
         let mut select_statement = self.conn.prepare_cached(select_statement)?;
         let names_opt = select_statement
             .query_row(params![symbol_hash], |row| {
-                let funs: String = row.get(0)?;
+                let funs: Option<String> = row.get(0)?;
                 Ok(funs)
             })
             .optional()?;
 
         if let Some(funs) = names_opt {
-            for fun in funs.split('|') {
+            for fun in funs.as_deref().unwrap_or_default().split_terminator('|') {
                 if symbol_hash == ToplevelCanonSymbolHash::from_fun(fun.to_owned()) {
                     return Ok(Some(fun.to_owned()));
                 }
@@ -589,103 +554,47 @@ impl Names {
         Ok(None)
     }
 
-    /// It scans O(table) for every entry in the reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_symbol_hashes(
+    /// This function will return an empty list if the path doesn't exist in the forward naming table
+    pub fn get_symbol_hashes_for_winners_and_losers(
         &self,
         path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH
-        FROM
-            NAMING_SYMBOLS
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut symbol_hashes = IntSet::default();
-
-        while let Some(row) = rows.next()? {
-            symbol_hashes.insert(row.get(0)?);
+    ) -> anyhow::Result<Vec<(ToplevelSymbolHash, crate::FileInfoId)>> {
+        // The NAMING_FILE_INFO table stores e.g. "Classname1|Classname2|Classname3". This
+        // helper turns it into a vec of (ToplevelSymbolHash,file_info_id) pairs
+        fn split(
+            s: Option<String>,
+            f: impl Fn(&str) -> ToplevelSymbolHash,
+            file_info_id: crate::FileInfoId,
+        ) -> Vec<(ToplevelSymbolHash, crate::FileInfoId)> {
+            match s {
+                None => vec![],
+                Some(s) => s
+                    .split_terminator('|')
+                    .map(|name| (f(name), file_info_id))
+                    .collect(),
+            }
+            // s.split_terminator yields an empty list for an empty string;
+            // s.split would have yielded a singleton list, which we don't want.
         }
 
-        Ok(symbol_hashes)
-    }
-
-    /// It scans O(table) for every entry in the overflow reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_overflow_symbol_hashes(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<IntSet<ToplevelSymbolHash>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS_OVERFLOW.HASH
-        FROM
-            NAMING_SYMBOLS_OVERFLOW
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS_OVERFLOW.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut symbol_hashes = IntSet::default();
-
-        while let Some(row) = rows.next()? {
-            symbol_hashes.insert(row.get(0)?);
-        }
-
-        Ok(symbol_hashes)
-    }
-
-    /// It scans O(table) for every entry in the reverse naming table that matches
-    /// the filename, and returns them.
-    /// TODO(ljw) This function does a needless O(table) scan.
-    /// It should get the same information more cheaply by lookup up the forward
-    /// naming table directly.
-    pub fn get_symbol_and_decl_hashes(
-        &self,
-        path: &RelativePath,
-    ) -> anyhow::Result<Vec<(ToplevelSymbolHash, DeclHash, crate::FileInfoId)>> {
-        let select_statement = "
-        SELECT
-            NAMING_SYMBOLS.HASH,
-            NAMING_SYMBOLS.DECL_HASH,
-            NAMING_SYMBOLS.FILE_INFO_ID
-        FROM
-            NAMING_SYMBOLS
-        LEFT JOIN
-            NAMING_FILE_INFO
-        ON
-            NAMING_SYMBOLS.FILE_INFO_ID = NAMING_FILE_INFO.FILE_INFO_ID
-        WHERE
-            NAMING_FILE_INFO.PATH_PREFIX_TYPE = ? AND
-            NAMING_FILE_INFO.PATH_SUFFIX = ?
-        ";
-        let mut select_statement = self.conn.prepare_cached(select_statement)?;
-        let mut rows = select_statement.query(params![path.prefix() as u8, path.path_str()])?;
-        let mut result = vec![];
-        while let Some(row) = rows.next()? {
-            result.push((row.get(0)?, row.get(1)?, row.get(2)?));
-        }
-        Ok(result)
+        let mut results = vec![];
+        self.conn
+            .prepare_cached(
+                "SELECT CLASSES, CONSTS, FUNS, TYPEDEFS, MODULES, FILE_INFO_ID FROM NAMING_FILE_INFO
+                WHERE PATH_PREFIX_TYPE = ?
+                AND PATH_SUFFIX = ?",
+            )?
+            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
+                let file_info_id: crate::FileInfoId = row.get(5)?;
+                results.extend(split(row.get(0)?, ToplevelSymbolHash::from_type, file_info_id));
+                results.extend(split(row.get(1)?, ToplevelSymbolHash::from_const, file_info_id));
+                results.extend(split(row.get(2)?, ToplevelSymbolHash::from_fun, file_info_id));
+                results.extend(split(row.get(3)?, ToplevelSymbolHash::from_type, file_info_id));
+                results.extend(split(row.get(4)?, ToplevelSymbolHash::from_module, file_info_id));
+                Ok(())
+            })
+            .optional()?;
+        Ok(results)
     }
 
     /// This inserts an item into the forward naming table.
@@ -709,9 +618,10 @@ impl Names {
                 CLASSES,
                 CONSTS,
                 FUNS,
-                TYPEDEFS
+                TYPEDEFS,
+                MODULES
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);",
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             )?
             .execute(params![
                 prefix_type,
@@ -722,42 +632,18 @@ impl Names {
                 Self::join_with_pipe(file_summary.consts()),
                 Self::join_with_pipe(file_summary.funs()),
                 Self::join_with_pipe(file_summary.typedefs()),
+                Self::join_with_pipe(file_summary.modules()),
             ])?;
         let file_info_id = crate::FileInfoId::last_insert_rowid(&self.conn);
         Ok(file_info_id)
     }
 
-    fn join_with_pipe<'a>(symbols: impl Iterator<Item = (&'a str, DeclHash)>) -> String {
-        let mut s = String::new();
-        for (symbol, _) in symbols {
-            s.push_str(symbol);
-            s.push('|');
-        }
-        s.pop(); // Remove trailing pipe character
-        s
-    }
-
-    /// This removes an entry from the forward naming table.
-    pub fn delete(&self, path: &RelativePath) -> anyhow::Result<()> {
-        let file_info_id: Option<crate::FileInfoId> = self
-            .conn
-            .prepare_cached(
-                "SELECT FILE_INFO_ID FROM NAMING_FILE_INFO
-                WHERE PATH_PREFIX_TYPE = ?
-                AND PATH_SUFFIX = ?",
-            )?
-            .query_row(params![path.prefix() as u8, path.path_str()], |row| {
-                row.get(0)
-            })
-            .optional()?;
-        let file_info_id = match file_info_id {
-            Some(id) => id,
-            None => return Ok(()),
-        };
-        self.conn
-            .prepare_cached("DELETE FROM NAMING_FILE_INFO WHERE FILE_INFO_ID = ?")?
-            .execute(params![file_info_id])?;
-        Ok(())
+    fn join_with_pipe<'a>(symbols: impl Iterator<Item = &'a crate::DeclSummary>) -> Option<String> {
+        let s = symbols
+            .map(|summary| summary.symbol.as_str())
+            .collect::<Vec<_>>()
+            .join("|");
+        if s.is_empty() { None } else { Some(s) }
     }
 
     /// This updates the forward naming table.
@@ -809,7 +695,7 @@ impl Names {
             .prepare_cached(
                 "
                 UPDATE NAMING_FILE_INFO
-                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?
+                SET TYPE_CHECKER_MODE=?, DECL_HASH=?, CLASSES=?, CONSTS=?, FUNS=?, TYPEDEFS=?, MODULES=?
                 WHERE FILE_INFO_ID=?
                 ",
             )?
@@ -820,6 +706,7 @@ impl Names {
                 join(decls_or_empty.consts(), "|"),
                 join(decls_or_empty.funs(), "|"),
                 join(decls_or_empty.typedefs(), "|"),
+                join(decls_or_empty.modules(), "|"),
                 file_info_id,
             ])?;
 
@@ -837,12 +724,12 @@ impl Names {
 
     /// This updates the reverse naming-table NAMING_SYMBOLS and NAMING_SYMBOLS_OVERFLOW
     /// by removing all old entries, then inserting the new entries.
-    /// TODO(ljw): remove previous implementations remove_symbol and insert_file_summary.
+    /// TODO(ljw): remove previous implementations of insert_file_summary.
     pub fn rev_update(
         &self,
         symbol_hash: ToplevelSymbolHash,
         winner: Option<&crate::SymbolRow>,
-        overflow: &[crate::SymbolRow],
+        overflow: &[&crate::SymbolRow],
     ) -> anyhow::Result<()> {
         self.conn
             .prepare("DELETE FROM NAMING_SYMBOLS WHERE HASH = ?")?
@@ -872,5 +759,103 @@ impl Names {
         }
 
         Ok(())
+    }
+
+    pub fn build_at_path(
+        path: impl AsRef<Path>,
+        file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
+    ) -> anyhow::Result<Self> {
+        let path = path.as_ref();
+        let conn = Connection::open(path)?;
+        let log = slog::Logger::root(slog::Discard, slog::o!());
+        let (conn, _save_result) = Self::build(&log, conn, |tx| {
+            file_summaries.into_iter().try_for_each(|x| Ok(tx.send(x)?))
+        })?;
+        Ok(Self { conn })
+    }
+
+    /// Build a naming table using the information provided in
+    /// `collect_file_summaries` and writing to `conn`. The naming table will be
+    /// built on a background thread while `collect_file_summaries` is run. Once
+    /// all file summaries have been sent on the `Sender`, drop it (usually by
+    /// letting it go out of scope as `collect_file_summaries` terminates) to
+    /// allow building to continue.
+    pub fn build(
+        log: &slog::Logger,
+        mut conn: rusqlite::Connection,
+        collect_file_summaries: impl FnOnce(
+            crossbeam::channel::Sender<(RelativePath, crate::FileSummary)>,
+        ) -> anyhow::Result<()>,
+    ) -> anyhow::Result<(rusqlite::Connection, crate::SaveResult)> {
+        // We can't use rusqlite::Transaction for now because a lot of methods
+        // we want to use are on Self, and Self wants ownership of the
+        // Connection. Sqlite will automatically perform a rollback when the
+        // connection is closed, which will happen (via impl Drop for
+        // Connection) if we return Err here.
+        conn.execute("BEGIN TRANSACTION", params![])?;
+        Self::create_tables(&mut conn)?;
+
+        let mut names = Self { conn };
+        let save_result = crossbeam::thread::scope(|scope| -> anyhow::Result<_> {
+            let (tx, rx) = crossbeam::channel::unbounded();
+
+            // Write to the db serially, but concurrently with parsing
+            let names = &mut names;
+            let db_thread = scope.spawn(move |_| -> anyhow::Result<_> {
+                let mut save_result = crate::SaveResult::default();
+                while let Ok((path, summary)) = rx.recv() {
+                    names.insert_file_summary(&path, &summary, &mut save_result)?;
+                }
+                Ok(save_result)
+            });
+
+            // Parse files (in parallel, if the caller chooses)
+            collect_file_summaries(tx)?;
+
+            db_thread.join().unwrap()
+        })
+        .unwrap()?;
+        names.set_checksum(save_result.checksum)?;
+        let mut conn = names.conn;
+
+        slog::info!(log, "Creating indices...");
+        Self::create_indices(&mut conn)?;
+
+        slog::info!(log, "Closing DB transaction...");
+        conn.execute("END TRANSACTION", params![])?;
+
+        Ok((conn, save_result))
+    }
+}
+
+/// This token is for a transaction. When you construct it,
+/// it does sql command "BEGIN EXCLUSIVE TRANSACTION".
+/// When you call end() or drop it, it does sql command "END TRANSACTION".
+/// (There's also a similar rusqlite::Transaction, but it takes &mut
+/// ownership of the connection, which makes it awkward to work with
+/// all our methods.)
+pub struct Transaction<'a> {
+    conn: Option<&'a rusqlite::Connection>,
+}
+
+impl<'a> Transaction<'a> {
+    fn new(conn: &'a rusqlite::Connection) -> anyhow::Result<Self> {
+        conn.execute_batch("BEGIN EXCLUSIVE TRANSACTION;")?;
+        Ok(Self { conn: Some(conn) })
+    }
+
+    pub fn end(mut self) -> anyhow::Result<()> {
+        if let Some(conn) = self.conn.take() {
+            conn.execute_batch("END TRANSACTION;")?;
+        }
+        Ok(())
+    }
+}
+
+impl<'a> Drop for Transaction<'a> {
+    fn drop(&mut self) {
+        if let Some(conn) = self.conn.take() {
+            let _ignore = conn.execute_batch("END TRANSACTION;");
+        }
     }
 }

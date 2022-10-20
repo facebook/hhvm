@@ -133,6 +133,8 @@ class OuterStructWithWrapperAndAdapter implements IThriftStruct {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public async function print(): Awaitable<void> {
     $inner_struct = await $this->get_struct_value()->genUnwrap();
     echo "----OuterStructWithWrapperAndAdapter----\n";
@@ -186,6 +188,8 @@ class OuterStructWithWrapper implements IThriftStruct {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public async function print(): Awaitable<void> {
     $inner_struct = await $this->get_struct_value()->genUnwrap();
     echo "----OuterStructWithWrapper----\n";
@@ -218,6 +222,8 @@ class OuterStructNoWrappedFields {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public function print(): void {
     echo "----OuterStructNoWrappedFields----\n";
     echo "\t\t value = ";
@@ -243,6 +249,8 @@ class InnerStruct implements IThriftStruct {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+
+  public function clearTerseFields()[write_props]: void {}
 
   public function print(): void {
     echo "\t\t ----InnerStruct----\n";

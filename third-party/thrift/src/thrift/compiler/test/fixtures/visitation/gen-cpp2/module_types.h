@@ -1115,8 +1115,11 @@ class union1 final  {
   union1(union1&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui:
       {
         set_ui(std::move(rhs.value_.ui));
@@ -1149,8 +1152,11 @@ class union1 final  {
   union1(const union1& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui:
       {
         set_ui(rhs.value_.ui);
@@ -1182,8 +1188,11 @@ class union1 final  {
   union1& operator=(union1&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui:
       {
         set_ui(std::move(rhs.value_.ui));
@@ -1217,8 +1226,11 @@ class union1 final  {
   union1& operator=(const union1& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui:
       {
         set_ui(rhs.value_.ui);
@@ -1520,8 +1532,11 @@ class union2 final  {
   union2(union2&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui_2:
       {
         set_ui_2(std::move(rhs.value_.ui_2));
@@ -1554,8 +1569,11 @@ class union2 final  {
   union2(const union2& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui_2:
       {
         set_ui_2(rhs.value_.ui_2);
@@ -1587,8 +1605,11 @@ class union2 final  {
   union2& operator=(union2&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui_2:
       {
         set_ui_2(std::move(rhs.value_.ui_2));
@@ -1622,8 +1643,11 @@ class union2 final  {
   union2& operator=(const union2& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui_2:
       {
         set_ui_2(rhs.value_.ui_2);
@@ -1925,8 +1949,11 @@ class union3 final  {
   union3(union3&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui_3:
       {
         set_ui_3(std::move(rhs.value_.ui_3));
@@ -1959,8 +1986,11 @@ class union3 final  {
   union3(const union3& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::ui_3:
       {
         set_ui_3(rhs.value_.ui_3);
@@ -1992,8 +2022,11 @@ class union3 final  {
   union3& operator=(union3&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui_3:
       {
         set_ui_3(std::move(rhs.value_.ui_3));
@@ -2027,8 +2060,11 @@ class union3 final  {
   union3& operator=(const union3& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::ui_3:
       {
         set_ui_3(rhs.value_.ui_3);
@@ -2508,8 +2544,11 @@ class unionA final  {
   unionA(unionA&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::i:
       {
         set_i(std::move(rhs.value_.i));
@@ -2547,8 +2586,11 @@ class unionA final  {
   unionA(const unionA& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::i:
       {
         set_i(rhs.value_.i);
@@ -2585,8 +2627,11 @@ class unionA final  {
   unionA& operator=(unionA&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::i:
       {
         set_i(std::move(rhs.value_.i));
@@ -2625,8 +2670,11 @@ class unionA final  {
   unionA& operator=(const unionA& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::i:
       {
         set_i(rhs.value_.i);
@@ -7917,8 +7965,11 @@ class union_with_special_names final  {
   union_with_special_names(union_with_special_names&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::get:
       {
         set_get(std::move(rhs.value_.get));
@@ -8071,8 +8122,11 @@ class union_with_special_names final  {
   union_with_special_names(const union_with_special_names& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::get:
       {
         set_get(rhs.value_.get);
@@ -8224,8 +8278,11 @@ class union_with_special_names final  {
   union_with_special_names& operator=(union_with_special_names&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::get:
       {
         set_get(std::move(rhs.value_.get));
@@ -8379,8 +8436,11 @@ class union_with_special_names final  {
   union_with_special_names& operator=(const union_with_special_names& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::get:
       {
         set_get(rhs.value_.get);

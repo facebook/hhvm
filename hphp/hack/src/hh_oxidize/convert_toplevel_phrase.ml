@@ -75,9 +75,9 @@ let enum_modules =
     ("error_codes", "NastCheck");
     ("error_codes", "Typing");
     ("error_codes", "Init");
-    (* An optional error set that runs only for arg --enable-global-write-check
-       or --enable-global-write-check-function. *)
-    ("error_codes", "GlobalWriteCheck");
+    (* An optional error set that runs only for arg --enable-global-access-check-files
+       or --enable-global-access-check-functions. *)
+    ("error_codes", "GlobalAccessCheck");
   ]
 
 let is_manually_converted_nested_module mod_name =

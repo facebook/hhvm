@@ -562,7 +562,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       Logger::Info("Got admin port prepare-to-stop request from %s",
                    transport->getRemoteHost());
       MemInfo info, newInfo;
-      Process::GetMemoryInfo(info);
+      Process::GetMemoryInfo(info, RO::EvalMemInfoCheckCgroup2);
       HttpServer::PrepareToStop();
 
       // We may consider purge_all() here, too.  But since requests
@@ -576,7 +576,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       // t.detach();
 
       transport->sendString("OK\n");
-      Process::GetMemoryInfo(newInfo);
+      Process::GetMemoryInfo(newInfo, RO::EvalMemInfoCheckCgroup2);
       Logger::FInfo("free/cached/buffer {}/{}/{} -> {}/{}/{}",
                     info.freeMb, info.cachedMb, info.buffersMb,
                     newInfo.freeMb, newInfo.cachedMb, newInfo.buffersMb);

@@ -55,7 +55,7 @@ class {{enum:name}}(thrift.py3.types.{{^enum:flags?}}Enum{{/enum:flags?}}{{#enum
 
 
 {{/program:enums}}
-{{#program:structs}}
+{{#program:filtered_structs}}
 {{#struct:union?}}
 _{{struct:name}}ValueType = _typing.Union[None, {{#struct:py3_fields}}{{^first?}}, {{/first?}}{{#field:type}}{{> types/pep484_type}}{{/field:type}}{{/struct:py3_fields}}]
 
@@ -120,7 +120,7 @@ class {{struct:name}}({{> types/python_struct_class}}, _typing.Hashable):
     def _to_py3(self) -> {{struct:name}}: ...
     def _to_py_deprecated(self) -> "{{program:py_deprecated_module_path}}.ttypes.{{struct:name}}": ...   # type: ignore
 
-{{/program:structs}}
+{{/program:filtered_structs}}
 {{#program:containerTypes}}
 {{#type:list?}}
 _{{> types/cython_python_type}}T = _typing.TypeVar('_{{> types/cython_python_type}}T', bound={{> types/pep484_containers}})

@@ -519,11 +519,11 @@ MaskedDecodeResultValue parseValue(
             prot, ftype, nextRead, nextWrite, protocolData, string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
-          object[FieldId{fid}] = nestedResult.included;
+          object[FieldId{fid}] = std::move(nestedResult.included);
         }
         if (!apache::thrift::empty(nestedResult.excluded)) {
           result.excluded.fields_ref().ensure()[FieldId{fid}] =
-              nestedResult.excluded;
+              std::move(nestedResult.excluded);
         }
         prot.readFieldEnd();
       }
@@ -546,14 +546,15 @@ MaskedDecodeResultValue parseValue(
             prot, valType, nextRead, nextWrite, protocolData, string_to_binary);
         // Set nested MaskedDecodeResult if not empty.
         if (!apache::thrift::empty(nestedResult.included)) {
-          map[keyValue] = nestedResult.included;
+          map[keyValue] = std::move(nestedResult.included);
         }
         if (!apache::thrift::empty(nestedResult.excluded)) {
           auto& keys = protocolData.keys().ensure();
           keys.push_back(keyValue);
           type::ValueId id =
               type::ValueId{apache::thrift::util::i32ToZigzag(keys.size() - 1)};
-          result.excluded.values_ref().ensure()[id] = nestedResult.excluded;
+          result.excluded.values_ref().ensure()[id] =
+              std::move(nestedResult.excluded);
         }
       }
       prot.readMapEnd();

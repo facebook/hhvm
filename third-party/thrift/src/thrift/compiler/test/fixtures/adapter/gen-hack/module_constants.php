@@ -67,6 +67,91 @@ class module_CONSTANTS implements \IThriftConstants {
     );
   }
 
+  /**
+   * Original thrift constant:-
+   * i32 timeout
+   */
+  const int timeout = 42;
+
+  /**
+   * Original thrift constant:-
+   * string msg
+   */
+  const string msg = "hello, world";
+
+  /**
+   * Original thrift constant:-
+   * struct module.Person2 person
+   */
+  <<__Memoize>>
+  public static function person()[write_props]: \thrift\test\Person2{
+    return \thrift\test\Person2::fromShape(
+      shape(
+        "name" => "DefaultName",
+      )
+    );
+  }
+
+  /**
+   * Original thrift constant:-
+   * i32 timeout_no_transitive
+   */
+  const int timeout_no_transitive = 420;
+
+  /**
+   * Original thrift constant:-
+   * string msg_no_transitive
+   */
+  const string msg_no_transitive = "hello, world 2";
+
+  /**
+   * Original thrift constant:-
+   * struct module.Person2 person_no_transitive
+   */
+  <<__Memoize>>
+  public static function person_no_transitive()[write_props]: \thrift\test\Person2{
+    return \thrift\test\Person2::fromShape(
+      shape(
+        "name" => "DefaultName 2",
+      )
+    );
+  }
+
+  /**
+   * Original thrift constant:-
+   * bool type_adapted
+   */
+  const \thrift\test\AdaptedBool type_adapted = true;
+
+  /**
+   * Original thrift constant:-
+   * struct module.MoveOnly nested_adapted
+   */
+  <<__Memoize>>
+  public static function nested_adapted()[write_props]: \thrift\test\MoveOnly{
+    return \thrift\test\MoveOnly::fromShape(
+      shape(
+        "ptr" => \thrift\test\HeapAllocated::fromShape(
+          shape(
+          )
+        ),
+      )
+    );
+  }
+
+  /**
+   * Original thrift constant:-
+   * list<byte> container_of_adapted
+   */
+  <<__Memoize>>
+  public static function container_of_adapted()[write_props]: \ConstVector<\thrift\test\AdaptedByte>{
+    return ImmVector {
+      1,
+      2,
+      3,
+    };
+  }
+
 
   public static function getAllStructuredAnnotations()[write_props]: dict<string, dict<string, \IThriftStruct>> {
     return dict[
@@ -109,6 +194,48 @@ class module_CONSTANTS implements \IThriftConstants {
         '\thrift\test\Config' => \thrift\test\Config::fromShape(
           shape(
             "path" => "baz2",
+          )
+        ),
+      ],
+      'timeout' => dict[
+        '\thrift\test\Person' => \thrift\test\Person::fromShape(
+          shape(
+            "name" => "Foo",
+          )
+        ),
+      ],
+      'msg' => dict[
+        '\thrift\test\Person' => \thrift\test\Person::fromShape(
+          shape(
+            "name" => "Bar",
+          )
+        ),
+      ],
+      'person' => dict[
+        '\thrift\test\Person' => \thrift\test\Person::fromShape(
+          shape(
+            "name" => "NameFromAnnotation",
+          )
+        ),
+      ],
+      'timeout_no_transitive' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::VariableAdapter",
+          )
+        ),
+      ],
+      'msg_no_transitive' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::VariableAdapter",
+          )
+        ),
+      ],
+      'person_no_transitive' => dict[
+        '\thrift\annotation\cpp\Adapter' => \thrift\annotation\cpp\Adapter::fromShape(
+          shape(
+            "name" => "::apache::thrift::test::VariableAdapter",
           )
         ),
       ],

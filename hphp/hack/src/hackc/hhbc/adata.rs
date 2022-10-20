@@ -3,15 +3,15 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ffi::Str;
 use serde::Serialize;
 
 use crate::typed_value::TypedValue;
+use crate::AdataId;
 
 #[derive(Debug, Eq, PartialEq, Serialize)]
 #[repr(C)]
 pub struct Adata<'arena> {
-    pub id: Str<'arena>,
+    pub id: AdataId<'arena>,
     pub value: TypedValue<'arena>,
 }
 

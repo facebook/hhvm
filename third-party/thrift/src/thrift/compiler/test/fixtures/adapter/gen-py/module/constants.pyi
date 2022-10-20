@@ -21,3 +21,12 @@ var3: MyStruct
 var4: int
 var5: str
 var6: MyStruct
+timeout: int
+msg: str
+person: Person2
+timeout_no_transitive: int
+msg_no_transitive: str
+person_no_transitive: Person2
+type_adapted: bool
+nested_adapted: MoveOnly
+container_of_adapted: __T.List[int]

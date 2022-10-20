@@ -619,7 +619,6 @@ struct MemRefAnalysis {
     ALocBits avail_in;
     ALocBits avail_out;
     ALocBits kill;
-    ALocBits gen;
   };
 
   explicit MemRefAnalysis(IRUnit& unit) : info(unit, BlockInfo{}) {}
@@ -995,11 +994,10 @@ struct PreAdder {
 
 //////////////////////////////////////////////////////////////////////
 
-template<class Kill, class Gen>
+template<class Kill>
 void mrinfo_step_impl(Env& env,
                       const IRInstruction& inst,
-                      Kill kill,
-                      Gen gen) {
+                      Kill kill) {
   auto do_store = [&] (AliasClass dst, SSATmp* value) {
     /*
      * Pure stores potentially (temporarily) break the heap's reference count
@@ -1013,11 +1011,16 @@ void mrinfo_step_impl(Env& env,
 
   auto const effects = memory_effects(inst);
   match<void>(
-    effects, [&](IrrelevantEffects) {}, [&](ExitEffects) {},
-    [&](ReturnEffects) {}, [&](GeneralEffects) {},
+    effects,
+    [&](IrrelevantEffects) {},
+    [&](ExitEffects) {},
+    [&](ReturnEffects) {},
+    [&](GeneralEffects) {},
+    [&](PureInlineCall) {},
+    [&](CallEffects) {},
+
     [&](UnknownEffects) { kill(ALocBits{}.set()); },
     [&](PureStore x) { do_store(x.dst, x.value); },
-    [&](PureInlineCall) {},
 
     /*
      * Note that loads do not kill a location.  In fact, it's possible that the
@@ -1033,21 +1036,7 @@ void mrinfo_step_impl(Env& env,
      * won't be able to remove support from the previous aset, and won't raise
      * the lower bound on the new loaded value.
      */
-    [&](PureLoad) {},
-
-    [&](CallEffects /*x*/) {
-      /*
-       * Because PHP callees can side-exit (or for that matter throw from their
-       * prologue), the program is ill-formed unless we have balanced reference
-       * counting for all memory locations.  Even if the call has the
-       * destroys_locals flag this is the case---after it destroys the locals
-       * the new value will have a fully synchronized reference count.
-       *
-       * This may need modifications after we allow php values to span calls in
-       * SSA registers.
-       */
-      gen(ALocBits{}.set());
-    });
+    [&](PureLoad) {});
 }
 
 // Helper for stepping after we've created a MemRefAnalysis.
@@ -1055,8 +1044,7 @@ void mrinfo_step(Env& env, const IRInstruction& inst, ALocBits& avail) {
   mrinfo_step_impl(
     env,
     inst,
-    [&] (ALocBits kill) { avail &= ~kill; },
-    [&] (ALocBits gen)  { avail |= gen; }
+    [&] (ALocBits kill) { avail &= ~kill; }
   );
 }
 
@@ -1089,11 +1077,6 @@ void populate_mrinfo(Env& env) {
         inst,
         [&] (ALocBits kill) {
           env.mrinfo.info[blk].kill |= kill;
-          env.mrinfo.info[blk].gen &= ~kill;
-        },
-        [&] (ALocBits gen) {
-          env.mrinfo.info[blk].gen |= gen;
-          env.mrinfo.info[blk].kill &= ~gen;
         }
       );
     }
@@ -1103,11 +1086,9 @@ void populate_mrinfo(Env& env) {
     [&] () -> std::string {
       auto ret = std::string{};
       for (auto& blk : env.rpoBlocks) {
-        folly::format(&ret, "  B{: <3}: {}\n"
-                            "      : {}\n",
+        folly::format(&ret, "  B{: <3}: {}\n",
           blk->id(),
-          show(env.mrinfo.info[blk].kill),
-          show(env.mrinfo.info[blk].gen)
+          show(env.mrinfo.info[blk].kill)
         );
       }
       return ret;
@@ -1117,7 +1098,7 @@ void populate_mrinfo(Env& env) {
   /*
    * 2. Find fixed point of avail_in:
    *
-   *   avail_out = avail_in - kill + gen
+   *   avail_out = avail_in - kill
    *   avail_in  = isect(pred) avail_out
    *
    * Locations that are marked "avail" mean they imply a non-zero lower bound
@@ -1143,7 +1124,7 @@ void populate_mrinfo(Env& env) {
     });
 
     auto const old = binfo.avail_out;
-    binfo.avail_out = (binfo.avail_in & ~binfo.kill) | binfo.gen;
+    binfo.avail_out = binfo.avail_in & ~binfo.kill;
     if (binfo.avail_out != old) {
       if (auto const t = blk->taken()) {
         incompleteQ.push(env.mrinfo.info[t].rpoId);
@@ -1413,12 +1394,15 @@ void find_alias_sets(Env& env) {
       id = env.asetMap[canon];
     } else {
       auto const cinst = canon->inst();
-      if (cinst->is(DefLabel) && cinst->numDsts() == 1) {
+      if (cinst->is(DefLabel)) {
+        auto const idx = cinst->findDst(canon);
+        assertx(idx < cinst->numDsts());
+
         int pid = -2;
-        cinst->block()->forEachSrc(0, [&](IRInstruction*, SSATmp* src) {
+        cinst->block()->forEachSrc(idx, [&](IRInstruction*, SSATmp* src) {
           if (pid == -1) return;
           src = canonical(src);
-          if (src == cinst->dst(0)) return;
+          if (src == canon) return;
           auto const srcId = env.asetMap[src];
           if (srcId == -1) {
             pid = -1;
@@ -1551,15 +1535,18 @@ bool merge_into(ASetInfo& dst, const ASetInfo& src) {
   auto const dst_count = dst.memory_support.count();
   auto const src_count = src.memory_support.count();
   auto const new_count = new_memory_support.count();
-  auto const dst_delta = dst_count - new_count;
-  auto const src_delta = src_count - new_count;
+  auto const dst_delta = safe_cast<int32_t>(dst_count - new_count);
+  auto const src_delta = safe_cast<int32_t>(src_count - new_count);
 
-  const int dst_unsupported_refs = dst.unsupported_refs + dst_delta;
-  const int src_unsupported_refs = src.unsupported_refs + src_delta;
+  auto const dst_unsupported_refs = std::min(
+    dst.unsupported_refs + dst_delta, dst.lower_bound);
+  auto const src_unsupported_refs = std::min(
+    src.unsupported_refs + src_delta, src.lower_bound);
+  auto const dst_supported_refs = dst.lower_bound - dst_unsupported_refs;
+  auto const src_supported_refs = src.lower_bound - src_unsupported_refs;
 
-  auto const unsupported_refs =
-    std::min(std::max(dst_unsupported_refs, src_unsupported_refs),
-             lower_bound);
+  auto const supported_refs = std::min(dst_supported_refs, src_supported_refs);
+  auto const unsupported_refs = lower_bound - supported_refs;
 
   if (dst.lower_bound != lower_bound) {
     dst.lower_bound = lower_bound;
@@ -1990,13 +1977,8 @@ void create_store_support(Env& env, RCState& state, AliasClass dst, SSATmp* tmp,
 
 void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
                  CallEffects e, PreAdder add_node) {
-  // We have to block all incref motion through a PHP call, by observing at the
-  // max.  This is fundamentally required because the callee can side-exit or
-  // throw an exception without a catch trace, so everything needs to be
-  // balanced.
-  observe_all(env, state, add_node);
-
   // The call can affect any unsupported_refs
+  observe_unbalanced_decrefs(env, state, add_node);
   kill_unsupported_refs(state);
 
   // Figure out locations the call may cause stores to, then remove any memory
@@ -2006,6 +1988,7 @@ void handle_call(Env& env, RCState& state, const IRInstruction& /*inst*/,
   bset |= env.ainfo.may_alias(e.actrec);
   bset |= env.ainfo.may_alias(e.outputs);
   bset |= env.ainfo.may_alias(AHeapAny);
+  bset |= env.ainfo.may_alias(ARdsAny);
   reduce_support_bits(env, state, bset, true, add_node);
 }
 
@@ -2813,6 +2796,7 @@ void pre_compute_anticipated(PreEnv& penv) {
         if (!first) {
           s.antOut &= ss.antIn;
           s.pantOut |= ss.pantIn;
+          assertx(!ss.phiPropagate.any());
           return;
         }
         first = false;
@@ -2876,22 +2860,37 @@ bool pre_adjust_for_phis(PreEnv& penv) {
     auto newProp = s.phiPropagate;
     for (auto i = 0; i < front.numDsts(); i++) {
       if (i == s.phiPropagate.size()) break;
-      if (s.phiPropagate.test(i)) continue;
-      auto const did = lookup_aset(penv.env, front.dst(i));
-      if (!did || !s.antIn.test(*did) || s.pavlIn.test(*did)) continue;
+
+      auto const newVal = [&]{
+        auto const did = lookup_aset(penv.env, front.dst(i));
+        if (!did || !s.antIn.test(*did)) return false;
+        bool result = false;
+        blk->forEachPred(
+          [&] (Block* pred) {
+            auto const sid = lookup_aset(penv.env, pred->back().src(i));
+            if (!sid) return;
+            auto& ps = penv.state[pred];
+            if (ps.pavlOut.test(*sid)) result = true;
+          }
+        );
+        return result;
+      }();
+
+      if (s.phiPropagate.test(i) == newVal) continue;
+
+      FTRACE(3, "{}setting phiPropagate[{}] in blk({})\n",
+             newVal ? "" : "un", i, blk->id());
+
+      newProp.flip(i);
+
       blk->forEachPred(
         [&] (Block* pred) {
-          auto const sid = lookup_aset(penv.env, pred->back().src(i));
-          if (!sid) return;
           auto& ps = penv.state[pred];
-          if (ps.pavlOut.test(*sid)) {
-            penv.antQ.push(ps.rpoId);
-            newProp.set(i);
-            FTRACE(3, "setting phiPropagate[{}] in blk({})\n", i, blk->id());
-          }
+          penv.antQ.push(ps.rpoId);
         }
       );
     }
+
     if (s.phiPropagate != newProp) {
       s.phiPropagate = newProp;
       penv.avlQ.push(s.rpoId);

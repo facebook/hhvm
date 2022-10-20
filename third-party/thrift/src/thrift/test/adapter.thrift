@@ -167,6 +167,7 @@ typedef CircularAdaptee AdaptedCircularAdaptee
 @cpp.Adapter{
   name = "::apache::thrift::test::TemplatedTestAdapter",
   underlyingName = "UnderlyingRenamedStruct",
+  extraNamespace = "detail",
 }
 struct RenamedStruct {
   1: i64 data;
@@ -175,7 +176,6 @@ struct RenamedStruct {
 @cpp.Adapter{
   name = "::apache::thrift::test::TemplatedTestAdapter",
   underlyingName = "UnderlyingSameNamespaceStruct",
-  extraNamespace = "",
 }
 struct SameNamespaceStruct {
   1: i64 data;

@@ -325,9 +325,9 @@ Job<LoadRepoJob> s_loadRepoJob;
 
 // Load all UnitEmitters from the RepoFile and convert them into what
 // whole_program expects as input.
-WholeProgramInput load_repo(coro::TicketExecutor& executor,
-                            Client& client,
-                            StructuredLogEntry& sample) {
+std::pair<WholeProgramInput, Config> load_repo(coro::TicketExecutor& executor,
+                                               Client& client,
+                                               StructuredLogEntry& sample) {
   trace_time timer("load repo", &sample);
 
   SCOPE_EXIT { RepoFile::destroy(); };
@@ -336,10 +336,9 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
   if (logging) std::cout << folly::format("{} units\n", units.size());
 
   // Start this as early as possible
-  coro::AsyncValue<Ref<Config>> config{
-    [&client] () {
-      return client.store(Config::get(RepoFile::globalData()));
-    },
+  auto config = Config::get(RepoFile::globalData());
+  coro::AsyncValue<Ref<Config>> storedConfig{
+    [&client, config] () { return client.store(config); },
     executor.sticky()
   };
 
@@ -421,7 +420,7 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
     // Store them (and the config we'll use).
     auto [refs, configRef] = HPHP_CORO_AWAIT(coro::collect(
       client.storeMulti(std::move(ues)),
-      config.getCopy()
+      storedConfig.getCopy()
     ));
 
     std::vector<std::tuple<Ref<UnitEmitterSerdeWrapper>>> tuplized;
@@ -462,7 +461,7 @@ WholeProgramInput load_repo(coro::TicketExecutor& executor,
     tasks.emplace_back(load(i, std::move(group)).scheduleOn(executor.sticky()));
   }
   coro::wait(coro::collectRange(std::move(tasks)));
-  return inputs;
+  return std::make_pair(std::move(inputs), std::move(config));
 }
 
 extern_worker::Options make_extern_worker_options() {
@@ -538,7 +537,7 @@ void compile_repo() {
   sample.setStr("extern_worker_impl", client->implName());
   sample.setStr("extern_worker_session", client->session());
 
-  auto inputs = load_repo(*executor, *client, sample);
+  auto [inputs, config] = load_repo(*executor, *client, sample);
 
   RepoAutoloadMapBuilder autoload;
   RepoFileBuilder repo{output_repo};
@@ -575,6 +574,7 @@ void compile_repo() {
   HphpSession session{Treadmill::SessionKind::HHBBC};
   whole_program(
     std::move(inputs),
+    std::move(config),
     std::move(executor),
     std::move(client),
     emit,

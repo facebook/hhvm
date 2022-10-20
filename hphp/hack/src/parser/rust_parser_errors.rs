@@ -73,6 +73,7 @@ enum FeatureStatus {
     Preview,
     Migration,
     Deprecated,
+    OngoingRelease,
     // TODO: add other modes like "Advanced" or "Deprecated" if necessary.
     // Those are just variants of "Preview" for the runtime's sake, though,
     // and likely only need to be distinguished in the lint rule rather than here
@@ -120,8 +121,8 @@ impl UnstableFeatures {
             UnstableFeatures::TypeConstMultipleBounds => Preview,
             UnstableFeatures::TypeConstSuperBound => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
-            UnstableFeatures::TypeRefinements => Unstable,
-            UnstableFeatures::MethodTraitDiamond => Preview,
+            UnstableFeatures::TypeRefinements => Preview,
+            UnstableFeatures::MethodTraitDiamond => OngoingRelease,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Preview,
             UnstableFeatures::EnumClassTypeConstants => Unstable,
@@ -1251,7 +1252,12 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             }
 
             _ => false,
-        } || self.env.context.active_unstable_features.contains(feature);
+        } || self.env.context.active_unstable_features.contains(feature)
+          // Preview features with an ongoing release should be allowed by the
+          // runtime, but not the typechecker
+          || (feature.get_feature_status() == FeatureStatus::OngoingRelease
+            && self.env.codegen);
+
         if !enabled {
             self.errors.push(make_error_from_node(
                 node,

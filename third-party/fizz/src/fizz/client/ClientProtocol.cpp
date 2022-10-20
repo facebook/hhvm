@@ -200,9 +200,9 @@ Actions ClientStateMachine::processSocketData(
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         e.getAlert());
-  } catch (const std::exception& e) {
+  } catch (...) {
     return detail::handleError(
         state,
         ReportError(folly::make_exception_wrapper<FizzException>(
@@ -210,7 +210,7 @@ Actions ClientStateMachine::processSocketData(
                 "error decoding record in state ",
                 toString(state.state()),
                 ": ",
-                e.what()),
+                folly::exceptionStr(std::current_exception())),
             AlertDescription::decode_error)),
         AlertDescription::decode_error);
   }
@@ -258,12 +258,12 @@ Actions processEvent(const State& state, Param param) {
   } catch (const FizzException& e) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         e.getAlert());
-  } catch (const std::exception& e) {
+  } catch (...) {
     return detail::handleError(
         state,
-        ReportError(folly::exception_wrapper(std::current_exception(), e)),
+        ReportError(folly::exception_wrapper(std::current_exception())),
         AlertDescription::unexpected_message);
   }
 }

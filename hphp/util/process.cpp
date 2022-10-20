@@ -14,6 +14,8 @@
    +----------------------------------------------------------------------+
 */
 #include "hphp/util/process.h"
+#include "hphp/util/process-cpu.h"
+#include "hphp/util/process-host.h"
 
 #include <sys/types.h>
 #include <stdlib.h>
@@ -158,6 +160,46 @@ int Process::GetNumThreads() {
   return ProcStatus::valid() ? ProcStatus::nThreads() : 1;
 }
 
+/////////////////////////////////////////////////////////////////////////
+
+namespace {
+
+/*
+ * Try to read the memory information from the given /cgroup2/memory.<fileName>
+ * file if available.  For reference, see the "Memory Interface Files" section in
+ * https://www.kernel.org/doc/Documentation/cgroup-v2.txt.
+ *
+ * In case this function fails to read from the given file, it returns -1.
+ * Otherwise, it returns the size read converted to MBs.
+ */
+int64_t readCgroup2FileMb(const char* fileName) {
+  std::string fullFileName = std::string("/cgroup2/memory.") + fileName;
+
+  if (FILE* f = fopen(fullFileName.c_str(), "r")) {
+    int64_t size;
+    if (fscanf(f, "%ld", &size) != 1) return -1;
+    fclose(f);
+    return size >> 20;
+  }
+
+  return -1;
+}
+
+/*
+ * If cgroup2 is enabled, update the MemInfo in `info' based on cgroup2 limits.
+ */
+void updateMemInfoWithCgroup2Info(MemInfo& info) {
+  const int64_t cgroup2TotalMb = readCgroup2FileMb("max");
+  if (cgroup2TotalMb >= 0) {
+    // Update info.totalMb with the cgroup2/memory.max limit.  Note that cgroup2
+    // doesn't have the "available memory" information, so we just reduce
+    // meminfo's availableMb by the same delta that totalMb is being reduced by.
+    const int64_t delta = info.totalMb - cgroup2TotalMb;
+    info.totalMb = cgroup2TotalMb;
+    info.availableMb -= delta;
+  }
+}
+
 // Files such as /proc/meminfo and /proc/self/status contain many lines
 // formatted as one of the following:
 //   <fieldName>: <number>
@@ -165,7 +207,7 @@ int Process::GetNumThreads() {
 // This function parses the line and return the number in it.  -1 is returned
 // when the line isn't formatted as expected (until one day we need to read a
 // line where -1 is a legit value).
-static int64_t readSize(const char* line, bool expectKB = false) {
+int64_t readSize(const char* line, bool expectKB = false) {
   int64_t result = -1;
   char tail[8];
   auto n = sscanf(line, "%*s %" SCNd64 " %7s", &result, tail);
@@ -176,7 +218,11 @@ static int64_t readSize(const char* line, bool expectKB = false) {
   return result;
 }
 
-bool Process::GetMemoryInfo(MemInfo& info) {
+}
+
+/////////////////////////////////////////////////////////////////////////
+
+bool Process::GetMemoryInfo(MemInfo& info, bool checkCgroup2) {
 #ifdef _WIN32
 #error "Process::GetMemoryInfo() doesn't support Windows (yet)."
   return false;
@@ -201,7 +247,10 @@ bool Process::GetMemoryInfo(MemInfo& info) {
       } else if (!strncmp(line, "MemAvailable:", 13)) {
         if (kb >= 0) info.availableMb = kb / 1024;
       }
-      if (info.valid()) return true;
+      if (info.valid()) {
+        if (checkCgroup2) updateMemInfoWithCgroup2Info(info);
+        return true;
+      }
     }
     // If MemAvailable isn't available, which shouldn't be the case for kernel
     // versions later than 3.14, we get a rough estimation.
@@ -214,61 +263,6 @@ bool Process::GetMemoryInfo(MemInfo& info) {
   return false;
 }
 
-int Process::GetCPUCount() {
-  return sysconf(_SC_NPROCESSORS_ONLN);
-}
-
-#ifdef __x86_64__
-static __inline void do_cpuid(u_int ax, u_int *p) {
-  asm volatile ("cpuid"
-                : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
-                : "0" (ax));
-}
-#elif defined(_M_X64)
-#include <intrin.h>
-static ALWAYS_INLINE void do_cpuid(int func, uint32_t* p) {
-  __cpuid((int*)p, func);
-}
-#endif
-
-std::string Process::GetCPUModel() {
-#if defined(__x86_64__) || defined(_M_X64)
-  uint32_t regs[4];
-  do_cpuid(0, regs);
-
-  const int vendor_size = sizeof(regs[1])*3;
-  std::swap(regs[2], regs[3]);
-  uint32_t cpu_exthigh = 0;
-  if (memcmp(regs + 1, "GenuineIntel", vendor_size) == 0 ||
-      memcmp(regs + 1, "AuthenticAMD", vendor_size) == 0) {
-    do_cpuid(0x80000000, regs);
-    cpu_exthigh = regs[0];
-  }
-
-  char cpu_brand[3 * sizeof(regs) + 1];
-  char *brand = cpu_brand;
-  if (cpu_exthigh >= 0x80000004) {
-    for (u_int i = 0x80000002; i < 0x80000005; i++) {
-      do_cpuid(i, regs);
-      memcpy(brand, regs, sizeof(regs));
-      brand += sizeof(regs);
-    }
-  }
-  *brand = '\0';
-  assert(brand - cpu_brand < sizeof(cpu_brand));
-  return cpu_brand;
-
-#else
-  // On non-x64, fall back to calling uname
-  std::string model = "Unknown ";
-  struct utsname uname_buf;
-  uname(&uname_buf);
-  model.append(uname_buf.machine);
-  return model;
-
-#endif  // __x86_64__
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string Process::GetAppName() {
@@ -277,14 +271,6 @@ std::string Process::GetAppName() {
     progname = "unknown program";
   }
   return progname;
-}
-
-std::string Process::GetHostName() {
-  char hostbuf[128];
-  hostbuf[0] = '\0'; // for cleaner valgrind output when gethostname() fails
-  gethostname(hostbuf, sizeof(hostbuf));
-  hostbuf[sizeof(hostbuf) - 1] = '\0';
-  return hostbuf;
 }
 
 std::string Process::GetCurrentUser() {

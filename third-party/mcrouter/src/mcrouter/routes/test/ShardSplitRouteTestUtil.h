@@ -23,9 +23,6 @@ namespace memcache {
 namespace mcrouter {
 namespace test {
 
-using FiberManagerContextTag =
-    typename fiber_local<MemcacheRouterInfo>::ContextTypeTag;
-
 constexpr size_t kNumSplits = 26 * 26 + 1;
 
 template <class Request, class RouterInfo = MemcacheRouterInfo>
@@ -46,7 +43,7 @@ void testShardingForOp(ShardSplitter splitter, uint64_t requestFlags = 0) {
     auto rh = get_route_handles(handles)[0];
     ShardSplitRouteHandle splitRoute(rh, splitter);
 
-    TestFiberManager fm{FiberManagerContextTag()};
+    TestFiberManager<MemcacheRouterInfo> fm;
     fm.run([&] {
       mockFiberContext<RouterInfo>();
       Request req("test:123:");

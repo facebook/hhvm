@@ -25,7 +25,7 @@ using namespace apache::thrift;
 
 template <typename Service>
 class StreamServiceTest
-    : public AsyncTestSetup<Service, TestStreamServiceAsyncClient> {};
+    : public AsyncTestSetup<Service, Client<TestStreamService>> {};
 
 using TestTypes = ::testing::Types<
     TestStreamGeneratorService,
@@ -40,7 +40,7 @@ using OrderedHeader = ClientBufferedStream<int32_t>::OrderedHeader;
 
 TYPED_TEST(StreamServiceTest, Basic) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen = (co_await client.co_range(0, 100)).toAsyncGenerator();
         int i = 0;
         while (auto t = co_await gen.next()) {
@@ -53,7 +53,7 @@ TYPED_TEST(StreamServiceTest, Basic) {
 
 TYPED_TEST(StreamServiceTest, Throw) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen = (co_await client.co_rangeThrow(0, 100)).toAsyncGenerator();
         for (int i = 0; i <= 100; i++) {
           auto t = co_await gen.next();
@@ -66,7 +66,7 @@ TYPED_TEST(StreamServiceTest, Throw) {
 
 TYPED_TEST(StreamServiceTest, ThrowUDE) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen =
             (co_await client.co_rangeThrowUDE(0, 100)).toAsyncGenerator();
         for (int i = 0; i <= 100; i++) {
@@ -80,7 +80,7 @@ TYPED_TEST(StreamServiceTest, ThrowUDE) {
 TYPED_TEST(StreamServiceTest, ServerTimeout) {
   this->server_->setStreamExpireTime(std::chrono::milliseconds(1));
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen = (co_await client.co_range(0, 100)).toAsyncGenerator();
         co_await folly::coro::sleep(std::chrono::milliseconds(100));
         EXPECT_THROW(while (co_await gen.next()){}, TApplicationException);
@@ -89,7 +89,7 @@ TYPED_TEST(StreamServiceTest, ServerTimeout) {
 
 TYPED_TEST(StreamServiceTest, WithHeader) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen =
             (co_await client.co_range(0, 100)).toAsyncGeneratorWithHeader();
         int i = 0;
@@ -124,7 +124,7 @@ TYPED_TEST(StreamServiceTest, WithHeader) {
 
 TYPED_TEST(StreamServiceTest, WithSizeTarget) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         auto gen = (co_await client.co_range(
                         RpcOptions().setMemoryBufferSize(512, 10), 0, 100))
                        .toAsyncGenerator();
@@ -137,6 +137,16 @@ TYPED_TEST(StreamServiceTest, WithSizeTarget) {
       });
 }
 
+TYPED_TEST(StreamServiceTest, DuplicateStreamIdThrows) {
+  this->template connectToServer<DuplicateWriteSocket>(
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
+        // dummy request to send setup frame
+        co_await client.co_test();
+        // sink request frame will now be sent twice with the same stream id
+        EXPECT_THROW(co_await client.co_range(0, 100), TTransportException);
+      });
+}
+
 class InitialThrowHandler
     : public apache::thrift::ServiceHandler<TestStreamService> {
  public:
@@ -145,8 +155,7 @@ class InitialThrowHandler
   }
 };
 class InitialThrowTest
-    : public AsyncTestSetup<InitialThrowHandler, TestStreamServiceAsyncClient> {
-};
+    : public AsyncTestSetup<InitialThrowHandler, Client<TestStreamService>> {};
 TEST_F(InitialThrowTest, InitialThrow) {
   class Callback : public StreamClientCallback {
    public:
@@ -186,7 +195,7 @@ TEST_F(InitialThrowTest, InitialThrow) {
     void resetServerCallback(StreamServerCallback&) override {}
   };
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         ThriftPresult<false> pargs;
         auto req = CompactSerializer::serialize<std::string>(pargs);
         for (auto onFirstResponseBool : {true, false}) {
@@ -209,7 +218,7 @@ TEST_F(InitialThrowTest, InitialThrow) {
 
 template <typename Service>
 class MultiStreamServiceTest
-    : public AsyncTestSetup<Service, TestStreamServiceAsyncClient> {
+    : public AsyncTestSetup<Service, Client<TestStreamService>> {
  protected:
   MultiStreamServiceTest() {
     this->numIOThreads_ = 5;
@@ -224,7 +233,7 @@ TYPED_TEST_CASE(MultiStreamServiceTest, MultiTestTypes);
 
 TYPED_TEST(MultiStreamServiceTest, Basic) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(
@@ -246,7 +255,7 @@ TYPED_TEST(MultiStreamServiceTest, Basic) {
 
 TYPED_TEST(MultiStreamServiceTest, Throw) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(
@@ -267,7 +276,7 @@ TYPED_TEST(MultiStreamServiceTest, Throw) {
 
 TYPED_TEST(MultiStreamServiceTest, ThrowUDE) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(
@@ -289,7 +298,7 @@ TYPED_TEST(MultiStreamServiceTest, ThrowUDE) {
 TYPED_TEST(MultiStreamServiceTest, ServerTimeout) {
   this->server_->setStreamExpireTime(std::chrono::milliseconds(1));
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(
@@ -315,7 +324,7 @@ TYPED_TEST(MultiStreamServiceTest, ServerTimeout) {
 
 TYPED_TEST(MultiStreamServiceTest, WithHeader) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(
@@ -361,7 +370,7 @@ TYPED_TEST(MultiStreamServiceTest, Cancel) {
   folly::coro::Baton waitForCancellation;
   this->handler_->waitForCancellation_ = &waitForCancellation;
   this->connectToServer(
-      [&](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [&](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         std::vector<folly::coro::Task<void>> tasks;
         for (int streamCount = 0; streamCount < 5; streamCount++) {
           tasks.push_back(folly::coro::co_invoke(
@@ -391,7 +400,7 @@ TYPED_TEST(MultiStreamServiceTest, Cancel) {
 
 TYPED_TEST(MultiStreamServiceTest, UncompletedPublisherDestructor) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         co_await client.co_uncompletedPublisherDestructor(
             RpcOptions().setTimeout(std::chrono::seconds{10}));
       });
@@ -399,7 +408,7 @@ TYPED_TEST(MultiStreamServiceTest, UncompletedPublisherDestructor) {
 
 TYPED_TEST(MultiStreamServiceTest, UncompletedPublisherMoveAssignment) {
   this->connectToServer(
-      [](TestStreamServiceAsyncClient& client) -> folly::coro::Task<void> {
+      [](Client<TestStreamService>& client) -> folly::coro::Task<void> {
         co_await client.co_uncompletedPublisherMoveAssignment(
             RpcOptions().setTimeout(std::chrono::seconds{10}));
       });

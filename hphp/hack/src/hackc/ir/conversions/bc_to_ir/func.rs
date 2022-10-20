@@ -107,6 +107,7 @@ fn convert_body<'a>(
         ref return_type_info,
         ref shadowed_tparams,
         ref upper_bounds,
+        stack_depth: _,
     } = *body;
 
     let tparams: ClassIdMap<_> = upper_bounds
@@ -141,7 +142,7 @@ fn convert_body<'a>(
         is_memoize_wrapper,
         is_memoize_wrapper_lsb,
         constants: Default::default(),
-        locs: Default::default(),
+        locs,
         num_iters,
         params: Default::default(),
         return_type: types::convert_maybe_type(return_type_info.as_ref(), &mut unit.strings),

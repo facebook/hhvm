@@ -134,6 +134,7 @@ c_AsyncFunctionWaitHandle::Create(const ActRec* fp,
   waitHandle->m_packedTailFrameIds = -1;
   assertx(!waitHandle->hasTailFrames());
   waitHandle->initialize(child);
+  waitHandle->m_implicitContext = *ImplicitContext::activeCtx;
   return waitHandle;
 }
 

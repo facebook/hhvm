@@ -495,13 +495,13 @@ let rec connect ?(allow_macos_hack = true) (env : env) (start_time : float) :
         ("Ran out of retries while waiting for Mercurial to finish rebase. Starting "
         ^^ "the server in the middle of rebase is strongly not recommended and you should "
         ^^ "first finish the rebase before retrying. If you really "
-        ^^ "know what you're doing, maybe try --force-dormant-start\n%!");
+        ^^ "know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with Out_of_retries)
     | ServerMonitorUtils.Server_dormant ->
       Printf.eprintf
         ("Error: No server running and connection limit reached for waiting"
         ^^ " on next server to be started. Please wait patiently. If you really"
-        ^^ " know what you're doing, maybe try --force-dormant-start\n%!");
+        ^^ " know what you're doing, maybe try --force-dormant-start true\n%!");
       raise Exit_status.(Exit_with No_server_running_should_retry)
     | ServerMonitorUtils.Build_id_mismatched mismatch_info_opt ->
       ServerMonitorUtils.(

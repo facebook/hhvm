@@ -79,7 +79,12 @@ fn bench_direct_decl_parse(c: &mut Criterion, files: &[(RcOc<RelativePath>, &[u8
     c.bench_function("direct_decl_parse", |b| {
         b.iter(|| {
             for (filename, text) in files {
-                let _ = direct_decl_parser::parse_decls(&opts, (**filename).clone(), text, &arena);
+                let _ = direct_decl_parser::parse_decls_for_typechecking(
+                    &opts,
+                    (**filename).clone(),
+                    text,
+                    &arena,
+                );
                 arena.reset();
             }
         })

@@ -27,7 +27,6 @@
 #include <set>
 
 using proxygen::HTTPException;
-using proxygen::HTTPHeaders;
 using proxygen::HTTPMessage;
 using proxygen::HTTPMethod;
 using proxygen::HTTPTransaction;
@@ -36,7 +35,6 @@ using proxygen::HTTP_HEADER_CONTENT_LENGTH;
 using proxygen::HTTP_HEADER_EXPECT;
 using proxygen::HTTP_HEADER_HOST;
 using proxygen::HTTP_HEADER_TRANSFER_ENCODING;
-using folly::IOBuf;
 using std::shared_ptr;
 using std::unique_ptr;
 

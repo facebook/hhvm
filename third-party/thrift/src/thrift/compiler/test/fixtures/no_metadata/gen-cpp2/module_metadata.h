@@ -27,13 +27,13 @@ class EnumMetadata<::cpp2::MyEnum>
   using EmptyMetadata::gen;
 };
 template <>
-class StructMetadata<::cpp2::MyDataItem>
+class StructMetadata<::cpp2::MyStruct>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;
 };
 template <>
-class StructMetadata<::cpp2::MyStruct>
+class StructMetadata<::cpp2::MyDataItem>
     : private EmptyMetadata {
  public:
   using EmptyMetadata::gen;

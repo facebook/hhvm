@@ -14,6 +14,6 @@ chrono = { version = "0.4", features = ["clock", "serde", "std"], default-featur
 fbinit = { path = "../../../../../../../common/rust/shed/fbinit" }
 locked_file_drain = { path = "../locked_file_drain" }
 slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
-slog-async = "2.3"
+slog-async = { version = "2.3", features = ["nested-values"] }
 slog-envlogger = "2.2"
 slog-term = "2.8"

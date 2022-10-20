@@ -59,7 +59,13 @@ func (p *Included) GetMyTransitiveField() *transitive0.Foo {
   if !p.IsSetMyTransitiveField() {
     return Included_MyTransitiveField_DEFAULT
   }
-return p.MyTransitiveField
+  return p.MyTransitiveField
+}
+func (p *Included) DefaultGetMyTransitiveField() *transitive0.Foo {
+  if !p.IsSetMyTransitiveField() {
+    return transitive0.NewFoo()
+  }
+  return p.MyTransitiveField
 }
 func (p *Included) IsSetMyTransitiveField() bool {
   return p != nil && p.MyTransitiveField != nil

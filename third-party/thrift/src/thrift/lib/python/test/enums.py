@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import pickle
 import unittest
-from enum import Enum
 from typing import cast, Type, TypeVar
 
 from testing.thrift_types import (
@@ -31,8 +30,8 @@ from testing.thrift_types import (
     OptionalFile,
     Perm,
 )
-from thrift.python.serializer import deserialize, serialize_iobuf
-from thrift.python.types import BadEnum
+from thrift.python.serializer import deserialize, Protocol, serialize_iobuf
+from thrift.python.types import BadEnum, Enum, Flag
 
 _E = TypeVar("_E", bound=Enum)
 
@@ -57,6 +56,20 @@ class EnumTests(unittest.TestCase):
         self.assertIsInstance(Kind.DIR, int, "Enums are Ints")
         self.assertIn(x.type, Kind)
         self.assertEqual(x.type.value, 4)
+
+    def test_enum_value_rename(self) -> None:
+        """The value name is None but we auto rename it to None_"""
+        x = deserialize(File, b'{"name":"blah", "type":0}', Protocol.JSON)
+        self.assertEqual(x.type, Kind.None_)
+
+    def test_bad_enum_hash_same(self) -> None:
+        x = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
+        y = deserialize(File, b'{"name": "something", "type": 64}', Protocol.JSON)
+        self.assertEqual(hash(x), hash(y))
+        self.assertEqual(hash(x.type), hash(y.type))
+        self.assertFalse(x.type is y.type)
+        self.assertEqual(x.type, y.type)
+        self.assertFalse(x.type != y.type)
 
     def test_bad_enum_in_struct(self) -> None:
         to_serialize = OptionalFile(name="something", type=64)
@@ -169,7 +182,10 @@ class EnumTests(unittest.TestCase):
     def test_format(self) -> None:
         self.assertEqual(f"{Color.red}", "Color.red")
 
-    def test_bool(self) -> None:
+    def test_bool_of_class(self) -> None:
+        self.assertTrue(bool(Color))
+
+    def test_bool_of_members(self) -> None:
         self.assertTrue(Kind.None_)
         self.assertTrue(Color.red)
 
@@ -177,6 +193,59 @@ class EnumTests(unittest.TestCase):
         serialized = pickle.dumps(Color.green)
         green = pickle.loads(serialized)
         self.assertIs(green, Color.green)
+
+    def test_adding_member(self) -> None:
+        with self.assertRaises(AttributeError):
+            # pyre-fixme[16]: `Type` has no attribute `black`.
+            Color.black = 3
+
+    def test_delete(self) -> None:
+        with self.assertRaises(AttributeError):
+            del Color.red
+
+    def test_changing_member(self) -> None:
+        with self.assertRaises(AttributeError):
+            # pyre-fixme[8]: Attribute has type `Color`; used as `str`.
+            Color.red = "lol"
+
+    def test_contains(self) -> None:
+        self.assertIn(Color.blue, Color)
+        self.assertIn(1, Color)
+
+    def test_hash(self) -> None:
+        colors = {}
+        colors[Color.red] = 0xFF0000
+        colors[Color.blue] = 0x0000FF
+        colors[Color.green] = 0x00FF00
+        self.assertEqual(colors[Color.green], 0x00FF00)
+
+    def test_enum_in_enum_out(self) -> None:
+        self.assertIs(Color(Color.blue), Color.blue)
+
+    def test_enum_value(self) -> None:
+        self.assertEqual(Color.red.value, 0)
+
+    def test_enum(self) -> None:
+        lst = list(Color)
+        self.assertEqual(len(lst), len(Color))
+        self.assertEqual(len(Color), 3)
+        self.assertEqual([Color.red, Color.blue, Color.green], lst)
+        for i, color in enumerate("red blue green".split(), 0):
+            e = Color(i)
+            self.assertEqual(e, getattr(Color, color))
+            self.assertEqual(e.value, i)
+            self.assertEqual(e, i)
+            self.assertEqual(e.name, color)
+            self.assertIn(e, Color)
+            self.assertIs(type(e), Color)
+            self.assertIsInstance(e, Color)
+            self.assertEqual(str(e), "Color." + color)
+            self.assertEqual(int(e), i)
+            self.assertEqual(repr(e), f"<Color.{color}: {i}>")
+
+    def test_insinstance_Enum(self) -> None:
+        self.assertIsInstance(Color.red, Enum)
+        self.assertTrue(issubclass(Color, Enum))
 
 
 class FlagTests(unittest.TestCase):
@@ -202,3 +271,41 @@ class FlagTests(unittest.TestCase):
         self.assertEqual(x, y)
         self.assertEqual(x.permissions, Perm.read | Perm.write)
         self.assertIsInstance(x.permissions, Perm)
+
+    def test_zero(self) -> None:
+        zero = Perm(0)
+        self.assertNotIn(zero, Perm)
+        self.assertIsInstance(zero, Perm)
+
+    def test_logical(self) -> None:
+        self.assertEqual(Perm.read & Perm.write, Perm(0))
+        self.assertEqual(Perm.read ^ Perm.write, Perm(6))
+        self.assertEqual(~Perm.read, Perm(3))
+
+    def test_combination(self) -> None:
+        combo = Perm(Perm.read.value | Perm.execute.value)
+        self.assertNotIn(combo, Perm)
+        self.assertIsInstance(combo, Perm)
+        self.assertIs(combo, Perm.read | Perm.execute)
+
+    def test_is(self) -> None:
+        allp = Perm(7)
+        self.assertIs(allp, Perm(7))
+
+    def test_invert(self) -> None:
+        x = Perm(-2)
+        self.assertIs(x, Perm.read | Perm.write)
+
+    def test_insinstance_Flag(self) -> None:
+        self.assertIsInstance(Perm.read, Flag)
+        self.assertTrue(issubclass(Perm, Flag))
+        self.assertIsInstance(Perm.read, Enum)
+        self.assertTrue(issubclass(Perm, Enum))
+
+    def test_combo_in_call(self) -> None:
+        x = Perm(7)
+        self.assertIs(x, Perm.read | Perm.write | Perm.execute)
+
+    def test_combo_repr(self) -> None:
+        x = Perm(7)
+        self.assertEqual("<Perm.read|write|execute: 7>", repr(x))

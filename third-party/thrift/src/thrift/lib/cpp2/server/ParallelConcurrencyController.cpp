@@ -119,7 +119,7 @@ bool ParallelConcurrencyController::trySchedule(bool onEnqueued) {
 }
 
 void ParallelConcurrencyController::executeRequest() {
-  auto req = pile_.dequeue();
+  auto [req, userdata] = pile_.dequeue();
   if (req) {
     ServerRequest& serverRequest = req.value();
     // Only continue when the request has not
@@ -134,7 +134,11 @@ void ParallelConcurrencyController::executeRequest() {
       return;
     }
 
-    serverRequest.setRequestPileNotification(&pile_);
+    if (userdata) {
+      serverRequest.requestData().requestPileUserData = *userdata;
+      serverRequest.setRequestPileNotification(&pile_);
+    }
+
     serverRequest.setConcurrencyControllerNotification(this);
     auto stats = ConcurrencyControllerBase::onExecute(serverRequest);
     AsyncProcessorHelper::executeRequest(std::move(*req));

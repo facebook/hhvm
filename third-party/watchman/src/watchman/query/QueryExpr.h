@@ -8,7 +8,9 @@
 #pragma once
 
 #include <optional>
+#include <vector>
 #include "watchman/Clock.h"
+#include "watchman/fs/FileDescriptor.h"
 #include "watchman/watchman_string.h"
 
 namespace watchman {
@@ -55,6 +57,26 @@ class QueryExpr {
       const AggregateOp /*op*/) const {
     return nullptr;
   }
+
+  /**
+   * Returns a set of glob expressions that form an upper bound on the results
+   * of this expression. This SHOULD be a tight upper bound that restricts the
+   * paths to a small set of prefixes (small relative to the size of the
+   * project).
+   *
+   * The patterns are intended to be evaluated by wildmatch (or a compatible
+   * globber) with the WM_PATHNAME flag set, and optionally WM_CASEFOLD
+   * (depending on the CaseSensitivity parameter). Note that this may differ
+   * from how the `glob` generator and any `match` terms are configured in the
+   * current query.
+   *
+   * WARNING: nullopt and an empty vector do NOT mean the same thing:
+   * - nullopt signifies no upper bound (the expression cannot be safely
+   * approximated by a glob)
+   * - an empty vector signifies that the expression cannot match any path.
+   */
+  virtual std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const = 0;
 };
 
 } // namespace watchman

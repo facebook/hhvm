@@ -270,15 +270,19 @@ MATCHER_P(BufMatches, expected, "") {
 }
 
 struct ReadCB {
-  constexpr static AsyncFizzBase::TransportOptions Options = {
-      false, // registerEventCallback
-  };
+  static const AsyncFizzBase::TransportOptions Options;
+};
+
+const AsyncFizzBase::TransportOptions ReadCB::Options = {
+    false, // registerEventCallback
 };
 
 struct RecvCB {
-  constexpr static AsyncFizzBase::TransportOptions Options = {
-      true, // registerEventCallback
-  };
+  static const AsyncFizzBase::TransportOptions Options;
+};
+
+const AsyncFizzBase::TransportOptions RecvCB::Options = {
+    true, // registerEventCallback
 };
 
 using TestTypes = ::testing::Types<ReadCB, RecvCB>;

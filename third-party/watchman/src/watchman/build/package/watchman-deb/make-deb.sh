@@ -58,4 +58,7 @@ mkdir -p /_debs
 
 DEB_OUTPUT="/_debs/watchman_$PACKAGE_VERSION.deb"
 
+# TODO: use dpkg-shlibdeps to automate generation of the runtime
+# dependency list
+
 dpkg-deb -b "$PACKAGE_WORKDIR" "$DEB_OUTPUT"

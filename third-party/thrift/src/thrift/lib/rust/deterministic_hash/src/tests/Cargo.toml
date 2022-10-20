@@ -22,7 +22,7 @@ path = "deterministic_hash_test.rs"
 
 [dependencies]
 anyhow = "1.0.65"
-async-trait = "0.1.56"
+async-trait = "0.1.58"
 codegen_includer_proc_macro = { path = "../../../../../../common/rust/shed/codegen_includer_proc_macro" }
 const-cstr = "0.3.0"
 fbthrift = { path = "../../.." }

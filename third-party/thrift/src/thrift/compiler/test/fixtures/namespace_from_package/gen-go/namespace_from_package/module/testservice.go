@@ -397,7 +397,7 @@ func (p *TestServiceInitResult) GetSuccess() int64 {
   if !p.IsSetSuccess() {
     return TestServiceInitResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *TestServiceInitResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

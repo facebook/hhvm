@@ -33,10 +33,7 @@ struct SortedTableLayout : public ArrayLayout<T, Item> {
   void thaw(ViewPosition self, T& out) const {
     auto v = view(self);
     out.clear();
-    // The below `static_cast` is strictly necessary for the correct overload of
-    // `reserve_if_possible` to be selected
-    apache::thrift::detail::pm::reserve_if_possible(
-        &out, static_cast<std::uint32_t>(v.size()));
+    apache::thrift::detail::pm::reserve_if_possible(&out, v.size());
     for (auto it = v.begin(); it != v.end(); ++it) {
       out.insert(out.end(), it.thaw());
     }

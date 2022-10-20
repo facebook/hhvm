@@ -221,6 +221,13 @@ impl<'a> Token<'a> {
         matches!(self, Token::OpenParen(_))
     }
 
+    pub(crate) fn is_close(&self) -> bool {
+        matches!(
+            self,
+            Token::CloseParen(_) | Token::CloseBracket(_) | Token::CloseCurly(_)
+        )
+    }
+
     pub(crate) fn is_close_paren(&self) -> bool {
         matches!(self, Token::CloseParen(_))
     }

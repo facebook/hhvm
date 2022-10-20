@@ -14,4 +14,4 @@ proc-macro = true
 hhbc-gen = { path = "../../../../../../../tools/hhbc-gen" }
 proc-macro2 = "1.0.46"
 quote = "1.0"
-syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

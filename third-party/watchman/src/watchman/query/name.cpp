@@ -7,6 +7,7 @@
 
 #include "watchman/Errors.h"
 #include "watchman/query/FileResult.h"
+#include "watchman/query/GlobEscaping.h"
 #include "watchman/query/Query.h"
 #include "watchman/query/QueryExpr.h"
 #include "watchman/query/TermRegistry.h"
@@ -148,6 +149,38 @@ class NameExpr : public QueryExpr {
       Query* query,
       const json_ref& term) {
     return parse(query, term, CaseSensitivity::CaseInSensitive);
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity outputCaseSensitive) const override {
+    if (caseSensitive == CaseSensitivity::CaseInSensitive &&
+        outputCaseSensitive != CaseSensitivity::CaseInSensitive) {
+      // The caller asked for a case-sensitive upper bound, so treat iname as
+      // unbounded.
+      return std::nullopt;
+    }
+    if (!wholename) {
+      // basename matches don't bound the prefix, so they're not very useful.
+      return std::nullopt;
+    }
+    std::unordered_set<std::string> globUpperBound;
+    if (!set.empty()) {
+      for (const auto& s : set) {
+        w_string outputPattern = convertLiteralPathToGlob(s);
+        if (outputCaseSensitive == CaseSensitivity::CaseInSensitive) {
+          outputPattern = outputPattern.piece().asLowerCase();
+        }
+        globUpperBound.insert(outputPattern.string());
+      }
+    } else {
+      w_string outputPattern = convertLiteralPathToGlob(name);
+      if (outputCaseSensitive == CaseSensitivity::CaseInSensitive) {
+        outputPattern = outputPattern.piece().asLowerCase();
+      }
+      globUpperBound.insert(outputPattern.string());
+    }
+    return std::vector<std::string>(
+        globUpperBound.begin(), globUpperBound.end());
   }
 };
 

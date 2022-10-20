@@ -6,6 +6,7 @@
  */
 
 #include "watchman/Errors.h"
+#include "watchman/query/GlobEscaping.h"
 #include "watchman/query/Query.h"
 #include "watchman/query/QueryExpr.h"
 #include "watchman/query/TermRegistry.h"
@@ -24,13 +25,20 @@ class DirNameExpr : public QueryExpr {
   struct w_query_int_compare depth;
   using StartsWith = bool (*)(w_string_piece str, w_string_piece prefix);
   StartsWith startswith;
+  CaseSensitivity caseSensitive;
 
  public:
   explicit DirNameExpr(
       w_string dirname,
       struct w_query_int_compare depth,
-      StartsWith startswith)
-      : dirname(dirname), depth(depth), startswith(startswith) {}
+      CaseSensitivity caseSensitive)
+      : dirname(dirname), depth(depth), startswith(caseSensitive == CaseSensitivity::CaseInSensitive
+            ? [](w_string_piece str,
+                 w_string_piece
+                     prefix) { return str.startsWithCaseInsensitive(prefix); }
+            : [](w_string_piece str, w_string_piece prefix) {
+                return str.startsWith(prefix);
+              }), caseSensitive(caseSensitive) {}
 
   EvaluateResult evaluate(QueryContextBase* ctx, FileResult*) override {
     auto& str = ctx->getWholeName();
@@ -116,15 +124,7 @@ class DirNameExpr : public QueryExpr {
     }
 
     return std::make_unique<DirNameExpr>(
-        json_to_w_string(name),
-        depth_comp,
-        case_sensitive == CaseSensitivity::CaseInSensitive
-            ? [](w_string_piece str,
-                 w_string_piece
-                     prefix) { return str.startsWithCaseInsensitive(prefix); }
-            : [](w_string_piece str, w_string_piece prefix) {
-                return str.startsWith(prefix);
-              });
+        json_to_w_string(name), depth_comp, case_sensitive);
   }
   static std::unique_ptr<QueryExpr> parseDirName(
       Query* query,
@@ -135,6 +135,33 @@ class DirNameExpr : public QueryExpr {
       Query* query,
       const json_ref& term) {
     return parse(query, term, CaseSensitivity::CaseInSensitive);
+  }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity outputCaseSensitive) const override {
+    // We could leverage the depth parameter to generate a depth bound, e.g. `*`
+    // for ["depth", "eq", "0"], but this risks taking precedence over a prefix
+    // bound elsewhere in the query, so for simplicity we avoid depth bounds
+    // right now.
+
+    if (caseSensitive == CaseSensitivity::CaseInSensitive &&
+        outputCaseSensitive != CaseSensitivity::CaseInSensitive) {
+      // The caller asked for a case-sensitive upper bound, so treat idirname as
+      // unbounded.
+      return std::nullopt;
+    }
+    if (dirname.size() == 0) {
+      // Treat ["dirname", ""] as unbounded.
+      return std::nullopt;
+    }
+    // NOTE: This is the correct way to escape `dirname` because the only
+    // separator it can contain is `/`. If there's a `\`, it's treated as a
+    // literal character, and is therefore escaped.
+    w_string outputPattern = convertLiteralPathToGlob(dirname);
+    if (outputCaseSensitive == CaseSensitivity::CaseInSensitive) {
+      outputPattern = outputPattern.piece().asLowerCase();
+    }
+    return std::vector<std::string>{outputPattern.string() + "/**"};
   }
 };
 

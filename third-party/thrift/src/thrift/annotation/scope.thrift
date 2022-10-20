@@ -17,7 +17,7 @@
 package "facebook.com/thrift/annotation"
 
 namespace java com.facebook.thrift.annotation_deprecated
-namespace js apache.thrift.annotation.scope
+namespace js thrift.annotation.scope
 namespace py.asyncio facebook_thrift_asyncio.annotation.scope
 namespace go thrift.annotation.scope
 namespace py thrift.annotation.scope

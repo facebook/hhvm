@@ -159,7 +159,7 @@ func (p *Serious) GetSonnet() string {
   if !p.IsSetSonnet() {
     return Serious_Sonnet_DEFAULT
   }
-return *p.Sonnet
+  return *p.Sonnet
 }
 func (p *Serious) IsSetSonnet() bool {
   return p != nil && p.Sonnet != nil

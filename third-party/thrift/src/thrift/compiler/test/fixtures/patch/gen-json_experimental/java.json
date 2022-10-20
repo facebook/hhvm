@@ -7,7 +7,7 @@
   "namespaces": {
     "go": "thrift.annotation.java",
     "java": "com.facebook.thrift.annotation.java_deprecated",
-    "js": "apache.thrift.annotation.java",
+    "js": "thrift.annotation.java",
     "py": "thrift.annotation.java",
     "py.asyncio": "facebook_thrift_asyncio.annotation.java"
   },  "structs" :

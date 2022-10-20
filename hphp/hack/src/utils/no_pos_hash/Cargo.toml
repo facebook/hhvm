@@ -9,7 +9,7 @@ path = "no_pos_hash.rs"
 
 [dependencies]
 arena_collections = { path = "../../arena_collections" }
-bstr = { version = "0.2", features = ["serde1"] }
+bstr = { version = "1.0", features = ["serde", "std", "unicode"] }
 fnv = "1.0"
 no_pos_hash_derive = { path = "derive" }
 ocamlrep = { path = "../../ocamlrep" }

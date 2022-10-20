@@ -548,14 +548,9 @@ HTTP2Codec::parseHeadersDecodeFrames(
   // decompress headers
   Cursor headerCursor(curHeaderBlock_.front());
 
-  // Validate circular dependencies.
-  if (priority && (curHeader_.stream == priority->streamDependency)) {
-    return folly::makeUnexpected(DeferredParseError(
-        ErrorCode::PROTOCOL_ERROR,
-        false,
-        folly::to<string>("Circular dependency for txn=", curHeader_.stream)));
-  }
-
+  // DO NOT return from this method until after the call to decodeStreaming
+  // unless you return a connection error.  Otherwise the HPACK state will
+  // get messed up.
   decodeInfo_.init(parsingReq_,
                    parsingDownstreamTrailers_,
                    validateHeaders_,
@@ -597,6 +592,14 @@ HTTP2Codec::parseHeadersDecodeFrames(
     }
     return folly::makeUnexpected(DeferredParseError(
         ErrorCode::COMPRESSION_ERROR, true, empty_string, std::move(msg)));
+  }
+
+  // Validate circular dependencies.
+  if (priority && (curHeader_.stream == priority->streamDependency)) {
+    return folly::makeUnexpected(DeferredParseError(
+        ErrorCode::PROTOCOL_ERROR,
+        false,
+        folly::to<string>("Circular dependency for txn=", curHeader_.stream)));
   }
 
   // Check parsing error

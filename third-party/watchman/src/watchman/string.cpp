@@ -52,21 +52,16 @@ w_string w_string_piece::asWString(w_string_type_t stringType) const {
 }
 
 w_string w_string_piece::asLowerCase(w_string_type_t stringType) const {
-  /* need to make a lowercase version */
-  auto* s = StringHeader::alloc(size(), stringType);
-  char* buf = s->buf();
+  // TODO: a fast islower check would avoid the unconditional
+  // allocation.
 
-  auto cursor = str_;
-  const char* const end = str_ + len_;
-  while (cursor < end) {
-    // TODO: `tolower` depends on locale.
-    *buf = (char)tolower((uint8_t)*cursor);
-    ++cursor;
-    ++buf;
-  }
-  *buf = 0;
-
-  return w_string{s};
+  uint32_t len = size();
+  return w_string::generate(len, stringType, [&](char* buf) {
+    for (uint32_t i = 0; i < len; ++i) {
+      // TODO: `tolower` depends on locale.
+      buf[i] = static_cast<char>(tolower(static_cast<unsigned char>(str_[i])));
+    }
+  });
 }
 
 std::optional<w_string> w_string_piece::asLowerCaseSuffix(
@@ -76,21 +71,7 @@ std::optional<w_string> w_string_piece::asLowerCaseSuffix(
     return std::nullopt;
   }
 
-  /* need to make a lowercase version */
-  auto* s = StringHeader::alloc(suffixPiece.size(), stringType);
-  char* buf = s->buf();
-
-  auto cursor = suffixPiece.str_;
-  const char* const end = suffixPiece.str_ + suffixPiece.len_;
-  while (cursor < end) {
-    // TODO: `tolower` depends on locale.
-    *buf = (char)tolower((uint8_t)*cursor);
-    ++cursor;
-    ++buf;
-  }
-  *buf = 0;
-
-  return w_string{s};
+  return suffixPiece.asLowerCase(stringType);
 }
 
 w_string w_string_piece::asUTF8Clean() const {
@@ -398,15 +379,13 @@ std::optional<w_string> w_string::asLowerCaseSuffix() const {
 }
 
 w_string w_string::normalizeSeparators(char targetSeparator) const {
-  uint32_t i, len;
-
-  len = str_->len;
+  uint32_t len = str_->len;
 
   if (len == 0) {
     return *this;
   }
 
-  char* thisbuf = str_->buf();
+  const char* thisbuf = str_->buf();
 
   // This doesn't do any special UNC or path len escape prefix handling
   // on windows.  We don't currently use it in a way that would require it.
@@ -420,19 +399,12 @@ w_string w_string::normalizeSeparators(char targetSeparator) const {
     }
   }
 
-  auto* s = StringHeader::alloc(len, W_STRING_BYTE);
-  char* buf = s->buf();
-
-  for (i = 0; i < len; i++) {
-    if (thisbuf[i] == '/' || thisbuf[i] == '\\') {
-      buf[i] = targetSeparator;
-    } else {
-      buf[i] = thisbuf[i];
+  return generate(len, W_STRING_BYTE, [&](char* buf) {
+    for (uint32_t i = 0; i < len; ++i) {
+      char c = thisbuf[i];
+      buf[i] = (c == '/' || c == '\\') ? targetSeparator : c;
     }
-  }
-  buf[len] = 0;
-
-  return w_string{s};
+  });
 }
 
 bool w_string::operator<(const w_string& other) const {

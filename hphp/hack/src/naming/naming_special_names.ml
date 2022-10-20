@@ -347,6 +347,8 @@ module UserAttributes = struct
 
   let uaHasReifiedParent = "__HasReifiedParent"
 
+  let uaSoftInternal = "__SoftInternal"
+
   let uaNoFlatten = "__NoFlatten"
 
   (* <<__SafeForGlobalAccessCheck>> marks global variables as safe from mutations.
@@ -699,6 +701,13 @@ module UserAttributes = struct
               doc =
                 "Marks this global variable as safe from mutation."
                 ^ " This ensures the global_access_check does NOT raise errors/warnings from writing to this global variable.";
+            } );
+          ( uaSoftInternal,
+            {
+              contexts = [fn; cls; mthd; instProperty; staticProperty];
+              autocomplete = false;
+              doc =
+                "Instead of throwing an exception upon a module boundary violation at this symbol, logs a warning instead.";
             } );
         ])
 

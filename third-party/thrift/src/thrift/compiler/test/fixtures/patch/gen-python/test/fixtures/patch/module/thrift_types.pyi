@@ -23,7 +23,7 @@ import apache.thrift.type.standard.thrift_types
 import facebook.thrift.annotation.thrift.thrift_types
 
 
-class MyEnum(_fbthrift_python_types.Enum, enum.IntEnum):
+class MyEnum(_fbthrift_python_types.Enum, int):
     MyValue0: MyEnum = ...
     def _to_python(self) -> MyEnum: ...
     def _to_py3(self) -> "test.fixtures.patch.module.types.MyEnum": ...  # type: ignore

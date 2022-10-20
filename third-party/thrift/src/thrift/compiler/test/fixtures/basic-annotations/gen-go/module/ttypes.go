@@ -385,7 +385,13 @@ func (p *MyStruct) GetMyUnion() *MyUnion {
   if !p.IsSetMyUnion() {
     return MyStruct_MyUnion_DEFAULT
   }
-return p.MyUnion
+  return p.MyUnion
+}
+func (p *MyStruct) DefaultGetMyUnion() *MyUnion {
+  if !p.IsSetMyUnion() {
+    return NewMyUnion()
+  }
+  return p.MyUnion
 }
 
 func (p *MyStruct) GetMyID() MyId {

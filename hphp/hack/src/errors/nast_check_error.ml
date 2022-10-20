@@ -129,6 +129,7 @@ type t =
       pos: Pos.t;
       second_pos: Pos.t;
     }
+  | Soft_internal_without_internal of Pos.t
 
 let repeated_record_field_name pos name prev_pos =
   User_error.make
@@ -582,6 +583,14 @@ let private_and_final pos =
     (pos, "Class methods cannot be both `private` and `final`.")
     []
 
+let soft_internal_without_internal pos =
+  User_error.make
+    Error_code.(to_enum Soft_internal_without_internal)
+    ( pos,
+      "<<__SoftInternal>> can only be used on internal symbols. Try adding internal to this symbol."
+    )
+    []
+
 let internal_member_inside_public_trait member_pos trait_pos =
   User_error.make
     Error_code.(to_enum InternalMemberInsidePublicTrait)
@@ -674,3 +683,4 @@ let to_user_error = function
     internal_member_inside_public_trait member_pos trait_pos
   | Attribute_conflicting_memoize { pos; second_pos } ->
     attribute_conflicting_memoize pos second_pos
+  | Soft_internal_without_internal pos -> soft_internal_without_internal pos

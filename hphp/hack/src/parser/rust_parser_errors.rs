@@ -114,7 +114,7 @@ impl UnstableFeatures {
             UnstableFeatures::ExpressionTrees => Unstable,
             UnstableFeatures::Ifc => Unstable,
             UnstableFeatures::Readonly => Preview,
-            UnstableFeatures::Modules => Preview,
+            UnstableFeatures::Modules => OngoingRelease,
             UnstableFeatures::ModuleReferences => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,

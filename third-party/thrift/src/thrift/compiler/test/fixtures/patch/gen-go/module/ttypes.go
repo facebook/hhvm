@@ -355,21 +355,27 @@ func (p *MyUnion) GetOption1() string {
   if !p.IsSetOption1() {
     return MyUnion_Option1_DEFAULT
   }
-return *p.Option1
+  return *p.Option1
 }
 var MyUnion_Option2_DEFAULT int32
 func (p *MyUnion) GetOption2() int32 {
   if !p.IsSetOption2() {
     return MyUnion_Option2_DEFAULT
   }
-return *p.Option2
+  return *p.Option2
 }
 var MyUnion_Option3_DEFAULT *InnerUnion
 func (p *MyUnion) GetOption3() *InnerUnion {
   if !p.IsSetOption3() {
     return MyUnion_Option3_DEFAULT
   }
-return p.Option3
+  return p.Option3
+}
+func (p *MyUnion) DefaultGetOption3() *InnerUnion {
+  if !p.IsSetOption3() {
+    return NewInnerUnion()
+  }
+  return p.Option3
 }
 func (p *MyUnion) CountSetFieldsMyUnion() int {
   count := 0
@@ -709,91 +715,115 @@ func (p *MyStruct) GetStructVal() *MyData {
   if !p.IsSetStructVal() {
     return MyStruct_StructVal_DEFAULT
   }
-return p.StructVal
+  return p.StructVal
+}
+func (p *MyStruct) DefaultGetStructVal() *MyData {
+  if !p.IsSetStructVal() {
+    return NewMyData()
+  }
+  return p.StructVal
 }
 var MyStruct_UnionVal_DEFAULT *MyUnion
 func (p *MyStruct) GetUnionVal() *MyUnion {
   if !p.IsSetUnionVal() {
     return MyStruct_UnionVal_DEFAULT
   }
-return p.UnionVal
+  return p.UnionVal
+}
+func (p *MyStruct) DefaultGetUnionVal() *MyUnion {
+  if !p.IsSetUnionVal() {
+    return NewMyUnion()
+  }
+  return p.UnionVal
 }
 var MyStruct_LateStructVal_DEFAULT *LateDefStruct
 func (p *MyStruct) GetLateStructVal() *LateDefStruct {
   if !p.IsSetLateStructVal() {
     return MyStruct_LateStructVal_DEFAULT
   }
-return p.LateStructVal
+  return p.LateStructVal
 }
 var MyStruct_DurationVal_DEFAULT *standard2.DurationStruct
 func (p *MyStruct) GetDurationVal() *standard2.DurationStruct {
   if !p.IsSetDurationVal() {
     return MyStruct_DurationVal_DEFAULT
   }
-return p.DurationVal
+  return p.DurationVal
+}
+func (p *MyStruct) DefaultGetDurationVal() *standard2.DurationStruct {
+  if !p.IsSetDurationVal() {
+    return standard2.NewDurationStruct()
+  }
+  return p.DurationVal
 }
 var MyStruct_TimeVal_DEFAULT *standard2.TimeStruct
 func (p *MyStruct) GetTimeVal() *standard2.TimeStruct {
   if !p.IsSetTimeVal() {
     return MyStruct_TimeVal_DEFAULT
   }
-return p.TimeVal
+  return p.TimeVal
+}
+func (p *MyStruct) DefaultGetTimeVal() *standard2.TimeStruct {
+  if !p.IsSetTimeVal() {
+    return standard2.NewTimeStruct()
+  }
+  return p.TimeVal
 }
 var MyStruct_OptBoolVal_DEFAULT bool
 func (p *MyStruct) GetOptBoolVal() bool {
   if !p.IsSetOptBoolVal() {
     return MyStruct_OptBoolVal_DEFAULT
   }
-return *p.OptBoolVal
+  return *p.OptBoolVal
 }
 var MyStruct_OptByteVal_DEFAULT int8
 func (p *MyStruct) GetOptByteVal() int8 {
   if !p.IsSetOptByteVal() {
     return MyStruct_OptByteVal_DEFAULT
   }
-return *p.OptByteVal
+  return *p.OptByteVal
 }
 var MyStruct_OptI16Val_DEFAULT int16
 func (p *MyStruct) GetOptI16Val() int16 {
   if !p.IsSetOptI16Val() {
     return MyStruct_OptI16Val_DEFAULT
   }
-return *p.OptI16Val
+  return *p.OptI16Val
 }
 var MyStruct_OptI32Val_DEFAULT int32
 func (p *MyStruct) GetOptI32Val() int32 {
   if !p.IsSetOptI32Val() {
     return MyStruct_OptI32Val_DEFAULT
   }
-return *p.OptI32Val
+  return *p.OptI32Val
 }
 var MyStruct_OptI64Val_DEFAULT int64
 func (p *MyStruct) GetOptI64Val() int64 {
   if !p.IsSetOptI64Val() {
     return MyStruct_OptI64Val_DEFAULT
   }
-return *p.OptI64Val
+  return *p.OptI64Val
 }
 var MyStruct_OptFloatVal_DEFAULT float32
 func (p *MyStruct) GetOptFloatVal() float32 {
   if !p.IsSetOptFloatVal() {
     return MyStruct_OptFloatVal_DEFAULT
   }
-return *p.OptFloatVal
+  return *p.OptFloatVal
 }
 var MyStruct_OptDoubleVal_DEFAULT float64
 func (p *MyStruct) GetOptDoubleVal() float64 {
   if !p.IsSetOptDoubleVal() {
     return MyStruct_OptDoubleVal_DEFAULT
   }
-return *p.OptDoubleVal
+  return *p.OptDoubleVal
 }
 var MyStruct_OptStringVal_DEFAULT string
 func (p *MyStruct) GetOptStringVal() string {
   if !p.IsSetOptStringVal() {
     return MyStruct_OptStringVal_DEFAULT
   }
-return *p.OptStringVal
+  return *p.OptStringVal
 }
 var MyStruct_OptBinaryVal_DEFAULT []byte
 
@@ -805,21 +835,27 @@ func (p *MyStruct) GetOptEnumVal() MyEnum {
   if !p.IsSetOptEnumVal() {
     return MyStruct_OptEnumVal_DEFAULT
   }
-return *p.OptEnumVal
+  return *p.OptEnumVal
 }
 var MyStruct_OptStructVal_DEFAULT *MyData
 func (p *MyStruct) GetOptStructVal() *MyData {
   if !p.IsSetOptStructVal() {
     return MyStruct_OptStructVal_DEFAULT
   }
-return p.OptStructVal
+  return p.OptStructVal
+}
+func (p *MyStruct) DefaultGetOptStructVal() *MyData {
+  if !p.IsSetOptStructVal() {
+    return NewMyData()
+  }
+  return p.OptStructVal
 }
 var MyStruct_OptLateStructVal_DEFAULT *LateDefStruct
 func (p *MyStruct) GetOptLateStructVal() *LateDefStruct {
   if !p.IsSetOptLateStructVal() {
     return MyStruct_OptLateStructVal_DEFAULT
   }
-return p.OptLateStructVal
+  return p.OptLateStructVal
 }
 var MyStruct_OptListVal_DEFAULT []int16
 
@@ -2334,14 +2370,26 @@ func (p *MyDataFieldPatch) GetData1() *patch1.StringPatch {
   if !p.IsSetData1() {
     return MyDataFieldPatch_Data1_DEFAULT
   }
-return p.Data1
+  return p.Data1
+}
+func (p *MyDataFieldPatch) DefaultGetData1() *patch1.StringPatch {
+  if !p.IsSetData1() {
+    return patch1.NewStringPatch()
+  }
+  return p.Data1
 }
 var MyDataFieldPatch_Data2_DEFAULT *patch1.I32Patch
 func (p *MyDataFieldPatch) GetData2() *patch1.I32Patch {
   if !p.IsSetData2() {
     return MyDataFieldPatch_Data2_DEFAULT
   }
-return p.Data2
+  return p.Data2
+}
+func (p *MyDataFieldPatch) DefaultGetData2() *patch1.I32Patch {
+  if !p.IsSetData2() {
+    return patch1.NewI32Patch()
+  }
+  return p.Data2
 }
 func (p *MyDataFieldPatch) IsSetData1() bool {
   return p != nil && p.Data1 != nil
@@ -2522,7 +2570,13 @@ func (p *MyDataPatch) GetAssign() *MyData {
   if !p.IsSetAssign() {
     return MyDataPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *MyDataPatch) DefaultGetAssign() *MyData {
+  if !p.IsSetAssign() {
+    return NewMyData()
+  }
+  return p.Assign
 }
 
 func (p *MyDataPatch) GetClear() bool {
@@ -2533,21 +2587,39 @@ func (p *MyDataPatch) GetPatchPrior() *MyDataFieldPatch {
   if !p.IsSetPatchPrior() {
     return MyDataPatch_PatchPrior_DEFAULT
   }
-return p.PatchPrior
+  return p.PatchPrior
+}
+func (p *MyDataPatch) DefaultGetPatchPrior() *MyDataFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewMyDataFieldPatch()
+  }
+  return p.PatchPrior
 }
 var MyDataPatch_Ensure_DEFAULT *MyData
 func (p *MyDataPatch) GetEnsure() *MyData {
   if !p.IsSetEnsure() {
     return MyDataPatch_Ensure_DEFAULT
   }
-return p.Ensure
+  return p.Ensure
+}
+func (p *MyDataPatch) DefaultGetEnsure() *MyData {
+  if !p.IsSetEnsure() {
+    return NewMyData()
+  }
+  return p.Ensure
 }
 var MyDataPatch_Patch_DEFAULT *MyDataFieldPatch
 func (p *MyDataPatch) GetPatch() *MyDataFieldPatch {
   if !p.IsSetPatch() {
     return MyDataPatch_Patch_DEFAULT
   }
-return p.Patch
+  return p.Patch
+}
+func (p *MyDataPatch) DefaultGetPatch() *MyDataFieldPatch {
+  if !p.IsSetPatch() {
+    return NewMyDataFieldPatch()
+  }
+  return p.Patch
 }
 func (p *MyDataPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -2845,7 +2917,13 @@ func (p *InnerUnionFieldPatch) GetInnerOption() *patch1.BinaryPatch {
   if !p.IsSetInnerOption() {
     return InnerUnionFieldPatch_InnerOption_DEFAULT
   }
-return p.InnerOption
+  return p.InnerOption
+}
+func (p *InnerUnionFieldPatch) DefaultGetInnerOption() *patch1.BinaryPatch {
+  if !p.IsSetInnerOption() {
+    return patch1.NewBinaryPatch()
+  }
+  return p.InnerOption
 }
 func (p *InnerUnionFieldPatch) IsSetInnerOption() bool {
   return p != nil && p.InnerOption != nil
@@ -2980,7 +3058,13 @@ func (p *InnerUnionPatch) GetAssign() *InnerUnion {
   if !p.IsSetAssign() {
     return InnerUnionPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *InnerUnionPatch) DefaultGetAssign() *InnerUnion {
+  if !p.IsSetAssign() {
+    return NewInnerUnion()
+  }
+  return p.Assign
 }
 
 func (p *InnerUnionPatch) GetClear() bool {
@@ -2991,21 +3075,39 @@ func (p *InnerUnionPatch) GetPatchPrior() *InnerUnionFieldPatch {
   if !p.IsSetPatchPrior() {
     return InnerUnionPatch_PatchPrior_DEFAULT
   }
-return p.PatchPrior
+  return p.PatchPrior
+}
+func (p *InnerUnionPatch) DefaultGetPatchPrior() *InnerUnionFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewInnerUnionFieldPatch()
+  }
+  return p.PatchPrior
 }
 var InnerUnionPatch_Ensure_DEFAULT *InnerUnion
 func (p *InnerUnionPatch) GetEnsure() *InnerUnion {
   if !p.IsSetEnsure() {
     return InnerUnionPatch_Ensure_DEFAULT
   }
-return p.Ensure
+  return p.Ensure
+}
+func (p *InnerUnionPatch) DefaultGetEnsure() *InnerUnion {
+  if !p.IsSetEnsure() {
+    return NewInnerUnion()
+  }
+  return p.Ensure
 }
 var InnerUnionPatch_Patch_DEFAULT *InnerUnionFieldPatch
 func (p *InnerUnionPatch) GetPatch() *InnerUnionFieldPatch {
   if !p.IsSetPatch() {
     return InnerUnionPatch_Patch_DEFAULT
   }
-return p.Patch
+  return p.Patch
+}
+func (p *InnerUnionPatch) DefaultGetPatch() *InnerUnionFieldPatch {
+  if !p.IsSetPatch() {
+    return NewInnerUnionFieldPatch()
+  }
+  return p.Patch
 }
 func (p *InnerUnionPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -3309,21 +3411,39 @@ func (p *MyUnionFieldPatch) GetOption1() *patch1.StringPatch {
   if !p.IsSetOption1() {
     return MyUnionFieldPatch_Option1_DEFAULT
   }
-return p.Option1
+  return p.Option1
+}
+func (p *MyUnionFieldPatch) DefaultGetOption1() *patch1.StringPatch {
+  if !p.IsSetOption1() {
+    return patch1.NewStringPatch()
+  }
+  return p.Option1
 }
 var MyUnionFieldPatch_Option2_DEFAULT *patch1.I32Patch
 func (p *MyUnionFieldPatch) GetOption2() *patch1.I32Patch {
   if !p.IsSetOption2() {
     return MyUnionFieldPatch_Option2_DEFAULT
   }
-return p.Option2
+  return p.Option2
+}
+func (p *MyUnionFieldPatch) DefaultGetOption2() *patch1.I32Patch {
+  if !p.IsSetOption2() {
+    return patch1.NewI32Patch()
+  }
+  return p.Option2
 }
 var MyUnionFieldPatch_Option3_DEFAULT *InnerUnionPatch
 func (p *MyUnionFieldPatch) GetOption3() *InnerUnionPatch {
   if !p.IsSetOption3() {
     return MyUnionFieldPatch_Option3_DEFAULT
   }
-return p.Option3
+  return p.Option3
+}
+func (p *MyUnionFieldPatch) DefaultGetOption3() *InnerUnionPatch {
+  if !p.IsSetOption3() {
+    return NewInnerUnionPatch()
+  }
+  return p.Option3
 }
 func (p *MyUnionFieldPatch) IsSetOption1() bool {
   return p != nil && p.Option1 != nil
@@ -3548,7 +3668,13 @@ func (p *MyUnionPatch) GetAssign() *MyUnion {
   if !p.IsSetAssign() {
     return MyUnionPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *MyUnionPatch) DefaultGetAssign() *MyUnion {
+  if !p.IsSetAssign() {
+    return NewMyUnion()
+  }
+  return p.Assign
 }
 
 func (p *MyUnionPatch) GetClear() bool {
@@ -3559,21 +3685,39 @@ func (p *MyUnionPatch) GetPatchPrior() *MyUnionFieldPatch {
   if !p.IsSetPatchPrior() {
     return MyUnionPatch_PatchPrior_DEFAULT
   }
-return p.PatchPrior
+  return p.PatchPrior
+}
+func (p *MyUnionPatch) DefaultGetPatchPrior() *MyUnionFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewMyUnionFieldPatch()
+  }
+  return p.PatchPrior
 }
 var MyUnionPatch_Ensure_DEFAULT *MyUnion
 func (p *MyUnionPatch) GetEnsure() *MyUnion {
   if !p.IsSetEnsure() {
     return MyUnionPatch_Ensure_DEFAULT
   }
-return p.Ensure
+  return p.Ensure
+}
+func (p *MyUnionPatch) DefaultGetEnsure() *MyUnion {
+  if !p.IsSetEnsure() {
+    return NewMyUnion()
+  }
+  return p.Ensure
 }
 var MyUnionPatch_Patch_DEFAULT *MyUnionFieldPatch
 func (p *MyUnionPatch) GetPatch() *MyUnionFieldPatch {
   if !p.IsSetPatch() {
     return MyUnionPatch_Patch_DEFAULT
   }
-return p.Patch
+  return p.Patch
+}
+func (p *MyUnionPatch) DefaultGetPatch() *MyUnionFieldPatch {
+  if !p.IsSetPatch() {
+    return NewMyUnionFieldPatch()
+  }
+  return p.Patch
 }
 func (p *MyUnionPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -3871,7 +4015,7 @@ func (p *MyStructFieldN10Patch) GetAssign() MyEnum {
   if !p.IsSetAssign() {
     return MyStructFieldN10Patch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *MyStructFieldN10Patch) GetClear() bool {
@@ -4039,7 +4183,7 @@ func (p *MyStructFieldN25Patch) GetAssign() MyEnum {
   if !p.IsSetAssign() {
     return MyStructFieldN25Patch_Assign_DEFAULT
   }
-return *p.Assign
+  return *p.Assign
 }
 
 func (p *MyStructFieldN25Patch) GetClear() bool {
@@ -5468,210 +5612,378 @@ func (p *MyStructFieldPatch) GetOptMapVal() *MyStructFieldN30Patch {
   if !p.IsSetOptMapVal() {
     return MyStructFieldPatch_OptMapVal_DEFAULT
   }
-return p.OptMapVal
+  return p.OptMapVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptMapVal() *MyStructFieldN30Patch {
+  if !p.IsSetOptMapVal() {
+    return NewMyStructFieldN30Patch()
+  }
+  return p.OptMapVal
 }
 var MyStructFieldPatch_OptSetVal_DEFAULT *MyStructFieldN29Patch
 func (p *MyStructFieldPatch) GetOptSetVal() *MyStructFieldN29Patch {
   if !p.IsSetOptSetVal() {
     return MyStructFieldPatch_OptSetVal_DEFAULT
   }
-return p.OptSetVal
+  return p.OptSetVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptSetVal() *MyStructFieldN29Patch {
+  if !p.IsSetOptSetVal() {
+    return NewMyStructFieldN29Patch()
+  }
+  return p.OptSetVal
 }
 var MyStructFieldPatch_OptListVal_DEFAULT *MyStructFieldN28Patch
 func (p *MyStructFieldPatch) GetOptListVal() *MyStructFieldN28Patch {
   if !p.IsSetOptListVal() {
     return MyStructFieldPatch_OptListVal_DEFAULT
   }
-return p.OptListVal
+  return p.OptListVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptListVal() *MyStructFieldN28Patch {
+  if !p.IsSetOptListVal() {
+    return NewMyStructFieldN28Patch()
+  }
+  return p.OptListVal
 }
 var MyStructFieldPatch_OptLateStructVal_DEFAULT *LateDefStructPatch
 func (p *MyStructFieldPatch) GetOptLateStructVal() *LateDefStructPatch {
   if !p.IsSetOptLateStructVal() {
     return MyStructFieldPatch_OptLateStructVal_DEFAULT
   }
-return p.OptLateStructVal
+  return p.OptLateStructVal
 }
 var MyStructFieldPatch_OptStructVal_DEFAULT *MyDataPatch
 func (p *MyStructFieldPatch) GetOptStructVal() *MyDataPatch {
   if !p.IsSetOptStructVal() {
     return MyStructFieldPatch_OptStructVal_DEFAULT
   }
-return p.OptStructVal
+  return p.OptStructVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptStructVal() *MyDataPatch {
+  if !p.IsSetOptStructVal() {
+    return NewMyDataPatch()
+  }
+  return p.OptStructVal
 }
 var MyStructFieldPatch_OptEnumVal_DEFAULT *MyStructFieldN25Patch
 func (p *MyStructFieldPatch) GetOptEnumVal() *MyStructFieldN25Patch {
   if !p.IsSetOptEnumVal() {
     return MyStructFieldPatch_OptEnumVal_DEFAULT
   }
-return p.OptEnumVal
+  return p.OptEnumVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptEnumVal() *MyStructFieldN25Patch {
+  if !p.IsSetOptEnumVal() {
+    return NewMyStructFieldN25Patch()
+  }
+  return p.OptEnumVal
 }
 var MyStructFieldPatch_OptBinaryVal_DEFAULT *patch1.BinaryPatch
 func (p *MyStructFieldPatch) GetOptBinaryVal() *patch1.BinaryPatch {
   if !p.IsSetOptBinaryVal() {
     return MyStructFieldPatch_OptBinaryVal_DEFAULT
   }
-return p.OptBinaryVal
+  return p.OptBinaryVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptBinaryVal() *patch1.BinaryPatch {
+  if !p.IsSetOptBinaryVal() {
+    return patch1.NewBinaryPatch()
+  }
+  return p.OptBinaryVal
 }
 var MyStructFieldPatch_OptStringVal_DEFAULT *patch1.StringPatch
 func (p *MyStructFieldPatch) GetOptStringVal() *patch1.StringPatch {
   if !p.IsSetOptStringVal() {
     return MyStructFieldPatch_OptStringVal_DEFAULT
   }
-return p.OptStringVal
+  return p.OptStringVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptStringVal() *patch1.StringPatch {
+  if !p.IsSetOptStringVal() {
+    return patch1.NewStringPatch()
+  }
+  return p.OptStringVal
 }
 var MyStructFieldPatch_OptDoubleVal_DEFAULT *patch1.DoublePatch
 func (p *MyStructFieldPatch) GetOptDoubleVal() *patch1.DoublePatch {
   if !p.IsSetOptDoubleVal() {
     return MyStructFieldPatch_OptDoubleVal_DEFAULT
   }
-return p.OptDoubleVal
+  return p.OptDoubleVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptDoubleVal() *patch1.DoublePatch {
+  if !p.IsSetOptDoubleVal() {
+    return patch1.NewDoublePatch()
+  }
+  return p.OptDoubleVal
 }
 var MyStructFieldPatch_OptFloatVal_DEFAULT *patch1.FloatPatch
 func (p *MyStructFieldPatch) GetOptFloatVal() *patch1.FloatPatch {
   if !p.IsSetOptFloatVal() {
     return MyStructFieldPatch_OptFloatVal_DEFAULT
   }
-return p.OptFloatVal
+  return p.OptFloatVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptFloatVal() *patch1.FloatPatch {
+  if !p.IsSetOptFloatVal() {
+    return patch1.NewFloatPatch()
+  }
+  return p.OptFloatVal
 }
 var MyStructFieldPatch_OptI64Val_DEFAULT *patch1.I64Patch
 func (p *MyStructFieldPatch) GetOptI64Val() *patch1.I64Patch {
   if !p.IsSetOptI64Val() {
     return MyStructFieldPatch_OptI64Val_DEFAULT
   }
-return p.OptI64Val
+  return p.OptI64Val
+}
+func (p *MyStructFieldPatch) DefaultGetOptI64Val() *patch1.I64Patch {
+  if !p.IsSetOptI64Val() {
+    return patch1.NewI64Patch()
+  }
+  return p.OptI64Val
 }
 var MyStructFieldPatch_OptI32Val_DEFAULT *patch1.I32Patch
 func (p *MyStructFieldPatch) GetOptI32Val() *patch1.I32Patch {
   if !p.IsSetOptI32Val() {
     return MyStructFieldPatch_OptI32Val_DEFAULT
   }
-return p.OptI32Val
+  return p.OptI32Val
+}
+func (p *MyStructFieldPatch) DefaultGetOptI32Val() *patch1.I32Patch {
+  if !p.IsSetOptI32Val() {
+    return patch1.NewI32Patch()
+  }
+  return p.OptI32Val
 }
 var MyStructFieldPatch_OptI16Val_DEFAULT *patch1.I16Patch
 func (p *MyStructFieldPatch) GetOptI16Val() *patch1.I16Patch {
   if !p.IsSetOptI16Val() {
     return MyStructFieldPatch_OptI16Val_DEFAULT
   }
-return p.OptI16Val
+  return p.OptI16Val
+}
+func (p *MyStructFieldPatch) DefaultGetOptI16Val() *patch1.I16Patch {
+  if !p.IsSetOptI16Val() {
+    return patch1.NewI16Patch()
+  }
+  return p.OptI16Val
 }
 var MyStructFieldPatch_OptByteVal_DEFAULT *patch1.BytePatch
 func (p *MyStructFieldPatch) GetOptByteVal() *patch1.BytePatch {
   if !p.IsSetOptByteVal() {
     return MyStructFieldPatch_OptByteVal_DEFAULT
   }
-return p.OptByteVal
+  return p.OptByteVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptByteVal() *patch1.BytePatch {
+  if !p.IsSetOptByteVal() {
+    return patch1.NewBytePatch()
+  }
+  return p.OptByteVal
 }
 var MyStructFieldPatch_OptBoolVal_DEFAULT *patch1.BoolPatch
 func (p *MyStructFieldPatch) GetOptBoolVal() *patch1.BoolPatch {
   if !p.IsSetOptBoolVal() {
     return MyStructFieldPatch_OptBoolVal_DEFAULT
   }
-return p.OptBoolVal
+  return p.OptBoolVal
+}
+func (p *MyStructFieldPatch) DefaultGetOptBoolVal() *patch1.BoolPatch {
+  if !p.IsSetOptBoolVal() {
+    return patch1.NewBoolPatch()
+  }
+  return p.OptBoolVal
 }
 var MyStructFieldPatch_TimeVal_DEFAULT *patch1.TimePatch
 func (p *MyStructFieldPatch) GetTimeVal() *patch1.TimePatch {
   if !p.IsSetTimeVal() {
     return MyStructFieldPatch_TimeVal_DEFAULT
   }
-return p.TimeVal
+  return p.TimeVal
+}
+func (p *MyStructFieldPatch) DefaultGetTimeVal() *patch1.TimePatch {
+  if !p.IsSetTimeVal() {
+    return patch1.NewTimePatch()
+  }
+  return p.TimeVal
 }
 var MyStructFieldPatch_DurationVal_DEFAULT *patch1.DurationPatch
 func (p *MyStructFieldPatch) GetDurationVal() *patch1.DurationPatch {
   if !p.IsSetDurationVal() {
     return MyStructFieldPatch_DurationVal_DEFAULT
   }
-return p.DurationVal
+  return p.DurationVal
+}
+func (p *MyStructFieldPatch) DefaultGetDurationVal() *patch1.DurationPatch {
+  if !p.IsSetDurationVal() {
+    return patch1.NewDurationPatch()
+  }
+  return p.DurationVal
 }
 var MyStructFieldPatch_LateStructVal_DEFAULT *LateDefStructPatch
 func (p *MyStructFieldPatch) GetLateStructVal() *LateDefStructPatch {
   if !p.IsSetLateStructVal() {
     return MyStructFieldPatch_LateStructVal_DEFAULT
   }
-return p.LateStructVal
+  return p.LateStructVal
 }
 var MyStructFieldPatch_UnionVal_DEFAULT *MyUnionPatch
 func (p *MyStructFieldPatch) GetUnionVal() *MyUnionPatch {
   if !p.IsSetUnionVal() {
     return MyStructFieldPatch_UnionVal_DEFAULT
   }
-return p.UnionVal
+  return p.UnionVal
+}
+func (p *MyStructFieldPatch) DefaultGetUnionVal() *MyUnionPatch {
+  if !p.IsSetUnionVal() {
+    return NewMyUnionPatch()
+  }
+  return p.UnionVal
 }
 var MyStructFieldPatch_StructVal_DEFAULT *MyDataPatch
 func (p *MyStructFieldPatch) GetStructVal() *MyDataPatch {
   if !p.IsSetStructVal() {
     return MyStructFieldPatch_StructVal_DEFAULT
   }
-return p.StructVal
+  return p.StructVal
+}
+func (p *MyStructFieldPatch) DefaultGetStructVal() *MyDataPatch {
+  if !p.IsSetStructVal() {
+    return NewMyDataPatch()
+  }
+  return p.StructVal
 }
 var MyStructFieldPatch_EnumVal_DEFAULT *MyStructFieldN10Patch
 func (p *MyStructFieldPatch) GetEnumVal() *MyStructFieldN10Patch {
   if !p.IsSetEnumVal() {
     return MyStructFieldPatch_EnumVal_DEFAULT
   }
-return p.EnumVal
+  return p.EnumVal
+}
+func (p *MyStructFieldPatch) DefaultGetEnumVal() *MyStructFieldN10Patch {
+  if !p.IsSetEnumVal() {
+    return NewMyStructFieldN10Patch()
+  }
+  return p.EnumVal
 }
 var MyStructFieldPatch_BinaryVal_DEFAULT *patch1.BinaryPatch
 func (p *MyStructFieldPatch) GetBinaryVal() *patch1.BinaryPatch {
   if !p.IsSetBinaryVal() {
     return MyStructFieldPatch_BinaryVal_DEFAULT
   }
-return p.BinaryVal
+  return p.BinaryVal
+}
+func (p *MyStructFieldPatch) DefaultGetBinaryVal() *patch1.BinaryPatch {
+  if !p.IsSetBinaryVal() {
+    return patch1.NewBinaryPatch()
+  }
+  return p.BinaryVal
 }
 var MyStructFieldPatch_StringVal_DEFAULT *patch1.StringPatch
 func (p *MyStructFieldPatch) GetStringVal() *patch1.StringPatch {
   if !p.IsSetStringVal() {
     return MyStructFieldPatch_StringVal_DEFAULT
   }
-return p.StringVal
+  return p.StringVal
+}
+func (p *MyStructFieldPatch) DefaultGetStringVal() *patch1.StringPatch {
+  if !p.IsSetStringVal() {
+    return patch1.NewStringPatch()
+  }
+  return p.StringVal
 }
 var MyStructFieldPatch_DoubleVal_DEFAULT *patch1.DoublePatch
 func (p *MyStructFieldPatch) GetDoubleVal() *patch1.DoublePatch {
   if !p.IsSetDoubleVal() {
     return MyStructFieldPatch_DoubleVal_DEFAULT
   }
-return p.DoubleVal
+  return p.DoubleVal
+}
+func (p *MyStructFieldPatch) DefaultGetDoubleVal() *patch1.DoublePatch {
+  if !p.IsSetDoubleVal() {
+    return patch1.NewDoublePatch()
+  }
+  return p.DoubleVal
 }
 var MyStructFieldPatch_FloatVal_DEFAULT *patch1.FloatPatch
 func (p *MyStructFieldPatch) GetFloatVal() *patch1.FloatPatch {
   if !p.IsSetFloatVal() {
     return MyStructFieldPatch_FloatVal_DEFAULT
   }
-return p.FloatVal
+  return p.FloatVal
+}
+func (p *MyStructFieldPatch) DefaultGetFloatVal() *patch1.FloatPatch {
+  if !p.IsSetFloatVal() {
+    return patch1.NewFloatPatch()
+  }
+  return p.FloatVal
 }
 var MyStructFieldPatch_I64Val_DEFAULT *patch1.I64Patch
 func (p *MyStructFieldPatch) GetI64Val() *patch1.I64Patch {
   if !p.IsSetI64Val() {
     return MyStructFieldPatch_I64Val_DEFAULT
   }
-return p.I64Val
+  return p.I64Val
+}
+func (p *MyStructFieldPatch) DefaultGetI64Val() *patch1.I64Patch {
+  if !p.IsSetI64Val() {
+    return patch1.NewI64Patch()
+  }
+  return p.I64Val
 }
 var MyStructFieldPatch_I32Val_DEFAULT *patch1.I32Patch
 func (p *MyStructFieldPatch) GetI32Val() *patch1.I32Patch {
   if !p.IsSetI32Val() {
     return MyStructFieldPatch_I32Val_DEFAULT
   }
-return p.I32Val
+  return p.I32Val
+}
+func (p *MyStructFieldPatch) DefaultGetI32Val() *patch1.I32Patch {
+  if !p.IsSetI32Val() {
+    return patch1.NewI32Patch()
+  }
+  return p.I32Val
 }
 var MyStructFieldPatch_I16Val_DEFAULT *patch1.I16Patch
 func (p *MyStructFieldPatch) GetI16Val() *patch1.I16Patch {
   if !p.IsSetI16Val() {
     return MyStructFieldPatch_I16Val_DEFAULT
   }
-return p.I16Val
+  return p.I16Val
+}
+func (p *MyStructFieldPatch) DefaultGetI16Val() *patch1.I16Patch {
+  if !p.IsSetI16Val() {
+    return patch1.NewI16Patch()
+  }
+  return p.I16Val
 }
 var MyStructFieldPatch_ByteVal_DEFAULT *patch1.BytePatch
 func (p *MyStructFieldPatch) GetByteVal() *patch1.BytePatch {
   if !p.IsSetByteVal() {
     return MyStructFieldPatch_ByteVal_DEFAULT
   }
-return p.ByteVal
+  return p.ByteVal
+}
+func (p *MyStructFieldPatch) DefaultGetByteVal() *patch1.BytePatch {
+  if !p.IsSetByteVal() {
+    return patch1.NewBytePatch()
+  }
+  return p.ByteVal
 }
 var MyStructFieldPatch_BoolVal_DEFAULT *patch1.BoolPatch
 func (p *MyStructFieldPatch) GetBoolVal() *patch1.BoolPatch {
   if !p.IsSetBoolVal() {
     return MyStructFieldPatch_BoolVal_DEFAULT
   }
-return p.BoolVal
+  return p.BoolVal
+}
+func (p *MyStructFieldPatch) DefaultGetBoolVal() *patch1.BoolPatch {
+  if !p.IsSetBoolVal() {
+    return patch1.NewBoolPatch()
+  }
+  return p.BoolVal
 }
 func (p *MyStructFieldPatch) IsSetOptMapVal() bool {
   return p != nil && p.OptMapVal != nil
@@ -7112,7 +7424,13 @@ func (p *MyStructPatch) GetAssign() *MyStruct {
   if !p.IsSetAssign() {
     return MyStructPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *MyStructPatch) DefaultGetAssign() *MyStruct {
+  if !p.IsSetAssign() {
+    return NewMyStruct()
+  }
+  return p.Assign
 }
 
 func (p *MyStructPatch) GetClear() bool {
@@ -7123,21 +7441,39 @@ func (p *MyStructPatch) GetPatchPrior() *MyStructFieldPatch {
   if !p.IsSetPatchPrior() {
     return MyStructPatch_PatchPrior_DEFAULT
   }
-return p.PatchPrior
+  return p.PatchPrior
+}
+func (p *MyStructPatch) DefaultGetPatchPrior() *MyStructFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewMyStructFieldPatch()
+  }
+  return p.PatchPrior
 }
 var MyStructPatch_Ensure_DEFAULT *MyStruct
 func (p *MyStructPatch) GetEnsure() *MyStruct {
   if !p.IsSetEnsure() {
     return MyStructPatch_Ensure_DEFAULT
   }
-return p.Ensure
+  return p.Ensure
+}
+func (p *MyStructPatch) DefaultGetEnsure() *MyStruct {
+  if !p.IsSetEnsure() {
+    return NewMyStruct()
+  }
+  return p.Ensure
 }
 var MyStructPatch_Patch_DEFAULT *MyStructFieldPatch
 func (p *MyStructPatch) GetPatch() *MyStructFieldPatch {
   if !p.IsSetPatch() {
     return MyStructPatch_Patch_DEFAULT
   }
-return p.Patch
+  return p.Patch
+}
+func (p *MyStructPatch) DefaultGetPatch() *MyStructFieldPatch {
+  if !p.IsSetPatch() {
+    return NewMyStructFieldPatch()
+  }
+  return p.Patch
 }
 func (p *MyStructPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil
@@ -7511,7 +7847,13 @@ func (p *LateDefStructPatch) GetAssign() *LateDefStruct {
   if !p.IsSetAssign() {
     return LateDefStructPatch_Assign_DEFAULT
   }
-return p.Assign
+  return p.Assign
+}
+func (p *LateDefStructPatch) DefaultGetAssign() *LateDefStruct {
+  if !p.IsSetAssign() {
+    return NewLateDefStruct()
+  }
+  return p.Assign
 }
 
 func (p *LateDefStructPatch) GetClear() bool {
@@ -7522,21 +7864,39 @@ func (p *LateDefStructPatch) GetPatchPrior() *LateDefStructFieldPatch {
   if !p.IsSetPatchPrior() {
     return LateDefStructPatch_PatchPrior_DEFAULT
   }
-return p.PatchPrior
+  return p.PatchPrior
+}
+func (p *LateDefStructPatch) DefaultGetPatchPrior() *LateDefStructFieldPatch {
+  if !p.IsSetPatchPrior() {
+    return NewLateDefStructFieldPatch()
+  }
+  return p.PatchPrior
 }
 var LateDefStructPatch_Ensure_DEFAULT *LateDefStruct
 func (p *LateDefStructPatch) GetEnsure() *LateDefStruct {
   if !p.IsSetEnsure() {
     return LateDefStructPatch_Ensure_DEFAULT
   }
-return p.Ensure
+  return p.Ensure
+}
+func (p *LateDefStructPatch) DefaultGetEnsure() *LateDefStruct {
+  if !p.IsSetEnsure() {
+    return NewLateDefStruct()
+  }
+  return p.Ensure
 }
 var LateDefStructPatch_Patch_DEFAULT *LateDefStructFieldPatch
 func (p *LateDefStructPatch) GetPatch() *LateDefStructFieldPatch {
   if !p.IsSetPatch() {
     return LateDefStructPatch_Patch_DEFAULT
   }
-return p.Patch
+  return p.Patch
+}
+func (p *LateDefStructPatch) DefaultGetPatch() *LateDefStructFieldPatch {
+  if !p.IsSetPatch() {
+    return NewLateDefStructFieldPatch()
+  }
+  return p.Patch
 }
 func (p *LateDefStructPatch) IsSetAssign() bool {
   return p != nil && p.Assign != nil

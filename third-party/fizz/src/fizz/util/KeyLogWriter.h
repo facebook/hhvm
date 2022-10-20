@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include <fizz/protocol/KeyScheduler.h>
 #include <fizz/protocol/Types.h>
 #include <fmt/format.h>
 #include <folly/Range.h>
@@ -53,6 +54,55 @@ class KeyLogWriter {
     if (outputFile_.fail()) {
       throw std::runtime_error("Error opening NSS key log output file");
     }
+  }
+
+  /**
+   * Convert SecretType to NSS Keylog label equivalent.
+   * @param secretType The secretType to convert to keylog label.
+   * @return the keylog label for secretType
+   */
+  static folly::Optional<Label> secretToNSSLabel(SecretType secretType) {
+    switch (secretType.type()) {
+      case SecretType::Type::EarlySecrets_E:
+        switch (secretType.tryAsEarlySecrets()) {
+          case EarlySecrets::ExternalPskBinder:
+            return folly::none;
+          case EarlySecrets::ResumptionPskBinder:
+            return folly::none;
+          case EarlySecrets::ClientEarlyTraffic:
+            return Label::CLIENT_EARLY_TRAFFIC_SECRET;
+          case EarlySecrets::EarlyExporter:
+            return Label::EARLY_EXPORTER_SECRET;
+          case EarlySecrets::ECHAcceptConfirmation:
+            return folly::none;
+          case EarlySecrets::HRRECHAcceptConfirmation:
+            return folly::none;
+        }
+      case SecretType::Type::HandshakeSecrets_E:
+        switch (secretType.tryAsHandshakeSecrets()) {
+          case HandshakeSecrets::ClientHandshakeTraffic:
+            return Label::CLIENT_HANDSHAKE_TRAFFIC_SECRET;
+          case HandshakeSecrets::ServerHandshakeTraffic:
+            return Label::SERVER_HANDSHAKE_TRAFFIC_SECRET;
+          case HandshakeSecrets::ECHAcceptConfirmation:
+            return folly::none;
+        }
+      case SecretType::Type::MasterSecrets_E:
+        switch (secretType.tryAsMasterSecrets()) {
+          case MasterSecrets::ExporterMaster:
+            return Label::EXPORTER_SECRET;
+          case MasterSecrets::ResumptionMaster:
+            return folly::none;
+        }
+      case SecretType::Type::AppTrafficSecrets_E:
+        switch (secretType.tryAsAppTrafficSecrets()) {
+          case AppTrafficSecrets::ClientAppTraffic:
+            return Label::CLIENT_TRAFFIC_SECRET_0;
+          case AppTrafficSecrets::ServerAppTraffic:
+            return Label::SERVER_TRAFFIC_SECRET_0;
+        }
+    }
+    return folly::none;
   }
 
   /**

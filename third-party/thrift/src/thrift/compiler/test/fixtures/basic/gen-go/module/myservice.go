@@ -1433,7 +1433,7 @@ func (p *MyServiceGetRandomDataResult) GetSuccess() string {
   if !p.IsSetSuccess() {
     return MyServiceGetRandomDataResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *MyServiceGetRandomDataResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2069,7 +2069,7 @@ func (p *MyServiceHasDataByIdResult) GetSuccess() bool {
   if !p.IsSetSuccess() {
     return MyServiceHasDataByIdResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *MyServiceHasDataByIdResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -2307,7 +2307,7 @@ func (p *MyServiceGetDataByIdResult) GetSuccess() string {
   if !p.IsSetSuccess() {
     return MyServiceGetDataByIdResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *MyServiceGetDataByIdResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

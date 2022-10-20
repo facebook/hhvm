@@ -1265,9 +1265,6 @@ class HandlerCallbackBase {
 
   ResponseChannelRequest* getRequest() { return req_.get(); }
 
-  template <class F>
-  void runFuncInQueue(F&& func, bool oneway = false);
-
   const folly::Executor::KeepAlive<>& getInternalKeepAlive();
 
  protected:
@@ -1665,20 +1662,6 @@ void GeneratedAsyncProcessorBase::processInThread(
     });
   } else {
     task->run();
-  }
-}
-
-template <class F>
-void HandlerCallbackBase::runFuncInQueue(F&& func, bool) {
-  assert(getEventBase()->isInEventBaseThread());
-  if (auto threadManager = getThreadManager_deprecated()) {
-    threadManager->add(
-        concurrency::FunctionRunner::create(std::forward<F>(func)),
-        0, // timeout
-        0, // expiration
-        true); // upstream
-  } else {
-    getHandlerExecutor()->add(std::forward<F>(func));
   }
 }
 

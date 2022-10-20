@@ -102,6 +102,12 @@ class TypeExpr : public QueryExpr {
 
     return std::make_unique<TypeExpr>(arg);
   }
+
+  std::optional<std::vector<std::string>> computeGlobUpperBound(
+      CaseSensitivity) const override {
+    // `type` doesn't constrain the path.
+    return std::nullopt;
+  }
 };
 W_TERM_PARSER(type, TypeExpr::parse);
 

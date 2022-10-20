@@ -431,14 +431,14 @@ func (p *FieldsInjectedWithIncludedStruct) GetInjectedStructuredAnnotationField(
   if !p.IsSetInjectedStructuredAnnotationField() {
     return FieldsInjectedWithIncludedStruct_InjectedStructuredAnnotationField_DEFAULT
   }
-return *p.InjectedStructuredAnnotationField
+  return *p.InjectedStructuredAnnotationField
 }
 var FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT string
 func (p *FieldsInjectedWithIncludedStruct) GetInjectedUnstructuredAnnotationField() string {
   if !p.IsSetInjectedUnstructuredAnnotationField() {
     return FieldsInjectedWithIncludedStruct_InjectedUnstructuredAnnotationField_DEFAULT
   }
-return *p.InjectedUnstructuredAnnotationField
+  return *p.InjectedUnstructuredAnnotationField
 }
 func (p *FieldsInjectedWithIncludedStruct) IsSetInjectedStructuredAnnotationField() bool {
   return p != nil && p.InjectedStructuredAnnotationField != nil

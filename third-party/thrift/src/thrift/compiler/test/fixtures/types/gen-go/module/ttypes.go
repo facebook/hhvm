@@ -1518,7 +1518,13 @@ func (p *TrivialNestedWithDefault) GetN() *TrivialNumeric {
   if !p.IsSetN() {
     return TrivialNestedWithDefault_N_DEFAULT
   }
-return p.N
+  return p.N
+}
+func (p *TrivialNestedWithDefault) DefaultGetN() *TrivialNumeric {
+  if !p.IsSetN() {
+    return NewTrivialNumeric()
+  }
+  return p.N
 }
 func (p *TrivialNestedWithDefault) IsSetN() bool {
   return p != nil && p.N != nil
@@ -1873,7 +1879,13 @@ func (p *ComplexNestedWithDefault) GetN() *ComplexString {
   if !p.IsSetN() {
     return ComplexNestedWithDefault_N_DEFAULT
   }
-return p.N
+  return p.N
+}
+func (p *ComplexNestedWithDefault) DefaultGetN() *ComplexString {
+  if !p.IsSetN() {
+    return NewComplexString()
+  }
+  return p.N
 }
 func (p *ComplexNestedWithDefault) IsSetN() bool {
   return p != nil && p.N != nil
@@ -2639,7 +2651,7 @@ func (p *MyStruct) GetData() *MyDataItem {
   if !p.IsSetData() {
     return MyStruct_Data_DEFAULT
   }
-return p.Data
+  return p.Data
 }
 func (p *MyStruct) IsSetData() bool {
   return p != nil && p.Data != nil
@@ -3251,14 +3263,14 @@ func (p *ForwardUsageRoot) GetForwardUsageStruct() *ForwardUsageStruct {
   if !p.IsSetForwardUsageStruct() {
     return ForwardUsageRoot_ForwardUsageStruct_DEFAULT
   }
-return p.ForwardUsageStruct
+  return p.ForwardUsageStruct
 }
 var ForwardUsageRoot_ForwardUsageByRef_DEFAULT *ForwardUsageByRef
 func (p *ForwardUsageRoot) GetForwardUsageByRef() *ForwardUsageByRef {
   if !p.IsSetForwardUsageByRef() {
     return ForwardUsageRoot_ForwardUsageByRef_DEFAULT
   }
-return p.ForwardUsageByRef
+  return p.ForwardUsageByRef
 }
 func (p *ForwardUsageRoot) IsSetForwardUsageStruct() bool {
   return p != nil && p.ForwardUsageStruct != nil
@@ -3430,7 +3442,13 @@ func (p *ForwardUsageStruct) GetFoo() *ForwardUsageRoot {
   if !p.IsSetFoo() {
     return ForwardUsageStruct_Foo_DEFAULT
   }
-return p.Foo
+  return p.Foo
+}
+func (p *ForwardUsageStruct) DefaultGetFoo() *ForwardUsageRoot {
+  if !p.IsSetFoo() {
+    return NewForwardUsageRoot()
+  }
+  return p.Foo
 }
 func (p *ForwardUsageStruct) IsSetFoo() bool {
   return p != nil && p.Foo != nil
@@ -3555,7 +3573,13 @@ func (p *ForwardUsageByRef) GetFoo() *ForwardUsageRoot {
   if !p.IsSetFoo() {
     return ForwardUsageByRef_Foo_DEFAULT
   }
-return p.Foo
+  return p.Foo
+}
+func (p *ForwardUsageByRef) DefaultGetFoo() *ForwardUsageRoot {
+  if !p.IsSetFoo() {
+    return NewForwardUsageRoot()
+  }
+  return p.Foo
 }
 func (p *ForwardUsageByRef) IsSetFoo() bool {
   return p != nil && p.Foo != nil
@@ -4375,14 +4399,14 @@ func (p *NoExceptMoveUnion) GetStringField() string {
   if !p.IsSetStringField() {
     return NoExceptMoveUnion_StringField_DEFAULT
   }
-return *p.StringField
+  return *p.StringField
 }
 var NoExceptMoveUnion_I32Field_DEFAULT int32
 func (p *NoExceptMoveUnion) GetI32Field() int32 {
   if !p.IsSetI32Field() {
     return NoExceptMoveUnion_I32Field_DEFAULT
   }
-return *p.I32Field
+  return *p.I32Field
 }
 func (p *NoExceptMoveUnion) CountSetFieldsNoExceptMoveUnion() int {
   count := 0

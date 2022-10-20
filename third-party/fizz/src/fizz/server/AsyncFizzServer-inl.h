@@ -343,6 +343,14 @@ void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
 template <typename SM>
 void AsyncFizzServerT<SM>::ActionMoveVisitor::operator()(
     SecretAvailable& secret) {
+  FOLLY_SDT(
+      fizz,
+      fizz_secret_available,
+      secret.secret.secret.size(),
+      secret.secret.secret.data(),
+      KeyLogWriter::secretToNSSLabel(secret.secret.type)
+          .value_or(std::numeric_limits<KeyLogWriter::Label>::max()),
+      server_.getClientRandom()->data());
   server_.secretAvailable(secret.secret);
 }
 

@@ -22,6 +22,14 @@ let has_attribute (name : string) (attrs : Nast.user_attribute list) : bool =
   | Some _ -> true
   | None -> false
 
+let check_soft_internal_without_internal
+    (internal : bool) (attrs : Nast.user_attribute list) =
+  match find_attribute SN.UserAttributes.uaSoftInternal attrs with
+  | Some { ua_name = (pos, _); _ } when not internal ->
+    Errors.add_nast_check_error
+    @@ Nast_check_error.Soft_internal_without_internal pos
+  | _ -> ()
+
 let check_attribute_arity attrs attr_name arg_spec =
   let attr = Naming_attributes.find attr_name attrs in
   let prim_err_opt =
@@ -158,6 +166,11 @@ let handler =
             (`Exact 0))
         params
 
+    method! at_fun_def _env fd =
+      check_soft_internal_without_internal
+        fd.fd_internal
+        fd.fd_fun.f_user_attributes
+
     method! at_method_ env m =
       let variadic_param =
         List.find_opt (fun p -> p.param_is_variadic) m.m_params
@@ -175,6 +188,9 @@ let handler =
         m.m_user_attributes
         SN.UserAttributes.uaDeprecated
         (`Range (1, 2));
+      check_soft_internal_without_internal
+        (Aast_defs.equal_visibility m.m_visibility Aast_defs.Internal)
+        m.m_user_attributes;
       check_deprecated_static m.m_user_attributes;
       check_duplicate_memoize m.m_user_attributes;
       (* Ban variadic arguments on memoized methods. *)
@@ -189,8 +205,15 @@ let handler =
         | None -> ()
 
     method! at_class_ _env c =
+      check_soft_internal_without_internal c.c_internal c.c_user_attributes;
       check_attribute_arity
         c.c_user_attributes
         SN.UserAttributes.uaDocs
-        (`Exact 1)
+        (`Exact 1);
+      List.iter
+        (fun cv ->
+          check_soft_internal_without_internal
+            (Aast_defs.equal_visibility cv.cv_visibility Aast_defs.Internal)
+            cv.cv_user_attributes)
+        c.c_vars
   end

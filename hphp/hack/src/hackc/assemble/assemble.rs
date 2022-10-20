@@ -21,6 +21,7 @@ use ffi::Slice;
 use ffi::Str;
 use log::trace;
 use naming_special_names_rust::coeffects::Ctx;
+use parse_macro::parse;
 
 use crate::assemble_imm::AssembleImm;
 use crate::lexer::Lexer;
@@ -158,7 +159,7 @@ impl<'a> UnitBuilder<'a> {
                     alloc,
                     token_iter,
                     ".includes",
-                    |alloc, t| {
+                    |t, alloc| {
                         let path_str = if t.peek_is(Token::is_decl) {
                             t.expect(Token::is_decl)?.into_ffi_str(alloc)
                         } else {
@@ -218,19 +219,21 @@ fn assemble_module<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Module<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".module")?;
-    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    parse!(token_iter,
+           ".module"
+           <attr:assemble_special_and_user_attrs(alloc)>
+           <name:assemble_class_name(alloc)>
+           <span:assemble_span>
+           "{"
+           <doc_comment:assemble_doc_comment(alloc)>
+           "}");
+    let (attr, attributes) = attr;
 
     ensure!(
         attr == hhvm_types_ffi::ffi::Attr::AttrNone,
         "Unexpected HHVM attrs in module definition"
     );
 
-    let name = assemble_class_name(alloc, token_iter)?;
-    let span = assemble_span(token_iter)?;
-    token_iter.expect(Token::is_open_curly)?;
-    let doc_comment = assemble_doc_comment(alloc, token_iter)?;
-    token_iter.expect(Token::is_close_curly)?;
     Ok(hhbc::Module {
         attributes,
         name,
@@ -245,13 +248,9 @@ fn assemble_module_use<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<Str<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".module_use")?;
-    let st = Str::new_slice(
-        alloc,
-        token_iter.expect_with(Token::into_unquoted_str_literal)?,
-    );
-    token_iter.expect(Token::is_semicolon)?;
-    Ok(st)
+    parse!(token_iter, ".module_use" <name:string> ";");
+    let name = Str::new_slice(alloc, escaper::unquote_slice(name.as_bytes()));
+    Ok(name)
 }
 
 /// Ex:
@@ -261,13 +260,8 @@ fn assemble_file_attributes<'arena>(
     token_iter: &mut Lexer<'_>,
     file_attributes: &mut Vec<hhbc::Attribute<'arena>>,
 ) -> Result<()> {
-    token_iter.expect_str(Token::is_decl, ".file_attributes")?;
-    token_iter.expect(Token::is_open_bracket)?;
-    while !token_iter.peek_is(Token::is_close_bracket) {
-        file_attributes.push(assemble_user_attr(alloc, token_iter)?);
-    }
-    token_iter.expect(Token::is_close_bracket)?;
-    token_iter.expect(Token::is_semicolon)?;
+    parse!(token_iter, ".file_attributes" "[" <attrs:assemble_user_attr(alloc),*> "]" ";");
+    file_attributes.extend(attrs);
     Ok(())
 }
 
@@ -278,44 +272,44 @@ fn assemble_typedef<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Typedef<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".alias")?;
-    let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
-    let name = assemble_class_name(alloc, token_iter)?;
-    token_iter.expect(Token::is_equal)?;
-    if let Maybe::Just(type_info) = assemble_type_info(alloc, token_iter, TypeInfoKind::TypeDef)? {
-        let span = assemble_span(token_iter)?;
-        //tv
-        let type_structure = assemble_triple_quoted_typed_value(alloc, token_iter)?;
-        token_iter.expect(Token::is_semicolon)?;
-        Ok(hhbc::Typedef {
-            name,
-            attributes,
-            type_info,
-            type_structure,
-            span,
-            attrs,
-        })
-    } else {
-        Err(token_iter.error("No type info provided to type def."))
-    }
+    parse!(token_iter, ".alias"
+           <attrs:assemble_special_and_user_attrs(alloc)>
+           <name:assemble_class_name(alloc)>
+           "="
+           <type_info:assemble_type_info(alloc, TypeInfoKind::TypeDef)>
+           <span:assemble_span>
+           <type_structure:assemble_triple_quoted_typed_value(alloc)>
+           ";");
+    let (attrs, attributes) = attrs;
+    Ok(hhbc::Typedef {
+        name,
+        attributes,
+        type_info,
+        type_structure,
+        span,
+        attrs,
+    })
 }
 
 fn assemble_class<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Class<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".class")?;
-    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
-    let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
-    let name = assemble_class_name(alloc, token_iter)?;
-    let span = assemble_span(token_iter)?;
-    let base = assemble_base(alloc, token_iter)?;
-    let implements = assemble_imp_or_enum_includes(alloc, token_iter, "implements")?;
-    let enum_includes = assemble_imp_or_enum_includes(alloc, token_iter, "enum_includes")?;
-    token_iter.expect(Token::is_open_curly)?;
-    let doc_comment = assemble_doc_comment(alloc, token_iter)?;
-    let uses = assemble_uses(alloc, token_iter)?;
-    let enum_type = assemble_enum_ty(alloc, token_iter)?;
+    parse!(token_iter, ".class"
+       <upper_bounds:assemble_upper_bounds(alloc)>
+       <attr:assemble_special_and_user_attrs(alloc)>
+       <name:assemble_class_name(alloc)>
+       <span:assemble_span>
+       <base:assemble_base(alloc)>
+       <implements:assemble_imp_or_enum_includes(alloc, "implements")>
+       <enum_includes:assemble_imp_or_enum_includes(alloc, "enum_includes")>
+       "{"
+       <doc_comment:assemble_doc_comment(alloc)>
+       <uses:assemble_uses(alloc)>
+       <enum_type:assemble_enum_ty(alloc)>
+    );
+    let (flags, attributes) = attr;
+
     let mut requirements = Vec::new();
     let mut ctx_constants = Vec::new();
     let mut properties = Vec::new();
@@ -337,7 +331,8 @@ fn assemble_class<'arena>(
             _ => Err(tok.error("Unknown class-level identifier"))?,
         }
     }
-    token_iter.expect(Token::is_close_curly)?;
+
+    parse!(token_iter, "}");
 
     let hhas_class = hhbc::Class {
         attributes,
@@ -379,19 +374,17 @@ fn assemble_ctx_constant<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::CtxConstant<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".ctx")?;
-    let name = token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc);
-    let is_abstract = token_iter.next_is_str(Token::is_identifier, "isAbstract");
+    parse!(token_iter, ".ctx" <name:id> <is_abstract:"isAbstract"?> <tokens:id*> ";");
+    let name = name.into_ffi_str(alloc);
+
     // .ctx has slice of recognized and unrecognized constants.
     // Making an assumption that recognized ~~ static coeffects and
     // unrecognized ~~ unenforced static coeffects
-    let mut tokens = Vec::new();
-    while !token_iter.peek_is(Token::is_semicolon) {
-        let tok = token_iter.expect_with(Token::into_identifier)?;
-        tokens.push(Str::new_slice(alloc, tok));
-    }
-    let (r, u) = tokens.into_iter().partition(is_enforced_static_coeffect);
-    token_iter.expect(Token::is_semicolon)?;
+    let (r, u) = tokens
+        .into_iter()
+        .map(|tok| tok.into_ffi_str(alloc))
+        .partition(is_enforced_static_coeffect);
+
     Ok(hhbc::CtxConstant {
         name,
         recognized: Slice::from_vec(alloc, r),
@@ -406,18 +399,13 @@ fn assemble_requirement<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Requirement<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".require")?;
-    let tok = token_iter.expect_token()?;
+    parse!(token_iter, ".require" <tok:id> "<" <name:assemble_class_name(alloc)> ">" ";");
     let kind = match tok.into_identifier()? {
         b"extends" => hhbc::TraitReqKind::MustExtend,
         b"implements" => hhbc::TraitReqKind::MustImplement,
         b"class" => hhbc::TraitReqKind::MustBeClass,
         _ => return Err(tok.error("Expected TraitReqKind")),
     };
-    token_iter.expect(Token::is_lt)?;
-    let name = assemble_class_name(alloc, token_iter)?;
-    token_iter.expect(Token::is_gt)?;
-    token_iter.expect(Token::is_semicolon)?;
     Ok(hhbc::Requirement { name, kind })
 }
 
@@ -433,7 +421,7 @@ fn assemble_const_or_type_const<'arena>(
         //type const
         let is_abstract = token_iter.next_is_str(Token::is_identifier, "isAbstract");
         let initializer = if token_iter.next_is(Token::is_equal) {
-            Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
+            Maybe::Just(assemble_triple_quoted_typed_value(token_iter, alloc)?)
         } else {
             Maybe::Nothing
         };
@@ -450,7 +438,7 @@ fn assemble_const_or_type_const<'arena>(
             if token_iter.next_is_str(Token::is_identifier, "uninit") {
                 Maybe::Just(hhbc::TypedValue::Uninit)
             } else {
-                Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?)
+                Maybe::Just(assemble_triple_quoted_typed_value(token_iter, alloc)?)
             }
         } else {
             Maybe::Nothing
@@ -476,10 +464,11 @@ fn assemble_method<'arena>(
     let method_tok = token_iter.peek().copied();
     token_iter.expect_str(Token::is_decl, ".method")?;
     let shadowed_tparams = assemble_shadowed_tparams(alloc, token_iter)?;
-    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
-    let (attrs, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    let upper_bounds = assemble_upper_bounds(token_iter, alloc)?;
+    let (attrs, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
-    let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type_info =
+        assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = assemble_method_name(alloc, token_iter)?;
     let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
@@ -546,25 +535,21 @@ fn assemble_property<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Property<'arena>> {
     let prop_tok = token_iter.peek().copied();
-    token_iter.expect_str(Token::is_decl, ".property")?;
-    let (flags, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
     // A doc comment is just a triple string literal : """{}"""
-    let doc_comment = if token_iter.peek_is(Token::is_triple_str_literal) {
-        Maybe::Just(assemble_unescaped_unquoted_triple_str(alloc, token_iter)?)
-    } else {
-        Maybe::Nothing
-    };
-    let type_info = if let Maybe::Just(ti) =
-        assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
-    {
-        ti
-    } else {
-        return Err(prop_tok.unwrap().error("No type_info for class property."));
-    };
-    let name = assemble_prop_name(alloc, token_iter)?;
-    token_iter.expect(Token::is_equal)?;
-    let initial_value = assemble_property_initial_value(alloc, token_iter)?;
-    token_iter.expect(Token::is_semicolon)?;
+    let mut doc_comment = Maybe::Nothing;
+    parse!(token_iter,
+           ".property"
+           <attrs:assemble_special_and_user_attrs(alloc)>
+           [triple_string: <dc:assemble_unescaped_unquoted_triple_str(alloc)> { doc_comment = Maybe::Just(dc); } ;
+            else: { } ;
+           ]
+           <type_info:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef)>
+           <name:assemble_prop_name(alloc)>
+           "="
+           <initial_value:assemble_property_initial_value(alloc)>
+           ";"
+    );
+    let (flags, attributes) = attrs;
     let visibility =
         determine_visibility(&flags).map_err(|e| prop_tok.unwrap().error(e.to_string()))?;
     Ok(hhbc::Property {
@@ -597,33 +582,23 @@ fn determine_visibility(attr: &hhvm_types_ffi::ffi::Attr) -> Result<hhbc::Visibi
 /// while a TV prints uninit as "uninit", initial value is printed as "uninit;""
 /// for all other typed values, initial_value is printed nested in triple quotes.
 fn assemble_property_initial_value<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Maybe<hhbc::TypedValue<'arena>>> {
-    let tok = token_iter
-        .peek()
-        .ok_or_else(|| anyhow!("Expected init value for property, reached EOF"))?;
-    let tv = match tok.as_bytes() {
-        b"uninit" => {
-            token_iter.expect_str(Token::is_identifier, "uninit")?;
-            Maybe::Just(hhbc::TypedValue::Uninit)
-        }
-        br#""""N;""""# => {
-            token_iter.expect_str(Token::is_triple_str_literal, r#""""N;""""#)?;
-            Maybe::Nothing
-        }
-        _ => Maybe::Just(assemble_triple_quoted_typed_value(alloc, token_iter)?),
-    };
-    Ok(tv)
+    Ok(parse!(token_iter,
+    [
+        "uninit": "uninit" { Maybe::Just(hhbc::TypedValue::Uninit) } ;
+        "\"\"\"N;\"\"\"": "\"\"\"N;\"\"\"" { Maybe::Nothing } ;
+        else: <v:assemble_triple_quoted_typed_value(alloc)> { Maybe::Just(v) } ;
+    ]))
 }
 
 fn assemble_class_name<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::ClassName<'arena>> {
-    Ok(hhbc::ClassName::new(
-        token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc),
-    ))
+    parse!(token_iter, <id:id>);
+    Ok(hhbc::ClassName::new(id.into_ffi_str(alloc)))
 }
 
 pub(crate) fn assemble_prop_name_from_str<'arena>(
@@ -636,8 +611,8 @@ pub(crate) fn assemble_prop_name_from_str<'arena>(
 }
 
 fn assemble_prop_name<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::PropName<'arena>> {
     // Only properties that can start with #s start with 0 or
     // 86 and are compiler added ones
@@ -674,17 +649,16 @@ fn assemble_method_name<'arena>(
 }
 
 fn assemble_const_name<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::ConstName<'arena>> {
-    Ok(hhbc::ConstName::new(
-        token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc),
-    ))
+    parse!(token_iter, <id:id>);
+    Ok(hhbc::ConstName::new(id.into_ffi_str(alloc)))
 }
 
 fn assemble_function_name<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::FunctionName<'arena>> {
     let nm = if token_iter.peek_is_str(Token::is_number, "86") {
         // Only functions that can start with #s start with
@@ -704,29 +678,28 @@ fn assemble_function_name<'arena>(
 /// extends C
 /// There is only one base per Class
 fn assemble_base<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Maybe<hhbc::ClassName<'arena>>> {
-    if token_iter.next_is_str(Token::is_identifier, "extends") {
-        Ok(Maybe::Just(assemble_class_name(alloc, token_iter)?))
-    } else {
-        Ok(Maybe::Nothing)
-    }
+    Ok(parse!(token_iter, [
+      "extends": "extends" <cn:assemble_class_name(alloc)> { Maybe::Just(cn) } ;
+      else: { Maybe::Nothing } ;
+    ]))
 }
 
 /// Ex:
 /// implements (Fooable Barable)
 /// enum_includes (Fooable Barable)
 fn assemble_imp_or_enum_includes<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
     imp_or_inc: &str,
 ) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
     let mut classes = Vec::new();
     if token_iter.next_is_str(Token::is_identifier, imp_or_inc) {
         token_iter.expect(Token::is_open_paren)?;
         while !token_iter.peek_is(Token::is_close_paren) {
-            classes.push(assemble_class_name(alloc, token_iter)?);
+            classes.push(assemble_class_name(token_iter, alloc)?);
         }
         token_iter.expect(Token::is_close_paren)?;
     }
@@ -735,45 +708,36 @@ fn assemble_imp_or_enum_includes<'arena>(
 
 /// Ex: .doc """doc""";
 fn assemble_doc_comment<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Maybe<Str<'arena>>> {
-    if token_iter.next_is_str(Token::is_decl, ".doc") {
-        let com = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
-        token_iter.expect(Token::is_semicolon)?;
-        Ok(Maybe::Just(com))
-    } else {
-        Ok(Maybe::Nothing)
-    }
+    Ok(parse!(token_iter, [
+        ".doc": ".doc" <com:assemble_unescaped_unquoted_triple_str(alloc)> ";" { Maybe::Just(com) } ;
+        else: { Maybe::Nothing } ;
+    ]))
 }
 
 /// Ex: .use TNonScalar;
 fn assemble_uses<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Slice<'arena, hhbc::ClassName<'arena>>> {
-    let mut classes = Vec::new();
-    if token_iter.next_is_str(Token::is_decl, ".use") {
-        while !token_iter.peek_is(Token::is_semicolon) {
-            classes.push(assemble_class_name(alloc, token_iter)?);
-        }
-        token_iter.expect(Token::is_semicolon)?;
-    }
+    let classes = parse!(token_iter, [
+        ".use": ".use" <classes:assemble_class_name(alloc)*> ";" { classes } ;
+        else: { Vec::new() } ;
+    ]);
     Ok(Slice::from_vec(alloc, classes))
 }
 
 /// Ex: .enum_ty <type_info>
 fn assemble_enum_ty<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
-    if token_iter.next_is_str(Token::is_decl, ".enum_ty") {
-        let ti = assemble_type_info(alloc, token_iter, TypeInfoKind::Enum)?;
-        token_iter.expect(Token::is_semicolon)?;
-        Ok(ti)
-    } else {
-        Ok(Maybe::Nothing)
-    }
+    parse!(token_iter, [
+        ".enum_ty": ".enum_ty" <ti:assemble_type_info_opt(alloc, TypeInfoKind::Enum)> ";" { Ok(ti) } ;
+        else: { Ok(Maybe::Nothing) } ;
+    ])
 }
 
 /// Ex: .fatal 2:63,2:63 Parse "A right parenthesis `)` is expected here.";
@@ -781,34 +745,26 @@ fn assemble_fatal<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Fatal<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".fatal")?;
+    parse!(token_iter, ".fatal"
+           <line_begin:numeric> ":" <col_begin:numeric> ","
+           <line_end:numeric> ":" <col_end:numeric>
+           <op:id>
+           <msg:token>
+           ";"
+    );
     let loc = hhbc::SrcLoc {
-        line_begin: token_iter.expect_and_get_number()?,
-        col_begin: {
-            token_iter.expect(Token::is_colon)?;
-            token_iter.expect_and_get_number()?
-        },
-        line_end: {
-            token_iter.expect(Token::is_comma)?;
-            token_iter.expect_and_get_number()?
-        },
-        col_end: {
-            token_iter.expect(Token::is_colon)?;
-            token_iter.expect_and_get_number()?
-        },
+        line_begin,
+        col_begin,
+        line_end,
+        col_end,
     };
-    let tok = token_iter.expect_token()?;
-    let op = tok.into_identifier()?;
-    let op = match op {
+    let op = match op.as_bytes() {
         b"Parse" => hhbc::FatalOp::Parse,
         b"Runtime" => hhbc::FatalOp::Runtime,
         b"RuntimeOmitFrame" => hhbc::FatalOp::RuntimeOmitFrame,
-        _ => return Err(tok.error("Unknown fatal op")),
+        _ => return Err(op.error("Unknown fatal op")),
     };
-    let msg = escaper::unescape_literal_bytes_into_vec_bytes(
-        token_iter.expect_with(Token::into_unquoted_str_literal)?,
-    )?;
-    token_iter.expect(Token::is_semicolon)?;
+    let msg = escaper::unescape_literal_bytes_into_vec_bytes(msg.into_unquoted_str_literal()?)?;
     let message = Str::new_slice(alloc, &msg);
     Ok(hhbc::Fatal { op, loc, message })
 }
@@ -820,19 +776,15 @@ fn assemble_adata<'arena>(
     alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Adata<'arena>> {
-    token_iter.expect_str(Token::is_decl, ".adata")?;
-    let id = hhbc::AdataId::new(token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc));
-    token_iter.expect(Token::is_equal)?;
-    // What's left here is tv
-    let value = assemble_triple_quoted_typed_value(alloc, token_iter)?;
-    token_iter.expect(Token::is_semicolon)?;
+    parse!(token_iter, ".adata" <id:id> "=" <value:assemble_triple_quoted_typed_value(alloc)> ";");
+    let id = hhbc::AdataId::new(id.into_ffi_str(alloc));
     Ok(hhbc::Adata { id, value })
 }
 
 /// For use by initial value
 fn assemble_triple_quoted_typed_value<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::TypedValue<'arena>> {
     let (st, line) = token_iter.expect_with(Token::into_triple_str_literal_and_line)?;
     // Guaranteed st is encased by """ """
@@ -1103,13 +1055,13 @@ fn assemble_refs<'arena, 'a, T: 'arena, F>(
     assemble_name: F,
 ) -> Result<Slice<'arena, T>>
 where
-    F: Fn(&'arena Bump, &mut Lexer<'_>) -> Result<T>,
+    F: Fn(&mut Lexer<'_>, &'arena Bump) -> Result<T>,
 {
     token_iter.expect_str(Token::is_decl, name_str)?;
     token_iter.expect(Token::is_open_curly)?;
     let mut names = Vec::new();
     while !token_iter.peek_is(Token::is_close_curly) {
-        names.push(assemble_name(alloc, token_iter)?);
+        names.push(assemble_name(token_iter, alloc)?);
     }
     token_iter.expect(Token::is_close_curly)?;
     Ok(Slice::from_vec(alloc, names))
@@ -1122,17 +1074,18 @@ fn assemble_function<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<hhbc::Function<'arena>> {
     token_iter.expect_str(Token::is_decl, ".function")?;
-    let upper_bounds = assemble_upper_bounds(alloc, token_iter)?;
+    let upper_bounds = assemble_upper_bounds(token_iter, alloc)?;
     // Special and user attrs may or may not be specified. If not specified, no [] printed
-    let (attr, attributes) = assemble_special_and_user_attrs(alloc, token_iter)?;
+    let (attr, attributes) = assemble_special_and_user_attrs(token_iter, alloc)?;
     let span = assemble_span(token_iter)?;
     // Body may not have return type info, so check if next token is a < or not
     // Specifically if body doesn't have a return type info bytecode printer doesn't print anything
     // (doesn't print <>)
-    let return_type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
+    let return_type_info =
+        assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
     // Assemble_name
 
-    let name = assemble_function_name(alloc, token_iter)?;
+    let name = assemble_function_name(token_iter, alloc)?;
     // Will store decls in this order: params, decl_vars, unnamed
     let mut decl_map = HashMap::new();
     let params = assemble_params(alloc, token_iter, &mut decl_map)?;
@@ -1187,20 +1140,14 @@ fn assemble_function_flags(
 /// Filepath: .filepath strliteral semicolon (.filepath already consumed in `assemble_from_toks)
 fn assemble_filepath(token_iter: &mut Lexer<'_>) -> Result<PathBuf> {
     // Filepath is .filepath strliteral and semicolon
-    token_iter.expect_str(Token::is_decl, ".filepath")?;
-    let fp = token_iter.expect_with(Token::into_unquoted_str_literal)?;
-    let fp = Path::new(OsStr::from_bytes(fp));
-    token_iter.expect(Token::is_semicolon)?;
+    parse!(token_iter, ".filepath" <fp:string> ";");
+    let fp = Path::new(OsStr::from_bytes(fp.into_unquoted_str_literal()?));
     Ok(fp.to_path_buf())
 }
 
 /// Span ex: (2, 4)
 fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
-    token_iter.expect(Token::is_open_paren)?;
-    let line_begin = token_iter.expect_and_get_number()?;
-    token_iter.expect(Token::is_comma)?;
-    let line_end = token_iter.expect_and_get_number()?;
-    token_iter.expect(Token::is_close_paren)?;
+    parse!(token_iter, "(" <line_begin:numeric> "," <line_end:numeric> ")");
     Ok(hhbc::Span {
         line_begin,
         line_end,
@@ -1210,45 +1157,21 @@ fn assemble_span(token_iter: &mut Lexer<'_>) -> Result<hhbc::Span> {
 /// Ex: {(T as <"HH\\int" "HH\\int" upper_bound>)}
 /// {(id as type_info, type_info ... ), (id as type_info, type_info ...)*}
 fn assemble_upper_bounds<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Slice<'arena, hhbc::UpperBound<'arena>>> {
-    token_iter.expect(Token::is_open_curly)?;
-    let mut ubs = Vec::new();
-    while !token_iter.peek_is(Token::is_close_curly) {
-        ubs.push(assemble_upper_bound(alloc, token_iter)?);
-        if !token_iter.peek_is(Token::is_close_curly) {
-            token_iter.expect(Token::is_comma)?;
-        }
-    }
-    token_iter.expect(Token::is_close_curly)?;
+    parse!(token_iter, "{" <ubs:assemble_upper_bound(alloc),*> "}");
     Ok(Slice::from_vec(alloc, ubs))
 }
 
 /// Ex: (T as <"HH\\int" "HH\\int" upper_bound>)
 fn assemble_upper_bound<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::UpperBound<'arena>> {
-    token_iter.expect(Token::is_open_paren)?;
-    let id = token_iter.expect(Token::is_identifier)?.into_ffi_str(alloc);
-    token_iter.expect_str(Token::is_identifier, "as")?;
-    let mut tis = Vec::new();
-    while !token_iter.peek_is(Token::is_close_paren) {
-        if let Maybe::Just(ti) =
-            assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?
-        {
-            tis.push(ti);
-        } else {
-            return Err(token_iter.error("Unexpected \"N\" in upper bound type info."));
-        }
-        if !token_iter.peek_is(Token::is_close_paren) {
-            token_iter.expect(Token::is_comma)?;
-        }
-    }
-    token_iter.expect(Token::is_close_paren)?;
+    parse!(token_iter, "(" <id:id> "as" <tis:assemble_type_info(alloc, TypeInfoKind::NotEnumOrTypeDef),*> ")");
     Ok(hhbc::UpperBound {
-        name: id,
+        name: id.into_ffi_str(alloc),
         bounds: Slice::from_vec(alloc, tis),
     })
 }
@@ -1256,8 +1179,8 @@ fn assemble_upper_bound<'arena>(
 /// Ex: [ "__EntryPoint"("""v:0:{}""")]. This example lacks Attrs
 /// Ex: [abstract final] This example lacks Attributes
 fn assemble_special_and_user_attrs<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<(
     hhvm_types_ffi::ffi::Attr,
     Slice<'arena, hhbc::Attribute<'arena>>,
@@ -1267,7 +1190,7 @@ fn assemble_special_and_user_attrs<'arena>(
     if token_iter.next_is(Token::is_open_bracket) {
         while !token_iter.peek_is(Token::is_close_bracket) {
             if token_iter.peek_is(Token::is_str_literal) {
-                user_atts.push(assemble_user_attr(alloc, token_iter)?)
+                user_atts.push(assemble_user_attr(token_iter, alloc)?)
             } else if token_iter.peek_is(Token::is_identifier) {
                 tr.add(assemble_hhvm_attr(token_iter)?);
             } else {
@@ -1338,8 +1261,8 @@ fn assemble_hhvm_attr(token_iter: &mut Lexer<'_>) -> Result<hhvm_types_ffi::ffi:
 /// Attributes are printed as follows:
 /// "name"("""v:args.len:{args}""") where args are typed values.
 fn assemble_user_attr<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<hhbc::Attribute<'arena>> {
     let nm = escaper::unescape_literal_bytes_into_vec_bytes(
         token_iter.expect_with(Token::into_unquoted_str_literal)?,
@@ -1358,7 +1281,7 @@ fn assemble_user_attr_args<'arena>(
     token_iter: &mut Lexer<'_>,
 ) -> Result<Slice<'arena, hhbc::TypedValue<'arena>>> {
     let tok = token_iter.peek().copied();
-    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(alloc, token_iter)? {
+    if let hhbc::TypedValue::Vec(sl) = assemble_triple_quoted_typed_value(token_iter, alloc)? {
         Ok(sl)
     } else {
         Err(tok
@@ -1374,14 +1297,28 @@ pub enum TypeInfoKind {
     NotEnumOrTypeDef,
 }
 
+fn assemble_type_info<'arena>(
+    token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
+    tik: TypeInfoKind,
+) -> Result<hhbc::TypeInfo<'arena>> {
+    let loc = token_iter.peek().copied();
+    if let Maybe::Just(ti) = assemble_type_info_opt(token_iter, alloc, tik)? {
+        Ok(ti)
+    } else if let Some(loc) = loc {
+        Err(loc.error("TypeInfo expected"))
+    } else {
+        Err(anyhow!("TypeInfo expected at end"))
+    }
+}
+
 /// Ex: <"HH\\void" N >
 /// < "user_type" "type_constraint.name" type_constraint.flags >
 /// if 'is_enum', no  type_constraint name printed
 /// if 'is_typedef', no user_type name printed
-
-fn assemble_type_info<'arena>(
-    alloc: &'arena Bump,
+fn assemble_type_info_opt<'arena>(
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
     tik: TypeInfoKind,
 ) -> Result<Maybe<hhbc::TypeInfo<'arena>>> {
     if token_iter.next_is(Token::is_lt) {
@@ -1468,7 +1405,7 @@ fn assemble_param<'arena>(
         if token_iter.peek_is(Token::is_open_bracket) {
             token_iter.expect(Token::is_open_bracket)?;
             while !token_iter.peek_is(Token::is_close_bracket) {
-                ua_vec.push(assemble_user_attr(alloc, token_iter)?);
+                ua_vec.push(assemble_user_attr(token_iter, alloc)?);
             }
             token_iter.expect(Token::is_close_bracket)?;
         }
@@ -1477,7 +1414,7 @@ fn assemble_param<'arena>(
     let is_inout = token_iter.next_is_str(Token::is_identifier, "inout");
     let is_readonly = token_iter.next_is_str(Token::is_identifier, "readonly");
     let is_variadic = token_iter.next_is(Token::is_variadic);
-    let type_info = assemble_type_info(alloc, token_iter, TypeInfoKind::NotEnumOrTypeDef)?;
+    let type_info = assemble_type_info_opt(token_iter, alloc, TypeInfoKind::NotEnumOrTypeDef)?;
     let name = token_iter.expect_with(Token::into_variable)?;
     let name = Str::new_slice(alloc, name);
     decl_map.insert(name, decl_map.len() as u32);
@@ -1502,7 +1439,7 @@ fn assemble_default_value<'arena>(
     let tr = if token_iter.next_is(Token::is_equal) {
         let label = assemble_label(token_iter)?;
         token_iter.expect(Token::is_open_paren)?;
-        let expr = assemble_unescaped_unquoted_triple_str(alloc, token_iter)?;
+        let expr = assemble_unescaped_unquoted_triple_str(token_iter, alloc)?;
         token_iter.expect(Token::is_close_paren)?;
         Maybe::Just(hhbc::DefaultValue { label, expr })
     } else {
@@ -1534,7 +1471,7 @@ fn assemble_body<'arena>(
     // only .declvars can be declared more than once
     while token_iter.peek_is(Token::is_decl) {
         if token_iter.peek_is_str(Token::is_decl, ".doc") {
-            doc_comment = assemble_doc_comment(alloc, token_iter)?;
+            doc_comment = assemble_doc_comment(token_iter, alloc)?;
         } else if token_iter.peek_is_str(Token::is_decl, ".ismemoizewrapperlsb") {
             token_iter.expect_str(Token::is_decl, ".ismemoizewrapperlsb")?;
             token_iter.expect(Token::is_semicolon)?;
@@ -1959,8 +1896,8 @@ pub(crate) fn assemble_unescaped_unquoted_str<'arena>(
 }
 
 fn assemble_unescaped_unquoted_triple_str<'arena>(
-    alloc: &'arena Bump,
     token_iter: &mut Lexer<'_>,
+    alloc: &'arena Bump,
 ) -> Result<Str<'arena>> {
     let st = escaper::unquote_slice(escaper::unquote_slice(escaper::unquote_slice(
         token_iter.expect_with(Token::into_triple_str_literal)?,

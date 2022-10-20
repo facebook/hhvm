@@ -7,8 +7,6 @@
 
 from __future__ import annotations
 
-import enum
-
 import folly.iobuf as _fbthrift_iobuf
 import thrift.python.types as _fbthrift_python_types
 import thrift.python.exceptions as _fbthrift_python_exceptions
@@ -453,7 +451,7 @@ class TypeName(metaclass=_fbthrift_python_types.UnionMeta):
 # This unfortunately has to be down here to prevent circular imports
 import apache.thrift.type.standard.thrift_metadata
 
-class Void(_fbthrift_python_types.Enum, enum.IntEnum):
+class Void(_fbthrift_python_types.Enum, int):
     NoValue = 0
     @staticmethod
     def __get_thrift_name__() -> str:
@@ -473,7 +471,7 @@ class Void(_fbthrift_python_types.Enum, enum.IntEnum):
 
     def _to_py_deprecated(self):
         return self.value
-class StandardProtocol(_fbthrift_python_types.Enum, enum.IntEnum):
+class StandardProtocol(_fbthrift_python_types.Enum, int):
     Custom = 0
     Binary = 1
     Compact = 2

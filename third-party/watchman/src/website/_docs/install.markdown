@@ -130,6 +130,9 @@ Download a [source snapshot from the latest release](https://github.com/facebook
 ```bash
 $ cd watchman
 
+# Ensure Cargo is installed. Either through your OS's package manager or https://rustup.rs/
+$ cargo version
+
 # Optionally, to save time, you can ask Watchman's build process to install system dependencies
 $ sudo ./install-system-packages.sh
 

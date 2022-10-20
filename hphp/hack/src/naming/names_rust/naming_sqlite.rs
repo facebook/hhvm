@@ -127,6 +127,38 @@ impl Names {
             params![],
         )?;
 
+        // This table contains a single dummy value and is here only to satisfy
+        // hh_server and hh_single_type_check.
+        conn.execute(
+            "
+            CREATE TABLE IF NOT EXISTS NAMING_LOCAL_CHANGES(
+                ID INTEGER PRIMARY KEY,
+                LOCAL_CHANGES BLOB NOT NULL,
+                BASE_CONTENT_VERSION TEXT
+            );",
+            params![],
+        )?;
+
+        // The blob here is Relative_path.Map.empty as an OCaml-marshaled blob.
+        // The base_content_version (computed from the unix timestamp and a
+        // random ID) needs only be unique.
+        conn.execute(
+            "
+            INSERT OR IGNORE INTO NAMING_LOCAL_CHANGES
+            VALUES(0,X'8495a6be0000000100000000000000000000000040',?);",
+            params![format!(
+                "{}-{}",
+                std::time::SystemTime::now()
+                    .duration_since(std::time::SystemTime::UNIX_EPOCH)
+                    .expect("SystemTime::now() before UNIX_EPOCH")
+                    .as_secs(),
+                {
+                    use rand::distributions::DistString;
+                    rand::distributions::Alphanumeric.sample_string(&mut rand::thread_rng(), 10)
+                },
+            )],
+        )?;
+
         Ok(())
     }
 

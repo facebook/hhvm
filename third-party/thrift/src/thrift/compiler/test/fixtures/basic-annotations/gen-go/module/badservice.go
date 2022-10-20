@@ -338,7 +338,7 @@ func (p *BadServiceBarResult) GetSuccess() int32 {
   if !p.IsSetSuccess() {
     return BadServiceBarResult_Success_DEFAULT
   }
-return *p.Success
+  return *p.Success
 }
 func (p *BadServiceBarResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil

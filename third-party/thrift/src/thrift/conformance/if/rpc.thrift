@@ -56,6 +56,7 @@ union ServerTestResult {
   103: StreamCreditTimeoutServerTestResult streamCreditTimeout;
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
+  300: InteractionConstructorServerTestResult interactionConstructor;
 }
 
 union ClientTestResult {
@@ -70,6 +71,7 @@ union ClientTestResult {
   103: StreamCreditTimeoutClientTestResult streamCreditTimeout;
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
+  300: InteractionConstructorClientTestResult interactionConstructor;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -115,6 +117,10 @@ struct SinkChunkTimeoutServerTestResult {
   1: Request request;
   2: list<Request> sinkPayloads;
   3: bool chunkTimeoutException;
+}
+
+struct InteractionConstructorServerTestResult {
+  1: bool constructorCalled;
 }
 
 struct RequestResponseBasicClientTestResult {
@@ -163,6 +169,8 @@ struct SinkChunkTimeoutClientTestResult {
   1: bool chunkTimeoutException;
 }
 
+struct InteractionConstructorClientTestResult {}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -175,6 +183,7 @@ union ClientInstruction {
   103: StreamCreditTimeoutClientInstruction streamCreditTimeout;
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
+  300: InteractionConstructorClientInstruction interactionConstructor;
 }
 
 union ServerInstruction {
@@ -189,6 +198,7 @@ union ServerInstruction {
   103: StreamCreditTimeoutServerInstruction streamCreditTimeout;
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
+  300: InteractionConstructorServerInstruction interactionConstructor;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -240,6 +250,8 @@ struct SinkChunkTimeoutClientInstruction {
   3: i64 chunkTimeoutMs;
 }
 
+struct InteractionConstructorClientInstruction {}
+
 struct RequestResponseBasicServerInstruction {
   1: Response response;
 }
@@ -289,6 +301,12 @@ struct SinkChunkTimeoutServerInstruction {
   2: i64 chunkTimeoutMs;
 }
 
+struct InteractionConstructorServerInstruction {}
+
+interaction BasicInteraction {
+  void init();
+}
+
 service RPCConformanceService {
   // =================== Conformance framework - Only for Server Tests ===================
   void sendTestCase(1: RpcTestCase testCase);
@@ -316,6 +334,9 @@ service RPCConformanceService {
   // =================== Sink ===================
   sink<Request, Response> sinkBasic(1: Request req);
   sink<Request, Response> sinkChunkTimeout(1: Request req);
+
+  // =================== Interactions ===================
+  performs BasicInteraction;
 }
 
 service BasicRPCConformanceService {

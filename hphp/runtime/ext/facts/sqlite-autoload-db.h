@@ -31,15 +31,15 @@ public:
   /**
    * Return a SQLiteAutoloadDB that can only be read
    */
-  static std::unique_ptr<SQLiteAutoloadDB> readOnly(std::filesystem::path path);
+  static std::shared_ptr<SQLiteAutoloadDB> readOnly(std::filesystem::path path);
 
   /**
    * Return a SQLiteAutoloadDB that you can write to
    */
-  static std::unique_ptr<SQLiteAutoloadDB>
+  static std::shared_ptr<SQLiteAutoloadDB>
   readWrite(std::filesystem::path path, ::gid_t gid, ::mode_t perms);
 
-  static SQLiteAutoloadDB& getThreadLocal(const SQLiteKey& dbData);
+  static std::shared_ptr<SQLiteAutoloadDB> get(const SQLiteKey& dbData);
 };
 
 } // namespace Facts

@@ -3383,6 +3383,7 @@ function print_commands(
 function msg_loop(int $num_tests, Queue $queue): void {
   $cols = null;
   $do_progress =
+    $num_tests > 0 &&
     (
       Status::getMode() === Status::MODE_NORMAL ||
       Status::getMode() === Status::MODE_RECORD_FAILURES

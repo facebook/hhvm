@@ -4,7 +4,7 @@
   "namespaces": {
     "go": "thrift.annotation.scope",
     "java": "com.facebook.thrift.annotation_deprecated",
-    "js": "apache.thrift.annotation.scope",
+    "js": "thrift.annotation.scope",
     "py": "thrift.annotation.scope",
     "py.asyncio": "facebook_thrift_asyncio.annotation.scope"
   },

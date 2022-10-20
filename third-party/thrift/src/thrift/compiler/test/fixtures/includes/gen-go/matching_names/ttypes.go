@@ -41,7 +41,13 @@ func (p *IncludesAlso) GetAlso() *IncludesAlso0.Also {
   if !p.IsSetAlso() {
     return IncludesAlso_Also_DEFAULT
   }
-return p.Also
+  return p.Also
+}
+func (p *IncludesAlso) DefaultGetAlso() *IncludesAlso0.Also {
+  if !p.IsSetAlso() {
+    return IncludesAlso0.NewAlso()
+  }
+  return p.Also
 }
 func (p *IncludesAlso) IsSetAlso() bool {
   return p != nil && p.Also != nil

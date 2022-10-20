@@ -236,14 +236,20 @@ func (p *MyUnion) GetMyEnum() MyEnum {
   if !p.IsSetMyEnum() {
     return MyUnion_MyEnum_DEFAULT
   }
-return *p.MyEnum
+  return *p.MyEnum
 }
 var MyUnion_MyDataItem_DEFAULT *MyStruct
 func (p *MyUnion) GetMyDataItem() *MyStruct {
   if !p.IsSetMyDataItem() {
     return MyUnion_MyDataItem_DEFAULT
   }
-return p.MyDataItem
+  return p.MyDataItem
+}
+func (p *MyUnion) DefaultGetMyDataItem() *MyStruct {
+  if !p.IsSetMyDataItem() {
+    return NewMyStruct()
+  }
+  return p.MyDataItem
 }
 func (p *MyUnion) CountSetFieldsMyUnion() int {
   count := 0

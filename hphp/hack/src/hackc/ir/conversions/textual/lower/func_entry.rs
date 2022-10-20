@@ -42,7 +42,9 @@ pub(crate) fn rewrite_entry<'a, 'b>(
             ty: UserType {
                 user_type: None,
                 enforced: EnforceableType {
-                    ty: tx_ty!(*HackParams),
+                    ty: ir::BaseType::RawPtr(Box::new(ir::BaseType::RawType(
+                        "HackParams".to_owned(),
+                    ))),
                     modifiers: TypeConstraintFlags::NoFlags,
                 },
             },

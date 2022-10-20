@@ -81,7 +81,7 @@ pub(crate) fn mangled_class_name(
 /// For a given class return the Ty for its static type.
 pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
     let cname = mangled_class_name(class, IsStatic::Static, strings);
-    textual::Ty::RawPtr(Box::new(textual::Ty::RawType(cname)))
+    textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
 }
 
 /// For a given class return the Ty for its non-static type.
@@ -136,7 +136,7 @@ fn write_get_static(
     textual::declare_global(
         w,
         &static_singleton_name(state, class),
-        textual::Ty::RawPtr(Box::new(static_ty(class.name, &state.strings))),
+        textual::Ty::Ptr(Box::new(static_ty(class.name, &state.strings))),
     )?;
 
     textual::write_function(

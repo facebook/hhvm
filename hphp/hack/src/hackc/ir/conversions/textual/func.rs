@@ -36,6 +36,7 @@ use crate::mangle::MangleId;
 use crate::state::UnitState;
 use crate::textual;
 use crate::textual::Sid;
+use crate::types::convert_ty;
 use crate::util;
 
 type Result<T = (), E = Error> = std::result::Result<T, E>;
@@ -60,16 +61,16 @@ pub(crate) fn write_func(
     func: &ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
-    let func = crate::lower::lower(func, &mut unit_state.strings);
+    let mut func = crate::lower::lower(func, &mut unit_state.strings);
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
-    let params = func
-        .params
-        .iter()
+    let params = std::mem::take(&mut func.params);
+    let params = params
+        .into_iter()
         .map(|p| {
             let name_bytes = unit_state.strings.lookup_bytes(p.name);
             let name_string = util::escaped_string(name_bytes);
-            (name_string, p.ty.enforced.ty.clone())
+            (name_string, convert_ty(p.ty.enforced))
         })
         .collect_vec();
     let params = params

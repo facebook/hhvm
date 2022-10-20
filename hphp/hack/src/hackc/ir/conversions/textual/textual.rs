@@ -57,7 +57,38 @@ impl fmt::Display for FmtSid {
     }
 }
 
-pub(crate) type Ty = ir::BaseType;
+#[derive(Debug, Clone)]
+pub(crate) enum Ty {
+    AnyArray,
+    Arraykey,
+    Bool,
+    Class(ir::ClassId),
+    Classname,
+    Darray,
+    Dict,
+    Float,
+    Int,
+    Keyset,
+    Mixed,
+    None,
+    Nonnull,
+    Noreturn,
+    Nothing,
+    Null,
+    Nullable(Box<Ty>),
+    Num,
+    Ptr(Box<Ty>),
+    Type(String),
+    Resource,
+    String,
+    This,
+    Typename,
+    Varray,
+    VarrayOrDarray,
+    Vec,
+    VecOrDict,
+    Void,
+}
 
 struct FmtTy<'a>(&'a Ty);
 
@@ -66,9 +97,9 @@ impl fmt::Display for FmtTy<'_> {
         match self.0 {
             Ty::Bool => write!(f, "bool"),
             Ty::Int => write!(f, "int"),
-            Ty::String => write!(f, "string"),
-            Ty::RawType(s) => write!(f, "{s}"),
-            Ty::RawPtr(sub) => write!(f, "*{}", FmtTy(sub)),
+            Ty::String => write!(f, "*string"),
+            Ty::Type(s) => write!(f, "{s}"),
+            Ty::Ptr(sub) => write!(f, "*{}", FmtTy(sub)),
             Ty::Mixed => f.write_str("*Mixed"),
             Ty::Noreturn => f.write_str("noreturn"),
             Ty::Void => f.write_str("void"),
@@ -85,6 +116,7 @@ impl fmt::Display for FmtTy<'_> {
             | Ty::Nonnull
             | Ty::Nothing
             | Ty::Null
+            | Ty::Nullable(_)
             | Ty::Num
             | Ty::Resource
             | Ty::This
@@ -340,6 +372,17 @@ where
 {
     fn into_exprs(self) -> Vec<Expr> {
         vec![self.0.into(), self.1.into(), self.2.into()]
+    }
+}
+
+impl<T, I, O, F> VarArgs for std::iter::Map<I, F>
+where
+    T: Into<Expr>,
+    I: Iterator<Item = O>,
+    F: FnMut(O) -> T,
+{
+    fn into_exprs(self) -> Vec<Expr> {
+        self.map_into().collect_vec()
     }
 }
 

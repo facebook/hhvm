@@ -11,7 +11,6 @@ pub mod decl_counters;
 pub mod decl_env;
 pub mod decl_provider;
 pub mod direct_decl_parser;
-pub mod doc_comment;
 pub mod i_map;
 pub mod i_set;
 pub mod ident;

@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d20d753dd323d2afc0ffd4ad9c7d7868>>
+// @generated SignedSource<<5a0c688d8aebefc01e205a647ef7ef08>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -316,6 +316,7 @@ pub struct Requirement(pub pos_or_decl::PosOrDecl, pub Ty);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "atc_")]
 #[repr(C)]
 pub struct AbstractTypeconst {
@@ -339,6 +340,7 @@ pub struct AbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct ConcreteTypeconst {
     pub tc_type: Ty,
@@ -359,6 +361,7 @@ pub struct ConcreteTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "patc_")]
 #[repr(C)]
 pub struct PartiallyAbstractTypeconst {
@@ -381,6 +384,7 @@ pub struct PartiallyAbstractTypeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Typeconst {
     TCAbstract(AbstractTypeconst),
@@ -402,6 +406,7 @@ pub enum Typeconst {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "ttc_")]
 #[repr(C)]
 pub struct TypeconstType {
@@ -448,6 +453,7 @@ pub struct TypeconstType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving show")]
 #[rust_to_ocaml(prefix = "te_")]
 #[repr(C)]

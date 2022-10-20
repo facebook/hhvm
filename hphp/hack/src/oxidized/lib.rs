@@ -23,7 +23,6 @@ pub use manual::aast_defs_impl;
 pub use manual::aast_impl;
 pub use manual::ast;
 pub use manual::ast_defs_impl;
-pub use manual::doc_comment;
 pub use manual::global_options_impl;
 pub use manual::i_map;
 pub use manual::i_set;

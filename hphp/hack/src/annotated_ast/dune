@@ -1,6 +1,6 @@
 (library
  (name annotated_ast)
- (modules aast aast_defs aast_defs_visitors_ancestors doc_comment)
+ (modules aast aast_defs aast_defs_visitors_ancestors)
  (wrapped false)
  (libraries ast namespace_env)
  (preprocess

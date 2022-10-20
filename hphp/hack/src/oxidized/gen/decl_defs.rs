@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<62ef891eda33f849f5c3d4f42bdde9bf>>
+// @generated SignedSource<<0f1d656e3df0a2836a68f5f873843b86>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -242,6 +242,7 @@ pub struct DeclClassType {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(prefix = "elt_")]
 #[repr(C)]
 pub struct Element {

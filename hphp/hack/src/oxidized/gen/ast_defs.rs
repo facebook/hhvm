@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<844a1e10bc318dd69e56e541d49f4db7>>
+// @generated SignedSource<<d61e680a0deb5da6445e6f37fd0f93be>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -22,6 +22,7 @@ pub use crate::shape_map;
 #[allow(unused_imports)]
 use crate::*;
 
+#[rust_to_ocaml(and)]
 pub type Id_ = String;
 
 #[derive(
@@ -39,13 +40,17 @@ pub type Id_ = String;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C)]
 pub struct Id(pub Pos, pub Id_);
 
+#[rust_to_ocaml(and)]
 pub type Pstring = (Pos, String);
 
+#[rust_to_ocaml(and)]
 pub type ByteString = String;
 
+#[rust_to_ocaml(and)]
 pub type PositionedByteString = (Pos, bstr::BString);
 
 #[derive(
@@ -63,6 +68,7 @@ pub type PositionedByteString = (Pos, bstr::BString);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ShapeFieldName {
     #[rust_to_ocaml(name = "SFlit_int")]
@@ -90,6 +96,7 @@ pub enum ShapeFieldName {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum Variance {
     Covariant,
@@ -116,6 +123,7 @@ arena_deserializer::impl_deserialize_in_arena!(Variance);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum ConstraintKind {
     #[rust_to_ocaml(name = "Constraint_as")]
@@ -128,6 +136,7 @@ pub enum ConstraintKind {
 impl TrivialDrop for ConstraintKind {}
 arena_deserializer::impl_deserialize_in_arena!(ConstraintKind);
 
+#[rust_to_ocaml(and)]
 pub type Reified = bool;
 
 #[derive(
@@ -147,6 +156,7 @@ pub type Reified = bool;
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum Abstraction {
     Concrete,
@@ -172,6 +182,7 @@ arena_deserializer::impl_deserialize_in_arena!(Abstraction);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ClassishKind {
     /// Kind for `class` and `abstract class`
@@ -203,6 +214,7 @@ pub enum ClassishKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ParamKind {
     /// Contains the position for an entire `inout` annotated expression, e.g.:
@@ -230,6 +242,7 @@ pub enum ParamKind {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum ReadonlyKind {
     Readonly,
@@ -254,6 +267,7 @@ arena_deserializer::impl_deserialize_in_arena!(ReadonlyKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum OgNullFlavor {
     #[rust_to_ocaml(name = "OG_nullthrows")]
@@ -281,6 +295,7 @@ arena_deserializer::impl_deserialize_in_arena!(OgNullFlavor);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum PropOrMethod {
     #[rust_to_ocaml(name = "Is_prop")]
@@ -308,6 +323,7 @@ arena_deserializer::impl_deserialize_in_arena!(PropOrMethod);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum FunKind {
     FSync,
@@ -333,6 +349,7 @@ arena_deserializer::impl_deserialize_in_arena!(FunKind);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum Bop {
     /// Addition: x + y
@@ -404,6 +421,7 @@ pub enum Bop {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum Uop {
     /// Bitwise negation: ~x
@@ -445,6 +463,7 @@ arena_deserializer::impl_deserialize_in_arena!(Uop);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum Visibility {
     #[rust_to_ocaml(attr = r#"visitors.name "visibility_Private""#)]
@@ -479,6 +498,7 @@ arena_deserializer::impl_deserialize_in_arena!(Visibility);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum XhpEnumValue {
     #[rust_to_ocaml(name = "XEV_Int")]
@@ -508,6 +528,7 @@ pub enum XhpEnumValue {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum Tprim {
     Tnull,
@@ -541,6 +562,7 @@ arena_deserializer::impl_deserialize_in_arena!(Tprim);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum TypedefVisibility {
     Transparent,
@@ -567,6 +589,7 @@ arena_deserializer::impl_deserialize_in_arena!(TypedefVisibility);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = r#"deriving ((show { with_path = false }), eq, ord,
     (visitors
        {

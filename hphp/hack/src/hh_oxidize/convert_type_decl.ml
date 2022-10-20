@@ -568,7 +568,7 @@ type enum_kind =
   | Sum_type of { num_variants: int }
   | Not_an_enum
 
-let type_declaration name td =
+let type_declaration ~mutual_rec name td =
   let tparam_list =
     match (td.ptype_params, td.ptype_name.txt) with
     (* HACK: eliminate tparam from `type _ ty_` and phase-parameterized types *)
@@ -602,6 +602,12 @@ let type_declaration name td =
   in
   let doc = doc_comment_of_attribute_list td.ptype_attributes in
   let attr = ocaml_attr td.ptype_attributes in
+  let attr =
+    if mutual_rec then
+      "#[rust_to_ocaml(and)]\n" ^ attr
+    else
+      attr
+  in
   let attrs_and_vis ?(additional_attrs = "") enum_kind ~force_derive_copy =
     if
       force_derive_copy
@@ -735,6 +741,7 @@ let type_declaration name td =
       if
         List.length td.ptype_params = List.length targs
         && String.(self () = ty_name)
+        && not mutual_rec
       then (
         add_ty_reexport id;
         raise (Skip_type_decl ("it is a re-export of " ^ id))
@@ -856,7 +863,7 @@ let type_declaration name td =
   (* type foo += A, e.g. the exn type. *)
   | (Ptype_open, None) -> raise (Skip_type_decl "Open types not supported")
 
-let type_declaration td =
+let type_declaration ?(mutual_rec = false) td =
   let name = td.ptype_name.txt in
   let name =
     if String.equal name "t" then
@@ -876,7 +883,8 @@ let type_declaration td =
       add_decl name (sprintf "pub use %s;" extern_type)
     | None ->
       (try
-         with_self name (fun () -> add_decl name (type_declaration name td))
+         with_self name (fun () ->
+             add_decl name (type_declaration ~mutual_rec name td))
        with
       | Skip_type_decl reason ->
         log "Not converting type %s::%s: %s" mod_name name reason)

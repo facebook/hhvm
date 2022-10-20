@@ -1082,7 +1082,7 @@ and ns_kind =
   | NSFun
   | NSConst
 
-and doc_comment = (Doc_comment.t[@visitors.opaque])
+and doc_comment = (Ast_defs.pstring[@visitors.opaque])
 
 and import_flavor =
   | Include

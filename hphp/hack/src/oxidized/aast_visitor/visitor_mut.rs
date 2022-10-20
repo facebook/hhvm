@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<a12303a91476776cb6333f6831c2e8c0>>
+// @generated SignedSource<<a0e8d89409b8f9ef290414d76df090f2>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -16,8 +16,6 @@ use crate::aast_defs::*;
 use crate::aast_defs::{self};
 use crate::ast_defs::*;
 use crate::ast_defs::{self};
-use crate::doc_comment::*;
-use crate::doc_comment::{self};
 use crate::*;
 pub fn visit<'node, P: Params>(
     v: &mut impl VisitorMut<'node, Params = P>,
@@ -215,13 +213,6 @@ pub trait VisitorMut<'node> {
         &mut self,
         c: &mut <Self::Params as Params>::Context,
         p: &'node mut DefaultCase<<Self::Params as Params>::Ex, <Self::Params as Params>::En>,
-    ) -> Result<(), <Self::Params as Params>::Error> {
-        p.recurse(c, self.object())
-    }
-    fn visit_doc_comment(
-        &mut self,
-        c: &mut <Self::Params as Params>::Context,
-        p: &'node mut DocComment,
     ) -> Result<(), <Self::Params as Params>::Error> {
         p.recurse(c, self.object())
     }

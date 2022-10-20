@@ -910,7 +910,7 @@ pub fn emit_class<'a, 'arena, 'decl>(
         name,
         span,
         flags,
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
         uses: Slice::fill_iter(alloc, uses.into_iter()),
         methods: Slice::fill_iter(alloc, methods.into_iter()),
         enum_type: Maybe::from(enum_type),

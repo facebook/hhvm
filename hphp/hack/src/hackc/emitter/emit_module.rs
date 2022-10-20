@@ -27,7 +27,7 @@ pub fn emit_module<'a, 'arena, 'decl>(
         attributes: Slice::fill_iter(alloc, attributes.into_iter()),
         name,
         span,
-        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &(c.0).1))),
+        doc_comment: Maybe::from(doc_comment.map(|c| Str::new_str(alloc, &c.1))),
     })
 }
 

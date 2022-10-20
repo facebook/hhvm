@@ -95,7 +95,6 @@ summary "Write oxidized/aast_visitor/"
   visitor                                                                     \
   --input "hphp/hack/src/oxidized/gen/aast_defs.rs"                           \
   --input "hphp/hack/src/oxidized/gen/ast_defs.rs"                            \
-  --input "hphp/hack/src/oxidized/manual/doc_comment.rs"                      \
   --output "hphp/hack/src/oxidized/aast_visitor/"                             \
   --root "Program"                                                            \
 

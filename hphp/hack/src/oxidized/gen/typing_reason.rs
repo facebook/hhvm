@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<d26d2a0112b37a52ef9d63ca87dc205e>>
+// @generated SignedSource<<1816bfd06f6a4cd194822e3ef44ae1c0>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -64,6 +64,7 @@ arena_deserializer::impl_deserialize_in_arena!(ArgPosition);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(C, u8)]
 pub enum ExprDepTypeReason {
     ERexpr(isize),
@@ -91,6 +92,7 @@ pub enum ExprDepTypeReason {
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[repr(u8)]
 pub enum BlameSource {
     BScall,
@@ -117,6 +119,7 @@ arena_deserializer::impl_deserialize_in_arena!(BlameSource);
     Serialize,
     ToOcamlRep
 )]
+#[rust_to_ocaml(and)]
 #[rust_to_ocaml(attr = "deriving eq")]
 #[repr(C, u8)]
 pub enum Blame {

@@ -22,7 +22,6 @@ use naming_special_names_rust::user_attributes as ua;
 use oxidized::aast_defs;
 use oxidized::ast;
 use oxidized::ast_defs;
-use oxidized::doc_comment;
 
 use crate::emit_attribute;
 use crate::emit_expression;
@@ -32,7 +31,7 @@ pub struct FromAstArgs<'ast> {
     pub id: &'ast ast::Sid,
     pub initial_value: &'ast Option<ast::Expr>,
     pub typehint: Option<&'ast aast_defs::Hint>,
-    pub doc_comment: Option<doc_comment::DocComment>,
+    pub doc_comment: Option<aast_defs::DocComment>,
     pub visibility: aast_defs::Visibility,
     pub is_static: bool,
     pub is_abstract: bool,
@@ -197,7 +196,7 @@ pub fn from_ast<'ast, 'arena, 'decl>(
         visibility: Visibility::from(args.visibility),
         doc_comment: args
             .doc_comment
-            .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.0.1)))
+            .map(|pstr| ffi::Str::from(alloc.alloc_str(&pstr.1)))
             .into(),
     };
     Ok(PropAndInit {

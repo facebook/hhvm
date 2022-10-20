@@ -34,9 +34,9 @@ use instruction_sequence::instr;
 use instruction_sequence::InstrSeq;
 use ocamlrep::rc::RcOc;
 use oxidized::aast;
+use oxidized::aast_defs::DocComment;
 use oxidized::ast;
 use oxidized::ast_defs;
-use oxidized::doc_comment::DocComment;
 use oxidized::namespace_env;
 use oxidized::pos::Pos;
 use print_expr::HhasBodyEnv;
@@ -444,7 +444,7 @@ pub fn make_body<'a, 'arena, 'decl>(
         ),
         params,
         return_type_info: return_type_info.into(),
-        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &(c.0).1)).into(),
+        doc_comment: doc_comment.map(|c| Str::new_str(alloc, &c.1)).into(),
         stack_depth,
     })
 }

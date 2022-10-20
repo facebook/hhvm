@@ -40,8 +40,6 @@
                 inherit (hhvm)
                   NIX_CFLAGS_COMPILE
                   CMAKE_TOOLCHAIN_FILE;
-                ${if hhvm?RUSTC_WRAPPER then "RUSTC_WRAPPER" else null} =
-                  hhvm.RUSTC_WRAPPER;
               };
         in
         rec {

@@ -118,7 +118,12 @@ pub(crate) fn convert_class<'a>(
         implements,
         methods,
         name,
-        properties: Slice::fill_iter(alloc, properties.iter().cloned()),
+        properties: Slice::fill_iter(
+            alloc,
+            properties
+                .into_iter()
+                .map(|prop| convert_property(alloc, prop)),
+        ),
         requirements,
         span: src_loc.to_span(),
         type_constants,
@@ -126,6 +131,18 @@ pub(crate) fn convert_class<'a>(
         uses,
     };
     unit.classes.push(class);
+}
+
+fn convert_property<'a>(alloc: &'a bumpalo::Bump, src: ir::Property<'a>) -> hhbc::Property<'a> {
+    hhbc::Property {
+        name: src.name,
+        flags: src.flags,
+        attributes: convert::convert_attributes(alloc, src.attributes),
+        visibility: src.visibility,
+        initial_value: src.initial_value.clone().into(),
+        type_info: src.type_info.clone(),
+        doc_comment: src.doc_comment,
+    }
 }
 
 fn convert_ctx_constant<'a>(

@@ -1664,12 +1664,12 @@ fn print_property(w: &mut dyn Write, property: &Property<'_>) -> Result {
         "  {} {}{}",
         FmtIdentifier(property.name.as_bytes()),
         FmtAttr(property.flags),
-        FmtSep::new(" <", ", ", ">", property.attributes.as_ref(), |w, attr| {
+        FmtSep::new(" <", ", ", ">", property.attributes.iter(), |w, attr| {
             write!(
                 w,
                 "{}({})",
                 FmtIdentifier(attr.name.as_ref()),
-                FmtSep::comma(attr.arguments.as_ref(), |w, arg| {
+                FmtSep::comma(attr.arguments.iter(), |w, arg| {
                     FmtTypedValue(arg).fmt(w)
                 })
             )

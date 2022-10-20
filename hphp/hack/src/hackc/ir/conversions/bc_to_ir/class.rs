@@ -77,6 +77,13 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         .map(|interface| ir::ClassId::from_hhbc(*interface, &mut unit.strings))
         .collect_vec();
 
+    let properties = cls
+        .properties
+        .as_ref()
+        .iter()
+        .map(convert_property)
+        .collect_vec();
+
     let name = ir::ClassId::from_hhbc(cls.name, &mut unit.strings);
 
     unit.classes.push(ir::Class {
@@ -91,7 +98,7 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
         implements,
         methods: Default::default(),
         name,
-        properties: cls.properties.as_ref().to_vec(),
+        properties,
         requirements,
         src_loc: ir::SrcLoc::from_span(filename, &cls.span),
         type_constants,
@@ -102,6 +109,23 @@ pub(crate) fn convert_class<'a>(unit: &mut ir::Unit<'a>, filename: ir::Filename,
             .map(|use_| ir::ClassId::from_hhbc(*use_, &mut unit.strings))
             .collect(),
     });
+}
+
+fn convert_property<'a>(prop: &hhbc::Property<'a>) -> ir::Property<'a> {
+    let attributes = prop
+        .attributes
+        .iter()
+        .map(convert::convert_attribute)
+        .collect_vec();
+    ir::Property {
+        name: prop.name,
+        flags: prop.flags,
+        attributes,
+        visibility: prop.visibility,
+        initial_value: prop.initial_value.clone().into(),
+        type_info: prop.type_info.clone(),
+        doc_comment: prop.doc_comment,
+    }
 }
 
 fn convert_ctx_constant<'a>(ctx: &hhbc::CtxConstant<'a>) -> ir::CtxConstant<'a> {

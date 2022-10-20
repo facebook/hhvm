@@ -56,7 +56,7 @@
               inherit src;
               outputHash = "sha256-2eahz8z/nBmBM6L6OnrdjLALnVXESMe8cMOGszF22I8=";
             });
-            meta = previousAttrs // {
+            meta = previousAttrs.meta // {
               description = "Patched sccache with working S3 support";
               homepage = "https://github.com/mozilla/sccache/pull/1086";
             };

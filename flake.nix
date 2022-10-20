@@ -64,21 +64,7 @@
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
           };
-          packages.hhvm_sccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
-            RUSTC_WRAPPER = "${packages.sccache_pr1086}/bin/sccache";
-            CMAKE_TOOLCHAIN_FILE = pkgs.writeTextFile {
-              name = "toolchain.cmake";
-              text = ''
-                ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
-                set(CMAKE_C_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE FILEPATH "C compiler launcher" FORCE)
-                set(CMAKE_CXX_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE FILEPATH "C++ compiler launcher" FORCE)
-              '';
-            };
-          });
           packages.hhvm_clang = packages.hhvm.override {
-            stdenv = pkgs.llvmPackages_14.stdenv;
-          };
-          packages.hhvm_sccache_clang = packages.hhvm_sccache.override {
             stdenv = pkgs.llvmPackages_14.stdenv;
           };
           packages.default = packages.hhvm;

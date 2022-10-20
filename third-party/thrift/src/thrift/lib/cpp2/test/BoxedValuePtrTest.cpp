@@ -47,81 +47,73 @@ constexpr bool operator==(int lhs, const TestStruct& rhs) {
   return lhs == rhs.a;
 }
 
-template <typename T>
-class BoxedTest : public ::testing::Test {};
-
-using BoxedPtrTypes =
-    ::testing::Types<boxed_value_ptr<TestStruct>, boxed_ptr<TestStruct>>;
-
-TYPED_TEST_SUITE(BoxedTest, BoxedPtrTypes);
-
-TYPED_TEST(BoxedTest, DefaultConstructor) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, DefaultConstructor) {
+  boxed_value_ptr<TestStruct> a;
   EXPECT_FALSE(static_cast<bool>(a));
 }
 
-TYPED_TEST(BoxedTest, Constructor) {
-  TypeParam a(5);
+TEST(BoxedValuePtrTest, Constructor) {
+  boxed_value_ptr<TestStruct> a(5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, CopyConstructor) {
-  TypeParam a(5);
-  TypeParam b(a);
+TEST(BoxedValuePtrTest, CopyConstructor) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(a);
   EXPECT_EQ(*b, 5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, CopyAssignment) {
-  TypeParam a(5);
-  TypeParam b;
+TEST(BoxedValuePtrTest, CopyAssignment) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b;
   b = a;
   EXPECT_EQ(*b, 5);
   EXPECT_EQ(*a, 5);
 }
 
-TYPED_TEST(BoxedTest, MoveConstructor) {
-  TypeParam a(5);
-  TypeParam b(std::move(a));
+TEST(BoxedValuePtrTest, MoveConstructor) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(std::move(a));
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, MoveAssignment) {
-  TypeParam a(5);
-  TypeParam b;
+TEST(BoxedValuePtrTest, MoveAssignment) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b;
   b = std::move(a);
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, EmptyAssignment) {
-  TypeParam a;
-  TypeParam b(5);
+TEST(BoxedValuePtrTest, EmptyAssignment) {
+  boxed_value_ptr<TestStruct> a;
+  boxed_value_ptr<TestStruct> b(5);
   EXPECT_EQ(*b, 5);
   b = a;
   EXPECT_FALSE(static_cast<bool>(b));
 }
 
-TYPED_TEST(BoxedTest, Emplace) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, Emplace) {
+  boxed_value_ptr<TestStruct> a;
   a.emplace(5);
   EXPECT_EQ(*a, 5);
   a.emplace(7);
   EXPECT_EQ(*a, 7);
 }
 
-TYPED_TEST(BoxedTest, Reset) {
-  TypeParam a(6);
+TEST(BoxedValuePtrTest, Reset) {
+  boxed_value_ptr<TestStruct> a(6);
   a.reset();
   EXPECT_FALSE(static_cast<bool>(a));
 }
 
-TYPED_TEST(BoxedTest, Assignment) {
-  TypeParam a;
+TEST(BoxedValuePtrTest, Assignment) {
+  boxed_value_ptr<TestStruct> a;
   a = 6;
   EXPECT_EQ(*a, 6);
 }
 
-TYPED_TEST(BoxedTest, MoveOnlyType) {
+TEST(BoxedValuePtrTest, MoveOnlyType) {
   boxed_value_ptr<std::unique_ptr<int>> a;
   a = std::make_unique<int>(5);
   EXPECT_EQ(**a, 5);
@@ -129,17 +121,17 @@ TYPED_TEST(BoxedTest, MoveOnlyType) {
   EXPECT_EQ(**b, 5);
 }
 
-TYPED_TEST(BoxedTest, Swap) {
-  TypeParam a(5);
-  TypeParam b(7);
+TEST(BoxedValuePtrTest, Swap) {
+  boxed_value_ptr<TestStruct> a(5);
+  boxed_value_ptr<TestStruct> b(7);
   std::swap(a, b);
   EXPECT_EQ(*a, 7);
   EXPECT_EQ(*b, 5);
 }
 
-TYPED_TEST(BoxedTest, Equal) {
-  TypeParam a;
-  TypeParam b;
+TEST(BoxedValuePtrTest, Equal) {
+  boxed_value_ptr<TestStruct> a;
+  boxed_value_ptr<TestStruct> b;
   EXPECT_TRUE(a == b);
   a = 5;
   EXPECT_FALSE(a == b);

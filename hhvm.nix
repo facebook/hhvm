@@ -25,9 +25,6 @@
 , gperftools
 , hostPlatform
 , icu
-# TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx to
-# detect C++ runtime once it is available
-, isDefaultStdlib ? true
 , imagemagick6
 , jemalloc
 , lastModifiedDate
@@ -73,6 +70,9 @@
 , zstd
 }:
 let
+  # TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx once it is available
+  isDefaultStdlib =
+    builtins.match ".*-stdlib=\+\+.*" (builtins.readFile "${stdenv.cc}/nix-support/libcxx-ldflags") == null;
   versionParts =
     builtins.match
       ''

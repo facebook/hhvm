@@ -117,7 +117,7 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_sccache' }}
+        - hhvm
         - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}

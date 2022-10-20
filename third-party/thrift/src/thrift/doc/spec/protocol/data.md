@@ -5,7 +5,7 @@ sidebar_position: 1
 
 # Data Protocols
 
-How [data](../definition/data.md) is (de)serialized.
+A data protocol in Thrift is a format that defines how [data](../definition/data.md) is serialized into a sequence of bytes and deserialized from it.
 
 ## Thrift Types
 
@@ -13,7 +13,7 @@ There are 13 different Thrift types that can appear in the serialized output.
 
 | Type   | Description                                                                                          |
 | ---    | ---                                                                                                  |
-| STOP   | STOP does not represent data, it is used to indicate that no fields are left in a serialized struct. |
+| STOP   | STOP does not represent data. It is used to indicate that no fields are left in a serialized struct. |
 | BOOL   | Boolean                                                                                              |
 | BYTE   | 8-bit signed integer                                                                                 |
 | DOUBLE | Double precision floating point number                                                               |
@@ -29,11 +29,13 @@ There are 13 different Thrift types that can appear in the serialized output.
 
 ## Serialization Formats
 
+<!-- Protocol names should be capitalized, e.g. Compact, Binary, Frozen. -->
+
 Each serialization format encodes the above Thrift types in a different way.
 
 ### Binary Protocol
 
-The Binary protocol produces data in a non-human readable format.
+The Binary protocol produces data in a non-human-readable format.
 
 #### TYPE CODES
 
@@ -97,7 +99,7 @@ Maps are serialized using the 8-bit type codes of the key and value types follow
 
 ### Compact Protocol
 
-The Compact protocol is similar to binary protocol, but some values are encoded so as to use fewer bytes. In particular, integral types are encoded using the [varint](https://l.facebook.com/l.php?u=https%3A%2F%2Fdevelopers.google.com%2Fprotocol-buffers%2Fdocs%2Fencoding&h=AT0fFXtpm2VAb2FPLDl4g0p0TYi-JFoAW58CVsKuE5GJub43Dy-V2LP_rrxsXHzByrC2JCVIf0QVQnvFoeYj1K1RyMDbg8f1oX2-uI6uoGTcsxpBDlIUXesMcEOhCgLWfakjX1jQmtnFqwASFso) format.
+The Compact protocol is similar to the Binary protocol, but some values are encoded so as to use fewer bytes. In particular, integral types are encoded using the [varint](https://developers.google.com/protocol-buffers/docs/encoding) format.
 
 #### TYPE CODES
 
@@ -142,11 +144,11 @@ Booleans that are field values are encoded in the type code, so they have no add
 
 #### INTEGRAL TYPES LARGER THAN 1 BYTE
 
-The Integral types that are larger than 1 Byte (`i16`, `i32`, and `i64`) are encoded using the Varint format.
+The integral types that are larger than 1 Byte (`i16`, `i32`, and `i64`) are encoded using the varint format.
 
 #### OTHER NUMERIC TYPE
 
-The remaining Thrift numeric types (`byte`, `float`, and `double`) are serialized in the same way as in binary protocol.
+The remaining Thrift numeric types (`byte`, `float`, and `double`) are serialized in the same way as in the Binary protocol.
 
 #### STRING
 
@@ -158,7 +160,7 @@ Strings are encoded using a variable-sized length followed by a sequence of 8-bi
 
 #### LIST/SET
 
-Lists and Sets are serialized in exactly the same way. The first byte contains the length (if less than 16) and the type code of the inner elements. If the length is at least 16, then it is encoded as a variable length integer. The serialized elements come next.
+Lists and sets are serialized in exactly the same way. The first byte contains the length (if less than 16) and the type code of the inner elements. If the length is at least 16, then it is encoded as a variable length integer. The serialized elements come next.
 First, the type code of the inner elements is written, then the 32-bit length, then the elements.
 
 | Length | Type Code | Payload           |
@@ -220,6 +222,6 @@ This protocol prints the Thrift object as a human readable, nicely indented stri
 
 ## Deprecated
 
-- JSON. This protocol serializes Thrift objects into JSON objects (see [yaml](../../experimental/yaml.md)).
-- SimpleJSON. This protocol is similar with JSON, it is simpler because it doesn't output verbose field type (see [yaml](../../experimental/yaml.md)).
-* Phpserialize. This protocol serializes Thrift objects into PHP's "serialize" format. It is write only now, you cannot deserialize from PHP.
+- JSON: This protocol serializes Thrift objects into JSON objects. See also [yaml](../../experimental/yaml.md).
+- SimpleJSON: This protocol also serializes to JSON but doesn't output verbose field types and uses field names instead of IDs (which affects schema evolution). See also [yaml](../../experimental/yaml.md).
+* PHPSerialize: This protocol serializes Thrift objects into PHP's "serialize" format. It is write-only now; you cannot deserialize from PHP.

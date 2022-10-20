@@ -260,11 +260,6 @@ stdenv.mkDerivation (inheritedEnvironmentVariables // rec {
   preBuild =
     ''
       set -e
-
-      env
-
-      false
-
       make \
         -f third-party/proxygen/CMakeFiles/bundled_proxygen.dir/build.make \
         third-party/proxygen/bundled_proxygen-prefix/src/bundled_proxygen-stamp/bundled_proxygen-patch

@@ -513,23 +513,35 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           Space;
           t env kw;
           Space;
+          t env left;
+          space_split ();
           Nest
             [
               Span
                 [
-                  t env left;
                   handle_possible_list
                     env
-                    ~before_each:space_split
+                    ~before_each:(fun _ ->
+                      Concat
+                        [
+                          (if list_length members > 1 then
+                            Newline
+                          else
+                            Space);
+                          SplitWith Cost.Moderate;
+                        ])
                     ~after_each:(fun last ->
                       if last then
-                        Space
+                        if list_length members > 1 then
+                          Newline
+                        else
+                          Space
                       else
                         Nothing)
                     members;
-                  t env right;
                 ];
             ];
+          t env right;
         ]
     | Syntax.TypeInRefinement
         {
@@ -559,7 +571,7 @@ let rec t (env : Env.t) (node : Syntax.t) : Doc.t =
           when_present eq space;
           t env eq;
           when_present eq_bound (fun _ ->
-              Concat [Space; SplitWith Cost.Moderate; Nest [t env eq_bound]]);
+              Concat [Space; SplitWith Cost.High; Nest [t env eq_bound]]);
         ]
     | Syntax.Contexts
         {

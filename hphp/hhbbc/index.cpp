@@ -1064,27 +1064,6 @@ struct ClassInfo {
     }
     return ancestor;
   }
-
-  /*
-   * Flags about the existence of various magic methods, or whether
-   * any derived classes may have those methods.  The non-derived
-   * flags imply the derived flags, even if the class is final, so you
-   * don't need to check both in those situations.
-   */
-  struct MagicFnInfo {
-    bool thisHas{false};
-    bool derivedHas{false};
-  };
-  MagicFnInfo magicBool;
-};
-
-struct MagicMapInfo {
-  StaticString name;
-  ClassInfo::MagicFnInfo ClassInfo::*pmem;
-};
-
-const MagicMapInfo magicMethods[] {
-  { StaticString{"__toBoolean"}, &ClassInfo::magicBool },
 };
 
 /*
@@ -1733,7 +1712,15 @@ bool Class::couldHaveMagicBool() const {
   return val.match(
     [] (SString) { return true; },
     [] (ClassInfo* cinfo) {
-      return cinfo->magicBool.derivedHas;
+      if (cinfo->cls->attrs & AttrInterface) {
+        for (auto const sub : cinfo->subclassList) {
+          if (has_magic_bool_conversion(sub->baseList[0]->cls->name)) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return has_magic_bool_conversion(cinfo->baseList[0]->cls->name);
     }
   );
 }
@@ -4360,49 +4347,6 @@ void compute_iface_vtables(IndexData& index) {
   }
 }
 
-void mark_magic_on_parents(ClassInfo& cinfo, ClassInfo& derived) {
-  auto any = false;
-  for (const auto& mm : magicMethods) {
-    if ((derived.*mm.pmem).thisHas) {
-      auto& derivedHas = (cinfo.*mm.pmem).derivedHas;
-      if (!derivedHas) {
-        derivedHas = any = true;
-      }
-    }
-  }
-  if (!any) return;
-  if (cinfo.parent) mark_magic_on_parents(*cinfo.parent, derived);
-  for (auto iface : cinfo.declInterfaces) {
-    mark_magic_on_parents(*const_cast<ClassInfo*>(iface), derived);
-  }
-}
-
-bool has_magic_method(const ClassInfo* cinfo, SString name) {
-  if (name == s_toBoolean.get()) {
-    // note that "having" a magic method includes the possibility that
-    // a parent class has it. This can't happen for the collection
-    // classes, because they're all final; but for SimpleXMLElement,
-    // we need to search.
-    while (cinfo->parent) cinfo = cinfo->parent;
-    return has_magic_bool_conversion(cinfo->cls->name);
-  }
-  return cinfo->methods.find(name) != end(cinfo->methods);
-}
-
-void find_magic_methods(IndexData& index) {
-  trace_time tracer("find magic methods", index.sample);
-
-  for (auto& cinfo : index.allClassInfos) {
-    bool any = false;
-    for (const auto& mm : magicMethods) {
-      bool const found = has_magic_method(cinfo.get(), mm.name.get());
-      any = any || found;
-      (cinfo.get()->*mm.pmem).thisHas = found;
-    }
-    if (any) mark_magic_on_parents(*cinfo, *cinfo);
-  }
-}
-
 void find_mocked_classes(IndexData& index) {
   trace_time tracer("find mocked classes", index.sample);
 
@@ -4847,17 +4791,6 @@ void check_invariants(const IndexData& index, const ClassInfo* cinfo) {
   // The baseList is non-empty, and the last element is this class.
   always_assert(!cinfo->baseList.empty());
   always_assert(cinfo->baseList.back() == cinfo);
-
-  for (const auto& mm : magicMethods) {
-    const auto& info = cinfo->*mm.pmem;
-
-    // Magic method flags should be consistent with the method table.
-    always_assert(info.thisHas == has_magic_method(cinfo, mm.name.get()));
-
-    // Non-'derived' flags (thisHas) about magic methods imply the derived
-    // ones.
-    always_assert(!info.thisHas || info.derivedHas);
-  }
 }
 
 void check_invariants(const IndexData& data, const FuncFamily& ff) {
@@ -8320,7 +8253,6 @@ Index::Index(Input input,
   compute_subclass_list(*m_data);
   clean_86reifiedinit_methods(*m_data); // uses the base class lists
   mark_no_override_methods(*m_data);
-  find_magic_methods(*m_data);          // uses the subclass lists
   find_mocked_classes(*m_data);
   mark_const_props(*m_data);
   mark_has_reified_parent(*m_data);

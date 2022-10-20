@@ -65,7 +65,7 @@ jobs:
         SCCACHE_ENDPOINT: https://hhvm-sccache.s3-accelerate.amazonaws.com
         SCCACHE_REGION: us-west-2
     - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
-    - if: matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang'
+    - if: always() && (matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang')
       run: nix shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --stop-server
     - run: hhvm --version
     - name: Build the deb package

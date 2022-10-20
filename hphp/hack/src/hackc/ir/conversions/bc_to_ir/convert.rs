@@ -4,6 +4,7 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use std::path::Path;
+use std::sync::Arc;
 
 use ffi::Maybe;
 use hash::HashMap;
@@ -25,7 +26,15 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
 
     let filename = ir::Filename(strings.intern_bytes(filename.as_os_str().as_bytes()));
 
-    let adata: HashMap<_, _> = unit.adata.iter().map(|a| (a.id, a.value.clone())).collect();
+    // Traditionally the HHBC AdataIds are named A_# - but let's not rely on
+    // that.
+    let adata_lookup = unit
+        .adata
+        .iter()
+        .map(|hhbc::Adata { id, value }| (*id, Arc::new(value.clone())))
+        .collect();
+
+    let unit_state = UnitState { adata_lookup };
 
     let constants = unit
         .constants
@@ -52,7 +61,6 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     let typedefs: Vec<_> = unit.typedefs.iter().cloned().collect();
 
     let mut ir_unit = ir::Unit {
-        adata,
         classes: Default::default(),
         constants,
         fatal: Default::default(),
@@ -72,13 +80,13 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     }
 
     for f in unit.functions.as_ref() {
-        crate::func::convert_function(&mut ir_unit, filename, f);
+        crate::func::convert_function(&mut ir_unit, filename, f, &unit_state);
     }
 
     // This is where we convert the methods for all the classes.
     for (idx, c) in unit.classes.as_ref().iter().enumerate() {
         for m in c.methods.as_ref() {
-            crate::func::convert_method(&mut ir_unit, filename, idx, m);
+            crate::func::convert_method(&mut ir_unit, filename, idx, m, &unit_state);
         }
     }
 
@@ -93,6 +101,11 @@ pub fn bc_to_ir<'a>(unit: &'_ Unit<'a>, filename: &Path) -> ir::Unit<'a> {
     }
 
     ir_unit
+}
+
+pub(crate) struct UnitState<'a> {
+    /// Conversion from hhbc::AdataId to hhbc::TypedValue
+    pub(crate) adata_lookup: HashMap<hhbc::AdataId<'a>, Arc<hhbc::TypedValue<'a>>>,
 }
 
 pub(crate) fn convert_attribute<'a>(attr: &hhbc::Attribute<'a>) -> ir::Attribute<'a> {

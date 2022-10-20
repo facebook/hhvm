@@ -94,6 +94,13 @@ pub(crate) fn convert_class<'a>(
         uses.into_iter().map(|use_| strings.lookup_class_name(use_)),
     );
 
+    let methods = Slice::fill_iter(
+        alloc,
+        methods.into_iter().map(|method| {
+            crate::func::convert_method(alloc, method, strings, &mut unit.adata_cache)
+        }),
+    );
+
     let class = hhbc::Class {
         attributes: convert::convert_attributes(alloc, attributes),
         base,
@@ -109,12 +116,7 @@ pub(crate) fn convert_class<'a>(
         enum_type,
         flags,
         implements,
-        methods: Slice::fill_iter(
-            alloc,
-            methods
-                .into_iter()
-                .map(|method| crate::func::convert_method(alloc, method, strings)),
-        ),
+        methods,
         name,
         properties: Slice::fill_iter(alloc, properties.iter().cloned()),
         requirements,

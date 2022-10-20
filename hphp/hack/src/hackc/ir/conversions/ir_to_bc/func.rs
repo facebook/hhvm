@@ -7,6 +7,7 @@ use ffi::Slice;
 use hhbc::Method;
 use log::trace;
 
+use crate::adata::AdataCache;
 use crate::convert;
 use crate::convert::UnitBuilder;
 use crate::emitter;
@@ -36,6 +37,7 @@ pub(crate) fn convert_func<'a>(
     alloc: &'a bumpalo::Bump,
     mut func: ir::Func<'a>,
     strings: &StringCache<'a, '_>,
+    adata: &mut AdataCache<'a>,
 ) -> hhbc::Body<'a> {
     // Compute liveness and implicit block parameters.
 
@@ -56,7 +58,7 @@ pub(crate) fn convert_func<'a>(
     // Now emit the instructions.
     trace!("-- emit instrs");
     let mut labeler = emitter::Labeler::new(&func);
-    let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings);
+    let (body_instrs, decl_vars) = emitter::emit_func(alloc, &func, &mut labeler, strings, adata);
 
     let return_type_info = crate::types::convert(alloc, &func.return_type, strings);
 
@@ -144,7 +146,7 @@ pub(crate) fn convert_function<'a>(
     let name = function.name;
     trace!("convert_function {}", name.as_bstr());
     let span = function.func.loc(function.func.loc_id).to_span();
-    let body = convert_func(alloc, function.func, strings);
+    let body = convert_func(alloc, function.func, strings, &mut unit.adata_cache);
     let attributes = convert::convert_attributes(alloc, function.attributes);
     let hhas_func = hhbc::Function {
         attributes,
@@ -162,10 +164,11 @@ pub(crate) fn convert_method<'a>(
     alloc: &'a bumpalo::Bump,
     method: ir::Method<'a>,
     strings: &StringCache<'a, '_>,
+    adata: &mut AdataCache<'a>,
 ) -> Method<'a> {
     trace!("convert_method {}", method.name.as_bstr());
     let span = method.func.loc(method.func.loc_id).to_span();
-    let body = convert_func(alloc, method.func, strings);
+    let body = convert_func(alloc, method.func, strings, adata);
     let attributes = convert::convert_attributes(alloc, method.attributes);
     hhbc::Method {
         attributes,

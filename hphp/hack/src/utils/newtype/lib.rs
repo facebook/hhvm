@@ -171,6 +171,12 @@ impl<N: FromUsize + Into<usize>, T> IdVec<N, T> {
     pub fn keys(&self) -> impl DoubleEndedIterator<Item = N> + '_ {
         (0..self.vec.len()).into_iter().map(|i| N::from_usize(i))
     }
+
+    pub fn push(&mut self, v: T) -> N {
+        let id = N::from_usize(self.len());
+        self.vec.push(v);
+        id
+    }
 }
 
 impl<N: Into<usize>, T: PartialEq> PartialEq for IdVec<N, T> {

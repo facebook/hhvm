@@ -3282,7 +3282,6 @@ version = "0.0.0"
 dependencies = [
  "ffi",
  "ir_core",
- "itertools 0.10.3",
 ]
 
 [[package]]

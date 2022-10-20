@@ -1,7 +1,8 @@
 // Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
+use std::sync::Arc;
+
 use ffi::Str;
-pub use hhbc::AdataId;
 pub use hhbc::CollectionType;
 pub use hhbc::ConstName;
 pub use hhbc::FloatBits;
@@ -13,21 +14,19 @@ use crate::ValueId;
 /// A constant value.
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Constant<'a> {
+    Array(Arc<TypedValue<'a>>),
     Bool(bool),
-    Dict(AdataId<'a>),
     Dir,
     Double(FloatBits),
     File,
     FuncCred,
     Int(i64),
-    Keyset(AdataId<'a>),
     Method,
     Named(ConstName<'a>),
     NewCol(CollectionType),
     Null,
     String(Str<'a>),
     Uninit,
-    Vec(AdataId<'a>),
 }
 
 impl HasOperands for Constant<'_> {

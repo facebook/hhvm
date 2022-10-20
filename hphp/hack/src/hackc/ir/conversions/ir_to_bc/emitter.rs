@@ -19,6 +19,7 @@ use ir::instr::FCallArgsFlags;
 use ir::instr::HasLoc;
 use ir::instr::HasLocals;
 use ir::instr::IrToBc;
+use ir::newtype::ConstantIdMap;
 use ir::print::FmtRawVid;
 use ir::print::FmtSep;
 use ir::BlockId;
@@ -27,6 +28,7 @@ use ir::LocalId;
 use itertools::Itertools;
 use log::trace;
 
+use crate::adata::AdataCache;
 use crate::ex_frame::BlockIdOrExFrame;
 use crate::ex_frame::ExFrame;
 use crate::strings::StringCache;
@@ -36,8 +38,31 @@ pub(crate) fn emit_func<'a>(
     func: &ir::Func<'a>,
     labeler: &mut Labeler,
     strings: &StringCache<'a, '_>,
+    adata_cache: &mut AdataCache<'a>,
 ) -> (InstrSeq<'a>, Vec<Str<'a>>) {
-    let mut ctx = InstrEmitter::new(alloc, func, labeler, strings);
+    let adata_id_map = func
+        .constants
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, constant)| {
+            let cid = ir::ConstantId::from_usize(idx);
+            match constant {
+                ir::Constant::Array(tv) => {
+                    let kind = match **tv {
+                        hhbc::TypedValue::Dict(_) => AdataKind::Dict,
+                        hhbc::TypedValue::Keyset(_) => AdataKind::Keyset,
+                        hhbc::TypedValue::Vec(_) => AdataKind::Vec,
+                        _ => unreachable!(),
+                    };
+                    let id = adata_cache.intern(tv);
+                    Some((cid, (id, kind)))
+                }
+                _ => None,
+            }
+        })
+        .collect();
+
+    let mut ctx = InstrEmitter::new(alloc, func, labeler, strings, &adata_id_map);
 
     // Collect the Blocks, grouping them into TryCatch sections.
     let root = crate::ex_frame::collect_tc_sections(func);
@@ -56,6 +81,19 @@ pub(crate) fn emit_func<'a>(
         .collect();
 
     (InstrSeq::List(ctx.instrs), decl_vars)
+}
+
+/// Use to look up a ConstantId and get the AdataId and AdataKind for that
+/// ConstantId.
+type AdataIdMap<'a> = ConstantIdMap<(hhbc::AdataId<'a>, AdataKind)>;
+
+/// Used for adata_id_map - the kind of the underlying array. Storing this in
+/// AdataIdMap means we don't have to pass around a &Unit just to look up what
+/// kind of array it represents.
+enum AdataKind {
+    Dict,
+    Keyset,
+    Vec,
 }
 
 /// Helper struct for converting ir::BlockId to hhbc::Label.
@@ -152,6 +190,7 @@ pub(crate) struct InstrEmitter<'a, 'b> {
     loc_id: ir::LocId,
     strings: &'b StringCache<'a, 'b>,
     locals: HashMap<LocalId, hhbc::Local>,
+    adata_id_map: &'b AdataIdMap<'a>,
 }
 
 fn convert_indexes_to_bools<'a>(
@@ -177,6 +216,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         func: &'b ir::Func<'a>,
         labeler: &'b mut Labeler,
         strings: &'b StringCache<'a, '_>,
+        adata_id_map: &'b AdataIdMap<'a>,
     ) -> Self {
         let locals = Self::prealloc_locals(func);
 
@@ -189,6 +229,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
             loc_id: ir::LocId::NONE,
             locals,
             strings,
+            adata_id_map,
         }
     }
 
@@ -667,25 +708,33 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
         }
     }
 
-    fn emit_constant(&mut self, lc: &ir::Constant<'a>) {
+    fn emit_constant(&mut self, cid: ir::ConstantId) {
         use ir::Constant;
-        let i = match lc {
-            Constant::Bool(false) => Opcode::False,
-            Constant::Bool(true) => Opcode::True,
-            Constant::Dir => Opcode::Dir,
-            Constant::Dict(name) => Opcode::Dict(*name),
-            Constant::Double(v) => Opcode::Double(*v),
-            Constant::File => Opcode::File,
-            Constant::FuncCred => Opcode::FuncCred,
-            Constant::Int(v) => Opcode::Int(*v),
-            Constant::Keyset(name) => Opcode::Keyset(*name),
-            Constant::Method => Opcode::Method,
-            Constant::Named(name) => Opcode::CnsE(*name),
-            Constant::NewCol(k) => Opcode::NewCol(*k),
-            Constant::Null => Opcode::Null,
-            Constant::String(v) => Opcode::String(*v),
-            Constant::Uninit => Opcode::NullUninit,
-            Constant::Vec(name) => Opcode::Vec(*name),
+
+        let i = if let Some((id, kind)) = self.adata_id_map.get(&cid) {
+            match kind {
+                AdataKind::Dict => Opcode::Dict(*id),
+                AdataKind::Keyset => Opcode::Keyset(*id),
+                AdataKind::Vec => Opcode::Vec(*id),
+            }
+        } else {
+            let lc = self.func.constant(cid);
+            match lc {
+                Constant::Array(_) => unreachable!(),
+                Constant::Bool(false) => Opcode::False,
+                Constant::Bool(true) => Opcode::True,
+                Constant::Dir => Opcode::Dir,
+                Constant::Double(v) => Opcode::Double(*v),
+                Constant::File => Opcode::File,
+                Constant::FuncCred => Opcode::FuncCred,
+                Constant::Int(v) => Opcode::Int(*v),
+                Constant::Method => Opcode::Method,
+                Constant::Named(name) => Opcode::CnsE(*name),
+                Constant::NewCol(k) => Opcode::NewCol(*k),
+                Constant::Null => Opcode::Null,
+                Constant::String(v) => Opcode::String(*v),
+                Constant::Uninit => Opcode::NullUninit,
+            }
         };
         self.push_opcode(i);
     }
@@ -914,7 +963,7 @@ impl<'a, 'b> InstrEmitter<'a, 'b> {
                 self.push_opcode(Opcode::PushL(local));
             }
             IrToBc::PushConstant(vid) => match vid.full() {
-                FullInstrId::Constant(cid) => self.emit_constant(self.func.constant(cid)),
+                FullInstrId::Constant(cid) => self.emit_constant(cid),
                 FullInstrId::Instr(_) | FullInstrId::None => panic!("Malformed PushConstant!"),
             },
             IrToBc::PushUninit => self.push_opcode(Opcode::NullUninit),

@@ -418,17 +418,15 @@ impl<'a> FuncState<'a> {
                         let s = util::escaped_string(s);
                         hack::expr_builtin(Builtin::String, [Expr::string(s)])
                     }
-                    Constant::Dict(..) => todo!(),
+                    Constant::Array(..) => todo!(),
                     Constant::Dir => todo!(),
                     Constant::Double(..) => todo!(),
                     Constant::File => todo!(),
                     Constant::FuncCred => todo!(),
-                    Constant::Keyset(..) => todo!(),
                     Constant::Method => todo!(),
                     Constant::Named(..) => todo!(),
                     Constant::NewCol(..) => todo!(),
                     Constant::Uninit => todo!(),
-                    Constant::Vec(..) => todo!(),
                 }
             }
             ir::FullInstrId::None => unreachable!(),
@@ -489,15 +487,13 @@ fn write_constants(remap: &mut ir::ValueIdMap<ValueId>, builder: &mut ir::FuncBu
             | Constant::String(..)
             | Constant::Uninit => None,
 
-            Constant::Dict(..) => todo!(),
+            Constant::Array(..) => todo!(),
             Constant::Dir => todo!(),
             Constant::File => todo!(),
             Constant::FuncCred => todo!(),
-            Constant::Keyset(..) => todo!(),
             Constant::Method => todo!(),
             Constant::Named(..) => todo!(),
             Constant::NewCol(..) => todo!(),
-            Constant::Vec(..) => todo!(),
         };
         if let Some(vid) = vid {
             remap.insert(src, vid);

@@ -20,6 +20,7 @@ use newtype::IdVec;
 
 use crate::context::Context;
 use crate::convert;
+use crate::convert::UnitState;
 use crate::types;
 
 /// Convert a hhbc::Function to an ir::Function
@@ -27,11 +28,12 @@ pub(crate) fn convert_function<'a>(
     unit: &mut ir::Unit<'a>,
     filename: ir::Filename,
     src: &Function<'a>,
+    unit_state: &UnitState<'a>,
 ) {
     trace!("--- convert_function {}", src.name.unsafe_as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
-    let func = convert_body(unit, filename, &src.body, span);
+    let func = convert_body(unit, filename, &src.body, span, unit_state);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -59,11 +61,12 @@ pub(crate) fn convert_method<'a>(
     filename: ir::Filename,
     clsidx: usize,
     src: &Method<'a>,
+    unit_state: &UnitState<'a>,
 ) {
     trace!("--- convert_method {}", src.name.unsafe_as_str());
 
     let span = ir::SrcLoc::from_span(filename, &src.span);
-    let func = convert_body(unit, filename, &src.body, span);
+    let func = convert_body(unit, filename, &src.body, span, unit_state);
     ir::verify::verify_func(&func, &Default::default(), &unit.strings).unwrap();
 
     let attributes = src
@@ -95,6 +98,7 @@ fn convert_body<'a>(
     filename: ir::Filename,
     body: &Body<'a>,
     src_loc: ir::SrcLoc,
+    unit_state: &UnitState<'a>,
 ) -> ir::Func<'a> {
     let Body {
         ref body_instrs,
@@ -151,7 +155,7 @@ fn convert_body<'a>(
         tparams,
     };
 
-    let mut ctx = Context::new(unit, filename, func, body_instrs);
+    let mut ctx = Context::new(unit, filename, func, body_instrs, unit_state);
 
     for param in params.as_ref() {
         let ir_param = convert_param(&mut ctx, param);

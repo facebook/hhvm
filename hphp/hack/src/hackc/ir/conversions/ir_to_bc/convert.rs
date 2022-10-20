@@ -7,6 +7,7 @@ use ffi::Maybe;
 use ffi::Slice;
 use hhbc::Fatal;
 
+use crate::adata::AdataCache;
 use crate::strings::StringCache;
 
 /// Convert an ir::Unit to a hhbc::Unit
@@ -19,14 +20,6 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
     let strings = StringCache::new(alloc, &ir_unit.strings);
 
     let mut unit = UnitBuilder::new_in(alloc);
-
-    unit.adata = Slice::fill_iter(
-        alloc,
-        ir_unit
-            .adata
-            .into_iter()
-            .map(|(name, value)| convert_adata(alloc, name, value)),
-    );
 
     for cls in ir_unit.classes.into_iter() {
         crate::class::convert_class(alloc, &mut unit, cls, &strings);
@@ -82,7 +75,7 @@ pub fn ir_to_bc<'a>(alloc: &'a bumpalo::Bump, ir_unit: ir::Unit<'a>) -> hhbc::Un
 }
 
 pub(crate) struct UnitBuilder<'a> {
-    pub adata: Slice<'a, hhbc::Adata<'a>>,
+    pub adata_cache: AdataCache<'a>,
     pub functions: bumpalo::collections::Vec<'a, hhbc::Function<'a>>,
     pub classes: bumpalo::collections::Vec<'a, hhbc::Class<'a>>,
 }
@@ -90,7 +83,7 @@ pub(crate) struct UnitBuilder<'a> {
 impl<'a> UnitBuilder<'a> {
     fn new_in(alloc: &'a bumpalo::Bump) -> Self {
         Self {
-            adata: Slice::empty(),
+            adata_cache: AdataCache::new(alloc),
             classes: bumpalo::collections::Vec::new_in(alloc),
             functions: bumpalo::collections::Vec::new_in(alloc),
         }
@@ -98,7 +91,7 @@ impl<'a> UnitBuilder<'a> {
 
     fn finish(self) -> hhbc::Unit<'a> {
         hhbc::Unit {
-            adata: self.adata,
+            adata: self.adata_cache.finish(),
             functions: self.functions.into_bump_slice().into(),
             classes: self.classes.into_bump_slice().into(),
             typedefs: Default::default(),
@@ -110,14 +103,6 @@ impl<'a> UnitBuilder<'a> {
             fatal: Default::default(),
         }
     }
-}
-
-fn convert_adata<'a>(
-    _alloc: &'a bumpalo::Bump,
-    name: hhbc::AdataId<'a>,
-    value: ir::TypedValue<'a>,
-) -> hhbc::Adata<'a> {
-    hhbc::Adata { id: name, value }
 }
 
 fn convert_symbol_refs<'a>(

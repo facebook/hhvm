@@ -19,6 +19,10 @@ macro_rules! impl_id {
                 Self(s)
             }
 
+            pub fn empty() -> Self {
+                Self(ffi::Slice::new(b""))
+            }
+
             pub fn is_empty(&self) -> bool {
                 self.0.is_empty()
             }

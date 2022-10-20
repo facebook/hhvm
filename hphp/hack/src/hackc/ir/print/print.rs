@@ -41,7 +41,6 @@ use ir_core::instr::Terminator;
 use ir_core::instr::Tmp;
 use ir_core::string_intern::StringInterner;
 use ir_core::*;
-use itertools::Itertools;
 
 use crate::formatters::*;
 use crate::util::FmtSep;
@@ -1861,15 +1860,6 @@ fn print_type_constant(w: &mut dyn Write, tc: &TypeConstant<'_>) -> Result {
 pub fn print_unit(w: &mut dyn Write, unit: &Unit<'_>, verbose: bool) -> Result {
     for attr in &unit.file_attributes {
         writeln!(w, ".attr {}", FmtAttribute(attr))?;
-    }
-
-    for (k, v) in unit.adata.iter().sorted_by(|(k0, _), (k1, _)| k0.cmp(k1)) {
-        writeln!(
-            w,
-            ".adata {} = {};",
-            FmtQuotedStr(&k.as_ffi_str()),
-            FmtTypedValue(v)
-        )?;
     }
 
     for v in &unit.symbol_refs.constants {

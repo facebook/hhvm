@@ -4,6 +4,9 @@
 // LICENSE file in the "hack" directory of this source tree.
 
 use anyhow::Result;
+use hash::HashMap;
+use hhbc::Adata;
+use hhbc::AdataId;
 use hhbc::Attribute;
 use hhbc::Body;
 use hhbc::Class;
@@ -14,6 +17,7 @@ use hhbc::Method;
 use hhbc::Module;
 use hhbc::Param;
 use hhbc::SymbolRefs;
+use hhbc::TypedValue;
 use hhbc::Typedef;
 use hhbc::Unit;
 
@@ -66,7 +70,16 @@ pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Re
 
     let path = CodePath::name("Unit");
 
-    sem_diff_map_t(&path.qualified("adata"), a_adata, b_adata, sem_diff_eq)?;
+    // Ignore adata for now - when we use it we'll compare that the values are
+    // the same at that time (because the key names may be different).
+    let a_adata = a_adata
+        .iter()
+        .map(|Adata { id, value }| (*id, value))
+        .collect();
+    let b_adata = b_adata
+        .iter()
+        .map(|Adata { id, value }| (*id, value))
+        .collect();
 
     sem_diff_map_t(
         &path.qualified("typedefs"),
@@ -115,14 +128,14 @@ pub fn sem_diff_unit<'arena>(a_unit: &Unit<'arena>, b_unit: &Unit<'arena>) -> Re
         &path.qualified("functions"),
         a_functions.as_arena_ref(),
         b_functions.as_arena_ref(),
-        sem_diff_function,
+        |path, a, b| sem_diff_function(path, a, &a_adata, b, &b_adata),
     )?;
 
     sem_diff_map_t(
         &path.qualified("classes"),
         a_classes.as_arena_ref(),
         b_classes.as_arena_ref(),
-        sem_diff_class,
+        |path, a, b| sem_diff_class(path, a, &a_adata, b, &b_adata),
     )?;
 
     Ok(())
@@ -155,10 +168,12 @@ fn sem_diff_attributes(
     sem_diff_slice(path, a, b, sem_diff_attribute)
 }
 
-fn sem_diff_body<'arena>(
+fn sem_diff_body<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Body<'arena>,
+    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     b: &'arena Body<'arena>,
+    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let Body {
         body_instrs: _,
@@ -229,7 +244,7 @@ fn sem_diff_body<'arena>(
     // them to be different.
 
     // This compares the instrs themselves.
-    crate::body::compare_bodies(path, a, b)
+    crate::body::compare_bodies(path, a, a_adata, b, b_adata)
 }
 
 fn sem_diff_param<'arena>(
@@ -276,10 +291,12 @@ fn sem_diff_param<'arena>(
     Ok(())
 }
 
-fn sem_diff_class<'arena>(
+fn sem_diff_class<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Class<'arena>,
+    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     b: &'arena Class<'arena>,
+    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let Class {
         attributes: a_attributes,
@@ -381,7 +398,7 @@ fn sem_diff_class<'arena>(
         &path.qualified("methods"),
         a_methods,
         b_methods,
-        sem_diff_method,
+        |path, a, b| sem_diff_method(path, a, a_adata, b, b_adata),
     )?;
 
     Ok(())
@@ -416,10 +433,12 @@ fn sem_diff_fatal(path: &CodePath<'_>, a: &Fatal<'_>, b: &Fatal<'_>) -> Result<(
     Ok(())
 }
 
-fn sem_diff_function<'arena>(
+fn sem_diff_function<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Function<'arena>,
+    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     b: &'arena Function<'arena>,
+    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let Function {
         attributes: a_attributes,
@@ -442,7 +461,7 @@ fn sem_diff_function<'arena>(
 
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
-    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
+    sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;
@@ -451,10 +470,12 @@ fn sem_diff_function<'arena>(
     Ok(())
 }
 
-fn sem_diff_method<'arena>(
+fn sem_diff_method<'arena, 'a>(
     path: &CodePath<'_>,
     a: &'arena Method<'arena>,
+    a_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
     b: &'arena Method<'arena>,
+    b_adata: &'a HashMap<AdataId<'arena>, &'a TypedValue<'arena>>,
 ) -> Result<()> {
     let Method {
         attributes: a_attributes,
@@ -479,7 +500,7 @@ fn sem_diff_method<'arena>(
     sem_diff_attributes(&path.qualified("attributes"), a_attributes, b_attributes)?;
     sem_diff_eq(&path.qualified("visibility"), a_visibility, b_visibility)?;
     sem_diff_eq(&path.qualified("name"), a_name, b_name)?;
-    sem_diff_body(&path.qualified("body"), a_body, b_body)?;
+    sem_diff_body(&path.qualified("body"), a_body, a_adata, b_body, b_adata)?;
     sem_diff_eq(&path.qualified("span"), a_span, b_span)?;
     sem_diff_eq(&path.qualified("coeffects"), a_coeffects, b_coeffects)?;
     sem_diff_eq(&path.qualified("flags"), a_flags, b_flags)?;

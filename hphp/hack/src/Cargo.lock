@@ -3195,6 +3195,7 @@ dependencies = [
  "bstr 1.0.1",
  "bumpalo",
  "eq_modulo_pos",
+ "hash",
  "hh24_types",
  "im",
  "indexmap",

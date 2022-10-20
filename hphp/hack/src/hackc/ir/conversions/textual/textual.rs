@@ -202,6 +202,7 @@ impl Expr {
         Expr::Const(Const::HackString(s.into()))
     }
 
+    #[allow(dead_code)]
     pub(crate) fn index(base: impl Into<Expr>, offset: impl Into<Expr>) -> Expr {
         let base = base.into();
         let offset = offset.into();

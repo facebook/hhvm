@@ -14,5 +14,5 @@ proc-macro2 = "1.0.46"
 quote = "1.0"
 signed_source = { path = "../utils/rust/signed_source" }
 structopt = "0.3.23"
-syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
 synstructure = "0.12"

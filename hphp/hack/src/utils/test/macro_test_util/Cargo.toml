@@ -9,4 +9,4 @@ path = "../macro_test_util.rs"
 
 [dependencies]
 proc-macro2 = "1.0.46"
-syn = { version = "1.0.96", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+syn = { version = "1.0.102", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }

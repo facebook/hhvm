@@ -31,8 +31,8 @@ jobs:
       fail-fast: false
       matrix:
         package:
-        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm' || 'hhvm_sccache' }}
-        - ${{ github.event_name == 'push' && github.ref_type == 'tag' && 'hhvm_clang' || 'hhvm_sccache_clang' }}
+        - hhvm
+        - hhvm_clang
         os:
         - ${{ github.event_name == 'pull_request' && '16-core' || 'ubuntu-latest' }}
     runs-on: ${{matrix.os}}
@@ -47,6 +47,13 @@ jobs:
           extra-trusted-substituters = s3://hhvm-nix-cache?region=us-west-2&endpoint=hhvm-nix-cache.s3-accelerate.amazonaws.com
           extra-trusted-public-keys = hhvm-nix-cache-1:MvKxscw16fAq6835oG8sbRgTGITb+1xGfYNhs+ee4yo=
           sandbox = false
+    - name: Build sccache
+      run: |
+        set -ex
+        SCCACHE_INSTALL_PATH="$(nix eval --raw "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086")"
+        echo "CMAKE_C_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
+        echo "CMAKE_CXX_COMPILER_LAUNCHER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
+        echo "RUSTC_WRAPPER=$SCCACHE_INSTALL_PATH/bin/sccache" >> "$GITHUB_ENV"
     - name: Assume the AWS role
       continue-on-error: true
       id: configure-aws-credentials
@@ -54,17 +61,15 @@ jobs:
       with:
         role-to-assume: arn:aws:iam::223121549624:role/hhvm-github-actions
         aws-region: us-west-2
-    - name: Start sccache server
-      if: matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang'
-      run: |
-        # In pull requests triggered jobs, set SCCACHE_S3_NO_CREDENTIALS=1 to use read-only compilation cache, where the github token does not permit to assume the AWS role
-        ${{ steps.configure-aws-credentials.outcome != 'success' && 'SCCACHE_S3_NO_CREDENTIALS="1"' || '' }} \
-        sudo "$(command -v nix)" shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --start-server
+    - if: steps.configure-aws-credentials.outcome != 'success'
+      run: echo "SCCACHE_S3_NO_CREDENTIALS=1" >> "$GITHUB_ENV"
+    - name: Build and install HHVM
+      # We need the --impure flag to access S3 for fetching compilation cache
+      run: nix profile install --impure --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
       env:
         SCCACHE_BUCKET: hhvm-sccache
         SCCACHE_ENDPOINT: https://hhvm-sccache.s3-accelerate.amazonaws.com
-        SCCACHE_REGION: ${{env.AWS_REGION}}
-    - run: nix profile install --print-build-logs "git+file://$(pwd)?submodules=1&shallow=1#${{matrix.package}}"
+        SCCACHE_REGION: us-west-2
     - if: always() && (matrix.package == 'hhvm_sccache' || matrix.package == 'hhvm_sccache_clang')
       run: nix shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --stop-server
     - run: hhvm --version

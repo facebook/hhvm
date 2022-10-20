@@ -24,6 +24,7 @@ pub enum Def {
     Alias {
         doc: Vec<String>,
         attrs: Vec<String>,
+        mutual_rec: bool,
         tparams: Vec<String>,
         name: TypeName,
         ty: Type,
@@ -31,6 +32,7 @@ pub enum Def {
     Record {
         doc: Vec<String>,
         attrs: Vec<String>,
+        mutual_rec: bool,
         tparams: Vec<String>,
         name: TypeName,
         fields: Vec<Field>,
@@ -38,6 +40,7 @@ pub enum Def {
     Variant {
         doc: Vec<String>,
         attrs: Vec<String>,
+        mutual_rec: bool,
         tparams: Vec<String>,
         name: TypeName,
         variants: Vec<Variant>,

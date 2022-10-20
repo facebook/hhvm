@@ -12,6 +12,7 @@ use syn::NestedMeta::Meta;
 static DOC: &str = "doc";
 static RUST_TO_OCAML: &str = "rust_to_ocaml";
 static PREFIX: &str = "prefix";
+static AND: &str = "and";
 static ATTR: &str = "attr";
 static NAME: &str = "name";
 static INLINE_TUPLE: &str = "inline_tuple";
@@ -21,6 +22,7 @@ pub struct Attrs {
     pub doc: Vec<String>,
     pub prefix: Option<String>,
     pub attrs: Vec<String>,
+    pub mutual_rec: bool,
     pub name: Option<String>,
     pub inline_tuple: bool,
 }
@@ -47,6 +49,7 @@ impl Attrs {
         let doc = get_doc_comment(attrs);
         let mut prefix = None;
         let mut ocaml_attrs = vec![];
+        let mut mutual_rec = false;
         let mut name = None;
         let mut inline_tuple = false;
 
@@ -69,6 +72,12 @@ impl Attrs {
                     if let Ok(s) = get_lit_str(ATTR, &m.lit) {
                         ocaml_attrs.push(s.value());
                     }
+                }
+                // Parse `#[rust_to_ocaml(and)]`
+                Meta(Path(word)) if word.is_ident(AND) => {
+                    // TODO: emit an error instead
+                    assert_eq!(kind, AttrKind::Container);
+                    mutual_rec = true;
                 }
                 // Parse `#[rust_to_ocaml(name = "foo")]`
                 Meta(NameValue(m)) if m.path.is_ident(NAME) => {
@@ -105,6 +114,7 @@ impl Attrs {
             doc,
             prefix,
             attrs: ocaml_attrs,
+            mutual_rec,
             name,
             inline_tuple,
         }

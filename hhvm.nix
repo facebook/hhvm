@@ -190,6 +190,8 @@ stdenv.mkDerivation rec {
       perl
       re2
       re2c
+      rustNightly.cargo
+      rustNightly.rust
       sqlite
       (if isDefaultStdlib then tbb else tbb.override { inherit stdenv; })
       tzdata

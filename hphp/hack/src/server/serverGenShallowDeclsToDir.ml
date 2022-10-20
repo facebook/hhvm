@@ -43,7 +43,7 @@ let get_name_and_decl_hashes_from_decls decls : (string * Int64.t) list =
       | Shallow_decl_defs.Class _ -> Some (name, decl_hash)
       | _ -> None)
 
-let get_hh_config_version ~(repo : Path.t) :
+let get_hhconfig_version ~(repo : Path.t) :
     (string, string) result Future.Promise.t =
   let hhconfig_path =
     Path.to_string
@@ -66,7 +66,7 @@ let get_hh_config_version ~(repo : Path.t) :
       let version = "v" ^ String_utils.lstrip version "^" in
       return_ok version
   end
-  >>= fun hh_config_version -> return_ok hh_config_version
+  >>= fun hhconfig_version -> return_ok hhconfig_version
 
 let go
     (env : ServerEnv.env)
@@ -77,8 +77,8 @@ let go
   let shallow_decl_file_name = "shallow_decls.bin" in
   let local_file = dir ^ "/" ^ shallow_decl_file_name in
   let repo = Wwwroot.get None in
-  let hh_config_version =
-    match Future.get @@ get_hh_config_version ~repo with
+  let hhconfig_version =
+    match Future.get @@ get_hhconfig_version ~repo with
     | Ok (Ok result) -> result
     | Ok (Error e) -> failwith (Printf.sprintf "%s" e)
     | Error e -> failwith (Printf.sprintf "%s" (Future.error_to_string e))
@@ -86,7 +86,7 @@ let go
   (* ensure manifold path exists when we run the Remote_old_decls_ffi *)
   let cmd =
     "manifold mkdirs hack_decl_prefetching/tree/prefetch/"
-    ^ hh_config_version
+    ^ hhconfig_version
     ^ "/shallow_decls"
   in
   ignore (Sys.command cmd);
@@ -178,7 +178,7 @@ let go
   match
     Remote_old_decls_ffi.put_decls
       ~silent:false
-      hh_config_version
+      hhconfig_version
       manifold_results
   with
   | Error msg ->

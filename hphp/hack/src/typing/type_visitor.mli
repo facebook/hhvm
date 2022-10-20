@@ -80,6 +80,14 @@ class type ['a] decl_type_visitor_type =
       Typing_defs.decl_ty ->
       Typing_defs.decl_class_refinement ->
       'a
+
+    method on_tnewtype :
+      'a ->
+      Typing_reason.decl_t ->
+      string ->
+      Typing_defs.decl_ty list ->
+      Typing_defs.decl_ty ->
+      'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type

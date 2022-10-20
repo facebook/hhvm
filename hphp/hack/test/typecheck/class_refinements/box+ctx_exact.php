@@ -12,8 +12,8 @@ interface BoxWithCtx extends Box {
     public function get()[this::C]: this::T;
 }
 
-type PureBox = BoxWithCtx with { ctx C = [] };
-type ZonedBox = BoxWithCtx with { ctx C = [zoned] };
+type PureBox = BoxWithCtx with { ctx C = [] };  // ERROR
+
 
 function get_pure_good(BoxWithCtx with { ctx C = [] } $b)[]: void {
   $b->get();  // OK

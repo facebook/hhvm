@@ -9,17 +9,31 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::py3::simple::AnEnum, 5> TEnumDataStorage<::py3::simple::AnEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::py3::simple::AnEnum, 5> TEnumDataStorage<::py3::simple::AnEnum>::values = {{
   type::None,
   type::ONE,
   type::TWO,
   type::THREE,
   type::FOUR,
 }};
-const std::array<folly::StringPiece, 5> TEnumDataStorage<::py3::simple::AnEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 5> TEnumDataStorage<::py3::simple::AnEnum>::names = {{
   "None",
   "ONE",
   "TWO",
@@ -27,70 +41,70 @@ const std::array<folly::StringPiece, 5> TEnumDataStorage<::py3::simple::AnEnum>:
   "FOUR",
 }};
 
-const std::array<::py3::simple::AnEnumRenamed, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::values = {{
+THRIFT_DATA_SECTION const std::array<::py3::simple::AnEnumRenamed, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::values = {{
   type::name,
   type::value,
   type::normal,
 }};
-const std::array<folly::StringPiece, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 3> TEnumDataStorage<::py3::simple::AnEnumRenamed>::names = {{
   "name",
   "value",
   "normal",
 }};
 
-const std::array<::py3::simple::Flags, 4> TEnumDataStorage<::py3::simple::Flags>::values = {{
+THRIFT_DATA_SECTION const std::array<::py3::simple::Flags, 4> TEnumDataStorage<::py3::simple::Flags>::values = {{
   type::flag_A,
   type::flag_B,
   type::flag_C,
   type::flag_D,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::py3::simple::Flags>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::py3::simple::Flags>::names = {{
   "flag_A",
   "flag_B",
   "flag_C",
   "flag_D",
 }};
 
-const std::array<::py3::simple::BinaryUnion::Type, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::py3::simple::BinaryUnion::Type, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::values = {{
   type::iobuf_val,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::py3::simple::BinaryUnion::Type>::names = {{
   "iobuf_val",
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_names = {{
   "err_code",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::SimpleException>::fields_types = {{
   TType::T_I16,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::SimpleException>::storage_names = {{
   "__fbthrift_field_err_code",
 }};
-const std::array<int, 1> TStructDataStorage<::py3::simple::SimpleException>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::py3::simple::SimpleException>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_names = {{
   "optional_blob",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::storage_names = {{
   "__fbthrift_field_optional_blob",
 }};
-const std::array<int, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::py3::simple::OptionalRefStruct>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_names = {{
   "is_on",
   "tiny_int",
   "small_int",
@@ -100,7 +114,7 @@ const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::Simple
   "smaller_real",
   "hidden_field",
 }};
-const std::array<int16_t, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -110,7 +124,7 @@ const std::array<int16_t, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fi
   7,
   8,
 }};
-const std::array<protocol::TType, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 8> TStructDataStorage<::py3::simple::SimpleStruct>::fields_types = {{
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -120,7 +134,7 @@ const std::array<protocol::TType, 8> TStructDataStorage<::py3::simple::SimpleStr
   TType::T_FLOAT,
   TType::T_I16,
 }};
-const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::SimpleStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::SimpleStruct>::storage_names = {{
   "__fbthrift_field_is_on",
   "__fbthrift_field_tiny_int",
   "__fbthrift_field_small_int",
@@ -130,7 +144,7 @@ const std::array<folly::StringPiece, 8> TStructDataStorage<::py3::simple::Simple
   "__fbthrift_field_smaller_real",
   "__fbthrift_field_hidden_field",
 }};
-const std::array<int, 8> TStructDataStorage<::py3::simple::SimpleStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 8> TStructDataStorage<::py3::simple::SimpleStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -141,7 +155,7 @@ const std::array<int, 8> TStructDataStorage<::py3::simple::SimpleStruct>::isset_
   7,
 }};
 
-const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_names = {{
   "structOne",
   "structTwo",
   "an_integer",
@@ -152,7 +166,7 @@ const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::Comple
   "cdef",
   "bytes_with_cpp_type",
 }};
-const std::array<int16_t, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -163,7 +177,7 @@ const std::array<int16_t, 9> TStructDataStorage<::py3::simple::ComplexStruct>::f
   8,
   9,
 }};
-const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::ComplexStruct>::fields_types = {{
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_I32,
@@ -174,7 +188,7 @@ const std::array<protocol::TType, 9> TStructDataStorage<::py3::simple::ComplexSt
   TType::T_STRING,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::ComplexStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::ComplexStruct>::storage_names = {{
   "__fbthrift_field_structOne",
   "__fbthrift_field_structTwo",
   "__fbthrift_field_an_integer",
@@ -185,7 +199,7 @@ const std::array<folly::StringPiece, 9> TStructDataStorage<::py3::simple::Comple
   "__fbthrift_field_cdef",
   "__fbthrift_field_bytes_with_cpp_type",
 }};
-const std::array<int, 9> TStructDataStorage<::py3::simple::ComplexStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 9> TStructDataStorage<::py3::simple::ComplexStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -197,35 +211,35 @@ const std::array<int, 9> TStructDataStorage<::py3::simple::ComplexStruct>::isset
   8,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_names = {{
   "iobuf_val",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnion>::fields_types = {{
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnion>::storage_names = {{
   "iobuf_val",
 }};
-const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnion>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_names = {{
   "u",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::fields_types = {{
   TType::T_STRUCT,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::storage_names = {{
   "__fbthrift_field_u",
 }};
-const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::py3::simple::BinaryUnionStruct>::isset_indexes = {{
   0,
 }};
 

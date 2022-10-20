@@ -721,6 +721,201 @@ class TestSubscribe(WatchmanTestCase.WatchmanTestCase):
                 break
         self.assertRegex(warn, r"Recrawled this watch")
 
+    def test_unique_name_error(self) -> None:
+        root = self.mkdtemp()
+        with open(os.path.join(root, ".watchmanconfig"), "w") as f:
+            f.write(json.dumps({"enforce_unique_subscription_names": True}))
+        self.touchRelative(root, "lemon")
+        self.watchmanCommand("watch", root)
+        self.assertFileList(root, files=["lemon", ".watchmanconfig"])
+
+        # Create a subscription
+        self.watchmanCommand("subscribe", root, "my_sub", {"fields": ["name"]})
+        # Drain the initial messages
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon", ".watchmanconfig"])
+
+        # Try to create another subscription with the same name
+        with self.assertRaises(pywatchman.WatchmanError) as ctx:
+            self.watchmanCommand(
+                "subscribe",
+                root,
+                "my_sub",
+                {"fields": ["name"], "expression": ["false"]},
+            )
+        self.assertIn("subscription name 'my_sub' is not unique", str(ctx.exception))
+
+        # Ensure the initial subscription is in force
+        self.touchRelative(root, "banana")
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+    def test_resubscribe_same_name_no_error(self) -> None:
+        root = self.mkdtemp()
+        with open(os.path.join(root, ".watchmanconfig"), "w") as f:
+            f.write(json.dumps({"enforce_unique_subscription_names": True}))
+        self.touchRelative(root, "lemon")
+        self.touchRelative(root, "banana")
+        self.watchmanCommand("watch", root)
+        self.assertFileList(root, files=["lemon", "banana", ".watchmanconfig"])
+
+        # Create a subscription
+        self.watchmanCommand(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "lemon"]},
+        )
+        # Drain the initial messages
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon"])
+        # Unsubscribe
+        self.watchmanCommand("unsubscribe", root, "my_sub")
+
+        # Create a new subscription with the same name
+        self.watchmanCommand(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "banana"]},
+        )
+        # Ensure the later subscription is in force
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+    def test_resubscribe_same_name_no_warning(self) -> None:
+        root = self.mkdtemp()
+        with open(os.path.join(root, ".watchmanconfig"), "w") as f:
+            f.write(json.dumps({"enforce_unique_subscription_names": False}))
+        self.touchRelative(root, "lemon")
+        self.touchRelative(root, "banana")
+        self.watchmanCommand("watch", root)
+        self.assertFileList(root, files=["lemon", "banana", ".watchmanconfig"])
+
+        # Create a subscription
+        self.watchmanCommand(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "lemon"]},
+        )
+        # Drain the initial messages
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon"])
+        # Unsubscribe
+        self.watchmanCommand("unsubscribe", root, "my_sub")
+
+        # Create a new subscription with the same name
+        dat = self.watchmanCommand(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "banana"]},
+        )
+        # Make sure we don't get a spurious warning here
+        self.assertNotIn("warning", dat)
+
+        # Ensure the later subscription is in force
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+    def test_multi_client_same_name(self) -> None:
+        root = self.mkdtemp()
+        with open(os.path.join(root, ".watchmanconfig"), "w") as f:
+            f.write(json.dumps({"enforce_unique_subscription_names": True}))
+        self.touchRelative(root, "lemon")
+        self.touchRelative(root, "banana")
+        self.watchmanCommand("watch", root)
+        self.assertFileList(root, files=["lemon", "banana", ".watchmanconfig"])
+
+        client1 = self.getClient(no_cache=True)
+        client2 = self.getClient(no_cache=True)
+
+        # Create a subscription
+        client1.query(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "lemon"]},
+        )
+        dat = self.waitForSub("my_sub", root, remove=True, client=client1)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon"])
+
+        # Create a new subscription with the same name from a different client,
+        # with a different expression
+        client2.query(
+            "subscribe",
+            root,
+            "my_sub",
+            {"fields": ["name"], "expression": ["name", "banana"]},
+        )
+        dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+        # Trigger events on both and ensure they are routed correctly.
+        self.touchRelative(root, "lemon")
+        self.touchRelative(root, "banana")
+
+        dat = self.waitForSub("my_sub", root, remove=True, client=client1)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon"])
+
+        dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+        client1.query("unsubscribe", root, "my_sub")
+        client1.close()
+
+        # Ensure unsubscribing and closing one client hasn't affected the other
+        self.touchRelative(root, "lemon")
+        self.touchRelative(root, "banana")
+
+        dat = self.waitForSub("my_sub", root, remove=True, client=client2)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["banana"])
+
+        client2.close()
+
+    def test_unique_name_warning(self) -> None:
+        root = self.mkdtemp()
+        with open(os.path.join(root, ".watchmanconfig"), "w") as f:
+            f.write(json.dumps({"enforce_unique_subscription_names": False}))
+        self.touchRelative(root, "lemon")
+        self.watchmanCommand("watch", root)
+        self.assertFileList(root, files=["lemon", ".watchmanconfig"])
+
+        # Create a subscription
+        self.watchmanCommand("subscribe", root, "my_sub", {"fields": ["name"]})
+        # Drain the initial messages
+        dat = self.waitForSub("my_sub", root, remove=True)
+        self.assertEqual(len(dat), 1)
+        dat = dat[0]
+        self.assertFileListsEqual(dat["files"], ["lemon", ".watchmanconfig"])
+
+        # Create another subscription with the same name
+        dat = self.watchmanCommand("subscribe", root, "my_sub", {"fields": ["name"]})
+        self.assertEqual(dat["warning"], "subscription name 'my_sub' is not unique")
+
     def findSubscriptionContainingFile(self, subdata, filename):
         filename = norm_relative_path(filename)
         for dat in subdata:

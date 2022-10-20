@@ -4,8 +4,10 @@ namespace HH {
 
 namespace ImplicitContext {
 
-
-
+async function soft_run_with_async<Tout>(
+  (function ()[_]: Awaitable<Tout>) $f,
+  string $key,
+)[zoned, ctx $f]: Awaitable<Tout>;
 
 function soft_run_with<Tout>(
   (function ()[_]: Tout) $f,
@@ -16,6 +18,11 @@ function soft_run_with<Tout>(
 
 abstract class ImplicitContext {
   abstract const type T as nonnull;
+
+  protected static async function runWithAsync<Tout>(
+    this::T $context,
+    (function ()[_]: Awaitable<Tout>) $f,
+  )[zoned, ctx $f]: Awaitable<Tout>;
 
   protected static function runWith<Tout>(
     this::T $context,

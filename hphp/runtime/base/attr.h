@@ -111,9 +111,19 @@ enum Attr {
   // Traits have been flattened on this class.
   AttrNoExpandTrait        = (1u << 12), //    X  |          |         //
                                          //       |          |         //
-  // Only valid in WholeProgram mode.  Indicates on a class that the class is
-  // not extended, or on a method that no extending class defines the method.
+  // Indicates that the class is not extended, or on a method that no
+  // extending class defines the method. Implies
+  // AttrNoOverrideOverride for classes.
   AttrNoOverride           = (1u << 13), //    X  |          |    X    //
+                                         //       |          |         //
+  // Set on classes to indicate it is not extended by a "regular"
+  // class (but might be extended by non-regular classes). A regular
+  // class is a class which isn't a trait, enum, or abstract
+  // class. Such classes cannot be instantiated (but can be
+  // manipulated in static contexts).  This is a weaker condition than
+  // AttrNoOverride but is useful if you have a known instance of the
+  // class (and therefore must be regular).
+  AttrNoOverrideRegular    = (1u << 14), //    X  |          |         //
                                          //       |          |         //
   // Indicates that this property was declared as readonly             //
   AttrIsReadonly           = (1u << 14), //       |    X     |         //
@@ -151,7 +161,6 @@ enum Attr {
                                          //       |          |         //
   // Set on base classes that do not have any reified classes that extend it.
   AttrNoReifiedInit        = (1u << 23), //    X  |          |         //
-                                         //                            //
                                          //       |          |         //
   AttrIsMethCaller         = (1u << 24), //       |          |    X    //
                                          //       |          |         //

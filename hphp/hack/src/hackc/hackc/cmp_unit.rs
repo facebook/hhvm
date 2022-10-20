@@ -292,6 +292,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
         params: a_params,
         return_type_info: a_return_type_info,
         doc_comment: a_doc_comment,
+        stack_depth: a_stack_depth,
     } = a;
     let Body {
         body_instrs: b_body_instrs,
@@ -304,6 +305,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
         params: b_params,
         return_type_info: b_return_type_info,
         doc_comment: b_doc_comment,
+        stack_depth: b_stack_depth,
     } = b;
 
     cmp_eq(a_num_iters, b_num_iters).qualified("num_iters")?;
@@ -312,6 +314,7 @@ fn cmp_body(a: &Body<'_>, b: &Body<'_>) -> Result<()> {
     cmp_eq(a_is_memoize_wrapper_lsb, b_is_memoize_wrapper_lsb)
         .qualified("is_memoize_wrapper_lsb")?;
     cmp_eq(a_doc_comment, b_doc_comment).qualified("doc_comment")?;
+    cmp_eq(a_stack_depth, b_stack_depth).qualified("stack_depth")?;
     cmp_eq(a_return_type_info, b_return_type_info).qualified("return_type_info")?;
     cmp_eq(a_upper_bounds, b_upper_bounds).qualified("upper_bounds")?;
     cmp_eq(a_shadowed_tparams, b_shadowed_tparams).qualified("shadowed_tparams")?;

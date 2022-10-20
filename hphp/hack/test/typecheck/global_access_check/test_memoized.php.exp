@@ -20,3 +20,7 @@ File "test_memoized.php", line 64, characters 5-47:
 [Test::test_method_call]{Foo->foo_instance_method_memoized_lsb}(Bar) A global variable is definitely read. (Other[11004])
 File "test_memoized.php", line 65, characters 5-16:
 [Test::test_method_call]{Foo->foo_instance_method_memoized_lsb}(int) A global variable is possibly written via reference. (Other[11002])
+File "test_memoized.php", line 68, characters 5-48:
+[Test::test_method_call]{Foo->foo_instance_method_memoized_lsb}(?Bar) A global variable is definitely read. (Other[11004])
+File "test_memoized.php", line 70, characters 7-18:
+[Test::test_method_call]{Foo->foo_instance_method_memoized_lsb}(int) A global variable is possibly written via reference. (Other[11002])

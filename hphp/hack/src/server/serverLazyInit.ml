@@ -1160,13 +1160,6 @@ let full_init
     (genv : ServerEnv.genv)
     (env : ServerEnv.env)
     (cgroup_steps : CgroupProfiler.step_group) : ServerEnv.env * float =
-  let mode = genv.local_config.ServerLocalConfig.hulk_strategy in
-  let env =
-    if HulkStrategy.is_hulk_v2 mode then
-      ServerCheckUtils.start_delegate_if_needed env genv 3_000_000 env.errorl
-    else
-      env
-  in
   let init_telemetry =
     ServerEnv.Init_telemetry.make
       ServerEnv.Init_telemetry.Init_lazy_full
@@ -1214,7 +1207,7 @@ let full_init
   in
   let fnl = Relative_path.Map.keys defs_per_file in
   let env =
-    if is_check_mode && not (HulkStrategy.is_hulk_v2 mode) then
+    if is_check_mode then
       ServerCheckUtils.start_delegate_if_needed
         env
         genv

@@ -318,6 +318,7 @@ X(attributes)
 X(kind)
 X(flags)
 X(baseTypes)
+X(requireClass)
 X(requireExtends)
 X(requireImplements)
 X(methods)
@@ -379,13 +380,14 @@ Array makeVec(const std::vector<MethodDetails>& methods) {
 }
 
 Array makeShape(const TypeDetails& type) {
-  size_t retSize = 8;
+  size_t retSize = 9;
   DictInit ret{retSize};
   ret.set(StrNR{s_name}, type.m_name);
   ret.set(StrNR{s_kind}, String{toString(type.m_kind)});
   ret.set(StrNR{s_flags}, type.m_flags);
   ret.set(StrNR{s_baseTypes}, makeVec(type.m_baseTypes));
   ret.set(StrNR{s_attributes}, makeVec(type.m_attributes));
+  ret.set(StrNR{s_requireClass}, makeVec(type.m_requireClass));
   ret.set(StrNR{s_requireExtends}, makeVec(type.m_requireExtends));
   ret.set(StrNR{s_requireImplements}, makeVec(type.m_requireImplements));
   ret.set(StrNR{s_methods}, makeVec(type.m_methods));
@@ -672,8 +674,8 @@ void WatchmanAutoloadMapFactory::garbageCollectUnusedAutoloadMaps(
     return maps;
   }();
 
-  // Final references to shared_ptr<Facts> fall out of scope
-  // while `m_mutex` lock is not held
+  // Final references to shared_ptr<Facts> fall out of scope on the Treadmill
+  Treadmill::enqueue([_destroyed = std::move(mapsToRemove)]() {});
 }
 
 FactsStore& getFactsOrThrow() {

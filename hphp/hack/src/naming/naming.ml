@@ -233,6 +233,8 @@ let arg_unpack_unexpected = function
 (* Naming of type hints *)
 (************************************************************************)
 
+let wrap_supportdyn p h = N.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
+
 (**
  * The existing hint function goes from Ast_defs.hint -> Nast.hint
  * This hint function goes from Aast.hint -> Nast.hint
@@ -493,8 +495,6 @@ and hint_
   | Aast.Hnothing ->
     Errors.internal_error Pos.none "Unexpected hint not present on legacy AST";
     N.Herr
-
-and wrap_supportdyn p h = N.Happly ((p, SN.Classes.cSupportDyn), [(p, h)])
 
 and hint_id
     ~forbid_this ~allow_retonly ~allow_wildcard ~tp_depth env ((p, x) as id) hl
@@ -812,722 +812,55 @@ let make_sdt ctx pos attrs =
   else
     attrs
 
-(* Naming of a class *)
-let rec class_ ctx c =
-  let env = Env.make_class_env ctx c in
-  let c =
-    elaborate_namespaces#on_class_
-      (Naming_elaborate_namespaces_endo.make_env env.namespace)
-      c
-  in
-  let c = Naming_captures.populate_class_ c in
-  let where_constraints =
-    type_where_constraints env c.Aast.c_where_constraints
-  in
-  let name = c.Aast.c_name in
-  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
-  let smethods = List.map ~f:(method_ env) smethods in
-  let (sprops, props) = Aast.split_vars c.Aast.c_vars in
-  let sprops = List.map ~f:(class_prop_static env) sprops in
-  let attrs = user_attributes env c.Aast.c_user_attributes in
-  let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
-  let props = List.map ~f:(class_prop_non_static ~const env) props in
-  let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
-  (* These would be out of order with the old attributes, but that shouldn't matter? *)
-  let props = props @ xhp_attrs in
-  let (in_enum_class, abstract_enum_class) =
-    let open Ast_defs in
-    match c.Aast.c_kind with
-    | Cenum_class Concrete -> (true, false)
-    | Cenum_class Abstract -> (true, true)
-    | Cclass _
-    | Cinterface
-    | Cenum
-    | Ctrait ->
-      (false, false)
-  in
-  let (enum_bound, enum) =
-    match c.Aast.c_enum with
-    | Some enum -> enum_ env name ~in_enum_class ~abstract_enum_class enum
-    | None -> (None, None)
-  in
-  let parents = List.map c.Aast.c_extends ~f:(hint ~allow_retonly:false env) in
-  let parents =
-    match enum_bound with
-    (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
-     * order to provide utility methods.
-     *)
-    | Some bounds_list ->
-      let pos = fst name in
-      let builtin =
-        if in_enum_class then
-          if abstract_enum_class then
-            SN.Classes.cHH_BuiltinAbstractEnumClass
-          else
-            SN.Classes.cHH_BuiltinEnumClass
-        else
-          SN.Classes.cHH_BuiltinEnum
-      in
-      let parent = (pos, N.Happly ((pos, builtin), bounds_list)) in
-      parent :: parents
-    | None -> parents
-  in
-  let methods = List.map ~f:(method_ env) methods in
-  let uses = List.map ~f:(hint env) c.Aast.c_uses in
-  let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
-  let (c_req_extends, c_req_implements, c_req_class) =
-    Aast.split_reqs c.Aast.c_reqs
-  in
-  if
-    (not (List.is_empty c_req_implements))
-    && not (Ast_defs.is_c_trait c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_implements
-         (fst (List.hd_exn c_req_implements));
-  if
-    (not (List.is_empty c_req_class)) && not (Ast_defs.is_c_trait c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_class (fst (List.hd_exn c_req_class));
-
-  let e =
-    TypecheckerOptions.explicit_consistent_constructors
-      (Provider_context.get_tcopt ctx)
-  in
-  if e > 0 && Option.is_none constructor then
-    Option.iter
-      (Naming_attributes.mem_pos SN.UserAttributes.uaConsistentConstruct attrs)
-      ~f:(fun pos ->
-        let err_opt =
-          match c.Aast.c_kind with
-          | Ast_defs.Ctrait ->
-            Some
-              (Naming_error.Explicit_consistent_constructor
-                 { classish_kind = c.Aast.c_kind; pos })
-          | _ when e > 1 ->
-            Some
-              (Naming_error.Explicit_consistent_constructor
-                 { classish_kind = c.Aast.c_kind; pos })
-          | _ -> None
+let make_class_id env ((p, x) as cid) =
+  ( (),
+    p,
+    match x with
+    | x when String.equal x SN.Classes.cParent ->
+      if Option.is_none env.current_cls then
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Parent_outside_class p)
         in
-        Option.iter err_opt ~f:Errors.add_naming_error);
-  let req_implements = List.map ~f:(hint env) c_req_implements in
-  let req_implements =
-    List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
-  in
-  if
-    (not (List.is_empty c_req_extends))
-    && (not (Ast_defs.is_c_trait c.Aast.c_kind))
-    && not (Ast_defs.is_c_interface c.Aast.c_kind)
-  then
-    Errors.add_naming_error
-    @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
-  let req_extends = List.map ~f:(hint env) c_req_extends in
-  let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
-  let req_class = List.map ~f:(hint env) c_req_class in
-  let req_class = List.map ~f:(fun h -> (h, N.RequireClass)) req_class in
-  (* Setting a class type parameters constraint to the 'this' type is weird
-   * so lets forbid it for now.
-   *)
-  let tparam_l = type_paraml ~forbid_this:true env c.Aast.c_tparams in
-  let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
-  let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
-  let implements =
-    List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
-  in
-  let constructor = Option.map constructor ~f:(method_ env) in
-  let (constructor, methods, smethods) =
-    interface c constructor methods smethods
-  in
-  let file_attributes =
-    file_attributes ctx c.Aast.c_mode c.Aast.c_file_attributes
-  in
-  let c_tparams = tparam_l in
-  let methods =
-    match constructor with
-    | None -> smethods @ methods
-    | Some c -> c :: smethods @ methods
-  in
-  let attrs =
-    let open Ast_defs in
-    match c.Aast.c_kind with
-    | Cclass _
-    | Cinterface
-    | Ctrait ->
-      make_sdt ctx (fst name) attrs
-    | Cenum
-    | Cenum_class _ ->
-      attrs
-  in
-  {
-    N.c_annotation = ();
-    N.c_span = c.Aast.c_span;
-    N.c_mode = c.Aast.c_mode;
-    N.c_final = c.Aast.c_final;
-    N.c_is_xhp = c.Aast.c_is_xhp;
-    N.c_has_xhp_keyword = c.Aast.c_has_xhp_keyword;
-    N.c_kind = c.Aast.c_kind;
-    N.c_name = name;
-    N.c_tparams;
-    N.c_extends = parents;
-    N.c_uses = uses;
-    N.c_xhp_attr_uses = xhp_attr_uses;
-    N.c_xhp_category = c.Aast.c_xhp_category;
-    N.c_reqs = req_extends @ req_implements @ req_class;
-    N.c_implements = implements;
-    N.c_where_constraints = where_constraints;
-    N.c_consts = consts;
-    N.c_typeconsts = typeconsts;
-    N.c_vars = sprops @ props;
-    N.c_methods = methods;
-    N.c_user_attributes = attrs;
-    N.c_file_attributes = file_attributes;
-    N.c_namespace = c.Aast.c_namespace;
-    N.c_enum = enum;
-    N.c_doc_comment = c.Aast.c_doc_comment;
-    N.c_xhp_children = c.Aast.c_xhp_children;
-    (* Naming and typechecking shouldn't use these fields *)
-    N.c_xhp_attrs = [];
-    N.c_emit_id = c.Aast.c_emit_id;
-    N.c_internal = c.Aast.c_internal;
-    N.c_module = c.Aast.c_module;
-    N.c_docs_url = c.Aast.c_docs_url;
-  }
-
-and user_attributes env attrl =
-  let seen = Caml.Hashtbl.create 0 in
-  let validate_seen ua_name =
-    let (pos, name) = ua_name in
-    let existing_attr_pos = Caml.Hashtbl.find_opt seen name in
-    match existing_attr_pos with
-    | Some prev_pos ->
-      let (pos, attr_name) = ua_name in
-      Errors.add_naming_error
-      @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name };
-      false
-    | None ->
-      Caml.Hashtbl.add seen name pos;
-      true
-  in
-  let on_attr acc { Aast.ua_name; ua_params } =
-    let () = check_name env.ctx ua_name in
-    if not (validate_seen ua_name) then
-      acc
-    else
-      let attr =
-        { N.ua_name; N.ua_params = List.map ~f:(expr env) ua_params }
-      in
-      attr :: acc
-  in
-  List.fold_left ~init:[] ~f:on_attr attrl
-
-and file_attributes ctx mode fal = List.map ~f:(file_attribute ctx mode) fal
-
-and file_attribute ctx mode fa =
-  let env = Env.make_file_attributes_env ctx mode fa.Aast.fa_namespace in
-  let ua = user_attributes env fa.Aast.fa_user_attributes in
-  N.{ fa_user_attributes = ua; fa_namespace = fa.Aast.fa_namespace }
-
-(* h cv is_required maybe_enum *)
-and xhp_attribute_decl env (h, cv, tag, maybe_enum) =
-  let (p, id) = cv.Aast.cv_id in
-  let default = cv.Aast.cv_expr in
-  let is_required = Option.is_some tag in
-  if is_required && Option.is_some default then
-    Errors.add_naming_error
-    @@ Naming_error.Xhp_required_with_default { pos = p; attr_name = id };
-  let hint_ =
-    match maybe_enum with
-    | Some (pos, items) ->
-      let is_int item =
-        match item with
-        | (_, _, Aast.Int _) -> true
-        | _ -> false
-      in
-      let contains_int = List.exists ~f:is_int items in
-      let is_string item =
-        match item with
-        | (_, _, Aast.String _)
-        | (_, _, Aast.String2 _) ->
-          true
-        | _ -> false
-      in
-      let contains_str = List.exists ~f:is_string items in
-      if contains_int && not contains_str then
-        Some (pos, Aast.Happly ((pos, "int"), []))
-      else if (not contains_int) && contains_str then
-        Some (pos, Aast.Happly ((pos, "string"), []))
+        N.CI (p, SN.Classes.cUnknown)
       else
-        Some (pos, Aast.Happly ((pos, "mixed"), []))
-    | _ -> Aast.hint_of_type_hint h
-  in
-  let strip_like h =
-    match h with
-    | Aast.Hlike h -> snd h
-    | _ -> h
-  in
-  let hint_ =
-    match hint_ with
-    | Some (p, h) ->
-      begin
-        match strip_like h with
-        | Aast.Hoption _ ->
-          if is_required then
-            Errors.add_naming_error
-            @@ Naming_error.Xhp_optional_required_attr
-                 { pos = p; attr_name = id };
-          hint_
-        | Aast.Happly ((_, "mixed"), []) -> hint_
-        | _ ->
-          let has_default =
-            match default with
-            | None
-            | Some (_, _, Aast.Null) ->
-              false
-            | _ -> true
-          in
-          if is_required || has_default then
-            hint_
-          else
-            Some (p, Aast.Hoption (p, h))
-      end
-    | None -> None
-  in
-  let (like, enum_values) =
-    match cv.Aast.cv_xhp_attr with
-    | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
-    | None -> (None, [])
-  in
-  let hint_ =
-    Option.map
-      ~f:(fun hint ->
-        match like with
-        | Some plike ->
-          if
-            not
-              (TypecheckerOptions.like_type_hints
-                 (Provider_context.get_tcopt env.ctx))
-          then
-            Errors.experimental_feature p "like-types";
-
-          (plike, Aast.Hlike hint)
-        | _ -> hint)
-      hint_
-  in
-  let hint_ = ((), hint_) in
-  let hint_ = Aast.type_hint_option_map hint_ ~f:(hint env) in
-  let (expr, _) = class_prop_expr_is_xhp env cv in
-  let xhp_attr_info =
-    Some { N.xai_like = like; N.xai_tag = tag; N.xai_enum_values = enum_values }
-  in
-  {
-    N.cv_final = cv.Aast.cv_final;
-    N.cv_xhp_attr = xhp_attr_info;
-    N.cv_readonly = cv.Aast.cv_readonly;
-    N.cv_abstract = cv.Aast.cv_abstract;
-    N.cv_visibility = cv.Aast.cv_visibility;
-    N.cv_type = hint_;
-    N.cv_id = cv.Aast.cv_id;
-    N.cv_expr = expr;
-    N.cv_user_attributes = [];
-    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
-    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
-    N.cv_is_static = cv.Aast.cv_is_static;
-    N.cv_span = cv.Aast.cv_span;
-  }
-
-and enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
-  let open Aast in
-  let pos = fst enum_name in
-  let enum_hint = (pos, Happly (enum_name, [])) in
-  let old_base =
-    if
-      in_enum_class
-      && TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
-    then
-      (pos, Hlike e.e_base)
-    else
-      e.e_base
-  in
-  let new_base = hint env old_base in
-  let bound =
-    if in_enum_class then
-      if abstract_enum_class then
-        []
+        N.CIparent
+    | x when String.equal x SN.Classes.cSelf ->
+      if Option.is_none env.current_cls then
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Self_outside_class p)
+        in
+        N.CI (p, SN.Classes.cUnknown)
       else
-        (* Turn the base type of the enum class into MemberOf<E, base> *)
-        let elt = (pos, SN.Classes.cMemberOf) in
-        let h = (pos, Happly (elt, [enum_hint; old_base])) in
-        [hint env h]
-    else
-      [enum_hint]
-  in
-  let enum =
-    {
-      N.e_base = new_base;
-      N.e_constraint = Option.map e.e_constraint ~f:(hint env);
-      N.e_includes = List.map ~f:(hint env) e.e_includes;
-    }
-  in
-  (Some bound, Some enum)
-
-and type_paraml ?(forbid_this = false) env tparams =
-  List.map tparams ~f:(type_param ~forbid_this env)
-
-(*
-  We need to be careful regarding the scoping of type variables:
-  Type parameters are always in scope simultaneously: Given
-  class C<T1 ... , T2 ... , Tn ...>,
-  all type parameters are in scope in the constraints of all other ones (and the where constraints,
-  in case of functions).
-  For consitency, the same holds for nested type parameters (i.e., type parameters of type
-  parameters). Given
-  class Foo<T<T1 ... , ...., Tn ... > ... >
-  every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
-*)
-and type_param ~forbid_this genv t =
-  let hk_types_enabled =
-    TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
-  in
-  let (pos, name) = t.Aast.tp_name in
-
-  if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
-    Errors.add_naming_error
-    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name };
-
-  (* Bring all type parameters into scope at once before traversing nested tparams,
-     as per the note above *)
-  let env = extend_tparams genv t.Aast.tp_parameters in
-  let tp_parameters =
-    if hk_types_enabled then
-      List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
-    else
-      []
-  in
-  (* Use the env with all nested tparams still in scope *)
-  let tp_constraints =
-    List.map t.Aast.tp_constraints ~f:(constraint_ ~forbid_this env)
-  in
-  let tp_constraints =
-    if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt genv.ctx)
-    then
-      (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos N.Hmixed))
-      :: tp_constraints
-    else
-      tp_constraints
-  in
-  {
-    N.tp_variance = t.Aast.tp_variance;
-    tp_name = t.Aast.tp_name;
-    tp_parameters;
-    tp_constraints;
-    tp_reified = t.Aast.tp_reified;
-    tp_user_attributes = user_attributes env t.Aast.tp_user_attributes;
-  }
-
-and type_where_constraints env locl_cstrl =
-  List.map
-    ~f:(fun (h1, ck, h2) ->
-      let ty1 = hint ~in_where_clause:true env h1 in
-      let ty2 = hint ~in_where_clause:true env h2 in
-      (ty1, ck, ty2))
-    locl_cstrl
-
-and class_prop_expr_is_xhp env cv =
-  let expr = Option.map cv.Aast.cv_expr ~f:(expr env) in
-  let expr =
-    if FileInfo.is_hhi env.in_mode && Option.is_none expr then
-      let pos = fst cv.Aast.cv_id in
-      Some ((), pos, ignored_expr_ (fst cv.Aast.cv_id))
-    else
-      expr
-  in
-  let is_xhp =
-    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":") with
-    | Invalid_argument _ -> false
-  in
-  (expr, is_xhp)
-
-and make_xhp_attr = function
-  | true -> Some { N.xai_like = None; N.xai_tag = None; N.xai_enum_values = [] }
-  | false -> None
-
-and class_prop_static env cv =
-  let attrs = user_attributes env cv.Aast.cv_user_attributes in
-  let lsb = Naming_attributes.mem SN.UserAttributes.uaLSB attrs in
-  let forbid_this = not lsb in
-  let h =
-    Aast.type_hint_option_map ~f:(hint ~forbid_this env) cv.Aast.cv_type
-  in
-  let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
-  {
-    N.cv_final = cv.Aast.cv_final;
-    N.cv_xhp_attr = make_xhp_attr is_xhp;
-    N.cv_abstract = cv.Aast.cv_abstract;
-    N.cv_readonly = cv.Aast.cv_readonly;
-    N.cv_visibility = cv.Aast.cv_visibility;
-    N.cv_type = h;
-    N.cv_id = cv.Aast.cv_id;
-    N.cv_expr = expr;
-    N.cv_user_attributes = attrs;
-    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
-    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
-    N.cv_is_static = cv.Aast.cv_is_static;
-    N.cv_span = cv.Aast.cv_span;
-  }
-
-and class_prop_non_static env ?(const = None) cv =
-  let h = Aast.type_hint_option_map ~f:(hint env) cv.Aast.cv_type in
-  let attrs = user_attributes env cv.Aast.cv_user_attributes in
-  (* if class is __Const, make all member fields __Const *)
-  let attrs =
-    match const with
-    | Some c ->
-      if not (Naming_attributes.mem SN.UserAttributes.uaConst attrs) then
-        c :: attrs
+        N.CIself
+    | x when String.equal x SN.Classes.cStatic ->
+      if Option.is_none env.current_cls then
+        let () =
+          Errors.add_typing_error
+            Typing_error.(primary @@ Primary.Static_outside_class p)
+        in
+        N.CI (p, SN.Classes.cUnknown)
       else
-        attrs
-    | None -> attrs
-  in
-  let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
-  {
-    N.cv_final = cv.Aast.cv_final;
-    N.cv_xhp_attr = make_xhp_attr is_xhp;
-    N.cv_visibility = cv.Aast.cv_visibility;
-    N.cv_readonly = cv.Aast.cv_readonly;
-    N.cv_type = h;
-    N.cv_abstract = cv.Aast.cv_abstract;
-    N.cv_id = cv.Aast.cv_id;
-    N.cv_expr = expr;
-    N.cv_user_attributes = attrs;
-    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
-    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
-    N.cv_is_static = cv.Aast.cv_is_static;
-    N.cv_span = cv.Aast.cv_span;
-  }
+        N.CIstatic
+    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr ((), p, N.This)
+    | x when String.equal x SN.SpecialIdents.dollardollar ->
+      (* We won't reach here for "new $$" because the parser creates a
+       * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
+       * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
+       * "$$" except in positions where a classname is expected, like in
+       * static member access. So, we only reach here for things
+       * like "$$::someMethod()". *)
+      N.CIexpr
+        ((), p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
+    | x when Char.equal x.[0] '$' ->
+      let lid = Local_id.make_unscoped x in
+      N.CIexpr ((), p, N.Lvar (p, lid))
+    | _ ->
+      let () = check_name env.ctx cid in
+      N.CI cid )
 
-and check_constant_expression env ~in_enum_class (ty, pos, e) =
-  if not in_enum_class then
-    check_constant_expr env (ty, pos, e)
-  else
-    true
-
-and check_constant_expr env expr =
-  let (_, pos, e) = expr in
-  match e with
-  | Aast.Id _
-  | Aast.Null
-  | Aast.True
-  | Aast.False
-  | Aast.Int _
-  | Aast.Float _
-  | Aast.String _ ->
-    true
-  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, cls)), _)
-    when match cls with
-         | Aast.Id (_, "static") -> false
-         | _ -> true ->
-    true
-  | Aast.Unop
-      ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
-    ->
-    check_constant_expr env e
-  | Aast.Binop (op, e1, e2) ->
-    (* Only assignment is invalid *)
-    begin
-      match op with
-      | Ast_defs.Eq _ ->
-        Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
-        false
-      | _ -> check_constant_expr env e1 && check_constant_expr env e2
-    end
-  | Aast.Eif (e1, e2, e3) ->
-    check_constant_expr env e1
-    && Option.for_all e2 ~f:(check_constant_expr env)
-    && check_constant_expr env e3
-  | Aast.Darray (_, l) ->
-    List.for_all l ~f:(fun (e1, e2) ->
-        check_constant_expr env e1 && check_constant_expr env e2)
-  | Aast.Varray (_, l) -> List.for_all l ~f:(check_constant_expr env)
-  | Aast.Shape fdl ->
-    (* Only check the values because shape field names are always legal *)
-    List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
-    when String.equal cn SN.AutoimportedFunctions.fun_
-         || String.equal cn SN.AutoimportedFunctions.class_meth
-         || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
-    arg_unpack_unexpected unpacked_element;
-    List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
-  | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
-  | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
-  | Aast.Collection (id, _, l) ->
-    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
-    (* Only vec/keyset/dict are allowed because they are value types *)
-    if
-      String.equal cn SN.Collections.cVec
-      || String.equal cn SN.Collections.cKeyset
-      || String.equal cn SN.Collections.cDict
-    then
-      List.for_all l ~f:(check_afield_constant_expr env)
-    else (
-      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
-      false
-    )
-  | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
-    (* Only vec/keyset are allowed because they are value types *)
-    List.for_all l ~f:(check_constant_expr env)
-  | Aast.KeyValCollection (Aast.Dict, _, l) ->
-    (* Only dict is allowed because it is a value type *)
-    List.for_all l ~f:(check_field_constant_expr env)
-  | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
-  | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
-    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
-    if String.equal cn SN.FB.cIncorrectType then
-      check_constant_expr env e
-    else (
-      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
-      false
-    )
-  | _ ->
-    Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
-    false
-
-and check_afield_constant_expr env afield =
-  match afield with
-  | Aast.AFvalue e -> check_constant_expr env e
-  | Aast.AFkvalue (e1, e2) ->
-    check_constant_expr env e1 && check_constant_expr env e2
-
-and check_field_constant_expr env (e1, e2) =
-  check_constant_expr env e1 && check_constant_expr env e2
-
-and constant_expr env ~in_enum_class e =
-  let valid_constant_expression =
-    check_constant_expression env ~in_enum_class e
-  in
-  if valid_constant_expression then
-    expr env e
-  else
-    let (_, p, _) = e in
-    invalid_expr p
-
-and class_const_kind env ~in_enum_class kind =
-  match kind with
-  | Aast.CCConcrete e -> N.CCConcrete (constant_expr env ~in_enum_class e)
-  | Aast.CCAbstract default ->
-    let default = Option.map default ~f:(constant_expr env ~in_enum_class) in
-    N.CCAbstract default
-
-and class_const env ~in_enum_class cc =
-  let h = Option.map cc.Aast.cc_type ~f:(hint env) in
-  let kind = class_const_kind env ~in_enum_class cc.Aast.cc_kind in
-  {
-    N.cc_type = h;
-    N.cc_id = cc.Aast.cc_id;
-    N.cc_kind = kind;
-    N.cc_doc_comment = cc.Aast.cc_doc_comment;
-    N.cc_span = cc.Aast.cc_span;
-    N.cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
-  }
-
-and typeconst env t =
-  let open Aast in
-  let tconst =
-    match t.c_tconst_kind with
-    | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
-      ->
-      TCAbstract
-        {
-          c_atc_as_constraint = Option.map ~f:(hint env) c_atc_as_constraint;
-          c_atc_super_constraint =
-            Option.map ~f:(hint env) c_atc_super_constraint;
-          c_atc_default = Option.map ~f:(hint env) c_atc_default;
-        }
-    | TCConcrete { c_tc_type } -> TCConcrete { c_tc_type = hint env c_tc_type }
-  in
-  let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
-  N.
-    {
-      c_tconst_user_attributes = attrs;
-      c_tconst_name = t.Aast.c_tconst_name;
-      c_tconst_kind = tconst;
-      c_tconst_span = t.Aast.c_tconst_span;
-      c_tconst_doc_comment = t.Aast.c_tconst_doc_comment;
-      c_tconst_is_ctx = t.Aast.c_tconst_is_ctx;
-    }
-
-and method_ genv m =
-  let genv = extend_tparams genv m.Aast.m_tparams in
-  let env = genv in
-  (* Cannot use 'this' if it is a public instance method *)
-  let paraml = fun_paraml env m.Aast.m_params in
-  let tparam_l = type_paraml env m.Aast.m_tparams in
-  let where_constraints =
-    type_where_constraints env m.Aast.m_where_constraints
-  in
-  let ret =
-    Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) m.Aast.m_ret
-  in
-  let body =
-    match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict ->
-      let fub_ast = block env m.N.m_body.N.fb_ast in
-      { N.fb_ast = fub_ast }
-  in
-  let attrs = user_attributes env m.Aast.m_user_attributes in
-  let m_ctxs = Option.map ~f:(contexts env) m.Aast.m_ctxs in
-  let m_unsafe_ctxs = Option.map ~f:(contexts env) m.Aast.m_unsafe_ctxs in
-  {
-    N.m_annotation = ();
-    N.m_span = m.Aast.m_span;
-    N.m_final = m.Aast.m_final;
-    N.m_visibility = m.Aast.m_visibility;
-    N.m_abstract = m.Aast.m_abstract;
-    N.m_readonly_this = m.Aast.m_readonly_this;
-    N.m_static = m.Aast.m_static;
-    N.m_name = m.Aast.m_name;
-    N.m_tparams = tparam_l;
-    N.m_where_constraints = where_constraints;
-    N.m_params = paraml;
-    N.m_ctxs;
-    N.m_unsafe_ctxs;
-    N.m_body = body;
-    N.m_fun_kind = m.Aast.m_fun_kind;
-    N.m_readonly_ret = m.Aast.m_readonly_ret;
-    N.m_ret = ret;
-    N.m_user_attributes = attrs;
-    N.m_external = m.Aast.m_external;
-    N.m_doc_comment = m.Aast.m_doc_comment;
-  }
-
-and fun_paraml env paraml =
-  let _ = List.fold_left ~f:check_repetition ~init:SSet.empty paraml in
-  List.map ~f:(fun_param env) paraml
-
-(* Variadic params are removed from the list *)
-and fun_param env (param : Nast.fun_param) =
-  let p = param.Aast.param_pos in
-  let name = param.Aast.param_name in
-  let tyhi =
-    Aast.type_hint_option_map param.Aast.param_type_hint ~f:(hint env)
-  in
-  let eopt = Option.map param.Aast.param_expr ~f:(expr env) in
-  {
-    N.param_annotation = ();
-    param_type_hint = tyhi;
-    param_is_variadic = param.Aast.param_is_variadic;
-    param_pos = p;
-    param_name = name;
-    param_expr = eopt;
-    param_callconv = param.Aast.param_callconv;
-    param_readonly = param.Aast.param_readonly;
-    param_user_attributes = user_attributes env param.Aast.param_user_attributes;
-    param_visibility = param.Aast.param_visibility;
-  }
-
-and extend_tparams genv paraml =
+let extend_tparams genv paraml =
   let params =
     List.fold_right
       paraml
@@ -1536,86 +869,23 @@ and extend_tparams genv paraml =
   in
   { genv with type_params = params }
 
-and fun_def ctx fd =
-  let fd =
-    if
-      Provider_context.get_tcopt ctx |> TypecheckerOptions.substitution_mutation
-      && FileInfo.equal_mode fd.Aast.fd_mode FileInfo.Mstrict
-    then
-      Substitution_mutation.mutate_fun_def fd
-    else
-      fd
-  in
-  let genv = Env.make_fun_decl_genv ctx fd in
-  let fd =
-    elaborate_namespaces#on_fun_def
-      (Naming_elaborate_namespaces_endo.make_env genv.namespace)
-      fd
-  in
-  let fd = Naming_captures.populate_fun_def fd in
+let type_where_constraints env locl_cstrl =
+  List.map
+    ~f:(fun (h1, ck, h2) ->
+      let ty1 = hint ~in_where_clause:true env h1 in
+      let ty2 = hint ~in_where_clause:true env h2 in
+      (ty1, ck, ty2))
+    locl_cstrl
 
-  let file_attributes =
-    file_attributes ctx fd.Aast.fd_mode fd.Aast.fd_file_attributes
-  in
-  let f = fun_ genv fd.Aast.fd_fun in
-  let named_fun_def =
-    {
-      N.fd_fun = f;
-      fd_mode = fd.Aast.fd_mode;
-      fd_namespace = fd.Aast.fd_namespace;
-      fd_file_attributes = file_attributes;
-      fd_internal = fd.Aast.fd_internal;
-      fd_module = fd.Aast.fd_module;
-    }
-  in
-  named_fun_def
+let make_xhp_attr = function
+  | true -> Some { N.xai_like = None; N.xai_tag = None; N.xai_enum_values = [] }
+  | false -> None
 
-and fun_ genv f =
-  let env = genv in
-  let where_constraints =
-    type_where_constraints env f.Aast.f_where_constraints
-  in
-  let h =
-    Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
-  in
-  let paraml = fun_paraml env f.Aast.f_params in
-  let f_tparams = type_paraml env f.Aast.f_tparams in
-  let f_kind = f.Aast.f_fun_kind in
-  let body =
-    match genv.in_mode with
-    | FileInfo.Mhhi -> { N.fb_ast = [] }
-    | FileInfo.Mstrict ->
-      let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
-      { N.fb_ast }
-  in
-  let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
-  let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
-  let attrs = user_attributes env f.Aast.f_user_attributes in
-  let attrs = make_sdt genv.ctx (fst f.Aast.f_name) attrs in
-  let named_fun =
-    {
-      N.f_annotation = ();
-      f_readonly_this = f.Aast.f_readonly_this;
-      f_span = f.Aast.f_span;
-      f_readonly_ret = f.Aast.f_readonly_ret;
-      f_ret = h;
-      f_name = f.Aast.f_name;
-      f_tparams;
-      f_where_constraints = where_constraints;
-      f_params = paraml;
-      (* TODO(T70095684) double-check f_ctxs *)
-      f_ctxs;
-      f_unsafe_ctxs;
-      f_body = body;
-      f_fun_kind = f_kind;
-      f_user_attributes = attrs;
-      f_external = f.Aast.f_external;
-      f_doc_comment = f.Aast.f_doc_comment;
-    }
-  in
-  named_fun
+(**************************************************************************)
+(* Statements *)
+(**************************************************************************)
 
-and stmt env (pos, st) =
+let rec stmt env (pos, st) =
   let stmt =
     match st with
     | Aast.Block _ -> failwith "stmt block error"
@@ -1696,6 +966,17 @@ and stmt env (pos, st) =
     | Aast.Expr e -> N.Expr (expr env e)
   in
   (pos, stmt)
+
+and awaitall_stmt env el b =
+  let el =
+    List.map
+      ~f:(fun (e1, e2) ->
+        let e2 = expr env e2 in
+        (e1, e2))
+      el
+  in
+  let s = block env b in
+  N.Awaitall (el, s)
 
 and if_stmt env e b1 b2 =
   let e = expr env e in
@@ -1798,28 +1079,9 @@ and block ?(new_scope = true) env stl =
 
 and branch env stmt_l = stmt_list stmt_l env
 
-and awaitall_stmt env el b =
-  let el =
-    List.map
-      ~f:(fun (e1, e2) ->
-        let e2 = expr env e2 in
-        (e1, e2))
-      el
-  in
-  let s = block env b in
-  N.Awaitall (el, s)
-
-and expr_obj_get_name env expr_ =
-  match expr_ with
-  | (_, p, Aast.Id x) -> ((), p, N.Id x)
-  | (_, p, e) -> expr env ((), p, e)
-
-and exprl env l = List.map ~f:(expr env) l
-
-and expr_call_args env = List.map ~f:(fun (pk, e) -> (pk, expr env e))
-
-and oexpr env e = Option.map e ~f:(expr env)
-
+(**************************************************************************)
+(* Expressions *)
+(**************************************************************************)
 and expr env ((), p, e) = ((), p, expr_ env p e)
 
 and expr_ env p (e : Nast.expr_) =
@@ -2329,6 +1591,17 @@ and expr_ env p (e : Nast.expr_) =
       "Malformed expr: Expr not found on legacy AST: T39599317";
     invalid_expr_ p
 
+and expr_obj_get_name env expr_ =
+  match expr_ with
+  | (_, p, Aast.Id x) -> ((), p, N.Id x)
+  | (_, p, e) -> expr env ((), p, e)
+
+and exprl env l = List.map ~f:(expr env) l
+
+and expr_call_args env = List.map ~f:(fun (pk, e) -> (pk, expr env e))
+
+and oexpr env e = Option.map e ~f:(expr env)
+
 and expr_lambda env f =
   let h =
     Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
@@ -2361,54 +1634,6 @@ and expr_lambda env f =
   }
 
 and f_body env f_body = block env f_body.Aast.fb_ast
-
-and make_class_id env ((p, x) as cid) =
-  ( (),
-    p,
-    match x with
-    | x when String.equal x SN.Classes.cParent ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Parent_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIparent
-    | x when String.equal x SN.Classes.cSelf ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Self_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIself
-    | x when String.equal x SN.Classes.cStatic ->
-      if Option.is_none env.current_cls then
-        let () =
-          Errors.add_typing_error
-            Typing_error.(primary @@ Primary.Static_outside_class p)
-        in
-        N.CI (p, SN.Classes.cUnknown)
-      else
-        N.CIstatic
-    | x when String.equal x SN.SpecialIdents.this -> N.CIexpr ((), p, N.This)
-    | x when String.equal x SN.SpecialIdents.dollardollar ->
-      (* We won't reach here for "new $$" because the parser creates a
-       * proper Ast_defs.Dollardollar node, so make_class_id won't be called with
-       * that node. In fact, the parser creates an Ast_defs.Dollardollar for all
-       * "$$" except in positions where a classname is expected, like in
-       * static member access. So, we only reach here for things
-       * like "$$::someMethod()". *)
-      N.CIexpr
-        ((), p, N.Lvar (p, Local_id.make_unscoped SN.SpecialIdents.dollardollar))
-    | x when Char.equal x.[0] '$' ->
-      let lid = Local_id.make_unscoped x in
-      N.CIexpr ((), p, N.Lvar (p, lid))
-    | _ ->
-      let () = check_name env.ctx cid in
-      N.CI cid )
 
 and casel env l = List.map l ~f:(case env)
 
@@ -2447,15 +1672,821 @@ and afield_kvalue env cname field =
     )
   | Aast.AFkvalue (e1, e2) -> (expr env e1, expr env e2)
 
-and attrl env l = List.map ~f:(attr env) l
-
 and attr env at =
   match at with
   | Aast.Xhp_simple { Aast.xs_name; xs_type; xs_expr = e } ->
     N.Xhp_simple { Aast.xs_name; xs_type; xs_expr = expr env e }
   | Aast.Xhp_spread e -> N.Xhp_spread (expr env e)
 
+and attrl env l = List.map ~f:(attr env) l
+
 and string2 env idl = List.map idl ~f:(expr env)
+
+(**************************************************************************)
+(* Functions *)
+(**************************************************************************)
+and fun_ genv f =
+  let env = genv in
+  let where_constraints =
+    type_where_constraints env f.Aast.f_where_constraints
+  in
+  let h =
+    Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) f.Aast.f_ret
+  in
+  let paraml = fun_paraml env f.Aast.f_params in
+  let f_tparams = type_paraml env f.Aast.f_tparams in
+  let f_kind = f.Aast.f_fun_kind in
+  let body =
+    match genv.in_mode with
+    | FileInfo.Mhhi -> { N.fb_ast = [] }
+    | FileInfo.Mstrict ->
+      let fb_ast = block env f.Aast.f_body.Aast.fb_ast in
+      { N.fb_ast }
+  in
+  let f_ctxs = Option.map ~f:(contexts env) f.Aast.f_ctxs in
+  let f_unsafe_ctxs = Option.map ~f:(contexts env) f.Aast.f_unsafe_ctxs in
+  let attrs = user_attributes env f.Aast.f_user_attributes in
+  let attrs = make_sdt genv.ctx (fst f.Aast.f_name) attrs in
+  let named_fun =
+    {
+      N.f_annotation = ();
+      f_readonly_this = f.Aast.f_readonly_this;
+      f_span = f.Aast.f_span;
+      f_readonly_ret = f.Aast.f_readonly_ret;
+      f_ret = h;
+      f_name = f.Aast.f_name;
+      f_tparams;
+      f_where_constraints = where_constraints;
+      f_params = paraml;
+      (* TODO(T70095684) double-check f_ctxs *)
+      f_ctxs;
+      f_unsafe_ctxs;
+      f_body = body;
+      f_fun_kind = f_kind;
+      f_user_attributes = attrs;
+      f_external = f.Aast.f_external;
+      f_doc_comment = f.Aast.f_doc_comment;
+    }
+  in
+  named_fun
+
+(* Variadic params are removed from the list *)
+and fun_param env (param : Nast.fun_param) =
+  let p = param.Aast.param_pos in
+  let name = param.Aast.param_name in
+  let tyhi =
+    Aast.type_hint_option_map param.Aast.param_type_hint ~f:(hint env)
+  in
+  let eopt = Option.map param.Aast.param_expr ~f:(expr env) in
+  {
+    N.param_annotation = ();
+    param_type_hint = tyhi;
+    param_is_variadic = param.Aast.param_is_variadic;
+    param_pos = p;
+    param_name = name;
+    param_expr = eopt;
+    param_callconv = param.Aast.param_callconv;
+    param_readonly = param.Aast.param_readonly;
+    param_user_attributes = user_attributes env param.Aast.param_user_attributes;
+    param_visibility = param.Aast.param_visibility;
+  }
+
+and fun_paraml env paraml =
+  let _ = List.fold_left ~f:check_repetition ~init:SSet.empty paraml in
+  List.map ~f:(fun_param env) paraml
+
+(**************************************************************************)
+(* User attrs *)
+(**************************************************************************)
+and user_attributes env attrl =
+  let seen = Caml.Hashtbl.create 0 in
+  let validate_seen ua_name =
+    let (pos, name) = ua_name in
+    let existing_attr_pos = Caml.Hashtbl.find_opt seen name in
+    match existing_attr_pos with
+    | Some prev_pos ->
+      let (pos, attr_name) = ua_name in
+      Errors.add_naming_error
+      @@ Naming_error.Duplicate_user_attribute { pos; prev_pos; attr_name };
+      false
+    | None ->
+      Caml.Hashtbl.add seen name pos;
+      true
+  in
+  let on_attr acc { Aast.ua_name; ua_params } =
+    let () = check_name env.ctx ua_name in
+    if not (validate_seen ua_name) then
+      acc
+    else
+      let attr =
+        { N.ua_name; N.ua_params = List.map ~f:(expr env) ua_params }
+      in
+      attr :: acc
+  in
+  List.fold_left ~init:[] ~f:on_attr attrl
+
+(**************************************************************************)
+(* Type parameters *)
+(**************************************************************************)
+(*
+  We need to be careful regarding the scoping of type variables:
+  Type parameters are always in scope simultaneously: Given
+  class C<T1 ... , T2 ... , Tn ...>,
+  all type parameters are in scope in the constraints of all other ones (and the where constraints,
+  in case of functions).
+  For consitency, the same holds for nested type parameters (i.e., type parameters of type
+  parameters). Given
+  class Foo<T<T1 ... , ...., Tn ... > ... >
+  every Ti is in scope of the constraints of all other Tj, and in the constraints on T itself.
+*)
+and type_param ~forbid_this genv t =
+  let hk_types_enabled =
+    TypecheckerOptions.higher_kinded_types (Provider_context.get_tcopt genv.ctx)
+  in
+  let (pos, name) = t.Aast.tp_name in
+
+  if (not hk_types_enabled) && (not @@ List.is_empty t.Aast.tp_parameters) then
+    Errors.add_naming_error
+    @@ Naming_error.Tparam_with_tparam { pos; tparam_name = name };
+
+  (* Bring all type parameters into scope at once before traversing nested tparams,
+     as per the note above *)
+  let env = extend_tparams genv t.Aast.tp_parameters in
+  let tp_parameters =
+    if hk_types_enabled then
+      List.map t.Aast.tp_parameters ~f:(type_param ~forbid_this env)
+    else
+      []
+  in
+  (* Use the env with all nested tparams still in scope *)
+  let tp_constraints =
+    List.map t.Aast.tp_constraints ~f:(constraint_ ~forbid_this env)
+  in
+  let tp_constraints =
+    if TypecheckerOptions.everything_sdt (Provider_context.get_tcopt genv.ctx)
+    then
+      (Ast_defs.Constraint_as, (pos, wrap_supportdyn pos N.Hmixed))
+      :: tp_constraints
+    else
+      tp_constraints
+  in
+  {
+    N.tp_variance = t.Aast.tp_variance;
+    tp_name = t.Aast.tp_name;
+    tp_parameters;
+    tp_constraints;
+    tp_reified = t.Aast.tp_reified;
+    tp_user_attributes = user_attributes env t.Aast.tp_user_attributes;
+  }
+
+and type_paraml ?(forbid_this = false) env tparams =
+  List.map tparams ~f:(type_param ~forbid_this env)
+
+(**************************************************************************)
+(* Type constants *)
+(**************************************************************************)
+
+let typeconst env t =
+  let open Aast in
+  let tconst =
+    match t.c_tconst_kind with
+    | TCAbstract { c_atc_as_constraint; c_atc_super_constraint; c_atc_default }
+      ->
+      TCAbstract
+        {
+          c_atc_as_constraint = Option.map ~f:(hint env) c_atc_as_constraint;
+          c_atc_super_constraint =
+            Option.map ~f:(hint env) c_atc_super_constraint;
+          c_atc_default = Option.map ~f:(hint env) c_atc_default;
+        }
+    | TCConcrete { c_tc_type } -> TCConcrete { c_tc_type = hint env c_tc_type }
+  in
+  let attrs = user_attributes env t.Aast.c_tconst_user_attributes in
+  N.
+    {
+      c_tconst_user_attributes = attrs;
+      c_tconst_name = t.Aast.c_tconst_name;
+      c_tconst_kind = tconst;
+      c_tconst_span = t.Aast.c_tconst_span;
+      c_tconst_doc_comment = t.Aast.c_tconst_doc_comment;
+      c_tconst_is_ctx = t.Aast.c_tconst_is_ctx;
+    }
+
+(**************************************************************************)
+(* Methods *)
+(**************************************************************************)
+
+let method_ genv m =
+  let genv = extend_tparams genv m.Aast.m_tparams in
+  let env = genv in
+  (* Cannot use 'this' if it is a public instance method *)
+  let paraml = fun_paraml env m.Aast.m_params in
+  let tparam_l = type_paraml env m.Aast.m_tparams in
+  let where_constraints =
+    type_where_constraints env m.Aast.m_where_constraints
+  in
+  let ret =
+    Aast.type_hint_option_map ~f:(hint ~allow_retonly:true env) m.Aast.m_ret
+  in
+  let body =
+    match genv.in_mode with
+    | FileInfo.Mhhi -> { N.fb_ast = [] }
+    | FileInfo.Mstrict ->
+      let fub_ast = block env m.N.m_body.N.fb_ast in
+      { N.fb_ast = fub_ast }
+  in
+  let attrs = user_attributes env m.Aast.m_user_attributes in
+  let m_ctxs = Option.map ~f:(contexts env) m.Aast.m_ctxs in
+  let m_unsafe_ctxs = Option.map ~f:(contexts env) m.Aast.m_unsafe_ctxs in
+  {
+    N.m_annotation = ();
+    N.m_span = m.Aast.m_span;
+    N.m_final = m.Aast.m_final;
+    N.m_visibility = m.Aast.m_visibility;
+    N.m_abstract = m.Aast.m_abstract;
+    N.m_readonly_this = m.Aast.m_readonly_this;
+    N.m_static = m.Aast.m_static;
+    N.m_name = m.Aast.m_name;
+    N.m_tparams = tparam_l;
+    N.m_where_constraints = where_constraints;
+    N.m_params = paraml;
+    N.m_ctxs;
+    N.m_unsafe_ctxs;
+    N.m_body = body;
+    N.m_fun_kind = m.Aast.m_fun_kind;
+    N.m_readonly_ret = m.Aast.m_readonly_ret;
+    N.m_ret = ret;
+    N.m_user_attributes = attrs;
+    N.m_external = m.Aast.m_external;
+    N.m_doc_comment = m.Aast.m_doc_comment;
+  }
+
+(**************************************************************************)
+(* Top level function definitions *)
+(**************************************************************************)
+
+let file_attribute ctx mode fa =
+  let env = Env.make_file_attributes_env ctx mode fa.Aast.fa_namespace in
+  let ua = user_attributes env fa.Aast.fa_user_attributes in
+  N.{ fa_user_attributes = ua; fa_namespace = fa.Aast.fa_namespace }
+
+let file_attributes ctx mode fal = List.map ~f:(file_attribute ctx mode) fal
+
+let fun_def ctx fd =
+  let fd =
+    if
+      Provider_context.get_tcopt ctx |> TypecheckerOptions.substitution_mutation
+      && FileInfo.equal_mode fd.Aast.fd_mode FileInfo.Mstrict
+    then
+      Substitution_mutation.mutate_fun_def fd
+    else
+      fd
+  in
+  let genv = Env.make_fun_decl_genv ctx fd in
+  let fd =
+    elaborate_namespaces#on_fun_def
+      (Naming_elaborate_namespaces_endo.make_env genv.namespace)
+      fd
+  in
+  let fd = Naming_captures.populate_fun_def fd in
+
+  let file_attributes =
+    file_attributes ctx fd.Aast.fd_mode fd.Aast.fd_file_attributes
+  in
+  let f = fun_ genv fd.Aast.fd_fun in
+  let named_fun_def =
+    {
+      N.fd_fun = f;
+      fd_mode = fd.Aast.fd_mode;
+      fd_namespace = fd.Aast.fd_namespace;
+      fd_file_attributes = file_attributes;
+      fd_internal = fd.Aast.fd_internal;
+      fd_module = fd.Aast.fd_module;
+    }
+  in
+  named_fun_def
+
+(**************************************************************************)
+(* Classes *)
+(**************************************************************************)
+
+let class_prop_expr_is_xhp env cv =
+  let expr = Option.map cv.Aast.cv_expr ~f:(expr env) in
+  let expr =
+    if FileInfo.is_hhi env.in_mode && Option.is_none expr then
+      let pos = fst cv.Aast.cv_id in
+      Some ((), pos, ignored_expr_ (fst cv.Aast.cv_id))
+    else
+      expr
+  in
+  let is_xhp =
+    try String.(sub (snd cv.Aast.cv_id) ~pos:0 ~len:1 = ":") with
+    | Invalid_argument _ -> false
+  in
+  (expr, is_xhp)
+
+let class_prop_static env cv =
+  let attrs = user_attributes env cv.Aast.cv_user_attributes in
+  let lsb = Naming_attributes.mem SN.UserAttributes.uaLSB attrs in
+  let forbid_this = not lsb in
+  let h =
+    Aast.type_hint_option_map ~f:(hint ~forbid_this env) cv.Aast.cv_type
+  in
+  let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
+  {
+    N.cv_final = cv.Aast.cv_final;
+    N.cv_xhp_attr = make_xhp_attr is_xhp;
+    N.cv_abstract = cv.Aast.cv_abstract;
+    N.cv_readonly = cv.Aast.cv_readonly;
+    N.cv_visibility = cv.Aast.cv_visibility;
+    N.cv_type = h;
+    N.cv_id = cv.Aast.cv_id;
+    N.cv_expr = expr;
+    N.cv_user_attributes = attrs;
+    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
+    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
+    N.cv_is_static = cv.Aast.cv_is_static;
+    N.cv_span = cv.Aast.cv_span;
+  }
+
+let class_prop_non_static env ?(const = None) cv =
+  let h = Aast.type_hint_option_map ~f:(hint env) cv.Aast.cv_type in
+  let attrs = user_attributes env cv.Aast.cv_user_attributes in
+  (* if class is __Const, make all member fields __Const *)
+  let attrs =
+    match const with
+    | Some c ->
+      if not (Naming_attributes.mem SN.UserAttributes.uaConst attrs) then
+        c :: attrs
+      else
+        attrs
+    | None -> attrs
+  in
+  let (expr, is_xhp) = class_prop_expr_is_xhp env cv in
+  {
+    N.cv_final = cv.Aast.cv_final;
+    N.cv_xhp_attr = make_xhp_attr is_xhp;
+    N.cv_visibility = cv.Aast.cv_visibility;
+    N.cv_readonly = cv.Aast.cv_readonly;
+    N.cv_type = h;
+    N.cv_abstract = cv.Aast.cv_abstract;
+    N.cv_id = cv.Aast.cv_id;
+    N.cv_expr = expr;
+    N.cv_user_attributes = attrs;
+    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
+    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
+    N.cv_is_static = cv.Aast.cv_is_static;
+    N.cv_span = cv.Aast.cv_span;
+  }
+
+let rec check_constant_expr env expr =
+  let (_, pos, e) = expr in
+  match e with
+  | Aast.Id _
+  | Aast.Null
+  | Aast.True
+  | Aast.False
+  | Aast.Int _
+  | Aast.Float _
+  | Aast.String _ ->
+    true
+  | Aast.Class_const ((_, _, Aast.CIexpr (_, _, cls)), _)
+    when match cls with
+         | Aast.Id (_, "static") -> false
+         | _ -> true ->
+    true
+  | Aast.Unop
+      ((Ast_defs.Uplus | Ast_defs.Uminus | Ast_defs.Utild | Ast_defs.Unot), e)
+    ->
+    check_constant_expr env e
+  | Aast.Binop (op, e1, e2) ->
+    (* Only assignment is invalid *)
+    begin
+      match op with
+      | Ast_defs.Eq _ ->
+        Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
+        false
+      | _ -> check_constant_expr env e1 && check_constant_expr env e2
+    end
+  | Aast.Eif (e1, e2, e3) ->
+    check_constant_expr env e1
+    && Option.for_all e2 ~f:(check_constant_expr env)
+    && check_constant_expr env e3
+  | Aast.Darray (_, l) ->
+    List.for_all l ~f:(fun (e1, e2) ->
+        check_constant_expr env e1 && check_constant_expr env e2)
+  | Aast.Varray (_, l) -> List.for_all l ~f:(check_constant_expr env)
+  | Aast.Shape fdl ->
+    (* Only check the values because shape field names are always legal *)
+    List.for_all fdl ~f:(fun (_, e) -> check_constant_expr env e)
+  | Aast.Call ((_, _, Aast.Id (_, cn)), _, el, unpacked_element)
+    when String.equal cn SN.AutoimportedFunctions.fun_
+         || String.equal cn SN.AutoimportedFunctions.class_meth
+         || String.equal cn SN.StdlibFunctions.array_mark_legacy ->
+    arg_unpack_unexpected unpacked_element;
+    List.for_all el ~f:(fun (_, e) -> check_constant_expr env e)
+  | Aast.Tuple el -> List.for_all el ~f:(check_constant_expr env)
+  | Aast.FunctionPointer ((Aast.FP_id _ | Aast.FP_class_const _), _) -> true
+  | Aast.Collection (id, _, l) ->
+    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
+    (* Only vec/keyset/dict are allowed because they are value types *)
+    if
+      String.equal cn SN.Collections.cVec
+      || String.equal cn SN.Collections.cKeyset
+      || String.equal cn SN.Collections.cDict
+    then
+      List.for_all l ~f:(check_afield_constant_expr env)
+    else (
+      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
+      false
+    )
+  | Aast.ValCollection ((Aast.Vec | Aast.Keyset), _, l) ->
+    (* Only vec/keyset are allowed because they are value types *)
+    List.for_all l ~f:(check_constant_expr env)
+  | Aast.KeyValCollection (Aast.Dict, _, l) ->
+    (* Only dict is allowed because it is a value type *)
+    List.for_all l ~f:(check_field_constant_expr env)
+  | Aast.As (e, (_, Aast.Hlike _), _) -> check_constant_expr env e
+  | Aast.As (e, (_, Aast.Happly (id, [_])), _) ->
+    let (p, cn) = NS.elaborate_id env.namespace NS.ElaborateClass id in
+    if String.equal cn SN.FB.cIncorrectType then
+      check_constant_expr env e
+    else (
+      Errors.add_naming_error @@ Naming_error.Illegal_constant p;
+      false
+    )
+  | _ ->
+    Errors.add_naming_error @@ Naming_error.Illegal_constant pos;
+    false
+
+and check_afield_constant_expr env afield =
+  match afield with
+  | Aast.AFvalue e -> check_constant_expr env e
+  | Aast.AFkvalue (e1, e2) ->
+    check_constant_expr env e1 && check_constant_expr env e2
+
+and check_field_constant_expr env (e1, e2) =
+  check_constant_expr env e1 && check_constant_expr env e2
+
+let check_constant_expression env ~in_enum_class (ty, pos, e) =
+  if not in_enum_class then
+    check_constant_expr env (ty, pos, e)
+  else
+    true
+
+let constant_expr env ~in_enum_class e =
+  let valid_constant_expression =
+    check_constant_expression env ~in_enum_class e
+  in
+  if valid_constant_expression then
+    expr env e
+  else
+    let (_, p, _) = e in
+    invalid_expr p
+
+let class_const_kind env ~in_enum_class kind =
+  match kind with
+  | Aast.CCConcrete e -> N.CCConcrete (constant_expr env ~in_enum_class e)
+  | Aast.CCAbstract default ->
+    let default = Option.map default ~f:(constant_expr env ~in_enum_class) in
+    N.CCAbstract default
+
+let class_const env ~in_enum_class cc =
+  let h = Option.map cc.Aast.cc_type ~f:(hint env) in
+  let kind = class_const_kind env ~in_enum_class cc.Aast.cc_kind in
+  {
+    N.cc_type = h;
+    N.cc_id = cc.Aast.cc_id;
+    N.cc_kind = kind;
+    N.cc_doc_comment = cc.Aast.cc_doc_comment;
+    N.cc_span = cc.Aast.cc_span;
+    N.cc_user_attributes = user_attributes env cc.Aast.cc_user_attributes;
+  }
+
+(* h cv is_required maybe_enum *)
+let xhp_attribute_decl env (h, cv, tag, maybe_enum) =
+  let (p, id) = cv.Aast.cv_id in
+  let default = cv.Aast.cv_expr in
+  let is_required = Option.is_some tag in
+  if is_required && Option.is_some default then
+    Errors.add_naming_error
+    @@ Naming_error.Xhp_required_with_default { pos = p; attr_name = id };
+  let hint_ =
+    match maybe_enum with
+    | Some (pos, items) ->
+      let is_int item =
+        match item with
+        | (_, _, Aast.Int _) -> true
+        | _ -> false
+      in
+      let contains_int = List.exists ~f:is_int items in
+      let is_string item =
+        match item with
+        | (_, _, Aast.String _)
+        | (_, _, Aast.String2 _) ->
+          true
+        | _ -> false
+      in
+      let contains_str = List.exists ~f:is_string items in
+      if contains_int && not contains_str then
+        Some (pos, Aast.Happly ((pos, "int"), []))
+      else if (not contains_int) && contains_str then
+        Some (pos, Aast.Happly ((pos, "string"), []))
+      else
+        Some (pos, Aast.Happly ((pos, "mixed"), []))
+    | _ -> Aast.hint_of_type_hint h
+  in
+  let strip_like h =
+    match h with
+    | Aast.Hlike h -> snd h
+    | _ -> h
+  in
+  let hint_ =
+    match hint_ with
+    | Some (p, h) ->
+      begin
+        match strip_like h with
+        | Aast.Hoption _ ->
+          if is_required then
+            Errors.add_naming_error
+            @@ Naming_error.Xhp_optional_required_attr
+                 { pos = p; attr_name = id };
+          hint_
+        | Aast.Happly ((_, "mixed"), []) -> hint_
+        | _ ->
+          let has_default =
+            match default with
+            | None
+            | Some (_, _, Aast.Null) ->
+              false
+            | _ -> true
+          in
+          if is_required || has_default then
+            hint_
+          else
+            Some (p, Aast.Hoption (p, h))
+      end
+    | None -> None
+  in
+  let (like, enum_values) =
+    match cv.Aast.cv_xhp_attr with
+    | Some xai -> (xai.Aast.xai_like, xai.Aast.xai_enum_values)
+    | None -> (None, [])
+  in
+  let hint_ =
+    Option.map
+      ~f:(fun hint ->
+        match like with
+        | Some plike ->
+          if
+            not
+              (TypecheckerOptions.like_type_hints
+                 (Provider_context.get_tcopt env.ctx))
+          then
+            Errors.experimental_feature p "like-types";
+
+          (plike, Aast.Hlike hint)
+        | _ -> hint)
+      hint_
+  in
+  let hint_ = ((), hint_) in
+  let hint_ = Aast.type_hint_option_map hint_ ~f:(hint env) in
+  let (expr, _) = class_prop_expr_is_xhp env cv in
+  let xhp_attr_info =
+    Some { N.xai_like = like; N.xai_tag = tag; N.xai_enum_values = enum_values }
+  in
+  {
+    N.cv_final = cv.Aast.cv_final;
+    N.cv_xhp_attr = xhp_attr_info;
+    N.cv_readonly = cv.Aast.cv_readonly;
+    N.cv_abstract = cv.Aast.cv_abstract;
+    N.cv_visibility = cv.Aast.cv_visibility;
+    N.cv_type = hint_;
+    N.cv_id = cv.Aast.cv_id;
+    N.cv_expr = expr;
+    N.cv_user_attributes = [];
+    N.cv_is_promoted_variadic = cv.Aast.cv_is_promoted_variadic;
+    N.cv_doc_comment = cv.Aast.cv_doc_comment (* Can make None to save space *);
+    N.cv_is_static = cv.Aast.cv_is_static;
+    N.cv_span = cv.Aast.cv_span;
+  }
+
+let enum_ env enum_name ~in_enum_class ~abstract_enum_class e =
+  let open Aast in
+  let pos = fst enum_name in
+  let enum_hint = (pos, Happly (enum_name, [])) in
+  let old_base =
+    if
+      in_enum_class
+      && TypecheckerOptions.everything_sdt (Provider_context.get_tcopt env.ctx)
+    then
+      (pos, Hlike e.e_base)
+    else
+      e.e_base
+  in
+  let new_base = hint env old_base in
+  let bound =
+    if in_enum_class then
+      if abstract_enum_class then
+        []
+      else
+        (* Turn the base type of the enum class into MemberOf<E, base> *)
+        let elt = (pos, SN.Classes.cMemberOf) in
+        let h = (pos, Happly (elt, [enum_hint; old_base])) in
+        [hint env h]
+    else
+      [enum_hint]
+  in
+  let enum =
+    {
+      N.e_base = new_base;
+      N.e_constraint = Option.map e.e_constraint ~f:(hint env);
+      N.e_includes = List.map ~f:(hint env) e.e_includes;
+    }
+  in
+  (Some bound, Some enum)
+
+let class_ ctx c =
+  let env = Env.make_class_env ctx c in
+  let c =
+    elaborate_namespaces#on_class_
+      (Naming_elaborate_namespaces_endo.make_env env.namespace)
+      c
+  in
+  let c = Naming_captures.populate_class_ c in
+  let where_constraints =
+    type_where_constraints env c.Aast.c_where_constraints
+  in
+  let name = c.Aast.c_name in
+  let (constructor, smethods, methods) = Aast.split_methods c.Aast.c_methods in
+  let smethods = List.map ~f:(method_ env) smethods in
+  let (sprops, props) = Aast.split_vars c.Aast.c_vars in
+  let sprops = List.map ~f:(class_prop_static env) sprops in
+  let attrs = user_attributes env c.Aast.c_user_attributes in
+  let const = Naming_attributes.find SN.UserAttributes.uaConst attrs in
+  let props = List.map ~f:(class_prop_non_static ~const env) props in
+  let xhp_attrs = List.map ~f:(xhp_attribute_decl env) c.Aast.c_xhp_attrs in
+  (* These would be out of order with the old attributes, but that shouldn't matter? *)
+  let props = props @ xhp_attrs in
+  let (in_enum_class, abstract_enum_class) =
+    let open Ast_defs in
+    match c.Aast.c_kind with
+    | Cenum_class Concrete -> (true, false)
+    | Cenum_class Abstract -> (true, true)
+    | Cclass _
+    | Cinterface
+    | Cenum
+    | Ctrait ->
+      (false, false)
+  in
+  let (enum_bound, enum) =
+    match c.Aast.c_enum with
+    | Some enum -> enum_ env name ~in_enum_class ~abstract_enum_class enum
+    | None -> (None, None)
+  in
+  let parents = List.map c.Aast.c_extends ~f:(hint ~allow_retonly:false env) in
+  let parents =
+    match enum_bound with
+    (* Make enums implicitly extend the BuiltinEnum/BuiltinEnumClass classes in
+     * order to provide utility methods.
+     *)
+    | Some bounds_list ->
+      let pos = fst name in
+      let builtin =
+        if in_enum_class then
+          if abstract_enum_class then
+            SN.Classes.cHH_BuiltinAbstractEnumClass
+          else
+            SN.Classes.cHH_BuiltinEnumClass
+        else
+          SN.Classes.cHH_BuiltinEnum
+      in
+      let parent = (pos, N.Happly ((pos, builtin), bounds_list)) in
+      parent :: parents
+    | None -> parents
+  in
+  let methods = List.map ~f:(method_ env) methods in
+  let uses = List.map ~f:(hint env) c.Aast.c_uses in
+  let xhp_attr_uses = List.map ~f:(hint env) c.Aast.c_xhp_attr_uses in
+  let (c_req_extends, c_req_implements, c_req_class) =
+    Aast.split_reqs c.Aast.c_reqs
+  in
+  if
+    (not (List.is_empty c_req_implements))
+    && not (Ast_defs.is_c_trait c.Aast.c_kind)
+  then
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_implements
+         (fst (List.hd_exn c_req_implements));
+  if
+    (not (List.is_empty c_req_class)) && not (Ast_defs.is_c_trait c.Aast.c_kind)
+  then
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_class (fst (List.hd_exn c_req_class));
+
+  let e =
+    TypecheckerOptions.explicit_consistent_constructors
+      (Provider_context.get_tcopt ctx)
+  in
+  if e > 0 && Option.is_none constructor then
+    Option.iter
+      (Naming_attributes.mem_pos SN.UserAttributes.uaConsistentConstruct attrs)
+      ~f:(fun pos ->
+        let err_opt =
+          match c.Aast.c_kind with
+          | Ast_defs.Ctrait ->
+            Some
+              (Naming_error.Explicit_consistent_constructor
+                 { classish_kind = c.Aast.c_kind; pos })
+          | _ when e > 1 ->
+            Some
+              (Naming_error.Explicit_consistent_constructor
+                 { classish_kind = c.Aast.c_kind; pos })
+          | _ -> None
+        in
+        Option.iter err_opt ~f:Errors.add_naming_error);
+  let req_implements = List.map ~f:(hint env) c_req_implements in
+  let req_implements =
+    List.map ~f:(fun h -> (h, N.RequireImplements)) req_implements
+  in
+  if
+    (not (List.is_empty c_req_extends))
+    && (not (Ast_defs.is_c_trait c.Aast.c_kind))
+    && not (Ast_defs.is_c_interface c.Aast.c_kind)
+  then
+    Errors.add_naming_error
+    @@ Naming_error.Invalid_require_extends (fst (List.hd_exn c_req_extends));
+  let req_extends = List.map ~f:(hint env) c_req_extends in
+  let req_extends = List.map ~f:(fun h -> (h, N.RequireExtends)) req_extends in
+  let req_class = List.map ~f:(hint env) c_req_class in
+  let req_class = List.map ~f:(fun h -> (h, N.RequireClass)) req_class in
+  (* Setting a class type parameters constraint to the 'this' type is weird
+   * so lets forbid it for now.
+   *)
+  let tparam_l = type_paraml ~forbid_this:true env c.Aast.c_tparams in
+  let consts = List.map ~f:(class_const env ~in_enum_class) c.Aast.c_consts in
+  let typeconsts = List.map ~f:(typeconst env) c.Aast.c_typeconsts in
+  let implements =
+    List.map ~f:(hint ~allow_retonly:false env) c.Aast.c_implements
+  in
+  let constructor = Option.map constructor ~f:(method_ env) in
+  let (constructor, methods, smethods) =
+    interface c constructor methods smethods
+  in
+  let file_attributes =
+    file_attributes ctx c.Aast.c_mode c.Aast.c_file_attributes
+  in
+  let c_tparams = tparam_l in
+  let methods =
+    match constructor with
+    | None -> smethods @ methods
+    | Some c -> c :: smethods @ methods
+  in
+  let attrs =
+    let open Ast_defs in
+    match c.Aast.c_kind with
+    | Cclass _
+    | Cinterface
+    | Ctrait ->
+      make_sdt ctx (fst name) attrs
+    | Cenum
+    | Cenum_class _ ->
+      attrs
+  in
+  {
+    N.c_annotation = ();
+    N.c_span = c.Aast.c_span;
+    N.c_mode = c.Aast.c_mode;
+    N.c_final = c.Aast.c_final;
+    N.c_is_xhp = c.Aast.c_is_xhp;
+    N.c_has_xhp_keyword = c.Aast.c_has_xhp_keyword;
+    N.c_kind = c.Aast.c_kind;
+    N.c_name = name;
+    N.c_tparams;
+    N.c_extends = parents;
+    N.c_uses = uses;
+    N.c_xhp_attr_uses = xhp_attr_uses;
+    N.c_xhp_category = c.Aast.c_xhp_category;
+    N.c_reqs = req_extends @ req_implements @ req_class;
+    N.c_implements = implements;
+    N.c_where_constraints = where_constraints;
+    N.c_consts = consts;
+    N.c_typeconsts = typeconsts;
+    N.c_vars = sprops @ props;
+    N.c_methods = methods;
+    N.c_user_attributes = attrs;
+    N.c_file_attributes = file_attributes;
+    N.c_namespace = c.Aast.c_namespace;
+    N.c_enum = enum;
+    N.c_doc_comment = c.Aast.c_doc_comment;
+    N.c_xhp_children = c.Aast.c_xhp_children;
+    (* Naming and typechecking shouldn't use these fields *)
+    N.c_xhp_attrs = [];
+    N.c_emit_id = c.Aast.c_emit_id;
+    N.c_internal = c.Aast.c_internal;
+    N.c_module = c.Aast.c_module;
+    N.c_docs_url = c.Aast.c_docs_url;
+  }
 
 (**************************************************************************)
 (* Typedefs *)

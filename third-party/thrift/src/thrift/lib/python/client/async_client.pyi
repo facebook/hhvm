@@ -21,6 +21,8 @@ from thrift.python.client.omni_client import (
     InteractionMethodPosition,
     RpcKind,
 )
+
+from thrift.python.common import RpcOptions
 from thrift.python.types import _fbthrift_ResponseStreamResult, StructOrUnion, TChunk
 
 TAsyncClient = typing.TypeVar("TAsyncClient", bound="AsyncClient")
@@ -53,6 +55,7 @@ class AsyncClient:
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
         uriOrName: str = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> None: ...
     @typing.overload
     async def _send_request(
@@ -67,6 +70,7 @@ class AsyncClient:
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
         uriOrName: str = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> TResponse: ...
     @typing.overload
     async def _send_request(
@@ -84,6 +88,7 @@ class AsyncClient:
         interaction_name: str = ...,
         created_interaction: AsyncClient = ...,
         uriOrName: str = ...,
+        rpc_options: typing.Optional[RpcOptions] = ...,
     ) -> typing.Tuple[TResponse, typing.AsyncGenerator[TChunk, None]]: ...
     def set_persistent_header(self, key: str, value: str) -> None: ...
     # pyre-ignore[2]: callback returns are ignored, can be any type

@@ -1058,8 +1058,7 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
 
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) {
-        assertx(!isInterface(cls));
+      if (cls && isNormalClass(cls)) {
         obj = gen(env, AssertType, Type::SubObj(cls), obj);
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
@@ -1074,7 +1073,8 @@ void fcallObjMethodObj(IRGS& env, const FCallArgs& fca, SSATmp* obj,
         // We may still want to use MethProfile to gather more information in
         // case the class isn't known exactly.
         auto const exactClass =
-          obj->type().clsSpec().exact() || cls->attrs() & AttrNoOverride;
+          obj->type().clsSpec().exact() ||
+          cls->attrs() & AttrNoOverrideRegular;
         auto const callCtx =
           MemberLookupContext(callContext(env, fca, cls), curFunc(env));
         return lookupImmutableObjMethod(cls, methodName->strVal(),
@@ -1510,7 +1510,7 @@ void emitFCallCtor(IRGS& env, FCallArgs fca, const StringData* clsHint) {
   auto const exactCls = [&] {
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) return cls;
+      if (cls && isNormalClass(cls)) return cls;
     }
     return obj->type().clsSpec().exactCls();
   }();
@@ -1902,7 +1902,7 @@ void fcallClsMethodCommon(IRGS& env,
   auto const knownClass = [&] () -> std::pair<const Class*, bool> {
     if (!clsHint->empty()) {
       auto const cls = lookupUniqueClass(env, clsHint);
-      if (cls) return std::make_pair(cls, true);
+      if (cls && isNormalClass(cls)) return std::make_pair(cls, true);
     }
 
     if (auto const cs = clsVal->type().clsSpec()) {

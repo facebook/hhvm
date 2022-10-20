@@ -213,7 +213,15 @@ let rec print_global_expr env expr =
     (* For Obj_get (e.g. $baz->memoized_method()), we concatenate the class type and the method id. *)
     let class_ty_str = Tast_env.print_ty env (Tast.get_type obj) in
     let (_, _, m_id) = m in
-    class_ty_str ^ "->" ^ print_global_expr env m_id
+    (* For the case $obj?->method(), the question mark is removed from the class type,
+       since we are not interested in the case where $obj is null. *)
+    let remove_question_mark_prefix str =
+      if String.is_prefix ~prefix:"?" str then
+        String.sub str ~pos:1 ~len:(String.length str - 1)
+      else
+        str
+    in
+    remove_question_mark_prefix class_ty_str ^ "->" ^ print_global_expr env m_id
   | _ -> "Unknown"
 
 (* Given the environment, the context and an expression, this function returns

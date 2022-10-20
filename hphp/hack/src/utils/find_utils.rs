@@ -5,8 +5,8 @@
 
 use std::path::Path;
 
-use lazy_static::lazy_static;
-use regex::RegexSet;
+use files_to_ignore::FilesToIgnore;
+use relative_path::RelativePath;
 
 const EXTENSIONS: [&str; 8] = [
     "php",         // normal php file
@@ -43,22 +43,39 @@ pub fn is_hack(path: &Path) -> bool {
 
 /// Returns true if path is a hack file, is not under any of (.hg, .git, .svn),
 /// and is not a .phpt file under phpunit/.
-pub fn is_non_ignored_hack(path: &Path) -> bool {
-    lazy_static! {
-        static ref IGNORE_PHPUNIT_VCS_REGEXSET: RegexSet = RegexSet::new(&[
-            // Under phpunit, the extension .phpt designates a test file that is not a
-            // proper php file although it does contain some php code.
-            r".*flib/intern/third-party/phpunit/phpunit.*\.phpt",
-            // Filter out all vc dirs
-            r"[.](hg|git|svn)/.*",
-        ])
-        .unwrap();
-    }
-    is_hack(path)
-        && match path.to_str() {
-            Some(path_str) => !IGNORE_PHPUNIT_VCS_REGEXSET.is_match(path_str),
-            None => false,
-        }
+pub fn is_non_ignored_hack(files_to_ignore: &FilesToIgnore, path: &Path) -> bool {
+    is_hack(path) && !files_to_ignore.should_ignore(path)
+}
+
+/// Traverse the directory `root` and yield the non-ignored Hack files under it
+/// in parallel using `jwalk`. The root will be stripped from each path and
+/// replaced with the given `Prefix`.
+pub fn find_hack_files<'a>(
+    files_to_ignore: &'a FilesToIgnore,
+    root: &'a Path,
+    prefix: relative_path::Prefix,
+) -> impl Iterator<Item = anyhow::Result<RelativePath>> + 'a {
+    jwalk::WalkDir::new(&root)
+        .into_iter()
+        .filter_map(move |entry_result| {
+            let entry = match entry_result {
+                Ok(entry) => entry,
+                Err(err) => return Some(Err(anyhow::anyhow!(err))),
+            };
+            if entry.file_type().is_dir() {
+                return None;
+            }
+            let path = entry.path();
+            if !is_hack(&path) {
+                return None;
+            }
+            let suffix = path.strip_prefix(&root).unwrap();
+            if files_to_ignore.should_ignore(&suffix) {
+                return None;
+            }
+            let path = RelativePath::make(prefix, suffix.to_owned());
+            Some(Ok(path))
+        })
 }
 
 #[cfg(test)]
@@ -118,7 +135,7 @@ mod tests {
             paths
                 .iter()
                 .map(PathBuf::as_path)
-                .filter(|path| is_non_ignored_hack(path))
+                .filter(|path| is_non_ignored_hack(&Default::default(), path))
                 .collect::<Vec<_>>(),
             vec![Path::new("alpha.hack"), Path::new("/my/path/check.hh")]
         );

@@ -21,6 +21,7 @@
 
 THRIFT_FLAG_DECLARE_bool(experimental_use_resource_pools);
 FOLLY_GFLAGS_DECLARE_bool(thrift_experimental_use_resource_pools);
+FOLLY_GFLAGS_DECLARE_bool(thrift_disable_resource_pools);
 
 THRIFT_FLAG_DECLARE_bool(allow_resource_pools_for_wildcards);
 FOLLY_GFLAGS_DECLARE_bool(thrift_allow_resource_pools_for_wildcards);

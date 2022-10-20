@@ -113,6 +113,7 @@ let locl_like r ty =
     | Tany _
     | Terr ->
       ty
+    | Tunion tys when List.exists Typing_defs.is_dynamic tys -> ty
     | _ -> mk (r, Tunion [dynamic r; ty])
 
 let supportdyn r ty =

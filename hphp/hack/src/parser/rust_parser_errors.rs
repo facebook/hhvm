@@ -121,7 +121,7 @@ impl UnstableFeatures {
             UnstableFeatures::TypeConstMultipleBounds => Preview,
             UnstableFeatures::TypeConstSuperBound => Unstable,
             UnstableFeatures::ClassConstDefault => Migration,
-            UnstableFeatures::TypeRefinements => Unstable,
+            UnstableFeatures::TypeRefinements => Preview,
             UnstableFeatures::MethodTraitDiamond => OngoingRelease,
             UnstableFeatures::UpcastExpression => Unstable,
             UnstableFeatures::RequireClass => Preview,

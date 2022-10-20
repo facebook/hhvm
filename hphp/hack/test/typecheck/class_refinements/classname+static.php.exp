@@ -1,15 +1,3 @@
-File "classname+static.php", line 8, characters 7-19:
-Invalid argument (Typing[4323])
-  File "classname+static.php", line 13, characters 12-15:
-  `TBox` is a constrained type parameter
-  File "classname+static.php", line 13, characters 20-42:
-  This type constraint is violated
-  File "classname+static.php", line 13, characters 20-42:
-  Expected an object with `type T = _`
-  File "classname+static.php", line 8, characters 7-12:
-  But got `this as Box`
-  File "classname+static.php", line 5, characters 16-18:
-    via this generic `this`; implicitly defined constant `::class` is a string that contains the fully qualified name of `Box`
 File "classname+static.php", line 9, characters 7-17:
 Invalid argument (Typing[4323])
   File "classname+static.php", line 13, characters 12-15:

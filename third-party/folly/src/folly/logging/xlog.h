@@ -144,16 +144,16 @@ static_assert(
  *
  * Note that this is threadsafe.
  */
-#define XLOG_EVERY_MS_IF(level, cond, ms, ...)                             \
-  XLOG_IF(                                                                 \
-      level,                                                               \
-      (cond) &&                                                            \
-          [__folly_detail_xlog_ms = ms] {                                  \
-            static ::folly::logging::IntervalRateLimiter                   \
-                folly_detail_xlog_limiter(                                 \
-                    1, std::chrono::milliseconds(__folly_detail_xlog_ms)); \
-            return folly_detail_xlog_limiter.check();                      \
-          }(),                                                             \
+#define XLOG_EVERY_MS_IF(level, cond, ms, ...)                               \
+  XLOG_IF(                                                                   \
+      level,                                                                 \
+      (cond) &&                                                              \
+          [__folly_detail_xlog_ms = ms] {                                    \
+            static ::folly::logging::IntervalRateLimiter                     \
+                folly_detail_xlog_limiter(                                   \
+                    1, ::std::chrono::milliseconds(__folly_detail_xlog_ms)); \
+            return folly_detail_xlog_limiter.check();                        \
+          }(),                                                               \
       ##__VA_ARGS__)
 
 /**
@@ -162,17 +162,17 @@ static_assert(
  *
  * Note that this is threadsafe.
  */
-#define XLOGF_EVERY_MS(level, ms, fmt, arg1, ...)                      \
-  XLOGF_IF(                                                            \
-      level,                                                           \
-      [__folly_detail_xlog_ms = ms] {                                  \
-        static ::folly::logging::IntervalRateLimiter                   \
-            folly_detail_xlog_limiter(                                 \
-                1, std::chrono::milliseconds(__folly_detail_xlog_ms)); \
-        return folly_detail_xlog_limiter.check();                      \
-      }(),                                                             \
-      fmt,                                                             \
-      arg1,                                                            \
+#define XLOGF_EVERY_MS(level, ms, fmt, arg1, ...)                        \
+  XLOGF_IF(                                                              \
+      level,                                                             \
+      [__folly_detail_xlog_ms = ms] {                                    \
+        static ::folly::logging::IntervalRateLimiter                     \
+            folly_detail_xlog_limiter(                                   \
+                1, ::std::chrono::milliseconds(__folly_detail_xlog_ms)); \
+        return folly_detail_xlog_limiter.check();                        \
+      }(),                                                               \
+      fmt,                                                               \
+      arg1,                                                              \
       ##__VA_ARGS__)
 
 namespace folly {
@@ -307,14 +307,15 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogEveryNThreadImpl(size_t n) {
  *
  * The internal counters are process-global and threadsafe.
  */
-#define XLOG_N_PER_MS(level, count, ms, ...)                                   \
-  XLOG_IF(                                                                     \
-      level,                                                                   \
-      [] {                                                                     \
-        static ::folly::logging::IntervalRateLimiter                           \
-            folly_detail_xlog_limiter((count), std::chrono::milliseconds(ms)); \
-        return folly_detail_xlog_limiter.check();                              \
-      }(),                                                                     \
+#define XLOG_N_PER_MS(level, count, ms, ...)               \
+  XLOG_IF(                                                 \
+      level,                                               \
+      [] {                                                 \
+        static ::folly::logging::IntervalRateLimiter       \
+            folly_detail_xlog_limiter(                     \
+                (count), ::std::chrono::milliseconds(ms)); \
+        return folly_detail_xlog_limiter.check();          \
+      }(),                                                 \
       ##__VA_ARGS__)
 
 namespace folly {
@@ -357,10 +358,11 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogFirstNExactImpl(std::size_t n) {
  * though.)
  */
 #ifdef FOLLY_XLOG_STRIP_PREFIXES
-#define XLOG_FILENAME \
-  folly::xlogStripFilename(__FILE__, FOLLY_XLOG_STRIP_PREFIXES)
+#define XLOG_FILENAME        \
+  (static_cast<char const*>( \
+      ::folly::xlogStripFilename(__FILE__, FOLLY_XLOG_STRIP_PREFIXES)))
 #else
-#define XLOG_FILENAME __FILE__
+#define XLOG_FILENAME (static_cast<char const*>(__FILE__))
 #endif
 
 #define XLOG_IMPL(level, type, ...) \
@@ -422,15 +424,15 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogFirstNExactImpl(std::size_t n) {
                 static ::folly::XlogCategoryInfo<XLOG_IS_IN_HEADER_FILE>    \
                     folly_detail_xlog_category;                             \
                 return folly_detail_xlog_category.getInfo(                  \
-                    &xlog_detail::xlogFileScopeInfo);                       \
+                    &::folly::detail::custom::xlogFileScopeInfo);           \
               }(),                                                          \
               (level),                                                      \
               [] {                                                          \
                 constexpr auto* folly_detail_xlog_filename = XLOG_FILENAME; \
-                return xlog_detail::getXlogCategoryName(                    \
+                return ::folly::detail::custom::getXlogCategoryName(        \
                     folly_detail_xlog_filename, 0);                         \
               }(),                                                          \
-              xlog_detail::isXlogCategoryOverridden(0),                     \
+              ::folly::detail::custom::isXlogCategoryOverridden(0),         \
               XLOG_FILENAME,                                                \
               __LINE__,                                                     \
               __func__,                                                     \
@@ -468,17 +470,17 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogFirstNExactImpl(std::size_t n) {
     return folly_detail_xlog_level.check(                       \
         (level),                                                \
         folly_detail_xlog_filename,                             \
-        xlog_detail::isXlogCategoryOverridden(0),               \
-        &xlog_detail::xlogFileScopeInfo);                       \
+        ::folly::detail::custom::isXlogCategoryOverridden(0),   \
+        &::folly::detail::custom::xlogFileScopeInfo);           \
   }())
 
 /**
  * Get the name of the log category that will be used by XLOG() statements
  * in this file.
  */
-#define XLOG_GET_CATEGORY_NAME()                            \
-  (xlog_detail::isXlogCategoryOverridden(0)                 \
-       ? xlog_detail::getXlogCategoryName(XLOG_FILENAME, 0) \
+#define XLOG_GET_CATEGORY_NAME()                                        \
+  (::folly::detail::custom::isXlogCategoryOverridden(0)                 \
+       ? ::folly::detail::custom::getXlogCategoryName(XLOG_FILENAME, 0) \
        : ::folly::getXlogCategoryNameForFile(XLOG_FILENAME))
 
 /**
@@ -490,7 +492,7 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogFirstNExactImpl(std::size_t n) {
  * expand to the correct filename based on where the macro is used.
  */
 #define XLOG_GET_CATEGORY() \
-  folly::LoggerDB::get().getCategory(XLOG_GET_CATEGORY_NAME())
+  (::folly::LoggerDB::get().getCategory(XLOG_GET_CATEGORY_NAME()))
 
 /**
  * XLOG_SET_CATEGORY_NAME() can be used to explicitly define the log category
@@ -514,14 +516,23 @@ FOLLY_EXPORT FOLLY_ALWAYS_INLINE bool xlogFirstNExactImpl(std::size_t n) {
 #endif
 
 #define XLOG_SET_CATEGORY_NAME(category)                                     \
-  namespace xlog_detail {                                                    \
+  namespace folly {                                                          \
+  namespace detail {                                                         \
+  namespace custom {                                                         \
   namespace {                                                                \
+  struct xlog_correct_usage;                                                 \
+  static_assert(                                                             \
+      ::std::is_same<                                                        \
+          xlog_correct_usage,                                                \
+          ::folly::detail::custom::xlog_correct_usage>::value,               \
+      "XLOG_SET_CATEGORY_NAME() should not be used within namespace scope"); \
   XLOG_SET_CATEGORY_CHECK                                                    \
-  FOLLY_CONSTEVAL inline folly::StringPiece getXlogCategoryName(             \
-      folly::StringPiece, int) {                                             \
+  FOLLY_CONSTEVAL inline StringPiece getXlogCategoryName(StringPiece, int) { \
     return category;                                                         \
   }                                                                          \
   FOLLY_CONSTEVAL inline bool isXlogCategoryOverridden(int) { return true; } \
+  }                                                                          \
+  }                                                                          \
   }                                                                          \
   }
 
@@ -851,7 +862,8 @@ FOLLY_CONSTEVAL const char* xlogStripFilename(
     const char* filename, const char* prefixes) {
   return detail::xlogStripFilenameRecursive(filename, prefixes, 0, 0, true);
 }
-} // namespace folly
+
+namespace detail {
 
 /*
  * We intentionally use an unnamed namespace inside a header file here.
@@ -859,8 +871,10 @@ FOLLY_CONSTEVAL const char* xlogStripFilename(
  * We want each .cpp file that uses xlog.h to get its own separate
  * implementation of the following functions and variables.
  */
-namespace xlog_detail {
+namespace custom {
 namespace {
+struct xlog_correct_usage;
+
 /**
  * The default getXlogCategoryName() function.
  *
@@ -879,8 +893,8 @@ namespace {
  * over this one.
  */
 template <typename T>
-FOLLY_CONSTEVAL inline folly::StringPiece getXlogCategoryName(
-    folly::StringPiece filename, T) {
+FOLLY_CONSTEVAL inline StringPiece getXlogCategoryName(
+    StringPiece filename, T) {
   return filename;
 }
 
@@ -908,6 +922,9 @@ FOLLY_CONSTEVAL inline bool isXlogCategoryOverridden(T) {
  * entire .cpp file, rather than needing a separate copy for each XLOG()
  * statement.
  */
-FOLLY_CONSTINIT ::folly::XlogFileScopeInfo xlogFileScopeInfo;
+FOLLY_CONSTINIT XlogFileScopeInfo xlogFileScopeInfo;
 } // namespace
-} // namespace xlog_detail
+} // namespace custom
+
+} // namespace detail
+} // namespace folly

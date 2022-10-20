@@ -263,11 +263,6 @@ and simplify_union ~approx_cancel_neg env ty1 ty2 r =
   else
     simplify_union_ ~approx_cancel_neg env ty1 ty2 r
 
-and is_class ty =
-  match get_node ty with
-  | Tclass _ -> true
-  | _ -> false
-
 and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
   let (env, ty1) = Env.expand_type env ty1 in
   let (env, ty2) = Env.expand_type env ty2 in
@@ -297,9 +292,9 @@ and simplify_union_ ~approx_cancel_neg env ty1 ty2 r =
       when equal_dependent_type dep1 dep2 ->
       let (env, tcstr) = union ~approx_cancel_neg env tcstr1 tcstr2 in
       (env, Some (mk (r, Tdependent (dep1, tcstr))))
-    | ((_, Tdependent (_, ty1)), _) when is_class ty1 ->
+    | ((_, Tdependent (_, ty1)), _) when Utils.is_class ty1 ->
       ty_equiv env ty1 ty2 ~are_ty_param:false
-    | (_, (_, Tdependent (_, ty2))) when is_class ty2 ->
+    | (_, (_, Tdependent (_, ty2))) when Utils.is_class ty2 ->
       ty_equiv env ty2 ty1 ~are_ty_param:false
     | ((_, Tnewtype (id1, tyl1, tcstr1)), (_, Tnewtype (id2, tyl2, tcstr2)))
       when String.equal id1 id2 ->

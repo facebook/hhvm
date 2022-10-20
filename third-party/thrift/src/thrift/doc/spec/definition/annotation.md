@@ -22,7 +22,7 @@ StructuredAnnotation ::= "@" ConstStruct | "@" ConstStructType
 
 ### Examples
 
-Here's a comprehensive list of various annotated entities.
+Here's an example of various annotated entities.
 
 ```
 struct FirstAnnotation {
@@ -32,18 +32,19 @@ struct FirstAnnotation {
 
 struct SecondAnnotation {
   2: i64 total = 0;
-  3: SecondAnnotation recurse (cpp.ref = "True");
+  @thrift.Box
+  3: optional SecondAnnotation recurse;
   4: bool is_cool;
 }
 
 @FirstAnnotation{name="my_type"}
-typedef string annotated_string
+typedef string AnnotatedString
 
 @FirstAnnotation{name="my_struct", count=3}
-@SecondAnnotationstruct
-MyStruct {
+@SecondAnnotation
+struct MyStruct {
   @SecondAnnotation{}
-  5: annotated_string tag;
+  5: AnnotatedString tag;
 }
 
 @FirstAnnotationexception
@@ -60,7 +61,7 @@ union MyUnion {
 @SecondAnnotation{total=4, recurse=SecondAnnotation{total=5}}
 service MyService {
   @SecondAnnotation
-  i64 my_function(2: annotated_string param);
+  i64 my_function(2: AnnotatedString param);
 }
 
 @FirstAnnotation{name="shiny"}
@@ -78,7 +79,7 @@ const map<string, string> MyConst = {
 
 ## Unstructured Annotations (Deprecated)
 
-Unstructured annotations are structured as key-value pairs where the key is a string and the value is either a string or a const structure. They may be applied to [definitions](../index.md) in the Thrift language, following that construct.
+Unstructured annotations are key-value pairs where the key is an identifier and the value is either a string or an identifier. Both identifiers are interpreted as strings. These annotations may be applied to [definitions](../index.md) in the Thrift language, following that construct.
 
 ```
 Annotations ::=
@@ -95,17 +96,80 @@ Annotation ::=
 
 If a value is not present, then the default value of `"1"` (a string) is assumed.
 
-## Scope Annotations
-
-How to specify what types of definitions an annotation can be applied to. See [scope.thrift](https://github.com/facebook/fbthrift/blob/v2022.07.18.00/thrift/annotation/scope.thrift#L24-L57).
-
-## Transitive Annotations
-
-Applies effects of sibling annotations. See [scope.thrift](https://github.com/facebook/fbthrift/blob/v2022.07.18.00/thrift/annotation/scope.thrift#L71-L94).
-
 ## Standard Annotations
 
 The standard Thrift annotation library is a set of structured annotations (i.e. `cpp.thrift`, `meta.thrift`, and more) that is located in `thrift/annotation`.
+
+### Scope Annotations
+
+How to specify what types of definitions an annotation can be applied to. See [scope.thrift](https://github.com/facebook/fbthrift/blob/v2022.07.18.00/thrift/annotation/scope.thrift#L24-L57).
+
+### Transitive Annotations
+
+Applies effects of sibling annotations. See [scope.thrift](https://github.com/facebook/fbthrift/blob/v2022.07.18.00/thrift/annotation/scope.thrift#L71-L94).
+
+### Thrift annotations
+
+Thrift annotations work in all officially supported languages.
+
+#### thrift.Box
+
+* Where to use: optional field name
+* Value: none
+* Example:
+
+```
+include "thrift/annotation/thrift.thrift"
+
+struct RecList {
+  @thrift.Box
+  1: optional RecList next;
+}
+```
+
+This indicates that a subobject should be allocated separately (e.g. because it is large and infrequently set).
+
+NOTE: The APIs and initialization behavior are same as normal field, but different from `@cpp.Ref`. e.g.
+
+```
+struct Foo {
+  1: optional i32 normal;
+  @thrift.Box
+  2: optional i32 boxed;
+  @cpp.Ref
+  3: optional i32 referred;
+}
+```
+in C++
+
+```
+Foo foo;
+EXPECT_FALSE(foo.normal().has_value()); // okay
+EXPECT_FALSE(foo.boxed().has_value()); // okay
+EXPECT_FALSE(foo.referred().has_value()); // build failure: std::unique_ptr doesn't have has_value method
+
+EXPECT_EQ(*foo.normal(), 0); // throw bad_field_access exception
+EXPECT_EQ(*foo.boxed(), 0); // throw bad_field_access exception
+EXPECT_EQ(*foo.referred(), 0); // okay, field has value by default
+```
+
+#### thrift.SerializeInFieldIdOrder
+
+Serialize fields in field id ascending order instead of fields declaration order. This makes serialization result deterministic after swapping fields. In addition, it can reduce payload size only for compact protocol. Example
+
+```
+@thrift.SerializeInFieldIdOrder
+struct Foo {
+  2: byte a;
+  1: byte b;
+}
+```
+
+This reduces serialized data size from 5 bytes to 4 bytes for compact protocol.
+
+Why? Compact protocol stored delta of field id, instead of actual field id in payload. When field is serialized out of field id order, delta=0 will be written, followed with actual field id, thus when field is serialized out of field id order, it uses more bytes for field id.
+
+NOTE: This annotation won't reduce payload size for other protocols.
 
 ### C++ annotations
 
@@ -180,12 +244,14 @@ struct BinaryTree {
 
 Makes a field a reference, not a value and Thrift generates a `std::unique_ptr/std::shared_ptr` for the annotated field, not a value. This annotation is added to support recursive types. However, you can also use it to turn a field from a value to a pointer. `@cpp.Ref` is equivalent having type`@cpp.RefType.Unique`. All `@cpp.Ref` fields **should be** optional.
 
+This annotation should be used instead of deprecated `cpp.ref` and `cpp.ref_type` annotations.
+
 NOTE: A struct may transitively contain itself as a field only if at least one of the fields in the inclusion chain is either an optional Ref field or a container. Otherwise the struct would have infinite size. See [`thrift/test/Recursive.thrift`](https://github.com/facebook/fbthrift/blob/main/thrift/test/Recursive.thrift) for examples.
 
 #### cpp.noncopyable and cpp.noncomparable
 
 * Where to use: struct/union/exception
-* Value: None
+* Value: none
 * Example:
 
 ```
@@ -202,21 +268,21 @@ This is to avoid generating copy constructor/copy assignment constructor and ove
 #### cpp.declare_hash and cpp.declare_equal_to
 
 * Where to use: struct
-* Value: None
+* Value: none
 
 Adds a `std::hash` and `std::equal_to` specialization for the Thrift struct. You need to provide your own hash and equal_to implementation. Use this annotation if you want to use your Thrift struct as the key type of `std::unordered_map` or other unordered associative containers.
 
 #### cpp.cache
 
 * Where to use: method parameter, must be a string and only one of the parameters can have this annotation
-* Value: None
+* Value: none
 
-This is added by the SMC team to support their custom processor, which caches response and uses the parameter annotated by `cpp.cache` as the key.
+This is used in SMC to support a custom processor which caches response and uses the parameter annotated with `cpp.cache` as the key.
 
 #### cpp.coroutine
 
 * Where to use: method
-* Value: None
+* Value: none
 * Example:
 
 ```
@@ -230,7 +296,7 @@ Enable coroutine generation. See [[Thrift/ImplementingAServer/]] for more inform
 #### priority
 
 * Where to use: method
-* Value: None
+* Value: none
 * Example:
 
 ```
@@ -346,14 +412,14 @@ enum TermIdType {
  PREFIX_USERID = 1,
 }
 ```
-NOTE: Signed 32 bit integer and 64 bit integer are not valid options. Enum in C++ by default uses signed 32 bit integer, and Thrift serializer treats all enums as signed 32 bit integer which will lead into truncation.
+NOTE: 64-bit integer and signed 32-bit integer are not valid options. Signed 32-bit integer is the default and 64-bit is not supported to avoid truncation since enums are sent as 32-bit integers over the wire.
 
 #### deprecated
 
-* Where to use: struct/member
-* Value: None or a custom message.
+* Where to use: struct/field
+* Value: none or a custom message
 
-This will mark the struct or member as deprecated and will issue a warning when compiling.Note that if other Thrift files include a Thrift file with deprecated annotations, those files will be treated as using these fields and propagate warnings when included. If `a.thrift` marks struct `foo` as deprecated, `b.thrift` includes `a.thrift`, and `c.cpp` includes `b.thrift`, deprecated warnings concerning foo will be raised when building `c.cpp` even if the file doesn't actually use `foo`.
+This will mark a struct or a field as deprecated and will issue a warning when compiling. Note that if other Thrift files include a Thrift file with deprecated annotations, those files will be treated as using these fields and propagate warnings when included. If `a.thrift` marks struct `foo` as deprecated, `b.thrift` includes `a.thrift`, and `c.cpp` includes `b.thrift`, deprecated warnings concerning foo will be raised when building `c.cpp` even if the file doesn't actually use `foo`.
 
 * Example:
 
@@ -364,7 +430,7 @@ struct MyStruct {
 } (deprecated)
 
 struct MyStruct3 {
- 1: i32 a = 0 (deprecated)  // Default member message: "i32 a is deprecated"
+ 1: i32 a = 0 (deprecated)  // Default message: "i32 a is deprecated"
 } (deprecated = "This is not longer supported")
 ```
 
@@ -401,7 +467,7 @@ which gives the size of 16 bytes compared to 32 bytes if `cpp.MinimizePadding` w
 
 #### cpp.name
 
-* Where to use: member
+* Where to use: field
 * Value: string with a valid C++ identifier
 * Example:
 
@@ -428,7 +494,7 @@ In most cases a much better solution is to rename the problematic Thrift field i
 
 #### cpp.mixin
 
-* Where to use: member
+* Where to use: field
 * Value: none
 * Example:
 
@@ -454,7 +520,7 @@ Read more: Thrift/Mixins
 #### cpp.Lazy
 
 * Where to use: field
-* Value: `true`
+* Value: none
 * Example:
 
 ```
@@ -482,11 +548,12 @@ Read more: Thrift/Lazy/
 #### cpp.PackIsset
 
 * Where to use: field
-* Value: `none`
+* Value: none
 * Example:
 
 ```
 include "thrift/annotation/cpp.thrift"
+
 @cpp.PackIsset
 struct Foo {
   1: optional i32 field1
@@ -502,19 +569,19 @@ Read more: Thrift/Isset_Bitpacking/
 * Example:
 
 ```
-// in C++ Header
+// In a C++ header:
 struct BitsetAdapter {
   static std::bitset<32> fromThrift(std::uint32_t t) { return {t}; }
   static std::uint32_t toThrift(std::bitset<32> t) { return t.to_ullong(); }
 };
 
-// In thrift file
+// In a thrift file:
 struct Foo {
   @cpp.Adapter{name = "BitsetAdapter"}
   1: i32 flags;
 }
 
-// in C++ file
+// In a C++ source file:
 Foo foo;
 foo.flags()->set(0); // set 0th bit
 ```
@@ -554,15 +621,15 @@ Declares that this is an allocator-aware structure, using the specified C++ allo
 
 #### cpp.use_allocator
 
-* Where to use: member
+* Where to use: field
 * Value: none
 
-Indicates that the structure's allocator should be passed down to this member at construction time.
+Indicates that the structure's allocator should be passed down to this field at construction time.
 
 #### cpp.allocator_via
 
 * Where to use: struct
-* Value: string with a valid C++ identifier which is a member field in this struct
+* Value: string with a name of a field in this struct
 
 This is a structure size optimization. The naive implementation of `get_allocator()` requires an additional data member to “remember” the allocator. With `cpp.allocator_via`, we instead delegate this responsibility to one of the allocator-aware fields.
 
@@ -690,64 +757,3 @@ This completely replaces the underlying type of a thrift for a custom implementa
 More detail: https://www.internalfb.com/intern/wiki/Thrift/Thrift_Guide/Adapter/
 
 </FbInternalOnly>
-
-### Thrift annotations
-
-Thrift annotations work in all officially supported languages.
-
-#### thrift.Box
-
-* Where to use: optional field name
-* Value: `true`
-* Example:
-
-```
-struct RecList {
-  @thrift.Box
-  1: optional RecList next;
-}
-```
-
-This indicates that a subobject should be allocated separately (e.g. because it is large and infrequently set).
-
-NOTE: The APIs and initialization behavior are same as normal field, but different from `@cpp.Ref`. e.g.
-
-```
-struct Foo {
-  1: optional i32 normal;
-  @thrift.Box
-  2: optional i32 boxed;
-  @cpp.Ref
-  3: optional i32 referred;
-}
-```
-in C++
-
-```
-Foo foo;
-EXPECT_FALSE(foo.normal().has_value()); // okay
-EXPECT_FALSE(foo.boxed().has_value()); // okay
-EXPECT_FALSE(foo.referred().has_value()); // build failure: std::unique_ptr doesn't have has_value method
-
-EXPECT_EQ(*foo.normal(), 0); // throw bad_field_access exception
-EXPECT_EQ(*foo.boxed(), 0); // throw bad_field_access exception
-EXPECT_EQ(*foo.referred(), 0); // okay, field has value by default
-```
-
-#### thrift.SerializeInFieldIdOrder
-
-Serialize fields in field id ascending order instead of fields declaration order. This makes serialization result deterministic after swapping fields. In addition, it can reduce payload size only for compact protocol. Example
-
-```
-@thrift.SerializeInFieldIdOrder
-struct Foo {
-  2: byte a;
-  1: byte b;
-}
-```
-
-This reduces serialized data size from 5 bytes to 4 bytes for compact protocol.
-
-Why? Compact protocol stored delta of field id, instead of actual field id in payload. When field is serialized out of field id order, delta=0 will be written, followed with actual field id, thus when field is serialized out of field id order, it uses more bytes for field id.
-
-NOTE: This annotation won't reduce payload size for other protocols.

@@ -9,24 +9,38 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::test::fixtures::enumstrict::EmptyEnum, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enumstrict::EmptyEnum, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::values = {{
 }};
-const std::array<folly::StringPiece, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TEnumDataStorage<::test::fixtures::enumstrict::EmptyEnum>::names = {{
 }};
 
-const std::array<::test::fixtures::enumstrict::MyEnum, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enumstrict::MyEnum, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::values = {{
   type::ONE,
   type::TWO,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::enumstrict::MyEnum>::names = {{
   "ONE",
   "TWO",
 }};
 
-const std::array<::test::fixtures::enumstrict::MyBigEnum, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::enumstrict::MyBigEnum, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::values = {{
   type::UNKNOWN,
   type::ONE,
   type::TWO,
@@ -48,7 +62,7 @@ const std::array<::test::fixtures::enumstrict::MyBigEnum, 20> TEnumDataStorage<:
   type::EIGHTEEN,
   type::NINETEEN,
 }};
-const std::array<folly::StringPiece, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 20> TEnumDataStorage<::test::fixtures::enumstrict::MyBigEnum>::names = {{
   "UNKNOWN",
   "ONE",
   "TWO",
@@ -71,23 +85,23 @@ const std::array<folly::StringPiece, 20> TEnumDataStorage<::test::fixtures::enum
   "NINETEEN",
 }};
 
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_names = {{
   "myEnum",
   "myBigEnum",
 }};
-const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_ids = {{
   1,
   2,
 }};
-const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::fields_types = {{
   TType::T_I32,
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::storage_names = {{
   "__fbthrift_field_myEnum",
   "__fbthrift_field_myBigEnum",
 }};
-const std::array<int, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 2> TStructDataStorage<::test::fixtures::enumstrict::MyStruct>::isset_indexes = {{
   0,
   1,
 }};

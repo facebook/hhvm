@@ -13,7 +13,7 @@ use crate::Param;
 use crate::TypeInfo;
 use crate::UpperBound;
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Serialize)]
 #[repr(C)]
 pub struct Body<'arena> {
     /// Must have been compacted with InstrSeq::compact_iter().
@@ -27,4 +27,7 @@ pub struct Body<'arena> {
     pub params: Slice<'arena, Param<'arena>>,
     pub return_type_info: Maybe<TypeInfo<'arena>>,
     pub doc_comment: Maybe<Str<'arena>>,
+    /// The statically computed stack depth for this Body. This can be computed
+    /// using the hhbc::compute_stack_depth() function.
+    pub stack_depth: usize,
 }

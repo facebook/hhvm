@@ -41,7 +41,21 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA']
+__all__ = ['UTF8STRINGS', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt']
+
+class ThriftAdaptedEnum:
+  Zero = 0
+  One = 1
+
+  _VALUES_TO_NAMES = {
+    0: "Zero",
+    1: "One",
+  }
+
+  _NAMES_TO_VALUES = {
+    "Zero": 0,
+    "One": 1,
+  }
 
 class MyAnnotation:
   """
@@ -2023,6 +2037,2751 @@ class MyStruct:
   def _to_py_deprecated(self):
     return self
 
+class AdaptTestStruct:
+  """
+  Attributes:
+   - delay
+   - custom
+   - timeout
+   - data
+   - meta
+   - indirectionString
+   - string_data
+   - double_wrapped_bool
+   - double_wrapped_integer
+   - binary_data
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.delay = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          self.custom = iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I64:
+          self.timeout = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I64:
+          self.data = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.STRING:
+          self.meta = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.STRING:
+          self.indirectionString = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.STRING:
+          self.string_data = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.BOOL:
+          self.double_wrapped_bool = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.I32:
+          self.double_wrapped_integer = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.STRING:
+          self.binary_data = iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptTestStruct')
+    if self.delay != None:
+      oprot.writeFieldBegin('delay', TType.I64, 1)
+      oprot.writeI64(self.delay)
+      oprot.writeFieldEnd()
+    if self.custom != None:
+      oprot.writeFieldBegin('custom', TType.STRING, 2)
+      oprot.writeString(self.custom)
+      oprot.writeFieldEnd()
+    if self.timeout != None:
+      oprot.writeFieldBegin('timeout', TType.I64, 3)
+      oprot.writeI64(self.timeout)
+      oprot.writeFieldEnd()
+    if self.data != None:
+      oprot.writeFieldBegin('data', TType.I64, 4)
+      oprot.writeI64(self.data)
+      oprot.writeFieldEnd()
+    if self.meta != None:
+      oprot.writeFieldBegin('meta', TType.STRING, 5)
+      oprot.writeString(self.meta.encode('utf-8')) if UTF8STRINGS and not isinstance(self.meta, bytes) else oprot.writeString(self.meta)
+      oprot.writeFieldEnd()
+    if self.indirectionString != None:
+      oprot.writeFieldBegin('indirectionString', TType.STRING, 6)
+      oprot.writeString(self.indirectionString.encode('utf-8')) if UTF8STRINGS and not isinstance(self.indirectionString, bytes) else oprot.writeString(self.indirectionString)
+      oprot.writeFieldEnd()
+    if self.string_data != None:
+      oprot.writeFieldBegin('string_data', TType.STRING, 7)
+      oprot.writeString(self.string_data.encode('utf-8')) if UTF8STRINGS and not isinstance(self.string_data, bytes) else oprot.writeString(self.string_data)
+      oprot.writeFieldEnd()
+    if self.double_wrapped_bool != None:
+      oprot.writeFieldBegin('double_wrapped_bool', TType.BOOL, 8)
+      oprot.writeBool(self.double_wrapped_bool)
+      oprot.writeFieldEnd()
+    if self.double_wrapped_integer != None:
+      oprot.writeFieldBegin('double_wrapped_integer', TType.I32, 9)
+      oprot.writeI32(self.double_wrapped_integer)
+      oprot.writeFieldEnd()
+    if self.binary_data != None:
+      oprot.writeFieldBegin('binary_data', TType.STRING, 10)
+      oprot.writeString(self.binary_data)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'delay' in json_obj and json_obj['delay'] is not None:
+      self.delay = long(json_obj['delay'])
+    if 'custom' in json_obj and json_obj['custom'] is not None:
+      self.custom = json_obj['custom']
+    if 'timeout' in json_obj and json_obj['timeout'] is not None:
+      self.timeout = long(json_obj['timeout'])
+    if 'data' in json_obj and json_obj['data'] is not None:
+      self.data = long(json_obj['data'])
+    if 'meta' in json_obj and json_obj['meta'] is not None:
+      self.meta = json_obj['meta']
+    if 'indirectionString' in json_obj and json_obj['indirectionString'] is not None:
+      self.indirectionString = json_obj['indirectionString']
+    if 'string_data' in json_obj and json_obj['string_data'] is not None:
+      self.string_data = json_obj['string_data']
+    if 'double_wrapped_bool' in json_obj and json_obj['double_wrapped_bool'] is not None:
+      self.double_wrapped_bool = json_obj['double_wrapped_bool']
+    if 'double_wrapped_integer' in json_obj and json_obj['double_wrapped_integer'] is not None:
+      self.double_wrapped_integer = json_obj['double_wrapped_integer']
+      if self.double_wrapped_integer > 0x7fffffff or self.double_wrapped_integer < -0x80000000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'binary_data' in json_obj and json_obj['binary_data'] is not None:
+      self.binary_data = json_obj['binary_data']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.delay is not None:
+      value = pprint.pformat(self.delay, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    delay=%s' % (value))
+    if self.custom is not None:
+      value = pprint.pformat(self.custom, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    custom=%s' % (value))
+    if self.timeout is not None:
+      value = pprint.pformat(self.timeout, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    timeout=%s' % (value))
+    if self.data is not None:
+      value = pprint.pformat(self.data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    data=%s' % (value))
+    if self.meta is not None:
+      value = pprint.pformat(self.meta, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    meta=%s' % (value))
+    if self.indirectionString is not None:
+      value = pprint.pformat(self.indirectionString, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    indirectionString=%s' % (value))
+    if self.string_data is not None:
+      value = pprint.pformat(self.string_data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    string_data=%s' % (value))
+    if self.double_wrapped_bool is not None:
+      value = pprint.pformat(self.double_wrapped_bool, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    double_wrapped_bool=%s' % (value))
+    if self.double_wrapped_integer is not None:
+      value = pprint.pformat(self.double_wrapped_integer, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    double_wrapped_integer=%s' % (value))
+    if self.binary_data is not None:
+      value = pprint.pformat(self.binary_data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    binary_data=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'delay',
+      'custom',
+      'timeout',
+      'data',
+      'meta',
+      'indirectionString',
+      'string_data',
+      'double_wrapped_bool',
+      'double_wrapped_integer',
+      'binary_data',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptTestStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptTestStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptTemplatedTestStruct:
+  """
+  Attributes:
+   - adaptedBool
+   - adaptedByte
+   - adaptedShort
+   - adaptedInteger
+   - adaptedLong
+   - adaptedDouble
+   - adaptedString
+   - adaptedList
+   - adaptedSet
+   - adaptedMap
+   - adaptedBoolDefault
+   - adaptedByteDefault
+   - adaptedShortDefault
+   - adaptedIntegerDefault
+   - adaptedLongDefault
+   - adaptedDoubleDefault
+   - adaptedStringDefault
+   - adaptedEnum
+   - adaptedListDefault
+   - adaptedSetDefault
+   - adaptedMapDefault
+   - doubleTypedefBool
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.BOOL:
+          self.adaptedBool = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.BYTE:
+          self.adaptedByte = iprot.readByte()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.I16:
+          self.adaptedShort = iprot.readI16()
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.I32:
+          self.adaptedInteger = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 5:
+        if ftype == TType.I64:
+          self.adaptedLong = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 6:
+        if ftype == TType.DOUBLE:
+          self.adaptedDouble = iprot.readDouble()
+        else:
+          iprot.skip(ftype)
+      elif fid == 7:
+        if ftype == TType.STRING:
+          self.adaptedString = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 8:
+        if ftype == TType.LIST:
+          self.adaptedList = []
+          (_etype167, _size164) = iprot.readListBegin()
+          if _size164 >= 0:
+            for _i168 in range(_size164):
+              _elem169 = iprot.readI64()
+              self.adaptedList.append(_elem169)
+          else: 
+            while iprot.peekList():
+              _elem170 = iprot.readI64()
+              self.adaptedList.append(_elem170)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 9:
+        if ftype == TType.SET:
+          self.adaptedSet = set()
+          (_etype174, _size171) = iprot.readSetBegin()
+          if _size171 >= 0:
+            for _i175 in range(_size171):
+              _elem176 = iprot.readI64()
+              self.adaptedSet.add(_elem176)
+          else: 
+            while iprot.peekSet():
+              _elem177 = iprot.readI64()
+              self.adaptedSet.add(_elem177)
+          iprot.readSetEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 10:
+        if ftype == TType.MAP:
+          self.adaptedMap = {}
+          (_ktype179, _vtype180, _size178 ) = iprot.readMapBegin() 
+          if _size178 >= 0:
+            for _i182 in range(_size178):
+              _key183 = iprot.readI64()
+              _val184 = iprot.readI64()
+              self.adaptedMap[_key183] = _val184
+          else: 
+            while iprot.peekMap():
+              _key185 = iprot.readI64()
+              _val186 = iprot.readI64()
+              self.adaptedMap[_key185] = _val186
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 11:
+        if ftype == TType.BOOL:
+          self.adaptedBoolDefault = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      elif fid == 12:
+        if ftype == TType.BYTE:
+          self.adaptedByteDefault = iprot.readByte()
+        else:
+          iprot.skip(ftype)
+      elif fid == 13:
+        if ftype == TType.I16:
+          self.adaptedShortDefault = iprot.readI16()
+        else:
+          iprot.skip(ftype)
+      elif fid == 14:
+        if ftype == TType.I32:
+          self.adaptedIntegerDefault = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 15:
+        if ftype == TType.I64:
+          self.adaptedLongDefault = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 16:
+        if ftype == TType.DOUBLE:
+          self.adaptedDoubleDefault = iprot.readDouble()
+        else:
+          iprot.skip(ftype)
+      elif fid == 17:
+        if ftype == TType.STRING:
+          self.adaptedStringDefault = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      elif fid == 18:
+        if ftype == TType.I32:
+          self.adaptedEnum = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      elif fid == 19:
+        if ftype == TType.LIST:
+          self.adaptedListDefault = []
+          (_etype190, _size187) = iprot.readListBegin()
+          if _size187 >= 0:
+            for _i191 in range(_size187):
+              _elem192 = iprot.readI64()
+              self.adaptedListDefault.append(_elem192)
+          else: 
+            while iprot.peekList():
+              _elem193 = iprot.readI64()
+              self.adaptedListDefault.append(_elem193)
+          iprot.readListEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 20:
+        if ftype == TType.SET:
+          self.adaptedSetDefault = set()
+          (_etype197, _size194) = iprot.readSetBegin()
+          if _size194 >= 0:
+            for _i198 in range(_size194):
+              _elem199 = iprot.readI64()
+              self.adaptedSetDefault.add(_elem199)
+          else: 
+            while iprot.peekSet():
+              _elem200 = iprot.readI64()
+              self.adaptedSetDefault.add(_elem200)
+          iprot.readSetEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 21:
+        if ftype == TType.MAP:
+          self.adaptedMapDefault = {}
+          (_ktype202, _vtype203, _size201 ) = iprot.readMapBegin() 
+          if _size201 >= 0:
+            for _i205 in range(_size201):
+              _key206 = iprot.readI64()
+              _val207 = iprot.readI64()
+              self.adaptedMapDefault[_key206] = _val207
+          else: 
+            while iprot.peekMap():
+              _key208 = iprot.readI64()
+              _val209 = iprot.readI64()
+              self.adaptedMapDefault[_key208] = _val209
+          iprot.readMapEnd()
+        else:
+          iprot.skip(ftype)
+      elif fid == 22:
+        if ftype == TType.BOOL:
+          self.doubleTypedefBool = iprot.readBool()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptTemplatedTestStruct')
+    if self.adaptedBool != None:
+      oprot.writeFieldBegin('adaptedBool', TType.BOOL, 1)
+      oprot.writeBool(self.adaptedBool)
+      oprot.writeFieldEnd()
+    if self.adaptedByte != None:
+      oprot.writeFieldBegin('adaptedByte', TType.BYTE, 2)
+      oprot.writeByte(self.adaptedByte)
+      oprot.writeFieldEnd()
+    if self.adaptedShort != None:
+      oprot.writeFieldBegin('adaptedShort', TType.I16, 3)
+      oprot.writeI16(self.adaptedShort)
+      oprot.writeFieldEnd()
+    if self.adaptedInteger != None:
+      oprot.writeFieldBegin('adaptedInteger', TType.I32, 4)
+      oprot.writeI32(self.adaptedInteger)
+      oprot.writeFieldEnd()
+    if self.adaptedLong != None:
+      oprot.writeFieldBegin('adaptedLong', TType.I64, 5)
+      oprot.writeI64(self.adaptedLong)
+      oprot.writeFieldEnd()
+    if self.adaptedDouble != None:
+      oprot.writeFieldBegin('adaptedDouble', TType.DOUBLE, 6)
+      oprot.writeDouble(self.adaptedDouble)
+      oprot.writeFieldEnd()
+    if self.adaptedString != None:
+      oprot.writeFieldBegin('adaptedString', TType.STRING, 7)
+      oprot.writeString(self.adaptedString.encode('utf-8')) if UTF8STRINGS and not isinstance(self.adaptedString, bytes) else oprot.writeString(self.adaptedString)
+      oprot.writeFieldEnd()
+    if self.adaptedList != None:
+      oprot.writeFieldBegin('adaptedList', TType.LIST, 8)
+      oprot.writeListBegin(TType.I64, len(self.adaptedList))
+      for iter210 in self.adaptedList:
+        oprot.writeI64(iter210)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.adaptedSet != None:
+      oprot.writeFieldBegin('adaptedSet', TType.SET, 9)
+      oprot.writeSetBegin(TType.I64, len(self.adaptedSet))
+      for iter211 in self.adaptedSet:
+        oprot.writeI64(iter211)
+      oprot.writeSetEnd()
+      oprot.writeFieldEnd()
+    if self.adaptedMap != None:
+      oprot.writeFieldBegin('adaptedMap', TType.MAP, 10)
+      oprot.writeMapBegin(TType.I64, TType.I64, len(self.adaptedMap))
+      for kiter212,viter213 in self.adaptedMap.items():
+        oprot.writeI64(kiter212)
+        oprot.writeI64(viter213)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.adaptedBoolDefault != None:
+      oprot.writeFieldBegin('adaptedBoolDefault', TType.BOOL, 11)
+      oprot.writeBool(self.adaptedBoolDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedByteDefault != None:
+      oprot.writeFieldBegin('adaptedByteDefault', TType.BYTE, 12)
+      oprot.writeByte(self.adaptedByteDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedShortDefault != None:
+      oprot.writeFieldBegin('adaptedShortDefault', TType.I16, 13)
+      oprot.writeI16(self.adaptedShortDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedIntegerDefault != None:
+      oprot.writeFieldBegin('adaptedIntegerDefault', TType.I32, 14)
+      oprot.writeI32(self.adaptedIntegerDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedLongDefault != None:
+      oprot.writeFieldBegin('adaptedLongDefault', TType.I64, 15)
+      oprot.writeI64(self.adaptedLongDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedDoubleDefault != None:
+      oprot.writeFieldBegin('adaptedDoubleDefault', TType.DOUBLE, 16)
+      oprot.writeDouble(self.adaptedDoubleDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedStringDefault != None:
+      oprot.writeFieldBegin('adaptedStringDefault', TType.STRING, 17)
+      oprot.writeString(self.adaptedStringDefault.encode('utf-8')) if UTF8STRINGS and not isinstance(self.adaptedStringDefault, bytes) else oprot.writeString(self.adaptedStringDefault)
+      oprot.writeFieldEnd()
+    if self.adaptedEnum != None:
+      oprot.writeFieldBegin('adaptedEnum', TType.I32, 18)
+      oprot.writeI32(self.adaptedEnum)
+      oprot.writeFieldEnd()
+    if self.adaptedListDefault != None:
+      oprot.writeFieldBegin('adaptedListDefault', TType.LIST, 19)
+      oprot.writeListBegin(TType.I64, len(self.adaptedListDefault))
+      for iter214 in self.adaptedListDefault:
+        oprot.writeI64(iter214)
+      oprot.writeListEnd()
+      oprot.writeFieldEnd()
+    if self.adaptedSetDefault != None:
+      oprot.writeFieldBegin('adaptedSetDefault', TType.SET, 20)
+      oprot.writeSetBegin(TType.I64, len(self.adaptedSetDefault))
+      for iter215 in self.adaptedSetDefault:
+        oprot.writeI64(iter215)
+      oprot.writeSetEnd()
+      oprot.writeFieldEnd()
+    if self.adaptedMapDefault != None:
+      oprot.writeFieldBegin('adaptedMapDefault', TType.MAP, 21)
+      oprot.writeMapBegin(TType.I64, TType.I64, len(self.adaptedMapDefault))
+      for kiter216,viter217 in self.adaptedMapDefault.items():
+        oprot.writeI64(kiter216)
+        oprot.writeI64(viter217)
+      oprot.writeMapEnd()
+      oprot.writeFieldEnd()
+    if self.doubleTypedefBool != None:
+      oprot.writeFieldBegin('doubleTypedefBool', TType.BOOL, 22)
+      oprot.writeBool(self.doubleTypedefBool)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'adaptedBool' in json_obj and json_obj['adaptedBool'] is not None:
+      self.adaptedBool = json_obj['adaptedBool']
+    if 'adaptedByte' in json_obj and json_obj['adaptedByte'] is not None:
+      self.adaptedByte = json_obj['adaptedByte']
+      if self.adaptedByte > 0x7f or self.adaptedByte < -0x80:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedShort' in json_obj and json_obj['adaptedShort'] is not None:
+      self.adaptedShort = json_obj['adaptedShort']
+      if self.adaptedShort > 0x7fff or self.adaptedShort < -0x8000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedInteger' in json_obj and json_obj['adaptedInteger'] is not None:
+      self.adaptedInteger = json_obj['adaptedInteger']
+      if self.adaptedInteger > 0x7fffffff or self.adaptedInteger < -0x80000000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedLong' in json_obj and json_obj['adaptedLong'] is not None:
+      self.adaptedLong = long(json_obj['adaptedLong'])
+    if 'adaptedDouble' in json_obj and json_obj['adaptedDouble'] is not None:
+      self.adaptedDouble = float(json_obj['adaptedDouble'])
+    if 'adaptedString' in json_obj and json_obj['adaptedString'] is not None:
+      self.adaptedString = json_obj['adaptedString']
+    if 'adaptedList' in json_obj and json_obj['adaptedList'] is not None:
+      self.adaptedList = []
+      for _tmp_e218 in json_obj['adaptedList']:
+        self.adaptedList.append(_tmp_e218)
+    if 'adaptedSet' in json_obj and json_obj['adaptedSet'] is not None:
+      self.adaptedSet = set_cls()
+      for _tmp_e219 in json_obj['adaptedSet']:
+        self.adaptedSet.add(_tmp_e219)
+    if 'adaptedMap' in json_obj and json_obj['adaptedMap'] is not None:
+      self.adaptedMap = dict_cls()
+      for _tmp_k220, _tmp_v221 in json_obj['adaptedMap'].items():
+        _tmp_kp222 = long(_tmp_k220)
+        self.adaptedMap[_tmp_kp222] = _tmp_v221
+    if 'adaptedBoolDefault' in json_obj and json_obj['adaptedBoolDefault'] is not None:
+      self.adaptedBoolDefault = json_obj['adaptedBoolDefault']
+    if 'adaptedByteDefault' in json_obj and json_obj['adaptedByteDefault'] is not None:
+      self.adaptedByteDefault = json_obj['adaptedByteDefault']
+      if self.adaptedByteDefault > 0x7f or self.adaptedByteDefault < -0x80:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedShortDefault' in json_obj and json_obj['adaptedShortDefault'] is not None:
+      self.adaptedShortDefault = json_obj['adaptedShortDefault']
+      if self.adaptedShortDefault > 0x7fff or self.adaptedShortDefault < -0x8000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedIntegerDefault' in json_obj and json_obj['adaptedIntegerDefault'] is not None:
+      self.adaptedIntegerDefault = json_obj['adaptedIntegerDefault']
+      if self.adaptedIntegerDefault > 0x7fffffff or self.adaptedIntegerDefault < -0x80000000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+    if 'adaptedLongDefault' in json_obj and json_obj['adaptedLongDefault'] is not None:
+      self.adaptedLongDefault = long(json_obj['adaptedLongDefault'])
+    if 'adaptedDoubleDefault' in json_obj and json_obj['adaptedDoubleDefault'] is not None:
+      self.adaptedDoubleDefault = float(json_obj['adaptedDoubleDefault'])
+    if 'adaptedStringDefault' in json_obj and json_obj['adaptedStringDefault'] is not None:
+      self.adaptedStringDefault = json_obj['adaptedStringDefault']
+    if 'adaptedEnum' in json_obj and json_obj['adaptedEnum'] is not None:
+      self.adaptedEnum = json_obj['adaptedEnum']
+      if not self.adaptedEnum in ThriftAdaptedEnum._VALUES_TO_NAMES:
+        msg = 'Integer value ''%s'' is not a recognized value of enum type ThriftAdaptedEnum' % self.adaptedEnum
+        if relax_enum_validation:
+            warnings.warn(msg)
+        else:
+            raise TProtocolException(TProtocolException.INVALID_DATA, msg)
+    if 'adaptedListDefault' in json_obj and json_obj['adaptedListDefault'] is not None:
+      self.adaptedListDefault = []
+      for _tmp_e223 in json_obj['adaptedListDefault']:
+        self.adaptedListDefault.append(_tmp_e223)
+    if 'adaptedSetDefault' in json_obj and json_obj['adaptedSetDefault'] is not None:
+      self.adaptedSetDefault = set_cls()
+      for _tmp_e224 in json_obj['adaptedSetDefault']:
+        self.adaptedSetDefault.add(_tmp_e224)
+    if 'adaptedMapDefault' in json_obj and json_obj['adaptedMapDefault'] is not None:
+      self.adaptedMapDefault = dict_cls()
+      for _tmp_k225, _tmp_v226 in json_obj['adaptedMapDefault'].items():
+        _tmp_kp227 = long(_tmp_k225)
+        self.adaptedMapDefault[_tmp_kp227] = _tmp_v226
+    if 'doubleTypedefBool' in json_obj and json_obj['doubleTypedefBool'] is not None:
+      self.doubleTypedefBool = json_obj['doubleTypedefBool']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.adaptedBool is not None:
+      value = pprint.pformat(self.adaptedBool, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedBool=%s' % (value))
+    if self.adaptedByte is not None:
+      value = pprint.pformat(self.adaptedByte, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedByte=%s' % (value))
+    if self.adaptedShort is not None:
+      value = pprint.pformat(self.adaptedShort, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedShort=%s' % (value))
+    if self.adaptedInteger is not None:
+      value = pprint.pformat(self.adaptedInteger, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedInteger=%s' % (value))
+    if self.adaptedLong is not None:
+      value = pprint.pformat(self.adaptedLong, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedLong=%s' % (value))
+    if self.adaptedDouble is not None:
+      value = pprint.pformat(self.adaptedDouble, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedDouble=%s' % (value))
+    if self.adaptedString is not None:
+      value = pprint.pformat(self.adaptedString, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedString=%s' % (value))
+    if self.adaptedList is not None:
+      value = pprint.pformat(self.adaptedList, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedList=%s' % (value))
+    if self.adaptedSet is not None:
+      value = pprint.pformat(self.adaptedSet, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedSet=%s' % (value))
+    if self.adaptedMap is not None:
+      value = pprint.pformat(self.adaptedMap, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedMap=%s' % (value))
+    if self.adaptedBoolDefault is not None:
+      value = pprint.pformat(self.adaptedBoolDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedBoolDefault=%s' % (value))
+    if self.adaptedByteDefault is not None:
+      value = pprint.pformat(self.adaptedByteDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedByteDefault=%s' % (value))
+    if self.adaptedShortDefault is not None:
+      value = pprint.pformat(self.adaptedShortDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedShortDefault=%s' % (value))
+    if self.adaptedIntegerDefault is not None:
+      value = pprint.pformat(self.adaptedIntegerDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedIntegerDefault=%s' % (value))
+    if self.adaptedLongDefault is not None:
+      value = pprint.pformat(self.adaptedLongDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedLongDefault=%s' % (value))
+    if self.adaptedDoubleDefault is not None:
+      value = pprint.pformat(self.adaptedDoubleDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedDoubleDefault=%s' % (value))
+    if self.adaptedStringDefault is not None:
+      value = pprint.pformat(self.adaptedStringDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedStringDefault=%s' % (value))
+    if self.adaptedEnum is not None:
+      value = pprint.pformat(self.adaptedEnum, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedEnum=%s' % (value))
+    if self.adaptedListDefault is not None:
+      value = pprint.pformat(self.adaptedListDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedListDefault=%s' % (value))
+    if self.adaptedSetDefault is not None:
+      value = pprint.pformat(self.adaptedSetDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedSetDefault=%s' % (value))
+    if self.adaptedMapDefault is not None:
+      value = pprint.pformat(self.adaptedMapDefault, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedMapDefault=%s' % (value))
+    if self.doubleTypedefBool is not None:
+      value = pprint.pformat(self.doubleTypedefBool, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    doubleTypedefBool=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'adaptedBool',
+      'adaptedByte',
+      'adaptedShort',
+      'adaptedInteger',
+      'adaptedLong',
+      'adaptedDouble',
+      'adaptedString',
+      'adaptedList',
+      'adaptedSet',
+      'adaptedMap',
+      'adaptedBoolDefault',
+      'adaptedByteDefault',
+      'adaptedShortDefault',
+      'adaptedIntegerDefault',
+      'adaptedLongDefault',
+      'adaptedDoubleDefault',
+      'adaptedStringDefault',
+      'adaptedEnum',
+      'adaptedListDefault',
+      'adaptedSetDefault',
+      'adaptedMapDefault',
+      'doubleTypedefBool',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptTemplatedTestStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptTemplatedTestStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptTemplatedNestedTestStruct:
+  """
+  Attributes:
+   - adaptedStruct
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.adaptedStruct = AdaptTemplatedTestStruct()
+          self.adaptedStruct.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptTemplatedNestedTestStruct')
+    if self.adaptedStruct != None:
+      oprot.writeFieldBegin('adaptedStruct', TType.STRUCT, 1)
+      self.adaptedStruct.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'adaptedStruct' in json_obj and json_obj['adaptedStruct'] is not None:
+      self.adaptedStruct = AdaptTemplatedTestStruct()
+      self.adaptedStruct.readFromJson(json_obj['adaptedStruct'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.adaptedStruct is not None:
+      value = pprint.pformat(self.adaptedStruct, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedStruct=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'adaptedStruct',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptTemplatedNestedTestStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptTemplatedNestedTestStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptTestUnion(object):
+  """
+  Attributes:
+   - delay
+   - custom
+  """
+
+  thrift_spec = None
+  __init__ = None
+
+  __EMPTY__ = 0
+  DELAY = 1
+  CUSTOM = 2
+  
+  @staticmethod
+  def isUnion():
+    return True
+
+  def get_delay(self):
+    assert self.field == 1
+    return self.value
+
+  def get_custom(self):
+    assert self.field == 2
+    return self.value
+
+  def set_delay(self, value):
+    self.field = 1
+    self.value = value
+
+  def set_custom(self, value):
+    self.field = 2
+    self.value = value
+
+  def getType(self):
+    return self.field
+
+  def __repr__(self):
+    value = pprint.pformat(self.value)
+    member = ''
+    if self.field == 1:
+      padding = ' ' * 6
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('delay', value)
+    if self.field == 2:
+      padding = ' ' * 7
+      value = padding.join(value.splitlines(True))
+      member = '\n    %s=%s' % ('custom', value)
+    return "%s(%s)" % (self.__class__.__name__, member)
+
+  def read(self, iprot):
+    self.field = 0
+    self.value = None
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+
+      if fid == 1:
+        if ftype == TType.I64:
+          _fbthrift_delay = iprot.readI64()
+          assert self.field == 0 and self.value is None
+          self.set_delay(_fbthrift_delay)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRING:
+          _fbthrift_custom = iprot.readString()
+          assert self.field == 0 and self.value is None
+          self.set_custom(_fbthrift_custom)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, True], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeUnionBegin('AdaptTestUnion')
+    if self.field == 1:
+      oprot.writeFieldBegin('delay', TType.I64, 1)
+      delay = self.value
+      oprot.writeI64(delay)
+      oprot.writeFieldEnd()
+    if self.field == 2:
+      oprot.writeFieldBegin('custom', TType.STRING, 2)
+      custom = self.value
+      oprot.writeString(custom)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeUnionEnd()
+  
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    self.field = 0
+    self.value = None
+    obj = json
+    if is_text:
+      obj = loads(json)
+    if not isinstance(obj, dict) or len(obj) > 1:
+      raise TProtocolException(TProtocolException.INVALID_DATA, 'Can not parse')
+    
+    if 'delay' in obj:
+      _fbthrift_delay = long(obj['delay'])
+      self.set_delay(_fbthrift_delay)
+    if 'custom' in obj:
+      _fbthrift_custom = obj['custom']
+      self.set_custom(_fbthrift_custom)
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptTestUnion, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptTestUnion, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AdaptedStruct:
+  """
+  Attributes:
+   - data
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.data = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AdaptedStruct')
+    if self.data != None:
+      oprot.writeFieldBegin('data', TType.I64, 1)
+      oprot.writeI64(self.data)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'data' in json_obj and json_obj['data'] is not None:
+      self.data = long(json_obj['data'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.data is not None:
+      value = pprint.pformat(self.data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    data=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'data',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AdaptedStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AdaptedStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class DirectlyAdaptedStruct:
+  """
+  Attributes:
+   - data
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.data = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('DirectlyAdaptedStruct')
+    if self.data != None:
+      oprot.writeFieldBegin('data', TType.I64, 1)
+      oprot.writeI64(self.data)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'data' in json_obj and json_obj['data'] is not None:
+      self.data = long(json_obj['data'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.data is not None:
+      value = pprint.pformat(self.data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    data=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'data',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.DirectlyAdaptedStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.DirectlyAdaptedStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class StructFieldAdaptedStruct:
+  """
+  Attributes:
+   - adaptedStruct
+   - adaptedTypedef
+   - directlyAdapted
+   - typedefOfAdapted
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.adaptedStruct = AdaptedStruct()
+          self.adaptedStruct.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.STRUCT:
+          self.adaptedTypedef = AdaptedStruct()
+          self.adaptedTypedef.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRUCT:
+          self.directlyAdapted = DirectlyAdaptedStruct()
+          self.directlyAdapted.read(iprot)
+        else:
+          iprot.skip(ftype)
+      elif fid == 4:
+        if ftype == TType.STRUCT:
+          self.typedefOfAdapted = DirectlyAdaptedStruct()
+          self.typedefOfAdapted.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('StructFieldAdaptedStruct')
+    if self.adaptedStruct != None:
+      oprot.writeFieldBegin('adaptedStruct', TType.STRUCT, 1)
+      self.adaptedStruct.write(oprot)
+      oprot.writeFieldEnd()
+    if self.adaptedTypedef != None:
+      oprot.writeFieldBegin('adaptedTypedef', TType.STRUCT, 2)
+      self.adaptedTypedef.write(oprot)
+      oprot.writeFieldEnd()
+    if self.directlyAdapted != None:
+      oprot.writeFieldBegin('directlyAdapted', TType.STRUCT, 3)
+      self.directlyAdapted.write(oprot)
+      oprot.writeFieldEnd()
+    if self.typedefOfAdapted != None:
+      oprot.writeFieldBegin('typedefOfAdapted', TType.STRUCT, 4)
+      self.typedefOfAdapted.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'adaptedStruct' in json_obj and json_obj['adaptedStruct'] is not None:
+      self.adaptedStruct = AdaptedStruct()
+      self.adaptedStruct.readFromJson(json_obj['adaptedStruct'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'adaptedTypedef' in json_obj and json_obj['adaptedTypedef'] is not None:
+      self.adaptedTypedef = AdaptedStruct()
+      self.adaptedTypedef.readFromJson(json_obj['adaptedTypedef'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'directlyAdapted' in json_obj and json_obj['directlyAdapted'] is not None:
+      self.directlyAdapted = DirectlyAdaptedStruct()
+      self.directlyAdapted.readFromJson(json_obj['directlyAdapted'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+    if 'typedefOfAdapted' in json_obj and json_obj['typedefOfAdapted'] is not None:
+      self.typedefOfAdapted = DirectlyAdaptedStruct()
+      self.typedefOfAdapted.readFromJson(json_obj['typedefOfAdapted'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.adaptedStruct is not None:
+      value = pprint.pformat(self.adaptedStruct, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedStruct=%s' % (value))
+    if self.adaptedTypedef is not None:
+      value = pprint.pformat(self.adaptedTypedef, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    adaptedTypedef=%s' % (value))
+    if self.directlyAdapted is not None:
+      value = pprint.pformat(self.directlyAdapted, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    directlyAdapted=%s' % (value))
+    if self.typedefOfAdapted is not None:
+      value = pprint.pformat(self.typedefOfAdapted, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    typedefOfAdapted=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'adaptedStruct',
+      'adaptedTypedef',
+      'directlyAdapted',
+      'typedefOfAdapted',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.StructFieldAdaptedStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.StructFieldAdaptedStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CircularAdaptee:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.field = CircularStruct()
+          self.field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CircularAdaptee')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.STRUCT, 1)
+      self.field.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'field' in json_obj and json_obj['field'] is not None:
+      self.field = CircularStruct()
+      self.field.readFromJson(json_obj['field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CircularAdaptee, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CircularAdaptee, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CircularStruct:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.field = CircularAdaptee()
+          self.field.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CircularStruct')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.STRUCT, 1)
+      self.field.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'field' in json_obj and json_obj['field'] is not None:
+      self.field = CircularAdaptee()
+      self.field.readFromJson(json_obj['field'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CircularStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CircularStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class RenamedStruct:
+  """
+  Attributes:
+   - data
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.data = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('RenamedStruct')
+    if self.data != None:
+      oprot.writeFieldBegin('data', TType.I64, 1)
+      oprot.writeI64(self.data)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'data' in json_obj and json_obj['data'] is not None:
+      self.data = long(json_obj['data'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.data is not None:
+      value = pprint.pformat(self.data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    data=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'data',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.RenamedStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.RenamedStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class SameNamespaceStruct:
+  """
+  Attributes:
+   - data
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.data = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('SameNamespaceStruct')
+    if self.data != None:
+      oprot.writeFieldBegin('data', TType.I64, 1)
+      oprot.writeI64(self.data)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'data' in json_obj and json_obj['data'] is not None:
+      self.data = long(json_obj['data'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.data is not None:
+      value = pprint.pformat(self.data, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    data=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'data',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.SameNamespaceStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.SameNamespaceStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class HeapAllocated:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('HeapAllocated')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.HeapAllocated, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.HeapAllocated, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class MoveOnly:
+  """
+  Attributes:
+   - ptr
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRUCT:
+          self.ptr = HeapAllocated()
+          self.ptr.read(iprot)
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('MoveOnly')
+    if self.ptr != None:
+      oprot.writeFieldBegin('ptr', TType.STRUCT, 1)
+      self.ptr.write(oprot)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'ptr' in json_obj and json_obj['ptr'] is not None:
+      self.ptr = HeapAllocated()
+      self.ptr.readFromJson(json_obj['ptr'], is_text=False, relax_enum_validation=relax_enum_validation, custom_set_cls=set_cls, custom_dict_cls=dict_cls)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.ptr is not None:
+      value = pprint.pformat(self.ptr, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    ptr=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'ptr',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.MoveOnly, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.MoveOnly, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class AlsoMoveOnly:
+  """
+  Attributes:
+   - ptr
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.ptr = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('AlsoMoveOnly')
+    if self.ptr != None:
+      oprot.writeFieldBegin('ptr', TType.I64, 1)
+      oprot.writeI64(self.ptr)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'ptr' in json_obj and json_obj['ptr'] is not None:
+      self.ptr = long(json_obj['ptr'])
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.ptr is not None:
+      value = pprint.pformat(self.ptr, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    ptr=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'ptr',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.AlsoMoveOnly, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.AlsoMoveOnly, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class ApplyAdapter:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('ApplyAdapter')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.ApplyAdapter, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.ApplyAdapter, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class TransitiveAdapted:
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('TransitiveAdapted')
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.TransitiveAdapted, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.TransitiveAdapted, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class CountingStruct:
+  """
+  Attributes:
+   - regularInt
+   - countingInt
+   - regularString
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I64:
+          self.regularInt = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 2:
+        if ftype == TType.I64:
+          self.countingInt = iprot.readI64()
+        else:
+          iprot.skip(ftype)
+      elif fid == 3:
+        if ftype == TType.STRING:
+          self.regularString = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('CountingStruct')
+    if self.regularInt != None:
+      oprot.writeFieldBegin('regularInt', TType.I64, 1)
+      oprot.writeI64(self.regularInt)
+      oprot.writeFieldEnd()
+    if self.countingInt != None:
+      oprot.writeFieldBegin('countingInt', TType.I64, 2)
+      oprot.writeI64(self.countingInt)
+      oprot.writeFieldEnd()
+    if self.regularString != None:
+      oprot.writeFieldBegin('regularString', TType.STRING, 3)
+      oprot.writeString(self.regularString.encode('utf-8')) if UTF8STRINGS and not isinstance(self.regularString, bytes) else oprot.writeString(self.regularString)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'regularInt' in json_obj and json_obj['regularInt'] is not None:
+      self.regularInt = long(json_obj['regularInt'])
+    if 'countingInt' in json_obj and json_obj['countingInt'] is not None:
+      self.countingInt = long(json_obj['countingInt'])
+    if 'regularString' in json_obj and json_obj['regularString'] is not None:
+      self.regularString = json_obj['regularString']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.regularInt is not None:
+      value = pprint.pformat(self.regularInt, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    regularInt=%s' % (value))
+    if self.countingInt is not None:
+      value = pprint.pformat(self.countingInt, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    countingInt=%s' % (value))
+    if self.regularString is not None:
+      value = pprint.pformat(self.regularString, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    regularString=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'regularInt',
+      'countingInt',
+      'regularString',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.CountingStruct, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.CountingStruct, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class Person:
+  """
+  Attributes:
+   - name
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Person')
+    if self.name != None:
+      oprot.writeFieldBegin('name', TType.STRING, 1)
+      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'name' in json_obj and json_obj['name'] is not None:
+      self.name = json_obj['name']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.name is not None:
+      value = pprint.pformat(self.name, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    name=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'name',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Person, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Person, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class Person2:
+  """
+  Attributes:
+   - name
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.STRING:
+          self.name = iprot.readString().decode('utf-8') if UTF8STRINGS else iprot.readString()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('Person2')
+    if self.name != None:
+      oprot.writeFieldBegin('name', TType.STRING, 1)
+      oprot.writeString(self.name.encode('utf-8')) if UTF8STRINGS and not isinstance(self.name, bytes) else oprot.writeString(self.name)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'name' in json_obj and json_obj['name'] is not None:
+      self.name = json_obj['name']
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.name is not None:
+      value = pprint.pformat(self.name, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    name=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'name',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.Person2, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.Person2, self)
+
+  def _to_py_deprecated(self):
+    return self
+
 SetWithAdapter = UnimplementedTypedef()
 StringWithAdapter = UnimplementedTypedef()
 ListWithElemAdapter = UnimplementedTypedef()
@@ -2034,6 +4793,22 @@ FooWithAdapter = Foo
 StructWithAdapter = my.Adapter2.Type
 UnionWithAdapter = my.Adapter2.Type
 AdaptedA = A
+DurationMs = UnimplementedTypedef()
+AdaptedBool = UnimplementedTypedef()
+AdaptedByte = UnimplementedTypedef()
+AdaptedShort = UnimplementedTypedef()
+AdaptedInteger = UnimplementedTypedef()
+AdaptedLong = UnimplementedTypedef()
+AdaptedDouble = UnimplementedTypedef()
+AdaptedString = UnimplementedTypedef()
+DoubleTypedefBool = AdaptedBool
+CustomProtocolType = UnimplementedTypedef()
+IndirectionString = UnimplementedTypedef()
+AdaptedEnum = ThriftAdaptedEnum
+AdaptedTypedef = AdaptedStruct
+TypedefOfDirect = DirectlyAdaptedStruct
+AdaptedCircularAdaptee = CircularAdaptee
+CountingInt = UnimplementedTypedef()
 all_structs.append(MyAnnotation)
 MyAnnotation.thrift_spec = (
   None, # 0
@@ -2367,6 +5142,551 @@ def MyStruct__setstate__(self, state):
 
 MyStruct.__getstate__ = lambda self: self.__dict__.copy()
 MyStruct.__setstate__ = MyStruct__setstate__
+
+all_structs.append(AdaptTestStruct)
+AdaptTestStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'delay', None, None, 2, ), # 1
+  (2, TType.STRING, 'custom', False, None, 2, ), # 2
+  (3, TType.I64, 'timeout', None, None, 2, ), # 3
+  (4, TType.I64, 'data', None, None, 2, ), # 4
+  (5, TType.STRING, 'meta', True, None, 2, ), # 5
+  (6, TType.STRING, 'indirectionString', True, None, 2, ), # 6
+  (7, TType.STRING, 'string_data', True, None, 2, ), # 7
+  (8, TType.BOOL, 'double_wrapped_bool', None, None, 2, ), # 8
+  (9, TType.I32, 'double_wrapped_integer', None, None, 2, ), # 9
+  (10, TType.STRING, 'binary_data', False, None, 2, ), # 10
+)
+
+AdaptTestStruct.thrift_struct_annotations = {
+}
+AdaptTestStruct.thrift_field_annotations = {
+}
+
+def AdaptTestStruct__init__(self, delay=None, custom=None, timeout=None, data=None, meta=None, indirectionString=None, string_data=None, double_wrapped_bool=None, double_wrapped_integer=None, binary_data=None,):
+  self.delay = delay
+  self.custom = custom
+  self.timeout = timeout
+  self.data = data
+  self.meta = meta
+  self.indirectionString = indirectionString
+  self.string_data = string_data
+  self.double_wrapped_bool = double_wrapped_bool
+  self.double_wrapped_integer = double_wrapped_integer
+  self.binary_data = binary_data
+
+AdaptTestStruct.__init__ = AdaptTestStruct__init__
+
+def AdaptTestStruct__setstate__(self, state):
+  state.setdefault('delay', None)
+  state.setdefault('custom', None)
+  state.setdefault('timeout', None)
+  state.setdefault('data', None)
+  state.setdefault('meta', None)
+  state.setdefault('indirectionString', None)
+  state.setdefault('string_data', None)
+  state.setdefault('double_wrapped_bool', None)
+  state.setdefault('double_wrapped_integer', None)
+  state.setdefault('binary_data', None)
+  self.__dict__ = state
+
+AdaptTestStruct.__getstate__ = lambda self: self.__dict__.copy()
+AdaptTestStruct.__setstate__ = AdaptTestStruct__setstate__
+
+all_structs.append(AdaptTemplatedTestStruct)
+AdaptTemplatedTestStruct.thrift_spec = (
+  None, # 0
+  (1, TType.BOOL, 'adaptedBool', None, None, 2, ), # 1
+  (2, TType.BYTE, 'adaptedByte', None, None, 2, ), # 2
+  (3, TType.I16, 'adaptedShort', None, None, 2, ), # 3
+  (4, TType.I32, 'adaptedInteger', None, None, 2, ), # 4
+  (5, TType.I64, 'adaptedLong', None, None, 2, ), # 5
+  (6, TType.DOUBLE, 'adaptedDouble', None, None, 2, ), # 6
+  (7, TType.STRING, 'adaptedString', True, None, 2, ), # 7
+  (8, TType.LIST, 'adaptedList', (TType.I64,None), None, 2, ), # 8
+  (9, TType.SET, 'adaptedSet', (TType.I64,None), None, 2, ), # 9
+  (10, TType.MAP, 'adaptedMap', (TType.I64,None,TType.I64,None), None, 2, ), # 10
+  (11, TType.BOOL, 'adaptedBoolDefault', None, True, 2, ), # 11
+  (12, TType.BYTE, 'adaptedByteDefault', None, 1, 2, ), # 12
+  (13, TType.I16, 'adaptedShortDefault', None, 2, 2, ), # 13
+  (14, TType.I32, 'adaptedIntegerDefault', None, 3, 2, ), # 14
+  (15, TType.I64, 'adaptedLongDefault', None, 4, 2, ), # 15
+  (16, TType.DOUBLE, 'adaptedDoubleDefault', None, 5, 2, ), # 16
+  (17, TType.STRING, 'adaptedStringDefault', True, "6", 2, ), # 17
+  (18, TType.I32, 'adaptedEnum', ThriftAdaptedEnum,   1, 2, ), # 18
+  (19, TType.LIST, 'adaptedListDefault', (TType.I64,None), [
+    1,
+  ], 2, ), # 19
+  (20, TType.SET, 'adaptedSetDefault', (TType.I64,None), set([
+    1,
+  ]), 2, ), # 20
+  (21, TType.MAP, 'adaptedMapDefault', (TType.I64,None,TType.I64,None), {
+    1 : 1,
+  }, 2, ), # 21
+  (22, TType.BOOL, 'doubleTypedefBool', None, None, 2, ), # 22
+)
+
+AdaptTemplatedTestStruct.thrift_struct_annotations = {
+}
+AdaptTemplatedTestStruct.thrift_field_annotations = {
+}
+
+def AdaptTemplatedTestStruct__init__(self, adaptedBool=None, adaptedByte=None, adaptedShort=None, adaptedInteger=None, adaptedLong=None, adaptedDouble=None, adaptedString=None, adaptedList=None, adaptedSet=None, adaptedMap=None, adaptedBoolDefault=AdaptTemplatedTestStruct.thrift_spec[11][4], adaptedByteDefault=AdaptTemplatedTestStruct.thrift_spec[12][4], adaptedShortDefault=AdaptTemplatedTestStruct.thrift_spec[13][4], adaptedIntegerDefault=AdaptTemplatedTestStruct.thrift_spec[14][4], adaptedLongDefault=AdaptTemplatedTestStruct.thrift_spec[15][4], adaptedDoubleDefault=AdaptTemplatedTestStruct.thrift_spec[16][4], adaptedStringDefault=AdaptTemplatedTestStruct.thrift_spec[17][4], adaptedEnum=AdaptTemplatedTestStruct.thrift_spec[18][4], adaptedListDefault=AdaptTemplatedTestStruct.thrift_spec[19][4], adaptedSetDefault=AdaptTemplatedTestStruct.thrift_spec[20][4], adaptedMapDefault=AdaptTemplatedTestStruct.thrift_spec[21][4], doubleTypedefBool=None,):
+  self.adaptedBool = adaptedBool
+  self.adaptedByte = adaptedByte
+  self.adaptedShort = adaptedShort
+  self.adaptedInteger = adaptedInteger
+  self.adaptedLong = adaptedLong
+  self.adaptedDouble = adaptedDouble
+  self.adaptedString = adaptedString
+  self.adaptedList = adaptedList
+  self.adaptedSet = adaptedSet
+  self.adaptedMap = adaptedMap
+  if adaptedBoolDefault is self.thrift_spec[11][4]:
+    adaptedBoolDefault = True
+  self.adaptedBoolDefault = adaptedBoolDefault
+  if adaptedByteDefault is self.thrift_spec[12][4]:
+    adaptedByteDefault = 1
+  self.adaptedByteDefault = adaptedByteDefault
+  if adaptedShortDefault is self.thrift_spec[13][4]:
+    adaptedShortDefault = 2
+  self.adaptedShortDefault = adaptedShortDefault
+  if adaptedIntegerDefault is self.thrift_spec[14][4]:
+    adaptedIntegerDefault = 3
+  self.adaptedIntegerDefault = adaptedIntegerDefault
+  if adaptedLongDefault is self.thrift_spec[15][4]:
+    adaptedLongDefault = 4
+  self.adaptedLongDefault = adaptedLongDefault
+  if adaptedDoubleDefault is self.thrift_spec[16][4]:
+    adaptedDoubleDefault = 5
+  self.adaptedDoubleDefault = adaptedDoubleDefault
+  if adaptedStringDefault is self.thrift_spec[17][4]:
+    adaptedStringDefault = "6"
+  self.adaptedStringDefault = adaptedStringDefault
+  if adaptedEnum is self.thrift_spec[18][4]:
+    adaptedEnum =   1
+  self.adaptedEnum = adaptedEnum
+  if adaptedListDefault is self.thrift_spec[19][4]:
+    adaptedListDefault = [
+    1,
+  ]
+  self.adaptedListDefault = adaptedListDefault
+  if adaptedSetDefault is self.thrift_spec[20][4]:
+    adaptedSetDefault = set([
+    1,
+  ])
+  self.adaptedSetDefault = adaptedSetDefault
+  if adaptedMapDefault is self.thrift_spec[21][4]:
+    adaptedMapDefault = {
+    1 : 1,
+  }
+  self.adaptedMapDefault = adaptedMapDefault
+  self.doubleTypedefBool = doubleTypedefBool
+
+AdaptTemplatedTestStruct.__init__ = AdaptTemplatedTestStruct__init__
+
+def AdaptTemplatedTestStruct__setstate__(self, state):
+  state.setdefault('adaptedBool', None)
+  state.setdefault('adaptedByte', None)
+  state.setdefault('adaptedShort', None)
+  state.setdefault('adaptedInteger', None)
+  state.setdefault('adaptedLong', None)
+  state.setdefault('adaptedDouble', None)
+  state.setdefault('adaptedString', None)
+  state.setdefault('adaptedList', None)
+  state.setdefault('adaptedSet', None)
+  state.setdefault('adaptedMap', None)
+  state.setdefault('adaptedBoolDefault', True)
+  state.setdefault('adaptedByteDefault', 1)
+  state.setdefault('adaptedShortDefault', 2)
+  state.setdefault('adaptedIntegerDefault', 3)
+  state.setdefault('adaptedLongDefault', 4)
+  state.setdefault('adaptedDoubleDefault', 5)
+  state.setdefault('adaptedStringDefault', "6")
+  state.setdefault('adaptedEnum',   1)
+  state.setdefault('adaptedListDefault', [
+    1,
+  ])
+  state.setdefault('adaptedSetDefault', set([
+    1,
+  ]))
+  state.setdefault('adaptedMapDefault', {
+    1 : 1,
+  })
+  state.setdefault('doubleTypedefBool', None)
+  self.__dict__ = state
+
+AdaptTemplatedTestStruct.__getstate__ = lambda self: self.__dict__.copy()
+AdaptTemplatedTestStruct.__setstate__ = AdaptTemplatedTestStruct__setstate__
+
+all_structs.append(AdaptTemplatedNestedTestStruct)
+AdaptTemplatedNestedTestStruct.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'adaptedStruct', [AdaptTemplatedTestStruct, AdaptTemplatedTestStruct.thrift_spec, False], None, 2, ), # 1
+)
+
+AdaptTemplatedNestedTestStruct.thrift_struct_annotations = {
+}
+AdaptTemplatedNestedTestStruct.thrift_field_annotations = {
+}
+
+def AdaptTemplatedNestedTestStruct__init__(self, adaptedStruct=None,):
+  self.adaptedStruct = adaptedStruct
+
+AdaptTemplatedNestedTestStruct.__init__ = AdaptTemplatedNestedTestStruct__init__
+
+def AdaptTemplatedNestedTestStruct__setstate__(self, state):
+  state.setdefault('adaptedStruct', None)
+  self.__dict__ = state
+
+AdaptTemplatedNestedTestStruct.__getstate__ = lambda self: self.__dict__.copy()
+AdaptTemplatedNestedTestStruct.__setstate__ = AdaptTemplatedNestedTestStruct__setstate__
+
+all_structs.append(AdaptTestUnion)
+AdaptTestUnion.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'delay', None, None, 2, ), # 1
+  (2, TType.STRING, 'custom', False, None, 2, ), # 2
+)
+
+AdaptTestUnion.thrift_struct_annotations = {
+  "cpp.name": "ThriftAdaptTestUnion",
+}
+AdaptTestUnion.thrift_field_annotations = {
+}
+
+def AdaptTestUnion__init__(self, delay=None, custom=None,):
+  self.field = 0
+  self.value = None
+  if delay is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 1
+    self.value = delay
+  if custom is not None:
+    assert self.field == 0 and self.value is None
+    self.field = 2
+    self.value = custom
+
+AdaptTestUnion.__init__ = AdaptTestUnion__init__
+
+all_structs.append(AdaptedStruct)
+AdaptedStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'data', None, None, 2, ), # 1
+)
+
+AdaptedStruct.thrift_struct_annotations = {
+  "cpp.name": "ThriftAdaptedStruct",
+}
+AdaptedStruct.thrift_field_annotations = {
+}
+
+def AdaptedStruct__init__(self, data=None,):
+  self.data = data
+
+AdaptedStruct.__init__ = AdaptedStruct__init__
+
+def AdaptedStruct__setstate__(self, state):
+  state.setdefault('data', None)
+  self.__dict__ = state
+
+AdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
+AdaptedStruct.__setstate__ = AdaptedStruct__setstate__
+
+all_structs.append(DirectlyAdaptedStruct)
+DirectlyAdaptedStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'data', None, None, 2, ), # 1
+)
+
+DirectlyAdaptedStruct.thrift_struct_annotations = {
+}
+DirectlyAdaptedStruct.thrift_field_annotations = {
+}
+
+def DirectlyAdaptedStruct__init__(self, data=None,):
+  self.data = data
+
+DirectlyAdaptedStruct.__init__ = DirectlyAdaptedStruct__init__
+
+def DirectlyAdaptedStruct__setstate__(self, state):
+  state.setdefault('data', None)
+  self.__dict__ = state
+
+DirectlyAdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
+DirectlyAdaptedStruct.__setstate__ = DirectlyAdaptedStruct__setstate__
+
+all_structs.append(StructFieldAdaptedStruct)
+StructFieldAdaptedStruct.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'adaptedStruct', [AdaptedStruct, AdaptedStruct.thrift_spec, False], None, 2, ), # 1
+  (2, TType.STRUCT, 'adaptedTypedef', [AdaptedStruct, AdaptedStruct.thrift_spec, False], None, 2, ), # 2
+  (3, TType.STRUCT, 'directlyAdapted', [DirectlyAdaptedStruct, DirectlyAdaptedStruct.thrift_spec, False], None, 2, ), # 3
+  (4, TType.STRUCT, 'typedefOfAdapted', [DirectlyAdaptedStruct, DirectlyAdaptedStruct.thrift_spec, False], None, 2, ), # 4
+)
+
+StructFieldAdaptedStruct.thrift_struct_annotations = {
+}
+StructFieldAdaptedStruct.thrift_field_annotations = {
+}
+
+def StructFieldAdaptedStruct__init__(self, adaptedStruct=None, adaptedTypedef=None, directlyAdapted=None, typedefOfAdapted=None,):
+  self.adaptedStruct = adaptedStruct
+  self.adaptedTypedef = adaptedTypedef
+  self.directlyAdapted = directlyAdapted
+  self.typedefOfAdapted = typedefOfAdapted
+
+StructFieldAdaptedStruct.__init__ = StructFieldAdaptedStruct__init__
+
+def StructFieldAdaptedStruct__setstate__(self, state):
+  state.setdefault('adaptedStruct', None)
+  state.setdefault('adaptedTypedef', None)
+  state.setdefault('directlyAdapted', None)
+  state.setdefault('typedefOfAdapted', None)
+  self.__dict__ = state
+
+StructFieldAdaptedStruct.__getstate__ = lambda self: self.__dict__.copy()
+StructFieldAdaptedStruct.__setstate__ = StructFieldAdaptedStruct__setstate__
+
+all_structs.append(CircularAdaptee)
+CircularAdaptee.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'field', [CircularStruct, CircularStruct.thrift_spec, False], None, 2, ), # 1
+)
+
+CircularAdaptee.thrift_struct_annotations = {
+}
+CircularAdaptee.thrift_field_annotations = {
+}
+
+def CircularAdaptee__init__(self, field=None,):
+  self.field = field
+
+CircularAdaptee.__init__ = CircularAdaptee__init__
+
+def CircularAdaptee__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+CircularAdaptee.__getstate__ = lambda self: self.__dict__.copy()
+CircularAdaptee.__setstate__ = CircularAdaptee__setstate__
+
+all_structs.append(CircularStruct)
+CircularStruct.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'field', [CircularAdaptee, CircularAdaptee.thrift_spec, False], None, 1, ), # 1
+)
+
+CircularStruct.thrift_struct_annotations = {
+}
+CircularStruct.thrift_field_annotations = {
+}
+
+def CircularStruct__init__(self, field=None,):
+  self.field = field
+
+CircularStruct.__init__ = CircularStruct__init__
+
+def CircularStruct__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+CircularStruct.__getstate__ = lambda self: self.__dict__.copy()
+CircularStruct.__setstate__ = CircularStruct__setstate__
+
+all_structs.append(RenamedStruct)
+RenamedStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'data', None, None, 2, ), # 1
+)
+
+RenamedStruct.thrift_struct_annotations = {
+}
+RenamedStruct.thrift_field_annotations = {
+}
+
+def RenamedStruct__init__(self, data=None,):
+  self.data = data
+
+RenamedStruct.__init__ = RenamedStruct__init__
+
+def RenamedStruct__setstate__(self, state):
+  state.setdefault('data', None)
+  self.__dict__ = state
+
+RenamedStruct.__getstate__ = lambda self: self.__dict__.copy()
+RenamedStruct.__setstate__ = RenamedStruct__setstate__
+
+all_structs.append(SameNamespaceStruct)
+SameNamespaceStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'data', None, None, 2, ), # 1
+)
+
+SameNamespaceStruct.thrift_struct_annotations = {
+}
+SameNamespaceStruct.thrift_field_annotations = {
+}
+
+def SameNamespaceStruct__init__(self, data=None,):
+  self.data = data
+
+SameNamespaceStruct.__init__ = SameNamespaceStruct__init__
+
+def SameNamespaceStruct__setstate__(self, state):
+  state.setdefault('data', None)
+  self.__dict__ = state
+
+SameNamespaceStruct.__getstate__ = lambda self: self.__dict__.copy()
+SameNamespaceStruct.__setstate__ = SameNamespaceStruct__setstate__
+
+all_structs.append(HeapAllocated)
+HeapAllocated.thrift_spec = (
+)
+
+HeapAllocated.thrift_struct_annotations = {
+}
+HeapAllocated.thrift_field_annotations = {
+}
+
+all_structs.append(MoveOnly)
+MoveOnly.thrift_spec = (
+  None, # 0
+  (1, TType.STRUCT, 'ptr', [HeapAllocated, HeapAllocated.thrift_spec, False], None, 2, ), # 1
+)
+
+MoveOnly.thrift_struct_annotations = {
+}
+MoveOnly.thrift_field_annotations = {
+}
+
+def MoveOnly__init__(self, ptr=None,):
+  self.ptr = ptr
+
+MoveOnly.__init__ = MoveOnly__init__
+
+def MoveOnly__setstate__(self, state):
+  state.setdefault('ptr', None)
+  self.__dict__ = state
+
+MoveOnly.__getstate__ = lambda self: self.__dict__.copy()
+MoveOnly.__setstate__ = MoveOnly__setstate__
+
+all_structs.append(AlsoMoveOnly)
+AlsoMoveOnly.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'ptr', None, None, 2, ), # 1
+)
+
+AlsoMoveOnly.thrift_struct_annotations = {
+}
+AlsoMoveOnly.thrift_field_annotations = {
+}
+
+def AlsoMoveOnly__init__(self, ptr=None,):
+  self.ptr = ptr
+
+AlsoMoveOnly.__init__ = AlsoMoveOnly__init__
+
+def AlsoMoveOnly__setstate__(self, state):
+  state.setdefault('ptr', None)
+  self.__dict__ = state
+
+AlsoMoveOnly.__getstate__ = lambda self: self.__dict__.copy()
+AlsoMoveOnly.__setstate__ = AlsoMoveOnly__setstate__
+
+all_structs.append(ApplyAdapter)
+ApplyAdapter.thrift_spec = (
+)
+
+ApplyAdapter.thrift_struct_annotations = {
+}
+ApplyAdapter.thrift_field_annotations = {
+}
+
+all_structs.append(TransitiveAdapted)
+TransitiveAdapted.thrift_spec = (
+)
+
+TransitiveAdapted.thrift_struct_annotations = {
+}
+TransitiveAdapted.thrift_field_annotations = {
+}
+
+all_structs.append(CountingStruct)
+CountingStruct.thrift_spec = (
+  None, # 0
+  (1, TType.I64, 'regularInt', None, None, 1, ), # 1
+  (2, TType.I64, 'countingInt', None, None, 1, ), # 2
+  (3, TType.STRING, 'regularString', True, None, 1, ), # 3
+)
+
+CountingStruct.thrift_struct_annotations = {
+}
+CountingStruct.thrift_field_annotations = {
+}
+
+def CountingStruct__init__(self, regularInt=None, countingInt=None, regularString=None,):
+  self.regularInt = regularInt
+  self.countingInt = countingInt
+  self.regularString = regularString
+
+CountingStruct.__init__ = CountingStruct__init__
+
+def CountingStruct__setstate__(self, state):
+  state.setdefault('regularInt', None)
+  state.setdefault('countingInt', None)
+  state.setdefault('regularString', None)
+  self.__dict__ = state
+
+CountingStruct.__getstate__ = lambda self: self.__dict__.copy()
+CountingStruct.__setstate__ = CountingStruct__setstate__
+
+all_structs.append(Person)
+Person.thrift_spec = (
+  None, # 0
+  (1, TType.STRING, 'name', True, None, 2, ), # 1
+)
+
+Person.thrift_struct_annotations = {
+}
+Person.thrift_field_annotations = {
+}
+
+def Person__init__(self, name=None,):
+  self.name = name
+
+Person.__init__ = Person__init__
+
+def Person__setstate__(self, state):
+  state.setdefault('name', None)
+  self.__dict__ = state
+
+Person.__getstate__ = lambda self: self.__dict__.copy()
+Person.__setstate__ = Person__setstate__
+
+all_structs.append(Person2)
+Person2.thrift_spec = (
+  None, # 0
+  (1, TType.STRING, 'name', True, None, 2, ), # 1
+)
+
+Person2.thrift_struct_annotations = {
+}
+Person2.thrift_field_annotations = {
+}
+
+def Person2__init__(self, name=None,):
+  self.name = name
+
+Person2.__init__ = Person2__init__
+
+def Person2__setstate__(self, state):
+  state.setdefault('name', None)
+  self.__dict__ = state
+
+Person2.__getstate__ = lambda self: self.__dict__.copy()
+Person2.__setstate__ = Person2__setstate__
 
 fix_spec(all_structs)
 del all_structs

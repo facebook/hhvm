@@ -608,6 +608,35 @@ let parse_options () =
             set_float_ simple_pessimize 1.0;
             set_bool_ complex_coercion ()),
         " Enables all like types features" );
+      ( "--naive-implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ always_pessimise_return ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables naive implicit pessimisation" );
+      ( "--implicit-pess",
+        Arg.Unit
+          (fun () ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ everything_sdt ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ()),
+        " Enables implicit pessimisation" );
+      ( "--explicit-pess",
+        Arg.String
+          (fun dir ->
+            set_bool_ enable_sound_dynamic ();
+            set_bool_ like_type_hints ();
+            set_bool_ enable_supportdyn_hint ();
+            set_bool_ pessimise_builtins ();
+            custom_hhi_path := Some dir),
+        " Enables checking explicitly pessimised files. Requires path to pessimised .hhi files "
+      );
       ( "--symbolindex-file",
         Arg.String (fun str -> symbolindex_file := Some str),
         " Load the symbol index from this file" );

@@ -74,11 +74,15 @@ void emitCheckSurpriseFlagsEnter(Vout& v, Vout& vcold, Vreg fp,
   vcold = doneCall;
 
   auto const sf = v.makeReg();
-  vcold << testq{rarg(0), rarg(0), sf};
+
+  auto const rIntercept = rarg(3); // NB: must match emitFunctionEnterHelper
+  assertx(!php_return_regs().contains(rIntercept));
+
+  vcold << testq{rIntercept, rIntercept, sf};
   ifThen(vcold, CC_NZ, sf, [&] (Vout& v) {
     // We are intercepting. Return to the caller.
     v << unrecordbasenativesp{};
-    v << jmpr{rarg(0), php_return_regs()};
+    v << jmpr{rIntercept, php_return_regs()};
   });
   vcold << jmp{done};
 
@@ -168,11 +172,15 @@ void cgCheckSurpriseAndStack(IRLS& env, const IRInstruction* inst) {
     v = done;
 
     auto const sf = v.makeReg();
-    v << testq{rarg(0), rarg(0), sf};
+
+    auto const rIntercept = rarg(3); // NB: must match emitFunctionEnterHelper
+    assertx(!php_return_regs().contains(rIntercept));
+
+    v << testq{rIntercept, rIntercept, sf};
     ifThen(v, CC_NZ, sf, [&] (Vout& v) {
       // We are intercepting. Return to the caller.
       v << unrecordbasenativesp{};
-      v << jmpr{rarg(0), php_return_regs()};
+      v << jmpr{rIntercept, php_return_regs()};
     });
   });
 }

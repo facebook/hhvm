@@ -2134,8 +2134,11 @@ class SimpleUnion  {
   SimpleUnion(SimpleUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -2158,8 +2161,11 @@ class SimpleUnion  {
   SimpleUnion(const SimpleUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -2181,8 +2187,11 @@ class SimpleUnion  {
   SimpleUnion& operator=(SimpleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -2206,8 +2215,11 @@ class SimpleUnion  {
   SimpleUnion& operator=(const SimpleUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -2435,8 +2447,11 @@ class ComplexUnion final  {
   ComplexUnion(ComplexUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -2589,8 +2604,11 @@ class ComplexUnion final  {
   ComplexUnion(const ComplexUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -2742,8 +2760,11 @@ class ComplexUnion final  {
   ComplexUnion& operator=(ComplexUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(std::move(rhs.value_.intValue));
@@ -2897,8 +2918,11 @@ class ComplexUnion final  {
   ComplexUnion& operator=(const ComplexUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::intValue:
       {
         set_intValue(rhs.value_.intValue);
@@ -9131,8 +9155,11 @@ class FloatUnion final  {
   FloatUnion(FloatUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::floatSide:
       {
         set_floatSide(std::move(rhs.value_.floatSide));
@@ -9155,8 +9182,11 @@ class FloatUnion final  {
   FloatUnion(const FloatUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::floatSide:
       {
         set_floatSide(rhs.value_.floatSide);
@@ -9178,8 +9208,11 @@ class FloatUnion final  {
   FloatUnion& operator=(FloatUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::floatSide:
       {
         set_floatSide(std::move(rhs.value_.floatSide));
@@ -9203,8 +9236,11 @@ class FloatUnion final  {
   FloatUnion& operator=(const FloatUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::floatSide:
       {
         set_floatSide(rhs.value_.floatSide);

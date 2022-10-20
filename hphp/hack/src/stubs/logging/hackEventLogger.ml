@@ -70,6 +70,7 @@ type rollout_flags = {
   use_manifold_cython_client: bool;
   disable_naming_table_fallback_loading: bool;
   use_type_alias_heap: bool;
+  load_state_natively_v4: bool;
 }
 
 let flush () = ()
@@ -573,6 +574,8 @@ end
 
 module Rage = struct
   let rage_start ~rageid:_ ~desc:_ ~root:_ ~from:_ ~disk_config:_ = ()
+
+  let rage_watchman ~rageid:_ ~items:_ = ()
 
   let rage
       ~rageid:_

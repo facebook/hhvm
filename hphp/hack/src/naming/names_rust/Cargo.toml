@@ -9,11 +9,13 @@ path = "names.rs"
 
 [dependencies]
 anyhow = "1.0.65"
+bumpalo = { version = "3.8", features = ["collections"] }
+crossbeam = "0.8"
 hh24_types = { path = "../../utils/hh24_types" }
 hh_hash = { path = "../../utils/hh_hash" }
-nohash-hasher = "0.2"
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 relative_path = { path = "../../utils/rust/relative_path" }
 rusqlite = { version = "0.28.0", features = ["backup", "blob", "column_decltype"] }
+slog = { version = "2.7", features = ["max_level_trace", "nested-values"] }
 typing_deps_hash = { path = "../../deps/cargo/typing_deps_hash" }

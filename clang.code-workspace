@@ -23,6 +23,7 @@
         ]
       }
     },
+    "cmake.buildDirectory": "${workspaceFolder}/_build"
   },
   "extensions": {
     "recommendations": [

@@ -578,10 +578,17 @@ HTTP2Codec::parseHeadersDecodeFrames(
     // Avoid logging header blocks that have failed decoding due to being
     // excessively large.
     if (decodeInfo_.decodeError != HPACK::DecodeError::HEADERS_TOO_LARGE) {
-      LOG(ERROR) << decodeErrorMessage << curHeader_.stream << " header block=";
+      goawayErrorMessage_ =
+          folly::to<std::string>(decodeErrorMessage,
+                                 curHeader_.stream,
+                                 ": decompression error=",
+                                 uint32_t(decodeInfo_.decodeError));
+      LOG(ERROR) << goawayErrorMessage_
+                 << (VLOG_IS_ON(3) ? ", header block=" : "");
       VLOG(3) << IOBufPrinter::printHexFolly(curHeaderBlock_.front(), true);
     } else {
-      LOG(ERROR) << decodeErrorMessage << curHeader_.stream;
+      goawayErrorMessage_ = folly::to<std::string>(
+          decodeErrorMessage, curHeader_.stream, ": headers too large");
     }
 
     if (msg) {
@@ -776,17 +783,16 @@ ErrorCode HTTP2Codec::parseRstStream(Cursor& cursor) {
   auto err = http2::parseRstStream(cursor, curHeader_, statusCode);
   RETURN_IF_ERROR(err);
   if (statusCode == ErrorCode::PROTOCOL_ERROR) {
-    goawayErrorMessage_ =
-        folly::to<string>("GOAWAY error: RST_STREAM with code=",
-                          getErrorCodeString(statusCode),
-                          " for streamID=",
-                          curHeader_.stream,
-                          " user-agent=",
-                          userAgent_);
+    auto errorMsg = folly::to<string>("RST_STREAM with code=",
+                                      getErrorCodeString(statusCode),
+                                      " for streamID=",
+                                      curHeader_.stream,
+                                      " user-agent=",
+                                      userAgent_);
     int logFreq = userAgent_.find(kOkhttp2) == std::string::npos
                       ? 1
                       : kOkhttp2GoawayLogFreq;
-    VLOG_EVERY_N(2, logFreq) << goawayErrorMessage_;
+    VLOG_EVERY_N(2, logFreq) << errorMsg;
   }
   deliverCallbackIfAllowed(
       &HTTPCodec::Callback::onAbort, "onAbort", curHeader_.stream, statusCode);
@@ -1020,15 +1026,11 @@ ErrorCode HTTP2Codec::parseWindowUpdate(Cursor& cursor) {
     } else {
       // Parsing a zero delta window update should cause a protocol error
       // and send a rst stream
-      goawayErrorMessage_ =
-          folly::to<string>("parseWindowUpdate Invalid 0 length");
+      goawayErrorMessage_ = folly::to<std::string>(
+          "streamID=", curHeader_.stream, " with window update delta=", delta);
       VLOG(4) << goawayErrorMessage_;
-      streamError(folly::to<std::string>("streamID=",
-                                         curHeader_.stream,
-                                         " with HTTP2Codec stream error: ",
-                                         "window update delta=",
-                                         delta),
-                  ErrorCode::PROTOCOL_ERROR);
+      streamError(goawayErrorMessage_, ErrorCode::PROTOCOL_ERROR);
+      // Stream error and protocol error
       return ErrorCode::PROTOCOL_ERROR;
     }
   }

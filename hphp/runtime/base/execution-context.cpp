@@ -1423,7 +1423,8 @@ void ExecutionContext::requestInit() {
     assertx(SystemLib::s_unit->isEmpty());
   }
 
-  *ImplicitContext::activeCtx = nullptr;
+  assertx(!ImplicitContext::activeCtx.isInit());
+  ImplicitContext::activeCtx.initWith(nullptr);
 
   profileRequestStart();
 

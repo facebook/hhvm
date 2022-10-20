@@ -92,7 +92,13 @@ void PreClass::prettyPrint(std::ostream &out) const {
   if (m_attrs & AttrFinal) { out << "final "; }
   if (m_attrs & AttrInterface) { out << "interface "; }
   out << m_name->data();
-  if (m_attrs & AttrNoOverride){ out << " (nooverride)"; }
+  if (m_attrs & AttrNoOverrideRegular) {
+    if (m_attrs & AttrNoOverride) {
+      out << " (no-override)";
+    } else {
+      out << " (no-override-regular)";
+    }
+  }
   if (m_attrs & AttrUnique)     out << " (unique)";
   if (m_attrs & AttrPersistent) out << " (persistent)";
   if (m_attrs & AttrIsConst) {

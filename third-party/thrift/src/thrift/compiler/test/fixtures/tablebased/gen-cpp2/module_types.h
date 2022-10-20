@@ -1039,8 +1039,11 @@ class ExampleUnion final  {
   ExampleUnion(ExampleUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::fieldA:
       {
         set_fieldA(std::move(rhs.value_.fieldA));
@@ -1063,8 +1066,11 @@ class ExampleUnion final  {
   ExampleUnion(const ExampleUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::fieldA:
       {
         set_fieldA(rhs.value_.fieldA);
@@ -1086,8 +1092,11 @@ class ExampleUnion final  {
   ExampleUnion& operator=(ExampleUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::fieldA:
       {
         set_fieldA(std::move(rhs.value_.fieldA));
@@ -1111,8 +1120,11 @@ class ExampleUnion final  {
   ExampleUnion& operator=(const ExampleUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::fieldA:
       {
         set_fieldA(rhs.value_.fieldA);

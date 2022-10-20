@@ -38,6 +38,31 @@ let make_local_server_api
       in
       ()
 
+    let upload_naming_table ~(nonce : string) : unit =
+      Hh_logger.log "Uploading the naming table...";
+      let cmd = "manifold mkdirs hulk/tree/naming/" ^ nonce in
+      Hh_logger.log "Running %s" cmd;
+      ignore (Sys.command cmd);
+
+      let blob_dir =
+        Tempfile.mkdtemp_with_dir (Path.make GlobalConfig.tmp_dir)
+      in
+      let blob_path = Path.(to_string (concat blob_dir "naming.bin")) in
+      let chan = Stdlib.open_out_bin blob_path in
+      Marshal.to_channel chan naming_table [];
+      Stdlib.close_out chan;
+
+      let cmd =
+        Printf.sprintf
+          "manifold putr --overwrite %s hulk/tree/naming/%s"
+          (Path.to_string blob_dir)
+          nonce
+      in
+      Hh_logger.log "Executing %s" cmd;
+      ignore (Sys.command cmd);
+      Hh_logger.log "Uploaded the naming table";
+      ()
+
     let snapshot_naming_table_base ~destination_path : unit Future.t =
       send_progress "Snapshotting the naming table for delegated type checking";
       let start_t = Unix.gettimeofday () in
@@ -205,7 +230,7 @@ let make_remote_server_api
             | e -> Error (Exn.to_string e))
         end
 
-    let build_naming_table _ =
+    let build_naming_table () =
       Hh_logger.log "Building naming table";
       let indexer =
         Find.make_next_files ~name:"root" ~filter:FindUtils.is_hack root
@@ -232,7 +257,7 @@ let make_remote_server_api
           let _ = Naming_global.ndecl_file_error_if_already_bound ctx k v in
           ());
       Hh_logger.log "Building naming table - Done!";
-      ()
+      naming_table
 
     let load_naming_and_dep_table
         (saved_state_main_artifacts :
@@ -261,7 +286,7 @@ let make_remote_server_api
         in
         Ok (naming_table, dep_table_path)
 
-    let download_naming_and_dep_table
+    let download_naming_and_dep_table_from_saved_state
         (manifold_api_key : string option)
         (manifold_path : string)
         ~(use_manifold_cython_client : bool) :
@@ -336,13 +361,13 @@ let make_remote_server_api
               ~modules:(List.map modules ~f:snd))
 
     let update_naming_table
-        (naming_table : Naming_table.t)
-        (dep_table_path : Path.t)
-        (changed_files : Relative_path.t list option) : (string, string) result
-        =
-      match changed_files with
-      | None -> Error "No changed files uploaded for remote worker's payload"
-      | Some changed_files ->
+        (naming_table_opt : naming_table)
+        (changed_files : Relative_path.t list option) : (unit, string) result =
+      match (naming_table_opt, changed_files) with
+      | (_, None) ->
+        Error "No changed files uploaded for remote worker's payload"
+      | (None, _) -> Error "No naming table present for the remote worker"
+      | (Some naming_table, Some changed_files) ->
         Hh_logger.log "Cleaning naming table of changed files";
         ignore
           (clean_changed_files_state
@@ -350,8 +375,8 @@ let make_remote_server_api
              naming_table
              changed_files
              ~t:(Unix.gettimeofday ()));
-        Ok (naming_table, changed_files, dep_table_path)
-        >>= fun (naming_table, changed_files, dep_table_path) ->
+        Ok (naming_table, changed_files)
+        >>= fun (naming_table, changed_files) ->
         let changed_hack_files =
           List.filter_map changed_files ~f:(fun file ->
               if FindUtils.is_hack (Relative_path.suffix file) then
@@ -381,16 +406,14 @@ let make_remote_server_api
               ~ide_files:Relative_path.Set.empty
               ~get_next
               ~trace:false
-              ~cache_decls:true,
-            dep_table_path )
-        >>= fun (naming_table, fast_parsed, dep_table_path) ->
+              ~cache_decls:true )
+        >>= fun (naming_table, fast_parsed) ->
         Hh_logger.log "Built updated decls for naming table";
         Hh_logger.log "Clearing old decls from naming table";
         remove_decls naming_table fast_parsed;
         Hh_logger.log "Updating naming table";
         ignore (Naming_table.update_many naming_table fast_parsed);
-        Ok (fast_parsed, dep_table_path)
-        >>= fun (fast_parsed, dep_table_path) ->
+        Ok fast_parsed >>= fun fast_parsed ->
         Hh_logger.log "Updating naming global";
         Naming_table.create fast_parsed
         |> Naming_table.iter ~f:(fun k v ->
@@ -398,35 +421,81 @@ let make_remote_server_api
                  Naming_global.ndecl_file_error_if_already_bound ctx k v
                in
                ());
-        Ok (Path.to_string dep_table_path)
+        Ok ()
 
-    let download_and_update_naming_table
+    let rec download_naming_table_for_full_init_helper
+        ~(naming_table_base : Path.t) ~(nonce : Int64.t) : naming_table =
+      let naming_table_manifold_path =
+        Printf.sprintf "hulk/tree/naming/%s/naming.bin" (Int64.to_string nonce)
+      in
+      let check_manifold_path_exists_cmd =
+        Printf.sprintf "manifold exists %s" naming_table_manifold_path
+      in
+      match Sys_utils.exec_try_read check_manifold_path_exists_cmd with
+      | Some output when Str.(string_match (regexp ".*EXISTS") output 0) ->
+        Hh_logger.log "Downloading the naming table...";
+
+        let cmd =
+          Printf.sprintf
+            "manifold get %s %s"
+            naming_table_manifold_path
+            (Path.to_string naming_table_base)
+        in
+        Hh_logger.log "Executing %s" cmd;
+        ignore (Sys.command cmd);
+
+        let naming_table_path = Path.to_string naming_table_base in
+        let chan = In_channel.create ~binary:true naming_table_path in
+        let naming_table = Marshal.from_channel chan in
+        let sqlite_naming_table_base =
+          Path.(concat (dirname naming_table_base) "naming.sql")
+        in
+        ignore
+        @@ Naming_table.save
+             naming_table
+             (Path.to_string sqlite_naming_table_base);
+        (match
+           load_naming_table_base
+             ~naming_table_base:(Some sqlite_naming_table_base)
+         with
+        | Ok naming_table -> naming_table
+        | _ -> None)
+      | _ ->
+        (* If the naming table hasn't been uploaded yet,
+           sleep for 5 seconds and try again *)
+        Unix.sleep 5;
+        download_naming_table_for_full_init_helper ~naming_table_base ~nonce
+
+    let download_naming_table_for_full_init ~(nonce : Int64.t) : naming_table =
+      let naming_dir =
+        Tempfile.mkdtemp_with_dir (Path.make GlobalConfig.tmp_dir)
+      in
+      let naming_table_base = Path.concat naming_dir "naming.bin" in
+      download_naming_table_for_full_init_helper ~naming_table_base ~nonce
+
+    let download_naming_and_dep_table
         ~(manifold_api_key : string option)
         ~(use_manifold_cython_client : bool)
-        (saved_state_manifold_path : string option)
-        (changed_files : Relative_path.t list option) : string option =
+        ~(nonce : Int64.t)
+        (saved_state_manifold_path : string option) :
+        naming_table * string option =
       match saved_state_manifold_path with
-      | None ->
-        Hh_logger.log
-          "[hulk lite] No saved_state_manifold_path, will fall back to building naming table locally";
-        build_naming_table ();
-        None
       | Some path ->
-        let dep_table_path_result =
-          download_naming_and_dep_table
+        let download_result =
+          download_naming_and_dep_table_from_saved_state
             manifold_api_key
             path
             ~use_manifold_cython_client
-          >>= fun (naming_table, dep_table_path) ->
-          update_naming_table naming_table dep_table_path changed_files
         in
-        (match dep_table_path_result with
-        | Ok dep_table_path -> Some dep_table_path
-        | Error err ->
-          Hh_logger.log "Could not build naming table from saved state: %s" err;
-          Hh_logger.log "Falling back to generating naming table";
-          build_naming_table ();
-          None)
+        (match download_result with
+        | Ok (naming_table, dep_table) ->
+          (Some naming_table, Some (Path.to_string dep_table))
+        | _ ->
+          let naming_table = build_naming_table () in
+          (Some naming_table, None))
+      | None ->
+        let naming_table = download_naming_table_for_full_init ~nonce in
+        (naming_table, None)
 
     let load_shallow_decls_saved_state
         (saved_state_main_artifacts :
@@ -590,69 +659,74 @@ let make_remote_server_api
 
     let fetch_and_cache_remote_decls
         ~ctx
-        naming_table
+        (naming_table_opt : naming_table)
         ~(from_saved_state : bool)
         (manifold_api_key : string option)
         (manifold_path : string)
         (use_manifold_cython_client : bool) =
-      let start_t = Unix.gettimeofday () in
-      let fileinfos_from_naming_table =
-        naming_table
-        |> Naming_table.to_defs_per_file ~warn_on_naming_costly_iter:false
-        |> Relative_path.Map.elements
-      in
-      let classnames =
-        List.fold
-          fileinfos_from_naming_table
-          ~init:[]
-          ~f:(fun acc (_filename, fileinfo) ->
-            SSet.fold
-              (fun class_name acc -> class_name :: acc)
-              fileinfo.FileInfo.n_classes
-              acc)
-      in
-      let remotely_fetched_decls =
-        if from_saved_state then
-          fetch_remote_decls_from_saved_state
-            manifold_api_key
-            manifold_path
-            use_manifold_cython_client
-            classnames
-        else
-          fetch_remote_decls_from_remote_old_decl_service classnames
-      in
-      List.iter fileinfos_from_naming_table ~f:(fun (filename, fileinfo) ->
-          let class_names = fileinfo.FileInfo.n_classes in
-          let pfh_decls : (string * Shallow_decl_defs.decl * Int64.t) list =
-            SSet.fold
-              (fun name acc ->
-                let remotely_fetched_decl =
-                  Option.join (SMap.find_opt name remotely_fetched_decls)
-                in
-                match
-                  Option.Monad_infix.(
-                    remotely_fetched_decl >>= fun decl ->
-                    Remote_old_decl_client.Utils.db_path_of_ctx ~ctx
-                    >>= fun db_path ->
-                    Remote_old_decl_client.Utils.name_to_decl_hash_opt
-                      ~name
-                      ~db_path
-                    >>= fun hash ->
-                    Some
-                      (name, Shallow_decl_defs.Class decl, Int64.of_string hash))
-                with
-                | Some pfh_decl -> pfh_decl :: acc
-                | None -> acc)
-              class_names
-              []
-          in
-          Direct_decl_utils.cache_decls ctx filename pfh_decls);
-      let (_ : float) =
-        Hh_logger.log_duration
-          "Fetched and cached decls from remote decl store"
-          start_t
-      in
-      ()
+      match naming_table_opt with
+      | None -> ()
+      | Some naming_table ->
+        let start_t = Unix.gettimeofday () in
+        let fileinfos_from_naming_table =
+          naming_table
+          |> Naming_table.to_defs_per_file ~warn_on_naming_costly_iter:false
+          |> Relative_path.Map.elements
+        in
+        let classnames =
+          List.fold
+            fileinfos_from_naming_table
+            ~init:[]
+            ~f:(fun acc (_filename, fileinfo) ->
+              SSet.fold
+                (fun class_name acc -> class_name :: acc)
+                fileinfo.FileInfo.n_classes
+                acc)
+        in
+        let remotely_fetched_decls =
+          if from_saved_state then
+            fetch_remote_decls_from_saved_state
+              manifold_api_key
+              manifold_path
+              use_manifold_cython_client
+              classnames
+          else
+            fetch_remote_decls_from_remote_old_decl_service classnames
+        in
+        List.iter fileinfos_from_naming_table ~f:(fun (filename, fileinfo) ->
+            let class_names = fileinfo.FileInfo.n_classes in
+            let pfh_decls : (string * Shallow_decl_defs.decl * Int64.t) list =
+              SSet.fold
+                (fun name acc ->
+                  let remotely_fetched_decl =
+                    Option.join (SMap.find_opt name remotely_fetched_decls)
+                  in
+                  match
+                    Option.Monad_infix.(
+                      remotely_fetched_decl >>= fun decl ->
+                      Remote_old_decl_client.Utils.db_path_of_ctx ~ctx
+                      >>= fun db_path ->
+                      Remote_old_decl_client.Utils.name_to_decl_hash_opt
+                        ~name
+                        ~db_path
+                      >>= fun hash ->
+                      Some
+                        ( name,
+                          Shallow_decl_defs.Class decl,
+                          Int64.of_string hash ))
+                  with
+                  | Some pfh_decl -> pfh_decl :: acc
+                  | None -> acc)
+                class_names
+                []
+            in
+            Direct_decl_utils.cache_decls ctx filename pfh_decls);
+        let (_ : float) =
+          Hh_logger.log_duration
+            "Fetched and cached decls from remote decl store"
+            start_t
+        in
+        ()
 
     let type_check
         ctx ~init_id ~check_id files_to_check ~state_filename ~telemetry =

@@ -63,7 +63,7 @@ pub fn populate_shallow_decl_store<R: Reason>(
             shallow_decl_store.add_decls(decls).unwrap();
             summary
                 .classes()
-                .map(|(class, _hash)| TypeName::new(class))
+                .map(|decl| TypeName::new(&decl.symbol))
                 .collect::<Vec<_>>()
                 .into_iter()
         })

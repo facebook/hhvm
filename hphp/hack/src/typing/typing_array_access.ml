@@ -1319,13 +1319,14 @@ let assign_array_get ~array_pos ~expr_pos ur env ty1 (key : Nast.expr) tkey ty2
         let ((env, ty_err1), idx_err) =
           type_index env expr_pos tkey tk Reason.index_array
         in
+        let (env, tv') = maybe_pessimise_type env tv in
         let (env, ty_err2) =
           Typing_ops.sub_type
             expr_pos
             ur
             env
             ty2
-            tv
+            tv'
             Typing_error.Callback.unify_error
         in
         let err_res = mk_ty_mismatch_res ty2 tv ty_err2 in

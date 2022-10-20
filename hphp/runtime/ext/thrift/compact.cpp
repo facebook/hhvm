@@ -704,6 +704,7 @@ struct CompactReader {
       SpecHolder specHolder;
       auto const& spec = specHolder.getSpec(cls);
       Object dest = spec.newObject(cls);
+      spec.clearTerseFields(cls, dest);
 
       readStructBegin();
       int16_t fieldNum;

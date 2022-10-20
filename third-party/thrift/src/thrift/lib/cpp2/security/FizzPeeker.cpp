@@ -68,9 +68,15 @@ class ThriftFizzAcceptorHandshakeHelper
       wangle::TransportInfo& tinfo,
       wangle::FizzHandshakeOptions&& options,
       const std::shared_ptr<apache::thrift::ThriftParametersContext>&
-          thriftParametersContext)
+          thriftParametersContext,
+      fizz::AsyncFizzBase::TransportOptions transportOptions)
       : wangle::FizzAcceptorHandshakeHelper::FizzAcceptorHandshakeHelper(
-            context, clientAddr, acceptTime, tinfo, std::move(options)),
+            context,
+            clientAddr,
+            acceptTime,
+            tinfo,
+            std::move(options),
+            transportOptions),
         thriftParametersContext_(thriftParametersContext) {}
 
   void start(
@@ -84,7 +90,8 @@ class ThriftFizzAcceptorHandshakeHelper
           std::make_shared<apache::thrift::ThriftParametersServerExtension>(
               thriftParametersContext_);
     }
-    transport_ = createFizzServer(std::move(sock), context_, thriftExtension_);
+    transport_ = createFizzServer(
+        std::move(sock), context_, thriftExtension_, transportOptions_);
     transport_->accept(this);
   }
 
@@ -183,7 +190,8 @@ wangle::AcceptorHandshakeHelper::UniquePtr FizzPeeker::getHelper(
           acceptTime,
           tinfo,
           std::move(optionsCopy),
-          thriftParametersContext_));
+          thriftParametersContext_,
+          transportOptions_));
 }
 
 } // namespace thrift

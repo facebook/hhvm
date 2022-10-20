@@ -31,6 +31,7 @@ members = [
     "hackc/emitter/cargo/scope",
     "hackc/hhvm_cxx/hhvm_hhbc_defs",
     "hackc/utils/cargo/hhbc_string_utils",
+    "hackc/utils/cargo/stack_depth",
     "hackc/utils/cargo/unique_id_builder",
     "heap",
     "hh_codegen",

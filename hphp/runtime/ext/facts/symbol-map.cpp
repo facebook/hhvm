@@ -459,7 +459,8 @@ SymbolMap::getTransitiveDerivedTypes(
     for (auto deriveKind :
          {DeriveKind::Extends,
           DeriveKind::RequireExtends,
-          DeriveKind::RequireImplements}) {
+          DeriveKind::RequireImplements,
+          DeriveKind::RequireClass}) {
       if (deriveKinds & static_cast<int>(deriveKind)) {
         for (auto subtype : getDerivedTypes(type, deriveKind)) {
           if (seen.count(subtype) > 0) {
@@ -1298,6 +1299,9 @@ void SymbolMap::updateDBPath(
       db.insertBaseType(
           path, type.m_name, DeriveKind::RequireImplements, baseType);
     }
+    for (auto const& baseType : type.m_requireClass) {
+      db.insertBaseType(path, type.m_name, DeriveKind::RequireClass, baseType);
+    }
     for (auto const& attribute : type.m_attributes) {
       if (attribute.m_args.empty()) {
         db.insertTypeAttribute(
@@ -1565,6 +1569,11 @@ void SymbolMap::Data::updatePath(
     }
     m_inheritanceInfo.setBaseTypes(
         typeName, path, DeriveKind::Extends, std::move(type.m_baseTypes));
+    m_inheritanceInfo.setBaseTypes(
+        typeName,
+        path,
+        DeriveKind::RequireClass,
+        std::move(type.m_requireClass));
     m_inheritanceInfo.setBaseTypes(
         typeName,
         path,

@@ -9,6 +9,8 @@
 pub mod cxx_ffi {
     unsafe extern "C++" {
         include!("hphp/hack/src/utils/hhvm_options/hhvm_runtime_options/ffi_bridge.h");
+        include!("hphp/util/process-cpu.h");
+        include!("hphp/util/process-host.h");
 
         fn Process_GetCPUModel() -> String;
         fn Process_GetHostName() -> String;

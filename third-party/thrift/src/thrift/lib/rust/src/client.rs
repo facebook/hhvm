@@ -34,7 +34,7 @@ pub trait ClientFactory {
     fn new<P, T>(protocol: P, transport: T) -> Arc<Self::Api>
     where
         P: Protocol<Frame = T> + 'static,
-        T: Transport + Sync,
+        T: Transport,
         P::Deserializer: Send,
     {
         let spawner = crate::NoopSpawner;
@@ -44,12 +44,12 @@ pub trait ClientFactory {
     fn with_spawner<P, T, S>(protocol: P, transport: T, spawner: S) -> Arc<Self::Api>
     where
         P: Protocol<Frame = T> + 'static,
-        T: Transport + Sync,
+        T: Transport,
         P::Deserializer: Send,
         S: Spawner;
 }
 
-pub trait Transport: Framing + Send + Sized + 'static {
+pub trait Transport: Framing + Send + Sync + Sized + 'static {
     type RpcOptions: Default;
 
     fn call(

@@ -482,12 +482,16 @@ class Adapter implements \IThriftSyncStruct {
    */
   public string $adaptedType;
   /**
-   * When applied directly to a type (as opposed to on a typedef) the IDL name of the
-   * type will refer to the adapted type in C++ and the underlying thrift struct will be
-   * generated in a nested namespace and/or with a different name. By default the struct
-   * will be generated in a nested 'detail' namespace with the same name,
-   * but both of these can be changed by setting these fields.
-   * Empty string disables the nested namespace and uses the IDL name for the struct.
+   * The name and/or extra namespace to use when directly adapting a type
+   * (as opposed a typedef).
+   * 
+   * In this case, the IDL name of the type will refer to the adapted type in
+   * C++ and the underlying thrift type will be generated in a nested
+   * namespace and/or with a different name.
+   * 
+   * If neither `underlyingName` or `extraNamespace` is provided, the
+   * underlying type will be generated in a nested 'detail' namespace with
+   * the same name.
    * 
    * Original thrift field:-
    * 3: string underlyingName
@@ -510,7 +514,7 @@ class Adapter implements \IThriftSyncStruct {
     $this->name = $name ?? '';
     $this->adaptedType = $adaptedType ?? '';
     $this->underlyingName = $underlyingName ?? '';
-    $this->extraNamespace = $extraNamespace ?? "detail";
+    $this->extraNamespace = $extraNamespace ?? '';
     $this->moveOnly = $moveOnly ?? false;
   }
 

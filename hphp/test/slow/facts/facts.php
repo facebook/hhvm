@@ -252,6 +252,11 @@ function print_extracted_facts(vec<string> $files): void {
       $base_types_json = \json_encode($base_types);
       print "      baseTypes: $base_types_json\n";
 
+      $require_class = $type['requireClass'];
+      \sort(inout $require_class);
+      $require_class_json = \json_encode($require_class);
+      print "      requireClass: $require_class_json\n";
+
       $require_extends = $type['requireExtends'];
       \sort(inout $require_extends);
       $require_extends_json = \json_encode($require_extends);
@@ -430,6 +435,41 @@ function facts(): void {
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
     ),
   );
+  // `require class` trait constraints
+  print_supertypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_transitive_subtypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_supertypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_transitive_subtypes(
+    FinalClassUsesTRequireClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS],
+    ),
+  );
+  print_supertypes(
+    TRequireClassFinalClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_EXTENDS]),
+  );
 
   print "\nExcluding `extends` relations\n";
 
@@ -488,6 +528,41 @@ function facts(): void {
       'kind' => keyset[HH\Facts\TypeKind::K_TRAIT],
       'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
     ),
+  );
+  // `require class` trait constraints
+  print_supertypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_subtypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_transitive_subtypes(
+    TRequireClassFinalClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_supertypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClass::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_transitive_subtypes(
+    FinalClassUsesTRequireClass::class,
+    shape(
+      'derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS],
+    ),
+  );
+  print_supertypes(
+    TRequireClassFinalClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
+  );
+  print_subtypes(
+    FinalClassUsesTRequireClassB::class,
+    shape('derive_kind' => keyset[HH\Facts\DeriveKind::K_REQUIRE_EXTENDS]),
   );
 
   print "\nFiltering by attribute\n";

@@ -17,6 +17,7 @@
 package "facebook.com/thrift/annotation"
 
 namespace java com.facebook.thrift.annotation_deprecated
+namespace js apache.thrift.annotation.scope
 namespace py.asyncio facebook_thrift_asyncio.annotation.scope
 namespace go thrift.annotation.scope
 namespace py thrift.annotation.scope
@@ -49,6 +50,7 @@ struct Interaction {} (
 struct Function {} (
   thrift.uri = "facebook.com/thrift/annotation/Function",
   hack.name = "TFunction",
+  js.name = "TFunction",
 )
 struct EnumValue {} (thrift.uri = "facebook.com/thrift/annotation/EnumValue")
 struct Const {} (

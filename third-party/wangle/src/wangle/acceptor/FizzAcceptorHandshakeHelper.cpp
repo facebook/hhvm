@@ -53,15 +53,16 @@ void FizzAcceptorHandshakeHelper::start(
         std::make_shared<TokenBindingServerExtension>(tokenBindingContext_);
   }
 
-  transport_ =
-      createFizzServer(std::move(sock), context_, tokenBindingExtension_);
+  transport_ = createFizzServer(
+      std::move(sock), context_, tokenBindingExtension_, transportOptions_);
   transport_->accept(this);
 }
 
 AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
     folly::AsyncSSLSocket::UniquePtr sslSock,
     const std::shared_ptr<const FizzServerContext>& fizzContext,
-    const std::shared_ptr<fizz::ServerExtensions>& extensions) {
+    const std::shared_ptr<fizz::ServerExtensions>& extensions,
+    fizz::AsyncFizzBase::TransportOptions options) {
   folly::AsyncTransport::UniquePtr asyncTransport;
   if (preferIoUringSocket_ &&
       folly::AsyncIoUringSocketFactory::supports(sslSock->getEventBase())) {
@@ -73,8 +74,8 @@ AsyncFizzServer::UniquePtr FizzAcceptorHandshakeHelper::createFizzServer(
     asyncSock->cacheAddresses();
     asyncTransport = folly::AsyncTransport::UniquePtr(std::move(asyncSock));
   }
-  AsyncFizzServer::UniquePtr fizzServer(
-      new AsyncFizzServer(std::move(asyncTransport), fizzContext, extensions));
+  AsyncFizzServer::UniquePtr fizzServer(new AsyncFizzServer(
+      std::move(asyncTransport), fizzContext, extensions, options));
   fizzServer->setHandshakeRecordAlignedReads(handshakeRecordAlignedReads_);
 
   return fizzServer;

@@ -114,6 +114,10 @@ class MysqlClientBase {
 
   virtual bool supportsLocalFiles() = 0;
 
+  static constexpr bool implementsPooling() {
+    return false;
+  }
+
  protected:
   friend class Connection;
   friend class Operation;

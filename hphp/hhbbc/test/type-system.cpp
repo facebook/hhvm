@@ -29,6 +29,7 @@
 #include "hphp/hhbbc/hhbbc.h"
 #include "hphp/hhbbc/misc.h"
 #include "hphp/hhbbc/representation.h"
+#include "hphp/hhbbc/parallel.h"
 #include "hphp/hhbbc/parse.h"
 #include "hphp/hhbbc/type-structure.h"
 #include "hphp/hhbbc/index.h"
@@ -58,7 +59,7 @@ void PrintTo(Emptiness e, ::std::ostream* os) {
 }
 
 Type make_obj_for_testing(trep, res::Class, bool, bool, bool);
-Type make_cls_for_testing(trep, res::Class, bool, bool, bool);
+Type make_cls_for_testing(trep, res::Class, bool, bool, bool, bool);
 Type make_arrval_for_testing(trep, SArray);
 Type make_arrpacked_for_testing(trep, std::vector<Type>);
 Type make_arrpackedn_for_testing(trep, Type);
@@ -70,108 +71,171 @@ namespace {
 //////////////////////////////////////////////////////////////////////
 
 const StaticString s_test("test");
-const StaticString s_TestClass("TestClass");
-const StaticString s_Base("Base");
-const StaticString s_A("A");
-const StaticString s_AA("AA");
-const StaticString s_AB("AB");
-const StaticString s_B("B");
-const StaticString s_BA("BA");
-const StaticString s_BB("BB");
-const StaticString s_BAA("BAA");
 const StaticString s_C("C");
-const StaticString s_IBase("IBase");
-const StaticString s_IA("IA");
-const StaticString s_IAA("IAA");
-const StaticString s_IB("IB");
 
-const StaticString s_I_A("I_A");
-const StaticString s_I_B("I_B");
-const StaticString s_I_C("I_C");
-const StaticString s_I_D("I_D");
-const StaticString s_I_E("I_E");
-const StaticString s_I_F("I_F");
-const StaticString s_I_G("I_G");
-const StaticString s_I_H("I_H");
-const StaticString s_I_I("I_I");
-const StaticString s_I_J("I_J");
-const StaticString s_I_K("I_K");
+#define TEST_CLASSES                            \
+  X(TestClass)                                  \
+  X(TestClassDeriver)                           \
+  X(Base)                                       \
+  X(A)                                          \
+  X(AA)                                         \
+  X(AB)                                         \
+  X(B)                                          \
+  X(BA)                                         \
+  X(BB)                                         \
+  X(BAA)                                        \
+  X(BAADeriver)                                 \
+  X(IBase)                                      \
+  X(IA)                                         \
+  X(IAA)                                        \
+  X(IB)                                         \
+                                                \
+  X(I_A)                                        \
+  X(I_B)                                        \
+  X(I_C)                                        \
+  X(I_D)                                        \
+  X(I_E)                                        \
+  X(I_F)                                        \
+  X(I_G)                                        \
+  X(I_H)                                        \
+  X(I_I)                                        \
+  X(I_J)                                        \
+  X(I_K)                                        \
+                                                \
+  X(X1)                                         \
+  X(X2)                                         \
+  X(X3)                                         \
+  X(X4)                                         \
+  X(X5)                                         \
+  X(X6)                                         \
+  X(X7)                                         \
+  X(X8)                                         \
+  X(X9)                                         \
+  X(X10)                                        \
+  X(X11)                                        \
+  X(X12)                                        \
+  X(X13)                                        \
+  X(X14)                                        \
+  X(X15)                                        \
+  X(X16)                                        \
+  X(X17)                                        \
+  X(X18)                                        \
+  X(X19)                                        \
+  X(X20)                                        \
+  X(X21)                                        \
+  X(X22)                                        \
+  X(X23)                                        \
+  X(X24)                                        \
+  X(X25)                                        \
+  X(X26)                                        \
+  X(X27)                                        \
+  X(X28)                                        \
+  X(X29)                                        \
+                                                \
+  X(Y1)                                         \
+  X(Y2)                                         \
+  X(Y3)                                         \
+  X(Y4)                                         \
+  X(Y5)                                         \
+  X(Y6)                                         \
+  X(Y7)                                         \
+  X(Y8)                                         \
+  X(Y9)                                         \
+                                                \
+  X(Z1)                                         \
+  X(Z2)                                         \
+  X(Z3)                                         \
+  X(Z4)                                         \
+  X(Z5)                                         \
+  X(Z6)                                         \
+  X(Z7)                                         \
+  X(Z8)                                         \
+  X(Z9)                                         \
+  X(Z10)                                        \
+                                                \
+  X(I_Y1)                                       \
+  X(I_Y2)                                       \
+  X(I_Y3)                                       \
+                                                \
+  X(I_Z1)                                       \
+  X(I_Z2)                                       \
+  X(I_Z3)                                       \
+  X(I_Z4)                                       \
+  X(I_Z5)                                       \
+  X(I_Z6)                                       \
+                                                \
+  X(ICanon1)                                    \
+  X(ICanon2)                                    \
+  X(ICanon3)                                    \
+  X(ICanon4)                                    \
+  X(ICanon5)                                    \
+  X(ICanon6)                                    \
+  X(ICanon7)                                    \
+  X(ICanon8)                                    \
+  X(ICanon9)                                    \
+  X(ICanon10)                                   \
+  X(ICanon11)                                   \
+  X(ICanon12)                                   \
+  X(ICanon13)                                   \
+  X(ICanon14)                                   \
+                                                \
+  X(Canon1)                                     \
+  X(Canon2)                                     \
+  X(Canon3)                                     \
+  X(Canon4)                                     \
+  X(Canon5)                                     \
+  X(Canon6)                                     \
+  X(Canon7)                                     \
+  X(Canon8)                                     \
+  X(Canon9)                                     \
+  X(Canon10)                                    \
+  X(Canon11)                                    \
+  X(Canon12)                                    \
+  X(Canon13)                                    \
+  X(Canon14)                                    \
+  X(Canon15)                                    \
+  X(Canon16)                                    \
+  X(Canon17)                                    \
+  X(Canon18)                                    \
+                                                \
+  X(T1)                                         \
+  X(T2)                                         \
+  X(T3)                                         \
+  X(T4)                                         \
+                                                \
+  X(Abs1)                                       \
+  X(Abs2)                                       \
+  X(Abs3)                                       \
+  X(Abs4)                                       \
+  X(Abs5)                                       \
+  X(Abs6)                                       \
+                                                \
+  X(T1_C1)                                      \
+  X(T4_C1)                                      \
+                                                \
+  X(Abs3_C1)                                    \
+  X(Abs3_C2)                                    \
+  X(Abs3_C3)                                    \
+                                                \
+  X(Abs4_C1)                                    \
+  X(Abs4_C2)                                    \
+                                                \
+  X(Abs6_C1)                                    \
+                                                \
+  X(Abs5_P)                                     \
+  X(Abs6_P)                                     \
+                                                \
+  Y(Foo1)                                       \
+  Y(Foo2)                                       \
+  Y(Foo3)                                       \
 
-const StaticString s_X1("X1");
-const StaticString s_X2("X2");
-const StaticString s_X3("X3");
-const StaticString s_X4("X4");
-const StaticString s_X5("X5");
-const StaticString s_X6("X6");
-const StaticString s_X7("X7");
-const StaticString s_X8("X8");
-const StaticString s_X9("X9");
-const StaticString s_X10("X10");
-const StaticString s_X11("X11");
-const StaticString s_X12("X12");
-const StaticString s_X13("X13");
-const StaticString s_X14("X14");
-const StaticString s_X15("X15");
-const StaticString s_X16("X16");
-const StaticString s_X17("X17");
-const StaticString s_X18("X18");
-const StaticString s_X19("X19");
-const StaticString s_X20("X20");
-const StaticString s_X21("X21");
-const StaticString s_X22("X22");
-const StaticString s_X23("X23");
-const StaticString s_X24("X24");
-const StaticString s_X25("X25");
-const StaticString s_X26("X26");
-const StaticString s_X27("X27");
-const StaticString s_X28("X28");
-const StaticString s_X29("X29");
-
-const StaticString s_Y1("Y1");
-const StaticString s_Y2("Y2");
-const StaticString s_Y3("Y3");
-const StaticString s_Y4("Y4");
-const StaticString s_Y5("Y5");
-const StaticString s_Y6("Y6");
-const StaticString s_Y7("Y7");
-const StaticString s_Y8("Y8");
-const StaticString s_Y9("Y9");
-
-const StaticString s_IY1("I_Y1");
-const StaticString s_IY2("I_Y2");
-const StaticString s_IY3("I_Y3");
-
-const StaticString s_IZ1("I_Z1");
-const StaticString s_IZ2("I_Z2");
-const StaticString s_IZ3("I_Z3");
-const StaticString s_IZ4("I_Z4");
-const StaticString s_IZ5("I_Z5");
-const StaticString s_IZ6("I_Z6");
-
-const StaticString s_Z1("Z1");
-const StaticString s_Z2("Z2");
-const StaticString s_Z3("Z3");
-const StaticString s_Z4("Z4");
-const StaticString s_Z5("Z5");
-const StaticString s_Z6("Z6");
-const StaticString s_Z7("Z7");
-const StaticString s_Z8("Z8");
-const StaticString s_Z9("Z9");
-const StaticString s_Z10("Z10");
-
-const StaticString s_ICanon1("ICanon1");
-const StaticString s_ICanon2("ICanon2");
-const StaticString s_ICanon3("ICanon3");
-const StaticString s_ICanon4("ICanon4");
-const StaticString s_ICanon5("ICanon5");
-const StaticString s_ICanon6("ICanon6");
-const StaticString s_Canon3("Canon3");
-
-const StaticString s_Awaitable("HH\\Awaitable");
-
-// Deliberately doesn't exist
-const StaticString s_Foo1("Foo1");
-const StaticString s_Foo2("Foo2");
+#define X(name)                                 \
+  const StaticString s_##name(#name);
+#define Y(name)                                 \
+  const StaticString s_##name(#name);
+  TEST_CLASSES
+#undef Y
+#undef X
 
 // A test program so we can actually test things involving object or
 // class types.
@@ -406,6 +470,30 @@ Index make_index() {
     .class [interface unique] ICanon6 implements (ICanon5) {
     }
 
+    .class [interface unique] ICanon7 {
+    }
+
+    .class [interface unique] ICanon8 {
+    }
+
+    .class [interface unique] ICanon9 {
+    }
+
+    .class [interface unique] ICanon10 {
+    }
+
+    .class [interface unique] ICanon11 {
+    }
+
+    .class [interface unique] ICanon12 {
+    }
+
+    .class [interface unique] ICanon13 {
+    }
+
+    .class [interface unique] ICanon14 {
+    }
+
     .class [unique] Canon1 implements (ICanon3 ICanon4) {
     }
 
@@ -415,11 +503,119 @@ Index make_index() {
     .class [unique] Canon3 implements (ICanon6) {
     }
 
+    .class [unique] Canon4 implements (ICanon9 ICanon10) {
+    }
+
+    .class [abstract unique] Canon5 implements (ICanon11 ICanon12) {
+    }
+
+    .class [abstract unique] Canon6 implements (ICanon11 ICanon12) {
+    }
+
+    .class [unique] Canon7 implements (ICanon11) {
+    }
+
+    .class [unique] Canon8 implements (ICanon12) {
+    }
+
+    .class [unique] Canon9 implements (ICanon11) {
+    }
+
+    .class [unique] Canon10 implements (ICanon12 ICanon13) {
+    }
+
+    .class [abstract unique] Canon11 implements (ICanon12 ICanon13) {
+    }
+
+    .class [unique] Canon12 implements (ICanon11 ICanon13) {
+    }
+
+    .class [unique] Canon13 implements (ICanon11 ICanon13) {
+    }
+
+    .class [abstract unique] Canon14 {
+    }
+
+    .class [abstract unique] Canon15 extends Canon14 {
+    }
+
+    .class [unique] Canon16 extends Canon14 implements (ICanon14) {
+    }
+
+    .class [unique] Canon17 extends Canon14 implements (ICanon14) {
+    }
+
+    .class [unique] Canon18 implements (ICanon14) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T1 {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T2 implements (ICanon7) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T3 implements (ICanon7) {
+    }
+
+    .class [trait unique "__NoFlatten"("""v:0:{}""")] T4 implements (ICanon8) {
+    }
+
+    .class [abstract unique] Abs1 implements (ICanon7) {
+    }
+
+    .class [abstract unique] Abs2 {
+      .use T4;
+    }
+
+    .class [abstract unique] Abs3 {
+    }
+
+    .class [abstract unique] Abs4 {
+    }
+
+    .class [unique] T1_C1 {
+      .use T1;
+    }
+
+    .class [unique] T4_C1 {
+      .use T4;
+    }
+
+    .class [unique] Abs3_C1 extends Abs3 {
+    }
+    .class [unique] Abs3_C2 extends Abs3_C1 {
+    }
+    .class [abstract unique] Abs3_C3 extends Abs3 {
+    }
+
+    .class [unique] Abs4_C1 extends Abs4 {
+    }
+    .class [unique] Abs4_C2 extends Abs4 {
+    }
+
+    .class [unique] Abs5_P {
+    }
+    .class [abstract unique] Abs5 extends Abs5_P {
+    }
+
+    .class [unique] Abs6_P {
+    }
+    .class [abstract unique] Abs6 extends Abs6_P {
+    }
+    .class [unique] Abs6_C1 extends Abs6 {
+    }
+
     .function test() {
       Int 1
       RetC
     }
   )";
+
+  Logger::LogLevel = Logger::LogNone;
+
+  HHBBC::parallel::num_threads = 1;
+  HHBBC::parallel::final_threads = 1;
+
   std::unique_ptr<UnitEmitter> ue{assemble_string(
     hhas.c_str(), hhas.size(),
     "ignore.php",
@@ -458,7 +654,12 @@ Index make_index() {
   if (parse.unit) {
     auto const name = parse.unit->filename;
     auto stored = coro::wait(client->store(std::move(parse.unit)));
-    indexInput.units.emplace_back(name, std::move(stored));
+    indexInput.units.emplace_back(
+      Index::Input::UnitMeta{
+        std::move(stored),
+        name
+      }
+    );
   }
   for (auto& c : parse.classes) {
     auto const name = c->name;
@@ -468,18 +669,26 @@ Index make_index() {
       Index::Input::ClassMeta{
         std::move(stored),
         name,
-        std::move(deps)
+        std::move(deps),
+        nullptr
       }
     );
   }
   for (auto& f : parse.funcs) {
     auto const name = f->name;
     auto stored = coro::wait(client->store(std::move(f)));
-    indexInput.funcs.emplace_back(name, std::move(stored));
+    indexInput.funcs.emplace_back(
+      Index::Input::FuncMeta{
+        std::move(stored),
+        name,
+        nullptr
+      }
+    );
   }
 
   return Index{
     std::move(indexInput),
+    HHBBC::Config::get(RepoGlobalData{}),
     std::move(executor),
     std::move(client),
     [] (std::unique_ptr<coro::TicketExecutor>,
@@ -511,8 +720,9 @@ Type make_specialized_wait_handle(trep bits, Type inner, const Index& index) {
 }
 
 Type make_specialized_exact_object(trep bits, res::Class cls,
-                                   bool isCtx = false) {
-  return make_obj_for_testing(bits, cls, false, isCtx, false);
+                                   bool isCtx = false,
+                                   bool canonicalize = true) {
+  return make_obj_for_testing(bits, cls, false, isCtx, canonicalize);
 }
 
 Type make_specialized_sub_object(trep bits, res::Class cls,
@@ -522,14 +732,17 @@ Type make_specialized_sub_object(trep bits, res::Class cls,
 }
 
 Type make_specialized_exact_class(trep bits, res::Class cls,
-                                  bool isCtx = false) {
-  return make_cls_for_testing(bits, cls, false, isCtx, false);
+                                  bool isCtx = false,
+                                  bool canonicalize = true,
+                                  bool nonReg = true) {
+  return make_cls_for_testing(bits, cls, false, isCtx, canonicalize, nonReg);
 }
 
 Type make_specialized_sub_class(trep bits, res::Class cls,
                                 bool isCtx = false,
-                                bool canonicalize = true) {
-  return make_cls_for_testing(bits, cls, true, isCtx, canonicalize);
+                                bool canonicalize = true,
+                                bool nonReg = true) {
+  return make_cls_for_testing(bits, cls, true, isCtx, canonicalize, nonReg);
 }
 
 Type make_specialized_arrval(trep bits, SArray ar) {
@@ -1241,10 +1454,78 @@ auto const specialized_arrays = folly::lazy([]{
   return types;
 });
 
+std::vector<Type> specializedClasses(const Index& index) {
+  hphp_fast_set<Type, TypeHasher> types;
+  auto const addExactSub = [&] (res::Class c) {
+    types.emplace(objExact(c));
+    types.emplace(subObj(c));
+    types.emplace(clsExact(c));
+    types.emplace(subCls(c));
+    types.emplace(clsExact(c, false));
+    types.emplace(subCls(c, false));
+  };
+
+#define X(name)                                                         \
+  {                                                                     \
+    auto const cls = index.resolve_class(Context{}, s_##name.get());    \
+    if (!cls || !cls->resolved()) ADD_FAILURE();                        \
+    addExactSub(*cls);                                                  \
+  }
+#define Y(name)                                                         \
+  {                                                                     \
+    auto const cls = index.resolve_class(Context{}, s_##name.get());    \
+    if (!cls || cls->resolved()) ADD_FAILURE();                         \
+    addExactSub(*cls);                                                  \
+  }
+  TEST_CLASSES
+#undef Y
+#undef X
+
+  auto const awaitable = index.wait_handle_class();
+  addExactSub(awaitable);
+
+  auto const clsX2 = index.resolve_class(Context{}, s_X2.get());
+  auto const clsX6 = index.resolve_class(Context{}, s_X6.get());
+  auto const clsX18 = index.resolve_class(Context{}, s_X18.get());
+  auto const clsY3 = index.resolve_class(Context{}, s_Y3.get());
+
+  types.emplace(make_specialized_wait_handle(BObj, TInt, index));
+  types.emplace(make_specialized_wait_handle(BObj, TStr, index));
+  types.emplace(make_specialized_wait_handle(BObj, TArrKey, index));
+  types.emplace(make_specialized_wait_handle(BObj, TBottom, index));
+
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX2), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX6), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsX18), index));
+  types.emplace(make_specialized_wait_handle(BObj, subObj(*clsY3), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX2), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX6), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsX18), index));
+  types.emplace(make_specialized_wait_handle(BObj, objExact(*clsY3), index));
+
+  types.emplace(TObj);
+  types.emplace(TCls);
+
+  while (true) {
+    auto combinations = types;
+    for (auto const& a : types) {
+      for (auto const& b : types) {
+        combinations.emplace(union_of(a, b));
+        combinations.emplace(intersection_of(a, b));
+      }
+    }
+    if (types.size() == combinations.size()) break;
+    types = std::move(combinations);
+  }
+  return std::vector<Type>{begin(types), end(types)};
+}
+
 std::vector<Type> allCases(const Index& index) {
   auto types = withData(index);
   auto const specialized = specialized_arrays();
   types.insert(types.end(), specialized.begin(), specialized.end());
+  auto const specializedCls = specializedClasses(index);
+  types.insert(types.end(), specializedCls.begin(), specializedCls.end());
   return types;
 }
 
@@ -1587,149 +1868,7 @@ TEST(Type, BasicOperators) {
 
 TEST(Type, SpecializedClasses) {
   auto index = make_index();
-
-  std::vector<Type> baseTypes;
-
-#define ADD(cls, name, addExact)                                        \
-  auto const cls = index.resolve_class(Context{}, name.get());          \
-  if (!cls || !cls->resolved()) ADD_FAILURE();                          \
-  if (cls->couldBeOverridden()) {                                        \
-    baseTypes.emplace_back(make_specialized_sub_object(BObj, *cls));    \
-  }                                                                     \
-  if (addExact) {                                                       \
-    baseTypes.emplace_back(make_specialized_exact_object(BObj, *cls));  \
-  }                                                                     \
-
-  ADD(clsI_A, s_I_A, true);
-  ADD(clsI_B, s_I_B, true);
-  ADD(clsI_C, s_I_C, true);
-  ADD(clsI_D, s_I_D, false);
-  ADD(clsI_E, s_I_E, false);
-  ADD(clsI_F, s_I_F, false);
-  ADD(clsI_G, s_I_G, false);
-  ADD(clsI_H, s_I_H, false);
-  ADD(clsI_I, s_I_I, false);
-  ADD(clsI_J, s_I_J, false);
-  ADD(clsI_K, s_I_K, false);
-
-  ADD(clsX1, s_X1, true);
-  ADD(clsX2, s_X2, true);
-  ADD(clsX3, s_X3, true);
-  ADD(clsX4, s_X4, true);
-  ADD(clsX5, s_X5, true);
-  ADD(clsX6, s_X6, true);
-  ADD(clsX7, s_X7, true);
-  ADD(clsX8, s_X8, true);
-  ADD(clsX9, s_X9, true);
-  ADD(clsX10, s_X10, true);
-  ADD(clsX11, s_X11, true);
-  ADD(clsX12, s_X12, true);
-  ADD(clsX13, s_X13, true);
-  ADD(clsX14, s_X14, true);
-  ADD(clsX15, s_X15, true);
-  ADD(clsX16, s_X16, true);
-  ADD(clsX17, s_X17, true);
-  ADD(clsX18, s_X18, true);
-  ADD(clsX19, s_X19, true);
-  ADD(clsX20, s_X20, true);
-  ADD(clsX21, s_X21, true);
-  ADD(clsX22, s_X22, true);
-  ADD(clsX23, s_X23, true);
-  ADD(clsX24, s_X24, true);
-  ADD(clsX25, s_X25, true);
-  ADD(clsX26, s_X26, true);
-  ADD(clsX27, s_X27, true);
-  ADD(clsX28, s_X28, true);
-  ADD(clsX29, s_X29, true);
-
-  ADD(clsBase, s_Base, true);
-  ADD(clsA, s_A, true);
-  ADD(clsAA, s_AA, true);
-  ADD(clsAB, s_AB, true);
-  ADD(clsB, s_B, true);
-  ADD(clsBA, s_BA, true);
-  ADD(clsBB, s_BB, true);
-  ADD(clsBAA, s_BAA, true);
-  ADD(clsIBase, s_IBase, true);
-  ADD(clsIA, s_IA, true);
-  ADD(clsIAA, s_IAA, true);
-  ADD(clsIB, s_IB, true);
-
-  ADD(clsY1, s_Y1, true);
-  ADD(clsY2, s_Y2, true);
-  ADD(clsY3, s_Y3, true);
-  ADD(clsY4, s_Y4, true);
-  ADD(clsY5, s_Y5, true);
-  ADD(clsY6, s_Y6, true);
-  ADD(clsY7, s_Y7, true);
-  ADD(clsY8, s_Y8, true);
-  ADD(clsY9, s_Y9, true);
-
-  ADD(clsIY1, s_IY1, false);
-  ADD(clsIY2, s_IY3, false);
-  ADD(clsIY3, s_IY3, false);
-
-  ADD(clsIZ1, s_IZ1, false);
-  ADD(clsIZ2, s_IZ3, false);
-  ADD(clsIZ3, s_IZ3, false);
-  ADD(clsIZ4, s_IZ4, false);
-  ADD(clsIZ5, s_IZ5, false);
-  ADD(clsIZ6, s_IZ6, false);
-
-  ADD(clsZ1, s_Z1, true);
-  ADD(clsZ2, s_Z2, true);
-  ADD(clsZ3, s_Z3, true);
-  ADD(clsZ4, s_Z4, true);
-  ADD(clsZ5, s_Z5, true);
-  ADD(clsZ6, s_Z6, true);
-  ADD(clsZ7, s_Z7, true);
-  ADD(clsZ8, s_Z8, true);
-  ADD(clsZ9, s_Z9, true);
-  ADD(clsZ10, s_Z10, true);
-
-#undef ADD
-
-  auto const clsFoo1 = index.resolve_class(Context{}, s_Foo1.get());
-  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
-  auto const clsFoo2 = index.resolve_class(Context{}, s_Foo2.get());
-  if (!clsFoo2 || clsFoo2->resolved()) ADD_FAILURE();
-  auto const clsC = index.resolve_class(Context{}, s_C.get());
-  if (!clsC || clsC->resolved()) ADD_FAILURE();
-
-  baseTypes.emplace_back(make_specialized_sub_object(BObj, *clsFoo1));
-  baseTypes.emplace_back(make_specialized_exact_object(BObj, *clsFoo1));
-  baseTypes.emplace_back(make_specialized_sub_object(BObj, *clsFoo2));
-  baseTypes.emplace_back(make_specialized_exact_object(BObj, *clsFoo2));
-
-  auto const awaitable = index.builtin_class(s_Awaitable.get());
-  baseTypes.emplace_back(make_specialized_sub_object(BObj, awaitable));
-  baseTypes.emplace_back(make_specialized_exact_object(BObj, awaitable));
-
-  baseTypes.emplace_back(make_specialized_wait_handle(BObj, TInt, index));
-  baseTypes.emplace_back(make_specialized_wait_handle(BObj, TStr, index));
-  baseTypes.emplace_back(make_specialized_wait_handle(BObj, TArrKey, index));
-  baseTypes.emplace_back(make_specialized_wait_handle(BObj, TBottom, index));
-
-  baseTypes.emplace_back(TObj);
-
-  auto const types = [&] {
-    hphp_fast_set<Type, TypeHasher> precombinations{
-      begin(baseTypes), end(baseTypes)
-    };
-    while (true) {
-      auto combinations = precombinations;
-      auto const presize = combinations.size();
-      for (auto const& a : precombinations) {
-        for (auto const& b : precombinations) {
-          combinations.emplace(union_of(a, b));
-          combinations.emplace(intersection_of(a, b));
-        }
-      }
-      if (presize == combinations.size()) break;
-      precombinations = std::move(combinations);
-    }
-    return std::vector<Type>{begin(precombinations), end(precombinations)};
-  }();
+  auto const types = specializedClasses(index);
 
   test_basic_operators(types);
 
@@ -2469,40 +2608,180 @@ TEST(Type, DblNan) {
   EXPECT_EQ(intersection_of(dval(qnan), dval(qnan)), dval(qnan));
 }
 
-TEST(Type, ToObj) {
+TEST(Type, ObjToCls) {
   auto index = make_index();
 
   auto const& all = allCases(index);
   for (auto const& t : all) {
     if (t.is(BBottom) || !t.subtypeOf(BCls)) continue;
-    EXPECT_TRUE(toobj(t).subtypeOf(BObj));
+    auto const obj = toobj(t);
+    EXPECT_TRUE(obj.subtypeOf(BObj));
     if (!is_specialized_cls(t)) {
-      EXPECT_EQ(toobj(t), TObj);
+      EXPECT_EQ(obj, TObj);
     } else {
-      EXPECT_TRUE(is_specialized_obj(toobj(t)));
+      EXPECT_TRUE(obj.is(BBottom) || is_specialized_obj(obj));
     }
   }
 
   for (auto const& t : all) {
     if (t.is(BBottom) || !t.subtypeOf(BObj)) continue;
-    EXPECT_TRUE(objcls(t).subtypeOf(BCls));
+    auto const cls = objcls(t);
+    EXPECT_TRUE(cls.subtypeOf(BCls));
     if (!is_specialized_obj(t)) {
-      EXPECT_EQ(objcls(t), TCls);
+      EXPECT_EQ(cls, TCls);
     } else {
-      EXPECT_TRUE(is_specialized_cls(objcls(t)));
+      EXPECT_TRUE(is_specialized_cls(cls));
+      if (is_specialized_cls(cls)) {
+        auto const& dcls = dcls_of(cls);
+        EXPECT_FALSE(dcls.containsNonRegular());
+      }
     }
+  }
+
+  for (auto const& t : all) {
+    if (t.is(BBottom) || !t.subtypeOf(BCls)) continue;
+    auto const obj = toobj(t);
+    if (obj.is(BBottom)) continue;
+    auto const cls = objcls(obj);
+    EXPECT_TRUE(cls.subtypeOf(t));
+    if (!is_specialized_cls(cls)) continue;
+    auto const& dcls = dcls_of(cls);
+    EXPECT_FALSE(dcls.containsNonRegular());
+    auto const obj2 = toobj(cls);
+    EXPECT_EQ(obj, obj2);
   }
 
   auto const clsA = index.resolve_class(Context{}, s_A.get());
   if (!clsA || !clsA->resolved()) ADD_FAILURE();
+  auto const clsICanon1 = index.resolve_class(Context{}, s_ICanon1.get());
+  if (!clsICanon1 || !clsICanon1->resolved()) ADD_FAILURE();
+  auto const clsICanon5 = index.resolve_class(Context{}, s_ICanon5.get());
+  if (!clsICanon5 || !clsICanon5->resolved()) ADD_FAILURE();
+  auto const clsCanon3 = index.resolve_class(Context{}, s_Canon3.get());
+  if (!clsCanon3 || !clsCanon3->resolved()) ADD_FAILURE();
+  auto const clsT1 = index.resolve_class(Context{}, s_T1.get());
+  if (!clsT1 || !clsT1->resolved()) ADD_FAILURE();
+  auto const clsT4_C1 = index.resolve_class(Context{}, s_T4_C1.get());
+  if (!clsT4_C1 || !clsT4_C1->resolved()) ADD_FAILURE();
+  auto const clsICanon8 = index.resolve_class(Context{}, s_ICanon8.get());
+  if (!clsICanon8 || !clsICanon8->resolved()) ADD_FAILURE();
+  auto const clsAbs4 = index.resolve_class(Context{}, s_Abs4.get());
+  if (!clsAbs4 || !clsAbs4->resolved()) ADD_FAILURE();
+  auto const clsAbs5_P = index.resolve_class(Context{}, s_Abs5_P.get());
+  if (!clsAbs5_P || !clsAbs5_P->resolved()) ADD_FAILURE();
+  auto const clsAbs6_P = index.resolve_class(Context{}, s_Abs6_P.get());
+  if (!clsAbs6_P || !clsAbs6_P->resolved()) ADD_FAILURE();
+  auto const clsICanon11 = index.resolve_class(Context{}, s_ICanon11.get());
+  if (!clsICanon11 || !clsICanon11->resolved()) ADD_FAILURE();
+  auto const clsICanon12 = index.resolve_class(Context{}, s_ICanon12.get());
+  if (!clsICanon12 || !clsICanon12->resolved()) ADD_FAILURE();
+  auto const clsICanon13 = index.resolve_class(Context{}, s_ICanon13.get());
+  if (!clsICanon13 || !clsICanon13->resolved()) ADD_FAILURE();
+  auto const clsCanon10 = index.resolve_class(Context{}, s_Canon10.get());
+  if (!clsCanon10 || !clsCanon10->resolved()) ADD_FAILURE();
 
-  auto const awaitable = index.builtin_class(s_Awaitable.get());
+  auto const clsFoo1 = index.resolve_class(Context{}, s_Foo1.get());
+  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
+  auto const clsFoo2 = index.resolve_class(Context{}, s_Foo2.get());
+  if (!clsFoo2 || clsFoo2->resolved()) ADD_FAILURE();
+
+  auto const awaitable = index.wait_handle_class();
 
   EXPECT_EQ(toobj(TCls), TObj);
   EXPECT_EQ(toobj(make_specialized_sub_class(BCls, *clsA)),
             make_specialized_sub_object(BObj, *clsA));
   EXPECT_EQ(toobj(make_specialized_exact_class(BCls, *clsA)),
             make_specialized_exact_object(BObj, *clsA));
+
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon5, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon5, false, false)),
+    make_specialized_exact_object(BObj, *clsCanon3, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsT1, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsICanon8, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsICanon8, false, false)),
+    make_specialized_exact_object(BObj, *clsT4_C1, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs4, false, false)),
+    TBottom
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs4, false, false)),
+    make_specialized_sub_object(BObj, *clsAbs4, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs5_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs5_P, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs5_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false)),
+    make_specialized_exact_object(BObj, *clsAbs6_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsAbs6_P, false, false)),
+    make_specialized_sub_object(BObj, *clsAbs6_P, false, false)
+  );
+  EXPECT_EQ(
+    toobj(make_specialized_sub_class(BCls, *clsFoo1, false, false)),
+    make_specialized_sub_object(BObj, *clsFoo1, false, false)
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, *clsFoo1, false, false),
+        make_specialized_sub_class(BCls, *clsFoo2, false, false)
+      )
+    ),
+    intersection_of(
+      make_specialized_sub_object(BObj, *clsFoo1, false, false),
+      make_specialized_sub_object(BObj, *clsFoo2, false, false)
+    )
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, *clsICanon11, false, false),
+        make_specialized_sub_class(BCls, *clsICanon12, false, false)
+      )
+    ),
+    TBottom
+  );
+
+  EXPECT_EQ(
+    toobj(
+      intersection_of(
+        make_specialized_sub_class(BCls, *clsICanon12, false, false),
+        make_specialized_sub_class(BCls, *clsICanon13, false, false)
+      )
+    ),
+    make_specialized_exact_object(BObj, *clsCanon10, false, false)
+  );
 
   EXPECT_EQ(objcls(TObj), TCls);
   EXPECT_EQ(objcls(make_specialized_sub_object(BObj, *clsA)),
@@ -2511,6 +2790,24 @@ TEST(Type, ToObj) {
             make_specialized_exact_class(BCls, *clsA));
   EXPECT_EQ(objcls(make_specialized_wait_handle(BObj, TInt, index)),
             make_specialized_sub_class(BCls, awaitable));
+
+  EXPECT_EQ(
+    objcls(make_specialized_sub_object(BObj, *clsICanon11)),
+    make_specialized_sub_class(BCls, *clsICanon11, false, false, false)
+  );
+
+  EXPECT_EQ(
+    objcls(
+      intersection_of(
+        make_specialized_sub_object(BObj, *clsICanon11),
+        make_specialized_sub_object(BObj, *clsICanon13)
+      )
+    ),
+    intersection_of(
+      make_specialized_sub_class(BCls, *clsICanon11, false, false, false),
+      make_specialized_sub_class(BCls, *clsICanon13, false, false, false)
+    )
+  );
 }
 
 TEST(Type, Option) {
@@ -2627,7 +2924,7 @@ TEST(Type, OptUnionOf) {
   EXPECT_EQ(TOptRClsMeth, union_of(TInitNull, TRClsMeth));
 
   auto index = make_index();
-  auto const rcls = index.builtin_class(s_Awaitable.get());
+  auto const rcls = index.wait_handle_class();
 
   EXPECT_TRUE(union_of(TObj, opt(objExact(rcls))) == TOptObj);
 
@@ -4515,7 +4812,7 @@ TEST(Type, Interface) {
 
   EXPECT_TRUE(subClsATy.subtypeOf(objcls(subObjIATy)));
   EXPECT_TRUE(subClsATy.couldBe(objcls(subObjIATy)));
-  EXPECT_EQ(objcls(subObjATy), subClsIATy);
+  EXPECT_EQ(objcls(subObjATy), subClsATy);
   EXPECT_TRUE(subClsAATy.subtypeOf(objcls(subObjIAATy)));
   EXPECT_TRUE(subClsAATy.couldBe(objcls(subObjIAATy)));
   EXPECT_EQ(objcls(subObjAATy), objcls(subObjIAATy));
@@ -4538,7 +4835,7 @@ TEST(Type, Interface) {
   EXPECT_TRUE(union_of(opt(exactObjATy), subObjIATy) == opt(subObjIATy));
 }
 
-TEST(Type, InterfaceCanonicalization) {
+TEST(Type, Canonicalization) {
   auto idx = make_index();
   auto const& program = idx.program();
   auto const unit = program.units.back().get();
@@ -4566,42 +4863,187 @@ TEST(Type, InterfaceCanonicalization) {
   if (!clsICanon6) ADD_FAILURE();
   auto const clsCanon3 = idx.resolve_class(ctx, s_Canon3.get());
   if (!clsCanon3) ADD_FAILURE();
+  auto const clsT1 = idx.resolve_class(ctx, s_T1.get());
+  if (!clsT1) ADD_FAILURE();
+  auto const clsICanon7 = idx.resolve_class(ctx, s_ICanon7.get());
+  if (!clsICanon7) ADD_FAILURE();
+  auto const clsAbs1 = idx.resolve_class(ctx, s_Abs1.get());
+  if (!clsAbs1) ADD_FAILURE();
+  auto const clsICanon8 = idx.resolve_class(ctx, s_ICanon8.get());
+  if (!clsICanon8) ADD_FAILURE();
+  auto const clsT4_C1 = idx.resolve_class(ctx, s_T4_C1.get());
+  if (!clsT4_C1) ADD_FAILURE();
+  auto const clsAbs3 = idx.resolve_class(ctx, s_Abs3.get());
+  if (!clsAbs3) ADD_FAILURE();
+  auto const clsAbs3_C1 = idx.resolve_class(ctx, s_Abs3_C1.get());
+  if (!clsAbs3_C1) ADD_FAILURE();
+  auto const clsAbs4 = idx.resolve_class(ctx, s_Abs4.get());
+  if (!clsAbs4) ADD_FAILURE();
+  auto const clsAbs5_P = idx.resolve_class(ctx, s_Abs5_P.get());
+  if (!clsAbs5_P) ADD_FAILURE();
+  auto const clsAbs6_P = idx.resolve_class(ctx, s_Abs6_P.get());
+  if (!clsAbs6_P) ADD_FAILURE();
+  auto const clsICanon9 = idx.resolve_class(ctx, s_ICanon9.get());
+  if (!clsICanon9) ADD_FAILURE();
+  auto const clsICanon10 = idx.resolve_class(ctx, s_ICanon10.get());
+  if (!clsICanon10) ADD_FAILURE();
+  auto const clsCanon4 = idx.resolve_class(ctx, s_Canon4.get());
+  if (!clsCanon4) ADD_FAILURE();
+  auto const clsZ1 = idx.resolve_class(ctx, s_Z1.get());
+  if (!clsZ1) ADD_FAILURE();
+  auto const clsIZ1 = idx.resolve_class(ctx, s_I_Z1.get());
+  if (!clsIZ1) ADD_FAILURE();
+  auto const clsCanon14 = idx.resolve_class(ctx, s_Canon14.get());
+  if (!clsCanon14) ADD_FAILURE();
+
+  auto const clsFoo1 = idx.resolve_class(ctx, s_Foo1.get());
+  if (!clsFoo1 || clsFoo1->resolved()) ADD_FAILURE();
 
   EXPECT_EQ(subObj(*clsICanon1), TBottom);
-  EXPECT_EQ(objExact(*clsICanon1), make_specialized_exact_object(BObj, *clsICanon1));
-  EXPECT_EQ(subCls(*clsICanon1), TBottom);
-  EXPECT_EQ(clsExact(*clsICanon1), make_specialized_exact_class(BCls, *clsICanon1));
+  EXPECT_EQ(objExact(*clsICanon1), TBottom);
+  EXPECT_EQ(subCls(*clsICanon1), make_specialized_sub_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(clsExact(*clsICanon1), make_specialized_exact_class(BCls, *clsICanon1, false, false));
+  EXPECT_EQ(subCls(*clsICanon1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon1, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon2), TBottom);
-  EXPECT_EQ(objExact(*clsICanon2), make_specialized_exact_object(BObj, *clsICanon2));
-  EXPECT_EQ(subCls(*clsICanon2), TBottom);
-  EXPECT_EQ(clsExact(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2));
+  EXPECT_EQ(objExact(*clsICanon2), TBottom);
+  EXPECT_EQ(subCls(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(clsExact(*clsICanon2), make_specialized_exact_class(BCls, *clsICanon2, false, false));
+  EXPECT_EQ(subCls(*clsICanon2, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon2, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon3), make_specialized_sub_object(BObj, *clsICanon3, false, false));
-  EXPECT_EQ(objExact(*clsICanon3), make_specialized_exact_object(BObj, *clsICanon3));
+  EXPECT_EQ(objExact(*clsICanon3), TBottom);
   EXPECT_EQ(subCls(*clsICanon3), make_specialized_sub_class(BCls, *clsICanon3, false, false));
-  EXPECT_EQ(clsExact(*clsICanon3), make_specialized_exact_class(BCls, *clsICanon3));
+  EXPECT_EQ(clsExact(*clsICanon3), make_specialized_exact_class(BCls, *clsICanon3, false, false));
+  EXPECT_EQ(subCls(*clsICanon3, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon3, false), TBottom);
 
   EXPECT_EQ(subObj(*clsICanon4), make_specialized_sub_object(BObj, *clsICanon3, false, false));
-  EXPECT_EQ(objExact(*clsICanon4), make_specialized_exact_object(BObj, *clsICanon4));
-  EXPECT_EQ(subCls(*clsICanon4), make_specialized_sub_class(BCls, *clsICanon3, false, false));
-  EXPECT_EQ(clsExact(*clsICanon4), make_specialized_exact_class(BCls, *clsICanon4));
+  EXPECT_EQ(objExact(*clsICanon4), TBottom);
+  EXPECT_EQ(subCls(*clsICanon4), make_specialized_sub_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(clsExact(*clsICanon4), make_specialized_exact_class(BCls, *clsICanon4, false, false));
+  EXPECT_EQ(subCls(*clsICanon4, false), make_specialized_sub_class(BCls, *clsICanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon4, false), TBottom);
 
-  EXPECT_EQ(subObj(*clsICanon5), make_specialized_exact_object(BObj, *clsCanon3));
-  EXPECT_EQ(objExact(*clsICanon5), make_specialized_exact_object(BObj, *clsICanon5));
-  EXPECT_EQ(subCls(*clsICanon5), make_specialized_exact_class(BCls, *clsCanon3));
-  EXPECT_EQ(clsExact(*clsICanon5), make_specialized_exact_class(BCls, *clsICanon5));
+  EXPECT_EQ(subObj(*clsICanon5), make_specialized_exact_object(BObj, *clsCanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon5), TBottom);
+  EXPECT_EQ(subCls(*clsICanon5), make_specialized_sub_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(clsExact(*clsICanon5), make_specialized_exact_class(BCls, *clsICanon5, false, false));
+  EXPECT_EQ(subCls(*clsICanon5, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon5, false), TBottom);
 
-  EXPECT_EQ(subObj(*clsICanon6), make_specialized_exact_object(BObj, *clsCanon3));
-  EXPECT_EQ(objExact(*clsICanon6), make_specialized_exact_object(BObj, *clsICanon6));
-  EXPECT_EQ(subCls(*clsICanon6), make_specialized_exact_class(BCls, *clsCanon3));
-  EXPECT_EQ(clsExact(*clsICanon6), make_specialized_exact_class(BCls, *clsICanon6));
+  EXPECT_EQ(subObj(*clsICanon6), make_specialized_exact_object(BObj, *clsCanon3, false, false));
+  EXPECT_EQ(objExact(*clsICanon6), TBottom);
+  EXPECT_EQ(subCls(*clsICanon6), make_specialized_sub_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(clsExact(*clsICanon6), make_specialized_exact_class(BCls, *clsICanon6, false, false));
+  EXPECT_EQ(subCls(*clsICanon6, false), make_specialized_exact_class(BCls, *clsCanon3, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon6, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsFoo1), make_specialized_sub_object(BObj, *clsFoo1, false, false));
+  EXPECT_EQ(objExact(*clsFoo1), make_specialized_sub_object(BObj, *clsFoo1, false, false));
+  EXPECT_EQ(subCls(*clsFoo1), make_specialized_sub_class(BCls, *clsFoo1, false, false));
+  EXPECT_EQ(clsExact(*clsFoo1), make_specialized_sub_class(BCls, *clsFoo1, false, false));
+  EXPECT_EQ(subCls(*clsFoo1, false), make_specialized_sub_class(BCls, *clsFoo1, false, false, false));
+  EXPECT_EQ(clsExact(*clsFoo1, false), make_specialized_sub_class(BCls, *clsFoo1, false, false, false));
+
+  EXPECT_EQ(subObj(*clsT1), TBottom);
+  EXPECT_EQ(objExact(*clsT1), TBottom);
+  EXPECT_EQ(subCls(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(clsExact(*clsT1), make_specialized_exact_class(BCls, *clsT1, false, false));
+  EXPECT_EQ(subCls(*clsT1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsT1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon7), TBottom);
+  EXPECT_EQ(objExact(*clsICanon7), TBottom);
+  EXPECT_EQ(subCls(*clsICanon7), make_specialized_sub_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(clsExact(*clsICanon7), make_specialized_exact_class(BCls, *clsICanon7, false, false));
+  EXPECT_EQ(subCls(*clsICanon7, false), TBottom);
+  EXPECT_EQ(clsExact(*clsICanon7, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs1), TBottom);
+  EXPECT_EQ(objExact(*clsAbs1), TBottom);
+  EXPECT_EQ(subCls(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(clsExact(*clsAbs1), make_specialized_exact_class(BCls, *clsAbs1, false, false));
+  EXPECT_EQ(subCls(*clsAbs1, false), TBottom);
+  EXPECT_EQ(clsExact(*clsAbs1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon8), make_specialized_exact_object(BObj, *clsT4_C1, false, false));
+  EXPECT_EQ(objExact(*clsICanon8), TBottom);
+  EXPECT_EQ(subCls(*clsICanon8), make_specialized_sub_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(clsExact(*clsICanon8), make_specialized_exact_class(BCls, *clsICanon8, false, false));
+  EXPECT_EQ(subCls(*clsICanon8, false), make_specialized_exact_class(BCls, *clsT4_C1, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon8, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs3), make_specialized_sub_object(BObj, *clsAbs3_C1, false, false));
+  EXPECT_EQ(objExact(*clsAbs3), TBottom);
+  EXPECT_EQ(subCls(*clsAbs3), make_specialized_sub_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(clsExact(*clsAbs3), make_specialized_exact_class(BCls, *clsAbs3, false, false));
+  EXPECT_EQ(subCls(*clsAbs3, false), make_specialized_sub_class(BCls, *clsAbs3_C1, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs3, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs4), make_specialized_sub_object(BObj, *clsAbs4, false, false));
+  EXPECT_EQ(objExact(*clsAbs4), TBottom);
+  EXPECT_EQ(subCls(*clsAbs4), make_specialized_sub_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(clsExact(*clsAbs4), make_specialized_exact_class(BCls, *clsAbs4, false, false));
+  EXPECT_EQ(subCls(*clsAbs4, false), make_specialized_sub_class(BCls, *clsAbs4, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs4, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
+  EXPECT_EQ(objExact(*clsAbs5_P), make_specialized_exact_object(BObj, *clsAbs5_P, false, false));
+  EXPECT_EQ(subCls(*clsAbs5_P), make_specialized_sub_class(BCls, *clsAbs5_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs5_P), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs5_P, false), make_specialized_exact_class(BCls, *clsAbs5_P, false, false, false));
+
+  EXPECT_EQ(subObj(*clsAbs6_P), make_specialized_sub_object(BObj, *clsAbs6_P, false, false));
+  EXPECT_EQ(objExact(*clsAbs6_P), make_specialized_exact_object(BObj, *clsAbs6_P, false, false));
+  EXPECT_EQ(subCls(*clsAbs6_P), make_specialized_sub_class(BCls, *clsAbs6_P, false, false));
+  EXPECT_EQ(clsExact(*clsAbs6_P), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
+  EXPECT_EQ(subCls(*clsAbs6_P, false), make_specialized_sub_class(BCls, *clsAbs6_P, false, false, false));
+  EXPECT_EQ(clsExact(*clsAbs6_P, false), make_specialized_exact_class(BCls, *clsAbs6_P, false, false, false));
+
+  EXPECT_EQ(subObj(*clsICanon9), make_specialized_exact_object(BObj, *clsCanon4, false, false));
+  EXPECT_EQ(objExact(*clsICanon9), TBottom);
+  EXPECT_EQ(subCls(*clsICanon9), make_specialized_sub_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(clsExact(*clsICanon9), make_specialized_exact_class(BCls, *clsICanon9, false, false));
+  EXPECT_EQ(subCls(*clsICanon9, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon9, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsICanon10), make_specialized_exact_object(BObj, *clsCanon4, false, false));
+  EXPECT_EQ(objExact(*clsICanon10), TBottom);
+  EXPECT_EQ(subCls(*clsICanon10), make_specialized_sub_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(clsExact(*clsICanon10), make_specialized_exact_class(BCls, *clsICanon10, false, false));
+  EXPECT_EQ(subCls(*clsICanon10, false), make_specialized_exact_class(BCls, *clsCanon4, false, false, false));
+  EXPECT_EQ(clsExact(*clsICanon10, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
+  EXPECT_EQ(objExact(*clsZ1), TBottom);
+  EXPECT_EQ(subCls(*clsZ1), make_specialized_sub_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(clsExact(*clsZ1), make_specialized_exact_class(BCls, *clsZ1, false, false));
+  EXPECT_EQ(subCls(*clsZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
+  EXPECT_EQ(clsExact(*clsZ1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsIZ1), make_specialized_sub_object(BObj, *clsZ1, false, false));
+  EXPECT_EQ(objExact(*clsIZ1), TBottom);
+  EXPECT_EQ(subCls(*clsIZ1), make_specialized_sub_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(clsExact(*clsIZ1), make_specialized_exact_class(BCls, *clsIZ1, false, false));
+  EXPECT_EQ(subCls(*clsIZ1, false), make_specialized_sub_class(BCls, *clsZ1, false, false, false));
+  EXPECT_EQ(clsExact(*clsIZ1, false), TBottom);
+
+  EXPECT_EQ(subObj(*clsCanon14), make_specialized_sub_object(BObj, *clsCanon14, false, false));
+  EXPECT_EQ(objExact(*clsCanon14), TBottom);
+  EXPECT_EQ(subCls(*clsCanon14), make_specialized_sub_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(clsExact(*clsCanon14), make_specialized_exact_class(BCls, *clsCanon14, false, false));
+  EXPECT_EQ(subCls(*clsCanon14, false), make_specialized_sub_class(BCls, *clsCanon14, false, false, false));
+  EXPECT_EQ(clsExact(*clsCanon14, false), TBottom);
 }
 
 TEST(Type, WaitH) {
   auto index = make_index();
 
-  auto const rcls   = index.builtin_class(s_Awaitable.get());
+  auto const rcls   = index.wait_handle_class();
   auto const twhobj = subObj(rcls);
 
   auto const& all = allCases(index);

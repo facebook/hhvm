@@ -95,7 +95,7 @@ class WatchmanConnection
   };
 
   folly::Future<std::string> getSockPath();
-  void failQueuedCommands(const folly::exception_wrapper& ex);
+  void failQueuedCommands(folly::exception_wrapper&& ex);
   void sendCommand(bool pop = false);
   void popAndSendCommand();
   void decodeNextResponse();

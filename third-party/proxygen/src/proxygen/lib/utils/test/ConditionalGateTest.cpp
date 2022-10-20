@@ -71,3 +71,9 @@ TEST(ReadyGateTest, Immediate) {
   ready.then([&done] { done = true; });
   EXPECT_TRUE(done);
 }
+
+TEST(ConditionalGateDeleteTest, DeleteFromCallback) {
+  auto ready = std::make_unique<ReadyGate>();
+  ready->then([&ready] { ready.reset(); });
+  ready->set();
+}

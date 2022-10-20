@@ -1090,6 +1090,27 @@ struct PredictiveFetch {
   // Optional query parameter: fetch top most accessed directories before endTime
   6: optional unsigned64 endTime;
 }
+
+/** Params for prefetchFiles(). */
+struct PrefetchParams {
+  1: PathString mountPoint;
+  2: list<string> globs;
+  // If set, don't prefetch matching blobs. Only prefetch trees.
+  3: bool directoriesOnly = false;
+  // Commit hashes for the revisions against which the globs should be
+  // evaluated, if this is empty then globFiles will fall back to using only
+  // the current revision.
+  4: list<ThriftRootId> revisions;
+  // The directory from which the glob should be evaluated. Defaults to the
+  // repository root.
+  5: PathString searchRoot;
+  // If set, will run the prefetch but will not wait for the result.
+  6: bool background = false;
+  // When set, the globs list must be empty and the globbing pattern will be obtained
+  // from an online service.
+  7: optional PredictiveFetch predictiveGlob;
+}
+
 /** Params for globFiles(). */
 struct GlobParams {
   1: PathString mountPoint;
@@ -1622,6 +1643,16 @@ service EdenService extends fb303_core.BaseService {
    * these for more details.
    */
   Glob globFiles(1: GlobParams params) throws (1: EdenError ex);
+
+  /**
+   * Has the same behavior as globFiles, but should be called in the case of a prefetch.
+   * This request could be deprioritized since it will be assumed that this call is used
+   * for optimization and the result not relied on for operations. This command does not
+   * return the list of prefetched files.
+   */
+  void prefetchFiles(1: PrefetchParams params) throws (1: EdenError ex) (
+    priority = 'BEST_EFFORT',
+  );
 
   /**
    * Gets a list of a user's most accessed directories, performs

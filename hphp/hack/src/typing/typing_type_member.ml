@@ -23,6 +23,10 @@ type type_member =
       upper: locl_ty option;
     }
 
+type unknown_concrete_class_kind =
+  | EDT of Ident.t
+  | This
+
 let make_missing_err ~on_error cls_id type_id =
   match on_error with
   | Some on_error ->
@@ -90,34 +94,47 @@ let lookup_class_type_member env ~on_error ~this_ty (cls_id, exact) type_id =
    * class and combine the two results. *)
   | _ -> lookup_class_decl_type_member env ~on_error ~this_ty cls_id type_id
 
-let make_dep_bound_type_member env ~on_error ~this_ty dep_kind bnd_ty type_id =
-  let rec collect_bounds env bnd_ty =
-    let (env, bnd_ty) = Env.expand_type env bnd_ty in
-    match deref bnd_ty with
-    | (_, Tclass (x_bnd, exact_bnd, _tyl_bnd)) ->
-      let (env, type_member) =
-        lookup_class_type_member
-          env
-          ~on_error
-          ~this_ty
-          (x_bnd, exact_bnd)
-          type_id
-      in
-      (match type_member with
-      | Error _ -> (env, [], [])
-      | Exact ty -> (env, [ty], [ty])
-      | Abstract { lower; upper } ->
-        (env, Option.to_list lower, Option.to_list upper))
-    | (_, Tintersection tyl) ->
-      List.fold tyl ~init:(env, [], []) ~f:(fun (env, l, h) bnd_ty ->
-          let (env, l', h') = collect_bounds env bnd_ty in
-          (env, l @ l', h @ h'))
-    | (_, _) -> (env, [], [])
+let make_type_member env ~on_error ~this_ty ucc_kind bnd_tys type_id =
+  let rec collect_bounds env lo_bnds up_bnds = function
+    | bnd_ty :: bnd_tys ->
+      let (env, bnd_ty) = Env.expand_type env bnd_ty in
+      (match deref bnd_ty with
+      | (_, Tclass (x_bnd, exact_bnd, _tyl_bnd)) ->
+        let (env, type_member) =
+          lookup_class_type_member
+            env
+            ~on_error
+            ~this_ty
+            (x_bnd, exact_bnd)
+            type_id
+        in
+        let (lo_bnds, up_bnds) =
+          match type_member with
+          | Error _ -> (lo_bnds, up_bnds)
+          | Exact ty -> (ty :: lo_bnds, ty :: up_bnds)
+          | Abstract { lower; upper } ->
+            let maybe_add bnds =
+              Option.fold ~init:bnds ~f:(Fun.flip List.cons)
+            in
+            (maybe_add lo_bnds lower, maybe_add up_bnds upper)
+        in
+        collect_bounds env lo_bnds up_bnds bnd_tys
+      | (_, Tintersection tyl) ->
+        collect_bounds env lo_bnds up_bnds (tyl @ bnd_tys)
+      | (_, _) -> collect_bounds env lo_bnds up_bnds bnd_tys)
+    | [] -> (env, lo_bnds, up_bnds)
   in
-  let rigid_tvar_name = DependentKind.to_string dep_kind ^ "::" ^ snd type_id in
+  let rigid_tvar_name =
+    let ucc_string_id =
+      match ucc_kind with
+      | This -> "this"
+      | EDT eid -> DependentKind.to_string (DTexpr eid)
+    in
+    ucc_string_id ^ "::" ^ snd type_id
+  in
   let reason = Reason.Rnone in
   let ty = Typing_make_type.generic reason rigid_tvar_name in
-  let (env, lower_bounds, upper_bounds) = collect_bounds env bnd_ty in
+  let (env, lower_bounds, upper_bounds) = collect_bounds env [] [] bnd_tys in
   let add_bounds bounds add env =
     List.fold bounds ~init:env ~f:(fun env bnd -> add env rigid_tvar_name bnd)
   in

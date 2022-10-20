@@ -70,14 +70,6 @@ let parse_function_or_method_id ~func_action ~meth_action name =
     Printf.eprintf "Invalid input\n";
     raise Exit_status.(Exit_with Input_error)
 
-let print_all ic =
-  try
-    while true do
-      Printf.printf "%s\n" (Timeout.input_line ic)
-    done
-  with
-  | End_of_file -> ()
-
 let expand_path file =
   let path = Path.make file in
   if Path.file_exists path then
@@ -176,7 +168,7 @@ let connect ?(use_priority_pipe = false) args =
  * so we need to be able to reconnect to retry. *)
 type connect_fun = unit -> ClientConnect.conn Lwt.t
 
-let rpc
+let rpc_with_connection
     (args : ClientEnv.client_check_env)
     (command : 'a ServerCommandTypes.t)
     (call : connect_fun -> desc:string -> 'a ServerCommandTypes.t -> 'b Lwt.t) :
@@ -193,20 +185,24 @@ let rpc_with_retry
     (args : ClientEnv.client_check_env)
     (command : 'a ServerCommandTypes.Done_or_retry.t ServerCommandTypes.t) :
     'a Lwt.t =
-  let%lwt result = rpc args command ClientConnect.rpc_with_retry in
+  let%lwt result =
+    rpc_with_connection args command ClientConnect.rpc_with_retry
+  in
   Lwt.return result
 
 let rpc_with_retry_list
     (args : ClientEnv.client_check_env)
     (command : 'a ServerCommandTypes.Done_or_retry.t list ServerCommandTypes.t)
     : 'a list Lwt.t =
-  let%lwt result = rpc args command ClientConnect.rpc_with_retry_list in
+  let%lwt result =
+    rpc_with_connection args command ClientConnect.rpc_with_retry_list
+  in
   Lwt.return result
 
 let rpc
     (args : ClientEnv.client_check_env) (command : 'result ServerCommandTypes.t)
     : ('result * Telemetry.t) Lwt.t =
-  rpc args command (fun conn_f ~desc command ->
+  rpc_with_connection args command (fun conn_f ~desc command ->
       let%lwt conn = conn_f () in
       let%lwt (result, telemetry) = ClientConnect.rpc conn ~desc command in
       Lwt.return (result, telemetry))

@@ -108,16 +108,14 @@ let rec maybe_consume
             let max_time = max_time -. consumed_t in
             maybe_consume ~max_time fd_ref acc)
 
-(**
- * Read data from stdout and stderr until EOF is reached. Waits for
- * process to terminate returns the stderr and stdout
- * and stderr.
- *
- * Idempotent.
- *
- * If process exits with something other than (Unix.WEXITED 0), will return a
- * Error
- *)
+(** Read data from stdout and stderr until EOF is reached. Waits for
+    process to terminate returns the stderr and stdout
+    and stderr.
+
+    Idempotent.
+
+    If process exits with something other than (Unix.WEXITED 0), will return a
+    Error *)
 let read_and_wait_pid_nonblocking (process : Process_types.t) : unit =
   Process_types.(
     let {

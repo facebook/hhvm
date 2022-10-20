@@ -4812,8 +4812,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion(NoExceptMoveUnion&& rhs) noexcept
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::string_field:
       {
         set_string_field(std::move(rhs.value_.string_field));
@@ -4836,8 +4839,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion(const NoExceptMoveUnion& rhs)
       : type_(folly::to_underlying(Type::__EMPTY__)) {
     if (this == &rhs) { return; }
-    if (rhs.getType() == Type::__EMPTY__) { return; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return;
+      }
       case Type::string_field:
       {
         set_string_field(rhs.value_.string_field);
@@ -4859,8 +4865,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion& operator=(NoExceptMoveUnion&& rhs) noexcept {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::string_field:
       {
         set_string_field(std::move(rhs.value_.string_field));
@@ -4884,8 +4893,11 @@ class NoExceptMoveUnion final  {
   NoExceptMoveUnion& operator=(const NoExceptMoveUnion& rhs) {
     if (this == &rhs) { return *this; }
     __fbthrift_clear();
-    if (rhs.getType() == Type::__EMPTY__) { return *this; }
     switch (rhs.getType()) {
+      case Type::__EMPTY__:
+      {
+        return *this;
+      }
       case Type::string_field:
       {
         set_string_field(rhs.value_.string_field);

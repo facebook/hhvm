@@ -296,15 +296,18 @@ let rec recheck_until_no_changes_left stats genv env select_outcome :
   let query_kind =
     match select_outcome with
     | ClientProvider.Select_new _ -> `Sync
-    | ClientProvider.Select_nothing ->
+    | ClientProvider.Select_nothing
+    | ClientProvider.Select_exception _
+    | ClientProvider.Not_selecting_hg_updating ->
       if Float.(start_time - env.last_notifier_check_time > 0.5) then
         `Async
       else
         `Skip
-    (* Do not process any disk changes when there are pending persistent
-     * client requests - some of them might be edits, and we don't want to
-     * do analysis on mid-edit state of the world *)
-    | ClientProvider.Select_persistent -> `Skip
+    | ClientProvider.Select_persistent ->
+      (* Do not process any disk changes when there are pending persistent
+       * client requests - some of them might be edits, and we don't want to
+       * do analysis on mid-edit state of the world *)
+      `Skip
   in
   let (env, updates, updates_stale, query_telemetry) =
     query_notifier genv env query_kind start_time
@@ -529,7 +532,9 @@ let generate_and_update_recheck_id env =
 
 let idle_if_no_client env waiting_client =
   match waiting_client with
-  | ClientProvider.Select_nothing ->
+  | ClientProvider.Select_nothing
+  | ClientProvider.Select_exception _
+  | ClientProvider.Not_selecting_hg_updating ->
     let {
       RecheckLoopStats.per_batch_telemetry;
       total_changed_files_count;
@@ -554,7 +559,9 @@ let idle_if_no_client env waiting_client =
       { env with last_idle_job_time = t }
     else
       env
-  | _ -> env
+  | ClientProvider.Select_new _
+  | ClientProvider.Select_persistent ->
+    env
 
 (** Push diagnostics (typechecker errors in the IDE are called diagnostics) to IDE.
     Return a reason why nothing was pushed and optionally the timestamp of the push. *)
@@ -617,7 +624,7 @@ let serve_one_iteration genv env client_provider =
   in
   let selected_client =
     match acceptable_new_client_kind with
-    | None -> ClientProvider.Select_nothing
+    | None -> ClientProvider.Not_selecting_hg_updating
     | Some client_kind ->
       ClientProvider.sleep_and_check
         client_provider
@@ -655,7 +662,18 @@ let serve_one_iteration genv env client_provider =
         "ready"
       else
         "HackIDE:active"
-    | _ -> "working");
+    | ClientProvider.Select_exception e ->
+      Printf.sprintf
+        "%s, exception during client selection: %s"
+        (if env.ide_idle then
+          "ready"
+        else
+          "HackIDE:active")
+        (Exception.get_ctor_string e)
+    | ClientProvider.Not_selecting_hg_updating -> "hg-transaction"
+    | ClientProvider.Select_new _
+    | ClientProvider.Select_persistent ->
+      "working");
   let env = idle_if_no_client env selected_client in
   let stage =
     if Option.is_some env.init_env.why_needed_full_check then
@@ -698,8 +716,11 @@ let serve_one_iteration genv env client_provider =
 
   let env =
     match selected_client with
-    | ClientProvider.Select_persistent -> env
-    | ClientProvider.Select_nothing -> env
+    | ClientProvider.Select_persistent
+    | ClientProvider.Select_nothing
+    | ClientProvider.Select_exception _
+    | ClientProvider.Not_selecting_hg_updating ->
+      env
     | ClientProvider.Select_new { ClientProvider.client; m2s_sequence_number }
       ->
       begin
@@ -853,7 +874,7 @@ let priority_client_interrupt_handler genv client_provider :
     let select_outcome =
       if ServerRevisionTracker.is_hg_updating () then (
         Hh_logger.log "Won't handle client message: hg is updating.";
-        ClientProvider.Select_nothing
+        ClientProvider.Not_selecting_hg_updating
       ) else
         ClientProvider.sleep_and_check
           client_provider
@@ -869,7 +890,15 @@ let priority_client_interrupt_handler genv client_provider :
       | ClientProvider.Select_nothing ->
         (* This is possible because client might have gone away during
          * sleep_and_check. *)
-        Hh_logger.log "Client went away or hg is updating.";
+        Hh_logger.log "Client went away.";
+        env
+      | ClientProvider.Select_exception e ->
+        Hh_logger.log
+          "Exception during client FD select: %s"
+          (Exception.get_ctor_string e);
+        env
+      | ClientProvider.Not_selecting_hg_updating ->
+        Hh_logger.log "hg is updating.";
         env
       | ClientProvider.Select_new { ClientProvider.client; m2s_sequence_number }
         ->

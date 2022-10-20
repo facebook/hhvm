@@ -64,6 +64,9 @@ class type ['a] decl_type_visitor_type =
 
     method on_trefinement :
       'a -> decl_phase Reason.t_ -> decl_ty -> decl_class_refinement -> 'a
+
+    method on_tnewtype :
+      'a -> decl_phase Reason.t_ -> string -> decl_ty list -> decl_ty -> 'a
   end
 
 class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
@@ -132,6 +135,11 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       let f _ { sft_ty; _ } acc = this#on_type acc sft_ty in
       TShapeMap.fold f fdm acc
 
+    method on_tnewtype acc _ _ tyl ty =
+      let acc = List.fold_left tyl ~f:this#on_type ~init:acc in
+      let acc = this#on_type acc ty in
+      acc
+
     method on_type acc ty =
       let (r, x) = deref ty in
       match x with
@@ -155,6 +163,7 @@ class virtual ['a] decl_type_visitor : ['a] decl_type_visitor_type =
       | Tunion tyl -> this#on_tunion acc r tyl
       | Tintersection tyl -> this#on_tintersection acc r tyl
       | Tshape (shape_kind, fdm) -> this#on_tshape acc r shape_kind fdm
+      | Tnewtype (name, tyl, ty) -> this#on_tnewtype acc r name tyl ty
   end
 
 class type ['a] locl_type_visitor_type =

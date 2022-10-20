@@ -2,9 +2,19 @@ name: Nix CI
 
 on:
   push:
+    branches-ignore:
+      # Exclude the push event for exported diffs, because the CI for export
+      # should have been covered by GitHub Actions triggered by pull requests.
+      - 'export-D+'
   pull_request:
-  issue_comment:
-    types: [created]
+
+concurrency:
+  # If the workflow is triggered by a pull request, then cancel previous runs
+  # for the same pull request, which share the same `github.ref`, otherwise the
+  # run ID is used to identify the concurrency group, which is a no-op because
+  # the run ID is always unique for each trigged event.
+  group: ${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   id-token: write
@@ -13,15 +23,9 @@ permissions:
 jobs:
   build-and-run-quick-tests:
     if: |
-      github.event_name == 'push' ||
+      github.repository != 'hhvm/hhvm-staging' ||
       github.event_name == 'pull_request' ||
-      (
-        github.event_name == 'issue_comment' &&
-        github.event.issue.pull_request &&
-        github.event.issue.user.login == 'github-actions[bot]' &&
-        github.event.comment.user.login == 'facebook-github-bot' &&
-        startsWith(github.event.comment.body, '@facebook-github-bot has imported this pull request.')
-      )
+      startsWith(github.ref_name, 'HHVM-')
     strategy:
       # Run tests on all OS's and HHVM versions, even if one fails
       fail-fast: false
@@ -40,10 +44,6 @@ jobs:
       SCCACHE_LOG: info
     steps:
     - uses: actions/checkout@v2.4.0
-    - if: github.event_name == 'issue_comment'
-      uses: dawidd6/action-checkout-pr@v1
-      with:
-        pr: ${{ github.event.issue.number }}
     - uses: cachix/install-nix-action@v17
       with:
         extra_nix_config: |

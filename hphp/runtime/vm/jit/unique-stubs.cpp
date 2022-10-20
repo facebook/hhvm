@@ -564,6 +564,9 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
     auto const sf = v.makeReg();
     v << testq{interceptRip, interceptRip, sf};
 
+    auto const rIntercept = rarg(3); // NB: must match cgCheckSurprise*
+    assertx(!php_return_regs().contains(rIntercept));
+
     unlikelyIfThen(v, vc, CC_NZ, sf, [&] (Vout& v) {
       // The event hook has already cleaned up the stack and popped the
       // callee's frame, so we're ready to continue from the original call
@@ -573,13 +576,13 @@ TCA emitFunctionEnterHelper(CodeBlock& main, CodeBlock& cold,
       loadReturnRegs(v);
 
       // Return to CheckSurprise*, which will jump to the intercept rip.
-      v << copy{interceptRip, rarg(0)};
-      v << stubret{RegSet(php_return_regs() | rarg(0)), false};
+      v << copy{interceptRip, rIntercept};
+      v << stubret{RegSet(php_return_regs() | rIntercept), false};
     });
 
     // Restore rvmfp() and return to the CheckSurprise* logic.
-    v << copy{v.cns(0), rarg(0)};
-    v << stubret{RegSet(php_return_regs() | rarg(0)), true};
+    v << copy{v.cns(0), rIntercept};
+    v << stubret{RegSet(php_return_regs() | rIntercept), true};
   }, name);
 
   meta.process(nullptr);

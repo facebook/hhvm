@@ -79,6 +79,15 @@ where
     K: Key + Copy + Hash + Eq + Send + Sync + 'static,
     V: Clone + Serialize + DeserializeOwned + Send + Sync + 'static,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        if self.cache.lock().contains(&key) {
+            return Ok(true);
+        }
+        Ok(shmffi::with(|segment| {
+            segment.table.contains_key(&self.hash_key(key))
+        }))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         if let Some(val) = self.cache.lock().get(&key) {
             return Ok(Some(val.clone()));
@@ -347,6 +356,15 @@ where
     K: Key + Copy + Hash + Eq + Send + Sync + 'static,
     V: ToOcamlRep + FromOcamlRep + Clone + Send + Sync + 'static,
 {
+    fn contains_key(&self, key: K) -> Result<bool> {
+        if self.cache.lock().contains(&key) {
+            return Ok(true);
+        }
+        Ok(shmffi::with(|segment| {
+            segment.table.contains_key(&self.hash_key(key))
+        }))
+    }
+
     fn get(&self, key: K) -> Result<Option<V>> {
         if let Some(val) = self.cache.lock().get(&key) {
             return Ok(Some(val.clone()));

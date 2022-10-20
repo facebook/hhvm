@@ -45,18 +45,29 @@
               };
         in
         rec {
+          packages.sccache_pr1086 = pkgs.sccache.overrideAttrs (finalAttrs: previousAttrs: rec {
+            src = pkgs.fetchFromGitHub {
+              owner = "alessandrod";
+              repo = "sccache";
+              rev = "new-s3";
+              sha256 = "sha256-ExVVFLfQH/Tr++UgtT9fHs+tM0yOp5pIWO0rKTubNFs=";
+            };
+            cargoDeps = previousAttrs.cargoDeps.overrideAttrs (_: {
+              inherit src;
+              outputHash = "sha256-2eahz8z/nBmBM6L6OnrdjLALnVXESMe8cMOGszF22I8=";
+            });
+          });
           packages.hhvm = pkgs.callPackage ./hhvm.nix {
             lastModifiedDate = self.lastModifiedDate;
-            isDefaultStdlib = true;
           };
           packages.hhvm_sccache = packages.hhvm.overrideAttrs (finalAttrs: previousAttrs: {
-            RUSTC_WRAPPER = "${pkgs.sccache}/bin/sccache";
+            RUSTC_WRAPPER = "${packages.sccache_pr1086}/bin/sccache";
             CMAKE_TOOLCHAIN_FILE = pkgs.writeTextFile {
               name = "toolchain.cmake";
               text = ''
                 ${builtins.readFile packages.hhvm.CMAKE_TOOLCHAIN_FILE}
-                set(CMAKE_C_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C compiler launcher" FORCE)
-                set(CMAKE_CXX_COMPILER_LAUNCHER "${pkgs.sccache}/bin/sccache" CACHE STRING "C++ compiler launcher" FORCE)
+                set(CMAKE_C_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE STRING "C compiler launcher" FORCE)
+                set(CMAKE_CXX_COMPILER_LAUNCHER "${packages.sccache_pr1086}/bin/sccache" CACHE STRING "C++ compiler launcher" FORCE)
               '';
             };
           });

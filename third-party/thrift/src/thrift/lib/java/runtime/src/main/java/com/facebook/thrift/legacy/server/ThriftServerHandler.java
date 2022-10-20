@@ -36,6 +36,7 @@ import com.facebook.thrift.server.RpcServerHandler;
 import com.facebook.thrift.util.MonoTimeoutTransformer;
 import com.facebook.thrift.util.NettyNiftyRequestContext;
 import com.facebook.thrift.util.NettyUtil;
+import com.facebook.thrift.util.resources.RpcResources;
 import io.airlift.units.Duration;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
@@ -185,7 +186,7 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
         .singleRequestNoResponse(serverRequestPayload)
         .transform(
             new MonoTimeoutTransformer<>(
-                context.channel().eventLoop(),
+                RpcResources.getOffLoopScheduler(),
                 requestTimeout.toMillis(),
                 TimeUnit.MILLISECONDS,
                 Mono.defer(
@@ -244,7 +245,7 @@ public class ThriftServerHandler extends ChannelDuplexHandler {
                     serverRequestPayload.getMessageSeqId()))
         .transform(
             new MonoTimeoutTransformer<>(
-                context.channel().eventLoop(),
+                RpcResources.getOffLoopScheduler(),
                 requestTimeout.toMillis(),
                 TimeUnit.MILLISECONDS,
                 Mono.defer(

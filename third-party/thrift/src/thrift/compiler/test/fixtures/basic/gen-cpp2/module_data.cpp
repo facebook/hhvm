@@ -9,48 +9,62 @@
 
 #include <thrift/lib/cpp2/gen/module_data_cpp.h>
 
+#if defined(__GNUC__) && defined(__linux__) && !FOLLY_MOBILE
+// This attribute is applied to the static data members to ensure that they are
+// not stripped from the compiled binary, in order to keep them available for
+// use by debuggers at runtime.
+//
+// The attribute works by forcing all of the data members (both used and unused
+// ones) into the same section. This stops the linker from stripping the unused
+// data, as it works on a per-section basis and only removes sections if they
+// are entirely unused.
+#define THRIFT_DATA_SECTION [[gnu::section(".rodata.thrift.data")]]
+#else
+#define THRIFT_DATA_SECTION
+#endif
+
 namespace apache {
 namespace thrift {
 
-const std::array<::test::fixtures::basic::MyEnum, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::basic::MyEnum, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::values = {{
   type::MyValue1,
   type::MyValue2,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::MyEnum>::names = {{
   "MyValue1",
   "MyValue2",
 }};
 
-const std::array<::test::fixtures::basic::HackEnum, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::basic::HackEnum, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::values = {{
   type::Value1,
   type::Value2,
 }};
-const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 2> TEnumDataStorage<::test::fixtures::basic::HackEnum>::names = {{
   "Value1",
   "Value2",
 }};
 
-const std::array<::test::fixtures::basic::MyUnion::Type, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::basic::MyUnion::Type, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::values = {{
   type::myEnum,
   type::myStruct,
   type::myDataItem,
   type::floatSet,
 }};
-const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TEnumDataStorage<::test::fixtures::basic::MyUnion::Type>::names = {{
   "myEnum",
   "myStruct",
   "myDataItem",
   "floatSet",
 }};
 
-const std::array<::test::fixtures::basic::UnionToBeRenamed::Type, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::values = {{
+THRIFT_DATA_SECTION const std::array<::test::fixtures::basic::UnionToBeRenamed::Type, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::values = {{
   type::reserved_field,
 }};
-const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TEnumDataStorage<::test::fixtures::basic::UnionToBeRenamed::Type>::names = {{
   "reserved_field",
 }};
 
-const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_names = {{
   "MyIntField",
   "MyStringField",
   "MyDataField",
@@ -61,7 +75,7 @@ const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::bas
   "floatSet",
   "no_hack_codegen_field",
 }};
-const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_ids = {{
   1,
   2,
   3,
@@ -72,7 +86,7 @@ const std::array<int16_t, 9> TStructDataStorage<::test::fixtures::basic::MyStruc
   8,
   9,
 }};
-const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::fields_types = {{
   TType::T_I64,
   TType::T_STRING,
   TType::T_STRUCT,
@@ -83,7 +97,7 @@ const std::array<protocol::TType, 9> TStructDataStorage<::test::fixtures::basic:
   TType::T_SET,
   TType::T_STRING,
 }};
-const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::storage_names = {{
   "__fbthrift_field_MyIntField",
   "__fbthrift_field_MyStringField",
   "__fbthrift_field_MyDataField",
@@ -94,7 +108,7 @@ const std::array<folly::StringPiece, 9> TStructDataStorage<::test::fixtures::bas
   "__fbthrift_field_floatSet",
   "__fbthrift_field_no_hack_codegen_field",
 }};
-const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::isset_indexes = {{
   0,
   1,
   2,
@@ -106,77 +120,77 @@ const std::array<int, 9> TStructDataStorage<::test::fixtures::basic::MyStruct>::
   8,
 }};
 
-const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_names = {{
 }};
-const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_ids = {{
 }};
-const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::fields_types = {{
 }};
-const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::storage_names = {{
 }};
-const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 0> TStructDataStorage<::test::fixtures::basic::MyDataItem>::isset_indexes = {{
 }};
 
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_names = {{
   "myEnum",
   "myStruct",
   "myDataItem",
   "floatSet",
 }};
-const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_ids = {{
   1,
   2,
   3,
   4,
 }};
-const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::fields_types = {{
   TType::T_I32,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_SET,
 }};
-const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::storage_names = {{
   "myEnum",
   "myStruct",
   "myDataItem",
   "floatSet",
 }};
-const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 4> TStructDataStorage<::test::fixtures::basic::MyUnion>::isset_indexes = {{
   0,
   1,
   2,
   3,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_names = {{
   "reserved_field",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::fields_types = {{
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::storage_names = {{
   "__fbthrift_field_reserved_field",
 }};
-const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::ReservedKeyword>::isset_indexes = {{
   0,
 }};
 
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_names = {{
   "reserved_field",
 }};
-const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_ids = {{
+THRIFT_DATA_SECTION const std::array<int16_t, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_ids = {{
   1,
 }};
-const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = {{
+THRIFT_DATA_SECTION const std::array<protocol::TType, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::fields_types = {{
   TType::T_I32,
 }};
-const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::storage_names = {{
+THRIFT_DATA_SECTION const std::array<folly::StringPiece, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::storage_names = {{
   "reserved_field",
 }};
-const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = {{
+THRIFT_DATA_SECTION const std::array<int, 1> TStructDataStorage<::test::fixtures::basic::UnionToBeRenamed>::isset_indexes = {{
   0,
 }};
 

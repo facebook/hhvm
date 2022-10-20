@@ -1669,6 +1669,7 @@ Function.thrift_spec = (
 
 Function.thrift_struct_annotations = {
   "hack.name": "TFunction",
+  "js.name": "TFunction",
   "thrift.uri": "facebook.com/thrift/annotation/Function",
 }
 Function.thrift_field_annotations = {

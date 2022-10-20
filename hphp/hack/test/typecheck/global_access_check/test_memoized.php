@@ -63,5 +63,11 @@ class Test {
 
     $g = $e->foo_instance_method_memoized_lsb();
     $g->prop = 2;
+
+    $h = true ? new Foo() : null;
+    $i = $h?->foo_instance_method_memoized_lsb();
+    if ($i is nonnull) {
+      $i->prop = 2;
+    }
   }
 }

@@ -33,9 +33,9 @@ impl<PP, P> UserError<PP, P> {
         pos
     }
 
-    pub fn msg(&self) -> &str {
+    pub fn msg(&self) -> &bstr::BStr {
         let Message(_, msg) = &self.claim;
-        msg
+        msg.as_ref()
     }
 
     pub fn code(&self) -> ErrorCode {
@@ -224,7 +224,8 @@ impl NastCheck {
                 format!(
                     "`{}` constraints are only legal on abstract type constants",
                     kind
-                ),
+                )
+                .into(),
             ),
             vec![],
             vec![],

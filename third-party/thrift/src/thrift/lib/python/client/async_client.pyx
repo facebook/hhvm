@@ -32,6 +32,7 @@ from thrift.python.exceptions cimport create_py_exception
 from thrift.python.exceptions import ApplicationError, ApplicationErrorType
 from thrift.python.serializer import serialize_iobuf, deserialize
 from thrift.python.stream cimport ClientBufferedStream
+from thrift.py3.common cimport cRpcOptions, RpcOptions
 
 blank_uri = "".encode('ascii')
 
@@ -105,11 +106,12 @@ cdef class AsyncClient:
         string interaction_name = "".encode('ascii'),
         AsyncClient created_interaction = None,
         string uriOrName = "".encode('ascii'),
+        RpcOptions rpc_options = None,
     ):
         # Required because the python async model means that we can't have an async function that returns a future
         if interaction_position == InteractionMethodPosition.Factory and created_interaction is not None:
             await asyncio.shield(created_interaction._connect_future)
-        return await self._send_request_inner(service_name, function_name, args, response_cls, qualifier, interaction_position, interaction_name, created_interaction)
+        return await self._send_request_inner(service_name, function_name, args, response_cls, qualifier, interaction_position, interaction_name, created_interaction, uriOrName, rpc_options)
 
     def _send_request_inner(
         AsyncClient self,
@@ -122,6 +124,7 @@ cdef class AsyncClient:
         string interaction_name = "".encode('ascii'),
         AsyncClient created_interaction = None,
         string uriOrName = "".encode('ascii'),
+        RpcOptions rpc_options = None,
     ):
         protocol = deref(self._omni_client).getChannelProtocolId()
         cdef IOBuf args_iobuf = serialize_iobuf(args, protocol=protocol)
@@ -138,6 +141,10 @@ cdef class AsyncClient:
             # data, meaning both need to be accessed at the same time, so just directly passing the pointer
             deref(self._omni_client).set_interaction_factory(created_interaction._omni_client.get())
 
+        cdef cRpcOptions c_rpc_options
+        if rpc_options is not None:
+            c_rpc_options = rpc_options._cpp_obj
+
         if response_cls is None:
             deref(self._omni_client).oneway_send(
                 service_name,
@@ -145,6 +152,7 @@ cdef class AsyncClient:
                 args_iobuf.c_clone(),
                 cmove(cData(function_name, FunctionQualifier.OneWay, uriOrName, interaction_position, interaction_name)),
                 self._persistent_headers,
+                cmove(c_rpc_options),
             )
             future.set_result(None)
             return future
@@ -160,6 +168,7 @@ cdef class AsyncClient:
                     args_iobuf.c_clone(),
                     cmove(cData(function_name, qualifier, uriOrName, interaction_position, interaction_name)),
                     self._persistent_headers,
+                    cmove(c_rpc_options),
                     rpc_kind,
                 ),
                 _async_client_send_request_callback,

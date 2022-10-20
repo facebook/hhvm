@@ -175,8 +175,6 @@ static value hh_shared_caml_alloc_some(value v) {
 #    ifndef SYS_memfd_create
 #      if defined(__x86_64__)
 #        define SYS_memfd_create 319
-#      elif defined(__powerpc64__)
-#        define SYS_memfd_create 360
 #      elif defined(__aarch64__)
 #        define SYS_memfd_create 385
 #      else
@@ -1812,7 +1810,7 @@ static _Bool hh_is_slot_taken_for_key(unsigned int slot, value key) {
     // actually is ready to be used before returning.
     time_t start = 0;
     while (hashtbl[slot].addr == HASHTBL_WRITE_IN_PROGRESS) {
-#if defined(__aarch64__) || defined(__powerpc64__)
+#if defined(__aarch64__)
       asm volatile("yield" : : : "memory");
 #else
       asm volatile("pause" : : : "memory");

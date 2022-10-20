@@ -331,6 +331,14 @@ class ReflectionTests(unittest.TestCase):
                 exceptions=[],
                 annotations={"cpp.name": "renamed_func_in_cpp"},
             ),
+            MethodSpec(
+                name="getPriority",
+                arguments=[],
+                result=int,
+                result_kind=NumberType.I32,
+                exceptions=[],
+                annotations={},
+            ),
         )
         self.assertEqual(x.methods, methods)
 

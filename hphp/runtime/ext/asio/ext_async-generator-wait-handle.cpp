@@ -17,6 +17,7 @@
 
 #include "hphp/runtime/ext/asio/ext_async-generator-wait-handle.h"
 
+#include "hphp/runtime/base/implicit-context.h"
 #include "hphp/runtime/ext/asio/asio-blockable.h"
 #include "hphp/runtime/ext/asio/asio-context.h"
 #include "hphp/runtime/ext/asio/asio-context-enter.h"
@@ -67,6 +68,7 @@ c_AsyncGeneratorWaitHandle::Create(const ActRec* fp,
   gen->resumable()->setResumeAddr(resumeAddr, suspendOffset);
   gen->attachWaitHandle(req::ptr<c_AsyncGeneratorWaitHandle>(wh));
 
+  wh.get()->m_implicitContext = *ImplicitContext::activeCtx;
   return wh.detach();
 }
 
@@ -125,6 +127,7 @@ void c_AsyncGeneratorWaitHandle::onUnblocked() {
 void c_AsyncGeneratorWaitHandle::await(req::ptr<c_WaitableWaitHandle>&& child) {
   // Prepare child for establishing dependency. May throw.
   prepareChild(child.get());
+  this->m_implicitContext = *ImplicitContext::activeCtx;
 
   // Set up the dependency.
   // No refcnt: incref by ref from child, decref by no longer being executed.

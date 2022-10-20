@@ -93,13 +93,15 @@ MaskRef MaskRef::get(MapId id) const {
 }
 
 bool MaskRef::isAllMask() const {
-  return (is_exclusion && mask == field_mask_constants::noneMask()) ||
-      (!is_exclusion && mask == field_mask_constants::allMask());
+  return (is_exclusion &&
+          ::apache::thrift::protocol::detail::isNoneMask(mask)) ||
+      (!is_exclusion && ::apache::thrift::protocol::detail::isAllMask(mask));
 }
 
 bool MaskRef::isNoneMask() const {
-  return (is_exclusion && mask == field_mask_constants::allMask()) ||
-      (!is_exclusion && mask == field_mask_constants::noneMask());
+  return (is_exclusion &&
+          ::apache::thrift::protocol::detail::isAllMask(mask)) ||
+      (!is_exclusion && ::apache::thrift::protocol::detail::isNoneMask(mask));
 }
 
 bool MaskRef::isExclusive() const {

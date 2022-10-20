@@ -269,6 +269,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
 
   void ensureDecoratedProcessorFactoryInitialized();
 
+  bool serverRanWithDCHECK();
+
 #if FOLLY_HAS_COROUTINES
   std::unique_ptr<folly::coro::CancellableAsyncScope> asyncScope_;
 #endif
@@ -592,6 +594,8 @@ class ThriftServer : public apache::thrift::BaseThriftServer,
   }
 
   void setFizzConfig(wangle::FizzConfig config) { fizzConfig_ = config; }
+
+  const wangle::FizzConfig& getFizzConfig() const { return fizzConfig_; }
 
   void setThriftConfig(ThriftTlsConfig thriftConfig) {
     thriftTlsConfig_ = thriftConfig;

@@ -1264,6 +1264,13 @@ static bool HHVM_METHOD(ReflectionClass, isInternalToModule) {
   return cls->isInternal();
 }
 
+static Variant HHVM_METHOD(ReflectionClass, getModule) {
+  auto const cls = ReflectionClassHandle::GetClassFor(this_);
+  auto const name = cls->moduleName();
+  if (!name) return init_null_variant;
+  return String::attach(const_cast<StringData*>(name));
+}
+
 static bool HHVM_METHOD(ReflectionClass, isAbstract) {
   auto const cls = ReflectionClassHandle::GetClassFor(this_);
   return cls->attrs() & AttrAbstract;
@@ -2354,6 +2361,7 @@ struct ReflectionExtension final : Extension {
     HHVM_ME(ReflectionClass, getInterfaceNames);
     HHVM_ME(ReflectionClass, getRequirementNames);
     HHVM_ME(ReflectionClass, getTraitNames);
+    HHVM_ME(ReflectionClass, getModule);
 
     HHVM_ME(ReflectionClass, hasMethod);
     HHVM_STATIC_ME(ReflectionClass, getMethodOrder);

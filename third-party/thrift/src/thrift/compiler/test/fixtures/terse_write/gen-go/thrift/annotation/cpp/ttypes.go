@@ -460,12 +460,16 @@ func (p *DisableLazyChecksum) String() string {
 //     };
 //  - AdaptedType: It is sometimes necessary to specify AdaptedType here (in case the codegen would
 // have a circular depdenceny, which will cause the C++ build to fail).
-//  - UnderlyingName: When applied directly to a type (as opposed to on a typedef) the IDL name of the
-// type will refer to the adapted type in C++ and the underlying thrift struct will be
-// generated in a nested namespace and/or with a different name. By default the struct
-// will be generated in a nested 'detail' namespace with the same name,
-// but both of these can be changed by setting these fields.
-// Empty string disables the nested namespace and uses the IDL name for the struct.
+//  - UnderlyingName: The name and/or extra namespace to use when directly adapting a type
+// (as opposed a typedef).
+// 
+// In this case, the IDL name of the type will refer to the adapted type in
+// C++ and the underlying thrift type will be generated in a nested
+// namespace and/or with a different name.
+// 
+// If neither `underlyingName` or `extraNamespace` is provided, the
+// underlying type will be generated in a nested 'detail' namespace with
+// the same name.
 //  - ExtraNamespace
 //  - MoveOnly: Must set to true when adapted type is not copyable.
 type Adapter struct {
@@ -477,9 +481,7 @@ type Adapter struct {
 }
 
 func NewAdapter() *Adapter {
-  return &Adapter{
-    ExtraNamespace: "detail",
-  }
+  return &Adapter{}
 }
 
 

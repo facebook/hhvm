@@ -45,13 +45,11 @@ summary "Write oxidized/gen/"
   hphp/hack/src/ast/ast_defs.ml                                               \
   hphp/hack/src/decl/decl_defs.ml                                             \
   hphp/hack/src/decl/pos/pos_or_decl.ml                                       \
-  hphp/hack/src/deps/fileInfo.ml                                              \
   hphp/hack/src/errors/user_error.ml                                        \
   hphp/hack/src/errors/errors.ml                                              \
   hphp/hack/src/errors/error_codes.ml                                         \
   hphp/hack/src/errors/message.ml                                             \
   hphp/hack/src/errors/quickfix.ml                                            \
-  hphp/hack/src/naming/naming_types.ml                                        \
   hphp/hack/src/naming/nast.ml                                                \
   hphp/hack/src/options/declParserOptions.ml                                  \
   hphp/hack/src/options/globalOptions.ml                                      \
@@ -67,7 +65,6 @@ summary "Write oxidized/gen/"
   hphp/hack/src/typing/typing_reason.ml                                       \
   hphp/hack/src/typing/typing_tyvar_occurrences.ml                            \
   hphp/hack/src/typing/xhp_attribute.ml                            \
-  hphp/hack/src/utils/core/prim_defs.ml                                       \
   hphp/hack/src/utils/decl_reference.ml                                       \
   hphp/hack/src/parser/scoured_comments.ml                                    \
 
@@ -76,6 +73,11 @@ summary "Write oxidized/gen/"
 sed "/^pub use gen::/d" hphp/hack/src/oxidized/lib.rs > hphp/hack/src/oxidized/lib.rs.tmp
 mv hphp/hack/src/oxidized/lib.rs.tmp hphp/hack/src/oxidized/lib.rs
 grep "^pub mod " hphp/hack/src/oxidized/gen/mod.rs | sed 's/^pub mod /pub use gen::/' >> hphp/hack/src/oxidized/lib.rs
+
+summary "Write individually-converted oxidized files"
+"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/deps/fileInfo.ml > hphp/hack/src/deps/rust/file_info.rs
+"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/utils/core/prim_defs.ml > hphp/hack/src/deps/rust/prim_defs.rs
+"${BUILD_AND_RUN}" src/hh_oxidize hh_oxidize --regen-command "$REGEN_COMMAND" --rustfmt-path "$RUSTFMT_PATH" hphp/hack/src/naming/naming_types.ml > hphp/hack/src/naming/rust/naming_types.rs
 
 summary "Write oxidized/impl_gen/"
 "${BUILD_AND_RUN}" src/hh_codegen hh_codegen                                  \

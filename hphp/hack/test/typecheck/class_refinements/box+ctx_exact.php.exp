@@ -1,3 +1,5 @@
+File "box+ctx_exact.php", line 15, characters 16-45:
+Type refinements cannot appear on the right-hand side of a type alias. (NastCheck[3101])
 File "box+ctx_exact.php", line 27, characters 7-9:
 This call is not allowed because its capabilities are incompatible with the context (Typing[4390])
   File "box+ctx_exact.php", line 26, characters 37-38:

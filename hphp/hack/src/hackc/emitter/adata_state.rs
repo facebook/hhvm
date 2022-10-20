@@ -4,21 +4,23 @@
 // LICENSE file in the "hack" directory of this source tree.
 use hash::HashMap;
 use hhbc::Adata;
+use hhbc::AdataId;
 use hhbc::TypedValue;
 
 #[derive(Debug, Default)]
 pub struct AdataState<'a> {
-    shared: HashMap<TypedValue<'a>, &'a str>,
+    shared: HashMap<TypedValue<'a>, AdataId<'a>>,
     adata: Vec<Adata<'a>>,
 }
 
 impl<'a> AdataState<'a> {
-    pub fn push(&mut self, alloc: &'a bumpalo::Bump, value: TypedValue<'a>) -> &'a str {
+    pub fn push(&mut self, alloc: &'a bumpalo::Bump, value: TypedValue<'a>) -> AdataId<'a> {
         push(alloc, &mut self.adata, value)
     }
 
-    pub fn intern(&mut self, alloc: &'a bumpalo::Bump, tv: TypedValue<'a>) -> &'a str {
-        self.shared
+    pub fn intern(&mut self, alloc: &'a bumpalo::Bump, tv: TypedValue<'a>) -> AdataId<'a> {
+        *self
+            .shared
             .entry(tv)
             .or_insert_with_key(|tv| push(alloc, &mut self.adata, tv.clone()))
     }
@@ -33,11 +35,8 @@ fn push<'a>(
     alloc: &'a bumpalo::Bump,
     adata: &mut Vec<Adata<'a>>,
     value: TypedValue<'a>,
-) -> &'a str {
-    let id: &str = alloc.alloc_str(&format!("A_{}", adata.len()));
-    adata.push(Adata {
-        id: id.into(),
-        value,
-    });
+) -> AdataId<'a> {
+    let id = AdataId::from_raw_string(alloc, &format!("A_{}", adata.len()));
+    adata.push(Adata { id, value });
     id
 }

@@ -260,9 +260,9 @@ module Select_timeout = struct
   (* A negative timeout for select means block until a fd is ready *)
   let no_select_timeout = ~-.1.0
 
-  (* A wrapper around Sys_utils.select_non_intr. If timeout would fire before the select's timeout,
-   * then change the select's timeout and throw an exception when it fires *)
   let select ?timeout rfds wfds xfds select_timeout =
+    (* A wrapper around Sys_utils.select_non_intr. If timeout would fire before the select's timeout,
+     * then change the select's timeout and throw an exception when it fires *)
     match timeout with
     (* No timeout set, fallback to Sys_utils.select_non_intr *)
     | None -> Sys_utils.select_non_intr rfds wfds xfds select_timeout

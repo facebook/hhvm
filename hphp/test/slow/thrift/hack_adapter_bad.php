@@ -13,6 +13,7 @@ class Struct1 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 class BadAdapter {}
@@ -29,6 +30,7 @@ class Struct2 {
   public static function withDefaultValues()[]: this {
     return new static();
   }
+  public function clearTerseFields()[write_props]: void {}
 }
 
 function testBinary() {

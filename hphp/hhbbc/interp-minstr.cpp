@@ -981,7 +981,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
           };
         }
         auto const raw =
-          env.index.lookup_public_prop(objcls(thisTy), sval(name));
+          env.index.lookup_public_prop(thisTy, sval(name));
         return { update ? raw : to_cell(raw), Effects::Throws };
       }();
 
@@ -1004,7 +1004,7 @@ Effects miProp(ISS& env, MOpMode mode, Type key, ReadonlyOp op) {
   if (env.collect.mInstrState.base.type.subtypeOf(BObj)) {
     auto const raw =
       env.index.lookup_public_prop(
-        objcls(env.collect.mInstrState.base.type),
+        env.collect.mInstrState.base.type,
         name ? sval(name) : TStr
       );
     auto const ty = update ? raw : to_cell(raw);
@@ -1391,7 +1391,7 @@ Effects miFinalCGetProp(ISS& env, int32_t nDiscard, const Type& key,
       if (!base.couldBe(BObj)) return TInitNull;
       auto t = to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1477,7 +1477,7 @@ Effects miFinalSetOpProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );
@@ -1535,7 +1535,7 @@ Effects miFinalIncDecProp(ISS& env, int32_t nDiscard,
       }
       return to_cell(
         env.index.lookup_public_prop(
-          objcls(base.subtypeOf(BObj) ? base : intersection_of(base, TObj)),
+          base.subtypeOf(BObj) ? base : intersection_of(base, TObj),
           sval(name)
         )
       );

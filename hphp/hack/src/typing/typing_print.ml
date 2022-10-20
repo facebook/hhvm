@@ -544,6 +544,7 @@ module Full = struct
     (* Don't strip_ns here! We want the FULL type, including the initial slash.
       *)
     | Tapply ((_, s), tyl)
+    | Tnewtype (s, tyl, _)
     | Tgeneric (s, tyl) ->
       let (fuel, tys_doc) = list ~fuel "<" k tyl ">" in
       let generic_doc = to_doc s ^^ tys_doc in

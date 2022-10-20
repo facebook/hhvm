@@ -126,6 +126,191 @@ struct ForEachField<::facebook::thrift::test::MyStruct> {
     f(1, static_cast<T&&>(t).set_string_ref()...);
   }
 };
+
+template <>
+struct ForEachField<::facebook::thrift::test::AdaptTestStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).delay_ref()...);
+    f(1, static_cast<T&&>(t).custom_ref()...);
+    f(2, static_cast<T&&>(t).timeout_ref()...);
+    f(3, static_cast<T&&>(t).data_ref()...);
+    f(4, static_cast<T&&>(t).meta_ref()...);
+    f(5, static_cast<T&&>(t).indirectionString_ref()...);
+    f(6, static_cast<T&&>(t).string_data_ref()...);
+    f(7, static_cast<T&&>(t).double_wrapped_bool_ref()...);
+    f(8, static_cast<T&&>(t).double_wrapped_integer_ref()...);
+    f(9, static_cast<T&&>(t).binary_data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::AdaptTemplatedTestStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).adaptedBool_ref()...);
+    f(1, static_cast<T&&>(t).adaptedByte_ref()...);
+    f(2, static_cast<T&&>(t).adaptedShort_ref()...);
+    f(3, static_cast<T&&>(t).adaptedInteger_ref()...);
+    f(4, static_cast<T&&>(t).adaptedLong_ref()...);
+    f(5, static_cast<T&&>(t).adaptedDouble_ref()...);
+    f(6, static_cast<T&&>(t).adaptedString_ref()...);
+    f(7, static_cast<T&&>(t).adaptedList_ref()...);
+    f(8, static_cast<T&&>(t).adaptedSet_ref()...);
+    f(9, static_cast<T&&>(t).adaptedMap_ref()...);
+    f(10, static_cast<T&&>(t).adaptedBoolDefault_ref()...);
+    f(11, static_cast<T&&>(t).adaptedByteDefault_ref()...);
+    f(12, static_cast<T&&>(t).adaptedShortDefault_ref()...);
+    f(13, static_cast<T&&>(t).adaptedIntegerDefault_ref()...);
+    f(14, static_cast<T&&>(t).adaptedLongDefault_ref()...);
+    f(15, static_cast<T&&>(t).adaptedDoubleDefault_ref()...);
+    f(16, static_cast<T&&>(t).adaptedStringDefault_ref()...);
+    f(17, static_cast<T&&>(t).adaptedEnum_ref()...);
+    f(18, static_cast<T&&>(t).adaptedListDefault_ref()...);
+    f(19, static_cast<T&&>(t).adaptedSetDefault_ref()...);
+    f(20, static_cast<T&&>(t).adaptedMapDefault_ref()...);
+    f(21, static_cast<T&&>(t).doubleTypedefBool_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::AdaptTemplatedNestedTestStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).adaptedStruct_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::ThriftAdaptTestUnion> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).delay_ref()...);
+    f(1, static_cast<T&&>(t).custom_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::ThriftAdaptedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::detail::DirectlyAdaptedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::StructFieldAdaptedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).adaptedStruct_ref()...);
+    f(1, static_cast<T&&>(t).adaptedTypedef_ref()...);
+    f(2, static_cast<T&&>(t).directlyAdapted_ref()...);
+    f(3, static_cast<T&&>(t).typedefOfAdapted_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::CircularAdaptee> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::CircularStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).field_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::UnderlyingRenamedStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::UnderlyingSameNamespaceStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).data_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::detail::HeapAllocated> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::MoveOnly> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).ptr_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::AlsoMoveOnly> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).ptr_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::ApplyAdapter> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::detail::TransitiveAdapted> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::CountingStruct> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).regularInt_ref()...);
+    f(1, static_cast<T&&>(t).countingInt_ref()...);
+    f(2, static_cast<T&&>(t).regularString_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::Person> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).name_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::facebook::thrift::test::Person2> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).name_ref()...);
+  }
+};
 } // namespace detail
 } // namespace thrift
 } // namespace apache

@@ -74,13 +74,14 @@ let write_format_and_sign env filename contents =
   in
   write filename contents
 
+let make_header regen_command =
+  match regen_command with
+  | None -> header
+  | Some cmd -> header ^ regen_instructions ^ cmd
+
 let convert_files env out_dir files regen_command =
   ignore (Sys.command (sprintf "rm -f %S/*.rs" out_dir));
-  let header =
-    match regen_command with
-    | None -> header
-    | Some cmd -> header ^ regen_instructions ^ cmd
-  in
+  let header = make_header regen_command in
   let modules = files |> List.map ~f:oxidize |> SMap.of_list in
   let () =
     modules
@@ -98,11 +99,12 @@ let convert_files env out_dir files regen_command =
   let manifest = header ^ "\n\n" ^ manifest_mods in
   write_format_and_sign env manifest_filename manifest
 
-let convert_single_file env filename =
+let convert_single_file env filename regen_command =
   with_tempfile @@ fun out_filename ->
   let (_, oxidized_module) = oxidize filename in
   let src = Stringify.stringify oxidized_module in
   write_format_and_sign env out_filename src;
+  let header = make_header regen_command in
   printf "%s\n%s" header (read out_filename)
 
 let parse_types_file filename =
@@ -168,7 +170,10 @@ let usage =
        buck run hphp/hack/src/hh_oxidize -- [target_file]"
 
 type mode =
-  | File of string
+  | File of {
+      file: string;
+      regen_command: string option;
+    }
   | Files of {
       out_dir: string;
       files: string list;
@@ -232,6 +237,7 @@ let parse_args () =
   Configuration.set
     { Configuration.mode = !mode; extern_types; owned_types; copy_types };
   let rustfmt_path = Option.value !rustfmt_path ~default:"rustfmt" in
+  let regen_command = !regen_command in
   match !files with
   | [] ->
     eprintf "%s\n" usage;
@@ -239,9 +245,7 @@ let parse_args () =
   | [file] ->
     if Option.is_some !out_dir then
       failwith "Cannot set output directory in single-file mode";
-    if Option.is_some !regen_command then
-      failwith "Cannot set regen command in single-file mode";
-    { mode = File file; rustfmt_path }
+    { mode = File { file; regen_command }; rustfmt_path }
   | files ->
     let out_dir =
       match !out_dir with
@@ -249,13 +253,12 @@ let parse_args () =
       | None ->
         failwith "Cannot convert multiple files without output directory"
     in
-    let regen_command = !regen_command in
     { mode = Files { out_dir; files; regen_command }; rustfmt_path }
 
 let () =
   let { mode; rustfmt_path } = parse_args () in
   let env = { rustfmt = rustfmt_path } in
   match mode with
-  | File file -> convert_single_file env file
+  | File { file; regen_command } -> convert_single_file env file regen_command
   | Files { out_dir; files; regen_command } ->
     convert_files env out_dir files regen_command

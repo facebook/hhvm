@@ -31,7 +31,7 @@ ocaml_ffi_arena_result! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls(&opts, filename, text, arena)
+        direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena)
     }
 
     fn hh_parse_and_hash_decls_ffi<'a>(
@@ -45,7 +45,7 @@ ocaml_ffi_arena_result! {
         // don't call into OCaml within this function scope.
         let text_value: ocamlrep::Value<'a> = unsafe { text.as_value() };
         let text = bytes_from_ocamlrep(text_value).expect("expected string");
-        direct_decl_parser::parse_decls(&opts, filename, text, arena).into()
+        direct_decl_parser::parse_decls_for_typechecking(&opts, filename, text, arena).into()
     }
 }
 

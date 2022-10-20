@@ -175,6 +175,23 @@ let get_enforcement ~return_from_async (ctx : Provider_context.t) (ty : decl_ty)
       | Unenforced (Some ety) ->
         Unenforced (Some (mk (get_reason ty, Toption ety)))
       | Unenforced None -> Unenforced None)
+    | Tnewtype (name, _, _) ->
+      if SSet.mem name visited then
+        Unenforced None
+      else (
+        match Typedef_provider.get_typedef ctx name with
+        | Some { td_vis = Aast.Opaque; td_type; _ } ->
+          let exp_ty =
+            enforcement
+              ~is_dynamic_enforceable
+              ctx
+              (SSet.add name visited)
+              td_type
+          in
+          make_unenforced exp_ty
+        | Some { td_vis = Aast.OpaqueModule; _ } -> Unenforced None
+        | _ -> failwith "should never happen"
+      )
   in
   if return_from_async then
     match get_node ty with

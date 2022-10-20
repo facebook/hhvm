@@ -9,7 +9,6 @@ path = "../../decl_parser.rs"
 
 [dependencies]
 anyhow = "1.0.65"
-arena_collections = { path = "../../../../arena_collections" }
 bumpalo = { version = "3.8", features = ["collections"] }
 direct_decl_parser = { path = "../../../../parser/api/cargo/direct_decl_parser" }
 file_provider = { path = "../../../file_provider/cargo/file_provider" }
@@ -17,5 +16,4 @@ names = { path = "../../../../naming/names_rust" }
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }
 pos = { path = "../../../pos/cargo/pos" }
-special_names = { path = "../../../special_names/cargo/special_names" }
 ty = { path = "../../../ty/cargo/ty" }

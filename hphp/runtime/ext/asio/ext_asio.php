@@ -357,11 +357,11 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
 
 /**
  * Generates a backtrace for $awaitable.
- * Following conditions must be met to produce non-empty backtrace:
+ * Following conditions must be met to produce non-null backtrace:
  * - $awaitable has not finished yet (i.e. has_finished($awaitable) === false)
  * - $awaitable is part of valid scheduler context
  *     (i.e. $awaitable->getContextIdx() > 0)
- * If either condition is not met, backtrace() returns empty array.
+ * If either condition is not met, backtrace() returns null.
  *
  * @param $awaitable - Awaitable, to take backtrace from.
  * @param int $options - bitmask of the following options:
@@ -371,7 +371,7 @@ function cancel<T>(Awaitable<T> $awaitable, \Exception $exception): bool;
  * @param int $limit - the maximum number of stack frames returned.
  *   By default (limit=0) it returns all stack frames.
  *
- * @return array - Returns an array of associative arrays.
+ * @return ?array - Returns an array of associative arrays, or null.
  *   See debug_backtrace() for detailed format description.
  */
 <<__Native>>
@@ -379,7 +379,7 @@ function backtrace<T>(
   Awaitable<T> $awaitable,
   int $options = \DEBUG_BACKTRACE_PROVIDE_OBJECT,
   int $limit = 0,
-): vec<dict<string, mixed>>;
+): /*?*/vec<dict<string, mixed>>;
 // TODO(T120344399): This ought to return a real backtrace type
 
 

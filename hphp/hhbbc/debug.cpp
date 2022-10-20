@@ -119,15 +119,27 @@ void dump_class_state(std::ostream& out,
     }
   }
 
+  std::vector<const php::Const*> constants;
+  constants.reserve(c->constants.size());
   for (auto const& constant : c->constants) {
-    if (constant.val) {
-      auto const ty = from_cell(*constant.val);
-      out << clsName << "::" << constant.name->data() << " :: "
+    constants.emplace_back(&constant);
+  }
+  std::sort(
+    begin(constants), end(constants),
+    [] (const php::Const* a, const php::Const* b) {
+      return string_data_lt{}(a->name, b->name);
+    }
+  );
+
+  for (auto const constant : constants) {
+    if (constant->val) {
+      auto const ty = from_cell(*constant->val);
+      out << clsName << "::" << constant->name->data() << " :: "
           << (ty.subtypeOf(BUninit) ? "<dynamic>" : show(ty));
-      if (constant.kind == ConstModifiers::Kind::Type) {
-        if (constant.resolvedTypeStructure) {
-          out << " (" << show(dict_val(constant.resolvedTypeStructure)) << ")";
-          switch ((php::Const::Invariance)constant.invariance) {
+      if (constant->kind == ConstModifiers::Kind::Type) {
+        if (constant->resolvedTypeStructure) {
+          out << " (" << show(dict_val(constant->resolvedTypeStructure)) << ")";
+          switch ((php::Const::Invariance)constant->invariance) {
             case php::Const::Invariance::None:
               break;
             case php::Const::Invariance::Present:
@@ -213,20 +225,48 @@ void dump_index(const std::string& dir,
   auto ind_dir = fs::path{dir} / "index";
 
   with_file(ind_dir, unit, [&] (std::ostream& out) {
+    std::vector<const php::Class*> classes;
     index.for_each_unit_class(
       unit,
-      [&] (const php::Class& c) {
-        dump_class_state(out, index, &c);
-        for (auto const& m : c.methods) {
-          if (!m) continue;
-          dump_func_state(out, index, *m);
-        }
+      [&] (const php::Class& c) { classes.emplace_back(&c); }
+    );
+    std::sort(
+      begin(classes), end(classes),
+      [] (const php::Class* a, const php::Class* b) {
+        return string_data_lti{}(a->name, b->name);
       }
     );
+
+    for (auto const c : classes) {
+      dump_class_state(out, index, c);
+
+      std::vector<const php::Func*> funcs;
+      funcs.reserve(c->methods.size());
+      for (auto const& m : c->methods) {
+        if (!m) continue;
+        funcs.emplace_back(m.get());
+      }
+      std::sort(
+        begin(funcs), end(funcs),
+        [] (const php::Func* a, const php::Func* b) {
+          return string_data_lt{}(a->name, b->name);
+        }
+      );
+      for (auto const f : funcs) dump_func_state(out, index, *f);
+    }
+
+    std::vector<const php::Func*> funcs;
     index.for_each_unit_func(
       unit,
-      [&] (const php::Func& f) { dump_func_state(out, index, f); }
+      [&] (const php::Func& f) { funcs.emplace_back(&f); }
     );
+    std::sort(
+      begin(funcs), end(funcs),
+      [] (const php::Func* a, const php::Func* b) {
+        return string_data_lt{}(a->name, b->name);
+      }
+    );
+    for (auto const f : funcs) dump_func_state(out, index, *f);
   });
 }
 
@@ -301,9 +341,9 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
     return s;
   };
 
-  auto const pct = [] (size_t a, size_t b) {
-    if (!b) return 0.0;
-    return double(a) / b * 100.0;
+  auto const pct = [] (size_t a, size_t b) -> std::string {
+    if (!b) return "--";
+    return folly::sformat("{:.2f}%", double(a) / b * 100.0);
   };
 
   auto const execs = stats.execs.load();
@@ -314,7 +354,7 @@ std::string client_stats(const extern_worker::Client::Stats& stats) {
   auto const loadCalls = stats.loadCalls.load();
 
   return folly::sformat(
-    "  Execs: {:,} total, {:,} cache-hits ({:.2f}%), {:,} fallbacks\n"
+    "  Execs: {:,} total, {:,} cache-hits ({}), {:,} fallbacks\n"
     "  Workers: {} usage, {:,} cores ({}/core), {} max used, {} reserved\n"
     "  Blobs: {:,} total, {:,} uploaded ({}), {:,} fallbacks\n"
     "  {:,} downloads ({}), {:,} throttles, (E: {} S: {} L: {}) avg latency\n",

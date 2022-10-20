@@ -109,6 +109,7 @@ std::vector<TypeDetails> move_type_vec(folly::dynamic* types) {
         .m_flags = static_cast<int>(std::move(type.at("flags")).getInt()),
         .m_baseTypes = move_str_vec(type.get_ptr("baseTypes")),
         .m_attributes = move_attr_vec(type.get_ptr("attributes")),
+        .m_requireClass = move_str_vec(type.get_ptr("requireClass")),
         .m_requireExtends = move_str_vec(type.get_ptr("requireExtends")),
         .m_requireImplements = move_str_vec(type.get_ptr("requireImplements")),
         .m_methods = move_method_vec(type.get_ptr("methods"))});

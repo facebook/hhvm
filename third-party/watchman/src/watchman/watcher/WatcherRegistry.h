@@ -25,7 +25,7 @@ class Root;
  * Maintains the list of available watchers.
  * This is fundamentally a map of name -> factory function.
  * Some watchers (kqueue, inotify) are available on multiple operating
- * systems: kqueue on OSX and *BSD, inotify on Linux and Solaris.
+ * systems: kqueue on macOS and *BSD, inotify on Linux and Solaris.
  * There are cases where a given watcher is not the preferred mechanism
  * (eg: inotify is implemented in terms of portfs on Solaris, so we
  * prefer to target the portfs layer directly), so we have a concept

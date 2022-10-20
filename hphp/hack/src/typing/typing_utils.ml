@@ -238,6 +238,16 @@ let localize x = !localize_ref x
 (* Checking properties of types *)
 (*****************************************************************************)
 
+let is_class ty =
+  match get_node ty with
+  | Tclass _ -> true
+  | _ -> false
+
+let is_class_i ty =
+  match ty with
+  | ConstraintType _ -> false
+  | LoclType ty -> is_class ty
+
 let is_mixed_i env ty =
   let mixed = LoclType (MakeType.mixed Reason.Rnone) in
   is_sub_type_for_union_i env mixed ty
@@ -819,3 +829,9 @@ let is_capability_i ty =
 let supports_dynamic env ty =
   let r = get_reason ty in
   sub_type env ty (MakeType.supportdyn r (MakeType.mixed Reason.Rnone))
+
+let strip_supportdyn ty =
+  match get_node ty with
+  | Tnewtype (name, [tyarg], _) when String.equal name SN.Classes.cSupportDyn ->
+    (true, tyarg)
+  | _ -> (false, ty)

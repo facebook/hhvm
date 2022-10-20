@@ -271,6 +271,13 @@ struct dynamic_converter_impl<type_class::enumeration> {
 template <typename ValueTypeClass>
 struct dynamic_converter_impl<type_class::list<ValueTypeClass>> {
   template <typename T>
+  static auto do_reserve(T& c, size_t size) -> decltype(c.reserve(size)) {
+    c.reserve(size);
+  }
+  template <typename T>
+  static void do_reserve(T&, ...) {}
+
+  template <typename T>
   static void to(folly::dynamic& out, T const& input, dynamic_format format) {
     out = folly::dynamic::array;
 
@@ -290,7 +297,7 @@ struct dynamic_converter_impl<type_class::list<ValueTypeClass>> {
     if (input.empty()) {
       return;
     }
-
+    do_reserve(out, input.size());
     for (const auto& i : input) {
       out.emplace_back();
       recurse_helper::from<ValueTypeClass>(out.back(), i, format, adherence);

@@ -367,6 +367,7 @@ type TypeData = shape(
   'kind' => TypeKind,
   'flags' => int,
   'baseTypes' => vec<string>,
+  'requireClass' => vec<string>,
   'requireExtends' => vec<string>,
   'requireImplements' => vec<string>,
   'attributes' => vec<AttributeData>,

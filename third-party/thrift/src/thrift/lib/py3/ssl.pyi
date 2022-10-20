@@ -20,7 +20,8 @@ Path = Union[str, bytes, os.PathLike[str], os.PathLike[bytes]]
 
 class SSLVersion(Enum):
     TLSv1_2: SSLVersion = ...
-    value: int
+    @property
+    def value(self) -> int: ...
 
 class SSLVerifyOption(Enum):
     VERIFY: SSLVerifyOption = ...

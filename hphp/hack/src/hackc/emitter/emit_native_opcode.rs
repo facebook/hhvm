@@ -43,7 +43,14 @@ pub fn emit_body<'a, 'arena, 'decl>(
                 body_instrs: Slice::from_vec(emitter.alloc, body_instrs.iter().cloned().collect()),
                 params: Slice::fill_iter(emitter.alloc, params.into_iter().map(|p| p.0)),
                 return_type_info: Just(rti),
-                ..Default::default()
+                decl_vars: Default::default(),
+                doc_comment: Default::default(),
+                is_memoize_wrapper: Default::default(),
+                is_memoize_wrapper_lsb: Default::default(),
+                num_iters: Default::default(),
+                shadowed_tparams: Default::default(),
+                stack_depth: Default::default(),
+                upper_bounds: Default::default(),
             })
         })
     })

@@ -33,6 +33,7 @@ X(attributes)
 X(kind)
 X(flags)
 X(baseTypes)
+X(requireClass)
 X(requireExtends)
 X(requireImplements)
 X(methods)
@@ -58,6 +59,7 @@ Array makeDict(const TypeDetails& type) {
       X(flags),
       X(baseTypes),
       X(attributes),
+      X(requireClass),
       X(requireExtends),
       X(requireImplements),
       X(methods));

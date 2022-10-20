@@ -27,13 +27,13 @@
 , icu
 # TODO(https://github.com/NixOS/nixpkgs/pull/193086): Use stdenv.cc.libcxx to
 # detect C++ runtime once it is available
-, isDefaultStdlib
+, isDefaultStdlib ? true
 , imagemagick6
 , jemalloc
 , lastModifiedDate
 , lib
 , libcap
-, libdwarf
+, libdwarf_20210528
 , libedit
 , libelf
 , libevent
@@ -168,7 +168,7 @@ stdenv.mkDerivation rec {
       (if isDefaultStdlib then icu else icu.override { inherit stdenv; })
       imagemagick6
       jemalloc
-      libdwarf
+      libdwarf_20210528
       libedit
       libelf
       libevent

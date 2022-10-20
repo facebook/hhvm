@@ -59,5 +59,7 @@ pub enum Opcode<'arena> {
 // The macro also generates:
 // impl Opcode<'arena> {
 //   pub fn variant_name(&self) -> &'static str;
+//   pub fn variant_index(&self) -> usize;
 //   pub fn num_inputs(&self) -> usize;
 // }
+// impl Targets for Opcode<'arena>;

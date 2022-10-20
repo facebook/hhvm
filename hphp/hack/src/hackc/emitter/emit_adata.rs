@@ -6,7 +6,7 @@
 use env::emitter::Emitter;
 use error::Error;
 use error::Result;
-use ffi::Str;
+use hhbc::AdataId;
 use hhbc::ClassName;
 use hhbc::TypedValue;
 use instruction_sequence::instr;
@@ -29,15 +29,15 @@ pub fn typed_value_into_instr<'arena, 'decl>(
         }
         TypedValue::Float(f) => Ok(instr::double(f)),
         TypedValue::Keyset(_) => {
-            let arrayid = Str::from(get_array_identifier(e, tv));
+            let arrayid = get_array_identifier(e, tv);
             Ok(instr::keyset(arrayid))
         }
         TypedValue::Vec(_) => {
-            let arrayid = Str::from(get_array_identifier(e, tv));
+            let arrayid = get_array_identifier(e, tv);
             Ok(instr::vec(arrayid))
         }
         TypedValue::Dict(_) => {
-            let arrayid = Str::from(get_array_identifier(e, tv));
+            let arrayid = get_array_identifier(e, tv);
             Ok(instr::dict(arrayid))
         }
     }
@@ -46,7 +46,7 @@ pub fn typed_value_into_instr<'arena, 'decl>(
 fn get_array_identifier<'arena, 'decl>(
     e: &mut Emitter<'arena, 'decl>,
     tv: TypedValue<'arena>,
-) -> &'arena str {
+) -> AdataId<'arena> {
     let alloc = e.alloc;
     if e.options().hhbc.array_provenance {
         e.adata_state_mut().push(alloc, tv)

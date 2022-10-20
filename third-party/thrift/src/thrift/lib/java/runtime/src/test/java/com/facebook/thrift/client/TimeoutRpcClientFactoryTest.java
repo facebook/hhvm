@@ -152,9 +152,9 @@ public class TimeoutRpcClientFactoryTest {
     RpcClientFactory delegate = Mockito.mock(RpcClientFactory.class);
     Mockito.when(delegate.createRpcClient(address)).thenReturn(Mono.never());
 
-    TimeoutRpcClientFactory factory =
-        new TimeoutRpcClientFactory(
-            delegate, new ThriftClientConfig().setConnectTimeout(Duration.valueOf("10ms")));
+    SimpleLoadBalancingRpcClientFactory factory =
+        new SimpleLoadBalancingRpcClientFactory(
+            delegate, 8, new ThriftClientConfig().setConnectTimeout(Duration.valueOf("10ms")));
 
     StepVerifier.create(factory.createRpcClient(address)).verifyError(TimeoutException.class);
   }

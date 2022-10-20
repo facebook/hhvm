@@ -146,22 +146,18 @@ public interface RpcClientFactory {
         rpcClientFactory = new EventHandlerRpcClientFactory(rpcClientFactory, clientEventHandlers);
       }
 
-      if (!disableReconnectingClient) {
-        rpcClientFactory = new ReconnectingRpcClientFactory(rpcClientFactory);
-      }
-
-      // TimeoutRpcClientFactory needs to come after ReconnectingRpcClientFactory to make
-      // sure that it times out. ReconnectingRpcClientFactory does emit unless there is a
-      // connection, and some code flatMaps on the emission. If the timeout is add inside
-      // the flatMap it won't be applied until the flatMap emits which isn't guaranteed to
-      // happen.
       if (!disableTimeout) {
         rpcClientFactory = new TimeoutRpcClientFactory(rpcClientFactory, thriftClientConfig);
       }
 
+      if (!disableReconnectingClient) {
+        rpcClientFactory = new ReconnectingRpcClientFactory(rpcClientFactory);
+      }
+
       if (connectionPoolSize >= 1) {
         rpcClientFactory =
-            new SimpleLoadBalancingRpcClientFactory(rpcClientFactory, connectionPoolSize);
+            new SimpleLoadBalancingRpcClientFactory(
+                rpcClientFactory, connectionPoolSize, thriftClientConfig);
       }
 
       return rpcClientFactory;

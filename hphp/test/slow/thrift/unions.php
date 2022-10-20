@@ -89,6 +89,8 @@ class ComplexUnion {
     return new static();
   }
 
+  public function clearTerseFields()[write_props]: void {}
+
   public function getName(): string {
     return 'ComplexUnion';
   }

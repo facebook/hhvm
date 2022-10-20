@@ -21,6 +21,17 @@ let rec of_decl_ty (ty : decl_ty) : string =
   | Tany _
   | Terr ->
     "mixed"
+  | Tnewtype (name, tyl, ty) ->
+    let name = Utils.strip_all_ns name in
+    (match tyl with
+    | [] -> name
+    | args ->
+      let args = List.map args ~f:of_decl_ty in
+      Printf.sprintf
+        "%s<%s> %s"
+        name
+        (String.concat ~sep:", " args)
+        (of_decl_ty ty))
   | Tnonnull -> "nonnull"
   | Tdynamic -> "dynamic"
   | Tthis -> "this"

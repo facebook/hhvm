@@ -84,6 +84,14 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
         std::unique_ptr<folly::IOBuf> endOfData) = 0;
   };
 
+  /* Interface used to get a reference to an folly::IOBufIovecBuilder
+   */
+  struct IOVecQueueOps {
+    virtual ~IOVecQueueOps() = default;
+    virtual void allocateBuffers(folly::IOBufIovecBuilder::IoVecVec& iovs) = 0;
+    virtual std::unique_ptr<folly::IOBuf> extractIOBufChain(size_t len) = 0;
+  };
+
   struct TransportOptions {
     /**
      * Controls whether or not the async recv callback should be registered
@@ -106,22 +114,23 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
      *   ReadMode::ReadVec
      *      Under this mode, Fizz will use vectored IO (`readv`) to read
      *      incoming data. This can help avoid additional copies at the expense
-     *      of allocating extra ref counting objects. The overall mem usage is
-     * also dependent on the readVecBlockSize value.
+     *      of allocating extra ref counting objects.
      *
      */
     folly::AsyncReader::ReadCallback::ReadMode readMode{ReadMode::ReadBuffer};
 
     /*
-     * AsyncTransport read vec block size
+     * Under `ReadMode::ReadVec`, Fizz will allocate buffers for vectored I/O
+     * through the `iovecQueue`.
+     *
+     * This field must be set if `readMode` is `ReadMode::ReadVec`.
+     *
+     * Multiple AsyncFizzBase instances may share the underlying
+     * `IOVecQueueOps`, provided that the implementation allows it. This can be
+     * useful in limiting the amount of memory allocated across a process with
+     * many Fizz connections.
      */
-    size_t readVecBlockSize{
-        folly::IOBufIovecBuilder::Options::kDefaultBlockSize};
-
-    /*
-     * AsyncTransport read vec read size
-     */
-    size_t readVecReadSize{4000};
+    std::shared_ptr<IOVecQueueOps> ioVecQueue{};
 
     /**
      * Under ReadMode::ReadBuffer, whenever Fizz's available read buffer space
@@ -519,7 +528,5 @@ class AsyncFizzBase : public folly::WriteChainAsyncTransportWrapper<
 
   TransportOptions transportOptions_;
   std::unique_ptr<FizzMsgHdr> msgHdr_;
-
-  folly::IOBufIovecBuilder ioVecQueue_;
 };
 } // namespace fizz

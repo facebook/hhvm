@@ -73,9 +73,6 @@ jobs:
         SCCACHE_BUCKET: hhvm-sccache
         SCCACHE_ENDPOINT: https://hhvm-sccache.s3-accelerate.amazonaws.com
         SCCACHE_REGION: us-west-2
-    - name: Stop sccache server and print statistics
-      if: always()
-      run: nix shell "git+file://$(pwd)?submodules=1&shallow=1#sccache_pr1086" --command sccache --stop-server
     - run: hhvm --version
     - name: Build the deb package
       if: runner.os == 'Linux'

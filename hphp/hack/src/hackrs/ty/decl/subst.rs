@@ -5,8 +5,8 @@
 
 use eq_modulo_pos::EqModuloPos;
 use hash::IndexMap;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use pos::TypeName;
 use serde::Deserialize;
 use serde::Serialize;

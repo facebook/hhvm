@@ -5,7 +5,6 @@
 
 use ocamlrep::FromOcamlRep;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_derive::FromOcamlRep;
 
 use super::folded::*;
 use super::ty::*;

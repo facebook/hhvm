@@ -6,8 +6,8 @@
 
 mod operator_generated;
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use parser_core_types::parser_env::ParserEnv;
 use parser_core_types::token_kind::TokenKind;
 

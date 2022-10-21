@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<21cde29940f7dd71a1ede03377dd9556>>
+// @generated SignedSource<<e7d7d108fdb8797b0ff7a60cbf27e043>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -11,8 +11,8 @@
 use arena_trait::TrivialDrop;
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 pub use reason::PosId;
 use serde::Deserialize;
 use serde::Serialize;

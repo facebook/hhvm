@@ -14,11 +14,10 @@ use depgraph::reader::DepGraph;
 use depgraph::reader::DepGraphOpener;
 use ocamlrep::FromError;
 use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use ocamlrep::Value;
 use ocamlrep_custom::caml_serialize_default_impls;
 use ocamlrep_custom::CamlSerialize;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 use once_cell::sync::OnceCell;
 use rpds::HashTrieSet;
 

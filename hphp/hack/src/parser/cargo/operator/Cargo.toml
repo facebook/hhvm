@@ -9,5 +9,4 @@ path = "../../operator.rs"
 
 [dependencies]
 ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 parser_core_types = { path = "../core_types" }

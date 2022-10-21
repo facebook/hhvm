@@ -5,8 +5,8 @@
 
 use std::cmp::Ordering;
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 

@@ -18,7 +18,7 @@ impl ocamlrep_custom::CamlSerialize for HhFanoutRustFfi {
     ocamlrep_custom::caml_serialize_default_impls!();
 }
 
-#[derive(ocamlrep_derive::ToOcamlRep, ocamlrep_derive::FromOcamlRep)]
+#[derive(ocamlrep::ToOcamlRep, ocamlrep::FromOcamlRep)]
 #[repr(C)]
 enum EdgesError {
     EeDecl(String),

@@ -18,7 +18,6 @@ mode_parser = { path = "../mode_parser" }
 namespaces_rust = { path = "../namespaces" }
 naming_special_names_rust = { path = "../../../naming" }
 ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 oxidized = { path = "../../../oxidized" }
 parser_core_types = { path = "../core_types" }
 positioned_by_ref_parser = { path = "../../api/cargo/positioned_by_ref_parser" }

@@ -4,7 +4,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::ToOcamlRep;
 
 use crate::lexable_trivia::LexableTrivia;
 use crate::lexable_trivia::LexableTrivium;

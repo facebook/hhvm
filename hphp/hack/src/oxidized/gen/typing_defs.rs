@@ -3,16 +3,16 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<5a0c688d8aebefc01e205a647ef7ef08>>
+// @generated SignedSource<<9bf00b97eb2c8ba7b8336b3bc48a6934>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 pub use typing_defs_core::*;

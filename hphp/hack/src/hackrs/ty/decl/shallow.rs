@@ -6,8 +6,8 @@
 use std::collections::BTreeMap;
 
 use eq_modulo_pos::EqModuloPos;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 pub use oxidized::ast_defs::Visibility;
 pub use oxidized_by_ref::method_flags::MethodFlags;
 pub use oxidized_by_ref::prop_flags::PropFlags;

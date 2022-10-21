@@ -3,7 +3,7 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 //
-// @generated SignedSource<<dd4d5f6aab0372c564e900fd6358f46f>>
+// @generated SignedSource<<bb8fff2dc42c496a3938a8df06034d27>>
 //
 // To regenerate this file, run:
 //   hphp/hack/src/oxidized_regen.sh
@@ -20,9 +20,9 @@ pub use ast_defs::TypedefVisibility;
 pub use ast_defs::Visibility;
 pub use local_id::LocalId;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 

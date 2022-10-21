@@ -21,7 +21,6 @@ hh24_types = { path = "../../utils/hh24_types" }
 names = { path = "../../naming/names_rust" }
 naming_provider = { path = "../../hackrs/naming_provider/cargo/naming_provider" }
 ocamlrep = { path = "../../ocamlrep" }
-ocamlrep_derive = { path = "../../ocamlrep_derive" }
 oxidized = { path = "../../oxidized" }
 oxidized_by_ref = { path = "../../oxidized_by_ref" }
 parking_lot = { version = "0.11.2", features = ["send_guard"] }

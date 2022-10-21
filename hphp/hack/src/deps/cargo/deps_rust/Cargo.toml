@@ -14,6 +14,5 @@ depgraph = { path = "../../../depgraph/cargo/depgraph" }
 hh_fanout_rust_ffi = { path = "../hh_fanout_rust_ffi" }
 ocamlrep = { path = "../../../ocamlrep" }
 ocamlrep_custom = { path = "../../../ocamlrep_custom" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 once_cell = "1.12"
 rpds = "0.11.0"

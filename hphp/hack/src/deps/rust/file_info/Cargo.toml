@@ -14,7 +14,6 @@ eq_modulo_pos = { path = "../../../utils/eq_modulo_pos" }
 naming_types = { path = "../../../naming/rust/naming_types" }
 no_pos_hash = { path = "../../../utils/no_pos_hash" }
 ocamlrep = { path = "../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../ocamlrep_derive" }
 parser_core_types = { path = "../../../parser/cargo/core_types" }
 rc_pos = { path = "../../../utils/rust/pos" }
 relative_path = { path = "../../../utils/rust/relative_path" }

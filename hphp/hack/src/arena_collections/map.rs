@@ -12,7 +12,6 @@ use arena_trait::Arena;
 use arena_trait::TrivialDrop;
 use ocamlrep::FromOcamlRepIn;
 use ocamlrep::ToOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 

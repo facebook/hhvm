@@ -9,8 +9,8 @@
 use std::borrow::Cow;
 use std::cmp::Ordering;
 
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 
 use crate::token_kind::TokenKind;
 

@@ -8,8 +8,8 @@ use std::fmt;
 
 use eq_modulo_pos::EqModuloPos;
 use hcons::Hc;
-use ocamlrep_derive::FromOcamlRep;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRep;
+use ocamlrep::ToOcamlRep;
 use oxidized::aast;
 pub use oxidized::aast_defs::ReifyKind;
 pub use oxidized::aast_defs::Tprim as Prim;

@@ -10,7 +10,6 @@ path = "../../utils.rs"
 [dependencies]
 eq_modulo_pos = { path = "../../../../utils/eq_modulo_pos" }
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 oxidized = { path = "../../../../oxidized" }
 pos = { path = "../../../pos/cargo/pos" }
 serde = { version = "1.0.136", features = ["derive", "rc"] }

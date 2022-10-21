@@ -7,8 +7,8 @@ use std::cmp::Ordering;
 
 use eq_modulo_pos::EqModuloPos;
 use no_pos_hash::NoPosHash;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use serde::Deserialize;
 use serde::Serialize;
 

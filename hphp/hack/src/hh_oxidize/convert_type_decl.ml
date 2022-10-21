@@ -60,8 +60,8 @@ let implements_traits _name = default_implements ()
 let default_derives () =
   (match Configuration.mode () with
   | Configuration.ByBox ->
-    [(Some "ocamlrep_derive", "FromOcamlRep"); (Some "serde", "Deserialize")]
-  | Configuration.ByRef -> [(Some "ocamlrep_derive", "FromOcamlRepIn")])
+    [(Some "ocamlrep", "FromOcamlRep"); (Some "serde", "Deserialize")]
+  | Configuration.ByRef -> [(Some "ocamlrep", "FromOcamlRepIn")])
   @ [
       (None, "Clone");
       (None, "Debug");
@@ -72,7 +72,7 @@ let default_derives () =
       (None, "PartialOrd");
       (Some "no_pos_hash", "NoPosHash");
       (Some "eq_modulo_pos", "EqModuloPos");
-      (Some "ocamlrep_derive", "ToOcamlRep");
+      (Some "ocamlrep", "ToOcamlRep");
       (Some "serde", "Serialize");
       (Some "serde", "Deserialize");
     ]
@@ -83,7 +83,7 @@ let is_by_box () = not (is_by_ref ())
 
 let additional_derives ty : (string option * string) list =
   if derive_copy ty then
-    [(None, "Copy"); (Some "ocamlrep_derive", "FromOcamlRepIn")]
+    [(None, "Copy"); (Some "ocamlrep", "FromOcamlRepIn")]
   else
     []
 
@@ -628,12 +628,12 @@ let type_declaration ~mutual_rec name td =
       let traits = derived_traits name @ additional_derives in
       let traits =
         match enum_kind with
-        | C_like _ -> (Some "ocamlrep_derive", "FromOcamlRep") :: traits
+        | C_like _ -> (Some "ocamlrep", "FromOcamlRep") :: traits
         | _ -> traits
       in
       let traits =
         if force_derive_copy then
-          (Some "ocamlrep_derive", "FromOcamlRepIn") :: traits
+          (Some "ocamlrep", "FromOcamlRepIn") :: traits
         else
           traits
       in

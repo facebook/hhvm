@@ -6,9 +6,9 @@
 use arena_collections::List;
 use arena_trait::TrivialDrop;
 use no_pos_hash::NoPosHash;
+use ocamlrep::FromOcamlRepIn;
+use ocamlrep::ToOcamlRep;
 use ocamlrep_caml_builtins::Int64;
-use ocamlrep_derive::FromOcamlRepIn;
-use ocamlrep_derive::ToOcamlRep;
 use oxidized::file_info::NameType;
 use serde::Deserialize;
 use serde::Serialize;
@@ -43,7 +43,7 @@ pub struct ParsedFile<'a> {
 }
 
 // NB: Must keep in sync with OCaml type `Direct_decl_parser.parsed_file_with_hashes`
-#[derive(ocamlrep_derive::ToOcamlRep)]
+#[derive(ToOcamlRep)]
 pub struct ParsedFileWithHashes<'a> {
     pub mode: Option<file_info::Mode>,
     pub hash: Int64,

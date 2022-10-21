@@ -15,7 +15,6 @@ hash = { path = "../../../../utils/hash" }
 hcons = { path = "../../../../hcons" }
 im = { version = "15.1", features = ["rayon", "serde"] }
 ocamlrep = { path = "../../../../ocamlrep" }
-ocamlrep_derive = { path = "../../../../ocamlrep_derive" }
 once_cell = "1.12"
 oxidized = { path = "../../../../oxidized" }
 oxidized_by_ref = { path = "../../../../oxidized_by_ref" }

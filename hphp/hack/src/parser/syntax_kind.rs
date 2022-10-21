@@ -17,7 +17,7 @@
  *
  */
 
-use ocamlrep_derive::{FromOcamlRep, ToOcamlRep};
+use ocamlrep::{FromOcamlRep, ToOcamlRep};
 
 use crate::token_kind::TokenKind;
 

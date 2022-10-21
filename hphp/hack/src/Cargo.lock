@@ -16,7 +16,6 @@ dependencies = [
  "namespaces_rust",
  "naming_special_names_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
  "positioned_by_ref_parser",
@@ -113,7 +112,6 @@ dependencies = [
  "arena_trait",
  "bumpalo",
  "ocamlrep",
- "ocamlrep_derive",
  "quickcheck",
  "serde",
 ]
@@ -1132,7 +1130,6 @@ dependencies = [
  "hh_fanout_rust_ffi",
  "ocamlrep",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "once_cell",
  "rpds",
 ]
@@ -1523,7 +1520,6 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "rc_pos",
  "relative_path",
@@ -2045,7 +2041,6 @@ dependencies = [
  "ocamlrep",
  "ocamlrep_caml_builtins",
  "ocamlrep_custom",
- "ocamlrep_derive",
  "ocamlrep_ocamlpool",
  "rpds",
 ]
@@ -2440,7 +2435,6 @@ name = "lint_rust"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
 ]
 
@@ -2695,7 +2689,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "serde",
 ]
 
@@ -2830,6 +2823,7 @@ dependencies = [
  "bytes",
  "indexmap",
  "nohash-hasher",
+ "ocamlrep_derive",
  "serde",
 ]
 
@@ -2867,7 +2861,6 @@ version = "0.0.0"
 dependencies = [
  "bitflags",
  "ocamlrep",
- "ocamlrep_derive",
 ]
 
 [[package]]
@@ -2911,7 +2904,6 @@ name = "operator"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -2968,7 +2960,6 @@ dependencies = [
  "naming_types",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
  "rc_pos",
@@ -2992,7 +2983,6 @@ dependencies = [
  "no_pos_hash",
  "ocamlrep",
  "ocamlrep_caml_builtins",
- "ocamlrep_derive",
  "oxidized",
  "pretty_assertions",
  "relative_path",
@@ -3100,7 +3090,6 @@ dependencies = [
  "line_break_map",
  "ocaml_helper",
  "ocamlrep",
- "ocamlrep_derive",
  "relative_path",
  "serde",
 ]
@@ -3191,7 +3180,6 @@ dependencies = [
  "indexmap",
  "intern",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "oxidized_by_ref",
  "relative_path",
@@ -3532,7 +3520,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
  "pretty_assertions",
  "relative_path",
@@ -3592,7 +3579,6 @@ dependencies = [
  "eq_modulo_pos",
  "no_pos_hash",
  "ocamlrep",
- "ocamlrep_derive",
  "pretty_assertions",
  "serde",
 ]
@@ -3691,7 +3677,6 @@ version = "0.0.0"
 dependencies = [
  "lint_rust",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "parser_core_types",
 ]
@@ -4037,7 +4022,6 @@ name = "smart_constructors"
 version = "0.0.0"
 dependencies = [
  "ocamlrep",
- "ocamlrep_derive",
  "parser_core_types",
 ]
 
@@ -4395,7 +4379,6 @@ dependencies = [
  "hcons",
  "im",
  "ocamlrep",
- "ocamlrep_derive",
  "once_cell",
  "oxidized",
  "oxidized_by_ref",
@@ -4514,7 +4497,6 @@ version = "0.0.0"
 dependencies = [
  "eq_modulo_pos",
  "ocamlrep",
- "ocamlrep_derive",
  "oxidized",
  "pos",
  "serde",

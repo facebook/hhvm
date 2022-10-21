@@ -1,5 +1,7 @@
 ===== ~int =====
 $li: 4
+
+Warning: Argument 1 to f_like() must be of type @int, string given in %s/test/slow/sound_dynamic/like_int.php on line 17
 $li: not like int
 $t: 4 [reified]
 

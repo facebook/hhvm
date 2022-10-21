@@ -1,6 +1,6 @@
 <?hh
 
-function f(mixed $x): ~int {
+function f(mixed $x): <<__Soft>> ~int {
   return $x;
 }
 

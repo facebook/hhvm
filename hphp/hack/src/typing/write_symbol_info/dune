@@ -10,6 +10,7 @@
   symbol_fact_id
   symbol_xrefs
   symbol_json_util
+  symbol_sym_hash
   symbol_index_batch
   symbol_index_decls
   symbol_index_xrefs

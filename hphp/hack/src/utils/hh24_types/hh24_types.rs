@@ -448,15 +448,15 @@ impl std::str::FromStr for DepgraphEdge {
                 dependency: dependency.parse()?,
                 dependent: dependent.parse()?,
             }),
-            _ => Err(ParseDepgraphEdgeError::Invalid),
+            _ => Err(ParseDepgraphEdgeError::Invalid(s.to_owned())),
         }
     }
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum ParseDepgraphEdgeError {
-    #[error("expected dependency_hash:dependent_hash")]
-    Invalid,
+    #[error("expected dependency_hash:dependent_hash format. actual \"{0}\"")]
+    Invalid(String),
     #[error("{0}")]
     FromInt(#[from] std::num::ParseIntError),
 }

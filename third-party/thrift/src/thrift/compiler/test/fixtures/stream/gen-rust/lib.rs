@@ -2661,8 +2661,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2676,6 +2676,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstream", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2726,8 +2727,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::StreamthrowsStreamError>>, crate::errors::pub_sub_streaming_service::StreamthrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2740,6 +2741,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("streamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2790,8 +2792,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ServicethrowsStreamError>>, crate::errors::pub_sub_streaming_service::ServicethrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2804,6 +2806,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("servicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2854,8 +2857,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::BoththrowsStreamError>>, crate::errors::pub_sub_streaming_service::BoththrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2868,6 +2871,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("boththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2918,8 +2922,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamstreamthrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2932,6 +2936,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamstreamthrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -2982,8 +2987,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamservicethrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -2996,6 +3001,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamservicethrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -3046,8 +3052,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<(::std::primitive::i32, ::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsStreamError>>), crate::errors::pub_sub_streaming_service::ResponseandstreamboththrowsError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -3060,6 +3066,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("responseandstreamboththrows", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),
@@ -3111,8 +3118,8 @@ pub mod client {
             rpc_options: T::RpcOptions,
         ) -> ::futures::future::BoxFuture<'static, ::std::result::Result<::futures::stream::BoxStream<'static, ::std::result::Result<::std::primitive::i32, crate::errors::pub_sub_streaming_service::ReturnstreamFastStreamError>>, crate::errors::pub_sub_streaming_service::ReturnstreamFastError>> {
             use ::const_cstr::const_cstr;
-            use ::futures::future::FutureExt as _;
             use ::tracing::Instrument as _;
+            use ::futures::FutureExt as _;
             use ::futures::StreamExt as _;
             use ::fbthrift::Deserialize as _;
 
@@ -3126,6 +3133,7 @@ pub mod client {
                 _phantom: ::std::marker::PhantomData,
             };
 
+            // need to do call setup outside of async block because T: Transport isn't Send
             let request_env = match ::fbthrift::help::serialize_request_envelope::<P, _>("returnstreamFast", &args) {
                 ::std::result::Result::Ok(res) => res,
                 ::std::result::Result::Err(err) => return ::futures::future::err(err.into()).boxed(),

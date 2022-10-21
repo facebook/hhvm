@@ -1,1 +1,1 @@
-Fatal error: Trait '<<flattened>>' may only be used from class 'C', which must be final in %s/requireclass_abstract_01.bad.php on line 6
+Fatal error: Non final class 'C' uses trait '<<flattened>>', but trait '<<flattened>>' may only be used from class 'C', which must be final in %s/requireclass_abstract_01.bad.php on line 6

@@ -762,7 +762,7 @@ let next
           List.fold ~init:0 !remote_payloads ~f:(fun acc payload ->
               acc + BigList.length payload.payload)
         in
-        let ( remaining_workitems_to_process,
+        let ( remaining_local_workitems_to_process,
               controller,
               remaining_payloads,
               job,
@@ -776,20 +776,29 @@ let next
             (HulkStrategy.is_hulk_heavy mode)
         in
         (* Update the total workitems_processed_count after remote workers
-           are done, so we can update the progress bar with the correct number
-           of files typechecked.
+           have made progress, so we can update the progress bar with the
+           correct number of files typechecked.
         *)
-        if
-          List.length !remote_payloads <> 0
-          && List.length remaining_payloads = 0
-        then
-          workitems_processed_count :=
+        (if List.length !remote_payloads > List.length remaining_payloads then
+          let remaining_remote_workitems_to_process =
+            List.fold ~init:0 remaining_payloads ~f:(fun acc payload ->
+                acc + BigList.length payload.payload)
+          in
+          let local_processed_count =
             !workitems_processed_count
-            + remote_workitems_to_process_length
-            - BigList.length remaining_workitems_to_process;
-        workitems_to_process := remaining_workitems_to_process;
+            - BigList.length remaining_local_workitems_to_process
+          in
+          let remote_processed_count =
+            remote_workitems_to_process_length
+            - remaining_remote_workitems_to_process
+          in
+          workitems_processed_count :=
+            local_processed_count + remote_processed_count);
+
+        workitems_to_process := remaining_local_workitems_to_process;
         delegate_state := controller;
         remote_payloads := remaining_payloads;
+
         job
       ) else
         None

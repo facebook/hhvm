@@ -1173,6 +1173,14 @@ net_async_status cli_safe_read_with_ok_nonblocking(MYSQL *mysql, bool parse_ok,
   ulong len = 0, complen = 0;
   DBUG_TRACE;
 
+  /*
+    In case connection is lost, net_end() is called to
+    free up net->extention. Thus return NET_ASYNC_ERROR.
+  */
+  if (net_async == nullptr) {
+    return NET_ASYNC_ERROR;
+  }
+
   if (net_async->async_multipacket_read_started == false) {
     net_async->async_multipacket_read_started = true;
     net_async->async_multipacket_read_saved_whereb = net->where_b;

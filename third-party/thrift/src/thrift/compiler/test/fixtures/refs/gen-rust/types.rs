@@ -148,6 +148,18 @@ pub struct StructWithNonOptionalBox {
 }
 
 #[derive(Clone, PartialEq)]
+pub struct StructWithInternBox {
+    pub field1: crate::types::Empty,
+    pub field2: crate::types::MyField,
+    // This field forces `..Default::default()` when instantiating this
+    // struct, to make code future-proof against new fields added later to
+    // the definition in Thrift. If you don't want this, add the annotation
+    // `(rust.exhaustive)` to the Thrift struct to eliminate this field.
+    #[doc(hidden)]
+    pub _dot_dot_Default_default: self::dot_dot::OtherFields,
+}
+
+#[derive(Clone, PartialEq)]
 pub struct StructWithRefTypeUnique {
     pub def_field: crate::types::Empty,
     pub opt_field: ::std::option::Option<crate::types::Empty>,
@@ -1419,6 +1431,83 @@ where
             a: field_a.unwrap_or_default(),
             b: field_b.unwrap_or_default(),
             c: field_c.unwrap_or_default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        })
+    }
+}
+
+
+#[allow(clippy::derivable_impls)]
+impl ::std::default::Default for self::StructWithInternBox {
+    fn default() -> Self {
+        Self {
+            field1: ::std::default::Default::default(),
+            field2: ::std::default::Default::default(),
+            _dot_dot_Default_default: self::dot_dot::OtherFields(()),
+        }
+    }
+}
+
+impl ::std::fmt::Debug for self::StructWithInternBox {
+    fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+        formatter
+            .debug_struct("StructWithInternBox")
+            .field("field1", &self.field1)
+            .field("field2", &self.field2)
+            .finish()
+    }
+}
+
+unsafe impl ::std::marker::Send for self::StructWithInternBox {}
+unsafe impl ::std::marker::Sync for self::StructWithInternBox {}
+
+impl ::fbthrift::GetTType for self::StructWithInternBox {
+    const TTYPE: ::fbthrift::TType = ::fbthrift::TType::Struct;
+}
+
+impl<P> ::fbthrift::Serialize<P> for self::StructWithInternBox
+where
+    P: ::fbthrift::ProtocolWriter,
+{
+    fn write(&self, p: &mut P) {
+        p.write_struct_begin("StructWithInternBox");
+        p.write_field_begin("field1", ::fbthrift::TType::Struct, 1);
+        ::fbthrift::Serialize::write(&self.field1, p);
+        p.write_field_end();
+        p.write_field_begin("field2", ::fbthrift::TType::Struct, 2);
+        ::fbthrift::Serialize::write(&self.field2, p);
+        p.write_field_end();
+        p.write_field_stop();
+        p.write_struct_end();
+    }
+}
+
+impl<P> ::fbthrift::Deserialize<P> for self::StructWithInternBox
+where
+    P: ::fbthrift::ProtocolReader,
+{
+    fn read(p: &mut P) -> ::anyhow::Result<Self> {
+        static FIELDS: &[::fbthrift::Field] = &[
+            ::fbthrift::Field::new("field1", ::fbthrift::TType::Struct, 1),
+            ::fbthrift::Field::new("field2", ::fbthrift::TType::Struct, 2),
+        ];
+        let mut field_field1 = ::std::option::Option::None;
+        let mut field_field2 = ::std::option::Option::None;
+        let _ = p.read_struct_begin(|_| ())?;
+        loop {
+            let (_, fty, fid) = p.read_field_begin(|_| (), FIELDS)?;
+            match (fty, fid as ::std::primitive::i32) {
+                (::fbthrift::TType::Stop, _) => break,
+                (::fbthrift::TType::Struct, 1) => field_field1 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (::fbthrift::TType::Struct, 2) => field_field2 = ::std::option::Option::Some(::fbthrift::Deserialize::read(p)?),
+                (fty, _) => p.skip(fty)?,
+            }
+            p.read_field_end()?;
+        }
+        p.read_struct_end()?;
+        ::std::result::Result::Ok(Self {
+            field1: field_field1.unwrap_or_default(),
+            field2: field_field2.unwrap_or_default(),
             _dot_dot_Default_default: self::dot_dot::OtherFields(()),
         })
     }

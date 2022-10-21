@@ -594,6 +594,43 @@ cdef __StructSpec get_reflection__StructWithNonOptionalBox():
         ),
     )
     return spec
+cdef __StructSpec get_reflection__StructWithInternBox():
+    cdef _module_types.StructWithInternBox defaults = _module_types.StructWithInternBox._fbthrift_create(
+        constant_shared_ptr[_module_types.cStructWithInternBox](
+            default_inst[_module_types.cStructWithInternBox]()
+        )
+    )
+    cdef __StructSpec spec = __StructSpec._fbthrift_create(
+        name="StructWithInternBox",
+        kind=__StructType.STRUCT,
+        annotations={
+        },
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=1,
+            name="field1",
+            type=_module_types.Empty,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    spec.add_field(
+        __FieldSpec._fbthrift_create(
+            id=2,
+            name="field2",
+            type=_module_types.MyField,
+            kind=__NumberType.NOT_A_NUMBER,
+            qualifier=__Qualifier.UNQUALIFIED,
+            default=None,
+            annotations={
+            },
+        ),
+    )
+    return spec
 cdef __StructSpec get_reflection__StructWithRefTypeUnique():
     cdef _module_types.StructWithRefTypeUnique defaults = _module_types.StructWithRefTypeUnique._fbthrift_create(
         constant_shared_ptr[_module_types.cStructWithRefTypeUnique](

@@ -1548,6 +1548,141 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::cpp2::StructWithInternBox>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::cpp2::StructWithInternBox>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace cpp2 {
+
+const folly::StringPiece StructWithInternBox::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<StructWithInternBox>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+StructWithInternBox::StructWithInternBox(const StructWithInternBox&) = default;
+StructWithInternBox& StructWithInternBox::operator=(const StructWithInternBox&) = default;
+StructWithInternBox::StructWithInternBox(FOLLY_MAYBE_UNUSED StructWithInternBox&& other) noexcept :
+    __fbthrift_field_field1(std::move(other.__fbthrift_field_field1)),
+    __fbthrift_field_field2(std::move(other.__fbthrift_field_field2)),
+    __isset(other.__isset) {
+}
+
+StructWithInternBox& StructWithInternBox::operator=(FOLLY_MAYBE_UNUSED StructWithInternBox&& other) noexcept {
+    this->__fbthrift_field_field1 = std::move(other.__fbthrift_field_field1);
+    this->__fbthrift_field_field2 = std::move(other.__fbthrift_field_field2);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+StructWithInternBox::StructWithInternBox(apache::thrift::FragileConstructor, ::cpp2::Empty field1__arg, ::cpp2::MyField field2__arg) :
+    __fbthrift_field_field1(std::move(field1__arg)),
+    __fbthrift_field_field2(std::move(field2__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+}
+
+
+void StructWithInternBox::__fbthrift_clear() {
+  // clear all fields
+  ::apache::thrift::clear(this->__fbthrift_field_field2);
+  __isset = {};
+}
+
+void StructWithInternBox::__fbthrift_clear_terse_fields() {
+}
+
+bool StructWithInternBox::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool StructWithInternBox::operator==(FOLLY_MAYBE_UNUSED const StructWithInternBox& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return false;
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool StructWithInternBox::operator<(FOLLY_MAYBE_UNUSED const StructWithInternBox& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field1_ref() == rhs.field1_ref())) {
+    return lhs.field1_ref() < rhs.field1_ref();
+  }
+  if (!(lhs.field2_ref() == rhs.field2_ref())) {
+    return lhs.field2_ref() < rhs.field2_ref();
+  }
+  return false;
+}
+
+const ::cpp2::Empty& StructWithInternBox::get_field1() const& {
+  return __fbthrift_field_field1;
+}
+
+::cpp2::Empty StructWithInternBox::get_field1() && {
+  return std::move(__fbthrift_field_field1);
+}
+
+const ::cpp2::MyField& StructWithInternBox::get_field2() const& {
+  return __fbthrift_field_field2;
+}
+
+::cpp2::MyField StructWithInternBox::get_field2() && {
+  return std::move(__fbthrift_field_field2);
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED StructWithInternBox& a, FOLLY_MAYBE_UNUSED StructWithInternBox& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field1, b.__fbthrift_field_field1);
+  swap(a.__fbthrift_field_field2, b.__fbthrift_field_field2);
+  swap(a.__isset, b.__isset);
+}
+
+template void StructWithInternBox::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t StructWithInternBox::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t StructWithInternBox::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t StructWithInternBox::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void StructWithInternBox::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t StructWithInternBox::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t StructWithInternBox::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t StructWithInternBox::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        StructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::Empty>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        StructWithInternBox,
+        ::apache::thrift::type_class::structure,
+        ::cpp2::MyField>,
+    "inconsistent use of json option");
+
+} // cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::cpp2::StructWithRefTypeUnique>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

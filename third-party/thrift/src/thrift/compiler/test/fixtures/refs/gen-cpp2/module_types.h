@@ -50,6 +50,8 @@ struct c;
 struct a;
 struct b;
 struct c;
+struct field1;
+struct field2;
 struct def_field;
 struct opt_field;
 struct req_field;
@@ -210,6 +212,14 @@ APACHE_THRIFT_DEFINE_ACCESSOR(b);
 #ifndef APACHE_THRIFT_ACCESSOR_c
 #define APACHE_THRIFT_ACCESSOR_c
 APACHE_THRIFT_DEFINE_ACCESSOR(c);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field1
+#define APACHE_THRIFT_ACCESSOR_field1
+APACHE_THRIFT_DEFINE_ACCESSOR(field1);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_field2
+#define APACHE_THRIFT_ACCESSOR_field2
+APACHE_THRIFT_DEFINE_ACCESSOR(field2);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_def_field
 #define APACHE_THRIFT_ACCESSOR_def_field
@@ -394,6 +404,7 @@ class Empty;
 class StructWithRef;
 class StructWithBox;
 class StructWithNonOptionalBox;
+class StructWithInternBox;
 class StructWithRefTypeUnique;
 class StructWithRefTypeShared;
 class StructWithRefTypeSharedConst;
@@ -2779,6 +2790,175 @@ class StructWithNonOptionalBox final  {
 
 template <class Protocol_>
 unsigned long StructWithNonOptionalBox::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+
+class StructWithInternBox final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+  template<class> friend struct ::apache::thrift::detail::invoke_reffer;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static const folly::StringPiece __fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord);
+
+  void __fbthrift_clear();
+  void __fbthrift_clear_terse_fields();
+  bool __fbthrift_is_empty() const;
+
+ public:
+  using __fbthrift_cpp2_type = StructWithInternBox;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  StructWithInternBox() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  StructWithInternBox(apache::thrift::FragileConstructor, ::cpp2::Empty field1__arg, ::cpp2::MyField field2__arg);
+
+  StructWithInternBox(StructWithInternBox&&) noexcept;
+
+  StructWithInternBox(const StructWithInternBox& src);
+
+
+  StructWithInternBox& operator=(StructWithInternBox&&) noexcept;
+  StructWithInternBox& operator=(const StructWithInternBox& src);
+ private:
+  ::cpp2::Empty __fbthrift_field_field1;
+ private:
+  ::cpp2::MyField __fbthrift_field_field2;
+ private:
+  apache::thrift::detail::isset_bitset<2, apache::thrift::detail::IssetBitsetOption::Unpacked> __isset;
+
+ public:
+
+  bool operator==(const StructWithInternBox&) const;
+  bool operator<(const StructWithInternBox&) const;
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1_ref() const& {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field1_ref() & {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field1() const& {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field1() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field1() & {
+    return {this->__fbthrift_field_field1, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::Empty>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field1() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field1), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field2_ref() const& {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field2_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field2_ref() & {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field2_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> field2() const& {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> field2() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> field2() & {
+    return {this->__fbthrift_field_field2, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::cpp2::MyField>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> field2() && {
+    return {static_cast<T&&>(this->__fbthrift_field_field2), __isset.at(1), __isset.bit(1)};
+  }
+  const ::cpp2::Empty& get_field1() const&;
+  ::cpp2::Empty get_field1() &&;
+
+  template <typename T_StructWithInternBox_field1_struct_setter = ::cpp2::Empty>
+  [[deprecated("Use `FOO.field1_ref() = BAR;` instead of `FOO.set_field1(BAR);`")]]
+  ::cpp2::Empty& set_field1(T_StructWithInternBox_field1_struct_setter&& field1_) {
+    field1_ref() = std::forward<T_StructWithInternBox_field1_struct_setter>(field1_);
+    return __fbthrift_field_field1;
+  }
+  const ::cpp2::MyField& get_field2() const&;
+  ::cpp2::MyField get_field2() &&;
+
+  template <typename T_StructWithInternBox_field2_struct_setter = ::cpp2::MyField>
+  [[deprecated("Use `FOO.field2_ref() = BAR;` instead of `FOO.set_field2(BAR);`")]]
+  ::cpp2::MyField& set_field2(T_StructWithInternBox_field2_struct_setter&& field2_) {
+    field2_ref() = std::forward<T_StructWithInternBox_field2_struct_setter>(field2_);
+    return __fbthrift_field_field2;
+  }
+
+  template <class Protocol_>
+  unsigned long read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<StructWithInternBox>;
+  friend void swap(StructWithInternBox& a, StructWithInternBox& b);
+};
+
+template <class Protocol_>
+unsigned long StructWithInternBox::read(Protocol_* iprot) {
   auto _xferStart = iprot->getCursorPosition();
   readNoXfer(iprot);
   return iprot->getCursorPosition() - _xferStart;

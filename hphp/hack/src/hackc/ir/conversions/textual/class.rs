@@ -78,6 +78,12 @@ pub(crate) fn mangled_class_name(
     }
 }
 
+/// For a given class return the Ty for its non-static (instance) type.
+pub(crate) fn non_static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
+    let cname = mangled_class_name(class, IsStatic::NonStatic, strings);
+    textual::Ty::Ptr(Box::new(textual::Ty::Type(cname)))
+}
+
 /// For a given class return the Ty for its static type.
 pub(crate) fn static_ty(class: ir::ClassId, strings: &ir::StringInterner) -> textual::Ty {
     let cname = mangled_class_name(class, IsStatic::Static, strings);
@@ -203,11 +209,18 @@ fn write_method(
         method.name.as_bstr()
     );
 
+    let this_ty = if method.attrs.is_static() {
+        static_ty(class.name, &state.strings)
+    } else {
+        non_static_ty(class.name, &state.strings)
+    };
+
     func::write_func(
         w,
         state,
         &method.name.mangle(class.name, &state.strings),
-        &method.func,
+        this_ty,
+        method.func,
     )
 }
 

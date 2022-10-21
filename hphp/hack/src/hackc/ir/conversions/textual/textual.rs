@@ -517,6 +517,28 @@ impl<'a> FuncWriter<'a> {
         Ok(())
     }
 
+    /// Call the target as a static call (without virtual dispatch).
+    pub(crate) fn call_static(
+        &mut self,
+        target: &str,
+        this: Expr,
+        params: impl VarArgs,
+    ) -> Result<Sid> {
+        let dst = self.alloc_sid();
+        write!(
+            self.w,
+            "{INDENT}{dst} = {target}({this}",
+            dst = FmtSid(dst),
+            this = FmtExpr(self.strings, &this)
+        )?;
+        let params = params.into_exprs();
+        for param in params {
+            write!(self.w, ", {}", FmtExpr(self.strings, &param))?;
+        }
+        writeln!(self.w, ")")?;
+        Ok(dst)
+    }
+
     pub(crate) fn call(&mut self, target: &str, params: impl VarArgs) -> Result<Sid> {
         let dst = self.alloc_sid();
         write!(self.w, "{INDENT}{dst} = {target}(", dst = FmtSid(dst))?;

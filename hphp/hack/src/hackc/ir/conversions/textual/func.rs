@@ -3,7 +3,10 @@
 // This source code is licensed under the MIT license found in the
 // LICENSE file in the "hack" directory of this source tree.
 
+use std::str::FromStr;
+
 use anyhow::Error;
+use ascii::AsciiString;
 use hash::HashSet;
 use ir::instr::HasLoc;
 use ir::instr::Hhbc;
@@ -51,21 +54,28 @@ pub(crate) fn write_function(
 ) -> Result {
     trace!("Convert Function {}", function.name.as_bstr());
 
-    write_func(w, state, &function.name.mangle(), &function.func)
+    write_func(
+        w,
+        state,
+        &function.name.mangle(),
+        tx_ty!(*void),
+        function.func,
+    )
 }
 
 pub(crate) fn write_func(
     w: &mut dyn std::io::Write,
     unit_state: &mut UnitState,
     name: &str,
-    func: &ir::Func<'_>,
+    this_ty: textual::Ty,
+    func: ir::Func<'_>,
 ) -> Result {
     let func = func.clone();
     let mut func = crate::lower::lower(func, &mut unit_state.strings);
     ir::verify::verify_func(&func, &Default::default(), &unit_state.strings)?;
 
     let params = std::mem::take(&mut func.params);
-    let params = params
+    let mut params = params
         .into_iter()
         .map(|p| {
             let name_bytes = unit_state.strings.lookup_bytes(p.name);
@@ -73,35 +83,33 @@ pub(crate) fn write_func(
             (name_string, convert_ty(p.ty.enforced))
         })
         .collect_vec();
+
+    // Prepend the 'this' parameter.
+    let this_name = AsciiString::from_str("this").unwrap();
+    params.insert(0, (this_name, this_ty));
+
     let params = params
         .iter()
         .map(|(name, ty)| (name.as_str(), ty.clone()))
         .collect_vec();
 
+    let ret_ty = convert_ty(std::mem::take(&mut func.return_type.enforced));
     let span = func.loc(func.loc_id).clone();
-    textual::write_function(
-        w,
-        &unit_state.strings,
-        name,
-        &span,
-        &params,
-        tx_ty!(mixed),
-        |w| {
-            let func = rewrite_prelude(func);
-            let mut func = rewrite_jmp_ops(func);
-            ir::passes::clean::run(&mut func);
+    textual::write_function(w, &unit_state.strings, name, &span, &params, ret_ty, |w| {
+        let func = rewrite_prelude(func);
+        let mut func = rewrite_jmp_ops(func);
+        ir::passes::clean::run(&mut func);
 
-            let mut state = FuncState::new(&unit_state.strings, &func);
+        let mut state = FuncState::new(&unit_state.strings, &func);
 
-            for bid in func.block_ids() {
-                write_block(w, &mut state, bid)?;
-            }
+        for bid in func.block_ids() {
+            write_block(w, &mut state, bid)?;
+        }
 
-            unit_state.external_funcs.extend(state.external_funcs);
+        unit_state.external_funcs.extend(state.external_funcs);
 
-            Ok(())
-        },
-    )
+        Ok(())
+    })
 }
 
 fn write_block(w: &mut textual::FuncWriter<'_>, state: &mut FuncState<'_>, bid: BlockId) -> Result {
@@ -321,11 +329,11 @@ fn write_call(
             let target = method.mangle(clsid, state.strings);
             state.external_funcs.insert(target.to_string());
             let this = class::load_static_class(w, clsid, state.strings)?;
-            let pack_args = std::iter::once(this.into())
-                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
-                .collect_vec();
-            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
-            w.call(&target, [arg_pack])?
+            w.call_static(
+                &target,
+                this.into(),
+                args.iter().copied().map(|vid| state.lookup_vid(vid)),
+            )?
         }
         CallDetail::FCallClsMethodM { .. } => todo!(),
         CallDetail::FCallClsMethodS { .. } => todo!(),
@@ -335,11 +343,13 @@ fn write_call(
         CallDetail::FCallFuncD { func } => {
             let target = func.mangle(state.strings);
             state.external_funcs.insert(target.to_string());
-            let pack_args = std::iter::once(textual::Expr::null())
-                .chain(args.iter().map(|vid| state.lookup_vid(*vid)))
-                .collect_vec();
-            let arg_pack = hack::call_builtin(w, hack::Builtin::ArgPack(args.len()), pack_args)?;
-            w.call(&target, [arg_pack])?
+            // A top-level function is called like a class static in a special
+            // top-level class. Its 'this' pointer is null.
+            w.call_static(
+                &target,
+                textual::Expr::null(),
+                args.iter().copied().map(|vid| state.lookup_vid(vid)),
+            )?
         }
         CallDetail::FCallObjMethod { .. } => todo!(),
         CallDetail::FCallObjMethodD { .. } => todo!(),

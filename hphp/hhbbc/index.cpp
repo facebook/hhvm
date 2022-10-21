@@ -1174,6 +1174,11 @@ struct ClassInfo2 {
    */
   bool hasConstProp{false};
 
+  /*
+   * Track if this class has a reified parent.
+   */
+  bool hasReifiedParent{false};
+
   template <typename SerDe> void serde(SerDe& sd) {
     sd(name)
       (parent)
@@ -1188,6 +1193,7 @@ struct ClassInfo2 {
       (extraMethods, std::less<MethRef>{})
       (closures)
       (hasConstProp)
+      (hasReifiedParent)
       ;
   }
 };
@@ -4386,18 +4392,6 @@ void mark_const_props(IndexData& index) {
   );
 }
 
-void mark_has_reified_parent(IndexData& index) {
-  trace_time tracer("mark has reified parent", index.sample);
-
-  for (auto& cinfo : index.allClassInfos) {
-    if (cinfo->cls->hasReifiedGenerics) {
-      for (auto& c : cinfo->subclassList) {
-        c->hasReifiedParent = true;
-      }
-    }
-  }
-}
-
 void mark_no_override_classes(IndexData& index) {
   trace_time tracer("mark no override classes", index.sample);
 
@@ -5917,6 +5911,7 @@ private:
     auto cinfo = std::make_unique<ClassInfo2>();
     cinfo->name = cls.name;
     cinfo->hasConstProp = cls.hasConstProp;
+    cinfo->hasReifiedParent = cls.hasReifiedGenerics;
 
     if (cls.parentName) {
       if (index.uninstantiable(cls.parentName)) {
@@ -5942,6 +5937,7 @@ private:
       cinfo->baseList = parentInfo.baseList;
       cinfo->implInterfaces = parentInfo.implInterfaces;
       cinfo->hasConstProp |= parentInfo.hasConstProp;
+      cinfo->hasReifiedParent |= parentInfo.hasReifiedParent;
     }
     cinfo->baseList.emplace_back(cls.name);
 
@@ -5970,6 +5966,7 @@ private:
         ifaceInfo.implInterfaces.begin(),
         ifaceInfo.implInterfaces.end()
       );
+      cinfo->hasReifiedParent |= ifaceInfo.hasReifiedParent;
     }
 
     for (auto const ename : cls.includedEnumNames) {
@@ -6027,6 +6024,7 @@ private:
         traitInfo.implInterfaces.end()
       );
       cinfo->hasConstProp |= traitInfo.hasConstProp;
+      cinfo->hasReifiedParent |= traitInfo.hasReifiedParent;
     }
 
     if (cls.attrs & AttrInterface) cinfo->implInterfaces.emplace(cls.name);
@@ -8030,6 +8028,7 @@ void make_class_infos_local(IndexData& index,
       }
 
       cinfo->hasConstProp = rcinfo->hasConstProp;
+      cinfo->hasReifiedParent = rcinfo->hasReifiedParent;
 
       // Free memory as we go.
       rcinfo.reset();
@@ -8255,7 +8254,6 @@ Index::Index(Input input,
   mark_no_override_methods(*m_data);
   find_mocked_classes(*m_data);
   mark_const_props(*m_data);
-  mark_has_reified_parent(*m_data);
   auto const logging = Trace::moduleEnabledRelease(Trace::hhbbc_time, 1);
   m_data->compute_iface_vtables = std::thread([&] {
       HphpSessionAndThread _{Treadmill::SessionKind::HHBBC};

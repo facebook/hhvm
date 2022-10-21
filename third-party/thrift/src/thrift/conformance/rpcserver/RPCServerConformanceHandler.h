@@ -57,6 +57,9 @@ class RPCServerConformanceHandler
 
   std::unique_ptr<BasicInteractionIf> createBasicInteraction() override;
 
+  apache::thrift::TileAndResponse<BasicInteractionIf, void>
+  basicInteractionFactoryFunction(int32_t initialSum) override;
+
   // =================== Test Utils ===================
   void sendTestCase(std::unique_ptr<RpcTestCase> req) override {
     testCase_ = std::move(req);

@@ -131,7 +131,15 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
 std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
 RPCServerConformanceHandler::createBasicInteraction() {
   result_.interactionConstructor_ref().emplace().constructorCalled() = true;
-  return std::make_unique<RPCServerConformanceHandler::BasicInteraction>();
+  return std::make_unique<BasicInteraction>();
+}
+
+apache::thrift::
+    TileAndResponse<RPCServerConformanceHandler::BasicInteractionIf, void>
+    RPCServerConformanceHandler::basicInteractionFactoryFunction(
+        int32_t initialSum) {
+  result_.interactionFactoryFunction_ref().emplace().initialSum() = initialSum;
+  return {std::make_unique<BasicInteraction>()};
 }
 
 } // namespace apache::thrift::conformance

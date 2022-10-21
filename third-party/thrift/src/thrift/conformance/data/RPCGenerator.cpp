@@ -699,6 +699,43 @@ Test createInteractionConstructorTest() {
   return ret;
 }
 
+Test createInteractionFactoryFunctionTest() {
+  Test ret;
+  ret.name() = "InteractionFactoryFunctionTest";
+  ret.tags()->emplace("spec/protocol/interface/#factory-functions");
+  ret.tags()->emplace("spec/protocol/interface/rocket/#factory-functions");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionFactoryFunctionTest/Success";
+
+  constexpr int initialSum = 10;
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction_ref()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace()
+      .initialSum() = initialSum;
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace();
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionFactoryFunction_ref()
+      .emplace()
+      .initialSum() = initialSum;
+
+  return ret;
+}
+
 void addCommonRequestResponseTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
@@ -722,6 +759,7 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkSubsequentCreditsTest());
   // =================== Interactions ===================
   suite.tests()->push_back(createInteractionConstructorTest());
+  suite.tests()->push_back(createInteractionFactoryFunctionTest());
 }
 
 } // namespace

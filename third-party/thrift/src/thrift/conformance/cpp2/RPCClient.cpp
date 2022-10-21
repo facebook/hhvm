@@ -225,6 +225,17 @@ InteractionConstructorClientTestResult interactionConstructorTest(
       }());
 }
 
+InteractionFactoryFunctionClientTestResult interactionFactoryFunctionTest(
+    InteractionFactoryFunctionClientInstruction& instruction) {
+  auto client = createClient();
+  return folly::coro::blockingWait(
+      [&]() -> folly::coro::Task<InteractionFactoryFunctionClientTestResult> {
+        co_await client->co_basicInteractionFactoryFunction(
+            *instruction.initialSum());
+        co_return InteractionFactoryFunctionClientTestResult();
+      }());
+}
+
 int main(int argc, char** argv) {
   folly::init(&argc, &argv);
 
@@ -281,6 +292,10 @@ int main(int argc, char** argv) {
     case ClientInstruction::Type::interactionConstructor:
       result.interactionConstructor_ref() = interactionConstructorTest(
           *clientInstruction.interactionConstructor_ref());
+      break;
+    case ClientInstruction::Type::interactionFactoryFunction:
+      result.interactionFactoryFunction_ref() = interactionFactoryFunctionTest(
+          *clientInstruction.interactionFactoryFunction_ref());
       break;
     default:
       throw std::runtime_error("Invalid TestCase Type.");

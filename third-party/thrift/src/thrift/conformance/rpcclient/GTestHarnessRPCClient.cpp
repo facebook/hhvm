@@ -176,6 +176,13 @@ class ConformanceVerificationServer
     return std::make_unique<BasicInteraction>();
   }
 
+  apache::thrift::TileAndResponse<BasicInteractionIf, void>
+  basicInteractionFactoryFunction(int32_t initialSum) override {
+    serverResult_.interactionFactoryFunction_ref().emplace().initialSum() =
+        initialSum;
+    return {std::make_unique<BasicInteraction>()};
+  }
+
   folly::SemiFuture<folly::Unit> getTestReceived() {
     return getTestReceivedPromise_.getSemiFuture();
   }

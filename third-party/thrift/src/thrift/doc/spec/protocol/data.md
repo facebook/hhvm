@@ -83,7 +83,7 @@ Strings are encoded using a 32-bit length followed by a sequence of 8-bit charac
 
 #### LIST/SET
 
-Lists and Sets are serialized in exactly the same way. First, the type code of the inner elements is written, then the signed 32-bit length, then the elements. Negative length values are invalid.
+Lists and sets are serialized as follows. First, the element type code is written, then the signed 32-bit length, then the elements. Negative length values are invalid.
 
 | Type Code | Length | Payload           |
 | ---       | ---    | ---               |
@@ -160,8 +160,7 @@ Strings are encoded using a variable-sized length followed by a sequence of 8-bi
 
 #### LIST/SET
 
-Lists and sets are serialized in exactly the same way. The first byte contains the length (if less than 16) and the type code of the inner elements. If the length is at least 16, then it is encoded as a variable length integer. The serialized elements come next.
-First, the type code of the inner elements is written, then the 32-bit length, then the elements.
+Lists and sets are serialized as follows. If the length is less than 15, then the first byte contains the length and the element type code. If the length is 15 or more, then the first byte contain `0xF` and the element type code followed by the length serialized as a varint-encoded 32-bit integer. Serialized elements come next.
 
 | Length | Type Code | Payload           |
 | ---    | ---       | ---               |

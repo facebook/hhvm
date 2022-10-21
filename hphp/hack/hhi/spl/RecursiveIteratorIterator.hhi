@@ -32,8 +32,8 @@ class RecursiveIteratorIterator<Tv> implements OuterIterator<Tv> {
   public function getInnerIterator(): Iterator<Tv>;
   public function current();
   public function key();
-  public function next();
-  public function rewind();
+  public function next(): void;
+  public function rewind(): void;
   public function valid();
   public function beginChildren();
   public function beginIteration();

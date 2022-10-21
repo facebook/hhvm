@@ -12,9 +12,9 @@ abstract class FilterIterator<Tv> extends IteratorIterator<Tv> {
 
   // Methods
   public function __construct(Iterator<Tv> $it);
-  public function rewind();
+  public function rewind(): void;
   public abstract function accept(): bool;
-  public function next();
+  public function next(): void;
   public function valid();
   public function key();
   public function current();

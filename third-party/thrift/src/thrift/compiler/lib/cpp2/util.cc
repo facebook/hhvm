@@ -56,20 +56,6 @@ fmt::string_view value_or_empty(const std::string* value) {
 
 } // namespace
 
-bool is_custom_type(const t_field& field) {
-  const t_type* type = field.get_type();
-  return gen::cpp::type_resolver::find_first_adapter(field) ||
-      t_typedef::get_first_annotation_or_null(
-             type,
-             {
-                 "cpp.template",
-                 "cpp2.template",
-                 "cpp.type",
-                 "cpp2.type",
-             }) ||
-      t_typedef::get_first_structured_annotation_or_null(type, kCppAdapterUri);
-}
-
 bool is_custom_type(const t_type& type) {
   return t_typedef::get_first_annotation_or_null(
              &type,
@@ -80,6 +66,39 @@ bool is_custom_type(const t_type& type) {
                  "cpp2.type",
              }) ||
       t_typedef::get_first_structured_annotation_or_null(&type, kCppAdapterUri);
+}
+
+bool is_custom_type(const t_field& field) {
+  return gen::cpp::type_resolver::find_first_adapter(field) ||
+      is_custom_type(*field.get_type());
+}
+
+bool container_supports_incomplete_params(const t_type& type) {
+  if (t_typedef::get_first_annotation_or_null(
+          &type,
+          {
+              "cpp.container_supports_incomplete_params",
+          }) ||
+      !is_custom_type(type)) {
+    return true;
+  }
+
+  static const std::unordered_set<std::string> template_exceptions = {
+      "folly::F14NodeMap",
+      "folly::F14VectorMap",
+      "folly::small_vector_map",
+      "folly::sorted_vector_map"};
+  auto cpp_template = t_typedef::get_first_annotation_or_null(
+      &type,
+      {
+          "cpp.template",
+          "cpp2.template",
+      });
+  if (cpp_template && template_exceptions.count(*cpp_template)) {
+    return true;
+  }
+
+  return false;
 }
 
 std::unordered_map<t_struct*, std::vector<t_struct*>>
@@ -118,8 +137,8 @@ gen_struct_dependency_graph(
         auto t = ftype->get_true_type();
         if (auto map = dynamic_cast<t_map const*>(t)) {
           // We don't add non-custom type `std::map` to dependency graph since
-          // it supports incomplete types
-          if (cpp2::is_custom_type(*map)) {
+          // all known implementations support incomplete types (though as UB).
+          if (!cpp2::container_supports_incomplete_params(*map)) {
             add_dependency(map->get_key_type());
             add_dependency(map->get_val_type());
           }

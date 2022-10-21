@@ -50,6 +50,13 @@ class RPCServerConformanceHandler
   apache::thrift::SinkConsumer<Request, Response> sinkChunkTimeout(
       std::unique_ptr<Request> req) override;
 
+  // =================== Interactions ===================
+  class BasicInteraction : public BasicInteractionIf {
+    void init() override {}
+  };
+
+  std::unique_ptr<BasicInteractionIf> createBasicInteraction() override;
+
   // =================== Test Utils ===================
   void sendTestCase(std::unique_ptr<RpcTestCase> req) override {
     testCase_ = std::move(req);

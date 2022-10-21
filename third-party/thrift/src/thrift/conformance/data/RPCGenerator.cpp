@@ -665,6 +665,40 @@ Test createSinkChunkTimeoutTest() {
   return ret;
 }
 
+// =================== Interactions ===================
+Test createInteractionConstructorTest() {
+  Test ret;
+  ret.name() = "InteractionConstructorTest";
+  ret.tags()->emplace("spec/protocol/interface/#constructors-deprecated");
+
+  auto& testCase = ret.testCases()->emplace_back();
+  testCase.name() = "InteractionConstructorTest/Success";
+
+  auto& rpcTest = testCase.rpc_ref().emplace();
+  rpcTest.clientInstruction_ref()
+      .emplace()
+      .interactionConstructor_ref()
+      .emplace();
+
+  rpcTest.clientTestResult_ref()
+      .emplace()
+      .interactionConstructor_ref()
+      .emplace();
+
+  rpcTest.serverInstruction_ref()
+      .emplace()
+      .interactionConstructor_ref()
+      .emplace();
+
+  rpcTest.serverTestResult_ref()
+      .emplace()
+      .interactionConstructor_ref()
+      .emplace()
+      .constructorCalled() = true;
+
+  return ret;
+}
+
 void addCommonRequestResponseTests(TestSuite& suite) {
   // =================== Request-Response ===================
   suite.tests()->push_back(createRequestResponseBasicTest());
@@ -686,6 +720,8 @@ void addCommonRPCTests(TestSuite& suite) {
   suite.tests()->push_back(createSinkBasicTest());
   suite.tests()->push_back(createSinkFragmentationTest());
   suite.tests()->push_back(createSinkSubsequentCreditsTest());
+  // =================== Interactions ===================
+  suite.tests()->push_back(createInteractionConstructorTest());
 }
 
 } // namespace

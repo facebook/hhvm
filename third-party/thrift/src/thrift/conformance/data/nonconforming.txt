@@ -128,6 +128,7 @@ python/ThriftRPCClientTest/SinkBasic/Success.SinkBasicTest
 python/ThriftRPCClientTest/SinkFragmentation/Success.SinkFragmentationTest
 python/ThriftRPCClientTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
 python/ThriftRPCClientTest/StreamChunkTimeout/Success.StreamChunkTimeoutTest
+python/ThriftRPCClientTest/InteractionConstructorTest/Success.InteractionConstructorTest
 # Python RPC conformance server tests
 python/ThriftRPCServerTest/StreamSubsequentCredits/Success.StreamSubsequentCreditsTest
 python/ThriftRPCServerTest/SinkBasic/Success.SinkBasicTest
@@ -137,6 +138,7 @@ python/ThriftRPCServerTest/StreamInitialResponse/Success.StreamInitialResponseTe
 python/ThriftRPCServerTest/StreamBasic/Success.StreamBasicTest
 python/ThriftRPCServerTest/SinkSubsequestCredits/Success.SinkSubsequentCreditsTest
 python/ThriftRPCServerTest/SinkFragmentation/Success.SinkFragmentationTest
+python/ThriftRPCServerTest/InteractionConstructorTest/Success.InteractionConstructorTest
 #
 #
 #
@@ -209,6 +211,7 @@ java2/CompatibilityTest/testset.string/AddField.Binary
 # TODO(dokwon): Move this to rpc specific nonconforming.txt
 java2/ThriftRPCClientTest/StreamCreditTimeout/Success.StreamCreditTimeoutTest
 java2/ThriftRPCClientTest/RequestResponseTimeout/Success.RequestResponseTimeoutTest
+java2/ThriftRPCClientTest/InteractionConstructorTest/Success.InteractionConstructorTest
 #
 #
 # All type change tests are failing in Java

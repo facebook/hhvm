@@ -127,4 +127,11 @@ RPCServerConformanceHandler::sinkChunkTimeout(std::unique_ptr<Request> req) {
                                                       ->chunkTimeoutMs()});
 }
 
+// =================== Interactions ===================
+std::unique_ptr<RPCServerConformanceHandler::BasicInteractionIf>
+RPCServerConformanceHandler::createBasicInteraction() {
+  result_.interactionConstructor_ref().emplace().constructorCalled() = true;
+  return std::make_unique<RPCServerConformanceHandler::BasicInteraction>();
+}
+
 } // namespace apache::thrift::conformance

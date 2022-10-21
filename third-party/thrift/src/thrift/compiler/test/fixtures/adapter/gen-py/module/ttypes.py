@@ -41,7 +41,7 @@ except ImportError:
 all_structs = []
 UTF8STRINGS = bool(0) or sys.version_info.major >= 3
 
-__all__ = ['UTF8STRINGS', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt']
+__all__ = ['UTF8STRINGS', 'ThriftAdaptedEnum', 'MyAnnotation', 'Foo', 'Baz', 'Bar', 'DirectlyAdapted', 'IndependentDirectlyAdapted', 'StructWithFieldAdapter', 'TerseAdaptedFields', 'B', 'A', 'Config', 'MyStruct', 'AdaptTestStruct', 'AdaptTemplatedTestStruct', 'AdaptTemplatedNestedTestStruct', 'AdaptTestUnion', 'AdaptedStruct', 'DirectlyAdaptedStruct', 'StructFieldAdaptedStruct', 'CircularAdaptee', 'CircularStruct', 'RenamedStruct', 'SameNamespaceStruct', 'HeapAllocated', 'MoveOnly', 'AlsoMoveOnly', 'ApplyAdapter', 'TransitiveAdapted', 'CountingStruct', 'Person', 'Person2', 'SetWithAdapter', 'StringWithAdapter', 'ListWithElemAdapter', 'ListWithElemAdapter_withAdapter', 'MyI64', 'DoubleTypedefI64', 'MyI32', 'FooWithAdapter', 'StructWithAdapter', 'UnionWithAdapter', 'AdaptedA', 'DurationMs', 'AdaptedBool', 'AdaptedByte', 'AdaptedShort', 'AdaptedInteger', 'AdaptedLong', 'AdaptedDouble', 'AdaptedString', 'DoubleTypedefBool', 'CustomProtocolType', 'IndirectionString', 'AdaptedEnum', 'AdaptedTypedef', 'TypedefOfDirect', 'AdaptedCircularAdaptee', 'CountingInt']
 
 class ThriftAdaptedEnum:
   Zero = 0
@@ -1245,6 +1245,115 @@ class DirectlyAdapted:
     import thrift.py3.converter
     py3_types = importlib.import_module("facebook.thrift.test.module.types")
     return thrift.py3.converter.to_py3_struct(py3_types.DirectlyAdapted, self)
+
+  def _to_py_deprecated(self):
+    return self
+
+class IndependentDirectlyAdapted:
+  """
+  Attributes:
+   - field
+  """
+
+  thrift_spec = None
+  thrift_field_annotations = None
+  thrift_struct_annotations = None
+  __init__ = None
+  @staticmethod
+  def isUnion():
+    return False
+
+  def read(self, iprot):
+    if (isinstance(iprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0)
+      return
+    if (isinstance(iprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(iprot, THeaderProtocol.THeaderProtocolAccelerate) and iprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and isinstance(iprot.trans, TTransport.CReadableTransport) and self.thrift_spec is not None and fastproto is not None:
+      fastproto.decode(self, iprot.trans, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2)
+      return
+    iprot.readStructBegin()
+    while True:
+      (fname, ftype, fid) = iprot.readFieldBegin()
+      if ftype == TType.STOP:
+        break
+      if fid == 1:
+        if ftype == TType.I32:
+          self.field = iprot.readI32()
+        else:
+          iprot.skip(ftype)
+      else:
+        iprot.skip(ftype)
+      iprot.readFieldEnd()
+    iprot.readStructEnd()
+
+  def write(self, oprot):
+    if (isinstance(oprot, TBinaryProtocol.TBinaryProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_BINARY_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=0))
+      return
+    if (isinstance(oprot, TCompactProtocol.TCompactProtocolAccelerated) or (isinstance(oprot, THeaderProtocol.THeaderProtocolAccelerate) and oprot.get_protocol_id() == THeaderProtocol.THeaderProtocol.T_COMPACT_PROTOCOL)) and self.thrift_spec is not None and fastproto is not None:
+      oprot.trans.write(fastproto.encode(self, [self.__class__, self.thrift_spec, False], utf8strings=UTF8STRINGS, protoid=2))
+      return
+    oprot.writeStructBegin('IndependentDirectlyAdapted')
+    if self.field != None:
+      oprot.writeFieldBegin('field', TType.I32, 1)
+      oprot.writeI32(self.field)
+      oprot.writeFieldEnd()
+    oprot.writeFieldStop()
+    oprot.writeStructEnd()
+
+  def readFromJson(self, json, is_text=True, **kwargs):
+    relax_enum_validation = bool(kwargs.pop('relax_enum_validation', False))
+    set_cls = kwargs.pop('custom_set_cls', set)
+    dict_cls = kwargs.pop('custom_dict_cls', dict)
+    if kwargs:
+        extra_kwargs = ', '.join(kwargs.keys())
+        raise ValueError(
+            'Unexpected keyword arguments: ' + extra_kwargs
+        )
+    json_obj = json
+    if is_text:
+      json_obj = loads(json)
+    if 'field' in json_obj and json_obj['field'] is not None:
+      self.field = json_obj['field']
+      if self.field > 0x7fffffff or self.field < -0x80000000:
+        raise TProtocolException(TProtocolException.INVALID_DATA, 'number exceeds limit in field')
+
+  def __repr__(self):
+    L = []
+    padding = ' ' * 4
+    if self.field is not None:
+      value = pprint.pformat(self.field, indent=0)
+      value = padding.join(value.splitlines(True))
+      L.append('    field=%s' % (value))
+    return "%s(%s)" % (self.__class__.__name__, "\n" + ",\n".join(L) if L else '')
+
+  def __eq__(self, other):
+    if not isinstance(other, self.__class__):
+      return False
+
+    return self.__dict__ == other.__dict__ 
+
+  def __ne__(self, other):
+    return not (self == other)
+
+  def __dir__(self):
+    return (
+      'field',
+    )
+
+  # Override the __hash__ function for Python3 - t10434117
+  __hash__ = object.__hash__
+
+  def _to_python(self):
+    import importlib
+    import thrift.python.converter
+    python_types = importlib.import_module("facebook.thrift.test.module.thrift_types")
+    return thrift.python.converter.to_python_struct(python_types.IndependentDirectlyAdapted, self)
+
+  def _to_py3(self):
+    import importlib
+    import thrift.py3.converter
+    py3_types = importlib.import_module("facebook.thrift.test.module.types")
+    return thrift.py3.converter.to_py3_struct(py3_types.IndependentDirectlyAdapted, self)
 
   def _to_py_deprecated(self):
     return self
@@ -4994,6 +5103,29 @@ def DirectlyAdapted__setstate__(self, state):
 
 DirectlyAdapted.__getstate__ = lambda self: self.__dict__.copy()
 DirectlyAdapted.__setstate__ = DirectlyAdapted__setstate__
+
+all_structs.append(IndependentDirectlyAdapted)
+IndependentDirectlyAdapted.thrift_spec = (
+  None, # 0
+  (1, TType.I32, 'field', None, None, 2, ), # 1
+)
+
+IndependentDirectlyAdapted.thrift_struct_annotations = {
+}
+IndependentDirectlyAdapted.thrift_field_annotations = {
+}
+
+def IndependentDirectlyAdapted__init__(self, field=None,):
+  self.field = field
+
+IndependentDirectlyAdapted.__init__ = IndependentDirectlyAdapted__init__
+
+def IndependentDirectlyAdapted__setstate__(self, state):
+  state.setdefault('field', None)
+  self.__dict__ = state
+
+IndependentDirectlyAdapted.__getstate__ = lambda self: self.__dict__.copy()
+IndependentDirectlyAdapted.__setstate__ = IndependentDirectlyAdapted__setstate__
 
 all_structs.append(StructWithFieldAdapter)
 StructWithFieldAdapter.thrift_spec = (

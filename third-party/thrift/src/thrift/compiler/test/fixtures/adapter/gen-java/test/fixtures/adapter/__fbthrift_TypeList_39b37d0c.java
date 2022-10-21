@@ -11,7 +11,7 @@ import com.facebook.thrift.type.TypeList;
 import java.util.ArrayList;
 import java.util.List;
 
-public class __fbthrift_TypeList_ac945fd7 implements TypeList {
+public class __fbthrift_TypeList_39b37d0c implements TypeList {
 
   private static List<TypeMapping> list = new ArrayList<>();
 
@@ -21,6 +21,7 @@ public class __fbthrift_TypeList_ac945fd7 implements TypeList {
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/Baz", "test.fixtures.adapter.Baz"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/Bar", "test.fixtures.adapter.Bar"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/DirectlyAdapted", "test.fixtures.adapter.DirectlyAdapted"));
+    list.add(new TypeList.TypeMapping("facebook.com/thrift/test/IndependentDirectlyAdapted", "test.fixtures.adapter.IndependentDirectlyAdapted"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/StructWithFieldAdapter", "test.fixtures.adapter.StructWithFieldAdapter"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/TerseAdaptedFields", "test.fixtures.adapter.TerseAdaptedFields"));
     list.add(new TypeList.TypeMapping("facebook.com/thrift/test/B", "test.fixtures.adapter.B"));

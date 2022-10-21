@@ -833,6 +833,95 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::facebook::thrift::test::detail::IndependentDirectlyAdapted>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace facebook { namespace thrift { namespace test {namespace detail {
+
+
+const char* IndependentDirectlyAdapted::__fbthrift_thrift_uri() {
+  return "facebook.com/thrift/test/IndependentDirectlyAdapted";
+}
+
+const folly::StringPiece IndependentDirectlyAdapted::__fbthrift_get_field_name(::apache::thrift::FieldOrdinal ord) {
+  if (ord == ::apache::thrift::FieldOrdinal{0}) { return {}; }
+  return apache::thrift::TStructDataStorage<IndependentDirectlyAdapted>::fields_names[folly::to_underlying(ord) - 1];
+}
+
+
+IndependentDirectlyAdapted::IndependentDirectlyAdapted(apache::thrift::FragileConstructor, ::std::int32_t field__arg) :
+    __fbthrift_field_field(std::move(field__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+}
+
+
+void IndependentDirectlyAdapted::__fbthrift_clear() {
+  // clear all fields
+  this->__fbthrift_field_field = ::std::int32_t();
+  __isset = {};
+}
+
+void IndependentDirectlyAdapted::__fbthrift_clear_terse_fields() {
+}
+
+bool IndependentDirectlyAdapted::__fbthrift_is_empty() const {
+  return false;
+}
+
+bool IndependentDirectlyAdapted::operator==(FOLLY_MAYBE_UNUSED const IndependentDirectlyAdapted& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool IndependentDirectlyAdapted::operator<(FOLLY_MAYBE_UNUSED const IndependentDirectlyAdapted& rhs) const {
+  FOLLY_MAYBE_UNUSED auto& lhs = *this;
+  if (!(lhs.field_ref() == rhs.field_ref())) {
+    return lhs.field_ref() < rhs.field_ref();
+  }
+  return false;
+}
+
+
+void swap(FOLLY_MAYBE_UNUSED IndependentDirectlyAdapted& a, FOLLY_MAYBE_UNUSED IndependentDirectlyAdapted& b) {
+  using ::std::swap;
+  swap(a.__fbthrift_field_field, b.__fbthrift_field_field);
+  swap(a.__isset, b.__isset);
+}
+
+template void IndependentDirectlyAdapted::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t IndependentDirectlyAdapted::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t IndependentDirectlyAdapted::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t IndependentDirectlyAdapted::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void IndependentDirectlyAdapted::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t IndependentDirectlyAdapted::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t IndependentDirectlyAdapted::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t IndependentDirectlyAdapted::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+} // namespace detail
+}}} // facebook::thrift::test
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::facebook::thrift::test::StructWithFieldAdapter>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,

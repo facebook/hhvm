@@ -183,6 +183,31 @@ StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted>::gen(ThriftMet
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs()->emplace("module.IndependentDirectlyAdapted", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& module_IndependentDirectlyAdapted = res.first->second;
+  module_IndependentDirectlyAdapted.name() = "module.IndependentDirectlyAdapted";
+  module_IndependentDirectlyAdapted.is_union() = false;
+  static const auto* const
+  module_IndependentDirectlyAdapted_fields = new std::array<EncodedThriftField, 1>{{
+    {1, "field", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  }};
+  for (const auto& f : *module_IndependentDirectlyAdapted_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id() = f.id;
+    field.name() = f.name;
+    field.is_optional() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type(), metadata);
+    field.structured_annotations() = f.structured_annotations;
+    module_IndependentDirectlyAdapted.fields()->push_back(std::move(field));
+  }
+  module_IndependentDirectlyAdapted.structured_annotations()->push_back(*cvStruct("cpp.Adapter", {{"name", cvString(R"(::my::Adapter)")}, {"adaptedType", cvString(R"(::my::Type)")}}).cv_struct_ref());
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::facebook::thrift::test::StructWithFieldAdapter>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs()->emplace("module.StructWithFieldAdapter", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {

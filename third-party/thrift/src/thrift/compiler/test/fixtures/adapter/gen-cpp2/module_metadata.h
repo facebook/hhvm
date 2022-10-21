@@ -63,6 +63,11 @@ class StructMetadata<::facebook::thrift::test::detail::DirectlyAdapted> {
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
+class StructMetadata<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+};
+template <>
 class StructMetadata<::facebook::thrift::test::StructWithFieldAdapter> {
  public:
   static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);

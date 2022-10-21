@@ -119,6 +119,19 @@ struct VisitByFieldId<::facebook::thrift::test::detail::DirectlyAdapted> {
 };
 
 template <>
+struct VisitByFieldId<::facebook::thrift::test::detail::IndependentDirectlyAdapted> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).field_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::facebook::thrift::test::detail::IndependentDirectlyAdapted");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::facebook::thrift::test::StructWithFieldAdapter> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {

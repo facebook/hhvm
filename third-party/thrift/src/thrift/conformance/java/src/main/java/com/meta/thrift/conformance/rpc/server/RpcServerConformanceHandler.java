@@ -174,4 +174,7 @@ public class RpcServerConformanceHandler implements RPCConformanceService {
   public BasicInteraction createBasicInteraction() throws TException {
     return null;
   }
+
+  @Override
+  public void basicInteractionFactoryFunction(int initialSum) throws TException {}
 }

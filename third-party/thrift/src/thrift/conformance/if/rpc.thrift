@@ -57,6 +57,7 @@ union ServerTestResult {
   200: SinkBasicServerTestResult sinkBasic;
   201: SinkChunkTimeoutServerTestResult sinkChunkTimeout;
   300: InteractionConstructorServerTestResult interactionConstructor;
+  301: InteractionFactoryFunctionServerTestResult interactionFactoryFunction;
 }
 
 union ClientTestResult {
@@ -72,6 +73,7 @@ union ClientTestResult {
   200: SinkBasicClientTestResult sinkBasic;
   201: SinkChunkTimeoutClientTestResult sinkChunkTimeout;
   300: InteractionConstructorClientTestResult interactionConstructor;
+  301: InteractionFactoryFunctionClientTestResult interactionFactoryFunction;
 }
 
 struct RequestResponseBasicServerTestResult {
@@ -123,6 +125,10 @@ struct InteractionConstructorServerTestResult {
   1: bool constructorCalled;
 }
 
+struct InteractionFactoryFunctionServerTestResult {
+  1: i32 initialSum;
+}
+
 struct RequestResponseBasicClientTestResult {
   1: Response response;
 }
@@ -171,6 +177,8 @@ struct SinkChunkTimeoutClientTestResult {
 
 struct InteractionConstructorClientTestResult {}
 
+struct InteractionFactoryFunctionClientTestResult {}
+
 union ClientInstruction {
   1: RequestResponseBasicClientInstruction requestResponseBasic;
   2: RequestResponseDeclaredExceptionClientInstruction requestResponseDeclaredException;
@@ -184,6 +192,7 @@ union ClientInstruction {
   200: SinkBasicClientInstruction sinkBasic;
   201: SinkChunkTimeoutClientInstruction sinkChunkTimeout;
   300: InteractionConstructorClientInstruction interactionConstructor;
+  301: InteractionFactoryFunctionClientInstruction interactionFactoryFunction;
 }
 
 union ServerInstruction {
@@ -199,6 +208,7 @@ union ServerInstruction {
   200: SinkBasicServerInstruction sinkBasic;
   201: SinkChunkTimeoutServerInstruction sinkChunkTimeout;
   300: InteractionConstructorServerInstruction interactionConstructor;
+  301: InteractionFactoryFunctionServerInstruction interactionFactoryFunction;
 }
 
 struct RequestResponseBasicClientInstruction {
@@ -252,6 +262,10 @@ struct SinkChunkTimeoutClientInstruction {
 
 struct InteractionConstructorClientInstruction {}
 
+struct InteractionFactoryFunctionClientInstruction {
+  1: i32 initialSum;
+}
+
 struct RequestResponseBasicServerInstruction {
   1: Response response;
 }
@@ -303,6 +317,8 @@ struct SinkChunkTimeoutServerInstruction {
 
 struct InteractionConstructorServerInstruction {}
 
+struct InteractionFactoryFunctionServerInstruction {}
+
 interaction BasicInteraction {
   void init();
 }
@@ -337,6 +353,7 @@ service RPCConformanceService {
 
   // =================== Interactions ===================
   performs BasicInteraction;
+  BasicInteraction basicInteractionFactoryFunction(i32 initialSum);
 }
 
 service BasicRPCConformanceService {

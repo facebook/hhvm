@@ -91,6 +91,7 @@ enum UnstableFeatures {
     Readonly,
     Modules,
     ModuleReferences,
+    Packages,
     ClassConstDefault,
     TypeConstMultipleBounds,
     TypeConstSuperBound,
@@ -116,6 +117,7 @@ impl UnstableFeatures {
             UnstableFeatures::Readonly => Preview,
             UnstableFeatures::Modules => OngoingRelease,
             UnstableFeatures::ModuleReferences => Unstable,
+            UnstableFeatures::Packages => Unstable,
             UnstableFeatures::ContextAliasDeclaration => Unstable,
             UnstableFeatures::ContextAliasDeclarationShort => Preview,
             UnstableFeatures::TypeConstMultipleBounds => Preview,
@@ -5253,6 +5255,9 @@ impl<'a, State: 'a + Clone> ParserErrors<'a, State> {
             ModuleMembershipDeclaration(_) => {
                 self.check_can_use_feature(node, &UnstableFeatures::Modules);
                 self.in_module = true;
+            }
+            PackageDeclaration(_) => {
+                self.check_can_use_feature(node, &UnstableFeatures::Packages);
             }
             _ => {}
         };

@@ -61,14 +61,17 @@ const LayoutFunctions* structDictVtable() {
 
 std::string describeStructLayout(const StructLayout::FieldVector& fv) {
   std::stringstream ss;
-  for (auto i = 0; i < fv.size(); ++i) {
+  for (auto i = 0; i < std::min(fv.size(), 0xfful); ++i) {
     auto const& field = fv[i];
     if (i > 0) ss << ',';
     if (!field.required) ss << '?';
     ss << '"' << folly::cEscape<std::string>(field.key->data()) << '"';
     ss << ':' << StructLayout::MaskToBound(field.type_mask).toString();
   }
-  return folly::sformat("StructDict<{}>", ss.str());
+  auto const isBigStruct = fv.size() > 0xff;
+  if (isBigStruct) ss << ", ...";
+  auto const type = isBigStruct ? 'B' : 'S';
+  return folly::sformat("StructDict<{},{}><{}>", type, fv.size(), ss.str());
 }
 
 constexpr uint16_t indexRaw(uint16_t idx) {
@@ -80,6 +83,7 @@ constexpr uint16_t indexRaw(uint16_t idx) {
 
 constexpr size_t colorTableLen = indexRaw(kMaxNumStructLayouts);
 StructLayout::PerfectHashTable* s_hashTableSet = nullptr;
+size_t s_maxColoredFields = 1;
 
 }
 
@@ -231,6 +235,7 @@ StructLayout::StructLayout(LayoutIndex index, const FieldVector& fv)
   m_header.m_layout_index = index;
   m_header.m_num_fields = fv.size();
   assertx(numFields() == m_key_to_slot.size());
+  m_may_contain_counted = getUnionTypeBound().maybe(jit::TCounted);
 
   StructDataLayout::initSizeIndex(this);
 
@@ -238,6 +243,10 @@ StructLayout::StructLayout(LayoutIndex index, const FieldVector& fv)
   static_assert(
     offsetof(StructLayout, m_header.m_layout_index) - extra_offset ==
       ArrayData::offsetOfBespokeIndex() - ArrayData::offsetofExtra());
+}
+
+bool StructLayout::isBigStruct() const {
+  return StructDataLayout::isBigStruct(this);
 }
 
 size_t StructLayout::numFields() const {
@@ -267,14 +276,21 @@ Slot StructLayout::keySlotNonStatic(LayoutIndex index, const StringData* key) {
 
 Slot StructLayout::keySlotStatic(LayoutIndex index, const StringData* key) {
   assertx(key->isStatic());
-  auto const& entry = s_hashTableSet[index.raw][key->color()];
+  auto const col = key->color();
+  auto const& entry = s_hashTableSet[index.raw][col];
   auto const match = entry.str == key;
-  if (debug) {
+  if constexpr (debug) {
     auto const layout = StructLayout::As(Layout::FromIndex(index));
     auto const slot = layout->keySlotNonStatic(key);
-    always_assert(slot == (match ? entry.slot : kInvalidSlot));
+    always_assert(entry.maybeDup ||
+                  slot == (match ? Slot(entry.slot) : kInvalidSlot));
   }
-  return match ? entry.slot : kInvalidSlot;
+  if (match) return Slot(entry.slot);
+  if (entry.maybeDup) {
+    auto const layout = StructLayout::As(Layout::FromIndex(index));
+    return layout->keySlotNonStatic(key);
+  }
+  return kInvalidSlot;
 }
 
 Slot StructLayout::keySlot(const StringData* key) const {
@@ -304,8 +320,10 @@ StructDict* StructDict::MakeReserve(const StructLayout* layout, bool legacy) {
   }();
 
   auto const sad = static_cast<StructDict*>(alloc);
-  auto const aux = packSizeIndexAndAuxBits(
-      sizeIdx, legacy ? ArrayData::kLegacyArray : 0);
+  auto const flags =
+    (legacy ? ArrayData::kLegacyArray : 0) |
+    (layout->mayContainCounted() ? ArrayData::kMayContainCounted : 0);
+  auto const aux = packSizeIndexAndAuxBits(sizeIdx, flags);
   sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   sad->m_extra = layout->extraInitializer();
   sad->m_size = 0;
@@ -315,22 +333,30 @@ StructDict* StructDict::MakeReserve(const StructLayout* layout, bool legacy) {
 }
 
 size_t StructDict::numFields() const {
-  return m_extra_lo8;
+  return StructDataLayout::numFields(this);
 }
 
-void StructLayout::createColoringHashMap() const {
+void StructLayout::createColoringHashMap(size_t maxColoredFields) const {
   auto& table = s_hashTableSet[index().raw];
   for (auto i = 0; i <= kMaxColor; i++) {
-    table[i] = { nullptr, 0, 0 };
+    table[i] = { nullptr, 0, false, 0 };
   }
-  for (auto i = 0; i < numFields(); i++) {
+  auto const numColoredFields = std::min(numFields(), maxColoredFields);
+  for (auto i = 0; i < numColoredFields; i++) {
     auto const key = m_fields[i].key;
     auto const color = key->color();
     assertx(color != StringData::kInvalidColor);
+    assertx(color != StringData::kDupColor);
     assertx(table[color].str == nullptr);
-    auto const slot = safe_cast<uint8_t>(keySlotNonStatic(key));
+    auto const slot = safe_cast<uint16_t>(keySlotNonStatic(key));
     auto const typeMask = m_fields[i].type_mask;
-    table[color] = { key, typeMask, slot };
+    table[color] = { key, typeMask, false, slot };
+  }
+  for (auto i = maxColoredFields; i < numFields(); i++) {
+    auto const key = m_fields[i].key;
+    auto const color = key->color();
+    assertx(color != StringData::kInvalidColor);
+    table[color].maybeDup = true;
   }
 }
 
@@ -345,13 +371,24 @@ StructLayout::PerfectHashTable* StructLayout::hashTable(const Layout* layout) {
   return &s_hashTableSet[layout->index().raw];
 }
 
+size_t StructLayout::maxColoredFields() {
+  assertx(Layout::HierarchyFinalized());
+  return s_maxColoredFields;
+}
+
+void StructLayout::setMaxColoredFields(size_t num) {
+  assertx(!Layout::HierarchyFinalized());
+  s_maxColoredFields = num;
+}
+
 const StructLayout* StructLayout::As(const Layout* l) {
   assertx(dynamic_cast<const StructLayout*>(l));
   return reinterpret_cast<const StructLayout*>(l);
 }
 
-StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
-                                        const StructLayout* layout) {
+template<typename PosType>
+StructDict* StructDict::MakeFromVanillaImpl(
+  ArrayData* ad, const StructLayout* layout) {
   if (!ad->isVanillaDict()) return nullptr;
 
   assertx(layout);
@@ -361,7 +398,7 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
 
   auto fail = false;
   auto required = layout->numRequiredFields();
-  auto pos = result->rawPositions();
+  auto pos = static_cast<PosType*>(result->rawPositions());
 
   VanillaDict::IterateKV(VanillaDict::as(ad), [&](auto k, auto v) -> bool {
     if (!tvIsString(k)) {
@@ -399,15 +436,25 @@ StructDict* StructDict::MakeFromVanilla(ArrayData* ad,
   return result;
 }
 
-StructDict* StructDict::MakeEmpty(const StructLayout* layout) {
-  auto const sizeIndex = safe_cast<uint8_t>(layout->sizeIndex());
-  return AllocStructDict(sizeIndex, layout->extraInitializer());
+StructDict* StructDict::MakeFromVanilla(ArrayData* ad, const StructLayout* l) {
+  return l->isBigStruct() ?
+    MakeFromVanillaImpl<uint16_t>(ad, l) : MakeFromVanillaImpl<uint8_t>(ad, l);
 }
 
-StructDict* StructDict::AllocStructDict(uint8_t sizeIndex, uint32_t extra) {
+StructDict* StructDict::MakeEmpty(const StructLayout* layout) {
+  auto const sizeIndex = safe_cast<uint8_t>(layout->sizeIndex());
+  return AllocStructDict(sizeIndex,
+                         layout->extraInitializer(),
+                         layout->mayContainCounted());
+}
+
+StructDict* StructDict::AllocStructDict(uint8_t sizeIndex,
+                                        uint32_t extra,
+                                        bool mayContainCounted) {
   auto const mem = tl_heap->objMallocIndex(sizeIndex);
   auto const sad = static_cast<StructDict*>(mem);
-  auto const aux = packSizeIndexAndAuxBits(sizeIndex, 0);
+  auto const aux = packSizeIndexAndAuxBits(
+    sizeIndex, mayContainCounted ? ArrayData::kMayContainCounted : 0);
   sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
   sad->m_extra = extra;
   sad->m_size = 0;
@@ -416,10 +463,11 @@ StructDict* StructDict::AllocStructDict(uint8_t sizeIndex, uint32_t extra) {
   return sad;
 }
 
+template<typename PosType>
 StructDict* StructDict::MakeStructDict(
-    uint8_t sizeIndex, uint32_t extra, uint32_t size,
+    uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
     const PosType* slots, const TypedValue* tvs) {
-  auto const result = AllocStructDict(sizeIndex, extra);
+  auto const result = AllocStructDict(sizeIndex, extra, mayContainCounted);
 
   result->m_size = size;
   auto const positions = result->rawPositions();
@@ -439,16 +487,34 @@ StructDict* StructDict::MakeStructDict(
   return result;
 }
 
+StructDict* StructDict::MakeStructDictSmall(
+    uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+    const uint8_t* slots, const TypedValue* tvs) {
+  return MakeStructDict<uint8_t>(sizeIndex, extra, size, mayContainCounted,
+                                 slots, tvs);
+}
+
+StructDict* StructDict::MakeStructDictBig(
+    uint8_t sizeIndex, uint32_t extra, uint32_t size, bool mayContainCounted,
+    const uint16_t* slots, const TypedValue* tvs) {
+  return MakeStructDict<uint16_t>(sizeIndex, extra, size, mayContainCounted,
+                                  slots, tvs);
+}
+
+bool StructDict::isBigStruct() const {
+  return StructDataLayout::isBigStruct(this);
+}
+
 const StructLayout* StructDict::layout() const {
   return StructLayout::As(Layout::FromIndex(layoutIndex()));
 }
 
-StructDict::PosType* StructDict::rawPositions() {
-  return reinterpret_cast<PosType*>(
-      reinterpret_cast<char*>(this) + StructDataLayout::positionOffset(this));
+void* StructDict::rawPositions() {
+  return
+    reinterpret_cast<char*>(this) + StructDataLayout::positionOffset(this);
 }
 
-const StructDict::PosType* StructDict::rawPositions() const {
+const void* StructDict::rawPositions() const {
   return const_cast<StructDict*>(this)->rawPositions();
 }
 
@@ -469,16 +535,20 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
   ad->setLegacyArrayInPlace(isLegacyArray());
 
   auto const layout = this->layout();
-  for (auto i = 0; i < m_size; i++) {
-    auto const slot = getSlotInPos(i);
-    auto const k = layout->field(slot).key;
-    auto const tv = rvalUnchecked(slot).tv();
-    auto const res =
-      VanillaDict::SetStrMove(ad, const_cast<StringData*>(k.get()), tv);
-    assertx(ad == res);
-    tvIncRefGen(tv);
-    ad = res;
-  }
+  auto const fn = [&]<typename PosType>() {
+    for (auto i = 0; i < m_size; i++) {
+      auto const slot = getSlotInPos<PosType>(i);
+      auto const k = layout->field(slot).key;
+      auto const tv = rvalUnchecked(slot).tv();
+      auto const res =
+        VanillaDict::SetStrMove(ad, const_cast<StringData*>(k.get()), tv);
+      assertx(ad == res);
+      tvIncRefGen(tv);
+      ad = res;
+    }
+  };
+  isBigStruct() ?
+    fn.template operator()<uint16_t>() : fn.template operator()<uint8_t>();
   assertx(ad->size() == size());
   return ad;
 }
@@ -486,26 +556,34 @@ ArrayData* StructDict::escalateWithCapacity(size_t capacity,
 void StructDict::ConvertToUncounted(
     StructDict* sad, const MakeUncountedEnv& env) {
   auto const size = sad->size();
-  for (auto pos = 0; pos < size; pos++) {
-    auto const slot = sad->getSlotInPos(pos);
-    auto const lval = sad->lvalUnchecked(slot);
-    ConvertTvToUncounted(lval, env);
-  }
+  auto const fn = [&]<typename PosType>() {
+    for (auto pos = 0; pos < size; pos++) {
+      auto const slot = sad->getSlotInPos<PosType>(pos);
+      auto const lval = sad->lvalUnchecked(slot);
+      ConvertTvToUncounted(lval, env);
+    }
+  };
+  sad->isBigStruct() ?
+    fn.template operator()<uint16_t>() : fn.template operator()<uint8_t>();
 }
 
 void StructDict::ReleaseUncounted(StructDict* sad) {
   auto const size = sad->size();
-  for (auto pos = 0; pos < size; pos++) {
-    auto const slot = sad->getSlotInPos(pos);
-    DecRefUncounted(sad->rvalUnchecked(slot).tv());
-  }
+  auto const fn = [&]<typename PosType>() {
+    for (auto pos = 0; pos < size; pos++) {
+      auto const slot = sad->getSlotInPos<PosType>(pos);
+      DecRefUncounted(sad->rvalUnchecked(slot).tv());
+    }
+  };
+  sad->isBigStruct() ?
+    fn.template operator()<uint16_t>() : fn.template operator()<uint8_t>();
 }
 
 void StructDict::Release(StructDict* sad) {
   sad->fixCountForRelease();
   assertx(sad->isRefCounted());
   assertx(sad->hasExactlyOneRef());
-  sad->decRefValues();
+  if (sad->mayContainCounted()) sad->decRefValues();
   tl_heap->objFreeIndex(sad, sad->sizeIndex());
 }
 
@@ -535,10 +613,11 @@ TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
   auto const color = k->color() & StructLayout::kMaxColor;
   auto const& entry = s_hashTableSet[sad->layoutIndex().raw][color];
 
-  // Perfect hash table miss: k is definitely missing if it's a static string;
+  // Perfect hash table miss: k is definitely missing if it's a static string
+  // and the color cannot be duplicate;
   // else, we need to fall back to a hash table lookup for the non-static k.
   if (entry.str != k) {
-    if (k->isStatic()) {
+    if (k->isStatic() && !entry.maybeDup) {
       assertx(NvGetStrNonStatic(sad, k).m_type == KindOfUninit);
       return make_tv<KindOfUninit>();
     }
@@ -557,13 +636,15 @@ TypedValue StructDict::NvGetStr(const StructDict* sad, const StringData* k) {
 
 TypedValue StructDict::GetPosKey(const StructDict* sad, ssize_t pos) {
   auto const layout = sad->layout();
-  auto const slot = sad->getSlotInPos(pos);
+  auto const slot = sad->isBigStruct() ?
+    sad->getSlotInPos<uint16_t>(pos) : sad->getSlotInPos<uint8_t>(pos);
   auto const k = layout->field(slot).key;
   return make_tv<KindOfPersistentString>(k);
 }
 
 TypedValue StructDict::GetPosVal(const StructDict* sad, ssize_t pos) {
-  auto const slot = sad->getSlotInPos(pos);
+  auto const slot = sad->isBigStruct() ?
+    sad->getSlotInPos<uint16_t>(pos) : sad->getSlotInPos<uint8_t>(pos);
   return sad->rvalUnchecked(slot).tv();
 }
 
@@ -656,10 +737,11 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
     auto const color = k->color() & StructLayout::kMaxColor;
     auto const& entry = s_hashTableSet[sadIn->layoutIndex().raw][color];
 
-    // Perfect hash table miss: k is definitely missing if it's a static string;
+    // Perfect hash table miss: k is definitely missing if it's a static string
+    // and the color is not duplicate;
     // else, we need to fall back to a hash table lookup for the non-static k.
     if (entry.str != k) {
-      if (k->isStatic()) return kNoMask;
+      if (k->isStatic() && !entry.maybeDup) return kNoMask;
       auto const layout = sadIn->layout();
       slot = layout->keySlotNonStatic(k);
       return slot == kInvalidSlot ? kNoMask : layout->field(slot).type_mask;
@@ -673,7 +755,7 @@ ArrayData* StructDict::SetStrMove(StructDict* sadIn,
   auto const present = slot != kInvalidSlot;
   auto const checked = present && !(static_cast<uint8_t>(v.type()) & type_mask);
 
-  if (debug) {
+  if constexpr (debug) {
     auto const layout = sadIn->layout();
     auto const checked_via_layout = present && layout->checkTypeBound(slot, v);
     always_assert(slot == layout->keySlot(k));
@@ -725,20 +807,22 @@ StructDict* StructDict::copy() const {
   memcpy16_inline(sad, this, heapSize);
   auto const aux = packSizeIndexAndAuxBits(sizeIdx, auxBits());
   sad->initHeader_16(HeaderKind::BespokeDict, OneReference, aux);
-  sad->incRefValues();
+  if (sad->mayContainCounted()) sad->incRefValues();
   return sad;
 }
 
 void StructDict::incRefValues() {
-  for (auto pos = 0; pos < m_size; pos++) {
-    auto const rval = rvalUnchecked(getSlotInPos(pos));
+  auto numFields = this->numFields();
+  for (auto i = 0; i < numFields; i++) {
+    auto const rval = rvalUnchecked(i);
     tvIncRefGen(rval.tv());
   }
 }
 
 void StructDict::decRefValues() {
-  for (auto pos = 0; pos < m_size; pos++) {
-    auto const rval = rvalUnchecked(getSlotInPos(pos));
+  auto numFields = this->numFields();
+  for (auto i = 0; i < numFields; i++) {
+    auto const rval = rvalUnchecked(i);
     tvDecRefGen(rval.tv());
   }
 }
@@ -772,7 +856,8 @@ ArrayData* StructDict::RemoveStrInSlot(StructDict* sadIn, Slot slot) {
   auto const lval = sad->lvalUnchecked(slot);
   tvDecRefGen(lval.tv());
   lval.type() = KindOfUninit;
-  sad->removeSlot(slot);
+  sad->isBigStruct() ?
+    sad->removeSlot<uint16_t>(slot) : sad->removeSlot<uint8_t>(slot);
 
   return sad;
 }
@@ -799,7 +884,8 @@ ArrayData* StructDict::PopMove(StructDict* sadIn, Variant& value) {
   }();
 
   auto const pos = sad->size() - 1;
-  auto const slot = sad->getSlotInPos(pos);
+  auto const slot = sad->isBigStruct() ?
+    sad->getSlotInPos<uint16_t>(pos) : sad->getSlotInPos<uint8_t>(pos);
   auto const lval = sad->lvalUnchecked(slot);
   value = Variant::attach(lval.tv());
   lval.type() = KindOfUninit;
@@ -843,11 +929,14 @@ ArrayData* StructDict::EscalateToVanilla(const StructDict* sad,
 
 void StructDict::addNextSlot(Slot slot) {
   assertx(slot < RO::EvalBespokeStructDictMaxNumKeys);
-  rawPositions()[m_size++] = slot;
+  isBigStruct() ?
+    static_cast<uint16_t*>(rawPositions())[m_size++] = slot :
+    static_cast<uint8_t*>(rawPositions())[m_size++] = slot;
 }
 
+template<typename PosType>
 void StructDict::removeSlot(Slot slot) {
-  auto const pos = rawPositions();
+  auto const pos = static_cast<PosType*>(rawPositions());
   auto idx = 0;
   for (size_t i = 0; i < m_size; i++) {
     auto const curr = pos[i];
@@ -857,10 +946,11 @@ void StructDict::removeSlot(Slot slot) {
   m_size--;
 }
 
+template<typename PosType>
 Slot StructDict::getSlotInPos(size_t pos) const {
   assertx(pos < m_size);
   assertx(pos < RO::EvalBespokeStructDictMaxNumKeys);
-  return rawPositions()[pos];
+  return static_cast<const PosType*>(rawPositions())[pos];
 }
 
 //////////////////////////////////////////////////////////////////////////////

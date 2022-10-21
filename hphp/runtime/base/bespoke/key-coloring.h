@@ -24,22 +24,30 @@ namespace HPHP::bespoke {
 using Color = uint16_t;
 using ColorMap = folly::F14FastMap<const StringData*, Color>;
 
-// Finds a colorable subset of the supplied layout/weight pairs. The return
-// value is a a pair of:
-//
-//   1) an iterator `ret` such that the range [begin, ret) is colorable
-//   2) the coloring produced (if any)
-//
-// Like std::remove, it partitions the vector into two pieces: a colorable
-// prefix, and a set of layouts that could not be colored. The return value is
-// an iterator pointing to the first element of the uncolorable suffix.
-//
-// The current implementation sorts the layouts by weight and finds a colorable
-// prefix of the resulting order.
-std::pair<LayoutWeightVector::const_iterator, Optional<ColorMap>>
-  findKeyColoring(LayoutWeightVector& layouts);
+struct ColoringMetaData {
+  ColorMap coloring;
+  size_t numColoredFields;
+};
 
-void applyColoring(const ColorMap& coloring);
+// Finds a coloring for the a fixed-length prefix of the fields
+// of the supplied struct layouts. The coloring guarantees that no two fields
+// of a layout have the same color if both of them are within the prefix length.
+// None of the fields within the prefix length may have
+// StringData::kInvalidColor or StringData::kDupColor. Fields after this prefix
+// length have a valid color, but it is not guaranteed to be unique within the
+// layout.
+//
+// The exact length of the prefix to be colored is determined by a
+// binary search in the range [1, kMaxColor - 2].
+// There is always a valid assignment for kMaxColor > 2.
+//
+// This function returns the color map and the maximum number of fields colored.
+ColoringMetaData findKeyColoring(LayoutWeightVector& layouts);
+
+// Assign colors to the strings that are fields of the layouts. All fields that
+// are not colored by findKeyColoring are assigned StringData::kDupColor.
+void applyColoring(const ColoringMetaData& coloring,
+                   const LayoutWeightVector& layouts);
 
 std::string dumpColoringInfo();
 

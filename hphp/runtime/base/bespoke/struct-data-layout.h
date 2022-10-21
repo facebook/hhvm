@@ -46,6 +46,12 @@ struct TypePosValLayout {
   static size_t typeOffsetForSlot(const StructLayout*, Slot slot);
   static size_t valueOffsetForSlot(const StructLayout*, Slot slot);
 
+  static size_t numFieldsOffset();
+  static size_t numFieldsSize();
+  static size_t numFields(const StructDict*);
+  static bool isBigStruct(const StructDict*) { return false; }
+  static bool isBigStruct(const StructLayout*) { return false; }
+
   static size_t staticTypeOffset();
   static size_t valueOffsetOffset();
   static constexpr size_t valueOffsetSize() {
@@ -95,6 +101,12 @@ struct UnalignedTVLayout {
   static size_t typeOffsetForSlot(const StructLayout*, Slot slot);
   static size_t valueOffsetForSlot(const StructLayout*, Slot slot);
 
+  static size_t numFieldsOffset();
+  static size_t numFieldsSize();
+  static size_t numFields(const StructDict*);
+  static bool isBigStruct(const StructDict*);
+  static bool isBigStruct(const StructLayout*);
+
   static void init(StructDict*);
   static void initSizeIndex(StructLayout*);
 
@@ -108,8 +120,7 @@ struct UnalignedTVLayout {
   //
   // The field's layout should pun our usage of ArrayData's m_extra field.
   typedef struct {
-    uint8_t m_num_fields;
-    uint8_t m_unused;
+    uint16_t m_num_fields;
     bespoke::LayoutIndex m_layout_index;
   } HeaderData;
 

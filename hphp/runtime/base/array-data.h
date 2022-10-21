@@ -142,6 +142,12 @@ struct ArrayData : MaybeCountable {
   static auto constexpr kSampledArray = 8;
 
   /*
+   * Indicates that this array-like may have ref-counted elements. Currently
+   * this bit is used only for StructDicts.
+   */
+  static auto constexpr kMayContainCounted = 16;
+
+  /*
    * See notes on the m_layout_index field for constraints on this value.
    */
   static auto constexpr kVanillaLayoutIndex = bespoke::LayoutIndex { 0xffff };

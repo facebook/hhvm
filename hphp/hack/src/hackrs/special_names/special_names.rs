@@ -28,6 +28,26 @@ fn concat<S1: AsRef<str>, S2: AsRef<str>>(s1: S1, s2: S2) -> String {
     format!("{}{}", s1.as_ref(), s2.as_ref())
 }
 
+pub fn types() -> impl Iterator<Item = TypeName> {
+    classes::iter()
+        .chain(collections::iter())
+        .chain(attribute_kinds::iter())
+        .chain(user_attributes::iter())
+        .chain(fb::types())
+        .chain(shapes::types())
+        .chain(regex::types())
+        .chain(coeffects::types())
+        .chain(capabilities::iter())
+}
+
+pub fn functions() -> impl Iterator<Item = FunName> {
+    autoimported_functions::iter()
+        .chain(pseudo_functions::iter())
+        .chain(stdlib_functions::iter())
+        .chain(fb::functions())
+        .chain(hh::iter())
+}
+
 pub mod classes {
     use super::*;
 
@@ -63,6 +83,43 @@ pub mod classes {
     pub static cEnumClassLabel: Lazy<TypeName> = lazy!(sn::classes::ENUM_CLASS_LABEL);
     pub static cSpliceable: Lazy<TypeName> = lazy!(sn::classes::SPLICEABLE);
     pub static cSupportDyn: Lazy<TypeName> = lazy!(sn::classes::SUPPORT_DYN);
+
+    pub fn iter_keywords() -> impl Iterator<Item = TypeName> {
+        [*cParent, *cStatic, *cSelf].into_iter()
+    }
+
+    pub fn iter() -> impl Iterator<Item = TypeName> {
+        [
+            *cUnknown,
+            *cAwaitable,
+            *cGenerator,
+            *cAsyncGenerator,
+            *cHHFormatString,
+            *cHH_BuiltinEnum,
+            *cHH_BuiltinEnumClass,
+            *cHH_BuiltinAbstractEnumClass,
+            *cThrowable,
+            *cStdClass,
+            *cDateTime,
+            *cDateTimeImmutable,
+            *cAsyncIterator,
+            *cAsyncKeyedIterator,
+            *cStringish,
+            *cStringishObject,
+            *cXHPChild,
+            *cIMemoizeParam,
+            *cUNSAFESingletonMemoizeParam,
+            *cClassname,
+            *cTypename,
+            *cIDisposable,
+            *cIAsyncDisposable,
+            *cMemberOf,
+            *cEnumClassLabel,
+            *cSpliceable,
+            *cSupportDyn,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod collections {
@@ -94,6 +151,35 @@ pub mod collections {
     pub static cDict: Lazy<TypeName> = lazy!(sn::collections::DICT);
     pub static cVec: Lazy<TypeName> = lazy!(sn::collections::VEC);
     pub static cKeyset: Lazy<TypeName> = lazy!(sn::collections::KEYSET);
+
+    pub fn iter() -> impl Iterator<Item = TypeName> {
+        [
+            *cVector,
+            *cMutableVector,
+            *cImmVector,
+            *cSet,
+            *cConstSet,
+            *cMutableSet,
+            *cImmSet,
+            *cMap,
+            *cMutableMap,
+            *cImmMap,
+            *cPair,
+            *cContainer,
+            *cKeyedContainer,
+            *cTraversable,
+            *cKeyedTraversable,
+            *cCollection,
+            *cConstVector,
+            *cConstMap,
+            *cConstCollection,
+            *cAnyArray,
+            *cDict,
+            *cVec,
+            *cKeyset,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod members {
@@ -141,6 +227,26 @@ pub mod attribute_kinds {
     pub static typeconst: Lazy<TypeName> = lazy!(sn::attribute_kinds::TYPE_CONST);
     pub static lambda: Lazy<TypeName> = lazy!(sn::attribute_kinds::LAMBDA);
     pub static enumcls: Lazy<TypeName> = lazy!(sn::attribute_kinds::ENUM_CLS);
+
+    pub fn iter() -> impl Iterator<Item = TypeName> {
+        [
+            *cls,
+            *clscst,
+            *enum_,
+            *typealias,
+            *fn_,
+            *mthd,
+            *instProperty,
+            *staticProperty,
+            *parameter,
+            *typeparam,
+            *file,
+            *typeconst,
+            *lambda,
+            *enumcls,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod user_attributes {
@@ -198,6 +304,54 @@ pub mod user_attributes {
         lazy!(sn::user_attributes::IGNORE_READONLY_LOCAL_ERRORS);
     pub static uaIgnoreCoeffectLocalErrors: Lazy<TypeName> =
         lazy!(sn::user_attributes::IGNORE_COEFFECT_LOCAL_ERRORS);
+
+    pub fn iter() -> impl Iterator<Item = TypeName> {
+        [
+            *uaOverride,
+            *uaConsistentConstruct,
+            *uaConst,
+            *uaDeprecated,
+            *uaEntryPoint,
+            *uaMemoize,
+            *uaMemoizeLSB,
+            *uaPHPStdLib,
+            *uaAcceptDisposable,
+            *uaReturnDisposable,
+            *uaLSB,
+            *uaSealed,
+            *uaLateInit,
+            *uaNewable,
+            *uaEnforceable,
+            *uaExplicit,
+            *uaNonDisjoint,
+            *uaSoft,
+            *uaWarn,
+            *uaMockClass,
+            *uaProvenanceSkipFrame,
+            *uaDynamicallyCallable,
+            *uaDynamicallyConstructible,
+            *uaReifiable,
+            *uaNeverInline,
+            *uaDisableTypecheckerInternal,
+            *uaHasTopLevelCode,
+            *uaIsFoldable,
+            *uaNative,
+            *uaOutOnly,
+            *uaAlwaysInline,
+            *uaEnableUnstableFeatures,
+            *uaEnumClass,
+            *uaPolicied,
+            *uaInferFlows,
+            *uaExternal,
+            *uaCanCall,
+            *uaSupportDynamicType,
+            *uaRequireDynamic,
+            *uaEnableMethodTraitDiamond,
+            *uaIgnoreReadonlyLocalErrors,
+            *uaIgnoreCoeffectLocalErrors,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod special_functions {
@@ -216,6 +370,18 @@ pub mod autoimported_functions {
     pub static inst_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::INST_METH);
     pub static class_meth: Lazy<FunName> = lazy!(sn::autoimported_functions::CLASS_METH);
     pub static meth_caller: Lazy<FunName> = lazy!(sn::autoimported_functions::METH_CALLER);
+
+    pub fn iter() -> impl Iterator<Item = FunName> {
+        [
+            *invariant_violation,
+            *invariant,
+            *fun,
+            *inst_meth,
+            *class_meth,
+            *meth_caller,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod special_idents {
@@ -248,6 +414,28 @@ pub mod pseudo_functions {
     pub static unsafe_nonnull_cast: Lazy<FunName> =
         lazy!(sn::pseudo_functions::UNSAFE_NONNULL_CAST);
     pub static enforced_cast: Lazy<FunName> = lazy!(sn::pseudo_functions::ENFORCED_CAST);
+
+    pub fn iter() -> impl Iterator<Item = FunName> {
+        [
+            *isset,
+            *unset,
+            *hh_show,
+            *hh_expect,
+            *hh_expect_equivalent,
+            *hh_show_env,
+            *hh_log_level,
+            *hh_force_solve,
+            *hh_loop_forever,
+            *echo,
+            *empty,
+            *exit,
+            *die,
+            *unsafe_cast,
+            *unsafe_nonnull_cast,
+            *enforced_cast,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod stdlib_functions {
@@ -266,6 +454,24 @@ pub mod stdlib_functions {
     pub static is_any_array: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_ANY_ARRAY);
     pub static is_dict_or_darray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_DICT_OR_DARRAY);
     pub static is_vec_or_varray: Lazy<FunName> = lazy!(sn::std_lib_functions::IS_VEC_OR_VARRAY);
+
+    pub fn iter() -> impl Iterator<Item = FunName> {
+        [
+            *is_array,
+            *is_null,
+            *get_class,
+            *array_filter,
+            *call_user_func,
+            *type_structure,
+            *array_mark_legacy,
+            *array_unmark_legacy,
+            *is_php_array,
+            *is_any_array,
+            *is_dict_or_darray,
+            *is_vec_or_varray,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod typehints {
@@ -352,6 +558,14 @@ pub mod fb {
     pub static idx: Lazy<FunName> = lazy!(sn::fb::IDX);
     pub static cTypeStructure: Lazy<TypeName> = lazy!(sn::fb::TYPE_STRUCTURE);
     pub static cIncorrectType: Lazy<TypeName> = lazy!(sn::fb::INCORRECT_TYPE);
+
+    pub fn types() -> impl Iterator<Item = TypeName> {
+        [*cEnum, *cTypeStructure, *cIncorrectType].into_iter()
+    }
+
+    pub fn functions() -> impl Iterator<Item = FunName> {
+        [*idx].into_iter()
+    }
 }
 
 pub mod hh {
@@ -359,6 +573,10 @@ pub mod hh {
 
     pub static contains: Lazy<FunName> = lazy!(sn::hh::CONTAINS);
     pub static contains_key: Lazy<FunName> = lazy!(sn::hh::CONTAINS_KEY);
+
+    pub fn iter() -> impl Iterator<Item = FunName> {
+        [*contains, *contains_key].into_iter()
+    }
 }
 
 pub mod shapes {
@@ -371,6 +589,10 @@ pub mod shapes {
     pub static removeKey: Lazy<MethodName> = lazy!(sn::shapes::REMOVE_KEY);
     pub static toArray: Lazy<MethodName> = lazy!(sn::shapes::TO_ARRAY);
     pub static toDict: Lazy<MethodName> = lazy!(sn::shapes::TO_DICT);
+
+    pub fn types() -> impl Iterator<Item = TypeName> {
+        [*cShapes].into_iter()
+    }
 }
 
 pub mod superglobals {
@@ -383,6 +605,10 @@ pub mod regex {
     use super::*;
 
     pub static tPattern: Lazy<TypeName> = lazy!(sn::regex::T_PATTERN);
+
+    pub fn types() -> impl Iterator<Item = TypeName> {
+        [*tPattern].into_iter()
+    }
 }
 
 pub mod emitter_special_functions {
@@ -422,6 +648,10 @@ pub mod coeffects {
     pub static contexts: Lazy<TypeName> = lazy!("\\HH\\Contexts");
     pub static unsafe_contexts: Lazy<TypeName> = lazy!(concat(*contexts, "\\Unsafe"));
     pub static generated_generic_prefix: Lazy<Symbol> = lazy!("T/");
+
+    pub fn types() -> impl Iterator<Item = TypeName> {
+        [*contexts, *unsafe_contexts].into_iter()
+    }
 }
 
 pub mod readonly {
@@ -442,11 +672,30 @@ pub mod capabilities {
     pub static accessGlobals: Lazy<TypeName> = lazy!(concat(prefix, "AccessGlobals"));
     pub static readGlobals: Lazy<TypeName> = lazy!(concat(prefix, "ReadGlobals"));
     pub static system: Lazy<TypeName> = lazy!(concat(prefix, "System"));
+    pub static systemLocal: Lazy<TypeName> = lazy!(concat(prefix, "SystemLocal"));
     pub static implicitPolicy: Lazy<TypeName> = lazy!(concat(prefix, "ImplicitPolicy"));
     pub static implicitPolicyLocal: Lazy<TypeName> = lazy!(concat(prefix, "ImplicitPolicyLocal"));
     pub static io: Lazy<TypeName> = lazy!(concat(prefix, "IO"));
     pub static rx: Lazy<TypeName> = lazy!(concat(prefix, "Rx"));
     pub static rxLocal: Lazy<TypeName> = lazy!(concat(*rx, "Local"));
+
+    pub fn iter() -> impl Iterator<Item = TypeName> {
+        [
+            *defaults,
+            *write_props,
+            *writeProperty,
+            *accessGlobals,
+            *readGlobals,
+            *system,
+            *systemLocal,
+            *implicitPolicy,
+            *implicitPolicyLocal,
+            *io,
+            *rx,
+            *rxLocal,
+        ]
+        .into_iter()
+    }
 }
 
 pub mod expression_trees {

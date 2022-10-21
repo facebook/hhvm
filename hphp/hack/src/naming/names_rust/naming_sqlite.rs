@@ -793,6 +793,8 @@ impl Names {
         Ok(())
     }
 
+    /// This creates a sqlite directory at the specified path.
+    /// It will fail if the directory containing that path doesn't exist.
     pub fn build_at_path(
         path: impl AsRef<Path>,
         file_summaries: impl IntoIterator<Item = (RelativePath, crate::FileSummary)>,
